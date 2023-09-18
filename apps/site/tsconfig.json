@@ -1,13 +1,17 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "@midday/tsconfig/base.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
-    "plugins": [{ "name": "next" }],
-    "strict": true
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
   },
-  "exclude": [],
-  "include": ["next-env.d.ts", "src", "*.ts", "*.mjs", ".next/types/**/*.ts"]
+  "include": [".", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

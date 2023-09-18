@@ -1,13 +1,1 @@
-{
-  "login": {
-    "title": "Who is the best chef among \nyour friends?",
-    "smsPlaceholder": "Enter sms code...",
-    "phonePlaceholder": "Enter your phone number...",
-    "continue": "Get started",
-    "terms1": "By continuing you agree to our \n",
-    "terms2": "Terms ",
-    "terms3": "and ",
-    "terms4": "Privacy Policy",
-    "next": "Next"
-  }
-}
+{}

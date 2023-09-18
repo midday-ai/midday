@@ -1,37 +1,42 @@
 {
   "$schema": "https://turborepo.org/schema.json",
-  "globalDependencies": ["**/.env", "tsconfig.json"],
+  "globalDependencies": ["**/.env"],
   "pipeline": {
+    "topo": {
+      "dependsOn": ["^topo"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
+    },
     "dev": {
       "persistent": true,
       "cache": false
     },
-    "build": {
-      "dependsOn": ["^build", "^db:generate"],
-      "outputs": [".next/**", ".expo/**"]
+    "format": {
+      "outputs": ["node_modules/.cache/.prettiercache"],
+      "outputMode": "new-only"
     },
-    "lint": {},
-    "lint:fix": {},
+    "lint": {
+      "dependsOn": ["^topo"],
+      "outputs": ["node_modules/.cache/.eslintcache"]
+    },
+    "typecheck": {
+      "dependsOn": ["^topo"],
+      "outputs": ["node_modules/.cache/tsbuildinfo.json"]
+    },
     "clean": {
       "cache": false
     },
     "//#clean": {
       "cache": false
-    },
-    "type-check": {
-      "dependsOn": ["^db:generate"],
-      "cache": false
     }
   },
   "globalEnv": [
-    "CI",
     "DATABASE_URL",
-    "EXPO_ROUTER_APP_ROOT",
-    "NODE_ENV",
-    "SKIP_ENV_VALIDATION",
-    "PORT",
-    "VERCEL",
-    "VERCEL_URL",
-    "RESEND_API_KEY"
+    "DISCORD_CLIENT_ID",
+    "DISCORD_CLIENT_SECRET",
+    "NEXTAUTH_SECRET",
+    "NEXTAUTH_URL"
   ]
 }

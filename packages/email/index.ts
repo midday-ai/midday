@@ -39,9 +39,9 @@ export const sendEmail = async ({
   }
 
   return resend.emails.send({
-    // from: "Sherwood <hello@midday.work>",
+    // from: "Midday <hello@midday.ai>",
     from: "onboarding@resend.dev",
-    to: test ? "hello@midday.work" : email,
+    to: test ? "hello@midday.ai" : email,
     subject,
     react,
     headers: {

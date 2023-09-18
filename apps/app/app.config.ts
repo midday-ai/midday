@@ -1,9 +1,9 @@
 import type { ExpoConfig } from "@expo/config";
 
 const defineConfig = (): ExpoConfig => ({
-  name: "Lasagne",
+  name: "Midday",
   slug: "expo",
-  scheme: "sherwood",
+  scheme: "midday",
   version: "1.0.0",
   orientation: "portrait",
   userInterfaceStyle: "automatic",
@@ -24,7 +24,7 @@ const defineConfig = (): ExpoConfig => ({
   assetBundlePatterns: ["**/*"],
   ios: {
     supportsTablet: false,
-    bundleIdentifier: "app.lasagne",
+    bundleIdentifier: "app.midday",
     buildNumber: "4",
     infoPlist: {
       CADisableMinimumFrameDurationOnPhone: true,
@@ -36,11 +36,11 @@ const defineConfig = (): ExpoConfig => ({
       backgroundColor: "#fff",
     },
   },
-  extra: {
-    eas: {
-      projectId: "f74a11d1-8757-479b-8dbe-2d17f52bee0e",
-    },
-  },
+  // extra: {
+  //   eas: {
+  //     projectId: "",
+  //   },
+  // },
   experiments: {
     tsconfigPaths: true,
   },

@@ -1,13 +1,1 @@
-{
-  "login": {
-    "title": "Vem är bäst kock bland \ndina vänner?",
-    "smsPlaceholder": "Ange sms-kod...",
-    "phonePlaceholder": "Ange telefonnummer...",
-    "continue": "Kom igång",
-    "terms1": "Genom att forsätta godkänner du \n",
-    "terms2": "Villkor ",
-    "terms3": "och ",
-    "terms4": "Integritetspolicy",
-    "next": "Nästa"
-  }
-}
+{}

@@ -1,5 +1,6 @@
-import baseConfig from "@midday/tailwind-config";
 import type { Config } from "tailwindcss";
+
+import baseConfig from "@midday/tailwind";
 
 export default {
   content: ["./src/**/*.{ts,tsx}"],

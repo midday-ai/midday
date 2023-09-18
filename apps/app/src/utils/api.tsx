@@ -31,14 +31,14 @@ export function TRPCProvider(props: { children: React.ReactNode }) {
     api.createClient({
       transformer: superjson,
       links: [
-        refreshTokenLink({
-          getRefreshToken: async () => getRefreshToken(),
-          // onRefreshFailed: async () => deleteTokens(),
-          onJwtPairFetched: async (tokens) => setTokens(tokens),
-          fetchJwtPairByRefreshToken: (refreshToken) => {
-            return blah.auth.refreshToken.query({ refreshToken });
-          },
-        }),
+        // refreshTokenLink({
+        //   getRefreshToken: async () => getRefreshToken(),
+        //   // onRefreshFailed: async () => deleteTokens(),
+        //   onJwtPairFetched: async (tokens) => setTokens(tokens),
+        //   fetchJwtPairByRefreshToken: (refreshToken) => {
+        //     return blah.auth.refreshToken.query({ refreshToken });
+        //   },
+        // }),
         httpBatchLink({
           url: `${process.env.EXPO_PUBLIC_API_ENDPOINT!}/api/trpc`,
           async headers() {

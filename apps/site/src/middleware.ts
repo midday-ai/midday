@@ -1,7 +1,10 @@
-import type { NextRequest } from "next/server";
-import { createI18nMiddleware } from "next-international/middleware";
-
-const I18nMiddleware = createI18nMiddleware(["en", "sv"] as const, "sv");
+import { createI18nMiddleware } from 'next-international/middleware'
+import { NextRequest } from 'next/server'
+ 
+const I18nMiddleware = createI18nMiddleware({
+  locales: ['en', 'sv'],
+  defaultLocale: 'en'
+})
 
 export function middleware(request: NextRequest) {
   return I18nMiddleware(request);

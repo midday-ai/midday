@@ -7,15 +7,13 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "db:generate": "pnpm with-env drizzle-kit generate:sqlite",
-    "db:push": "pnpm with-env drizzle-kit push:sqlite",
-    "db:migrate": "pnpm with-env drizzle-kit generate:sqlite",
-    "db:introspect": "pnpm with-env drizzle-kit introspect:sqlite",
-    "dev": "pnpm with-env drizzle-kit studio --port 3002",
-    "with-env": "dotenv -e ../../.env --"
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "push": "drizzle-kit push:mysql",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@libsql/client": "^0.3.4",
+    "@planetscale/database": "^1.11.0",
     "drizzle-orm": "^0.28.6",
     "drizzle-zod": "^0.5.1"
   },

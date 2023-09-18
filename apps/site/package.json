@@ -36,8 +36,9 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "@midday/eslint": "^0.2.0",
+    "@midday/eslint": "workspace:*",
     "@midday/tailwind": "workspace:*",
+    "@midday/tsconfig": "workspace:*",
     "@types/node": "^20.6.2",
     "@types/react": "^18.2.22",
     "@types/react-dom": "^18.2.7",

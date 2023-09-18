@@ -13,8 +13,8 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { TRPCProvider } from "@/utils/api";
-import { AuthProvider } from "@/context/AuthProvider";
+// import { TRPCProvider } from "@/utils/api";
+// import { AuthProvider } from "@/context/AuthProvider";
 
 const LightTheme = {
   ...DefaultTheme,
@@ -45,42 +45,44 @@ const RootLayout = () => {
     return null;
   }
 
-  return (
-    <AuthProvider>
-      <ThemeProvider value={scheme === "dark" ? DarkTheme : LightTheme}>
-        <TRPCProvider>
-          <GestureHandlerRootView className="flex-1">
-            <SafeAreaProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen
-                  name="(tabs)"
-                  options={{ headerShown: false, animation: "fade" }}
-                />
+  return null
 
-                <Stack.Screen
-                  name="(auth)"
-                  options={{ headerShown: false, animation: "none" }}
-                />
+  // return (
+  //   <AuthProvider>
+  //     <ThemeProvider value={scheme === "dark" ? DarkTheme : LightTheme}>
+  //       <TRPCProvider>
+  //         <GestureHandlerRootView className="flex-1">
+  //           <SafeAreaProvider>
+  //             <Stack screenOptions={{ headerShown: false }}>
+  //               <Stack.Screen
+  //                 name="(tabs)"
+  //                 options={{ headerShown: false, animation: "fade" }}
+  //               />
 
-                <Stack.Screen
-                  name="settings"
-                  options={{ presentation: "formSheet" }}
-                />
-                <Stack.Screen
-                  name="add-contest"
-                  options={{ presentation: "formSheet" }}
-                />
-                <Stack.Screen
-                  name="edit-profile"
-                  options={{ presentation: "formSheet" }}
-                />
-              </Stack>
-            </SafeAreaProvider>
-          </GestureHandlerRootView>
-        </TRPCProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  );
+  //               <Stack.Screen
+  //                 name="(auth)"
+  //                 options={{ headerShown: false, animation: "none" }}
+  //               />
+
+  //               <Stack.Screen
+  //                 name="settings"
+  //                 options={{ presentation: "formSheet" }}
+  //               />
+  //               <Stack.Screen
+  //                 name="add-contest"
+  //                 options={{ presentation: "formSheet" }}
+  //               />
+  //               <Stack.Screen
+  //                 name="edit-profile"
+  //                 options={{ presentation: "formSheet" }}
+  //               />
+  //             </Stack>
+  //           </SafeAreaProvider>
+  //         </GestureHandlerRootView>
+  //       </TRPCProvider>
+  //     </ThemeProvider>
+  //   </AuthProvider>
+  // );
 };
 
 export default RootLayout;
