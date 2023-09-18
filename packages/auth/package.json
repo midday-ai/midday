@@ -4,7 +4,6 @@
   "private": true,
   "main": "./index.ts",
   "types": "./index.ts",
-  "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
