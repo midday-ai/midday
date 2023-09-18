@@ -20,7 +20,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "@midday/eslint": "^0.2.0",
+    "@midday/eslint": "workspace:*",
     "eslint": "^8.49.0",
     "typescript": "^5.2.2"
   },

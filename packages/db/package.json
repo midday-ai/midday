@@ -20,6 +20,18 @@
   "devDependencies": {
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.19.13",
+    "@midday/eslint": "workspace:*",
+    "@midday/prettier": "workspace:*",
+    "@midday/tsconfig": "workspace:*",
+    "eslint": "^8.49.0",
+    "prettier": "^3.0.3",
     "typescript": "^5.2.2"
-  }
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@midday/eslint/base"
+    ]
+  },
+  "prettier": "@midday/prettier"
 }

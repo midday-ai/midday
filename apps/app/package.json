@@ -53,7 +53,7 @@
     "@babel/runtime": "^7.22.15",
     "@expo/config-plugins": "^7.2.5",
     "@midday/api": "workspace:*",
-    "@midday/eslint": "^0.2.0",
+    "@midday/eslint": "workspace:*",
     "@midday/tailwind": "workspace:*",
     "@types/babel__core": "^7.20.2",
     "@types/react": "^18.2.22",

@@ -13,7 +13,7 @@
     "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,md,json}\" --ignore-path .gitignore",
     "lint": "turbo lint && manypkg check",
     "lint:fix": "turbo lint:fix && manypkg fix",
-    "check:types": "turbo type-check"
+    "check:types": "turbo typecheck"
   },
   "dependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.1.0",
