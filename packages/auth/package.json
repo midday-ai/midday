@@ -1,0 +1,10 @@
+{
+  "name": "@midday/auth",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "private": true,
+  "types": "./index.ts",
+  "dependencies": {
+    "jose": "^4.14.6"
+  }
+}

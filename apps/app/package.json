@@ -1,0 +1,72 @@
+{
+  "name": "@midday/app",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index",
+  "scripts": {
+    "clean": "git clean -xdf .expo .turbo node_modules",
+    "dev": "expo start -c --ios",
+    "dev:android": "expo start --android",
+    "dev:ios": "expo start --ios",
+    "lint": "eslint .",
+    "lint:fix": "pnpm lint --fix",
+    "check:types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo-google-fonts/bodoni-moda": "^0.2.3",
+    "@expo/metro-config": "^0.10.7",
+    "@pyncz/trpc-refresh-token-link": "^1.0.0",
+    "@shopify/flash-list": "1.6.1",
+    "@tanstack/react-query": "^4.35.3",
+    "@trpc/client": "^10.38.3",
+    "@trpc/react-query": "^10.38.3",
+    "@trpc/server": "^10.38.3",
+    "clsx": "^2.0.0",
+    "expo": "^49.0.11",
+    "expo-constants": "~14.4.2",
+    "expo-font": "~11.6.0",
+    "expo-image": "~1.5.1",
+    "expo-linking": "~6.0.0",
+    "expo-localization": "~14.5.0",
+    "expo-router": "^2.0.6",
+    "expo-secure-store": "~12.5.0",
+    "expo-splash-screen": "~0.22.0",
+    "expo-status-bar": "~1.7.1",
+    "expo-system-ui": "~2.6.0",
+    "i18next": "^23.5.1",
+    "nativewind": "^2.0.11",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-i18next": "^13.2.2",
+    "react-native": "0.72.4",
+    "react-native-gesture-handler": "~2.13.0",
+    "react-native-reanimated": "3.5.2",
+    "react-native-safe-area-context": "4.7.2",
+    "react-native-screens": "~3.25.0",
+    "react-native-url-polyfill": "^2.0.0",
+    "superjson": "1.13.1",
+    "tailwind-merge": "^1.14.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.22.20",
+    "@babel/preset-env": "^7.22.20",
+    "@babel/runtime": "^7.22.15",
+    "@expo/config-plugins": "^7.2.5",
+    "@midday/api": "workspace:*",
+    "@midday/eslint": "^0.2.0",
+    "@midday/tailwind": "workspace:*",
+    "@types/babel__core": "^7.20.2",
+    "@types/react": "^18.2.22",
+    "eslint": "^8.49.0",
+    "postcss": "^8.4.29",
+    "tailwindcss": "3.3.3",
+    "typescript": "^5.2.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@midday/eslint/base",
+      "@midday/eslint/react"
+    ]
+  }
+}

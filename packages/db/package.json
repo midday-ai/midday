@@ -1,0 +1,27 @@
+{
+  "name": "@midday/db",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "private": true,
+  "types": "./index.ts",
+  "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "db:generate": "pnpm with-env drizzle-kit generate:sqlite",
+    "db:push": "pnpm with-env drizzle-kit push:sqlite",
+    "db:migrate": "pnpm with-env drizzle-kit generate:sqlite",
+    "db:introspect": "pnpm with-env drizzle-kit introspect:sqlite",
+    "dev": "pnpm with-env drizzle-kit studio --port 3002",
+    "with-env": "dotenv -e ../../.env --"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.3.4",
+    "drizzle-orm": "^0.28.6",
+    "drizzle-zod": "^0.5.1"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^7.3.0",
+    "drizzle-kit": "^0.19.13",
+    "typescript": "^5.2.2"
+  }
+}

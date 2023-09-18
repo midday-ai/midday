@@ -1,0 +1,37 @@
+{
+  "name": "@midday/email",
+  "version": "1.0.0",
+  "main": "./index.ts",
+  "private": true,
+  "types": "./index.ts",
+  "workspaces": [
+    ".react-email"
+  ],
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint .",
+    "lint:fix": "pnpm lint --fix",
+    "check:types": "tsc --noEmit",
+    "dev": "email dev -p 3001",
+    "export": "email export"
+  },
+  "dependencies": {
+    "@react-email/button": "0.0.10",
+    "@react-email/components": "0.0.7",
+    "@react-email/html": "0.0.4",
+    "nanoid": "^5.0.1",
+    "react-email": "1.9.4",
+    "resend": "^1.1.0"
+  },
+  "devDependencies": {
+    "@midday/eslint": "^0.2.0",
+    "eslint": "^8.49.0",
+    "typescript": "^5.2.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "@midday/eslint/base"
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://turborepo.org/schema.json",
+  "globalDependencies": ["**/.env", "tsconfig.json"],
+  "pipeline": {
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "build": {
+      "dependsOn": ["^build", "^db:generate"],
+      "outputs": [".next/**", ".expo/**"]
+    },
+    "lint": {},
+    "lint:fix": {},
+    "clean": {
+      "cache": false
+    },
+    "//#clean": {
+      "cache": false
+    },
+    "type-check": {
+      "dependsOn": ["^db:generate"],
+      "cache": false
+    }
+  },
+  "globalEnv": [
+    "CI",
+    "DATABASE_URL",
+    "EXPO_ROUTER_APP_ROOT",
+    "NODE_ENV",
+    "SKIP_ENV_VALIDATION",
+    "PORT",
+    "VERCEL",
+    "VERCEL_URL",
+    "RESEND_API_KEY"
+  ]
+}

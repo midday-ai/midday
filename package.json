@@ -1,0 +1,26 @@
+{
+  "name": "midday",
+  "private": true,
+  "engines": {
+    "node": ">=v18.17.0"
+  },
+  "workspaces": ["packages/*", "apps/*", "tooling/*"],
+  "scripts": {
+    "build": "turbo build",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo clean",
+    "dev": "turbo dev --parallel",
+    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,md,json}\" --ignore-path .gitignore",
+    "lint": "turbo lint && manypkg check",
+    "lint:fix": "turbo lint:fix && manypkg fix",
+    "check:types": "turbo type-check"
+  },
+  "dependencies": {
+    "@ianvs/prettier-plugin-sort-imports": "^4.1.0",
+    "@manypkg/cli": "^0.21.0",
+    "prettier": "^3.0.3",
+    "prettier-plugin-tailwindcss": "^0.5.4",
+    "turbo": "^1.10.14",
+    "typescript": "^5.2.2"
+  }
+}
