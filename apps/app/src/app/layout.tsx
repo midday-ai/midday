@@ -13,6 +13,7 @@ const fontSans = Inter({
 
 export const metadata: Metadata = {
 	title: "Midday",
+	description: "Simple monorepo with shared backend for web & mobile apps",
 };
 
 export default function Layout({ children }: { children: ReactElement }) {
