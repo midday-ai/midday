@@ -6,8 +6,8 @@
   "types": "./index.ts",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "lint": "biome check .",
+    "format": "biome format \"**/*.{mjs,ts,md,json}\"",
     "push": "drizzle-kit push:mysql",
     "typecheck": "tsc --noEmit"
   },
@@ -19,18 +19,7 @@
   "devDependencies": {
     "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.19.13",
-    "@midday/eslint": "workspace:*",
-    "@midday/prettier": "workspace:*",
     "@midday/tsconfig": "workspace:*",
-    "eslint": "^8.49.0",
-    "prettier": "^3.0.3",
     "typescript": "^5.2.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@midday/eslint/base"
-    ]
-  },
-  "prettier": "@midday/prettier"
+  }
 }

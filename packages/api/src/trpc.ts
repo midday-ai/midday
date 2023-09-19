@@ -1,8 +1,17 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+/**
+ * YOU PROBABLY DON'T NEED TO EDIT THIS FILE, UNLESS:
+ * 1. You want to modify request context (see Part 1)
+ * 2. You want to create a new middleware or type of procedure (see Part 3)
+ *
+ * tl;dr - this is where all the tRPC server stuff is created and plugged in.
+ * The pieces you will need to use are documented accordingly near the end
+ */
+import { TRPCError, initTRPC } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { verifyToken } from "@midday/auth";
-import type { User } from "@midday/auth";
+
+import { auth } from "@midday/auth";
+import type { Session } from "@midday/auth";
 import { db } from "@midday/db";
 
 /**
@@ -15,7 +24,7 @@ import { db } from "@midday/db";
  *
  */
 interface CreateContextOptions {
-  user: User | null;
+	session: Session | null;
 }
 
 /**
@@ -27,11 +36,11 @@ interface CreateContextOptions {
  * - trpc's `createSSGHelpers` where we don't have req/res
  * @see https://create.t3.gg/en/usage/trpc#-servertrpccontextts
  */
-export const createInnerTRPCContext = (opts: CreateContextOptions) => {
-  return {
-    user: opts.user,
-    db,
-  };
+const createInnerTRPCContext = (opts: CreateContextOptions) => {
+	return {
+		session: opts.session,
+		db,
+	};
 };
 
 /**
@@ -39,12 +48,18 @@ export const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
-export const createTRPCContext = async (token: string) => {
-  const user = token ? await verifyToken(token) : null;
+export const createTRPCContext = async (opts: {
+	req?: Request;
+	auth?: Session;
+}) => {
+	const session = opts.auth ?? (await auth());
+	const source = opts.req?.headers.get("x-trpc-source") ?? "unknown";
 
-  return createInnerTRPCContext({
-    user,
-  });
+	console.log(">>> tRPC Request from", source, "by", session?.user);
+
+	return createInnerTRPCContext({
+		session,
+	});
 };
 
 /**
@@ -54,17 +69,17 @@ export const createTRPCContext = async (token: string) => {
  * transformer
  */
 const t = initTRPC.context<typeof createTRPCContext>().create({
-  transformer: superjson,
-  errorFormatter({ shape, error }) {
-    return {
-      ...shape,
-      data: {
-        ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
-      },
-    };
-  },
+	transformer: superjson,
+	errorFormatter({ shape, error }) {
+		return {
+			...shape,
+			data: {
+				...shape.data,
+				zodError:
+					error.cause instanceof ZodError ? error.cause.flatten() : null,
+			},
+		};
+	},
 });
 
 /**
@@ -94,15 +109,15 @@ export const publicProcedure = t.procedure;
  * procedure
  */
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.user?.uid) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-  return next({
-    ctx: {
-      // infers the `user` as non-nullable
-      user: ctx.user,
-    },
-  });
+	if (!ctx.session?.user) {
+		throw new TRPCError({ code: "UNAUTHORIZED" });
+	}
+	return next({
+		ctx: {
+			// infers the `session` as non-nullable
+			session: { ...ctx.session, user: ctx.session.user },
+		},
+	});
 });
 
 /**

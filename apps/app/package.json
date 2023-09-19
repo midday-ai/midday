@@ -8,8 +8,8 @@
     "dev": "expo start -c --ios",
     "dev:android": "expo start --android",
     "dev:ios": "expo start --ios",
-    "lint": "eslint .",
-    "lint:fix": "pnpm lint --fix",
+    "lint": "biome check .",
+    "format": "biome format --write .",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
@@ -53,20 +53,11 @@
     "@babel/runtime": "^7.22.15",
     "@expo/config-plugins": "^7.2.5",
     "@midday/api": "workspace:*",
-    "@midday/eslint": "workspace:*",
     "@midday/tailwind": "workspace:*",
     "@types/babel__core": "^7.20.2",
     "@types/react": "^18.2.22",
-    "eslint": "^8.49.0",
-    "postcss": "^8.4.29",
+    "postcss": "^8.4.30",
     "tailwindcss": "3.3.3",
     "typescript": "^5.2.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@midday/eslint/base",
-      "@midday/eslint/react"
-    ]
   }
 }

@@ -6,8 +6,8 @@
   "types": "./index.ts",
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "lint": "biome check .",
+    "format": "biome format \"**/*.{mjs,ts,md,json}\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,18 +22,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "@midday/eslint": "workspace:*",
-    "@midday/prettier": "workspace:*",
     "@midday/tsconfig": "workspace:*",
-    "eslint": "^8.49.0",
-    "prettier": "^3.0.3",
     "typescript": "^5.2.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@midday/eslint/base"
-    ]
-  },
-  "prettier": "@midday/prettier"
+  }
 }

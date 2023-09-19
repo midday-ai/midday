@@ -19,8 +19,6 @@ apps
 packages
   ├─ api
   |   └─ tRPC v10 router definition
-  ├─ config
-  |   └─ Shared Tailwind & Eslint configs
   └─ db
       └─ Typesafe db calls using drizzle
 ```

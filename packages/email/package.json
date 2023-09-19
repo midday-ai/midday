@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "lint:fix": "pnpm lint --fix",
+    "lint": "biome check .",
+    "format": "biome --write .",
     "check:types": "tsc --noEmit",
     "dev": "email dev -p 3001",
     "export": "email export"
@@ -24,14 +24,6 @@
     "resend": "^1.1.0"
   },
   "devDependencies": {
-    "@midday/eslint": "workspace:*",
-    "eslint": "^8.49.0",
     "typescript": "^5.2.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@midday/eslint/base"
-    ]
   }
 }

@@ -9,8 +9,8 @@ export * from "drizzle-orm";
 export const schema = { ...auth, ...post };
 
 export const db = drizzle(
-  new Client({
-    url: process.env.DATABASE_URL,
-  }).connection(),
-  { schema },
+	new Client({
+		url: process.env.DATABASE_URL,
+	}).connection(),
+	{ schema },
 );

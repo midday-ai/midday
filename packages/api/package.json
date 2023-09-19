@@ -6,8 +6,8 @@
   "private": true,
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
-    "lint": "eslint .",
-    "lint:fix": "pnpm lint --fix",
+    "lint": "biome check .",
+    "format": "biome format --write .",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
@@ -20,14 +20,6 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
-    "@midday/eslint": "workspace:*",
-    "eslint": "^8.49.0",
     "typescript": "^5.2.2"
-  },
-  "eslintConfig": {
-    "root": true,
-    "extends": [
-      "@midday/eslint/base"
-    ]
   }
 }
