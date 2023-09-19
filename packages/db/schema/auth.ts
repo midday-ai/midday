@@ -36,23 +36,3 @@ export const accounts = pgTable(
 		compoundKey: primaryKey(account.provider, account.providerAccountId),
 	}),
 );
-
-export const sessions = pgTable("session", {
-	sessionToken: text("sessionToken").notNull().primaryKey(),
-	userId: text("userId")
-		.notNull()
-		.references(() => users.id, { onDelete: "cascade" }),
-	expires: timestamp("expires", { mode: "date" }).notNull(),
-});
-
-export const verificationTokens = pgTable(
-	"verificationToken",
-	{
-		identifier: text("identifier").notNull(),
-		token: text("token").notNull(),
-		expires: timestamp("expires", { mode: "date" }).notNull(),
-	},
-	(vt) => ({
-		compoundKey: primaryKey(vt.identifier, vt.token),
-	}),
-);

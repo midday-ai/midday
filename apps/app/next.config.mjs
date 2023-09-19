@@ -4,6 +4,14 @@ import "./src/env.mjs";
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "lh3.googleusercontent.com",
+			},
+		],
+	},
 	transpilePackages: ["@midday/api", "@midday/ui", "@midday/auth", "@acme/db"],
 	eslint: {
 		ignoreDuringBuilds: true,

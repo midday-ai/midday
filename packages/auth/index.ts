@@ -12,6 +12,7 @@ declare module "next-auth" {
 	interface Session {
 		user: {
 			id: string;
+			picture?: string;
 		} & DefaultSession["user"];
 	}
 }
@@ -21,6 +22,9 @@ export const {
 	auth,
 	CSRF_experimental,
 } = NextAuth({
+	session: {
+		strategy: "jwt",
+	},
 	adapter: DrizzleAdapter(db),
 	providers: [
 		GoogleProvider({
@@ -36,19 +40,5 @@ export const {
 				id: user.id,
 			},
 		}),
-
-		// @TODO - if you wanna have auth on the edge
-		// jwt: ({ token, profile }) => {
-		//   if (profile?.id) {
-		//     token.id = profile.id;
-		//     token.image = profile.picture;
-		//   }
-		//   return token;
-		// },
-
-		// @TODO
-		// authorized({ request, auth }) {
-		//   return !!auth?.user
-		// }
 	},
 });

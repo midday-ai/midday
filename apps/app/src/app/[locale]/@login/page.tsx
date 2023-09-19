@@ -1,12 +1,9 @@
-import { SignIn } from "@/components/auth";
+import { SignIn } from "@/components/sing-in";
 
 export default function Login() {
 	return (
-		<SignIn
-			provider="google"
-			className="rounded-full bg-white/10 px-10 py-3 font-semibold no-underline transition hover:bg-white/20"
-		>
-			Sign in with Google
-		</SignIn>
+		<div className="flex min-h-screen justify-center items-center bg-zinc-900">
+			<SignIn provider="google">Sign in with Google</SignIn>
+		</div>
 	);
 }
