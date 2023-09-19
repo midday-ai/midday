@@ -1,3 +1,4 @@
+import { StartPage } from "@/components/startpage";
 import { getStaticParams } from "@/locales/server";
 import { setStaticParamsLocale } from "next-international/server";
 
@@ -10,9 +11,5 @@ export default function Page({
 }: { params: { locale: string } }) {
 	setStaticParamsLocale(locale);
 
-	return (
-		<div className="mx-auto w-full max-w-xl">
-			<div className="flex justify-between py-6">Hello</div>
-		</div>
-	);
+	return <StartPage />;
 }

@@ -1,6 +1,7 @@
 {
     "name": "@midday/ui",
     "version": "1.0.0",
+    "main": "./src/index.ts",
     "private": true,
     "sideEffects": false,
     "scripts": {
@@ -14,6 +15,7 @@
       "typescript": "^5.2.2"
     },
     "exports": {
+        ".": "./src/index.ts",
         "./input": "./src/input.tsx"
     }
   }

@@ -1,9 +1,6 @@
 {
   "name": "midday",
   "private": true,
-  "engines": {
-    "node": ">=v18.17.0"
-  },
   "workspaces": [
     "packages/*",
     "apps/*",
