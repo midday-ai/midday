@@ -29,7 +29,6 @@ export const env = createEnv({
 	runtimeEnv: {
 		VERCEL_URL: process.env.VERCEL_URL,
 		PORT: process.env.PORT,
-		// DATABASE_URL: process.env.DATABASE_URL,
 	},
 	skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

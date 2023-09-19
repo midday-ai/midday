@@ -1,7 +1,7 @@
 ```
 .github
   └─ workflows
-        └─ CI with pnpm cache setup
+        └─ CI with bun
 .vscode
   └─ Recommended extensions and settings for VSCode users
 apps
