@@ -3,7 +3,7 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import type { ReactElement } from "react";
-import { Switch } from "./switch";
+// import { Switch } from "./switch";
 
 export const runtime = "edge";
 
@@ -22,9 +22,9 @@ export default function Layout({ children }: { children: ReactElement }) {
 		<html lang="en">
 			<body className={["font-sans", fontSans.variable].join(" ")}>
 				{children}
-				<footer className="mx-auto mt-10 w-full max-w-xl">
+				{/* <footer className="mx-auto mt-10 w-full max-w-xl">
 					<Switch />
-				</footer>
+				</footer> */}
 			</body>
 		</html>
 	);

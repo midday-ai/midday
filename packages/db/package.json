@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "postgres": "3.3.5",
+    "@vercel/postgres": "^0.4.2",
     "drizzle-orm": "^0.28.6",
     "drizzle-zod": "^0.5.1"
   },

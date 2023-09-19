@@ -30,5 +30,5 @@
 			"cache": false
 		}
 	},
-	"globalEnv": ["DATABASE_URL", "NEXTAUTH_SECRET", "NEXTAUTH_URL"]
+	"globalEnv": ["POSTGRES_URL", "NEXTAUTH_SECRET", "NEXTAUTH_URL"]
 }

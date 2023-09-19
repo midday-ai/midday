@@ -1,10 +1,10 @@
-// Importing env files here to validate on build
+import "@midday/auth/env.mjs";
 import "./src/env.mjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	transpilePackages: ["@midday/ui"],
+	transpilePackages: ["@midday/api", "@midday/ui", "@midday/auth", "@acme/db"],
 	eslint: {
 		ignoreDuringBuilds: true,
 	},
