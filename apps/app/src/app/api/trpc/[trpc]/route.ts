@@ -4,6 +4,7 @@ import { appRouter, createTRPCContext } from "@midday/api";
 import { auth } from "@midday/auth";
 
 export const runtime = "edge";
+export const preferredRegion = "fra1";
 
 /**
  * Configure basic CORS headers

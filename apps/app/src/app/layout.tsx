@@ -6,6 +6,7 @@ import type { ReactElement } from "react";
 // import { Switch } from "./switch";
 
 export const runtime = "edge";
+export const preferredRegion = "fra1";
 
 const fontSans = Inter({
 	subsets: ["latin"],
