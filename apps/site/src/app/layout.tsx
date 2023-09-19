@@ -10,8 +10,6 @@ const fontSans = Inter({
 	variable: "--font-sans",
 });
 
-export const runtime = "edge";
-
 export const metadata: Metadata = {
 	title: "Midday",
 	description: "Simple monorepo with shared backend for web & mobile apps",
