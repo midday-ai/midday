@@ -6,8 +6,7 @@ import NextAuth from "next-auth";
 
 export type { Session } from "next-auth";
 
-// Update this whenever adding new providers so that the client can
-export const providers = ["discord"] as const;
+export const providers = ["google"] as const;
 export type OAuthProviders = typeof providers[number];
 
 declare module "next-auth" {
@@ -33,19 +32,5 @@ export const {
 				id: user.id,
 			},
 		}),
-
-		// @TODO - if you wanna have auth on the edge
-		// jwt: ({ token, profile }) => {
-		//   if (profile?.id) {
-		//     token.id = profile.id;
-		//     token.image = profile.picture;
-		//   }
-		//   return token;
-		// },
-
-		// @TODO
-		// authorized({ request, auth }) {
-		//   return !!auth?.user
-		// }
 	},
 });

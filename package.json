@@ -19,8 +19,8 @@
     "check:types": "turbo typecheck"
   },
   "dependencies": {
-    "@manypkg/cli": "^0.21.0",
     "@biomejs/biome": "1.2.2",
+    "@manypkg/cli": "^0.21.0",
     "turbo": "^1.10.14",
     "typescript": "^5.2.2"
   }

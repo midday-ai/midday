@@ -7,7 +7,7 @@ export const env = createEnv({
 			.string()
 			.optional()
 			.transform((v) => (v ? `https://${v}` : undefined)),
-		PORT: z.coerce.number().default(3000),
+		PORT: z.coerce.number().default(3001),
 	},
 	/**
 	 * Specify your server-side environment variables schema here. This way you can ensure the app isn't
