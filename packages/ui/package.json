@@ -1,0 +1,20 @@
+{
+    "name": "@midday/ui",
+    "version": "1.0.0",
+    "private": true,
+    "sideEffects": false,
+    "scripts": {
+      "clean": "rm -rf .turbo node_modules",
+      "lint": "biome check .",
+      "format": "biome --write .",
+      "check:types": "tsc --noEmit"
+    },
+    "dependencies": {},
+    "devDependencies": {
+      "typescript": "^5.2.2"
+    },
+    "exports": {
+        "./input": "./src/input.tsx"
+    }
+  }
+  
