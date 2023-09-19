@@ -1,12 +1,8 @@
-import type { OAuthProviders } from "@midday/auth";
-import { CSRF_experimental } from "@midday/auth";
+"use client";
+
+import { signOut } from "next-auth/react";
 import type { ComponentProps } from "react";
 
 export function SignOut(props: ComponentProps<"button">) {
-	return (
-		<form action="/api/auth/signout" method="post">
-			<button {...props} type="submit" />
-			<CSRF_experimental />
-		</form>
-	);
+	return <button {...props} type="button" onClick={() => signOut()} />;
 }

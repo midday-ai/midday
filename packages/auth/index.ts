@@ -20,7 +20,6 @@ declare module "next-auth" {
 export const {
 	handlers: { GET, POST },
 	auth,
-	CSRF_experimental,
 } = NextAuth({
 	session: {
 		strategy: "jwt",
@@ -32,13 +31,17 @@ export const {
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
 		}),
 	],
-	callbacks: {
-		session: ({ session, user }) => ({
-			...session,
-			user: {
-				...session.user,
-				id: user.id,
-			},
-		}),
-	},
+	// callbacks: {
+	// 	jwt({ token, profile }) {
+	// 		if (profile) {
+	// 			token.id = profile.id;
+	// 			token.image = profile.avatar_url || profile.picture;
+	// 		}
+
+	// 		return token;
+	// 	},
+	// 	authorized({ auth }) {
+	// 		return !!auth?.user; // this ensures there is a logged in user for -every- request
+	// 	},
+	// },
 });
