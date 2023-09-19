@@ -1,22 +1,17 @@
 {
-  "extends": "@midday/tsconfig/base.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["./src/*"]
+    "extends": "@midday/tsconfig/base.json",
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@/*": ["./src/*"]
+      },
+      "plugins": [
+        {
+          "name": "next"
+        }
+      ],
+      "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json"
     },
-    "jsx": "react-native",
-    "tsBuildInfoFile": "node_modules/.cache/tsbuildinfo.json",
-    "types": ["nativewind/types"]
-  },
-  "include": [
-    "expo-plugins",
-    "src",
-    "*.ts",
-    "index.tsx",
-    "*.js",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ],
-  "exclude": ["node_modules"]
-}
+    "include": [".", ".next/types/**/*.ts"],
+    "exclude": ["node_modules"]
+  }
