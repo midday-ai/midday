@@ -17,7 +17,6 @@
     "drizzle-zod": "^0.5.1"
   },
   "devDependencies": {
-    "dotenv-cli": "^7.3.0",
     "drizzle-kit": "^0.19.13",
     "@midday/tsconfig": "workspace:*",
     "typescript": "^5.2.2"
