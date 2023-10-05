@@ -22,6 +22,7 @@
     "@tanstack/react-query": "^4.35.7",
     "@tanstack/react-query-devtools": "^4.35.7",
     "@tanstack/react-query-next-experimental": "5.0.0-alpha.80",
+    "tailwindcss": "3.3.3",
     "@midday/ui": "workspace:*"
   },
   "devDependencies": {
@@ -33,7 +34,6 @@
     "@types/react-dom": "^18.2.10",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "tailwindcss": "3.3.3",
     "typescript": "^5.2.2"
   }
 }
