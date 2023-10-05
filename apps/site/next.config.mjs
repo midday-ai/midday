@@ -4,6 +4,7 @@ const config = {
 	transpilePackages: ["@midday/ui", "@midday/tailwind"],
 	experimental: {
 		serverActions: true,
+		externalDir: true,
 	},
 	eslint: {
 		ignoreDuringBuilds: true,

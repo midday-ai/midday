@@ -98,6 +98,21 @@ export function StartPage() {
       </div>
 
       <div className="flex w-full">
+        <div className="w-[1px] h-[1px] bg-white rounded-full absolute top-[35%] left-[5%]" />
+        <div className="w-[5px] h-[5px] bg-white rounded-full absolute top-[44%] left-[10%]" />
+        <div className="w-[1px] h-[1px] bg-white rounded-full absolute top-[41%] left-[15%]" />
+        <div className="w-[2px] h-[2px] bg-white rounded-full absolute top-[39%] left-[25%]" />
+        <div className="w-[5px] h-[5px] bg-[#22FF66] rounded-full absolute top-[44%] left-[30%]" />
+        <div className="w-[1px] h-[1px] bg-white rounded-full absolute top-[45%] left-[44%]" />
+
+        <div className="w-[5px] h-[5px] bg-white rounded-full absolute top-[54%] right-[5%]" />
+        <div className="w-[3px] h-[3px] bg-[#8306FF] rounded-full absolute top-[60%] right-[10%]" />
+        <div className="w-[5px] h-[5px] bg-white rounded-full absolute top-[50%] right-[20%]" />
+        <div className="w-[2px] h-[2px] bg-white rounded-full absolute top-[59%] right-[27%]" />
+        <div className="w-[5px] h-[5px] bg-white rounded-full absolute top-[47%] right-[29%]" />
+        <div className="w-[3px] h-[3px] bg-white rounded-full absolute top-[53%] right-[32%]" />
+        <div className="w-[5px] h-[5px] bg-white rounded-full absolute top-[50%] right-[40%]" />
+
         <div className="flex-1 relative">
           <Image
             src={transactions}
@@ -113,9 +128,9 @@ export function StartPage() {
         <Image
           src={search}
           alt="Midday | Search"
-          width={550}
+          width={638}
           height={260}
-          className="absolute left-[50%] -ml-[275px] z-10 bottom-32"
+          className="absolute left-[50%] -ml-[319px] z-10 -bottom-12"
         />
 
         <div className="flex-1 relative">
