@@ -11,8 +11,8 @@ import superjson from "superjson";
 import { ZodError } from "zod";
 
 import { auth } from "@midday/auth";
-import type { Session } from "@midday/auth";
 import { db } from "@midday/db";
+import { type Session } from "next-auth";
 
 /**
  * 1. CONTEXT

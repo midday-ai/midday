@@ -12,22 +12,22 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "^13.5.1",
+    "next": "^13.5.4",
     "next-international": "^1.0.1",
     "framer-motion": "10.16",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "zustand": "^4.4.1",
+    "zustand": "^4.4.2",
     "@midday/ui": "workspace:*"
   },
   "devDependencies": {
     "@midday/tailwind": "workspace:*",
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^20.6.2",
-    "@types/react": "^18.2.22",
-    "@types/react-dom": "^18.2.7",
-    "autoprefixer": "^10.4.15",
-    "postcss": "^8.4.30",
+    "@types/node": "^20.8.2",
+    "@types/react": "^18.2.25",
+    "@types/react-dom": "^18.2.10",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
     "tailwindcss": "3.3.3",
     "typescript": "^5.2.2"
   }

@@ -1,3 +1,4 @@
+import { ConnectBank } from "@/components/connect-bank";
 import { SignOut } from "@/components/sign-out";
 import { auth } from "@midday/auth";
 import Image from "next/image";
@@ -7,6 +8,7 @@ export default async function Dashboard() {
 
 	return (
 		<div className="flex min-h-screen justify-center items-center">
+			<ConnectBank />
 			{session.user.picture && (
 				<Image
 					src={session.user.picture}

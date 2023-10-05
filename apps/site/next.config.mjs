@@ -1,7 +1,7 @@
 /** @type {import("next").NextConfig} */
 const config = {
 	reactStrictMode: true,
-	transpilePackages: ["@midday/ui"],
+	transpilePackages: ["@midday/ui", "@midday/tailwind"],
 	eslint: {
 		ignoreDuringBuilds: true,
 	},
