@@ -12,13 +12,15 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@midday/ui": "workspace:*",
+    "clsx": "^2.0.0",
+    "framer-motion": "10.16",
     "next": "^13.5.4",
     "next-international": "^1.0.1",
-    "framer-motion": "10.16",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "zustand": "^4.4.3",
-    "@midday/ui": "workspace:*"
+    "tailwind-merge": "^1.14.0",
+    "zustand": "^4.4.3"
   },
   "devDependencies": {
     "@midday/tailwind": "workspace:*",

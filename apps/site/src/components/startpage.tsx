@@ -17,7 +17,7 @@ function SubmitButton() {
       <svg
         aria-hidden="true"
         role="status"
-        className="absolute w-4 h-4 mr-3 text-white animate-spin top-2 right-2"
+        className="absolute w-4 h-4 mr-3 text-black animate-spin top-2 right-2"
         viewBox="0 0 100 101"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
@@ -75,26 +75,44 @@ export function StartPage() {
       </div>
 
       <div className="flex justify-center mt-8">
-        <form
-          action={async (formData) => {
-            await addEmail(formData);
-            setSubmitted(true);
-          }}
-        >
-          <fieldset className="relative">
-            <input
-              placeholder="Enter your email"
-              type="email"
-              name="email"
-              id="email"
-              autoComplete="email"
-              aria-label="Email address"
-              required
-              className="border bg-transparent border-[#2C2C2C] font-sm text-[#606060] outline-none py-1 px-3 w-[300px] placeholder-[#606060] rounded-lg h-10"
-            />
-            <SubmitButton />
-          </fieldset>
-        </form>
+        {submitted ? (
+          <div className="border border-[#2C2C2C] font-sm text-white h-10 rounded-lg w-[300px] flex items-center py-1 px-3 justify-between">
+            <p>Subscribed!</p>
+
+            <svg
+              width="17"
+              height="17"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m14.546 4.724-8 8-3.667-3.667.94-.94 2.727 2.72 7.06-7.053.94.94Z"
+                fill="#fff"
+              />
+            </svg>
+          </div>
+        ) : (
+          <form
+            action={async (formData) => {
+              await addEmail(formData);
+              setSubmitted(true);
+            }}
+          >
+            <fieldset className="relative">
+              <input
+                placeholder="Enter your email"
+                type="email"
+                name="email"
+                id="email"
+                autoComplete="email"
+                aria-label="Email address"
+                required
+                className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[300px] placeholder-[#606060] rounded-lg h-10"
+              />
+              <SubmitButton />
+            </fieldset>
+          </form>
+        )}
       </div>
 
       <div className="flex w-full">
