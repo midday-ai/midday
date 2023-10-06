@@ -70,8 +70,8 @@ export function StartPage() {
 						<h1 className="font-bold pb-1 text-5xl">Smart pre-accounting</h1>
 					</div>
 					<p className="text-[#B0B0B0]">
-						Automate financial tasks, stay organized, and make informed
-						decisions effortlessly.
+						Automate financial tasks, stay organized, and
+						<br /> make informed decisions effortlessly.
 					</p>
 				</div>
 
