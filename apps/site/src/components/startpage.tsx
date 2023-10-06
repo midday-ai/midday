@@ -66,9 +66,9 @@ export function StartPage() {
         </header>
 
         <div className="text-center mt-20">
-          <h1 className="font-bold pb-1 text-white font-size text-5xl mb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
-            Smart pre-accounting
-          </h1>
+          <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
+            <h1 className="font-bold pb-1 text-5xl">Smart pre-accounting</h1>
+          </div>
           <p className="text-[#B0B0B0]">
             Introducing our open-source pre-accounting tool. Automate financial
             tasks, stay <br />
