@@ -19,7 +19,7 @@ function SubmitButton() {
         <svg
           aria-hidden="true"
           role="status"
-          className="absolute w-4 h-4 mr-3 text-black animate-spin top-2 right-2"
+          className="absolute w-4 h-4 mr-3 text-black animate-spin top-2.5 right-2"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="absolute right-2 h-6 bg-white top-2 px-4 rounded-md font-medium text-sm z-10"
+      className="absolute right-2 h-7 bg-white top-2 px-4 rounded-md font-medium text-sm z-10"
     >
       Join
     </button>
@@ -81,7 +81,7 @@ export function StartPage() {
 
         <div className="flex justify-center mt-8">
           {submitted ? (
-            <div className="border border-[#2C2C2C] font-sm text-white h-10 rounded-lg w-[300px] flex items-center py-1 px-3 justify-between">
+            <div className="border border-[#2C2C2C] font-sm text-white h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
               <p>Subscribed!</p>
 
               <svg
@@ -112,7 +112,7 @@ export function StartPage() {
                   autoComplete="email"
                   aria-label="Email address"
                   required
-                  className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[300px] placeholder-[#606060] rounded-lg h-10"
+                  className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[330px] placeholder-[#606060] rounded-lg h-11"
                 />
                 <SubmitButton />
               </fieldset>
