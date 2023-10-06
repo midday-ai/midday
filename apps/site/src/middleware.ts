@@ -14,3 +14,7 @@ export async function middleware(req: NextRequest) {
 
 	return I18nMiddleware(req);
 }
+
+export const config = {
+	matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth).*)"],
+};
