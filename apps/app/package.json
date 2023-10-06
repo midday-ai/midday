@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
+    "@midday/supabase": "workspace:*",
     "next": "^13.5.4",
     "next-international": "^1.0.1",
     "react": "18.2.0",

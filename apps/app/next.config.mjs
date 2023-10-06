@@ -1,4 +1,3 @@
-import "@midday/auth/env.mjs";
 import "./src/env.mjs";
 
 /** @type {import("next").NextConfig} */
@@ -12,7 +11,7 @@ const config = {
 			},
 		],
 	},
-	transpilePackages: ["@midday/api", "@midday/ui", "@midday/tailwind"],
+	transpilePackages: ["@midday/ui", "@midday/tailwind"],
 	experimental: {
 		serverActions: true,
 	},

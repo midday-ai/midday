@@ -3,7 +3,6 @@ import { cn } from "@midday/ui";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactElement } from "react";
-import { TRPCReactProvider } from "./providers";
 
 export const runtime = "edge";
 export const preferredRegion = "fra1";

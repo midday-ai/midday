@@ -10,7 +10,7 @@
     "format": "biome format --write .",
     "check:types": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": { "@supabase/auth-helpers-nextjs": "^0.8.1", "@supabase/supabase-js": "^2.38.0" },
   "devDependencies": {
     "typescript": "^5.2.2"
   }
