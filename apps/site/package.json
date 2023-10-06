@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
+    "@vercel/analytics": "^1.1.0",
     "clsx": "^2.0.0",
     "framer-motion": "10.16",
     "next": "^13.5.4",

@@ -1,4 +1,6 @@
 import "@/styles/globals.css";
+import { Analytics } from "@vercel/analytics/react";
+
 import { cn } from "@midday/ui";
 
 import type { Metadata } from "next";
@@ -19,7 +21,10 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en">
-      <body className={cn(fontSans.variable, "bg-background")}>{children}</body>
+      <body className={cn(fontSans.variable, "bg-background")}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
