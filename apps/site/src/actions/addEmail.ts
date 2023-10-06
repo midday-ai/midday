@@ -1,4 +1,5 @@
 "use server";
+import { track } from "@vercel/analytics/server";
 
 export async function addEmail(formData: FormData) {
 	const email = formData.get("email");
@@ -15,6 +16,10 @@ export async function addEmail(formData: FormData) {
 	);
 
 	const json = await res.json();
+
+	if (email) {
+		track("Subscribe", { email: email?.toString() });
+	}
 
 	return json;
 }
