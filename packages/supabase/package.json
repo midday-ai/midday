@@ -1,5 +1,5 @@
 {
-  "name": "@midday/api",
+  "name": "@midday/supabase",
   "version": "1.0.0",
   "main": "./index.ts",
   "types": "./index.ts",
@@ -10,15 +10,7 @@
     "format": "biome format --write .",
     "check:types": "tsc --noEmit"
   },
-  "dependencies": {
-    "@midday/auth": "workspace:*",
-    "@midday/db": "workspace:*",
-    "@trpc/client": "^10.38.5",
-    "@trpc/server": "^10.38.5",
-    "plaid": "16.0.0",
-    "superjson": "1.13.3",
-    "zod": "^3.22.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^5.2.2"
   }

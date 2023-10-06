@@ -1,4 +1,4 @@
-import { auth } from "@midday/auth";
+// import { auth } from "@midday/auth";
 
 export default async function Layout({
 	dashboard,
@@ -7,6 +7,6 @@ export default async function Layout({
 	dashboard: React.ReactNode;
 	login: React.ReactNode;
 }) {
-	const session = await auth();
-	return session ? dashboard : login;
+	// const session = await auth();
+	return false ? dashboard : login;
 }

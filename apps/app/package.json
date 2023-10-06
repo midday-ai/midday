@@ -5,24 +5,20 @@
   "scripts": {
     "build": "next build",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "dev": "next dev",
+    "dev": "next dev -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
     "start": "next start",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@midday/ui": "workspace:*",
     "next": "^13.5.4",
     "next-international": "^1.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.13.3",
-    "react-plaid-link": "3.4.1",
-    "zod": "^3.22.4",
-    "@tanstack/react-query": "^4.35.7",
-    "@tanstack/react-query-devtools": "^4.35.7",
-    "@tanstack/react-query-next-experimental": "5.0.0-alpha.80",
-    "@midday/ui": "workspace:*"
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@midday/tailwind": "workspace:*",
