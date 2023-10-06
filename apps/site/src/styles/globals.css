@@ -1,3 +1,33 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.btn {
+    border: none;
+    outline: none;
+    position: relative;
+    z-index: 1;
+    border-radius: 8px;
+    background: linear-gradient(to right, #F5F5F5, #5B5B5B);
+    cursor: pointer;
+}
+
+.btn::before {
+    content: "";
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    top: 1px;
+    bottom: 1px;
+    border-radius: 7px;
+    background-color: #141414;
+    z-index: -1;
+}
+
+.btn::after {
+    content: attr(data);
+    background: linear-gradient(to left, #F5F5F5, #5B5B5B);
+    background-clip: text;
+    color: transparent;
+    transition: 200ms
+}

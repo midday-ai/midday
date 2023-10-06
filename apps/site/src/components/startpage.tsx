@@ -37,7 +37,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="absolute right-2 h-6 bg-white top-2 px-4 rounded-md font-medium text-sm"
+      className="absolute right-2 h-6 bg-white top-2 px-4 rounded-md font-medium text-sm z-10"
     >
       Join
     </button>
@@ -49,70 +49,69 @@ export function StartPage() {
 
   return (
     <div>
-      <header className="p-10 flex justify-between">
-        <Logo />
+      <div className="px-5 lg:px-10">
+        <header className="py-10 flex justify-between">
+          <Logo />
 
-        <button
-          type="button"
-          className="text-white border rounded-lg px-8 py-1.5"
-        >
-          Sign in
-        </button>
-      </header>
+          <button type="button" className="text-white px-8 h-[38px] btn">
+            Sign in
+          </button>
+        </header>
 
-      <div className="text-center mt-20">
-        <h1 className="font-bold text-white font-size text-5xl mb-4 block">
-          Smart pre-accounting
-        </h1>
-        <p className="text-[#B0B0B0]">
-          Introducing our open-source pre-accounting tool. Automate financial
-          tasks, stay <br />
-          organized, and make informed decisions effortlessly. Experience the
-          future of pre-
-          <br />
-          accounting today!
-        </p>
-      </div>
+        <div className="text-center mt-20">
+          <h1 className="font-bold pb-1 text-white font-size text-5xl mb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
+            Smart pre-accounting
+          </h1>
+          <p className="text-[#B0B0B0]">
+            Introducing our open-source pre-accounting tool. Automate financial
+            tasks, stay <br />
+            organized, and make informed decisions effortlessly. Experience the
+            future of pre-
+            <br />
+            accounting today!
+          </p>
+        </div>
 
-      <div className="flex justify-center mt-8">
-        {submitted ? (
-          <div className="border border-[#2C2C2C] font-sm text-white h-10 rounded-lg w-[300px] flex items-center py-1 px-3 justify-between">
-            <p>Subscribed!</p>
+        <div className="flex justify-center mt-8">
+          {submitted ? (
+            <div className="border border-[#2C2C2C] font-sm text-white h-10 rounded-lg w-[300px] flex items-center py-1 px-3 justify-between">
+              <p>Subscribed!</p>
 
-            <svg
-              width="17"
-              height="17"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
+              <svg
+                width="17"
+                height="17"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="m14.546 4.724-8 8-3.667-3.667.94-.94 2.727 2.72 7.06-7.053.94.94Z"
+                  fill="#fff"
+                />
+              </svg>
+            </div>
+          ) : (
+            <form
+              action={async (formData) => {
+                await addEmail(formData);
+                setSubmitted(true);
+              }}
             >
-              <path
-                d="m14.546 4.724-8 8-3.667-3.667.94-.94 2.727 2.72 7.06-7.053.94.94Z"
-                fill="#fff"
-              />
-            </svg>
-          </div>
-        ) : (
-          <form
-            action={async (formData) => {
-              await addEmail(formData);
-              setSubmitted(true);
-            }}
-          >
-            <fieldset className="relative">
-              <input
-                placeholder="Enter your email"
-                type="email"
-                name="email"
-                id="email"
-                autoComplete="email"
-                aria-label="Email address"
-                required
-                className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[300px] placeholder-[#606060] rounded-lg h-10"
-              />
-              <SubmitButton />
-            </fieldset>
-          </form>
-        )}
+              <fieldset className="relative">
+                <input
+                  placeholder="Enter your email"
+                  type="email"
+                  name="email"
+                  id="email"
+                  autoComplete="email"
+                  aria-label="Email address"
+                  required
+                  className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[300px] placeholder-[#606060] rounded-lg h-10"
+                />
+                <SubmitButton />
+              </fieldset>
+            </form>
+          )}
+        </div>
       </div>
 
       <div className="flex w-full">
