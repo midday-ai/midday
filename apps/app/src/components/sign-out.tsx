@@ -11,13 +11,12 @@ export function SignOut(props: ComponentProps<"button">) {
 	const handleSignOut = async () => {
 		await supabase.auth.signOut();
 		router.refresh();
+		router.push("/");
 	};
 
 	return (
-		<div>
-			<button onClick={handleSignOut} type="button" className="text-white">
-				Sign out
-			</button>
-		</div>
+		<button onClick={handleSignOut} type="button" className="text-white">
+			Sign out
+		</button>
 	);
 }

@@ -86,6 +86,7 @@ export function StartPage() {
 								fill="none"
 								xmlns="http://www.w3.org/2000/svg"
 							>
+								<title>Check</title>
 								<path
 									d="m14.546 4.724-8 8-3.667-3.667.94-.94 2.727 2.72 7.06-7.053.94.94Z"
 									fill="#fff"

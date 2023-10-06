@@ -17,7 +17,8 @@
     "exports": {
         ".": "./src/index.ts",
         "./input": "./src/input.tsx",
-        "./logo": "./src/logo.tsx"
+        "./logo": "./src/logo.tsx",
+        "./logo-small": "./src/logo-small.tsx"
     }
   }
   

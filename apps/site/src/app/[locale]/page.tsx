@@ -3,15 +3,15 @@ import { getStaticParams } from "@/locales/server";
 import { setStaticParamsLocale } from "next-international/server";
 
 export function generateStaticParams() {
-  return getStaticParams();
+	return getStaticParams();
 }
 
 export default function Page({
-  params: { locale },
+	params: { locale },
 }: {
-  params: { locale: string };
+	params: { locale: string };
 }) {
-  setStaticParamsLocale(locale);
+	setStaticParamsLocale(locale);
 
-  return <StartPage />;
+	return <StartPage />;
 }
