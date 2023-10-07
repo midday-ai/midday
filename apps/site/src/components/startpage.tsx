@@ -1,7 +1,7 @@
 "use client";
 
 import { addEmail } from "@/actions/addEmail";
-import { Logo } from "@midday/ui/logo";
+import { Icons } from "@midday/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
 import overview from "public/overview.png";
@@ -55,7 +55,7 @@ export function StartPage() {
 			<div className="px-5 lg:px-10">
 				<header className="py-10 flex justify-between">
 					<Link href="/">
-						<Logo />
+						<Icons.Logo />
 					</Link>
 
 					<Link href="https://app.midday.ai">

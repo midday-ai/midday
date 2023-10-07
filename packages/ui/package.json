@@ -1,24 +1,21 @@
 {
-    "name": "@midday/ui",
-    "version": "1.0.0",
-    "main": "./src/index.ts",
-    "private": true,
-    "sideEffects": false,
-    "scripts": {
-      "clean": "rm -rf .turbo node_modules",
-      "lint": "biome check .",
-      "format": "biome --write .",
-      "check:types": "tsc --noEmit"
-    },
-    "dependencies": {},
-    "devDependencies": {
-      "typescript": "^5.2.2"
-    },
-    "exports": {
-        ".": "./src/index.ts",
-        "./input": "./src/input.tsx",
-        "./logo": "./src/logo.tsx",
-        "./logo-small": "./src/logo-small.tsx"
-    }
+  "name": "@midday/ui",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome --write .",
+    "check:types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./input": "./src/input.tsx",
+    "./icons": "./src/icons.tsx"
   }
-  
+}

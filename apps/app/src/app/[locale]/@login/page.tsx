@@ -1,5 +1,5 @@
 import { GoogleSignIn } from "@/components/google-sign-in";
-import { Logo } from "@midday/ui/logo";
+import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 
 export default function Login() {
@@ -7,7 +7,7 @@ export default function Login() {
 		<div>
 			<div className="absolute left-10 top-10">
 				<Link href="https://midday.ai">
-					<Logo />
+					<Icons.Logo />
 				</Link>
 			</div>
 			<div className="flex min-h-screen justify-center items-center">

@@ -8,10 +8,20 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "check:types": "tsc --noEmit"
+    "check:types": "tsc --noEmit",
+    "login": "supabase login",
+    "db:generate": "supabase gen types typescript --project-id pytddvqiozwrhfbwqazp --schema public > src/types/db.ts"
   },
-  "dependencies": { "@supabase/auth-helpers-nextjs": "^0.8.1", "@supabase/supabase-js": "^2.38.0" },
+  "dependencies": { 
+    "@supabase/auth-helpers-nextjs": "^0.8.1", 
+    "@supabase/supabase-js": "^2.38.0"
+  },
   "devDependencies": {
+    "supabase": "^1.100.1",
     "typescript": "^5.2.2"
-  }
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts"
+}
 }

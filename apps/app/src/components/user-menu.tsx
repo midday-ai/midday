@@ -1,23 +1,18 @@
-import { createServerComponentClient } from "@midday/supabase";
-import { cookies } from "next/headers";
+import { getUserDetails } from "@midday/supabase/server";
 import Image from "next/image";
 import { SignOut } from "./sign-out";
 
 export async function UserMenu() {
-	const supabase = createServerComponentClient({ cookies });
-
-	const {
-		data: { session },
-	} = await supabase.auth.getSession();
+	const user = await getUserDetails();
 
 	return (
 		<div className="px-4 py-6 flex space-x-2">
 			<Image
-				src={session?.user.user_metadata.avatar_url}
+				src={user.avatar_url}
 				width={24}
 				height={24}
 				className="rounded-full"
-				alt={session?.user.user_metadata.full_name}
+				alt={user.full_name}
 			/>
 			<SignOut />
 		</div>
