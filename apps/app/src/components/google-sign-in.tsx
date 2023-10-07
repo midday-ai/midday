@@ -2,6 +2,7 @@
 
 import { createClientComponentClient } from "@midday/supabase";
 import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 
 export function GoogleSignIn() {
 	const supabase = createClientComponentClient();
@@ -18,9 +19,10 @@ export function GoogleSignIn() {
 	return (
 		<Button
 			onClick={handleSignIn}
-			className="active:scale-[0.98] rounded-xl bg-white px-10 py-4 text-black"
+			className="active:scale-[0.98] rounded-xl bg-white px-6 py-4 text-black font-medium flex space-x-2"
 		>
-			Continue with Google
+			<Icons.Google />
+			<span>Continue with Google</span>
 		</Button>
 	);
 }
