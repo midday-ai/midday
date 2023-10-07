@@ -21,12 +21,14 @@
   },
   "exports": {
     "./icons": "./src/components/icons.tsx",
+    "./button": "./src/components/button.tsx",
     "./utils": "./src/utils",
     "./tailwind.config": "./tailwind.config.ts",
     "./postcss": "./postcss.js",
     "./globals.css": "./src/globals.css"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "tailwind-merge": "^1.14.0",
