@@ -1,9 +1,14 @@
 {
   "name": "@midday/ui",
   "version": "1.0.0",
-  "main": "./src/index.ts",
   "private": true,
   "sideEffects": false,
+  "files": [
+    "index.ts",
+    "tailwind.config.ts",
+    "postcss.js",
+    "globals.css"
+  ],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -11,11 +16,20 @@
     "check:types": "tsc --noEmit"
   },
   "devDependencies": {
+    "autoprefixer": "^10.4.16",
     "typescript": "^5.2.2"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./input": "./src/input.tsx",
-    "./icons": "./src/icons.tsx"
+    "./icons": "./src/components/icons.tsx",
+    "./utils": "./src/utils",
+    "./tailwind.config": "./tailwind.config.ts",
+    "./postcss": "./postcss.js",
+    "./globals.css": "./src/globals.css"
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^1.14.0",
+    "tailwindcss-animate": "^1.0.7"
   }
 }

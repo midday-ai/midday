@@ -11,7 +11,7 @@ const config = {
 			},
 		],
 	},
-	transpilePackages: ["@midday/ui", "@midday/tailwind"],
+	transpilePackages: ["@midday/ui"],
 	experimental: {
 		serverActions: true,
 	},

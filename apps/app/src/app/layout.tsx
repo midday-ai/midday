@@ -1,5 +1,6 @@
 import "@/styles/globals.css";
-import { cn } from "@midday/ui";
+import "@midday/ui/globals.css";
+import { cn } from "@midday/ui/utils";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactElement } from "react";
