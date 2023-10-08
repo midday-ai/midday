@@ -1,11 +1,11 @@
 {
-  "name": "@midday/app",
+  "name": "@midday/website",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "dev": "next dev -p 3001",
+    "dev": "next dev",
     "lint": "next lint",
     "format": "biome format --write .",
     "start": "next start",
@@ -13,19 +13,17 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
-    "@midday/supabase": "workspace:*",
+    "@vercel/analytics": "^1.1.0",
     "next": "^13.5.4",
     "next-international": "^1.1.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "zod": "^3.22.4"
+    "zustand": "^4.4.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@t3-oss/env-nextjs": "^0.7.0",
-    "@types/node": "^20.8.2",
+    "@types/node": "^20.8.3",
     "@types/react": "^18.2.25",
-    "@types/react-dom": "^18.2.10",
-    "typescript": "^5.2.2"
+    "@types/react-dom": "^18.2.11"
   }
 }

@@ -38,29 +38,6 @@ export default function Login() {
 							style={{ animationDelay: "0ms" }}
 						/>
 
-						{/* 
-						<div
-							className="w-[1px] h-[1px] bg-white rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
-							style={{ animationDelay: "0ms" }}
-						/>
-						<div
-							className="w-[2px] h-[2px] bg-white rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
-							style={{ animationDelay: "700ms" }}
-						/>
-						<div
-							className="w-[5px] h-[5px] bg-[#22FF66] rounded-full absolute top-[44%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
-							style={{ animationDelay: "1s" }}
-						/>
-						<div
-							className="w-[1px] h-[1px] bg-white rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
-							style={{ animationDelay: "400ms" }}
-						/>
-
-						<div
-							className="w-[5px] h-[5px] bg-white rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
-							style={{ animationDelay: "2s" }}
-						/> */}
-
 						<div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
 							<h1 className="font-bold pb-1 text-3xl">Login to midday.</h1>
 						</div>
