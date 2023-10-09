@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: ReactElement }) {
   return (
-    <html lang="en">
+    <html lang="en" class="dark">
       <body className={cn(fontSans.variable, "bg-background")}>
         {children}
         <Analytics />
