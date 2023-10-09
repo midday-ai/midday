@@ -1,9 +1,9 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-	title: "Transactions | Midday",
+  title: "Transactions | Midday",
 };
 
 export default function Transactions() {
-	return <p>Transactions</p>;
+  return <p>Transactions</p>;
 }

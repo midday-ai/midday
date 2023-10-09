@@ -7,23 +7,23 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import type { ReactElement } from "react";
 
 const fontSans = Plus_Jakarta_Sans({
-	subsets: ["latin"],
-	variable: "--font-sans",
+  subsets: ["latin"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-	title: "Midday | Smart pre-accounting",
-	description:
-		"Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+  title: "Midday | Smart pre-accounting",
+  description:
+    "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
 };
 
 export default function Layout({ children }: { children: ReactElement }) {
-	return (
-		<html lang="en">
-			<body className={cn(fontSans.variable, "bg-background")}>
-				{children}
-				<Analytics />
-			</body>
-		</html>
-	);
+  return (
+    <html lang="en">
+      <body className={cn(fontSans.variable, "bg-background")}>
+        {children}
+        <Analytics />
+      </body>
+    </html>
+  );
 }
