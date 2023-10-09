@@ -40,7 +40,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="absolute right-2 h-7 bg-white top-2 px-4 rounded-md font-medium text-sm z-10"
+      className="absolute right-2 h-7 bg-white top-2 px-4 rounded-md font-medium text-sm z-10 text-black"
     >
       Join
     </button>
