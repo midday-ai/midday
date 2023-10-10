@@ -22,6 +22,6 @@ export async function sendFeeback(formData: FormData) {
   });
 
   const json = await res.json();
-  console.log(json);
+
   return json;
 }

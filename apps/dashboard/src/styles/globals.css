@@ -2,3 +2,7 @@ html,
 body {
   height: 100%;
 }
+
+.steps-gradient {
+  background: linear-gradient(180deg,transparent,#23252c 10%,#23252c 90%,transparent);
+}

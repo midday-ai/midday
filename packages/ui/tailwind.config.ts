@@ -7,7 +7,7 @@ export default {
     extend: {
       fontFamily: {
         display: "var(--display-sans)",
-        body: "var(--body-sans)",
+        body: "var(--font-sans)",
       },
       colors: {
         border: "hsl(var(--border))",
