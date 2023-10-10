@@ -1,4 +1,5 @@
 "use server";
+
 import { track } from "@vercel/analytics/server";
 
 export async function addEmail(formData: FormData) {

@@ -8,6 +8,7 @@ export const env = createEnv({
       .optional()
       .transform((v) => (v ? `https://${v}` : undefined)),
     PORT: z.coerce.number().default(3000),
+    RESEND_API_KEY: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -29,6 +30,7 @@ export const env = createEnv({
     VERCEL_URL: process.env.VERCEL_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,

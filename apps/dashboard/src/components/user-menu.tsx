@@ -4,13 +4,8 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import Image from "next/image";
@@ -30,7 +25,7 @@ export async function UserMenu() {
           alt={user.full_name}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 mr-6" sideOffset={10}>
+      <DropdownMenuContent className="w-56" sideOffset={10} align="end">
         <DropdownMenuGroup>
           <DropdownMenuItem>
             Profile
@@ -46,10 +41,13 @@ export async function UserMenu() {
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          New Company
-          <DropdownMenuShortcut>⌘+C</DropdownMenuShortcut>
-        </DropdownMenuItem>
+        <DropdownMenuGroup>
+          <DropdownMenuItem>Teams</DropdownMenuItem>
+          <DropdownMenuItem>
+            New Team
+            <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
           <SignOut />

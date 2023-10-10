@@ -1,6 +1,6 @@
 import { CommandMenu } from "@/components/command-menu";
 import { Feedback } from "@/components/feedback";
-import { Notifications } from "@/components/notifications";
+import { NotificationCenter } from "@/components/notification-center";
 import { UserMenu } from "@/components/user-menu";
 
 export function Header() {
@@ -9,7 +9,7 @@ export function Header() {
       <CommandMenu />
       <div className="flex space-x-2">
         <Feedback />
-        <Notifications />
+        <NotificationCenter />
         <UserMenu />
       </div>
     </header>
