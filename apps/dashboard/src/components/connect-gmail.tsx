@@ -1,4 +1,5 @@
 import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 
 export function ConnectGmail() {
   return (
@@ -10,8 +11,11 @@ export function ConnectGmail() {
           transactions for a automated process.
         </p>
 
-        <div className="mt-8 space-x-2">
-          <Button disabled>Connnect</Button>
+        <div className="mt-8 space-x-2 items-center flex">
+          <Button disabled className="space-x-2">
+            <Icons.Google />
+            <span>Connect</span>
+          </Button>
           <Button disabled variant="ghost">
             Skip
           </Button>

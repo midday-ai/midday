@@ -14,7 +14,7 @@ const fontSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Midday | Smart pre-accounting",
+  title: "Midday | Your bussiness financial OS.",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
 };

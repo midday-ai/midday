@@ -1,6 +1,6 @@
 "use client";
 
-import { addEmail } from "@/actions/addEmail";
+import { subscribeEmail } from "@/actions/subscribeEmail";
 import { Icons } from "@midday/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,7 +32,7 @@ function SubmitButton() {
 }
 
 export function StartPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitted, setSubmitted] = useState(false);
 
   return (
     <div>
@@ -43,24 +43,37 @@ export function StartPage() {
           </Link>
 
           <Link href="https://app.midday.ai">
-            <button type="button" className="text-white px-8 h-[38px] btn">
-              Sign in
+            <button
+              type="button"
+              className="relative rounded-lg overflow-hidden p-[1px]"
+              style={{
+                background:
+                  "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
+              }}
+            >
+              <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-white px-8 h-[39px] h-full font-normal">
+                Sign in
+              </span>
             </button>
           </Link>
         </header>
 
         <div className="text-center mt-20">
           <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
-            <h1 className="font-bold pb-1 text-5xl">Smart pre-accounting</h1>
+            <h1 className="font-bold pb-1 text-5xl">
+              Your bussiness financial OS.
+            </h1>
           </div>
           <p className="text-[#B0B0B0]">
-            Automate financial tasks, stay organized, and
-            <br /> make informed decisions effortlessly.
+            Asset management, real-time profit/loss tracking, and seamless
+            preparation for your
+            <br />
+            accountant, powered by AI-enhanced search and filters.
           </p>
         </div>
 
         <div className="flex justify-center mt-8">
-          {submitted ? (
+          {isSubmitted ? (
             <div className="border border-[#2C2C2C] font-sm text-white h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
               <p>Subscribed!</p>
 
@@ -80,7 +93,7 @@ export function StartPage() {
           ) : (
             <form
               action={async (formData) => {
-                await addEmail(formData);
+                await subscribeEmail(formData, "pre-launch");
                 setSubmitted(true);
               }}
             >

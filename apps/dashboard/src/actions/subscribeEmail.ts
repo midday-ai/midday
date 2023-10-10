@@ -1,8 +1,6 @@
 "use server";
 
-import { track } from "@vercel/analytics/server";
-
-export async function addEmail(formData: FormData) {
+export async function subscribeEmail(formData: FormData, userGroup: string) {
   const email = formData.get("email");
 
   const res = await fetch(
@@ -12,15 +10,11 @@ export async function addEmail(formData: FormData) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, userGroup: "pre-launch" }),
+      body: JSON.stringify({ email, userGroup }),
     },
   );
 
   const json = await res.json();
-
-  if (email) {
-    track("Subscribe", { email: email?.toString() });
-  }
 
   return json;
 }
