@@ -2,7 +2,7 @@ import { Button } from "@midday/ui/button";
 
 export function ConnectGmail() {
   return (
-    <div className="py-6 px-8 max-w-[900px] flex items-between">
+    <div className="py-6 px-8 max-w-[900px] flex items-between opacity-50">
       <div className="flex-1">
         <h2 className="mb-2">Connect Gmail</h2>
         <p className="text-sm text-[#B0B0B0]">

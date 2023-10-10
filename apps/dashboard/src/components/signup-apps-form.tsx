@@ -27,6 +27,7 @@ function SubmitButton() {
 export function SignupAppsForm() {
   return (
     <form
+      className="opacity-50"
       action={async (formData) => {
         // await addEmail(formData);
         // setSubmitted(true);
