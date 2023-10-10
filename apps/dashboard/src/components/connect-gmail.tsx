@@ -11,8 +11,10 @@ export function ConnectGmail() {
         </p>
 
         <div className="mt-8 space-x-2">
-          <Button>Connnect</Button>
-          <Button variant="ghost">Skip</Button>
+          <Button disabled>Connnect</Button>
+          <Button disabled variant="ghost">
+            Skip
+          </Button>
         </div>
       </div>
     </div>

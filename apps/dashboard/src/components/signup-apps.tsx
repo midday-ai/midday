@@ -2,7 +2,7 @@ import { SignupAppsForm } from "./signup-apps-form";
 
 export function SignupApps() {
   return (
-    <div className="py-6 px-8 max-w-[900px] flex items-between">
+    <div className="py-6 px-8 max-w-[900px] flex items-between opacity-50">
       <div className="flex-1">
         <h2 className="mb-2">Sign up for apps</h2>
         <p className="text-sm text-[#B0B0B0]">

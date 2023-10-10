@@ -16,6 +16,7 @@ function SubmitButton() {
 
   return (
     <button
+      disabled
       type="submit"
       className="absolute right-2 h-7 bg-white top-2 px-4 rounded-md font-medium text-sm z-10 text-black"
     >
@@ -27,7 +28,6 @@ function SubmitButton() {
 export function SignupAppsForm() {
   return (
     <form
-      className="opacity-50"
       action={async (formData) => {
         // await addEmail(formData);
         // setSubmitted(true);
