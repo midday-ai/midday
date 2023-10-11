@@ -1,6 +1,7 @@
 "use client";
 
 import { subscribeEmail } from "@/actions/subscribeEmail";
+import { useScopedI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +12,7 @@ import { useState } from "react";
 import { experimental_useFormStatus as useFormStatus } from "react-dom";
 
 function SubmitButton() {
+  const t = useScopedI18n("startpage");
   const { pending } = useFormStatus();
 
   if (pending) {
@@ -26,12 +28,13 @@ function SubmitButton() {
       type="submit"
       className="absolute right-2 h-7 bg-white top-2 px-4 rounded-md font-medium text-sm z-10 text-black"
     >
-      Join
+      {t("join")}
     </button>
   );
 }
 
 export function StartPage() {
+  const t = useScopedI18n("startpage");
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
@@ -52,7 +55,7 @@ export function StartPage() {
               }}
             >
               <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-white px-8 h-[39px] h-full font-normal">
-                Sign in
+                {t("signIn")}
               </span>
             </button>
           </Link>
@@ -60,22 +63,15 @@ export function StartPage() {
 
         <div className="text-center mt-20">
           <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
-            <h1 className="font-bold pb-1 text-5xl">
-              Your bussiness financial OS.
-            </h1>
+            <h1 className="font-bold pb-1 text-5xl">{t("title")}</h1>
           </div>
-          <p className="text-[#B0B0B0]">
-            Asset management, real-time profit/loss tracking, and seamless
-            preparation for your
-            <br />
-            accountant, powered by AI-enhanced search and filters.
-          </p>
+          <p className="text-[#B0B0B0]">{t("description")}</p>
         </div>
 
         <div className="flex justify-center mt-8">
           {isSubmitted ? (
             <div className="border border-[#2C2C2C] font-sm text-white h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
-              <p>Subscribed!</p>
+              <p>{t("subscribed")}</p>
 
               <svg
                 width="17"
@@ -99,7 +95,7 @@ export function StartPage() {
             >
               <fieldset className="relative">
                 <input
-                  placeholder="Enter your email"
+                  placeholder={t("email")}
                   type="email"
                   name="email"
                   id="email"

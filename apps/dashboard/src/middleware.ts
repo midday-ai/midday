@@ -9,11 +9,15 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function middleware(req: NextRequest) {
-  const res = NextResponse.next();
+  const res = I18nMiddleware(req);
   const supabase = createMiddlewareClient({ req, res });
-  await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
-  return I18nMiddleware(req);
+  if (!data.session && req.nextUrl.pathname !== "/") {
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  return res;
 }
 
 export const config = {
