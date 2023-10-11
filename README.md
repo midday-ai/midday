@@ -4,7 +4,7 @@
   <h3 align="center">Midday.ai</h3>
 
 <p align="center">
-    Your bussiness financial OS.
+    Your business financial OS.
     <br />
     <a href="https://midday.ai"><strong>Learn more »</strong></a>
     <br />

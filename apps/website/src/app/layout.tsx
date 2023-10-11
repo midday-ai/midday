@@ -12,7 +12,7 @@ const fontSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Midday | Your bussiness financial OS.",
+  title: "Midday | Your business financial OS.",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
 };
