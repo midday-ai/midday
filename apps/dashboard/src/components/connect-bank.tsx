@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import banks_SE from "public/banks_SE.png";
-import ConnectBankModal from "./connect-bank-modal";
+import ConnectBankModal from "./modals/connect-bank-modal";
+import SelectAccountModal from "./modals/select-account-modal";
 
 export function ConnectBank() {
   const searchParams = useSearchParams();
@@ -32,6 +33,7 @@ export function ConnectBank() {
       />
 
       {searchParams.get("step") === "bank" && <ConnectBankModal />}
+      {searchParams.get("step") === "account" && <SelectAccountModal />}
     </div>
   );
 }

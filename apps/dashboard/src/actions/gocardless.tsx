@@ -4,6 +4,11 @@ import { env } from "@/env.mjs";
 
 const baseUrl = "https://bankaccountdata.gocardless.com";
 
+enum balanceType {
+  interimBooked = "interimBooked",
+  interimAvailable = "interimAvailable",
+}
+
 export async function getAccessToken() {
   const res = await fetch(`${baseUrl}/api/v2/token/new/`, {
     method: "POST",
@@ -38,9 +43,7 @@ export async function getBanks({ token, country }: GetBanksOptions) {
     },
   );
 
-  const json = await res.json();
-
-  return json;
+  return res.json();
 }
 
 type CreateEndUserAgreementOptions = {
@@ -66,9 +69,7 @@ export async function createEndUserAgreement({
     }),
   });
 
-  const json = await res.json();
-
-  return json;
+  return res.json();
 }
 
 type BuildLinkOptions = {
@@ -97,17 +98,54 @@ export async function buildLink({
     }),
   });
 
-  const json = await res.json();
-
-  return json;
+  return res.json();
 }
 
-type ListAccountsOptions = {
+type GetAccountByIdOptions = {
   token: string;
   id: string;
 };
 
-export async function listAccounts({ id, token }: ListAccountsOptions) {
+export async function getAccountById({ id, token }: GetAccountByIdOptions) {
+  const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return account.json();
+}
+
+type GetAccountsOptions = {
+  token: string;
+  id: string;
+};
+
+type GetAccountBalancesByIdOptions = {
+  token: string;
+  id: string;
+};
+
+export async function getAccountBalancesById({
+  id,
+  token,
+}: GetAccountBalancesByIdOptions) {
+  const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/balances/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return account.json();
+}
+
+export async function getAccounts({ token, id }: GetAccountsOptions) {
+  const banks = await getBanks({ token, country: "se" });
+
   const res = await fetch(`${baseUrl}/api/v2/requisitions/${id}/`, {
     method: "GET",
     headers: {
@@ -116,21 +154,29 @@ export async function listAccounts({ id, token }: ListAccountsOptions) {
     },
   });
 
-  const { accounts } = await res.json();
+  const data = await res.json();
 
-  const katt = await Promise.all(
-    accounts.map(async (accountId) => {
-      const res = await fetch(`${baseUrl}/api/v2/accounts/${accountId}/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+  const result = await Promise.all(
+    data.accounts.map(async (id) => {
+      const accountData = await getAccountById({ token, id });
+      const { balances } = await getAccountBalancesById({ token, id });
+
+      return {
+        ...accountData,
+        bank: banks.find((bank) => bank.id === accountData.institution_id),
+        balances: {
+          available: balances.find(
+            (balance) => balance.balanceType === balanceType.interimAvailable,
+          )?.balanceAmount,
+          boked: balances.find(
+            (balance) => balance.balanceType === balanceType.interimBooked,
+          )?.balanceAmount,
         },
-      });
-
-      return res.json();
+      };
     }),
   );
 
-  console.log(katt);
+  return result.sort((a, b) =>
+    a.balances.available - b.balances.available ? 1 : -1,
+  );
 }

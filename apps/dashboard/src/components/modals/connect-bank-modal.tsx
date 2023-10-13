@@ -5,8 +5,8 @@ import {
   createEndUserAgreement,
   getAccessToken,
   getBanks,
-} from "@/utils/gocardless";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+} from "@/actions/gocardless";
+import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -32,8 +32,7 @@ function BankRow({ id, name, logo, onSelect }) {
     <div className="flex justify-between">
       <div className="flex items-center">
         <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarImage src={logo} alt="Avatar" />
-          <AvatarFallback>JL</AvatarFallback>
+          <AvatarImage src={logo} alt={name} />
         </Avatar>
         <div className="ml-4 space-y-1">
           <p className="text-sm font-medium leading-none">{name}</p>
@@ -57,7 +56,7 @@ export default function ConnectBankModal() {
   const [filteredResults, setFilteredResults] = useState([]);
 
   useEffect(() => {
-    async function fetchBanks() {
+    async function fetchData() {
       const { access } = await getAccessToken();
       const banks = await getBanks({ token: access, country: "se" });
       setToken(access);
@@ -65,14 +64,14 @@ export default function ConnectBankModal() {
       setFilteredResults(banks);
     }
 
-    fetchBanks();
+    fetchData();
   }, []);
 
   const handleCreateEndUserAgreement = async (institutionId: string) => {
     const data = await createEndUserAgreement({ institutionId, token });
 
     const { link } = await buildLink({
-      redirect: `${location.origin}/onboarding`,
+      redirect: `${location.origin}/onboarding?step=account`,
       token,
       institutionId,
       agreement: data.id,
@@ -107,11 +106,13 @@ export default function ConnectBankModal() {
           <div>
             <Input
               placeholder="Search bank"
+              autoComplete={false}
               type="search"
               className="my-2"
               onChange={(evt) => handleFilterBanks(evt.target.value)}
             />
-            <div className="space-y-6 pt-4 h-[400px] overflow-auto">
+            <div className="space-y-6 pt-4 h-[400px] overflow-auto scrollbar-hide">
+              {filteredResults.length === 0 && <p>No banks found</p>}
               {filteredResults.map((bank) => {
                 return (
                   <BankRow
