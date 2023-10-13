@@ -1,8 +1,15 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import banks_SE from "public/banks_SE.png";
+import ConnectBankModal from "./connect-bank-modal";
 
 export function ConnectBank() {
+  const searchParams = useSearchParams();
+
   return (
     <div className="py-6 px-8 border max-w-[900px] rounded-2xl flex items-between">
       <div className="flex-1 relative">
@@ -11,7 +18,10 @@ export function ConnectBank() {
           We need a connection to your bank to get your transactions and
           balance.
         </p>
-        <Button className="absolute bottom-0">Connnect</Button>
+
+        <Link href="/onboarding?step=bank">
+          <Button className="absolute bottom-0">Connnect</Button>
+        </Link>
       </div>
       <Image
         src={banks_SE}
@@ -20,6 +30,8 @@ export function ConnectBank() {
         alt="Banks"
         className="-mt-2 -mr-2"
       />
+
+      {searchParams.get("step") === "bank" && <ConnectBankModal />}
     </div>
   );
 }

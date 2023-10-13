@@ -15,7 +15,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "next": "^13.5.4",
-    "next-international": "^1.1.1",
+    "next-international": "^1.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "zod": "^3.22.4"
@@ -23,9 +23,9 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.0",
-    "@types/node": "^20.8.3",
-    "@types/react": "^18.2.25",
-    "@types/react-dom": "^18.2.11",
+    "@types/node": "^20.8.5",
+    "@types/react": "^18.2.28",
+    "@types/react-dom": "^18.2.13",
     "typescript": "^5.2.2"
   }
 }

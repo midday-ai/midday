@@ -9,9 +9,5 @@ type ProviderProps = {
 };
 
 export function Provider({ locale, children }: ProviderProps) {
-  return (
-    <I18nProviderClient locale={locale} fallback={<p>Loading...</p>}>
-      {children}
-    </I18nProviderClient>
-  );
+  return <I18nProviderClient locale={locale}>{children}</I18nProviderClient>;
 }

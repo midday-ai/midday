@@ -14,7 +14,7 @@
   },
   "dependencies": { 
     "@supabase/auth-helpers-nextjs": "^0.8.1", 
-    "@supabase/supabase-js": "^2.38.0"
+    "@supabase/supabase-js": "^2.38.1"
   },
   "devDependencies": {
     "supabase": "^1.100.1",

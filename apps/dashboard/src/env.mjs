@@ -10,6 +10,8 @@ export const env = createEnv({
     PORT: z.coerce.number().default(3000),
     RESEND_API_KEY: z.string(),
     LOOPS_ENDPOINT: z.string(),
+    GOCARDLESS_SECRET_ID: z.string(),
+    GOCARDLESS_SECRET_KEY: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -34,6 +36,8 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
+    GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
+    GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
