@@ -12,12 +12,14 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@hookform/resolvers": "^3.3.2",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "next": "^13.5.4",
     "next-international": "^1.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "react-hook-form": "^7.47.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {

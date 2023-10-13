@@ -26,14 +26,30 @@ export async function getUserDetails() {
 
   try {
     const { data: userDetails } = await supabase
-      .from("profiles")
+      .from("users")
       .select()
       .eq("id", user?.user.id)
-
       .single();
     return userDetails;
   } catch (error) {
     console.error("Error:", error);
     return null;
   }
+}
+
+// export async function getUserTeams() {
+//   const supabase = createServerClient();
+//   const user = await getSession();
+//   const { data, error } = await supabase.from("teams").select(`
+//   id,
+//   team_name,
+//   users ( id, name )
+// `);
+
+//   return data;
+// }
+
+export async function saveAccounts() {
+  const supabase = createServerClient();
+  const user = await getSession();
 }

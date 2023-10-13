@@ -17,10 +17,50 @@ import {
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { useRouter } from "next/navigation";
+import { Skeleton } from "@midday/ui/skeleton";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-function BankRow({ id, name, logo, onSelect }) {
+function RowsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[130px]" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[180px]" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[120px]" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[160px]" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[140px]" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[200px]" />
+      </div>{" "}
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[130px]" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="h-3.5 w-[130px]" />
+      </div>
+    </div>
+  );
+}
+
+function Row({ id, name, logo, onSelect }) {
   const [loading, setLoading] = useState(false);
 
   const handleOnSelect = () => {
@@ -51,6 +91,8 @@ function BankRow({ id, name, logo, onSelect }) {
 
 export default function ConnectBankModal() {
   const router = useRouter();
+  const pathname = usePathname();
+  const [loading, setLoading] = useState(true);
   const [token, setToken] = useState();
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -59,6 +101,7 @@ export default function ConnectBankModal() {
     async function fetchData() {
       const { access } = await getAccessToken();
       const banks = await getBanks({ token: access, country: "se" });
+      setLoading(false);
       setToken(access);
       setResults(banks);
       setFilteredResults(banks);
@@ -93,7 +136,7 @@ export default function ConnectBankModal() {
   };
 
   return (
-    <Dialog defaultOpen onOpenChange={() => router.back()}>
+    <Dialog defaultOpen onOpenChange={() => router.push(pathname)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Connect bank</DialogTitle>
@@ -112,10 +155,10 @@ export default function ConnectBankModal() {
               onChange={(evt) => handleFilterBanks(evt.target.value)}
             />
             <div className="space-y-6 pt-4 h-[400px] overflow-auto scrollbar-hide">
-              {filteredResults.length === 0 && <p>No banks found</p>}
+              {loading && <RowsSkeleton />}
               {filteredResults.map((bank) => {
                 return (
-                  <BankRow
+                  <Row
                     key={bank.id}
                     id={bank.id}
                     name={bank.name}
@@ -124,6 +167,9 @@ export default function ConnectBankModal() {
                   />
                 );
               })}
+              {!loading && filteredResults.length === 0 && (
+                <p>No banks found</p>
+              )}
             </div>
           </div>
         </DialogHeader>

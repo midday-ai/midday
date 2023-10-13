@@ -1,7 +1,6 @@
 "use server";
 
 import { env } from "@/env.mjs";
-
 const baseUrl = "https://bankaccountdata.gocardless.com";
 
 enum balanceType {
