@@ -9,6 +9,9 @@
 			"dependsOn": ["^build"],
 			"outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
 		},
+		"start": {
+			"cache": false
+		},
 		"dev": {
 			"persistent": true,
 			"cache": false

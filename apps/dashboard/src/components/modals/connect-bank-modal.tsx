@@ -1,11 +1,11 @@
 "use client";
 
-import {
-  buildLink,
-  createEndUserAgreement,
-  getAccessToken,
-  getBanks,
-} from "@/actions/gocardless";
+// import {
+//   buildLink,
+//   createEndUserAgreement,
+//   getAccessToken,
+//   getBanks,
+// } from "@/actions/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 function RowsSkeleton() {
@@ -90,37 +90,39 @@ function Row({ id, name, logo, onSelect }) {
 }
 
 export default function ConnectBankModal() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState();
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
+  const isOpen = searchParams.get("step") === "bank";
 
-  useEffect(() => {
-    async function fetchData() {
-      const { access } = await getAccessToken();
-      const banks = await getBanks({ token: access, country: "se" });
-      setLoading(false);
-      setToken(access);
-      setResults(banks);
-      setFilteredResults(banks);
-    }
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const { access } = await getAccessToken();
+  //     const banks = await getBanks({ token: access, country: "se" });
+  //     setLoading(false);
+  //     setToken(access);
+  //     setResults(banks);
+  //     setFilteredResults(banks);
+  //   }
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
   const handleCreateEndUserAgreement = async (institutionId: string) => {
-    const data = await createEndUserAgreement({ institutionId, token });
+    // const data = await createEndUserAgreement({ institutionId, token });
 
-    const { link } = await buildLink({
-      redirect: `${location.origin}/onboarding?step=account`,
-      token,
-      institutionId,
-      agreement: data.id,
-    });
+  //   const { link } = await buildLink({
+  //     redirect: `${location.origin}/onboarding?step=account`,
+  //     token,
+  //     institutionId,
+  //     agreement: data.id,
+  //   });
 
-    router.push(link);
+  //   router.push(link);
   };
 
   const handleFilterBanks = (value: string) => {
@@ -136,7 +138,7 @@ export default function ConnectBankModal() {
   };
 
   return (
-    <Dialog defaultOpen onOpenChange={() => router.push(pathname)}>
+    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Connect bank</DialogTitle>

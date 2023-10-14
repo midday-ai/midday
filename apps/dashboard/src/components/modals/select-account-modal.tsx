@@ -1,6 +1,6 @@
 "use client";
 
-import { getAccessToken, getAccounts } from "@/actions/gocardless";
+// import { getAccessToken, getAccounts } from "@/actions/gocardless";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -57,6 +57,7 @@ export default function ConnectBankModal({onCreateAccounts, onInitialSync}) {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
+  const isOpen = searchParams.get("step") === "account";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -81,25 +82,25 @@ export default function ConnectBankModal({onCreateAccounts, onInitialSync}) {
   }
 
   useEffect(() => {
-    async function fetchData() {
-      const { access } = await getAccessToken();
-      const accounts = await getAccounts({
-        token: access,
-        id: searchParams.get("ref"),
-      });
+    // async function fetchData() {
+    //   const { access } = await getAccessToken();
+    //   const accounts = await getAccounts({
+    //     token: access,
+    //     id: searchParams.get("ref"),
+    //   });
 
-      setAccounts(accounts);
-      setLoading(false);
+    //   setAccounts(accounts);
+    //   setLoading(false);
 
-      // Set default accounts to checked
-      form.reset({ accounts: accounts.map((account) => account.id) });
-    }
+    //   // Set default accounts to checked
+    //   form.reset({ accounts: accounts.map((account) => account.id) });
+    // }
 
-    fetchData();
+    // fetchData();
   }, []);
 
   return (
-    <Dialog defaultOpen onOpenChange={() => router.push(pathname)}>
+    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
       <DialogContent>
         <DialogHeader className="mb-8">
           <DialogTitle>Select accounts</DialogTitle>

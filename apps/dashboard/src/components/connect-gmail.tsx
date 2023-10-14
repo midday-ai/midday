@@ -9,7 +9,7 @@ export function ConnectGmail() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const active = searchParams.get("step") === "gmail";
+  const active = searchParams.get("step") === "gmail" || searchParams.get("step") === "apps";
 
   const handleSkip = () => {
     router.push(`${pathname}?step=apps`);

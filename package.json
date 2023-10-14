@@ -11,7 +11,8 @@
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "dev": "turbo dev --parallel",
-    "dev:app": "turbo dev --filter=@midday/app",
+    "start:dashboard": "turbo dev --filter=@midday/dashboard",
+    "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
     "check:types": "turbo typecheck"
