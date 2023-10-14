@@ -117,11 +117,6 @@ export async function getAccountById({ id, token }: GetAccountByIdOptions) {
   return account.json();
 }
 
-type GetAccountsOptions = {
-  token: string;
-  id: string;
-};
-
 type GetAccountBalancesByIdOptions = {
   token: string;
   id: string;
@@ -142,6 +137,11 @@ export async function getAccountBalancesById({
   return account.json();
 }
 
+type GetAccountsOptions = {
+  token: string;
+  id: string;
+};
+
 export async function getAccounts({ token, id }: GetAccountsOptions) {
   const banks = await getBanks({ token, country: "se" });
 
@@ -156,7 +156,7 @@ export async function getAccounts({ token, id }: GetAccountsOptions) {
   const data = await res.json();
 
   const result = await Promise.all(
-    data.accounts.map(async (id) => {
+    data.accounts?.map(async (id) => {
       const accountData = await getAccountById({ token, id });
       const { balances } = await getAccountBalancesById({ token, id });
 
@@ -178,4 +178,21 @@ export async function getAccounts({ token, id }: GetAccountsOptions) {
   return result.sort((a, b) =>
     a.balances.available - b.balances.available ? 1 : -1,
   );
+}
+
+type GetTransactionsOptions = {
+  token: string;
+  id: string;
+};
+
+export async function getTransactions({ token, id }: GetTransactionsOptions) {
+  const res = await fetch(`${baseUrl}/api/v2/accounts/${id}/transactions/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return res.json();
 }

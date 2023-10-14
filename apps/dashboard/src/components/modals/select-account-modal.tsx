@@ -1,7 +1,9 @@
 "use client";
 
 import { getAccessToken, getAccounts } from "@/actions/gocardless";
+import { initialTransactionsSync } from "@/actions/transactions";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createAccounts } from "@midday/supabase/server";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -15,12 +17,11 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@midday/ui/form";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -66,8 +67,10 @@ export default function ConnectBankModal() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    await createAccounts(values.accounts);
+    await initialTransactionsSync(values.accounts);
+    router.push(`${pathname}?step=gmail`);
   }
 
   useEffect(() => {
@@ -81,6 +84,7 @@ export default function ConnectBankModal() {
       setAccounts(accounts);
 
       setLoading(false);
+
       // Set default accounts to checked
       form.reset({ accounts: accounts.map((account) => account.id) });
     }
@@ -155,8 +159,16 @@ export default function ConnectBankModal() {
             ))}
 
             <div className="pt-4">
-              <Button className="w-full" type="submit">
-                Save
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? (
+                  <Icons.Loader className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Save"
+                )}
               </Button>
             </div>
           </form>

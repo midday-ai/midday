@@ -1,3 +1,4 @@
+import { getTeamBankAccounts } from "@midday/supabase/server";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -6,9 +7,9 @@ export const metadata: Metadata = {
 };
 
 export default async function Overview() {
-  const connected = false;
+  const accounts = await getTeamBankAccounts();
 
-  if (!connected) {
+  if (!accounts.length) {
     redirect("/onboarding");
   }
 

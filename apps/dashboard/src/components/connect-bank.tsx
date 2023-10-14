@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -10,9 +11,18 @@ import SelectAccountModal from "./modals/select-account-modal";
 
 export function ConnectBank() {
   const searchParams = useSearchParams();
+  const active =
+    !searchParams.has("step") ||
+    searchParams.get("step") === "bank" ||
+    searchParams.get("step") === "account";
 
   return (
-    <div className="py-6 px-8 border max-w-[900px] rounded-2xl flex items-between">
+    <div
+      className={cn(
+        "py-6 px-8 border max-w-[900px] rounded-2xl flex items-between opacity-50",
+        active && "opacity-1",
+      )}
+    >
       <div className="flex-1 relative">
         <h2 className="mb-2">Connect bank account</h2>
         <p className="text-sm text-[#B0B0B0]">

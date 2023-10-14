@@ -21,9 +21,9 @@ export function MainMenu() {
       icon: Icons.Transactions,
     },
     {
-      path: "/integrations",
-      name: "Integrations",
-      icon: Icons.Integrations,
+      path: "/apps",
+      name: "App Store",
+      icon: Icons.Apps,
     },
     {
       path: "/settings",
