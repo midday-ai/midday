@@ -15,6 +15,7 @@
     "@hookform/resolvers": "^3.3.2",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
+    "@tanstack/react-table": "^8.10.7",
     "change-case": "^5.0.2",
     "next": "^13.5.4",
     "next-international": "^1.1.2",

@@ -17,7 +17,7 @@ export async function initialTransactionsSync(ids: string[]) {
       await createTransactions(
         transactions.booked.map((data) => ({
           transaction_id: data.transactionId,
-          reference: data.entryReference,
+          reference_id: data.entryReference,
           booking_date: data.bookingDate,
           value_date: data.valueDate,
           display: capitalCase(data.additionalInformation),
@@ -26,6 +26,7 @@ export async function initialTransactionsSync(ids: string[]) {
           internal_id: data.internalTransactionId,
           amount: data.transactionAmount.amount,
           currency: data.transactionAmount.currency,
+          bank_account_id: id,
         })),
       );
     }),

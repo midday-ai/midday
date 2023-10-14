@@ -36,6 +36,7 @@
     "./skeleton": "./src/components/skeleton.tsx",
     "./tailwind.config": "./tailwind.config.ts",
     "./textarea": "./src/components/textarea.tsx",
+    "./table": "./src/components/table.tsx",
     "./utils": "./src/utils"
   },
   "dependencies": {

@@ -3,7 +3,7 @@
 import { getAccessToken, getAccounts } from "@/actions/gocardless";
 import { initialTransactionsSync } from "@/actions/transactions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createAccounts } from "@midday/supabase/server";
+import { createTeamBankAccounts } from "@midday/supabase/server";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -68,7 +68,15 @@ export default function ConnectBankModal() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await createAccounts(values.accounts);
+    const accountsWithDetails = values.accounts
+      .map((accountId) => accounts.find((account) => account.id === accountId))
+      .map((account) => ({
+        id: account.id,
+        bank_name: account.bank.name,
+        logo_url: account.bank.logo,
+      }));
+
+    await createTeamBankAccounts(accountsWithDetails);
     await initialTransactionsSync(values.accounts);
     router.push(`${pathname}?step=gmail`);
   }
@@ -82,7 +90,6 @@ export default function ConnectBankModal() {
       });
 
       setAccounts(accounts);
-
       setLoading(false);
 
       // Set default accounts to checked

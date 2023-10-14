@@ -12,32 +12,25 @@ export const createServerClient = cache(() =>
 export async function getSession() {
   const supabase = createServerClient();
 
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    return session;
-  } catch (error) {
-    console.error("Error:", error);
-    return null;
-  }
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  return session;
 }
 
 export async function getUserDetails() {
   const supabase = createServerClient();
   const user = await getSession();
 
-  try {
-    const { data } = await supabase
-      .from("users")
-      .select()
-      .eq("id", user?.user.id)
-      .single();
-    return data;
-  } catch (error) {
-    console.error("Error:", error);
-    return null;
-  }
+  const { data, error } = await supabase
+    .from("users")
+    .select()
+    .eq("id", user?.user.id)
+    .single();
+
+  console.error(error);
+
+  return data;
 }
 
 export async function saveAccounts() {
@@ -45,16 +38,19 @@ export async function saveAccounts() {
   const user = await getSession();
 }
 
-export async function createAccounts(accounts) {
+export async function createTeamBankAccounts(accounts) {
   const supabase = createServerClient();
-  const user = await getSession();
+  const user = await getUserDetails();
 
   const { data } = await supabase
-    .from("accounts")
+    .from("bank_accounts")
     .insert(
-      accounts.map((account_id) => ({
-        account_id,
-        created_by: user?.user.id,
+      accounts.map((account) => ({
+        account_id: account.id,
+        bank_name: account.bank_name,
+        logo_url: account.logo_url,
+        created_by: user?.id,
+        team_id: user?.team_id,
         provider: "gocardless",
       })),
     )
@@ -82,35 +78,63 @@ export async function getTeamBankAccounts() {
   const supabase = createServerClient();
   const user = await getUserDetails();
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("bank_accounts")
     .select("*")
     .eq("team_id", user?.team_id);
 
+  console.error(error);
+
   return data;
 }
 
-export async function getTeamMembers() {
+export async function getTeamMembers(team_id: string) {
   const supabase = createServerClient();
-  const user = await getSession();
 
-  const { data, error } = await supabase.from("teams").select(`
+  const { data, error } = await supabase
+    .from("teams")
+    .select(`
       *, 
       members(*)
-    `);
+    `)
+    .eq("id", team_id);
 
-  console.log(data, error);
+  console.error(error);
+
+  return data;
 }
 
 export async function createTransactions(transactions) {
   const supabase = createServerClient();
-  const user = await getSession();
+  const user = await getUserDetails();
 
-  const { data } = await supabase.from("transactions").insert(
+  const { data, error } = await supabase.from("transactions").insert(
     transactions.map((transaction) => ({
       ...transaction,
+      team_id: user?.team_id,
     })),
   );
+
+  console.error(error);
+
+  return data;
+}
+
+export async function getTransactions({ from = 0, to = 20 }) {
+  const supabase = createServerClient();
+  const user = await getUserDetails();
+
+  // TODO: Set "bank_account_id" uuid references bank_account
+  const { data, error } = await supabase
+    .from("transactions")
+    .select(`
+      *,
+      account:bank_account_id(*)
+    `)
+    .eq("team_id", user?.team_id)
+    .range(from, to);
+
+  console.error(error);
 
   return data;
 }

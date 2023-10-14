@@ -12,25 +12,31 @@ export interface Database {
       bank_accounts: {
         Row: {
           account_id: string
+          bank_name: string | null
           created_at: string
           created_by: string
           id: string
+          logo_url: string | null
           provider: Database["public"]["Enums"]["bankProviders"]
           team_id: string | null
         }
         Insert: {
           account_id: string
+          bank_name?: string | null
           created_at?: string
           created_by: string
           id?: string
+          logo_url?: string | null
           provider: Database["public"]["Enums"]["bankProviders"]
           team_id?: string | null
         }
         Update: {
           account_id?: string
+          bank_name?: string | null
           created_at?: string
           created_by?: string
           id?: string
+          logo_url?: string | null
           provider?: Database["public"]["Enums"]["bankProviders"]
           team_id?: string | null
         }
@@ -103,10 +109,10 @@ export interface Database {
       }
       transactions: {
         Row: {
-          account: string | null
           amount: number | null
-          assigned_to: string | null
+          assigned_id: string | null
           attachment: string | null
+          bank_account_id: string | null
           booking_date: string | null
           created_at: string
           currency: string | null
@@ -115,18 +121,18 @@ export interface Database {
           internal_id: string | null
           note: string | null
           original: string | null
-          reference: string
-          team: string | null
+          reference_id: string
+          team_id: string | null
           transaction_code: string | null
           transaction_id: string
           value_date: string | null
           vat: Database["public"]["Enums"]["vatRates"] | null
         }
         Insert: {
-          account?: string | null
           amount?: number | null
-          assigned_to?: string | null
+          assigned_id?: string | null
           attachment?: string | null
+          bank_account_id?: string | null
           booking_date?: string | null
           created_at?: string
           currency?: string | null
@@ -135,18 +141,18 @@ export interface Database {
           internal_id?: string | null
           note?: string | null
           original?: string | null
-          reference: string
-          team?: string | null
+          reference_id: string
+          team_id?: string | null
           transaction_code?: string | null
           transaction_id: string
           value_date?: string | null
           vat?: Database["public"]["Enums"]["vatRates"] | null
         }
         Update: {
-          account?: string | null
           amount?: number | null
-          assigned_to?: string | null
+          assigned_id?: string | null
           attachment?: string | null
+          bank_account_id?: string | null
           booking_date?: string | null
           created_at?: string
           currency?: string | null
@@ -155,8 +161,8 @@ export interface Database {
           internal_id?: string | null
           note?: string | null
           original?: string | null
-          reference?: string
-          team?: string | null
+          reference_id?: string
+          team_id?: string | null
           transaction_code?: string | null
           transaction_id?: string
           value_date?: string | null
@@ -164,20 +170,20 @@ export interface Database {
         }
         Relationships: [
           {
-            foreignKeyName: "transactions_account_fkey"
-            columns: ["account"]
-            referencedRelation: "bank_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transactions_assigned_to_fkey"
-            columns: ["assigned_to"]
+            foreignKeyName: "transactions_assigned_id_fkey"
+            columns: ["assigned_id"]
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_team_fkey"
-            columns: ["team"]
+            foreignKeyName: "transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "transactions_team_id_fkey"
+            columns: ["team_id"]
             referencedRelation: "teams"
             referencedColumns: ["id"]
           }
