@@ -1,21 +1,23 @@
-"use client";
-
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+// import { useSearchParams } from "next/navigation";
 import banks_SE from "public/banks_SE.png";
 import ConnectBankModal from "./modals/connect-bank-modal";
 import SelectAccountModal from "./modals/select-account-modal";
+import { initialTransactionsSync } from "@/actions/transactions";
+import { createTeamBankAccounts } from "@midday/supabase/actions";
 
 export function ConnectBank() {
-  const searchParams = useSearchParams();
-  const active =
-    !searchParams.has("step") ||
-    searchParams.get("step") === "bank" ||
-    searchParams.get("step") === "account";
+  // const searchParams = useSearchParams();
+  // const active =
+  //   !searchParams.has("step") ||
+  //   searchParams.get("step") === "bank" ||
+  //   searchParams.get("step") === "account";
 
+
+  const active = false;
   return (
     <div
       className={cn(
@@ -42,8 +44,8 @@ export function ConnectBank() {
         className="-mt-2 -mr-2"
       />
 
-      {searchParams.get("step") === "bank" && <ConnectBankModal />}
-      {searchParams.get("step") === "account" && <SelectAccountModal />}
+      <ConnectBankModal  />
+      <SelectAccountModal onInitialSync={initialTransactionsSync} onCreateAccounts={createTeamBankAccounts} />
     </div>
   );
 }

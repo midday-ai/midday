@@ -1,6 +1,6 @@
 "use server";
 
-import { createTransactions } from "@midday/supabase/server";
+import { createTransactions } from "@midday/supabase/actions";
 import { capitalCase } from "change-case";
 import { getAccessToken, getTransactions } from "./gocardless";
 
@@ -13,6 +13,10 @@ export async function initialTransactionsSync(ids: string[]) {
         token: access,
         id,
       });
+
+      if(!transactions?.booked.length) {
+        return
+      }
 
       await createTransactions(
         transactions.booked.map((data) => ({

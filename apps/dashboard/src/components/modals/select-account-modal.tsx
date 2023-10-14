@@ -1,9 +1,7 @@
 "use client";
 
 import { getAccessToken, getAccounts } from "@/actions/gocardless";
-import { initialTransactionsSync } from "@/actions/transactions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createTeamBankAccounts } from "@midday/supabase/server";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -53,7 +51,7 @@ function RowsSkeleton() {
   );
 }
 
-export default function ConnectBankModal() {
+export default function ConnectBankModal({onCreateAccounts, onInitialSync}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [accounts, setAccounts] = useState([]);
@@ -76,8 +74,9 @@ export default function ConnectBankModal() {
         logo_url: account.bank.logo,
       }));
 
-    await createTeamBankAccounts(accountsWithDetails);
-    await initialTransactionsSync(values.accounts);
+    await onCreateAccounts(accountsWithDetails);
+    await onInitialSync(values.accounts);
+    console.log('wefwef')
     router.push(`${pathname}?step=gmail`);
   }
 
