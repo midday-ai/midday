@@ -23,6 +23,11 @@ export const columns: ColumnDef<Payment>[] = [
   {
     accessorKey: "amount",
     header: "Amount",
+    cell: ({ row }) =>
+      new Intl.NumberFormat("de-DE", {
+        style: "currency",
+        currency: row.original.currency,
+      }).format(row.original.amount),
   },
   {
     accessorKey: "transaction_code",

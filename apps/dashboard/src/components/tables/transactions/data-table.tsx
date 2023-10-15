@@ -55,6 +55,7 @@ export function DataTable<TData, TValue>({
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
               <TableRow
+                className="h-[45px]"
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
               >
@@ -67,7 +68,7 @@ export function DataTable<TData, TValue>({
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={columns.length} className="h-32 text-center">
                 No results.
               </TableCell>
             </TableRow>
