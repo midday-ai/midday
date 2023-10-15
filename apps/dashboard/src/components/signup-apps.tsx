@@ -1,6 +1,6 @@
 "use client";
 
-import { subscribeEmail } from "@/actions/subscribeEmail";
+import { subscribeEmail } from "@/actions";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";

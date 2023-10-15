@@ -1,6 +1,6 @@
 "use client";
 
-import { sendFeeback } from "@/actions/sendFeedback";
+import { sendFeeback } from "@/actions";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";

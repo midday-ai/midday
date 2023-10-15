@@ -1,7 +1,8 @@
 "use client";
 
-// import { getAccessToken, getAccounts } from "@/actions/gocardless";
+import { createTeamBankAccounts, initialTransactionsSync } from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getAccessToken, getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -51,7 +52,7 @@ function RowsSkeleton() {
   );
 }
 
-export default function ConnectBankModal({onCreateAccounts, onInitialSync}) {
+export default function SelectAccountModal() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [accounts, setAccounts] = useState([]);
@@ -75,27 +76,27 @@ export default function ConnectBankModal({onCreateAccounts, onInitialSync}) {
         logo_url: account.bank.logo,
       }));
 
-    await onCreateAccounts(accountsWithDetails);
-    await onInitialSync(values.accounts);
-     router.push(`${pathname}?step=gmail`);
+    await createTeamBankAccounts(accountsWithDetails);
+    await initialTransactionsSync(values.accounts);
+    router.push(`${pathname}?step=gmail`);
   }
 
   useEffect(() => {
-    // async function fetchData() {
-    //   const { access } = await getAccessToken();
-    //   const accounts = await getAccounts({
-    //     token: access,
-    //     id: searchParams.get("ref"),
-    //   });
+    async function fetchData() {
+      const { access } = await getAccessToken();
+      const accounts = await getAccounts({
+        token: access,
+        id: searchParams.get("ref"),
+      });
 
-    //   setAccounts(accounts);
-    //   setLoading(false);
+      setAccounts(accounts);
+      setLoading(false);
 
-    //   // Set default accounts to checked
-    //   form.reset({ accounts: accounts.map((account) => account.id) });
-    // }
+      // Set default accounts to checked
+      form.reset({ accounts: accounts.map((account) => account.id) });
+    }
 
-    // fetchData();
+    fetchData();
   }, []);
 
   return (

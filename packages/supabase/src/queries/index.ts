@@ -1,4 +1,3 @@
-import invariant from "tiny-invariant";
 import { Client } from "../types";
 
 export async function getSession(supabase: Client) {
@@ -9,13 +8,11 @@ export async function getSession(supabase: Client) {
 export async function getUserDetails(supabase: Client) {
   const user = await getSession(supabase);
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("users")
     .select()
     .eq("id", user?.session?.user.id)
     .single();
-
-  invariant(error);
 
   return data;
 }
@@ -37,12 +34,10 @@ export async function getUserTeams(supabase: Client) {
 export async function getTeamBankAccounts(supabase: Client) {
   const user = await getUserDetails(supabase);
 
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("bank_accounts")
     .select("*")
     .eq("team_id", user?.team_id);
-
-  invariant(error);
 
   return data;
 }
@@ -55,15 +50,13 @@ export async function getTeamMembers(
   supabase: Client,
   { team_id }: GetTeamMembersParams,
 ) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("teams")
     .select(`
       *,
       members(*)
     `)
     .eq("id", team_id);
-
-  invariant(error);
 
   return data;
 }
@@ -80,7 +73,7 @@ export async function getTransactions(
   const user = await getUserDetails(supabase);
 
   // TODO: Set "bank_account_id" uuid references bank_account
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("transactions")
     .select(`
       *,
@@ -88,8 +81,6 @@ export async function getTransactions(
     `)
     .eq("team_id", user?.team_id)
     .range(from, to);
-
-  invariant(error);
 
   return data;
 }
