@@ -1,6 +1,6 @@
 import { columns } from "@/components/tables/transactions/columns";
 import { DataTable } from "@/components/tables/transactions/data-table";
-import { getTransactions } from "@midday/supabase/server";
+// import { getTransactions } from "@midday/supabase/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Transactions() {
-  const data = await getTransactions({ from: 0, to: 25 });
-  return <DataTable columns={columns} data={data} />;
+  return null;
+  // const data = await getTransactions({ from: 0, to: 25 });
+  // return <DataTable columns={columns} data={data} />;
 }

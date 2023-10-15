@@ -114,6 +114,7 @@ export default function ConnectBankModal() {
 
   const handleCreateEndUserAgreement = async (institutionId: string) => {
     const data = await createEndUserAgreement({ institutionId, token });
+
     const { link } = await buildLink({
       redirect: `${location.origin}/onboarding?step=account`,
       token,
