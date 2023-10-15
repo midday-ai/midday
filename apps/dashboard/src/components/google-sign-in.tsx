@@ -1,11 +1,11 @@
 "use client";
 
-import { createClientComponentClient } from "@midday/supabase";
+import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 
 export function GoogleSignIn() {
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({

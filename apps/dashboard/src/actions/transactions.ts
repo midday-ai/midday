@@ -1,10 +1,11 @@
 "use server";
 
-import { createTransactions } from "@midday/supabase/actions";
+import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
 import { capitalCase } from "change-case";
 import { getAccessToken, getTransactions } from "./gocardless";
 
 export async function initialTransactionsSync(ids: string[]) {
+  const supabase = await getSupabaseServerActionClient();
   const { access } = await getAccessToken();
 
   await Promise.all(
@@ -14,11 +15,12 @@ export async function initialTransactionsSync(ids: string[]) {
         id,
       });
 
-      if(!transactions?.booked.length) {
-        return
+      if (!transactions?.booked.length) {
+        return;
       }
 
       await createTransactions(
+        supabase,
         transactions.booked.map((data) => ({
           transaction_id: data.transactionId,
           reference_id: data.entryReference,

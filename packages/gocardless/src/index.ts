@@ -1,6 +1,5 @@
 "use server";
 
-import { env } from "@/env.mjs";
 const baseUrl = "https://bankaccountdata.gocardless.com";
 
 enum balanceType {
@@ -15,8 +14,8 @@ export async function getAccessToken() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      secret_id: env.GOCARDLESS_SECRET_ID,
-      secret_key: env.GOCARDLESS_SECRET_KEY,
+      secret_id: process.env.GOCARDLESS_SECRET_ID,
+      secret_key: process.env.GOCARDLESS_SECRET_KEY,
     }),
   });
 

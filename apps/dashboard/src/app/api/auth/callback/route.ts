@@ -1,16 +1,15 @@
-import { createRouteHandlerClient } from "@midday/supabase";
-import { cookies } from "next/headers";
+import { getSupabasRouteClient } from "@midday/supabase/route-client";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
-  const requestUrl = new URL(request.url);
+export async function GET(req: NextRequest) {
+  const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
 
   if (code) {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = getSupabasRouteClient();
     await supabase.auth.exchangeCodeForSession(code);
   }
 

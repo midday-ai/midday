@@ -1,6 +1,6 @@
 "use client";
 
-import { createClientComponentClient } from "@midday/supabase";
+import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
 import {
   DropdownMenuItem,
   DropdownMenuShortcut,
@@ -10,7 +10,7 @@ import { useState } from "react";
 
 export function SignOut() {
   const [isLoading, setLoading] = useState(false);
-  const supabase = createClientComponentClient();
+  const supabase = getSupabaseBrowserClient();
   const router = useRouter();
 
   const handleSignOut = async () => {

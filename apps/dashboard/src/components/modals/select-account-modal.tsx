@@ -77,8 +77,7 @@ export default function ConnectBankModal({onCreateAccounts, onInitialSync}) {
 
     await onCreateAccounts(accountsWithDetails);
     await onInitialSync(values.accounts);
-    console.log('wefwef')
-    router.push(`${pathname}?step=gmail`);
+     router.push(`${pathname}?step=gmail`);
   }
 
   useEffect(() => {

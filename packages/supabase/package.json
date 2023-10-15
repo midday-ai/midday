@@ -1,8 +1,6 @@
 {
   "name": "@midday/supabase",
   "version": "1.0.0",
-  "main": "./index.ts",
-  "types": "./index.ts",
   "private": true,
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
@@ -12,17 +10,22 @@
     "login": "supabase login",
     "db:generate": "supabase gen types typescript --project-id pytddvqiozwrhfbwqazp --schema public > src/types/db.ts"
   },
-  "dependencies": { 
-    "@supabase/auth-helpers-nextjs": "^0.8.1", 
-    "@supabase/supabase-js": "^2.38.1"
+  "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.8.1",
+    "@supabase/supabase-js": "^2.38.1",
+    "supabase": "^1.100.1",
+    "tiny-invariant": "^1.3.1"
   },
   "devDependencies": {
-    "supabase": "^1.100.1",
     "typescript": "^5.2.2"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./server": "./src/server.ts",
-    "./actions": "./src/actions.ts"
+    "./action-client": "./src/client/action-client.ts",
+    "./route-client": "./src/client/route-client.ts",
+    "./browser-client": "./src/client/browser-client.ts",
+    "./middleware-client": "./src/client/middleware-client.ts",
+    "./server-client": "./src/client/server-client.ts",
+    "./mutations": "./src/mutations/index.ts",
+    "./queries": "./src/queries/index.ts"
   }
 }

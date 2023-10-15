@@ -1,5 +1,4 @@
-import { createServerComponentClient } from "@midday/supabase";
-import { cookies } from "next/headers";
+import { getSupabaseServerClient } from "@midday/supabase/server-client";
 
 export default async function Layout({
   dashboard,
@@ -8,7 +7,7 @@ export default async function Layout({
   dashboard: React.ReactNode;
   login: React.ReactNode;
 }) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = getSupabaseServerClient();
 
   const {
     data: { session },

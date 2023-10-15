@@ -7,11 +7,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Overview() {
-  const accounts = await getTeamBankAccounts();
+  // const accounts = await getTeamBankAccounts();
 
-  if (!accounts.length) {
-    redirect("/onboarding");
-  }
+  // if (!accounts.length) {
+  //   redirect("/onboarding");
+  // }
 
   return <p>Overview</p>;
 }

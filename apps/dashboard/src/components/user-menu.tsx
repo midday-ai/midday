@@ -1,4 +1,4 @@
-import { getSession } from "@midday/supabase/server";
+import { getSupabaseServerClient } from "@midday/supabase/server-client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,17 +13,18 @@ import Link from "next/link";
 import { SignOut } from "./sign-out";
 
 export async function UserMenu() {
-  const { user } = await getSession();
+  const supabase = getSupabaseServerClient();
+  const { data } = await supabase.auth.getSession();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Image
-          src={user?.user_metadata?.avatar_url}
+          src={data.session.user.user_metadata.avatar_url}
           width={32}
           height={32}
           className="rounded-full w-8 h-8"
-          alt={user.full_name}
+          alt={data.full_name}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" sideOffset={10} align="end">

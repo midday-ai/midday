@@ -4,14 +4,10 @@ import Link from "next/link";
 import banks_SE from "public/banks_SE.png";
 import ConnectBankModal from "./modals/connect-bank-modal";
 import SelectAccountModal from "./modals/select-account-modal";
-import { initialTransactionsSync } from "@/actions/transactions";
-import { createTeamBankAccounts } from "@midday/supabase/actions";
 
 export function ConnectBank() {
   return (
-    <div
-      className="py-6 px-8 border max-w-[900px] rounded-2xl flex items-between opacity-1"
-    >
+    <div className="py-6 px-8 border max-w-[900px] rounded-2xl flex items-between opacity-1">
       <div className="flex-1 relative">
         <h2 className="mb-2">Connect bank account</h2>
         <p className="text-sm text-[#B0B0B0]">
@@ -31,8 +27,8 @@ export function ConnectBank() {
         className="-mt-2 -mr-2"
       />
 
-      <ConnectBankModal  />
-      <SelectAccountModal onInitialSync={initialTransactionsSync} onCreateAccounts={createTeamBankAccounts} />
+      <ConnectBankModal />
+      <SelectAccountModal />
     </div>
   );
 }

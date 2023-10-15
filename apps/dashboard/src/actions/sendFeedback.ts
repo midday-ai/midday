@@ -1,13 +1,14 @@
 "use server";
 
 import { env } from "@/env.mjs";
-import { getSession } from "@midday/supabase/server";
+import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
 
 const baseUrl = "https://api.resend.com";
 
 export async function sendFeeback(formData: FormData) {
+  const supabase = await getSupabaseServerActionClient();
   const feedback = formData.get("feedback");
-  const { user } = await getSession();
+  const { data } = await supabase.auth.getSession();
 
   const res = await fetch(`${baseUrl}/email`, {
     method: "POST",
@@ -19,7 +20,7 @@ export async function sendFeeback(formData: FormData) {
       from: "feedback@midday.ai",
       to: "pontus@lostisland.co",
       subject: "Feedback",
-      text: `${feedback} \nName: ${user?.user_metadata?.name} \nEmail: ${user?.email}`,
+      text: `${feedback} \nName: ${data?.data_metadata?.name} \nEmail: ${data?.email}`,
     }),
   });
 
