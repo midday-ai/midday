@@ -229,7 +229,7 @@ export function Filter({ sections }: Props) {
   };
 
   return (
-    <div className="flex space-x-2">
+    <div className="flex space-x-2 items-center">
       <Popover open={isOpen} onOpenChange={setOpen} size>
         <PopoverTrigger asChild>
           <Button variant="outline" className="space-x-2">
@@ -448,6 +448,10 @@ export function Filter({ sections }: Props) {
           </Tabs.Root>
         </PopoverContent>
       </Popover>
+
+      {!Object.keys(filters).length && (
+        <span className="pl-4 text-sm text-[#606060]">No filters applied</span>
+      )}
 
       {Object.keys(filters).map((optionId) => {
         const section = sections.find((o) => o.id === optionId);
