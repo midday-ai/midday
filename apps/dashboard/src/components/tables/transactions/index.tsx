@@ -1,5 +1,5 @@
 import { Pagination } from "@/components/pagination";
-import { DataTable } from "@/components/tables/transactions/data-table";
+import { DataTable } from "@/components/tables/transactions/table";
 import { getTransactions } from "@midday/supabase/queries";
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
 import { columns } from "./columns";

@@ -1,6 +1,6 @@
 import { Filter } from "@/components/filter";
+import { sections } from "@/components/filters/transactions";
 import { TransactionsTable } from "@/components/tables/transactions";
-import { Button } from "@midday/ui/button";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -16,12 +16,8 @@ export default async function Transactions({
   const page = typeof searchParams.page === "string" ? +searchParams.page : 1;
 
   return (
-    <div>
-      <div className="flex justify-between mb-8 items-center">
-        <Filter />
-        <Button>Export</Button>
-      </div>
-
+    <div className="space-y-8">
+      <Filter sections={sections} />
       <Suspense fallback={<p>Loading...</p>}>
         <TransactionsTable page={page} />
       </Suspense>
