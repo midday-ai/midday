@@ -6,6 +6,7 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
 
 export type Transaction = {
   id: string;
@@ -15,12 +16,14 @@ export type Transaction = {
   currency: string;
   vat: number;
   attachment: string;
+  value_date: string;
 };
 
 export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
     meta: {
+      className: "w-[50px]",
       Loading: () => <Checkbox />,
     },
     header: ({ table }) => (
@@ -39,15 +42,18 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     meta: {
-      Loading: () => <Skeleton className="h-3.5 w-[81px]" />,
+      className: "w-[120px]",
+      Loading: () => <Skeleton className="h-3.5 w-[80px]" />,
     },
     accessorKey: "value_date",
     header: "Date",
+    cell: ({ row }) => format(new Date(row.original.value_date), "E, LLL d"),
   },
   {
     accessorKey: "display",
     header: "To/From",
     meta: {
+      className: "w-[380px]",
       Loading: () => <Skeleton className="h-3.5 w-[182px]" />,
     },
     cell: ({ row }) => {
@@ -62,6 +68,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "amount",
     header: "Amount",
     meta: {
+      className: "w-[250px]",
       Loading: () => <Skeleton className="h-3.5 w-[110px]" />,
     },
     cell: ({ row }) => {
@@ -79,6 +86,7 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     meta: {
+      className: "w-[280px]",
       Loading: () => <Skeleton className="h-3.5 w-[130px]" />,
     },
     accessorKey: "transaction_code",
@@ -87,7 +95,13 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     header: "Assigned",
     meta: {
-      Loading: () => <Skeleton className="h-3.5 w-[130px]" />,
+      className: "w-[180px]",
+      Loading: () => (
+        <div className="flex items-center space-x-2 w-[120px]">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-3.5 w-[100px]" />
+        </div>
+      ),
     },
     cell: ({ row }) => {
       if (!row.original?.assigned) {
@@ -95,14 +109,16 @@ export const columns: ColumnDef<Transaction>[] = [
       }
 
       return (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 w-[120px]">
           <Avatar className="h-5 w-5">
             <AvatarImage
               src={row.original.assigned?.avatar_url}
               alt={row.original.assigned?.full_name}
             />
           </Avatar>
-          <span>{row.original.assigned?.full_name}</span>
+          <span className="truncate">
+            {row.original.assigned?.full_name.split(" ").at(0)}
+          </span>
         </div>
       );
     },

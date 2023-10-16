@@ -75,7 +75,10 @@ export function DataTable<TData, TValue>({
                   const { Loading } = cell.column.columnDef.meta;
 
                   return (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className={cell.column.columnDef.meta?.className}
+                    >
                       {loading ? (
                         <Loading />
                       ) : (
