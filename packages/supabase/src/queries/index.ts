@@ -82,9 +82,11 @@ export async function getTransactions(
     .from("transactions")
     .select(`
       *,
-      account:bank_account_id(*)
+      account:bank_account_id(*),
+      assigned:assigned_id(*)
     `)
     .eq("team_id", user?.team_id)
+    .order("value_date", { ascending: false })
     .range(from, to);
 
   return {

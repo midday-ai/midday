@@ -27,12 +27,6 @@ export const sections = [
         to: endOfDay(new Date()),
       },
       {
-        id: "tomorrow",
-        label: "Tomorrow",
-        from: startOfDay(addDays(new Date(), 1)),
-        to: endOfDay(addDays(new Date(), 1)),
-      },
-      {
         id: "this_month",
         label: "This month",
         from: startOfDay(startOfMonth(new Date())),
@@ -128,18 +122,7 @@ export const sections = [
     label: "Assigned",
     icon: User,
     type: SectionType.checkbox,
-    options: [
-      {
-        // id: SearchOrderStatus.New,
-        label: "Fullfilled",
-        description: "Transactions with the status Fullfilled",
-      },
-      //   {
-      //     // id: SearchOrderStatus.OutForDelivery,
-      //     label: "Out for delivery",
-      //     description: "Orders with the status Out for delivery",
-      //   },
-    ],
+    options: [],
   },
   {
     id: "status",
@@ -152,11 +135,11 @@ export const sections = [
         label: "Fullfilled",
         description: "Transactions with the status Fullfilled",
       },
-      //   {
-      //     // id: SearchOrderStatus.OutForDelivery,
-      //     label: "Out for delivery",
-      //     description: "Orders with the status Out for delivery",
-      //   },
+      {
+        // id: SearchOrderStatus.OutForDelivery,
+        label: "Unfulfilled",
+        description: "Transactions with the status Unfulfilled",
+      },
     ],
   },
 ];

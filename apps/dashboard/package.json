@@ -13,9 +13,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
+    "@midday/gocardless": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@midday/gocardless": "workspace:*",
     "@tanstack/react-table": "^8.10.7",
     "change-case": "^5.0.2",
     "next": "^13.5.4",
@@ -23,7 +23,8 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hook-form": "^7.47.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.4.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
