@@ -11,7 +11,15 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import { Calendar, CreditCard, Search, Tag, User } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Calendar,
+  CircleDollarSign,
+  Paperclip,
+  Search,
+  Tag,
+  User,
+} from "lucide-react";
 
 export const sections = [
   {
@@ -61,57 +69,46 @@ export const sections = [
     placeholder: "Search for transactions, amount...",
     options: [],
   },
-  //   {
-  //     id: "delivery_type",
-  //     label: "Delivery type",
-  //     icon: Truck,
-  //     type: SectionType.checkbox,
-  //     options: [
-  //       {
-  //         // id: SearchDeliveryType.Delivery,
-  //         label: "Delivery",
-  //         description: "Orders with Delivery type",
-  //       },
-  //       {
-  //         // id: SearchDeliveryType.Pickup,
-  //         label: "Pickup",
-  //         description: "Orders with Pickup type",
-  //       },
-  //     ],
-  //   },
+  {
+    id: "amount",
+    label: "Amount",
+    icon: ArrowRightLeft,
+    type: SectionType.checkbox,
+    options: [],
+  },
   {
     id: "method",
     label: "Method",
-    icon: CreditCard,
+    icon: CircleDollarSign,
     type: SectionType.checkbox,
     options: [
       {
-        // id: SearchCustomerType.Wholesale,
+        id: "card",
         label: "Card",
         description: "Transactions with method Card",
       },
       {
-        // id: SearchCustomerType.Wholesale,
+        id: 'card-foreign-purchase"',
         label: "Card foreign purchase",
         description: "Transactions with method Card foreign purchase",
       },
       {
-        // id: SearchCustomerType.Retail,
+        id: "payment",
         label: "Payment",
         description: "Transactions with method Payment",
       },
       {
-        // id: SearchCustomerType.Retail,
+        id: "transfer",
         label: "Transfer",
         description: "Transactions with method Transfer",
       },
       {
-        // id: SearchCustomerType.Retail,
+        id: "foreign-payment",
         label: "Incoming foreign payment",
         description: "Transactions with method Incoming foreign payment",
       },
       {
-        // id: SearchCustomerType.Retail,
+        id: "bankgiro-payment",
         label: "Bankgiro payment",
         description: "Transactions with method Bankgiro payment",
       },
@@ -131,15 +128,22 @@ export const sections = [
     type: SectionType.checkbox,
     options: [
       {
-        // id: SearchOrderStatus.New,
+        id: "fullfilled",
         label: "Fullfilled",
         description: "Transactions with the status Fullfilled",
       },
       {
-        // id: SearchOrderStatus.OutForDelivery,
+        id: "unfulfilled",
         label: "Unfulfilled",
         description: "Transactions with the status Unfulfilled",
       },
     ],
+  },
+  {
+    id: "attachments",
+    label: "Attachments",
+    icon: Paperclip,
+    type: SectionType.checkbox,
+    options: [],
   },
 ];

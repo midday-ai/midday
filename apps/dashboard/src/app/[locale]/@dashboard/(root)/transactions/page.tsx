@@ -1,7 +1,8 @@
 import { ExportButton } from "@/components/export-button";
 import { Filter } from "@/components/filter";
 import { sections } from "@/components/filters/transactions";
-import { TransactionsTable } from "@/components/tables/transactions";
+import { Table } from "@/components/tables/transactions";
+import { Loading } from "@/components/tables/transactions/loading";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -23,8 +24,8 @@ export default async function Transactions({
         <ExportButton />
       </div>
 
-      <Suspense fallback={<p>Loading...</p>}>
-        <TransactionsTable page={page} />
+      <Suspense fallback={<Loading />}>
+        <Table page={page} />
       </Suspense>
     </>
   );

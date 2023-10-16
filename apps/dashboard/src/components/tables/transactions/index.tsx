@@ -6,7 +6,7 @@ import { columns } from "./columns";
 
 const size = 30;
 
-export async function TransactionsTable({ page }: { page: number }) {
+export async function Table({ page }: { page: number }) {
   const from = (page - 1) * size;
   const supabase = await getSupabaseServerClient();
   const { data, count } = await getTransactions(supabase, {

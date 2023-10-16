@@ -2,21 +2,26 @@
 
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Checkbox } from "@midday/ui/checkbox";
+import { Icons } from "@midday/ui/icons";
+import { Skeleton } from "@midday/ui/skeleton";
+import { cn } from "@midday/ui/utils";
 import { ColumnDef } from "@tanstack/react-table";
 
 export type Transaction = {
   id: string;
   amount: number;
+  display: string;
   status: "pending" | "fulfilled";
   currency: string;
+  vat: number;
+  attachment: string;
 };
 
 export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
     meta: {
-      className:
-        "sticky left-0 bg-background w-[50px] min-w-[50px] max-w[50px]",
+      Loading: () => <Checkbox />,
     },
     header: ({ table }) => (
       <Checkbox
@@ -33,28 +38,57 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
   },
   {
+    meta: {
+      Loading: () => <Skeleton className="h-3.5 w-[81px]" />,
+    },
     accessorKey: "value_date",
     header: "Date",
   },
   {
     accessorKey: "display",
     header: "To/From",
+    meta: {
+      Loading: () => <Skeleton className="h-3.5 w-[182px]" />,
+    },
+    cell: ({ row }) => {
+      return (
+        <span className={cn(row.original.amount > 0 && "text-[#00E547]")}>
+          {row.original.display}
+        </span>
+      );
+    },
   },
   {
     accessorKey: "amount",
     header: "Amount",
-    cell: ({ row }) =>
-      new Intl.NumberFormat("de-DE", {
+    meta: {
+      Loading: () => <Skeleton className="h-3.5 w-[110px]" />,
+    },
+    cell: ({ row }) => {
+      const amount = new Intl.NumberFormat("de-DE", {
         style: "currency",
         currency: row.original.currency,
-      }).format(row.original.amount),
+      }).format(row.original.amount);
+
+      return (
+        <span className={cn(row.original.amount > 0 && "text-[#00E547]")}>
+          {amount}
+        </span>
+      );
+    },
   },
   {
+    meta: {
+      Loading: () => <Skeleton className="h-3.5 w-[130px]" />,
+    },
     accessorKey: "transaction_code",
     header: "Method",
   },
   {
     header: "Assigned",
+    meta: {
+      Loading: () => <Skeleton className="h-3.5 w-[130px]" />,
+    },
     cell: ({ row }) => {
       if (!row.original?.assigned) {
         return null;
@@ -75,5 +109,12 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     header: "Status",
+    meta: {
+      Loading: () => <Skeleton className="h-3.5 w-[130px]" />,
+    },
+    cell: ({ row }) => {
+      const fullfilled = row.original.attachment && row.original.vat;
+      return fullfilled ? <Icons.Check /> : <Icons.AlertCircle />;
+    },
   },
 ];

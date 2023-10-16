@@ -29,7 +29,6 @@ export const Icons = {
   ),
   Overview: () => (
     <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Overview</title>
       <path
         d="M6 14H4V7h2v7Zm4 0H8V4h2v10Zm4 0h-2v-4h2v4Zm2 2H2V2h14v14.1M16 0H2C.9 0 0 .9 0 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V2c0-1.1-.9-2-2-2Z"
         fill="#fff"
@@ -38,7 +37,6 @@ export const Icons = {
   ),
   Apps: () => (
     <svg width="18" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Apps</title>
       <path
         d="M6.6 14.6 8 13.15 5.85 11 8 8.85 6.6 7.4 3 11l3.6 3.6Zm4.8 0L15 11l-3.6-3.6L10 8.85 12.15 11 10 13.15l1.4 1.45ZM2 20c-.55 0-1.02-.196-1.413-.587A1.926 1.926 0 0 1 0 18V4c0-.55.196-1.02.588-1.413A1.926 1.926 0 0 1 2 2h4.2c.217-.6.58-1.083 1.087-1.45A2.857 2.857 0 0 1 9 0c.633 0 1.204.183 1.713.55.508.367.87.85 1.087 1.45H16c.55 0 1.02.196 1.413.587C17.803 2.98 18 3.45 18 4v14c0 .55-.196 1.02-.587 1.413A1.926 1.926 0 0 1 16 20H2Zm0-2h14V4H2v14ZM9 3.25a.728.728 0 0 0 .75-.75.728.728 0 0 0-.75-.75.728.728 0 0 0-.75.75.728.728 0 0 0 .75.75Z"
         fill="#fff"
@@ -47,7 +45,6 @@ export const Icons = {
   ),
   Transactions: () => (
     <svg width="19" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Transactions</title>
       <path
         d="M3 5.5 5.5 10h-5L3 5.5ZM1 0h4v4H1V0Zm2 16a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM7 1v2h12V1H7Zm0 14h12v-2H7v2Zm0-6h12V7H7v2Z"
         fill="#fff"
@@ -56,7 +53,6 @@ export const Icons = {
   ),
   Google: () => (
     <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Google</title>
       <g clipPath="url(#a)">
         <path
           d="M10 3.958c1.475 0 2.796.509 3.838 1.5l2.854-2.854C14.959.992 12.696 0 10 0a9.995 9.995 0 0 0-8.933 5.508l3.325 2.58c.787-2.371 3-4.13 5.608-4.13Z"
@@ -84,7 +80,6 @@ export const Icons = {
   ),
   Settings: () => (
     <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Settings</title>
       <path
         d="M8 18v-6h2v2h8v2h-8v2H8Zm-8-2v-2h6v2H0Zm4-4v-2H0V8h4V6h2v6H4Zm4-2V8h10v2H8Zm4-4V0h2v2h4v2h-4v2h-2ZM0 4V2h10v2H0Z"
         fill="#fff"
@@ -93,7 +88,6 @@ export const Icons = {
   ),
   Notifications: () => (
     <svg width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <title>Notifications</title>
       <path
         d="M5.833 12.25h2.334A1.17 1.17 0 0 1 7 13.417a1.17 1.17 0 0 1-1.167-1.167Zm6.417-1.167v.584H1.75v-.584l1.167-1.166v-3.5a4.06 4.06 0 0 1 2.916-3.909v-.175A1.17 1.17 0 0 1 7 1.167a1.17 1.17 0 0 1 1.167 1.166v.175a4.06 4.06 0 0 1 2.916 3.909v3.5l1.167 1.166ZM9.917 6.417A2.888 2.888 0 0 0 7 3.5a2.888 2.888 0 0 0-2.917 2.917V10.5h5.834V6.417Z"
         fill="#747474"
@@ -117,6 +111,34 @@ export const Icons = {
       <path
         d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
         fill="currentColor"
+      />
+    </svg>
+  ),
+  Check: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={16}
+      height={17}
+      fill="none"
+      {...props}
+    >
+      <path
+        fill="#fff"
+        d="m14 5.167-8 8L2.333 9.5l.94-.94L6 11.28l7.06-7.053.94.94Z"
+      />
+    </svg>
+  ),
+  AlertCircle: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={16}
+      height={17}
+      fill="none"
+      {...props}
+    >
+      <path
+        fill="#fff"
+        d="M7.333 10.5h1.334v1.333H7.334V10.5Zm0-5.333h1.334v4H7.334v-4ZM8 1.833c-3.686 0-6.667 3-6.667 6.667A6.667 6.667 0 1 0 8 1.833Zm0 12A5.333 5.333 0 1 1 8 3.167a5.333 5.333 0 0 1 0 10.666Z"
       />
     </svg>
   ),
