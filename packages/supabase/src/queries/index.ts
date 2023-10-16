@@ -72,6 +72,11 @@ export async function getTransactions(
 ) {
   const user = await getUserDetails(supabase);
 
+  const { count } = await supabase
+    .from("transactions")
+    .select("*", { count: "exact", head: true })
+    .eq("team_id", user?.team_id);
+
   // TODO: Set "bank_account_id" uuid references bank_account
   const { data } = await supabase
     .from("transactions")
@@ -82,5 +87,8 @@ export async function getTransactions(
     .eq("team_id", user?.team_id)
     .range(from, to);
 
-  return data;
+  return {
+    count,
+    data,
+  };
 }
