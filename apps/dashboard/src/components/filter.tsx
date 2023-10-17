@@ -16,8 +16,8 @@ import { cn } from "@midday/ui/utils";
 import * as Tabs from "@radix-ui/react-tabs";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Trash2, X } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useQueryState } from "next-usequerystate";
+import { useEffect, useState } from "react";
 
 export enum SectionType {
   date = "date",
@@ -58,12 +58,12 @@ export function Filter({ sections }: Props) {
   const [isOpen, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [recentSearch, setRecentSearch] = useState<string[]>([]);
-
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const filters = searchParams?.get("filters")
-    ? JSON.parse(searchParams?.get("filters") as string)
-    : [];
+  const [filters, setFilters] = useQueryState("filter", {
+    defaultValue: [],
+    shallow: false,
+    serialize: (obj) => JSON.stringify(obj),
+    parse: (query) => JSON.parse(query) as { foo: string; bar: number },
+  });
 
   useEffect(() => {
     const storageKey = sections.find(
@@ -76,65 +76,56 @@ export function Filter({ sections }: Props) {
     }
   }, [activeId]);
 
-  const toggleFilter = useCallback(
-    (option: SelectedOption) => {
-      const params = new URLSearchParams(searchParams);
+  // const toggleFilter = useCallback(
+  //   (option: SelectedOption) => {
+  //     const params = new URLSearchParams(searchParams);
 
-      let query;
+  //     let query;
 
-      const filter = option.filter.toLowerCase();
-      const value = option.value.toLowerCase();
-      const section = filters[filter];
+  //     const filter = option.filter.toLowerCase();
+  //     const value = option.value.toLowerCase();
+  //     const section = filters[filter];
 
-      if (section?.includes(value)) {
-        query = {
-          ...filters,
-          [filter]: section.filter((item: string) => item !== value),
-        };
-      } else {
-        query = {
-          ...filters,
-          [filter]: [...(filters[filter] ?? []), value],
-        };
-      }
+  //     if (section?.includes(value)) {
+  //       query = {
+  //         ...filters,
+  //         [filter]: section.filter((item: string) => item !== value),
+  //       };
+  //     } else {
+  //       query = {
+  //         ...filters,
+  //         [filter]: [...(filters[filter] ?? []), value],
+  //       };
+  //     }
 
-      params.set("filters", JSON.stringify(query));
-      router.replace(`?${params.toString()}`);
-    },
-    [filters, searchParams],
-  );
+  //     params.set("filters", JSON.stringify(query));
+  //     router.replace(`?${params.toString()}`);
+  //   },
+  //   [filters, searchParams],
+  // );
 
-  const handleDateChange = (id: string, range = {}) => {
-    const params = new URLSearchParams(searchParams);
+  const handleDateChange = (activeId, range = {}) => {
+    const prevRange = filters[activeId];
 
-    const previous = filters[id];
-
-    params.set(
-      "filters",
-      JSON.stringify({
-        ...filters,
-        [id]: {
-          ...previous,
-          ...range,
-        },
-      }),
-    );
-
-    router.replace(`?${params.toString()}`);
+    if (range.from || range.to) {
+      setFilters({
+        [activeId]: { ...prevRange, ...range },
+      });
+    } else {
+      setFilters(null);
+    }
   };
 
   const handleDeleteFilter = (filter: string) => {
-    const params = new URLSearchParams(searchParams);
-    delete filters[filter];
-    params.set("filters", JSON.stringify(filters));
-    router.replace(`?${params.toString()}`);
+    // delete filters[filter];
+    // setFilters(filters);
   };
 
   const handleOnSearch = (
     evt: React.KeyboardEvent<HTMLInputElement>,
     storage?: string,
   ) => {
-    const params = new URLSearchParams();
+    // const params = new URLSearchParams();
 
     if (evt.key === "Enter") {
       setOpen(false);
@@ -143,35 +134,35 @@ export function Filter({ sections }: Props) {
       }
 
       if (query) {
-        params.set(
-          "filters",
-          JSON.stringify({
-            ...filters,
-            ...(query && { search: query }),
-          }),
-        );
+        // params.set(
+        //   "filters",
+        //   JSON.stringify({
+        //     ...filters,
+        //     ...(query && { search: query }),
+        //   }),
+        // );
       } else {
-        delete filters.search;
-        params.set("filters", JSON.stringify(filters));
+        // delete filters.search;
+        // params.set("filters", JSON.stringify(filters));
       }
 
-      router.replace(`?${params.toString()}`);
+      // router.replace(`?${params.toString()}`);
     }
   };
 
   const handleSelectRecentSearch = (value: string) => {
-    const params = new URLSearchParams();
+    // const params = new URLSearchParams();
     setOpen(false);
 
-    params.set(
-      "filters",
-      JSON.stringify({
-        ...filters,
-        search: value,
-      }),
-    );
+    // params.set(
+    //   "filters",
+    //   JSON.stringify({
+    //     ...filters,
+    //     search: value,
+    //   }),
+    // );
 
-    router.replace(`?${params.toString()}`);
+    // router.replace(`?${params.toString()}`);
   };
 
   const handleOpenSection = (id?: string) => {
@@ -256,7 +247,7 @@ export function Filter({ sections }: Props) {
                     <Button
                       className={cn(
                         "rounded-md w-[190px] items-center justify-start relative mb-1.5 group",
-                        isActive && "bg-[#1D1D1D]",
+                        isActive && "bg-secondary",
                       )}
                       variant="ghost"
                     >
@@ -264,7 +255,7 @@ export function Filter({ sections }: Props) {
                       <p
                         className={cn(
                           "p-sm font-normal ml-2 text-primary",
-                          isActive && "bg-[#1D1D1D]",
+                          isActive && "bg-secondary",
                         )}
                       >
                         {label}
@@ -293,7 +284,7 @@ export function Filter({ sections }: Props) {
                     <Select
                       onValueChange={(id) => {
                         const value = section?.options.find((o) => o.id === id);
-                        handleDateChange(activeId, {
+                        handleDateChange(id, {
                           from: value?.from,
                           to: value?.to,
                         });
@@ -316,12 +307,8 @@ export function Filter({ sections }: Props) {
                     <MonthRangePicker
                       setDate={(range) => handleDateChange(activeId, range)}
                       date={{
-                        from:
-                          filters[activeId]?.from &&
-                          new Date(filters[activeId]?.from),
-                        to:
-                          filters[activeId]?.to &&
-                          new Date(filters[activeId]?.to),
+                        from: filters[activeId]?.from,
+                        to: filters[activeId]?.to,
                       }}
                     />
                   </Tabs.TabsContent>
@@ -458,7 +445,7 @@ export function Filter({ sections }: Props) {
 
         return (
           <div className="flex space-x-2" key={optionId}>
-            <Button variant="secondary" className="flex space-x-2 bg-[#1D1D1D]">
+            <Button variant="secondary" className="flex space-x-2 bg-secondary">
               <X size={14} onClick={() => handleDeleteFilter(optionId)} />
               <p onClick={() => handleOpenSection(section?.id)}>
                 {section && renderFilter(section)}

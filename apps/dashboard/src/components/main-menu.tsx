@@ -47,7 +47,7 @@ export function MainMenu() {
               key={path}
               className={cn(
                 "py-2.5 px-4 rounded-lg border border-transparent",
-                isActive && "bg-[#1D1D1D] border-border",
+                isActive && "bg-secondary border-border",
               )}
             >
               <Link

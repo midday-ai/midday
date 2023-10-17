@@ -1,15 +1,17 @@
 "use client";
 
+import { endOfMonth, formatISO, isSameDay, startOfMonth } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useState } from "react";
 import { cn } from "../utils";
 import { Button } from "./button";
+import { buttonVariants } from "./button";
 
 const monthsNumber = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
 export type DateRange = {
-  from?: Date | null;
-  to?: Date | null;
+  from?: string | null;
+  to?: string | null;
 };
 
 type Props = React.HTMLAttributes<HTMLDivElement> & {
@@ -21,14 +23,16 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
   const [yearOffset, setYearOffset] = useState<number>(0);
 
   const today = new Date();
+  const fromDate = date?.from ? new Date(date.from) : null;
+  const toDate = date?.to ? new Date(date.to) : null;
 
   const isMonthSelected = (month: Date) => {
-    if (!date?.from || !date?.to) {
+    if (!fromDate || !toDate) {
       return false;
     }
-    const startYearMonth =
-      date?.from.getFullYear() * 12 + date?.from.getMonth();
-    const endYearMonth = date?.to.getFullYear() * 12 + date?.to.getMonth();
+
+    const startYearMonth = fromDate.getFullYear() * 12 + fromDate.getMonth();
+    const endYearMonth = toDate.getFullYear() * 12 + toDate.getMonth();
     const currentYearMonth = month.getFullYear() * 12 + month.getMonth();
 
     return (
@@ -37,27 +41,61 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
   };
 
   const isMonthStart = (month: Date) => {
-    return month.getTime() === (date?.from?.getTime() || 0);
-  };
-
-  const isMonthEnd = (month: Date) => {
-    if (!date?.to) {
+    if (!fromDate) {
       return false;
     }
 
-    const endYearMonth = date?.to.getFullYear() * 12 + date?.to.getMonth();
+    const startYearMonth = fromDate.getFullYear() * 12 + fromDate.getMonth();
+    const currentYearMonth = month.getFullYear() * 12 + month.getMonth();
+
+    return currentYearMonth === startYearMonth;
+  };
+
+  const isMonthEnd = (month: Date) => {
+    if (!toDate) {
+      return false;
+    }
+
+    const endYearMonth = toDate.getFullYear() * 12 + toDate.getMonth();
     const currentYearMonth = month.getFullYear() * 12 + month.getMonth();
 
     return currentYearMonth === endYearMonth;
   };
 
-  const handleMonthClick = (month: Date) => {
+  const handleMonthClick = (selectedDate: Date) => {
+    if (toDate && isSameDay(endOfMonth(selectedDate), toDate)) {
+      setDate({
+        from: null,
+        to: null,
+      });
+
+      return;
+    }
+
     if (!date?.from || date?.to) {
-      setDate({ from: month, to: null });
-    } else if (month < date?.from) {
-      setDate({ from: month, to: date?.from });
+      setDate({
+        from: formatISO(startOfMonth(new Date(selectedDate)), {
+          representation: "date",
+        }),
+        to: null,
+      });
+    } else if (fromDate && selectedDate < fromDate) {
+      setDate({
+        from: formatISO(startOfMonth(new Date(selectedDate)), {
+          representation: "date",
+        }),
+        to: date?.from
+          ? formatISO(endOfMonth(new Date(date.from)), {
+              representation: "date",
+            })
+          : null,
+      });
     } else {
-      setDate({ to: month });
+      setDate({
+        to: formatISO(endOfMonth(new Date(selectedDate)), {
+          representation: "date",
+        }),
+      });
     }
   };
 
@@ -75,10 +113,12 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
         key={month}
         variant="ghost"
         className={cn(
-          "text-xs rounded-xl",
+          "!text-xs font-normal !rounded-none mb-2",
+          isSelectedDate && buttonVariants({ variant: "default" }),
           isSelectedDate &&
-            "bg-black text-white hover:bg-black hover:text-white",
-          isRange && "bg-accent-pale",
+            "!rounded-md hover:bg-primary hover:text-primary-foreground",
+          isRange && buttonVariants({ variant: "secondary" }),
+          isRange && "hover:bg-secondary hover:text-secondary-foreground",
         )}
         onClick={() => handleMonthClick(monthStart)}
       >

@@ -64,21 +64,21 @@ export async function getTeamMembers(
 type GetTransactionsParams = {
   from: number;
   to: number;
+  date: {
+    from?: string;
+    to?: string;
+  };
 };
 
 export async function getTransactions(
   supabase: Client,
-  { from = 0, to = 20 }: GetTransactionsParams,
+  { from = 0, to = 30, date }: GetTransactionsParams = {},
 ) {
+  const matchFilter = [];
   const user = await getUserDetails(supabase);
 
-  const { count } = await supabase
-    .from("transactions")
-    .select("*", { count: "exact", head: true })
-    .eq("team_id", user?.team_id);
-
   // TODO: Set "bank_account_id" uuid references bank_account
-  const { data } = await supabase
+  const base = supabase
     .from("transactions")
     .select(`
       *,
@@ -86,11 +86,13 @@ export async function getTransactions(
       assigned:assigned_id(*)
     `)
     .eq("team_id", user?.team_id)
-    .order("value_date", { ascending: false })
+    // .order("date", { ascending: false })
     .range(from, to);
 
-  return {
-    count,
-    data,
-  };
+  if (date?.from && date?.to) {
+    base.gte("date", date.from);
+    base.lte("date", date.to);
+  }
+
+  return base;
 }

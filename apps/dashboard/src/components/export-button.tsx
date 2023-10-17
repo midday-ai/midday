@@ -5,14 +5,15 @@ import { Button } from "@midday/ui/button";
 import { ChevronDown } from "lucide-react";
 
 export function ExportButton() {
-  const { rowSelection } = useTransactionsStore((state) => state);
-  const disabled = !Object.keys(rowSelection).length;
+  const isSomeRowsSelected = useTransactionsStore(
+    (state) => state.isSomeRowsSelected,
+  );
 
   return (
     <Button
-      disabled={disabled}
+      disabled={!isSomeRowsSelected}
       className="space-x-2"
-      variant={disabled ? "outline" : "default"}
+      variant={isSomeRowsSelected ? "default" : "outline"}
     >
       <span>Export</span> <ChevronDown size={16} />
     </Button>

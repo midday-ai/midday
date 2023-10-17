@@ -72,7 +72,7 @@ export async function initialTransactionsSync(ids: string[]) {
           transaction_id: data.transactionId,
           reference_id: data.entryReference,
           booking_date: data.bookingDate,
-          value_date: data.valueDate,
+          date: data.valueDate,
           display: capitalCase(data.additionalInformation),
           original: data.additionalInformation,
           transaction_code: data.proprietaryBankTransactionCode,

@@ -19,7 +19,7 @@ import {
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  loading: boolean;
+  loading?: boolean;
 }
 
 export function DataTable<TData, TValue>({

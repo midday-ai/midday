@@ -16,7 +16,7 @@ export type Transaction = {
   currency: string;
   vat: number;
   attachment: string;
-  value_date: string;
+  date: string;
 };
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -34,20 +34,14 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
     cell: ({ row }) => (
       <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        {...{
+          checked: row.getIsSelected(),
+          disabled: !row.getCanSelect(),
+          onCheckedChange: row.getToggleSelectedHandler(),
+        }}
       />
     ),
     enableHiding: false,
-  },
-  {
-    meta: {
-      className: "w-[120px]",
-      Loading: () => <Skeleton className="h-3.5 w-[80px]" />,
-    },
-    accessorKey: "value_date",
-    header: "Date",
-    cell: ({ row }) => format(new Date(row.original.value_date), "E, LLL d"),
   },
   {
     accessorKey: "display",
@@ -63,6 +57,15 @@ export const columns: ColumnDef<Transaction>[] = [
         </span>
       );
     },
+  },
+  {
+    meta: {
+      className: "w-[170px]",
+      Loading: () => <Skeleton className="h-3.5 w-[120px]" />,
+    },
+    accessorKey: "date",
+    header: "Date",
+    cell: ({ row }) => format(new Date(row.original.date), "E, LLL d, y"),
   },
   {
     accessorKey: "amount",

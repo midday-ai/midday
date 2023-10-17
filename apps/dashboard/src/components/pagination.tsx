@@ -1,19 +1,29 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
 import Link from "next/link";
+import { useEffect, useState, useTransition } from "react";
 
 type Props = {
-  totalPages: number;
   page: number;
 };
 
-export function Pagination({ totalPages, page }: Props) {
+export function Pagination({ page }: Props) {
+  const [isLoading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(false);
+  }, [page]);
+
   return (
-    totalPages > page && (
-      <Link href={`?page=${page + 1}`} scroll={false}>
-        <Button variant="outline" className="w-full h-10">
-          Load more
-        </Button>
-      </Link>
-    )
+    <Link href={`?page=${page + 1}`} scroll={false}>
+      <Button
+        variant="outline"
+        className="w-full h-10"
+        onClick={() => setLoading(true)}
+      >
+        {isLoading ? "Loading..." : "Load more"}
+      </Button>
+    </Link>
   );
 }

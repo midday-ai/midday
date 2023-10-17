@@ -6,22 +6,29 @@ import { columns } from "./columns";
 
 const size = 30;
 
-export async function Table({ page }: { page: number }) {
-  const from = (page - 1) * size;
+export async function Table({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  const page = typeof searchParams.page === "string" ? +searchParams.page : 1;
+
+  const { date } =
+    (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
+
+  const to = page * size;
   const supabase = await getSupabaseServerClient();
-  const { data, count } = await getTransactions(supabase, {
-    from: 0,
-    to: from + size,
+  const { data } = await getTransactions(supabase, {
+    to,
+    date,
   });
 
-  const totalPages = count / size;
+  const totalCount = data.length;
 
   return (
     <div className="space-y-4">
       <DataTable columns={columns} data={data} />
-      <div>
-        <Pagination page={page} totalPages={totalPages} />
-      </div>
+      <div>{totalCount > to && <Pagination page={page} />}</div>
     </div>
   );
 }
