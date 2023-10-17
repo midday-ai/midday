@@ -18,7 +18,7 @@ export async function Table({
 
   const to = page * size;
   const supabase = await getSupabaseServerClient();
-  const { data } = await getTransactions(supabase, {
+  const data = await getTransactions(supabase, {
     to,
     date,
   });

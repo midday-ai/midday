@@ -1,45 +1,38 @@
 import { Client } from "../types";
 
 export async function getSession(supabase: Client) {
-  const { data } = await supabase.auth.getSession();
-  return data;
+  return supabase.auth.getSession();
 }
 
 export async function getUserDetails(supabase: Client) {
   const user = await getSession(supabase);
 
-  const { data } = await supabase
+  return supabase
     .from("users")
     .select()
     .eq("id", user?.session?.user.id)
     .single();
-
-  return data;
 }
 
 export async function getUserTeams(supabase: Client) {
   const user = await getUserDetails(supabase);
 
-  const { data } = await supabase
+  return supabase
     .from("members")
     .select(`
       *,
       team:teams(*)
     `)
     .eq("team_id", user?.team_id);
-
-  return data;
 }
 
 export async function getTeamBankAccounts(supabase: Client) {
   const user = await getUserDetails(supabase);
 
-  const { data } = await supabase
+  return supabase
     .from("bank_accounts")
     .select("*")
     .eq("team_id", user?.team_id);
-
-  return data;
 }
 
 type GetTeamMembersParams = {
@@ -74,7 +67,6 @@ export async function getTransactions(
   supabase: Client,
   { from = 0, to = 30, date }: GetTransactionsParams = {},
 ) {
-  const matchFilter = [];
   const user = await getUserDetails(supabase);
 
   // TODO: Set "bank_account_id" uuid references bank_account
@@ -86,7 +78,6 @@ export async function getTransactions(
       assigned:assigned_id(*)
     `)
     .eq("team_id", user?.team_id)
-    // .order("date", { ascending: false })
     .range(from, to);
 
   if (date?.from && date?.to) {
