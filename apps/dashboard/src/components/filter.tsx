@@ -109,24 +109,24 @@ export function Filter({ sections }: Props) {
 
     if (range.from || range.to) {
       setFilters({
+        ...filters,
         [activeId]: { ...prevRange, ...range },
       });
     } else {
-      setFilters(null);
+      delete filters[activeId];
+      setFilters(filters);
     }
   };
 
   const handleDeleteFilter = (filter: string) => {
-    // delete filters[filter];
-    // setFilters(filters);
+    delete filters[filter];
+    setFilters(filters);
   };
 
   const handleOnSearch = (
     evt: React.KeyboardEvent<HTMLInputElement>,
     storage?: string,
   ) => {
-    // const params = new URLSearchParams();
-
     if (evt.key === "Enter") {
       setOpen(false);
       if (storage) {
@@ -134,35 +134,17 @@ export function Filter({ sections }: Props) {
       }
 
       if (query) {
-        // params.set(
-        //   "filters",
-        //   JSON.stringify({
-        //     ...filters,
-        //     ...(query && { search: query }),
-        //   }),
-        // );
+        setFilters({ ...filters, search: query });
       } else {
-        // delete filters.search;
-        // params.set("filters", JSON.stringify(filters));
+        delete filters.search;
+        setFilters(filters);
       }
-
-      // router.replace(`?${params.toString()}`);
     }
   };
 
   const handleSelectRecentSearch = (value: string) => {
-    // const params = new URLSearchParams();
     setOpen(false);
-
-    // params.set(
-    //   "filters",
-    //   JSON.stringify({
-    //     ...filters,
-    //     search: value,
-    //   }),
-    // );
-
-    // router.replace(`?${params.toString()}`);
+    setFilters({ ...filters, search: value });
   };
 
   const handleOpenSection = (id?: string) => {

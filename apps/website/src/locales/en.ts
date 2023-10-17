@@ -1,6 +1,6 @@
 export default {
   startpage: {
-    title: "Your business financial OS.",
+    title: "The financial OS for your business.",
     description:
       "Asset management, real-time profit/loss tracking, and seamless preparation for your \n accountant, powered by AI-enhanced search and filters.",
     signIn: "Sign in",

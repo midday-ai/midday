@@ -13,7 +13,7 @@ export async function Table({
 }) {
   const page = typeof searchParams.page === "string" ? +searchParams.page : 1;
 
-  const { date } =
+  const { date, search } =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
 
   const to = page * size;
@@ -21,6 +21,7 @@ export async function Table({
   const { data } = await getTransactions(supabase, {
     to,
     date,
+    search,
   });
 
   const totalCount = data.length;

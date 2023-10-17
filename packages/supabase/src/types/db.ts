@@ -116,7 +116,7 @@ export interface Database {
           booking_date: string | null;
           created_at: string;
           currency: string | null;
-          display: string | null;
+          name: string | null;
           id: number;
           internal_id: string | null;
           note: string | null;
@@ -136,7 +136,7 @@ export interface Database {
           booking_date?: string | null;
           created_at?: string;
           currency?: string | null;
-          display?: string | null;
+          name?: string | null;
           id?: number;
           internal_id?: string | null;
           note?: string | null;
@@ -156,7 +156,7 @@ export interface Database {
           booking_date?: string | null;
           created_at?: string;
           currency?: string | null;
-          display?: string | null;
+          name?: string | null;
           id?: number;
           internal_id?: string | null;
           note?: string | null;

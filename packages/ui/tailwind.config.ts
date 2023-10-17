@@ -5,10 +5,6 @@ export default {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
-      fontFamily: {
-        display: "var(--display-sans)",
-        body: "var(--font-sans)",
-      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

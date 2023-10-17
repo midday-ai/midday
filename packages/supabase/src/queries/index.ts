@@ -57,6 +57,7 @@ export async function getTeamMembers(
 type GetTransactionsParams = {
   from: number;
   to: number;
+  search?: string;
   date: {
     from?: string;
     to?: string;
@@ -65,7 +66,7 @@ type GetTransactionsParams = {
 
 export async function getTransactions(
   supabase: Client,
-  { from = 0, to = 30, date }: GetTransactionsParams = {},
+  { from = 0, to = 30, date, search }: GetTransactionsParams = {},
 ) {
   const { data: userData } = await getUserDetails(supabase);
 
@@ -83,6 +84,13 @@ export async function getTransactions(
   if (date?.from && date?.to) {
     base.gte("date", date.from);
     base.lte("date", date.to);
+  }
+
+  if (search) {
+    base.textSearch("name", search, {
+      type: "websearch",
+      config: "english",
+    });
   }
 
   return base;

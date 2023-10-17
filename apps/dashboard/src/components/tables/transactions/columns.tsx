@@ -11,7 +11,7 @@ import { format } from "date-fns";
 export type Transaction = {
   id: string;
   amount: number;
-  display: string;
+  name: string;
   status: "pending" | "fulfilled";
   currency: string;
   vat: number;
@@ -44,7 +44,7 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "display",
+    accessorKey: "name",
     header: "To/From",
     meta: {
       className: "w-[380px]",
@@ -53,7 +53,7 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       return (
         <span className={cn(row.original.amount > 0 && "text-[#00E547]")}>
-          {row.original.display}
+          {row.original.name}
         </span>
       );
     },
