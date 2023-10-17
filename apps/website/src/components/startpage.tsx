@@ -102,7 +102,7 @@ export function StartPage() {
                   autoComplete="email"
                   aria-label="Email address"
                   required
-                  className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[330px] placeholder-[#606060] rounded-lg h-11"
+                  className="border bg-transparent border-[#2C2C2C] font-sm text-white outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11"
                 />
                 <SubmitButton />
               </fieldset>

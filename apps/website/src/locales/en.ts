@@ -4,7 +4,7 @@ export default {
     description:
       "Asset management, real-time profit/loss tracking, and seamless preparation for your \n accountant, powered by AI-enhanced search and filters.",
     signIn: "Sign in",
-    join: "Join",
+    join: "Join waitlist",
     subscribed: "Subscribed!",
     email: "Enter your email",
   },
