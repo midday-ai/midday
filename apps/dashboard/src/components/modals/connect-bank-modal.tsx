@@ -109,8 +109,10 @@ export default function ConnectBankModal() {
       setFilteredResults(banks);
     }
 
-    fetchData();
-  }, []);
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
 
   const handleCreateEndUserAgreement = async (institutionId: string) => {
     const data = await createEndUserAgreement({ institutionId, token });

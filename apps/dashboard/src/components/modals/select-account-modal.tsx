@@ -96,8 +96,10 @@ export default function SelectAccountModal() {
       form.reset({ accounts: accounts.map((account) => account.id) });
     }
 
-    fetchData();
-  }, []);
+    if (isOpen) {
+      fetchData();
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>

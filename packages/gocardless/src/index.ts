@@ -67,6 +67,7 @@ export async function createEndUserAgreement({
     }),
   });
 
+  console.log(res);
   return res.json();
 }
 
