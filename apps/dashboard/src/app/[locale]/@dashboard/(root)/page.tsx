@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default async function Overview() {
   const supabase = await getSupabaseServerClient();
-  const accounts = await getTeamBankAccounts(supabase);
+  const { data } = await getTeamBankAccounts(supabase);
 
-  if (!accounts.length) {
+  if (!data?.length) {
     redirect("/onboarding");
   }
 

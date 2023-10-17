@@ -1,6 +1,9 @@
 "use client";
 
-import { createTeamBankAccounts, initialTransactionsSync } from "@/actions";
+import {
+  createTeamBankAccountsAction,
+  initialTransactionsSync,
+} from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccessToken, getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
@@ -76,7 +79,7 @@ export default function SelectAccountModal() {
         logo_url: account.bank.logo,
       }));
 
-    await createTeamBankAccounts(accountsWithDetails);
+    await createTeamBankAccountsAction(accountsWithDetails);
     await initialTransactionsSync(values.accounts);
     router.push(`${pathname}?step=gmail`);
   }

@@ -5,17 +5,17 @@ export async function getSession(supabase: Client) {
 }
 
 export async function getUserDetails(supabase: Client) {
-  const user = await getSession(supabase);
+  const { data } = await getSession(supabase);
 
   return supabase
     .from("users")
     .select()
-    .eq("id", user?.session?.user.id)
+    .eq("id", data?.session?.user.id)
     .single();
 }
 
 export async function getUserTeams(supabase: Client) {
-  const user = await getUserDetails(supabase);
+  const { data: userData } = await getUserDetails(supabase);
 
   return supabase
     .from("members")
@@ -23,16 +23,16 @@ export async function getUserTeams(supabase: Client) {
       *,
       team:teams(*)
     `)
-    .eq("team_id", user?.team_id);
+    .eq("team_id", userData?.team_id);
 }
 
 export async function getTeamBankAccounts(supabase: Client) {
-  const user = await getUserDetails(supabase);
+  const { data: userData } = await getUserDetails(supabase);
 
   return supabase
     .from("bank_accounts")
     .select("*")
-    .eq("team_id", user?.team_id);
+    .eq("team_id", userData?.team_id);
 }
 
 type GetTeamMembersParams = {
@@ -67,7 +67,7 @@ export async function getTransactions(
   supabase: Client,
   { from = 0, to = 30, date }: GetTransactionsParams = {},
 ) {
-  const user = await getUserDetails(supabase);
+  const { data: userData } = await getUserDetails(supabase);
 
   // TODO: Set "bank_account_id" uuid references bank_account
   const base = supabase
@@ -77,7 +77,7 @@ export async function getTransactions(
       account:bank_account_id(*),
       assigned:assigned_id(*)
     `)
-    .eq("team_id", user?.team_id)
+    .eq("team_id", userData?.team_id)
     .range(from, to);
 
   if (date?.from && date?.to) {

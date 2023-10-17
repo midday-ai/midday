@@ -4,7 +4,7 @@ import { env } from "@/env.mjs";
 import { getAccessToken, getTransactions } from "@midday/gocardless";
 import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
 import {
-  createTeamBankAccounts as createBankAccount,
+  createTeamBankAccounts,
   createTransactions,
 } from "@midday/supabase/mutations";
 import { capitalCase } from "change-case";
@@ -86,7 +86,7 @@ export async function initialTransactionsSync(ids: string[]) {
   );
 }
 
-export async function createTeamBankAccounts(accounts) {
+export async function createTeamBankAccountsAction(accounts) {
   const supabase = await getSupabaseServerActionClient();
-  await createBankAccount(supabase, accounts);
+  await createTeamBankAccounts(supabase, accounts);
 }
