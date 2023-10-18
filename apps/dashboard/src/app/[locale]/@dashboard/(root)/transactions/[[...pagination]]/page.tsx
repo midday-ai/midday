@@ -12,9 +12,14 @@ export const metadata: Metadata = {
 
 export default async function Transactions({
   searchParams,
+  params,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const page = !params?.pagination ? 0 : parseInt(params.pagination[0]!);
+  const filter =
+    (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
+
   return (
     <>
       <div className="flex justify-between sticky top-0 z-10 py-6 backdrop-filter backdrop-blur-lg bg-background/80">
@@ -23,7 +28,7 @@ export default async function Transactions({
       </div>
 
       <Suspense fallback={<Loading />}>
-        <Table searchParams={searchParams} />
+        <Table filter={filter} page={page} />
       </Suspense>
     </>
   );

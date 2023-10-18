@@ -1,41 +1,26 @@
-import {
-  DataTable,
-  DataTableRow,
-} from "@/components/tables/transactions/data-table";
-import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
+import { Pagination } from "@/components/pagination";
+import { DataTable } from "@/components/tables/transactions/data-table";
 import { getPagination, getTransactions } from "@midday/supabase/queries";
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
 
-const pageSize = 30;
+const pageSize = 50;
 
-export async function Table({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const filter =
-    (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
-
-  async function fetchMore(page: number) {
-    "use server";
-
-    const supabase = await getSupabaseServerActionClient();
-    const { data } = await getTransactions(supabase, {
-      ...getPagination(page, pageSize),
-      filter,
-    });
-
-    return [
-      data.map((row) => <DataTableRow data={row} key={row.id} />),
-      page + 1,
-    ] as const;
-  }
-
+export async function Table({ filter, page }) {
   const supabase = await getSupabaseServerClient();
   const { data } = await getTransactions(supabase, {
-    ...getPagination(0, pageSize),
+    ...getPagination(page, pageSize),
     filter,
   });
 
-  return <DataTable initialItems={data} fetchMore={fetchMore} />;
+  return (
+    <>
+      <DataTable data={data} />
+      <Pagination
+        basePath="/transactions"
+        page={page}
+        hasNextPage={data.length === pageSize}
+        className="mt-4"
+      />
+    </>
+  );
 }

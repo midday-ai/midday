@@ -153,7 +153,7 @@ export function Filter({ sections }: Props) {
         setFilters({ ...filters, search: query });
       } else {
         delete filters.search;
-        setFilters("katt");
+        setFilters(filters);
       }
     }
   };
