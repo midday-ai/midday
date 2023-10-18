@@ -52,19 +52,25 @@ export async function getUserTeamMembers(supabase: Client) {
 type GetTransactionsParams = {
   from: number;
   to: number;
-  search?: string;
-  status: "fullfilled" | "unfullfilled";
-  date: {
-    from?: string;
-    to?: string;
+  filter: {
+    search?: string;
+    status?: "fullfilled" | "unfullfilled";
+    attachments?: "include" | "exclude";
+    date: {
+      from?: string;
+      to?: string;
+    };
   };
 };
 
 export async function getTransactions(
   supabase: Client,
-  { from = 0, to = 30, date, search, status }: GetTransactionsParams = {},
+  params: GetTransactionsParams,
 ) {
+  const { from = 0, to = 30, filter } = params;
+  const { date, search, status, attachments } = filter;
   const { data: userData } = await getUserDetails(supabase);
+
   // TODO: Set "bank_account_id" uuid references bank_account
   const query = supabase
     .from("transactions")
@@ -82,6 +88,7 @@ export async function getTransactions(
   }
 
   if (search) {
+    console.log(search);
     query.textSearch("name", search, {
       type: "websearch",
       config: "english",
@@ -94,8 +101,16 @@ export async function getTransactions(
   }
 
   if (status?.includes("unfullfilled")) {
-    query.eq("attachment", null);
-    query.eq("vat", null);
+    query.is("attachment", null);
+    query.is("vat", null);
+  }
+
+  if (attachments === "exclude") {
+    query.is("attachment", null);
+  }
+
+  if (attachments === "include") {
+    query.not("attachment", "is", null);
   }
 
   return query;

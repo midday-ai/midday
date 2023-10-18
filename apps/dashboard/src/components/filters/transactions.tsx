@@ -89,58 +89,6 @@ export const sections = [
     placeholder: "Search for transactions, amount...",
     options: [],
   },
-  // {
-  //   id: "amount",
-  //   label: "Amount",
-  //   icon: ArrowRightLeft,
-  //   type: SectionType.checkbox,
-  //   options: [],
-  // },
-  // {
-  //   id: "method",
-  //   label: "Method",
-  //   icon: CircleDollarSign,
-  //   type: SectionType.checkbox,
-  //   options: [
-  //     {
-  //       id: "card",
-  //       label: "Card",
-  //       description: "Transactions with method Card",
-  //     },
-  //     {
-  //       id: 'card-foreign-purchase"',
-  //       label: "Card foreign purchase",
-  //       description: "Transactions with method Card foreign purchase",
-  //     },
-  //     {
-  //       id: "payment",
-  //       label: "Payment",
-  //       description: "Transactions with method Payment",
-  //     },
-  //     {
-  //       id: "transfer",
-  //       label: "Transfer",
-  //       description: "Transactions with method Transfer",
-  //     },
-  //     {
-  //       id: "foreign-payment",
-  //       label: "Incoming foreign payment",
-  //       description: "Transactions with method Incoming foreign payment",
-  //     },
-  //     {
-  //       id: "bankgiro-payment",
-  //       label: "Bankgiro payment",
-  //       description: "Transactions with method Bankgiro payment",
-  //     },
-  //   ],
-  // },
-  {
-    id: "assigned",
-    label: "Assigned",
-    icon: User,
-    type: SectionType.checkbox,
-    options: [],
-  },
   {
     id: "status",
     label: "Status",

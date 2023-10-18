@@ -65,7 +65,7 @@ export function Filter({ sections }: Props) {
     defaultValue: [],
     shallow: false,
     serialize: (obj) => JSON.stringify(obj),
-    parse: (query) => JSON.parse(query) as { foo: string; bar: number },
+    parse: (query) => JSON.parse(query),
   });
 
   useEffect(() => {
@@ -105,8 +105,6 @@ export function Filter({ sections }: Props) {
     const value = option.value.toLowerCase();
     const section = filters[filter];
 
-    console.log(option);
-
     if (section?.includes(value)) {
       query = {
         ...filters,
@@ -121,6 +119,21 @@ export function Filter({ sections }: Props) {
 
     if (query && !query[filter].length) {
       delete query[filter];
+    }
+
+    if (option.single) {
+      const defaultValue = sections.find(
+        (section) => section.id === filter,
+      )?.defaultValue;
+
+      if (value === defaultValue) {
+        delete query[filter];
+      } else {
+        query = {
+          ...filters,
+          [filter]: value,
+        };
+      }
     }
 
     setFilters(query);
@@ -140,7 +153,7 @@ export function Filter({ sections }: Props) {
         setFilters({ ...filters, search: query });
       } else {
         delete filters.search;
-        setFilters(filters);
+        setFilters("katt");
       }
     }
   };
@@ -160,7 +173,7 @@ export function Filter({ sections }: Props) {
 
   const handleRecentSearch = (storage: string, value: string) => {
     if (!recentSearch.includes(value)) {
-      const updated = [value, ...recentSearch].slice(0, 8);
+      const updated = [value, ...recentSearch].slice(0, 6);
 
       setRecentSearch(updated);
       localStorage.setItem(storage, JSON.stringify(updated));
@@ -178,7 +191,7 @@ export function Filter({ sections }: Props) {
     const filter = filters[section.id];
 
     switch (section.type) {
-      case "date": {
+      case SectionType.date: {
         if (filter.from && filter.to) {
           return `${format(new Date(filter.from), "MMM d, yyyy")} - ${format(
             new Date(filter.to),
@@ -188,8 +201,12 @@ export function Filter({ sections }: Props) {
 
         return filter.from && format(new Date(filter.from), "MMM d, yyyy");
       }
-      case "search": {
+      case SectionType.search: {
         return `Anything matching "${filter}"`;
+      }
+
+      case SectionType.radio: {
+        return section.options.find((option) => option.id === filter)?.label;
       }
 
       default: {
@@ -205,7 +222,7 @@ export function Filter({ sections }: Props) {
   };
 
   return (
-    <div className="flex space-x-2 items-center">
+    <div className="flex items-center">
       <Popover open={isOpen} onOpenChange={setOpen} size>
         <PopoverTrigger asChild>
           <Button variant="outline" className="space-x-2">
@@ -417,8 +434,6 @@ export function Filter({ sections }: Props) {
                 );
               }
 
-              console.log;
-
               if (section.type === SectionType.radio) {
                 return (
                   <Tabs.TabsContent
@@ -432,6 +447,7 @@ export function Filter({ sections }: Props) {
                         toggleFilter({
                           filter: activeId!,
                           value,
+                          single: true,
                         })
                       }
                     >
@@ -442,7 +458,10 @@ export function Filter({ sections }: Props) {
                         .find((section) => section.id === activeId)
                         ?.options?.map((option) => {
                           return (
-                            <div className="flex items-center space-x-2">
+                            <div
+                              className="flex items-center space-x-2"
+                              key={option.id}
+                            >
                               <RadioGroupItem
                                 value={option.id}
                                 id={option.id}
@@ -460,8 +479,10 @@ export function Filter({ sections }: Props) {
         </PopoverContent>
       </Popover>
 
+      <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
+
       {!Object.keys(filters).length && (
-        <span className="pl-4 text-sm text-[#606060]">No filters applied</span>
+        <span className="text-sm text-[#606060]">No filters applied</span>
       )}
 
       {Object.keys(filters).map((optionId) => {
