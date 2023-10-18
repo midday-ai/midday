@@ -142,41 +142,43 @@ export default function ConnectBankModal() {
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Connect bank</DialogTitle>
-          <DialogDescription>
-            Select your bank and follow the steps below, we will have access to
-            2 years of historical transactions and will have access for 3
-            months. We will notify you once you need to connect again.
-          </DialogDescription>
+        <div className="p-4">
+          <DialogHeader>
+            <DialogTitle>Connect bank</DialogTitle>
+            <DialogDescription>
+              Select your bank and follow the steps below, we will have access
+              to 2 years of historical transactions and will have access for 3
+              months. We will notify you once you need to connect again.
+            </DialogDescription>
 
-          <div>
-            <Input
-              placeholder="Search bank"
-              autoComplete={false}
-              type="search"
-              className="my-2"
-              onChange={(evt) => handleFilterBanks(evt.target.value)}
-            />
-            <div className="space-y-6 pt-4 h-[400px] overflow-auto scrollbar-hide">
-              {loading && <RowsSkeleton />}
-              {filteredResults.map((bank) => {
-                return (
-                  <Row
-                    key={bank.id}
-                    id={bank.id}
-                    name={bank.name}
-                    logo={bank.logo}
-                    onSelect={() => handleCreateEndUserAgreement(bank.id)}
-                  />
-                );
-              })}
-              {!loading && filteredResults.length === 0 && (
-                <p>No banks found</p>
-              )}
+            <div>
+              <Input
+                placeholder="Search bank"
+                autoComplete={false}
+                type="search"
+                className="my-2"
+                onChange={(evt) => handleFilterBanks(evt.target.value)}
+              />
+              <div className="space-y-6 pt-4 h-[400px] overflow-auto scrollbar-hide">
+                {loading && <RowsSkeleton />}
+                {filteredResults.map((bank) => {
+                  return (
+                    <Row
+                      key={bank.id}
+                      id={bank.id}
+                      name={bank.name}
+                      logo={bank.logo}
+                      onSelect={() => handleCreateEndUserAgreement(bank.id)}
+                    />
+                  );
+                })}
+                {!loading && filteredResults.length === 0 && (
+                  <p>No banks found</p>
+                )}
+              </div>
             </div>
-          </div>
-        </DialogHeader>
+          </DialogHeader>
+        </div>
       </DialogContent>
     </Dialog>
   );

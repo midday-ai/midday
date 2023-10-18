@@ -35,21 +35,16 @@ export async function getTeamBankAccounts(supabase: Client) {
     .eq("team_id", userData?.team_id);
 }
 
-type GetTeamMembersParams = {
-  team_id: string;
-};
+export async function getUserTeamMembers(supabase: Client) {
+  const { data: userData } = await getUserDetails(supabase);
 
-export async function getTeamMembers(
-  supabase: Client,
-  { team_id }: GetTeamMembersParams,
-) {
   const { data } = await supabase
     .from("teams")
     .select(`
       *,
       members(*)
     `)
-    .eq("id", team_id);
+    .eq("id", userData?.team_id);
 
   return data;
 }
@@ -58,6 +53,7 @@ type GetTransactionsParams = {
   from: number;
   to: number;
   search?: string;
+  status: "fullfilled" | "unfullfilled";
   date: {
     from?: string;
     to?: string;
@@ -66,12 +62,11 @@ type GetTransactionsParams = {
 
 export async function getTransactions(
   supabase: Client,
-  { from = 0, to = 30, date, search }: GetTransactionsParams = {},
+  { from = 0, to = 30, date, search, status }: GetTransactionsParams = {},
 ) {
   const { data: userData } = await getUserDetails(supabase);
-
   // TODO: Set "bank_account_id" uuid references bank_account
-  const base = supabase
+  const query = supabase
     .from("transactions")
     .select(`
       *,
@@ -82,16 +77,26 @@ export async function getTransactions(
     .range(from, to);
 
   if (date?.from && date?.to) {
-    base.gte("date", date.from);
-    base.lte("date", date.to);
+    query.gte("date", date.from);
+    query.lte("date", date.to);
   }
 
   if (search) {
-    base.textSearch("name", search, {
+    query.textSearch("name", search, {
       type: "websearch",
       config: "english",
     });
   }
 
-  return base;
+  if (status?.includes("fullfilled")) {
+    query.not("attachment", "is", null);
+    query.not("vat", "is", null);
+  }
+
+  if (status?.includes("unfullfilled")) {
+    query.eq("attachment", null);
+    query.eq("vat", null);
+  }
+
+  return query;
 }

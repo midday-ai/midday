@@ -1,6 +1,5 @@
 "use client";
 
-import { useTransactionsStore } from "@/store/transactions";
 import {
   Table,
   TableBody,
@@ -27,19 +26,11 @@ export function DataTable<TData, TValue>({
   data,
   loading,
 }: DataTableProps<TData, TValue>) {
-  const { rowSelection, setRowSelecton } = useTransactionsStore(
-    (state) => state,
-  );
-
   const table = useReactTable({
     data,
     columns,
-    state: {
-      rowSelection,
-    },
     enableRowSelection: true,
     getCoreRowModel: getCoreRowModel(),
-    onRowSelectionChange: setRowSelecton,
   });
 
   return (

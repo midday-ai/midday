@@ -22,7 +22,7 @@ export function MainMenu() {
     },
     {
       path: "/apps",
-      name: "App Store",
+      name: "Apps",
       icon: Icons.Apps,
     },
     {

@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
+import ThemeSwitch from "./theme-switch";
 
 export async function UserMenu() {
   const supabase = getSupabaseServerClient();
@@ -29,10 +30,23 @@ export async function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" sideOffset={10} align="end">
         <DropdownMenuGroup>
-          <Link href="/settings/profile">
+          <Link href="/settings/account">
             <DropdownMenuItem>
-              Profile
+              Account
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
+
+          <Link href="/settings">
+            <DropdownMenuItem>
+              Settings
+              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+            </DropdownMenuItem>
+          </Link>
+          <Link href="/settings/team">
+            <DropdownMenuItem>
+              Team
+              <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
           <Link href="/onboarding">
@@ -41,13 +55,12 @@ export async function UserMenu() {
               <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
-          <Link href="/settings">
-            <DropdownMenuItem>
-              Settings
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </Link>
         </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <div className="flex flex-row justify-between items-center p-2">
+          <p className="text-sm">Theme</p>
+          <ThemeSwitch />
+        </div>
         <DropdownMenuSeparator />
         <SignOut />
       </DropdownMenuContent>

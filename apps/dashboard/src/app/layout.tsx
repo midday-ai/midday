@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { cn } from "@midday/ui/utils";
@@ -22,8 +23,18 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: ReactElement }) {
   return (
-    <html lang="en" className="dark">
-      <body className={cn(fontSans.variable, "bg-background")}>{children}</body>
+    <html lang="en">
+      <body className={cn(fontSans.variable, "bg-background")}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          forcedTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

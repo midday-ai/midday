@@ -23,7 +23,7 @@
     "./calendar": "./src/components/calendar.tsx",
     "./avatar": "./src/components/avatar.tsx",
     "./select": "./src/components/select.tsx",
-    "./radio": "./src/components/radio.tsx",
+    "./radio-group": "./src/components/radio-group.tsx",
     "./button": "./src/components/button.tsx",
     "./month-range-picker": "./src/components/month-range-picker.tsx",
     "./checkbox": "./src/components/checkbox.tsx",

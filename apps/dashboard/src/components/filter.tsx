@@ -3,8 +3,10 @@
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { MonthRangePicker } from "@midday/ui/month-range-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -23,6 +25,7 @@ export enum SectionType {
   date = "date",
   checkbox = "checkbox",
   search = "search",
+  radio = "radio",
 }
 
 type SelectedOption = {
@@ -76,44 +79,16 @@ export function Filter({ sections }: Props) {
     }
   }, [activeId]);
 
-  // const toggleFilter = useCallback(
-  //   (option: SelectedOption) => {
-  //     const params = new URLSearchParams(searchParams);
-
-  //     let query;
-
-  //     const filter = option.filter.toLowerCase();
-  //     const value = option.value.toLowerCase();
-  //     const section = filters[filter];
-
-  //     if (section?.includes(value)) {
-  //       query = {
-  //         ...filters,
-  //         [filter]: section.filter((item: string) => item !== value),
-  //       };
-  //     } else {
-  //       query = {
-  //         ...filters,
-  //         [filter]: [...(filters[filter] ?? []), value],
-  //       };
-  //     }
-
-  //     params.set("filters", JSON.stringify(query));
-  //     router.replace(`?${params.toString()}`);
-  //   },
-  //   [filters, searchParams],
-  // );
-
-  const handleDateChange = (activeId, range = {}) => {
+  const handleDateChange = (range = {}) => {
     const prevRange = filters[activeId];
 
     if (range.from || range.to) {
       setFilters({
         ...filters,
-        [activeId]: { ...prevRange, ...range },
+        date: { ...prevRange, ...range },
       });
     } else {
-      delete filters[activeId];
+      delete filters.date;
       setFilters(filters);
     }
   };
@@ -121,6 +96,34 @@ export function Filter({ sections }: Props) {
   const handleDeleteFilter = (filter: string) => {
     delete filters[filter];
     setFilters(filters);
+  };
+
+  const toggleFilter = (option: SelectedOption) => {
+    let query;
+
+    const filter = option.filter.toLowerCase();
+    const value = option.value.toLowerCase();
+    const section = filters[filter];
+
+    console.log(option);
+
+    if (section?.includes(value)) {
+      query = {
+        ...filters,
+        [filter]: section.filter((item: string) => item !== value),
+      };
+    } else {
+      query = {
+        ...filters,
+        [filter]: [...(filters[filter] ?? []), value],
+      };
+    }
+
+    if (query && !query[filter].length) {
+      delete query[filter];
+    }
+
+    setFilters(query);
   };
 
   const handleOnSearch = (
@@ -211,7 +214,7 @@ export function Filter({ sections }: Props) {
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[650px] min-h-[320px] rounded-xl mt-2.5 p-0 overflow-hidden"
+          className="w-[650px] rounded-xl mt-2.5 p-0 overflow-hidden"
           align="start"
         >
           <Tabs.Root
@@ -220,7 +223,7 @@ export function Filter({ sections }: Props) {
             onValueChange={setActiveId}
             value={activeId}
           >
-            <Tabs.TabsList className="w-[220px] min-h-[340px] p-4 flex flex-col items-start">
+            <Tabs.TabsList className="w-[220px] h-[300px] p-4 flex flex-col items-start">
               {sections?.map(({ id, label, icon: Icon }) => {
                 const isActive = activeId === id;
 
@@ -266,7 +269,7 @@ export function Filter({ sections }: Props) {
                     <Select
                       onValueChange={(id) => {
                         const value = section?.options.find((o) => o.id === id);
-                        handleDateChange(id, {
+                        handleDateChange({
                           from: value?.from,
                           to: value?.to,
                         });
@@ -287,7 +290,7 @@ export function Filter({ sections }: Props) {
                     </Select>
 
                     <MonthRangePicker
-                      setDate={(range) => handleDateChange(activeId, range)}
+                      setDate={handleDateChange}
                       date={{
                         from: filters[activeId]?.from,
                         to: filters[activeId]?.to,
@@ -410,6 +413,45 @@ export function Filter({ sections }: Props) {
                           </div>
                         );
                       })}
+                  </Tabs.TabsContent>
+                );
+              }
+
+              console.log;
+
+              if (section.type === SectionType.radio) {
+                return (
+                  <Tabs.TabsContent
+                    value={section.id}
+                    className="p-4 w-[480px] space-y-4"
+                    key={section.id}
+                  >
+                    <RadioGroup
+                      defaultValue={filters[activeId] || section?.defaultValue}
+                      onValueChange={(value) =>
+                        toggleFilter({
+                          filter: activeId!,
+                          value,
+                        })
+                      }
+                    >
+                      {sections
+                        ?.filter(
+                          (section) => section.type === SectionType.radio,
+                        )
+                        .find((section) => section.id === activeId)
+                        ?.options?.map((option) => {
+                          return (
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem
+                                value={option.id}
+                                id={option.id}
+                              />
+                              <Label htmlFor={option.id}>{option.label}</Label>
+                            </div>
+                          );
+                        })}
+                    </RadioGroup>
                   </Tabs.TabsContent>
                 );
               }

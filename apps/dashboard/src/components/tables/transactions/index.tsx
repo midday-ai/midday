@@ -13,7 +13,7 @@ export async function Table({
 }) {
   const page = typeof searchParams.page === "string" ? +searchParams.page : 1;
 
-  const { date, search } =
+  const { date, search, status } =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
 
   const to = page * size;
@@ -22,6 +22,7 @@ export async function Table({
     to,
     date,
     search,
+    status,
   });
 
   const totalCount = data.length;

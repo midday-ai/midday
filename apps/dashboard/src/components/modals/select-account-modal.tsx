@@ -107,84 +107,89 @@ export default function SelectAccountModal() {
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
       <DialogContent>
-        <DialogHeader className="mb-8">
-          <DialogTitle>Select accounts</DialogTitle>
-          <DialogDescription>
-            Select the accounts you want to sync with Midday.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="p-4">
+          <DialogHeader className="mb-8">
+            <DialogTitle>Select accounts</DialogTitle>
+            <DialogDescription>
+              Select the accounts you want to sync with Midday.
+            </DialogDescription>
+          </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {loading && <RowsSkeleton />}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              {loading && <RowsSkeleton />}
 
-            {accounts.map((account) => (
-              <FormField
-                key={account.id}
-                control={form.control}
-                name="accounts"
-                render={({ field }) => {
-                  const formattedAmount = new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: account.balances.available.currency,
-                  }).format(account.balances.available.amount);
+              {accounts.map((account) => (
+                <FormField
+                  key={account.id}
+                  control={form.control}
+                  name="accounts"
+                  render={({ field }) => {
+                    const formattedAmount = new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: account.balances.available.currency,
+                    }).format(account.balances.available.amount);
 
-                  return (
-                    <FormItem key={account.id} className="flex justify-between">
-                      <FormLabel className="flex items-between">
-                        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                          <AvatarImage
-                            src={account.bank.logo}
-                            alt={account.bank.name}
-                          />
-                        </Avatar>
-                        <div className="ml-4 space-y-1">
-                          <p className="text-sm font-medium leading-none mb-1">
-                            {account.iban}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {account.bank.name} - {formattedAmount}
-                          </p>
+                    return (
+                      <FormItem
+                        key={account.id}
+                        className="flex justify-between"
+                      >
+                        <FormLabel className="flex items-between">
+                          <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                            <AvatarImage
+                              src={account.bank.logo}
+                              alt={account.bank.name}
+                            />
+                          </Avatar>
+                          <div className="ml-4 space-y-1">
+                            <p className="text-sm font-medium leading-none mb-1">
+                              {account.iban}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {account.bank.name} - {formattedAmount}
+                            </p>
+                          </div>
+                        </FormLabel>
+
+                        <div>
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(account.id)}
+                              onCheckedChange={(checked) => {
+                                return checked
+                                  ? field.onChange([...field.value, account.id])
+                                  : field.onChange(
+                                      field.value?.filter(
+                                        (value) => value !== account.id,
+                                      ),
+                                    );
+                              }}
+                            />
+                          </FormControl>
                         </div>
-                      </FormLabel>
+                      </FormItem>
+                    );
+                  }}
+                />
+              ))}
 
-                      <div>
-                        <FormControl>
-                          <Checkbox
-                            checked={field.value?.includes(account.id)}
-                            onCheckedChange={(checked) => {
-                              return checked
-                                ? field.onChange([...field.value, account.id])
-                                : field.onChange(
-                                    field.value?.filter(
-                                      (value) => value !== account.id,
-                                    ),
-                                  );
-                            }}
-                          />
-                        </FormControl>
-                      </div>
-                    </FormItem>
-                  );
-                }}
-              />
-            ))}
-
-            <div className="pt-4">
-              <Button
-                className="w-full"
-                type="submit"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? (
-                  <Icons.Loader className="w-4 h-4 animate-spin" />
-                ) : (
-                  "Save"
-                )}
-              </Button>
-            </div>
-          </form>
-        </Form>
+              <div className="pt-4">
+                <Button
+                  className="w-full"
+                  type="submit"
+                  disabled={form.formState.isSubmitting}
+                >
+                  {form.formState.isSubmitting ? (
+                    <Icons.Loader className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </div>
       </DialogContent>
     </Dialog>
   );

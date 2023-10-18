@@ -1,7 +1,6 @@
 "use client";
 
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
-import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
@@ -20,29 +19,6 @@ export type Transaction = {
 };
 
 export const columns: ColumnDef<Transaction>[] = [
-  {
-    id: "select",
-    meta: {
-      className: "w-[50px]",
-      Loading: () => <Checkbox />,
-    },
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        {...{
-          checked: row.getIsSelected(),
-          disabled: !row.getCanSelect(),
-          onCheckedChange: row.getToggleSelectedHandler(),
-        }}
-      />
-    ),
-    enableHiding: false,
-  },
   {
     accessorKey: "name",
     header: "To/From",
