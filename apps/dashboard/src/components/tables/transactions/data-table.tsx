@@ -1,9 +1,11 @@
 "use client";
 
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
+import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import {
   Table,
+  TableBody,
   TableCell,
   TableHead,
   TableHeader,
@@ -11,7 +13,7 @@ import {
 } from "@midday/ui/table";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import InfiniteScroll from "react-infinite-scroller";
 
 function FormattedAmount({ currency, amount }) {
@@ -72,27 +74,64 @@ export function DataTableRow({ data }) {
         <AssignedUser user={data.assigned} />
       </TableCell>
       <TableCell>
-        {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}{" "}
+        {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
       </TableCell>
     </TableRow>
   );
 }
 
-export function DataTable({ data, fetchMore }: ItemsProps) {
-  const fetching = useRef(false);
-  const [items, setItems] = useState<React.JSX.Element[]>(data);
+export function DataTable({ initialItems, fetchMore }: ItemsProps) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [loadMoreNodes, setLoadMoreNodes] = useState<React.JSX.Element[]>([]);
+  const [disabled, setDisabled] = useState(false);
+  const currentOffsetRef = useRef(0);
+  const [loading, setLoading] = useState(false);
 
-  const loadMore = async (page: number) => {
-    if (!fetching.current) {
-      try {
-        fetching.current = true;
-        const data = await fetchMore(page);
-        setItems((prev) => [...prev, ...data]);
-      } finally {
-        fetching.current = false;
+  const loadMore = useCallback(
+    async (abortController?: AbortController) => {
+      setLoading(true);
+
+      fetchMore(currentOffsetRef.current)
+        .then(([node, next]) => {
+          if (abortController?.signal.aborted) return;
+
+          setLoadMoreNodes((prev) => [...prev, node]);
+          if (next === null) {
+            currentOffsetRef.current ??= undefined;
+            setDisabled(true);
+            return;
+          }
+
+          currentOffsetRef.current = next;
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+    },
+    [fetchMore],
+  );
+
+  useEffect(() => {
+    const signal = new AbortController();
+
+    const element = ref.current;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting && element?.disabled === false) {
+        loadMore(signal);
       }
+    });
+
+    if (element) {
+      observer.observe(element);
     }
-  };
+
+    return () => {
+      signal.abort();
+      if (element) {
+        observer.unobserve(element);
+      }
+    };
+  }, [loadMore]);
 
   return (
     <>
@@ -108,25 +147,25 @@ export function DataTable({ data, fetchMore }: ItemsProps) {
               <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
-          <InfiniteScroll
-            // hasMore={hasMore}
-            hasMore={true}
-            loadMore={loadMore}
-            pageStart={0}
-            element="tbody"
-          >
-            {items.map((row) => (
+          <TableBody>
+            {initialItems?.map((row) => (
               <DataTableRow key={row.id} data={row} />
             ))}
-          </InfiniteScroll>
+
+            {loadMoreNodes}
+          </TableBody>
         </Table>
       </div>
 
-      {/* {hasMore && (
-        <div className="mt-4 flex justify-center items-center">
-          <span className="text-[#606060] text-sm">Loading...</span>
-        </div>
-      )} */}
+      <Button
+        variant="outline"
+        className="w-full mt-4"
+        ref={ref}
+        disabled={disabled || loading}
+        onClick={() => loadMore()}
+      >
+        {loading ? "Loading..." : "Load More"}
+      </Button>
     </>
   );
 }

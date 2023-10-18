@@ -25,7 +25,10 @@ export async function Table({
       filter,
     });
 
-    return data;
+    return [
+      data.map((row) => <DataTableRow data={row} key={row.id} />),
+      page + 1,
+    ] as const;
   }
 
   const supabase = await getSupabaseServerClient();
@@ -34,5 +37,5 @@ export async function Table({
     filter,
   });
 
-  return <DataTable data={data} fetchMore={fetchMore} />;
+  return <DataTable initialItems={data} fetchMore={fetchMore} />;
 }
