@@ -1,34 +1,38 @@
-import { Pagination } from "@/components/pagination";
-import { DataTable } from "@/components/tables/transactions/table";
-import { getTransactions } from "@midday/supabase/queries";
+import {
+  DataTable,
+  DataTableRow,
+} from "@/components/tables/transactions/data-table";
+import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
+import { getPagination, getTransactions } from "@midday/supabase/queries";
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
-import { columns } from "./columns";
 
-const size = 30;
+const pageSize = 30;
 
 export async function Table({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const page = typeof searchParams.page === "string" ? +searchParams.page : 1;
-
   const filter =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
 
-  const to = page * size;
+  async function fetchMore(page: number) {
+    "use server";
+
+    const supabase = await getSupabaseServerActionClient();
+    const { data } = await getTransactions(supabase, {
+      ...getPagination(page, pageSize),
+      filter,
+    });
+
+    return data;
+  }
+
   const supabase = await getSupabaseServerClient();
   const { data } = await getTransactions(supabase, {
-    to,
+    ...getPagination(0, pageSize),
     filter,
   });
 
-  const totalCount = data.length;
-
-  return (
-    <div className="space-y-4">
-      <DataTable columns={columns} data={data} />
-      <div>{totalCount > to && <Pagination page={page} />}</div>
-    </div>
-  );
+  return <DataTable data={data} fetchMore={fetchMore} />;
 }

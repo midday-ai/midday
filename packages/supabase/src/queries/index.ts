@@ -1,5 +1,13 @@
 import { Client } from "../types";
 
+export function getPagination(page: number, size: number) {
+  const limit = size ? +size : 3;
+  const from = page ? page * limit : 0;
+  const to = page ? from + size - 1 : size - 1;
+
+  return { from, to };
+}
+
 export async function getSession(supabase: Client) {
   return supabase.auth.getSession();
 }
@@ -67,11 +75,10 @@ export async function getTransactions(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to = 30, filter } = params;
-  const { date, search, status, attachments } = filter;
+  const { from = 0, to, filter } = params;
+  const { date = {}, search, status, attachments } = filter || {};
   const { data: userData } = await getUserDetails(supabase);
 
-  // TODO: Set "bank_account_id" uuid references bank_account
   const query = supabase
     .from("transactions")
     .select(`
@@ -88,7 +95,6 @@ export async function getTransactions(
   }
 
   if (search) {
-    console.log(search);
     query.textSearch("name", search, {
       type: "websearch",
       config: "english",

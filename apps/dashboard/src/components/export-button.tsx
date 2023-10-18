@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 
 export function ExportButton() {
   return (
-    <Button className="space-x-2" variant="outline">
+    <Button className="space-x-2">
       <span>Export</span> <ChevronDown size={16} />
     </Button>
   );

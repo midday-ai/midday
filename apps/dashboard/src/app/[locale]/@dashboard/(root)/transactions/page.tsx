@@ -1,7 +1,7 @@
 import { ExportButton } from "@/components/export-button";
 import { Filter } from "@/components/filter";
-import { sections } from "@/components/filters/transactions";
 import { Table } from "@/components/tables/transactions";
+import { sections } from "@/components/tables/transactions/filters";
 import { Loading } from "@/components/tables/transactions/loading";
 import { Metadata } from "next";
 import { Suspense } from "react";

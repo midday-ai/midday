@@ -1,8 +1,7 @@
-import { columns } from "./columns";
-import { DataTable } from "./table";
+import { DataTable } from "./data-table";
 
 const data = [...Array(25)].map((_, i) => ({ id: i.toString() }));
 
 export function Loading() {
-  return <DataTable columns={columns} data={data} loading />;
+  return <DataTable data={data} loading />;
 }

@@ -75,7 +75,7 @@ export async function initialTransactionsSync(ids: string[]) {
           date: data.valueDate,
           name: capitalCase(data.additionalInformation),
           original: data.additionalInformation,
-          transaction_code: data.proprietaryBankTransactionCode,
+          method: data.proprietaryBankTransactionCode,
           internal_id: data.internalTransactionId,
           amount: data.transactionAmount.amount,
           currency: data.transactionAmount.currency,
