@@ -18,7 +18,7 @@ export function Loading() {
         <DataTableHeader />
         <TableBody>
           {data?.map((row) => (
-            <TableRow>
+            <TableRow className="h-[45px]">
               <TableCell className="w-[380px]">
                 <Skeleton className="h-3.5 w-[182px]" />
               </TableCell>

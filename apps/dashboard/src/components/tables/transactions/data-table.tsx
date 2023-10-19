@@ -51,7 +51,7 @@ export function DataTableRow({ data }) {
   const fullfilled = data.attachment && data.vat;
 
   return (
-    <TableRow>
+    <TableRow className="h-[45px]">
       <TableCell className="w-[380px]">
         <span className={cn(data.amount > 0 && "text-[#00E547]")}>
           {data.name}
