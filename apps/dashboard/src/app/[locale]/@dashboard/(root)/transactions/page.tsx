@@ -1,10 +1,12 @@
 import { ExportButton } from "@/components/export-button";
 import { Filter } from "@/components/filter";
-import { sections } from "@/components/filters/transactions";
 import { Table } from "@/components/tables/transactions";
+import { sections } from "@/components/tables/transactions/filters";
 import { Loading } from "@/components/tables/transactions/loading";
 import { Metadata } from "next";
 import { Suspense } from "react";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Transactions | Midday",
@@ -15,6 +17,10 @@ export default async function Transactions({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
+  const filter =
+    (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
+
   return (
     <>
       <div className="flex justify-between sticky top-0 z-10 py-6 backdrop-filter backdrop-blur-lg bg-background/80">
@@ -23,7 +29,7 @@ export default async function Transactions({
       </div>
 
       <Suspense fallback={<Loading />}>
-        <Table searchParams={searchParams} />
+        <Table filter={filter} page={page} />
       </Suspense>
     </>
   );

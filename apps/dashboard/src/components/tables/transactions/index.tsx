@@ -1,34 +1,25 @@
 import { Pagination } from "@/components/pagination";
-import { DataTable } from "@/components/tables/transactions/table";
-import { getTransactions } from "@midday/supabase/queries";
+import { DataTable } from "@/components/tables/transactions/data-table";
+import { getPagination, getTransactions } from "@midday/supabase/queries";
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
-import { columns } from "./columns";
 
-const size = 30;
+const pageSize = 50;
 
-export async function Table({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
-}) {
-  const page = typeof searchParams.page === "string" ? +searchParams.page : 1;
-
-  const filter =
-    (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
-
-  const to = page * size;
+export async function Table({ filter, page }) {
   const supabase = await getSupabaseServerClient();
   const { data } = await getTransactions(supabase, {
-    to,
+    ...getPagination(page, pageSize),
     filter,
   });
 
-  const totalCount = data.length;
-
   return (
-    <div className="space-y-4">
-      <DataTable columns={columns} data={data} />
-      <div>{totalCount > to && <Pagination page={page} />}</div>
-    </div>
+    <>
+      <DataTable data={data} />
+      <Pagination
+        page={page}
+        hasNextPage={data.length === pageSize}
+        className="mt-4"
+      />
+    </>
   );
 }

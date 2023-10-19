@@ -11,15 +11,7 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import {
-  ArrowRightLeft,
-  Calendar,
-  CircleDollarSign,
-  Paperclip,
-  Search,
-  Tag,
-  User,
-} from "lucide-react";
+import { Calendar, Paperclip, Search, Tag } from "lucide-react";
 
 export const sections = [
   {

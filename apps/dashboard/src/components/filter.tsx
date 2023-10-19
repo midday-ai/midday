@@ -153,7 +153,7 @@ export function Filter({ sections }: Props) {
         setFilters({ ...filters, search: query });
       } else {
         delete filters.search;
-        setFilters("katt");
+        setFilters(filters);
       }
     }
   };
@@ -485,20 +485,25 @@ export function Filter({ sections }: Props) {
         <span className="text-sm text-[#606060]">No filters applied</span>
       )}
 
-      {Object.keys(filters).map((optionId) => {
-        const section = sections.find((o) => o.id === optionId);
+      <div className="flex space-x-2">
+        {Object.keys(filters).map((optionId) => {
+          const section = sections.find((o) => o.id === optionId);
 
-        return (
-          <div className="flex space-x-2" key={optionId}>
-            <Button variant="secondary" className="flex space-x-2 bg-secondary">
-              <X size={14} onClick={() => handleDeleteFilter(optionId)} />
-              <p onClick={() => handleOpenSection(section?.id)}>
-                {section && renderFilter(section)}
-              </p>
-            </Button>
-          </div>
-        );
-      })}
+          return (
+            <div className="flex space-x-2" key={optionId}>
+              <Button
+                variant="secondary"
+                className="flex space-x-2 bg-secondary"
+              >
+                <X size={14} onClick={() => handleDeleteFilter(optionId)} />
+                <p onClick={() => handleOpenSection(section?.id)}>
+                  {section && renderFilter(section)}
+                </p>
+              </Button>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

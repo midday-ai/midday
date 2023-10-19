@@ -1,45 +1,56 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { cn } from "@midday/ui/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback } from "react";
 
 type Props = {
   page: number;
+  className?: string;
+  hasNextPage: boolean;
 };
 
-export function Pagination({ page }: Props) {
+export function Pagination({ page, className, hasNextPage }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [isLoading, setLoading] = useState(false);
+  const router = useRouter();
 
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
+  const createPaginationQuery = useCallback(
+    (page: number) => {
       const params = new URLSearchParams(searchParams);
-      params.set(name, value);
 
-      return params.toString();
+      if (page > 0) {
+        params.set("page", String(page));
+      } else {
+        params.delete("page");
+      }
+
+      router.push(`${pathname}?${params.toString()}`);
     },
     [searchParams],
   );
 
-  useEffect(() => {
-    setLoading(false);
-  }, [page]);
-
   return (
-    <Link
-      href={`${pathname}?${createQueryString("page", page + 1)}`}
-      scroll={false}
-    >
+    <div className={cn(className, "flex justify-end space-x-2")}>
       <Button
-        variant="outline"
-        className="w-full h-10"
-        onClick={() => setLoading(true)}
+        variant="icon"
+        className="p-0"
+        disabled={!page}
+        onClick={() => createPaginationQuery(page - 1)}
       >
-        {isLoading ? "Loading..." : "Load more"}
+        <ChevronLeft size={22} />
       </Button>
-    </Link>
+
+      <Button
+        variant="icon"
+        className="p-0"
+        disabled={!hasNextPage}
+        onClick={() => createPaginationQuery(page + 1)}
+      >
+        <ChevronRight size={22} />
+      </Button>
+    </div>
   );
 }

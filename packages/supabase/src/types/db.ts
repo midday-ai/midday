@@ -123,7 +123,7 @@ export interface Database {
           original: string | null;
           reference_id: string;
           team_id: string | null;
-          transaction_code: string | null;
+          method: string | null;
           transaction_id: string;
           date: string | null;
           vat: Database["public"]["Enums"]["vatRates"] | null;
@@ -143,7 +143,7 @@ export interface Database {
           original?: string | null;
           reference_id: string;
           team_id?: string | null;
-          transaction_code?: string | null;
+          method?: string | null;
           transaction_id: string;
           date?: string | null;
           vat?: Database["public"]["Enums"]["vatRates"] | null;
@@ -163,7 +163,7 @@ export interface Database {
           original?: string | null;
           reference_id?: string;
           team_id?: string | null;
-          transaction_code?: string | null;
+          method?: string | null;
           transaction_id?: string;
           date?: string | null;
           vat?: Database["public"]["Enums"]["vatRates"] | null;
