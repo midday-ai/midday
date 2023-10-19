@@ -87,6 +87,7 @@ export async function getTransactions(
       assigned:assigned_id(*)
     `)
     .eq("team_id", userData?.team_id)
+    .order("date", { ascending: false })
     .range(from, to);
 
   if (date?.from && date?.to) {

@@ -16,7 +16,6 @@ export async function Table({ filter, page }) {
     <>
       <DataTable data={data} />
       <Pagination
-        basePath="/transactions"
         page={page}
         hasNextPage={data.length === pageSize}
         className="mt-4"

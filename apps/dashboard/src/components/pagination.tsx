@@ -3,24 +3,31 @@
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 type Props = {
   page: number;
   className?: string;
   hasNextPage: boolean;
-  basePath: string;
 };
 
-export function Pagination({ basePath, page, className, hasNextPage }: Props) {
+export function Pagination({ page, className, hasNextPage }: Props) {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
 
   const createPaginationQuery = useCallback(
     (page: number) => {
       const params = new URLSearchParams(searchParams);
-      router.push(`${basePath}/${page}?${params.toString()}`);
+
+      if (page > 0) {
+        params.set("page", String(page));
+      } else {
+        params.delete("page");
+      }
+
+      router.push(`${pathname}?${params.toString()}`);
     },
     [searchParams],
   );
