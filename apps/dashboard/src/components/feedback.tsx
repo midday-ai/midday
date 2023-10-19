@@ -2,10 +2,10 @@
 
 import { sendFeeback } from "@/actions";
 import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { Textarea } from "@midday/ui/textarea";
 import { cn } from "@midday/ui/utils";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { experimental_useFormStatus as useFormStatus } from "react-dom";
 
@@ -14,11 +14,7 @@ function SubmitButton() {
 
   return (
     <Button type="submit">
-      {pending ? (
-        <Icons.Loader className="w-4 h-4 text-black animate-spin" />
-      ) : (
-        "Send"
-      )}
+      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
     </Button>
   );
 }

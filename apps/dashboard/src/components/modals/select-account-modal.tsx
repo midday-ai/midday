@@ -23,8 +23,8 @@ import {
   FormItem,
   FormLabel,
 } from "@midday/ui/form";
-import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -181,7 +181,7 @@ export default function SelectAccountModal() {
                   disabled={form.formState.isSubmitting}
                 >
                   {form.formState.isSubmitting ? (
-                    <Icons.Loader className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     "Save"
                   )}

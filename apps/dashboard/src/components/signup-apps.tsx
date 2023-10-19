@@ -2,8 +2,8 @@
 
 import { subscribeEmail } from "@/actions";
 import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
+import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { experimental_useFormStatus as useFormStatus } from "react-dom";
@@ -19,7 +19,7 @@ function SubmitButton({ disabled }) {
   if (pending) {
     return (
       <div className="absolute top-1 right-0">
-        <Icons.Loader className="absolute w-4 h-4 mr-3 text-black animate-spin top-2.5 right-2" />
+        <Loader2 className="absolute w-4 h-4 mr-3 text-black animate-spin top-2.5 right-2" />
       </div>
     );
   }

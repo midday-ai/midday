@@ -14,7 +14,9 @@ const baseUrl = "https://api.resend.com";
 export async function sendFeeback(formData: FormData) {
   const supabase = await getSupabaseServerActionClient();
   const feedback = formData.get("feedback");
-  const { data } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   const res = await fetch(`${baseUrl}/email`, {
     method: "POST",
@@ -26,7 +28,7 @@ export async function sendFeeback(formData: FormData) {
       from: "feedback@midday.ai",
       to: "pontus@lostisland.co",
       subject: "Feedback",
-      text: `${feedback} \nName: ${data?.session?.data_metadata?.name} \nEmail: ${data?.session?.email}`,
+      text: `${feedback} \nName: ${session?.user?.user_metadata?.name} \nEmail: ${session?.user?.email}`,
     }),
   });
 

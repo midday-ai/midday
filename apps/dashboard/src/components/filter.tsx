@@ -72,6 +72,11 @@ export function Filter({ sections }: Props) {
     const params = new URLSearchParams(searchParams);
     params.set("filter", JSON.stringify(query));
     params.delete("page");
+
+    if (Object.keys(query).length === 0) {
+      params.delete("filter");
+    }
+
     router.replace(`${pathname}?${params.toString()}`);
   };
 

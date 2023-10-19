@@ -15,9 +15,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -79,11 +79,7 @@ function Row({ id, name, logo, onSelect }) {
         </div>
       </div>
       <Button variant="outline" onClick={handleOnSelect}>
-        {loading ? (
-          <Icons.Loader className="w-4 h-4 animate-spin" />
-        ) : (
-          "Connect"
-        )}
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
       </Button>
     </div>
   );

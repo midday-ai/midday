@@ -3,6 +3,7 @@
 import { subscribeEmail } from "@/actions/subscribeEmail";
 import { useScopedI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import overview from "public/overview.png";
@@ -18,7 +19,7 @@ function SubmitButton() {
   if (pending) {
     return (
       <div className="absolute top-1 right-0">
-        <Icons.Loader className="absolute w-4 h-4 mr-3 text-black animate-spin top-2.5 right-2" />
+        <Loader2 className="absolute w-4 h-4 mr-3 text-black animate-spin top-2.5 right-2" />
       </div>
     );
   }
