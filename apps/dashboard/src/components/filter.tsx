@@ -18,7 +18,7 @@ import { cn } from "@midday/ui/utils";
 import * as Tabs from "@radix-ui/react-tabs";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Trash2, X } from "lucide-react";
-import { useQueryState } from "next-usequerystate";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export enum SectionType {
@@ -57,16 +57,25 @@ type Props = {
 };
 
 export function Filter({ sections }: Props) {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const [activeId, setActiveId] = useState(sections?.at(0)?.id as string);
   const [isOpen, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [recentSearch, setRecentSearch] = useState<string[]>([]);
-  const [filters, setFilters] = useQueryState("filter", {
-    defaultValue: [],
-    shallow: false,
-    serialize: (obj) => JSON.stringify(obj),
-    parse: (query) => JSON.parse(query),
-  });
+  const filters = searchParams?.get("filter")
+    ? JSON.parse(searchParams?.get("filter") as string)
+    : [];
+
+  const setFilters = (query) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("filter", JSON.stringify(query));
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`, undefined, {
+      shallow: false,
+    });
+  };
 
   useEffect(() => {
     const storageKey = sections.find(
