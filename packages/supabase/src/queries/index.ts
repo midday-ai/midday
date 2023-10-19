@@ -60,6 +60,10 @@ export async function getUserTeamMembers(supabase: Client) {
 type GetTransactionsParams = {
   from: number;
   to: number;
+  sort: {
+    column: string;
+    value: "asc" | "desc";
+  };
   filter: {
     search?: string;
     status?: "fullfilled" | "unfullfilled";
@@ -75,7 +79,7 @@ export async function getTransactions(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter } = params;
+  const { from = 0, to, filter, sort } = params;
   const { date = {}, search, status, attachments } = filter || {};
   const { data: userData } = await getUserDetails(supabase);
 
@@ -89,8 +93,14 @@ export async function getTransactions(
     `,
       { count: "exact" },
     )
-    .eq("team_id", userData?.team_id)
-    .order("date", { ascending: false });
+    .eq("team_id", userData?.team_id);
+
+  if (sort) {
+    const [column, value] = sort;
+    query.order(column, { ascending: value === "asc" });
+  } else {
+    query.order("date", { ascending: false });
+  }
 
   if (date?.from && date?.to) {
     query.gte("date", date.from);
@@ -125,8 +135,9 @@ export async function getTransactions(
   const { data, count } = await query.range(from, to);
 
   // Only calculate total amount when a fitler is applied
+  // Investigate pg functions
   const totalAmount = filter
-    ? (await query.range(0, 10000000))?.data?.reduce(
+    ? (await query.limit(10000000))?.data?.reduce(
         (amount, item) => item.amount + amount,
         0,
       )

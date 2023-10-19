@@ -1,13 +1,6 @@
 import { Skeleton } from "@midday/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
-import { DataTable, DataTableHeader, DataTableRow } from "./data-table";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { DataTableHeader } from "./data-table-header";
 
 const data = [...Array(25)].map((_, i) => ({ id: i.toString() }));
 

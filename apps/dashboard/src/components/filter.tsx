@@ -72,9 +72,7 @@ export function Filter({ sections }: Props) {
     const params = new URLSearchParams(searchParams);
     params.set("filter", JSON.stringify(query));
     params.delete("page");
-    router.replace(`${pathname}?${params.toString()}`, undefined, {
-      shallow: false,
-    });
+    router.replace(`${pathname}?${params.toString()}`);
   };
 
   useEffect(() => {

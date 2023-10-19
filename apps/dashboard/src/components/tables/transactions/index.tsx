@@ -6,7 +6,7 @@ import { BottomBar } from "./bottom-bar";
 
 const pageSize = 50;
 
-export async function Table({ filter, page }) {
+export async function Table({ filter, page, sort }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
   const supabase = await getSupabaseServerClient();
@@ -14,6 +14,7 @@ export async function Table({ filter, page }) {
     to,
     from,
     filter,
+    sort,
   });
 
   if (!data) {

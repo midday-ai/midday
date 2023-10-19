@@ -1,32 +1,10 @@
+import { NumberFormat } from "@/components/number-format";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
-
-function FormattedAmount({ currency, amount }) {
-  if (!currency || !amount) {
-    return null;
-  }
-
-  const formattedAmount = new Intl.NumberFormat("de-DE", {
-    style: "currency",
-    currency,
-  }).format(amount);
-
-  return (
-    <span className={cn(amount > 0 && "text-[#00E547]")}>
-      {formattedAmount}
-    </span>
-  );
-}
+import { DataTableHeader } from "./data-table-header";
 
 function AssignedUser({ user }) {
   return (
@@ -61,7 +39,11 @@ export function DataTableRow({ data }) {
         {data.date && format(new Date(data.date), "E, LLL d, y")}
       </TableCell>
       <TableCell className="w-[250px]">
-        <FormattedAmount currency={data.currency} amount={data.amount} />
+        <NumberFormat
+          amount={data.amount}
+          currency={data.currency}
+          className={data.amount > 0 && "text-[#00E547]"}
+        />
       </TableCell>
       <TableCell className="w-[280px]">{data.method}</TableCell>
       <TableCell className="w-[180px]">
@@ -71,33 +53,6 @@ export function DataTableRow({ data }) {
         {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
       </TableCell>
     </TableRow>
-  );
-}
-
-export function DataTableHeader() {
-  return (
-    <TableHeader className="sticky -top-[1px] z-10 ">
-      <TableRow>
-        <TableHead className="w-[380px] backdrop-filter backdrop-blur-lg bg-background/80">
-          To/From
-        </TableHead>
-        <TableHead className="w-[170px] backdrop-filter backdrop-blur-lg bg-background/80">
-          Date
-        </TableHead>
-        <TableHead className="w-[250px] backdrop-filter backdrop-blur-lg bg-background/80">
-          Amount
-        </TableHead>
-        <TableHead className="w-[280px] backdrop-filter backdrop-blur-lg bg-background/80">
-          Method
-        </TableHead>
-        <TableHead className="w-[180px] backdrop-filter backdrop-blur-lg bg-background/80">
-          Assigned
-        </TableHead>
-        <TableHead className="backdrop-filter backdrop-blur-lg bg-background/80">
-          Status
-        </TableHead>
-      </TableRow>
-    </TableHeader>
   );
 }
 

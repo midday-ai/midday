@@ -1,5 +1,6 @@
 "use client";
 
+import { NumberFormat } from "@/components/number-format";
 import { Pagination } from "@/components/pagination";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -13,11 +14,6 @@ export function BottomBar({
   hasNextPage,
   currency,
 }) {
-  const formattedAmount = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(totalAmount);
-
   return (
     <AnimatePresence>
       <motion.div
@@ -30,7 +26,7 @@ export function BottomBar({
             <span className="text-sm">Total</span>
           </div>
           <div>
-            <span className="text-sm font-medium">{formattedAmount}</span>
+            <NumberFormat amount={totalAmount} currency={currency} />
           </div>
           <div>
             <Pagination

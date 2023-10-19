@@ -20,6 +20,7 @@ export default async function Transactions({
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
   const filter =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
+  const sort = searchParams?.sort?.split(":");
 
   return (
     <>
@@ -29,7 +30,7 @@ export default async function Transactions({
       </div>
 
       <Suspense fallback={<Loading />}>
-        <Table filter={filter} page={page} />
+        <Table filter={filter} page={page} sort={sort} />
       </Suspense>
     </>
   );
