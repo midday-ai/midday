@@ -142,4 +142,18 @@ export const Icons = {
       />
     </svg>
   ),
+  EmptyState: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={40}
+      height={40}
+      fill="none"
+      {...props}
+    >
+      <path
+        fill="#fff"
+        d="M23.333 16.667H5V20h18.333v-3.333Zm0-6.667H5v3.333h18.333V10ZM5 26.667h11.667v-3.334H5v3.334Zm19 10 4.333-4.334 4.334 4.334L35 34.333 30.667 30 35 25.667l-2.333-2.334-4.334 4.334L24 23.333l-2.333 2.334L26 30l-4.333 4.333L24 36.667Z"
+      />
+    </svg>
+  ),
 };
