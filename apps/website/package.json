@@ -17,8 +17,7 @@
     "next": "^13.5.5",
     "next-international": "^1.1.3",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "zustand": "^4.4.3"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
