@@ -1,9 +1,13 @@
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/transactions/data-table";
-import { getPagination, getTransactions } from "@midday/supabase/queries";
+import {
+  getPagination,
+  getTeamBankAccounts,
+  getTransactions,
+} from "@midday/supabase/queries";
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
 import { BottomBar } from "./bottom-bar";
-import { EmptyState } from "./empty-state";
+import { NoAccountConnected, NoResults } from "./empty-states";
 
 const pageSize = 50;
 
@@ -19,7 +23,13 @@ export async function Table({ filter, page, sort }) {
   });
 
   if (!data) {
-    return <EmptyState />;
+    const { data: bankAccounts } = await getTeamBankAccounts(supabase);
+
+    if (!bankAccounts?.length) {
+      return <NoAccountConnected />;
+    }
+
+    return <NoResults />;
   }
 
   const hasNextPage = meta.count + 1 * page > pageSize;

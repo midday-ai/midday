@@ -142,7 +142,7 @@ export const Icons = {
       />
     </svg>
   ),
-  EmptyState: (props: any) => (
+  Transactions2: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width={40}
@@ -151,8 +151,22 @@ export const Icons = {
       {...props}
     >
       <path
-        fill="#fff"
+        fill="currentColor"
         d="M23.333 16.667H5V20h18.333v-3.333Zm0-6.667H5v3.333h18.333V10ZM5 26.667h11.667v-3.334H5v3.334Zm19 10 4.333-4.334 4.334 4.334L35 34.333 30.667 30 35 25.667l-2.333-2.334-4.334 4.334L24 23.333l-2.333 2.334L26 30l-4.333 4.333L24 36.667Z"
+      />
+    </svg>
+  ),
+  Bank: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={36}
+      height={37}
+      fill="none"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M33.167 36.833 30.333 34h-28.5v-3.333H27L19.334 23v4.333H16v-7.666l-7.333-7.334H1.834V9l2.333-1.167L.333 4 2.5 1.833l32.834 32.834-2.167 2.166ZM6 15.667v11.666h3.334V15.667H6ZM17.667 4.5 26.333 9h-12.5l3.334 3.333H33.5V9L17.667.667l-8 4.166 2.5 2.5 5.5-2.833Zm11.666 20v-8.833H26v5.5l3.334 3.333Z"
       />
     </svg>
   ),

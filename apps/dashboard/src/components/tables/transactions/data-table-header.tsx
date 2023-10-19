@@ -41,13 +41,10 @@ export function DataTableHeader() {
   );
 
   return (
-    <TableHeader className="sticky -top-[1px] z-10 ">
+    <TableHeader className="sticky -top-[1px] z-10">
       <TableRow>
         {headers.map((header) => (
-          <TableHead
-            key={header.id}
-            className="backdrop-filter backdrop-blur-lg bg-background/80"
-          >
+          <TableHead key={header.id} className="bg-background">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
