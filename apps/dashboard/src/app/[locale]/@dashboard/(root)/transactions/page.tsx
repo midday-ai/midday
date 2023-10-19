@@ -23,7 +23,7 @@ export default async function Transactions({
 
   return (
     <>
-      <div className="flex justify-between sticky top-0 z-10 py-6 backdrop-filter backdrop-blur-lg bg-background/80">
+      <div className="flex justify-between py-6">
         <Filter sections={sections} />
         <ExportButton />
       </div>

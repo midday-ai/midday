@@ -76,14 +76,26 @@ export function DataTableRow({ data }) {
 
 export function DataTableHeader() {
   return (
-    <TableHeader>
+    <TableHeader className="sticky -top-[1px] z-10 ">
       <TableRow>
-        <TableHead className="w-[380px]">To/From</TableHead>
-        <TableHead className="w-[170px]">Date</TableHead>
-        <TableHead className="w-[250px]">Amount</TableHead>
-        <TableHead className="w-[280px]">Method</TableHead>
-        <TableHead className="w-[180px]">Assigned</TableHead>
-        <TableHead>Status</TableHead>
+        <TableHead className="w-[380px] backdrop-filter backdrop-blur-lg bg-background/80">
+          To/From
+        </TableHead>
+        <TableHead className="w-[170px] backdrop-filter backdrop-blur-lg bg-background/80">
+          Date
+        </TableHead>
+        <TableHead className="w-[250px] backdrop-filter backdrop-blur-lg bg-background/80">
+          Amount
+        </TableHead>
+        <TableHead className="w-[280px] backdrop-filter backdrop-blur-lg bg-background/80">
+          Method
+        </TableHead>
+        <TableHead className="w-[180px] backdrop-filter backdrop-blur-lg bg-background/80">
+          Assigned
+        </TableHead>
+        <TableHead className="backdrop-filter backdrop-blur-lg bg-background/80">
+          Status
+        </TableHead>
       </TableRow>
     </TableHeader>
   );
@@ -91,15 +103,13 @@ export function DataTableHeader() {
 
 export function DataTable({ data }: ItemsProps) {
   return (
-    <div className="rounded-md border">
-      <Table>
-        <DataTableHeader />
-        <TableBody>
-          {data?.map((row) => (
-            <DataTableRow key={row.id} data={row} />
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <Table>
+      <DataTableHeader />
+      <TableBody>
+        {data?.map((row) => (
+          <DataTableRow key={row.id} data={row} />
+        ))}
+      </TableBody>
+    </Table>
   );
 }

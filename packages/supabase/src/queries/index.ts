@@ -81,14 +81,16 @@ export async function getTransactions(
 
   const query = supabase
     .from("transactions")
-    .select(`
+    .select(
+      `
       *,
       account:bank_account_id(*),
       assigned:assigned_id(*)
-    `)
+    `,
+      { count: "exact" },
+    )
     .eq("team_id", userData?.team_id)
-    .order("date", { ascending: false })
-    .range(from, to);
+    .order("date", { ascending: false });
 
   if (date?.from && date?.to) {
     query.gte("date", date.from);
@@ -120,5 +122,22 @@ export async function getTransactions(
     query.not("attachment", "is", null);
   }
 
-  return query;
+  const { data, count } = await query.range(from, to);
+
+  // Only calculate total amount when a fitler is applied
+  const totalAmount = filter
+    ? (await query.range(0, 10000000))?.data?.reduce(
+        (amount, item) => item.amount + amount,
+        0,
+      )
+    : 0;
+
+  return {
+    meta: {
+      count,
+      totalAmount,
+      currency: data?.at(0)?.currency,
+    },
+    data,
+  };
 }
