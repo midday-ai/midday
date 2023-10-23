@@ -1,3 +1,5 @@
+import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { getTransaction } from "@midday/supabase/queries";
 import {
   Accordion,
   AccordionContent,
@@ -14,22 +16,74 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { Skeleton } from "@midday/ui/skeleton";
+import { cn } from "@midday/ui/utils";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { NumberFormat } from "./number-format";
 
-export function TransactionDetails() {
+export function TransactionDetails({ transactionId, onClose }) {
+  const supabase = getSupabaseBrowserClient();
+  const [data, setData] = useState();
+  const [isLoading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+
+    async function fetchData() {
+      const result = await getTransaction(supabase, transactionId);
+
+      if (result) {
+        setData(result.data);
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [transactionId, supabase]);
+
   return (
     <div className="border h-full w-full p-6">
       <div className="sticky top-12">
         <div className="flex justify-between mb-4">
-          <div>
-            <span className="text-[#606060] text-xs">Mar 2, 2023</span>
-            <h2 className="mt-4 mb-3">Lemsqzy Screenstudio</h2>
+          <div className="flex-1 flex-col">
+            {isLoading ? (
+              <Skeleton className="w-[10%] h-[14px] rounded-full mt-1 mb-6" />
+            ) : (
+              <span className="text-[#606060] text-xs">
+                {format(new Date(data.date), "MMM d")}
+              </span>
+            )}
+
+            <h2 className="mt-4 mb-3">
+              {isLoading ? (
+                <Skeleton className="w-[35%] h-[22px] rounded-full mb-4" />
+              ) : (
+                data?.name
+              )}
+            </h2>
             <div className="flex flex-col">
-              <span className="text-4xl">€ 299.50</span>
-              <span className="text-[#606060]">vat. € 49.50</span>
+              {isLoading ? (
+                <Skeleton className="w-[50%] h-[32px] rounded-full mb-1" />
+              ) : (
+                <NumberFormat
+                  amount={data.amount}
+                  currency={data.currency}
+                  className={cn(
+                    "text-4xl",
+                    data.amount > 0 && "text-[#00E547]",
+                  )}
+                />
+              )}
             </div>
           </div>
 
-          <Button variant="ghost" size="icon" className="p-0 m-0 w-4 h-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="p-0 m-0 w-4 h-4"
+            onClick={onClose}
+          >
             <Icons.Close className="w-4 h-4" />
           </Button>
         </div>

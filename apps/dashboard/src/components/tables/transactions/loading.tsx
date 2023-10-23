@@ -4,10 +4,17 @@ import { DataTableCell, Row } from "./data-table-row";
 
 const data = [...Array(25)].map((_, i) => ({ id: i.toString() }));
 
-export function Loading() {
+type Props = {
+  collapsed: boolean;
+};
+
+export function Loading({ collapsed }) {
   return (
-    <div className="border">
-      <DataTableHeader />
+    <div
+      className="border"
+      style={{ width: collapsed ? "calc(100vw - 800px)" : "100%" }}
+    >
+      <DataTableHeader collapsed={collapsed} />
 
       {data?.map((row) => (
         <Row className="h-[45px]" key={row.id}>
@@ -20,15 +27,19 @@ export function Loading() {
           <DataTableCell className="w-[200px]">
             <Skeleton className="h-3.5 w-[50%]" />
           </DataTableCell>
-          <DataTableCell className="w-[284px]">
-            <Skeleton className="h-3.5 w-[40%]" />
-          </DataTableCell>
-          <DataTableCell className="w-[284px]">
-            <div className="flex items-center space-x-2 w-[80%]">
-              <Skeleton className="h-5 w-5 rounded-full" />
-              <Skeleton className="h-3.5 w-[70%]" />
-            </div>
-          </DataTableCell>
+          {!collapsed && (
+            <>
+              <DataTableCell className="w-[284px]">
+                <Skeleton className="h-3.5 w-[40%]" />
+              </DataTableCell>
+              <DataTableCell className="w-[284px]">
+                <div className="flex items-center space-x-2 w-[80%]">
+                  <Skeleton className="h-5 w-5 rounded-full" />
+                  <Skeleton className="h-3.5 w-[70%]" />
+                </div>
+              </DataTableCell>
+            </>
+          )}
           <DataTableCell>
             <Skeleton className="h-3.5 w-[15px]" />
           </DataTableCell>

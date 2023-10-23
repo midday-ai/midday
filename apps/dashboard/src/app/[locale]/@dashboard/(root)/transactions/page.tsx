@@ -18,6 +18,7 @@ export default async function Transactions({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
+  const transactionId = searchParams?.id;
   const filter =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
   const sort = searchParams?.sort?.split(":");
@@ -29,7 +30,7 @@ export default async function Transactions({
         <ExportButton />
       </div>
 
-      <Suspense fallback={<Loading />}>
+      <Suspense fallback={<Loading collapsed={Boolean(transactionId)} />}>
         <Table filter={filter} page={page} sort={sort} />
       </Suspense>
     </>

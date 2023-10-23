@@ -152,3 +152,15 @@ export async function getTransactions(
     data,
   };
 }
+
+export async function getTransaction(supabase: Client, id: string) {
+  return supabase
+    .from("transactions")
+    .select(`
+      *,
+      account:bank_account_id(*),
+      assigned:assigned_id(*)
+    `)
+    .eq("id", id)
+    .single();
+}

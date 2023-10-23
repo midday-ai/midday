@@ -87,7 +87,7 @@ export function DataTableHeader({ collapsed }: Props) {
         >
           <DataTableCell>
             <Button
-              className="px-4 py-2 hover:bg-transparent space-x-2"
+              className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
               onClick={() => createSortQuery("method")}
             >
@@ -111,7 +111,7 @@ export function DataTableHeader({ collapsed }: Props) {
         >
           <DataTableCell>
             <Button
-              className="px-4 py-2 hover:bg-transparent space-x-2"
+              className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
               onClick={() => createSortQuery("assigned")}
             >

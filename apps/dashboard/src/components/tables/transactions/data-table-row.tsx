@@ -31,10 +31,13 @@ export function DataTableCell({ children, className }) {
   );
 }
 
-export function Row({ children, onSelect }) {
+export function Row({ children, onSelect, selected }) {
   return (
     <div
-      className="flex border-b items-center h-[45px] hover:bg-secondary"
+      className={cn(
+        "flex border-b items-center h-[45px] hover:bg-secondary",
+        selected && "bg-secondary",
+      )}
       onClick={onSelect}
     >
       {children}
@@ -42,11 +45,11 @@ export function Row({ children, onSelect }) {
   );
 }
 
-export function DataTableRow({ collapsed, onSelect, data }) {
+export function DataTableRow({ collapsed, onSelect, data, selected }) {
   const fullfilled = data.attachment && data.vat;
 
   return (
-    <Row onSelect={onSelect}>
+    <Row onSelect={() => onSelect(data.id)} selected={selected}>
       <DataTableCell className="w-[100px]">
         {data.date && format(new Date(data.date), "MMM d")}
       </DataTableCell>
