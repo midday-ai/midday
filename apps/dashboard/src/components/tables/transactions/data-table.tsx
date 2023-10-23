@@ -87,7 +87,7 @@ export function DataTable({ data }: ItemsProps) {
         ))}
       </motion.div>
 
-      <AnimatePresence>
+      <AnimatePresence initial={false}>
         {transactionId && (
           <motion.div
             className="h-full w-[480px] absolute top-0 right-0 bottom-0"
