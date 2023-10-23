@@ -151,4 +151,32 @@ export const Icons = {
       />
     </svg>
   ),
+  Info: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={14}
+      height={14}
+      fill="none"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M6.333 5h1.333V3.667H6.333M7 12.333A5.34 5.34 0 0 1 1.666 7 5.34 5.34 0 0 1 7 1.667 5.34 5.34 0 0 1 12.333 7 5.34 5.34 0 0 1 7 12.333Zm0-12a6.667 6.667 0 1 0 0 13.334A6.667 6.667 0 0 0 7 .333Zm-.667 10h1.333v-4H6.333v4Z"
+      />
+    </svg>
+  ),
+  Close: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={14}
+      height={14}
+      fill="none"
+      {...props}
+    >
+      <path
+        fill="currentColor"
+        d="M14 1.41 12.59 0 7 5.59 1.41 0 0 1.41 5.59 7 0 12.59 1.41 14 7 8.41 12.59 14 14 12.59 8.41 7 14 1.41Z"
+      />
+    </svg>
+  ),
 };

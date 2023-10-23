@@ -38,7 +38,6 @@ export async function Table({ filter, page, sort }) {
     <>
       <DataTable data={data} />
       {hasFilters ? (
-        // NOTE: Spacer for bottom bar
         <div className="h-10" />
       ) : (
         <Pagination

@@ -113,12 +113,15 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
         key={month}
         variant="ghost"
         className={cn(
-          "!text-xs font-normal !rounded-none mb-2",
+          "!text-xs font-normal mb-2",
           isSelectedDate && buttonVariants({ variant: "default" }),
           isSelectedDate &&
             "!rounded-md hover:bg-primary hover:text-primary-foreground",
           isRange && buttonVariants({ variant: "secondary" }),
-          isRange && "hover:bg-secondary hover:text-secondary-foreground",
+          isRange &&
+            "hover:bg-secondary hover:text-secondary-foreground !rounded-none",
+          isStart && "!rounded-none !rounded-l-md",
+          isEnd && "!rounded-none !rounded-r-md",
         )}
         onClick={() => handleMonthClick(monthStart)}
       >

@@ -1,6 +1,7 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
+import { Toaster } from "@midday/ui/toaster";
 import { cn } from "@midday/ui/utils";
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
@@ -33,6 +34,7 @@ export default function Layout({ children }: { children: ReactElement }) {
           disableTransitionOnChange
         >
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -2,6 +2,13 @@
 
 import { NumberFormat } from "@/components/number-format";
 import { Pagination } from "@/components/pagination";
+import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 
 export function BottomBar({
@@ -21,9 +28,19 @@ export function BottomBar({
         animate={{ y: show ? 0 : 100 }}
         initial={{ y: 100 }}
       >
-        <div className="backdrop-filter backdrop-blur-lg flex h-12  bg-[#1A1A1A]/80 justify-between items-center flex px-4 border border-[#2C2C2C] rounded-lg">
-          <div>
+        <div className="backdrop-filter backdrop-blur-lg flex h-12 bg-[#1A1A1A]/80 justify-between items-center flex px-4 border border-[#2C2C2C] rounded-lg">
+          <div className="flex items-center space-x-2">
             <span className="text-sm">Total</span>
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Icons.Info className="text-[#606060]" />
+                </TooltipTrigger>
+                <TooltipContent sideOffset={30}>
+                  <p>Includes transactions from all pages of results.</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <div>
             <NumberFormat amount={totalAmount} currency={currency} />

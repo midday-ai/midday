@@ -1,20 +1,17 @@
 "use client";
+
 import { Button } from "@midday/ui/button";
-import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
+import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
+import { DataTableCell } from "./data-table-row";
 
-const headers = [
-  { id: "name", label: "To/From" },
-  { id: "date", label: "Date" },
-  { id: "amount", label: "Amount" },
-  { id: "method", label: "Method" },
-  { id: "assigned", label: "Assigned" },
-  { id: "attachment", label: "Status" },
-];
+type Props = {
+  collapsed?: boolean;
+};
 
-export function DataTableHeader() {
+export function DataTableHeader({ collapsed }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -37,31 +34,114 @@ export function DataTableHeader() {
 
       router.replace(`${pathname}?${params.toString()}`);
     },
-    [searchParams],
+    [searchParams, router, pathname],
   );
 
   return (
-    <TableHeader className="sticky -top-[1px] z-10">
-      <TableRow>
-        {headers.map((header) => (
-          <TableHead key={header.id} className="bg-background">
+    <div className="sticky -top-[1px] z-10 bg-background">
+      <div className="flex border-b items-center h-[45px] hover:bg-secondary">
+        <DataTableCell className="w-[100px]">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("date")}
+          >
+            <span>Date</span>
+            {"date" === column && value === "asc" && <ArrowDown size={16} />}
+            {"date" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </DataTableCell>
+
+        <DataTableCell className="w-[430px]">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("name")}
+          >
+            <span>Name</span>
+            {"name" === column && value === "asc" && <ArrowDown size={16} />}
+            {"name" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </DataTableCell>
+
+        <DataTableCell className="w-[200px]">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("amount")}
+          >
+            <span>Amount</span>
+            {"amount" === column && value === "asc" && <ArrowDown size={16} />}
+            {"amount" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </DataTableCell>
+
+        <motion.div
+          className="border-r"
+          initial={false}
+          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "20%" }}
+          transition={{
+            duration: 0.25,
+            ease: "easeInOut",
+          }}
+        >
+          <DataTableCell>
             <Button
-              className="p-0 hover:bg-transparent space-x-2"
+              className="px-4 py-2 hover:bg-transparent space-x-2"
               variant="ghost"
-              onClick={() => createSortQuery(header.id)}
+              onClick={() => createSortQuery("method")}
             >
-              <span>{header.label}</span>
-              {header.id === column && value === "asc" && (
+              <span>Method</span>
+              {"method" === column && value === "asc" && (
                 <ArrowDown size={16} />
               )}
+              {"method" === column && value === "desc" && <ArrowUp size={16} />}
+            </Button>
+          </DataTableCell>
+        </motion.div>
 
-              {header.id === column && value === "desc" && (
+        <motion.div
+          className="border-r"
+          initial={false}
+          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "20%" }}
+          transition={{
+            duration: 0.25,
+            ease: "easeInOut",
+          }}
+        >
+          <DataTableCell>
+            <Button
+              className="px-4 py-2 hover:bg-transparent space-x-2"
+              variant="ghost"
+              onClick={() => createSortQuery("assigned")}
+            >
+              <span>Assigned</span>
+              {"assigned" === column && value === "asc" && (
+                <ArrowDown size={16} />
+              )}
+              {"assigned" === column && value === "desc" && (
                 <ArrowUp size={16} />
               )}
             </Button>
-          </TableHead>
-        ))}
-      </TableRow>
-    </TableHeader>
+          </DataTableCell>
+        </motion.div>
+
+        <DataTableCell className="w-[100px]">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("attachment")}
+          >
+            <span>Status</span>
+            {"attachment" === column && value === "asc" && (
+              <ArrowDown size={16} />
+            )}
+            {"attachment" === column && value === "desc" && (
+              <ArrowUp size={16} />
+            )}
+          </Button>
+        </DataTableCell>
+      </div>
+    </div>
   );
 }

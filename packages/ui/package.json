@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
+  "module": "NodeNext",
+  "moduleResolution": "NodeNext",
   "files": [
     "index.ts",
     "tailwind.config.ts",
@@ -22,6 +24,10 @@
   "exports": {
     "./calendar": "./src/components/calendar.tsx",
     "./avatar": "./src/components/avatar.tsx",
+    "./toast": "./src/components/toast.tsx",
+    "./toaster": "./src/components/toaster.tsx",
+    "./use-toast": "./src/components/use-toast.tsx",
+    "./accordion": "./src/components/accordion.tsx",
     "./select": "./src/components/select.tsx",
     "./radio-group": "./src/components/radio-group.tsx",
     "./button": "./src/components/button.tsx",
@@ -38,12 +44,14 @@
     "./popover": "./src/components/popover.tsx",
     "./postcss": "./postcss.js",
     "./skeleton": "./src/components/skeleton.tsx",
+    "./tooltip": "./src/components/tooltip.tsx",
     "./tailwind.config": "./tailwind.config.ts",
     "./textarea": "./src/components/textarea.tsx",
     "./table": "./src/components/table.tsx",
     "./utils": "./src/utils"
   },
   "dependencies": {
+    "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -55,6 +63,8 @@
     "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tabs": "^1.0.4",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
