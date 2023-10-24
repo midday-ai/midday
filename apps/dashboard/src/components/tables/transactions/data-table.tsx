@@ -1,9 +1,12 @@
 "use client";
 
 import { TransactionDetails } from "@/components/transaction-details";
+import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQueryState } from "next-usequerystate";
-import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";
 
@@ -13,9 +16,13 @@ type Item = {
 
 type ItemsProps = {
   data: Item[];
+  teamId?: string;
 };
 
-export function DataTable({ data }: ItemsProps) {
+export function DataTable({ data, teamId }: ItemsProps) {
+  const ref = useRef(null);
+  const supabase = getSupabaseBrowserClient();
+  const router = useRouter();
   const [transactionId, setTransactionId] = useQueryState("id", {
     shallow: false, // TODO: Fix without this (redirect after mutation)
   });
@@ -27,6 +34,8 @@ export function DataTable({ data }: ItemsProps) {
   const handleOnClose = () => {
     setTransactionId(null);
   };
+
+  useOnClickOutside(ref, handleOnClose);
 
   useEffect(() => {
     const currentIndex = data.findIndex((row) => row.id === transactionId);
@@ -65,8 +74,30 @@ export function DataTable({ data }: ItemsProps) {
     };
   }, [handleOnClose, transactionId, data, setTransactionId]);
 
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime_transactions")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "transactions",
+          filter: `team_id=eq.${teamId}`,
+        },
+        () => {
+          router.refresh();
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, router, teamId]);
+
   return (
-    <div className="flex relative space-x-8 cursor-default">
+    <div className="flex relative space-x-8 cursor-default" ref={ref}>
       <motion.div
         className="border"
         initial={false}

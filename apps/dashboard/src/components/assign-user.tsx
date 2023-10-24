@@ -13,6 +13,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { startTransition, useEffect, useState } from "react";
 
 export function AssignUser({ id, selectedId, isLoading }) {
+  const [value, setValue] = useState();
   const supabase = getSupabaseBrowserClient();
   const [users, setUsers] = useState([]);
 
@@ -23,6 +24,10 @@ export function AssignUser({ id, selectedId, isLoading }) {
       });
     });
   };
+
+  useEffect(() => {
+    setValue(selectedId);
+  }, [selectedId]);
 
   useEffect(() => {
     async function getUsers() {
@@ -36,13 +41,16 @@ export function AssignUser({ id, selectedId, isLoading }) {
   return (
     <>
       <Label htmlFor="assign">Assign</Label>
-      {isLoading ? (
-        <Skeleton className="h-[36px] rounded-md" />
-      ) : (
-        <Select defaultValue={selectedId} onValueChange={handleOnValueChange}>
+
+      <div className="relative">
+        <Select value={value} onValueChange={handleOnValueChange}>
           <SelectTrigger id="assign" className="line-clamp-1 truncate">
-            <SelectValue placeholder="Select" />
+            {isLoading && (
+              <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-2.5 z-10" />
+            )}
+            <SelectValue placeholder={!isLoading && "Select"} />
           </SelectTrigger>
+
           <SelectContent>
             {users.map(({ user }) => (
               <SelectItem key={user.id} value={user.id}>
@@ -51,7 +59,7 @@ export function AssignUser({ id, selectedId, isLoading }) {
             ))}
           </SelectContent>
         </Select>
-      )}
+      </div>
     </>
   );
 }

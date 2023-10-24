@@ -4,7 +4,7 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useRouter } from "next/navigation";
 
-export function NoResults() {
+export function NoResults({ hasFilters }) {
   const router = useRouter();
 
   return (
@@ -18,9 +18,14 @@ export function NoResults() {
           </p>
         </div>
 
-        <Button variant="outline" onClick={() => router.back()}>
-          Go back
-        </Button>
+        {hasFilters && (
+          <Button
+            variant="outline"
+            onClick={() => router.push("/transactions")}
+          >
+            Clear filters
+          </Button>
+        )}
       </div>
     </div>
   );

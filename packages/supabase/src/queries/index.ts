@@ -93,12 +93,13 @@ export async function getTransactions(
     `,
       { count: "exact" },
     )
-    .eq("team_id", userData?.team_id)
-    .order("date", { ascending: false });
+    .eq("team_id", userData?.team_id);
 
   if (sort) {
     const [column, value] = sort;
     query.order(column, { ascending: value === "asc" });
+  } else {
+    query.order("date", { ascending: false });
   }
 
   if (date?.from && date?.to) {

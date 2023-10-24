@@ -4,6 +4,7 @@ import {
   getPagination,
   getTeamBankAccounts,
   getTransactions,
+  getUserDetails,
 } from "@midday/supabase/queries";
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
 import { BottomBar } from "./bottom-bar";
@@ -15,6 +16,7 @@ export async function Table({ filter, page, sort }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
   const supabase = await getSupabaseServerClient();
+  const { data: userData } = await getUserDetails(supabase);
   const { data, meta } = await getTransactions(supabase, {
     to,
     from,
@@ -22,21 +24,21 @@ export async function Table({ filter, page, sort }) {
     sort,
   });
 
-  if (!data) {
+  if (!data?.length) {
     const { data: bankAccounts } = await getTeamBankAccounts(supabase);
 
     if (!bankAccounts?.length) {
       return <NoAccountConnected />;
     }
 
-    return <NoResults />;
+    return <NoResults hasFilters={hasFilters} />;
   }
 
   const hasNextPage = meta.count + 1 * page > pageSize;
 
   return (
     <>
-      <DataTable data={data} />
+      <DataTable data={data} teamId={userData?.team_id} />
       {hasFilters ? (
         <div className="h-10" />
       ) : (
@@ -49,16 +51,18 @@ export async function Table({ filter, page, sort }) {
           className="mt-4"
         />
       )}
-      <BottomBar
-        show={hasFilters}
-        page={page}
-        count={meta.count}
-        hasNextPage={hasNextPage}
-        to={to}
-        from={from}
-        totalAmount={meta.totalAmount}
-        currency={meta.currency}
-      />
+      {meta.count > 0 && (
+        <BottomBar
+          show={hasFilters}
+          page={page}
+          count={meta.count}
+          hasNextPage={hasNextPage}
+          to={to}
+          from={from}
+          totalAmount={meta.totalAmount}
+          currency={meta.currency}
+        />
+      )}
     </>
   );
 }

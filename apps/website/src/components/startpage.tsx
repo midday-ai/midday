@@ -62,7 +62,7 @@ export function StartPage() {
           </Link>
         </header>
 
-        <div className="text-center mt-20">
+        <div className="text-center mt-2 lg:mt-20">
           <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
             <h1 className="font-medium pb-1 text-5xl">{t("title")}</h1>
           </div>

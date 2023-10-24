@@ -19,7 +19,7 @@ export function Loading({ collapsed }) {
       {data?.map((row) => (
         <Row className="h-[45px]" key={row.id}>
           <DataTableCell className="w-[100px]">
-            <Skeleton className="h-3.5 w-[40%]" />
+            <Skeleton className="h-3.5 w-[60%]" />
           </DataTableCell>
           <DataTableCell className="w-[430px]">
             <Skeleton className="h-3.5 w-[70%]" />

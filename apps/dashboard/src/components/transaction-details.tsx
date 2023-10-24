@@ -12,7 +12,6 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { useEffect, useRef, useState } from "react";
-import { useOnClickOutside } from "usehooks-ts";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { Note } from "./note";
@@ -20,7 +19,6 @@ import { NumberFormat } from "./number-format";
 import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
-  const ref = useRef(null);
   const supabase = getSupabaseBrowserClient();
   const [data, setData] = useState();
   const [isLoading, setLoading] = useState(true);
@@ -40,13 +38,8 @@ export function TransactionDetails({ transactionId, onClose }) {
     fetchData();
   }, [transactionId, supabase]);
 
-  useOnClickOutside(ref, onClose);
-
   return (
-    <div
-      className="border h-full min-h-[calc(100vh-150px)] w-full p-6"
-      ref={ref}
-    >
+    <div className="border h-full min-h-[calc(100vh-150px)] w-full p-6">
       <div className="sticky top-12">
         <div className="flex justify-between mb-4">
           <div className="flex-1 flex-col">
@@ -104,7 +97,6 @@ export function TransactionDetails({ transactionId, onClose }) {
                 <div className="grid gap-2 w-full">
                   <AssignUser
                     isLoading={isLoading}
-                    key={data?.id}
                     id={transactionId}
                     selectedId={data?.assigned?.id}
                   />
@@ -112,7 +104,6 @@ export function TransactionDetails({ transactionId, onClose }) {
                 <div className="grid gap-2 w-full">
                   <SelectVat
                     isLoading={isLoading}
-                    key={data?.id}
                     id={transactionId}
                     selectedId={data?.vat ?? undefined}
                   />

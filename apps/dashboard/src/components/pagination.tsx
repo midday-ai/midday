@@ -4,13 +4,14 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
 
 type Props = {
   page: number;
   className?: string;
   hasNextPage: boolean;
   count: number;
+  to: number;
+  from: number;
 };
 
 export function Pagination({
@@ -27,20 +28,17 @@ export function Pagination({
   const formattedFrom = from + 1;
   const formattedTo = to + 1;
 
-  const createPaginationQuery = useCallback(
-    (page: number) => {
-      const params = new URLSearchParams(searchParams);
+  const createPaginationQuery = (page: number) => {
+    const params = new URLSearchParams(searchParams);
 
-      if (page > 0) {
-        params.set("page", String(page));
-      } else {
-        params.delete("page");
-      }
+    if (page > 0) {
+      params.set("page", String(page));
+    } else {
+      params.delete("page");
+    }
 
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [searchParams],
-  );
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <div className={cn(className, "flex items-center space-x-4 justify-end")}>
