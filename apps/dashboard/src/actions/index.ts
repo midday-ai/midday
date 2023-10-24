@@ -6,8 +6,10 @@ import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
 import {
   createTeamBankAccounts,
   createTransactions,
+  updateTransaction,
 } from "@midday/supabase/mutations";
 import { capitalCase } from "change-case";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 const baseUrl = "https://api.resend.com";
 
@@ -91,4 +93,10 @@ export async function initialTransactionsSync(ids: string[]) {
 export async function createTeamBankAccountsAction(accounts) {
   const supabase = await getSupabaseServerActionClient();
   await createTeamBankAccounts(supabase, accounts);
+}
+
+export async function updateTransactionAction(id: string, data: any) {
+  revalidateTag("transactions");
+  const supabase = await getSupabaseServerActionClient();
+  await updateTransaction(supabase, id, data);
 }

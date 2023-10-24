@@ -8,19 +8,14 @@ import {
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Label } from "@midday/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { useEffect, useState } from "react";
+import { AssignUser } from "./assign-user";
+import { Note } from "./note";
 import { NumberFormat } from "./number-format";
+import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
   const supabase = getSupabaseBrowserClient();
@@ -51,7 +46,7 @@ export function TransactionDetails({ transactionId, onClose }) {
               <Skeleton className="w-[10%] h-[14px] rounded-full mt-1 mb-6" />
             ) : (
               <span className="text-[#606060] text-xs">
-                {format(new Date(data.date), "MMM d")}
+                {data?.date && format(new Date(data.date), "MMM d")}
               </span>
             )}
 
@@ -67,11 +62,11 @@ export function TransactionDetails({ transactionId, onClose }) {
                 <Skeleton className="w-[50%] h-[32px] rounded-full mb-1" />
               ) : (
                 <NumberFormat
-                  amount={data.amount}
-                  currency={data.currency}
+                  amount={data?.amount}
+                  currency={data?.currency}
                   className={cn(
                     "text-4xl",
-                    data.amount > 0 && "text-[#00E547]",
+                    data?.amount > 0 && "text-[#00E547]",
                   )}
                 />
               )}
@@ -99,31 +94,18 @@ export function TransactionDetails({ transactionId, onClose }) {
 
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <div className="grid gap-2 w-full">
-                  <Label htmlFor="assign">Assign</Label>
-                  <Select defaultValue="1">
-                    <SelectTrigger
-                      id="assign"
-                      className="line-clamp-1 truncate"
-                    >
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">Pontus Abrahamsson</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <AssignUser
+                    key={data?.id}
+                    id={transactionId}
+                    selectedId={data?.assigned?.id}
+                  />
                 </div>
                 <div className="grid gap-2 w-full">
-                  <Label htmlFor="tax">Tax Rate</Label>
-                  <Select>
-                    <SelectTrigger id="tax" className="line-clamp-1 truncate">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">25%</SelectItem>
-                      <SelectItem value="2">12%</SelectItem>
-                      <SelectItem value="3">7%</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <SelectVat
+                    key={data?.id}
+                    id={transactionId}
+                    selectedId={data?.vat ?? undefined}
+                  />
                 </div>
               </div>
             </AccordionContent>
@@ -159,7 +141,9 @@ export function TransactionDetails({ transactionId, onClose }) {
 
           <AccordionItem value="note">
             <AccordionTrigger>Note</AccordionTrigger>
-            <AccordionContent>Note</AccordionContent>
+            <AccordionContent>
+              <Note defaultValue={data?.note} />
+            </AccordionContent>
           </AccordionItem>
         </Accordion>
       </div>

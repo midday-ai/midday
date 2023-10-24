@@ -16,7 +16,9 @@ type ItemsProps = {
 };
 
 export function DataTable({ data }: ItemsProps) {
-  const [transactionId, setTransactionId] = useQueryState("id");
+  const [transactionId, setTransactionId] = useQueryState("id", {
+    shallow: false,
+  });
 
   const handleOnSelect = (id: string) => {
     setTransactionId(id);

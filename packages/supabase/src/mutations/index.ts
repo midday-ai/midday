@@ -33,3 +33,16 @@ export async function createTransactions(supabase: Client, transactions) {
 
   return data;
 }
+
+export async function updateTransaction(
+  supabase: Client,
+  id: string,
+  data: any,
+) {
+  // TODO: Fix RLS
+  try {
+    await supabase.from("transactions").update(data).eq("id", id);
+  } catch (err) {
+    console.log(err);
+  }
+}

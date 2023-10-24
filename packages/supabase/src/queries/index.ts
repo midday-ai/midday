@@ -43,16 +43,16 @@ export async function getTeamBankAccounts(supabase: Client) {
     .eq("team_id", userData?.team_id);
 }
 
-export async function getUserTeamMembers(supabase: Client) {
+export async function getTeamMembers(supabase: Client) {
   const { data: userData } = await getUserDetails(supabase);
 
   const { data } = await supabase
-    .from("teams")
+    .from("users_on_team")
     .select(`
-      *,
-      members(*)
+      id,
+      user:users(id,full_name)
     `)
-    .eq("id", userData?.team_id);
+    .eq("team_id", userData?.team_id);
 
   return data;
 }
@@ -93,13 +93,12 @@ export async function getTransactions(
     `,
       { count: "exact" },
     )
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", userData?.team_id)
+    .order("date", { ascending: true });
 
   if (sort) {
     const [column, value] = sort;
     query.order(column, { ascending: value === "asc" });
-  } else {
-    query.order("date", { ascending: false });
   }
 
   if (date?.from && date?.to) {

@@ -9,10 +9,12 @@ import { motion } from "framer-motion";
 
 function AssignedUser({ user }) {
   return (
-    <div className="flex space-x-2 w-[120px] px-4 py-2">
-      <Avatar className="h-5 w-5">
-        <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
-      </Avatar>
+    <div className="flex space-x-2">
+      {user?.avatar_url && (
+        <Avatar className="h-5 w-5">
+          <AvatarImage src={user.avatar_url} alt={user?.full_name} />
+        </Avatar>
+      )}
       <span className="truncate">{user?.full_name.split(" ").at(0)}</span>
     </div>
   );
@@ -85,8 +87,8 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
           ease: "easeInOut",
         }}
       >
-        <DataTableCell>
-          <AssignedUser user={data.user} />
+        <DataTableCell className="w-[120px]">
+          <AssignedUser user={data.assigned} />
         </DataTableCell>
       </motion.div>
 
