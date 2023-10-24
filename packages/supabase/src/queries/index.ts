@@ -94,7 +94,7 @@ export async function getTransactions(
       { count: "exact" },
     )
     .eq("team_id", userData?.team_id)
-    .order("date", { ascending: true });
+    .order("date", { ascending: false });
 
   if (sort) {
     const [column, value] = sort;

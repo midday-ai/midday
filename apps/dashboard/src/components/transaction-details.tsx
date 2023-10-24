@@ -11,13 +11,16 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useOnClickOutside } from "usehooks-ts";
 import { AssignUser } from "./assign-user";
+import { Attachments } from "./attachments";
 import { Note } from "./note";
 import { NumberFormat } from "./number-format";
 import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
+  const ref = useRef(null);
   const supabase = getSupabaseBrowserClient();
   const [data, setData] = useState();
   const [isLoading, setLoading] = useState(true);
@@ -37,8 +40,13 @@ export function TransactionDetails({ transactionId, onClose }) {
     fetchData();
   }, [transactionId, supabase]);
 
+  useOnClickOutside(ref, onClose);
+
   return (
-    <div className="border h-full min-h-[calc(100vh-150px)] w-full p-6">
+    <div
+      className="border h-full min-h-[calc(100vh-150px)] w-full p-6"
+      ref={ref}
+    >
       <div className="sticky top-12">
         <div className="flex justify-between mb-4">
           <div className="flex-1 flex-col">
@@ -95,6 +103,7 @@ export function TransactionDetails({ transactionId, onClose }) {
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <div className="grid gap-2 w-full">
                   <AssignUser
+                    isLoading={isLoading}
                     key={data?.id}
                     id={transactionId}
                     selectedId={data?.assigned?.id}
@@ -102,6 +111,7 @@ export function TransactionDetails({ transactionId, onClose }) {
                 </div>
                 <div className="grid gap-2 w-full">
                   <SelectVat
+                    isLoading={isLoading}
                     key={data?.id}
                     id={transactionId}
                     selectedId={data?.vat ?? undefined}
@@ -114,35 +124,14 @@ export function TransactionDetails({ transactionId, onClose }) {
           <AccordionItem value="attachment">
             <AccordionTrigger>Attachment</AccordionTrigger>
             <AccordionContent>
-              <div className="w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1">
-                <p className="text-xs">
-                  Drop your files here, or{" "}
-                  <span className="underline underline-offset-1">
-                    click to browse.
-                  </span>
-                </p>
-                <p className="text-xs text-dark-gray">3MB file limit.</p>
-              </div>
-
-              <ul className="mt-4">
-                <li className="flex items-center space-x-4">
-                  <img
-                    className="rounded-md"
-                    alt=""
-                    src="https://sfimednikka.files.wordpress.com/2014/10/skc3a4rmavbild-2014-10-23-kl-09-54-01.png"
-                    width={40}
-                    height={40}
-                  />
-                  <span>receipt.jpeg</span>
-                </li>
-              </ul>
+              <Attachments id={data?.id} />
             </AccordionContent>
           </AccordionItem>
 
           <AccordionItem value="note">
             <AccordionTrigger>Note</AccordionTrigger>
             <AccordionContent>
-              <Note defaultValue={data?.note} />
+              <Note id={transactionId} defaultValue={data?.note} />
             </AccordionContent>
           </AccordionItem>
         </Accordion>

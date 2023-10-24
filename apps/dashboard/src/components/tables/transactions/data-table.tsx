@@ -17,7 +17,7 @@ type ItemsProps = {
 
 export function DataTable({ data }: ItemsProps) {
   const [transactionId, setTransactionId] = useQueryState("id", {
-    shallow: false,
+    shallow: false, // TODO: Fix without this (redirect after mutation)
   });
 
   const handleOnSelect = (id: string) => {

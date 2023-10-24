@@ -1,6 +1,20 @@
-import { Textarea } from "@midday/ui/textarea";
+"use client";
 
-export function Note({ defaultValue }) {
+import { updateTransactionAction } from "@/actions";
+import { Textarea } from "@midday/ui/textarea";
+import { startTransition, useState } from "react";
+
+export function Note({ id, defaultValue }) {
+  const [value, setValue] = useState(defaultValue);
+
+  const handleOnBlur = () => {
+    startTransition(() => {
+      updateTransactionAction(id, {
+        note: value,
+      });
+    });
+  };
+
   return (
     <Textarea
       name="feedback"
@@ -9,13 +23,8 @@ export function Note({ defaultValue }) {
       autoFocus
       placeholder="Note"
       className="min-h-[100px] resize-none"
-      // onChange={(evt) => setValue(evt.target.value)}
+      onBlur={handleOnBlur}
+      onChange={(evt) => setValue(evt.target.value)}
     />
   );
-
-  //   <div className="mt-1 flex items-center justify-end">
-  {
-    /* <SubmitButton /> */
-  }
-  //   </div>
 }

@@ -25,6 +25,7 @@
     "./middleware-client": "./src/client/middleware-client.ts",
     "./server-client": "./src/client/server-client.ts",
     "./mutations": "./src/mutations/index.ts",
-    "./queries": "./src/queries/index.ts"
+    "./queries": "./src/queries/index.ts",
+    "./storage": "./src/utils/storage.ts"
   }
 }

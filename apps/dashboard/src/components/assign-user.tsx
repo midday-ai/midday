@@ -9,9 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { Skeleton } from "@midday/ui/skeleton";
 import { startTransition, useEffect, useState } from "react";
 
-export function AssignUser({ id, selectedId }) {
+export function AssignUser({ id, selectedId, isLoading }) {
   const supabase = getSupabaseBrowserClient();
   const [users, setUsers] = useState([]);
 
@@ -35,18 +36,22 @@ export function AssignUser({ id, selectedId }) {
   return (
     <>
       <Label htmlFor="assign">Assign</Label>
-      <Select defaultValue={selectedId} onValueChange={handleOnValueChange}>
-        <SelectTrigger id="assign" className="line-clamp-1 truncate">
-          <SelectValue placeholder="Select" />
-        </SelectTrigger>
-        <SelectContent>
-          {users.map(({ user }) => (
-            <SelectItem key={user.id} value={user.id}>
-              {user.full_name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {isLoading ? (
+        <Skeleton className="h-[36px] rounded-md" />
+      ) : (
+        <Select defaultValue={selectedId} onValueChange={handleOnValueChange}>
+          <SelectTrigger id="assign" className="line-clamp-1 truncate">
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
+          <SelectContent>
+            {users.map(({ user }) => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.full_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </>
   );
 }
