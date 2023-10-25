@@ -1,7 +1,7 @@
 "use client";
 
-import { NumberFormat } from "@/components/number-format";
 import { Pagination } from "@/components/pagination";
+import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -43,7 +43,12 @@ export function BottomBar({
             </TooltipProvider>
           </div>
           <div>
-            <NumberFormat amount={totalAmount} currency={currency} />
+            <span className="text-sm font-medium">
+              {formatAmount({
+                amount: totalAmount,
+                currency,
+              })}
+            </span>
           </div>
           <div>
             <Pagination

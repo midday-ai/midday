@@ -1,3 +1,4 @@
+import { formatAmount } from "@/utils/format";
 import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
 import { getTransaction } from "@midday/supabase/queries";
 import {
@@ -15,7 +16,6 @@ import { useEffect, useRef, useState } from "react";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { Note } from "./note";
-import { NumberFormat } from "./number-format";
 import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
@@ -62,14 +62,18 @@ export function TransactionDetails({ transactionId, onClose }) {
               {isLoading ? (
                 <Skeleton className="w-[50%] h-[32px] rounded-full mb-1" />
               ) : (
-                <NumberFormat
-                  amount={data?.amount}
-                  currency={data?.currency}
+                <span
                   className={cn(
                     "text-4xl",
                     data?.amount > 0 && "text-[#00E547]",
                   )}
-                />
+                >
+                  {data &&
+                    formatAmount({
+                      amount: data?.amount,
+                      currency: data?.currency,
+                    })}
+                </span>
               )}
             </div>
           </div>

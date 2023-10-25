@@ -12,14 +12,20 @@ export function useUpload() {
 
     const { data: userData } = await getUserDetails(supabase);
 
-    const result = await upload(supabase, {
-      path: `${bucketName}/${userData?.team_id}/${path}`,
+    const basePath = `${bucketName}/${userData?.team_id}/${path}`;
+    const filePath = `${userData?.team_id}/${path}/${file.name}`;
+
+    const url = await upload(supabase, {
+      path: basePath,
       file,
     });
 
     setLoading(false);
 
-    return result;
+    return {
+      url,
+      path: filePath,
+    };
   };
 
   return {

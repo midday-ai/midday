@@ -11,15 +11,13 @@ export async function upload(
 ) {
   const bytes = await file.arrayBuffer();
   const bucket = client.storage.from(path);
-  const [name, extension] = file.name.split(".");
-  const fileName = `${name}.${extension}`;
 
-  const result = await bucket.upload(`${fileName}`, bytes, {
+  const result = await bucket.upload(file.name, bytes, {
     upsert: true,
   });
 
   if (!result.error) {
-    return bucket.getPublicUrl(fileName).data.publicUrl;
+    return bucket.getPublicUrl(file.name).data.publicUrl;
   }
 
   throw result.error;
@@ -27,14 +25,19 @@ export async function upload(
 
 type RemoveParams = {
   path: string;
-  file: string;
+  bucket: string;
 };
 
 export async function remove(
   client: SupabaseClient,
-  { path, file }: RemoveParams,
+  { bucket, path }: RemoveParams,
 ) {
-  console.log(path);
-  console.log(file);
-  await client.storage.from(path).remove([file]);
+  return client.storage.from(bucket).remove([path]);
+}
+
+export async function download(
+  client: SupabaseClient,
+  { bucket, path }: RemoveParams,
+) {
+  return client.storage.from(bucket).download(path);
 }

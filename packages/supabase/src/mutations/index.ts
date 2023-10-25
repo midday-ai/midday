@@ -52,7 +52,7 @@ export type Attachment = {
   type: string;
   name: string;
   size: number;
-  url: string;
+  path: string;
   transaction_id: string;
 };
 
@@ -83,11 +83,9 @@ export async function deleteAttachment(supabase: Client, id: string) {
     .select("id, transaction_id, name, team:team_id(id)")
     .single();
 
-  console.log(`documents/${data.team?.id}/transactions/${data.transaction_id}`);
-
   remove(supabase, {
-    path: `documents/${data.team?.id}/transactions/${data.transaction_id}`,
-    file: data.name,
+    bucket: "documents",
+    path: `${data.team?.id}/transactions/${data.transaction_id}/${data.name}`,
   });
 
   return data;

@@ -1,6 +1,6 @@
 "use client";
 
-import { NumberFormat } from "@/components/number-format";
+import { formatAmount } from "@/utils/format";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
@@ -59,11 +59,9 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
       <DataTableCell className="w-[430px]">{data.name}</DataTableCell>
 
       <DataTableCell className="w-[200px]">
-        <NumberFormat
-          amount={data.amount}
-          currency={data.currency}
-          className={data.amount > 0 && "text-[#00E547]"}
-        />
+        <span className={cn("text-sm", data.amount > 0 && "text-[#00E547]")}>
+          {formatAmount({ amount: data.amount, currency: data.currency })}
+        </span>
       </DataTableCell>
 
       <motion.div

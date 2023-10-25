@@ -1,11 +1,13 @@
 "use client";
 
 import { useUpload } from "@/hooks/useUpload";
+import { formatSize } from "@/utils/format";
 import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
 import {
   createAttachments,
   deleteAttachment,
 } from "@midday/supabase/mutations";
+import { download } from "@midday/supabase/storage";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
@@ -16,9 +18,6 @@ import { useDropzone } from "react-dropzone";
 const Item = ({ file, onDelete }) => {
   const isPresent = useIsPresent();
   const animations = {
-    style: {
-      position: isPresent ? "static" : "absolute",
-    },
     initial: { opacity: 0 },
     animate: { opacity: 1 },
     exit: {
@@ -38,7 +37,18 @@ const Item = ({ file, onDelete }) => {
           <File size={18} />
         </div>
 
-        <span>{file.name}</span>
+        <div className="flex flex-col space-y-0.5">
+          <a
+            href={`/api/download/document?path=${file.path}&filename=${file.name}`}
+            download
+            className="truncate"
+          >
+            {file.name}
+          </a>
+          <span className="text-xs text-[#606060]">
+            {formatSize(file.size)}
+          </span>
+        </div>
       </div>
 
       <Button
@@ -65,6 +75,7 @@ export function Attachments({ id, data }) {
   const { isLoading, uploadFile } = useUpload();
 
   const handleOnDelete = async (id: string) => {
+    setFiles((files) => files.filter((file) => file.id !== id));
     await deleteAttachment(supabase, id);
   };
 
@@ -73,25 +84,25 @@ export function Attachments({ id, data }) {
 
     const uploaded = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
-        const url = await uploadFile({
+        const { path } = await uploadFile({
           bucketName: "documents",
           path: `transactions/${id}`,
           file: acceptedFile,
         });
 
-        return createAttachments(supabase, [
-          {
-            transaction_id: id,
-            url,
-            name: acceptedFile.name,
-            type: acceptedFile.type,
-            size: acceptedFile.size,
-          },
-        ]);
+        return {
+          path,
+          name: acceptedFile.name,
+          size: acceptedFile.size,
+          transaction_id: id,
+          type: acceptedFile.type,
+        };
       }),
     );
 
-    setFiles(uploaded);
+    const newFiles = await createAttachments(supabase, uploaded);
+
+    setFiles(newFiles);
   };
 
   useEffect(() => {
@@ -106,8 +117,8 @@ export function Attachments({ id, data }) {
     <div>
       <div
         className={cn(
-          "w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1 transition-colors",
-          isDragActive && "bg-secondary",
+          "w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1 transition-colors text-[#606060]",
+          isDragActive && "bg-secondary text-white",
         )}
         {...getRootProps()}
       >
@@ -134,7 +145,7 @@ export function Attachments({ id, data }) {
             <Item
               key={file.name}
               file={file}
-              onDelete={() => handleOnDelete(file?.id)}
+              onDelete={() => handleOnDelete(file.id)}
             />
           ))}
         </ul>
