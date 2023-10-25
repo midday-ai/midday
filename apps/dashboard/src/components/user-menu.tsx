@@ -25,7 +25,7 @@ export async function UserMenu() {
           width={32}
           height={32}
           className="rounded-full w-8 h-8"
-          alt={data.full_name}
+          alt={data.session.user.user_metadata.full_name}
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" sideOffset={10} align="end">
