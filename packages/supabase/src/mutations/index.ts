@@ -1,5 +1,6 @@
 import { getUserDetails } from "../queries";
 import { Client } from "../types";
+import { remove } from "../utils/storage";
 
 export async function createTeamBankAccounts(supabase: Client, accounts) {
   const { data: userData } = await getUserDetails(supabase);
@@ -45,4 +46,49 @@ export async function updateTransaction(
   } catch (err) {
     console.log(err);
   }
+}
+
+export type Attachment = {
+  type: string;
+  name: string;
+  size: number;
+  url: string;
+  transaction_id: string;
+};
+
+export async function createAttachments(
+  supabase: Client,
+  attachments: Attachment[],
+) {
+  const { data: userData } = await getUserDetails(supabase);
+
+  const { data } = await supabase
+    .from("attachments")
+    .insert(
+      attachments.map((attachment) => ({
+        ...attachment,
+        team_id: userData?.team_id,
+      })),
+    )
+    .select();
+
+  return data;
+}
+
+export async function deleteAttachment(supabase: Client, id: string) {
+  const { data } = await supabase
+    .from("attachments")
+    .delete()
+    .eq("id", id)
+    .select("id, transaction_id, name, team:team_id(id)")
+    .single();
+
+  console.log(`documents/${data.team?.id}/transactions/${data.transaction_id}`);
+
+  remove(supabase, {
+    path: `documents/${data.team?.id}/transactions/${data.transaction_id}`,
+    file: data.name,
+  });
+
+  return data;
 }

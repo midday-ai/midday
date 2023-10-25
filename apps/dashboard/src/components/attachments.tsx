@@ -1,16 +1,19 @@
 "use client";
 
 import { useUpload } from "@/hooks/useUpload";
+import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import {
+  createAttachments,
+  deleteAttachment,
+} from "@midday/supabase/mutations";
 import { Button } from "@midday/ui/button";
-import { Progress } from "@midday/ui/progress";
-import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
 import { File, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-const Item = ({ progress, file }) => {
+const Item = ({ file, onDelete }) => {
   const isPresent = useIsPresent();
   const animations = {
     style: {
@@ -34,16 +37,15 @@ const Item = ({ progress, file }) => {
         <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center">
           <File size={18} />
         </div>
-        <div className="flex-col space-y-2 w-[80%]">
-          <span>{file.name}</span>
-          {progress < 100 && <Progress value={progress} className="h-[3px]" />}
-        </div>
+
+        <span>{file.name}</span>
       </div>
 
       <Button
         variant="ghost"
         size="icon"
         className="w-auto hover:bg-transparent flex"
+        onClick={onDelete}
       >
         <X size={14} />
       </Button>
@@ -51,22 +53,52 @@ const Item = ({ progress, file }) => {
   );
 };
 
-export function Attachments({ id }) {
-  const [progress, setProgress] = useState(0);
-  const [files, setFiles] = useState<File[]>([]);
+type Attachment = {
+  type: string;
+  name: string;
+  size: number;
+};
+
+export function Attachments({ id, data }) {
+  const supabase = getSupabaseBrowserClient();
+  const [files, setFiles] = useState<Attachment[]>([]);
   const { isLoading, uploadFile } = useUpload();
 
-  const onDrop = async (acceptedFiles: Array<File>) => {
-    setFiles(acceptedFiles);
-
-    setInterval(() => setProgress((progress) => progress + 1), 10);
-
-    const file = await uploadFile({
-      bucketName: "documents",
-      path: `transactions/${id}`,
-      file: acceptedFiles.at(0),
-    });
+  const handleOnDelete = async (id: string) => {
+    await deleteAttachment(supabase, id);
   };
+
+  const onDrop = async (acceptedFiles: Array<Attachment>) => {
+    setFiles((prev) => [...prev, ...acceptedFiles]);
+
+    const uploaded = await Promise.all(
+      acceptedFiles.map(async (acceptedFile) => {
+        const url = await uploadFile({
+          bucketName: "documents",
+          path: `transactions/${id}`,
+          file: acceptedFile,
+        });
+
+        return createAttachments(supabase, [
+          {
+            transaction_id: id,
+            url,
+            name: acceptedFile.name,
+            type: acceptedFile.type,
+            size: acceptedFile.size,
+          },
+        ]);
+      }),
+    );
+
+    setFiles(uploaded);
+  };
+
+  useEffect(() => {
+    if (data) {
+      setFiles(data);
+    }
+  }, [data]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -98,8 +130,12 @@ export function Attachments({ id }) {
       </div>
       <AnimatePresence>
         <ul className="mt-4 space-y-4">
-          {files.map((file) => (
-            <Item key={file.name} progress={progress} file={file} />
+          {files.map((file, index) => (
+            <Item
+              key={file.name}
+              file={file}
+              onDelete={() => handleOnDelete(file?.id)}
+            />
           ))}
         </ul>
       </AnimatePresence>

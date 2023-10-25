@@ -115,7 +115,7 @@ export function TransactionDetails({ transactionId, onClose }) {
           <AccordionItem value="attachment">
             <AccordionTrigger>Attachment</AccordionTrigger>
             <AccordionContent>
-              <Attachments id={data?.id} />
+              <Attachments id={data?.id} data={data?.attachments} />
             </AccordionContent>
           </AccordionItem>
 

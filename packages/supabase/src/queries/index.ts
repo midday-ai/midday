@@ -159,7 +159,8 @@ export async function getTransaction(supabase: Client, id: string) {
     .select(`
       *,
       account:bank_account_id(*),
-      assigned:assigned_id(*)
+      assigned:assigned_id(*),
+      attachments(*)
     `)
     .eq("id", id)
     .single();

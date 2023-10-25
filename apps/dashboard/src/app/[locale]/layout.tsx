@@ -21,7 +21,7 @@ export default async function Layout({
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (!ADMINS.includes(session?.user?.id)) {
+  if (session && !ADMINS.includes(session?.user?.id)) {
     return closed;
   }
 

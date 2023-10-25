@@ -1,11 +1,14 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 
-type Data = {
+type UploadParams = {
   file: File;
   path: string;
 };
 
-export async function upload(client: SupabaseClient, { file, path }: Data) {
+export async function upload(
+  client: SupabaseClient,
+  { file, path }: UploadParams,
+) {
   const bytes = await file.arrayBuffer();
   const bucket = client.storage.from(path);
   const [name, extension] = file.name.split(".");
@@ -20,4 +23,18 @@ export async function upload(client: SupabaseClient, { file, path }: Data) {
   }
 
   throw result.error;
+}
+
+type RemoveParams = {
+  path: string;
+  file: string;
+};
+
+export async function remove(
+  client: SupabaseClient,
+  { path, file }: RemoveParams,
+) {
+  console.log(path);
+  console.log(file);
+  await client.storage.from(path).remove([file]);
 }
