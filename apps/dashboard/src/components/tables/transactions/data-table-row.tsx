@@ -48,7 +48,7 @@ export function Row({ children, onSelect, selected }) {
 }
 
 export function DataTableRow({ collapsed, onSelect, data, selected }) {
-  const fullfilled = data.attachment && data.vat;
+  const fullfilled = data.attachments.length > 0 && data.vat;
 
   return (
     <Row onSelect={() => onSelect(data.id)} selected={selected}>

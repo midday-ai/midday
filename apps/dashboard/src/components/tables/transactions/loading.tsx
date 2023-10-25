@@ -2,7 +2,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableCell, Row } from "./data-table-row";
 
-const data = [...Array(25)].map((_, i) => ({ id: i.toString() }));
+const data = [...Array(40)].map((_, i) => ({ id: i.toString() }));
 
 type Props = {
   collapsed: boolean;

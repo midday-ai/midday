@@ -88,8 +88,8 @@ export async function getTransactions(
     .select(
       `
       *,
-      account:bank_account_id(*),
-      assigned:assigned_id(*)
+      assigned:assigned_id(*),
+      attachments(id)
     `,
       { count: "exact" },
     )
@@ -99,7 +99,7 @@ export async function getTransactions(
     const [column, value] = sort;
     query.order(column, { ascending: value === "asc" });
   } else {
-    query.order("date", { ascending: false });
+    query.order("order");
   }
 
   if (date?.from && date?.to) {

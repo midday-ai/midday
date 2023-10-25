@@ -5,7 +5,7 @@ import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQueryState } from "next-usequerystate";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useOnClickOutside } from "usehooks-ts";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";
@@ -20,7 +20,6 @@ type ItemsProps = {
 };
 
 export function DataTable({ data, teamId }: ItemsProps) {
-  const ref = useRef(null);
   const supabase = getSupabaseBrowserClient();
   const router = useRouter();
   const [transactionId, setTransactionId] = useQueryState("id", {
@@ -34,8 +33,6 @@ export function DataTable({ data, teamId }: ItemsProps) {
   const handleOnClose = () => {
     setTransactionId(null);
   };
-
-  useOnClickOutside(ref, handleOnClose);
 
   useEffect(() => {
     const currentIndex = data.findIndex((row) => row.id === transactionId);
@@ -97,7 +94,7 @@ export function DataTable({ data, teamId }: ItemsProps) {
   }, [supabase, router, teamId]);
 
   return (
-    <div className="flex relative space-x-8 cursor-default" ref={ref}>
+    <div className="flex relative space-x-8 cursor-default">
       <motion.div
         className="border"
         initial={false}

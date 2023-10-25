@@ -96,7 +96,7 @@ export async function createTeamBankAccountsAction(accounts) {
 }
 
 export async function updateTransactionAction(id: string, data: any) {
-  revalidateTag("transactions");
   const supabase = await getSupabaseServerActionClient();
   await updateTransaction(supabase, id, data);
+  revalidateTag("transactions");
 }

@@ -23,24 +23,28 @@ export function SelectVat({ id, selectedId, isLoading }) {
   }, [selectedId]);
 
   return (
-    <>
+    <div className="relative">
       <Label htmlFor="tax">Tax Rate</Label>
 
-      <div className="relative">
-        <Select value={value} onValueChange={handleOnValueChange}>
-          <SelectTrigger id="tax" className="line-clamp-1 truncate">
-            {isLoading && (
-              <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-2.5 z-10" />
-            )}
-            <SelectValue placeholder={!isLoading && "Select"} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="25">25%</SelectItem>
-            <SelectItem value="12">12%</SelectItem>
-            <SelectItem value="7">7%</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="mt-1">
+        {isLoading ? (
+          <div className="h-[36px] border rounded-md">
+            <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[35px]" />
+          </div>
+        ) : (
+          <Select value={value} onValueChange={handleOnValueChange}>
+            <SelectTrigger id="tax" className="line-clamp-1 truncate">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="25">25%</SelectItem>
+              <SelectItem value="12">12%</SelectItem>
+              <SelectItem value="7">7%</SelectItem>
+              <SelectItem value="0">0%</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
-    </>
+    </div>
   );
 }

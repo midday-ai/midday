@@ -12,6 +12,7 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion, useIsPresent } from "framer-motion";
 import { File, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -71,12 +72,14 @@ type Attachment = {
 
 export function Attachments({ id, data }) {
   const supabase = getSupabaseBrowserClient();
+  const router = useRouter();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { isLoading, uploadFile } = useUpload();
 
   const handleOnDelete = async (id: string) => {
     setFiles((files) => files.filter((file) => file.id !== id));
     await deleteAttachment(supabase, id);
+    router.refresh();
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
@@ -101,8 +104,10 @@ export function Attachments({ id, data }) {
     );
 
     const newFiles = await createAttachments(supabase, uploaded);
+    const uniqueFiles = new Set([...files, ...newFiles]);
+    setFiles([...uniqueFiles]);
 
-    setFiles(newFiles);
+    router.refresh();
   };
 
   useEffect(() => {
