@@ -51,7 +51,7 @@ export function StartPage() {
 
         <div className="flex justify-center mt-8">
           {isSubmitted ? (
-            <div className="border border-[#2C2C2C] font-sm text-white h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
+            <div className="border border border-[#2C2C2C] font-sm text-white h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
               <p>{t("subscribed")}</p>
 
               <svg
@@ -95,37 +95,37 @@ export function StartPage() {
       <div className="flex w-full">
         <div className="grid md:grid-cols-6 grid-cols-3 gap-[32px] m-auto mt-12">
           <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
               <Icons.OpenSource />
             </div>
             <span className="text-[#606060] text-sm">{t("open")}</span>
           </div>
           <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
               <Icons.ChartGantt />
             </div>
             <span className="text-[#606060] text-sm">{t("live")}</span>
           </div>
           <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
               <Icons.FileDocument />
             </div>
             <span className="text-[#606060] text-sm">{t("document")}</span>
           </div>
           <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
               <Icons.ReceiptText />
             </div>
             <span className="text-[#606060] text-sm">{t("reciept")}</span>
           </div>
           <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
               <Icons.TimeCog />
             </div>
             <span className="text-[#606060] text-sm">{t("time")}</span>
           </div>
           <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
               <Icons.CreationOutline />
             </div>
             <span className="text-[#606060] text-sm">{t("ai")}</span>
