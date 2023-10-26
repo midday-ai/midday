@@ -14,7 +14,9 @@ export function NoResults({ hasFilters }) {
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">No results</h2>
           <p className="text-[#606060] text-sm">
-            Try another search, or adjusting the filters
+            {hasFilters
+              ? "Try another search, or adjusting the filters"
+              : "There are no transactions imported"}
           </p>
         </div>
 

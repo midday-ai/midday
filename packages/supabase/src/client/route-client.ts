@@ -2,7 +2,6 @@ import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { createClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { cache } from "react";
-import invariant from "tiny-invariant";
 import { Database } from "../types/db";
 
 const createServerSupabaseClient = cache(() => {
@@ -17,20 +16,8 @@ export const getSupabasRouteClient = cache(
       admin: false,
     },
   ) => {
-    invariant(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      "Supabase URL not provided",
-    );
-
-    invariant(
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      "Supabase Anon Key not provided",
-    );
-
     if (params.admin) {
       const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-      invariant(serviceRoleKey, "Supabase Service Role Key not provided");
 
       return createClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL,

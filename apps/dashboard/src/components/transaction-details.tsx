@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { Note } from "./note";
+import { SelectCategory } from "./select-category";
 import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
@@ -92,24 +93,31 @@ export function TransactionDetails({ transactionId, onClose }) {
           <AccordionItem value="general">
             <AccordionTrigger>General</AccordionTrigger>
             <AccordionContent>
-              <p className="text-[#606060]">
+              <p className="text-[#606060] mb-6">
                 Fusce id lobortis elit. Sed tincidunt efficitur elit, nec
                 molestie justo imperdiet quis.
               </p>
 
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="grid gap-2 w-full">
-                  <AssignUser
-                    isLoading={isLoading}
-                    id={transactionId}
-                    selectedId={data?.assigned?.id}
-                  />
-                </div>
+              <SelectCategory
+                isLoading={isLoading}
+                id={transactionId}
+                selectedId={data?.category}
+              />
+
+              <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
                 <div className="grid gap-2 w-full">
                   <SelectVat
                     isLoading={isLoading}
                     id={transactionId}
                     selectedId={data?.vat ?? undefined}
+                  />
+                </div>
+
+                <div className="grid gap-2 w-full">
+                  <AssignUser
+                    isLoading={isLoading}
+                    id={transactionId}
+                    selectedId={data?.assigned?.id}
                   />
                 </div>
               </div>

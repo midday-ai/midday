@@ -55,6 +55,24 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
   return json;
 }
 
+const mapTransactionMethod = (method: string) => {
+  switch (method) {
+    case "Payment":
+    case "Bankgiro payment":
+    case "Incoming foreign payment":
+      return "payment";
+    case "Card purchase":
+    case "Card foreign purchase":
+      return "card_purchase";
+    case "Card ATM":
+      return "card_atm";
+    case "Transfer":
+      return "transfer";
+    default:
+      return "other";
+  }
+};
+
 export async function initialTransactionsSync(ids: string[]) {
   const supabase = await getSupabaseServerActionClient();
   const { access } = await getAccessToken();
@@ -74,13 +92,13 @@ export async function initialTransactionsSync(ids: string[]) {
         supabase,
         transactions.booked.map((data) => ({
           transaction_id: data.transactionId,
-          reference_id: data.entryReference,
+          reference: data.entryReference,
           booking_date: data.bookingDate,
           date: data.valueDate,
           name: capitalCase(data.additionalInformation),
           original: data.additionalInformation,
-          method: data.proprietaryBankTransactionCode,
-          internal_id: data.internalTransactionId,
+          method: mapTransactionMethod(data.proprietaryBankTransactionCode),
+          provider_transaction_id: data.internalTransactionId,
           amount: data.transactionAmount.amount,
           currency: data.transactionAmount.currency,
           bank_account_id: id,

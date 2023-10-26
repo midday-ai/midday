@@ -1,5 +1,6 @@
 "use client";
 
+import { Category } from "@/components/category";
 import { formatAmount } from "@/utils/format";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
@@ -67,7 +68,21 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
       <motion.div
         className="border-r"
         initial={false}
-        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "20%" }}
+        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 200 }}
+        transition={{
+          duration: 0.25,
+          ease: "easeInOut",
+        }}
+      >
+        <DataTableCell>
+          <Category name={data.category} />
+        </DataTableCell>
+      </motion.div>
+
+      <motion.div
+        className="border-r"
+        initial={false}
+        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 150 }}
         transition={{
           duration: 0.25,
           ease: "easeInOut",
@@ -79,7 +94,7 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
       <motion.div
         className="border-r"
         initial={false}
-        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "20%" }}
+        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 200 }}
         transition={{
           duration: 0.25,
           ease: "easeInOut",

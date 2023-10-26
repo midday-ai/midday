@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: ReactElement }) {
           disableTransitionOnChange
         >
           {children}
-          <Toaster swipeDirection="left" />
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -1,4 +1,13 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
+import {
+  MdDesk,
+  MdDevices,
+  MdFastfood,
+  MdFlightTakeoff,
+  MdHomeWork,
+  MdPayments,
+  MdSave,
+} from "react-icons/md";
 
 export const Icons = {
   LogoSmall: () => (
@@ -268,4 +277,11 @@ export const Icons = {
       />
     </svg>
   ),
+  FlightTakeoff: MdFlightTakeoff,
+  Desk: MdDesk,
+  FastFood: MdFastfood,
+  Save: MdSave,
+  HomeWork: MdHomeWork,
+  Payments: MdPayments,
+  Devices: MdDevices,
 };

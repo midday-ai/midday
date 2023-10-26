@@ -20,11 +20,11 @@ export function MainMenu() {
       name: "Transactions",
       icon: Icons.Transactions,
     },
-    {
-      path: "/documents",
-      name: "Documents",
-      icon: Icons.FileDocument,
-    },
+    // {
+    //   path: "/documents",
+    //   name: "Documents",
+    //   icon: Icons.FileDocument,
+    // },
     {
       path: "/apps",
       name: "Apps",

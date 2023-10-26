@@ -10,11 +10,11 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { startTransition, useEffect, useState } from "react";
 
-export function SelectVat({ id, selectedId, isLoading }) {
+export function SelectCategory({ id, selectedId, isLoading }) {
   const [value, setValue] = useState();
   const handleOnValueChange = (value: string) => {
     startTransition(() => {
-      updateTransactionAction(id, { vat: value });
+      updateTransactionAction(id, { category: value });
     });
   };
 
@@ -24,7 +24,7 @@ export function SelectVat({ id, selectedId, isLoading }) {
 
   return (
     <div className="relative">
-      <Label htmlFor="tax">VAT</Label>
+      <Label htmlFor="tax">Category</Label>
 
       <div className="mt-1">
         {isLoading ? (

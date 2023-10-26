@@ -1,4 +1,5 @@
 import { getSupabaseServerClient } from "@midday/supabase/server-client";
+import { Provider } from "./provider";
 
 const ADMINS = [
   "ec10c095-8cf7-4ba3-a62e-98f2a3d40c4c",
@@ -10,10 +11,12 @@ export default async function Layout({
   dashboard,
   login,
   closed,
+  params: { locale },
 }: {
   dashboard: React.ReactNode;
   login: React.ReactNode;
   closed: React.ReactNode;
+  params: { locale: string };
 }) {
   const supabase = getSupabaseServerClient();
 
@@ -25,5 +28,5 @@ export default async function Layout({
     return closed;
   }
 
-  return session ? dashboard : login;
+  return <Provider locale={locale}>{session ? dashboard : login}</Provider>;
 }

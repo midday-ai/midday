@@ -58,7 +58,7 @@ export function DataTableHeader({ collapsed }: Props) {
             variant="ghost"
             onClick={() => createSortQuery("name")}
           >
-            <span>Name</span>
+            <span>Description</span>
             {"name" === column && value === "asc" && <ArrowDown size={16} />}
             {"name" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
@@ -79,7 +79,31 @@ export function DataTableHeader({ collapsed }: Props) {
         <motion.div
           className="border-r"
           initial={false}
-          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "20%" }}
+          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 200 }}
+          transition={{
+            duration: 0.25,
+            ease: "easeInOut",
+          }}
+        >
+          <DataTableCell>
+            <Button
+              className="p-0 hover:bg-transparent space-x-2"
+              variant="ghost"
+              onClick={() => createSortQuery("category")}
+            >
+              <span>Category</span>
+              {"method" === column && value === "asc" && (
+                <ArrowDown size={16} />
+              )}
+              {"method" === column && value === "desc" && <ArrowUp size={16} />}
+            </Button>
+          </DataTableCell>
+        </motion.div>
+
+        <motion.div
+          className="border-r"
+          initial={false}
+          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 150 }}
           transition={{
             duration: 0.25,
             ease: "easeInOut",
@@ -103,7 +127,7 @@ export function DataTableHeader({ collapsed }: Props) {
         <motion.div
           className="border-r"
           initial={false}
-          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : "20%" }}
+          animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 200 }}
           transition={{
             duration: 0.25,
             ease: "easeInOut",
