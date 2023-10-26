@@ -74,7 +74,7 @@ export function StartPage() {
                 setSubmitted(true);
               }}
             >
-              <fieldset className="relative">
+              <fieldset className="relative z-50">
                 <input
                   placeholder={t("email")}
                   type="email"
