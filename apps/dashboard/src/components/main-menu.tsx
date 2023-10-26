@@ -21,6 +21,11 @@ export function MainMenu() {
       icon: Icons.Transactions,
     },
     {
+      path: "/documents",
+      name: "Documents",
+      icon: Icons.FileDocument,
+    },
+    {
       path: "/apps",
       name: "Apps",
       icon: Icons.Apps,

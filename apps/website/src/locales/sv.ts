@@ -1,6 +1,6 @@
 export default {
   startpage: {
-    title: "Det finansiella OS för ditt företag.",
+    title: "Ditt finansiella OS för företaget.",
     description:
       "Kapitalförvaltning, realtidsspårning av vinst/förlust och sömlös förberedelse för din\n revisor, driven av AI-förbättrad sökning och filter.",
     subscribed: "Uppskriven!",
