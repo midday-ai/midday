@@ -1,4 +1,11 @@
-import { updateTransactionAction } from "@/actions";
+import {
+  updateSimilarTransactionsAction,
+  updateTransactionAction,
+} from "@/actions";
+import { useI18n } from "@/locales/client";
+import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { getSimilarTransactions } from "@midday/supabase/queries";
+import { Button } from "@midday/ui/button";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -8,14 +15,46 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
-import { startTransition, useEffect, useState } from "react";
+import { ToastAction } from "@midday/ui/toast";
+import { useToast } from "@midday/ui/use-toast";
+import { useEffect, useState } from "react";
 
-export function SelectCategory({ id, selectedId, isLoading }) {
+const categories = [
+  "office_supplies",
+  "travel",
+  "rent",
+  "income",
+  "software",
+  "transfer",
+  "meals",
+  "equipment",
+];
+
+export function SelectCategory({ id, name, selectedId, isLoading }) {
   const [value, setValue] = useState();
-  const handleOnValueChange = (value: string) => {
-    startTransition(() => {
-      updateTransactionAction(id, { category: value });
-    });
+  const supabase = getSupabaseBrowserClient();
+  const t = useI18n();
+  const { toast } = useToast();
+
+  const handleUpdateSimilar = () => {
+    updateSimilarTransactionsAction(id);
+  };
+
+  const handleOnValueChange = async (value: string) => {
+    await updateTransactionAction(id, { category: value });
+    const transactions = await getSimilarTransactions(supabase, id);
+
+    if (transactions?.data?.length) {
+      toast({
+        duration: 6000,
+        description: `Categorize ${transactions?.data?.length} transactions form ${name} as ${value} too?`,
+        action: (
+          <ToastAction altText="Yes" onClick={handleUpdateSimilar}>
+            Yes
+          </ToastAction>
+        ),
+      });
+    }
   };
 
   useEffect(() => {
@@ -24,7 +63,7 @@ export function SelectCategory({ id, selectedId, isLoading }) {
 
   return (
     <div className="relative">
-      <Label htmlFor="tax">Category</Label>
+      <Label htmlFor="category">Category</Label>
 
       <div className="mt-1">
         {isLoading ? (
@@ -33,14 +72,15 @@ export function SelectCategory({ id, selectedId, isLoading }) {
           </div>
         ) : (
           <Select value={value} onValueChange={handleOnValueChange}>
-            <SelectTrigger id="tax" className="line-clamp-1 truncate">
+            <SelectTrigger id="category" className="line-clamp-1 truncate">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="25">25%</SelectItem>
-              <SelectItem value="12">12%</SelectItem>
-              <SelectItem value="7">7%</SelectItem>
-              <SelectItem value="0">0%</SelectItem>
+              {categories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {t(`categories.${category}`)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         )}

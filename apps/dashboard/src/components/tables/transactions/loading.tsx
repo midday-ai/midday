@@ -22,24 +22,28 @@ export function Loading({ collapsed }) {
             <Skeleton className="h-3.5 w-[60%]" />
           </DataTableCell>
           <DataTableCell className="w-[430px]">
-            <Skeleton className="h-3.5 w-[70%]" />
+            <Skeleton className="h-3.5 w-[50%]" />
           </DataTableCell>
           <DataTableCell className="w-[200px]">
             <Skeleton className="h-3.5 w-[50%]" />
           </DataTableCell>
           {!collapsed && (
             <>
-              <DataTableCell className="w-[284px]">
-                <Skeleton className="h-3.5 w-[40%]" />
+              <DataTableCell className="w-[200px]">
+                <Skeleton className="h-3.5 w-[60%]" />
               </DataTableCell>
-              <DataTableCell className="w-[284px]">
-                <div className="flex items-center space-x-2 w-[80%]">
-                  <Skeleton className="h-5 w-5 rounded-full" />
-                  <Skeleton className="h-3.5 w-[70%]" />
-                </div>
+              <DataTableCell className="w-[150px]">
+                <Skeleton className="h-3.5 w-[80px]" />
               </DataTableCell>
             </>
           )}
+
+          <DataTableCell className="w-[200px]">
+            <div className="flex items-center space-x-2 w-[80%]">
+              <Skeleton className="h-5 w-5 rounded-full" />
+              <Skeleton className="h-3.5 w-[70%]" />
+            </div>
+          </DataTableCell>
           <DataTableCell>
             <Skeleton className="h-3.5 w-[15px]" />
           </DataTableCell>

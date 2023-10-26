@@ -7,6 +7,7 @@ export default {
     rent: "Rent",
     equipment: "Equipment",
     income: "Income",
+    transfer: "Transfer",
   },
   transaction_methods: {
     card_purchase: "Card Purchase",

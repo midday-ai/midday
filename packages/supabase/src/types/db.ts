@@ -9,6 +9,52 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      attachments: {
+        Row: {
+          created_at: string;
+          id: string;
+          name: string | null;
+          path: string | null;
+          size: number | null;
+          team_id: string | null;
+          transaction_id: string | null;
+          type: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          name?: string | null;
+          path?: string | null;
+          size?: number | null;
+          team_id?: string | null;
+          transaction_id?: string | null;
+          type?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          name?: string | null;
+          path?: string | null;
+          size?: number | null;
+          team_id?: string | null;
+          transaction_id?: string | null;
+          type?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "attachments_team_id_fkey";
+            columns: ["team_id"];
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "attachments_transaction_id_fkey";
+            columns: ["transaction_id"];
+            referencedRelation: "transactions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       bank_accounts: {
         Row: {
           account_id: string;
@@ -55,40 +101,6 @@ export interface Database {
           },
         ];
       };
-      members: {
-        Row: {
-          id: string;
-          role: Database["public"]["Enums"]["teamRoles"] | null;
-          team_id: string;
-          user_id: string;
-        };
-        Insert: {
-          id?: string;
-          role?: Database["public"]["Enums"]["teamRoles"] | null;
-          team_id: string;
-          user_id: string;
-        };
-        Update: {
-          id?: string;
-          role?: Database["public"]["Enums"]["teamRoles"] | null;
-          team_id?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "members_team_id_fkey";
-            columns: ["team_id"];
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "members_user_id_fkey";
-            columns: ["user_id"];
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       teams: {
         Row: {
           created_at: string;
@@ -111,61 +123,68 @@ export interface Database {
         Row: {
           amount: number | null;
           assigned_id: string | null;
-          attachment: string | null;
           bank_account_id: string | null;
           booking_date: string | null;
+          category: Database["public"]["Enums"]["transactionCategories"] | null;
           created_at: string;
           currency: string | null;
-          name: string | null;
-          id: number;
-          internal_id: string | null;
-          note: string | null;
-          original: string | null;
-          reference_id: string;
-          team_id: string | null;
-          method: string | null;
-          transaction_id: string;
           date: string | null;
+          id: string;
+          method: Database["public"]["Enums"]["transactionMethods"] | null;
+          name: string | null;
+          note: string | null;
+          order: number;
+          original: string | null;
+          provider_transaction_id: string | null;
+          reference: string;
+          team_id: string | null;
+          transaction_id: string;
           vat: Database["public"]["Enums"]["vatRates"] | null;
         };
         Insert: {
           amount?: number | null;
           assigned_id?: string | null;
-          attachment?: string | null;
           bank_account_id?: string | null;
           booking_date?: string | null;
+          category?:
+            | Database["public"]["Enums"]["transactionCategories"]
+            | null;
           created_at?: string;
           currency?: string | null;
-          name?: string | null;
-          id?: number;
-          internal_id?: string | null;
-          note?: string | null;
-          original?: string | null;
-          reference_id: string;
-          team_id?: string | null;
-          method?: string | null;
-          transaction_id: string;
           date?: string | null;
+          id?: string;
+          method?: Database["public"]["Enums"]["transactionMethods"] | null;
+          name?: string | null;
+          note?: string | null;
+          order?: number;
+          original?: string | null;
+          provider_transaction_id?: string | null;
+          reference: string;
+          team_id?: string | null;
+          transaction_id: string;
           vat?: Database["public"]["Enums"]["vatRates"] | null;
         };
         Update: {
           amount?: number | null;
           assigned_id?: string | null;
-          attachment?: string | null;
           bank_account_id?: string | null;
           booking_date?: string | null;
+          category?:
+            | Database["public"]["Enums"]["transactionCategories"]
+            | null;
           created_at?: string;
           currency?: string | null;
-          name?: string | null;
-          id?: number;
-          internal_id?: string | null;
-          note?: string | null;
-          original?: string | null;
-          reference_id?: string;
-          team_id?: string | null;
-          method?: string | null;
-          transaction_id?: string;
           date?: string | null;
+          id?: string;
+          method?: Database["public"]["Enums"]["transactionMethods"] | null;
+          name?: string | null;
+          note?: string | null;
+          order?: number;
+          original?: string | null;
+          provider_transaction_id?: string | null;
+          reference?: string;
+          team_id?: string | null;
+          transaction_id?: string;
           vat?: Database["public"]["Enums"]["vatRates"] | null;
         };
         Relationships: [
@@ -229,6 +248,40 @@ export interface Database {
           },
         ];
       };
+      users_on_team: {
+        Row: {
+          id: string;
+          role: Database["public"]["Enums"]["teamRoles"] | null;
+          team_id: string;
+          user_id: string;
+        };
+        Insert: {
+          id?: string;
+          role?: Database["public"]["Enums"]["teamRoles"] | null;
+          team_id: string;
+          user_id: string;
+        };
+        Update: {
+          id?: string;
+          role?: Database["public"]["Enums"]["teamRoles"] | null;
+          team_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "users_on_team_team_id_fkey";
+            columns: ["team_id"];
+            referencedRelation: "teams";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "users_on_team_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -239,6 +292,21 @@ export interface Database {
     Enums: {
       bankProviders: "gocardless" | "plaid";
       teamRoles: "admin" | "member";
+      transactionCategories:
+        | "office_supplies"
+        | "travel"
+        | "rent"
+        | "income"
+        | "software"
+        | "transfer"
+        | "meals"
+        | "equipment";
+      transactionMethods:
+        | "payment"
+        | "card_purchase"
+        | "card_atm"
+        | "transfer"
+        | "other";
       transactionStatus: "booked" | "pending";
       vatRates: "25" | "12" | "6" | "0";
     };

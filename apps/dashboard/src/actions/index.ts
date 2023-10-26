@@ -6,10 +6,11 @@ import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
 import {
   createTeamBankAccounts,
   createTransactions,
+  updateSimilarTransactions,
   updateTransaction,
 } from "@midday/supabase/mutations";
 import { capitalCase } from "change-case";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 const baseUrl = "https://api.resend.com";
 
@@ -102,6 +103,7 @@ export async function initialTransactionsSync(ids: string[]) {
           amount: data.transactionAmount.amount,
           currency: data.transactionAmount.currency,
           bank_account_id: id,
+          category: data.amount > 0 ? "income" : null,
         })),
       );
     }),
@@ -116,5 +118,11 @@ export async function createTeamBankAccountsAction(accounts) {
 export async function updateTransactionAction(id: string, data: any) {
   const supabase = await getSupabaseServerActionClient();
   await updateTransaction(supabase, id, data);
+  revalidateTag("transactions");
+}
+
+export async function updateSimilarTransactionsAction(id: string) {
+  const supabase = await getSupabaseServerActionClient();
+  await updateSimilarTransactions(supabase, id);
   revalidateTag("transactions");
 }

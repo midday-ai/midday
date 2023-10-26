@@ -7,6 +7,7 @@ export default {
     rent: "Hyra",
     equipment: "Utrustning",
     income: "Inkomst",
+    transfer: "Överföring",
   },
   transaction_methods: {
     card_purchase: "Kortbetalning",

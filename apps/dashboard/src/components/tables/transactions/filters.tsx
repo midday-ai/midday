@@ -11,7 +11,7 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import { Calendar, Paperclip, Search, Tag } from "lucide-react";
+import { Archive, Calendar, Paperclip, Search, Tag } from "lucide-react";
 
 export const sections = [
   {
@@ -117,6 +117,27 @@ export const sections = [
       {
         id: "exclude",
         label: "No attachment",
+      },
+    ],
+  },
+  {
+    id: "category",
+    label: "Category",
+    icon: Archive,
+    type: SectionType.radio,
+    defaultValue: "all",
+    options: [
+      {
+        id: "all",
+        label: "All",
+      },
+      {
+        id: "include",
+        label: "Has category",
+      },
+      {
+        id: "exclude",
+        label: "No category",
       },
     ],
   },

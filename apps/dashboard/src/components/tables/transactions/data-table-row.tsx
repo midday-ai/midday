@@ -1,6 +1,7 @@
 "use client";
 
 import { Category } from "@/components/category";
+import { TransactionMethod } from "@/components/transaction-method";
 import { formatAmount } from "@/utils/format";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
@@ -74,7 +75,7 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
           ease: "easeInOut",
         }}
       >
-        <DataTableCell>
+        <DataTableCell className="w-[150px]">
           <Category name={data.category} />
         </DataTableCell>
       </motion.div>
@@ -88,7 +89,9 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
           ease: "easeInOut",
         }}
       >
-        <DataTableCell>{data.method}</DataTableCell>
+        <DataTableCell>
+          <TransactionMethod method={data.method} />
+        </DataTableCell>
       </motion.div>
 
       <motion.div

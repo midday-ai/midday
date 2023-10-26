@@ -68,6 +68,7 @@ type GetTransactionsParams = {
     search?: string;
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
+    category?: "include" | "exclude";
     date: {
       from?: string;
       to?: string;
@@ -80,7 +81,7 @@ export async function getTransactions(
   params: GetTransactionsParams,
 ) {
   const { from = 0, to, filter, sort } = params;
-  const { date = {}, search, status, attachments } = filter || {};
+  const { date = {}, search, status, attachments, category } = filter || {};
   const { data: userData } = await getUserDetails(supabase);
 
   const query = supabase
@@ -132,6 +133,14 @@ export async function getTransactions(
     query.not("attachment", "is", null);
   }
 
+  if (category === "exclude") {
+    query.is("category", null);
+  }
+
+  if (category === "include") {
+    query.not("category", "is", null);
+  }
+
   const { data, count } = await query.range(from, to);
 
   // Only calculate total amount when a fitler is applied
@@ -164,4 +173,21 @@ export async function getTransaction(supabase: Client, id: string) {
     `)
     .eq("id", id)
     .single();
+}
+
+export async function getSimilarTransactions(supabase: Client, id: string) {
+  const { data: userData } = await getUserDetails(supabase);
+
+  const transaction = await supabase
+    .from("transactions")
+    .select("name, category")
+    .eq("id", id)
+    .single();
+
+  return supabase
+    .from("transactions")
+    .select("id, amount", { count: "exact" })
+    .eq("name", transaction.data.name)
+    .eq("team_id", userData?.team_id)
+    .is("category", null);
 }

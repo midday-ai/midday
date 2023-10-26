@@ -100,8 +100,9 @@ export function TransactionDetails({ transactionId, onClose }) {
 
               <SelectCategory
                 isLoading={isLoading}
+                name={data?.name}
                 id={transactionId}
-                selectedId={data?.category}
+                selectedId={data?.category ?? undefined}
               />
 
               <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
@@ -117,7 +118,7 @@ export function TransactionDetails({ transactionId, onClose }) {
                   <AssignUser
                     isLoading={isLoading}
                     id={transactionId}
-                    selectedId={data?.assigned?.id}
+                    selectedId={data?.assigned?.id ?? undefined}
                   />
                 </div>
               </div>

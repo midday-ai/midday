@@ -40,11 +40,24 @@ export async function updateTransaction(
   id: string,
   data: any,
 ) {
-  try {
-    await supabase.from("transactions").update(data).eq("id", id);
-  } catch (err) {
-    console.log(err);
-  }
+  return supabase.from("transactions").update(data).eq("id", id);
+}
+
+export async function updateSimilarTransactions(supabase: Client, id: string) {
+  const { data: userData } = await getUserDetails(supabase);
+
+  const transaction = await supabase
+    .from("transactions")
+    .select("name, category")
+    .eq("id", id)
+    .single();
+
+  await supabase
+    .from("transactions")
+    .update({ category: transaction.data.category })
+    .eq("name", transaction.data.name)
+    .eq("team_id", userData?.team_id)
+    .is("category", null);
 }
 
 export type Attachment = {

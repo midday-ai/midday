@@ -1,5 +1,6 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import {
+  MdAccountBalanceWallet,
   MdDesk,
   MdDevices,
   MdFastfood,
@@ -284,4 +285,5 @@ export const Icons = {
   HomeWork: MdHomeWork,
   Payments: MdPayments,
   Devices: MdDevices,
+  AccountBalance: MdAccountBalanceWallet,
 };
