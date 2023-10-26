@@ -9,7 +9,7 @@ export function Header() {
 
   return (
     <header
-      className="pt-10 pb-5 flex justify-between px-5 lg:px-10 sticky top-0 backdrop-filter backdrop-blur-2xl z-[9999]"
+      className="pt-10 pb-5 flex justify-between px-5 lg:px-10 sticky top-0 backdrop-filter backdrop-blur-2xl z-[999]"
       style={{ background: "rgba(18, 18, 18,.8)" }}
     >
       <Link href="/">
