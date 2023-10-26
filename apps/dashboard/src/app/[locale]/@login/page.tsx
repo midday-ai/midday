@@ -12,7 +12,7 @@ export default function Login() {
       </div>
 
       <div className="flex min-h-screen justify-center items-center">
-        <div className="pointer-events-none relative z-20 m-auto flex w-full max-w-[380px] flex-col">
+        <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
           <div className="flex w-full flex-col relative">
             <div className="w-[2px] h-[2px] bg-white rounded-full absolute -top-[20px] -left-[100px] animate-[pulse_2s_ease-in-out_infinite]" />
             <div className="w-[3px] h-[3px] bg-white rounded-full absolute -top-[70px] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
@@ -55,7 +55,8 @@ export default function Login() {
 
             <p className="text-xs text-[#606060]">
               By clicking Continue with Google, you acknowledge that you have
-              read and understood, and agree to Midday's and Privacy Policy.
+              read and understood, and agree to Midday's and{" "}
+              <a href="https://midday.ai/policy">Privacy Policy</a>.
             </p>
           </div>
         </div>

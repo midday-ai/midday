@@ -3,8 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "module": "NodeNext",
-  "moduleResolution": "NodeNext",
   "files": [
     "index.ts",
     "tailwind.config.ts",
@@ -71,10 +69,10 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
-    "lucide-react": "^0.288.0",
+    "lucide-react": "^0.289.0",
     "react-day-picker": "^8.9.1",
     "tailwind-merge": "^1.14.0",
-    "tailwindcss": "^3.3.3",
+    "tailwindcss": "^3.3.5",
     "tailwindcss-animate": "^1.0.7"
   }
 }

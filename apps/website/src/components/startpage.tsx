@@ -5,12 +5,12 @@ import { useScopedI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import overview from "public/overview.png";
 import search from "public/search.png";
 import transactions from "public/transactions.png";
 import { useState } from "react";
 import { experimental_useFormStatus as useFormStatus } from "react-dom";
+import { Header } from "./header";
 
 function SubmitButton() {
   const t = useScopedI18n("startpage");
@@ -39,30 +39,10 @@ export function StartPage() {
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
-    <div>
+    <div className="h-screen relative min-h-[1100px]">
+      <Header />
       <div className="px-5 lg:px-10">
-        <header className="py-10 flex justify-between">
-          <Link href="/">
-            <Icons.Logo />
-          </Link>
-
-          <Link href="https://app.midday.ai">
-            <button
-              type="button"
-              className="relative rounded-lg overflow-hidden p-[1px]"
-              style={{
-                background:
-                  "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
-              }}
-            >
-              <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-white px-8 h-[39px] h-full font-normal">
-                {t("signIn")}
-              </span>
-            </button>
-          </Link>
-        </header>
-
-        <div className="text-center mt-2 lg:mt-20">
+        <div className="text-center mt-20">
           <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
             <h1 className="font-medium pb-1 text-5xl">{t("title")}</h1>
           </div>
@@ -113,6 +93,45 @@ export function StartPage() {
       </div>
 
       <div className="flex w-full">
+        <div className="grid md:grid-cols-6 grid-cols-3 gap-[32px] m-auto mt-12">
+          <div className="w-[100px] text-center leading-tight">
+            <div className="w-[100px] h-[65px] border rounded-lg mb-2 flex items-center justify-center">
+              <Icons.OpenSource />
+            </div>
+            <span className="text-[#606060] text-sm">{t("open")}</span>
+          </div>
+          <div className="w-[100px] text-center leading-tight">
+            <div className="w-[100px] h-[65px] border rounded-lg mb-2 flex items-center justify-center">
+              <Icons.ChartGantt />
+            </div>
+            <span className="text-[#606060] text-sm">{t("live")}</span>
+          </div>
+          <div className="w-[100px] text-center leading-tight">
+            <div className="w-[100px] h-[65px] border rounded-lg mb-2 flex items-center justify-center">
+              <Icons.FileDocument />
+            </div>
+            <span className="text-[#606060] text-sm">{t("document")}</span>
+          </div>
+          <div className="w-[100px] text-center leading-tight">
+            <div className="w-[100px] h-[65px] border rounded-lg mb-2 flex items-center justify-center">
+              <Icons.ReceiptText />
+            </div>
+            <span className="text-[#606060] text-sm">{t("reciept")}</span>
+          </div>
+          <div className="w-[100px] text-center leading-tight">
+            <div className="w-[100px] h-[65px] border rounded-lg mb-2 flex items-center justify-center">
+              <Icons.TimeCog />
+            </div>
+            <span className="text-[#606060] text-sm">{t("time")}</span>
+          </div>
+          <div className="w-[100px] text-center leading-tight">
+            <div className="w-[100px] h-[65px] border rounded-lg mb-2 flex items-center justify-center">
+              <Icons.CreationOutline />
+            </div>
+            <span className="text-[#606060] text-sm">{t("ai")}</span>
+          </div>
+        </div>
+
         <div className="w-[1px] h-[1px] bg-white rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
         <div
           className="w-[5px] h-[5px] bg-white rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
@@ -127,7 +146,7 @@ export function StartPage() {
           style={{ animationDelay: "700ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full absolute top-[44%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "1s" }}
         />
         <div
@@ -152,7 +171,7 @@ export function StartPage() {
           style={{ animationDelay: "50ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[47%] right-[29%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "10ms" }}
         />
         <div
@@ -164,31 +183,29 @@ export function StartPage() {
           style={{ animationDelay: "190ms" }}
         />
 
-        <div className="flex-1 relative">
+        <div className="absolute bottom-0 w-full">
           <Image
-            src={transactions}
-            alt="Midday | Transactions"
+            src={overview}
+            alt="Midday | Overview"
             width={993}
             height={645}
             style={{
               objectFit: "contain",
             }}
           />
-        </div>
 
-        <Image
-          src={search}
-          alt="Midday | Search"
-          width={638}
-          height={260}
-          className="absolute left-[50%] -ml-[319px] z-10 -bottom-12"
-        />
+          <Image
+            src={search}
+            alt="Midday | Search"
+            width={638}
+            height={260}
+            className="absolute left-[50%] -ml-[319px] z-10 bottom-3"
+          />
 
-        <div className="flex-1 relative">
           <Image
             className="absolute right-0 bottom-0"
-            src={overview}
-            alt="Midday | Overview"
+            src={transactions}
+            alt="Midday | Transactions"
             width={993}
             height={645}
             style={{
