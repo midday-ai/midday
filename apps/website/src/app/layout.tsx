@@ -13,6 +13,7 @@ const fontSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://midday.ai"),
   title: "Midday | The financial OS for your business",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
