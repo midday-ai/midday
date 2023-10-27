@@ -1,23 +1,25 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 type UploadParams = {
   file: File;
   path: string;
+  bucket: string;
 };
 
 export async function upload(
   client: SupabaseClient,
-  { file, path }: UploadParams,
+  { file, path, bucket }: UploadParams,
 ) {
-  const bytes = await file.arrayBuffer();
-  const bucket = client.storage.from(path);
+  const b = client.storage.from(bucket);
+  const fullPath = `${path}/${file.name}`;
 
-  const result = await bucket.upload(file.name, bytes, {
+  const result = await b.upload(fullPath, file, {
     upsert: true,
+    cacheControl: "3600",
   });
 
   if (!result.error) {
-    return bucket.getPublicUrl(file.name).data.publicUrl;
+    return b.getPublicUrl(fullPath).data.publicUrl;
   }
 
   throw result.error;

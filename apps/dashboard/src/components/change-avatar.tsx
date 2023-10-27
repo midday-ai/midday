@@ -1,5 +1,7 @@
-import { getUserDetails } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+"use client";
+
+import { updateUserAction } from "@/actions/update-user-action";
+import { useUpload } from "@/hooks/useUpload";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   Card,
@@ -8,10 +10,29 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hook";
+import { useRef } from "react";
 
-export async function ChangeAvatar() {
-  const supabase = createClient();
-  const { data: userData } = await getUserDetails(supabase);
+export function ChangeAvatar({ userId, avatarUrl, fullName }) {
+  const action = useAction(updateUserAction);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { isLoading, uploadFile } = useUpload();
+
+  const handleUpload = async (evt: React.ChangeEvent<HTMLInputElement>) => {
+    const { files } = evt.target;
+    const selectedFile = files as FileList;
+
+    const { url } = await uploadFile({
+      bucket: "avatars",
+      path: userId,
+      file: selectedFile[0] as File,
+    });
+
+    if (url) {
+      action.execute({ avatar_url: url, path: "/settings" });
+    }
+  };
 
   return (
     <Card>
@@ -24,11 +45,28 @@ export async function ChangeAvatar() {
           </CardDescription>
         </CardHeader>
 
-        <Avatar className="rounded-full w-16 h-16">
-          <AvatarImage src={userData.avatar_url} />
-          <AvatarFallback>
-            <span className="text-md">{userData.full_name?.charAt(0)}</span>
-          </AvatarFallback>
+        <Avatar
+          className="rounded-full w-16 h-16 flex items-center justify-center bg-muted"
+          onClick={() => inputRef?.current?.click()}
+        >
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <AvatarImage src={avatarUrl} />
+              <AvatarFallback>
+                <span className="text-md">{fullName?.charAt(0)}</span>
+              </AvatarFallback>
+            </>
+          )}
+
+          <input
+            ref={inputRef}
+            type="file"
+            style={{ display: "none" }}
+            multiple={false}
+            onChange={handleUpload}
+          />
         </Avatar>
       </div>
       <CardFooter>An avatar is optional but strongly recommended.</CardFooter>

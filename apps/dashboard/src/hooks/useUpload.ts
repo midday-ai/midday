@@ -1,5 +1,4 @@
 import { createClient } from "@midday/supabase/client";
-import { getUserDetails } from "@midday/supabase/queries";
 import { upload } from "@midday/supabase/storage";
 import { useState } from "react";
 
@@ -7,24 +6,20 @@ export function useUpload() {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(false);
 
-  const uploadFile = async ({ bucketName, file, path }) => {
+  const uploadFile = async ({ file, path, bucket }) => {
     setLoading(true);
 
-    const { data: userData } = await getUserDetails(supabase);
-
-    const basePath = `${bucketName}/${userData?.team_id}/${path}`;
-    const filePath = `${userData?.team_id}/${path}/${file.name}`;
-
     const url = await upload(supabase, {
-      path: basePath,
+      path,
       file,
+      bucket,
     });
 
     setLoading(false);
 
     return {
       url,
-      path: filePath,
+      path: `${path}/${file.name}`,
     };
   };
 

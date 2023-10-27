@@ -7,17 +7,16 @@ import {
   createAttachments,
   deleteAttachment,
 } from "@midday/supabase/mutations";
-import { download } from "@midday/supabase/storage";
+import { getUserDetails } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
-import { AnimatePresence, motion, useIsPresent } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { File, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 const Item = ({ file, onDelete }) => {
-  const isPresent = useIsPresent();
   const animations = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
@@ -85,11 +84,13 @@ export function Attachments({ id, data }) {
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
     setFiles((prev) => [...prev, ...acceptedFiles]);
 
+    const { data: userData } = await getUserDetails(supabase);
+
     const uploaded = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
         const { path } = await uploadFile({
-          bucketName: "documents",
-          path: `transactions/${id}`,
+          bucket: "documents",
+          path: `${userData?.team_id}/transactions/${id}`,
           file: acceptedFile,
         });
 

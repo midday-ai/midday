@@ -15,8 +15,12 @@ export default async function Account() {
 
   return (
     <div className="flex flex-col space-y-12">
-      <ChangeAvatar />
-      <DisplayName defaultValue={userData.full_name} />
+      <ChangeAvatar
+        userId={userData.id}
+        fullName={userData.full_name}
+        avatarUrl={userData.avatar_url}
+      />
+      <DisplayName fullName={userData.full_name} />
       <DeleteAccount />
     </div>
   );

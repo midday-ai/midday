@@ -24,20 +24,12 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useForm } from "react-hook-form";
 
-export function DisplayName({ defaultValue }) {
-  const action = useAction(updateUserAction, {
-    onSuccess: () => {
-      console.log("success");
-    },
-    onError: (error) => {
-      console.log("error");
-    },
-  });
-
+export function DisplayName({ fullName }) {
+  const action = useAction(updateUserAction);
   const form = useForm<UpdateUserFormValues>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      full_name: defaultValue,
+      full_name: fullName,
       path: "/settings",
     },
   });
