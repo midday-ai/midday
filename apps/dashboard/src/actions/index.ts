@@ -103,7 +103,7 @@ export async function initialTransactionsSync(ids: string[]) {
           amount: data.transactionAmount.amount,
           currency: data.transactionAmount.currency,
           bank_account_id: id,
-          category: data.amount > 0 ? "income" : null,
+          category: data.transactionAmount.amount > 0 ? "income" : null,
         })),
       );
     }),

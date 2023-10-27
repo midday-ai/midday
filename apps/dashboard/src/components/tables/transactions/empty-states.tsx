@@ -16,7 +16,7 @@ export function NoResults({ hasFilters }) {
           <p className="text-[#606060] text-sm">
             {hasFilters
               ? "Try another search, or adjusting the filters"
-              : "There are no transactions imported"}
+              : "There are no transactions imported yet"}
           </p>
         </div>
 
