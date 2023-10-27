@@ -1,5 +1,5 @@
 import { formatAmount } from "@/utils/format";
-import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { createClient } from "@midday/supabase/client";
 import { getTransaction } from "@midday/supabase/queries";
 import {
   Accordion,
@@ -20,7 +20,7 @@ import { SelectCategory } from "./select-category";
 import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = createClient();
   const [data, setData] = useState();
   const [isLoading, setLoading] = useState(true);
 

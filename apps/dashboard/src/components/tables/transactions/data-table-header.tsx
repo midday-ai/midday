@@ -38,8 +38,8 @@ export function DataTableHeader({ collapsed }: Props) {
   );
 
   return (
-    <div className="sticky -top-[1px] z-10 bg-background">
-      <div className="flex border-b items-center h-[45px] hover:bg-secondary">
+    <div className="sticky -top-[1px] z-10 backdrop-blur backdrop-filter bg bg-opacity-50 bg-background">
+      <div className="flex items-center h-[45px] hover:bg-secondary">
         <DataTableCell className="w-[100px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"

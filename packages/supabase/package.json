@@ -11,7 +11,7 @@
     "db:generate": "supabase gen types typescript --project-id pytddvqiozwrhfbwqazp --schema public > src/types/db.ts"
   },
   "dependencies": {
-    "@supabase/auth-helpers-nextjs": "^0.8.1",
+    "@supabase/ssr": "^0.0.4",
     "@supabase/supabase-js": "^2.38.3",
     "supabase": "^1.106.1"
   },
@@ -19,11 +19,8 @@
     "typescript": "^5.2.2"
   },
   "exports": {
-    "./action-client": "./src/client/action-client.ts",
-    "./route-client": "./src/client/route-client.ts",
-    "./browser-client": "./src/client/browser-client.ts",
-    "./middleware-client": "./src/client/middleware-client.ts",
-    "./server-client": "./src/client/server-client.ts",
+    "./server": "./src/client/server.ts",
+    "./client": "./src/client/client.ts",
     "./mutations": "./src/mutations/index.ts",
     "./queries": "./src/queries/index.ts",
     "./storage": "./src/utils/storage.ts"

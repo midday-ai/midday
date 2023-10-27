@@ -1,5 +1,5 @@
 import { updateTransactionAction } from "@/actions";
-import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { createClient } from "@midday/supabase/client";
 import { getTeamMembers } from "@midday/supabase/queries";
 import { Label } from "@midday/ui/label";
 import {
@@ -14,7 +14,7 @@ import { startTransition, useEffect, useState } from "react";
 
 export function AssignUser({ id, selectedId, isLoading }) {
   const [value, setValue] = useState();
-  const supabase = getSupabaseBrowserClient();
+  const supabase = createClient();
   const [users, setUsers] = useState([]);
 
   const handleOnValueChange = (value: string) => {

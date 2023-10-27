@@ -1,10 +1,10 @@
-import { getSupabasRouteClient } from "@midday/supabase/route-client";
+import { createClient } from "@midday/supabase/server";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextApiRequest, res: NextApiResponse) {
-  const supabase = getSupabasRouteClient();
+  const supabase = createClient();
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get("path");
   const filename = requestUrl.searchParams.get("filename");

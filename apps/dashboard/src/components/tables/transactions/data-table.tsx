@@ -1,12 +1,11 @@
 "use client";
 
 import { TransactionDetails } from "@/components/transaction-details";
-import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { createClient } from "@midday/supabase/client";
 import { AnimatePresence, motion } from "framer-motion";
 import { useQueryState } from "next-usequerystate";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useOnClickOutside } from "usehooks-ts";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";
 
@@ -20,7 +19,7 @@ type ItemsProps = {
 };
 
 export function DataTable({ data, teamId }: ItemsProps) {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = createClient();
   const router = useRouter();
   const [transactionId, setTransactionId] = useQueryState("id", {
     shallow: false, // TODO: Fix without this (redirect after mutation)

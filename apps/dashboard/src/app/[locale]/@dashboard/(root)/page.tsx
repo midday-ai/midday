@@ -1,5 +1,5 @@
 import { getTeamBankAccounts } from "@midday/supabase/queries";
-import { getSupabaseServerClient } from "@midday/supabase/server-client";
+import { createClient } from "@midday/supabase/server";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Overview() {
-  const supabase = await getSupabaseServerClient();
+  const supabase = await createClient();
   const { data } = await getTeamBankAccounts(supabase);
 
   if (!data?.length) {

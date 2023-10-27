@@ -1,10 +1,10 @@
-import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { createClient } from "@midday/supabase/client";
 import { getUserDetails } from "@midday/supabase/queries";
 import { upload } from "@midday/supabase/storage";
 import { useState } from "react";
 
 export function useUpload() {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = createClient();
   const [isLoading, setLoading] = useState(false);
 
   const uploadFile = async ({ bucketName, file, path }) => {

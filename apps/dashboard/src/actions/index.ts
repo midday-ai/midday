@@ -2,20 +2,20 @@
 
 import { env } from "@/env.mjs";
 import { getAccessToken, getTransactions } from "@midday/gocardless";
-import { getSupabaseServerActionClient } from "@midday/supabase/action-client";
 import {
   createTeamBankAccounts,
   createTransactions,
   updateSimilarTransactions,
   updateTransaction,
 } from "@midday/supabase/mutations";
+import { createClient } from "@midday/supabase/server";
 import { capitalCase } from "change-case";
 import { revalidateTag } from "next/cache";
 
 const baseUrl = "https://api.resend.com";
 
 export async function sendFeeback(formData: FormData) {
-  const supabase = await getSupabaseServerActionClient();
+  const supabase = await createClient();
   const feedback = formData.get("feedback");
   const {
     data: { session },
@@ -75,7 +75,7 @@ const mapTransactionMethod = (method: string) => {
 };
 
 export async function initialTransactionsSync(ids: string[]) {
-  const supabase = await getSupabaseServerActionClient();
+  const supabase = await createClient();
   const { access } = await getAccessToken();
 
   await Promise.all(
@@ -111,18 +111,18 @@ export async function initialTransactionsSync(ids: string[]) {
 }
 
 export async function createTeamBankAccountsAction(accounts) {
-  const supabase = await getSupabaseServerActionClient();
+  const supabase = await createClient();
   await createTeamBankAccounts(supabase, accounts);
 }
 
 export async function updateTransactionAction(id: string, data: any) {
-  const supabase = await getSupabaseServerActionClient();
+  const supabase = await createClient();
   await updateTransaction(supabase, id, data);
   revalidateTag("transactions");
 }
 
 export async function updateSimilarTransactionsAction(id: string) {
-  const supabase = await getSupabaseServerActionClient();
+  const supabase = await createClient();
   await updateSimilarTransactions(supabase, id);
   revalidateTag("transactions");
 }

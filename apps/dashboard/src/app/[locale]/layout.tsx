@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from "@midday/supabase/server-client";
+import { createClient } from "@midday/supabase/server";
 import { Provider } from "./provider";
 
 const ADMINS = [
@@ -18,7 +18,7 @@ export default async function Layout({
   closed: React.ReactNode;
   params: { locale: string };
 }) {
-  const supabase = getSupabaseServerClient();
+  const supabase = createClient();
 
   const {
     data: { session },

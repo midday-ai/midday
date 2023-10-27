@@ -1,4 +1,4 @@
-import { getSupabaseMiddlewareClient } from "@midday/supabase/middleware-client";
+import { createClient } from "@midday/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,7 +10,7 @@ const I18nMiddleware = createI18nMiddleware({
 
 export async function middleware(req: NextRequest) {
   const res = I18nMiddleware(req);
-  const supabase = getSupabaseMiddlewareClient(req, res);
+  const supabase = createClient();
   const { data } = await supabase.auth.getSession();
 
   if (!data.session && req.nextUrl.pathname !== "/") {

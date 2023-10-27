@@ -2,7 +2,7 @@
 
 import { useUpload } from "@/hooks/useUpload";
 import { formatSize } from "@/utils/format";
-import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { createClient } from "@midday/supabase/client";
 import {
   createAttachments,
   deleteAttachment,
@@ -71,7 +71,7 @@ type Attachment = {
 };
 
 export function Attachments({ id, data }) {
-  const supabase = getSupabaseBrowserClient();
+  const supabase = createClient();
   const router = useRouter();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { isLoading, uploadFile } = useUpload();

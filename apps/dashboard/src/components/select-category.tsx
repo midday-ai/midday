@@ -3,9 +3,8 @@ import {
   updateTransactionAction,
 } from "@/actions";
 import { useI18n } from "@/locales/client";
-import { getSupabaseBrowserClient } from "@midday/supabase/browser-client";
+import { createClient } from "@midday/supabase/client";
 import { getSimilarTransactions } from "@midday/supabase/queries";
-import { Button } from "@midday/ui/button";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -32,7 +31,7 @@ const categories = [
 
 export function SelectCategory({ id, name, selectedId, isLoading }) {
   const [value, setValue] = useState();
-  const supabase = getSupabaseBrowserClient();
+  const supabase = createClient();
   const t = useI18n();
   const { toast } = useToast();
 

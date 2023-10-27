@@ -6,7 +6,7 @@ import {
   getTransactions,
   getUserDetails,
 } from "@midday/supabase/queries";
-import { getSupabaseServerClient } from "@midday/supabase/server-client";
+import { createClient } from "@midday/supabase/server";
 import { BottomBar } from "./bottom-bar";
 import { NoAccountConnected, NoResults } from "./empty-states";
 
@@ -15,7 +15,7 @@ const pageSize = 50;
 export async function Table({ filter, page, sort }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
-  const supabase = await getSupabaseServerClient();
+  const supabase = await createClient();
   const { data: userData } = await getUserDetails(supabase);
   const { data, meta } = await getTransactions(supabase, {
     to,

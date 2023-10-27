@@ -1,4 +1,4 @@
-import { getSupabaseServerClient } from "@midday/supabase/server-client";
+import { createClient } from "@midday/supabase/server";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import { SignOut } from "./sign-out";
 import ThemeSwitch from "./theme-switch";
 
 export async function UserMenu() {
-  const supabase = getSupabaseServerClient();
+  const supabase = createClient();
   const { data } = await supabase.auth.getSession();
 
   return (
@@ -47,12 +47,6 @@ export async function UserMenu() {
             <DropdownMenuItem>
               Team
               <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </Link>
-          <Link href="/onboarding">
-            <DropdownMenuItem>
-              Onboarding
-              <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>
