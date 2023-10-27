@@ -39,7 +39,7 @@ export function Row({ children, onSelect, selected }) {
   return (
     <div
       className={cn(
-        "flex border-b items-center h-[45px] hover:bg-secondary",
+        "flex items-center h-[45px] hover:bg-secondary border-t",
         selected && "bg-secondary",
       )}
       onClick={onSelect}
@@ -75,7 +75,7 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
           ease: "easeInOut",
         }}
       >
-        <DataTableCell className="w-[150px]">
+        <DataTableCell className="w-[200px]">
           <Category name={data.category} />
         </DataTableCell>
       </motion.div>
