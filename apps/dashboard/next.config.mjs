@@ -16,9 +16,6 @@ const config = {
     ],
   },
   transpilePackages: ["@midday/ui"],
-  experimental: {
-    serverActions: true,
-  },
   eslint: {
     ignoreDuringBuilds: true,
   },

@@ -1,11 +1,13 @@
 import { Button } from "@midday/ui/button";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Input } from "@midday/ui/input";
 
 export function DisplayName() {
   return (
@@ -13,12 +15,17 @@ export function DisplayName() {
       <CardHeader>
         <CardTitle>Display name</CardTitle>
         <CardDescription>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Please enter your full name, or a display name you are comfortable
+          with.
         </CardDescription>
       </CardHeader>
-      {/* <CardContent>wef</CardContent> */}
+
+      <CardContent>
+        <Input className="max-w-[50%]" />
+      </CardContent>
+
       <CardFooter className="flex justify-between">
-        <div>Proin viverra sem quis arcu lacinia</div>
+        <div>Please use 32 characters at maximum.</div>
 
         <Button>Save</Button>
       </CardFooter>

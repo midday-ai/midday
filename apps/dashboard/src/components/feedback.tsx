@@ -7,7 +7,7 @@ import { Textarea } from "@midday/ui/textarea";
 import { cn } from "@midday/ui/utils";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { experimental_useFormStatus as useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

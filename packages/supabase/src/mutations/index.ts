@@ -43,6 +43,11 @@ export async function updateTransaction(
   return supabase.from("transactions").update(data).eq("id", id);
 }
 
+export async function updateUser(supabase: Client, data: any) {
+  const { data: userData } = await getUserDetails(supabase);
+  return supabase.from("users").update(data).eq("id", userData?.id).select();
+}
+
 export async function updateSimilarTransactions(supabase: Client, id: string) {
   const { data: userData } = await getUserDetails(supabase);
 

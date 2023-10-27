@@ -9,7 +9,7 @@ import overview from "public/overview.png";
 import search from "public/search.png";
 import transactions from "public/transactions.png";
 import { useState } from "react";
-import { experimental_useFormStatus as useFormStatus } from "react-dom";
+import { useFormStatus } from "react-dom";
 import { Header } from "./header";
 
 function SubmitButton() {

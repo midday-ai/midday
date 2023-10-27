@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ]}
       />
 
-      <main className="mt-8">{children}</main>
+      <main className="mt-12">{children}</main>
     </div>
   );
 }

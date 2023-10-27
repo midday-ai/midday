@@ -24,14 +24,14 @@ export function DeleteAccount() {
       <CardHeader>
         <CardTitle>Delete account</CardTitle>
         <CardDescription>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce
-          tincidunt eros in tellus tincidunt, ut elementum neque semper. Nunc
-          faucibus tortor id tincidunt fermentum. Pellentesque dictum.
+          Permanently remove your Personal Account and all of its contents from
+          the Midday platform. This action is not reversible, so please continue
+          with caution.
         </CardDescription>
       </CardHeader>
       {/* <CardContent>wef</CardContent> */}
       <CardFooter className="flex justify-between">
-        <div>Proin viverra sem quis arcu lacinia</div>
+        <div />
 
         <AlertDialog>
           <AlertDialogTrigger asChild>

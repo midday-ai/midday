@@ -22,7 +22,7 @@ export async function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="rounded-full w-8 h-8">
-          <AvatarImage src={userData.avatar_url} alt="@shadcn" />
+          <AvatarImage src={userData.avatar_url} />
           <AvatarFallback>
             <span className="text-xs">{userData.full_name?.charAt(0)}</span>
           </AvatarFallback>
