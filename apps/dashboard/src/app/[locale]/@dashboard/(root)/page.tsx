@@ -1,3 +1,4 @@
+import { Chart } from "@/components/chart";
 import { getTeamBankAccounts } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Metadata } from "next";
@@ -15,5 +16,6 @@ export default async function Overview() {
     redirect("/onboarding");
   }
 
-  return <p>Overview</p>;
+  return null;
+  return <Chart />;
 }

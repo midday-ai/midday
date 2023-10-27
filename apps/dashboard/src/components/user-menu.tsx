@@ -37,12 +37,12 @@ export async function UserMenu() {
             </DropdownMenuItem>
           </Link>
 
-          <Link href="/settings/team">
+          {/* <Link href="/settings/team">
             <DropdownMenuItem>
               Team
               <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
             </DropdownMenuItem>
-          </Link>
+          </Link> */}
 
           <Link href="/onboarding">
             <DropdownMenuItem>
