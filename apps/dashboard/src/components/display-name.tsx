@@ -1,3 +1,8 @@
+"use client";
+
+import { UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
+import { updateUserAction } from "@/actions/update-user-action";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
   Card,
@@ -7,28 +12,82 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hook";
+import { useForm } from "react-hook-form";
 
-export function DisplayName() {
+export function DisplayName({ defaultValue }) {
+  const action = useAction(updateUserAction, {
+    onSuccess: () => {
+      console.log("success");
+    },
+    onError: (error) => {
+      console.log("error");
+    },
+  });
+
+  const form = useForm<UpdateUserFormValues>({
+    resolver: zodResolver(updateUserSchema),
+    defaultValues: {
+      full_name: defaultValue,
+      path: "/settings",
+    },
+  });
+
+  const onSubmit = form.handleSubmit(async (data) => {
+    action.execute({
+      full_name: data.full_name,
+      path: data.path,
+    });
+  });
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Display name</CardTitle>
-        <CardDescription>
-          Please enter your full name, or a display name you are comfortable
-          with.
-        </CardDescription>
-      </CardHeader>
+    <Form {...form}>
+      <form onSubmit={onSubmit}>
+        <Card>
+          <CardHeader>
+            <CardTitle>Display name</CardTitle>
+            <CardDescription>
+              Please enter your full name, or a display name you are comfortable
+              with.
+            </CardDescription>
+          </CardHeader>
 
-      <CardContent>
-        <Input className="max-w-[50%]" />
-      </CardContent>
+          <CardContent>
+            <FormField
+              control={form.control}
+              name="full_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </CardContent>
 
-      <CardFooter className="flex justify-between">
-        <div>Please use 32 characters at maximum.</div>
-
-        <Button>Save</Button>
-      </CardFooter>
-    </Card>
+          <CardFooter className="flex justify-between">
+            <div>Please use 32 characters at maximum.</div>
+            <Button type="submit" disabled={action.status === "executing"}>
+              {action.status === "executing" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Save"
+              )}
+            </Button>
+          </CardFooter>
+        </Card>
+      </form>
+    </Form>
   );
 }

@@ -29,13 +29,15 @@ export function DeleteAccount() {
           with caution.
         </CardDescription>
       </CardHeader>
-      {/* <CardContent>wef</CardContent> */}
       <CardFooter className="flex justify-between">
         <div />
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="hover:bg-destructive">
+            <Button
+              variant="destructive"
+              className="hover:bg-destructive text-muted"
+            >
               Delete
             </Button>
           </AlertDialogTrigger>

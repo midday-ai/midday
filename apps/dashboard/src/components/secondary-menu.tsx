@@ -12,6 +12,7 @@ export function SecondaryMenu({ items }) {
       <ul className="flex space-x-6 text-sm">
         {items.map((item) => (
           <Link
+            key={item.path}
             href={item.path}
             className={cn(
               "text-[#606060]",
