@@ -8,6 +8,8 @@ export default {
     equipment: "Equipment",
     income: "Income",
     transfer: "Transfer",
+    activity: "Activity",
+    other: "Other",
   },
   transaction_methods: {
     card_purchase: "Card Purchase",

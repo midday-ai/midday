@@ -1,3 +1,5 @@
+"use client";
+
 import { formatAmount } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTransaction } from "@midday/supabase/queries";
@@ -12,7 +14,7 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { Note } from "./note";
@@ -36,7 +38,9 @@ export function TransactionDetails({ transactionId, onClose }) {
       }
     }
 
-    fetchData();
+    if (transactionId) {
+      fetchData();
+    }
   }, [transactionId, supabase]);
 
   return (

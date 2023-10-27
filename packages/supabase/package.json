@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@supabase/ssr": "^0.0.4",
-    "@supabase/supabase-js": "^2.38.3",
+    "@supabase/supabase-js": "^2.38.4",
     "supabase": "^1.106.1"
   },
   "devDependencies": {

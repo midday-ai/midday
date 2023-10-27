@@ -8,6 +8,8 @@ export default {
     equipment: "Utrustning",
     income: "Inkomst",
     transfer: "Överföring",
+    activity: "Aktivitet",
+    other: "Annan",
   },
   transaction_methods: {
     card_purchase: "Kortbetalning",

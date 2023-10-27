@@ -70,8 +70,9 @@ export function SignupApps() {
           </button>
         </div>
         <p className="text-sm text-[#B0B0B0]">
-          We’re currently developing our iOS and Android apps. Sign up <br />
-          below if you want to be notified for the beta release.
+          We’re currently developing our iOS, Android and Mac apps. Sign up{" "}
+          <br />
+          below if you want to get notified for the beta release.
         </p>
 
         <div className="mt-8">

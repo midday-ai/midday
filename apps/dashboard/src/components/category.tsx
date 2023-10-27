@@ -19,6 +19,10 @@ export function CategoryIcon({ name, size = 18 }) {
       return <Icons.Devices className="text-[#E9BE26]" size={size} />;
     case "transfer":
       return <Icons.AccountBalance className="text-[#FF902B]" size={size} />;
+    case "other":
+      return <Icons.Fence className="text-[#E926B2]" size={size} />;
+    case "activity":
+      return <Icons.Celebration className="text-[#E5E926]" size={size} />;
     default:
       return null;
   }

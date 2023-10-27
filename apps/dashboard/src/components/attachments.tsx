@@ -33,12 +33,12 @@ const Item = ({ file, onDelete }) => {
       layout
       className="flex items-center justify-between"
     >
-      <div className="flex space-x-4 w-[80%] items-center">
+      <div className="flex space-x-4 items-center">
         <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center">
           <File size={18} />
         </div>
 
-        <div className="flex flex-col space-y-0.5">
+        <div className="flex flex-col space-y-0.5 w-80">
           <a
             href={`/api/download/document?path=${file.path}&filename=${file.name}`}
             download

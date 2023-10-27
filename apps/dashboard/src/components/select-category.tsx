@@ -27,6 +27,8 @@ const categories = [
   "transfer",
   "meals",
   "equipment",
+  "activity",
+  "other",
 ];
 
 export function SelectCategory({ id, name, selectedId, isLoading }) {
@@ -46,7 +48,9 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
     if (transactions?.data?.length) {
       toast({
         duration: 6000,
-        description: `Categorize ${transactions?.data?.length} transactions form ${name} as ${value} too?`,
+        description: `Categorize ${
+          transactions?.data?.length
+        } transactions form ${name} as ${t(`categories.${value}`)} too?`,
         action: (
           <ToastAction altText="Yes" onClick={handleUpdateSimilar}>
             Yes
