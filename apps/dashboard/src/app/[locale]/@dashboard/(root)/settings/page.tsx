@@ -18,7 +18,7 @@ export default async function Account() {
       <ChangeAvatar
         userId={userData.id}
         fullName={userData.full_name}
-        avatarUrl={userData.avatar_url}
+        avatarUrl={userData?.avatar_url}
       />
       <DisplayName fullName={userData.full_name} />
       <DeleteAccount />

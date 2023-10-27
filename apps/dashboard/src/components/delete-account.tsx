@@ -1,3 +1,6 @@
+"use client";
+
+import { deleteUserAction } from "@/actions/delete-user-action";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +20,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { Loader2 } from "lucide-react";
+import { useTransition } from "react";
 
 export function DeleteAccount() {
+  const [isPending, startTransition] = useTransition();
+
   return (
     <Card className="border-destructive">
       <CardHeader>
@@ -51,7 +58,15 @@ export function DeleteAccount() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction>Continue</AlertDialogAction>
+              <AlertDialogAction
+                onClick={() => startTransition(() => deleteUserAction())}
+              >
+                {isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Continue"
+                )}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -5,6 +5,7 @@ const ADMINS = [
   "ec10c095-8cf7-4ba3-a62e-98f2a3d40c4c",
   "7d723617-c2e1-4b71-8bf4-fb02479b264a",
   "efea0311-0786-4f70-9b5a-63e3efa5d319",
+  "2f76981b-fc66-479c-8203-521a5a1f734a",
 ];
 
 export default async function Layout({

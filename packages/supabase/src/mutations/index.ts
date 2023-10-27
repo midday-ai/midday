@@ -1,4 +1,4 @@
-import { getUserDetails } from "../queries";
+import { getSession, getUserDetails } from "../queries";
 import { Client } from "../types";
 import { remove } from "../utils/storage";
 
@@ -45,7 +45,18 @@ export async function updateTransaction(
 
 export async function updateUser(supabase: Client, data: any) {
   const { data: userData } = await getUserDetails(supabase);
+
   return supabase.from("users").update(data).eq("id", userData?.id).select();
+}
+
+export async function deleteUser(supabase: Client) {
+  const {
+    data: { session },
+  } = await getSession(supabase);
+  // await supabase.auth.admin.deleteUser(session?.user.id);
+  // TODO: Delete files etc
+  await supabase.from("users").delete().eq("id", session?.user.id);
+  await supabase.auth.signOut();
 }
 
 export async function updateSimilarTransactions(supabase: Client, id: string) {
