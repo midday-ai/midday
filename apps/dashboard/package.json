@@ -16,6 +16,7 @@
     "@midday/gocardless": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
+    "@vercel/kv": "^0.2.3",
     "change-case": "^5.1.2",
     "framer-motion": "^10.16.4",
     "next": "^14.0.0",

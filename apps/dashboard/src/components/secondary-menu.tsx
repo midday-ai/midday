@@ -8,7 +8,7 @@ export function SecondaryMenu({ items }) {
   const pathname = usePathname();
 
   return (
-    <nav className="mt-4">
+    <nav>
       <ul className="flex space-x-6 text-sm">
         {items.map((item) => (
           <Link
