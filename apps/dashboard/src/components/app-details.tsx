@@ -1,14 +1,8 @@
-import { VoteButton } from "@/components/vote-button";
-import { createClient } from "@vercel/kv";
+import { Vote } from "@/components/vote";
+import { Skeleton } from "@midday/ui/skeleton";
+import { Suspense } from "react";
 
-const kv = createClient({
-  url: process.env.KV_REST_API_URL,
-  token: process.env.KV_REST_API_TOKEN,
-});
-
-export async function AppDetails({ id, name, description, logo }) {
-  const count = await kv.mget(id);
-
+export function AppDetails({ id, name, description, logo }) {
   return (
     <section key={id} className="flex space-x-12 items-center mt-10 pt-10">
       <div className="w-[300px] h-[200px] flex items-center justify-center bg-gradient-to-b from-[#1A1A1A] to-[#171717] rounded-xl">
@@ -19,7 +13,9 @@ export async function AppDetails({ id, name, description, logo }) {
         <p className="text-sm text-[#606060]">{description}</p>
       </div>
 
-      <VoteButton count={count} id={id} />
+      <Suspense fallback={<Skeleton className="p-6 flex-col w-14 h-16" />}>
+        <Vote id={id} />
+      </Suspense>
     </section>
   );
 }

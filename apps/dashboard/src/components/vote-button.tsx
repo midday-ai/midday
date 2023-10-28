@@ -11,8 +11,8 @@ export function VoteButton({ count, id }) {
 
   const [optimisticCount, addOptimisticCount] = useOptimistic(
     count,
-    (currentState) => {
-      return +currentState + 1;
+    (prevCount) => {
+      return +prevCount + 1;
     },
   );
 
@@ -24,7 +24,11 @@ export function VoteButton({ count, id }) {
   };
 
   return (
-    <Button variant="outline" className="p-6 flex-col" onClick={handleVote}>
+    <Button
+      variant="outline"
+      className="p-6 flex-col w-14 h-16"
+      onClick={handleVote}
+    >
       <div className="flex space-x-2 items-center flex-col">
         <ChevronUp size={16} />
         {optimisticCount}
