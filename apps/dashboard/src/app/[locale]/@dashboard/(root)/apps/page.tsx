@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 const apps = [
   {
     id: "linear",
+    active: true,
     name: "Linear",
     description:
       "Our integration with Linear from Midday is a powerful collaboration tool that seamlessly connects Linear, a popular project management and issue tracking platform, with Midday. Midday will create tasks in Linear about everything related to your financial tasks.",
