@@ -1,4 +1,5 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
+import { RefreshCw } from "lucide-react";
 import {
   MdAccountBalanceWallet,
   MdCelebration,
@@ -290,4 +291,5 @@ export const Icons = {
   AccountBalance: MdAccountBalanceWallet,
   Fence: MdFence,
   Celebration: MdCelebration,
+  RefreshCw,
 };

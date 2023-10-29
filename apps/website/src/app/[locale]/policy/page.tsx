@@ -360,7 +360,7 @@ export default function Policy() {
                 <strong>
                   The right to access, update or delete the information we have
                   on you.
-                </strong>{" "}
+                </strong>
                 Whenever made possible, you can access, update or request
                 deletion of your Personal Data directly within your account
                 settings section. If you are unable to perform these actions

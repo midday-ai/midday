@@ -1,11 +1,16 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import banks_SE from "public/banks_SE.png";
 import ConnectBankModal from "./modals/connect-bank-modal";
 import SelectAccountModal from "./modals/select-account-modal";
 
 export function ConnectBank() {
+  const pathname = usePathname();
+
   return (
     <div className="py-6 px-8 border max-w-[900px] rounded-2xl flex items-between opacity-1">
       <div className="flex-1 relative">
@@ -15,7 +20,7 @@ export function ConnectBank() {
           balance.
         </p>
 
-        <Link href="/onboarding?step=bank">
+        <Link href={`${pathname}?step=bank`}>
           <Button className="absolute bottom-0">Connnect</Button>
         </Link>
       </div>

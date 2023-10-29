@@ -8,7 +8,6 @@ export const metadata: Metadata = {
 const apps = [
   {
     id: "linear",
-    active: true,
     name: "Linear",
     description:
       "Our integration with Linear from Midday is a powerful collaboration tool that seamlessly connects Linear, a popular project management and issue tracking platform, with Midday. Midday will create tasks in Linear about everything related to your financial tasks.",
@@ -87,6 +86,7 @@ const apps = [
   {
     id: "fortnox",
     name: "Fortnox",
+    active: true,
     description:
       "Integration with Fortnox is a powerful solution that allows seamless connectivity between Midday and Fortnox, a popular cloud-based accounting and financial management software. This integration streamlines financial processes by enabling data exchange, synchronization, and automation between Midday and Fortnox.",
     logo: (
@@ -110,6 +110,7 @@ const apps = [
   {
     id: "visma",
     name: "Visma",
+    active: true,
     description:
       "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
     logo: (

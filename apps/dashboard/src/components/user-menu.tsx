@@ -30,24 +30,24 @@ export async function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" sideOffset={10} align="end">
         <DropdownMenuGroup>
-          <Link href="/settings">
+          <Link href="/account">
             <DropdownMenuItem>
               Account
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
 
-          {/* <Link href="/settings/team">
+          <Link href="/settings">
             <DropdownMenuItem>
-              Team
-              <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
+              Settings
+              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
             </DropdownMenuItem>
-          </Link> */}
+          </Link>
 
           <Link href="/onboarding">
             <DropdownMenuItem>
               Onboarding
-              <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+              <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>
         </DropdownMenuGroup>

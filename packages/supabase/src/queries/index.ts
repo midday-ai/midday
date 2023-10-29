@@ -17,7 +17,10 @@ export async function getUserDetails(supabase: Client) {
 
   return supabase
     .from("users")
-    .select()
+    .select(`
+      *,
+      team:team_id(*)
+    `)
     .eq("id", data?.session?.user.id)
     .single();
 }

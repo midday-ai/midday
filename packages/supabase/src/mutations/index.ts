@@ -11,7 +11,15 @@ export async function createTeamBankAccounts(supabase: Client, accounts) {
       accounts.map((account) => ({
         account_id: account.id,
         bank_name: account.bank_name,
+        name: account.name,
         logo_url: account.logo_url,
+        bban: account.bban,
+        bic: account.bic,
+        currency: account.currency,
+        details: account.details,
+        display_name: account.displayName,
+        iban: account.iban,
+        linked_accounts: account.linkedAccounts,
         created_by: userData?.id,
         team_id: userData?.team_id,
         provider: "gocardless",
@@ -45,7 +53,6 @@ export async function updateTransaction(
 
 export async function updateUser(supabase: Client, data: any) {
   const { data: userData } = await getUserDetails(supabase);
-
   return supabase.from("users").update(data).eq("id", userData?.id).select();
 }
 
@@ -57,6 +64,32 @@ export async function deleteUser(supabase: Client) {
   // TODO: Delete files etc
   await supabase.from("users").delete().eq("id", session?.user.id);
   await supabase.auth.signOut();
+}
+
+export async function updateTeam(supabase: Client, data: any) {
+  const { data: userData } = await getUserDetails(supabase);
+  return supabase
+    .from("teams")
+    .update(data)
+    .eq("id", userData?.team_id)
+    .select();
+}
+
+export async function deleteTeam(supabase: Client) {
+  const { data: userData } = await getUserDetails(supabase);
+  return supabase.from("teams").delete().eq("id", userData?.team_id);
+}
+
+export async function deleteBankAccount(supabase: Client, id: string) {
+  try {
+    const { data, error } = await supabase
+      .from("bank_accounts")
+      .delete()
+      .eq("id", id);
+    console.log(error);
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export async function updateSimilarTransactions(supabase: Client, id: string) {

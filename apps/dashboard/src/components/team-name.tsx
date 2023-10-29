@@ -1,7 +1,7 @@
 "use client";
 
-import { UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
-import { updateUserAction } from "@/actions/update-user-action";
+import { UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
+import { updateTeamAction } from "@/actions/update-team-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -24,21 +24,18 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useForm } from "react-hook-form";
 
-export function DisplayName({ fullName }) {
-  const action = useAction(updateUserAction);
-  const form = useForm<UpdateUserFormValues>({
-    resolver: zodResolver(updateUserSchema),
+export function TeamName({ name }) {
+  const action = useAction(updateTeamAction);
+  const form = useForm<UpdateTeamFormValues>({
+    resolver: zodResolver(updateTeamSchema),
     defaultValues: {
-      full_name: fullName,
-      path: "/account",
+      name,
+      path: "/settings",
     },
   });
 
   const onSubmit = form.handleSubmit(async (data) => {
-    action.execute({
-      full_name: data.full_name,
-      path: data.path,
-    });
+    action.execute(data);
   });
 
   return (
@@ -46,17 +43,17 @@ export function DisplayName({ fullName }) {
       <form onSubmit={onSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Display name</CardTitle>
+            <CardTitle>Team Name</CardTitle>
             <CardDescription>
-              Please enter your full name, or a display name you are comfortable
-              with.
+              This is your team's visible name within Midday. For example, the
+              name of your company or department.
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <FormField
               control={form.control}
-              name="full_name"
+              name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>

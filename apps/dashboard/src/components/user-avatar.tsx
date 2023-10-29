@@ -14,7 +14,7 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useRef } from "react";
 
-export function ChangeAvatar({ userId, avatarUrl, fullName }) {
+export function UserAvatar({ userId, avatarUrl, fullName }) {
   const action = useAction(updateUserAction);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isLoading, uploadFile } = useUpload();
@@ -30,7 +30,7 @@ export function ChangeAvatar({ userId, avatarUrl, fullName }) {
     });
 
     if (url) {
-      action.execute({ avatar_url: url, path: "/settings" });
+      action.execute({ avatar_url: url, path: "/account" });
     }
   };
 
