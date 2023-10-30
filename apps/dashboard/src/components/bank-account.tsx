@@ -31,7 +31,9 @@ export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
       <div className="flex space-x-2">
         <Button
           variant="outline"
-          onClick={() => action.execute({ id, path: "/settings/connected" })}
+          onClick={() =>
+            action.execute({ id, revalidatePath: "/settings/connected" })
+          }
         >
           Remove
         </Button>

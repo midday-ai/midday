@@ -30,28 +30,22 @@ export function ChangeLanguage() {
   const locale = useCurrentLocale();
   const t = useI18n();
 
-  const handleOnChange = (locale: string) => {
+  const handleOnChange = async (locale: string) => {
+    await action.execute({ locale });
     changeLocale(locale);
-
-    action.execute({
-      locale,
-      path: "/account",
-    });
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Language</CardTitle>
-        <CardDescription>
-          Change the language used in the user interface.
-        </CardDescription>
+        <CardTitle>{t("language.title")}</CardTitle>
+        <CardDescription>{t("language.description")}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <Select defaultValue={locale} onValueChange={handleOnChange}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select language" />
+            <SelectValue placeholder={t("language.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>

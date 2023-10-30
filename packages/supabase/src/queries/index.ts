@@ -92,6 +92,7 @@ export async function getTransactions(
     .select(
       `
       *,
+      bank_account:bank_account_id(currency),
       assigned:assigned_id(*),
       attachments(id)
     `,
@@ -159,7 +160,7 @@ export async function getTransactions(
     meta: {
       count,
       totalAmount,
-      currency: data?.at(0)?.currency,
+      currency: data?.bank_account?.currency,
     },
     data,
   };

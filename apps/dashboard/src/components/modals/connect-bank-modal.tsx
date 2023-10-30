@@ -3,7 +3,6 @@
 import {
   buildLink,
   createEndUserAgreement,
-  getAccessToken,
   getBanks,
 } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
@@ -85,24 +84,24 @@ function Row({ id, name, logo, onSelect }) {
   );
 }
 
-export default function ConnectBankModal() {
+export default function ConnectBankModal({ countryCode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState();
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const isOpen = searchParams.get("step") === "bank";
 
   useEffect(() => {
     async function fetchData() {
-      const { access } = await getAccessToken();
-      const banks = await getBanks({ token: access, country: "se" });
+      const banks = await getBanks(countryCode);
       setLoading(false);
-      setToken(access);
-      setResults(banks);
-      setFilteredResults(banks);
+
+      if (banks.length > 0) {
+        setResults(banks);
+        setFilteredResults(banks);
+      }
     }
 
     if (isOpen) {
@@ -111,11 +110,10 @@ export default function ConnectBankModal() {
   }, [isOpen]);
 
   const handleCreateEndUserAgreement = async (institutionId: string) => {
-    const data = await createEndUserAgreement({ institutionId, token });
+    const data = await createEndUserAgreement(institutionId);
 
     const { link } = await buildLink({
       redirect: `${location.origin}/${pathname}?step=account`,
-      token,
       institutionId,
       agreement: data.id,
     });
@@ -157,7 +155,7 @@ export default function ConnectBankModal() {
               />
               <div className="space-y-6 pt-4 h-[400px] overflow-auto scrollbar-hide">
                 {loading && <RowsSkeleton />}
-                {filteredResults.map((bank) => {
+                {filteredResults?.map((bank) => {
                   return (
                     <Row
                       key={bank.id}

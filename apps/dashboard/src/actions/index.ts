@@ -1,7 +1,7 @@
 "use server";
 
 import { env } from "@/env.mjs";
-import { getAccessToken, getTransactions } from "@midday/gocardless";
+import { getTransactions } from "@midday/gocardless";
 import {
   createTeamBankAccounts,
   createTransactions,
@@ -74,16 +74,12 @@ const mapTransactionMethod = (method: string) => {
   }
 };
 
-export async function initialTransactionsSync(ids: string[]) {
+export async function initialTransactionsSync(accounts: any) {
   const supabase = await createClient();
-  const { access } = await getAccessToken();
 
   await Promise.all(
-    ids.map(async (id) => {
-      const { transactions } = await getTransactions({
-        token: access,
-        id,
-      });
+    accounts.map(async (account) => {
+      const { transactions } = await getTransactions(account.account_id);
 
       if (!transactions?.booked.length) {
         return;
@@ -102,7 +98,7 @@ export async function initialTransactionsSync(ids: string[]) {
           provider_transaction_id: data.internalTransactionId,
           amount: data.transactionAmount.amount,
           currency: data.transactionAmount.currency,
-          bank_account_id: id,
+          bank_account_id: account.id,
           category: data.transactionAmount.amount > 0 ? "income" : null,
         })),
       );
@@ -112,7 +108,7 @@ export async function initialTransactionsSync(ids: string[]) {
 
 export async function createTeamBankAccountsAction(accounts) {
   const supabase = await createClient();
-  await createTeamBankAccounts(supabase, accounts);
+  return createTeamBankAccounts(supabase, accounts);
 }
 
 export async function updateTransactionAction(id: string, data: any) {

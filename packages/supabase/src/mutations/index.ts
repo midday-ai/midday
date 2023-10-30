@@ -9,17 +9,7 @@ export async function createTeamBankAccounts(supabase: Client, accounts) {
     .from("bank_accounts")
     .insert(
       accounts.map((account) => ({
-        account_id: account.id,
-        bank_name: account.bank_name,
-        name: account.name,
-        logo_url: account.logo_url,
-        bban: account.bban,
-        bic: account.bic,
-        currency: account.currency,
-        details: account.details,
-        display_name: account.displayName,
-        iban: account.iban,
-        linked_accounts: account.linkedAccounts,
+        ...account,
         created_by: userData?.id,
         team_id: userData?.team_id,
         provider: "gocardless",
@@ -36,7 +26,7 @@ export async function createTransactions(supabase: Client, transactions) {
   const { data } = await supabase.from("transactions").insert(
     transactions.map((transaction) => ({
       ...transaction,
-      team_id: userData?.team_id,
+      team_id: userData.team_id,
     })),
   );
 

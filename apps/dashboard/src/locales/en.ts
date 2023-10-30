@@ -18,6 +18,11 @@ export default {
     transfer: "Transfer",
     other: "Other",
   },
+  language: {
+    title: "Languages",
+    description: "Change the language used in the user interface.",
+    placeholder: "Select language",
+  },
   languages: {
     en: "English",
     sv: "Swedish",

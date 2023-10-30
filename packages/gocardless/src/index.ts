@@ -1,13 +1,56 @@
 "use server";
 
+import { client } from "@midday/kv";
+
 const baseUrl = "https://bankaccountdata.gocardless.com";
+
+const ONE_HOUR = 3600;
 
 enum balanceType {
   interimBooked = "interimBooked",
   interimAvailable = "interimAvailable",
 }
 
-export async function getAccessToken() {
+const keys = {
+  accessToken: "go_cardless_access_token",
+  refreshToken: "go_cardless_refresh_token",
+};
+
+async function getRefreshToken(refresh: string) {
+  const res = await fetch(`${baseUrl}/api/v2/token/refresh/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      refresh,
+    }),
+  });
+
+  const result = await res.json();
+
+  await client.set(keys.accessToken, result.access, {
+    ex: result.access_expires - ONE_HOUR,
+    nx: true,
+  });
+
+  return result;
+}
+
+async function getAccessToken() {
+  const [accessToken, refreshToken] = await Promise.all([
+    client.get(keys.accessToken),
+    client.get(keys.refreshToken),
+  ]);
+
+  if (accessToken) {
+    return accessToken;
+  }
+
+  if (refreshToken) {
+    return getRefreshToken(refreshToken);
+  }
+
   const res = await fetch(`${baseUrl}/api/v2/token/new/`, {
     method: "POST",
     headers: {
@@ -19,19 +62,27 @@ export async function getAccessToken() {
     }),
   });
 
-  const json = await res.json();
+  const result = await res.json();
 
-  return json;
+  await Promise.all([
+    client.set(keys.accessToken, result.access, {
+      ex: result.access_expires - ONE_HOUR,
+      nx: true,
+    }),
+    client.set(keys.refreshToken, result.refresh, {
+      ex: result.refresh_expires - ONE_HOUR,
+      nx: true,
+    }),
+  ]);
+
+  return result;
 }
 
-type GetBanksOptions = {
-  token: string;
-  country: "se";
-};
+export async function getBanks(countryCode: string) {
+  const token = await getAccessToken();
 
-export async function getBanks({ token, country }: GetBanksOptions) {
   const res = await fetch(
-    `${baseUrl}/api/v2/institutions/?country=${country}`,
+    `${baseUrl}/api/v2/institutions/?country=${countryCode.toLowerCase()}`,
     {
       method: "GET",
       headers: {
@@ -44,15 +95,9 @@ export async function getBanks({ token, country }: GetBanksOptions) {
   return res.json();
 }
 
-type CreateEndUserAgreementOptions = {
-  token: string;
-  institutionId: string;
-};
+export async function createEndUserAgreement(institutionId: string) {
+  const token = await getAccessToken();
 
-export async function createEndUserAgreement({
-  token,
-  institutionId,
-}: CreateEndUserAgreementOptions) {
   const res = await fetch(`${baseUrl}/api/v2/agreements/enduser/`, {
     method: "POST",
     headers: {
@@ -71,18 +116,18 @@ export async function createEndUserAgreement({
 }
 
 type BuildLinkOptions = {
-  token: string;
   institutionId: string;
   agreement: string;
   redirect: string;
 };
 
 export async function buildLink({
-  token,
   institutionId,
   agreement,
   redirect,
 }: BuildLinkOptions) {
+  const token = await getAccessToken();
+
   const res = await fetch(`${baseUrl}/api/v2/requisitions/`, {
     method: "POST",
     headers: {
@@ -99,32 +144,38 @@ export async function buildLink({
   return res.json();
 }
 
-type GetAccountByIdOptions = {
-  token: string;
-  id: string;
-};
+export async function getAccountDetails(id: string) {
+  const token = await getAccessToken();
 
-export async function getAccountById({ id, token }: GetAccountByIdOptions) {
-  const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const [account, details] = await Promise.all([
+    fetch(`${baseUrl}/api/v2/accounts/${id}/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+    fetch(`${baseUrl}/api/v2/accounts/${id}/details/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  ]);
 
-  return account.json();
+  const accountData = await account.json();
+  const detailsData = await details.json();
+
+  return {
+    ...accountData,
+    ...detailsData?.account,
+  };
 }
 
-type GetAccountBalancesByIdOptions = {
-  token: string;
-  id: string;
-};
+export async function getAccountBalancesById(id: string) {
+  const token = await getAccessToken();
 
-export async function getAccountBalancesById({
-  id,
-  token,
-}: GetAccountBalancesByIdOptions) {
   const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/balances/`, {
     method: "GET",
     headers: {
@@ -137,14 +188,19 @@ export async function getAccountBalancesById({
 }
 
 type GetAccountsOptions = {
-  token: string;
-  id: string;
+  accountId: string;
+  countryCode: string;
 };
 
-export async function getAccounts({ token, id }: GetAccountsOptions) {
-  const banks = await getBanks({ token, country: "se" });
+export async function getAccounts({
+  accountId,
+  countryCode,
+}: GetAccountsOptions) {
+  const token = await getAccessToken();
+  const banks = await getBanks(countryCode);
+  console.log("accountId", accountId);
 
-  const res = await fetch(`${baseUrl}/api/v2/requisitions/${id}/`, {
+  const res = await fetch(`${baseUrl}/api/v2/requisitions/${accountId}/`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -156,8 +212,8 @@ export async function getAccounts({ token, id }: GetAccountsOptions) {
 
   const result = await Promise.all(
     data.accounts?.map(async (id) => {
-      const accountData = await getAccountById({ token, id });
-      const { balances } = await getAccountBalancesById({ token, id });
+      const accountData = await getAccountDetails(id);
+      const { balances } = await getAccountBalancesById(id);
 
       return {
         ...accountData,
@@ -179,19 +235,19 @@ export async function getAccounts({ token, id }: GetAccountsOptions) {
   );
 }
 
-type GetTransactionsOptions = {
-  token: string;
-  id: string;
-};
+export async function getTransactions(accountId: string) {
+  const token = await getAccessToken();
 
-export async function getTransactions({ token, id }: GetTransactionsOptions) {
-  const res = await fetch(`${baseUrl}/api/v2/accounts/${id}/transactions/`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
+  const result = await fetch(
+    `${baseUrl}/api/v2/accounts/${accountId}/transactions/`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
-  return res.json();
+  return result.json();
 }

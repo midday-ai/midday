@@ -18,6 +18,11 @@ export default {
     transfer: "Överföring",
     other: "Annan",
   },
+  language: {
+    title: "Språk",
+    description: "Ändra språket som används i användargränssnittet.",
+    placeholder: "Välj språk",
+  },
   languages: {
     en: "Engelska",
     sv: "Svenska",

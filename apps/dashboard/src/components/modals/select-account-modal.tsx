@@ -5,7 +5,7 @@ import {
   initialTransactionsSync,
 } from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccessToken, getAccounts } from "@midday/gocardless";
+import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -24,6 +24,7 @@ import {
   FormLabel,
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
+import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -55,7 +56,7 @@ function RowsSkeleton() {
   );
 }
 
-export default function SelectAccountModal() {
+export default function SelectAccountModal({ countryCode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [accounts, setAccounts] = useState([]);
@@ -72,24 +73,36 @@ export default function SelectAccountModal() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const accountsWithDetails = values.accounts
-      .map((accountId) => accounts.find((account) => account.id === accountId))
+      .map((id) => accounts.find((account) => account.id === id))
       .map((account) => ({
-        id: account.id,
+        account_id: account.id,
         bank_name: account.bank.name,
         logo_url: account.bank.logo,
+        name: capitalCase(account.name),
+        bic: account.bic,
+        bban: account.bban,
+        currency: account.currency,
+        details: account.details,
+        iban: account.iban,
+        institution_id: account.institution_id,
+        owner_name: capitalCase(account.ownerName),
+        resource_id: account.resourceId,
+        product: account.product,
       }));
 
-    await createTeamBankAccountsAction(accountsWithDetails);
-    await initialTransactionsSync(values.accounts);
+    const createdAccounts = await createTeamBankAccountsAction(
+      accountsWithDetails,
+    );
+
+    await initialTransactionsSync(createdAccounts);
     router.push(`${pathname}?step=gmail`);
   }
 
   useEffect(() => {
     async function fetchData() {
-      const { access } = await getAccessToken();
       const accounts = await getAccounts({
-        token: access,
-        id: searchParams.get("ref"),
+        accountId: searchParams.get("ref"),
+        countryCode,
       });
 
       setAccounts(accounts);

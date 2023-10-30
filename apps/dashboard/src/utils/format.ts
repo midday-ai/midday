@@ -1,3 +1,5 @@
+import { useCurrentLocale } from "@/locales/client";
+
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];
 
@@ -22,7 +24,13 @@ type FormatAmountParams = {
 };
 
 export function formatAmount({ currency, amount }: FormatAmountParams) {
-  return Intl.NumberFormat("en-US", {
+  const locale = useCurrentLocale();
+
+  if (!currency) {
+    return;
+  }
+
+  return Intl.NumberFormat(locale, {
     style: "currency",
     currency,
   }).format(amount);

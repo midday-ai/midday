@@ -2,17 +2,19 @@
 
 import { updateUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { action } from "./safe-action";
 import { updateUserSchema } from "./schema";
 
 export const updateUserAction = action(
   updateUserSchema,
-  async ({ path, ...data }) => {
+  async ({ revalidatePath, ...data }) => {
     const supabase = createClient();
     const user = await updateUser(supabase, data);
 
-    revalidatePath(path);
+    if (revalidatePath) {
+      revalidatePathFunc(revalidatePath);
+    }
 
     return user;
   },

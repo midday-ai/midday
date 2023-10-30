@@ -30,7 +30,7 @@ export function TeamName({ name }) {
     resolver: zodResolver(updateTeamSchema),
     defaultValues: {
       name,
-      path: "/settings",
+      revalidatePath: "/settings",
     },
   });
 
@@ -57,7 +57,7 @@ export function TeamName({ name }) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} className="max-w-[300px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -30,7 +30,7 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
     });
 
     if (url) {
-      action.execute({ logo_url: url, path: "/settings" });
+      action.execute({ logo_url: url, revalidatePath: "/settings" });
     }
   };
 

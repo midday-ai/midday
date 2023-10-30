@@ -30,14 +30,14 @@ export function DisplayName({ fullName }) {
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
       full_name: fullName,
-      path: "/account",
+      revalidatePath: "/account",
     },
   });
 
   const onSubmit = form.handleSubmit(async (data) => {
     action.execute({
       full_name: data.full_name,
-      path: data.path,
+      revalidatePath: data.path,
     });
   });
 
@@ -60,7 +60,7 @@ export function DisplayName({ fullName }) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} className="max-w-[260px]" />
+                    <Input {...field} className="max-w-[300px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

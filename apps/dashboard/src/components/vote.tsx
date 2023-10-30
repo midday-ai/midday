@@ -1,13 +1,8 @@
 import { VoteButton } from "@/components/vote-button";
-import { createClient } from "@vercel/kv";
-
-const kv = createClient({
-  url: process.env.KV_REST_API_URL,
-  token: process.env.KV_REST_API_TOKEN,
-});
+import { client } from "@midday/kv";
 
 export async function Vote({ id }) {
-  const count = await kv.mget(id);
+  const count = await client.mget(id);
 
   return <VoteButton count={count} id={id} />;
 }

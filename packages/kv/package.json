@@ -1,0 +1,16 @@
+{
+    "name": "@midday/kv",
+    "version": "1.0.0",
+    "private": true,
+    "main": "src/index.ts",
+    "scripts": {
+        "clean": "rm -rf .turbo node_modules",
+        "lint": "biome check .",
+        "format": "biome format --write .",
+        "check:types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@vercel/kv": "^0.2.3"
+    }
+}
+  

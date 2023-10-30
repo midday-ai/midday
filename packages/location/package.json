@@ -1,5 +1,5 @@
 {
-    "name": "@midday/gocardless",
+    "name": "@midday/location",
     "version": "1.0.0",
     "main": "src/index.ts",
     "private": true,
@@ -9,9 +9,6 @@
       "lint": "biome check .",
       "format": "biome --write .",
       "check:types": "tsc --noEmit"
-    },
-    "dependencies": {
-      "@midday/kv": "workspace:*"
     },
     "devDependencies": {
         "typescript": "^5.2.2"
