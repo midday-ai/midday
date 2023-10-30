@@ -31,7 +31,6 @@ export default function Layout({ children }: { children: ReactElement }) {
           defaultTheme="system"
           forcedTheme="dark"
           enableSystem
-          disableTransitionOnChange
         >
           {children}
           <Toaster />

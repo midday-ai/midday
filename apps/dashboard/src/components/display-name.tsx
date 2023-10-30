@@ -46,7 +46,7 @@ export function DisplayName({ fullName }) {
       <form onSubmit={onSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Display name</CardTitle>
+            <CardTitle>Display Name</CardTitle>
             <CardDescription>
               Please enter your full name, or a display name you are comfortable
               with.
@@ -60,7 +60,7 @@ export function DisplayName({ fullName }) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} className="max-w-[260px]" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

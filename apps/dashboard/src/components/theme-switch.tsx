@@ -20,13 +20,13 @@ const ThemeIcon = ({ currentTheme }: Props) => {
   }
 };
 
-const ThemeSwitch = () => {
+export const ThemeSwitch = () => {
   const { theme, setTheme, themes } = useTheme();
 
   return (
     <div className="flex items-center relative">
       <select
-        className="text-xs border rounded appearance-none pl-6 pr-6 py-1.5 bg-transparent outline-none capitalize"
+        className="text-xs border rounded appearance-none pl-6 pr-6 py-1.5 bg-transparent outline-none capitalize w-full"
         defaultValue={theme}
         onChange={(event) => setTheme(event.target.value)}
       >
@@ -47,5 +47,3 @@ const ThemeSwitch = () => {
     </div>
   );
 };
-
-export default ThemeSwitch;

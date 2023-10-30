@@ -12,7 +12,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
-import ThemeSwitch from "./theme-switch";
+import { ThemeSwitch } from "./theme-switch";
 
 export async function UserMenu() {
   const supabase = createClient();

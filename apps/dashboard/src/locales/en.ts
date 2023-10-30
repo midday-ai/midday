@@ -18,4 +18,8 @@ export default {
     transfer: "Transfer",
     other: "Other",
   },
+  languages: {
+    en: "English",
+    sv: "Swedish",
+  },
 } as const;
