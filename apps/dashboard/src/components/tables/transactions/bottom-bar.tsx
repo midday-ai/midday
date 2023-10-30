@@ -1,6 +1,7 @@
 "use client";
 
 import { Pagination } from "@/components/pagination";
+import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -21,6 +22,8 @@ export function BottomBar({
   hasNextPage,
   currency,
 }) {
+  const locale = useCurrentLocale();
+
   return (
     <AnimatePresence>
       <motion.div
@@ -47,6 +50,7 @@ export function BottomBar({
               {formatAmount({
                 amount: totalAmount,
                 currency,
+                locale,
               })}
             </span>
           </div>

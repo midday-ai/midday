@@ -1,5 +1,6 @@
 "use client";
 
+import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTransaction } from "@midday/supabase/queries";
@@ -23,6 +24,7 @@ import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose }) {
   const supabase = createClient();
+  const locale = useCurrentLocale();
   const [data, setData] = useState();
   const [isLoading, setLoading] = useState(true);
 
@@ -73,11 +75,11 @@ export function TransactionDetails({ transactionId, onClose }) {
                     data?.amount > 0 && "text-[#00E547]",
                   )}
                 >
-                  {data &&
-                    formatAmount({
-                      amount: data?.amount,
-                      currency: data?.currency,
-                    })}
+                  {formatAmount({
+                    amount: data?.amount,
+                    currency: data?.currency,
+                    locale,
+                  })}
                 </span>
               )}
             </div>

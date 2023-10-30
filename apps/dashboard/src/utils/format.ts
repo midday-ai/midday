@@ -1,5 +1,3 @@
-import { useCurrentLocale } from "@/locales/client";
-
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];
 
@@ -21,12 +19,11 @@ export function formatSize(bytes: number): string {
 type FormatAmountParams = {
   currency: string;
   amount: number;
+  locale: string;
 };
 
-export function formatAmount({ currency, amount }: FormatAmountParams) {
-  const locale = useCurrentLocale();
-
-  if (!currency) {
+export function formatAmount({ currency, amount, locale }: FormatAmountParams) {
+  if (!currency || !locale) {
     return;
   }
 
