@@ -25,6 +25,7 @@ import {
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
 import { capitalCase } from "change-case";
+import { addDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -88,6 +89,7 @@ export default function SelectAccountModal({ countryCode }) {
         owner_name: capitalCase(account.ownerName),
         resource_id: account.resourceId,
         product: account.product,
+        expires_at: addDays(new Date(), 180).toDateString(),
       }));
 
     const createdAccounts = await createTeamBankAccountsAction(

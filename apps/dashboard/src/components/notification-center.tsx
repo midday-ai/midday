@@ -14,7 +14,7 @@ export function NotificationCenter() {
           size="icon"
           className="rounded-full w-8 h-8 flex items-center"
         >
-          <Icons.Notifications />
+          <Icons.Notifications size={16} />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -30,7 +30,7 @@ export function NotificationCenter() {
               <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
                 <Icons.Inbox size={18} />
               </div>
-              <p className="p-dark-gray text-sm">No new notifications</p>
+              <p className="text-dark-gray text-sm">No new notifications</p>
             </>
           )}
         </div>

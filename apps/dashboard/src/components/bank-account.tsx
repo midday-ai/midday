@@ -40,7 +40,7 @@ export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
 
         <Link href="todo">
           <Button variant="outline" size="icon">
-            <Icons.RefreshCw size={16} />
+            <Icons.Refresh size={16} />
           </Button>
         </Link>
       </div>

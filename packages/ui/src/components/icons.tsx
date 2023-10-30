@@ -1,5 +1,4 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
-import { RefreshCw } from "lucide-react";
 import {
   MdAccountBalanceWallet,
   MdCelebration,
@@ -10,6 +9,7 @@ import {
   MdFlightTakeoff,
   MdHomeWork,
   MdPayments,
+  MdRefresh,
   MdSave,
 } from "react-icons/md";
 
@@ -108,7 +108,7 @@ export const Icons = {
     <svg width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M5.833 12.25h2.334A1.17 1.17 0 0 1 7 13.417a1.17 1.17 0 0 1-1.167-1.167Zm6.417-1.167v.584H1.75v-.584l1.167-1.166v-3.5a4.06 4.06 0 0 1 2.916-3.909v-.175A1.17 1.17 0 0 1 7 1.167a1.17 1.17 0 0 1 1.167 1.166v.175a4.06 4.06 0 0 1 2.916 3.909v3.5l1.167 1.166ZM9.917 6.417A2.888 2.888 0 0 0 7 3.5a2.888 2.888 0 0 0-2.917 2.917V10.5h5.834V6.417Z"
-        fill="#747474"
+        fill="currentColor"
       />
     </svg>
   ),
@@ -291,5 +291,5 @@ export const Icons = {
   AccountBalance: MdAccountBalanceWallet,
   Fence: MdFence,
   Celebration: MdCelebration,
-  RefreshCw,
+  Refresh: MdRefresh,
 };
