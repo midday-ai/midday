@@ -12,36 +12,27 @@ export function MainMenu() {
   const items = [
     {
       path: "/",
-      name: "Overview",
       icon: Icons.Overview,
     },
     {
       path: "/transactions",
-      name: "Transactions",
       icon: () => <Icons.Transactions size={20} />,
     },
-    // {
-    //   path: "/documents",
-    //   name: "Documents",
-    //   icon: Icons.FileDocument,
-    // },
     {
       path: "/apps",
-      name: "Apps",
       icon: Icons.Apps,
     },
     {
       path: "/settings",
-      name: "Settings",
       icon: Icons.Settings,
     },
   ];
 
   return (
-    <nav className="mt-6 ml-2">
+    <nav className="mt-6">
       <ul className="flex flex-col gap-2">
         {items.map((item) => {
-          const { path, name, icon: Icon } = item;
+          const { path, icon: Icon } = item;
           const isActive =
             (pathname === "/onboarding" && path === "/") ||
             (pathname === "/" && path === "/") ||
@@ -51,16 +42,12 @@ export function MainMenu() {
             <li
               key={path}
               className={cn(
-                "py-2.5 px-4 rounded-lg border border-transparent",
+                "rounded-lg border border-transparent w-[55px] h-[45px] flex items-center justify-center",
                 isActive && "bg-secondary border-[#2C2C2C]",
               )}
             >
-              <Link
-                href={path}
-                className="flex items-center space-x-3 text-white"
-              >
+              <Link href={path}>
                 <Icon />
-                <span className="text-sm">{name}</span>
               </Link>
             </li>
           );

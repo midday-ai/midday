@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex">
       <Sidebar />
 
-      <div className="flex-1 ml-8 mr-8 mb-8">
+      <div className="flex-1 ml-8 mr-10 mb-8">
         <Header />
         {children}
       </div>

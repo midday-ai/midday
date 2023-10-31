@@ -97,7 +97,7 @@ export function DataTable({ data, teamId }: ItemsProps) {
       <motion.div
         className="border"
         initial={false}
-        animate={{ width: transactionId ? "calc(100vw - 800px)" : "100%" }}
+        animate={{ width: transactionId ? "calc(100vw - 662px)" : "100%" }}
         transition={{
           ease: "easeInOut",
           duration: 0.25,
