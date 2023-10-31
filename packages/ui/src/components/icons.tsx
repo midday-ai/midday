@@ -1,4 +1,5 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
+import { Settings } from "lucide-react";
 import {
   MdAccountBalanceWallet,
   MdCelebration,
@@ -288,4 +289,5 @@ export const Icons = {
   Celebration: MdCelebration,
   Refresh: MdRefresh,
   Inventory2: MdInventory2,
+  SettingsCog: Settings,
 };

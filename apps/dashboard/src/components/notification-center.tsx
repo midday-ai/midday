@@ -31,7 +31,7 @@ function TransactionNotification({
   markMessageAsRead,
 }) {
   return (
-    <div className="flex items-between justify-between space-x-4 px-4 py-4 hover:bg-secondary">
+    <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
       <Link
         className="flex flex items-between justify-between space-x-4 "
         onClick={() => setOpen(false)}
@@ -105,7 +105,7 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="rounded-xl h-[535px] w-[400px] mr-7 p-0 overflow-hidden"
+        className="rounded-xl h-[535px] w-[400px] mr-7 p-0 overflow-hidden relative"
         sideOffset={10}
       >
         <Tabs defaultValue="inbox">
@@ -117,6 +117,21 @@ export function NotificationCenter() {
               Archive
             </TabsTrigger>
           </TabsList>
+
+          <Link
+            href="/settings/notifications"
+            className="absolute right-[11px] top-1.5"
+          >
+            <Button
+              variant="secondary"
+              size="icon"
+              className="rounded-full bg-ransparent hover:bg-muted"
+              onClick={() => setOpen(false)}
+            >
+              <Icons.SettingsCog className="text-[#606060]" size={16} />
+            </Button>
+          </Link>
+
           <TabsContent value="inbox" className="relative mt-0">
             {!unreadNotifications.length && (
               <EmptyState description="No new notifications" />

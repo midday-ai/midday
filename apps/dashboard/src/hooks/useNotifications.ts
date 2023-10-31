@@ -1,5 +1,5 @@
 import { createClient } from "@midday/supabase/client";
-import { HeadlessService, IMessage } from "@novu/headless";
+import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useNotifications() {
@@ -62,14 +62,7 @@ export function useNotifications() {
 
     if (headlessService) {
       headlessService.fetchNotifications({
-        listener: ({
-          data,
-          error,
-          isError,
-          isFetching,
-          isLoading,
-          status,
-        }) => {},
+        listener: ({}) => {},
         onSuccess: (response) => {
           setNotifications(response.data);
         },
@@ -88,8 +81,8 @@ export function useNotifications() {
         })),
       );
       headlessService.markAllMessagesAsSeen({
-        listener: (result) => {},
-        onError: (error) => {},
+        listener: () => {},
+        onError: () => {},
       });
     }
   };
@@ -126,7 +119,7 @@ export function useNotifications() {
       });
 
       headlessService.initializeSession({
-        listener: (res) => {},
+        listener: () => {},
         onSuccess: () => {
           headlessServiceRef.current = headlessService;
           fetchNotifications();
