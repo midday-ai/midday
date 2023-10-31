@@ -1,0 +1,19 @@
+{
+    "name": "@midday/email",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+      "clean": "rm -rf .turbo node_modules",
+      "lint": "biome check .",
+      "format": "biome format --write .",
+      "check:types": "tsc --noEmit"
+    },
+    "dependencies": {
+      
+    },
+    "devDependencies": {
+      "typescript": "^5.2.2"
+    }
+    
+  }
+  

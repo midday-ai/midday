@@ -3,7 +3,6 @@
 import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hook";
 

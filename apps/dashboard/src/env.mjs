@@ -12,6 +12,9 @@ export const env = createEnv({
     LOOPS_ENDPOINT: z.string(),
     GOCARDLESS_SECRET_ID: z.string(),
     GOCARDLESS_SECRET_KEY: z.string(),
+    NOVU_API_KEY: z.string(),
+    KV_REST_API_URL: z.string(),
+    KV_REST_API_TOKEN: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -25,6 +28,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
+    NEXT_PUBLIC_APPLICATION_IDENTIFIER: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -38,6 +42,11 @@ export const env = createEnv({
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
     GOCARDLESS_SECRET_ID: process.env.GOCARDLESS_SECRET_ID,
     GOCARDLESS_SECRET_KEY: process.env.GOCARDLESS_SECRET_KEY,
+    NOVU_API_KEY: process.env.NOVU_API_KEY,
+    KV_REST_API_URL: process.env.KV_REST_API_URL,
+    KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
+    NEXT_PUBLIC_APPLICATION_IDENTIFIER:
+      process.env.NEXT_PUBLIC_APPLICATION_IDENTIFIER,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

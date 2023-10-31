@@ -8,6 +8,8 @@ import {
   MdFence,
   MdFlightTakeoff,
   MdHomeWork,
+  MdInventory2,
+  MdOutlineFormatListBulleted,
   MdPayments,
   MdRefresh,
   MdSave,
@@ -61,14 +63,7 @@ export const Icons = {
       />
     </svg>
   ),
-  Transactions: () => (
-    <svg width="19" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M3 5.5 5.5 10h-5L3 5.5ZM1 0h4v4H1V0Zm2 16a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM7 1v2h12V1H7Zm0 14h12v-2H7v2Zm0-6h12V7H7v2Z"
-        fill="currentColor"
-      />
-    </svg>
-  ),
+  Transactions: MdOutlineFormatListBulleted,
   Google: () => (
     <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g clipPath="url(#a)">
@@ -292,4 +287,5 @@ export const Icons = {
   Fence: MdFence,
   Celebration: MdCelebration,
   Refresh: MdRefresh,
+  Inventory2: MdInventory2,
 };

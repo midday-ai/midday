@@ -18,7 +18,7 @@ export function MainMenu() {
     {
       path: "/transactions",
       name: "Transactions",
-      icon: Icons.Transactions,
+      icon: () => <Icons.Transactions size={20} />,
     },
     // {
     //   path: "/documents",
