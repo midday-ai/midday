@@ -8,8 +8,9 @@ import type { ReactElement } from "react";
 
 const fontSans = Instrument_Sans({
   subsets: ["latin"],
-  display: "swap",
   variable: "--font-sans",
+  display: "swap",
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {

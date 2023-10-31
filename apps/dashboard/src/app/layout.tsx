@@ -12,8 +12,9 @@ export const preferredRegion = "fra1";
 
 const fontSans = Instrument_Sans({
   subsets: ["latin"],
-  display: "swap",
   variable: "--font-sans",
+  display: "swap",
+  adjustFontFallback: false,
 });
 
 export const metadata: Metadata = {
