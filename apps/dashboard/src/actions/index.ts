@@ -3,7 +3,7 @@
 import { env } from "@/env.mjs";
 import { getTransactions } from "@midday/gocardless";
 import {
-  createTeamBankAccounts,
+  createBankAccounts,
   createTransactions,
   updateSimilarTransactions,
   updateTransaction,
@@ -106,9 +106,9 @@ export async function initialTransactionsSync(accounts: any) {
   );
 }
 
-export async function createTeamBankAccountsAction(accounts) {
+export async function createBankAccountsAction(accounts) {
   const supabase = await createClient();
-  return createTeamBankAccounts(supabase, accounts);
+  return createBankAccounts(supabase, accounts);
 }
 
 export async function updateTransactionAction(id: string, data: any) {

@@ -1,7 +1,6 @@
 import { ConnectBank } from "@/components/connect-bank";
 import { ConnectGmail } from "@/components/connect-gmail";
 import { SignupApps } from "@/components/signup-apps";
-import { getCountryCode } from "@midday/location";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,8 +8,6 @@ export const metadata: Metadata = {
 };
 
 export default function Onboarding() {
-  const countryCode = getCountryCode();
-
   return (
     <div className="relative py-12 px-6">
       <div className="steps-gradient absolute top-12 left-12 h-[800px] w-px" />
@@ -24,7 +21,7 @@ export default function Onboarding() {
         </div>
 
         <div className="space-y-6">
-          <ConnectBank countryCode={countryCode} />
+          <ConnectBank />
           <ConnectGmail />
           <SignupApps />
         </div>

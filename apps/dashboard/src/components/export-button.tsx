@@ -1,6 +1,6 @@
 "use client";
 
-import ExportTransactionsModal from "@/components/modals/export-transactions-modal";
+import { ExportTransactionsModal } from "@/components/modals/export-transactions-modal";
 import { Button } from "@midday/ui/button";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";

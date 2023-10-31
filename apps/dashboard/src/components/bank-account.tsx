@@ -6,7 +6,6 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hook";
-import Link from "next/link";
 
 export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
   const action = useAction(deleteBankAccountAction);
@@ -37,12 +36,6 @@ export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
         >
           Remove
         </Button>
-
-        <Link href="todo">
-          <Button variant="outline" size="icon">
-            <Icons.Refresh size={16} />
-          </Button>
-        </Link>
       </div>
     </div>
   );

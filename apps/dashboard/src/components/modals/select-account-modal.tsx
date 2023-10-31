@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  createTeamBankAccountsAction,
-  initialTransactionsSync,
-} from "@/actions";
+import { createBankAccountsAction, initialTransactionsSync } from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
@@ -25,7 +22,6 @@ import {
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
 import { capitalCase } from "change-case";
-import { addDays } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -57,7 +53,7 @@ function RowsSkeleton() {
   );
 }
 
-export default function SelectAccountModal({ countryCode }) {
+export function SelectAccountModal({ countryCode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [accounts, setAccounts] = useState([]);
@@ -77,26 +73,24 @@ export default function SelectAccountModal({ countryCode }) {
       .map((id) => accounts.find((account) => account.id === id))
       .map((account) => ({
         account_id: account.id,
-        bank_name: account.bank.name,
-        logo_url: account.bank.logo,
         name: capitalCase(account.name),
         bic: account.bic,
         bban: account.bban,
         currency: account.currency,
         details: account.details,
         iban: account.iban,
-        institution_id: account.institution_id,
         owner_name: capitalCase(account.ownerName),
-        resource_id: account.resourceId,
-        product: account.product,
-        expires_at: addDays(new Date(), 180).toDateString(),
+        bank: {
+          agreement_id: account.agreement_id,
+          institution_id: account.institution_id,
+          name: account.bank.name,
+          logo_url: account.bank.logo,
+        },
       }));
 
-    const createdAccounts = await createTeamBankAccountsAction(
-      accountsWithDetails,
-    );
+    const { data } = await createBankAccountsAction(accountsWithDetails);
 
-    await initialTransactionsSync(createdAccounts);
+    await initialTransactionsSync(data);
     router.push(`${pathname}?step=gmail`);
   }
 

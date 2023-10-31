@@ -1,23 +1,45 @@
+import { addDays } from "date-fns";
 import { getSession, getUserDetails } from "../queries";
 import { Client } from "../types";
 import { remove } from "../utils/storage";
 
-export async function createTeamBankAccounts(supabase: Client, accounts) {
+export async function createBankAccounts(supabase: Client, accounts) {
   const { data: userData } = await getUserDetails(supabase);
+  // Get first account to create a bank connection
+  const bankConnection = await createBankConnection(supabase, {
+    ...accounts.at(0).bank,
+    team_id: userData?.team_id,
+  });
 
-  const { data } = await supabase
+  return supabase
     .from("bank_accounts")
     .insert(
       accounts.map((account) => ({
-        ...account,
-        created_by: userData?.id,
+        account_id: account.account_id,
+        bank_connection_id: bankConnection?.data?.id,
         team_id: userData?.team_id,
-        provider: "gocardless",
+        created_by: userData.id,
+        name: account.name,
+        bban: account.bban,
+        iban: account.iban,
+        bic: account.bic,
+        currency: account.currency,
+        owner_name: account.owner_name,
       })),
     )
     .select();
+}
 
-  return data;
+export async function createBankConnection(supabase: Client, bank: any) {
+  return await supabase
+    .from("bank_connections")
+    .insert({
+      ...bank,
+      expires_at: addDays(new Date(), 180).toDateString(),
+      provider: "gocardless",
+    })
+    .select()
+    .single();
 }
 
 export async function createTransactions(supabase: Client, transactions) {
@@ -71,15 +93,7 @@ export async function deleteTeam(supabase: Client) {
 }
 
 export async function deleteBankAccount(supabase: Client, id: string) {
-  try {
-    const { data, error } = await supabase
-      .from("bank_accounts")
-      .delete()
-      .eq("id", id);
-    console.log(error);
-  } catch (err) {
-    console.log(err);
-  }
+  return await supabase.from("bank_accounts").delete().eq("id", id);
 }
 
 export async function updateSimilarTransactions(supabase: Client, id: string) {

@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 
-export default function ExportTransactionsModal({ isOpen, setOpen }) {
+export function ExportTransactionsModal({ isOpen, setOpen }) {
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent>

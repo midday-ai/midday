@@ -5,10 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import banks_SE from "public/banks_SE.png";
-import ConnectBankModal from "./modals/connect-bank-modal";
-import SelectAccountModal from "./modals/select-account-modal";
 
-export function ConnectBank({ countryCode }) {
+export function ConnectBank() {
   const pathname = usePathname();
 
   return (
@@ -31,9 +29,6 @@ export function ConnectBank({ countryCode }) {
         alt="Banks"
         className="-mt-2 -mr-2"
       />
-
-      <ConnectBankModal countryCode={countryCode} />
-      <SelectAccountModal countryCode={countryCode} />
     </div>
   );
 }

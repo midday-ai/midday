@@ -5,6 +5,8 @@ import { client } from "@midday/kv";
 const baseUrl = "https://bankaccountdata.gocardless.com";
 
 const ONE_HOUR = 3600;
+const ACCESS_VALID_FOR_DAYS = 180;
+const MAX_HISTORICAL_DAYS = 730;
 
 enum balanceType {
   interimBooked = "interimBooked",
@@ -107,8 +109,8 @@ export async function createEndUserAgreement(institutionId: string) {
     body: JSON.stringify({
       institution_id: institutionId,
       access_scope: ["balances", "details", "transactions"],
-      access_valid_for_days: 180,
-      max_historical_days: 730,
+      access_valid_for_days: ACCESS_VALID_FOR_DAYS,
+      max_historical_days: MAX_HISTORICAL_DAYS,
     }),
   });
 
@@ -126,22 +128,26 @@ export async function buildLink({
   agreement,
   redirect,
 }: BuildLinkOptions) {
-  const token = await getAccessToken();
+  try {
+    const token = await getAccessToken();
 
-  const res = await fetch(`${baseUrl}/api/v2/requisitions/`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      redirect,
-      institution_id: institutionId,
-      agreement,
-    }),
-  });
+    const res = await fetch(`${baseUrl}/api/v2/requisitions/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        redirect,
+        institution_id: institutionId,
+        agreement,
+      }),
+    });
 
-  return res.json();
+    return res.json();
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 export async function getAccountDetails(id: string) {
@@ -198,7 +204,6 @@ export async function getAccounts({
 }: GetAccountsOptions) {
   const token = await getAccessToken();
   const banks = await getBanks(countryCode);
-  console.log("accountId", accountId);
 
   const res = await fetch(`${baseUrl}/api/v2/requisitions/${accountId}/`, {
     method: "GET",

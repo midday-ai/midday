@@ -1,10 +1,7 @@
 import { CommandMenu } from "@/components/command-menu";
 import { Feedback } from "@/components/feedback";
 import { NotificationCenter } from "@/components/notification-center";
-import {
-  ReconnectBank,
-  ReconnectBankButton,
-} from "@/components/reconnect-bank";
+import { ReconnectBank } from "@/components/reconnect-bank";
 import { UserMenu } from "@/components/user-menu";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Suspense } from "react";
@@ -15,7 +12,7 @@ export function Header() {
       <CommandMenu />
       <div className="flex space-x-2">
         <Feedback />
-        <Suspense fallback={<ReconnectBankButton />}>
+        <Suspense>
           <ReconnectBank />
         </Suspense>
         <NotificationCenter />

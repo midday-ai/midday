@@ -37,12 +37,21 @@ export async function getUserTeams(supabase: Client) {
     .eq("team_id", userData?.team_id);
 }
 
+export async function getTeamBankConnections(supabase: Client) {
+  const { data: userData } = await getUserDetails(supabase);
+
+  return supabase
+    .from("bank_connections")
+    .select("*")
+    .eq("team_id", userData?.team_id);
+}
+
 export async function getTeamBankAccounts(supabase: Client) {
   const { data: userData } = await getUserDetails(supabase);
 
   return supabase
     .from("bank_accounts")
-    .select("*")
+    .select("*, bank:bank_connection_id(*)")
     .eq("team_id", userData?.team_id);
 }
 

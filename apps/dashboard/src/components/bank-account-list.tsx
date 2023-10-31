@@ -48,14 +48,14 @@ export async function BankAccountList() {
 
   return (
     <div className="px-6 pb-6 space-y-6 divide-y">
-      {data.map((bank) => (
+      {data.map((account) => (
         <BankAccount
-          key={bank.id}
-          id={bank.id}
-          last_accessed={bank.last_accessed}
-          bank_name={bank.bank_name}
-          name={bank.name}
-          logo={bank.logo_url}
+          key={account.id}
+          id={account.id}
+          last_accessed={account.last_accessed}
+          bank_name={account.bank.name}
+          name={account.name}
+          logo={account.bank.logo_url}
         />
       ))}
     </div>

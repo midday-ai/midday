@@ -84,7 +84,7 @@ function Row({ id, name, logo, onSelect }) {
   );
 }
 
-export default function ConnectBankModal({ countryCode }) {
+export function ConnectBankModal({ countryCode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -141,7 +141,7 @@ export default function ConnectBankModal({ countryCode }) {
             <DialogTitle>Connect bank</DialogTitle>
             <DialogDescription>
               Select your bank and follow the steps below, we will have access
-              to 2 years of historical transactions and will have access for 3
+              to 2 years of historical transactions and will have access for 6
               months. We will notify you once you need to connect again.
             </DialogDescription>
 
