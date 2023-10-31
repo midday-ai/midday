@@ -128,26 +128,22 @@ export async function buildLink({
   agreement,
   redirect,
 }: BuildLinkOptions) {
-  try {
-    const token = await getAccessToken();
+  const token = await getAccessToken();
 
-    const res = await fetch(`${baseUrl}/api/v2/requisitions/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        redirect,
-        institution_id: institutionId,
-        agreement,
-      }),
-    });
+  const res = await fetch(`${baseUrl}/api/v2/requisitions/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      redirect,
+      institution_id: institutionId,
+      agreement,
+    }),
+  });
 
-    return res.json();
-  } catch (err) {
-    console.log(err);
-  }
+  return res.json();
 }
 
 export async function getAccountDetails(id: string) {

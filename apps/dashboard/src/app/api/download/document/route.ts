@@ -1,9 +1,10 @@
 import { createClient } from "@midday/supabase/server";
-import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
+export const preferredRegion = "fra1";
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
+export async function GET(req, res) {
   const supabase = createClient();
   const requestUrl = new URL(req.url);
   const path = requestUrl.searchParams.get("path");

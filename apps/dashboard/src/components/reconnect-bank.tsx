@@ -6,7 +6,7 @@ import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { cn } from "@midday/ui/utils";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
-import Link from "next/link";
+import { ReconnectButton } from "./reconnect-button";
 
 const WARNING_DAYS = 14;
 const ERROR_DAYS = 7;
@@ -64,7 +64,7 @@ export async function ReconnectBank() {
                     <AvatarImage src={bank.logo_url} alt={bank.name} />
                   </Avatar>
                   <div className="ml-4 flex flex-col">
-                    <p className="text-xs font-medium leading-none">
+                    <p className="text-xs font-medium leading-none mb-1">
                       {bank.name}
                     </p>
 
@@ -82,11 +82,10 @@ export async function ReconnectBank() {
                 </div>
 
                 <div className="flex space-x-2">
-                  <Link href="todo">
-                    <Button variant="outline" size="icon">
-                      <Icons.Refresh size={16} />
-                    </Button>
-                  </Link>
+                  <ReconnectButton
+                    id={bank.id}
+                    institutionId={bank.institution_id}
+                  />
                 </div>
               </div>
             );

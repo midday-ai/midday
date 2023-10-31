@@ -42,6 +42,19 @@ export async function createBankConnection(supabase: Client, bank: any) {
     .single();
 }
 
+export async function updateBankConnection(supabase: Client, id: string) {
+  const { data: userData } = await getUserDetails(supabase);
+
+  return await supabase
+    .from("bank_connections")
+    .update({
+      expires_at: addDays(new Date(), 180).toDateString(),
+    })
+    .eq("team_id", userData?.team_id)
+    .eq("id", id)
+    .select();
+}
+
 export async function createTransactions(supabase: Client, transactions) {
   const { data: userData } = await getUserDetails(supabase);
 
