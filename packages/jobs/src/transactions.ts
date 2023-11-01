@@ -1,15 +1,12 @@
-import { Database } from "@/supabase-types";
-import { client } from "@/trigger";
 import { SupabaseManagement } from "@trigger.dev/supabase";
+import { client } from "./client";
 
 const supabaseManagement = new SupabaseManagement({
   id: "supabase-management",
   apiKey: process.env.SUPABASE_API_KEY!,
 });
 
-const db = supabaseManagement.db<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-);
+const db = supabaseManagement.db(process.env.NEXT_PUBLIC_SUPABASE_URL!);
 
 client.defineJob({
   id: "transactions-job",

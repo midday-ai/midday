@@ -1,15 +1,18 @@
 {
-  "name": "@midday/email",
+  "name": "@midday/jobs",
   "version": "1.0.0",
+  "main": "src/index.ts",
   "private": true,
+  "sideEffects": false,
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
-    "format": "biome format --write .",
+    "format": "biome --write .",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "react-email": "^1.9.5"
+    "@trigger.dev/sdk": "^2.2.4",
+    "@trigger.dev/supabase": "^2.2.4"
   },
   "devDependencies": {
     "typescript": "^5.2.2"
