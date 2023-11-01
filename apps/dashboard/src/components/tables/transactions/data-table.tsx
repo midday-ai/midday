@@ -25,6 +25,10 @@ export function DataTable({ data, teamId }: ItemsProps) {
     shallow: false, // TODO: Fix without this (redirect after mutation)
   });
 
+  const selectedTransaction = data.find(
+    (transaction) => transaction.id === transactionId,
+  );
+
   const handleOnSelect = (id: string) => {
     setTransactionId(id);
   };
@@ -32,6 +36,12 @@ export function DataTable({ data, teamId }: ItemsProps) {
   const handleOnClose = () => {
     setTransactionId(null);
   };
+
+  useEffect(() => {
+    if (!selectedTransaction) {
+      handleOnClose();
+    }
+  }, [selectedTransaction]);
 
   useEffect(() => {
     const currentIndex = data.findIndex((row) => row.id === transactionId);
@@ -140,9 +150,7 @@ export function DataTable({ data, teamId }: ItemsProps) {
             <TransactionDetails
               transactionId={transactionId}
               onClose={handleOnClose}
-              data={data.find(
-                (transaction) => transaction.id === transactionId,
-              )}
+              data={selectedTransaction}
             />
           </motion.div>
         )}

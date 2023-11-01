@@ -26,8 +26,6 @@ const Item = ({ file, onDelete }) => {
     transition: { opacity: { duration: 0.4 } },
   };
 
-  console.log(file);
-
   return (
     <motion.li
       {...animations}

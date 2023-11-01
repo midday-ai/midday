@@ -169,7 +169,7 @@ export async function getTransactions(
     meta: {
       count,
       totalAmount,
-      currency: data?.bank_account?.currency,
+      currency: data?.at(0)?.bank_account?.currency,
     },
     data,
   };

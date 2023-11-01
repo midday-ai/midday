@@ -23,12 +23,8 @@ export function useNotifications() {
       );
 
       headlessService.markAllMessagesAsRead({
-        listener: (result) => {
-          console.log(result);
-        },
-        onError: (error) => {
-          console.error("Error marking all messages as read:", error);
-        },
+        listener: () => {},
+        onError: () => {},
       });
     }
   };
@@ -122,9 +118,7 @@ export function useNotifications() {
           headlessServiceRef.current = headlessService;
           fetchNotifications();
         },
-        onError: (error) => {
-          console.log("headlessSice error:", error);
-        },
+        onError: () => {},
       });
     }
   }, [fetchNotifications, subscriberId]);

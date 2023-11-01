@@ -15,8 +15,7 @@ export function NotificationSetting({
   const { execute, optimisticData } = useOptimisticAction(
     updateSubscriberPreferenceAction,
     { enabled },
-    (state, katt) => {
-      console.log(katt);
+    (state) => {
       return {
         ...state,
         enabled: !state.enabled,

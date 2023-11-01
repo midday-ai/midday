@@ -73,7 +73,7 @@ export function SelectAccountModal({ countryCode }) {
       .map((id) => accounts.find((account) => account.id === id))
       .map((account) => ({
         account_id: account.id,
-        name: capitalCase(account.name),
+        name: capitalCase(account.name || account.iban),
         bic: account.bic,
         bban: account.bban,
         currency: account.currency,
@@ -115,7 +115,10 @@ export function SelectAccountModal({ countryCode }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
-      <DialogContent>
+      <DialogContent
+        onPointerDownOutside={(event) => event.preventDefault()}
+        onEscapeKeyDown={(event) => event.preventDefault()}
+      >
         <div className="p-4">
           <DialogHeader className="mb-8">
             <DialogTitle>Select accounts</DialogTitle>
