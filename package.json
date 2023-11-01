@@ -13,6 +13,7 @@
     "dev": "turbo dev --parallel",
     "start:dashboard": "turbo dev --filter=@midday/dashboard",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
+    "jobs:dashboard": "turbo jobs --filter=@midday/dashboard",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
     "check:types": "turbo typecheck"
