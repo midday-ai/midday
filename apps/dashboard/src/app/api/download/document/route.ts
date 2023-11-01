@@ -1,8 +1,8 @@
 import { createClient } from "@midday/supabase/server";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
-export const preferredRegion = "fra1";
+// export const runtime = "edge";
+// export const preferredRegion = "fra1";
 
 export async function GET(req, res) {
   const supabase = createClient();

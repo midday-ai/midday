@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const runtime = "edge";
-export const preferredRegion = "fra1";
+// export const runtime = "edge";
+// export const preferredRegion = "fra1";
 
 export async function GET(req: NextRequest) {
   const requestUrl = new URL(req.url);
