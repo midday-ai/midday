@@ -1,7 +1,7 @@
 "use client";
 
 import { updateTeamAction } from "@/actions/update-team-action";
-import { useUpload } from "@/hooks/useUpload";
+import { useUpload } from "@/hooks/use-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   Card,

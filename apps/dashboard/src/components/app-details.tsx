@@ -4,7 +4,10 @@ import { Suspense } from "react";
 
 export function AppDetails({ id, name, description, logo, active }) {
   return (
-    <section key={id} className="flex space-x-12 items-center mt-10 pt-10">
+    <section
+      key={id}
+      className="flex space-x-12 items-center mt-10 pt-10 first:pt-0"
+    >
       <div className="w-[300px] h-[200px] flex items-center justify-center bg-gradient-to-b from-[#1A1A1A] to-[#171717] rounded-xl">
         {logo}
       </div>

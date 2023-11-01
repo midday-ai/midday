@@ -8,10 +8,10 @@ import { createClient } from "@midday/supabase/server";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Settings | Midday",
+  title: "Profile Settings | Midday",
 };
 
-export default async function Account() {
+export default async function Profile() {
   const supabase = createClient();
   const { data: userData } = await getUserDetails(supabase);
 

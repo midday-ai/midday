@@ -29,7 +29,7 @@ export function SelectVat({ id, selectedId, isLoading }) {
       <div className="mt-1">
         {isLoading ? (
           <div className="h-[36px] border rounded-md">
-            <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[35px]" />
+            <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
           </div>
         ) : (
           <Select value={value} onValueChange={handleOnValueChange}>

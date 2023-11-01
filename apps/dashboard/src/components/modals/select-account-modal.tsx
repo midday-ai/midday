@@ -91,7 +91,7 @@ export function SelectAccountModal({ countryCode }) {
     const { data } = await createBankAccountsAction(accountsWithDetails);
 
     await initialTransactionsSync(data);
-    router.push(`${pathname}?step=gmail`);
+    router.push(`${pathname}?step=apps`);
   }
 
   useEffect(() => {

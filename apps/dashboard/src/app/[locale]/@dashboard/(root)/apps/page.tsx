@@ -145,7 +145,7 @@ const apps = [
 
 export default function Apps() {
   return (
-    <div className="max-w-[1200px] mt-8">
+    <div className="max-w-[1200px]">
       <div className="divide-y">
         {apps.map((app) => {
           return <AppDetails key={app.id} {...app} />;

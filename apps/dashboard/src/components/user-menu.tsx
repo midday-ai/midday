@@ -30,9 +30,9 @@ export async function UserMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" sideOffset={10} align="end">
         <DropdownMenuGroup>
-          <Link href="/account">
+          <Link href="/profile">
             <DropdownMenuItem>
-              Account
+              Profile
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
           </Link>

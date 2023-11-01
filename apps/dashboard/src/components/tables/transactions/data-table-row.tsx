@@ -1,27 +1,14 @@
 "use client";
 
+import { AssignedUser } from "@/components/assigned-user";
 import { Category } from "@/components/category";
 import { TransactionMethod } from "@/components/transaction-method";
 import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-
-function AssignedUser({ user }) {
-  return (
-    <div className="flex space-x-2">
-      {user?.avatar_url && (
-        <Avatar className="h-5 w-5">
-          <AvatarImage src={user.avatar_url} alt={user?.full_name} />
-        </Avatar>
-      )}
-      <span className="truncate">{user?.full_name.split(" ").at(0)}</span>
-    </div>
-  );
-}
 
 export function DataTableCell({ children, className }) {
   return (
@@ -63,7 +50,7 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
       <DataTableCell className="w-[430px]">{data.name}</DataTableCell>
 
       <DataTableCell className="w-[200px]">
-        <span className={cn("text-sm", data.amount > 0 && "text-[#00E547]")}>
+        <span className={cn("text-sm", data.amount > 0 && "text-[#00C969]")}>
           {formatAmount({
             amount: data.amount,
             currency: data.currency,

@@ -97,7 +97,9 @@ export function DataTable({ data, teamId }: ItemsProps) {
       <motion.div
         className="border"
         initial={false}
-        animate={{ width: transactionId ? "calc(100vw - 662px)" : "100%" }}
+        animate={{
+          width: transactionId ? "calc(100vw - var(--sidebar-width))" : "100%",
+        }}
         transition={{
           ease: "easeInOut",
           duration: 0.25,
@@ -138,6 +140,9 @@ export function DataTable({ data, teamId }: ItemsProps) {
             <TransactionDetails
               transactionId={transactionId}
               onClose={handleOnClose}
+              data={data.find(
+                (transaction) => transaction.id === transactionId,
+              )}
             />
           </motion.div>
         )}

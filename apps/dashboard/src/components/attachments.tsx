@@ -1,6 +1,6 @@
 "use client";
 
-import { useUpload } from "@/hooks/useUpload";
+import { useUpload } from "@/hooks/use-upload";
 import { formatSize } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import {
@@ -26,6 +26,8 @@ const Item = ({ file, onDelete }) => {
     transition: { opacity: { duration: 0.4 } },
   };
 
+  console.log(file);
+
   return (
     <motion.li
       {...animations}
@@ -46,7 +48,7 @@ const Item = ({ file, onDelete }) => {
             {file.name}
           </a>
           <span className="text-xs text-[#606060]">
-            {formatSize(file.size)}
+            {file.size && formatSize(file.size)}
           </span>
         </div>
       </div>

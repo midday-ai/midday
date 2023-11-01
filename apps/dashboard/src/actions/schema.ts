@@ -25,3 +25,12 @@ export const deleteBankAccountSchema = z.object({
 export type DeleteBankAccountFormValues = z.infer<
   typeof deleteBankAccountSchema
 >;
+
+export const updateSubscriberPreferenceSchema = z.object({
+  templateId: z.string(),
+  teamId: z.string(),
+  revalidatePath: z.string(),
+  subscriberId: z.string(),
+  type: z.string(),
+  enabled: z.boolean(),
+});

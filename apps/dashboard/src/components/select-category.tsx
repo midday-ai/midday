@@ -17,6 +17,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
 import { useEffect, useState } from "react";
+import { CategoryIcon } from "./category";
 
 const categories = [
   "office_supplies",
@@ -71,7 +72,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
       <div className="mt-1">
         {isLoading ? (
           <div className="h-[36px] border rounded-md">
-            <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[35px]" />
+            <Skeleton className="h-[14px] w-[40%] rounded-sm absolute left-3 top-[39px]" />
           </div>
         ) : (
           <Select value={value} onValueChange={handleOnValueChange}>
@@ -81,7 +82,10 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
             <SelectContent>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>
-                  {t(`categories.${category}`)}
+                  <div className="flex space-x-2">
+                    <CategoryIcon name={category} />
+                    <span>{t(`categories.${category}`)}</span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>

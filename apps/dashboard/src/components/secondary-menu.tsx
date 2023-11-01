@@ -8,7 +8,10 @@ export function SecondaryMenu({ items }) {
   const pathname = usePathname();
 
   return (
-    <nav>
+    <nav
+      className="sticky -top-[1px] z-10 backdrop-blur backdrop-filter bg-opacity-50 py-4"
+      style={{ background: "rgba(18, 18, 18,.9)" }}
+    >
       <ul className="flex space-x-6 text-sm">
         {items.map((item) => (
           <Link

@@ -1,4 +1,5 @@
 import { createClient } from "@midday/supabase/client";
+import { getUserDetails } from "@midday/supabase/queries";
 import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -89,11 +90,8 @@ export function useNotifications() {
 
   useEffect(() => {
     async function fetchUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      setSubscriberId(session?.user.id);
+      const { data: userData } = await getUserDetails(supabase);
+      setSubscriberId(`${userData.team_id}_${userData.id}`);
     }
 
     fetchUser();

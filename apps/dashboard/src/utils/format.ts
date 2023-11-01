@@ -22,8 +22,12 @@ type FormatAmountParams = {
   locale: string;
 };
 
-export function formatAmount({ currency, amount, locale }: FormatAmountParams) {
-  if (!currency || !locale) {
+export function formatAmount({
+  currency,
+  amount,
+  locale = "en-US",
+}: FormatAmountParams) {
+  if (!currency) {
     return;
   }
 

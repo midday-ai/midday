@@ -6,3 +6,13 @@ body {
 .steps-gradient {
   background: linear-gradient(180deg,transparent,#23252c 10%,#23252c 90%,transparent);
 }
+
+:root {
+  --sidebar-width: 662px;
+}
+
+@media (min-width: 1280px) {
+  :root {
+    --sidebar-width: 827px;
+  }
+}

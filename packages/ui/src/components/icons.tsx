@@ -1,7 +1,6 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { Settings } from "lucide-react";
 import {
-  MdAccountBalanceWallet,
   MdCelebration,
   MdDesk,
   MdDevices,
@@ -10,8 +9,12 @@ import {
   MdFlightTakeoff,
   MdHomeWork,
   MdInventory2,
+  MdOutlineAccountBalanceWallet,
   MdOutlineFormatListBulleted,
+  MdOutlineNotificationsNone,
   MdPayments,
+  MdPeople,
+  MdPerson,
   MdRefresh,
   MdSave,
 } from "react-icons/md";
@@ -96,14 +99,6 @@ export const Icons = {
     <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M8 18v-6h2v2h8v2h-8v2H8Zm-8-2v-2h6v2H0Zm4-4v-2H0V8h4V6h2v6H4Zm4-2V8h10v2H8Zm4-4V0h2v2h4v2h-4v2h-2ZM0 4V2h10v2H0Z"
-        fill="currentColor"
-      />
-    </svg>
-  ),
-  Notifications: () => (
-    <svg width="14" height="14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M5.833 12.25h2.334A1.17 1.17 0 0 1 7 13.417a1.17 1.17 0 0 1-1.167-1.167Zm6.417-1.167v.584H1.75v-.584l1.167-1.166v-3.5a4.06 4.06 0 0 1 2.916-3.909v-.175A1.17 1.17 0 0 1 7 1.167a1.17 1.17 0 0 1 1.167 1.166v.175a4.06 4.06 0 0 1 2.916 3.909v3.5l1.167 1.166ZM9.917 6.417A2.888 2.888 0 0 0 7 3.5a2.888 2.888 0 0 0-2.917 2.917V10.5h5.834V6.417Z"
         fill="currentColor"
       />
     </svg>
@@ -284,10 +279,13 @@ export const Icons = {
   HomeWork: MdHomeWork,
   Payments: MdPayments,
   Devices: MdDevices,
-  AccountBalance: MdAccountBalanceWallet,
+  AccountBalance: MdOutlineAccountBalanceWallet,
   Fence: MdFence,
   Celebration: MdCelebration,
   Refresh: MdRefresh,
   Inventory2: MdInventory2,
   SettingsCog: Settings,
+  Person: MdPerson,
+  Peolple: MdPeople,
+  Notifications: MdOutlineNotificationsNone,
 };

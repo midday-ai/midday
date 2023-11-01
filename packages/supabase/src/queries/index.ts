@@ -62,7 +62,7 @@ export async function getTeamMembers(supabase: Client) {
     .from("users_on_team")
     .select(`
       id,
-      user:users(id,full_name)
+      user:users(id,full_name,avatar_url)
     `)
     .eq("team_id", userData?.team_id);
 
@@ -103,7 +103,7 @@ export async function getTransactions(
       *,
       bank_account:bank_account_id(currency),
       assigned:assigned_id(*),
-      attachments(id)
+      attachments(id,size,name)
     `,
       { count: "exact" },
     )

@@ -1,5 +1,4 @@
 import { ConnectBank } from "@/components/connect-bank";
-import { ConnectGmail } from "@/components/connect-gmail";
 import { SignupApps } from "@/components/signup-apps";
 import { Metadata } from "next";
 
@@ -22,7 +21,6 @@ export default function Onboarding() {
 
         <div className="space-y-6">
           <ConnectBank />
-          <ConnectGmail />
           <SignupApps />
         </div>
       </div>

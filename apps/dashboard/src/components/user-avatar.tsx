@@ -1,7 +1,7 @@
 "use client";
 
 import { updateUserAction } from "@/actions/update-user-action";
-import { useUpload } from "@/hooks/useUpload";
+import { useUpload } from "@/hooks/use-upload";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   Card,
@@ -30,7 +30,7 @@ export function UserAvatar({ userId, avatarUrl, fullName }) {
     });
 
     if (url) {
-      action.execute({ avatar_url: url, revalidatePath: "/account" });
+      action.execute({ avatar_url: url, revalidatePath: "/profile" });
     }
   };
 

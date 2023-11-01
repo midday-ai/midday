@@ -31,13 +31,13 @@
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.47.0",
-    "recharts": "^2.9.1",
+    "recharts": "^2.9.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.1",
-    "@types/node": "^20.8.9",
+    "@types/node": "^20.8.10",
     "@types/react": "^18.2.33",
     "@types/react-dom": "^18.2.14",
     "typescript": "^5.2.2"

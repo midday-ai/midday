@@ -14,7 +14,9 @@ export function Loading({ collapsed }) {
     <div className="flex relative space-x-8 cursor-default">
       <div
         className="border"
-        style={{ width: collapsed ? "calc(100vw - 662px)" : "100%" }}
+        style={{
+          width: collapsed ? "calc(100vw - var(--sidebar-width))" : "100%",
+        }}
       >
         <DataTableHeader collapsed={collapsed} />
 
