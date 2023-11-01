@@ -18,14 +18,16 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
     "@midday/gocardless": "workspace:*",
+    "@midday/jobs": "workspace:*",
     "@midday/kv": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/notification": "workspace:*",
-    "@midday/jobs": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.21.0",
+    "@tremor/react": "^3.10.1",
     "@trigger.dev/nextjs": "^2.2.4",
+    "@uidotdev/usehooks": "^2.4.1",
     "change-case": "^5.1.2",
     "framer-motion": "^10.16.4",
     "next": "14.0.0",
@@ -37,7 +39,6 @@
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.47.0",
-    "recharts": "^2.9.2",
     "zod": "^3.22.4"
   },
   "devDependencies": {

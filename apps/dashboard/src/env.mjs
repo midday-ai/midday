@@ -15,7 +15,6 @@ export const env = createEnv({
     NOVU_API_KEY: z.string(),
     KV_REST_API_URL: z.string(),
     KV_REST_API_TOKEN: z.string(),
-    SUPABASE_API_KEY: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -48,7 +47,6 @@ export const env = createEnv({
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     NEXT_PUBLIC_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_APPLICATION_IDENTIFIER,
-    SUPABASE_API_KEY: process.env.SUPABASE_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

@@ -49,9 +49,11 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
     if (transactions?.data?.length) {
       toast({
         duration: 6000,
-        description: `Categorize ${
+        description: `Do you want to mark ${
           transactions?.data?.length
-        } transactions form ${name} as ${t(`categories.${value}`)} too?`,
+        } similar transactions form ${name} as ${t(
+          `categories.${value}`,
+        )} too?`,
         action: (
           <ToastAction altText="Yes" onClick={handleUpdateSimilar}>
             Yes

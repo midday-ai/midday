@@ -73,7 +73,7 @@ export function Attachments({ id, data }) {
   const supabase = createClient();
   const router = useRouter();
   const [files, setFiles] = useState<Attachment[]>([]);
-  const { isLoading, uploadFile } = useUpload();
+  const { uploadFile } = useUpload();
 
   const handleOnDelete = async (id: string) => {
     setFiles((files) => files.filter((file) => file.id !== id));
