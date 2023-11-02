@@ -76,8 +76,6 @@ const data = [
 ];
 
 const ToolTipContent = ({ payload = {} }) => {
-  const [current, previous] = payload;
-
   return (
     <div className="w-[240px] rounded-xl border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
@@ -153,7 +151,7 @@ export function Chart() {
         />
         <Tooltip content={ToolTipContent} cursor={false} />
 
-        <Bar dataKey="previousTotal" barSize={12}>
+        <Bar dataKey="previousTotal" barSize={14}>
           {data.map((entry, index) => (
             <Cell
               key={`cell-${index}`}
@@ -162,7 +160,7 @@ export function Chart() {
           ))}
         </Bar>
 
-        <Bar dataKey="currentTotal" barSize={12}>
+        <Bar dataKey="currentTotal" barSize={14}>
           {data.map((entry, index) => (
             <Cell
               key={`cell-${index}`}

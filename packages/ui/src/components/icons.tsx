@@ -63,7 +63,7 @@ export const Icons = {
   Apps: MdOutlineIntegrationInstructions,
   Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
-  Documents: MdOutlineInventory2,
+  Files: MdOutlineInventory2,
   Google: () => (
     <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g clipPath="url(#a)">

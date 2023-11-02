@@ -26,9 +26,9 @@ export function MainMenu() {
       icon: () => <Icons.Invoice size={22} />,
     },
     {
-      path: "/documents",
-      name: "Documents",
-      icon: () => <Icons.Documents size={22} />,
+      path: "/files",
+      name: "Files",
+      icon: () => <Icons.Files size={22} />,
     },
     {
       path: "/apps",
