@@ -13,22 +13,32 @@ export function MainMenu() {
     {
       path: "/",
       name: "Overview",
-      icon: Icons.Overview,
+      icon: () => <Icons.Overview size={22} />,
     },
     {
       path: "/transactions",
       name: "Transactions",
-      icon: Icons.Transactions,
+      icon: () => <Icons.Transactions size={22} />,
+    },
+    {
+      path: "/invoices",
+      name: "Invoices",
+      icon: () => <Icons.Invoice size={22} />,
+    },
+    {
+      path: "/documents",
+      name: "Documents",
+      icon: () => <Icons.Documents size={22} />,
     },
     {
       path: "/apps",
       name: "Apps",
-      icon: Icons.Apps,
+      icon: () => <Icons.Apps size={22} />,
     },
     {
       path: "/settings",
       name: "Settings",
-      icon: Icons.Settings,
+      icon: () => <Icons.Settings size={22} />,
     },
   ];
 
@@ -52,7 +62,7 @@ export function MainMenu() {
             >
               <Link
                 href={path}
-                className="flex space-x-4 p-0 items-center xl:py-2 xl:px-4"
+                className="flex space-x-3 p-0 items-center xl:py-2 xl:px-4"
               >
                 <Icon />
                 <span className="hidden xl:inline text-sm">{name}</span>

@@ -4,19 +4,27 @@ import {
   MdCelebration,
   MdDesk,
   MdDevices,
+  MdExpandMore,
   MdFastfood,
   MdFence,
   MdFlightTakeoff,
   MdHomeWork,
   MdInventory2,
   MdOutlineAccountBalanceWallet,
-  MdOutlineFormatListBulleted,
+  MdOutlineBallot,
+  MdOutlineDescription,
+  MdOutlineIntegrationInstructions,
+  MdOutlineInventory2,
   MdOutlineNotificationsNone,
+  MdOutlineTune,
   MdPayments,
   MdPeople,
   MdPerson,
   MdRefresh,
   MdSave,
+  MdStackedBarChart,
+  MdTrendingDown,
+  MdTrendingUp,
 } from "react-icons/md";
 
 export const Icons = {
@@ -51,23 +59,11 @@ export const Icons = {
       />
     </svg>
   ),
-  Overview: () => (
-    <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M6 14H4V7h2v7Zm4 0H8V4h2v10Zm4 0h-2v-4h2v4Zm2 2H2V2h14v14.1M16 0H2C.9 0 0 .9 0 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V2c0-1.1-.9-2-2-2Z"
-        fill="currentColor"
-      />
-    </svg>
-  ),
-  Apps: () => (
-    <svg width="18" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M6.6 14.6 8 13.15 5.85 11 8 8.85 6.6 7.4 3 11l3.6 3.6Zm4.8 0L15 11l-3.6-3.6L10 8.85 12.15 11 10 13.15l1.4 1.45ZM2 20c-.55 0-1.02-.196-1.413-.587A1.926 1.926 0 0 1 0 18V4c0-.55.196-1.02.588-1.413A1.926 1.926 0 0 1 2 2h4.2c.217-.6.58-1.083 1.087-1.45A2.857 2.857 0 0 1 9 0c.633 0 1.204.183 1.713.55.508.367.87.85 1.087 1.45H16c.55 0 1.02.196 1.413.587C17.803 2.98 18 3.45 18 4v14c0 .55-.196 1.02-.587 1.413A1.926 1.926 0 0 1 16 20H2Zm0-2h14V4H2v14ZM9 3.25a.728.728 0 0 0 .75-.75.728.728 0 0 0-.75-.75.728.728 0 0 0-.75.75.728.728 0 0 0 .75.75Z"
-        fill="currentColor"
-      />
-    </svg>
-  ),
-  Transactions: MdOutlineFormatListBulleted,
+  Overview: MdStackedBarChart,
+  Apps: MdOutlineIntegrationInstructions,
+  Transactions: MdOutlineBallot,
+  Invoice: MdOutlineDescription,
+  Documents: MdOutlineInventory2,
   Google: () => (
     <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g clipPath="url(#a)">
@@ -95,14 +91,7 @@ export const Icons = {
       </defs>
     </svg>
   ),
-  Settings: () => (
-    <svg width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M8 18v-6h2v2h8v2h-8v2H8Zm-8-2v-2h6v2H0Zm4-4v-2H0V8h4V6h2v6H4Zm4-2V8h10v2H8Zm4-4V0h2v2h4v2h-4v2h-2ZM0 4V2h10v2H0Z"
-        fill="currentColor"
-      />
-    </svg>
-  ),
+  Settings: MdOutlineTune,
   Inbox: ArchiveIcon,
   Check: (props: any) => (
     <svg
@@ -288,4 +277,7 @@ export const Icons = {
   Person: MdPerson,
   Peolple: MdPeople,
   Notifications: MdOutlineNotificationsNone,
+  ChevronDown: MdExpandMore,
+  TrendingUp: MdTrendingUp,
+  TrendingDown: MdTrendingDown,
 };
