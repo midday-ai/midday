@@ -23,6 +23,7 @@
     "./client": "./src/client/client.ts",
     "./mutations": "./src/mutations/index.ts",
     "./queries": "./src/queries/index.ts",
-    "./storage": "./src/utils/storage.ts"
+    "./storage": "./src/utils/storage.ts",
+    "./types": "./src/types/db.ts"
   }
 }
