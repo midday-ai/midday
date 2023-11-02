@@ -6,7 +6,11 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Suspense } from "react";
-import { TransactionsList } from "./transactions-list";
+import {
+  TransactionsList,
+  TransactionsListHeader,
+  TransactionsListSkeleton,
+} from "./transactions-list";
 
 export function LatestTransactions() {
   return (
@@ -27,7 +31,8 @@ export function LatestTransactions() {
         </DropdownMenu>
       </div>
 
-      <Suspense>
+      <TransactionsListHeader />
+      <Suspense fallback={<TransactionsListSkeleton />}>
         <TransactionsList />
       </Suspense>
     </div>

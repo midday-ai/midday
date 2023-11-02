@@ -26,7 +26,13 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(fontSans.variable, "bg-background")}>
+      <body
+        className={cn(
+          fontSans.variable,
+          // TODO: Only in native desktop
+          "bg-background !outline-none !select-none",
+        )}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

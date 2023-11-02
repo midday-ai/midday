@@ -7,7 +7,14 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  Cell,
+  Label,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 const data = [
   { name: "Group A", value: 400 },
@@ -85,6 +92,14 @@ export function Spending() {
               fill="#8884d8"
               dataKey="value"
             >
+              <Label
+                value="€ 32,240"
+                position="center"
+                fontSize={23}
+                fill="#F5F5F3"
+                fontFamily="var(--font-sans)"
+              />
+
               {data.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
