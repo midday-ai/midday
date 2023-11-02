@@ -1,6 +1,7 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { Settings } from "lucide-react";
 import {
+  MdBarChart,
   MdCelebration,
   MdDesk,
   MdDevices,
@@ -11,10 +12,10 @@ import {
   MdHomeWork,
   MdInventory2,
   MdOutlineAccountBalanceWallet,
-  MdOutlineBallot,
   MdOutlineDescription,
   MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
+  MdOutlineListAlt,
   MdOutlineNotificationsNone,
   MdOutlineTune,
   MdPayments,
@@ -22,7 +23,6 @@ import {
   MdPerson,
   MdRefresh,
   MdSave,
-  MdStackedBarChart,
   MdTrendingDown,
   MdTrendingUp,
 } from "react-icons/md";
@@ -59,9 +59,9 @@ export const Icons = {
       />
     </svg>
   ),
-  Overview: MdStackedBarChart,
+  Overview: MdBarChart,
   Apps: MdOutlineIntegrationInstructions,
-  Transactions: MdOutlineBallot,
+  Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
   Documents: MdOutlineInventory2,
   Google: () => (
