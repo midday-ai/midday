@@ -32,6 +32,10 @@ client.defineJob({
 
     const transactions = await getTransactions(payload.accountId);
 
+    await io.logger.info(
+      `Transactions: ${JSON.stringify(transactions, null, 2)}`,
+    );
+
     const { count } = await io.supabase.client.from("transactions").upsert(
       transactions.map((transaction) => ({
         ...transaction,
@@ -86,6 +90,10 @@ client.defineJob({
     await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
     const transactions = await getTransactions(payload.accountId);
+
+    await io.logger.info(
+      `Transactions: ${JSON.stringify(transactions, null, 2)}`,
+    );
 
     const { count } = await io.supabase.client.from("transactions").insert(
       transactions.map((transaction) => ({
