@@ -32,12 +32,12 @@ client.defineJob({
 
     const transactions = await getTransactions(payload.accountId);
 
-    await io.logger.info(
-      `Transactions: ${JSON.stringify(transactions, null, 2)}`,
-    );
+    if (!transactions?.booked.length) {
+      await io.logger.info("No transactions found");
+    }
 
     const { count } = await io.supabase.client.from("transactions").upsert(
-      transactions.map((transaction) => ({
+      transactions.booked.map((transaction) => ({
         ...transaction,
         team_id: payload.teamId,
       })),
@@ -91,12 +91,12 @@ client.defineJob({
 
     const transactions = await getTransactions(payload.accountId);
 
-    await io.logger.info(
-      `Transactions: ${JSON.stringify(transactions, null, 2)}`,
-    );
+    if (!transactions?.booked.length) {
+      await io.logger.info("No transactions found");
+    }
 
     const { count } = await io.supabase.client.from("transactions").insert(
-      transactions.map((transaction) => ({
+      transactions?.booked.map((transaction) => ({
         ...transaction,
         team_id: payload.teamId,
       })),
