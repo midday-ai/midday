@@ -27,15 +27,9 @@ client.defineJob({
   version: "0.4.0",
   trigger: dynamicSchedule,
   integrations: { supabase },
-  run: async (_, io) => {
-    const accountId = ctx.source.id;
+  run: async (payload, io, ctx) => {
+    const { accountId, teamId } = ctx.source.metadata;
     await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
-
-    const { data } = await io.supabase.client
-      .from("bank_accounts")
-      .select("team_id")
-      .eq("account_id", accountId)
-      .single();
 
     const { transactions } = await getTransactions(accountId);
 
@@ -46,7 +40,7 @@ client.defineJob({
     const { count } = await io.supabase.client.from("transactions").upsert(
       transactions.booked.map((transaction) => ({
         ...transaction,
-        team_id: data?.team_id,
+        team_id: teamId,
       })),
       { onConflict: "provider_transaction_id", ignoreDuplicates: false },
     );
@@ -68,15 +62,20 @@ client.defineJob({
       name: "transactions.initial.sync",
       payload: {
         accountId: payload.record.account_id,
+        teamId: payload.record.team_id,
       },
     });
 
     //use the account_id as the id for the DynamicSchedule
     //so it comes through to run() in the context source.id
     await dynamicSchedule.register(payload.record.account_id, {
-      type: "cron",
+      type: "interval",
+      metadata: {
+        accountId: payload.record.account_id,
+        teamId: payload.record.team_id,
+      },
       options: {
-        cron: "0 * * * *",
+        seconds: 36000,
       },
     });
   },
@@ -90,21 +89,14 @@ client.defineJob({
     name: "transactions.initial.sync",
     schema: z.object({
       accountId: z.string(),
+      teamId: z.string(),
     }),
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const { accountId } = payload;
+    await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
-    await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
-
-    const { data } = await io.supabase.client
-      .from("bank_accounts")
-      .select("team_id")
-      .eq("account_id", accountId)
-      .single();
-
-    const { transactions } = await getTransactions(accountId);
+    const { transactions } = await getTransactions(payload.accountId);
 
     if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
@@ -113,7 +105,7 @@ client.defineJob({
     const { count } = await io.supabase.client.from("transactions").insert(
       transactions?.booked.map((transaction) => ({
         ...transaction,
-        team_id: data?.team_id,
+        team_id: payload.teamId,
       })),
     );
 
