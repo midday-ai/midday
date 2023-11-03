@@ -32,7 +32,7 @@ client.defineJob({
 
     const { transactions } = await getTransactions(payload.accountId);
 
-    if (!transactions?.booked?.length) {
+    if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
     }
 
@@ -91,7 +91,7 @@ client.defineJob({
 
     const { transactions } = await getTransactions(payload.accountId);
 
-    if (!transactions?.booked?.length) {
+    if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
     }
 
