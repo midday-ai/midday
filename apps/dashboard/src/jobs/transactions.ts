@@ -26,12 +26,13 @@ client.defineJob({
   name: "Transactions - Latest Transactions",
   version: "0.4.0",
   trigger: dynamicSchedule,
+  integrations: { supabase },
   run: async (payload, io) => {
     await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
     const transactions = await getTransactions(payload.accountId);
 
-    const { count } = await supabase.client.from("transactions").upsert(
+    const { count } = await io.supabase.client.from("transactions").upsert(
       transactions.map((transaction) => ({
         ...transaction,
         team_id: payload.teamId,
@@ -81,12 +82,12 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
-  run: async (payload, io, ctx) => {
+  run: async (payload, io) => {
     await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
     const transactions = await getTransactions(payload.accountId);
 
-    const { count } = await supabase.client.from("transactions").insert(
+    const { count } = await io.supabase.client.from("transactions").insert(
       transactions.map((transaction) => ({
         ...transaction,
         team_id: payload.teamId,
