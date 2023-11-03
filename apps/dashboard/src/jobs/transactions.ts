@@ -26,21 +26,15 @@ client.defineJob({
   name: "Transactions - Latest Transactions",
   version: "0.4.0",
   trigger: dynamicSchedule,
-  run: async (payload, io, ctx) => {
+  run: async (payload, io) => {
     await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
-
-    const account = await supabase.client
-      .from("bank_accounts")
-      .select("team_id")
-      .eq("id", payload.teamId)
-      .single();
 
     const transactions = await getTransactions(payload.accountId);
 
     const { count } = await supabase.client.from("transactions").upsert(
       transactions.map((transaction) => ({
         ...transaction,
-        team_id: account.data?.team_id,
+        team_id: payload.teamId,
       })),
       { onConflict: "provider_transaction_id", ignoreDuplicates: false },
     );
@@ -87,23 +81,15 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
-  run: async (_, io, ctx) => {
-    const id = ctx.source.id;
+  run: async (payload, io, ctx) => {
+    await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
-    await io.logger.info(`Fetching Transactions for ID: ${id}`);
-
-    const account = await supabase.client
-      .from("bank_accounts")
-      .select("team_id")
-      .eq("id", id)
-      .single();
-
-    const transactions = await getTransactions(ctx.source.id);
+    const transactions = await getTransactions(payload.accountId);
 
     const { count } = await supabase.client.from("transactions").insert(
       transactions.map((transaction) => ({
         ...transaction,
-        team_id: account.data?.team_id,
+        team_id: payload.teamId,
       })),
     );
 
