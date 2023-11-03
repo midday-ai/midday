@@ -30,9 +30,9 @@ client.defineJob({
   run: async (payload, io) => {
     await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
-    const transactions = await getTransactions(payload.accountId);
+    const { transactions } = await getTransactions(payload.accountId);
 
-    if (!transactions?.booked.length) {
+    if (!transactions?.booked?.length) {
       await io.logger.info("No transactions found");
     }
 
@@ -89,9 +89,9 @@ client.defineJob({
   run: async (payload, io) => {
     await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
 
-    const transactions = await getTransactions(payload.accountId);
+    const { transactions } = await getTransactions(payload.accountId);
 
-    if (!transactions?.booked.length) {
+    if (!transactions?.booked?.length) {
       await io.logger.info("No transactions found");
     }
 
