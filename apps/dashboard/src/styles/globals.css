@@ -4,6 +4,10 @@ body {
   overscroll-behavior: none;
 }
 
+*:focus {
+  outline: none;
+}
+
 .steps-gradient {
   background: linear-gradient(180deg,transparent,#23252c 10%,#23252c 90%,transparent);
 }

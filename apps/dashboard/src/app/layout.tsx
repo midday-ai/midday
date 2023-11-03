@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={cn(fontSans.variable, "bg-background ")}>
+      <body className={cn(fontSans.variable, "bg-background !outline-none")}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

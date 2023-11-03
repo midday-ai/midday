@@ -7,6 +7,7 @@ import { getTeamBankAccounts } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Overview | Midday",
@@ -24,7 +25,10 @@ export default async function Overview() {
     <div>
       <Period className="mt-6 mb-8" />
       <Summary />
-      <Chart />
+
+      <Suspense>
+        <Chart />
+      </Suspense>
 
       <div className="flex space-x-8 mt-14">
         <Spending />
