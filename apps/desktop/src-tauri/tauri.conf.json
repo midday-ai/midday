@@ -36,7 +36,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "ai.midday.app",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -70,9 +70,8 @@
         "width": 1250,
         "minWidth": 1050,
         "hiddenTitle": true,
-        "titleBarStyle": "Transparent",
-        "url": "http://localhost:3001"
-      }
+        "titleBarStyle": "Overlay"
+       }
     ]
   }
 }
