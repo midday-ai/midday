@@ -129,12 +129,17 @@ type GetTransactionsParams = {
   };
 };
 
+// TODO: zod parse
 export async function getTransactions(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
   const { from = 0, to, filter, sort, teamId } = params;
   const { date = {}, search, status, attachments, category } = filter || {};
+
+  if (!teamId) {
+    throw new Error("No team id found");
+  }
 
   const query = supabase
     .from("transactions")

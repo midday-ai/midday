@@ -40,7 +40,7 @@ export async function TransactionsList() {
   const { data } = await getCachedTransactions({
     to: 5,
     from: 0,
-    teamId: userData.team_id,
+    teamId: userData?.team_id,
   });
 
   return (
