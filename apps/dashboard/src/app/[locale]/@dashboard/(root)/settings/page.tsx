@@ -14,8 +14,8 @@ export default async function Account() {
   return (
     <div className="flex flex-col space-y-12">
       <TeamAvatar
-        teamId={userData.team.id}
-        name={userData.team.name}
+        teamId={userData?.team.id}
+        name={userData?.team.name}
         logoUrl={userData?.team?.logo_url}
       />
       <TeamName name={userData.team.name} />
