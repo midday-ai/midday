@@ -6,30 +6,23 @@ export const runtime = "edge";
 export const preferredRegion = "fra1";
 
 export async function POST(req: Request) {
-  const data = await req.json();
-  console.log("webhook", data);
+  const { payload, type } = await req.json();
   const headersList = headers();
 
-  return null;
   if (
+    type === "deployment.succeeded" &&
     headersList.get("x-vercel-signature") ===
       process.env.VERCEL_WEBHOOK_SECRET &&
     payload.target === "production"
   ) {
     const supabase = createClient();
 
-    console.log("here", 1);
-
     if (payload.target === "production") {
       await supabase.from("deployments").insert({
-        deployment_id: payload.id,
-        target: payload.target,
+        deployment_id: payload.deployment.id,
+        target: payload.deployment.target,
       });
-
-      console.log("here", 2);
     }
-
-    console.log("here", 3);
   }
 
   return Response.json({
