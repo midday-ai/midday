@@ -74,13 +74,10 @@ client.defineJob({
       },
     });
 
-    // use the account_id as the id for the DynamicSchedule
+    // use the bank account row id as the id for the DynamicSchedule
     // so it comes through to run() in the context source.id
-    await dynamicSchedule.register(payload.record.account_id, {
+    await dynamicSchedule.register(payload.record.id, {
       type: "interval",
-      metadata: {
-        accountId: payload.record.account_id,
-      },
       options: {
         seconds: 36000,
       },
@@ -95,18 +92,20 @@ client.defineJob({
   trigger: dynamicSchedule,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    const accountId = ctx.source.id;
-
-    await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
-
-    // NOTE Can't get team id in ctx.metadata to work
     const { data } = await io.supabase.client
       .from("bank_accounts")
-      .select("team_id")
-      .eq("account_id", accountId)
+      .select("id,team_id,account_id")
+      .eq("id", ctx.source.id)
       .single();
 
-    const { transactions } = await getTransactions(accountId);
+    if (!data) {
+      // TODO: Remove schedule
+      await io.logger.error(`Bank account not found: ${ctx.source.id}`);
+    }
+
+    await io.logger.info(`Fetching Transactions for ID: ${data?.account_id}`);
+
+    const { transactions } = await getTransactions(data?.account_id);
 
     if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
@@ -116,7 +115,7 @@ client.defineJob({
       .from("transactions")
       .upsert(
         transformTransactions(transactions?.booked, {
-          accountId,
+          accountId: data?.id,
           teamId: data?.team_id,
         }),
         {
@@ -145,8 +144,9 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
-  run: async (payload, io) => {
+  run: async (payload, io, ctx) => {
     const { accountId, teamId } = payload;
+
     await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
 
     const { transactions } = await getTransactions(accountId);
@@ -159,7 +159,7 @@ client.defineJob({
       .from("transactions")
       .insert(
         transformTransactions(transactions?.booked, {
-          accountId,
+          accountId: ctx.source.id,
           teamId: teamId,
         }),
       );
