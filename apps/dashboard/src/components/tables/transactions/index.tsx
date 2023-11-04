@@ -25,7 +25,7 @@ export async function Table({ filter, page, sort }) {
     from,
     filter,
     sort,
-    teamId: userData.team_id,
+    teamId: userData?.team_id,
   });
 
   if (!data?.length) {
