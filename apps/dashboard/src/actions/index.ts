@@ -74,38 +74,6 @@ const mapTransactionMethod = (method: string) => {
   }
 };
 
-export async function initialTransactionsSync(accounts: any) {
-  const supabase = await createClient();
-
-  await Promise.all(
-    accounts.map(async (account) => {
-      const { transactions } = await getTransactions(account.account_id);
-
-      if (!transactions?.booked.length) {
-        return;
-      }
-
-      await createTransactions(
-        supabase,
-        transactions.booked.map((data) => ({
-          transaction_id: data.transactionId,
-          reference: data.entryReference,
-          booking_date: data.bookingDate,
-          date: data.valueDate,
-          name: capitalCase(data.additionalInformation),
-          original: data.additionalInformation,
-          method: mapTransactionMethod(data.proprietaryBankTransactionCode),
-          provider_transaction_id: data.internalTransactionId,
-          amount: data.transactionAmount.amount,
-          currency: data.transactionAmount.currency,
-          bank_account_id: account.id,
-          category: data.transactionAmount.amount > 0 ? "income" : null,
-        })),
-      );
-    }),
-  );
-}
-
 export async function createBankAccountsAction(accounts) {
   const supabase = await createClient();
   return createBankAccounts(supabase, accounts);

@@ -22,14 +22,49 @@ const dynamicSchedule = client.defineDynamicSchedule({
 });
 
 client.defineJob({
+  id: "bank-account-created",
+  name: "Bank Account Created",
+  version: "0.5.0",
+  trigger: supabaseTriggers.onInserted({
+    table: "bank_accounts",
+  }),
+  run: async (payload, io) => {
+    await io.sendEvent("Schedule Transactions", {
+      id: payload.record.id,
+      name: "transactions.initial.sync",
+      payload: {
+        accountId: payload.record.account_id,
+        teamId: payload.record.team_id,
+      },
+    });
+
+    //use the id as the id for the DynamicSchedule
+    //so it comes through to run() in the context source.id
+    await dynamicSchedule.register(payload.record.id, {
+      type: "interval",
+      metadata: {
+        accountId: payload.record.account_id,
+        teamId: payload.record.team_id,
+      },
+      options: {
+        seconds: 36000,
+      },
+    });
+  },
+});
+
+client.defineJob({
   id: "transactions-sync",
   name: "Transactions - Latest Transactions",
-  version: "0.4.0",
+  version: "0.5.0",
   trigger: dynamicSchedule,
   integrations: { supabase },
   run: async (payload, io, ctx) => {
     const { accountId, teamId } = ctx.source.metadata;
-    await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
+
+    await io.logger.info(
+      `Fetching Transactions for Team ID: ${teamId} and account ID: ${accountId}`,
+    );
 
     const { transactions } = await getTransactions(accountId);
 
@@ -50,41 +85,9 @@ client.defineJob({
 });
 
 client.defineJob({
-  id: "bank-account-created",
-  name: "Bank Account Created",
-  version: "0.4.0",
-  trigger: supabaseTriggers.onInserted({
-    table: "bank_accounts",
-  }),
-  run: async (payload, io) => {
-    await io.sendEvent("Schedule Transactions", {
-      id: payload.record.id,
-      name: "transactions.initial.sync",
-      payload: {
-        accountId: payload.record.account_id,
-        teamId: payload.record.team_id,
-      },
-    });
-
-    //use the account_id as the id for the DynamicSchedule
-    //so it comes through to run() in the context source.id
-    await dynamicSchedule.register(payload.record.account_id, {
-      type: "interval",
-      metadata: {
-        accountId: payload.record.account_id,
-        teamId: payload.record.team_id,
-      },
-      options: {
-        seconds: 36000,
-      },
-    });
-  },
-});
-
-client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
-  version: "0.4.0",
+  version: "0.5.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({

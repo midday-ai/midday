@@ -1,6 +1,6 @@
 "use client";
 
-import { createBankAccountsAction, initialTransactionsSync } from "@/actions";
+import { createBankAccountsAction } from "@/actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
@@ -88,9 +88,8 @@ export function SelectAccountModal({ countryCode }) {
         },
       }));
 
-    const { data } = await createBankAccountsAction(accountsWithDetails);
+    await createBankAccountsAction(accountsWithDetails);
 
-    await initialTransactionsSync(data);
     router.push(`${pathname}?step=apps`);
   }
 
