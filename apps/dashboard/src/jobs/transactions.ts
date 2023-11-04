@@ -25,7 +25,7 @@ const mapTransactionMethod = (method: string) => {
 };
 
 const transformTransactions = (transactions, { teamId, accountId }) =>
-  transactions.booked.map((data) => ({
+  transactions.map((data) => ({
     transaction_id: data.transactionId,
     reference: data.entryReference,
     booking_date: data.bookingDate,
@@ -74,8 +74,8 @@ client.defineJob({
       },
     });
 
-    //use the account_id as the id for the DynamicSchedule
-    //so it comes through to run() in the context source.id
+    // use the account_id as the id for the DynamicSchedule
+    // so it comes through to run() in the context source.id
     await dynamicSchedule.register(payload.record.account_id, {
       type: "interval",
       metadata: {
