@@ -33,7 +33,6 @@
     "next-safe-action": "^5.0.2",
     "next-themes": "^0.2.1",
     "next-usequerystate": "^1.9.1",
-    "nextjs-better-unstable-cache": "^1.0.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Client } from "../types";
 
 export function getPagination(page: number, size: number) {
@@ -9,7 +10,7 @@ export function getPagination(page: number, size: number) {
 }
 
 export async function getSession(supabase: Client) {
-  return supabase.auth.getSession();
+  return cache(() => supabase.auth.getSession());
 }
 
 export async function getCurrentUser(supabase: Client) {
