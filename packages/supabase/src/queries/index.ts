@@ -22,7 +22,8 @@ export async function getCurrentUser(supabase: Client) {
       team:team_id(*)
     `)
     .eq("id", data?.session?.user.id)
-    .single();
+    .single()
+    .throwOnError();
 }
 
 export async function getUserTeams(supabase: Client) {
@@ -34,7 +35,8 @@ export async function getUserTeams(supabase: Client) {
       *,
       team:teams(*)
     `)
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", userData?.team_id)
+    .throwOnError();
 }
 
 export async function getTeamBankConnections(supabase: Client) {
@@ -43,7 +45,8 @@ export async function getTeamBankConnections(supabase: Client) {
   return supabase
     .from("bank_connections")
     .select("*")
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", userData?.team_id)
+    .throwOnError();
 }
 
 export async function getTeamBankAccounts(supabase: Client) {
@@ -52,7 +55,8 @@ export async function getTeamBankAccounts(supabase: Client) {
   return supabase
     .from("bank_accounts")
     .select("*, bank:bank_connection_id(*)")
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", userData?.team_id)
+    .throwOnError();
 }
 
 export async function getTeamMembers(supabase: Client) {
@@ -64,7 +68,8 @@ export async function getTeamMembers(supabase: Client) {
       id,
       user:users(id,full_name,avatar_url)
     `)
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", userData?.team_id)
+    .throwOnError();
 
   return data;
 }
@@ -88,7 +93,8 @@ export async function getSpending(supabase: Client, params: GetSpendingParams) {
     `,
     )
     .order("order")
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", userData?.team_id)
+    .throwOnError();
 
   if (from && to) {
     query.gte("date", from);
@@ -136,10 +142,6 @@ export async function getTransactions(
 ) {
   const { from = 0, to, filter, sort, teamId } = params;
   const { date = {}, search, status, attachments, category } = filter || {};
-
-  if (!teamId) {
-    throw new Error("No team id found");
-  }
 
   const query = supabase
     .from("transactions")
@@ -199,7 +201,7 @@ export async function getTransactions(
     query.not("category", "is", null);
   }
 
-  const { data, count } = await query.range(from, to);
+  const { data, count } = await query.range(from, to).throwOnError();
 
   // Only calculate total amount when a fitler is applied
   // Investigate pg functions
@@ -230,7 +232,8 @@ export async function getTransaction(supabase: Client, id: string) {
       attachments(*)
     `)
     .eq("id", id)
-    .single();
+    .single()
+    .throwOnError();
 }
 
 export async function getSimilarTransactions(supabase: Client, id: string) {
@@ -247,5 +250,6 @@ export async function getSimilarTransactions(supabase: Client, id: string) {
     .select("id, amount", { count: "exact" })
     .eq("name", transaction.data.name)
     .eq("team_id", userData?.team_id)
-    .is("category", null);
+    .is("category", null)
+    .throwOnError();
 }
