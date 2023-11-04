@@ -2,7 +2,7 @@ export default {
   startpage: {
     title: "The financial OS for your business.",
     description:
-      "File management, real-time profit/loss tracking, and seamless preparation for your accountant, powered by AI-enhanced search and filters.",
+      "File management, real-time profit/loss tracking, and seamless preparation for your\n accountant, powered by AI-enhanced search and filters.",
     join: "Join waitlist",
     subscribed: "Subscribed!",
     email: "Enter your email",
