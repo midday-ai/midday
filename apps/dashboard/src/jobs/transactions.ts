@@ -112,16 +112,22 @@ client.defineJob({
       await io.logger.info("No transactions found");
     }
 
-    const { count } = await io.supabase.client.from("transactions").upsert(
-      transformTransactions(transactions?.booked, {
-        accountId,
-        teamId: data?.team_id,
-      }),
-      {
-        onConflict: "provider_transaction_id",
-        ignoreDuplicates: true,
-      },
-    );
+    const { count, error } = await io.supabase.client
+      .from("transactions")
+      .upsert(
+        transformTransactions(transactions?.booked, {
+          accountId,
+          teamId: data?.team_id,
+        }),
+        {
+          onConflict: "provider_transaction_id",
+          ignoreDuplicates: true,
+        },
+      );
+
+    if (error) {
+      await io.logger.error(JSON.stringify(error, null, 2));
+    }
 
     await io.logger.info(`Total Transactions Created: ${count}`);
   },
@@ -149,12 +155,18 @@ client.defineJob({
       await io.logger.info("No transactions found");
     }
 
-    const { count } = await io.supabase.client.from("transactions").insert(
-      transformTransactions(transactions?.booked, {
-        accountId,
-        teamId: teamId,
-      }),
-    );
+    const { count, error } = await io.supabase.client
+      .from("transactions")
+      .insert(
+        transformTransactions(transactions?.booked, {
+          accountId,
+          teamId: teamId,
+        }),
+      );
+
+    if (error) {
+      await io.logger.error(JSON.stringify(error, null, 2));
+    }
 
     await io.logger.info(`Total Transactions Created: ${count}`);
   },
