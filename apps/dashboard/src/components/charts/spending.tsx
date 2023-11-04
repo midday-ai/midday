@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
+import { formatAmount, getClientLocale } from "@/utils/format";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -15,54 +17,66 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { Category, CategoryIcon, mapCategoryColor } from "../category";
 
 const data = [
-  { name: "Group A", value: 400 },
-  { name: "Group B", value: 300 },
-  { name: "Group C", value: 300 },
-  { name: "Group D", value: 200 },
+  { category: "equipment", value: 2045, currency: "SEK" },
+  { category: "rent", value: 3002, currency: "SEK" },
+  { category: "travel", value: 522, currency: "SEK" },
+  { category: "office_supplies", value: 632, currency: "SEK" },
+  { category: "software", value: 633, currency: "SEK" },
+  { category: "transfer", value: 763, currency: "SEK" },
+  { category: "meals", value: 154, currency: "SEK" },
+  { category: "other", value: 520, currency: "SEK" },
+  { category: "uncategorized", value: 109, currency: "SEK" },
 ];
 
-const COLORS = ["#F5F5F3", "#FFD02B", "#00C969", "#0064D9"];
+const ToolTipContent = ({ payload = [] }) => {
+  const t = useI18n();
+  const locale = getClientLocale();
+  const item = payload.at(0)?.payload;
 
-const ToolTipContent = ({ payload = {} }) => {
   return (
-    <div className="w-[240px] rounded-xl border shadow-sm bg-background">
-      <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
-        <p className="text-sm">Revenue</p>
-        <div>
-          <div className="flex space-x-1 text-[#00C969] items-center">
-            <span className="text-[12px] font-medium">24%</span>
-          </div>
+    <div className="rounded-xl border shadow-sm bg-background p-1">
+      <div className="px-4 py-2 flex justify-between items-center space-x-12">
+        <div className="text-sm font-medium flex items-center space-x-2">
+          {item?.category && <CategoryIcon name={item.category} />}
+          <p>
+            {item?.value &&
+              formatAmount({
+                amount: item.value,
+                currency: item.currency,
+                locale,
+              })}
+          </p>
         </div>
-      </div>
-
-      <div className="p-4">
-        <div className="flex justify-between mb-2">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-[8px] h-[8px] rounded-full bg-[#F5F5F3]" />
-            <p className="font-medium text-[13px]">€20345.50</p>
-          </div>
-
-          <p className="text-xs text-[#606060] text-right">October 20, 2023</p>
-        </div>
-
-        <div className="flex justify-between">
-          <div className="flex items-center justify-center space-x-2">
-            <div className="w-[8px] h-[8px] rounded-full bg-[#606060]" />
-            <p className="font-medium text-[13px]">€20345.50</p>
-          </div>
-
-          <p className="text-xs text-[#606060] text-right">October 20, 2022</p>
-        </div>
+        <p className="text-sm text-[#606060]">
+          {item?.category && t(`categories.${item.category}`)}
+        </p>
       </div>
     </div>
   );
 };
 
+function SpendingCategoryList({ categories }) {
+  return (
+    <ul className="absolute left-8 bottom-8 space-y-2">
+      {categories.map(({ category }) => (
+        <li key={category}>
+          <Category
+            key={category}
+            name={category}
+            className="text-sm text-[#606060] space-x-3"
+          />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function Spending() {
   return (
-    <div className="flex-1 border p-8">
+    <div className="flex-1 border p-8 relative">
       <DropdownMenu>
         <DropdownMenuTrigger>
           <div className="flex items-center space-x-2">
@@ -81,6 +95,7 @@ export function Spending() {
         </DropdownMenuContent>
       </DropdownMenu>
       <div className="h-[350px]">
+        <SpendingCategoryList categories={data} />
         <ResponsiveContainer>
           <PieChart width={250} height={250}>
             <Pie
@@ -93,18 +108,18 @@ export function Spending() {
               dataKey="value"
             >
               <Label
-                value="€ 32,240"
+                value={formatAmount({
+                  amount: 32240,
+                  currency: "SEK",
+                })}
                 position="center"
                 fontSize={23}
                 fill="#F5F5F3"
                 fontFamily="var(--font-sans)"
               />
 
-              {data.map((_, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+              {data.map(({ category }, index) => (
+                <Cell key={`cell-${index}`} fill={mapCategoryColor(category)} />
               ))}
             </Pie>
             <Tooltip content={ToolTipContent} />

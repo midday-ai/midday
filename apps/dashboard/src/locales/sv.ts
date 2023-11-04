@@ -10,6 +10,7 @@ export default {
     transfer: "Överföring",
     activity: "Aktivitet",
     other: "Annan",
+    uncategorized: "Okategoriserad",
   },
   transaction_methods: {
     card_purchase: "Kortbetalning",

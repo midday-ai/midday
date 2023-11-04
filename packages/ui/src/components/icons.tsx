@@ -12,7 +12,9 @@ import {
   MdHomeWork,
   MdInventory2,
   MdOutlineAccountBalanceWallet,
+  MdOutlineCategory,
   MdOutlineDescription,
+  MdOutlineDifference,
   MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
   MdOutlineListAlt,
@@ -280,4 +282,6 @@ export const Icons = {
   ChevronDown: MdExpandMore,
   TrendingUp: MdTrendingUp,
   TrendingDown: MdTrendingDown,
+  Category: MdOutlineCategory,
+  Difference: MdOutlineDifference,
 };

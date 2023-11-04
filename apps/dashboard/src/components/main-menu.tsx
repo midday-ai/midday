@@ -44,7 +44,7 @@ export function MainMenu() {
 
   return (
     <nav className="mt-6 xl:w-full">
-      <ul className="flex flex-col gap-2 xl:w-full">
+      <ul className="flex flex-col gap-0.5 xl:w-full">
         {items.map((item) => {
           const { path, icon: Icon, name } = item;
           const isActive =

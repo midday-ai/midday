@@ -15,19 +15,19 @@ export async function ReconnectBank() {
   const supabase = createClient();
   const { data } = await getTeamBankConnections(supabase);
 
-  const hasWarningStatus = data.some(
+  if (!data?.length) {
+    return null;
+  }
+
+  const hasWarningStatus = data?.some(
     (bank) =>
       differenceInDays(new Date(bank.expires_at), new Date()) <= WARNING_DAYS,
   );
 
-  const hasErrorStatus = data.some(
+  const hasErrorStatus = data?.some(
     (bank) =>
       differenceInDays(new Date(bank.expires_at), new Date()) <= ERROR_DAYS,
   );
-
-  if (!data.length) {
-    return null;
-  }
 
   return (
     <Popover>

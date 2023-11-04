@@ -1,38 +1,73 @@
 import { useI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
+import { cn } from "@midday/ui/utils";
 
-export function CategoryIcon({ name, size = 18 }) {
+export const mapCategoryColor = (name: string) => {
   switch (name) {
     case "travel":
-      return <Icons.FlightTakeoff className="text-[#ABDD1D]" size={size} />;
+      return "#ABDD1D";
     case "office_supplies":
-      return <Icons.Desk className="text-[#BB4647]" size={size} />;
+      return "#BB4647";
     case "meals":
-      return <Icons.FastFood className="text-[#1ADBDB]" size={size} />;
+      return "#1ADBDB";
     case "software":
-      return <Icons.Save className="text-[#0064D9]" size={size} />;
+      return "#0064D9";
     case "rent":
-      return <Icons.HomeWork className="text-[#A843CB]" size={size} />;
+      return "#A843CB";
     case "income":
-      return <Icons.Payments className="text-[#00C969]" size={size} />;
+      return "#00C969";
     case "equipment":
-      return <Icons.Devices className="text-[#E9BE26]" size={size} />;
+      return "#E9BE26";
     case "transfer":
-      return <Icons.AccountBalance className="text-[#FF902B]" size={size} />;
+      return "#FF902B";
     case "other":
-      return <Icons.Fence className="text-[#E926B2]" size={size} />;
+      return "#F5F5F3";
     case "activity":
-      return <Icons.Celebration className="text-[#E5E926]" size={size} />;
+      return "#E5E926";
+    case "uncategorized":
+      return "#606060";
+    default:
+      return;
+  }
+};
+
+export function CategoryIcon({ name, size = 18 }) {
+  const color = mapCategoryColor(name);
+
+  switch (name) {
+    case "travel":
+      return <Icons.FlightTakeoff style={{ color }} size={size} />;
+    case "office_supplies":
+      return <Icons.Desk style={{ color }} size={size} />;
+    case "meals":
+      return <Icons.FastFood style={{ color }} size={size} />;
+    case "software":
+      return <Icons.Save style={{ color }} size={size} />;
+    case "rent":
+      return <Icons.HomeWork style={{ color }} size={size} />;
+    case "income":
+      return <Icons.Payments style={{ color }} size={size} />;
+    case "equipment":
+      return <Icons.Devices style={{ color }} size={size} />;
+    case "transfer":
+      return <Icons.AccountBalance style={{ color }} size={size} />;
+    case "other": {
+      return <Icons.Category style={{ color }} size={size} />;
+    }
+    case "activity":
+      return <Icons.Celebration style={{ color }} size={size} />;
+    case "uncategorized":
+      return <Icons.Difference style={{ color }} size={size} />;
     default:
       return null;
   }
 }
 
-export function Category({ name }) {
+export function Category({ name, className }) {
   const t = useI18n();
 
   return (
-    <div className="flex space-x-2 items-center">
+    <div className={cn("flex space-x-2 items-center", className)}>
       <CategoryIcon name={name} />
       {name && <p>{t(`categories.${name}`)}</p>}
     </div>

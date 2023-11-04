@@ -10,6 +10,7 @@ export default {
     transfer: "Transfer",
     activity: "Activity",
     other: "Other",
+    uncategorized: "Uncategorized",
   },
   transaction_methods: {
     card_purchase: "Card Purchase",

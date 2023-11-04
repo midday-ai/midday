@@ -1,16 +1,19 @@
+export function getClientLocale() {
+  return navigator.languages && navigator.languages.length >= 0
+    ? navigator.languages[0]
+    : "en-US";
+}
+
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];
+  const locale = getClientLocale();
 
-  const navigatorLocal =
-    navigator.languages && navigator.languages.length >= 0
-      ? navigator.languages[0]
-      : "en-US";
   const unitIndex = Math.max(
     0,
     Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1),
   );
 
-  return Intl.NumberFormat(navigatorLocal, {
+  return Intl.NumberFormat(locale, {
     style: "unit",
     unit: units[unitIndex],
   }).format(bytes / 1024 ** unitIndex);
@@ -19,7 +22,7 @@ export function formatSize(bytes: number): string {
 type FormatAmountParams = {
   currency: string;
   amount: number;
-  locale: string;
+  locale?: string;
 };
 
 export function formatAmount({
