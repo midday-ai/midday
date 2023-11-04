@@ -3,7 +3,43 @@ import { getTransactions } from "@midday/gocardless";
 import { Database } from "@midday/supabase/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
+import { capitalCase } from "change-case";
 import { z } from "zod";
+
+const mapTransactionMethod = (method: string) => {
+  switch (method) {
+    case "Payment":
+    case "Bankgiro payment":
+    case "Incoming foreign payment":
+      return "payment";
+    case "Card purchase":
+    case "Card foreign purchase":
+      return "card_purchase";
+    case "Card ATM":
+      return "card_atm";
+    case "Transfer":
+      return "transfer";
+    default:
+      return "other";
+  }
+};
+
+const transformTransactions = (transactions, { teamId, accountId }) =>
+  transactions.booked.map((data) => ({
+    transaction_id: data.transactionId,
+    reference: data.entryReference,
+    booking_date: data.bookingDate,
+    date: data.valueDate,
+    name: capitalCase(data.additionalInformation),
+    original: data.additionalInformation,
+    method: mapTransactionMethod(data.proprietaryBankTransactionCode),
+    provider_transaction_id: data.internalTransactionId,
+    amount: data.transactionAmount.amount,
+    currency: data.transactionAmount.currency,
+    bank_account_id: accountId,
+    category: data.transactionAmount.amount > 0 ? "income" : null,
+    team_id: teamId,
+  }));
 
 const supabaseManagement = new SupabaseManagement({
   id: "supabase-integration",
@@ -24,7 +60,7 @@ const dynamicSchedule = client.defineDynamicSchedule({
 client.defineJob({
   id: "bank-account-created",
   name: "Bank Account Created",
-  version: "0.6.0",
+  version: "0.7.0",
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -55,7 +91,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-sync",
   name: "Transactions - Latest Transactions",
-  version: "0.6.0",
+  version: "0.7.0",
   trigger: dynamicSchedule,
   integrations: { supabase },
   run: async (_, io, ctx) => {
@@ -77,11 +113,14 @@ client.defineJob({
     }
 
     const { count } = await io.supabase.client.from("transactions").upsert(
-      transactions.booked.map((transaction) => ({
-        ...transaction,
-        team_id: data?.team_id,
-      })),
-      { onConflict: "provider_transaction_id", ignoreDuplicates: false },
+      transformTransactions(transactions?.booked, {
+        accountId,
+        teamId: data?.team_id,
+      }),
+      {
+        onConflict: "provider_transaction_id",
+        ignoreDuplicates: true,
+      },
     );
 
     await io.logger.info(`Total Transactions Created: ${count}`);
@@ -91,7 +130,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
-  version: "0.6.0",
+  version: "0.7.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({
@@ -101,19 +140,20 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    await io.logger.info(`Fetching Transactions for ID: ${payload.accountId}`);
+    const { accountId, teamId } = payload;
+    await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
 
-    const { transactions } = await getTransactions(payload.accountId);
+    const { transactions } = await getTransactions(accountId);
 
     if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
     }
 
     const { count } = await io.supabase.client.from("transactions").insert(
-      transactions?.booked.map((transaction) => ({
-        ...transaction,
-        team_id: payload.teamId,
-      })),
+      transformTransactions(transactions?.booked, {
+        accountId,
+        teamId: teamId,
+      }),
     );
 
     await io.logger.info(`Total Transactions Created: ${count}`);

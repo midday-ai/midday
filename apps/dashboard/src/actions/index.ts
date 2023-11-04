@@ -1,15 +1,12 @@
 "use server";
 
 import { env } from "@/env.mjs";
-import { getTransactions } from "@midday/gocardless";
 import {
   createBankAccounts,
-  createTransactions,
   updateSimilarTransactions,
   updateTransaction,
 } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { capitalCase } from "change-case";
 import { revalidateTag } from "next/cache";
 
 const baseUrl = "https://api.resend.com";
@@ -55,24 +52,6 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
 
   return json;
 }
-
-const mapTransactionMethod = (method: string) => {
-  switch (method) {
-    case "Payment":
-    case "Bankgiro payment":
-    case "Incoming foreign payment":
-      return "payment";
-    case "Card purchase":
-    case "Card foreign purchase":
-      return "card_purchase";
-    case "Card ATM":
-      return "card_atm";
-    case "Transfer":
-      return "transfer";
-    default:
-      return "other";
-  }
-};
 
 export async function createBankAccountsAction(accounts) {
   const supabase = await createClient();
