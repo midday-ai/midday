@@ -102,6 +102,7 @@ export async function getSpending(supabase: Client, params: GetSpendingParams) {
       `
       *,
       currency,
+      category,
       amount,
     `,
     )

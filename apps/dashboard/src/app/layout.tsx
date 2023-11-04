@@ -1,3 +1,4 @@
+import { Deployments } from "@/components/deployments";
 import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
@@ -35,6 +36,7 @@ export default function Layout({ children }: { children: ReactElement }) {
         >
           {children}
           <Toaster />
+          <Deployments />
         </ThemeProvider>
       </body>
     </html>
