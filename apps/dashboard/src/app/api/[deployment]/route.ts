@@ -6,7 +6,8 @@ export const runtime = "edge";
 export const preferredRegion = "fra1";
 
 export async function POST(req: Request) {
-  const { payload } = await req.json();
+  const { payload, ...rest } = await req.json();
+  console.log("webhook", rest);
   const headersList = headers();
 
   if (
@@ -16,12 +17,18 @@ export async function POST(req: Request) {
   ) {
     const supabase = createClient();
 
+    console.log("here", 1);
+
     if (payload.target === "production") {
       await supabase.from("deployments").insert({
         deployment_id: payload.id,
         target: payload.target,
       });
+
+      console.log("here", 2);
     }
+
+    console.log("here", 3);
   }
 
   return Response.json({
