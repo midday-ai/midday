@@ -12,63 +12,56 @@ export async function getSession(supabase: Client) {
   return supabase.auth.getSession();
 }
 
-export async function getCurrentUser(supabase: Client) {
-  const { data } = await getSession(supabase);
-
+export async function getUserQuery(supabase: Client, userId: string) {
   return supabase
     .from("users")
     .select(`
       *,
       team:team_id(*)
     `)
-    .eq("id", data?.session?.user.id)
+    .eq("id", userId)
     .single()
     .throwOnError();
 }
 
-export async function getUserTeams(supabase: Client) {
-  const { data: userData } = await getCurrentUser(supabase);
-
+export async function getMembersByTeamId(supabase: Client, teamId: string) {
   return supabase
     .from("members")
     .select(`
       *,
       team:teams(*)
     `)
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", teamId)
     .throwOnError();
 }
 
-export async function getTeamBankConnections(supabase: Client) {
-  const { data: userData } = await getCurrentUser(supabase);
-
+export async function getBankConnectionsByTeamIdQuery(
+  supabase: Client,
+  teamId: string,
+) {
   return supabase
     .from("bank_connections")
     .select("*")
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", teamId)
     .throwOnError();
 }
 
-export async function getTeamBankAccounts(supabase: Client) {
-  const { data: userData } = await getCurrentUser(supabase);
-
+export async function getTeamBankAccounts(supabase: Client, teamId: string) {
   return supabase
     .from("bank_accounts")
     .select("*, bank:bank_connection_id(*)")
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", teamId)
     .throwOnError();
 }
 
-export async function getTeamMembers(supabase: Client) {
-  const { data: userData } = await getCurrentUser(supabase);
-
+export async function getTeamMembers(supabase: Client, teamId: string) {
   const { data } = await supabase
     .from("users_on_team")
     .select(`
       id,
       user:users(id,full_name,avatar_url)
     `)
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", teamId)
     .throwOnError();
 
   return data;
@@ -77,10 +70,11 @@ export async function getTeamMembers(supabase: Client) {
 type GetSpendingParams = {
   from: number;
   to: number;
+  teamId: string;
 };
 
 export async function getSpending(supabase: Client, params: GetSpendingParams) {
-  const { from, to } = params;
+  const { from, to, teamId } = params;
 
   const query = supabase
     .from("transactions")
@@ -93,7 +87,7 @@ export async function getSpending(supabase: Client, params: GetSpendingParams) {
     `,
     )
     .order("order")
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", teamId)
     .throwOnError();
 
   if (from && to) {
@@ -135,8 +129,7 @@ type GetTransactionsParams = {
   };
 };
 
-// TODO: zod parse
-export async function getTransactions(
+export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
@@ -236,9 +229,16 @@ export async function getTransaction(supabase: Client, id: string) {
     .throwOnError();
 }
 
-export async function getSimilarTransactions(supabase: Client, id: string) {
-  const { data: userData } = await getCurrentUser(supabase);
+type GetSimilarTransactionsParams = {
+  id: string;
+  teamId: string;
+};
 
+export async function getSimilarTransactions(
+  supabase: Client,
+  params: GetSimilarTransactionsParams,
+) {
+  const { id, teamId } = params;
   const transaction = await supabase
     .from("transactions")
     .select("name, category")
@@ -249,7 +249,7 @@ export async function getSimilarTransactions(supabase: Client, id: string) {
     .from("transactions")
     .select("id, amount", { count: "exact" })
     .eq("name", transaction.data.name)
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", teamId)
     .is("category", null)
     .throwOnError();
 }

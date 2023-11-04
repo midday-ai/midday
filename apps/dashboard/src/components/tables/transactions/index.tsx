@@ -1,14 +1,10 @@
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import {
-  getCachedCurrentUser,
   getCachedTransactions,
+  getUser,
 } from "@midday/supabase/cached-queries";
-import {
-  getPagination,
-  getTeamBankAccounts,
-  getTransactions,
-} from "@midday/supabase/queries";
+import { getPagination, getTeamBankAccounts } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { BottomBar } from "./bottom-bar";
 import { NoAccountConnected, NoResults } from "./empty-states";
@@ -19,7 +15,7 @@ export async function Table({ filter, page, sort }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
   const supabase = await createClient();
-  const { data: userData } = await getCachedCurrentUser();
+  const { data: userData } = await getUser();
   const { data, meta } = await getCachedTransactions({
     to,
     from,

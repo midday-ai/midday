@@ -1,4 +1,4 @@
-import { getCachedCurrentUser } from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 
 export async function UserMenu() {
-  const { data: userData } = await getCachedCurrentUser();
+  const { data: userData } = await getUser();
 
   return (
     <DropdownMenu>

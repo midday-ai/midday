@@ -1,10 +1,10 @@
 import { updateSubscriberPreferenceAction } from "@/actions/update-subscriber-preference-action";
 import { getSubscriberPreferences } from "@midday/notification";
-import { getCachedCurrentUser } from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
 import { NotificationSetting } from "./notification-setting";
 
 export async function NotificationSettings() {
-  const { data: userData } = await getCachedCurrentUser();
+  const { data: userData } = await getUser();
   const { data: subscriberPreferences } = await getSubscriberPreferences({
     subscriberId: userData.id,
     teamId: userData.team_id,
