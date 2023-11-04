@@ -24,7 +24,7 @@ const dynamicSchedule = client.defineDynamicSchedule({
 client.defineJob({
   id: "bank-account-created",
   name: "Bank Account Created",
-  version: "0.5.0",
+  version: "0.6.0",
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -38,13 +38,12 @@ client.defineJob({
       },
     });
 
-    //use the id as the id for the DynamicSchedule
+    //use the account_id as the id for the DynamicSchedule
     //so it comes through to run() in the context source.id
-    await dynamicSchedule.register(payload.record.id, {
+    await dynamicSchedule.register(payload.record.account_id, {
       type: "interval",
       metadata: {
         accountId: payload.record.account_id,
-        teamId: payload.record.team_id,
       },
       options: {
         seconds: 36000,
@@ -56,15 +55,20 @@ client.defineJob({
 client.defineJob({
   id: "transactions-sync",
   name: "Transactions - Latest Transactions",
-  version: "0.5.0",
+  version: "0.6.0",
   trigger: dynamicSchedule,
   integrations: { supabase },
-  run: async (payload, io, ctx) => {
-    const { accountId, teamId } = ctx.source.metadata;
+  run: async (_, io, ctx) => {
+    const accountId = ctx.source.id;
 
-    await io.logger.info(
-      `Fetching Transactions for Team ID: ${teamId} and account ID: ${accountId}`,
-    );
+    await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
+
+    // NOTE Can't get team id in ctx.metadata to work
+    const { data } = await io.supabase.client
+      .from("bank_accounts")
+      .select("team_id")
+      .eq("account_id", accountId)
+      .single();
 
     const { transactions } = await getTransactions(accountId);
 
@@ -75,7 +79,7 @@ client.defineJob({
     const { count } = await io.supabase.client.from("transactions").upsert(
       transactions.booked.map((transaction) => ({
         ...transaction,
-        team_id: teamId,
+        team_id: data?.team_id,
       })),
       { onConflict: "provider_transaction_id", ignoreDuplicates: false },
     );
@@ -87,7 +91,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
-  version: "0.5.0",
+  version: "0.6.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({
