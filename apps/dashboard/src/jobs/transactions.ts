@@ -71,6 +71,7 @@ client.defineJob({
       payload: {
         accountId: payload.record.account_id,
         teamId: payload.record.team_id,
+        recordId: payload.record.id,
       },
     });
 
@@ -141,11 +142,12 @@ client.defineJob({
     schema: z.object({
       accountId: z.string(),
       teamId: z.string(),
+      recordId: z.string(),
     }),
   }),
   integrations: { supabase },
-  run: async (payload, io, ctx) => {
-    const { accountId, teamId } = payload;
+  run: async (payload, io) => {
+    const { accountId, teamId, recordId } = payload;
 
     await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
 
@@ -159,7 +161,7 @@ client.defineJob({
       .from("transactions")
       .insert(
         transformTransactions(transactions?.booked, {
-          accountId: ctx.source.id,
+          accountId: recordId,
           teamId: teamId,
         }),
       );
