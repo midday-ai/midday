@@ -1,26 +1,24 @@
 import { createClient } from "@midday/supabase/server";
-import { headers } from "next/headers";
 
-export const dynamic = "force-dynamic";
-export const runtime = "edge";
-export const preferredRegion = "fra1";
+export const runtime = "nodejs";
+
+async function verifySignature(req) {
+  const payload = await req.text();
+  const signature = crypto
+    .createHmac("sha1", process.env.VERCEL_WEBHOOK_SECRET)
+    .update(payload)
+    .digest("hex");
+
+  return signature === req.headers["x-vercel-signature"];
+}
 
 export async function POST(req: Request) {
+  const valid = await verifySignature(req);
   const { payload, type } = await req.json();
-  const headersList = headers();
-
-  console.log("type", type);
-  console.log(
-    "signature valid",
-    headersList.get("x-vercel-signature") === process.env.VERCEL_WEBHOOK_SECRET,
-  );
-
-  console.log("target", payload.target);
 
   if (
+    valid &&
     type === "deployment.succeeded" &&
-    headersList.get("x-vercel-signature") ===
-      process.env.VERCEL_WEBHOOK_SECRET &&
     payload.target === "production"
   ) {
     const supabase = createClient();
