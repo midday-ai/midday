@@ -1,6 +1,5 @@
 import { formatAmount } from "@/utils/format";
-import { getTransactions } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getCachedTransactions } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 
@@ -34,16 +33,14 @@ export function TransactionsListSkeleton() {
 }
 
 export async function TransactionsList() {
-  const supabase = createClient();
-
-  const { data } = await getTransactions(supabase, {
+  const { data } = await getCachedTransactions({
     to: 5,
     from: 0,
   });
 
   return (
     <ul className="bullet-none divide-y">
-      {data.map((transaction) => (
+      {data?.map((transaction) => (
         <li key={transaction.id} className="flex justify-between p-3">
           <span
             className={cn(
@@ -62,7 +59,7 @@ export async function TransactionsList() {
             {formatAmount({
               locale: "en",
               amount: transaction.amount,
-              currency: transaction.bank_account.currency,
+              currency: transaction.currency,
             })}
           </span>
         </li>

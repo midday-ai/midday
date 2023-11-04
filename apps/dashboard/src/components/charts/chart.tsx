@@ -113,62 +113,75 @@ const ToolTipContent = ({ payload = {} }) => {
 
 export function Chart() {
   return (
-    <ResponsiveContainer width="100%" height={290} className="-ml-3">
-      <BarChart
-        data={data}
-        margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
-        barGap={15}
-      >
-        <XAxis
-          dataKey="name"
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickMargin={10}
-          tick={{
-            fill: "#606060",
-            fontSize: 14,
-            fontFamily: "var(--font-sans)",
-          }}
-        />
-        <YAxis
-          stroke="#888888"
-          fontSize={12}
-          tickLine={false}
-          axisLine={false}
-          tickFormatter={(value) => `$${value}`}
-          tick={{
-            fill: "#606060",
-            fontSize: 14,
-            fontFamily: "var(--font-sans)",
-          }}
-        />
-        <CartesianGrid
-          strokeDasharray="3 3"
-          vertical={false}
-          stroke="#2C2C2C"
-        />
-        <Tooltip content={ToolTipContent} cursor={false} />
+    <div className="relative">
+      <div className="flex space-x-4 absolute right-0 -top-10">
+        <div className="flex space-x-2 items-center">
+          <span className="w-2 h-2 rounded-full bg-[#F5F5F3]" />
+          <span className="text-sm text-[#606060]">Chosen Period</span>
+        </div>
+        <div className="flex space-x-2 items-center">
+          <span className="w-2 h-2 rounded-full bg-[#606060]" />
+          <span className="text-sm text-[#606060]">Last Period</span>
+        </div>
+      </div>
 
-        <Bar dataKey="previousTotal" barSize={14}>
-          {data.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={entry.previousTotal > 0 ? "#323232" : "#FF3638"}
-            />
-          ))}
-        </Bar>
+      <ResponsiveContainer width="100%" height={290} className="-ml-3">
+        <BarChart
+          data={data}
+          margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
+          barGap={15}
+        >
+          <XAxis
+            dataKey="name"
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickMargin={10}
+            tick={{
+              fill: "#606060",
+              fontSize: 14,
+              fontFamily: "var(--font-sans)",
+            }}
+          />
+          <YAxis
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => `$${value}`}
+            tick={{
+              fill: "#606060",
+              fontSize: 14,
+              fontFamily: "var(--font-sans)",
+            }}
+          />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            vertical={false}
+            stroke="#2C2C2C"
+          />
+          <Tooltip content={ToolTipContent} cursor={false} />
 
-        <Bar dataKey="currentTotal" barSize={14}>
-          {data.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={entry.currentTotal > 0 ? "#F5F5F3" : "#FF3638"}
-            />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+          <Bar dataKey="previousTotal" barSize={14}>
+            {data.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.previousTotal > 0 ? "#323232" : "#FF3638"}
+              />
+            ))}
+          </Bar>
+
+          <Bar dataKey="currentTotal" barSize={14}>
+            {data.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={entry.currentTotal > 0 ? "#F5F5F3" : "#FF3638"}
+              />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   );
 }

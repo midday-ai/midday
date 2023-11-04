@@ -13,8 +13,10 @@ export const metadata: Metadata = {
 export default async function Overview() {
   return (
     <div>
-      <Period className="mt-6 mb-8" />
-      <Summary />
+      <div className="flex justify-between mt-6">
+        <Summary />
+        <Period />
+      </div>
 
       <Suspense>
         <Chart />

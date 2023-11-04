@@ -3,8 +3,7 @@ import { ChangeTheme } from "@/components/change-theme";
 import { DeleteAccount } from "@/components/delete-account";
 import { DisplayName } from "@/components/display-name";
 import { UserAvatar } from "@/components/user-avatar";
-import { getUserDetails } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getCachedCurrentUser } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,8 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Profile() {
-  const supabase = createClient();
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
 
   return (
     <div className="flex flex-col space-y-12">

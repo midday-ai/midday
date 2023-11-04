@@ -12,7 +12,7 @@ import {
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
 import { DialogProps } from "@radix-ui/react-alert-dialog";
-import { LaptopIcon, MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -148,12 +148,6 @@ export function CommandMenu({ ...props }: DialogProps) {
             <CommandItem onSelect={() => runCommand(() => console.log("dark"))}>
               <MoonIcon className="mr-2 h-4 w-4" />
               Dark
-            </CommandItem>
-            <CommandItem
-              onSelect={() => runCommand(() => console.log("system"))}
-            >
-              <LaptopIcon className="mr-2 h-4 w-4" />
-              System
             </CommandItem>
           </CommandGroup>
         </CommandList>

@@ -12,7 +12,7 @@ export async function getSession(supabase: Client) {
   return supabase.auth.getSession();
 }
 
-export async function getUserDetails(supabase: Client) {
+export async function getCurrentUser(supabase: Client) {
   const { data } = await getSession(supabase);
 
   return supabase
@@ -26,7 +26,7 @@ export async function getUserDetails(supabase: Client) {
 }
 
 export async function getUserTeams(supabase: Client) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   return supabase
     .from("members")
@@ -38,7 +38,7 @@ export async function getUserTeams(supabase: Client) {
 }
 
 export async function getTeamBankConnections(supabase: Client) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   return supabase
     .from("bank_connections")
@@ -47,7 +47,7 @@ export async function getTeamBankConnections(supabase: Client) {
 }
 
 export async function getTeamBankAccounts(supabase: Client) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   return supabase
     .from("bank_accounts")
@@ -56,7 +56,7 @@ export async function getTeamBankAccounts(supabase: Client) {
 }
 
 export async function getTeamMembers(supabase: Client) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   const { data } = await supabase
     .from("users_on_team")
@@ -88,20 +88,59 @@ type GetTransactionsParams = {
   };
 };
 
-export async function getTransactions(
-  supabase: Client,
-  params: GetTransactionsParams,
-) {
-  const { from = 0, to, filter, sort } = params;
-  const { date = {}, search, status, attachments, category } = filter || {};
-  const { data: userData } = await getUserDetails(supabase);
+type GetSpendingParams = {
+  from: number;
+  to: number;
+};
+
+export async function getSpending(supabase: Client, params: GetSpendingParams) {
+  const { from, to } = params;
 
   const query = supabase
     .from("transactions")
     .select(
       `
       *,
-      bank_account:bank_account_id(currency),
+      currency,
+      amount,
+    `,
+    )
+    .order("order")
+    .eq("team_id", userData?.team_id);
+
+  if (from && to) {
+    query.gte("date", from);
+    query.lte("date", to);
+  }
+
+  const { data, count } = await query.range(0, 100000);
+
+  const totalAmount = data?.reduce((amount, item) => item.amount + amount, 0);
+
+  return {
+    meta: {
+      count,
+      totalAmount,
+      currency: data?.at(0)?.currency,
+    },
+    data,
+  };
+}
+
+export async function getTransactions(
+  supabase: Client,
+  params: GetTransactionsParams,
+) {
+  const { from = 0, to, filter, sort } = params;
+  const { date = {}, search, status, attachments, category } = filter || {};
+  const { data: userData } = await getCurrentUser(supabase);
+
+  const query = supabase
+    .from("transactions")
+    .select(
+      `
+      *,
+      currency
       assigned:assigned_id(*),
       attachments(id,size,name)
     `,
@@ -169,7 +208,7 @@ export async function getTransactions(
     meta: {
       count,
       totalAmount,
-      currency: data?.at(0)?.bank_account?.currency,
+      currency: data?.at(0)?.currency,
     },
     data,
   };
@@ -189,7 +228,7 @@ export async function getTransaction(supabase: Client, id: string) {
 }
 
 export async function getSimilarTransactions(supabase: Client, id: string) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   const transaction = await supabase
     .from("transactions")

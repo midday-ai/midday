@@ -1,10 +1,11 @@
 import { addDays } from "date-fns";
-import { getSession, getUserDetails } from "../queries";
+import { getCurrentUser, getSession } from "../queries";
+import { getCachedCurrentUser } from "../queries/cached-queries";
 import { Client } from "../types";
 import { remove } from "../utils/storage";
 
 export async function createBankAccounts(supabase: Client, accounts) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
   // Get first account to create a bank connection
   const bankConnection = await createBankConnection(supabase, {
     ...accounts.at(0).bank,
@@ -43,7 +44,7 @@ export async function createBankConnection(supabase: Client, bank: any) {
 }
 
 export async function updateBankConnection(supabase: Client, id: string) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   return await supabase
     .from("bank_connections")
@@ -56,7 +57,7 @@ export async function updateBankConnection(supabase: Client, id: string) {
 }
 
 export async function createTransactions(supabase: Client, transactions) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCurrentUser(supabase);
 
   const { data } = await supabase.from("transactions").insert(
     transactions.map((transaction) => ({
@@ -77,7 +78,7 @@ export async function updateTransaction(
 }
 
 export async function updateUser(supabase: Client, data: any) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
   return supabase.from("users").update(data).eq("id", userData?.id).select();
 }
 
@@ -92,7 +93,7 @@ export async function deleteUser(supabase: Client) {
 }
 
 export async function updateTeam(supabase: Client, data: any) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
   return supabase
     .from("teams")
     .update(data)
@@ -101,7 +102,7 @@ export async function updateTeam(supabase: Client, data: any) {
 }
 
 export async function deleteTeam(supabase: Client) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
   return supabase.from("teams").delete().eq("id", userData?.team_id);
 }
 
@@ -110,7 +111,7 @@ export async function deleteBankAccount(supabase: Client, id: string) {
 }
 
 export async function updateSimilarTransactions(supabase: Client, id: string) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
 
   const transaction = await supabase
     .from("transactions")
@@ -138,7 +139,7 @@ export async function createAttachments(
   supabase: Client,
   attachments: Attachment[],
 ) {
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
 
   const { data } = await supabase
     .from("attachments")

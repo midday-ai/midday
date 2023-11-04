@@ -1,8 +1,7 @@
 import { DeleteTeam } from "@/components/delete-team";
 import { TeamAvatar } from "@/components/team-avatar";
 import { TeamName } from "@/components/team-name";
-import { getUserDetails } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getCachedCurrentUser } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,8 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Account() {
-  const supabase = createClient();
-  const { data: userData } = await getUserDetails(supabase);
+  const { data: userData } = await getCachedCurrentUser();
 
   return (
     <div className="flex flex-col space-y-12">
