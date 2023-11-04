@@ -2,22 +2,22 @@ import { createClient } from "@midday/supabase/server";
 
 export const runtime = "nodejs";
 
-async function verifySignature(req) {
-  const payload = await req.text();
-  const signature = crypto
-    .createHmac("sha1", process.env.VERCEL_WEBHOOK_SECRET)
-    .update(payload)
-    .digest("hex");
+// async function verifySignature(req) {
+//   const payload = await req.text();
+//   const signature = crypto
+//     .createHmac("sha1", process.env.VERCEL_WEBHOOK_SECRET)
+//     .update(payload)
+//     .digest("hex");
 
-  return signature === req.headers["x-vercel-signature"];
-}
+//   return signature === req.headers["x-vercel-signature"];
+// }
 
 export async function POST(req: Request) {
-  const valid = await verifySignature(req);
+  // const valid = await verifySignature(req);
   const { payload, type } = await req.json();
 
   if (
-    valid &&
+    // valid &&
     type === "deployment.succeeded" &&
     payload.target === "production"
   ) {
