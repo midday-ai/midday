@@ -2,7 +2,7 @@ export default {
   startpage: {
     title: "Ditt finansiella OS för företaget.",
     description:
-      "Kapitalförvaltning, realtidsspårning av vinst/förlust och sömlös förberedelse för din\n revisor, driven av AI-förbättrad sökning och filter.",
+      "Filhantering, realtids-statistik av vinst/förlust och sömlös förberedelse för din\n revisor, driven av AI-förbättrad sökning och filter.",
     subscribed: "Uppskriven!",
     join: "Gå med",
     email: "Ange din e-postadress",

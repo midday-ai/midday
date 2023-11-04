@@ -25,6 +25,7 @@ export async function Table({ filter, page, sort }) {
     from,
     filter,
     sort,
+    teamId: userData.team_id,
   });
 
   if (!data?.length) {
@@ -41,7 +42,7 @@ export async function Table({ filter, page, sort }) {
 
   return (
     <>
-      <DataTable data={data} teamId={userData?.team_id} />
+      <DataTable data={data} teamId={userData.team_id} />
       {hasFilters ? (
         <div className="h-10" />
       ) : (

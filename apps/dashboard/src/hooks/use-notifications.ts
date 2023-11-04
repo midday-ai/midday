@@ -87,7 +87,10 @@ export function useNotifications() {
   useEffect(() => {
     async function fetchUser() {
       const { data: userData } = await getCurrentUser(supabase);
-      setSubscriberId(`${userData.team_id}_${userData.id}`);
+
+      if (userData) {
+        setSubscriberId(`${userData.team_id}_${userData.id}`);
+      }
     }
 
     fetchUser();

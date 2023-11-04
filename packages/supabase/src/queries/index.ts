@@ -69,25 +69,6 @@ export async function getTeamMembers(supabase: Client) {
   return data;
 }
 
-type GetTransactionsParams = {
-  from: number;
-  to: number;
-  sort: {
-    column: string;
-    value: "asc" | "desc";
-  };
-  filter: {
-    search?: string;
-    status?: "fullfilled" | "unfullfilled";
-    attachments?: "include" | "exclude";
-    category?: "include" | "exclude";
-    date: {
-      from?: string;
-      to?: string;
-    };
-  };
-};
-
 type GetSpendingParams = {
   from: number;
   to: number;
@@ -128,13 +109,32 @@ export async function getSpending(supabase: Client, params: GetSpendingParams) {
   };
 }
 
+type GetTransactionsParams = {
+  teamId: string;
+  from: number;
+  to: number;
+  sort: {
+    column: string;
+    value: "asc" | "desc";
+  };
+  filter: {
+    search?: string;
+    status?: "fullfilled" | "unfullfilled";
+    attachments?: "include" | "exclude";
+    category?: "include" | "exclude";
+    date: {
+      from?: string;
+      to?: string;
+    };
+  };
+};
+
 export async function getTransactions(
   supabase: Client,
   params: GetTransactionsParams,
 ) {
-  const { from = 0, to, filter, sort } = params;
+  const { from = 0, to, filter, sort, teamId } = params;
   const { date = {}, search, status, attachments, category } = filter || {};
-  const { data: userData } = await getCurrentUser(supabase);
 
   const query = supabase
     .from("transactions")
@@ -147,7 +147,7 @@ export async function getTransactions(
     `,
       { count: "exact" },
     )
-    .eq("team_id", userData?.team_id);
+    .eq("team_id", teamId);
 
   if (sort) {
     const [column, value] = sort;
