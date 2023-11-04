@@ -6,10 +6,11 @@ export const runtime = "edge";
 export const preferredRegion = "fra1";
 
 export async function POST(req: Request) {
-  const { payload, ...rest } = await req.json();
-  console.log("webhook", rest);
+  const data = await req.json();
+  console.log("webhook", data);
   const headersList = headers();
 
+  return null;
   if (
     headersList.get("x-vercel-signature") ===
       process.env.VERCEL_WEBHOOK_SECRET &&
