@@ -1,4 +1,5 @@
 import { ConnectBank } from "@/components/connect-bank";
+import { DownloadDesktop } from "@/components/donwload-desktop";
 import { SignupApps } from "@/components/signup-apps";
 import { Metadata } from "next";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 export default function Onboarding() {
   return (
     <div className="relative py-12 px-6">
-      <div className="steps-gradient absolute top-12 left-12 h-[800px] w-px" />
+      <div className="steps-gradient absolute top-10 bottom-0 left-12 h-screen w-px" />
 
       <div className="pl-20">
         <div className="mb-14">
@@ -19,8 +20,9 @@ export default function Onboarding() {
           </p>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <ConnectBank />
+          <DownloadDesktop />
           <SignupApps />
         </div>
       </div>

@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
+import { OnboardingStep } from "./onboarding-step";
 
 function SubmitButton({ disabled }) {
   const router = useRouter();
@@ -46,13 +47,9 @@ export function SignupApps() {
   };
 
   return (
-    <div
-      className={cn(
-        "py-6 px-8 max-w-[900px] flex items-between opacity-50",
-        active && "opacity-1",
-      )}
-    >
-      <div className="flex-1">
+    <div className="py-6 px-8 max-w-[900px] flex items-between relative">
+      <OnboardingStep active={active} done={false} />
+      <div className={cn("flex-1 opacity-30 relative", active && "opacity-1")}>
         <div className="flex items-start space-x-2">
           <h2 className="mb-2">Sign up for apps</h2>
           <button
@@ -69,7 +66,7 @@ export function SignupApps() {
             </span>
           </button>
         </div>
-        <p className="text-sm text-[#B0B0B0]">
+        <p className="text-sm text-[#606060]">
           We’re currently developing our iOS, Android and Mac apps. Sign up{" "}
           <br />
           below if you want to get notified for the beta release.
@@ -103,7 +100,12 @@ export function SignupApps() {
                   </fieldset>
                 </form>
 
-                <Button disabled={!active} variant="ghost" onClick={handleSkip}>
+                <Button
+                  disabled={!active}
+                  variant="ghost"
+                  onClick={handleSkip}
+                  className="font-normal text-sm hover:bg-transparent text-[#606060]"
+                >
                   Skip
                 </Button>
               </div>

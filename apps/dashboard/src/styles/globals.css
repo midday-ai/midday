@@ -9,7 +9,7 @@ body {
 }
 
 .steps-gradient {
-  background: linear-gradient(180deg,transparent,#23252c 10%,#23252c 90%,transparent);
+  background: linear-gradient(180deg,#121212 0%, #2C2C2C 40%, #2C2C2C 100%);
 }
 
 :root {

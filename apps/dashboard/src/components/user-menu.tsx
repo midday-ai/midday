@@ -24,7 +24,7 @@ export async function UserMenu() {
         <Avatar className="rounded-full w-8 h-8">
           <AvatarImage src={userData?.avatar_url} />
           <AvatarFallback>
-            <span className="text-xs">{userData.full_name?.charAt(0)}</span>
+            <span className="text-xs">{userData?.full_name?.charAt(0)}</span>
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

@@ -90,7 +90,7 @@ export function SelectAccountModal({ countryCode }) {
 
     await createBankAccountsAction(accountsWithDetails);
 
-    router.push(`${pathname}?step=apps`);
+    router.push(`${pathname}?step=desktop`);
   }
 
   useEffect(() => {
