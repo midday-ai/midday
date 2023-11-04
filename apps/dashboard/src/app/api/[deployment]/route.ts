@@ -9,6 +9,14 @@ export async function POST(req: Request) {
   const { payload, type } = await req.json();
   const headersList = headers();
 
+  console.log("type", type);
+  console.log(
+    "signature valid",
+    headersList.get("x-vercel-signature") === process.env.VERCEL_WEBHOOK_SECRET,
+  );
+
+  console.log("target", payload.target);
+
   if (
     type === "deployment.succeeded" &&
     headersList.get("x-vercel-signature") ===
@@ -17,12 +25,10 @@ export async function POST(req: Request) {
   ) {
     const supabase = createClient();
 
-    if (payload.target === "production") {
-      await supabase.from("deployments").insert({
-        deployment_id: payload.deployment.id,
-        target: payload.deployment.target,
-      });
-    }
+    await supabase.from("deployments").insert({
+      deployment_id: payload.deployment.id,
+      target: payload.deployment.target,
+    });
   }
 
   return Response.json({
