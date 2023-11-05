@@ -1,11 +1,11 @@
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import {
-  getCachedTransactions,
+  getTeamBankAccounts,
+  getTransactions,
   getUser,
 } from "@midday/supabase/cached-queries";
-import { getPagination, getTeamBankAccounts } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getPagination } from "@midday/supabase/queries";
 import { BottomBar } from "./bottom-bar";
 import { NoAccountConnected, NoResults } from "./empty-states";
 
@@ -14,18 +14,16 @@ const pageSize = 50;
 export async function Table({ filter, page, sort }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
-  const supabase = await createClient();
   const { data: userData } = await getUser();
-  const { data, meta } = await getCachedTransactions({
+  const { data, meta } = await getTransactions({
     to,
     from,
     filter,
     sort,
-    teamId: userData?.team_id,
   });
 
   if (!data?.length) {
-    const { data: bankAccounts } = await getTeamBankAccounts(supabase);
+    const { data: bankAccounts } = await getTeamBankAccounts();
 
     if (!bankAccounts?.length) {
       return <NoAccountConnected />;

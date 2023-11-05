@@ -2,18 +2,31 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
   getBankConnectionsByTeamIdQuery,
+  getTeamBankAccountsQuery,
   getTransactionsQuery,
   getUserQuery,
 } from "../queries";
 
-export const getCachedTransactions = unstable_cache(
-  async (params) => {
-    const supabase = await createClient();
-    return getTransactionsQuery(supabase, params);
-  },
-  ["transactions"],
-  { tags: ["transactions"] },
-);
+export const getTransactions = async (params) => {
+  const supabase = await createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTransactionsQuery(supabase, { ...params, teamId });
+    },
+    [`transactions-${teamId}`],
+    {
+      tags: [`user-${teamId}`],
+    },
+  )(params);
+};
 
 export const getUser = async () => {
   const supabase = await createClient();
@@ -33,7 +46,7 @@ export const getUser = async () => {
     {
       tags: [`user-${userId}`],
     },
-  )();
+  )(userId);
 };
 
 export const getBankConnectionsByTeamId = async () => {
@@ -53,5 +66,26 @@ export const getBankConnectionsByTeamId = async () => {
     {
       tags: [`user-${userId}`],
     },
-  )();
+  )(userId);
+};
+
+export const getTeamBankAccounts = async () => {
+  const supabase = await createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTeamBankAccountsQuery(supabase, teamId);
+    },
+    [`bank-accounts-${teamId}`],
+    {
+      tags: [`bank-accounts-${teamId}`],
+    },
+  )(teamId);
 };

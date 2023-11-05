@@ -46,7 +46,10 @@ export async function getBankConnectionsByTeamIdQuery(
     .throwOnError();
 }
 
-export async function getTeamBankAccounts(supabase: Client, teamId: string) {
+export async function getTeamBankAccountsQuery(
+  supabase: Client,
+  teamId: string,
+) {
   return supabase
     .from("bank_accounts")
     .select("*, bank:bank_connection_id(*)")

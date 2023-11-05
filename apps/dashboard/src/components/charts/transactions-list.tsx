@@ -1,8 +1,5 @@
 import { formatAmount } from "@/utils/format";
-import {
-  getCachedTransactions,
-  getUser,
-} from "@midday/supabase/cached-queries";
+import { getTransactions } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 
@@ -36,11 +33,9 @@ export function TransactionsListSkeleton() {
 }
 
 export async function TransactionsList() {
-  const { data: userData } = await getUser();
-  const { data } = await getCachedTransactions({
+  const { data } = await getTransactions({
     to: 5,
     from: 0,
-    teamId: userData?.team_id,
   });
 
   return (

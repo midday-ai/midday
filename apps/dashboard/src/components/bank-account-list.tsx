@@ -1,6 +1,5 @@
 import { BankAccount } from "@/components/bank-account";
-import { getTeamBankAccounts } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 
 export function BankAccountListSkeleton() {
@@ -43,8 +42,7 @@ export function BankAccountListSkeleton() {
 }
 
 export async function BankAccountList() {
-  const supabase = createClient();
-  const { data } = await getTeamBankAccounts(supabase);
+  const { data } = await getTeamBankAccounts();
 
   return (
     <div className="px-6 pb-6 space-y-6 divide-y">
