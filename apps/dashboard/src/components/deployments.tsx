@@ -24,8 +24,8 @@ export function Deployments() {
         () => {
           toast({
             duration: 60000,
-            title: "A new deployment is available",
-            description: "Refresh to get the latest update",
+            title: "A new update is available",
+            description: "Refresh to get the latest and greatest",
             action: (
               <Button
                 variant="outline"
