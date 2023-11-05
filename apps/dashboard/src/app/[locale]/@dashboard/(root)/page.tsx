@@ -18,9 +18,11 @@ export default async function Overview() {
         <Period />
       </div>
 
-      <Suspense>
-        <Chart />
-      </Suspense>
+      <div className="h-[280px]">
+        <Suspense>
+          <Chart />
+        </Suspense>
+      </div>
 
       <div className="flex space-x-8 mt-14">
         <Spending />

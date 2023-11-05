@@ -1,4 +1,4 @@
-import { type CookieOptions, createServerClient } from "@supabase/ssr";
+import { createClient } from "@midday/supabase/middleware";
 import { createI18nMiddleware } from "next-international/middleware";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -10,25 +10,7 @@ const I18nMiddleware = createI18nMiddleware({
 
 export async function middleware(request: NextRequest) {
   const response = I18nMiddleware(request);
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-      },
-    },
-  );
+  const { supabase } = createClient(request, response);
 
   const { data } = await supabase.auth.getSession();
 
