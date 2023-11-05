@@ -1,11 +1,11 @@
 import { addDays } from "date-fns";
-import { getCurrentUser, getSession } from "../queries";
-import { getUser } from "../queries/cached-queries";
+import { getCurrentUserTeamQuery, getSession } from "../queries";
+// import { getUser } from "../queries/cached-queries";
 import { Client } from "../types";
 import { remove } from "../utils/storage";
 
 export async function createBankAccounts(supabase: Client, accounts) {
-  const { data: userData } = await getUser();
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
   // Get first account to create a bank connection
   const bankConnection = await createBankConnection(supabase, {
     ...accounts.at(0).bank,
@@ -88,11 +88,16 @@ export async function updateTransaction(
   id: string,
   data: any,
 ) {
-  return supabase.from("transactions").update(data).eq("id", id);
+  return supabase
+    .from("transactions")
+    .update(data)
+    .eq("id", id)
+    .select()
+    .single();
 }
 
 export async function updateUser(supabase: Client, data: any) {
-  const { data: userData } = await getUser();
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
   return supabase.from("users").update(data).eq("id", userData?.id).select();
 }
 
@@ -107,7 +112,7 @@ export async function deleteUser(supabase: Client) {
 }
 
 export async function updateTeam(supabase: Client, data: any) {
-  const { data: userData } = await getUser();
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
   return supabase
     .from("teams")
     .update(data)
@@ -116,7 +121,7 @@ export async function updateTeam(supabase: Client, data: any) {
 }
 
 export async function deleteTeam(supabase: Client) {
-  const { data: userData } = await getUser();
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
   return supabase.from("teams").delete().eq("id", userData?.team_id);
 }
 
@@ -125,7 +130,7 @@ export async function deleteBankAccount(supabase: Client, id: string) {
 }
 
 export async function updateSimilarTransactions(supabase: Client, id: string) {
-  const { data: userData } = await getUser();
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
   const transaction = await supabase
     .from("transactions")
@@ -138,7 +143,9 @@ export async function updateSimilarTransactions(supabase: Client, id: string) {
     .update({ category: transaction.data.category })
     .eq("name", transaction.data.name)
     .eq("team_id", userData?.team_id)
-    .is("category", null);
+    .is("category", null)
+    .select()
+    .single();
 }
 
 export type Attachment = {
@@ -153,7 +160,7 @@ export async function createAttachments(
   supabase: Client,
   attachments: Attachment[],
 ) {
-  const { data: userData } = await getUser();
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
   const { data } = await supabase
     .from("attachments")

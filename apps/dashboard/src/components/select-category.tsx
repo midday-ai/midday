@@ -4,7 +4,10 @@ import {
 } from "@/actions";
 import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
-import { getSimilarTransactions } from "@midday/supabase/queries";
+import {
+  getCurrentUserTeamQuery,
+  getSimilarTransactions,
+} from "@midday/supabase/queries";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -44,7 +47,11 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
 
   const handleOnValueChange = async (value: string) => {
     await updateTransactionAction(id, { category: value });
-    const transactions = await getSimilarTransactions(supabase, id);
+    const { data: userData } = await getCurrentUserTeamQuery(supabase);
+    const transactions = await getSimilarTransactions(supabase, {
+      id,
+      teamId: userData?.team_id,
+    });
 
     if (transactions?.data?.length) {
       toast({

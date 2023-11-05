@@ -1,6 +1,9 @@
 import { updateTransactionAction } from "@/actions";
 import { createClient } from "@midday/supabase/client";
-import { getTeamMembers } from "@midday/supabase/queries";
+import {
+  getCurrentUserTeamQuery,
+  getTeamMembersQuery,
+} from "@midday/supabase/queries";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -32,7 +35,8 @@ export function AssignUser({ id, selectedId, isLoading }) {
 
   useEffect(() => {
     async function getUsers() {
-      const data = await getTeamMembers(supabase);
+      const { data: userData } = await getCurrentUserTeamQuery(supabase);
+      const data = await getTeamMembersQuery(supabase, userData?.team_id);
       setUsers(data);
     }
 

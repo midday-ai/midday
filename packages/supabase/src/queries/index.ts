@@ -24,6 +24,14 @@ export async function getUserQuery(supabase: Client, userId: string) {
     .throwOnError();
 }
 
+export async function getCurrentUserTeamQuery(supabase: Client) {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return getUserQuery(supabase, session?.user?.id);
+}
+
 export async function getMembersByTeamId(supabase: Client, teamId: string) {
   return supabase
     .from("members")
@@ -57,7 +65,7 @@ export async function getTeamBankAccountsQuery(
     .throwOnError();
 }
 
-export async function getTeamMembers(supabase: Client, teamId: string) {
+export async function getTeamMembersQuery(supabase: Client, teamId: string) {
   const { data } = await supabase
     .from("users_on_team")
     .select(`
@@ -144,7 +152,7 @@ export async function getTransactionsQuery(
     .select(
       `
       *,
-      currency
+      currency,
       assigned:assigned_id(*),
       attachments(id,size,name)
     `,

@@ -7,7 +7,7 @@ import {
   createAttachments,
   deleteAttachment,
 } from "@midday/supabase/mutations";
-import { getUserQuery } from "@midday/supabase/queries";
+import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -84,10 +84,7 @@ export function Attachments({ id, data }) {
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
     setFiles((prev) => [...prev, ...acceptedFiles]);
 
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const { data: userData } = await getUserQuery(supabase, session?.user?.id);
+    const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
     const uploaded = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {

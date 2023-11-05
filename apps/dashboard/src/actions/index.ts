@@ -58,14 +58,14 @@ export async function createBankAccountsAction(accounts) {
   return createBankAccounts(supabase, accounts);
 }
 
-export async function updateTransactionAction(id: string, data: any) {
+export async function updateTransactionAction(id: string, payload: any) {
   const supabase = await createClient();
-  await updateTransaction(supabase, id, data);
-  revalidateTag("transactions");
+  const { data } = await updateTransaction(supabase, id, payload);
+  revalidateTag(`transactions-${data.team_id}`);
 }
 
 export async function updateSimilarTransactionsAction(id: string) {
   const supabase = await createClient();
-  await updateSimilarTransactions(supabase, id);
-  revalidateTag("transactions");
+  const data = await updateSimilarTransactions(supabase, id);
+  revalidateTag(`transactions-${data.team_id}`);
 }
