@@ -79,44 +79,64 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
 }
 
 type GetSpendingParams = {
-  from: number;
-  to: number;
+  from: string;
+  to: string;
   teamId: string;
 };
 
-export async function getSpending(supabase: Client, params: GetSpendingParams) {
-  const { from, to, teamId } = params;
-
+export async function getSpendingQuery(
+  supabase: Client,
+  params: GetSpendingParams,
+) {
   const query = supabase
     .from("transactions")
     .select(
       `
-      *,
       currency,
       category,
-      amount,
+      amount
     `,
     )
     .order("order")
-    .eq("team_id", teamId)
+    .eq("team_id", params.teamId)
+    .lte("amount", 0)
     .throwOnError();
 
-  if (from && to) {
-    query.gte("date", from);
-    query.lte("date", to);
+  if (params.from && params.to) {
+    query.gte("date", params.from);
+    query.lte("date", params.to);
   }
 
-  const { data, count } = await query.range(0, 100000);
+  const { data, count } = await query.range(0, 10000000);
 
   const totalAmount = data?.reduce((amount, item) => item.amount + amount, 0);
+
+  const combinedValues = {};
+
+  for (const item of data) {
+    const { category, amount, currency } = item;
+    // TODO: Remove on next import, we default to uncategorized now
+    const blah = !category ? "uncategorized" : category;
+    if (combinedValues[blah]) {
+      combinedValues[blah].amount += amount;
+    } else {
+      combinedValues[blah] = { amount, currency };
+    }
+  }
 
   return {
     meta: {
       count,
-      totalAmount,
+      totalAmount: +Math.abs(totalAmount).toFixed(2),
       currency: data?.at(0)?.currency,
     },
-    data,
+    data: Object.entries(combinedValues).map(
+      ([category, { amount, currency }]) => ({
+        category,
+        currency,
+        amount: +Math.abs(amount).toFixed(2),
+      }),
+    ),
   };
 }
 

@@ -34,3 +34,9 @@ export const updateSubscriberPreferenceSchema = z.object({
   type: z.string(),
   enabled: z.boolean(),
 });
+
+export const changeSpendingPeriodSchema = z.object({
+  id: z.string(),
+  from: z.string().datetime(),
+  to: z.string().datetime(),
+});

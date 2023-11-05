@@ -28,4 +28,10 @@ export default {
     en: "Engelska",
     sv: "Svenska",
   },
+  spending_period: {
+    this_month: "Den här månaden",
+    last_month: "Förra månaden",
+    this_year: "Det här året",
+    last_year: "Förra året",
+  },
 } as const;

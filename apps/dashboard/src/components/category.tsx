@@ -1,3 +1,5 @@
+"use client";
+
 import { useI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";

@@ -28,4 +28,10 @@ export default {
     en: "English",
     sv: "Swedish",
   },
+  spending_period: {
+    this_month: "This month",
+    last_month: "Last month",
+    this_year: "This year",
+    last_year: "Last year",
+  },
 } as const;

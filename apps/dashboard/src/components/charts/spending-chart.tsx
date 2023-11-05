@@ -10,23 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { Category, CategoryIcon, mapCategoryColor } from "../category";
-
-function SpendingCategoryList({ categories }) {
-  return (
-    <ul className="absolute left-8 bottom-8 space-y-2">
-      {categories.map(({ category }) => (
-        <li key={category}>
-          <Category
-            key={category}
-            name={category}
-            className="text-sm text-[#606060] space-x-3"
-          />
-        </li>
-      ))}
-    </ul>
-  );
-}
+import { CategoryIcon, mapCategoryColor } from "../category";
 
 const ToolTipContent = ({ payload = [] }) => {
   const t = useI18n();
@@ -39,11 +23,13 @@ const ToolTipContent = ({ payload = [] }) => {
         <div className="text-sm font-medium flex items-center space-x-2">
           {item?.category && <CategoryIcon name={item.category} />}
           <p>
-            {item?.value &&
+            {item?.amount &&
               formatAmount({
-                amount: item.value,
+                amount: item.amount,
                 currency: item.currency,
                 locale,
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0,
               })}
           </p>
         </div>
@@ -55,52 +41,38 @@ const ToolTipContent = ({ payload = [] }) => {
   );
 };
 
-export function SpendingChart() {
-  const data = [
-    { category: "equipment", value: 2045, currency: "SEK" },
-    { category: "rent", value: 3002, currency: "SEK" },
-    { category: "travel", value: 522, currency: "SEK" },
-    { category: "office_supplies", value: 632, currency: "SEK" },
-    { category: "software", value: 633, currency: "SEK" },
-    { category: "transfer", value: 763, currency: "SEK" },
-    { category: "meals", value: 154, currency: "SEK" },
-    { category: "other", value: 520, currency: "SEK" },
-    { category: "uncategorized", value: 109, currency: "SEK" },
-  ];
-
+export function SpendingChart({ categories, currency, totalAmount }) {
   return (
-    <>
-      <SpendingCategoryList categories={data} />
+    <ResponsiveContainer>
+      <PieChart width={250} height={250}>
+        <Pie
+          stroke="none"
+          isAnimationActive={false}
+          data={categories}
+          innerRadius={210 / 2}
+          outerRadius={250 / 2}
+          fill="#8884d8"
+          dataKey="amount"
+        >
+          <Label
+            value={formatAmount({
+              amount: totalAmount,
+              currency,
+              maximumFractionDigits: 0,
+              minimumFractionDigits: 0,
+            })}
+            position="center"
+            fontSize={23}
+            fill="#F5F5F3"
+            fontFamily="var(--font-sans)"
+          />
 
-      <ResponsiveContainer>
-        <PieChart width={250} height={250}>
-          <Pie
-            stroke="none"
-            isAnimationActive={false}
-            data={data}
-            innerRadius={210 / 2}
-            outerRadius={250 / 2}
-            fill="#8884d8"
-            dataKey="value"
-          >
-            <Label
-              value={formatAmount({
-                amount: 32240,
-                currency: "SEK",
-              })}
-              position="center"
-              fontSize={23}
-              fill="#F5F5F3"
-              fontFamily="var(--font-sans)"
-            />
-
-            {data?.map(({ category }, index) => (
-              <Cell key={`cell-${index}`} fill={mapCategoryColor(category)} />
-            ))}
-          </Pie>
-          <Tooltip content={ToolTipContent} />
-        </PieChart>
-      </ResponsiveContainer>
-    </>
+          {categories?.map(({ category }, index) => (
+            <Cell key={`cell-${index}`} fill={mapCategoryColor(category)} />
+          ))}
+        </Pie>
+        <Tooltip content={ToolTipContent} />
+      </PieChart>
+    </ResponsiveContainer>
   );
 }
