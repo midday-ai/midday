@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
   getBankConnectionsByTeamIdQuery,
+  getMetricsQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
   getTeamMembersQuery,
@@ -10,8 +11,7 @@ import {
 } from "../queries";
 
 export const getTransactions = async (params) => {
-  const supabase = await createClient();
-
+  const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -31,8 +31,7 @@ export const getTransactions = async (params) => {
 };
 
 export const getUser = async () => {
-  const supabase = await createClient();
-
+  const supabase = createClient();
   const { data } = await supabase.auth.getSession();
   const userId = data.session?.user.id;
 
@@ -52,7 +51,7 @@ export const getUser = async () => {
 };
 
 export const getBankConnectionsByTeamId = async () => {
-  const supabase = await createClient();
+  const supabase = createClient();
   const user = await getUser();
   const userId = user?.data?.id;
 
@@ -72,7 +71,7 @@ export const getBankConnectionsByTeamId = async () => {
 };
 
 export const getTeamBankAccounts = async () => {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -93,7 +92,7 @@ export const getTeamBankAccounts = async () => {
 };
 
 export const getTeamMembers = async () => {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -114,7 +113,7 @@ export const getTeamMembers = async () => {
 };
 
 export const getSpending = async (params) => {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -130,6 +129,27 @@ export const getSpending = async (params) => {
     [`spending-${teamId}`],
     {
       tags: [`spending-${teamId}`],
+    },
+  )(params);
+};
+
+export const getMetrics = async (params) => {
+  const supabase = createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getMetricsQuery(supabase, { ...params, teamId });
+    },
+    [`metrics-v2-${teamId}`],
+    {
+      tags: [`metrics-${teamId}`],
       revalidate: 10,
     },
   )(params);

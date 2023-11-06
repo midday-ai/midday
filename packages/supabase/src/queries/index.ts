@@ -1,3 +1,4 @@
+import { addMonths, differenceInMonths, format, subYears } from "date-fns";
 import { Client } from "../types";
 
 export function getPagination(page: number, size: number) {
@@ -6,6 +7,21 @@ export function getPagination(page: number, size: number) {
   const to = page ? from + size - 1 : size - 1;
 
   return { from, to };
+}
+
+export function getMonthRange(current: Date, previous: Date) {
+  const range = [];
+  const months = Math.abs(differenceInMonths(current, previous)) + 1;
+
+  for (let i = 0; i < months; i++) {
+    range.push(addMonths(new Date(current), i));
+  }
+
+  return range;
+}
+
+export function getPercentageIncrease(a: number, b: number) {
+  return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
 
 export async function getSession(supabase: Client) {
@@ -298,4 +314,94 @@ export async function getSimilarTransactions(
     .eq("team_id", teamId)
     .is("category", null)
     .throwOnError();
+}
+
+type GetMetricsParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  type?: "income" | "profit_loss";
+};
+
+export async function getMetricsQuery(
+  supabase: Client,
+  params: GetMetricsParams,
+) {
+  const { teamId, from, to } = params;
+
+  const previousFromDate = subYears(new Date(from), 1);
+  // const dateFormat = type === 'monthly' ? 'y-M' : 'y-M-dd';
+  const dateFormat = "y-M";
+
+  const { data } = await supabase
+    .from("transactions")
+    .select(`
+      amount,
+      date,
+      currency
+    `)
+    .eq("team_id", teamId)
+    .order("order")
+    .limit(1000000)
+    .gte("date", previousFromDate.toDateString())
+    .lte("date", to)
+    .throwOnError();
+
+  const sum = [
+    ...data
+      .reduce((map, item) => {
+        const key = format(new Date(item.date), dateFormat);
+        const prev = map.get(key);
+
+        if (prev) {
+          prev.value += item.amount;
+        } else {
+          map.set(key, { key, value: item.amount });
+        }
+
+        return map;
+      }, new Map())
+      .values(),
+  ];
+
+  const result = sum.reduce((acc, item) => {
+    const year = format(new Date(item.key), "y");
+    if (!acc[year]) {
+      acc[year] = [];
+    }
+    acc[year].push(item);
+    return acc;
+  }, {});
+
+  const [prevData, currentData] = Object.values(result);
+
+  const current = new Date(from);
+  const previous = new Date(to);
+  const monthRange = getMonthRange(current, previous);
+
+  return monthRange.map((date) => {
+    const currentKey = format(date, dateFormat);
+    const previousKey = format(subYears(date, 1), dateFormat);
+    const current = currentData.find((p) => p.key === currentKey);
+    const currentValue = current?.value ?? 0;
+
+    const previous = prevData.find((p) => p.key === previousKey);
+    const previousValue = previous?.value ?? 0;
+
+    return {
+      date: date.toDateString(),
+      previous: {
+        date: previousKey,
+        value: previousValue,
+      },
+      current: {
+        date: format(date, "y-M-dd"),
+        value: currentValue,
+      },
+      precentage: {
+        value: getPercentageIncrease(previousValue, currentValue),
+        status: currentValue > previousValue ? "positive" : "negative",
+      },
+    };
+  });
 }

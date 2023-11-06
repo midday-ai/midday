@@ -1,5 +1,5 @@
-import { Chart } from "@/components/charts/chart";
-import { Period } from "@/components/charts/period";
+import { Katt } from "@/components/charts/katt";
+import { SelectPeriod } from "@/components/charts/select-period";
 import { Spending } from "@/components/charts/spending";
 import { Summary } from "@/components/charts/summary";
 import { Transactions } from "@/components/charts/transactions";
@@ -15,12 +15,12 @@ export default async function Overview() {
     <div>
       <div className="flex justify-between mt-6">
         <Summary />
-        <Period />
+        <SelectPeriod />
       </div>
 
       <div className="h-[280px]">
         <Suspense>
-          <Chart />
+          <Katt />
         </Suspense>
       </div>
 

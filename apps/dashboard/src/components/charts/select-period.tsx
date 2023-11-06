@@ -8,15 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { cn } from "@midday/ui/utils";
 
-export function Period() {
+export function SelectPeriod() {
   return (
-    <div className={cn("flex space-x-4")}>
+    <div className="flex space-x-4">
       <DateRangePicker formattedValue="Oct 08, 2022 - Oct 08, 2023" />
 
       <Select>
-        <SelectTrigger className="w-[130px]">
+        <SelectTrigger className="w-[130px] font-medium">
           <SelectValue placeholder="Monthly" />
         </SelectTrigger>
         <SelectContent className="mt-1">

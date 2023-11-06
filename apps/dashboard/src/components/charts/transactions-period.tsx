@@ -36,7 +36,7 @@ export function TransactionsPeriod({ type }) {
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
+        <DropdownMenuContent className="w-[130px]">
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option}

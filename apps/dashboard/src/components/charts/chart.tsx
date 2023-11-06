@@ -1,6 +1,7 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
+import { format } from "date-fns";
 import {
   Bar,
   BarChart,
@@ -11,69 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-
-const data = [
-  {
-    name: "Jan",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Feb",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Mar",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Apr",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "May",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Jun",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: -Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Jul",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: -Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Aug",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Sep",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Oct",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Nov",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-  {
-    name: "Dec",
-    currentTotal: Math.floor(Math.random() * 5000) + 1000,
-    previousTotal: Math.floor(Math.random() * 5000) + 40,
-  },
-];
 
 const ToolTipContent = ({ payload = {} }) => {
   return (
@@ -111,7 +49,12 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function Chart() {
+export function Chart({ data }) {
+  const formattedData = data.map((item) => ({
+    ...item,
+    date: format(new Date(item.date), "MMM"),
+  }));
+
   return (
     <div className="relative">
       <div className="flex space-x-4 absolute right-0 -top-10">
@@ -127,12 +70,12 @@ export function Chart() {
 
       <ResponsiveContainer width="100%" height={290} className="-ml-3">
         <BarChart
-          data={data}
+          data={formattedData}
           margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
           barGap={15}
         >
           <XAxis
-            dataKey="name"
+            dataKey="date"
             stroke="#888888"
             fontSize={12}
             tickLine={false}
@@ -163,20 +106,20 @@ export function Chart() {
           />
           <Tooltip content={ToolTipContent} cursor={false} />
 
-          <Bar dataKey="previousTotal" barSize={14}>
+          <Bar dataKey="previous.value" barSize={14}>
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.previousTotal > 0 ? "#323232" : "#FF3638"}
+                fill={entry.previous.value > 0 ? "#323232" : "#FF3638"}
               />
             ))}
           </Bar>
 
-          <Bar dataKey="currentTotal" barSize={14}>
+          <Bar dataKey="current.value" barSize={14}>
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.currentTotal > 0 ? "#F5F5F3" : "#FF3638"}
+                fill={entry.current.value > 0 ? "#F5F5F3" : "#FF3638"}
               />
             ))}
           </Bar>

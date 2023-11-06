@@ -64,7 +64,7 @@ export function SpendingPeriod({ initialPeriod }) {
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56">
+        <DropdownMenuContent className="w-[150px]">
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option.id}
