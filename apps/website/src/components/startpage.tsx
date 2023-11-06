@@ -40,7 +40,7 @@ export function StartPage() {
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
-    <div className="h-screen relative min-h-[1100px]">
+    <div className="h-screen relative min-h-[1180px]">
       <Header />
       <div className="px-5 lg:px-10">
         <div className="text-center mt-20">
