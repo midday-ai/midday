@@ -1,13 +1,15 @@
 import { formatAmount } from "@/utils/format";
 import { getTransactions } from "@midday/supabase/cached-queries";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 
 export function TransactionsListHeader() {
   return (
-    <div className="flex justify-between p-3 border-b-[1px]">
-      <span className="font-medium text-sm">Description</span>
-      <span className="font-medium text-sm w-[40%]">Amount</span>
+    <div className="flex  p-3 border-b-[1px]">
+      <span className="font-medium text-sm w-[50%]">Description</span>
+      <span className="font-medium text-sm w-[35%]">Amount</span>
+      <span className="font-medium text-sm">Status</span>
     </div>
   );
 }
@@ -34,7 +36,7 @@ export function TransactionsListSkeleton() {
 
 export async function TransactionsList({ type }) {
   const { data } = await getTransactions({
-    to: 7,
+    to: 6,
     from: 0,
     filter: {
       type,
@@ -43,30 +45,37 @@ export async function TransactionsList({ type }) {
 
   return (
     <ul className="bullet-none divide-y">
-      {data?.map((transaction) => (
-        <li key={transaction.id} className="flex justify-between p-3">
-          <span
-            className={cn(
-              "text-sm",
-              transaction?.amount > 0 && "text-[#00C969]",
-            )}
-          >
-            {transaction.name}
-          </span>
-          <span
-            className={cn(
-              "w-[40%] text-sm",
-              transaction?.amount > 0 && "text-[#00C969]",
-            )}
-          >
-            {formatAmount({
-              locale: "en",
-              amount: transaction.amount,
-              currency: transaction.currency,
-            })}
-          </span>
-        </li>
-      ))}
+      {data?.map((transaction) => {
+        const fullfilled =
+          transaction.attachments.length > 0 && transaction.vat;
+
+        return (
+          <li key={transaction.id} className="flex p-3">
+            <span
+              className={cn(
+                "text-sm w-[50%]",
+                transaction?.amount > 0 && "text-[#00C969]",
+              )}
+            >
+              {transaction.name}
+            </span>
+            <span
+              className={cn(
+                "text-sm w-[35%]",
+                transaction?.amount > 0 && "text-[#00C969]",
+              )}
+            >
+              {formatAmount({
+                locale: "en",
+                amount: transaction.amount,
+                currency: transaction.currency,
+              })}
+            </span>
+
+            {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
+          </li>
+        );
+      })}
     </ul>
   );
 }
