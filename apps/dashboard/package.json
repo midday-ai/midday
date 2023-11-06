@@ -21,7 +21,6 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.21.0",
-    "@tremor/react": "^3.10.1",
     "@trigger.dev/nextjs": "^2.2.4",
     "@trigger.dev/react": "^2.2.4",
     "@trigger.dev/sdk": "^2.2.4",
