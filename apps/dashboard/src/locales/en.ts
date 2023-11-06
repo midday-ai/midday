@@ -34,4 +34,9 @@ export default {
     this_year: "This year",
     last_year: "Last year",
   },
+  transactions_period: {
+    all: "All",
+    income: "Income",
+    outcome: "Outcome",
+  },
 } as const;

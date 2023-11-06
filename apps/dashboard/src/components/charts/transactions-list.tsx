@@ -32,10 +32,13 @@ export function TransactionsListSkeleton() {
   );
 }
 
-export async function TransactionsList() {
+export async function TransactionsList({ type }) {
   const { data } = await getTransactions({
-    to: 5,
+    to: 7,
     from: 0,
+    filter: {
+      type,
+    },
   });
 
   return (

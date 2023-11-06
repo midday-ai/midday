@@ -43,7 +43,7 @@ const ToolTipContent = ({ payload = [] }) => {
 
 export function SpendingChart({ categories, currency, totalAmount }) {
   return (
-    <ResponsiveContainer>
+    <ResponsiveContainer width="100%">
       <PieChart width={250} height={250}>
         <Pie
           stroke="none"

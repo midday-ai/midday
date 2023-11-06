@@ -60,7 +60,7 @@ export function SpendingPeriod({ initialPeriod }) {
       <DropdownMenu>
         <DropdownMenuTrigger>
           <div className="flex items-center space-x-2">
-            {t(`spending_period.${optimisticData.id}`)}
+            <span>{t(`spending_period.${optimisticData.id}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>

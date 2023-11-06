@@ -99,7 +99,7 @@ export async function getSpendingQuery(
     )
     .order("order")
     .eq("team_id", params.teamId)
-    .lte("amount", 0)
+    .lt("amount", 0)
     .throwOnError();
 
   if (params.from && params.to) {
@@ -115,12 +115,11 @@ export async function getSpendingQuery(
 
   for (const item of data) {
     const { category, amount, currency } = item;
-    // TODO: Remove on next import, we default to uncategorized now
-    const blah = !category ? "uncategorized" : category;
-    if (combinedValues[blah]) {
-      combinedValues[blah].amount += amount;
+
+    if (combinedValues[category]) {
+      combinedValues[category].amount += amount;
     } else {
-      combinedValues[blah] = { amount, currency };
+      combinedValues[category] = { amount, currency };
     }
   }
 
@@ -153,6 +152,7 @@ type GetTransactionsParams = {
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
     category?: "include" | "exclude";
+    type?: "income" | "outcome";
     date: {
       from?: string;
       to?: string;
@@ -165,7 +165,14 @@ export async function getTransactionsQuery(
   params: GetTransactionsParams,
 ) {
   const { from = 0, to, filter, sort, teamId } = params;
-  const { date = {}, search, status, attachments, category } = filter || {};
+  const {
+    date = {},
+    search,
+    status,
+    attachments,
+    category,
+    type,
+  } = filter || {};
 
   const query = supabase
     .from("transactions")
@@ -223,6 +230,14 @@ export async function getTransactionsQuery(
 
   if (category === "include") {
     query.not("category", "is", null);
+  }
+
+  if (type === "outcome") {
+    query.lt("amount", 0);
+  }
+
+  if (type === "income") {
+    query.gt("amount", 0);
   }
 
   const { data, count } = await query.range(from, to).throwOnError();

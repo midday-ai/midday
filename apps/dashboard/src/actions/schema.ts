@@ -40,3 +40,9 @@ export const changeSpendingPeriodSchema = z.object({
   from: z.string().datetime(),
   to: z.string().datetime(),
 });
+
+export const changeTransactionsPeriodSchema = z.enum([
+  "all",
+  "income",
+  "outcome",
+]);

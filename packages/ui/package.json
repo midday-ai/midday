@@ -39,6 +39,7 @@
     "./dialog": "./src/components/dialog.tsx",
     "./scroll-area": "./src/components/scroll-area.tsx",
     "./dropdown-menu": "./src/components/dropdown-menu.tsx",
+    "./date-range-picker": "./src/components/date-range-picker.tsx",
     "./form": "./src/components/form.tsx",
     "./globals.css": "./src/globals.css",
     "./icons": "./src/components/icons.tsx",

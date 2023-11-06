@@ -34,4 +34,9 @@ export default {
     this_year: "Det här året",
     last_year: "Förra året",
   },
+  transactions_period: {
+    all: "All",
+    income: "Inkomst",
+    outcome: "Utgifter",
+  },
 } as const;
