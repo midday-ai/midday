@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import overview from "public/overview.png";
 import search from "public/search.png";
+import tracking from "public/tracking.png";
 import transactions from "public/transactions.png";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -185,6 +186,7 @@ export function StartPage() {
 
         <div className="absolute bottom-0 w-full">
           <Image
+            quality={100}
             src={overview}
             alt="Midday | Overview"
             width={993}
@@ -195,14 +197,25 @@ export function StartPage() {
           />
 
           <Image
+            quality={100}
             src={search}
             alt="Midday | Search"
             width={638}
             height={260}
-            className="absolute left-[50%] -ml-[319px] z-10 bottom-3"
+            className="absolute left-[50%] -ml-[319px] z-10 bottom-[70px]"
           />
 
           <Image
+            quality={100}
+            src={tracking}
+            alt="Midday | Tracking"
+            width={360}
+            height={268}
+            className="absolute right-[20%] z-10 bottom-[240px]"
+          />
+
+          <Image
+            quality={100}
             className="absolute right-0 bottom-0"
             src={transactions}
             alt="Midday | Transactions"
