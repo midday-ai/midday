@@ -12,7 +12,6 @@ type Props = {
   range: DateRange;
   className: React.HTMLAttributes<HTMLDivElement>;
   onSelect: (range?: DateRange) => void;
-  defaultValue: string;
   placeholder: string;
 };
 
@@ -20,7 +19,6 @@ export function DateRangePicker({
   className,
   range,
   onSelect,
-  defaultValue,
   placeholder,
 }: Props) {
   return (
@@ -29,12 +27,9 @@ export function DateRangePicker({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className={cn(
-              "justify-start text-left font-medium space-x-2",
-              !defaultValue && "text-[#606060]",
-            )}
+            className={cn("justify-start text-left font-medium space-x-2")}
           >
-            <span>{defaultValue ?? placeholder}</span>
+            <span>{placeholder}</span>
             <Icons.ChevronDown />
           </Button>
         </PopoverTrigger>

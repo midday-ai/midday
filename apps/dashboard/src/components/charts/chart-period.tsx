@@ -1,6 +1,5 @@
 "use client";
 
-// import { changeChartPeriodAction } from "@/actions/change-chart-period";
 import { DateRangePicker } from "@midday/ui/date-range-picker";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -15,33 +14,33 @@ import { format } from "date-fns";
 import { parseAsString, useQueryStates } from "next-usequerystate";
 import { useState } from "react";
 
-export function ChartPeriod({ initialValue, defaultRange }) {
-  let defaultValue;
+export function ChartPeriod({ initialValue, defaultValue }) {
+  let placeholder;
 
-  const [range, setRange] = useQueryStates(
+  const [state, setState] = useQueryStates(
     {
       to: parseAsString.withDefault(initialValue?.to ?? undefined),
       from: parseAsString.withDefault(initialValue?.from ?? undefined),
+      period: parseAsString.withDefault(
+        initialValue?.period ?? defaultValue.period,
+      ),
     },
     {
       shallow: false,
     },
   );
 
-  if (range?.from) {
-    defaultValue = format(new Date(range.from), "LLL dd, y");
+  if (state?.from) {
+    placeholder = format(new Date(state.from), "LLL dd, y");
   } else {
-    defaultValue = format(new Date(defaultRange.from), "LLL dd, y");
+    placeholder = format(new Date(defaultValue.from), "LLL dd, y");
   }
 
-  if (range?.to) {
-    defaultValue = `${defaultValue} -${format(
-      new Date(range.to),
-      "LLL dd, y",
-    )} `;
+  if (state?.to) {
+    placeholder = `${placeholder} -${format(new Date(state.to), "LLL dd, y")} `;
   } else {
-    defaultValue = `${defaultValue} -${format(
-      new Date(defaultRange.to),
+    placeholder = `${placeholder} -${format(
+      new Date(defaultValue.to),
       "LLL dd, y",
     )} `;
   }
@@ -49,20 +48,23 @@ export function ChartPeriod({ initialValue, defaultRange }) {
   return (
     <div className="flex space-x-4">
       <DateRangePicker
-        defaultValue={defaultValue}
+        placeholder={placeholder}
         range={{
-          from: range?.from && new Date(range.from),
-          to: range?.to && new Date(range.to),
+          from: state?.from && new Date(state.from),
+          to: state?.to && new Date(state.to),
         }}
         onSelect={(range) => {
-          setRange({
+          setState({
             from: range?.from ? new Date(range.from).toISOString() : null,
             to: range?.to ? new Date(range.to).toISOString() : null,
           });
         }}
       />
 
-      <Select>
+      <Select
+        defaultValue={state.period}
+        onValueChange={(period) => setState({ period })}
+      >
         <SelectTrigger className="w-[130px] font-medium">
           <SelectValue placeholder="Monthly" />
         </SelectTrigger>

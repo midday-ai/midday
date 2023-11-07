@@ -321,17 +321,17 @@ type GetMetricsParams = {
   from: string;
   to: string;
   type?: "income" | "profit_loss";
+  period?: "weekly" | "monthly";
 };
 
 export async function getMetricsQuery(
   supabase: Client,
   params: GetMetricsParams,
 ) {
-  const { teamId, from, to } = params;
+  const { teamId, from, to, period = "monthly" } = params;
 
   const previousFromDate = subYears(new Date(from), 1);
-  // const dateFormat = type === 'monthly' ? 'y-M' : 'y-M-dd';
-  const dateFormat = "y-M";
+  const dateFormat = period === "monthly" ? "y-M" : "y-M-dd";
 
   const { data } = await supabase
     .from("transactions")
@@ -405,6 +405,7 @@ export async function getMetricsQuery(
 
       return {
         date: date.toDateString(),
+        period,
         previous: {
           date: previousKey,
           value: previousValue,

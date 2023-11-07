@@ -3,8 +3,8 @@ import { getMetrics } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { RevenueChart } from "./revenue-chart";
 
-export async function Chart({ range, defaultRange }) {
-  const data = await getMetrics({ ...defaultRange, ...range });
+export async function Chart({ value, defaultValue }) {
+  const data = await getMetrics({ ...defaultValue, ...value });
 
   return (
     <div className="relative mt-28">
