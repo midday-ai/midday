@@ -399,7 +399,10 @@ export async function getMetricsQuery(
         value: currentValue,
       },
       precentage: {
-        value: getPercentageIncrease(previousValue, currentValue),
+        value: getPercentageIncrease(
+          Math.abs(previousValue),
+          Math.abs(currentValue),
+        ),
         status: currentValue > previousValue ? "positive" : "negative",
       },
     };

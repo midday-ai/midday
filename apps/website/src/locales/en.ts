@@ -8,7 +8,7 @@ export default {
     email: "Enter your email",
     open: "Open source",
     live: "Live profit/loss",
-    document: "File management",
+    document: "Files",
     reciept: "Receipt linking",
     time: "Project time tracking",
     ai: "AI-enhanced filter & search",

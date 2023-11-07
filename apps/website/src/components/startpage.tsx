@@ -5,6 +5,7 @@ import { useScopedI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import mobile from "public/mobile.png";
 import overview from "public/overview.png";
 import search from "public/search.png";
 import tracking from "public/tracking.png";
@@ -40,10 +41,10 @@ export function StartPage() {
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
-    <div className="h-screen relative min-h-[1180px]">
+    <div className="h-screen relative min-h-[820px] md:min-h-[1180px]">
       <Header />
       <div className="px-5 lg:px-10">
-        <div className="text-center mt-20">
+        <div className="text-center mt-16 md:mt-20">
           <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
             <h1 className="font-medium pb-1 text-5xl">{t("title")}</h1>
           </div>
@@ -187,9 +188,22 @@ export function StartPage() {
         <div className="absolute bottom-0 w-full">
           <Image
             quality={100}
+            src={mobile}
+            alt="Midday | Mobile"
+            width={393}
+            className="block absolute left-0 right-0 md:hidden"
+            height={393}
+            style={{
+              objectFit: "contain",
+            }}
+          />
+
+          <Image
+            quality={100}
             src={overview}
             alt="Midday | Overview"
             width={993}
+            className="hidden md:block"
             height={645}
             style={{
               objectFit: "contain",

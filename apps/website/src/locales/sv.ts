@@ -8,7 +8,7 @@ export default {
     email: "Ange din e-postadress",
     open: "Öppen källkod",
     live: "Live vinst/förlust",
-    document: "Document",
+    document: "Filer",
     reciept: "Kvittolänkning",
     time: "Tidsrapportering",
     ai: "AI filter och sökning",
