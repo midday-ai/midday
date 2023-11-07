@@ -39,7 +39,7 @@ export default {
     income: "Income",
     outcome: "Outcome",
   },
-  chart_selector: {
+  chart_type: {
     revenue: "Revenue",
     profit_loss: "Profit/Loss",
   },

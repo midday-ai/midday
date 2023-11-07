@@ -39,7 +39,7 @@ export default {
     income: "Inkomst",
     outcome: "Utgifter",
   },
-  chart_selector: {
+  chart_type: {
     revenue: "Inkomst",
     profit_loss: "Vinst/Förlust",
   },

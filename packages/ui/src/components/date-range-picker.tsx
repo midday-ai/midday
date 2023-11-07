@@ -9,17 +9,19 @@ import { Icons } from "./icons";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 type Props = {
-  date: DateRange;
+  range: DateRange;
   className: React.HTMLAttributes<HTMLDivElement>;
-  setDate: (range?: DateRange) => void;
-  formattedValue: string;
+  onSelect: (range?: DateRange) => void;
+  defaultValue: string;
+  placeholder: string;
 };
 
 export function DateRangePicker({
   className,
-  date,
-  setDate,
-  formattedValue,
+  range,
+  onSelect,
+  defaultValue,
+  placeholder,
 }: Props) {
   return (
     <div className={cn("grid gap-2", className)}>
@@ -27,9 +29,12 @@ export function DateRangePicker({
         <PopoverTrigger asChild>
           <Button
             variant="outline"
-            className="justify-start text-left font-medium space-x-2"
+            className={cn(
+              "justify-start text-left font-medium space-x-2",
+              !defaultValue && "text-[#606060]",
+            )}
           >
-            <span>{formattedValue}</span>
+            <span>{defaultValue ?? placeholder}</span>
             <Icons.ChevronDown />
           </Button>
         </PopoverTrigger>
@@ -37,9 +42,9 @@ export function DateRangePicker({
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={date?.from}
-            selected={date}
-            onSelect={setDate}
+            defaultMonth={range?.from}
+            selected={range}
+            onSelect={onSelect}
             numberOfMonths={2}
           />
         </PopoverContent>
