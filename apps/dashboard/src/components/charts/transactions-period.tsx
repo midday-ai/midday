@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTransactionsPeriodAction } from "@/actions/change-transactions-period";
+import { changeTransactionsPeriodAction } from "@/actions/change-transactions-period-action";
 import { useI18n } from "@/locales/client";
 import {
   DropdownMenu,
