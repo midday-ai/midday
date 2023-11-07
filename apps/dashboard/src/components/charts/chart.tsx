@@ -38,7 +38,7 @@ const ToolTipContent = ({ payload = {} }) => {
               {formatAmount({
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
-                currency: "SEK",
+                currency: current?.payload?.current.currency,
                 amount: current?.payload?.current.value || 0,
               })}
             </p>
@@ -56,7 +56,7 @@ const ToolTipContent = ({ payload = {} }) => {
             <p className="font-medium text-[13px]">
               {formatAmount({
                 amount: previous?.payload?.previous.value || 0,
-                currency: "SEK",
+                currency: previous?.payload?.current.currency,
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
               })}
@@ -74,7 +74,7 @@ const ToolTipContent = ({ payload = {} }) => {
 };
 
 export function Chart({ data }) {
-  const formattedData = data.map((item) => ({
+  const formattedData = data.result.map((item) => ({
     ...item,
     date: format(new Date(item.date), "MMM"),
   }));
@@ -141,16 +141,16 @@ export function Chart({ data }) {
           <Tooltip content={ToolTipContent} cursor={false} />
 
           <Bar dataKey="previous.value" barSize={14}>
-            {data.map((entry, index) => (
+            {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.previous.value > 0 ? "#323232" : "#FF3638"}
+                fill={entry.previous.value > 0 ? "#323232" : "#41191A"}
               />
             ))}
           </Bar>
 
           <Bar dataKey="current.value" barSize={14}>
-            {data.map((entry, index) => (
+            {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
                 fill={entry.current.value > 0 ? "#F5F5F3" : "#FF3638"}

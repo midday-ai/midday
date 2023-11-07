@@ -356,7 +356,11 @@ export async function getMetricsQuery(
         if (prev) {
           prev.value += item.amount;
         } else {
-          map.set(key, { key, value: item.amount });
+          map.set(key, {
+            key,
+            value: item.amount,
+            currency: item.currency,
+          });
         }
 
         return map;
@@ -375,36 +379,50 @@ export async function getMetricsQuery(
 
   const [prevData, currentData] = Object.values(result);
 
+  const prevTotal = prevData.reduce((value, item) => item.value + value, 0);
+  const currentTotal = currentData.reduce(
+    (value, item) => item.value + value,
+    0,
+  );
+
   const current = new Date(from);
   const previous = new Date(to);
   const monthRange = getMonthRange(current, previous);
 
-  return monthRange.map((date) => {
-    const currentKey = format(date, dateFormat);
-    const previousKey = format(subYears(date, 1), dateFormat);
-    const current = currentData.find((p) => p.key === currentKey);
-    const currentValue = current?.value ?? 0;
+  return {
+    summary: {
+      currentTotal,
+      prevTotal,
+      currency: data?.at(0)?.currency,
+    },
+    result: monthRange.map((date) => {
+      const currentKey = format(date, dateFormat);
+      const previousKey = format(subYears(date, 1), dateFormat);
+      const current = currentData.find((p) => p.key === currentKey);
+      const currentValue = current?.value ?? 0;
+      const previous = prevData.find((p) => p.key === previousKey);
+      const previousValue = previous?.value ?? 0;
 
-    const previous = prevData.find((p) => p.key === previousKey);
-    const previousValue = previous?.value ?? 0;
-
-    return {
-      date: date.toDateString(),
-      previous: {
-        date: previousKey,
-        value: previousValue,
-      },
-      current: {
-        date: format(date, "y-M-dd"),
-        value: currentValue,
-      },
-      precentage: {
-        value: getPercentageIncrease(
-          Math.abs(previousValue),
-          Math.abs(currentValue),
-        ),
-        status: currentValue > previousValue ? "positive" : "negative",
-      },
-    };
-  });
+      return {
+        date: date.toDateString(),
+        previous: {
+          date: previousKey,
+          value: previousValue,
+          currency: previous.currency,
+        },
+        current: {
+          date: format(date, "y-M-dd"),
+          value: currentValue,
+          currency: current.currency,
+        },
+        precentage: {
+          value: getPercentageIncrease(
+            Math.abs(previousValue),
+            Math.abs(currentValue),
+          ),
+          status: currentValue > previousValue ? "positive" : "negative",
+        },
+      };
+    }),
+  };
 }

@@ -147,7 +147,7 @@ export const getMetrics = async (params) => {
     async () => {
       return getMetricsQuery(supabase, { ...params, teamId });
     },
-    [`metrifffcs-v2-${teamId}`],
+    [`metrics-${teamId}`],
     {
       tags: [`metrics-${teamId}`],
       revalidate: 10,
