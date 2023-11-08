@@ -1,4 +1,11 @@
-import { addMonths, differenceInMonths, format, subYears } from "date-fns";
+import {
+  addMonths,
+  addWeeks,
+  differenceInMonths,
+  differenceInWeeks,
+  format,
+  subYears,
+} from "date-fns";
 import { Client } from "../types";
 
 export function getPagination(page: number, size: number) {
@@ -15,6 +22,17 @@ export function getMonthRange(current: Date, previous: Date) {
 
   for (let i = 0; i < months; i++) {
     range.push(addMonths(new Date(current), i));
+  }
+
+  return range;
+}
+
+export function getWeekRange(current: Date, previous: Date) {
+  const range = [];
+  const weeks = Math.abs(differenceInWeeks(current, previous)) + 1;
+
+  for (let i = 0; i < weeks; i++) {
+    range.push(addWeeks(new Date(current), i));
   }
 
   return range;
@@ -331,7 +349,7 @@ export async function getMetricsQuery(
   const { teamId, from, to, type, period = "monthly" } = params;
 
   const previousFromDate = subYears(new Date(from), 1);
-  const dateFormat = period === "monthly" ? "y-M" : "y-M-dd";
+  const dateFormat = period === "monthly" ? "y-M" : "y-ww";
 
   const query = supabase
     .from("transactions")
@@ -363,6 +381,7 @@ export async function getMetricsQuery(
         } else {
           map.set(key, {
             key,
+            date: item.date,
             value: item.amount,
             currency: item.currency,
           });
@@ -374,11 +393,11 @@ export async function getMetricsQuery(
   ];
 
   const result = sum.reduce((acc, item) => {
-    const year = format(new Date(item.key), "y");
-    if (!acc[year]) {
-      acc[year] = [];
+    const key = format(new Date(item.date), "y");
+    if (!acc[key]) {
+      acc[key] = [];
     }
-    acc[year].push(item);
+    acc[key].push(item);
     return acc;
   }, {});
 
@@ -392,7 +411,10 @@ export async function getMetricsQuery(
 
   const current = new Date(from);
   const previous = new Date(to);
-  const monthRange = getMonthRange(current, previous);
+  const range =
+    period === "weekly"
+      ? getWeekRange(current, previous)
+      : getMonthRange(current, previous);
 
   return {
     summary: {
@@ -404,7 +426,7 @@ export async function getMetricsQuery(
       type,
       period,
     },
-    result: monthRange.map((date) => {
+    result: range.map((date) => {
       const currentKey = format(date, dateFormat);
       const previousKey = format(subYears(date, 1), dateFormat);
       const current = currentData.find((p) => p.key === currentKey);
@@ -415,14 +437,14 @@ export async function getMetricsQuery(
       return {
         date: date.toDateString(),
         previous: {
-          date: previousKey,
-          value: previousValue,
-          currency: previous?.currency,
+          date: format(subYears(date, 1), "y-M-d"),
+          value: previousValue ?? 0,
+          currency: previous?.currency || data?.at(0)?.currency,
         },
         current: {
-          date: format(date, "y-M-dd"),
-          value: currentValue,
-          currency: current?.currency,
+          date: format(date, "y-M-d"),
+          value: currentValue ?? 0,
+          currency: current?.currency || data?.at(0)?.currency,
         },
         precentage: {
           value: getPercentageIncrease(

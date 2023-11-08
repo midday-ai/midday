@@ -16,7 +16,7 @@ import {
 } from "recharts";
 import { Status } from "./status";
 
-const ToolTipContent = ({ payload = {}, ...rest }) => {
+const ToolTipContent = ({ payload = {} }) => {
   const t = useI18n();
   const [current, previous] = payload;
 
@@ -27,10 +27,12 @@ const ToolTipContent = ({ payload = {}, ...rest }) => {
           {t(`chart_type.${current?.payload?.meta?.type}`)}
         </p>
         <div>
-          <Status
-            value={`${current?.payload.precentage.value}%`}
-            variant={current?.payload.precentage.status}
-          />
+          {current?.payload.precentage.value > 0 && (
+            <Status
+              value={`${current?.payload.precentage.value}%`}
+              variant={current?.payload.precentage.status}
+            />
+          )}
         </div>
       </div>
 
@@ -49,8 +51,14 @@ const ToolTipContent = ({ payload = {}, ...rest }) => {
           </div>
 
           <p className="text-xs text-[#606060] text-right">
-            {current?.payload?.current.date &&
-              format(new Date(current.payload.current.date), "MMM, Y")}
+            {current?.payload?.meta?.period === "weekly"
+              ? current?.payload?.current?.date &&
+                `Week ${format(
+                  new Date(current.payload.current.date),
+                  "ww, Y",
+                )}`
+              : current?.payload?.current?.date &&
+                format(new Date(current.payload.current.date), "MMM, Y")}
           </p>
         </div>
 
@@ -68,8 +76,14 @@ const ToolTipContent = ({ payload = {}, ...rest }) => {
           </div>
 
           <p className="text-xs text-[#606060] text-right">
-            {previous?.payload?.previous.date &&
-              format(new Date(previous.payload.previous.date), "MMM, Y")}
+            {previous?.payload?.meta?.period === "weekly"
+              ? previous?.payload?.previous?.date &&
+                `Week ${format(
+                  new Date(previous.payload.previous.date),
+                  "ww, Y",
+                )}`
+              : previous?.payload?.previous?.date &&
+                format(new Date(previous.payload.previous.date), "MMM, Y")}
           </p>
         </div>
       </div>
@@ -81,7 +95,10 @@ export function BarChart({ data }) {
   const formattedData = data.result.map((item) => ({
     ...item,
     meta: data.meta,
-    date: format(new Date(item.date), "MMM"),
+    date: format(
+      new Date(item.date),
+      data.meta.period === "weekly" ? "w" : "MMM",
+    ),
   }));
 
   return (
