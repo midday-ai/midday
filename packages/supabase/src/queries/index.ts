@@ -400,6 +400,10 @@ export async function getMetricsQuery(
       prevTotal,
       currency: data?.at(0)?.currency,
     },
+    meta: {
+      type,
+      period,
+    },
     result: monthRange.map((date) => {
       const currentKey = format(date, dateFormat);
       const previousKey = format(subYears(date, 1), dateFormat);
@@ -410,7 +414,6 @@ export async function getMetricsQuery(
 
       return {
         date: date.toDateString(),
-        period,
         previous: {
           date: previousKey,
           value: previousValue,

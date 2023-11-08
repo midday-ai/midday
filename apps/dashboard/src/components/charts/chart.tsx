@@ -1,7 +1,7 @@
 import { formatAmount } from "@/utils/format";
 import { getMetrics } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
-import { RevenueChart } from "./revenue-chart";
+import { BarChart } from "./bar-chart";
 
 export async function Chart({ value, defaultValue }) {
   const type = cookies().get("chart-type")?.value ?? "profit_loss";
@@ -29,7 +29,7 @@ export async function Chart({ value, defaultValue }) {
           last period
         </p>
       </div>
-      <RevenueChart data={data} />
+      <BarChart data={data} />
     </div>
   );
 }

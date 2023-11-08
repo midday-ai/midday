@@ -1,11 +1,12 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import {
   Bar,
-  BarChart,
+  BarChart as BaseBarChart,
   CartesianGrid,
   Cell,
   ResponsiveContainer,
@@ -15,13 +16,16 @@ import {
 } from "recharts";
 import { Status } from "./status";
 
-const ToolTipContent = ({ payload = {} }) => {
+const ToolTipContent = ({ payload = {}, ...rest }) => {
+  const t = useI18n();
   const [current, previous] = payload;
 
   return (
     <div className="w-[240px] rounded-xl border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
-        <p className="text-sm">Profit/Loss</p>
+        <p className="text-sm">
+          {t(`chart_type.${current?.payload?.meta?.type}`)}
+        </p>
         <div>
           <Status
             value={`${current?.payload.precentage.value}%`}
@@ -73,9 +77,10 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function RevenueChart({ data }) {
+export function BarChart({ data }) {
   const formattedData = data.result.map((item) => ({
     ...item,
+    meta: data.meta,
     date: format(new Date(item.date), "MMM"),
   }));
 
@@ -93,7 +98,7 @@ export function RevenueChart({ data }) {
       </div>
 
       <ResponsiveContainer width="100%" height={290}>
-        <BarChart
+        <BaseBarChart
           data={formattedData}
           margin={{ top: 0, left: 40, right: 0, bottom: 0 }}
           barGap={15}
@@ -157,7 +162,7 @@ export function RevenueChart({ data }) {
               />
             ))}
           </Bar>
-        </BarChart>
+        </BaseBarChart>
       </ResponsiveContainer>
     </div>
   );
