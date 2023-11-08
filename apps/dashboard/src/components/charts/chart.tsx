@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { RevenueChart } from "./revenue-chart";
 
 export async function Chart({ value, defaultValue }) {
-  const data = await getMetrics({ ...defaultValue, ...value });
+  const type = cookies().get("chart-type")?.value ?? "profit_loss";
+  const data = await getMetrics({ ...defaultValue, ...value, type });
 
   return (
     <div className="relative mt-28">

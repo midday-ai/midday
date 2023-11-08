@@ -11,7 +11,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hook";
 
-const options = ["all", "income", "outcome"];
+const options = ["all", "income", "expense"];
 
 export function TransactionsPeriod({ type }) {
   const t = useI18n();

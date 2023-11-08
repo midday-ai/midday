@@ -168,7 +168,7 @@ type GetTransactionsParams = {
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
     category?: "include" | "exclude";
-    type?: "income" | "outcome";
+    type?: "income" | "expense";
     date: {
       from?: string;
       to?: string;
@@ -248,7 +248,7 @@ export async function getTransactionsQuery(
     query.not("category", "is", null);
   }
 
-  if (type === "outcome") {
+  if (type === "expense") {
     query.lt("amount", 0);
   }
 
@@ -328,12 +328,12 @@ export async function getMetricsQuery(
   supabase: Client,
   params: GetMetricsParams,
 ) {
-  const { teamId, from, to, period = "monthly" } = params;
+  const { teamId, from, to, type, period = "monthly" } = params;
 
   const previousFromDate = subYears(new Date(from), 1);
   const dateFormat = period === "monthly" ? "y-M" : "y-M-dd";
 
-  const { data } = await supabase
+  const query = supabase
     .from("transactions")
     .select(`
       amount,
@@ -344,8 +344,13 @@ export async function getMetricsQuery(
     .order("order")
     .limit(1000000)
     .gte("date", previousFromDate.toDateString())
-    .lte("date", to)
-    .throwOnError();
+    .lte("date", to);
+
+  if (type === "income") {
+    query.gt("amount", 0);
+  }
+
+  const { data } = await query.throwOnError();
 
   const sum = [
     ...data
@@ -409,12 +414,12 @@ export async function getMetricsQuery(
         previous: {
           date: previousKey,
           value: previousValue,
-          currency: previous.currency,
+          currency: previous?.currency,
         },
         current: {
           date: format(date, "y-M-dd"),
           value: currentValue,
-          currency: current.currency,
+          currency: current?.currency,
         },
         precentage: {
           value: getPercentageIncrease(

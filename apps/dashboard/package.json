@@ -21,13 +21,13 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.21.0",
-    "@trigger.dev/nextjs": "^2.2.4",
-    "@trigger.dev/react": "^2.2.4",
-    "@trigger.dev/sdk": "^2.2.4",
+    "@trigger.dev/nextjs": "^2.2.5",
+    "@trigger.dev/react": "^2.2.5",
+    "@trigger.dev/sdk": "^2.2.5",
     "change-case": "^5.1.2",
     "framer-motion": "^10.16.4",
     "next": "14.0.1",
-    "next-international": "^1.1.3",
+    "next-international": "^1.1.4",
     "next-safe-action": "^5.0.2",
     "next-themes": "^0.2.1",
     "next-usequerystate": "^1.9.2",
@@ -41,9 +41,9 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.1",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.36",
-    "@types/react-dom": "^18.2.14",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
     "typescript": "^5.2.2"
   }
 }

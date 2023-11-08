@@ -37,10 +37,10 @@ export default {
   transactions_period: {
     all: "All",
     income: "Income",
-    outcome: "Outcome",
+    expense: "Expense",
   },
   chart_type: {
-    revenue: "Revenue",
     profit_loss: "Profit/Loss",
+    income: "Income",
   },
 } as const;

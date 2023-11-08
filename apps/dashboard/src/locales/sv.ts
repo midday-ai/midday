@@ -40,7 +40,7 @@ export default {
     outcome: "Utgifter",
   },
   chart_type: {
-    revenue: "Inkomst",
     profit_loss: "Vinst/Förlust",
+    income: "Inkomst",
   },
 } as const;

@@ -4,7 +4,7 @@ import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import { cookies } from "next/headers";
 
 export async function ChartSelectors({ value, defaultValue }) {
-  const chartType = cookies().get("chart-type")?.value ?? "revenue";
+  const chartType = cookies().get("chart-type")?.value ?? "profit_loss";
 
   return (
     <div className="flex justify-between mt-6">

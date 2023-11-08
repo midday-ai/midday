@@ -22,8 +22,8 @@
   "dependencies": {
     "@biomejs/biome": "1.3.3",
     "@manypkg/cli": "^0.21.0",
-    "@trigger.dev/sdk": "^2.2.4",
-    "@trigger.dev/supabase": "^2.2.4",
+    "@trigger.dev/sdk": "^2.2.5",
+    "@trigger.dev/supabase": "^2.2.5",
     "turbo": "^1.10.16",
     "typescript": "^5.2.2"
   }
