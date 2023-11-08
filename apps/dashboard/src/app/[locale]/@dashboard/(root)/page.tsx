@@ -3,8 +3,12 @@ import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Realtime } from "@/components/charts/realtime";
 import { Spending } from "@/components/charts/spending";
 import { Transactions } from "@/components/charts/transactions";
-import { getUser } from "@midday/supabase/cached-queries";
-import { startOfMonth, startOfYear, subMonths } from "date-fns";
+import { OverviewModal } from "@/components/modals/overview-modal";
+import {
+  getBankConnectionsByTeamId,
+  getUser,
+} from "@midday/supabase/cached-queries";
+import { startOfMonth, startOfYear } from "date-fns";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -20,6 +24,8 @@ const defaultValue = {
 
 export default async function Overview({ searchParams }) {
   const { data: userData } = await getUser();
+  const { data } = await getBankConnectionsByTeamId();
+
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
     ...(searchParams.to && { to: searchParams.to }),
@@ -41,6 +47,7 @@ export default async function Overview({ searchParams }) {
         <Transactions />
       </div>
 
+      {!data?.length && <OverviewModal />}
       <Realtime teamId={userData.team_id} />
     </div>
   );

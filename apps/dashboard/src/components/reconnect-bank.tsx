@@ -1,5 +1,4 @@
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
@@ -12,8 +11,7 @@ const WARNING_DAYS = 14;
 const ERROR_DAYS = 7;
 
 export async function ReconnectBank() {
-  const supabase = createClient();
-  const { data } = await getBankConnectionsByTeamId(supabase);
+  const { data } = await getBankConnectionsByTeamId();
 
   if (!data?.length) {
     return null;

@@ -403,8 +403,8 @@ export async function getMetricsQuery(
 
   const [prevData, currentData] = Object.values(result);
 
-  const prevTotal = prevData.reduce((value, item) => item.value + value, 0);
-  const currentTotal = currentData.reduce(
+  const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
+  const currentTotal = currentData?.reduce(
     (value, item) => item.value + value,
     0,
   );
@@ -429,9 +429,9 @@ export async function getMetricsQuery(
     result: range.map((date) => {
       const currentKey = format(date, dateFormat);
       const previousKey = format(subYears(date, 1), dateFormat);
-      const current = currentData.find((p) => p.key === currentKey);
+      const current = currentData?.find((p) => p.key === currentKey);
       const currentValue = current?.value ?? 0;
-      const previous = prevData.find((p) => p.key === previousKey);
+      const previous = prevData?.find((p) => p.key === previousKey);
       const previousValue = previous?.value ?? 0;
 
       return {

@@ -1,12 +1,12 @@
 import { ExportButton } from "@/components/export-button";
 import { Filter } from "@/components/filter";
+import { TransactionsModal } from "@/components/modals/transactions-modal";
 import { Table } from "@/components/tables/transactions";
 import { sections } from "@/components/tables/transactions/filters";
 import { Loading } from "@/components/tables/transactions/loading";
+import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 import { Suspense } from "react";
-
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Transactions | Midday",
@@ -17,6 +17,7 @@ export default async function Transactions({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const { data } = await getBankConnectionsByTeamId();
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
   const transactionId = searchParams?.id;
   const filter =
@@ -33,6 +34,8 @@ export default async function Transactions({
       <Suspense fallback={<Loading collapsed={Boolean(transactionId)} />}>
         <Table filter={filter} page={page} sort={sort} />
       </Suspense>
+
+      {!data?.length && <TransactionsModal />}
     </>
   );
 }
