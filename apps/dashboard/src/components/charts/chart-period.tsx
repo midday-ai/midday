@@ -12,9 +12,8 @@ import {
 } from "@midday/ui/select";
 import { format } from "date-fns";
 import { parseAsString, useQueryStates } from "next-usequerystate";
-import { useState } from "react";
 
-export function ChartPeriod({ initialValue, defaultValue }) {
+export function ChartPeriod({ initialValue, defaultValue, disabled }) {
   let placeholder;
 
   const [state, setState] = useQueryStates(
@@ -48,6 +47,7 @@ export function ChartPeriod({ initialValue, defaultValue }) {
   return (
     <div className="flex space-x-4">
       <DateRangePicker
+        disabled={disabled}
         placeholder={placeholder}
         range={{
           from: state?.from && new Date(state.from),
@@ -62,6 +62,7 @@ export function ChartPeriod({ initialValue, defaultValue }) {
       />
 
       <Select
+        disabled={disabled}
         defaultValue={state.period}
         onValueChange={(period) => setState({ period })}
       >

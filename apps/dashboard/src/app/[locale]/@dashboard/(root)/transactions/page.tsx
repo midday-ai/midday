@@ -5,6 +5,7 @@ import { Table } from "@/components/tables/transactions";
 import { sections } from "@/components/tables/transactions/filters";
 import { Loading } from "@/components/tables/transactions/loading";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
+import { cn } from "@midday/ui/utils";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -24,6 +25,8 @@ export default async function Transactions({
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
   const sort = searchParams?.sort?.split(":");
 
+  const empty = !data?.length;
+
   return (
     <>
       <div className="flex justify-between py-6">
@@ -31,9 +34,11 @@ export default async function Transactions({
         <ExportButton />
       </div>
 
-      <Suspense fallback={<Loading collapsed={Boolean(transactionId)} />}>
-        <Table filter={filter} page={page} sort={sort} />
-      </Suspense>
+      <div className={cn(empty && "opacity-20 pointer-events-none")}>
+        <Suspense fallback={<Loading collapsed={Boolean(transactionId)} />}>
+          <Table filter={filter} page={page} sort={sort} noAccounts={empty} />
+        </Suspense>
+      </div>
 
       {!data?.length && <TransactionsModal />}
     </>

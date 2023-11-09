@@ -28,12 +28,12 @@ export function TransactionsModal() {
         <div className="p-4">
           <div className="mb-8 space-y-5">
             <h2 className="font-medium text-xl">
-              Get real time transactions data
+              Get real-time transaction data
             </h2>
             <p className="text-[#878787] text-sm">
-              Get real time data and be able to see which transactions are
-              missing receipts, categorize, upload and set correct taxrate.
-              Export & deliver everything neatly to your accountant.
+              Get real-time data and be able to see which transactions are
+              missing receipts, categorize, upload, and set the correct tax
+              rate. Export & deliver everything neatly to your accountant.
             </p>
           </div>
 

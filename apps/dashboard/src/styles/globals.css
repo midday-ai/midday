@@ -21,3 +21,28 @@ body {
     --sidebar-width: 827px;
   }
 }
+
+.skeleton-box {
+  background-color: hsl(var(--border));
+  color: hsl(var(--border)) !important;
+  user-select: none !important;
+  cursor: default !important;
+  animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite;
+  border-color: transparent !important;
+}
+
+.skeleton-circle {
+  background-color: hsl(var(--border));
+  border-radius: 1000px !important;
+  color: hsl(var(--border)) !important;
+  user-select: none !important;
+  cursor: default !important;
+  animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite;
+  border-color: transparent !important;
+}
+
+.skeleton-circle > *,
+.skeleton-box > *,
+.skeleton-line > * {
+  opacity: 0 !important;
+}

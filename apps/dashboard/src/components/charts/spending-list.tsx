@@ -1,5 +1,6 @@
 import { getSpending } from "@midday/supabase/cached-queries";
 import { Category } from "../category";
+import { spendingData } from "./data";
 import { SpendingChart } from "./spending-chart";
 
 function SpendingCategoryList({ categories }) {
@@ -20,8 +21,10 @@ function SpendingCategoryList({ categories }) {
   );
 }
 
-export async function SpendingList({ initialPeriod }) {
-  const { data, meta } = await getSpending(initialPeriod);
+export async function SpendingList({ initialPeriod, disabled }) {
+  const { data, meta } = disabled
+    ? spendingData
+    : await getSpending(initialPeriod);
 
   return (
     <>

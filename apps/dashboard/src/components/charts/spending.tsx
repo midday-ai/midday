@@ -6,7 +6,7 @@ import { ErrorFallback } from "../error-fallback";
 import { SpendingList } from "./spending-list";
 import { SpendingPeriod } from "./spending-period";
 
-export async function Spending() {
+export async function Spending({ disabled }) {
   const initialPeriod = cookies().has("spending-period")
     ? JSON.parse(cookies().get("spending-period")?.value)
     : {
@@ -22,7 +22,7 @@ export async function Spending() {
       <div className="h-[350px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense>
-            <SpendingList initialPeriod={initialPeriod} />
+            <SpendingList initialPeriod={initialPeriod} disabled={disabled} />
           </Suspense>
         </ErrorBoundary>
       </div>

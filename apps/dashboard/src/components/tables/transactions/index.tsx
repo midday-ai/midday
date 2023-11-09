@@ -1,17 +1,14 @@
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/transactions/data-table";
-import {
-  getTeamBankAccounts,
-  getTransactions,
-  getUser,
-} from "@midday/supabase/cached-queries";
+import { getTransactions, getUser } from "@midday/supabase/cached-queries";
 import { getPagination } from "@midday/supabase/queries";
 import { BottomBar } from "./bottom-bar";
-import { NoAccountConnected, NoResults } from "./empty-states";
+import { NoResults } from "./empty-states";
+import { Loading } from "./loading";
 
 const pageSize = 50;
 
-export async function Table({ filter, page, sort }) {
+export async function Table({ filter, page, sort, noAccounts }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
   const { data: userData } = await getUser();
@@ -23,12 +20,9 @@ export async function Table({ filter, page, sort }) {
   });
 
   if (!data?.length) {
-    const { data: bankAccounts } = await getTeamBankAccounts();
-
-    if (!bankAccounts?.length) {
-      return <NoAccountConnected />;
+    if (noAccounts) {
+      return <Loading collapsed={false} />;
     }
-
     return <NoResults hasFilters={hasFilters} />;
   }
 

@@ -13,18 +13,20 @@ type Props = {
   className: React.HTMLAttributes<HTMLDivElement>;
   onSelect: (range?: DateRange) => void;
   placeholder: string;
+  disabled?: boolean;
 };
 
 export function DateRangePicker({
   className,
   range,
+  disabled,
   onSelect,
   placeholder,
 }: Props) {
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
-        <PopoverTrigger asChild>
+        <PopoverTrigger asChild disabled={disabled}>
           <Button
             variant="outline"
             className={cn("justify-start text-left font-medium space-x-2")}

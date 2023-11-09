@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
-import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import {
   Bar,
@@ -166,7 +165,7 @@ export function BarChart({ data }) {
             {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.previous.value > 0 ? "#323232" : "#41191A"}
+                fill={+entry.previous.value > 0 ? "#323232" : "#41191A"}
               />
             ))}
           </Bar>
@@ -175,7 +174,7 @@ export function BarChart({ data }) {
             {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={entry.current.value > 0 ? "#F5F5F3" : "#FF3638"}
+                fill={+entry.current.value > 0 ? "#F5F5F3" : "#FF3638"}
               />
             ))}
           </Bar>

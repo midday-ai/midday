@@ -13,7 +13,7 @@ import { useOptimisticAction } from "next-safe-action/hook";
 
 const options = ["all", "income", "expense"];
 
-export function TransactionsPeriod({ type }) {
+export function TransactionsPeriod({ type, disabled }) {
   const t = useI18n();
   const { execute, optimisticData } = useOptimisticAction(
     changeTransactionsPeriodAction,
@@ -30,7 +30,7 @@ export function TransactionsPeriod({ type }) {
       </div>
 
       <DropdownMenu>
-        <DropdownMenuTrigger>
+        <DropdownMenuTrigger disabled={disabled}>
           <div className="flex items-center space-x-2">
             <span>{t(`transactions_period.${optimisticData}`)}</span>
             <Icons.ChevronDown />

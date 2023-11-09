@@ -1,6 +1,5 @@
 import { ChartPeriod } from "@/components/charts/chart-period";
 import { ChartType } from "@/components/charts/chart-type";
-import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import { cookies } from "next/headers";
 
 export async function ChartSelectors({ value, defaultValue }) {

@@ -28,10 +28,10 @@ export function OverviewModal() {
         <div className="p-4">
           <div className="mb-8 space-y-5">
             <h2 className="font-medium text-xl">
-              Get insights of your bussiness you didnt know
+              Get insights of your business you didn't know
             </h2>
             <p className="text-[#878787] text-sm">
-              View realtime profit/loss as well as revenue numbers. Compare to
+              View real-time profit/loss as well as revenue numbers. Compare to
               previous years. See what you spend your money on and where you can
               save.
             </p>

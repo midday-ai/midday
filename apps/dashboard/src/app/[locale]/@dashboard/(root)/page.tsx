@@ -8,6 +8,7 @@ import {
   getBankConnectionsByTeamId,
   getUser,
 } from "@midday/supabase/cached-queries";
+import { cn } from "@midday/ui/utils";
 import { startOfMonth, startOfYear } from "date-fns";
 import { Metadata } from "next";
 import { Suspense } from "react";
@@ -32,23 +33,27 @@ export default async function Overview({ searchParams }) {
     period: searchParams.period,
   };
 
+  const empty = !data?.length;
+
   return (
-    <div>
-      <div className="h-[450px]">
-        <ChartSelectors value={value} defaultValue={defaultValue} />
+    <>
+      <div className={cn(empty && "opacity-20 pointer-events-none")}>
+        <div className="h-[450px]">
+          <ChartSelectors value={value} defaultValue={defaultValue} />
 
-        <Suspense>
-          <Chart value={value} defaultValue={defaultValue} />
-        </Suspense>
+          <Suspense>
+            <Chart value={value} defaultValue={defaultValue} disabled={empty} />
+          </Suspense>
+        </div>
+
+        <div className="flex space-x-8 mt-14">
+          <Spending disabled={empty} />
+          <Transactions disabled={empty} />
+        </div>
+
+        <Realtime teamId={userData.team_id} />
       </div>
-
-      <div className="flex space-x-8 mt-14">
-        <Spending />
-        <Transactions />
-      </div>
-
-      {!data?.length && <OverviewModal />}
-      <Realtime teamId={userData.team_id} />
-    </div>
+      {empty && <OverviewModal />}
+    </>
   );
 }
