@@ -1,7 +1,7 @@
-name: Production Deployment - Dashboard
+name: Production Deployment - Website
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
 on:
@@ -9,7 +9,7 @@ on:
     branches:
       - main
     paths:
-      - apps/dashboard/**
+      - apps/website/**
       - packages/**
 jobs:
   deploy-production:
@@ -32,4 +32,4 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         run: |
           vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` app.midday.ai
+          vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` midday.ai
