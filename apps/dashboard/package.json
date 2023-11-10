@@ -36,7 +36,6 @@
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.48.2",
     "recharts": "^2.9.3",
-    "sharp": "^0.32.6",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -45,6 +44,7 @@
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "sharp": "^0.32.6",
     "typescript": "^5.2.2"
   }
 }
