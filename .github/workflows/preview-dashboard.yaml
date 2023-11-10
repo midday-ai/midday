@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - name: Generate slug
+        uses: rlespinasse/github-slug-action@v4
       - uses: oven-sh/setup-bun@v1
       - name: Install Vercel CLI
         run: bun install --global vercel@latest
