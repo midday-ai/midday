@@ -1,0 +1,35 @@
+name: Production Deployment - Dashboard
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+on:
+  push:
+    branches:
+      - main
+jobs:
+  Deploy-Production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: oven-sh/setup-bun@v1
+      - name: Generate slug
+        uses: rlespinasse/github-slug-action@v4
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: 📤 Pull Vercel Environment Information
+        run: vercel env pull .env --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Install Playwright Browsers
+        run: pnpm playwright install --with-deps
+      - name: Build
+        run: bun run build
+      - name: 📤 Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🏗 Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_URL: ${{ env.GITHUB_REF_SLUG }}.app.midday.ai
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      - name: Deploy Project Artifacts to Vercel
+        run: |
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` ${{ env.GITHUB_REF_SLUG }}.app.midday.ai

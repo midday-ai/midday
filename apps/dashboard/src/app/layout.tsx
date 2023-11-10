@@ -8,9 +8,6 @@ import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
 import type { ReactElement } from "react";
 
-export const runtime = "edge";
-export const preferredRegion = "fra1";
-
 const fontSans = Instrument_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
