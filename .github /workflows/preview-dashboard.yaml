@@ -6,8 +6,11 @@ on:
   push:
     branches-ignore:
       - main
+    paths:
+      - apps/dashboard/**
+      - packages/**
 jobs:
-  Deploy-Production:
+  ceploy-production:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

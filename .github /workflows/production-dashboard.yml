@@ -2,12 +2,17 @@ name: Production Deployment - Dashboard
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 on:
   push:
     branches:
       - main
+    paths:
+      - apps/dashboard/**
+      - packages/**
 jobs:
-  Deploy-Production:
+  deploy-production:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
