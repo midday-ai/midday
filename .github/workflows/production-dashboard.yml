@@ -21,8 +21,6 @@ jobs:
         run: npm install --global vercel@latest
       - name: 📤 Pull Vercel Environment Information
         run: vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-      - name: Install Playwright Browsers
-        run: pnpm playwright install --with-deps
       - name: Build
         run: bun run build
       - name: 📤 Pull Vercel Environment Information
