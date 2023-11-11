@@ -24,6 +24,7 @@
     "@trigger.dev/nextjs": "^2.2.6",
     "@trigger.dev/react": "^2.2.6",
     "@trigger.dev/sdk": "^2.2.6",
+    "@trigger.dev/supabase": "^2.2.6",
     "change-case": "^5.1.2",
     "framer-motion": "^10.16.4",
     "next": "canary",
