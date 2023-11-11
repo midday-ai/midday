@@ -4,12 +4,12 @@ import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 
-export function GoogleSignIn() {
+export function SlackSignIn() {
   const supabase = createClient();
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
-      provider: "google",
+      provider: "slack",
       options: {
         redirectTo: `${location.origin}/api/auth/callback`,
       },
@@ -21,8 +21,8 @@ export function GoogleSignIn() {
       onClick={handleSignIn}
       className="active:scale-[0.98] rounded-xl bg-white px-6 py-4 text-black font-medium flex space-x-2 h-[40px]"
     >
-      <Icons.Google />
-      <span>Continue with Google</span>
+      <Icons.Slack />
+      <span>Continue with Slack</span>
     </Button>
   );
 }

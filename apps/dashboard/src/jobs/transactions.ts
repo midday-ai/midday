@@ -60,7 +60,7 @@ const dynamicSchedule = client.defineDynamicSchedule({
 client.defineJob({
   id: "bank-account-created",
   name: "Bank Account Created",
-  version: "0.7.0",
+  version: "0.8.0",
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -89,7 +89,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-sync",
   name: "Transactions - Latest Transactions",
-  version: "0.7.0",
+  version: "0.8.0",
   trigger: dynamicSchedule,
   integrations: { supabase },
   run: async (_, io, ctx) => {
@@ -102,6 +102,7 @@ client.defineJob({
     if (!data) {
       // TODO: Remove schedule
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
+      await dynamicSchedule.unregister(ctx.source.id);
     }
 
     await io.logger.info(`Fetching Transactions for ID: ${data?.account_id}`);
@@ -136,7 +137,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
-  version: "0.7.0",
+  version: "0.8.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({
