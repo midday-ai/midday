@@ -21,22 +21,22 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.21.0",
-    "@trigger.dev/nextjs": "^2.2.5",
-    "@trigger.dev/react": "^2.2.5",
-    "@trigger.dev/sdk": "^2.2.5",
+    "@trigger.dev/nextjs": "^2.2.6",
+    "@trigger.dev/react": "^2.2.6",
+    "@trigger.dev/sdk": "^2.2.6",
+    "@trigger.dev/supabase": "^2.2.6",
     "change-case": "^5.1.2",
     "framer-motion": "^10.16.4",
     "next": "canary",
     "next-international": "^1.1.4",
-    "next-safe-action": "^5.0.2",
+    "next-safe-action": "^5.0.3",
     "next-themes": "^0.2.1",
-    "next-usequerystate": "^1.10.1",
+    "next-usequerystate": "^1.10.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
     "react-hook-form": "^7.48.2",
     "recharts": "^2.9.3",
-    "sharp": "^0.32.6",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -45,6 +45,7 @@
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "sharp": "^0.32.6",
     "typescript": "^5.2.2"
   }
 }

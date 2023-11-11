@@ -1,4 +1,5 @@
 import { GoogleSignIn } from "@/components/google-sign-in";
+import { SlackSignIn } from "@/components/slack-sign-in";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 
@@ -49,8 +50,9 @@ export default function Login() {
               <br /> effortlessly.
             </p>
 
-            <div className="pointer-events-auto mt-6 flex flex-col mb-4">
+            <div className="pointer-events-auto mt-6 flex flex-col mb-4 space-y-4">
               <GoogleSignIn />
+              <SlackSignIn />
             </div>
 
             <p className="text-xs text-[#606060]">

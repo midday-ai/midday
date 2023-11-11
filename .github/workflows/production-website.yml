@@ -1,0 +1,35 @@
+name: Production Deployment - Website
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/website/**
+      - packages/**
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: oven-sh/setup-bun@v1
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: 📤 Pull Vercel Environment Information
+        run: vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Install Playwright Browsers
+        run: pnpm playwright install --with-deps
+      - name: Build
+        run: bun run build
+      - name: 📤 Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 🏗 Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: |
+          vercel deploy --prod --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` midday.ai
