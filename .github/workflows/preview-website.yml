@@ -15,10 +15,13 @@ jobs:
   deploy-preview:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
       - name: Generate slug
         uses: rlespinasse/github-slug-action@v4
       - uses: oven-sh/setup-bun@v1
+      - uses: actions/setup-node@v3
       - name: Install Vercel CLI
         run: bun install --global vercel@latest
       - name: 📤 Pull Vercel Environment Information
