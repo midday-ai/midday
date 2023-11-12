@@ -17,7 +17,7 @@ export function ExportTransactionsModal({ isOpen, setOpen }) {
             <DialogTitle>Export</DialogTitle>
             <DialogDescription>
               Heads up, we’ve noticed that 12 of your transactions are missing
-              receipts. Click “show more” and we’ll filter them for you.
+              receipts. Click show more and we’ll filter them for you.
             </DialogDescription>
           </DialogHeader>
         </div>
