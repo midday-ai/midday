@@ -16,7 +16,8 @@ export function ExportTransactionsModal({ isOpen, setOpen }) {
           <DialogHeader className="mb-8">
             <DialogTitle>Export</DialogTitle>
             <DialogDescription>
-              Select the accounts you want to sync with Midday.
+              Heads up, we’ve noticed that 12 of your transactions are missing
+              receipts. Click “show more” and we’ll filter them for you.
             </DialogDescription>
           </DialogHeader>
         </div>

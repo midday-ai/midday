@@ -1,6 +1,6 @@
 "use client";
 
-import { createClient } from "@midday/supabase/client";
+import { signOutAction } from "@/actions/sign-out-action";
 import {
   DropdownMenuItem,
   DropdownMenuShortcut,
@@ -10,14 +10,12 @@ import { useState } from "react";
 
 export function SignOut() {
   const [isLoading, setLoading] = useState(false);
-  const supabase = createClient();
   const router = useRouter();
 
   const handleSignOut = async () => {
     setLoading(true);
-    await supabase.auth.signOut();
+    signOutAction();
     router.refresh();
-    router.push("/");
   };
 
   return (
