@@ -19,9 +19,8 @@ jobs:
         with:
           fetch-depth: 2
       - uses: oven-sh/setup-bun@v1
-      - uses: actions/setup-node@v3
       - name: Install Vercel CLI
-        run: npm install --global vercel@latest
+        run: bun i --global vercel@latest
       - name: 📤 Pull Vercel Environment Information
         run: vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build
