@@ -25,7 +25,6 @@ export async function POST(req: Request) {
 
     await supabase.from("deployments").insert({
       deployment_id: payload.deployment.id,
-      target: payload.deployment.target,
     });
   }
 

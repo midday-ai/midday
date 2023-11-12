@@ -2,8 +2,8 @@ name: Preview Deployment - Website
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
-  # TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-  # TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
 on:
   push:
     branches-ignore:
