@@ -285,9 +285,9 @@ export const transactionList = {
   data: [
     { id: 1, name: "Spotify", amount: -199, currency: "SEK" },
     { id: 2, name: "Netflix", amount: -179, currency: "SEK" },
-    { id: 2, name: "WeWork", amount: -6700, currency: "SEK" },
+    { id: 3, name: "WeWork", amount: -6700, currency: "SEK" },
     {
-      id: 2,
+      id: 4,
       name: "Acme Inc",
       amount: 76300,
       currency: "SEK",
@@ -295,7 +295,7 @@ export const transactionList = {
       vat: 25,
     },
     {
-      id: 2,
+      id: 5,
       name: "GitHub",
       amount: -99,
       currency: "SEK",
@@ -303,7 +303,7 @@ export const transactionList = {
       vat: 25,
     },
     {
-      id: 2,
+      id: 6,
       name: "Supabase",
       amount: -299,
       currency: "SEK",
@@ -311,7 +311,7 @@ export const transactionList = {
       vat: 25,
     },
     {
-      id: 2,
+      id: 7,
       name: "Acme Inc",
       amount: 86300,
       currency: "SEK",

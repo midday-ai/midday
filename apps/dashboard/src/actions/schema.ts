@@ -52,3 +52,15 @@ export const changeTransactionsPeriodSchema = z.enum([
   "income",
   "expense",
 ]);
+
+export const createAttachmentsSchema = z.array(
+  z.object({
+    path: z.string(),
+    name: z.string(),
+    size: z.number(),
+    transaction_id: z.string(),
+    type: z.string(),
+  }),
+);
+
+export const deleteAttachmentSchema = z.string();

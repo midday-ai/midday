@@ -7,6 +7,7 @@ import {
   updateTransaction,
 } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
+import { invalidateCacheAction } from "./invalidate-cache-action";
 import { revalidateTag } from "next/cache";
 
 const baseUrl = "https://api.resend.com";
@@ -55,17 +56,33 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
 
 export async function createBankAccountsAction(accounts) {
   const supabase = await createClient();
-  return createBankAccounts(supabase, accounts);
+  const {data} = await createBankAccounts(supabase, accounts);
+  const teamId = data.at(0).team_id;
+
+   revalidateTag(`bank_connections_${teamId}`)
+
+  return data;
 }
 
 export async function updateTransactionAction(id: string, payload: any) {
   const supabase = await createClient();
   const { data } = await updateTransaction(supabase, id, payload);
-  revalidateTag(`transactions-${data.team_id}`);
+
+  invalidateCacheAction([
+    `transactions_${data.team_id}`,
+    `spending_${data.team_id}`,
+    `metrics_${data.team_id}`,
+  ]);
 }
 
 export async function updateSimilarTransactionsAction(id: string) {
   const supabase = await createClient();
-  const data = await updateSimilarTransactions(supabase, id);
-  revalidateTag(`transactions-${data.team_id}`);
+  const { data } = await updateSimilarTransactions(supabase, id);
+  const teamId = data.at(0).team_id;
+
+  invalidateCacheAction([
+    `transactions_${teamId}`,
+    `spending_${teamId}`,
+    `metrics_${teamId}`,
+  ]);
 }

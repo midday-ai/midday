@@ -37,7 +37,7 @@ const transformTransactions = (transactions, { teamId, accountId }) =>
     amount: data.transactionAmount.amount,
     currency: data.transactionAmount.currency,
     bank_account_id: accountId,
-    category: data.transactionAmount.amount > 0 ? "income" : null,
+    category: data.transactionAmount.amount > 0 ? "income" : "uncategorized",
     team_id: teamId,
   }));
 

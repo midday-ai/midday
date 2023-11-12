@@ -23,9 +23,9 @@ export const getTransactions = async (params) => {
     async () => {
       return getTransactionsQuery(supabase, { ...params, teamId });
     },
-    [`transactions-${teamId}`],
+    ["transactions", teamId],
     {
-      tags: [`transactions-${teamId}`],
+      tags: [`transactions_${teamId}`],
     },
   )(params);
 };
@@ -43,9 +43,9 @@ export const getUser = async () => {
     async () => {
       return getUserQuery(supabase, userId);
     },
-    [`user-${userId}`],
+    ["user", userId],
     {
-      tags: [`user-${userId}`],
+      tags: [`user_${userId}`],
     },
   )(userId);
 };
@@ -53,21 +53,21 @@ export const getUser = async () => {
 export const getBankConnectionsByTeamId = async () => {
   const supabase = createClient();
   const user = await getUser();
-  const userId = user?.data?.id;
+  const teamId = user?.data?.team_id;
 
-  if (!userId) {
+  if (!teamId) {
     return null;
   }
 
   return unstable_cache(
     async () => {
-      return getBankConnectionsByTeamIdQuery(supabase, userId);
+      return getBankConnectionsByTeamIdQuery(supabase, teamId);
     },
-    [`user-${userId}`],
+    ["bank_connections", teamId],
     {
-      tags: [`user-${userId}`],
+      tags: [`bank_connections_${teamId}`],
     },
-  )(userId);
+  )(teamId);
 };
 
 export const getTeamBankAccounts = async () => {
@@ -84,9 +84,9 @@ export const getTeamBankAccounts = async () => {
     async () => {
       return getTeamBankAccountsQuery(supabase, teamId);
     },
-    [`bank-accounts-${teamId}`],
+    ["bank_accounts", teamId],
     {
-      tags: [`bank-accounts-${teamId}`],
+      tags: [`bank_accounts_${teamId}`],
     },
   )(teamId);
 };
@@ -105,16 +105,15 @@ export const getTeamMembers = async () => {
     async () => {
       return getTeamMembersQuery(supabase, teamId);
     },
-    [`bank-members-${teamId}`],
+    ["team_members", teamId],
     {
-      tags: [`bank-members-${teamId}`],
+      tags: [`bank_members_${teamId}`],
     },
   )(teamId);
 };
 
 export const getSpending = async (params) => {
   const supabase = createClient();
-
   const user = await getUser();
   const teamId = user?.data?.team_id;
 
@@ -126,9 +125,9 @@ export const getSpending = async (params) => {
     async () => {
       return getSpendingQuery(supabase, { ...params, teamId });
     },
-    [`spending-${teamId}`],
+    ["spending", teamId],
     {
-      tags: [`spending-${teamId}`],
+      tags: [`spending_${teamId}`],
     },
   )(params);
 };
@@ -147,9 +146,9 @@ export const getMetrics = async (params) => {
     async () => {
       return getMetricsQuery(supabase, { ...params, teamId });
     },
-    [`metrics-${teamId}`],
+    ["metrics", teamId],
     {
-      tags: [`metrics-${teamId}`],
+      tags: [`metrics_${teamId}`],
     },
   )(params);
 };

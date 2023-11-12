@@ -1,12 +1,11 @@
 "use client";
 
+import { createAttachmentsAction } from "@/actions/create-attachments-action";
+import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
+import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
 import { useUpload } from "@/hooks/use-upload";
 import { formatSize } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
-import {
-  createAttachments,
-  deleteAttachment,
-} from "@midday/supabase/mutations";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
@@ -77,8 +76,7 @@ export function Attachments({ id, data }) {
 
   const handleOnDelete = async (id: string) => {
     setFiles((files) => files.filter((file) => file.id !== id));
-    await deleteAttachment(supabase, id);
-    router.refresh();
+    await deleteAttachmentAction(id);
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
@@ -86,10 +84,10 @@ export function Attachments({ id, data }) {
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
-    const uploaded = await Promise.all(
+    const uploadedFiles = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
         const { path } = await uploadFile({
-          bucket: "documents",
+          bucket: "files",
           path: `${userData?.team_id}/transactions/${id}`,
           file: acceptedFile,
         });
@@ -104,11 +102,9 @@ export function Attachments({ id, data }) {
       }),
     );
 
-    const newFiles = await createAttachments(supabase, uploaded);
+    const { data: newFiles } = await createAttachmentsAction(uploadedFiles);
     const uniqueFiles = new Set([...files, ...newFiles]);
     setFiles([...uniqueFiles]);
-
-    router.refresh();
   };
 
   useEffect(() => {

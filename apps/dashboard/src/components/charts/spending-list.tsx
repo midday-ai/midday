@@ -26,6 +26,14 @@ export async function SpendingList({ initialPeriod, disabled }) {
     ? spendingData
     : await getSpending(initialPeriod);
 
+  if (!data?.length) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-[#606060]">No transactions found</p>
+      </div>
+    );
+  }
+
   return (
     <>
       <SpendingCategoryList categories={data} />

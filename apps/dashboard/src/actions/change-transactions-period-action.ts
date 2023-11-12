@@ -16,7 +16,7 @@ export const changeTransactionsPeriodAction = action(
       value,
     });
 
-    revalidateTag(`transactions-${user.data.team_id}`);
+    revalidateTag(`transactions_${user.data.team_id}`);
 
     return value;
   },

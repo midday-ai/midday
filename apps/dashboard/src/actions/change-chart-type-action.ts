@@ -16,7 +16,7 @@ export const changeChartTypeAction = action(
       value,
     });
 
-    revalidateTag(`chart-${user.data.team_id}`);
+    revalidateTag(`chart_${user.data.team_id}`);
 
     return value;
   },

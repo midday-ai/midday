@@ -14,7 +14,7 @@ export async function Chart({ value, defaultValue, disabled }) {
   return (
     <div className="relative mt-28">
       <div className="absolute -top-[110px] space-y-2">
-        <h1 className={cn("text-3xl", true && "skeleton-box")}>
+        <h1 className={cn("text-3xl", disabled && "skeleton-box")}>
           {formatAmount({
             amount: data.summary.currentTotal || 0,
             currency: data.summary.currency,
@@ -22,7 +22,7 @@ export async function Chart({ value, defaultValue, disabled }) {
             minimumFractionDigits: 0,
           })}
         </h1>
-        <p className={cn("text-sm text-[#606060]", true && "skeleton-box")}>
+        <p className={cn("text-sm text-[#606060]", disabled && "skeleton-box")}>
           vs{" "}
           {formatAmount({
             amount: data.summary.prevTotal || 0,

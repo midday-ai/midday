@@ -25,7 +25,8 @@ export default async function Transactions({
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
   const sort = searchParams?.sort?.split(":");
 
-  const empty = !data?.length;
+  const isOpen = Boolean(searchParams.step);
+  const empty = !data?.length && !isOpen;
 
   return (
     <>
@@ -40,7 +41,7 @@ export default async function Transactions({
         </Suspense>
       </div>
 
-      {!data?.length && <TransactionsModal />}
+      {empty && <TransactionsModal />}
     </>
   );
 }

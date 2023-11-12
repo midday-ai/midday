@@ -16,7 +16,7 @@ export const changeSpendingPeriodAction = action(
       value: JSON.stringify(params),
     });
 
-    revalidateTag(`spending-${user.data.team_id}`);
+    revalidateTag(`spending_${user.data.team_id}`);
 
     return params;
   },

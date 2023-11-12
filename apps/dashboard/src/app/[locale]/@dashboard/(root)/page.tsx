@@ -33,7 +33,8 @@ export default async function Overview({ searchParams }) {
     period: searchParams.period,
   };
 
-  const empty = !data?.length;
+  const isOpen = Boolean(searchParams.step);
+  const empty = !data?.length && !isOpen;
 
   return (
     <>

@@ -142,7 +142,6 @@ export async function getSpendingQuery(
   }
 
   const { data, count } = await query.range(0, 10000000);
-
   const totalAmount = data?.reduce((amount, item) => item.amount + amount, 0);
 
   const combinedValues = {};

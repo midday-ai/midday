@@ -1,6 +1,5 @@
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getSession } from "../queries";
-// import { getUser } from "../queries/cached-queries";
 import { Client } from "../types";
 import { remove } from "../utils/storage";
 
@@ -92,7 +91,7 @@ export async function updateTransaction(
     .from("transactions")
     .update(data)
     .eq("id", id)
-    .select()
+    .select("id, team_id")
     .single();
 }
 
@@ -138,14 +137,13 @@ export async function updateSimilarTransactions(supabase: Client, id: string) {
     .eq("id", id)
     .single();
 
-  await supabase
+  return supabase
     .from("transactions")
     .update({ category: transaction.data.category })
     .eq("name", transaction.data.name)
     .eq("team_id", userData?.team_id)
     .is("category", null)
-    .select()
-    .single();
+    .select("id, team_id");
 }
 
 export type Attachment = {
@@ -180,12 +178,12 @@ export async function deleteAttachment(supabase: Client, id: string) {
     .from("attachments")
     .delete()
     .eq("id", id)
-    .select("id, transaction_id, name, team:team_id(id)")
+    .select("id, transaction_id, name, team_id")
     .single();
 
   remove(supabase, {
-    bucket: "documents",
-    path: `${data.team?.id}/transactions/${data.transaction_id}/${data.name}`,
+    bucket: "files",
+    path: `${data.team_id}/transactions/${data.transaction_id}/${data.name}`,
   });
 
   return data;

@@ -39,7 +39,7 @@ export async function TransactionsList({ type, disabled }) {
   const { data } = disabled
     ? transactionList
     : await getTransactions({
-        to: 6,
+        to: 5,
         from: 0,
         filter: {
           type,
