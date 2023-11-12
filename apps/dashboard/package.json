@@ -32,6 +32,7 @@
     "next-safe-action": "^5.0.3",
     "next-themes": "^0.2.1",
     "next-usequerystate": "^1.10.2",
+    "sharp": "^0.32.6",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
@@ -45,7 +46,6 @@
     "@types/node": "^20.9.0",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
-    "sharp": "^0.32.6",
     "typescript": "^5.2.2"
   }
 }
