@@ -4,6 +4,7 @@ import { Database } from "@midday/supabase/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
 import { capitalCase } from "change-case";
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 
 const mapTransactionMethod = (method: string) => {
@@ -80,7 +81,8 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 36000,
+        // seconds: 3600,
+        seconds: 10 * 60, // 10 minutes
       },
     });
   },
@@ -130,6 +132,10 @@ client.defineJob({
     }
 
     await io.logger.info(`Total Transactions Created: ${count}`);
+
+    revalidateTag(`transactions_${data?.team_id}`);
+    revalidateTag(`spending_${data?.team_id}`);
+    revalidateTag(`metrics_${data?.team_id}`);
   },
 });
 
@@ -171,5 +177,9 @@ client.defineJob({
     }
 
     await io.logger.info(`Total Transactions Created: ${count}`);
+
+    revalidateTag(`transactions_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
   },
 });
