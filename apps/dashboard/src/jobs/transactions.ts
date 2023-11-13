@@ -1,5 +1,6 @@
 import { client } from "@/trigger";
 import { getTransactions } from "@midday/gocardless";
+import { TriggerEvents, trigger, triggerBulk } from "@midday/notification";
 import { Database } from "@midday/supabase/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
@@ -82,7 +83,7 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 10 * 60, // 10 minutes
+        seconds: 3600 * 4, // every 4h
       },
     });
   },
@@ -139,6 +140,43 @@ client.defineJob({
       .select();
 
     if (transactionsData?.length && transactionsData.length > 0) {
+      // Send notification for each transaction
+      triggerBulk(
+        transactionsData.map((transaction) => ({
+          name: TriggerEvents.TransactionNewInApp,
+          payload: {
+            html: "TODO",
+          },
+          users: [
+            {
+              subscriberId: "",
+              teamId: "123",
+              email: "",
+              fullName: "Pontus Abrahamsson",
+              avatarUrl: "https://",
+            },
+          ],
+        }))
+      );
+
+      // Send email with react-email-template
+      trigger({
+        name: TriggerEvents.TransactionNewEmail,
+        payload: {
+          subject: "New transactions",
+          html: "TODO",
+        },
+        users: [
+          {
+            subscriberId: "",
+            teamId: "123",
+            email: "",
+            fullName: "Pontus Abrahamsson",
+            avatarUrl: "https://",
+          },
+        ],
+      });
+
       revalidateTag(`transactions_${data?.team_id}`);
       revalidateTag(`spending_${data?.team_id}`);
       revalidateTag(`metrics_${data?.team_id}`);

@@ -4,7 +4,8 @@ const novu = new Novu(process.env.NOVU_API_KEY!);
 const API_ENDPOINT = "https://api.novu.co/v1";
 
 export enum TriggerEvents {
-  TransactionNew = "transaction_new",
+  TransactionNewInApp = "transaction_new_in_app",
+  TransactionNewEmail = "transaction_new_email",
 }
 
 type TriggerUser = {
@@ -16,15 +17,14 @@ type TriggerUser = {
 };
 
 type TriggerPayload = {
-  event: TriggerEvents;
-  html?: string;
+  name: TriggerEvents;
   payload: any;
   users: TriggerUser[];
   tenant?: string; // NOTE: Currently no way to listen for messages with tenant, we use team_id + user_id for unique
 };
 
 export async function trigger(data: TriggerPayload) {
-  return novu.trigger(data.event, {
+  return novu.trigger(data.name, {
     to: data.users.map((user) => ({
       ...user,
       //   Prefix subscriber id with team id
@@ -33,6 +33,21 @@ export async function trigger(data: TriggerPayload) {
     payload: data.payload,
     tenant: data.tenant,
   });
+}
+
+export async function triggerBulk(events: TriggerPayload[]) {
+  return novu.bulkTrigger(
+    events.map((data) => ({
+      name: data.name,
+      to: data.users.map((user) => ({
+        ...user,
+        //   Prefix subscriber id with team id
+        subscriberId: `${user.teamId}_${user.subscriberId}`,
+      })),
+      payload: data.payload,
+      tenant: data.tenant,
+    }))
+  );
 }
 
 type GetSubscriberPreferencesParams = {
@@ -51,7 +66,7 @@ export async function getSubscriberPreferences({
       headers: {
         Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
       },
-    },
+    }
   );
 
   return response.json();
@@ -86,7 +101,7 @@ export async function updateSubscriberPreference({
           enabled,
         },
       }),
-    },
+    }
   );
 
   return response.json();
