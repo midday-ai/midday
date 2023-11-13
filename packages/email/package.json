@@ -6,10 +6,13 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "check:types": "tsc --noEmit"
+    "check:types": "tsc --noEmit",
+    "dev": "email dev -p 3002",
+    "export": "email export"
   },
   "dependencies": {
-    "react-email": "^1.9.5"
+    "@react-email/components": "0.0.6",
+    "react-email": "1.9.3"
   },
   "devDependencies": {
     "typescript": "^5.2.2"

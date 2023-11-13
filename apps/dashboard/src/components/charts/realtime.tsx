@@ -1,6 +1,5 @@
 "use client";
 
-import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
 import { createClient } from "@midday/supabase/client";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -21,12 +20,6 @@ export function Realtime({ teamId }) {
           filter: `team_id=eq.${teamId}`,
         },
         () => {
-          invalidateCacheAction([
-            `transactions-${teamId}`,
-            `spending-${teamId}`,
-            `metrics-${teamId}`,
-          ]);
-
           router.refresh();
         }
       )

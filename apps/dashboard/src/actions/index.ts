@@ -7,8 +7,8 @@ import {
   updateTransaction,
 } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { invalidateCacheAction } from "./invalidate-cache-action";
 import { revalidateTag } from "next/cache";
+import { invalidateCacheAction } from "./invalidate-cache-action";
 
 const baseUrl = "https://api.resend.com";
 
@@ -56,10 +56,10 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
 
 export async function createBankAccountsAction(accounts) {
   const supabase = await createClient();
-  const {data} = await createBankAccounts(supabase, accounts);
+  const { data } = await createBankAccounts(supabase, accounts);
   const teamId = data.at(0).team_id;
 
-   revalidateTag(`bank_connections_${teamId}`)
+  revalidateTag(`bank_connections_${teamId}`);
 
   return data;
 }

@@ -10,7 +10,7 @@ export default {
     live: "Live profit/loss",
     document: "Files",
     reciept: "Receipt linking",
-    time: "Project time tracking",
+    time: "Time tracking",
     ai: "AI-enhanced filter & search",
   },
   header: {
