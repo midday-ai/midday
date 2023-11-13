@@ -2,10 +2,12 @@
 
 import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
 import { createClient } from "@midday/supabase/client";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 export function Realtime({ teamId }) {
   const supabase = createClient();
+  const router = useRouter();
 
   useEffect(() => {
     const channel = supabase
@@ -24,6 +26,8 @@ export function Realtime({ teamId }) {
             `spending-${teamId}`,
             `metrics-${teamId}`,
           ]);
+
+          router.refresh();
         }
       )
       .subscribe();

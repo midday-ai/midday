@@ -81,7 +81,6 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        // seconds: 3600,
         seconds: 10 * 60, // 10 minutes
       },
     });
@@ -114,7 +113,7 @@ client.defineJob({
       await io.logger.info("No transactions found");
     }
 
-    const { count, error } = await io.supabase.client
+    const { data: transactionsData, error } = await io.supabase.client
       .from("transactions")
       .upsert(
         transformTransactions(transactions?.booked, {
@@ -125,13 +124,20 @@ client.defineJob({
           onConflict: "internal_id",
           ignoreDuplicates: true,
         }
-      );
+      )
+      .select("*");
 
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
     }
 
-    await io.logger.info(`Total Transactions Created: ${count}`);
+    await io.logger.info(
+      `Total Transactions Created: ${transactionsData?.length}`
+    );
+
+    await io.logger.info(`Revalidating cache: transactions_${data?.team_id}`);
+
+    await io.logger.error(JSON.stringify(transactionsData, null, 2));
 
     revalidateTag(`transactions_${data?.team_id}`);
     revalidateTag(`spending_${data?.team_id}`);
