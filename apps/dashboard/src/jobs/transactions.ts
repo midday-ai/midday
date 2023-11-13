@@ -4,7 +4,6 @@ import { Database } from "@midday/supabase/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
 import { capitalCase } from "change-case";
-import { revalidateTag } from "next/cache";
 import { z } from "zod";
 
 const mapTransactionMethod = (method: string) => {
@@ -62,6 +61,7 @@ client.defineJob({
   id: "bank-account-created",
   name: "Bank Account Created",
   version: "1.0.0",
+  enabled: false,
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -92,6 +92,7 @@ client.defineJob({
   name: "Transactions - Latest Transactions",
   version: "1.0.0",
   trigger: dynamicSchedule,
+  enabled: false,
   integrations: { supabase },
   run: async (_, io, ctx) => {
     const { data } = await io.supabase.client
@@ -105,8 +106,6 @@ client.defineJob({
       await dynamicSchedule.unregister(ctx.source.id);
       // TODO: Delete requisitions
     }
-
-    await io.logger.info(`Fetching Transactions for ID: ${data?.account_id}`);
 
     const { transactions } = await getTransactions(data?.account_id);
 
@@ -132,20 +131,7 @@ client.defineJob({
       await io.logger.error(JSON.stringify(error, null, 2));
     }
 
-    await io.logger.error(JSON.stringify(transactionsData, null, 2));
-
-    await io.logger.info(
-      `Total Transactions Created: ${transactionsData?.length}`
-    );
-
-    await io.logger.info(`Revalidating cache: transactions_${data?.team_id}`);
-
-    await io.logger.error(JSON.stringify(transactionsData, null, 2));
-
-    // Only run when new data
-    revalidateTag(`transactions_${data?.team_id}`);
-    revalidateTag(`spending_${data?.team_id}`);
-    revalidateTag(`metrics_${data?.team_id}`);
+    await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
   },
 });
 
@@ -153,6 +139,7 @@ client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
   version: "1.0.0",
+  enabled: false,
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({
@@ -165,31 +152,26 @@ client.defineJob({
   run: async (payload, io) => {
     const { accountId, teamId, recordId } = payload;
 
-    await io.logger.info(`Fetching Transactions for ID: ${accountId}`);
-
     const { transactions } = await getTransactions(accountId);
 
     if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
     }
 
-    const { count, error } = await io.supabase.client
+    const { data: transactionsData, error } = await io.supabase.client
       .from("transactions")
       .insert(
         transformTransactions(transactions?.booked, {
           accountId: recordId,
           teamId: teamId,
         })
-      );
+      )
+      .select();
 
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
     }
 
-    await io.logger.info(`Total Transactions Created: ${count}`);
-
-    revalidateTag(`transactions_${teamId}`);
-    revalidateTag(`spending_${teamId}`);
-    revalidateTag(`metrics_${teamId}`);
+    await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
   },
 });
