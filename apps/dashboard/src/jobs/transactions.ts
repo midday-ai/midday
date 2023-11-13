@@ -33,7 +33,7 @@ const transformTransactions = (transactions, { teamId, accountId }) =>
     name: capitalCase(data.additionalInformation),
     original: data.additionalInformation,
     method: mapTransactionMethod(data.proprietaryBankTransactionCode),
-    provider_transaction_id: data.internalTransactionId,
+    internal_id: data.internalTransactionId,
     amount: data.transactionAmount.amount,
     currency: data.transactionAmount.currency,
     bank_account_id: accountId,
@@ -100,7 +100,6 @@ client.defineJob({
       .single();
 
     if (!data) {
-      // TODO: Remove schedule
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
       await dynamicSchedule.unregister(ctx.source.id);
     }
@@ -121,7 +120,7 @@ client.defineJob({
           teamId: data?.team_id,
         }),
         {
-          onConflict: "provider_transaction_id",
+          onConflict: "internal_id",
           ignoreDuplicates: true,
         },
       );

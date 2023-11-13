@@ -24,7 +24,7 @@ export function Realtime({ teamId }) {
             `spending-${teamId}`,
             `metrics-${teamId}`,
           ]);
-        },
+        }
       )
       .subscribe();
 

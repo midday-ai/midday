@@ -305,6 +305,7 @@ export async function getTransaction(supabase: Client, id: string) {
     `)
     .eq("id", id)
     .single()
+
     .throwOnError();
 }
 
