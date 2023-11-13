@@ -4,6 +4,7 @@ import { Database } from "@midday/supabase/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
 import { capitalCase } from "change-case";
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 
 const mapTransactionMethod = (method: string) => {
@@ -61,7 +62,6 @@ client.defineJob({
   id: "bank-account-created",
   name: "Bank Account Created",
   version: "1.0.0",
-  enabled: false,
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -92,7 +92,6 @@ client.defineJob({
   name: "Transactions - Latest Transactions",
   version: "1.0.0",
   trigger: dynamicSchedule,
-  enabled: false,
   integrations: { supabase },
   run: async (_, io, ctx) => {
     const { data } = await io.supabase.client
@@ -127,6 +126,12 @@ client.defineJob({
       )
       .select();
 
+    if (transactionsData?.length && transactionsData.length > 0) {
+      revalidateTag(`transactions_${data?.team_id}`);
+      revalidateTag(`spending_${data?.team_id}`);
+      revalidateTag(`metrics_${data?.team_id}`);
+    }
+
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
     }
@@ -139,7 +144,6 @@ client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
   version: "1.0.0",
-  enabled: false,
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({
@@ -167,6 +171,12 @@ client.defineJob({
         })
       )
       .select();
+
+    if (transactionsData?.length && transactionsData.length > 0) {
+      revalidateTag(`transactions_${teamId}`);
+      revalidateTag(`spending_${teamId}`);
+      revalidateTag(`metrics_${teamId}`);
+    }
 
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
