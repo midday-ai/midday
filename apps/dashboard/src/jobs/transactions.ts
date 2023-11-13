@@ -141,41 +141,41 @@ client.defineJob({
 
     if (transactionsData?.length && transactionsData.length > 0) {
       // Send notification for each transaction
-      triggerBulk(
-        transactionsData.map((transaction) => ({
-          name: TriggerEvents.TransactionNewInApp,
-          payload: {
-            html: "TODO",
-          },
-          users: [
-            {
-              subscriberId: "",
-              teamId: "123",
-              email: "",
-              fullName: "Pontus Abrahamsson",
-              avatarUrl: "https://",
-            },
-          ],
-        }))
-      );
+      // triggerBulk(
+      //   transactionsData.map((transaction) => ({
+      //     name: TriggerEvents.TransactionNewInApp,
+      //     payload: {
+      //       html: "TODO",
+      //     },
+      //     users: [
+      //       {
+      //         subscriberId: "",
+      //         teamId: "123",
+      //         email: "",
+      //         fullName: "Pontus Abrahamsson",
+      //         avatarUrl: "https://",
+      //       },
+      //     ],
+      //   }))
+      // );
 
       // Send email with react-email-template
-      trigger({
-        name: TriggerEvents.TransactionNewEmail,
-        payload: {
-          subject: "New transactions",
-          html: "TODO",
-        },
-        users: [
-          {
-            subscriberId: "",
-            teamId: "123",
-            email: "",
-            fullName: "Pontus Abrahamsson",
-            avatarUrl: "https://",
-          },
-        ],
-      });
+      // trigger({
+      //   name: TriggerEvents.TransactionNewEmail,
+      //   payload: {
+      //     subject: "New transactions",
+      //     html: "TODO",
+      //   },
+      //   users: [
+      //     {
+      //       subscriberId: "",
+      //       teamId: "123",
+      //       email: "",
+      //       fullName: "Pontus Abrahamsson",
+      //       avatarUrl: "https://",
+      //     },
+      //   ],
+      // });
 
       revalidateTag(`transactions_${data?.team_id}`);
       revalidateTag(`spending_${data?.team_id}`);
