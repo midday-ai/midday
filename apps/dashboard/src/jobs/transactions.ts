@@ -61,7 +61,7 @@ const dynamicSchedule = client.defineDynamicSchedule({
 client.defineJob({
   id: "bank-account-created",
   name: "Bank Account Created",
-  version: "0.9.0",
+  version: "1.0.0",
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -90,7 +90,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-sync",
   name: "Transactions - Latest Transactions",
-  version: "0.9.0",
+  version: "1.0.0",
   trigger: dynamicSchedule,
   integrations: { supabase },
   run: async (_, io, ctx) => {
@@ -103,6 +103,7 @@ client.defineJob({
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
       await dynamicSchedule.unregister(ctx.source.id);
+      // TODO: Delete requisitions
     }
 
     await io.logger.info(`Fetching Transactions for ID: ${data?.account_id}`);
@@ -125,11 +126,13 @@ client.defineJob({
           ignoreDuplicates: true,
         }
       )
-      .select("*");
+      .select();
 
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
     }
+
+    await io.logger.error(JSON.stringify(transactionsData, null, 2));
 
     await io.logger.info(
       `Total Transactions Created: ${transactionsData?.length}`
@@ -139,6 +142,7 @@ client.defineJob({
 
     await io.logger.error(JSON.stringify(transactionsData, null, 2));
 
+    // Only run when new data
     revalidateTag(`transactions_${data?.team_id}`);
     revalidateTag(`spending_${data?.team_id}`);
     revalidateTag(`metrics_${data?.team_id}`);
@@ -148,7 +152,7 @@ client.defineJob({
 client.defineJob({
   id: "transactions-initial-sync",
   name: "Transactions - Initial",
-  version: "0.9.0",
+  version: "1.0.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
     schema: z.object({
