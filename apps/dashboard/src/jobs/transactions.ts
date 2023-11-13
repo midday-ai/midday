@@ -143,7 +143,7 @@ client.defineJob({
       revalidateTag(`transactions_${data?.team_id}`);
       revalidateTag(`spending_${data?.team_id}`);
       revalidateTag(`metrics_${data?.team_id}`);
-      revalidateTag(`bank_accounts_${teamId}`);
+      revalidateTag(`bank_accounts_${data?.team_id}`);
     }
 
     if (error) {
