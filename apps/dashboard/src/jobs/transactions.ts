@@ -100,6 +100,18 @@ client.defineJob({
       .eq("id", ctx.source.id)
       .single();
 
+    // Update bank account last_accessed
+    try {
+      await io.supabase.client
+        .from("bank_accounts")
+        .update({
+          last_accessed: new Date().toDateString(),
+        })
+        .eq("id", ctx.source.id);
+    } catch (err) {
+      await io.logger.info(err);
+    }
+
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
       await dynamicSchedule.unregister(ctx.source.id);
@@ -124,12 +136,14 @@ client.defineJob({
           ignoreDuplicates: true,
         }
       )
+      .order("order")
       .select();
 
     if (transactionsData?.length && transactionsData.length > 0) {
       revalidateTag(`transactions_${data?.team_id}`);
       revalidateTag(`spending_${data?.team_id}`);
       revalidateTag(`metrics_${data?.team_id}`);
+      revalidateTag(`bank_accounts_${teamId}`);
     }
 
     if (error) {

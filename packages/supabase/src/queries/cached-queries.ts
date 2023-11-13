@@ -26,7 +26,7 @@ export const getTransactions = async (params) => {
     ["transactions", teamId],
     {
       tags: [`transactions_${teamId}`],
-    },
+    }
   )(params);
 };
 
@@ -46,7 +46,7 @@ export const getUser = async () => {
     ["user", userId],
     {
       tags: [`user_${userId}`],
-    },
+    }
   )(userId);
 };
 
@@ -66,7 +66,7 @@ export const getBankConnectionsByTeamId = async () => {
     ["bank_connections", teamId],
     {
       tags: [`bank_connections_${teamId}`],
-    },
+    }
   )(teamId);
 };
 
@@ -87,7 +87,7 @@ export const getTeamBankAccounts = async () => {
     ["bank_accounts", teamId],
     {
       tags: [`bank_accounts_${teamId}`],
-    },
+    }
   )(teamId);
 };
 
@@ -108,7 +108,7 @@ export const getTeamMembers = async () => {
     ["team_members", teamId],
     {
       tags: [`bank_members_${teamId}`],
-    },
+    }
   )(teamId);
 };
 
@@ -128,7 +128,7 @@ export const getSpending = async (params) => {
     ["spending", teamId],
     {
       tags: [`spending_${teamId}`],
-    },
+    }
   )(params);
 };
 
@@ -149,6 +149,6 @@ export const getMetrics = async (params) => {
     ["metrics", teamId],
     {
       tags: [`metrics_${teamId}`],
-    },
+    }
   )(params);
 };
