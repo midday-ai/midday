@@ -26,7 +26,8 @@ const mapTransactionMethod = (method: string) => {
 };
 
 const transformTransactions = (transactions, { teamId, accountId }) =>
-  transactions.map((data) => ({
+  // We want to insert transactions in reversed order so the incremental id in supabase is correct
+  transactions.reverse().map((data) => ({
     transaction_id: data.transactionId,
     reference: data.entryReference,
     booking_date: data.bookingDate,
@@ -136,7 +137,6 @@ client.defineJob({
           ignoreDuplicates: true,
         }
       )
-      .order("order")
       .select();
 
     if (transactionsData?.length && transactionsData.length > 0) {

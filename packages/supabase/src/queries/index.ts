@@ -49,10 +49,12 @@ export async function getSession(supabase: Client) {
 export async function getUserQuery(supabase: Client, userId: string) {
   return supabase
     .from("users")
-    .select(`
+    .select(
+      `
       *,
       team:team_id(*)
-    `)
+    `
+    )
     .eq("id", userId)
     .single()
     .throwOnError();
@@ -69,17 +71,19 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
 export async function getMembersByTeamId(supabase: Client, teamId: string) {
   return supabase
     .from("members")
-    .select(`
+    .select(
+      `
       *,
       team:teams(*)
-    `)
+    `
+    )
     .eq("team_id", teamId)
     .throwOnError();
 }
 
 export async function getBankConnectionsByTeamIdQuery(
   supabase: Client,
-  teamId: string,
+  teamId: string
 ) {
   return supabase
     .from("bank_connections")
@@ -90,7 +94,7 @@ export async function getBankConnectionsByTeamIdQuery(
 
 export async function getTeamBankAccountsQuery(
   supabase: Client,
-  teamId: string,
+  teamId: string
 ) {
   return supabase
     .from("bank_accounts")
@@ -102,10 +106,12 @@ export async function getTeamBankAccountsQuery(
 export async function getTeamMembersQuery(supabase: Client, teamId: string) {
   const { data } = await supabase
     .from("users_on_team")
-    .select(`
+    .select(
+      `
       id,
       user:users(id,full_name,avatar_url)
-    `)
+    `
+    )
     .eq("team_id", teamId)
     .throwOnError();
 
@@ -120,7 +126,7 @@ type GetSpendingParams = {
 
 export async function getSpendingQuery(
   supabase: Client,
-  params: GetSpendingParams,
+  params: GetSpendingParams
 ) {
   const query = supabase
     .from("transactions")
@@ -129,9 +135,9 @@ export async function getSpendingQuery(
       currency,
       category,
       amount
-    `,
+    `
     )
-    .order("order")
+    .order("order", { ascending: false })
     .eq("team_id", params.teamId)
     .lt("amount", 0)
     .throwOnError();
@@ -167,7 +173,7 @@ export async function getSpendingQuery(
         category,
         currency,
         amount: +Math.abs(amount).toFixed(2),
-      }),
+      })
     ),
   };
 }
@@ -195,7 +201,7 @@ type GetTransactionsParams = {
 
 export async function getTransactionsQuery(
   supabase: Client,
-  params: GetTransactionsParams,
+  params: GetTransactionsParams
 ) {
   const { from = 0, to, filter, sort, teamId } = params;
   const {
@@ -216,7 +222,7 @@ export async function getTransactionsQuery(
       assigned:assigned_id(*),
       attachments(id,size,name)
     `,
-      { count: "exact" },
+      { count: "exact" }
     )
     .eq("team_id", teamId);
 
@@ -224,7 +230,7 @@ export async function getTransactionsQuery(
     const [column, value] = sort;
     query.order(column, { ascending: value === "asc" });
   } else {
-    query.order("order");
+    query.order("order", { ascending: false });
   }
 
   if (date?.from && date?.to) {
@@ -280,7 +286,7 @@ export async function getTransactionsQuery(
   const totalAmount = filter
     ? (await query.limit(10000000))?.data?.reduce(
         (amount, item) => item.amount + amount,
-        0,
+        0
       )
     : 0;
 
@@ -297,12 +303,14 @@ export async function getTransactionsQuery(
 export async function getTransaction(supabase: Client, id: string) {
   return supabase
     .from("transactions")
-    .select(`
+    .select(
+      `
       *,
       account:bank_account_id(*),
       assigned:assigned_id(*),
       attachments(*)
-    `)
+    `
+    )
     .eq("id", id)
     .single()
 
@@ -316,7 +324,7 @@ type GetSimilarTransactionsParams = {
 
 export async function getSimilarTransactions(
   supabase: Client,
-  params: GetSimilarTransactionsParams,
+  params: GetSimilarTransactionsParams
 ) {
   const { id, teamId } = params;
   const transaction = await supabase
@@ -344,7 +352,7 @@ type GetMetricsParams = {
 
 export async function getMetricsQuery(
   supabase: Client,
-  params: GetMetricsParams,
+  params: GetMetricsParams
 ) {
   const { teamId, from, to, type, period = "monthly" } = params;
 
@@ -353,13 +361,15 @@ export async function getMetricsQuery(
 
   const query = supabase
     .from("transactions")
-    .select(`
+    .select(
+      `
       amount,
       date,
       currency
-    `)
+    `
+    )
     .eq("team_id", teamId)
-    .order("order")
+    .order("order", { ascending: false })
     .limit(1000000)
     .gte("date", previousFromDate.toDateString())
     .lte("date", to);
@@ -406,7 +416,7 @@ export async function getMetricsQuery(
   const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
   const currentTotal = currentData?.reduce(
     (value, item) => item.value + value,
-    0,
+    0
   );
 
   const current = new Date(from);
@@ -449,7 +459,7 @@ export async function getMetricsQuery(
         precentage: {
           value: getPercentageIncrease(
             Math.abs(previousValue),
-            Math.abs(currentValue),
+            Math.abs(currentValue)
           ),
           status: currentValue > previousValue ? "positive" : "negative",
         },
