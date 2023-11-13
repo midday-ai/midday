@@ -109,6 +109,8 @@ client.defineJob({
       })
       .eq("id", ctx.source.id);
 
+    revalidateTag(`bank_accounts_${data?.team_id}`);
+
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
       await dynamicSchedule.unregister(ctx.source.id);
@@ -139,7 +141,6 @@ client.defineJob({
       revalidateTag(`transactions_${data?.team_id}`);
       revalidateTag(`spending_${data?.team_id}`);
       revalidateTag(`metrics_${data?.team_id}`);
-      revalidateTag(`bank_accounts_${data?.team_id}`);
     }
 
     if (error) {
