@@ -102,16 +102,12 @@ client.defineJob({
       .single();
 
     // Update bank account last_accessed
-    try {
-      await io.supabase.client
-        .from("bank_accounts")
-        .update({
-          last_accessed: new Date().toDateString(),
-        })
-        .eq("id", ctx.source.id);
-    } catch (err) {
-      await io.logger.info(err);
-    }
+    io.supabase.client
+      .from("bank_accounts")
+      .update({
+        last_accessed: new Date(),
+      })
+      .eq("id", ctx.source.id);
 
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
