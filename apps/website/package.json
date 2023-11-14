@@ -12,6 +12,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@midday/location": "workspace:*",
     "@midday/ui": "workspace:*",
     "@vercel/analytics": "^1.1.1",
     "next": "canary",
