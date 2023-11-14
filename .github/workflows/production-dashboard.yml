@@ -15,23 +15,19 @@ jobs:
   deploy-production:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 2
+        uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
-      - name: Install Vercel CLI
-        run: bun i --global vercel@latest
-      - name: 📤 Pull Vercel Environment Information
-        run: vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        with:
+          bun-version: "1.0.11"
       - name: Install dependencies
-        run: bun i
-      - name: Build
-        run: bun run build
+        run: bun install --frozen-lockfile
       - name: 📤 Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: bun vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: 📤 Pull Vercel Environment Information
+        run: bun vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: bun vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: |
-          vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` app.midday.ai
+          bun vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bun vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` app.midday.ai

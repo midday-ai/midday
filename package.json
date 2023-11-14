@@ -25,5 +25,8 @@
     "@manypkg/cli": "^0.21.0",
     "turbo": "^1.10.16",
     "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "vercel": "^32.5.3"
   }
 }
