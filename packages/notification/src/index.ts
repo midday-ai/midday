@@ -19,17 +19,17 @@ type TriggerUser = {
 type TriggerPayload = {
   name: TriggerEvents;
   payload: any;
-  users: TriggerUser[];
+  user: TriggerUser;
   tenant?: string; // NOTE: Currently no way to listen for messages with tenant, we use team_id + user_id for unique
 };
 
 export async function trigger(data: TriggerPayload) {
   return novu.trigger(data.name, {
-    to: data.users.map((user) => ({
-      ...user,
+    to: {
+      ...data.user,
       //   Prefix subscriber id with team id
-      subscriberId: `${user.teamId}_${user.subscriberId}`,
-    })),
+      subscriberId: `${data.user.teamId}_${data.user.subscriberId}`,
+    },
     payload: data.payload,
     tenant: data.tenant,
   });
@@ -39,11 +39,11 @@ export async function triggerBulk(events: TriggerPayload[]) {
   return novu.bulkTrigger(
     events.map((data) => ({
       name: data.name,
-      to: data.users.map((user) => ({
-        ...user,
+      to: {
+        ...data.user,
         //   Prefix subscriber id with team id
-        subscriberId: `${user.teamId}_${user.subscriberId}`,
-      })),
+        subscriberId: `${data.user.teamId}_${data.user.subscriberId}`,
+      },
       payload: data.payload,
       tenant: data.tenant,
     }))

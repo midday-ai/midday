@@ -1,7 +1,9 @@
 import { client } from "@/trigger";
+import { TransactionsEmail } from "@midday/email/emails/transactions";
 import { getTransactions } from "@midday/gocardless";
-import { TriggerEvents, trigger, triggerBulk } from "@midday/notification";
+import { TriggerEvents, triggerBulk } from "@midday/notification";
 import { Database } from "@midday/supabase/src/types";
+import { renderAsync } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
 import { capitalCase } from "change-case";
@@ -139,13 +141,23 @@ client.defineJob({
       )
       .select();
 
+    const { data: usersData } = await io.supabase.client
+      .from("users_on_team")
+      .select("team_id, user:user_id(id, full_name, avatar_url, email, locale)")
+      .eq("team_id", data?.team_id);
+
     if (transactionsData?.length && transactionsData.length > 0) {
+      revalidateTag(`transactions_${data?.team_id}`);
+      revalidateTag(`spending_${data?.team_id}`);
+      revalidateTag(`metrics_${data?.team_id}`);
+
       // Send notification for each transaction
       // triggerBulk(
       //   transactionsData.map((transaction) => ({
       //     name: TriggerEvents.TransactionNewInApp,
       //     payload: {
-      //       html: "TODO",
+      //       description: "You have a new transaction of -1000 from Github",
+      //       currency: "SEK",
       //     },
       //     users: [
       //       {
@@ -159,27 +171,42 @@ client.defineJob({
       //   }))
       // );
 
-      // Send email with react-email-template
-      // trigger({
-      //   name: TriggerEvents.TransactionNewEmail,
-      //   payload: {
-      //     subject: "New transactions",
-      //     html: "TODO",
-      //   },
-      //   users: [
-      //     {
-      //       subscriberId: "",
-      //       teamId: "123",
-      //       email: "",
-      //       fullName: "Pontus Abrahamsson",
-      //       avatarUrl: "https://",
-      //     },
-      //   ],
-      // });
+      const emailEvents = await Promise.all(
+        usersData?.map(async ({ user, team_id }) => {
+          const html = await renderAsync(
+            TransactionsEmail({
+              fullName: user.full_name,
+              transactions: transactionsData.map((transaction) => ({
+                id: transaction.id,
+                date: transaction.date,
+                amount: transaction.amount,
+                name: transaction.name,
+                currency: transaction.currency,
+              })),
+              locale: user.locale,
+            })
+          );
 
-      revalidateTag(`transactions_${data?.team_id}`);
-      revalidateTag(`spending_${data?.team_id}`);
-      revalidateTag(`metrics_${data?.team_id}`);
+          return {
+            name: TriggerEvents.TransactionNewEmail,
+            payload: {
+              subject: "New transactions",
+              html,
+            },
+            user: {
+              subscriberId: user.id,
+              teamId: team_id,
+              email: user.email,
+              fullName: user.full_name,
+              avatarUrl: user.avatar_url,
+            },
+          };
+        })
+      );
+
+      if (emailEvents?.length) {
+        triggerBulk(emailEvents);
+      }
     }
 
     if (error) {

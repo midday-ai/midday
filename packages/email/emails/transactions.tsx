@@ -2,7 +2,6 @@ import { cn } from "@midday/ui/utils";
 import {
   Body,
   Button,
-  Column,
   Container,
   Font,
   Head,
@@ -12,7 +11,6 @@ import {
   Img,
   Link,
   Preview,
-  Row,
   Section,
   Tailwind,
   Text,
@@ -29,7 +27,7 @@ type Transaction = {
 };
 
 interface TransactionsEmailEmailProps {
-  firstName: string;
+  fullName: string;
   transactions: Transaction[];
   locale: string;
 }
@@ -76,10 +74,12 @@ const baseAppUrl =
     : "http://localhost:3001";
 
 export const TransactionsEmail = ({
-  firstName = "Viktor",
+  fullName = "Viktor Hofte",
   transactions = defaultTransactions,
   locale = "en",
 }: TransactionsEmailEmailProps) => {
+  const firstName = fullName.split(" ").at(0);
+
   const previewText = `Hi ${firstName}, We found 5 transactions thats missing receipts. Feel free to attach them to ease your own or your accountants work for upcoming declerations.`;
 
   return (
@@ -150,7 +150,7 @@ export const TransactionsEmail = ({
               </thead>
 
               <tbody>
-                {transactions.map((transaction) => (
+                {transactions?.map((transaction) => (
                   <tr key={transaction.id}>
                     <td align="left">
                       <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
@@ -190,11 +190,9 @@ export const TransactionsEmail = ({
 
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
-                pX={20}
-                pY={12}
                 className="bg-[#000000] rounded-xl text-white text-[12px] font-semibold no-underline text-center"
                 href={`${baseAppUrl}/transactions?from_id=${
-                  transactions.at(0).id
+                  transactions.at(0)?.id
                 }`}
               >
                 View transactions
