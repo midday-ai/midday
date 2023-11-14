@@ -85,7 +85,7 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 3600 * 4, // every 4h
+        seconds: 60 * 10, // every 4h
       },
     });
   },
