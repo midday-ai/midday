@@ -31,5 +31,5 @@ jobs:
         run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: |
-          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
           vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` ${{ env.GITHUB_REF_SLUG }}.midday.ai

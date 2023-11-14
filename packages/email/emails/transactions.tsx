@@ -65,7 +65,7 @@ const defaultTransactions = [
 
 const baseUrl =
   process.env.NODE_ENV === "production"
-    ? "https://midday.ai"
+    ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
 const baseAppUrl =
