@@ -17,6 +17,7 @@ import {
 } from "@react-email/components";
 import { format } from "date-fns";
 import * as React from "react";
+import { getI18n } from "../i18n";
 
 type Transaction = {
   id: string;
@@ -78,9 +79,13 @@ export const TransactionsEmail = ({
   transactions = defaultTransactions,
   locale = "en",
 }: TransactionsEmailEmailProps) => {
+  const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);
 
-  const previewText = `Hi ${firstName}, We found 5 transactions thats missing receipts. Feel free to attach them to ease your own or your accountants work for upcoming declerations.`;
+  const previewText = t(
+    { id: "transactions.preview" },
+    { firstName: "Pontus", numberOfTransactions: transactions.length }
+  );
 
   return (
     <Html>
@@ -129,6 +134,8 @@ export const TransactionsEmail = ({
               thats missing receipts. Feel free to attach them to ease your own
               or your accountants work for upcoming declerations.
             </Text>
+
+            <br />
 
             <table style={{ width: "100%" }} className="border-collapse w-full">
               <thead>
