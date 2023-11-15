@@ -1,5 +1,4 @@
 import { CommandMenu } from "@/components/command-menu";
-import { Feedback } from "@/components/feedback";
 import { NotificationCenter } from "@/components/notification-center";
 import { ReconnectBank } from "@/components/reconnect-bank";
 import { UserMenu } from "@/components/user-menu";
@@ -11,7 +10,6 @@ export function Header() {
     <header className="border-b-[1px] flex justify-between py-4">
       <CommandMenu />
       <div className="flex space-x-2">
-        <Feedback />
         <Suspense>
           <ReconnectBank />
         </Suspense>

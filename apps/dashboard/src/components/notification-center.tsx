@@ -76,11 +76,11 @@ export function NotificationCenter() {
   } = useNotifications();
 
   const unreadNotifications = notifications.filter(
-    (notification) => !notification.read,
+    (notification) => !notification.read
   );
 
   const archivedNotifications = notifications.filter(
-    (notification) => notification.read,
+    (notification) => notification.read
   );
 
   useEffect(() => {

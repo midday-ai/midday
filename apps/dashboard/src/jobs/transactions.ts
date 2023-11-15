@@ -159,6 +159,7 @@ client.defineJob({
           return transactionsData.map((transaction) => ({
             name: TriggerEvents.TransactionNewInApp,
             payload: {
+              transactionId: transaction.id,
               description: t(
                 { id: "notifications.transaction" },
                 {
