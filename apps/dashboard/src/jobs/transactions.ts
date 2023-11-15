@@ -154,7 +154,7 @@ client.defineJob({
 
       const notificationEvents = await Promise.all(
         usersData?.flatMap(async ({ user, team_id }) => {
-          const t = getI18n({ locale: user.locale });
+          const { t } = getI18n({ locale: user.locale });
 
           return transactionsData.map((transaction) => ({
             name: TriggerEvents.TransactionNewInApp,
@@ -184,7 +184,7 @@ client.defineJob({
 
       const emailEvents = await Promise.all(
         usersData?.map(async ({ user, team_id }) => {
-          const t = getI18n({ locale: user.locale });
+          const { t } = getI18n({ locale: user.locale });
 
           const html = await renderAsync(
             TransactionsEmail({
