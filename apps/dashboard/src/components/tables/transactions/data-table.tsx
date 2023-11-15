@@ -26,7 +26,7 @@ export function DataTable({ data, teamId }: ItemsProps) {
   });
 
   const selectedTransaction = data.find(
-    (transaction) => transaction.id === transactionId,
+    (transaction) => transaction.id === transactionId
   );
 
   const handleOnSelect = (id: string) => {
@@ -36,12 +36,6 @@ export function DataTable({ data, teamId }: ItemsProps) {
   const handleOnClose = () => {
     setTransactionId(null);
   };
-
-  useEffect(() => {
-    if (!selectedTransaction) {
-      handleOnClose();
-    }
-  }, [selectedTransaction]);
 
   useEffect(() => {
     const currentIndex = data.findIndex((row) => row.id === transactionId);
@@ -93,7 +87,7 @@ export function DataTable({ data, teamId }: ItemsProps) {
         },
         () => {
           router.refresh();
-        },
+        }
       )
       .subscribe();
 

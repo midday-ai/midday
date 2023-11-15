@@ -292,7 +292,6 @@ export const transactionList = {
       amount: 76300,
       currency: "SEK",
       attachments: [{}],
-      vat: 25,
     },
     {
       id: 5,
@@ -300,7 +299,6 @@ export const transactionList = {
       amount: -99,
       currency: "SEK",
       attachments: [{}],
-      vat: 25,
     },
     {
       id: 6,
@@ -308,7 +306,6 @@ export const transactionList = {
       amount: -299,
       currency: "SEK",
       attachments: [{}],
-      vat: 25,
     },
     {
       id: 7,
@@ -316,7 +313,6 @@ export const transactionList = {
       amount: 86300,
       currency: "SEK",
       attachments: [{}],
-      vat: 25,
     },
   ],
 };

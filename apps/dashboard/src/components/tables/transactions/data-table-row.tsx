@@ -15,7 +15,7 @@ export function DataTableCell({ children, className }) {
     <div
       className={cn(
         className,
-        "h-[45px] px-4 py-2 border-r last:border-none truncate overflow-hidden text-sm flex items-center",
+        "h-[45px] px-4 py-2 border-r last:border-none truncate overflow-hidden text-sm flex items-center"
       )}
     >
       {children}
@@ -28,7 +28,7 @@ export function Row({ children, onSelect, selected }) {
     <div
       className={cn(
         "flex items-center h-[45px] hover:bg-secondary border-t",
-        selected && "bg-secondary",
+        selected && "bg-secondary"
       )}
       onClick={onSelect}
     >
@@ -39,7 +39,7 @@ export function Row({ children, onSelect, selected }) {
 
 export function DataTableRow({ collapsed, onSelect, data, selected }) {
   const locale = useCurrentLocale();
-  const fullfilled = data.attachments.length > 0 && data.vat;
+  const fullfilled = data.attachments.length > 0;
 
   return (
     <Row onSelect={() => onSelect(data.id)} selected={selected}>

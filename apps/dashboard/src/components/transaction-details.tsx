@@ -18,12 +18,10 @@ import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
-import { SelectVat } from "./select-vat";
 
 export function TransactionDetails({ transactionId, onClose, data }) {
   const locale = useCurrentLocale();
   const [isLoading, setLoading] = useState(true);
-  const calculatedVat = data?.vat ? Math.abs(data.amount * data.vat) / 100 : 0;
 
   useEffect(() => {
     setLoading(false);
@@ -60,20 +58,11 @@ export function TransactionDetails({ transactionId, onClose, data }) {
                   <span
                     className={cn(
                       "text-4xl",
-                      data?.amount > 0 && "text-[#00C969]",
+                      data?.amount > 0 && "text-[#00C969]"
                     )}
                   >
                     {formatAmount({
                       amount: data?.amount,
-                      currency: data?.currency,
-                      locale,
-                    })}
-                  </span>
-
-                  <span className="text-m text-[#606060]">
-                    vat.{" "}
-                    {formatAmount({
-                      amount: calculatedVat,
                       currency: data?.currency,
                       locale,
                     })}
@@ -93,29 +82,19 @@ export function TransactionDetails({ transactionId, onClose, data }) {
           </Button>
         </div>
 
-        <SelectCategory
-          isLoading={isLoading}
-          name={data?.name}
-          id={transactionId}
-          selectedId={data?.category ?? undefined}
-        />
-
         <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
-          <div className="grid gap-2 w-full">
-            <SelectVat
-              isLoading={isLoading}
-              id={transactionId}
-              selectedId={data?.vat ?? undefined}
-            />
-          </div>
+          <SelectCategory
+            isLoading={isLoading}
+            name={data?.name}
+            id={transactionId}
+            selectedId={data?.category ?? undefined}
+          />
 
-          <div className="grid gap-2 w-full">
-            <AssignUser
-              isLoading={isLoading}
-              id={transactionId}
-              selectedId={data?.assigned?.id ?? undefined}
-            />
-          </div>
+          <AssignUser
+            isLoading={isLoading}
+            id={transactionId}
+            selectedId={data?.assigned?.id ?? undefined}
+          />
         </div>
 
         <Accordion type="multiple" defaultValue={["attachment"]}>

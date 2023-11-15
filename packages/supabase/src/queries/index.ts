@@ -245,22 +245,17 @@ export async function getTransactionsQuery(
     });
   }
 
-  if (status?.includes("fullfilled")) {
-    query.not("attachment", "is", null);
-    query.not("vat", "is", null);
+  if (attachments === "exclude" || status?.includes("unfullfilled")) {
+    query.filter("attachments.id", "is", null);
   }
 
-  if (status?.includes("unfullfilled")) {
-    query.is("attachment", null);
-    query.is("vat", null);
-  }
-
-  if (attachments === "exclude") {
-    query.is("attachment", null);
-  }
-
-  if (attachments === "include") {
-    query.not("attachment", "is", null);
+  if (status?.includes("fullfilled") || attachments === "include") {
+    query.select(`
+      *,
+      currency,
+      assigned:assigned_id(*),
+      attachments!inner(id,size,name)
+    `);
   }
 
   if (category === "exclude") {

@@ -20,14 +20,14 @@ export function MainMenu() {
       name: "Transactions",
       icon: () => <Icons.Transactions size={22} />,
     },
+    // {
+    //   path: "/invoices",
+    //   name: "Invoices",
+    //   icon: () => <Icons.Invoice size={22} />,
+    // },
     {
-      path: "/invoices",
-      name: "Invoices",
-      icon: () => <Icons.Invoice size={22} />,
-    },
-    {
-      path: "/files",
-      name: "Files",
+      path: "/vault",
+      name: "Vault",
       icon: () => <Icons.Files size={22} />,
     },
     {
@@ -57,7 +57,7 @@ export function MainMenu() {
               key={path}
               className={cn(
                 "rounded-lg border border-transparent w-[55px] h-[45px] flex items-center justify-center xl:w-full xl:justify-start",
-                isActive && "bg-secondary border-[#2C2C2C]",
+                isActive && "bg-secondary border-[#2C2C2C]"
               )}
             >
               <Link

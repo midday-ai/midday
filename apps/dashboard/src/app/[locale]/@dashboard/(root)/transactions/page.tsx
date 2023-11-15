@@ -36,7 +36,10 @@ export default async function Transactions({
       </div>
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>
-        <Suspense fallback={<Loading collapsed={Boolean(transactionId)} />}>
+        <Suspense
+          fallback={<Loading collapsed={Boolean(transactionId)} />}
+          key={page}
+        >
           <Table filter={filter} page={page} sort={sort} noAccounts={empty} />
         </Suspense>
       </div>
