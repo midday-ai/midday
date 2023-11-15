@@ -16,6 +16,10 @@ const config = {
         protocol: "https",
         hostname: "cdn.nordigen.com",
       },
+      {
+        protocol: "https",
+        hostname: "avatars.slack-edge.com",
+      },
     ],
   },
   transpilePackages: ["@midday/ui"],

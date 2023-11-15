@@ -8,6 +8,7 @@ const ADMINS = [
   "2f76981b-fc66-479c-8203-521a5a1f734a",
   "3cb7ad12-907e-49c6-9f3a-ea3eeb1d34cf",
   "71908de2-2727-43a8-8a3f-4ae203faa4c5",
+  "a9f6e6f2-8d58-4cf7-a3e7-312be3ee9560", // Ali Saheli
 ];
 
 export default async function Layout({
