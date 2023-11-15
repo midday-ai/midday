@@ -157,17 +157,17 @@ export const TransactionsEmail = ({
                 <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#DCDAD2] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      Date
+                      {t({ id: "date" })}
                     </Text>
                   </th>
                   <th align="left" style={{ width: "50%" }}>
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      To/From
+                      {t({ id: "description" })}
                     </Text>
                   </th>
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      Amount
+                      {t({ id: "amount" })}
                     </Text>
                   </th>
                 </tr>
