@@ -1,5 +1,6 @@
 import { client } from "@/trigger";
 import { TransactionsEmail } from "@midday/email/emails/transactions";
+import { getI18n } from "@midday/email/locales";
 import { getTransactions } from "@midday/gocardless";
 import { TriggerEvents, triggerBulk } from "@midday/notification";
 import { Database } from "@midday/supabase/src/types";
@@ -151,28 +152,40 @@ client.defineJob({
       revalidateTag(`spending_${data?.team_id}`);
       revalidateTag(`metrics_${data?.team_id}`);
 
-      // Send notification for each transaction
-      // triggerBulk(
-      //   transactionsData.map((transaction) => ({
-      //     name: TriggerEvents.TransactionNewInApp,
-      //     payload: {
-      //       description: "You have a new transaction of -1000 from Github",
-      //       currency: "SEK",
-      //     },
-      //     users: [
-      //       {
-      //         subscriberId: "",
-      //         teamId: "123",
-      //         email: "",
-      //         fullName: "Pontus Abrahamsson",
-      //         avatarUrl: "https://",
-      //       },
-      //     ],
-      //   }))
-      // );
+      const notificationEvents = await Promise.all(
+        usersData?.flatMap(async ({ user, team_id }) => {
+          const t = getI18n({ locale: user.locale });
+
+          return transactionsData.map((transaction) => ({
+            name: TriggerEvents.TransactionNewInApp,
+            payload: {
+              description: t(
+                { id: "transactions.notification" },
+                { amount: transaction.amount, from: transaction.name } // TODO: Format
+              ),
+              currency: "SEK",
+            },
+            user: {
+              subscriberId: user.id,
+              teamId: team_id,
+              email: user.email,
+              fullName: user.full_name,
+              avatarUrl: user.avatar_url,
+            },
+          }));
+        })
+      );
+
+      console.log(JSON.stringify(await notificationEvents, null, 2));
+
+      if (notificationEvents?.length) {
+        triggerBulk(notificationEvents);
+      }
 
       const emailEvents = await Promise.all(
         usersData?.map(async ({ user, team_id }) => {
+          const t = getI18n({ locale: user.locale });
+
           const html = await renderAsync(
             TransactionsEmail({
               fullName: user.full_name,
@@ -190,7 +203,7 @@ client.defineJob({
           return {
             name: TriggerEvents.TransactionNewEmail,
             payload: {
-              subject: "New transactions",
+              subject: t({ id: "transactions.subject" }),
               html,
             },
             user: {

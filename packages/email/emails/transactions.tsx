@@ -17,7 +17,7 @@ import {
 } from "@react-email/components";
 import { format } from "date-fns";
 import * as React from "react";
-import { getI18n } from "../i18n";
+import { getI18n } from "../locales";
 
 type Transaction = {
   id: string;
@@ -111,6 +111,7 @@ export const TransactionsEmail = ({
       <Preview>{previewText}</Preview>
       <Tailwind>
         <Body className="bg-[#F0EFEC] my-auto mx-auto font-sans">
+          <br />
           <Container className="border border-solid border-[#DCDAD2] rounded my-[40px] mx-auto p-[20px] w-[560px]">
             <Section className="mt-[32px]">
               <Img
@@ -122,23 +123,37 @@ export const TransactionsEmail = ({
               />
             </Section>
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              You have <span className="font-semibold">5 transactions</span>{" "}
-              thats missing <br />
-              receipts.
+              {t({ id: "transactions.title1" })}
+              <span className="font-semibold">
+                {t(
+                  { id: "transactions.title2" },
+                  { numberOfTransactions: transactions.length }
+                )}{" "}
+              </span>
+              {t({ id: "transactions.title3" })} <br />
+              {t({ id: "transactions.title4" })}.
             </Heading>
             <Text className="text-[#121212] text-[14px] leading-[24px]">
-              Hi {firstName},<br /> <br />
-              We found <span className="font-semibold">
-                5 transactions
-              </span>{" "}
-              thats missing receipts. Feel free to attach them to ease your own
-              or your accountants work for upcoming declerations.
+              {t({ id: "transactions.description1" }, { firstName })},
+              <br />
+              <br />
+              {t({ id: "transactions.description2" })}{" "}
+              <span className="font-semibold">
+                {t(
+                  { id: "transactions.description3" },
+                  { numberOfTransactions: transactions.length }
+                )}{" "}
+              </span>
+              {t({ id: "transactions.description4" })}.
             </Text>
 
             <br />
 
-            <table style={{ width: "100%" }} className="border-collapse w-full">
-              <thead>
+            <table
+              style={{ width: "100% !important", minWidth: "100%" }}
+              className="border-collapse w-full"
+            >
+              <thead style={{ width: "100%" }}>
                 <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#DCDAD2] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
@@ -158,7 +173,7 @@ export const TransactionsEmail = ({
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody style={{ width: "100%", minWidth: "100% !important" }}>
                 {transactions?.map((transaction) => (
                   <tr
                     key={transaction.id}
@@ -207,25 +222,21 @@ export const TransactionsEmail = ({
                   transactions.at(0)?.id
                 }`}
               >
-                View transactions
+                {t({ id: "transactions.button" })}
               </Button>
             </Section>
-            <Hr className="border border-solid border-[#DCDAD2] my-[45px] mx-0 w-full" />
+            <Hr className="border-0 border-b-[1px] border-solid border-[#DCDAD2] my-[45px] mx-0 w-full" />
             <Text className="text-[#878787] text-[12px] leading-[24px]">
-              Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus
-              convallis sit amet lectus eget tincidunt. Vestibulum vehicula
-              rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum
-              eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit
-              elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim
-              vitae mauris auctor blandit id et nibh.
+              {t({ id: "transactions.footer" })}
             </Text>
 
             <Link href={`${baseAppUrl}/settings/notifications`}>
               <Text className="text-[#878787] text-[12px] underline">
-                Notification preferences
+                {t({ id: "transactions.settings" })}
               </Text>
             </Link>
           </Container>
+          <br />
         </Body>
       </Tailwind>
     </Html>

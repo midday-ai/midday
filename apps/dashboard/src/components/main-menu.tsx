@@ -20,11 +20,6 @@ export function MainMenu() {
       name: "Transactions",
       icon: () => <Icons.Transactions size={22} />,
     },
-    // {
-    //   path: "/invoices",
-    //   name: "Invoices",
-    //   icon: () => <Icons.Invoice size={22} />,
-    // },
     {
       path: "/vault",
       name: "Vault",
