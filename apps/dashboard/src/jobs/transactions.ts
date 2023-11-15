@@ -152,35 +152,35 @@ client.defineJob({
       revalidateTag(`spending_${data?.team_id}`);
       revalidateTag(`metrics_${data?.team_id}`);
 
-      const notificationEvents = await Promise.all(
-        usersData?.flatMap(async ({ user, team_id }) => {
-          const { t } = getI18n({ locale: user.locale });
+      // const notificationEvents = await Promise.all(
+      //   usersData?.flatMap(async ({ user, team_id }) => {
+      //     const { t } = getI18n({ locale: user.locale });
 
-          return transactionsData.map((transaction) => ({
-            name: TriggerEvents.TransactionNewInApp,
-            payload: {
-              description: t(
-                { id: "transactions.notification" },
-                { amount: transaction.amount, from: transaction.name } // TODO: Format
-              ),
-              currency: "SEK",
-            },
-            user: {
-              subscriberId: user.id,
-              teamId: team_id,
-              email: user.email,
-              fullName: user.full_name,
-              avatarUrl: user.avatar_url,
-            },
-          }));
-        })
-      );
+      //     return transactionsData.map((transaction) => ({
+      //       name: TriggerEvents.TransactionNewInApp,
+      //       payload: {
+      //         description: t(
+      //           { id: "transactions.notification" },
+      //           { amount: transaction.amount, from: transaction.name } // TODO: Format
+      //         ),
+      //         currency: "SEK",
+      //       },
+      //       user: {
+      //         subscriberId: user.id,
+      //         teamId: team_id,
+      //         email: user.email,
+      //         fullName: user.full_name,
+      //         avatarUrl: user.avatar_url,
+      //       },
+      //     }));
+      //   })
+      // );
 
-      console.log(JSON.stringify(await notificationEvents, null, 2));
+      // console.log(JSON.stringify(await notificationEvents, null, 2));
 
-      if (notificationEvents?.length) {
-        triggerBulk(notificationEvents);
-      }
+      // if (notificationEvents?.length) {
+      //   triggerBulk(notificationEvents);
+      // }
 
       const emailEvents = await Promise.all(
         usersData?.map(async ({ user, team_id }) => {
