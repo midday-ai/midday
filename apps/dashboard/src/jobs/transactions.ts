@@ -31,7 +31,7 @@ const mapTransactionMethod = (method: string) => {
 
 const transformTransactions = (transactions, { teamId, accountId }) =>
   // We want to insert transactions in reversed order so the incremental id in supabase is correct
-  transactions.reverse().map((data) => ({
+  transactions?.reverse().map((data) => ({
     transaction_id: data.transactionId,
     reference: data.entryReference,
     booking_date: data.bookingDate,
@@ -162,7 +162,7 @@ client.defineJob({
               description: t(
                 { id: "notifications.transaction" },
                 {
-                  amount: Intl.NumberFormat(locale, {
+                  amount: Intl.NumberFormat(user.locale, {
                     style: "currency",
                     currency: transaction.currency,
                   }).format(transaction.amount),

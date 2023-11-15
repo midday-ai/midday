@@ -441,12 +441,12 @@ export async function getMetricsQuery(
       return {
         date: date.toDateString(),
         previous: {
-          date: format(subYears(date, 1), "y-M-d"),
+          date: subYears(date, 1).toISOString(),
           value: previousValue ?? 0,
           currency: previous?.currency || data?.at(0)?.currency,
         },
         current: {
-          date: format(date, "y-M-d"),
+          date: date.toISOString(),
           value: currentValue ?? 0,
           currency: current?.currency || data?.at(0)?.currency,
         },

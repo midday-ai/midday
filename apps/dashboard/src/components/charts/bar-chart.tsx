@@ -54,7 +54,7 @@ const ToolTipContent = ({ payload = {} }) => {
               ? current?.payload?.current?.date &&
                 `Week ${format(
                   new Date(current.payload.current.date),
-                  "ww, Y",
+                  "ww, Y"
                 )}`
               : current?.payload?.current?.date &&
                 format(new Date(current.payload.current.date), "MMM, Y")}
@@ -79,7 +79,7 @@ const ToolTipContent = ({ payload = {} }) => {
               ? previous?.payload?.previous?.date &&
                 `Week ${format(
                   new Date(previous.payload.previous.date),
-                  "ww, Y",
+                  "ww, Y"
                 )}`
               : previous?.payload?.previous?.date &&
                 format(new Date(previous.payload.previous.date), "MMM, Y")}
@@ -96,7 +96,7 @@ export function BarChart({ data }) {
     meta: data.meta,
     date: format(
       new Date(item.date),
-      data.meta.period === "weekly" ? "w" : "MMM",
+      data.meta.period === "weekly" ? "w" : "MMM"
     ),
   }));
 
