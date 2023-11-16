@@ -10,7 +10,7 @@ export async function StaffToolbar() {
   } = await supabase.auth.getSession();
   const admins = await get("admins");
 
-  const isAdmin = admins?.includes(session.user.id);
+  const isAdmin = admins?.includes(session?.user.id);
 
   return isAdmin ? <VercelToolbar /> : null;
 }

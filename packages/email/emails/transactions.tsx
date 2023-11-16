@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@midday/ui/utils";
 import {
   Body,
@@ -157,17 +159,17 @@ export const TransactionsEmail = ({
                 <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#DCDAD2] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      {t({ id: "date" })}
+                      {t({ id: "transactions.date" })}
                     </Text>
                   </th>
                   <th align="left" style={{ width: "50%" }}>
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      {t({ id: "description" })}
+                      {t({ id: "transactions.description" })}
                     </Text>
                   </th>
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      {t({ id: "amount" })}
+                      {t({ id: "transactions.amount" })}
                     </Text>
                   </th>
                 </tr>
