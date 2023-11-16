@@ -39,6 +39,7 @@ export default function Layout({ children }: { children: ReactElement }) {
         </ThemeProvider>
 
         <Suspense>
+          {/* Vercel toolbar */}
           <StaffToolbar />
         </Suspense>
       </body>
