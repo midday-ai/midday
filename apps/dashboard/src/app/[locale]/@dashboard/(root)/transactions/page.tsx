@@ -44,7 +44,7 @@ export default async function Transactions({
         </Suspense>
       </div>
 
-      {empty && <TransactionsModal />}
+      {!isOpen && empty && <TransactionsModal />}
     </>
   );
 }

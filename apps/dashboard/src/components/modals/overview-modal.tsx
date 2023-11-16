@@ -47,7 +47,7 @@ export function OverviewModal() {
                 alt="Overview"
                 className={cn(
                   "w-full opacity-0 absolute transition-all",
-                  image.id === activeId && "opacity-1",
+                  image.id === activeId && "opacity-1"
                 )}
               />
             ))}
@@ -63,7 +63,7 @@ export function OverviewModal() {
                   key={image.id}
                   className={cn(
                     "w-[16px] h-[6px] rounded-full bg-[#D9D9D9] opacity-30 transition-all cursor-pointer",
-                    image.id === activeId && "opacity-1",
+                    image.id === activeId && "opacity-1"
                   )}
                 />
               ))}

@@ -54,7 +54,7 @@ export default async function Overview({ searchParams }) {
 
         <Realtime teamId={userData.team_id} />
       </div>
-      {empty && <OverviewModal />}
+      {!isOpen && empty && <OverviewModal />}
     </>
   );
 }
