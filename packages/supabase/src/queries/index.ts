@@ -259,7 +259,7 @@ export async function getTransactionsQuery(
   }
 
   if (category === "exclude") {
-    query.is("category", null);
+    query.eq("category", "uncategorized");
   }
 
   if (category === "include") {
@@ -332,7 +332,7 @@ export async function getSimilarTransactions(
     .select("id, amount", { count: "exact" })
     .eq("name", transaction.data.name)
     .eq("team_id", teamId)
-    .is("category", null)
+    .eq("category", "uncategorized")
     .throwOnError();
 }
 

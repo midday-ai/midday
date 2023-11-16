@@ -33,6 +33,7 @@ const categories = [
   "equipment",
   "activity",
   "other",
+  "uncategorized",
 ];
 
 export function SelectCategory({ id, name, selectedId, isLoading }) {
@@ -59,7 +60,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
         description: `Do you want to mark ${
           transactions?.data?.length
         } similar transactions form ${name} as ${t(
-          `categories.${value}`,
+          `categories.${value}`
         )} too?`,
         action: (
           <ToastAction altText="Yes" onClick={handleUpdateSimilar}>

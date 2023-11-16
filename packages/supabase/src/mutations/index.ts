@@ -25,7 +25,7 @@ export async function createBankAccounts(supabase: Client, accounts) {
         bic: account.bic,
         currency: account.currency,
         owner_name: account.owner_name,
-      })),
+      }))
     )
     .select();
 }
@@ -49,7 +49,7 @@ type UpdateBankConnectionData = {
 
 export async function updateBankConnection(
   supabase: Client,
-  data: UpdateBankConnectionData,
+  data: UpdateBankConnectionData
 ) {
   const { id, teamId } = data;
 
@@ -70,7 +70,7 @@ type CreateTransactionsData = {
 
 export async function createTransactions(
   supabase: Client,
-  data: CreateTransactionsData,
+  data: CreateTransactionsData
 ) {
   const { transactions, teamId } = data;
 
@@ -78,14 +78,14 @@ export async function createTransactions(
     transactions.map((transaction) => ({
       ...transaction,
       team_id: teamId,
-    })),
+    }))
   );
 }
 
 export async function updateTransaction(
   supabase: Client,
   id: string,
-  data: any,
+  data: any
 ) {
   return supabase
     .from("transactions")
@@ -142,7 +142,7 @@ export async function updateSimilarTransactions(supabase: Client, id: string) {
     .update({ category: transaction.data.category })
     .eq("name", transaction.data.name)
     .eq("team_id", userData?.team_id)
-    .is("category", null)
+    .eq("category", "uncategorized")
     .select("id, team_id");
 }
 
@@ -156,7 +156,7 @@ export type Attachment = {
 
 export async function createAttachments(
   supabase: Client,
-  attachments: Attachment[],
+  attachments: Attachment[]
 ) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
@@ -166,7 +166,7 @@ export async function createAttachments(
       attachments.map((attachment) => ({
         ...attachment,
         team_id: userData?.team_id,
-      })),
+      }))
     )
     .select();
 

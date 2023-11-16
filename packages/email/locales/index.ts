@@ -35,18 +35,18 @@ const messages = {
     "transactions.title1": "Du har ",
     "transactions.title2":
       "{numberOfTransactions, plural, =1 {1 transaktion} other {# transaktioner}}",
-    "transactions.title3": "som det saknas",
+    "transactions.title3": "som saknar",
     "transactions.title4": "kvitton",
     "transactions.description1": "Hej {firstName}",
     "transactions.description2": "Vi hittade",
     "transactions.description3":
       "{numberOfTransactions, plural, =1 {1 transaktion} other {# transaktioner}}",
     "transactions.description4":
-      "som det saknas kvitton. Bifoga dem gärna för att underlätta ditt eget eller dina revisorers arbete inför kommande deklarationer",
+      "som saknar kvitton. Bifoga dem gärna för att underlätta ditt eget eller dina revisorers arbete inför kommande deklarationer",
     "transactions.button": "Visa transaktioner",
     "transactions.footer":
       " Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim vitae mauris auctor blandit id et nibh.",
-    "transactions.settings": "Notifikationsinställningar",
+    "transactions.settings": "Inställningar",
     "transactions.amount": "Belopp",
     "transactions.date": "Datum",
     "transactions.description": "Beskrivning",
