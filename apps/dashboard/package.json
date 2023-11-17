@@ -29,7 +29,7 @@
     "@vercel/toolbar": "^0.1.5",
     "change-case": "^5.2.0",
     "framer-motion": "^10.16.5",
-    "next": "14.0.3",
+    "next": "canary",
     "next-international": "^1.1.4",
     "next-safe-action": "^5.0.3",
     "next-themes": "^0.2.1",
