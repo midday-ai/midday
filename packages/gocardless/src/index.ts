@@ -91,7 +91,7 @@ export async function getBanks(countryCode: string) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    },
+    }
   );
 
   return res.json();
@@ -221,18 +221,18 @@ export async function getAccounts({
         bank: banks.find((bank) => bank.id === accountData.institution_id),
         balances: {
           available: balances.find(
-            (balance) => balance.balanceType === balanceType.interimAvailable,
+            (balance) => balance.balanceType === balanceType.interimAvailable
           )?.balanceAmount,
           boked: balances.find(
-            (balance) => balance.balanceType === balanceType.interimBooked,
+            (balance) => balance.balanceType === balanceType.interimBooked
           )?.balanceAmount,
         },
       };
-    }),
+    })
   );
 
   return result.sort((a, b) =>
-    a.balances.available - b.balances.available ? 1 : -1,
+    a.balances.available - b.balances.available ? 1 : -1
   );
 }
 
@@ -247,7 +247,7 @@ export async function getTransactions(accountId: string) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-    },
+    }
   );
 
   return result.json();

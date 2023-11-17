@@ -10,7 +10,7 @@
         "check:types": "tsc --noEmit"
     },
     "dependencies": {
-        "@vercel/kv": "^1.0.0"
+        "@vercel/kv": "0.2.4"
     }
 }
   

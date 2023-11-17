@@ -3,10 +3,9 @@
 import { buildLink, createEndUserAgreement } from "@midday/gocardless";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export function ReconnectButton({ id, institutionId }) {
-  const pathname = usePathname();
   const router = useRouter();
 
   const handleCreateEndUserAgreement = async () => {

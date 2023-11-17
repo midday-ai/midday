@@ -86,7 +86,7 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 60 * 10, // every 4h
+        seconds: 3600 * 4, // every 4h
       },
     });
   },
@@ -168,7 +168,7 @@ client.defineJob({
                     currency: transaction.currency,
                   }).format(transaction.amount),
                   from: transaction.name,
-                } // TODO: Format
+                }
               ),
             },
             user: {
@@ -277,5 +277,24 @@ client.defineJob({
     }
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
+  },
+});
+
+client.defineJob({
+  id: "transactions-export",
+  name: "Transactions - Export",
+  version: "1.0.0",
+  trigger: eventTrigger({
+    name: "transactions.export",
+    schema: z.object({
+      from: z.string().datetime(),
+      to: z.string().datetime(),
+    }),
+  }),
+  integrations: { supabase },
+  run: async (payload, io) => {
+    const { from, to } = payload;
+
+    await io.logger.info("Transactions Export");
   },
 });
