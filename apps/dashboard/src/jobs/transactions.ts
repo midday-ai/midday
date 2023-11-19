@@ -289,12 +289,25 @@ client.defineJob({
     schema: z.object({
       from: z.string().datetime(),
       to: z.string().datetime(),
+      accountId: z.string(),
     }),
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const { from, to } = payload;
+    const { from, to, accountId } = payload;
+
+    const generateExport = await io.createStatus("generate-export", {
+      label: "Generating memes",
+      state: "loading",
+    });
 
     await io.logger.info("Transactions Export");
+
+    await generateExport.update("generate-export", {
+      state: "success",
+      data: {
+        url: "",
+      },
+    });
   },
 });

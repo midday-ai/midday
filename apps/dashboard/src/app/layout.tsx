@@ -1,4 +1,3 @@
-import { Deployments } from "@/components/deployments";
 import { StaffToolbar } from "@/components/staff-toolbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
@@ -35,11 +34,9 @@ export default function Layout({ children }: { children: ReactElement }) {
         >
           {children}
           <Toaster />
-          <Deployments />
         </ThemeProvider>
 
         <Suspense>
-          {/* Vercel toolbar */}
           <StaffToolbar />
         </Suspense>
       </body>
