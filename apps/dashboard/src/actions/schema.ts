@@ -60,7 +60,12 @@ export const createAttachmentsSchema = z.array(
     size: z.number(),
     transaction_id: z.string(),
     type: z.string(),
-  }),
+  })
 );
 
 export const deleteAttachmentSchema = z.string();
+
+export const exportTransactionsSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+});
