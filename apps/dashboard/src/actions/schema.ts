@@ -66,6 +66,6 @@ export const createAttachmentsSchema = z.array(
 export const deleteAttachmentSchema = z.string();
 
 export const exportTransactionsSchema = z.object({
-  from: z.string(),
-  to: z.string(),
+  from: z.coerce.date(),
+  to: z.coerce.date(),
 });

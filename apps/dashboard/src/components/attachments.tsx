@@ -87,7 +87,7 @@ export function Attachments({ id, data }) {
     const uploadedFiles = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
         const { path } = await uploadFile({
-          bucket: "files",
+          bucket: "vault",
           path: `${userData?.team_id}/transactions/${id}`,
           file: acceptedFile,
         });
@@ -99,7 +99,7 @@ export function Attachments({ id, data }) {
           transaction_id: id,
           type: acceptedFile.type,
         };
-      }),
+      })
     );
 
     const { data: newFiles } = await createAttachmentsAction(uploadedFiles);
@@ -120,7 +120,7 @@ export function Attachments({ id, data }) {
       <div
         className={cn(
           "w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1 transition-colors text-[#606060]",
-          isDragActive && "bg-secondary text-white",
+          isDragActive && "bg-secondary text-white"
         )}
         {...getRootProps()}
       >

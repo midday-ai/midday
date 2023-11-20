@@ -182,7 +182,7 @@ export async function deleteAttachment(supabase: Client, id: string) {
     .single();
 
   remove(supabase, {
-    bucket: "files",
+    bucket: "vault",
     path: `${data.team_id}/transactions/${data.transaction_id}/${data.name}`,
   });
 

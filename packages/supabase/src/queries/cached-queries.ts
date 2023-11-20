@@ -149,7 +149,6 @@ export const getMetrics = async (params) => {
     ["metrics", teamId],
     {
       tags: [`metrics_${teamId}`],
-      revalidate: 10,
     }
   )(params);
 };

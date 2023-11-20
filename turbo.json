@@ -38,8 +38,6 @@
 		}
 	},
 	"globalEnv": [
-		"POSTGRES_URL",
-		"NEXTAUTH_SECRET",
-		"NEXTAUTH_URL"
+		"POSTGRES_URL"
 	]
 }

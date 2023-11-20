@@ -9,7 +9,7 @@ export async function GET(req, res) {
   const path = requestUrl.searchParams.get("path");
   const filename = requestUrl.searchParams.get("filename");
 
-  const { data } = await supabase.storage.from("files").download(path);
+  const { data } = await supabase.storage.from("vault").download(path);
   const responseHeaders = new Headers(res.headers);
 
   responseHeaders.set(

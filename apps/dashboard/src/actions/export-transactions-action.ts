@@ -19,6 +19,6 @@ export const exportTransactionsAction = action(
       },
     });
 
-    console.log(event);
+    return event;
   }
 );

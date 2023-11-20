@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useSearchParams } from "next/navigation";
@@ -17,15 +18,31 @@ import { useEffect } from "react";
 
 export function ExportTransactionsModal({ isOpen, setOpen }) {
   const searchParams = useSearchParams();
-  const { execute, status } = useAction(exportTransactionsAction);
+  const { execute, status, result } = useAction(exportTransactionsAction);
   const filter = searchParams.get("filter");
   const date = filter ? JSON.parse(filter)?.date : null;
+  const { toast } = useToast();
 
   useEffect(() => {
     if (status === "hasSucceeded" && isOpen) {
       setOpen(false);
     }
   }, [status]);
+
+  useEffect(() => {
+    if (result.data) {
+      toast({
+        duration: 6000,
+        title: "Exporting...",
+        description: "Your export is ready base on 46 transactions.",
+        // action: (
+        //   <ToastAction altText="Yes" onClick={handleUpdateSimilar}>
+        //     Yes
+        //   </ToastAction>
+        // ),
+      });
+    }
+  }, [result]);
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>

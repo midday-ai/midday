@@ -16,7 +16,7 @@
     "supabase": "^1.112.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.2"
   },
   "exports": {
     "./server": "./src/client/server.ts",
