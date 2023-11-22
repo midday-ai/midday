@@ -16,12 +16,14 @@ type Item = {
 type ItemsProps = {
   data: Item[];
   teamId?: string;
+  initialTransactionId: string;
 };
 
-export function DataTable({ data, teamId }: ItemsProps) {
+export function DataTable({ data, teamId, initialTransactionId }: ItemsProps) {
   const supabase = createClient();
   const router = useRouter();
   const [transactionId, setTransactionId] = useQueryState("id", {
+    defaultValue: initialTransactionId,
     shallow: false, // TODO: Fix without this (redirect after mutation)
   });
 
@@ -80,7 +82,7 @@ export function DataTable({ data, teamId }: ItemsProps) {
       .on(
         "postgres_changes",
         {
-          event: "*",
+          event: "INSERT",
           schema: "public",
           table: "transactions",
           filter: `team_id=eq.${teamId}`,

@@ -2,6 +2,7 @@
 
 import { AssignedUser } from "@/components/assigned-user";
 import { Category } from "@/components/category";
+import { Tag } from "@/components/tag";
 import { TransactionMethod } from "@/components/transaction-method";
 import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
@@ -47,7 +48,11 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
         {data.date && format(new Date(data.date), "MMM d")}
       </DataTableCell>
 
-      <DataTableCell className="w-[430px]">{data.name}</DataTableCell>
+      <DataTableCell className="w-[430px]">
+        <div className="flex space-x-4 items-center">
+          <span>{data.name}</span> {data.pending && <Tag type="pending" />}
+        </div>
+      </DataTableCell>
 
       <DataTableCell className="w-[200px]">
         <span className={cn("text-sm", data.amount > 0 && "text-[#00C969]")}>

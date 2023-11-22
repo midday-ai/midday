@@ -218,7 +218,6 @@ export async function getTransactionsQuery(
     .select(
       `
       *,
-      currency,
       assigned:assigned_id(*),
       attachments(id,size,name)
     `,

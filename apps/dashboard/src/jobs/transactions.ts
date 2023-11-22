@@ -87,7 +87,7 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 3600 * 4, // every 4h
+        seconds: 3600, // every 1h
       },
     });
   },
@@ -305,8 +305,6 @@ client.defineJob({
     });
 
     await io.logger.info("Transactions Export");
-
-    console.log(from, to);
 
     const data = await getTransactionsQuery(client, {
       teamId,
