@@ -20,7 +20,7 @@ export function NotificationSetting({
         ...state,
         enabled: !state.enabled,
       };
-    },
+    }
   );
 
   const onChange = () => {
@@ -35,7 +35,7 @@ export function NotificationSetting({
   };
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-2 mb-3">
       <Checkbox
         id={id}
         checked={optimisticData.enabled}

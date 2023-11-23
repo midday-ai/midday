@@ -72,7 +72,7 @@ client.defineJob({
     table: "bank_accounts",
   }),
   run: async (payload, io) => {
-    await io.sendEvent("Schedule Transactions", {
+    await io.sendEvent("Transactions Initial Sync", {
       id: payload.record.id,
       name: "transactions.initial.sync",
       payload: {
@@ -237,7 +237,7 @@ client.defineJob({
 
 client.defineJob({
   id: "transactions-initial-sync",
-  name: "Transactions - Initial",
+  name: "Transactions - Initial Sync",
   version: "1.0.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
@@ -253,6 +253,14 @@ client.defineJob({
 
     const { transactions } = await getTransactions(accountId);
 
+    // Update bank account last_accessed
+    await io.supabase.client
+      .from("bank_accounts")
+      .update({
+        last_accessed: new Date(),
+      })
+      .eq("id", recordId);
+
     if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
     }
@@ -261,7 +269,7 @@ client.defineJob({
       .from("transactions")
       .insert(
         transformTransactions(transactions?.booked, {
-          accountId: recordId,
+          accountId: recordId, // Bank account record id
           teamId: teamId,
         })
       )
