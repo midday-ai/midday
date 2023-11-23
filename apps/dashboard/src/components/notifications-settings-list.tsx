@@ -5,9 +5,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { Skeleton } from "@midday/ui/skeleton";
 import { Suspense } from "react";
-import { NotificationSettings } from "./notification-settings";
+import {
+  NotificationSettings,
+  NotificationSettingsSkeleton,
+} from "./notification-settings";
 
 export async function NotificationsSettingsList() {
   return (
@@ -20,7 +22,7 @@ export async function NotificationsSettingsList() {
       </CardHeader>
 
       <CardContent>
-        <Suspense fallback={<Skeleton className="h-4 w-[25%]" />}>
+        <Suspense fallback={<NotificationSettingsSkeleton />}>
           <NotificationSettings />
         </Suspense>
       </CardContent>

@@ -8,7 +8,13 @@ import { Loading } from "./loading";
 
 const pageSize = 50;
 
-export async function Table({ filter, page, sort, noAccounts }) {
+export async function Table({
+  filter,
+  page,
+  sort,
+  noAccounts,
+  initialTransactionId,
+}) {
   const hasFilters = Object.keys(filter).length > 0;
   const { to, from } = getPagination(page, pageSize);
   const { data: userData } = await getUser();
@@ -30,7 +36,11 @@ export async function Table({ filter, page, sort, noAccounts }) {
 
   return (
     <>
-      <DataTable data={data} teamId={userData.team_id} />
+      <DataTable
+        data={data}
+        teamId={userData.team_id}
+        initialTransactionId={initialTransactionId}
+      />
       {hasFilters ? (
         <div className="h-10" />
       ) : (

@@ -40,7 +40,13 @@ export default async function Transactions({
           fallback={<Loading collapsed={Boolean(transactionId)} />}
           key={page}
         >
-          <Table filter={filter} page={page} sort={sort} noAccounts={empty} />
+          <Table
+            filter={filter}
+            page={page}
+            sort={sort}
+            noAccounts={empty}
+            initialTransactionId={searchParams.id}
+          />
         </Suspense>
       </div>
 

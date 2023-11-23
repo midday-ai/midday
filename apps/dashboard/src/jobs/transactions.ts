@@ -3,6 +3,7 @@ import { TransactionsEmail } from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
 import { getTransactions } from "@midday/gocardless";
 import { TriggerEvents, triggerBulk } from "@midday/notification";
+import { getTransactionsQuery } from "@midday/supabase/queries";
 import { Database } from "@midday/supabase/src/types";
 import { renderAsync } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
@@ -71,7 +72,7 @@ client.defineJob({
     table: "bank_accounts",
   }),
   run: async (payload, io) => {
-    await io.sendEvent("Schedule Transactions", {
+    await io.sendEvent("Transactions Initial Sync", {
       id: payload.record.id,
       name: "transactions.initial.sync",
       payload: {
@@ -86,7 +87,7 @@ client.defineJob({
     await dynamicSchedule.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 3600 * 4, // every 4h
+        seconds: 3600, // every 1h
       },
     });
   },
@@ -236,7 +237,7 @@ client.defineJob({
 
 client.defineJob({
   id: "transactions-initial-sync",
-  name: "Transactions - Initial",
+  name: "Transactions - Initial Sync",
   version: "1.0.0",
   trigger: eventTrigger({
     name: "transactions.initial.sync",
@@ -252,6 +253,14 @@ client.defineJob({
 
     const { transactions } = await getTransactions(accountId);
 
+    // Update bank account last_accessed
+    await io.supabase.client
+      .from("bank_accounts")
+      .update({
+        last_accessed: new Date(),
+      })
+      .eq("id", recordId);
+
     if (!transactions?.booked.length) {
       await io.logger.info("No transactions found");
     }
@@ -260,7 +269,7 @@ client.defineJob({
       .from("transactions")
       .insert(
         transformTransactions(transactions?.booked, {
-          accountId: recordId,
+          accountId: recordId, // Bank account record id
           teamId: teamId,
         })
       )
@@ -287,8 +296,8 @@ client.defineJob({
   trigger: eventTrigger({
     name: "transactions.export",
     schema: z.object({
-      from: z.string().datetime(),
-      to: z.string().datetime(),
+      from: z.coerce.date(),
+      to: z.coerce.date(),
       teamId: z.string(),
     }),
   }),
@@ -296,14 +305,30 @@ client.defineJob({
   run: async (payload, io) => {
     const { from, to, teamId } = payload;
 
-    const generateExport = await io.createStatus("generate-export", {
-      label: "Generating memes",
+    const client = await io.supabase.client;
+
+    const generateExport = await io.createStatus("generate-export-start", {
+      label: "Generating export",
       state: "loading",
     });
 
     await io.logger.info("Transactions Export");
 
-    await generateExport.update("generate-export", {
+    const data = await getTransactionsQuery(client, {
+      teamId,
+      from: 0,
+      to: 100000,
+      filter: {
+        date: {
+          from: from.toDateString(),
+          to: to.toDateString(),
+        },
+      },
+    });
+
+    await io.logger.info(`Transactions: ${JSON.stringify(data, null, 2)}`);
+
+    await generateExport.update("generate-export-done", {
       state: "success",
       data: {
         url: "",

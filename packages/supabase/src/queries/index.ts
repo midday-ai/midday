@@ -180,8 +180,8 @@ export async function getSpendingQuery(
 
 type GetTransactionsParams = {
   teamId: string;
-  from: number;
   to: number;
+  from: number;
   sort: {
     column: string;
     value: "asc" | "desc";
@@ -218,7 +218,6 @@ export async function getTransactionsQuery(
     .select(
       `
       *,
-      currency,
       assigned:assigned_id(*),
       attachments(id,size,name)
     `,
