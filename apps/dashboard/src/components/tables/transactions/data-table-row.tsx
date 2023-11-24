@@ -5,6 +5,7 @@ import { Category } from "@/components/category";
 import { TransactionMethod } from "@/components/transaction-method";
 import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
@@ -47,7 +48,16 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
         {data.date && format(new Date(data.date), "MMM d")}
       </DataTableCell>
 
-      <DataTableCell className="w-[430px]">{data.name}</DataTableCell>
+      <DataTableCell className="w-[430px] space-x-2">
+        <Avatar className="rounded-full w-5 h-5">
+          <AvatarImage src={data?.enrichment?.logo_url} />
+          <AvatarFallback>
+            <span className="text-[10px]">{data?.name?.charAt(0)}</span>
+          </AvatarFallback>
+        </Avatar>
+
+        <span>{data.name}</span>
+      </DataTableCell>
 
       <DataTableCell className="w-[200px]">
         <span className={cn("text-sm", data.amount > 0 && "text-[#00C969]")}>

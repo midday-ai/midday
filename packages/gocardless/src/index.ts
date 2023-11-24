@@ -252,3 +252,31 @@ export async function getTransactions(accountId: string) {
 
   return result.json();
 }
+
+export async function getRequisitions() {
+  const token = await getAccessToken();
+
+  const result = await fetch(`${baseUrl}/api/v2/requisitions/`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return result.json();
+}
+
+export async function deleteRequisition(id: string) {
+  const token = await getAccessToken();
+
+  const result = await fetch(`${baseUrl}/api/v2/requisitions/${id}/`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return result.json();
+}

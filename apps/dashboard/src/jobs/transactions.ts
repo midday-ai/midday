@@ -12,6 +12,23 @@ import { capitalCase } from "change-case";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 
+export async function processPromisesBatch(
+  items: Array<any>,
+  limit: number,
+  fn: (item: any) => Promise<any>
+): Promise<any> {
+  let results = [];
+  for (let start = 0; start < items.length; start += limit) {
+    const end = start + limit > items.length ? items.length : start + limit;
+
+    const slicedResults = await Promise.all(items.slice(start, end).map(fn));
+
+    results = [...results, ...slicedResults];
+  }
+
+  return results;
+}
+
 const mapTransactionMethod = (method: string) => {
   switch (method) {
     case "Payment":
@@ -44,7 +61,7 @@ const transformTransactions = (transactions, { teamId, accountId }) =>
     amount: data.transactionAmount.amount,
     currency: data.transactionAmount.currency,
     bank_account_id: accountId,
-    category: data.transactionAmount.amount > 0 ? "income" : "uncategorized",
+    category: data.transactionAmount.amount > 0 ? "income" : null,
     team_id: teamId,
   }));
 
@@ -227,6 +244,13 @@ client.defineJob({
       }
     }
 
+    await io.sendEvent("Enrich Transactions", {
+      name: "transactions.encrichment",
+      payload: {
+        teamId: data?.team_id,
+      },
+    });
+
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
     }
@@ -279,6 +303,13 @@ client.defineJob({
       revalidateTag(`transactions_${teamId}`);
       revalidateTag(`spending_${teamId}`);
       revalidateTag(`metrics_${teamId}`);
+
+      await io.sendEvent("Enrich Transactions", {
+        name: "transactions.encrichment",
+        payload: {
+          teamId,
+        },
+      });
     }
 
     if (error) {
@@ -286,6 +317,68 @@ client.defineJob({
     }
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
+  },
+});
+
+client.defineJob({
+  id: "transactions-encrichment",
+  name: "Transactions - Enrichment",
+  version: "1.0.0",
+  trigger: eventTrigger({
+    name: "transactions.encrichment",
+    schema: z.object({
+      teamId: z.string(),
+    }),
+  }),
+  integrations: { supabase },
+  run: async (payload, io) => {
+    const { teamId } = payload;
+
+    const { data: transactionsData } = await io.supabase.client
+      .from("transactions")
+      .select("id, name")
+      .eq("team_id", teamId)
+      .is("category", null)
+      .is("logo_url", null)
+      .is("enrichment_id", null)
+      .select();
+
+    async function enrichTransactions(transaction) {
+      const { data } = await io.supabase.client
+        .rpc("search_enriched_transactions", { term: transaction.name })
+        .single();
+
+      return {
+        ...data,
+        enriched_id: data?.id,
+      };
+    }
+
+    const result = await processPromisesBatch(
+      transactionsData,
+      5,
+      enrichTransactions
+    );
+
+    if (result.length > 0) {
+      const { data: updatedTransactions } = await io.supabase.client
+        .from("transactions")
+        .upsert(result, {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        })
+        .select();
+
+      if (updatedTransactions?.length > 0) {
+        revalidateTag(`transactions_${teamId}`);
+        revalidateTag(`spending_${teamId}`);
+        revalidateTag(`metrics_${teamId}`);
+
+        await io.logger.info(
+          `Transactions Enriched: ${updatedTransactions?.length}`
+        );
+      }
+    }
   },
 });
 
