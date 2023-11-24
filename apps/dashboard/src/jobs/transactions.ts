@@ -348,10 +348,12 @@ client.defineJob({
         .rpc("search_enriched_transactions", { term: transaction.name })
         .single();
 
-      return {
-        ...data,
-        enriched_id: data?.id,
-      };
+      if (data) {
+        return {
+          ...transaction,
+          enrichment_id: data?.id ?? null,
+        };
+      }
     }
 
     const result = await processPromisesBatch(
@@ -360,10 +362,12 @@ client.defineJob({
       enrichTransactions
     );
 
-    if (result.length > 0) {
+    const filteredItems = result.filter(Boolean);
+
+    if (filteredItems.length > 0) {
       const { data: updatedTransactions } = await io.supabase.client
         .from("transactions")
-        .update(result)
+        .upsert(filteredItems)
         .select();
 
       if (updatedTransactions?.length > 0) {
