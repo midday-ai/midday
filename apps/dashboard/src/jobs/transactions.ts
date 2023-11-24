@@ -363,10 +363,7 @@ client.defineJob({
     if (result.length > 0) {
       const { data: updatedTransactions } = await io.supabase.client
         .from("transactions")
-        .upsert(result, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        })
+        .update(result)
         .select();
 
       if (updatedTransactions?.length > 0) {
