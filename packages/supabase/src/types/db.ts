@@ -54,7 +54,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "transactions";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       bank_accounts: {
@@ -124,7 +124,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       bank_connections: {
@@ -165,7 +165,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       teams: {
@@ -189,6 +189,34 @@ export interface Database {
         };
         Relationships: [];
       };
+      transaction_enrichments: {
+        Row: {
+          category: Database["public"]["Enums"]["transactionCategories"] | null;
+          created_at: string;
+          id: string;
+          logo_url: string | null;
+          value: string | null;
+        };
+        Insert: {
+          category?:
+            | Database["public"]["Enums"]["transactionCategories"]
+            | null;
+          created_at?: string;
+          id?: string;
+          logo_url?: string | null;
+          value?: string | null;
+        };
+        Update: {
+          category?:
+            | Database["public"]["Enums"]["transactionCategories"]
+            | null;
+          created_at?: string;
+          id?: string;
+          logo_url?: string | null;
+          value?: string | null;
+        };
+        Relationships: [];
+      };
       transactions: {
         Row: {
           amount: number | null;
@@ -199,17 +227,18 @@ export interface Database {
           created_at: string;
           currency: string | null;
           date: string | null;
+          enrichment_id: string | null;
           id: string;
+          internal_id: string | null;
+          logo_url: string | null;
           method: Database["public"]["Enums"]["transactionMethods"] | null;
           name: string | null;
           note: string | null;
           order: number;
           original: string | null;
-          internal_id: string | null;
           reference: string;
           team_id: string | null;
           transaction_id: string;
-          vat: Database["public"]["Enums"]["vatRates"] | null;
         };
         Insert: {
           amount?: number | null;
@@ -222,17 +251,18 @@ export interface Database {
           created_at?: string;
           currency?: string | null;
           date?: string | null;
+          enrichment_id?: string | null;
           id?: string;
+          internal_id?: string | null;
+          logo_url?: string | null;
           method?: Database["public"]["Enums"]["transactionMethods"] | null;
           name?: string | null;
           note?: string | null;
           order?: number;
           original?: string | null;
-          internal_id?: string | null;
           reference: string;
           team_id?: string | null;
           transaction_id: string;
-          vat?: Database["public"]["Enums"]["vatRates"] | null;
         };
         Update: {
           amount?: number | null;
@@ -245,17 +275,18 @@ export interface Database {
           created_at?: string;
           currency?: string | null;
           date?: string | null;
+          enrichment_id?: string | null;
           id?: string;
+          internal_id?: string | null;
+          logo_url?: string | null;
           method?: Database["public"]["Enums"]["transactionMethods"] | null;
           name?: string | null;
           note?: string | null;
           order?: number;
           original?: string | null;
-          internal_id?: string | null;
           reference?: string;
           team_id?: string | null;
           transaction_id?: string;
-          vat?: Database["public"]["Enums"]["vatRates"] | null;
         };
         Relationships: [
           {
@@ -273,12 +304,19 @@ export interface Database {
             referencedColumns: ["id"];
           },
           {
+            foreignKeyName: "transactions_enrichment_id_fkey";
+            columns: ["enrichment_id"];
+            isOneToOne: false;
+            referencedRelation: "transaction_enrichments";
+            referencedColumns: ["id"];
+          },
+          {
             foreignKeyName: "transactions_team_id_fkey";
             columns: ["team_id"];
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       users: {
@@ -323,7 +361,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
       users_on_team: {
@@ -359,7 +397,7 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: "users";
             referencedColumns: ["id"];
-          },
+          }
         ];
       };
     };
@@ -367,7 +405,60 @@ export interface Database {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      gtrgm_compress: {
+        Args: {
+          "": unknown;
+        };
+        Returns: unknown;
+      };
+      gtrgm_decompress: {
+        Args: {
+          "": unknown;
+        };
+        Returns: unknown;
+      };
+      gtrgm_in: {
+        Args: {
+          "": unknown;
+        };
+        Returns: unknown;
+      };
+      gtrgm_options: {
+        Args: {
+          "": unknown;
+        };
+        Returns: undefined;
+      };
+      gtrgm_out: {
+        Args: {
+          "": unknown;
+        };
+        Returns: unknown;
+      };
+      search_enriched_transactions: {
+        Args: {
+          term: string;
+        };
+        Returns: {
+          id: string;
+        }[];
+      };
+      set_limit: {
+        Args: {
+          "": number;
+        };
+        Returns: number;
+      };
+      show_limit: {
+        Args: Record<PropertyKey, never>;
+        Returns: number;
+      };
+      show_trgm: {
+        Args: {
+          "": string;
+        };
+        Returns: unknown;
+      };
     };
     Enums: {
       bankProviders: "gocardless" | "plaid";
@@ -382,6 +473,7 @@ export interface Database {
         | "meals"
         | "equipment"
         | "activity"
+        | "uncategorized"
         | "other";
       transactionMethods:
         | "payment"

@@ -169,11 +169,14 @@ export async function getSpendingQuery(
       currency: data?.at(0)?.currency,
     },
     data: Object.entries(combinedValues).map(
-      ([category, { amount, currency }]) => ({
-        category,
-        currency,
-        amount: +Math.abs(amount).toFixed(2),
-      })
+      ([category, { amount, currency }]) => {
+        return {
+          category:
+            !category || category === "null" ? "uncategorized" : category,
+          currency,
+          amount: +Math.abs(amount).toFixed(2),
+        };
+      }
     ),
   };
 }
@@ -219,6 +222,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
+      enrichment:enrichment_id(id,category,logo_url),
       attachments(id,size,name)
     `,
       { count: "exact" }
@@ -290,7 +294,13 @@ export async function getTransactionsQuery(
       totalAmount,
       currency: data?.at(0)?.currency,
     },
-    data,
+    data: data?.map((transaction) => ({
+      ...transaction,
+      category:
+        transaction?.category ||
+        transaction?.enrichment?.category ||
+        "uncategorized",
+    })),
   };
 }
 
@@ -300,9 +310,9 @@ export async function getTransaction(supabase: Client, id: string) {
     .select(
       `
       *,
-      account:bank_account_id(*),
       assigned:assigned_id(*),
-      attachments(*)
+      enrichment:enrichment_id(id,category,logo_url),
+      attachments(id,size,name)
     `
     )
     .eq("id", id)
