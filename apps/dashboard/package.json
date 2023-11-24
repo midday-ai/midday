@@ -16,6 +16,7 @@
     "@hookform/resolvers": "^3.3.2",
     "@midday/gocardless": "workspace:*",
     "@midday/kv": "workspace:*",
+    "@midday/plaid": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/notification": "workspace:*",
     "@midday/supabase": "workspace:*",

@@ -134,6 +134,7 @@ export async function getSpendingQuery(
       `
       currency,
       category,
+      enrichment:enrichment_id(category),
       amount
     `
     )
@@ -153,12 +154,14 @@ export async function getSpendingQuery(
   const combinedValues = {};
 
   for (const item of data) {
-    const { category, amount, currency } = item;
+    const { category, amount, currency, enrichment } = item;
 
-    if (combinedValues[category]) {
-      combinedValues[category].amount += amount;
+    const key = (category || enrichment?.category) ?? "uncategorized";
+
+    if (combinedValues[key]) {
+      combinedValues[key].amount += amount;
     } else {
-      combinedValues[category] = { amount, currency };
+      combinedValues[key] = { amount, currency };
     }
   }
 
@@ -171,8 +174,7 @@ export async function getSpendingQuery(
     data: Object.entries(combinedValues).map(
       ([category, { amount, currency }]) => {
         return {
-          category:
-            !category || category === "null" ? "uncategorized" : category,
+          category: !category ? "uncategorized" : category,
           currency,
           amount: +Math.abs(amount).toFixed(2),
         };
