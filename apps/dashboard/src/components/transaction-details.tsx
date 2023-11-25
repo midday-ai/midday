@@ -8,7 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -43,7 +42,7 @@ export function TransactionDetails({ transactionId, onClose, data }) {
 
             <h2 className="mt-4 mb-3">
               {isLoading ? (
-                <Skeleton className="w-[35%] h-[22px] rounded-md" />
+                <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
               ) : (
                 data?.name
               )}
@@ -51,30 +50,22 @@ export function TransactionDetails({ transactionId, onClose, data }) {
             <div className="flex justify-between items-center">
               <div className="flex flex-col w-full">
                 {isLoading ? (
-                  <Skeleton className="w-[50%] h-[30px] rounded-md" />
+                  <Skeleton className="w-[50%] h-[30px] rounded-md mb-2" />
                 ) : (
-                  <div className="flex flex-col space-y-3">
-                    <span
-                      className={cn(
-                        "text-4xl",
-                        data?.amount > 0 && "text-[#00C969]"
-                      )}
-                    >
-                      {formatAmount({
-                        amount: data?.amount,
-                        currency: data?.currency,
-                        locale,
-                      })}
-                    </span>
-                  </div>
+                  <span
+                    className={cn(
+                      "text-4xl",
+                      data?.amount > 0 && "text-[#00C969]"
+                    )}
+                  >
+                    {formatAmount({
+                      amount: data?.amount,
+                      currency: data?.currency,
+                      locale,
+                    })}
+                  </span>
                 )}
               </div>
-              <Avatar className="rounded-full w-[60px] h-[60px]">
-                <AvatarImage src={data?.enrichment?.logo_url} />
-                <AvatarFallback>
-                  <span className="text-sm">{data?.name?.charAt(0)}</span>
-                </AvatarFallback>
-              </Avatar>
             </div>
           </div>
 

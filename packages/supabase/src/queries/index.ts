@@ -134,7 +134,6 @@ export async function getSpendingQuery(
       `
       currency,
       category,
-      enrichment:enrichment_id(category),
       amount
     `
     )
@@ -154,9 +153,9 @@ export async function getSpendingQuery(
   const combinedValues = {};
 
   for (const item of data) {
-    const { category, amount, currency, enrichment } = item;
+    const { category, amount, currency } = item;
 
-    const key = (category || enrichment?.category) ?? "uncategorized";
+    const key = category ?? "uncategorized";
 
     if (combinedValues[key]) {
       combinedValues[key].amount += amount;
@@ -224,7 +223,6 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      enrichment:enrichment_id(id,category,logo_url),
       attachments(id,size,name)
     `,
       { count: "exact" }
@@ -298,10 +296,7 @@ export async function getTransactionsQuery(
     },
     data: data?.map((transaction) => ({
       ...transaction,
-      category:
-        transaction?.category ||
-        transaction?.enrichment?.category ||
-        "uncategorized",
+      category: transaction?.category || "uncategorized",
     })),
   };
 }
@@ -313,7 +308,6 @@ export async function getTransaction(supabase: Client, id: string) {
       `
       *,
       assigned:assigned_id(*),
-      enrichment:enrichment_id(id,category,logo_url),
       attachments(id,size,name)
     `
     )
