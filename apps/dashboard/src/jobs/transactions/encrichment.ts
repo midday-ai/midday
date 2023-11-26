@@ -49,7 +49,7 @@ client.defineJob({
 
     const filteredItems = result.filter(Boolean);
 
-    if (filteredItems?.length > 0) {
+    if (filteredItems && filteredItems?.length > 0) {
       const { data: updatedTransactions } = await io.supabase.client
         .from("transactions")
         .upsert(filteredItems)

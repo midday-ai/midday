@@ -60,6 +60,7 @@ client.defineJob({
       name: Events.TRANSACTIONS_NOTIFICATION,
       payload: {
         teamId: data?.team_id,
+        transactions: transactionsData,
       },
     });
 
@@ -67,7 +68,6 @@ client.defineJob({
       name: Events.TRANSACTIONS_ENCRICHMENT,
       payload: {
         teamId: data?.team_id,
-        transactions: transactionsData,
       },
     });
 
