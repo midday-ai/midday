@@ -25,6 +25,7 @@ client.defineJob({
       .eq("team_id", teamId)
       .is("category", null)
       .is("enrichment_id", null)
+      .limit(10000)
       .select();
 
     async function enrichTransactions(transaction) {
