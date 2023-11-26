@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@midday/ui/utils";
 import {
   Body,
