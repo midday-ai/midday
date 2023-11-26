@@ -36,8 +36,6 @@ client.defineJob({
       .select("team_id, user:user_id(id, full_name, avatar_url, email, locale)")
       .eq("team_id", teamId);
 
-    await io.logger.info(`usersData: ${JSON.stringify(usersData, null, 2)}`);
-
     if (transactions?.length && transactions.length > 0) {
       revalidateTag(`transactions_${teamId}`);
       revalidateTag(`spending_${teamId}`);
@@ -77,13 +75,13 @@ client.defineJob({
         })
       );
 
-      await io.logger.info(
-        `notificationEvents: ${JSON.stringify(notificationEvents, null, 2)}`
-      );
-
       if (notificationEvents?.length) {
         triggerBulk(notificationEvents.flat());
       }
+
+      await io.logger.info(
+        `notificationEvents: ${JSON.stringify(notificationEvents, null, 2)}`
+      );
 
       const emailEvents = await Promise.all(
         usersData?.map(async ({ user, team_id }) => {
