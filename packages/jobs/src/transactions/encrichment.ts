@@ -1,9 +1,9 @@
-import { client, supabase } from "@/client";
-import { Events, Jobs } from "@/constants";
-import { processPromisesBatch } from "@/utils";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
+import { client, supabase } from "../client";
+import { Events, Jobs } from "../constants";
+import { processPromisesBatch } from "../utils";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_ENCRICHMENT,

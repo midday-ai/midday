@@ -1,8 +1,8 @@
-import { client, supabase } from "@/client";
-import { Events, Jobs } from "@/constants";
-import { transformTransactions } from "@/utils";
 import { getTransactions } from "@midday/gocardless";
 import { revalidateTag } from "next/cache";
+import { client, supabase } from "../client";
+import { Events, Jobs } from "../constants";
+import { transformTransactions } from "../utils";
 import { scheduler } from "./scheduler";
 
 client.defineJob({

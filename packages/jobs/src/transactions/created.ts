@@ -1,4 +1,4 @@
-import { client, supabaseTriggers } from "@/client";
+import { client, supabaseTriggers } from "../client";
 import { Events, Jobs } from "../constants";
 import { scheduler } from "./scheduler";
 
