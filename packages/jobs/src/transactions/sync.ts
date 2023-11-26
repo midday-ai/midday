@@ -37,10 +37,6 @@ client.defineJob({
 
     const { transactions } = await getTransactions(data?.account_id);
 
-    if (!transactions?.booked.length) {
-      await io.logger.info("No transactions found");
-    }
-
     const { data: transactionsData, error } = await io.supabase.client
       .from("transactions")
       .upsert(

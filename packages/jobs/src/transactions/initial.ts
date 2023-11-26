@@ -32,10 +32,6 @@ client.defineJob({
       })
       .eq("id", recordId);
 
-    if (!transactions?.booked.length) {
-      await io.logger.info("No transactions found");
-    }
-
     const { data: transactionsData, error } = await io.supabase.client
       .from("transactions")
       .insert(

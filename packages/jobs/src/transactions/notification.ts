@@ -41,10 +41,6 @@ client.defineJob({
       revalidateTag(`spending_${teamId}`);
       revalidateTag(`metrics_${teamId}`);
 
-      await io.logger.info(
-        `transactions: ${JSON.stringify(transactions, null, 2)}`
-      );
-
       const notificationEvents = await Promise.all(
         usersData?.map(async ({ user, team_id }) => {
           const { t } = getI18n({ locale: user.locale });
@@ -79,10 +75,6 @@ client.defineJob({
         triggerBulk(notificationEvents.flat());
       }
 
-      await io.logger.info(
-        `notificationEvents: ${JSON.stringify(notificationEvents, null, 2)}`
-      );
-
       const emailEvents = await Promise.all(
         usersData?.map(async ({ user, team_id }) => {
           const { t } = getI18n({ locale: user.locale });
@@ -116,10 +108,6 @@ client.defineJob({
             },
           };
         })
-      );
-
-      await io.logger.info(
-        `emailEvents: ${JSON.stringify(emailEvents, null, 2)}`
       );
 
       if (emailEvents?.length) {
