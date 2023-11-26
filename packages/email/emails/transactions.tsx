@@ -65,12 +65,12 @@ const defaultTransactions = [
 ];
 
 const baseUrl =
-  process.env.NODE_ENV === "production"
+  process.env.VERCEL_ENV === "production"
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
 const baseAppUrl =
-  process.env.NODE_ENV === "production"
+  process.env.VERCEL_ENV === "production"
     ? "https://app.midday.ai"
     : "http://localhost:3001";
 
