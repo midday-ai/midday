@@ -1,16 +1,19 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { Settings } from "lucide-react";
 import {
+  MdApartment,
   MdBarChart,
   MdCelebration,
   MdDesk,
   MdDevices,
+  MdDynamicForm,
   MdExpandMore,
   MdFastfood,
   MdFence,
   MdFlightTakeoff,
   MdHomeWork,
   MdInventory2,
+  MdLtePlusMobiledata,
   MdOutlineAccountBalanceWallet,
   MdOutlineCategory,
   MdOutlineDescription,
@@ -310,4 +313,7 @@ export const Icons = {
   TrendingDown: MdTrendingDown,
   Category: MdOutlineCategory,
   Difference: MdOutlineDifference,
+  Apartment: MdApartment,
+  LtePlusMobiledata: MdLtePlusMobiledata,
+  DynamicForm: MdDynamicForm,
 };

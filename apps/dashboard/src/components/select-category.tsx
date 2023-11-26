@@ -33,6 +33,9 @@ const categories = [
   "equipment",
   "activity",
   "other",
+  "taxes",
+  "internet_and_telephone",
+  "facilities_expenses",
   "uncategorized",
 ];
 

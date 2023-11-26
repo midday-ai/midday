@@ -4,6 +4,7 @@ export default {
     travel: "Travel",
     software: "Software",
     office_supplies: "Office Supplies",
+    internet_and_telephone: "Internet and Telephone",
     rent: "Rent",
     equipment: "Equipment",
     income: "Income",
@@ -11,6 +12,8 @@ export default {
     activity: "Activity",
     other: "Other",
     uncategorized: "Uncategorized",
+    taxes: "Taxes",
+    facilities_expenses: "Facilities Expenses",
   },
   transaction_methods: {
     card_purchase: "Card Purchase",

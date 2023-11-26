@@ -134,7 +134,8 @@ export async function getSpendingQuery(
       `
       currency,
       category,
-      amount
+      amount,
+      enrichment:enrichment_id(category)
     `
     )
     .order("order", { ascending: false })
@@ -153,9 +154,9 @@ export async function getSpendingQuery(
   const combinedValues = {};
 
   for (const item of data) {
-    const { category, amount, currency } = item;
+    const { category, amount, currency, enrichment } = item;
 
-    const key = category ?? "uncategorized";
+    const key = category || enrichment?.category || "uncategorized";
 
     if (combinedValues[key]) {
       combinedValues[key].amount += amount;
@@ -170,15 +171,17 @@ export async function getSpendingQuery(
       totalAmount: +Math.abs(totalAmount).toFixed(2),
       currency: data?.at(0)?.currency,
     },
-    data: Object.entries(combinedValues).map(
-      ([category, { amount, currency }]) => {
+    data: Object.entries(combinedValues)
+      .map(([category, { amount, currency, enrichment }]) => {
         return {
-          category: !category ? "uncategorized" : category,
+          category: !category
+            ? "uncategorized"
+            : category || enrichment?.category,
           currency,
           amount: +Math.abs(amount).toFixed(2),
         };
-      }
-    ),
+      })
+      .sort((a, b) => b.amount - a.amount),
   };
 }
 
@@ -223,6 +226,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
+      enrichment:enrichment_id(category),
       attachments(id,size,name)
     `,
       { count: "exact" }
@@ -296,7 +300,10 @@ export async function getTransactionsQuery(
     },
     data: data?.map((transaction) => ({
       ...transaction,
-      category: transaction?.category || "uncategorized",
+      category:
+        transaction?.category ||
+        transaction?.enrichment?.category ||
+        "uncategorized",
     })),
   };
 }

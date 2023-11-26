@@ -4,6 +4,7 @@ export default {
     travel: "Resa",
     software: "Mjukvara",
     office_supplies: "Kontorsmaterial",
+    internet_and_telephone: "Internet och telefon",
     rent: "Hyra",
     equipment: "Utrustning",
     income: "Inkomst",
@@ -11,6 +12,8 @@ export default {
     activity: "Aktivitet",
     other: "Annan",
     uncategorized: "Okategoriserad",
+    taxes: "Skatter",
+    facilities_expenses: "Anläggningskostnader",
   },
   transaction_methods: {
     card_purchase: "Kortbetalning",

@@ -28,6 +28,12 @@ export const mapCategoryColor = (name: string) => {
       return "#E5E926";
     case "uncategorized":
       return "#606060";
+    case "taxes":
+      return "#A0A8DF";
+    case "internet_and_telephone":
+      return "#00524C";
+    case "facilities_expenses":
+      return "#A8AABC";
     default:
       return;
   }
@@ -60,6 +66,12 @@ export function CategoryIcon({ name, size = 18 }) {
       return <Icons.Celebration style={{ color }} size={size} />;
     case "uncategorized":
       return <Icons.Difference style={{ color }} size={size} />;
+    case "taxes":
+      return <Icons.Apartment style={{ color }} size={size} />;
+    case "internet_and_telephone":
+      return <Icons.LtePlusMobiledata style={{ color }} size={size} />;
+    case "facilities_expenses":
+      return <Icons.DynamicForm style={{ color }} size={size} />;
     default:
       return null;
   }
