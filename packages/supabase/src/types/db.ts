@@ -191,29 +191,22 @@ export interface Database {
       };
       transaction_enrichments: {
         Row: {
-          category: Database["public"]["Enums"]["transactionCategories"] | null;
+          category: Database["public"]["Enums"]["transactionCategories"];
           created_at: string;
           id: string;
-          logo_url: string | null;
-          value: string | null;
+          name: string | null;
         };
         Insert: {
-          category?:
-            | Database["public"]["Enums"]["transactionCategories"]
-            | null;
+          category: Database["public"]["Enums"]["transactionCategories"];
           created_at?: string;
           id?: string;
-          logo_url?: string | null;
-          value?: string | null;
+          name?: string | null;
         };
         Update: {
-          category?:
-            | Database["public"]["Enums"]["transactionCategories"]
-            | null;
+          category?: Database["public"]["Enums"]["transactionCategories"];
           created_at?: string;
           id?: string;
-          logo_url?: string | null;
-          value?: string | null;
+          name?: string | null;
         };
         Relationships: [];
       };
@@ -227,10 +220,8 @@ export interface Database {
           created_at: string;
           currency: string | null;
           date: string | null;
-          enrichment_id: string | null;
           id: string;
           internal_id: string | null;
-          logo_url: string | null;
           method: Database["public"]["Enums"]["transactionMethods"] | null;
           name: string | null;
           note: string | null;
@@ -251,10 +242,8 @@ export interface Database {
           created_at?: string;
           currency?: string | null;
           date?: string | null;
-          enrichment_id?: string | null;
           id?: string;
           internal_id?: string | null;
-          logo_url?: string | null;
           method?: Database["public"]["Enums"]["transactionMethods"] | null;
           name?: string | null;
           note?: string | null;
@@ -275,10 +264,8 @@ export interface Database {
           created_at?: string;
           currency?: string | null;
           date?: string | null;
-          enrichment_id?: string | null;
           id?: string;
           internal_id?: string | null;
-          logo_url?: string | null;
           method?: Database["public"]["Enums"]["transactionMethods"] | null;
           name?: string | null;
           note?: string | null;
@@ -301,13 +288,6 @@ export interface Database {
             columns: ["bank_account_id"];
             isOneToOne: false;
             referencedRelation: "bank_accounts";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "transactions_enrichment_id_fkey";
-            columns: ["enrichment_id"];
-            isOneToOne: false;
-            referencedRelation: "transaction_enrichments";
             referencedColumns: ["id"];
           },
           {
@@ -440,7 +420,10 @@ export interface Database {
           term: string;
         };
         Returns: {
+          category: Database["public"]["Enums"]["transactionCategories"];
+          created_at: string;
           id: string;
+          name: string | null;
         }[];
       };
       set_limit: {
@@ -474,6 +457,7 @@ export interface Database {
         | "equipment"
         | "activity"
         | "uncategorized"
+        | "taxes"
         | "other";
       transactionMethods:
         | "payment"

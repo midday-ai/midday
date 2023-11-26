@@ -2,11 +2,12 @@ import { client } from "@/trigger";
 import { getTransactions } from "@midday/gocardless";
 import { revalidateTag } from "next/cache";
 import { supabase } from "../client";
+import { Events, Jobs } from "../constants";
 import { scheduler } from "./scheduler";
 import { transformTransactions } from "./utils";
 
 client.defineJob({
-  id: "transactions-sync",
+  id: Jobs.TRANSACTIONS_SYNC,
   name: "🔄 Transactions - Latest Transactions",
   version: "1.0.1",
   trigger: scheduler,
@@ -56,14 +57,14 @@ client.defineJob({
       .select();
 
     await io.sendEvent("🔔 Send notifications", {
-      name: "transactions.notification",
+      name: Events.TRANSACTIONS_NOTIFICATION,
       payload: {
         teamId: data?.team_id,
       },
     });
 
     await io.sendEvent("💅 Enrich Transactions", {
-      name: "transactions.encrichment",
+      name: Events.TRANSACTIONS_ENCRICHMENT,
       payload: {
         teamId: data?.team_id,
         transactions: transactionsData,

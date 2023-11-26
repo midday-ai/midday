@@ -3,13 +3,14 @@ import { getTransactionsQuery } from "@midday/supabase/queries";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { supabase } from "../client";
+import { Events, Jobs } from "../constants";
 
 client.defineJob({
-  id: "transactions-export",
-  name: "Transactions - Export",
+  id: Jobs.TRANSACTIONS_EXPORT,
+  name: "🗄️ Transactions - Export",
   version: "1.0.1",
   trigger: eventTrigger({
-    name: "transactions.export",
+    name: Events.TRANSACTIONS_EXPORT,
     schema: z.object({
       from: z.coerce.date(),
       to: z.coerce.date(),

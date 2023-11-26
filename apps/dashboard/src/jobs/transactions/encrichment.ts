@@ -3,14 +3,15 @@ import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabase } from "../client";
+import { Events, Jobs } from "../constants";
 import { processPromisesBatch } from "./utils";
 
 client.defineJob({
-  id: "transactions-encrichment",
+  id: Jobs.TRANSACTIONS_ENCRICHMENT,
   name: "💅 Transactions - Enrichment",
   version: "1.0.1",
   trigger: eventTrigger({
-    name: "transactions.encrichment",
+    name: Events.TRANSACTIONS_ENCRICHMENT,
     schema: z.object({
       teamId: z.string(),
     }),

@@ -6,13 +6,14 @@ import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabase } from "../client";
+import { Events, Jobs } from "../constants";
 
 client.defineJob({
-  id: "transactions-notification",
+  id: Jobs.TRANSACTIONS_NOTIFICATION,
   name: "🔔 Transactions - Notification",
   version: "1.0.1",
   trigger: eventTrigger({
-    name: "transactions.notification",
+    name: Events.TRANSACTIONS_NOTIFICATION,
     schema: z.object({
       transactions: z.array(
         z.object({

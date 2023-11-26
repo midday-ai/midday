@@ -4,14 +4,15 @@ import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabase } from "../client";
+import { Events, Jobs } from "../constants";
 import { transformTransactions } from "./utils";
 
 client.defineJob({
-  id: "transactions-initial-sync",
+  id: Jobs.TRANSACTIONS_INITIAL_SYNC,
   name: "🔂 Transactions - Initial Sync",
   version: "1.0.1",
   trigger: eventTrigger({
-    name: "transactions.initial.sync",
+    name: Events.TRANSACTIONS_INITIAL_SYNC,
     schema: z.object({
       accountId: z.string(),
       teamId: z.string(),
@@ -52,7 +53,7 @@ client.defineJob({
       revalidateTag(`metrics_${teamId}`);
 
       await io.sendEvent("💅 Enrich Transactions", {
-        name: "transactions.encrichment",
+        name: Events.TRANSACTIONS_ENCRICHMENT,
         payload: {
           teamId,
         },

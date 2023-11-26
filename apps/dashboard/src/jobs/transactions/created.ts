@@ -1,9 +1,10 @@
 import { client } from "@/trigger";
 import { supabaseTriggers } from "../client";
+import { Events, Jobs } from "../constants";
 import { scheduler } from "./scheduler";
 
 client.defineJob({
-  id: "bank-account-created",
+  id: Jobs.BANK_ACCOUNT_CREATED,
   name: "🏦 Bank Account Created",
   version: "1.0.1",
   trigger: supabaseTriggers.onInserted({
@@ -12,7 +13,7 @@ client.defineJob({
   run: async (payload, io) => {
     await io.sendEvent("🔂 Transactions Initial Sync", {
       id: payload.record.id,
-      name: "transactions.initial.sync",
+      name: Events.TRANSACTIONS_INITIAL_SYNC,
       payload: {
         accountId: payload.record.account_id,
         teamId: payload.record.team_id,
