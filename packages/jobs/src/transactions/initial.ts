@@ -1,11 +1,10 @@
-import { client } from "@/trigger";
+import { client, supabase } from "@/client";
+import { Events, Jobs } from "@/constants";
+import { transformTransactions } from "@/utils";
 import { getTransactions } from "@midday/gocardless";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
-import { transformTransactions } from "./utils";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,

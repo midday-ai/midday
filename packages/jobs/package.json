@@ -1,0 +1,18 @@
+{
+    "name": "@midday/jobs",
+    "version": "1.0.0",
+    "private": true,
+    "main": "src/index.ts",
+    "scripts": {
+        "clean": "rm -rf .turbo node_modules",
+        "lint": "biome check .",
+        "format": "biome format --write .",
+        "check:types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@trigger.dev/react": "^2.2.7",
+        "@trigger.dev/sdk": "^2.2.7",
+        "@trigger.dev/supabase": "^2.2.7"
+    }
+}
+  

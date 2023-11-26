@@ -1,12 +1,12 @@
-import { client } from "@/trigger";
+import { client, supabase } from "@/client";
+import { Events, Jobs } from "@/constants";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
 import { TriggerEvents, triggerBulk } from "@midday/notification";
+import { renderAsync } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_NOTIFICATION,

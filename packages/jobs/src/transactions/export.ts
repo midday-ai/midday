@@ -1,9 +1,8 @@
-import { client } from "@/trigger";
+import { client, supabase } from "@/client";
+import { Events, Jobs } from "@/constants";
 import { getTransactionsQuery } from "@midday/supabase/queries";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
-import { supabase } from "../client";
-import { Events, Jobs } from "../constants";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_EXPORT,
