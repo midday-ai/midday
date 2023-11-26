@@ -334,52 +334,51 @@ client.defineJob({
   run: async (payload, io) => {
     const { teamId } = payload;
 
-    // const { data: transactionsData } = await io.supabase.client
-    //   .from("transactions")
-    //   .select("id, name")
-    //   .eq("team_id", teamId)
-    //   .is("category", null)
-    //   .is("logo_url", null)
-    //   .is("enrichment_id", null)
-    //   .select();
+    const { data: transactionsData } = await io.supabase.client
+      .from("transactions")
+      .select("id, name")
+      .eq("team_id", teamId)
+      .is("category", null)
+      .is("enrichment_id", null)
+      .select();
 
-    // async function enrichTransactions(transaction) {
-    //   const { data } = await io.supabase.client
-    //     .rpc("search_enriched_transactions", { term: transaction.name })
-    //     .single();
+    async function enrichTransactions(transaction) {
+      const { data } = await io.supabase.client
+        .rpc("search_enriched_transactions", { term: transaction.name })
+        .single();
 
-    //   if (data) {
-    //     return {
-    //       ...transaction,
-    //       enrichment_id: data?.id ?? null,
-    //     };
-    //   }
-    // }
+      if (data) {
+        return {
+          ...transaction,
+          enrichment_id: data?.id ?? null,
+        };
+      }
+    }
 
-    // const result = await processPromisesBatch(
-    //   transactionsData,
-    //   5,
-    //   enrichTransactions
-    // );
+    const result = await processPromisesBatch(
+      transactionsData,
+      5,
+      enrichTransactions
+    );
 
-    // const filteredItems = result.filter(Boolean);
+    const filteredItems = result.filter(Boolean);
 
-    // if (filteredItems.length > 0) {
-    //   const { data: updatedTransactions } = await io.supabase.client
-    //     .from("transactions")
-    //     .upsert(filteredItems)
-    //     .select();
+    if (filteredItems?.length > 0) {
+      const { data: updatedTransactions } = await io.supabase.client
+        .from("transactions")
+        .upsert(filteredItems)
+        .select();
 
-    //   if (updatedTransactions?.length > 0) {
-    //     revalidateTag(`transactions_${teamId}`);
-    //     revalidateTag(`spending_${teamId}`);
-    //     revalidateTag(`metrics_${teamId}`);
+      if (updatedTransactions?.length > 0) {
+        revalidateTag(`transactions_${teamId}`);
+        revalidateTag(`spending_${teamId}`);
+        revalidateTag(`metrics_${teamId}`);
 
-    //     await io.logger.info(
-    //       `Transactions Enriched: ${updatedTransactions?.length}`
-    //     );
-    //   }
-    // }
+        await io.logger.info(
+          `Transactions Enriched: ${updatedTransactions?.length}`
+        );
+      }
+    }
   },
 });
 

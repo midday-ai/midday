@@ -16,7 +16,6 @@
     "@hookform/resolvers": "^3.3.2",
     "@midday/gocardless": "workspace:*",
     "@midday/kv": "workspace:*",
-    "@midday/plaid": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/notification": "workspace:*",
     "@midday/supabase": "workspace:*",
@@ -46,7 +45,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.1",
-    "@types/node": "^20.9.5",
+    "@types/node": "^20.10.0",
     "@types/react": "^18.2.38",
     "@types/react-dom": "^18.2.17",
     "typescript": "^5.3.2"

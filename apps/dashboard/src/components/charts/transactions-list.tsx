@@ -1,6 +1,5 @@
 import { formatAmount } from "@/utils/format";
 import { getTransactions } from "@midday/supabase/cached-queries";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
@@ -60,15 +59,6 @@ export async function TransactionsList({ type, disabled }) {
               className="flex p-3"
             >
               <div className="w-[50%] flex space-x-2">
-                <Avatar className="rounded-full w-5 h-5">
-                  <AvatarImage src={transaction?.enrichment?.logo_url} />
-                  <AvatarFallback>
-                    <span className="text-[10px]">
-                      {transaction?.name?.charAt(0)}
-                    </span>
-                  </AvatarFallback>
-                </Avatar>
-
                 <span
                   className={cn(
                     "text-sm",
