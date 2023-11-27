@@ -26,6 +26,7 @@ export const getTransactions = async (params) => {
     ["transactions", teamId],
     {
       tags: [`transactions_${teamId}`],
+      revalidate: 10,
     }
   )(params);
 };

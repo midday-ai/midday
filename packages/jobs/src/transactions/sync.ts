@@ -37,18 +37,29 @@ client.defineJob({
 
     const { transactions } = await getTransactions(data?.account_id);
 
+    // We want to insert transactions in reversed order so the incremental id in the databae is correct
+    const combinedTransactions = [
+      ...transactions.booked,
+      ...transactions.pending.map((transaction) => ({
+        ...transaction,
+        pending: true,
+      })),
+    ].reverse();
+
+    const transformedTransactions = transformTransactions(
+      combinedTransactions,
+      {
+        accountId: data?.id,
+        teamId: data?.team_id,
+      }
+    );
+
     const { data: transactionsData, error } = await io.supabase.client
       .from("transactions")
-      .upsert(
-        transformTransactions(transactions?.booked, {
-          accountId: data?.id,
-          teamId: data?.team_id,
-        }),
-        {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        }
-      )
+      .upsert(transformedTransactions, {
+        onConflict: "internal_id,pending_id",
+        ignoreDuplicates: true,
+      })
       .select();
 
     await io.sendEvent("🔔 Send notifications", {

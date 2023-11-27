@@ -46,4 +46,7 @@ export default {
     profit_loss: "Vinst/Förlust",
     income: "Inkomst",
   },
+  tags: {
+    pending: "Väntande",
+  },
 } as const;

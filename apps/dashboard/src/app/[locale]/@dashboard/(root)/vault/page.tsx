@@ -1,3 +1,4 @@
+import { Table } from "@/components/tables/vault";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -5,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function Vault() {
-  return null;
+  return <Table />;
 }

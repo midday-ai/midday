@@ -35,20 +35,30 @@ export async function processPromisesBatch(
   return results;
 }
 
-export const transformTransactions = (transactions, { teamId, accountId }) =>
-  // We want to insert transactions in reversed order so the incremental id in supabase is correct
-  transactions?.reverse().map((data) => ({
-    transaction_id: data.transactionId,
-    reference: data.entryReference,
-    booking_date: data.bookingDate,
-    date: data.valueDate,
-    name: capitalCase(data.additionalInformation),
-    original: data.additionalInformation,
-    method: mapTransactionMethod(data.proprietaryBankTransactionCode),
-    internal_id: data.internalTransactionId,
-    amount: data.transactionAmount.amount,
-    currency: data.transactionAmount.currency,
-    bank_account_id: accountId,
-    category: data.transactionAmount.amount > 0 ? "income" : null,
-    team_id: teamId,
-  }));
+export const transformTransactions = (transactions, { teamId, accountId }) => {
+  return transactions?.map((data) => {
+    const name = capitalCase(data.additionalInformation);
+    const amount = data.transactionAmount.amount;
+
+    return {
+      transaction_id: data.transactionId ?? null,
+      reference: data.entryReference ?? null,
+      booking_date: data.bookingDate ?? null,
+      date: data.valueDate,
+      name,
+      original: data.additionalInformation,
+      method: mapTransactionMethod(data.proprietaryBankTransactionCode),
+      // internal_id: data.internalTransactionId ?? null,
+      amount,
+      currency: data.transactionAmount.currency,
+      bank_account_id: accountId,
+      category: amount > 0 ? "income" : null,
+      team_id: teamId,
+      pending: data?.pending,
+      // We use name, amount, valueDate and accountId to generate a unique ID for pending transactions
+      internal_id: Buffer.from(
+        `${name}_${amount}_${data.valueDate}_${accountId}`
+      ).toString("base64"),
+    };
+  });
+};

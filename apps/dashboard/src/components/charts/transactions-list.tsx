@@ -4,6 +4,7 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import Link from "next/link";
+import { Tag } from "../tag";
 import { transactionList } from "./data";
 
 export function TransactionsListHeader() {
@@ -66,7 +67,10 @@ export async function TransactionsList({ type, disabled }) {
                     transaction?.amount > 0 && "text-[#00C969]"
                   )}
                 >
-                  {transaction.name}
+                  <div className="flex space-x-4 items-center">
+                    <span>{transaction.name}</span>
+                    {transaction?.pending && <Tag type="pending" />}
+                  </div>
                 </span>
               </div>
               <div className="w-[35%]">
