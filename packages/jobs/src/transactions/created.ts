@@ -25,7 +25,7 @@ client.defineJob({
     await scheduler.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 60 * 10, // every 1h
+        seconds: 36000, // every 1h
       },
     });
   },

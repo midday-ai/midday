@@ -31,6 +31,7 @@ client.defineJob({
     async function enrichTransactions(transaction) {
       const { data } = await io.supabase.client
         .rpc("search_enriched_transactions", { term: transaction.name })
+        .limit(1)
         .single();
 
       if (data) {
