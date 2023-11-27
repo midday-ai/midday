@@ -13,7 +13,6 @@ import {
   MdFlightTakeoff,
   MdHomeWork,
   MdInventory2,
-  MdLtePlusMobiledata,
   MdOutlineAccountBalanceWallet,
   MdOutlineCategory,
   MdOutlineDescription,
@@ -28,6 +27,7 @@ import {
   MdPerson,
   MdRefresh,
   MdSave,
+  MdSensors,
   MdTrendingDown,
   MdTrendingUp,
 } from "react-icons/md";
@@ -314,6 +314,6 @@ export const Icons = {
   Category: MdOutlineCategory,
   Difference: MdOutlineDifference,
   Apartment: MdApartment,
-  LtePlusMobiledata: MdLtePlusMobiledata,
+  Sensors: MdSensors,
   DynamicForm: MdDynamicForm,
 };

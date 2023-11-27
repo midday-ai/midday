@@ -53,7 +53,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
     await updateTransactionAction(id, { category: value });
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
-      id,
+      name,
       teamId: userData?.team_id,
     });
 

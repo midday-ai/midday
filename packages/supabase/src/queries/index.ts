@@ -266,7 +266,7 @@ export async function getTransactionsQuery(
   }
 
   if (category === "exclude") {
-    query.eq("category", "uncategorized");
+    query.is("category", null).is("enrichment_id", null);
   }
 
   if (category === "include") {
@@ -324,7 +324,7 @@ export async function getTransaction(supabase: Client, id: string) {
 }
 
 type GetSimilarTransactionsParams = {
-  id: string;
+  name: string;
   teamId: string;
 };
 
@@ -332,19 +332,15 @@ export async function getSimilarTransactions(
   supabase: Client,
   params: GetSimilarTransactionsParams
 ) {
-  const { id, teamId } = params;
-  const transaction = await supabase
-    .from("transactions")
-    .select("name, category")
-    .eq("id", id)
-    .single();
+  const { name, teamId } = params;
 
   return supabase
     .from("transactions")
     .select("id, amount", { count: "exact" })
-    .eq("name", transaction.data.name)
+    .eq("name", name)
     .eq("team_id", teamId)
-    .eq("category", "uncategorized")
+    .is("category", null)
+    .is("enrichment_id", null)
     .throwOnError();
 }
 

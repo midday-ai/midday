@@ -29,9 +29,9 @@ export const mapCategoryColor = (name: string) => {
     case "uncategorized":
       return "#606060";
     case "taxes":
-      return "#A0A8DF";
+      return "#0086A1";
     case "internet_and_telephone":
-      return "#00524C";
+      return "#FF8976";
     case "facilities_expenses":
       return "#A8AABC";
     default:
@@ -69,7 +69,7 @@ export function CategoryIcon({ name, size = 18 }) {
     case "taxes":
       return <Icons.Apartment style={{ color }} size={size} />;
     case "internet_and_telephone":
-      return <Icons.LtePlusMobiledata style={{ color }} size={size} />;
+      return <Icons.Sensors style={{ color }} size={size} />;
     case "facilities_expenses":
       return <Icons.DynamicForm style={{ color }} size={size} />;
     default:

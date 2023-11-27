@@ -1,8 +1,10 @@
 "use server";
 
 import { env } from "@/env.mjs";
+import { getUser } from "@midday/supabase/cached-queries";
 import {
   createBankAccounts,
+  createEnrichmentTransaction,
   updateSimilarTransactions,
   updateTransaction,
 } from "@midday/supabase/mutations";
@@ -68,6 +70,14 @@ export async function updateTransactionAction(id: string, payload: any) {
   const supabase = await createClient();
   const { data } = await updateTransaction(supabase, id, payload);
 
+  // Add category to global enrichment_transactions
+  if (data?.category) {
+    createEnrichmentTransaction(supabase, {
+      name: data.name,
+      category: data.category,
+    });
+  }
+
   invalidateCacheAction([
     `transactions_${data.team_id}`,
     `spending_${data.team_id}`,
@@ -77,8 +87,9 @@ export async function updateTransactionAction(id: string, payload: any) {
 
 export async function updateSimilarTransactionsAction(id: string) {
   const supabase = await createClient();
-  const { data } = await updateSimilarTransactions(supabase, id);
-  const teamId = data.at(0).team_id;
+  await updateSimilarTransactions(supabase, id);
+  const user = await getUser();
+  const teamId = user.data.team_id;
 
   invalidateCacheAction([
     `transactions_${teamId}`,

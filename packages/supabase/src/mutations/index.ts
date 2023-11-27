@@ -1,6 +1,6 @@
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getSession } from "../queries";
-import { Client } from "../types";
+import { Client, Database } from "../types";
 import { remove } from "../utils/storage";
 
 export async function createBankAccounts(supabase: Client, accounts) {
@@ -91,7 +91,7 @@ export async function updateTransaction(
     .from("transactions")
     .update(data)
     .eq("id", id)
-    .select("id, team_id")
+    .select("id, team_id, category, name")
     .single();
 }
 
@@ -142,7 +142,8 @@ export async function updateSimilarTransactions(supabase: Client, id: string) {
     .update({ category: transaction.data.category })
     .eq("name", transaction.data.name)
     .eq("team_id", userData?.team_id)
-    .eq("category", "uncategorized")
+    .is("category", null)
+    .is("enrichment_id", null)
     .select("id, team_id");
 }
 
@@ -168,6 +169,29 @@ export async function createAttachments(
         team_id: userData?.team_id,
       }))
     )
+    .select();
+
+  return data;
+}
+
+type CreateEnrichmentTransactionParams = {
+  name: string;
+  category: Database["public"]["Enums"]["transactionCategories"];
+};
+
+export async function createEnrichmentTransaction(
+  supabase: Client,
+  params: CreateEnrichmentTransactionParams
+) {
+  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+
+  const { data } = await supabase
+    .from("transaction_enrichments")
+    .insert({
+      name: params.name,
+      category: params.category,
+      created_by: userData?.id,
+    })
     .select();
 
   return data;
