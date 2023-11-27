@@ -17,18 +17,55 @@ export async function NotificationSettings() {
     teamId: userData.team_id,
   });
 
-  return subscriberPreferences.map((preference) => {
-    return (
-      <NotificationSetting
-        key={preference.template._id}
-        id={preference.template._id}
-        name={preference.template.name}
-        enabled={preference.preference.channels?.in_app}
-        updateSubscriberPreferenceAction={updateSubscriberPreferenceAction}
-        subscriberId={userData.id}
-        teamId={userData.team_id}
-        type="in_app"
-      />
-    );
-  });
+  const inAppSettings = subscriberPreferences
+    ?.filter((setting) =>
+      Object.keys(setting.preference.channels).includes("in_app")
+    )
+    .map((setting) => {
+      return (
+        <NotificationSetting
+          key={setting.template._id}
+          id={setting.template._id}
+          name={setting.template.name}
+          enabled={setting.preference.channels?.in_app}
+          updateSubscriberPreferenceAction={updateSubscriberPreferenceAction}
+          subscriberId={userData.id}
+          teamId={userData.team_id}
+          type="in_app"
+        />
+      );
+    });
+
+  const emailSettings = subscriberPreferences
+    ?.filter((setting) =>
+      Object.keys(setting.preference.channels).includes("email")
+    )
+    .map((setting) => {
+      return (
+        <NotificationSetting
+          key={setting.template._id}
+          id={setting.template._id}
+          name={setting.template.name}
+          enabled={setting.preference.channels?.email}
+          updateSubscriberPreferenceAction={updateSubscriberPreferenceAction}
+          subscriberId={userData.id}
+          teamId={userData.team_id}
+          type="email"
+        />
+      );
+    });
+
+  return (
+    <div className="flex space-y-4 flex-col">
+      <div>
+        <h2 className="mb-2">Web</h2>
+        {inAppSettings}
+      </div>
+
+      <div>
+        <h2 className="mb-2">Email</h2>
+        {emailSettings}
+      </div>
+    </div>
+  );
 }

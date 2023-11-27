@@ -336,7 +336,7 @@ export async function getSimilarTransactions(
 
   return supabase
     .from("transactions")
-    .select("id, amount", { count: "exact" })
+    .select("id, amount, team_id", { count: "exact" })
     .eq("name", name)
     .eq("team_id", teamId)
     .is("category", null)
@@ -467,5 +467,27 @@ export async function getMetricsQuery(
         },
       };
     }),
+  };
+}
+
+type GetVaultParams = {
+  teamId: string;
+  path?: string;
+};
+
+const defaultFolders = [{ id: "inbox" }, { id: "exports" }];
+
+export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
+  const { teamId, path } = params;
+  let basePath = teamId;
+
+  if (path) {
+    basePath = `${basePath}/${path}`;
+  }
+
+  const { data } = await supabase.storage.from("vault").list(basePath);
+
+  return {
+    data: data?.filter((file) => file.name !== ".emptyFolderPlaceholder"),
   };
 }

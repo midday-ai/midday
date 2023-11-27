@@ -22,18 +22,18 @@ export const mapCategoryColor = (name: string) => {
       return "#E9BE26";
     case "transfer":
       return "#FF902B";
-    case "other":
-      return "#F5F5F3";
+    case "internet_and_telephone":
+      return "#FF8976";
+    case "facilities_expenses":
+      return "#A8AABC";
     case "activity":
       return "#E5E926";
     case "uncategorized":
       return "#606060";
     case "taxes":
-      return "#0086A1";
-    case "internet_and_telephone":
-      return "#FF8976";
-    case "facilities_expenses":
-      return "#A8AABC";
+      return "#B39CD0";
+    case "other":
+      return "#F5F5F3";
     default:
       return;
   }

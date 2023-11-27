@@ -8,6 +8,7 @@ import {
   getTeamMembersQuery,
   getTransactionsQuery,
   getUserQuery,
+  getVaultQuery,
 } from "../queries";
 
 export const getTransactions = async (params) => {
@@ -149,6 +150,28 @@ export const getMetrics = async (params) => {
     ["metrics", teamId],
     {
       tags: [`metrics_${teamId}`],
+    }
+  )(params);
+};
+
+export const getVault = async (params) => {
+  const supabase = createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getVaultQuery(supabase, { ...params, teamId });
+    },
+    ["vault", teamId],
+    {
+      tags: [`vault_${teamId}`],
+      revalidate: 10,
     }
   )(params);
 };
