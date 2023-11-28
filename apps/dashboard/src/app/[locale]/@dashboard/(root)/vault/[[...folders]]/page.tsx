@@ -1,3 +1,4 @@
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Table } from "@/components/tables/vault";
 import { Metadata } from "next";
 
@@ -6,5 +7,10 @@ export const metadata: Metadata = {
 };
 
 export default function Vault({ params }) {
-  return <Table path={params?.folders?.join("/")} />;
+  return (
+    <div>
+      <Breadcrumbs folders={params?.folders} />
+      <Table path={params?.folders?.join("/")} />
+    </div>
+  );
 }

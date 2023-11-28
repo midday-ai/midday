@@ -18,6 +18,8 @@ client.defineJob({
       .eq("id", ctx.source.id)
       .single();
 
+    const teamId = data?.team_id;
+
     // Update bank account last_accessed
     await io.supabase.client
       .from("bank_accounts")
@@ -26,8 +28,8 @@ client.defineJob({
       })
       .eq("id", ctx.source.id);
 
-    revalidateTag(`bank_accounts_${data?.team_id}`);
-    await io.logger.info(`bank_accounts_${data?.team_id}`);
+    revalidateTag(`bank_accounts_${teamId}`);
+    await io.logger.info(`bank_accounts_${teamId}`);
 
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
@@ -42,7 +44,7 @@ client.defineJob({
       .upsert(
         transformTransactions(transactions?.booked, {
           accountId: data?.id,
-          teamId: data?.team_id,
+          teamId,
         }),
         {
           onConflict: "internal_id",
@@ -51,20 +53,28 @@ client.defineJob({
       )
       .select();
 
-    await io.sendEvent("🔔 Send notifications", {
-      name: Events.TRANSACTIONS_NOTIFICATION,
-      payload: {
-        teamId: data?.team_id,
-        transactions: transactionsData,
-      },
-    });
+    if (transactionsData && transactionsData.length > 0) {
+      await io.logger.log(`Sending notifications: ${transactionsData.length}`);
 
-    await io.sendEvent("💅 Enrich Transactions", {
-      name: Events.TRANSACTIONS_ENCRICHMENT,
-      payload: {
-        teamId: data?.team_id,
-      },
-    });
+      revalidateTag(`transactions_${teamId}`);
+      revalidateTag(`spending_${teamId}`);
+      revalidateTag(`metrics_${teamId}`);
+
+      await io.sendEvent("🔔 Send notifications", {
+        name: Events.TRANSACTIONS_NOTIFICATION,
+        payload: {
+          teamId,
+          transactions: transactionsData,
+        },
+      });
+
+      await io.sendEvent("💅 Enrich Transactions", {
+        name: Events.TRANSACTIONS_ENCRICHMENT,
+        payload: {
+          teamId,
+        },
+      });
+    }
 
     if (error) {
       await io.logger.error(JSON.stringify(error, null, 2));

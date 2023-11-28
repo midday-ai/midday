@@ -3,7 +3,6 @@ import { getI18n } from "@midday/email/locales";
 import { TriggerEvents, triggerBulk } from "@midday/notification";
 import { renderAsync } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
@@ -36,83 +35,81 @@ client.defineJob({
       .select("team_id, user:user_id(id, full_name, avatar_url, email, locale)")
       .eq("team_id", teamId);
 
-    if (transactions?.length && transactions.length > 0) {
-      revalidateTag(`transactions_${teamId}`);
-      revalidateTag(`spending_${teamId}`);
-      revalidateTag(`metrics_${teamId}`);
+    const notificationEvents = await Promise.all(
+      usersData?.map(async ({ user, team_id }) => {
+        const { t } = getI18n({ locale: user.locale });
 
-      const notificationEvents = await Promise.all(
-        usersData?.map(async ({ user, team_id }) => {
-          const { t } = getI18n({ locale: user.locale });
+        return transactions.map((transaction) => ({
+          name: TriggerEvents.TransactionNewInApp,
+          payload: {
+            transactionId: transaction.id,
+            description: t(
+              { id: "notifications.transaction" },
+              {
+                amount: Intl.NumberFormat(user.locale, {
+                  style: "currency",
+                  currency: transaction.currency,
+                }).format(transaction.amount),
+                from: transaction.name,
+              }
+            ),
+          },
+          user: {
+            subscriberId: user.id,
+            teamId: team_id,
+            email: user.email,
+            fullName: user.full_name,
+            avatarUrl: user.avatar_url,
+          },
+        }));
+      })
+    );
 
-          return transactions.map((transaction) => ({
-            name: TriggerEvents.TransactionNewInApp,
-            payload: {
-              transactionId: transaction.id,
-              description: t(
-                { id: "notifications.transaction" },
-                {
-                  amount: Intl.NumberFormat(user.locale, {
-                    style: "currency",
-                    currency: transaction.currency,
-                  }).format(transaction.amount),
-                  from: transaction.name,
-                }
-              ),
-            },
-            user: {
-              subscriberId: user.id,
-              teamId: team_id,
-              email: user.email,
-              fullName: user.full_name,
-              avatarUrl: user.avatar_url,
-            },
-          }));
-        })
+    if (notificationEvents?.length) {
+      await io.logger.log(
+        `Sending notifications: ${notificationEvents.length}`
       );
+      triggerBulk(notificationEvents.flat());
+    }
 
-      if (notificationEvents?.length) {
-        triggerBulk(notificationEvents.flat());
-      }
+    const emailEvents = await Promise.all(
+      usersData?.map(async ({ user, team_id }) => {
+        const { t } = getI18n({ locale: user.locale });
 
-      const emailEvents = await Promise.all(
-        usersData?.map(async ({ user, team_id }) => {
-          const { t } = getI18n({ locale: user.locale });
+        const html = await renderAsync(
+          TransactionsEmail({
+            fullName: user.full_name,
+            transactions: transactions.map((transaction) => ({
+              id: transaction.id,
+              date: transaction.date,
+              amount: transaction.amount,
+              name: transaction.name,
+              currency: transaction.currency,
+            })),
+            locale: user.locale,
+          })
+        );
 
-          const html = await renderAsync(
-            TransactionsEmail({
-              fullName: user.full_name,
-              transactions: transactions.map((transaction) => ({
-                id: transaction.id,
-                date: transaction.date,
-                amount: transaction.amount,
-                name: transaction.name,
-                currency: transaction.currency,
-              })),
-              locale: user.locale,
-            })
-          );
+        return {
+          name: TriggerEvents.TransactionNewEmail,
+          payload: {
+            subject: t({ id: "transactions.subject" }),
+            html,
+          },
+          user: {
+            subscriberId: user.id,
+            teamId: team_id,
+            email: user.email,
+            fullName: user.full_name,
+            avatarUrl: user.avatar_url,
+          },
+        };
+      })
+    );
 
-          return {
-            name: TriggerEvents.TransactionNewEmail,
-            payload: {
-              subject: t({ id: "transactions.subject" }),
-              html,
-            },
-            user: {
-              subscriberId: user.id,
-              teamId: team_id,
-              email: user.email,
-              fullName: user.full_name,
-              avatarUrl: user.avatar_url,
-            },
-          };
-        })
-      );
-
-      if (emailEvents?.length) {
-        triggerBulk(emailEvents);
-      }
+    if (emailEvents?.length) {
+      await io.logger.log(`Sending emails: ${emailEvents.length}`);
+      triggerBulk(emailEvents);
     }
   },
 });
