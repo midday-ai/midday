@@ -1,12 +1,12 @@
 import { Icons } from "@midday/ui/icons";
 
-export function FileIcon({ mimetype, name }) {
+export function FileIcon({ mimetype, name, isFolder }) {
   if (name === "exports") {
     return <Icons.DriveFileMove size={16} className="text-[#878787]" />;
   }
 
   if (name === "inbox") {
-    return <Icons.FolderOpen size={16} className="text-[#878787]" />;
+    return <Icons.FolderSpecial size={16} className="text-[#878787]" />;
   }
 
   if (name === "transactions") {
@@ -15,6 +15,10 @@ export function FileIcon({ mimetype, name }) {
 
   if (mimetype?.startsWith("image")) {
     return <Icons.BrokenImage size={16} className="text-[#878787]" />;
+  }
+
+  if (isFolder) {
+    return <Icons.Folder size={16} className="text-[#878787]" />;
   }
 
   switch (mimetype) {

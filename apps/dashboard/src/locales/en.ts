@@ -46,4 +46,10 @@ export default {
     profit_loss: "Profit/Loss",
     income: "Income",
   },
+  folders: {
+    all: "All",
+    exports: "Exports",
+    inbox: "Inbox",
+    transactions: "Transactions",
+  },
 } as const;

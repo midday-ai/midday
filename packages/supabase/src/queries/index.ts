@@ -475,10 +475,17 @@ type GetVaultParams = {
   path?: string;
 };
 
-const defaultFolders = [{ id: "inbox" }, { id: "exports" }];
-
 export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { teamId, path } = params;
+
+  const defaultFolders = path
+    ? []
+    : [
+        { name: "inbox", isFolder: true },
+        { name: "exports", isFolder: true },
+        { name: "transactions", isFolder: true },
+      ];
+
   let basePath = teamId;
 
   if (path) {
@@ -487,7 +494,18 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const { data } = await supabase.storage.from("vault").list(basePath);
 
+  const filteredData =
+    data
+      ?.filter((file) => file.name !== ".emptyFolderPlaceholder")
+      .map((item) => ({ ...item, isFolder: !item.id })) ?? [];
+
+  const mergedMap = new Map(
+    [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj])
+  );
+
+  const mergedArray = Array.from(mergedMap.values());
+
   return {
-    data: data?.filter((file) => file.name !== ".emptyFolderPlaceholder"),
+    data: mergedArray,
   };
 }

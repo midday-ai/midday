@@ -13,8 +13,8 @@ export function DataTable({ data }) {
       <TableHeader>
         <TableRow>
           <TableHead className="w-[60%]">Name</TableHead>
-          <TableHead className="w-full">Uploaded</TableHead>
-          <TableHead className="text-right w-full">Actions</TableHead>
+          <TableHead className="w-[15%]">Created at</TableHead>
+          <TableHead className="w-full">Last modified at</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
