@@ -6,7 +6,7 @@ export async function Table({ path }) {
   const { data } = await getVault({ path });
 
   return (
-    <div className="mt-6 h-[calc(100vh-240px)] border">
+    <div className="mt-6 h-[calc(100vh-180px)] border">
       <DataTable data={data} />
       {data.length === 0 && <EmptyTable type={path} />}
     </div>
