@@ -18,16 +18,24 @@ export default function Vault({ params }) {
       <div className="flex justify-between items-center mt-6 h-[32px]">
         <Breadcrumbs folders={params?.folders} />
 
-        {!disableActions && (
-          <div className="flex space-x-2">
-            <Button variant="outline" className="w-[32px] h-[32px]" size="icon">
-              <Icons.FileUpload />
-            </Button>
-            <Button variant="outline" className="w-[32px] h-[32px]" size="icon">
-              <Icons.CreateNewFolder />
-            </Button>
-          </div>
-        )}
+        <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            className="w-[32px] h-[32px]"
+            size="icon"
+            disabled={disableActions}
+          >
+            <Icons.FileUpload />
+          </Button>
+          <Button
+            variant="outline"
+            className="w-[32px] h-[32px]"
+            size="icon"
+            disabled={disableActions}
+          >
+            <Icons.CreateNewFolder />
+          </Button>
+        </div>
       </div>
       <Table path={params?.folders?.join("/")} />
     </div>
