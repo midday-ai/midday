@@ -4,7 +4,7 @@ import "./src/env.mjs";
 const config = {
   reactStrictMode: true,
   experimental: {
-    ppr: true,
+    // ppr: true,
   },
   images: {
     remotePatterns: [
