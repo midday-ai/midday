@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-const Item = ({ file, onDelete }) => {
+const Item = ({ file, onDelete, id }) => {
   const animations = {
     initial: { opacity: 0 },
     animate: { opacity: 1 },
@@ -38,7 +38,7 @@ const Item = ({ file, onDelete }) => {
 
         <div className="flex flex-col space-y-0.5 w-80">
           <a
-            href={`/api/download/document?path=${file.path}&filename=${file.name}`}
+            href={`/api/download/file?path=transactions/${id}&filename=${file.name}`}
             download
             className="truncate"
           >
@@ -146,6 +146,7 @@ export function Attachments({ id, data }) {
           {files.map((file, index) => (
             <Item
               key={file.name}
+              id={id}
               file={file}
               onDelete={() => handleOnDelete(file.id)}
             />

@@ -7,6 +7,7 @@ import {
   subYears,
 } from "date-fns";
 import { Client } from "../types";
+import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
 export function getPagination(page: number, size: number) {
   const limit = size ? +size : 3;
@@ -496,7 +497,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const filteredData =
     data
-      ?.filter((file) => file.name !== ".emptyFolderPlaceholder")
+      ?.filter((file) => file.name !== EMPTY_FOLDER_PLACEHOLDER_FILE_NAME)
       .map((item) => ({ ...item, isFolder: !item.id })) ?? [];
 
   const mergedMap = new Map(

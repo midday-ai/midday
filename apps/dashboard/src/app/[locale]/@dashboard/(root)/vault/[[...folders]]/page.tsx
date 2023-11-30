@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function Vault({ params }) {
   const disableActions = ["transactions", "inbox", "exports"].includes(
-    params.folders?.slice(-1)?.at(0)
+    params?.folders?.at(0)
   );
 
   return (

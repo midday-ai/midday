@@ -69,3 +69,18 @@ export const exportTransactionsSchema = z.object({
   from: z.coerce.date(),
   to: z.coerce.date(),
 });
+
+export const deleteFileSchema = z.object({
+  path: z.string(),
+  isFolder: z.boolean().optional(),
+});
+
+export const createFolderSchema = z.object({
+  path: z.string(),
+  name: z.string(),
+});
+
+export const shareFileSchema = z.object({
+  filepath: z.string(),
+  expireIn: z.number(),
+});
