@@ -6,7 +6,7 @@ export function EmptyTable({ type }: Props) {
   switch (type) {
     case "inbox":
       return (
-        <div className="border border-t-0 p-4 h-[calc(100vh-240px)] flex justify-center items-center">
+        <div className="h-[calc(100%-80px)] p-4 flex justify-center items-center">
           <div className="items-center flex flex-col text-center">
             <h2 className="mb-2">This is your inbox</h2>
             <p className="text-sm text-[#878787]">
@@ -19,7 +19,7 @@ export function EmptyTable({ type }: Props) {
 
     default:
       return (
-        <div className="border border-t-0 p-4 h-[calc(100vh-240px)] flex justify-center items-center">
+        <div className="h-[calc(100%-80px)] p-4 flex justify-center items-center">
           <div className="items-center flex flex-col text-center">
             <h2 className="mb-2">Drop your files here</h2>
             <p className="text-sm text-[#878787]">

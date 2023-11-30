@@ -12,8 +12,6 @@ export async function GET(req, res) {
   const path = requestUrl.searchParams.get("path");
   const filename = requestUrl.searchParams.get("filename");
 
-  console.log(`${user.data.team_id}/${path}/${filename}`);
-
   const { data } = await download(supabase, {
     bucket: "vault",
     path: `${user.data.team_id}/${path}/${filename}`,

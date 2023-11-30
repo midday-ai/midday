@@ -103,3 +103,61 @@ export async function share(
 ) {
   return client.storage.from(bucket).createSignedUrl(path, expireIn, options);
 }
+
+export async function getAllItemsAlongFolder(folder) {
+  const items = [];
+
+  let formattedPathToFolder = "";
+  const { name, columnIndex, prefix } = folder;
+
+  if (prefix === undefined) {
+    const pathToFolder = this.openedFolders
+      .slice(0, columnIndex)
+      .map((folder) => folder.name)
+      .join("/");
+    formattedPathToFolder =
+      pathToFolder.length > 0 ? `${pathToFolder}/${name}` : name;
+  } else {
+    formattedPathToFolder = `${prefix}/${name}`;
+  }
+
+  const options = {
+    limit: 10000,
+    offset: OFFSET,
+    sortBy: { column: this.sortBy, order: this.sortByOrder },
+  };
+  let folderContents = [];
+
+  for (;;) {
+    const res = await post(
+      `${this.endpoint}/buckets/${this.selectedBucket.name}/objects/list`,
+      {
+        path: formattedPathToFolder,
+        options,
+      }
+    );
+    folderContents = folderContents.concat(res);
+    options.offset += options.limit;
+    if ((res || []).length < options.limit) {
+      break;
+    }
+  }
+
+  const subfolders = folderContents?.filter((item) => item.id === null) ?? [];
+  const folderItems = folderContents?.filter((item) => item.id !== null) ?? [];
+
+  folderItems.forEach((item) =>
+    items.push({ ...item, prefix: formattedPathToFolder })
+  );
+
+  const subFolderContents = await Promise.all(
+    subfolders.map((folder) =>
+      this.getAllItemsAlongFolder({ ...folder, prefix: formattedPathToFolder })
+    )
+  );
+  subFolderContents.map((subfolderContent) => {
+    subfolderContent.map((item) => items.push(item));
+  });
+
+  return items;
+}

@@ -193,13 +193,23 @@ export function DataTableRow({ data }) {
             <ContextMenuItem>Rename</ContextMenuItem>
           )}
           <ContextMenuItem>
-            <a
-              href={`/api/download/file?path=${folderPath}&filename=${data.name}`}
-              download
-              className="truncate"
-            >
-              Download
-            </a>
+            {data.isFolder ? (
+              <a
+                href={`/api/download/zip?path=${folderPath}&filename=${data.name}`}
+                download
+                className="truncate"
+              >
+                Download
+              </a>
+            ) : (
+              <a
+                href={`/api/download/file?path=${folderPath}&filename=${data.name}`}
+                download
+                className="truncate"
+              >
+                Download
+              </a>
+            )}
           </ContextMenuItem>
           {!disableActions && !isDefaultFolder && (
             <AlertDialogTrigger asChild>

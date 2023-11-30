@@ -2,7 +2,6 @@
 
 import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
-import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
 import { useUpload } from "@/hooks/use-upload";
 import { formatSize } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
@@ -11,7 +10,6 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { File, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -70,7 +68,6 @@ type Attachment = {
 
 export function Attachments({ id, data }) {
   const supabase = createClient();
-  const router = useRouter();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
 
@@ -143,7 +140,7 @@ export function Attachments({ id, data }) {
       </div>
       <AnimatePresence>
         <ul className="mt-4 space-y-4">
-          {files.map((file, index) => (
+          {files.map((file) => (
             <Item
               key={file.name}
               id={id}
