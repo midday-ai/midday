@@ -200,6 +200,7 @@ export function StartPage() {
 
           <Image
             quality={100}
+            loading="eager"
             src={overview}
             alt="Midday | Overview"
             width={993}
