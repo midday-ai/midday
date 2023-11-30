@@ -29,6 +29,7 @@ import {
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
+import ms from "ms";
 import { useAction } from "next-safe-action/hook";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
@@ -44,13 +45,9 @@ export const translatedFolderName = (t: any, folder: string) => {
       return t("folders.exports");
 
     default:
-      return folder;
+      return decodeURIComponent(folder);
   }
 };
-
-const ONE_WEEK_IN_SECONDS = 604800;
-const ONE_MONTH_IN_SECONDS = 2629743;
-const ONE_YEAR_IN_SECONDS = ONE_MONTH_IN_SECONDS * 12;
 
 export function DataTableRow({ data }) {
   const t = useI18n();
@@ -63,6 +60,7 @@ export function DataTableRow({ data }) {
   const isDefaultFolder = ["inbox", "exports", "transactions"].includes(
     data.name
   );
+
   const disableActions = ["transactions"].includes(folders?.at(0));
   const folderPath = folders.join("/");
   const filepath = [...folders, data.name].join("/");
@@ -150,7 +148,7 @@ export function DataTableRow({ data }) {
                   onClick={() =>
                     shareFile.execute({
                       filepath,
-                      expireIn: ONE_WEEK_IN_SECONDS,
+                      expireIn: ms("1 week"),
                     })
                   }
                 >
@@ -160,7 +158,7 @@ export function DataTableRow({ data }) {
                   onClick={() =>
                     shareFile.execute({
                       filepath,
-                      expireIn: ONE_MONTH_IN_SECONDS,
+                      expireIn: ms("1 month"),
                     })
                   }
                 >
@@ -170,7 +168,7 @@ export function DataTableRow({ data }) {
                   onClick={() =>
                     shareFile.execute({
                       filepath,
-                      expireIn: ONE_YEAR_IN_SECONDS,
+                      expireIn: ms("1 year"),
                     })
                   }
                 >
@@ -231,7 +229,7 @@ export function DataTableRow({ data }) {
             <AlertDialogAction
               onClick={() =>
                 deleteFile.execute({
-                  path: data.isFile ? folderPath : filepath,
+                  path: decodeURIComponent(data.isFile ? folderPath : filepath),
                   isFolder: data.isFolder,
                 })
               }

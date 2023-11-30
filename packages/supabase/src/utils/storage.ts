@@ -12,16 +12,16 @@ export async function upload(
   client: SupabaseClient,
   { file, path, bucket }: UploadParams
 ) {
-  const b = client.storage.from(bucket);
+  const storage = client.storage.from(bucket);
   const fullPath = `${path}/${file.name}`;
 
-  const result = await b.upload(fullPath, file, {
+  const result = await storage.upload(fullPath, file, {
     upsert: true,
     cacheControl: "3600",
   });
 
   if (!result.error) {
-    return b.getPublicUrl(fullPath).data.publicUrl;
+    return storage.getPublicUrl(fullPath).data.publicUrl;
   }
 
   throw result.error;
@@ -104,60 +104,60 @@ export async function share(
   return client.storage.from(bucket).createSignedUrl(path, expireIn, options);
 }
 
-export async function getAllItemsAlongFolder(folder) {
-  const items = [];
+// export async function getAllItemsAlongFolder(folder) {
+//   const items = [];
 
-  let formattedPathToFolder = "";
-  const { name, columnIndex, prefix } = folder;
+//   let formattedPathToFolder = "";
+//   const { name, columnIndex, prefix } = folder;
 
-  if (prefix === undefined) {
-    const pathToFolder = this.openedFolders
-      .slice(0, columnIndex)
-      .map((folder) => folder.name)
-      .join("/");
-    formattedPathToFolder =
-      pathToFolder.length > 0 ? `${pathToFolder}/${name}` : name;
-  } else {
-    formattedPathToFolder = `${prefix}/${name}`;
-  }
+//   if (prefix === undefined) {
+//     const pathToFolder = this.openedFolders
+//       .slice(0, columnIndex)
+//       .map((folder) => folder.name)
+//       .join("/");
+//     formattedPathToFolder =
+//       pathToFolder.length > 0 ? `${pathToFolder}/${name}` : name;
+//   } else {
+//     formattedPathToFolder = `${prefix}/${name}`;
+//   }
 
-  const options = {
-    limit: 10000,
-    offset: OFFSET,
-    sortBy: { column: this.sortBy, order: this.sortByOrder },
-  };
-  let folderContents = [];
+//   const options = {
+//     limit: 10000,
+//     offset: OFFSET,
+//     sortBy: { column: this.sortBy, order: this.sortByOrder },
+//   };
+//   let folderContents = [];
 
-  for (;;) {
-    const res = await post(
-      `${this.endpoint}/buckets/${this.selectedBucket.name}/objects/list`,
-      {
-        path: formattedPathToFolder,
-        options,
-      }
-    );
-    folderContents = folderContents.concat(res);
-    options.offset += options.limit;
-    if ((res || []).length < options.limit) {
-      break;
-    }
-  }
+//   for (;;) {
+//     const res = await post(
+//       `${this.endpoint}/buckets/${this.selectedBucket.name}/objects/list`,
+//       {
+//         path: formattedPathToFolder,
+//         options,
+//       }
+//     );
+//     folderContents = folderContents.concat(res);
+//     options.offset += options.limit;
+//     if ((res || []).length < options.limit) {
+//       break;
+//     }
+//   }
 
-  const subfolders = folderContents?.filter((item) => item.id === null) ?? [];
-  const folderItems = folderContents?.filter((item) => item.id !== null) ?? [];
+//   const subfolders = folderContents?.filter((item) => item.id === null) ?? [];
+//   const folderItems = folderContents?.filter((item) => item.id !== null) ?? [];
 
-  folderItems.forEach((item) =>
-    items.push({ ...item, prefix: formattedPathToFolder })
-  );
+//   folderItems.forEach((item) =>
+//     items.push({ ...item, prefix: formattedPathToFolder })
+//   );
 
-  const subFolderContents = await Promise.all(
-    subfolders.map((folder) =>
-      this.getAllItemsAlongFolder({ ...folder, prefix: formattedPathToFolder })
-    )
-  );
-  subFolderContents.map((subfolderContent) => {
-    subfolderContent.map((item) => items.push(item));
-  });
+//   const subFolderContents = await Promise.all(
+//     subfolders.map((folder) =>
+//       this.getAllItemsAlongFolder({ ...folder, prefix: formattedPathToFolder })
+//     )
+//   );
+//   subFolderContents.map((subfolderContent) => {
+//     subfolderContent.map((item) => items.push(item));
+//   });
 
-  return items;
-}
+//   return items;
+// }
