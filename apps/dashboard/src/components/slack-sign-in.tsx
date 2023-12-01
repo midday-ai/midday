@@ -19,7 +19,7 @@ export function SlackSignIn() {
   return (
     <Button
       onClick={handleSignIn}
-      className="active:scale-[0.98] rounded-xl bg-white px-6 py-4 text-black font-medium flex space-x-2 h-[40px]"
+      className="active:scale-[0.98] rounded-xl bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px]"
     >
       <Icons.Slack />
       <span>Continue with Slack</span>

@@ -10,7 +10,7 @@ export function SecondaryMenu({ items }) {
   return (
     <nav
       className="sticky -top-[1px] z-10 backdrop-blur backdrop-filter bg-opacity-50 py-4"
-      style={{ background: "rgba(18, 18, 18,.9)" }}
+      style={{ background: "var(--sticky)" }}
     >
       <ul className="flex space-x-6 text-sm">
         {items.map((item) => (
@@ -20,7 +20,7 @@ export function SecondaryMenu({ items }) {
             className={cn(
               "text-[#606060]",
               pathname === item.path &&
-                "text-white font-medium underline underline-offset-8",
+                "text-primary font-medium underline underline-offset-8"
             )}
           >
             <span>{item.label}</span>

@@ -25,7 +25,7 @@ export function Header() {
               "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
           }}
         >
-          <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-white px-8 h-[39px] h-full font-normal">
+          <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-primary px-8 h-[39px] h-full font-normal">
             {t("signIn")}
           </span>
         </button>

@@ -53,7 +53,7 @@ export function StartPage() {
 
         <div className="flex justify-center mt-8">
           {isSubmitted ? (
-            <div className="border border border-[#2C2C2C] font-sm text-white h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
+            <div className="border border border-[#2C2C2C] font-sm text-primary h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
               <p>{t("subscribed")}</p>
 
               <svg
@@ -85,7 +85,7 @@ export function StartPage() {
                   autoComplete="email"
                   aria-label="Email address"
                   required
-                  className="bg-[#1A1A1A] font-sm text-white outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11"
+                  className="bg-[#1A1A1A] font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11"
                 />
                 <SubmitButton />
               </fieldset>

@@ -19,13 +19,8 @@ export default function Vault({ params }) {
         <Breadcrumbs folders={params?.folders} />
 
         <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            className="w-[32px] h-[32px]"
-            size="icon"
-            disabled={disableActions}
-          >
-            <Icons.FileUpload />
+          <Button variant="outline" disabled={disableActions}>
+            Upload
           </Button>
           <Button
             variant="outline"

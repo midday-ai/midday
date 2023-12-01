@@ -18,7 +18,7 @@ export function TransactionsModal() {
 
   return (
     <div
-      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl p-px shadow-lg text-white rounded-lg z-50 "
+      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl p-px shadow-lg text-primary rounded-lg z-50 "
       style={{
         background:
           "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #727d8b 50%, rgba(235,248,255,.18) 100%)",
@@ -47,7 +47,7 @@ export function TransactionsModal() {
                 alt="Overview"
                 className={cn(
                   "w-full opacity-0 absolute transition-all",
-                  image.id === activeId && "opacity-1",
+                  image.id === activeId && "opacity-1"
                 )}
               />
             ))}
@@ -63,7 +63,7 @@ export function TransactionsModal() {
                   key={image.id}
                   className={cn(
                     "w-[16px] h-[6px] rounded-full bg-[#D9D9D9] opacity-30 transition-all cursor-pointer",
-                    image.id === activeId && "opacity-1",
+                    image.id === activeId && "opacity-1"
                   )}
                 />
               ))}

@@ -117,7 +117,7 @@ export function Attachments({ id, data }) {
       <div
         className={cn(
           "w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1 transition-colors text-[#606060]",
-          isDragActive && "bg-secondary text-white"
+          isDragActive && "bg-secondary text-primary"
         )}
         {...getRootProps()}
       >

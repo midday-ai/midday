@@ -34,13 +34,13 @@ export function DataTableHeader({ collapsed }: Props) {
 
       router.replace(`${pathname}?${params.toString()}`);
     },
-    [searchParams, router, pathname],
+    [searchParams, router, pathname]
   );
 
   return (
     <div
       className="sticky -top-[1px] z-10 backdrop-blur backdrop-filter bg-opacity-50"
-      style={{ background: "rgba(18, 18, 18,.9)" }}
+      style={{ background: "var(--sticky)" }}
     >
       <div className="flex items-center h-[45px] hover:bg-secondary">
         <DataTableCell className="w-[100px]">

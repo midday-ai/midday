@@ -182,6 +182,7 @@ export async function getSpendingQuery(
           amount: +Math.abs(amount).toFixed(2),
         };
       })
+      .filter((item) => item.category !== "transfer")
       .sort((a, b) => b.amount - a.amount),
   };
 }
@@ -309,19 +310,25 @@ export async function getTransactionsQuery(
   };
 }
 
-export async function getTransaction(supabase: Client, id: string) {
-  return supabase
+export async function getTransactionQuery(supabase: Client, id: string) {
+  const { data } = await supabase
     .from("transactions")
     .select(
       `
       *,
       assigned:assigned_id(*),
+      enrichment:enrichment_id(category),
       attachments(id,size,name)
     `
     )
     .eq("id", id)
     .single()
     .throwOnError();
+
+  return {
+    ...data,
+    category: data?.enrichment?.category || "uncategorized",
+  };
 }
 
 type GetSimilarTransactionsParams = {

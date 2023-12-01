@@ -39,7 +39,7 @@ export default function Login() {
               style={{ animationDelay: "0ms" }}
             />
 
-            <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
+            <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
               <h1 className="font-bold pb-1 text-3xl">Login to midday.</h1>
             </div>
 

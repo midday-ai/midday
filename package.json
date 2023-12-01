@@ -21,12 +21,12 @@
     "check:types": "turbo typecheck"
   },
   "dependencies": {
-    "@biomejs/biome": "1.4.0",
+    "@biomejs/biome": "1.4.1",
     "@manypkg/cli": "^0.21.1",
     "turbo": "^1.10.16",
     "typescript": "^5.3.2"
   },
   "devDependencies": {
-    "vercel": "^32.5.6"
+    "vercel": "^32.6.0"
   }
 }

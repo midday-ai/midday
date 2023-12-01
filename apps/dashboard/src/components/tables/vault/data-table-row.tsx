@@ -49,7 +49,7 @@ export const translatedFolderName = (t: any, folder: string) => {
   }
 };
 
-export function DataTableRow({ data }) {
+export function DataTableRow({ data, addOptimisticData }) {
   const t = useI18n();
   const { toast } = useToast();
   const router = useRouter();
@@ -90,9 +90,7 @@ export function DataTableRow({ data }) {
   });
 
   const createFolder = useAction(createFolderAction, {
-    onError: (katt) => {
-      console.log(katt);
-
+    onError: () => {
       toast({
         duration: 4000,
         description:

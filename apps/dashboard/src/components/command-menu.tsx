@@ -13,6 +13,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { DialogProps } from "@radix-ui/react-alert-dialog";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
@@ -64,6 +65,7 @@ const settings = [
 
 export function CommandMenu({ ...props }: DialogProps) {
   const router = useRouter();
+  const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -139,13 +141,11 @@ export function CommandMenu({ ...props }: DialogProps) {
           <CommandSeparator />
 
           <CommandGroup heading="Appearance">
-            <CommandItem
-              onSelect={() => runCommand(() => console.log("light"))}
-            >
+            <CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
               <SunIcon className="mr-2 h-4 w-4" />
               Light
             </CommandItem>
-            <CommandItem onSelect={() => runCommand(() => console.log("dark"))}>
+            <CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
               <MoonIcon className="mr-2 h-4 w-4" />
               Dark
             </CommandItem>

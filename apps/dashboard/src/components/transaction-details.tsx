@@ -2,6 +2,8 @@
 
 import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
+import { createClient } from "@midday/supabase/client";
+import { getTransactionQuery } from "@midday/supabase/queries";
 import {
   Accordion,
   AccordionContent,
@@ -19,12 +21,37 @@ import { Attachments } from "./attachments";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 
-export function TransactionDetails({ transactionId, onClose, data }) {
+export function TransactionDetails({
+  transactionId,
+  onClose,
+  data: initialData,
+}) {
+  const [data, setData] = useState(initialData);
+  const supabase = createClient();
   const locale = useCurrentLocale();
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLoading(false);
+    if (initialData) {
+      setLoading(false);
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const transaction = await getTransactionQuery(supabase, transactionId);
+        setData(transaction);
+        setLoading(false);
+      } catch {
+        setLoading(false);
+        onClose();
+      }
+    }
+
+    if (!data) {
+      fetchData();
+    }
   }, [data]);
 
   return (

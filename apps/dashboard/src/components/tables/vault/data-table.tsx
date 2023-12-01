@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Table,
   TableBody,
@@ -5,9 +7,15 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import { useOptimistic } from "react";
 import { DataTableRow } from "./data-table-row";
 
 export function DataTable({ data }) {
+  const [optimisticData, addOptimisticData] = useOptimistic(
+    data,
+    (state, item) => [...state, item]
+  );
+
   return (
     <Table>
       <TableHeader className="border-0">
@@ -18,8 +26,12 @@ export function DataTable({ data }) {
         </TableRow>
       </TableHeader>
       <TableBody className="border-r-0 border-l-0">
-        {data?.map((row) => (
-          <DataTableRow key={row.name} data={row} />
+        {optimisticData?.map((row) => (
+          <DataTableRow
+            key={row.name}
+            data={row}
+            addOptimisticData={addOptimisticData}
+          />
         ))}
       </TableBody>
     </Table>

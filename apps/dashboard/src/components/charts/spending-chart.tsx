@@ -63,7 +63,7 @@ export function SpendingChart({ categories, currency, totalAmount }) {
             })}
             position="center"
             fontSize={23}
-            fill="#F5F5F3"
+            fill="hsl(var(--foreground))"
             fontFamily="var(--font-sans)"
           />
 
