@@ -101,7 +101,7 @@ export default async function Login() {
                 <CollapsibleTrigger className="text-center w-full font-medium text-sm">
                   More options
                 </CollapsibleTrigger>
-                <CollapsibleContent className="w-full mt-4">
+                <CollapsibleContent className="w-full mt-4 mb-4">
                   <div className="flex flex-col space-y-4">
                     {moreSignInOptions}
                   </div>
