@@ -1,9 +1,53 @@
+import { AppleSignIn } from "@/components/apple-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
+import { Cookies } from "@/utils/constants";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@midday/ui/collapsible";
 import { Icons } from "@midday/ui/icons";
+import { c } from "next-usequerystate/dist/parsers-d2c58bed";
+import { cookies } from "next/headers";
 import Link from "next/link";
 
-export default function Login() {
+export default async function Login() {
+  const cookieStore = cookies();
+  const preffered = cookieStore.get(Cookies.PrefferedSignInProvider);
+
+  let prefferedSignInOption = <GoogleSignIn />;
+  let moreSignInOptions = (
+    <>
+      <AppleSignIn />
+      <SlackSignIn />
+    </>
+  );
+
+  switch (preffered?.value) {
+    case "apple":
+      prefferedSignInOption = <AppleSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
+          <SlackSignIn />
+        </>
+      );
+      break;
+
+    case "slack":
+      prefferedSignInOption = <SlackSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
+          <AppleSignIn />
+        </>
+      );
+      break;
+    default:
+      break;
+  }
+
   return (
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
@@ -40,22 +84,32 @@ export default function Login() {
             />
 
             <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
-              <h1 className="font-bold pb-1 text-3xl">Login to midday.</h1>
+              <h1 className="font-medium pb-1 text-3xl">Login to midday.</h1>
             </div>
 
-            <p className="font-bold pb-1 text-2xl text-[#606060]">
+            <p className="font-medium pb-1 text-2xl text-[#878787]">
               Automate financial tasks, <br /> stay organized, and make
               <br />
               informed decisions
               <br /> effortlessly.
             </p>
 
-            <div className="pointer-events-auto mt-6 flex flex-col mb-4 space-y-4">
-              <GoogleSignIn />
-              <SlackSignIn />
+            <div className="pointer-events-auto mt-6 flex flex-col mb-6">
+              {prefferedSignInOption}
+
+              <Collapsible className="border-t-[1px] pt-4 mt-6">
+                <CollapsibleTrigger className="text-center w-full font-medium text-sm">
+                  More options
+                </CollapsibleTrigger>
+                <CollapsibleContent className="w-full mt-4">
+                  <div className="flex flex-col space-y-4">
+                    {moreSignInOptions}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
 
-            <p className="text-xs text-[#606060]">
+            <p className="text-xs text-[#878787]">
               By clicking Continue with Google, you acknowledge that you have
               read and understood, and agree to Midday's and{" "}
               <a href="https://midday.ai/policy">Privacy Policy</a>.

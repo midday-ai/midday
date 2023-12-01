@@ -1,5 +1,6 @@
 "use server";
 
+import { Cookies } from "@/utils/constants";
 import { getUser } from "@midday/supabase/cached-queries";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
@@ -12,12 +13,12 @@ export const changeTransactionsPeriodAction = action(
     const user = await getUser();
 
     cookies().set({
-      name: "transactions-period",
+      name: Cookies.TransactionsPeriod,
       value,
     });
 
     revalidateTag(`transactions_${user.data.team_id}`);
 
     return value;
-  },
+  }
 );

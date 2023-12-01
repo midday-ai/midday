@@ -1,5 +1,6 @@
 "use server";
 
+import { Cookies } from "@/utils/constants";
 import { getUser } from "@midday/supabase/cached-queries";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
@@ -12,12 +13,12 @@ export const changeChartTypeAction = action(
     const user = await getUser();
 
     cookies().set({
-      name: "chart-type",
+      name: Cookies.ChartType,
       value,
     });
 
     revalidateTag(`chart_${user.data.team_id}`);
 
     return value;
-  },
+  }
 );
