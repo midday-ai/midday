@@ -1,3 +1,4 @@
+import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { cn } from "@midday/ui/utils";
@@ -24,7 +25,9 @@ export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" className="dark whitespace-pre-line">
       <body className={cn(fontSans.variable, "bg-background")}>
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

@@ -17,14 +17,15 @@
     "@vercel/analytics": "^1.1.1",
     "next": "14.0.2",
     "next-international": "^1.1.4",
+    "next-themes": "^0.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^20.10.1",
-    "@types/react": "^18.2.39",
+    "@types/node": "^20.10.2",
+    "@types/react": "^18.2.40",
     "@types/react-dom": "^18.2.17"
   }
 }

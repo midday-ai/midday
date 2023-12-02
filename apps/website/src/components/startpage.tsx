@@ -6,9 +6,13 @@ import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import mobile from "public/mobile.png";
+import overviewLight from "public/overview-light.png";
 import overview from "public/overview.png";
+import searchLight from "public/search-light.png";
 import search from "public/search.png";
+import trackingLight from "public/tracking-light.png";
 import tracking from "public/tracking.png";
+import transactionsLight from "public/transactions-light.png";
 import transactions from "public/transactions.png";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
@@ -21,7 +25,7 @@ function SubmitButton() {
   if (pending) {
     return (
       <div className="absolute top-1 right-0">
-        <Loader2 className="absolute w-4 h-4 mr-3 text-black animate-spin top-2.5 right-2" />
+        <Loader2 className="absolute w-4 h-4 mr-3 text-base animate-spin top-2.5 right-2" />
       </div>
     );
   }
@@ -29,7 +33,7 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="absolute right-2 h-7 bg-white top-2 px-4 rounded-md font-medium text-sm z-10 text-black"
+      className="absolute right-2 h-7 bg-primary top-2 px-4 rounded-md font-medium text-sm z-10 text-primary-foreground"
     >
       {t("join")}
     </button>
@@ -45,10 +49,12 @@ export function StartPage() {
       <Header />
       <div className="px-5 lg:px-10">
         <div className="text-center mt-16 md:mt-20">
-          <div className="pb-4 bg-gradient-to-r from-white via-white to-[#848484] inline-block text-transparent bg-clip-text">
+          <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
             <h1 className="font-medium pb-1 text-5xl">{t("title")}</h1>
           </div>
-          <p className="text-[#B0B0B0]">{t("description")}</p>
+          <p className="text-[#696969] dark:text-[#B0B0B0]">
+            {t("description")}
+          </p>
         </div>
 
         <div className="flex justify-center mt-8">
@@ -85,7 +91,7 @@ export function StartPage() {
                   autoComplete="email"
                   aria-label="Email address"
                   required
-                  className="bg-[#1A1A1A] font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11"
+                  className="bg-background font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11 border border-color-[#DCDAD2]"
                 />
                 <SubmitButton />
               </fieldset>
@@ -134,54 +140,54 @@ export function StartPage() {
           </div>
         </div>
 
-        <div className="w-[1px] h-[1px] bg-white rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
+        <div className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
         <div
-          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "500ms" }}
         />
         <div
-          className="w-[1px] h-[1px] bg-white rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "0ms" }}
         />
         <div
-          className="w-[2px] h-[2px] bg-white rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "700ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full invisible md:visible absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "1s" }}
         />
         <div
-          className="w-[1px] h-[1px] bg-white rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "400ms" }}
         />
 
         <div
-          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "2s" }}
         />
         <div
-          className="w-[3px] h-[3px] bg-[#8306FF] rounded-full absolute top-[60%] right-[10%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[3px] h-[3px] bg-[#8306FF] rounded-full invisible md:visible absolute top-[60%] right-[10%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "4s" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[50%] right-[20%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[20%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "200ms" }}
         />
         <div
-          className="w-[2px] h-[2px] bg-white rounded-full absolute top-[59%] right-[27%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[59%] right-[27%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "50ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "10ms" }}
         />
         <div
-          className="w-[3px] h-[3px] bg-white rounded-full absolute top-[53%] right-[32%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[3px] h-[3px] bg-primary invisible md:visible rounded-full absolute top-[53%] right-[32%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "100ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-white rounded-full absolute top-[50%] right-[40%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[40%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "190ms" }}
         />
 
@@ -204,7 +210,20 @@ export function StartPage() {
             src={overview}
             alt="Midday | Overview"
             width={993}
-            className="hidden md:block"
+            className="hidden dark:md:block dark:block"
+            height={645}
+            style={{
+              objectFit: "contain",
+            }}
+          />
+
+          <Image
+            quality={100}
+            loading="eager"
+            src={overviewLight}
+            alt="Midday | Overview"
+            width={993}
+            className="hidden md:block dark:hidden"
             height={645}
             style={{
               objectFit: "contain",
@@ -217,7 +236,16 @@ export function StartPage() {
             alt="Midday | Search"
             width={638}
             height={260}
-            className="absolute left-[50%] -ml-[319px] z-10 bottom-[70px] hidden md:block"
+            className="absolute left-[50%] -ml-[319px] z-10 bottom-0 hidden dark:md:block dark:block"
+          />
+
+          <Image
+            quality={100}
+            src={searchLight}
+            alt="Midday | Search"
+            width={638}
+            height={260}
+            className="absolute left-[50%] -ml-[319px] z-10 bottom-0 hidden md:block dark:hidden"
           />
 
           <Image
@@ -226,13 +254,34 @@ export function StartPage() {
             alt="Midday | Tracking"
             width={360}
             height={268}
-            className="absolute right-[20%] z-10 bottom-[240px] hidden md:block"
+            className="absolute right-[20%] z-10 bottom-[240px] hidden dark:md:block dark:block"
           />
 
           <Image
             quality={100}
-            className="absolute right-0 bottom-0 hidden md:block"
+            src={trackingLight}
+            alt="Midday | Tracking"
+            width={360}
+            height={268}
+            className="absolute right-[22%] z-10 bottom-[180px] hidden md:block dark:hidden"
+          />
+
+          <Image
+            quality={100}
+            className="absolute right-0 bottom-0 hidden dark:md:block dark:block"
             src={transactions}
+            alt="Midday | Transactions"
+            width={993}
+            height={645}
+            style={{
+              objectFit: "contain",
+            }}
+          />
+
+          <Image
+            quality={100}
+            className="absolute right-0 bottom-0 hidden md:block dark:hidden"
+            src={transactionsLight}
             alt="Midday | Transactions"
             width={993}
             height={645}

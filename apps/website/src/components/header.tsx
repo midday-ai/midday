@@ -8,10 +8,7 @@ export function Header() {
   const t = useScopedI18n("header");
 
   return (
-    <header
-      className="pt-4 pb-4 md:pt-10 md:pb-5 flex justify-between px-5 lg:px-10  backdrop-filter backdrop-blur-2xl z-[999]"
-      style={{ background: "rgba(18, 18, 18,.8)" }}
-    >
+    <header className="pt-4 pb-4 md:pt-10 md:pb-5 flex justify-between px-5 lg:px-10">
       <Link href="/" title="Midday">
         <Icons.Logo />
       </Link>
@@ -19,7 +16,7 @@ export function Header() {
       <Link href="https://app.midday.ai">
         <button
           type="button"
-          className="relative rounded-lg overflow-hidden p-[1px]"
+          className="relative rounded-lg overflow-hidden dark:p-[1px] border border-primary dark:border-0"
           style={{
             background:
               "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
