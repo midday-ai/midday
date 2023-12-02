@@ -55,7 +55,7 @@ export function SignupApps() {
           <button
             disabled
             type="button"
-            className="relative rounded-lg overflow-hidden p-[1px]"
+            className="relative rounded-lg overflow-hidden border dark:border-none dark:p-[1px]"
             style={{
               background:
                 "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
