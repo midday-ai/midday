@@ -15,7 +15,7 @@ export function SignOut() {
   const handleSignOut = async () => {
     setLoading(true);
     signOutAction();
-    router.refresh();
+    router.replace("/");
   };
 
   return (

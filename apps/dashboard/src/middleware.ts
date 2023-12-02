@@ -16,7 +16,14 @@ export async function middleware(request: NextRequest) {
   const { data } = await supabase.auth.getSession();
 
   if (!data.session && request.nextUrl.pathname !== "/") {
-    return NextResponse.redirect(new URL("/", request.url));
+    const url = new URL("/", request.url);
+    const encodedSearchParams = encodeURIComponent(
+      `${request.nextUrl.pathname.substring(1)}${request.nextUrl.search}`
+    );
+
+    url.searchParams.append("return_to", encodedSearchParams);
+
+    return NextResponse.redirect(url);
   }
 
   if (

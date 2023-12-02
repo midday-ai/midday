@@ -3,15 +3,18 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useSearchParams } from "next/navigation";
 
 export function GoogleSignIn() {
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("return_to");
 
   const handleSignIn = async () => {
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/api/auth/callback?provider=google`,
+        redirectTo: `${location.origin}/api/auth/callback?return_to=${returnTo}&provider=google`,
       },
     });
   };
