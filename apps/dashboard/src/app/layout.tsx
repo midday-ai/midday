@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
+import { cn } from "@midday/ui/utils";
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
 import { type ReactElement, Suspense } from "react";
@@ -19,13 +20,24 @@ export const metadata: Metadata = {
   title: "Midday | The financial OS for your business",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "white" },
+    { media: "(prefers-color-scheme: dark)", color: "black" },
+  ],
 };
 
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={fontSans.variable}>
-        <ThemeProvider attribute="class">
+      <body
+        className={cn(fontSans.variable, "whitespace-pre-line antialiased")}
+      >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
           <Toaster />
         </ThemeProvider>
