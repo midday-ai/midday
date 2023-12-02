@@ -1,7 +1,7 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Table } from "@/components/tables/vault";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { CreateFolderButton } from "@/components/tables/vault/create-folder-button";
+import { UploadButton } from "@/components/tables/vault/upload-button";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -19,17 +19,8 @@ export default function Vault({ params }) {
         <Breadcrumbs folders={params?.folders} />
 
         <div className="flex space-x-2">
-          <Button variant="outline" disabled={disableActions}>
-            Upload
-          </Button>
-          <Button
-            variant="outline"
-            className="w-[32px] h-[32px]"
-            size="icon"
-            disabled={disableActions}
-          >
-            <Icons.CreateNewFolder />
-          </Button>
+          <CreateFolderButton />
+          <UploadButton disableActions={disableActions} />
         </div>
       </div>
       <Table path={params?.folders?.join("/")} />

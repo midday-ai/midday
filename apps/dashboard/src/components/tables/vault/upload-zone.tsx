@@ -78,7 +78,7 @@ export function UploadZone({ children }) {
                 isDragActive && "visible"
               )}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps()} id="upload-files" />
 
               <p className="text-xs">
                 Drop your files here, to
