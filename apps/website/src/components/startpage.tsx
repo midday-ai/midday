@@ -102,7 +102,7 @@ export function StartPage() {
       </div>
 
       <div className="w-full">
-        <div className="md:h-[730px] flex">
+        <div className="md:h-[730px] dark:md:h-[830px] flex">
           <div className="grid md:grid-cols-6 grid-cols-3 gap-[32px] m-auto mt-12">
             <div className="w-[100px] text-center leading-tight">
               <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
