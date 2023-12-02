@@ -28,9 +28,7 @@ export const metadata: Metadata = {
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={cn(fontSans.variable, "whitespace-pre-line antialiased")}
-      >
+      <body className={cn(fontSans.variable, "whitespace-pre-line")}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -8,7 +8,7 @@ export function AppDetails({ id, name, description, logo, active }) {
       key={id}
       className="flex space-x-12 items-center mt-10 pt-10 first:pt-0"
     >
-      <div className="w-[300px] h-[200px] flex items-center justify-center bg-gradient-to-b from-[#1A1A1A] to-[#171717] rounded-xl">
+      <div className="w-[300px] h-[200px] flex items-center justify-center bg-gradient-to-b from-[#E7E5E1] to-[#DCDAD6]  dark:from-[#1A1A1A] dark:to-[#171717] rounded-xl">
         {logo}
       </div>
       <div className="flex-1">
@@ -18,7 +18,7 @@ export function AppDetails({ id, name, description, logo, active }) {
             <button
               disabled
               type="button"
-              className="relative rounded-lg overflow-hidden p-[1px]"
+              className="relative rounded-lg overflow-hidden border dark:p-[1px] dark:border-none"
               style={{
                 background:
                   "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
