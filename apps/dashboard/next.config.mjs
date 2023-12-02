@@ -22,7 +22,7 @@ const config = {
       },
     ],
   },
-  transpilePackages: ["@midday/ui", "@midday/jobs"],
+  transpilePackages: ["@midday/ui", "@midday/jobs", "@midday/tailwind"],
   eslint: {
     ignoreDuringBuilds: true,
   },
