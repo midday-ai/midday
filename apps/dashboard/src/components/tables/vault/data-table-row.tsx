@@ -26,6 +26,20 @@ import {
   ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@midday/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
@@ -132,7 +146,94 @@ export function DataTableRow({ data, addOptimisticData }) {
               {data?.created_at ? format(new Date(data.created_at), "Pp") : "-"}
             </TableCell>
             <TableCell>
-              {data?.updated_at ? format(new Date(data.updated_at), "Pp") : "-"}
+              <div className="flex justify-between">
+                <span>
+                  {data?.updated_at
+                    ? format(new Date(data.updated_at), "Pp")
+                    : "-"}
+                </span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <Icons.MoreHoriz />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    className="w-56"
+                    sideOffset={10}
+                    align="end"
+                  >
+                    {!data.isFolder && (
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger>
+                          Share URL
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                shareFile.execute({
+                                  filepath,
+                                  expireIn: ms("1 week"),
+                                })
+                              }
+                            >
+                              Expire in 1 week
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                shareFile.execute({
+                                  filepath,
+                                  expireIn: ms("1 month"),
+                                })
+                              }
+                            >
+                              Expire in 1 month
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                shareFile.execute({
+                                  filepath,
+                                  expireIn: ms("1 year"),
+                                })
+                              }
+                            >
+                              Expire in 1 year
+                            </DropdownMenuItem>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                    )}
+
+                    {!disableActions && !isDefaultFolder && (
+                      <DropdownMenuItem>Rename</DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem>
+                      {data.isFolder ? (
+                        <a
+                          href={`/api/download/zip?path=${folderPath}&filename=${data.name}`}
+                          download
+                          className="truncate"
+                        >
+                          Download
+                        </a>
+                      ) : (
+                        <a
+                          href={`/api/download/file?path=${folderPath}&filename=${data.name}`}
+                          download
+                          className="truncate"
+                        >
+                          Download
+                        </a>
+                      )}
+                    </DropdownMenuItem>
+                    {!disableActions && !isDefaultFolder && (
+                      <AlertDialogTrigger asChild>
+                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                      </AlertDialogTrigger>
+                    )}
+                    {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </TableCell>
           </TableRow>
         </ContextMenuTrigger>

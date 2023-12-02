@@ -19,7 +19,6 @@ export async function UserMenu() {
 
   return (
     <>
-      {" "}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Avatar className="rounded-full w-8 h-8">
