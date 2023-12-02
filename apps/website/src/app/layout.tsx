@@ -23,8 +23,10 @@ export const metadata: Metadata = {
 
 export default function Layout({ children }: { children: ReactElement }) {
   return (
-    <html lang="en" className="whitespace-pre-line" suppressHydrationWarning>
-      <body className={cn(fontSans.variable, "bg-background")}>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={cn(fontSans.variable, "bg-background whitespace-pre-line")}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
