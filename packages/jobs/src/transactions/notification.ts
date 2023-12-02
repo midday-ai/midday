@@ -66,10 +66,10 @@ client.defineJob({
     );
 
     if (notificationEvents?.length) {
+      triggerBulk(notificationEvents.flat());
       await io.logger.log(
         `Sending notifications: ${notificationEvents.length}`
       );
-      triggerBulk(notificationEvents.flat());
     }
 
     const emailEvents = await Promise.all(
@@ -108,8 +108,9 @@ client.defineJob({
     );
 
     if (emailEvents?.length) {
-      await io.logger.log(`Sending emails: ${emailEvents.length}`);
       triggerBulk(emailEvents);
+      await io.logger.log(`Sending emails: ${emailEvents.length}`);
+      await io.logger.log(`Emails: ${JSON.stringify(emailEvents, null, 2)}`);
     }
   },
 });

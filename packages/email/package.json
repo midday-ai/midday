@@ -19,5 +19,8 @@
   },
   "devDependencies": {
     "typescript": "^5.3.2"
+  },
+  "overrides": {
+    "@react-email/render": "0.0.9"
   }
 }
