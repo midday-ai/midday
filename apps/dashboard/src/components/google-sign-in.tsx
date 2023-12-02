@@ -11,10 +11,18 @@ export function GoogleSignIn() {
   const returnTo = searchParams.get("return_to");
 
   const handleSignIn = async () => {
+    const redirectTo = new URL("/api/auth/callback", location.origin);
+
+    if (returnTo) {
+      redirectTo.searchParams.append("return_to", returnTo);
+    }
+
+    redirectTo.searchParams.append("provider", "google");
+
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${location.origin}/api/auth/callback?return_to=${returnTo}&provider=google`,
+        redirectTo: redirectTo.toString(),
       },
     });
   };

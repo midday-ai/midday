@@ -9,7 +9,9 @@ export async function signOutAction() {
     data: { session },
   } = await supabase.auth.getSession();
 
-  await supabase.auth.signOut();
+  await supabase.auth.signOut({
+    scope: "local",
+  });
 
   revalidateTag(`user_${session.user.id}`);
 }
