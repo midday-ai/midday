@@ -5,6 +5,7 @@ import { useScopedI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import mobileLight from "public/mobile-light.png";
 import mobile from "public/mobile.png";
 import overviewLight from "public/overview-light.png";
 import overview from "public/overview.png";
@@ -45,7 +46,7 @@ export function StartPage() {
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
-    <div className="h-screen relative min-h-[770px] dark:min-h-[1040px] md:min-h-[1180px] dark:md:min-h-[1180px]">
+    <div className="relative">
       <Header />
       <div className="px-5 lg:px-10">
         <div className="text-center mt-16 md:mt-20">
@@ -100,104 +101,105 @@ export function StartPage() {
         </div>
       </div>
 
-      <div className="flex w-full">
-        <div className="grid md:grid-cols-6 grid-cols-3 gap-[32px] m-auto mt-12">
-          <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
-              <Icons.OpenSource />
+      <div className="w-full">
+        <div className="md:h-[840px] flex">
+          <div className="grid md:grid-cols-6 grid-cols-3 gap-[32px] m-auto mt-12">
+            <div className="w-[100px] text-center leading-tight">
+              <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+                <Icons.OpenSource />
+              </div>
+              <span className="text-[#606060] text-sm">{t("open")}</span>
             </div>
-            <span className="text-[#606060] text-sm">{t("open")}</span>
-          </div>
-          <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
-              <Icons.ChartGantt />
+            <div className="w-[100px] text-center leading-tight">
+              <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+                <Icons.ChartGantt />
+              </div>
+              <span className="text-[#606060] text-sm">{t("live")}</span>
             </div>
-            <span className="text-[#606060] text-sm">{t("live")}</span>
-          </div>
-          <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
-              <Icons.FileDocument />
+            <div className="w-[100px] text-center leading-tight">
+              <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+                <Icons.FileDocument />
+              </div>
+              <span className="text-[#606060] text-sm">{t("document")}</span>
             </div>
-            <span className="text-[#606060] text-sm">{t("document")}</span>
-          </div>
-          <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
-              <Icons.ReceiptText />
+            <div className="w-[100px] text-center leading-tight">
+              <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+                <Icons.ReceiptText />
+              </div>
+              <span className="text-[#606060] text-sm">{t("reciept")}</span>
             </div>
-            <span className="text-[#606060] text-sm">{t("reciept")}</span>
-          </div>
-          <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
-              <Icons.TimeCog />
+            <div className="w-[100px] text-center leading-tight">
+              <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+                <Icons.TimeCog />
+              </div>
+              <span className="text-[#606060] text-sm">{t("time")}</span>
             </div>
-            <span className="text-[#606060] text-sm">{t("time")}</span>
-          </div>
-          <div className="w-[100px] text-center leading-tight">
-            <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
-              <Icons.CreationOutline />
+            <div className="w-[100px] text-center leading-tight">
+              <div className="w-[100px] h-[65px] border border-[#2C2C2C] rounded-lg mb-2 flex items-center justify-center">
+                <Icons.CreationOutline />
+              </div>
+              <span className="text-[#606060] text-sm">{t("ai")}</span>
             </div>
-            <span className="text-[#606060] text-sm">{t("ai")}</span>
           </div>
+
+          <div className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
+          <div
+            className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "500ms" }}
+          />
+          <div
+            className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "0ms" }}
+          />
+          <div
+            className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "700ms" }}
+          />
+          <div
+            className="w-[5px] h-[5px] bg-[#22FF66] rounded-full invisible md:visible absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "1s" }}
+          />
+          <div
+            className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "400ms" }}
+          />
+
+          <div
+            className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "2s" }}
+          />
+          <div
+            className="w-[3px] h-[3px] bg-[#8306FF] rounded-full invisible md:visible absolute top-[60%] right-[10%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "4s" }}
+          />
+          <div
+            className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[20%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "200ms" }}
+          />
+          <div
+            className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[59%] right-[27%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "50ms" }}
+          />
+          <div
+            className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "10ms" }}
+          />
+          <div
+            className="w-[3px] h-[3px] bg-primary invisible md:visible rounded-full absolute top-[53%] right-[32%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "100ms" }}
+          />
+          <div
+            className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[40%] animate-[pulse_2s_ease-in-out_infinite]"
+            style={{ animationDelay: "190ms" }}
+          />
         </div>
-
-        <div className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
-        <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "500ms" }}
-        />
-        <div
-          className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "0ms" }}
-        />
-        <div
-          className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "700ms" }}
-        />
-        <div
-          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full invisible md:visible absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "400ms" }}
-        />
-
-        <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "2s" }}
-        />
-        <div
-          className="w-[3px] h-[3px] bg-[#8306FF] rounded-full invisible md:visible absolute top-[60%] right-[10%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "4s" }}
-        />
-        <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[20%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "200ms" }}
-        />
-        <div
-          className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[59%] right-[27%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "50ms" }}
-        />
-        <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "10ms" }}
-        />
-        <div
-          className="w-[3px] h-[3px] bg-primary invisible md:visible rounded-full absolute top-[53%] right-[32%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "100ms" }}
-        />
-        <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[40%] animate-[pulse_2s_ease-in-out_infinite]"
-          style={{ animationDelay: "190ms" }}
-        />
-
-        <div className="absolute bottom-0 w-full">
+        <div className="w-full absolute bottom-0 right-0 left-0">
           <Image
             quality={100}
             src={mobile}
             alt="Midday | Mobile"
             width={393}
-            className="block absolute left-0 right-0 md:hidden"
+            className="absolute left-0 right-0 hidden dark:block dark:md:hidden"
             height={393}
             style={{
               objectFit: "contain",
@@ -210,20 +212,7 @@ export function StartPage() {
             src={overview}
             alt="Midday | Overview"
             width={993}
-            className="hidden dark:md:block dark:block"
-            height={645}
-            style={{
-              objectFit: "contain",
-            }}
-          />
-
-          <Image
-            quality={100}
-            loading="eager"
-            src={overviewLight}
-            alt="Midday | Overview"
-            width={993}
-            className="hidden md:block dark:hidden"
+            className="absolute left-0 bottom-0 hidden dark:md:block"
             height={645}
             style={{
               objectFit: "contain",
@@ -241,29 +230,11 @@ export function StartPage() {
 
           <Image
             quality={100}
-            src={searchLight}
-            alt="Midday | Search"
-            width={638}
-            height={260}
-            className="absolute left-[50%] -ml-[319px] z-10 bottom-0 hidden md:block dark:hidden"
-          />
-
-          <Image
-            quality={100}
             src={tracking}
             alt="Midday | Tracking"
             width={360}
             height={268}
             className="absolute right-[20%] z-10 bottom-[240px] hidden dark:md:block"
-          />
-
-          <Image
-            quality={100}
-            src={trackingLight}
-            alt="Midday | Tracking"
-            width={360}
-            height={268}
-            className="absolute right-[22%] z-10 bottom-[180px] hidden md:block dark:hidden"
           />
 
           <Image
@@ -276,6 +247,49 @@ export function StartPage() {
             style={{
               objectFit: "contain",
             }}
+          />
+
+          <Image
+            quality={100}
+            src={mobileLight}
+            alt="Midday | Mobile"
+            width={393}
+            className="absolute left-0 right-0 block md:hidden dark:hidden"
+            height={393}
+            style={{
+              objectFit: "contain",
+            }}
+          />
+
+          <Image
+            quality={100}
+            loading="eager"
+            src={overviewLight}
+            alt="Midday | Overview"
+            width={993}
+            className="absolute left-0 bottom-0 hidden md:block dark:hidden"
+            height={645}
+            style={{
+              objectFit: "contain",
+            }}
+          />
+
+          <Image
+            quality={100}
+            src={searchLight}
+            alt="Midday | Search"
+            width={638}
+            height={260}
+            className="absolute left-[50%] -ml-[319px] z-10 bottom-0 hidden md:block dark:hidden"
+          />
+
+          <Image
+            quality={100}
+            src={trackingLight}
+            alt="Midday | Tracking"
+            width={360}
+            height={268}
+            className="absolute right-[22%] z-10 bottom-[180px] hidden md:block dark:hidden"
           />
 
           <Image
