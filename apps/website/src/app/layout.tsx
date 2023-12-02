@@ -25,7 +25,12 @@ export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" className="dark whitespace-pre-line">
       <body className={cn(fontSans.variable, "bg-background")}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
           {children}
         </ThemeProvider>
         <Analytics />

@@ -236,7 +236,7 @@ export function StartPage() {
             alt="Midday | Search"
             width={638}
             height={260}
-            className="absolute left-[50%] -ml-[319px] z-10 bottom-0 hidden dark:md:block dark:block"
+            className="absolute left-[50%] -ml-[319px] z-10 bottom-0 hidden dark:md:block"
           />
 
           <Image
@@ -254,7 +254,7 @@ export function StartPage() {
             alt="Midday | Tracking"
             width={360}
             height={268}
-            className="absolute right-[20%] z-10 bottom-[240px] hidden dark:md:block dark:block"
+            className="absolute right-[20%] z-10 bottom-[240px] hidden dark:md:block"
           />
 
           <Image
@@ -268,7 +268,7 @@ export function StartPage() {
 
           <Image
             quality={100}
-            className="absolute right-0 bottom-0 hidden dark:md:block dark:block"
+            className="absolute right-0 bottom-0 hidden dark:md:block"
             src={transactions}
             alt="Midday | Transactions"
             width={993}
