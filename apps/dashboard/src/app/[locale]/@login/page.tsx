@@ -5,12 +5,12 @@ import { GoogleSignIn } from "@/components/google-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@midday/ui/collapsible";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
-import { c } from "next-usequerystate/dist/parsers-d2c58bed";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
@@ -130,16 +130,22 @@ export default async function Login() {
             <div className="pointer-events-auto mt-6 flex flex-col mb-6">
               {prefferedSignInOption}
 
-              <Collapsible className="border-t-[1px] pt-4 mt-6">
-                <CollapsibleTrigger className="text-center w-full font-medium text-sm">
-                  More options
-                </CollapsibleTrigger>
-                <CollapsibleContent className="w-full mt-4 mb-4">
-                  <div className="flex flex-col space-y-4">
-                    {moreSignInOptions}
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
+              <Accordion
+                type="single"
+                collapsible
+                className="border-t-[1px] pt-2 mt-6"
+              >
+                <AccordionItem value="item-1" className="border-0">
+                  <AccordionTrigger className="justify-start space-x-2 justify-center flex text-sm">
+                    <span>More options</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="mt-4">
+                    <div className="flex flex-col space-y-4">
+                      {moreSignInOptions}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
 
             <p className="text-xs text-[#878787]">
