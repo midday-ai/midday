@@ -5,14 +5,14 @@ import Link from "next/link";
 export default function Closed() {
   return (
     <div>
-      <div className="absolute left-10 top-10">
+      <div className="absolute left-5 top-4 md:left-10 md:top-10">
         <Link href="https://midday.ai">
           <Icons.Logo />
         </Link>
       </div>
 
-      <div className="flex min-h-screen justify-center items-center">
-        <div className="pointer-events-none relative z-20 m-auto flex w-full max-w-[380px] flex-col">
+      <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
+        <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
           <div className="flex w-full flex-col relative">
             <div className="w-[2px] h-[2px] bg-primary rounded-full absolute -top-[20px] -left-[100px] animate-[pulse_2s_ease-in-out_infinite]" />
             <div className="w-[3px] h-[3px] bg-primary rounded-full absolute -top-[70px] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />

@@ -33,6 +33,7 @@ export function TransactionDetails({
 
   useEffect(() => {
     if (initialData) {
+      setData(initialData);
       setLoading(false);
     }
   }, [initialData]);
