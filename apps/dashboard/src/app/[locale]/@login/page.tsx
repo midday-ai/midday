@@ -12,21 +12,18 @@ import {
 } from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
 import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import Link from "next/link";
+import { userAgent } from "next/server";
 
 export default async function Login() {
   const cookieStore = cookies();
   const preffered = cookieStore.get(Cookies.PrefferedSignInProvider);
+  const { device } = userAgent({ headers: headers() });
 
-  let prefferedSignInOption = <GoogleSignIn />;
-  let moreSignInOptions = (
-    <>
-      <AppleSignIn />
-      <SlackSignIn />
-      <GithubSignIn />
-      <FigmaSignIn />
-    </>
-  );
+  let moreSignInOptions = null;
+  let prefferedSignInOption =
+    device?.vendor === "Apple" ? <AppleSignIn /> : <GoogleSignIn />;
 
   switch (preffered?.value) {
     case "apple":
@@ -77,8 +74,38 @@ export default async function Login() {
       );
       break;
 
-    default:
+    case "google":
+      prefferedSignInOption = <GoogleSignIn />;
+      moreSignInOptions = (
+        <>
+          <AppleSignIn />
+          <GithubSignIn />
+          <SlackSignIn />
+          <FigmaSignIn />
+        </>
+      );
       break;
+
+    default:
+      if (device?.vendor === "Apple") {
+        moreSignInOptions = (
+          <>
+            <GoogleSignIn />
+            <SlackSignIn />
+            <GithubSignIn />
+            <FigmaSignIn />
+          </>
+        );
+      } else {
+        moreSignInOptions = (
+          <>
+            <AppleSignIn />
+            <SlackSignIn />
+            <GithubSignIn />
+            <FigmaSignIn />
+          </>
+        );
+      }
   }
 
   return (
