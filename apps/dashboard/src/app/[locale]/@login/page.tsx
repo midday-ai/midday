@@ -2,6 +2,7 @@ import { AppleSignIn } from "@/components/apple-sign-in";
 import { FigmaSignIn } from "@/components/figma-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
+import { NotionSignIn } from "@/components/notion-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
 import {
@@ -34,6 +35,7 @@ export default async function Login() {
           <SlackSignIn />
           <GithubSignIn />
           <FigmaSignIn />
+          <NotionSignIn />
         </>
       );
       break;
@@ -46,6 +48,7 @@ export default async function Login() {
           <AppleSignIn />
           <GithubSignIn />
           <FigmaSignIn />
+          <NotionSignIn />
         </>
       );
       break;
@@ -58,6 +61,7 @@ export default async function Login() {
           <AppleSignIn />
           <SlackSignIn />
           <FigmaSignIn />
+          <NotionSignIn />
         </>
       );
       break;
@@ -70,6 +74,7 @@ export default async function Login() {
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
+          <NotionSignIn />
         </>
       );
       break;
@@ -78,6 +83,20 @@ export default async function Login() {
       prefferedSignInOption = <GoogleSignIn />;
       moreSignInOptions = (
         <>
+          <AppleSignIn />
+          <GithubSignIn />
+          <SlackSignIn />
+          <FigmaSignIn />
+          <NotionSignIn />
+        </>
+      );
+      break;
+
+    case "notion":
+      prefferedSignInOption = <NotionSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
@@ -94,6 +113,7 @@ export default async function Login() {
             <SlackSignIn />
             <GithubSignIn />
             <FigmaSignIn />
+            <NotionSignIn />
           </>
         );
       } else {
@@ -103,6 +123,7 @@ export default async function Login() {
             <SlackSignIn />
             <GithubSignIn />
             <FigmaSignIn />
+            <NotionSignIn />
           </>
         );
       }
