@@ -14,37 +14,37 @@ export default function Closed() {
       <div className="flex min-h-screen justify-center items-center">
         <div className="pointer-events-none relative z-20 m-auto flex w-full max-w-[380px] flex-col">
           <div className="flex w-full flex-col relative">
-            <div className="w-[2px] h-[2px] bg-white rounded-full absolute -top-[20px] -left-[100px] animate-[pulse_2s_ease-in-out_infinite]" />
-            <div className="w-[3px] h-[3px] bg-white rounded-full absolute -top-[70px] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
+            <div className="w-[2px] h-[2px] bg-primary rounded-full absolute -top-[20px] -left-[100px] animate-[pulse_2s_ease-in-out_infinite]" />
+            <div className="w-[3px] h-[3px] bg-primary rounded-full absolute -top-[70px] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
             <div
-              className="w-[5px] h-[5px] bg-white rounded-full absolute -top-[120px] left-[80px] animate-[pulse_2s_ease-in-out_infinite]"
+              className="w-[5px] h-[5px] bg-primary rounded-full absolute -top-[120px] left-[80px] animate-[pulse_2s_ease-in-out_infinite]"
               style={{ animationDelay: "500ms" }}
             />
             <div
-              className="w-[5px] h-[5px] bg-white rounded-full absolute -top-[80px] left-[180px] animate-[pulse_2s_ease-in-out_infinite]"
+              className="w-[5px] h-[5px] bg-primary rounded-full absolute -top-[80px] left-[180px] animate-[pulse_2s_ease-in-out_infinite]"
               style={{ animationDelay: "0ms" }}
             />
             <div
-              className="w-[3px] h-[3px] bg-white rounded-full absolute -top-[20px] -right-[40px] animate-[pulse_2s_ease-in-out_infinite]"
+              className="w-[3px] h-[3px] bg-[#FFD02B] rounded-full absolute -top-[20px] -right-[40px] animate-[pulse_2s_ease-in-out_infinite]"
               style={{ animationDelay: "200ms" }}
             />
             <div
-              className="w-[2px] h-[2px] bg-white rounded-full absolute -top-[100px] -right-[100px] animate-[pulse_2s_ease-in-out_infinite]"
+              className="w-[2px] h-[2px] bg-primary rounded-full absolute -top-[100px] -right-[100px] animate-[pulse_2s_ease-in-out_infinite]"
               style={{ animationDelay: "2s" }}
             />
 
             <div
-              className="w-[5px] h-[5px] bg-white rounded-full absolute top-[80px] -right-[100px] animate-[pulse_2s_ease-in-out_infinite]"
+              className="w-[5px] h-[5px] bg-primary rounded-full absolute top-[80px] -right-[100px] animate-[pulse_2s_ease-in-out_infinite]"
               style={{ animationDelay: "0ms" }}
             />
 
             <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
-              <h1 className="font-bold pb-1 text-3xl">
+              <h1 className="font-medium pb-1 text-3xl">
                 We will soon open up for beta.{" "}
               </h1>
             </div>
 
-            <p className="font-bold pb-1 text-2xl text-[#606060]">
+            <p className="font-medium pb-1 text-2xl text-[#606060]">
               You can't login yet but keep a lookout in your email for when we
               open up for beta testing.
             </p>

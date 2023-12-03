@@ -19,7 +19,7 @@ export default function Vault({ params }) {
         <Breadcrumbs folders={params?.folders} />
 
         <div className="flex space-x-2">
-          <CreateFolderButton />
+          <CreateFolderButton disableActions={disableActions} />
           <UploadButton disableActions={disableActions} />
         </div>
       </div>

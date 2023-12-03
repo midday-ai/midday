@@ -1,4 +1,6 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
+import { FigmaSignIn } from "@/components/figma-sign-in";
+import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
@@ -21,6 +23,8 @@ export default async function Login() {
     <>
       <AppleSignIn />
       <SlackSignIn />
+      <GithubSignIn />
+      <FigmaSignIn />
     </>
   );
 
@@ -31,6 +35,8 @@ export default async function Login() {
         <>
           <GoogleSignIn />
           <SlackSignIn />
+          <GithubSignIn />
+          <FigmaSignIn />
         </>
       );
       break;
@@ -41,9 +47,36 @@ export default async function Login() {
         <>
           <GoogleSignIn />
           <AppleSignIn />
+          <GithubSignIn />
+          <FigmaSignIn />
         </>
       );
       break;
+
+    case "github":
+      prefferedSignInOption = <GithubSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
+          <AppleSignIn />
+          <SlackSignIn />
+          <FigmaSignIn />
+        </>
+      );
+      break;
+
+    case "figma":
+      prefferedSignInOption = <FigmaSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
+          <AppleSignIn />
+          <GithubSignIn />
+          <SlackSignIn />
+        </>
+      );
+      break;
+
     default:
       break;
   }
@@ -110,9 +143,12 @@ export default async function Login() {
             </div>
 
             <p className="text-xs text-[#878787]">
-              By clicking Continue with Google, you acknowledge that you have
-              read and understood, and agree to Midday's and{" "}
-              <a href="https://midday.ai/policy">Privacy Policy</a>.
+              By clicking continue, you acknowledge that you have read and
+              understood, and agree to Midday's and{" "}
+              <a href="https://midday.ai/policy" className="underline">
+                Privacy Policy
+              </a>
+              .
             </p>
           </div>
         </div>
