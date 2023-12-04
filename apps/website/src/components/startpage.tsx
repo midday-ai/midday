@@ -233,6 +233,7 @@ export function StartPage() {
 
         <Image
           quality={100}
+          loading="eager"
           src={search}
           alt="Midday | Search"
           width={638}
@@ -242,6 +243,7 @@ export function StartPage() {
 
         <Image
           quality={100}
+          loading="eager"
           src={tracking}
           alt="Midday | Tracking"
           width={360}
@@ -251,6 +253,7 @@ export function StartPage() {
 
         <Image
           quality={100}
+          loading="eager"
           className="absolute right-0 bottom-0 hidden dark:md:block"
           src={transactions}
           alt="Midday | Transactions"
@@ -289,6 +292,7 @@ export function StartPage() {
         <Image
           quality={100}
           src={searchLight}
+          loading="eager"
           alt="Midday | Search"
           width={638}
           height={260}
@@ -298,6 +302,7 @@ export function StartPage() {
         <Image
           quality={100}
           src={trackingLight}
+          loading="eager"
           alt="Midday | Tracking"
           width={360}
           height={268}
@@ -306,6 +311,7 @@ export function StartPage() {
 
         <Image
           quality={100}
+          loading="eager"
           className="absolute right-0 bottom-0 hidden md:block dark:hidden"
           src={transactionsLight}
           alt="Midday | Transactions"
