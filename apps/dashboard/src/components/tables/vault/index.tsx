@@ -9,7 +9,7 @@ export async function Table({ path }) {
   });
 
   return (
-    <div className="mt-6 h-[calc(100vh-180px)] border">
+    <div className="mt-6 h-[calc(100vh-180px)] border overflow-scroll relative">
       <UploadZone>
         <DataTable data={data} />
         {data.length === 0 && <EmptyTable type={path} />}

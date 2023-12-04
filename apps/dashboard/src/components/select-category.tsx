@@ -60,7 +60,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
     if (transactions?.data?.length) {
       toast({
         duration: 6000,
-        description: `Do you want to mark ${
+        title: `Do you want to mark ${
           transactions?.data?.length
         } similar transactions form ${name} as ${t(
           `categories.${value}`

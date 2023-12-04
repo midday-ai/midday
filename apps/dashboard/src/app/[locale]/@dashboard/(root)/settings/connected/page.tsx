@@ -2,7 +2,7 @@ import { ConnectedAccounts } from "@/components/connected-accounts";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Connected Accounts | Midday",
+  title: "Bank Accounts | Midday",
 };
 
 export default function Connected() {

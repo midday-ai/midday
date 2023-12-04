@@ -81,7 +81,8 @@ export function DataTableRow({ data, addOptimisticData }) {
       setTimeout(() => {
         toast({
           duration: 4000,
-          description: "Successfully deleted file",
+          title: "Successfully deleted file",
+          variant: "success",
         });
       }, 100);
     },
@@ -94,7 +95,7 @@ export function DataTableRow({ data, addOptimisticData }) {
 
         toast({
           duration: 4000,
-          description: `Copied URL for ${data.name} to clipboard.`,
+          title: `Copied URL for ${data.name} to clipboard.`,
         });
       } catch (err) {}
     },
@@ -104,7 +105,7 @@ export function DataTableRow({ data, addOptimisticData }) {
     onError: () => {
       toast({
         duration: 4000,
-        description:
+        title:
           "The folder already exists in the current directory. Please use a different name.",
       });
     },

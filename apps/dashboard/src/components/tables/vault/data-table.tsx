@@ -18,7 +18,10 @@ export function DataTable({ data }) {
 
   return (
     <Table>
-      <TableHeader className="border-0">
+      <TableHeader
+        className="border-0 sticky top-0 backdrop-blur backdrop-filter bg-opacity-50"
+        style={{ background: "var(--sticky)" }}
+      >
         <TableRow>
           <TableHead className="w-[60%]">Name</TableHead>
           <TableHead className="w-[15%]">Created at</TableHead>
