@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: "Midday | The financial OS for your business",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+};
+
+export const viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },

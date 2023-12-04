@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   title: "Midday | The financial OS for your business",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+};
+
+export const viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },
@@ -27,13 +30,13 @@ export const metadata: Metadata = {
 
 export default function Layout({
   children,
-  params,
+  params: { locale = "en" },
 }: {
   children: ReactElement;
   params: { locale: string };
 }) {
   return (
-    <html lang={params.locale} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body className={cn(fontSans.variable, "whitespace-pre-line")}>
         <ThemeProvider
           attribute="class"
