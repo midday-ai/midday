@@ -29,11 +29,8 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -209,7 +206,7 @@ export function DataTableRow({ data, addOptimisticData }) {
                     <DropdownMenuItem>
                       {data.isFolder ? (
                         <a
-                          href={`/api/download/zip?path=${folderPath}&filename=${data.name}`}
+                          href={`/api/download/zip?path=${filepath}&filename=${data.name}`}
                           download
                           className="truncate"
                         >
@@ -292,7 +289,7 @@ export function DataTableRow({ data, addOptimisticData }) {
           <ContextMenuItem>
             {data.isFolder ? (
               <a
-                href={`/api/download/zip?path=${folderPath}&filename=${data.name}`}
+                href={`/api/download/zip?path=${filepath}&filename=${data.name}`}
                 download
                 className="truncate"
               >

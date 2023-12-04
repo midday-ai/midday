@@ -1,19 +1,33 @@
+import { getUser } from "@midday/supabase/cached-queries";
+import { getVaultRecursiveQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
+import { download } from "@midday/supabase/storage";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 
 export const preferredRegion = "fra1";
 export const runtime = "edge";
+export const dynamic = "force-dynamic";
 
 export async function GET(req, res) {
-  const promises = [];
-  const supabase = createClient();
   const requestUrl = new URL(req.url);
+  const supabase = createClient();
+  const user = await getUser();
   const path = requestUrl.searchParams.get("path");
   const filename = requestUrl.searchParams.get("filename");
 
+  const promises: any = [];
+
+  const files = await getVaultRecursiveQuery(supabase, {
+    teamId: user.data.team_id,
+    path,
+  });
+
   files.forEach((file) => {
     promises.push(
-      supabaseClient.storage.from(bucket).download(`${folder}/${file.name}`)
+      download(supabase, {
+        bucket: "vault",
+        path: `${file.basePath}/${file.name}`,
+      })
     );
   });
 
@@ -32,20 +46,21 @@ export async function GET(req, res) {
   });
 
   downloadedFiles.forEach((downloadedFile) => {
-    if (downloadedFile) {
+    if (downloadedFile?.blob) {
       zipWriter.add(downloadedFile.name, new BlobReader(downloadedFile.blob));
     }
   });
 
-  //   const { data } = await supabase.storage.from("vault").download(path);
-  //   const responseHeaders = new Headers(res.headers);
+  const responseHeaders = new Headers(res.headers);
 
-  //   responseHeaders.set(
-  //     "Content-Disposition",
-  //     `attachment; filename="${filename}"`
-  //   );
+  responseHeaders.set(
+    "Content-Disposition",
+    `attachment; filename="${filename}.zip"`
+  );
 
-  //   return new Response(data, {
-  //     headers: responseHeaders,
-  //   });
+  const data = await zipWriter.close();
+
+  return new Response(data, {
+    headers: responseHeaders,
+  });
 }

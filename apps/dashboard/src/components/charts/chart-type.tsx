@@ -20,7 +20,7 @@ export function ChartType({ initialValue, disabled }) {
     initialValue,
     (_, newState) => {
       return newState;
-    },
+    }
   );
 
   return (

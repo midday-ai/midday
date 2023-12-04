@@ -25,9 +25,15 @@ export const metadata: Metadata = {
   ],
 };
 
-export default function Layout({ children }: { children: ReactElement }) {
+export default function Layout({
+  children,
+  params,
+}: {
+  children: ReactElement;
+  params: { locale: string };
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={params.locale} suppressHydrationWarning>
       <body className={cn(fontSans.variable, "whitespace-pre-line")}>
         <ThemeProvider
           attribute="class"

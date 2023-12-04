@@ -3,4 +3,5 @@ export const Cookies = {
   SpendingPeriod: "spending-period",
   ChartType: "chart-type",
   TransactionsPeriod: "transactions-period",
+  OnboardingVisited: "onboarding-visited",
 };

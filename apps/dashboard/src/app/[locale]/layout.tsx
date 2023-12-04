@@ -4,7 +4,6 @@ import { Provider } from "./provider";
 export default async function Layout({
   dashboard,
   login,
-
   params: { locale },
 }: {
   dashboard: React.ReactNode;

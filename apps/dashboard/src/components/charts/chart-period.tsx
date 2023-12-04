@@ -1,7 +1,6 @@
 "use client";
 
 import { DateRangePicker } from "@midday/ui/date-range-picker";
-import { Icons } from "@midday/ui/icons";
 import {
   Select,
   SelectContent,
@@ -21,12 +20,12 @@ export function ChartPeriod({ initialValue, defaultValue, disabled }) {
       to: parseAsString.withDefault(initialValue?.to ?? undefined),
       from: parseAsString.withDefault(initialValue?.from ?? undefined),
       period: parseAsString.withDefault(
-        initialValue?.period ?? defaultValue.period,
+        initialValue?.period ?? defaultValue.period
       ),
     },
     {
       shallow: false,
-    },
+    }
   );
 
   if (state?.from) {
@@ -40,7 +39,7 @@ export function ChartPeriod({ initialValue, defaultValue, disabled }) {
   } else {
     placeholder = `${placeholder} -${format(
       new Date(defaultValue.to),
-      "LLL dd, y",
+      "LLL dd, y"
     )} `;
   }
 

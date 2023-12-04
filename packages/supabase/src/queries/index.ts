@@ -517,3 +517,61 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     data: mergedArray,
   };
 }
+
+type GetVaultRecursiveParams = {
+  teamId: string;
+  path?: string;
+  folder?: string;
+  limit?: number;
+  offset?: number;
+};
+
+export async function getVaultRecursiveQuery(
+  supabase: Client,
+  params: GetVaultRecursiveParams
+) {
+  const { teamId, path, folder, limit = 10000, offset = 0 } = params;
+
+  let basePath = teamId;
+
+  if (path) {
+    basePath = `${basePath}/${path}`;
+  }
+
+  if (folder) {
+    basePath = `${basePath}/${folder}`;
+  }
+
+  const items = [];
+  let folderContents: any = [];
+
+  for (;;) {
+    const { data } = await supabase.storage.from("vault").list(basePath);
+
+    folderContents = folderContents.concat(data);
+    // offset += limit;
+    if ((data || []).length < limit) {
+      break;
+    }
+  }
+
+  const subfolders = folderContents?.filter((item) => item.id === null) ?? [];
+  const folderItems = folderContents?.filter((item) => item.id !== null) ?? [];
+
+  folderItems.forEach((item) => items.push({ ...item, basePath }));
+
+  const subFolderContents = await Promise.all(
+    subfolders.map((folder: any) =>
+      getVaultRecursiveQuery(supabase, {
+        ...params,
+        folder: decodeURIComponent(folder.name),
+      })
+    )
+  );
+
+  subFolderContents.map((subfolderContent) => {
+    subfolderContent.map((item) => items.push(item));
+  });
+
+  return items;
+}

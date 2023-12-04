@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const returnTo = requestUrl.searchParams.get("return_to");
   const provider = requestUrl.searchParams.get("provider");
+  const onboardingVisited = cookieStore.get(Cookies.OnboardingVisited)?.value;
 
   if (provider) {
     cookieStore.set(Cookies.PrefferedSignInProvider, provider);
@@ -21,6 +22,11 @@ export async function GET(req: NextRequest) {
   if (code) {
     const supabase = createClient(cookieStore);
     await supabase.auth.exchangeCodeForSession(code);
+  }
+
+  if (!onboardingVisited) {
+    cookieStore.set(Cookies.OnboardingVisited, "true");
+    return NextResponse.redirect(`${requestUrl.origin}/onboarding`);
   }
 
   if (returnTo) {

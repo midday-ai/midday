@@ -1,6 +1,5 @@
 "use client";
 
-import { createT } from "next-international";
 import { createI18nClient } from "next-international/client";
 
 export const languages = ["en", "sv"];
