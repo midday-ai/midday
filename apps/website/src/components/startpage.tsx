@@ -153,54 +153,54 @@ export function StartPage() {
           </div>
         </div>
 
-        <div className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
+        <div className="w-[1px] h-[1px] bg-primary rounded-full absolute top-[35%] left-[5%] animate-[pulse_2s_ease-in-out_infinite]" />
         <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary rounded-full absolute top-[44%] left-[10%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "500ms" }}
         />
         <div
-          className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[1px] h-[1px] bg-primary rounded-full absolute top-[41%] left-[15%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "0ms" }}
         />
         <div
-          className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[2px] h-[2px] bg-primary rounded-full absolute top-[39%] left-[25%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "700ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full invisible md:visible absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-[#22FF66] rounded-full absolute top-[34%] left-[30%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "1s" }}
         />
         <div
-          className="w-[1px] h-[1px] bg-primary invisible md:visible rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[1px] h-[1px] bg-primary rounded-full absolute top-[45%] left-[44%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "400ms" }}
         />
 
         <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary rounded-full absolute top-[54%] right-[5%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "2s" }}
         />
         <div
-          className="w-[3px] h-[3px] bg-[#8306FF] rounded-full invisible md:visible absolute top-[60%] right-[10%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[3px] h-[3px] bg-[#8306FF] rounded-full absolute top-[60%] right-[10%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "4s" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[20%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary rounded-full absolute top-[50%] right-[20%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "200ms" }}
         />
         <div
-          className="w-[2px] h-[2px] bg-primary invisible md:visible rounded-full absolute top-[59%] right-[27%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[2px] h-[2px] bg-primary rounded-full absolute top-[59%] right-[27%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "50ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary rounded-full absolute top-[40%] right-[24%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "10ms" }}
         />
         <div
-          className="w-[3px] h-[3px] bg-primary invisible md:visible rounded-full absolute top-[53%] right-[32%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[3px] h-[3px] bg-primary rounded-full absolute top-[53%] right-[32%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "100ms" }}
         />
         <div
-          className="w-[5px] h-[5px] bg-primary invisible md:visible rounded-full absolute top-[50%] right-[40%] animate-[pulse_2s_ease-in-out_infinite]"
+          className="w-[5px] h-[5px] bg-primary rounded-full absolute top-[50%] right-[40%] animate-[pulse_2s_ease-in-out_infinite]"
           style={{ animationDelay: "190ms" }}
         />
       </div>
