@@ -15,7 +15,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import { useAction } from "next-safe-action/hook";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 export function UploadZone({ children }) {
@@ -60,7 +60,7 @@ export function UploadZone({ children }) {
     },
   });
 
-  const onDrop = useCallback(async (files) => {
+  const onDrop = async (files) => {
     setShowProgress(true);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
@@ -107,7 +107,7 @@ export function UploadZone({ children }) {
         title: "Something went wrong please try again.",
       });
     }
-  }, []);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
