@@ -26,6 +26,9 @@ export function Toaster() {
                 <div className="flex space-x-2 justify-between">
                   <div className="flex space-x-2 items-center">
                     {props?.variant === "success" && <Icons.Check />}
+                    {props?.variant === "error" && (
+                      <Icons.Error className="text-[#FF3638]" />
+                    )}
 
                     {props?.variant === "progress" && (
                       <Loader2 className="h-4 w-4 animate-spin" />

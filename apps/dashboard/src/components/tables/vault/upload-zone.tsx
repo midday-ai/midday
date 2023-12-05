@@ -52,8 +52,8 @@ export function UploadZone({ children }) {
   const createFolder = useAction(createFolderAction, {
     onError: () => {
       toast({
-        duration: 4000,
-        // position: "bottom-right",
+        duration: 2500,
+        variant: "error",
         title:
           "The folder already exists in the current directory. Please use a different name.",
       });
@@ -64,14 +64,14 @@ export function UploadZone({ children }) {
     setShowProgress(true);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
-    console.log(`${userData?.team_id}/${folderPath}`);
+    const filePath = [userData?.team_id, ...folders].join("/");
 
     try {
       await Promise.all(
         files.map(async (file, idx) => {
           await resumableUpload(supabase, {
             bucket: "vault",
-            path: `${userData?.team_id}/${folderPath}`,
+            path: filePath,
             file,
             onProgress: (bytesUploaded, bytesTotal) => {
               uploadProgress.current[idx] = (bytesUploaded / bytesTotal) * 100;
@@ -103,6 +103,7 @@ export function UploadZone({ children }) {
     } catch {
       toast({
         duration: 2500,
+        variant: "error",
         title: "Something went wrong please try again.",
       });
     }

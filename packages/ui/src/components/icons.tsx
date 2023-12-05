@@ -12,6 +12,7 @@ import {
   MdDevices,
   MdDriveFileMove,
   MdDynamicForm,
+  MdErrorOutline,
   MdExpandMore,
   MdFastfood,
   MdFence,
@@ -411,4 +412,5 @@ export const Icons = {
   FileUpload: MdFileUpload,
   Search: MdSearch,
   CreateNewFolder: MdCreateNewFolder,
+  Error: MdErrorOutline,
 };

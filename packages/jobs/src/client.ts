@@ -10,7 +10,7 @@ export const client = new TriggerClient({
 
 export const supabase = new Supabase<Database>({
   id: "supabase",
-  projectId: process.env.SUPABASE_ID!,
+  projectId: process.env.NEXT_PUBLIC_SUPABASE_ID!,
   supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
 });
 
@@ -18,4 +18,6 @@ export const supabaseManagement = new SupabaseManagement({
   id: "supabase-integration",
 });
 
-export const supabaseTriggers = supabaseManagement.db(process.env.SUPABASE_ID!);
+export const supabaseTriggers = supabaseManagement.db(
+  process.env.NEXT_PUBLIC_SUPABASE_ID!
+);

@@ -28,9 +28,16 @@ export async function upload(
   throw result.error;
 }
 
+type ResumableUploadParmas = {
+  file: File;
+  path: string;
+  bucket: string;
+  onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
+};
+
 export async function resumableUpload(
   client: SupabaseClient,
-  { file, path, bucket, onProgress }: UploadParams
+  { file, path, bucket, onProgress }: ResumableUploadParmas
 ) {
   const {
     data: { session },
@@ -38,15 +45,14 @@ export async function resumableUpload(
 
   const fullPath = `${path}/${file.name}`;
 
-  console.log(fullPath);
-
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: `https://pytddvqiozwrhfbwqazp.supabase.co/storage/v1/upload/resumable`,
-      retryDelays: [0, 3000, 5000, 10000, 20000],
+      endpoint: `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co/storage/v1/upload/resumable`,
+      retryDelays: [0, 3000, 5000, 10000],
       headers: {
         authorization: `Bearer ${session?.access_token}`,
-        "x-upsert": "true", // optionally set upsert to true to overwrite existing files
+        // optionally set upsert to true to overwrite existing files
+        "x-upsert": "true",
       },
       uploadDataDuringCreation: true,
       // Important if you want to allow re-uploading the same file https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
