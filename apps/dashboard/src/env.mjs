@@ -29,6 +29,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
     NEXT_PUBLIC_APPLICATION_IDENTIFIER: z.string(),
+    NEXT_PUBLIC_SUPABASE_ID: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -37,6 +38,7 @@ export const env = createEnv({
     VERCEL_URL: process.env.VERCEL_URL,
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_SUPABASE_ID: process.env.NEXT_PUBLIC_SUPABASE_ID,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
