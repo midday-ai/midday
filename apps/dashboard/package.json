@@ -25,7 +25,7 @@
     "@trigger.dev/nextjs": "^2.2.11",
     "@vercel/edge-config": "^0.4.1",
     "@vercel/toolbar": "^0.1.6",
-    "@zip.js/zip.js": "2.7.31",
+    "@zip.js/zip.js": "2.7.32",
     "change-case": "^5.2.0",
     "framer-motion": "^10.16.14",
     "ms": "^2.1.3",

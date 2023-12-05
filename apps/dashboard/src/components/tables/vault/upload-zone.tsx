@@ -2,9 +2,9 @@
 
 import { createFolderAction } from "@/actions/create-folder-action";
 import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
+import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
-import { resumableUpload } from "@midday/supabase/storage";
 import {
   ContextMenu,
   ContextMenuContent,
