@@ -71,8 +71,12 @@ export const exportTransactionsSchema = z.object({
 });
 
 export const deleteFileSchema = z.object({
-  path: z.string(),
-  isFolder: z.boolean().optional(),
+  id: z.string(),
+  path: z.array(z.string()),
+});
+
+export const deleteFolderSchema = z.object({
+  path: z.array(z.string()),
 });
 
 export const createFolderSchema = z.object({

@@ -2,7 +2,7 @@ import * as tus from "tus-js-client";
 
 type ResumableUploadParmas = {
   file: File;
-  path: string;
+  path: string[];
   bucket: string;
   onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
 };
@@ -15,7 +15,9 @@ export async function resumableUpload(
     data: { session },
   } = await client.auth.getSession();
 
-  const fullPath = `${path}/${file.name}`;
+  const fullPath = decodeURIComponent([...path, file.name].join("/"));
+
+  console.log(fullPath);
 
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {

@@ -60,7 +60,7 @@ export const translatedFolderName = (t: any, folder: string) => {
   }
 };
 
-export function DataTableRow({ data, addOptimisticData }) {
+export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
   const t = useI18n();
   const { toast } = useToast();
   const router = useRouter();
@@ -76,18 +76,6 @@ export function DataTableRow({ data, addOptimisticData }) {
   const folderPath = folders.join("/");
   const filepath = [...folders, data.name].join("/");
 
-  const deleteFile = useAction(deleteFileAction, {
-    onSuccess: () => {
-      setTimeout(() => {
-        toast({
-          duration: 4000,
-          title: "Successfully deleted file",
-          variant: "success",
-        });
-      }, 100);
-    },
-  });
-
   const shareFile = useAction(shareFileAction, {
     onSuccess: async (url) => {
       try {
@@ -96,18 +84,9 @@ export function DataTableRow({ data, addOptimisticData }) {
         toast({
           duration: 4000,
           title: `Copied URL for ${data.name} to clipboard.`,
+          variant: "success",
         });
       } catch (err) {}
-    },
-  });
-
-  const createFolder = useAction(createFolderAction, {
-    onError: () => {
-      toast({
-        duration: 4000,
-        title:
-          "The folder already exists in the current directory. Please use a different name.",
-      });
     },
   });
 
@@ -324,12 +303,18 @@ export function DataTableRow({ data, addOptimisticData }) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() =>
-                deleteFile.execute({
-                  path: decodeURIComponent(data.isFile ? folderPath : filepath),
-                  isFolder: data.isFolder,
-                })
-              }
+              onClick={() => {
+                if (data.isFolder) {
+                  deleteFolder({
+                    path: [...folders, data.name],
+                  });
+                } else {
+                  deleteFile({
+                    id: data.id,
+                    path: [...folders, data.name],
+                  });
+                }
+              }}
             >
               Continue
             </AlertDialogAction>

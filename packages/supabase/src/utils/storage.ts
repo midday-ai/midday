@@ -28,7 +28,7 @@ export async function upload(
 }
 
 type RemoveParams = {
-  path: string;
+  path: string[];
   bucket: string;
 };
 
@@ -36,11 +36,13 @@ export async function remove(
   client: SupabaseClient,
   { bucket, path }: RemoveParams
 ) {
-  return client.storage.from(bucket).remove([path]);
+  return client.storage
+    .from(bucket)
+    .remove([decodeURIComponent(path.join("/"))]);
 }
 
 type DeleteFolderParams = {
-  path: string;
+  path: string[];
   bucket: string;
 };
 
@@ -48,13 +50,31 @@ export async function deleteFolder(
   client: SupabaseClient,
   { bucket, path }: DeleteFolderParams
 ) {
-  const { data: list } = await client.storage.from(bucket).list(path);
-  const filesToRemove = list?.map((file) => `${path}/${file.name}`);
-  return client.storage.from(bucket).remove([...filesToRemove, path]);
+  const { data: list } = await client.storage
+    .from(bucket)
+    .list(decodeURIComponent(path.join("/")));
+
+  const filesToRemove = list?.flatMap((file) => {
+    // Folder, remove empty file before folder
+    if (!file.id) {
+      return [
+        `${decodeURIComponent(
+          [...path, file.name].join("/")
+        )}/${EMPTY_FOLDER_PLACEHOLDER_FILE_NAME}`,
+        decodeURIComponent([...path, file.name].join("/")),
+      ];
+    }
+
+    return [decodeURIComponent([...path, file.name].join("/"))];
+  });
+
+  console.log(filesToRemove);
+
+  return client.storage.from(bucket).remove(filesToRemove);
 }
 
 type CreateFolderParams = {
-  path: string;
+  path: string[];
   name: string;
   bucket: string;
 };
@@ -63,7 +83,9 @@ export async function createFolder(
   client: SupabaseClient,
   { bucket, path, name }: CreateFolderParams
 ) {
-  const fullPath = `${path}/${name}/${EMPTY_FOLDER_PLACEHOLDER_FILE_NAME}`;
+  const fullPath = decodeURIComponent(
+    [...path, name, EMPTY_FOLDER_PLACEHOLDER_FILE_NAME].join("/")
+  );
 
   const { error, data } = await client.storage
     .from(bucket)

@@ -41,7 +41,10 @@ export function UploadZone({ children }) {
 
       setToastId(id);
     } else {
-      update(toastId, { progress });
+      update(toastId, {
+        progress,
+        title: `Uploading ${uploadProgress.current.length} files`,
+      });
     }
   }, [showProgress, progress, toastId]);
 
@@ -61,10 +64,13 @@ export function UploadZone({ children }) {
   });
 
   const onDrop = async (files) => {
+    // Set default progress
+    uploadProgress.current = files.map(() => 0);
+
     setShowProgress(true);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
-    const filePath = [userData?.team_id, ...folders].join("/");
+    const filePath = [userData?.team_id, ...folders];
 
     try {
       await Promise.all(
@@ -88,6 +94,9 @@ export function UploadZone({ children }) {
           });
         })
       );
+
+      // Reset once done
+      uploadProgress.current = [];
 
       setProgress(0);
       toast({

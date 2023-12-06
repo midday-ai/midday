@@ -1,5 +1,8 @@
 "use client";
 
+import { createFolderAction } from "@/actions/create-folder-action";
+import { deleteFileAction } from "@/actions/delete-file-action";
+import { deleteFolderAction } from "@/actions/delete-folder-action";
 import {
   Table,
   TableBody,
@@ -7,14 +10,68 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hook";
 import { useOptimistic } from "react";
 import { DataTableRow } from "./data-table-row";
 
 export function DataTable({ data }) {
-  const [optimisticData, addOptimisticData] = useOptimistic(
+  const { toast } = useToast();
+
+  const [optimisticData, setOptimisticData] = useOptimistic(
     data,
-    (state, item) => [...state, item]
+    (state, { action, ...item }) => {
+      switch (action) {
+        case "delete":
+          return state.filter(({ id }) => id !== item.id);
+        case "delete-folder":
+          return state.filter(({ name }) => name !== item.name);
+        case "update":
+          return state.map((d) => (d.id === item.id ? item : d));
+        default:
+          return [...state, item];
+      }
+    }
   );
+
+  const deleteFile = useAction(deleteFileAction, {
+    onExecute: ({ id }) => {
+      setOptimisticData({ action: "delete", id });
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const deleteFolder = useAction(deleteFolderAction, {
+    onExecute: ({ id }) => {
+      setOptimisticData({ action: "delete-folder", id });
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const createFolder = useAction(createFolderAction, {
+    onExecute: () => {
+      setOptimisticData({ id: "new" });
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        title:
+          "The folder already exists in the current directory. Please use a different name.",
+      });
+    },
+  });
 
   return (
     <Table>
@@ -33,7 +90,9 @@ export function DataTable({ data }) {
           <DataTableRow
             key={row.name}
             data={row}
-            addOptimisticData={addOptimisticData}
+            deleteFile={(params) => deleteFile.execute(params)}
+            deleteFolder={(params) => deleteFolder.execute(params)}
+            createFolder={(params) => createFolder.execute(params)}
           />
         ))}
       </TableBody>

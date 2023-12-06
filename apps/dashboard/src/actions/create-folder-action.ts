@@ -13,11 +13,9 @@ export const createFolderAction = action(createFolderSchema, async (value) => {
 
   await createFolder(supabase, {
     bucket: "vault",
-    path: `${user.data.team_id}/${value.path}`,
+    path: [user.data.team_id, value.path],
     name: value.name,
   });
 
   await revalidateTag(`vault_${user.data.team_id}`);
-
-  return error;
 });

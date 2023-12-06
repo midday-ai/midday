@@ -25,16 +25,16 @@ export function Toaster() {
               <div className="space-y-2 w-full">
                 <div className="flex space-x-2 justify-between">
                   <div className="flex space-x-2 items-center">
-                    {props?.variant === "success" && <Icons.Check />}
-                    {props?.variant === "error" && (
-                      <Icons.Error className="text-[#FF3638]" />
-                    )}
-
-                    {props?.variant === "progress" && (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    )}
-
-                    {title && <ToastTitle>{title}</ToastTitle>}
+                    <div className="w-[20px] h-[20px]">
+                      {props?.variant === "success" && <Icons.Check />}
+                      {props?.variant === "error" && (
+                        <Icons.Error className="text-[#FF3638]" />
+                      )}
+                      {props?.variant === "progress" && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
+                    </div>
+                    <div>{title && <ToastTitle>{title}</ToastTitle>}</div>
                   </div>
 
                   <div>

@@ -2,16 +2,16 @@
 
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
-import { remove } from "@midday/supabase/storage";
+import { deleteFolder } from "@midday/supabase/storage";
 import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
-import { deleteFileSchema } from "./schema";
+import { deleteFolderSchema } from "./schema";
 
-export const deleteFileAction = action(deleteFileSchema, async (value) => {
+export const deleteFolderAction = action(deleteFolderSchema, async (value) => {
   const supabase = createClient();
   const user = await getUser();
 
-  await remove(supabase, {
+  await deleteFolder(supabase, {
     bucket: "vault",
     path: [user.data.team_id, ...value.path],
   });
