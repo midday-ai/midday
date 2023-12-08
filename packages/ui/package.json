@@ -23,7 +23,6 @@
     "./calendar": "./src/components/calendar.tsx",
     "./card": "./src/components/card.tsx",
     "./context-menu": "./src/components/context-menu.tsx",
-    "./pin-input": "./src/components/pin-input.tsx",
     "./collapsible": "./src/components/collapsible.tsx",
     "./alert": "./src/components/alert.tsx",
     "./alert-dialog": "./src/components/alert-dialog.tsx",

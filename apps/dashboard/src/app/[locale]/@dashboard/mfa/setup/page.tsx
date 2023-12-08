@@ -47,7 +47,7 @@ export default function Setup() {
 
   let content = <MfaStart setEnroll={setEnroll} />;
 
-  if (true) {
+  if (enroll) {
     content = <EnrollMFA />;
   }
 

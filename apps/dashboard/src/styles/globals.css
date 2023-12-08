@@ -45,3 +45,55 @@ body {
 .skeleton-line > * {
   opacity: 0 !important;
 }
+
+.pin-field-container {
+  display: grid;
+  grid-auto-columns: max-content;
+  grid-auto-flow: column;
+  justify-content: center;
+  margin: 4rem 0;
+}
+
+.pin-field {
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--secondary));
+  border-right: none;
+  font-size: 2rem;
+  height: 4rem;
+  outline: none;
+  text-align: center;
+  transition-duration: 250ms;
+  transition-property: color, border, box-shadow, transform;
+  width: 4rem;
+}
+
+.pin-field:last-of-type {
+  border-radius: 0 0.5rem 0.5rem 0;
+  border-right: 1px solid hsl(var(--border));
+}
+
+.pin-field:focus {
+  box-shadow: 0 0 0.25rem rgba(white, 0.5);
+  opacity: 0.9;
+  outline: none;
+}
+
+.invalid {
+  animation: shake 0.2s ease-in-out 0s 2;
+}
+
+.pin-field:first-of-type {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.pin-field[disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0rem); }
+  25% { transform: translateX(0.5rem); }
+  75% { transform: translateX(-0.5rem); }
+  100% { transform: translateX(0rem); }
+}

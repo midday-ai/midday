@@ -12,11 +12,11 @@ const I18nMiddleware = createI18nMiddleware({
 export async function middleware(request: NextRequest) {
   const response = I18nMiddleware(request);
   const { supabase } = createClient(request, response);
+  const url = new URL("/", request.url);
 
   const { data } = await supabase.auth.getSession();
 
   if (!data.session && request.nextUrl.pathname !== "/") {
-    const url = new URL("/", request.url);
     const encodedSearchParams = `${request.nextUrl.pathname.substring(1)}${
       request.nextUrl.search
     }`;
@@ -32,6 +32,17 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname !== "/closed"
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
+  }
+
+  const { data: mfaData } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+  if (
+    mfaData.nextLevel === "aal2" &&
+    mfaData.nextLevel !== mfaData.currentLevel &&
+    request.nextUrl.pathname !== "/mfa/verify"
+  ) {
+    return NextResponse.redirect(`${url.origin}/mfa/verify`);
   }
 
   return response;
