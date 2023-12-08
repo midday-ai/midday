@@ -3,20 +3,18 @@
 import { createClient } from "@midday/supabase/server";
 import { revalidatePath } from "next/cache";
 import { action } from "./safe-action";
-import { unenrollMfaSchema } from "./schema";
+import { mfaVerifySchema } from "./schema";
 
-export const unenrollMfaAction = action(
-  unenrollMfaSchema,
-  async ({ factorId }) => {
+export const mfaVerifyAction = action(
+  mfaVerifySchema,
+  async ({ factorId, challengeId, code }) => {
     const supabase = createClient();
 
-    const { data, error } = await supabase.auth.mfa.unenroll({
+    const { data } = await supabase.auth.mfa.verify({
       factorId,
+      challengeId,
+      code,
     });
-
-    if (error) {
-      throw Error(error.message);
-    }
 
     revalidatePath("/settings/security");
 

@@ -1,6 +1,6 @@
 import { createClient } from "@midday/supabase/client";
+import { Button } from "@midday/ui/button";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PinField from "react-pin-field";
@@ -48,6 +48,14 @@ export function EnrollMFA() {
     enroll();
   }, []);
 
+  const handleOnCancel = () => {
+    supabase.auth.mfa.unenroll({
+      factorId,
+    });
+
+    router.push("/onboarding");
+  };
+
   return (
     <>
       <div className="flex items-center justify-center">
@@ -75,9 +83,13 @@ export function EnrollMFA() {
       </div>
 
       <div className="flex border-t-[1px] pt-4 mt-6 justify-center mb-6">
-        <Link href="/onboarding" className="text-medium text-sm">
+        <Button
+          onClick={handleOnCancel}
+          variant="ghost"
+          className="text-medium text-sm hover:bg-transparent"
+        >
           Cancel
-        </Link>
+        </Button>
       </div>
     </>
   );

@@ -1,9 +1,11 @@
 "use client";
 
+import { mfaVerifyAction } from "@/actions/mfa-verify-action";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { cn } from "@midday/ui/utils";
+import { useAction } from "next-safe-action/hook";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -20,25 +22,21 @@ export function AddNewDeviceModal() {
   const [qr, setQR] = useState("");
   const isOpen = searchParams.get("add") === "device";
 
+  const verify = useAction(mfaVerifyAction, {
+    onSuccess: () => router.push(pathname),
+  });
+
   const onComplete = async (code: string) => {
     if (!isValidating) {
       setValidating(true);
 
       const challenge = await supabase.auth.mfa.challenge({ factorId });
 
-      try {
-        const verify = await supabase.auth.mfa.verify({
-          factorId,
-          challengeId: challenge.data.id,
-          code,
-        });
-
-        if (verify.data) {
-          router.push(pathname);
-        }
-      } catch {
-        setError(true);
-      }
+      verify.execute({
+        factorId,
+        challengeId: challenge.data.id,
+        code,
+      });
     }
   };
 
@@ -65,9 +63,22 @@ export function AddNewDeviceModal() {
     }
   }, [isOpen]);
 
+  const handleOnClose = () => {
+    router.push(pathname);
+
+    supabase.auth.mfa.unenroll({
+      factorId,
+    });
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
-      <DialogContent className="max-w-[455px]">
+    <Dialog open={isOpen} onOpenChange={handleOnClose}>
+      <DialogContent
+        className="max-w-[455px]"
+        onInteractOutside={(evt) => {
+          evt.preventDefault();
+        }}
+      >
         <div className="p-6">
           <div className="flex items-center justify-center mt-8">
             <div className="w-[190px] h-[190px] bg-white rounded-md">
@@ -96,7 +107,7 @@ export function AddNewDeviceModal() {
 
           <div className="flex border-t-[1px] pt-4 mt-4 justify-center">
             <Button
-              onClick={() => router.push(pathname)}
+              onClick={handleOnClose}
               variant="ghost"
               className="text-medium text-sm hover:bg-transparent"
             >

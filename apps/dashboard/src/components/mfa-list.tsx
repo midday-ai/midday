@@ -36,7 +36,7 @@ export async function MFAList() {
             </p>
           </div>
 
-          <RemoveMFAButton factoryId={factor.id} />
+          <RemoveMFAButton factorId={factor.id} />
         </div>
       );
     });

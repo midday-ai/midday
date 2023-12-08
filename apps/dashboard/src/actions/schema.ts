@@ -85,7 +85,13 @@ export const createFolderSchema = z.object({
 });
 
 export const unenrollMfaSchema = z.object({
-  factoryId: z.string(),
+  factorId: z.string(),
+});
+
+export const mfaVerifySchema = z.object({
+  factorId: z.string(),
+  challengeId: z.string(),
+  code: z.string(),
 });
 
 export const shareFileSchema = z.object({

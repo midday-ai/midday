@@ -6,10 +6,10 @@ import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hook";
 
 type Props = {
-  factoryId: string;
+  factorId: string;
 };
 
-export function RemoveMFAButton({ factoryId }: Props) {
+export function RemoveMFAButton({ factorId }: Props) {
   const { toast } = useToast();
 
   const unenroll = useAction(unenrollMfaAction, {
@@ -23,7 +23,7 @@ export function RemoveMFAButton({ factoryId }: Props) {
   });
 
   return (
-    <Button variant="outline" onClick={() => unenroll.execute({ factoryId })}>
+    <Button variant="outline" onClick={() => unenroll.execute({ factorId })}>
       Remove
     </Button>
   );
