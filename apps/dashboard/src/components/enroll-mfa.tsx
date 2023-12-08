@@ -31,7 +31,7 @@ export function EnrollMFA() {
   };
 
   useEffect(() => {
-    (async () => {
+    async function enroll() {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
       });
@@ -43,14 +43,16 @@ export function EnrollMFA() {
       setFactorId(data.id);
 
       setQR(data.totp.qr_code);
-    })();
+    }
+
+    enroll();
   }, []);
 
   return (
     <>
       <div className="flex items-center justify-center">
-        <div className="w-[300px] h-[300px]">
-          {qr && <Image src={qr} alt="qr" width={300} height={300} />}
+        <div className="w-[190px] h-[190px] bg-white rounded-md">
+          {qr && <Image src={qr} alt="qr" width={190} height={190} />}
         </div>
       </div>
       <div className="my-8">

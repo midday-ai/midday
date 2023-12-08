@@ -16,6 +16,7 @@ export async function middleware(request: NextRequest) {
 
   const { data } = await supabase.auth.getSession();
 
+  // Not authenticated
   if (!data.session && request.nextUrl.pathname !== "/") {
     const encodedSearchParams = `${request.nextUrl.pathname.substring(1)}${
       request.nextUrl.search
@@ -26,6 +27,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Check if in beta list
   if (
     data.session &&
     !(await get("beta"))?.includes(data.session.user.id) &&
@@ -37,6 +39,7 @@ export async function middleware(request: NextRequest) {
   const { data: mfaData } =
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
+  // Enrolled for mfa but not verified
   if (
     mfaData.nextLevel === "aal2" &&
     mfaData.nextLevel !== mfaData.currentLevel &&

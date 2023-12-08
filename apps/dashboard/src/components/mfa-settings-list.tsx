@@ -1,16 +1,16 @@
+import { Button } from "@midday/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { Suspense } from "react";
-import { ErrorFallback } from "./error-fallback";
+import Link from "next/link";
 import { UnenrollMFA } from "./unenroll-mfa";
 
-export async function MfaSettingsList() {
+export function MfaSettingsList() {
   return (
     <Card>
       <CardHeader>
@@ -23,12 +23,14 @@ export async function MfaSettingsList() {
 
       <CardContent>
         <UnenrollMFA />
-        {/* <ErrorBoundary errorComponent={ErrorFallback}> */}
-        {/* <Suspense fallback={<NotificationSettingsSkeleton />}> */}
-        {/* <NotificationSettings /> */}
-        {/* </Suspense> */}
-        {/* </ErrorBoundary> */}
       </CardContent>
+
+      <CardFooter className="flex justify-between">
+        <div />
+        <Link href="?add=device">
+          <Button>Add new device</Button>
+        </Link>
+      </CardFooter>
     </Card>
   );
 }

@@ -1,7 +1,5 @@
 "use client";
 
-import { createFolderAction } from "@/actions/create-folder-action";
-import { deleteFileAction } from "@/actions/delete-file-action";
 import { shareFileAction } from "@/actions/share-file-action";
 import { FileIcon } from "@/components/file-icon";
 import { useI18n } from "@/locales/client";

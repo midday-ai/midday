@@ -52,4 +52,8 @@ export default {
     inbox: "Inbox",
     transactions: "Transactions",
   },
+  mfa_status: {
+    verified: "Verified",
+    unverified: "Unverified",
+  },
 } as const;

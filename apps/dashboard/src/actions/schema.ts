@@ -84,6 +84,10 @@ export const createFolderSchema = z.object({
   name: z.string(),
 });
 
+export const unenrollMfaSchema = z.object({
+  factoryId: z.string(),
+});
+
 export const shareFileSchema = z.object({
   filepath: z.string(),
   expireIn: z.number(),

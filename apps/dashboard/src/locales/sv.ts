@@ -52,4 +52,8 @@ export default {
     inbox: "Inbox",
     transactions: "Transaktioner",
   },
+  mfa_status: {
+    verified: "Verifierad",
+    unverified: "Overifierad",
+  },
 } as const;
