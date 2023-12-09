@@ -30,6 +30,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
     NEXT_PUBLIC_APPLICATION_IDENTIFIER: z.string(),
     NEXT_PUBLIC_SUPABASE_ID: z.string(),
+    NEXT_PUBLIC_TRIGGER_API_KEY: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -49,6 +50,7 @@ export const env = createEnv({
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
     NEXT_PUBLIC_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_APPLICATION_IDENTIFIER,
+    NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

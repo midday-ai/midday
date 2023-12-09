@@ -1,3 +1,4 @@
+import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { ConnectBankModal } from "@/components/modals/connect-bank-modal";
 import { SelectAccountModal } from "@/components/modals/select-account-modal";
@@ -18,6 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <ConnectBankModal countryCode={countryCode} />
       <SelectAccountModal countryCode={countryCode} />
+      <ExportStatus />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { createClient } from "@midday/supabase/server";
-import { Provider } from "./provider";
+import { Providers } from "./providers";
 
 export default async function Layout({
   dashboard,
@@ -16,5 +16,5 @@ export default async function Layout({
     data: { session },
   } = await supabase.auth.getSession();
 
-  return <Provider locale={locale}>{session ? dashboard : login}</Provider>;
+  return <Providers locale={locale}>{session ? dashboard : login}</Providers>;
 }
