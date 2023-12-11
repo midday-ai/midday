@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
 import { cn } from "@midday/ui/utils";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
 import { type ReactElement, Suspense } from "react";
@@ -46,12 +47,13 @@ export default function Layout({
           disableTransitionOnChange
         >
           {children}
+          <SpeedInsights />
           <Toaster />
-        </ThemeProvider>
 
-        <Suspense>
-          <StaffToolbar />
-        </Suspense>
+          <Suspense>
+            <StaffToolbar />
+          </Suspense>
+        </ThemeProvider>
       </body>
     </html>
   );

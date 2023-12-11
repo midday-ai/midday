@@ -1,7 +1,7 @@
+// import { ActivityList } from "@/components/activity-list";
 import { MfaSettingsList } from "@/components/mfa-settings-list";
 import { AddNewDeviceModal } from "@/components/modals/add-new-device";
 import { Metadata } from "next";
-import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Security | Midday",
@@ -9,12 +9,10 @@ export const metadata: Metadata = {
 
 export default async function Security() {
   return (
-    <>
-      <Suspense>
-        <MfaSettingsList />
-      </Suspense>
-
+    <div className="space-y-12">
+      {/* <ActivityList /> */}
+      <MfaSettingsList />
       <AddNewDeviceModal />
-    </>
+    </div>
   );
 }

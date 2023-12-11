@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function Connected() {
   return (
-    <div className="flex flex-col space-y-12">
+    <div className="space-y-12">
       <ConnectedAccounts />
     </div>
   );

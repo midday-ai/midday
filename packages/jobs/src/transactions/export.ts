@@ -25,6 +25,9 @@ client.defineJob({
     const generateExport = await io.createStatus("generate-export-start", {
       label: "Generating export",
       state: "loading",
+      data: {
+        progress: 10,
+      },
     });
 
     await io.logger.info("Transactions Export");
@@ -41,12 +44,49 @@ client.defineJob({
       },
     });
 
+    // await generateExport.update("generate-export-transaction", {
+    //   state: "loading",
+    //   data: {
+    //     progress: 30,
+    //   },
+    // });
+
+    await generateExport.update("generate-export-transaction", {
+      state: "loading",
+      data: {
+        progress: 50,
+      },
+    });
+
     await io.logger.info(`Transactions: ${JSON.stringify(data, null, 2)}`);
+
+    await generateExport.update("generate-export-attachments", {
+      state: "loading",
+      data: {
+        progress: 70,
+      },
+    });
+
+    await generateExport.update("generate-export-zip", {
+      state: "loading",
+      data: {
+        progress: 80,
+      },
+    });
+
+    await generateExport.update("generate-export-move", {
+      state: "loading",
+      data: {
+        progress: 90,
+      },
+    });
 
     await generateExport.update("generate-export-done", {
       state: "success",
       data: {
-        url: "",
+        url: "https://service.midday.ai",
+        progress: 100,
+        totalItems: data.meta.count,
       },
     });
   },

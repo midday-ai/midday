@@ -110,7 +110,7 @@ export const TransactionsEmail = ({
       </Head>
       <Preview>{previewText}</Preview>
       <Tailwind>
-        <Body className="bg-[#F0EFEC] my-auto mx-auto font-sans">
+        <Body className="bg-[#F6F6F3] my-auto mx-auto font-sans">
           <br />
           <Container className="border border-solid border-[#DCDAD2] rounded my-[40px] mx-auto p-[20px] w-[560px]">
             <Section className="mt-[32px]">
@@ -217,7 +217,7 @@ export const TransactionsEmail = ({
 
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
-                className="bg-[#000000] rounded-xl text-primary text-[12px] font-semibold no-underline text-center px-6 py-3"
+                className="bg-[#000000] rounded-xl text-primary text-[12px] text-white font-semibold no-underline text-center px-6 py-3"
                 href={`${baseAppUrl}/transactions?from_id=${
                   transactions.at(0)?.id
                 }`}

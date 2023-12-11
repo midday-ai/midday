@@ -14,7 +14,7 @@ export default async function Profile() {
   const { data: userData } = await getUser();
 
   return (
-    <div className="flex flex-col space-y-12">
+    <div className="space-y-12">
       <UserAvatar
         userId={userData.id}
         fullName={userData.full_name}

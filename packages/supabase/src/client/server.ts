@@ -1,5 +1,5 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Database } from "../types";
 
 export const createClient = () => {
@@ -33,6 +33,12 @@ export const createClient = () => {
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
+        },
+      },
+      global: {
+        headers: {
+          // Pass user agent from browser
+          "user-agent": headers().get("user-agent") as string,
         },
       },
     }

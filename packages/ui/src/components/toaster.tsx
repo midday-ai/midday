@@ -19,46 +19,60 @@ export function Toaster() {
   return (
     <ToastProvider>
       {toasts.map(
-        ({ id, title, description, progress = 0, action, ...props }) => {
+        ({
+          id,
+          title,
+          description,
+          progress = 0,
+          action,
+          footer,
+          ...props
+        }) => {
           return (
-            <Toast key={id} {...props}>
-              <div className="space-y-2 w-full">
-                <div className="flex space-x-2 justify-between">
-                  <div className="flex space-x-2 items-center">
-                    <div className="w-[20px] h-[20px]">
-                      {props?.variant === "success" && <Icons.Check />}
-                      {props?.variant === "error" && (
-                        <Icons.Error className="text-[#FF3638]" />
+            <Toast key={id} {...props} className="flex flex-col">
+              <div className="flex w-full">
+                <div className="space-y-2 w-full">
+                  <div className="flex space-x-2 justify-between">
+                    <div className="flex space-x-2 items-center">
+                      {props?.variant && (
+                        <div className="w-[20px] h-[20px]">
+                          {props?.variant === "success" && <Icons.Check />}
+                          {props?.variant === "error" && (
+                            <Icons.Error className="text-[#FF3638]" />
+                          )}
+                          {props?.variant === "progress" && (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          )}
+                        </div>
                       )}
+                      <div>{title && <ToastTitle>{title}</ToastTitle>}</div>
+                    </div>
+
+                    <div>
                       {props?.variant === "progress" && (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="text-sm text-[#878787]">
+                          {progress}%
+                        </span>
                       )}
                     </div>
-                    <div>{title && <ToastTitle>{title}</ToastTitle>}</div>
                   </div>
 
-                  <div>
-                    {props?.variant === "progress" && (
-                      <span className="text-sm text-[#878787]">
-                        {progress}%
-                      </span>
-                    )}
-                  </div>
+                  {props.variant === "progress" && (
+                    <Progress
+                      value={progress}
+                      className="w-full rounded-none h-[3px] bg-border"
+                    />
+                  )}
+
+                  {description && (
+                    <ToastDescription>{description}</ToastDescription>
+                  )}
                 </div>
-
-                {props.variant === "progress" && (
-                  <Progress
-                    value={progress}
-                    className="w-full rounded-none h-[3px] bg-border"
-                  />
-                )}
-
-                {description && (
-                  <ToastDescription>{description}</ToastDescription>
-                )}
+                {action}
+                <ToastClose />
               </div>
-              {action}
-              <ToastClose />
+
+              <div className="w-full flex justify-end">{footer}</div>
             </Toast>
           );
         }

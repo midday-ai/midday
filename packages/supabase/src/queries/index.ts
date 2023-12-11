@@ -575,3 +575,11 @@ export async function getVaultRecursiveQuery(
 
   return items;
 }
+
+export async function getAuthSessions(supabase: Client) {
+  return supabase
+    .from("auth.sessions")
+    .eq("user_id", "330e6a53-7a98-407c-a135-26882a2bcaf3")
+    .order("ordupdated_ater", { ascending: false })
+    .limit(5);
+}

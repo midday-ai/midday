@@ -12,8 +12,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
-import { cookies } from "next/headers";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { userAgent } from "next/server";
 

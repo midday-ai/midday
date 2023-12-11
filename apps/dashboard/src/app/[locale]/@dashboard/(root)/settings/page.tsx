@@ -12,7 +12,7 @@ export default async function Account() {
   const { data: userData } = await getUser();
 
   return (
-    <div className="flex flex-col space-y-12">
+    <div className="space-y-12">
       <TeamAvatar
         teamId={userData?.team?.id}
         name={userData?.team?.name}
