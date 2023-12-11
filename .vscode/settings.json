@@ -1,16 +1,16 @@
 {
-	"editor.codeActionsOnSave": {
-		"source.organizeImports.biome": true
-	},
-	"[javascript]": {
-		"editor.defaultFormatter": "biomejs.biome"
-	},
-	"editor.formatOnSave": true,
-	"tailwindCSS.experimental.configFile": "./tooling/tailwind/index.ts",
-	"typescript.enablePromptUseWorkspaceTsdk": true,
-	"typescript.tsdk": "node_modules/typescript/lib",
-	"typescript.preferences.autoImportFileExcludePatterns": [
-		"next/router.d.ts",
-		"next/dist/client/router.d.ts"
-	]
+  "editor.codeActionsOnSave": {
+    "source.organizeImports.biome": "explicit"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "editor.formatOnSave": true,
+  "tailwindCSS.experimental.configFile": "./tooling/tailwind/index.ts",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "next/router.d.ts",
+    "next/dist/client/router.d.ts"
+  ]
 }

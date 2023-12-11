@@ -34,7 +34,7 @@
     "next-international": "^1.1.4",
     "next-safe-action": "^5.2.1",
     "next-themes": "^0.2.1",
-    "next-usequerystate": "^1.13.1",
+    "next-usequerystate": "^1.13.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
