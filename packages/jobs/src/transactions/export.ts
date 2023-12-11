@@ -44,23 +44,21 @@ client.defineJob({
       },
     });
 
-    // await generateExport.update("generate-export-transaction", {
-    //   state: "loading",
-    //   data: {
-    //     progress: 30,
-    //   },
-    // });
-
     await generateExport.update("generate-export-transaction", {
+      state: "loading",
+      data: {
+        progress: 30,
+      },
+    });
+
+    await generateExport.update("generate-export-attachments-start", {
       state: "loading",
       data: {
         progress: 50,
       },
     });
 
-    await io.logger.info(`Transactions: ${JSON.stringify(data, null, 2)}`);
-
-    await generateExport.update("generate-export-attachments", {
+    await generateExport.update("generate-export-attachments-end", {
       state: "loading",
       data: {
         progress: 70,
