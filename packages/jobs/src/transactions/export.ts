@@ -82,7 +82,8 @@ client.defineJob({
     await generateExport.update("generate-export-done", {
       state: "success",
       data: {
-        url: "https://service.midday.ai",
+        filePath: "exports/export-2022-01-01-2023-01-01.zip",
+        fileName: "export-2022-01-01-2023-01-01.zip",
         progress: 100,
         totalItems: data.meta.count,
       },

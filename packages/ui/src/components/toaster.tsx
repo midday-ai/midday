@@ -31,7 +31,7 @@ export function Toaster() {
           return (
             <Toast key={id} {...props} className="flex flex-col">
               <div className="flex w-full">
-                <div className="space-y-2 w-full">
+                <div className="space-y-2 w-full justify-center">
                   <div className="flex space-x-2 justify-between">
                     <div className="flex space-x-2 items-center">
                       {props?.variant && (

@@ -205,7 +205,6 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
                         <DropdownMenuItem>Delete</DropdownMenuItem>
                       </AlertDialogTrigger>
                     )}
-                    {/* <DropdownMenuItem>Settings</DropdownMenuItem> */}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
