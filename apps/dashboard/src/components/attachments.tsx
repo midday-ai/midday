@@ -7,32 +7,44 @@ import { formatSize } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@midday/ui/hover-card";
 import { cn } from "@midday/ui/utils";
-import { AnimatePresence, motion } from "framer-motion";
 import { File, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 const Item = ({ file, onDelete, id }) => {
-  const animations = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: {
-      opacity: 0,
-    },
-    transition: { opacity: { duration: 0.4 } },
-  };
-
   return (
-    <motion.li
-      {...animations}
-      layout
-      className="flex items-center justify-between"
-    >
+    <div className="flex items-center justify-between">
       <div className="flex space-x-4 items-center">
-        <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center">
-          <File size={18} />
-        </div>
+        <HoverCard openDelay={300}>
+          <HoverCardTrigger>
+            <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center overflow-hidden cursor-pointer">
+              {/* <File size={18} /> */}
+
+              <embed
+                src={`https://service.midday.ai/storage/v1/object/public/vault/${file.path}#toolbar=0`}
+                title={file.name}
+                className="w-[40px] h-[40px] pointer-none"
+              />
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent
+            className="w-70 h-[350px]"
+            side="left"
+            sideOffset={55}
+          >
+            <embed
+              src={`https://service.midday.ai/storage/v1/object/public/vault/${file.path}#toolbar=0`}
+              title={file.name}
+              className="w-80 h-full"
+            />
+          </HoverCardContent>
+        </HoverCard>
 
         <div className="flex flex-col space-y-0.5 w-80">
           <a
@@ -56,7 +68,7 @@ const Item = ({ file, onDelete, id }) => {
       >
         <X size={14} />
       </Button>
-    </motion.li>
+    </div>
   );
 };
 
@@ -138,18 +150,17 @@ export function Attachments({ id, data }) {
           </div>
         )}
       </div>
-      <AnimatePresence>
-        <ul className="mt-4 space-y-4">
-          {files.map((file) => (
-            <Item
-              key={file.name}
-              id={id}
-              file={file}
-              onDelete={() => handleOnDelete(file.id)}
-            />
-          ))}
-        </ul>
-      </AnimatePresence>
+
+      <ul className="mt-4 space-y-4">
+        {files.map((file) => (
+          <Item
+            key={file.name}
+            id={id}
+            file={file}
+            onDelete={() => handleOnDelete(file.id)}
+          />
+        ))}
+      </ul>
     </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { OnboardingStep } from "./onboarding-step";
 
@@ -19,7 +18,7 @@ export function DownloadDesktop() {
         className={cn(
           "flex items-between opacity-30",
           active && "opacity-1",
-          done && "opacity-1",
+          done && "opacity-1"
         )}
       >
         <OnboardingStep active={active} done={done} />
