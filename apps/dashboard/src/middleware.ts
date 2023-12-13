@@ -41,6 +41,7 @@ export async function middleware(request: NextRequest) {
 
   // Enrolled for mfa but not verified
   if (
+    mfaData &&
     mfaData.nextLevel === "aal2" &&
     mfaData.nextLevel !== mfaData.currentLevel &&
     request.nextUrl.pathname !== "/mfa/verify"

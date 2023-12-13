@@ -1,9 +1,9 @@
-import { format } from "@fast-csv/format";
+import { writeToString } from "@fast-csv/format";
 import { getTransactionsQuery } from "@midday/supabase/queries";
 import { download } from "@midday/supabase/storage";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
-import formatDate from "date-fns/format";
+import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
+import { format } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
@@ -23,10 +23,17 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
+    const client = await io.supabase.client;
     const locale = "en-us";
     const { from, to, teamId } = payload;
 
-    const client = await io.supabase.client;
+    const filePath = `export-${format(new Date(from), "y-M-d")}-${format(
+      new Date(to),
+      "y-M-d"
+    )}`;
+
+    const path = `${teamId}/exports`;
+    const fileName = `${filePath}.zip`;
 
     const generateExport = await io.createStatus("generate-export-start", {
       label: "Generating export",
@@ -102,27 +109,21 @@ client.defineJob({
       },
     });
 
-    const csvStream = format({
+    const rows = data.map((transaction, idx) => [
+      idx + 1,
+      transaction.date,
+      transaction.name,
+      Intl.NumberFormat(locale, {
+        style: "currency",
+        currency: transaction.currency,
+      }).format(transaction.amount),
+      transaction?.attachments?.length > 0 ? "✔️" : "❌",
+      transaction?.note ?? "",
+    ]);
+
+    const csv = await writeToString(rows, {
       headers: ["ID", "Date", "Description", "Amount", "Attachment", "Note"],
     });
-
-    csvStream.pipe(process.stdout).on("end", () => process.exit());
-
-    csvStream.write(
-      data.map((transaction, idx) => [
-        idx + 1,
-        transaction.date,
-        transaction.name,
-        Intl.NumberFormat(locale, {
-          style: "currency",
-          currency: transaction.currency,
-        }).format(transaction.amount),
-        transaction?.attachments?.length > 0 ? "✔️" : "❌",
-        transaction?.note ?? "",
-      ])
-    );
-
-    csvStream.end();
 
     await generateExport.update("generate-export-csv-end", {
       state: "loading",
@@ -141,19 +142,12 @@ client.defineJob({
     const zipFileWriter = new BlobWriter("application/zip");
     const zipWriter = new ZipWriter(zipFileWriter);
 
-    // zipWriter.add("transactions.csv", new TextWriter('csvStream'));
-
-    // zipWriter.add("transactions.csv", new BlobReader(attachment.value.blob));
-
-    const filePath = `export-${formatDate(
-      new Date(from),
-      "y-M-d"
-    )}-${formatDate(new Date(to), "y-M-d")}`;
+    zipWriter.add("transactions.csv", new TextReader(csv));
 
     attachments.map((attachment) => {
       if (attachment?.value.blob) {
         zipWriter.add(
-          `${filePath}/${attachment.value.name}`,
+          attachment.value.name,
           new BlobReader(attachment.value.blob)
         );
       }
@@ -167,9 +161,6 @@ client.defineJob({
         progress: 90,
       },
     });
-
-    const path = `${teamId}/exports`;
-    const fileName = `${filePath}.zip`;
 
     await client.storage
       .from("vault")
