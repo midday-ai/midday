@@ -8,7 +8,7 @@ import { processPromisesBatch } from "../utils";
 client.defineJob({
   id: Jobs.TRANSACTIONS_ENCRICHMENT,
   name: "💅 Transactions - Enrichment",
-  version: "1.0.1",
+  version: "1.0.2",
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_ENCRICHMENT,
     schema: z.object({

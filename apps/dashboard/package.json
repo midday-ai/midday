@@ -28,6 +28,7 @@
     "@vercel/toolbar": "^0.1.6",
     "@zip.js/zip.js": "2.7.32",
     "change-case": "^5.3.0",
+    "fast-csv": "^4.3.6",
     "framer-motion": "^10.16.16",
     "ms": "^2.1.3",
     "next": "14.0.4",
@@ -38,7 +39,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
-    "react-hook-form": "^7.49.0",
+    "react-hook-form": "^7.49.1",
     "react-pin-field": "^3.1.4",
     "recharts": "^2.10.3",
     "sharp": "^0.33.0",
@@ -50,7 +51,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.1",
     "@types/node": "^20.10.4",
-    "@types/react": "^18.2.43",
+    "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.17",
     "typescript": "^5.3.3"
   }

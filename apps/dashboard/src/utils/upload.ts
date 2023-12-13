@@ -17,8 +17,6 @@ export async function resumableUpload(
 
   const fullPath = decodeURIComponent([...path, file.name].join("/"));
 
-  console.log(fullPath);
-
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
       endpoint: `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co/storage/v1/upload/resumable`,

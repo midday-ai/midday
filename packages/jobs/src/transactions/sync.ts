@@ -8,7 +8,7 @@ import { scheduler } from "./scheduler";
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC,
   name: "🔄 Transactions - Latest Transactions",
-  version: "1.0.1",
+  version: "1.0.2",
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {

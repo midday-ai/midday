@@ -10,7 +10,7 @@ import { Events, Jobs } from "../constants";
 client.defineJob({
   id: Jobs.TRANSACTIONS_NOTIFICATION,
   name: "🔔 Transactions - Notification",
-  version: "1.0.1",
+  version: "1.0.2",
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_NOTIFICATION,
     schema: z.object({

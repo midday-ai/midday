@@ -5,7 +5,7 @@ import { scheduler } from "./scheduler";
 client.defineJob({
   id: Jobs.BANK_ACCOUNT_CREATED,
   name: "🏦 Bank Account Created",
-  version: "1.0.1",
+  version: "1.0.2",
   trigger: supabaseTriggers.onInserted({
     table: "bank_accounts",
   }),
@@ -25,7 +25,7 @@ client.defineJob({
     await scheduler.register(payload.record.id, {
       type: "interval",
       options: {
-        seconds: 36000, // every 1h
+        seconds: 3600, // every 1h
       },
     });
   },

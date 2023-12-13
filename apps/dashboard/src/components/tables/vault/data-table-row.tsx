@@ -184,7 +184,7 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
                     <DropdownMenuItem>
                       {data.isFolder ? (
                         <a
-                          href={`/api/download/zip?path=${filepath}&filename=${data.name}`}
+                          href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
                           download
                           className="truncate"
                         >
@@ -192,7 +192,7 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
                         </a>
                       ) : (
                         <a
-                          href={`/api/download/file?path=${folderPath}&filename=${data.name}`}
+                          href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
                           download
                           className="truncate"
                         >
@@ -266,7 +266,7 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
           <ContextMenuItem>
             {data.isFolder ? (
               <a
-                href={`/api/download/zip?path=${filepath}&filename=${data.name}`}
+                href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
                 download
                 className="truncate"
               >
@@ -274,7 +274,7 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
               </a>
             ) : (
               <a
-                href={`/api/download/file?path=${folderPath}&filename=${data.name}`}
+                href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
                 download
                 className="truncate"
               >

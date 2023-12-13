@@ -23,10 +23,10 @@
   "dependencies": {
     "@biomejs/biome": "1.4.1",
     "@manypkg/cli": "^0.21.1",
-    "turbo": "^1.11.1",
+    "turbo": "^1.11.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "vercel": "32.7.0"
+    "vercel": "32.7.1"
   }
 }

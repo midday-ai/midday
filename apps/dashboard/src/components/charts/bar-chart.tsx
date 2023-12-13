@@ -144,6 +144,7 @@ export function BarChart({ data }) {
               formatAmount({
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
+                // TODO: Fix
                 currency: "SEK",
                 amount: value,
               })

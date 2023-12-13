@@ -14,7 +14,7 @@ export async function GET(req, res) {
 
   const { data } = await download(supabase, {
     bucket: "vault",
-    path: `${user.data.team_id}/${path}/${filename}`,
+    path: `${user.data.team_id}/${path}`,
   });
 
   const responseHeaders = new Headers(res.headers);

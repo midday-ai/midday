@@ -59,7 +59,6 @@ export function ExportStatus() {
   });
 
   const handleOnDownload = (id: string) => {
-    console.log("download");
     dismiss(id);
   };
 
@@ -117,7 +116,10 @@ export function ExportStatus() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <a href={`/api/download/file?path=katt&filename=katt.zip`} download>
+            <a
+              href={`/api/download/file?path=exports/${status?.data?.fileName}&filename=${status?.data?.fileName}`}
+              download
+            >
               <Button size="sm" onClick={() => handleOnDownload(id)}>
                 Download
               </Button>

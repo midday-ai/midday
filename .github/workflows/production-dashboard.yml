@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: "1.0.16"
+          bun-version: "1.0.17"
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: 📤 Pull Vercel Environment Information

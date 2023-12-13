@@ -9,7 +9,7 @@ import { transformTransactions } from "../utils";
 client.defineJob({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,
   name: "🔂 Transactions - Initial Sync",
-  version: "1.0.1",
+  version: "1.0.2",
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_INITIAL_SYNC,
     schema: z.object({

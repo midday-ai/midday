@@ -36,7 +36,7 @@ const Item = ({ file, onDelete, id }) => {
 
         <div className="flex flex-col space-y-0.5 w-80">
           <a
-            href={`/api/download/file?path=transactions/${id}&filename=${file.name}`}
+            href={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
             download
             className="truncate"
           >

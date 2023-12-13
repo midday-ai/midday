@@ -229,7 +229,7 @@ export async function getTransactionsQuery(
       *,
       assigned:assigned_id(*),
       enrichment:enrichment_id(category),
-      attachments(id,size,name)
+      attachments(id,size,name,path)
     `,
       { count: "exact" }
     )
@@ -318,7 +318,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       *,
       assigned:assigned_id(*),
       enrichment:enrichment_id(category),
-      attachments(id,size,name)
+      attachments(id,size,name,path)
     `
     )
     .eq("id", id)
