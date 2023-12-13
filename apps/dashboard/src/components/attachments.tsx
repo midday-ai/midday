@@ -24,11 +24,13 @@ const Item = ({ file, onDelete, id }) => {
         <HoverCard openDelay={300}>
           <HoverCardTrigger>
             <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center overflow-hidden cursor-pointer">
-              <embed
-                src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
-                title={file.name}
-                className="w-[40px] h-[40px] pointer-none"
-              />
+              {file.path && (
+                <embed
+                  src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
+                  title={file.name}
+                  className="w-[40px] h-[40px] pointer-none"
+                />
+              )}
             </div>
           </HoverCardTrigger>
           <HoverCardContent
@@ -36,11 +38,13 @@ const Item = ({ file, onDelete, id }) => {
             side="left"
             sideOffset={55}
           >
-            <embed
-              src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
-              title={file.name}
-              className="w-80 h-full"
-            />
+            {file.path && (
+              <embed
+                src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
+                title={file.name}
+                className="w-80 h-full"
+              />
+            )}
           </HoverCardContent>
         </HoverCard>
 
