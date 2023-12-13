@@ -13,7 +13,7 @@ import {
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
 import { cn } from "@midday/ui/utils";
-import { File, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -24,10 +24,8 @@ const Item = ({ file, onDelete, id }) => {
         <HoverCard openDelay={300}>
           <HoverCardTrigger>
             <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center overflow-hidden cursor-pointer">
-              {/* <File size={18} /> */}
-
               <embed
-                src={`https://service.midday.ai/storage/v1/object/public/vault/${file.path}#toolbar=0`}
+                src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
                 title={file.name}
                 className="w-[40px] h-[40px] pointer-none"
               />
@@ -39,7 +37,7 @@ const Item = ({ file, onDelete, id }) => {
             sideOffset={55}
           >
             <embed
-              src={`https://service.midday.ai/storage/v1/object/public/vault/${file.path}#toolbar=0`}
+              src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
               title={file.name}
               className="w-80 h-full"
             />
