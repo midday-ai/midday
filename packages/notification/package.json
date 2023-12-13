@@ -10,9 +10,9 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@novu/node": "^0.21.0"
+    "@novu/node": "^0.22.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.3"
   }
 }
