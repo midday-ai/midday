@@ -15,7 +15,7 @@ import { useAction } from "next-safe-action/hook";
 import { useOptimistic } from "react";
 import { DataTableRow } from "./data-table-row";
 
-export function DataTable({ data }) {
+export function DataTable({ data, teamId }) {
   const { toast } = useToast();
 
   const [optimisticData, setOptimisticData] = useOptimistic(
@@ -90,6 +90,7 @@ export function DataTable({ data }) {
           <DataTableRow
             key={row.name}
             data={row}
+            teamId={teamId}
             deleteFile={(params) => deleteFile.execute(params)}
             deleteFolder={(params) => deleteFolder.execute(params)}
             createFolder={(params) => createFolder.execute(params)}

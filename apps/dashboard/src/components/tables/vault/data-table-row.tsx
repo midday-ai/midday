@@ -34,6 +34,11 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@midday/ui/hover-card";
 import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
@@ -58,7 +63,13 @@ export const translatedFolderName = (t: any, folder: string) => {
   }
 };
 
-export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
+export function DataTableRow({
+  data,
+  deleteFile,
+  createFolder,
+  deleteFolder,
+  teamId,
+}) {
   const t = useI18n();
   const { toast } = useToast();
   const router = useRouter();
@@ -94,28 +105,42 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
     }
   };
 
+  console.log(data);
+
   return (
     <AlertDialog>
       <ContextMenu>
         <ContextMenuTrigger asChild>
-          <TableRow
-            className="h-[45px] cursor-default"
-            onClick={handleNavigate}
-          >
-            <TableCell>
-              <div className="flex items-center space-x-2">
-                <FileIcon
-                  mimetype={data?.metadata?.mimetype}
-                  name={data.name}
-                  isFolder={data.isFolder}
-                />
-                <span>{translatedFolderName(t, data.name)}</span>
-                {data?.metadata?.size && (
-                  <span className="text-[#878787]">
-                    {formatSize(data.metadata.size)}
-                  </span>
+          <TableRow className="h-[45px] cursor-default">
+            <TableCell onClick={handleNavigate}>
+              <HoverCard openDelay={300}>
+                <HoverCardTrigger
+                  disabled={data?.metadata?.mimetype !== "application/pdf"}
+                >
+                  <div className="flex items-center space-x-2">
+                    <FileIcon
+                      mimetype={data?.metadata?.mimetype}
+                      name={data.name}
+                      isFolder={data.isFolder}
+                    />
+                    <span>{translatedFolderName(t, data.name)}</span>
+                    {data?.metadata?.size && (
+                      <span className="text-[#878787]">
+                        {formatSize(data.metadata.size)}
+                      </span>
+                    )}
+                  </div>
+                </HoverCardTrigger>
+                {data?.metadata?.mimetype === "application/pdf" && (
+                  <HoverCardContent className="w-70 h-[350px]">
+                    <iframe
+                      src={`/api/proxy?filePath=vault/${teamId}/${filepath}#toolbar=0`}
+                      title={data.name}
+                      className="w-80 h-full"
+                    />
+                  </HoverCardContent>
                 )}
-              </div>
+              </HoverCard>
             </TableCell>
             <TableCell>
               {data?.created_at ? format(new Date(data.created_at), "Pp") : "-"}
@@ -252,7 +277,7 @@ export function DataTableRow({ data, deleteFile, createFolder, deleteFolder }) {
           )}
           <ContextMenuItem
             onClick={() =>
-              createFolder.execute({
+              createFolder({
                 path: folderPath,
                 name: "Untitled folder",
               })
