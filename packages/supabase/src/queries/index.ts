@@ -500,7 +500,9 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     basePath = `${basePath}/${path}`;
   }
 
-  const { data } = await supabase.storage.from("vault").list(basePath);
+  const { data } = await supabase.storage.from("vault").list(basePath, {
+    sortBy: { column: "name", order: "asc" },
+  });
 
   const filteredData =
     data

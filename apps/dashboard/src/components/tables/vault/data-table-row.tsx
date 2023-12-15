@@ -1,8 +1,12 @@
 "use client";
 
+import { createFolderAction } from "@/actions/create-folder-action";
+import { deleteFileAction } from "@/actions/delete-file-action";
+import { deleteFolderAction } from "@/actions/delete-folder-action";
 import { shareFileAction } from "@/actions/share-file-action";
 import { FileIcon } from "@/components/file-icon";
 import { useI18n } from "@/locales/client";
+import { useVaultContext } from "@/store/vault/hook";
 import { formatSize } from "@/utils/format";
 import {
   AlertDialog,
@@ -40,12 +44,15 @@ import {
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
 import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import ms from "ms";
 import { useAction } from "next-safe-action/hook";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useParams, usePathname } from "next/navigation";
+import { useState } from "react";
 
 export const translatedFolderName = (t: any, folder: string) => {
   switch (folder) {
@@ -57,24 +64,62 @@ export const translatedFolderName = (t: any, folder: string) => {
       return t("folders.transactions");
     case "exports":
       return t("folders.exports");
-
     default:
       return decodeURIComponent(folder);
   }
 };
 
-export function DataTableRow({
-  data,
-  deleteFile,
-  createFolder,
-  deleteFolder,
-  teamId,
-}) {
+function RowTitle({ isEditing, name: initialName, path, href }) {
   const t = useI18n();
   const { toast } = useToast();
-  const router = useRouter();
+  const [name, setName] = useState(initialName ?? "Untitled Folder");
+
+  const createFolder = useAction(createFolderAction, {
+    onExecute: () => {},
+    onError: () => {
+      toast({
+        duration: 3500,
+        title:
+          "The folder already exists in the current directory. Please use a different name.",
+      });
+    },
+  });
+
+  const handleOnBlur = (evt) => {
+    createFolder.execute({ path, name });
+  };
+
+  const handleOnKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
+    if (evt.key === "Enter") {
+      createFolder.execute({ path, name });
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <Input
+        className="w-auto border-0"
+        value={name}
+        autoFocus
+        onBlur={handleOnBlur}
+        onKeyDown={handleOnKeyDown}
+        onChange={(evt) => setName(evt.target.value)}
+      />
+    );
+  }
+
+  if (href) {
+    return <Link href={href}>{translatedFolderName(t, name)}</Link>;
+  }
+
+  return <span>{translatedFolderName(t, name)}</span>;
+}
+
+export function DataTableRow({ data, teamId }) {
+  const { toast } = useToast();
   const pathname = usePathname();
   const params = useParams();
+  const { deleteItem, createFolder } = useVaultContext((s) => s);
 
   const folders = params?.folders ?? [];
   const isDefaultFolder = ["inbox", "exports", "transactions"].includes(
@@ -84,6 +129,40 @@ export function DataTableRow({
   const disableActions = ["transactions"].includes(folders?.at(0));
   const folderPath = folders.join("/");
   const filepath = [...folders, data.name].join("/");
+
+  const deleteFolder = useAction(deleteFolderAction, {
+    onExecute: () => deleteItem(data.name),
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const deleteFile = useAction(deleteFileAction, {
+    onExecute: ({ id }) => deleteItem(id),
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const handleDeleteItem = () => {
+    if (data.isFolder) {
+      deleteFolder.execute({ path: [...folders, data.name] });
+    } else {
+      deleteFile.execute({ id: data.id, path: [...folders, data.name] });
+    }
+  };
+
+  const handleCreateFolder = () => {
+    createFolder({ path: folderPath, name: "Untitled folder" });
+  };
 
   const shareFile = useAction(shareFileAction, {
     onSuccess: async (url) => {
@@ -99,20 +178,12 @@ export function DataTableRow({
     },
   });
 
-  const handleNavigate = () => {
-    if (data.isFolder) {
-      router.push(`${pathname}/${data.name}`);
-    }
-  };
-
-  console.log(data);
-
   return (
     <AlertDialog>
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow className="h-[45px] cursor-default">
-            <TableCell onClick={handleNavigate}>
+            <TableCell>
               <HoverCard openDelay={300}>
                 <HoverCardTrigger
                   disabled={data?.metadata?.mimetype !== "application/pdf"}
@@ -123,7 +194,14 @@ export function DataTableRow({
                       name={data.name}
                       isFolder={data.isFolder}
                     />
-                    <span>{translatedFolderName(t, data.name)}</span>
+
+                    <RowTitle
+                      href={data.isFolder && `${pathname}/${data.name}`}
+                      name={data.name}
+                      isEditing={data.isEditing}
+                      path={folderPath}
+                    />
+
                     {data?.metadata?.size && (
                       <span className="text-[#878787]">
                         {formatSize(data.metadata.size)}
@@ -157,7 +235,7 @@ export function DataTableRow({
                     <Icons.MoreHoriz />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent
-                    className="w-56"
+                    className="w-42"
                     sideOffset={10}
                     align="end"
                   >
@@ -203,9 +281,9 @@ export function DataTableRow({
                       </DropdownMenuSub>
                     )}
 
-                    {!disableActions && !isDefaultFolder && (
+                    {/* {!disableActions && !isDefaultFolder && (
                       <DropdownMenuItem>Rename</DropdownMenuItem>
-                    )}
+                    )} */}
                     <DropdownMenuItem>
                       {data.isFolder ? (
                         <a
@@ -275,19 +353,14 @@ export function DataTableRow({
               </ContextMenuSubContent>
             </ContextMenuSub>
           )}
-          <ContextMenuItem
-            onClick={() =>
-              createFolder({
-                path: folderPath,
-                name: "Untitled folder",
-              })
-            }
-          >
-            Create folder
-          </ContextMenuItem>
-          {!disableActions && !isDefaultFolder && (
-            <ContextMenuItem>Rename</ContextMenuItem>
+          {!disableActions && (
+            <ContextMenuItem onClick={handleCreateFolder}>
+              Create folder
+            </ContextMenuItem>
           )}
+          {/* {!disableActions && !isDefaultFolder && (
+            <ContextMenuItem>Rename</ContextMenuItem>
+          )} */}
           <ContextMenuItem>
             {data.isFolder ? (
               <a
@@ -324,20 +397,7 @@ export function DataTableRow({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (data.isFolder) {
-                  deleteFolder({
-                    path: [...folders, data.name],
-                  });
-                } else {
-                  deleteFile({
-                    id: data.id,
-                    path: [...folders, data.name],
-                  });
-                }
-              }}
-            >
+            <AlertDialogAction onClick={handleDeleteItem}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>

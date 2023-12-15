@@ -1,7 +1,7 @@
 "use client";
 
-import { createFolderAction } from "@/actions/create-folder-action";
 import { invalidateCacheAction } from "@/actions/invalidate-cache-action";
+import { useVaultContext } from "@/store/vault/hook";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
@@ -13,7 +13,6 @@ import {
 } from "@midday/ui/context-menu";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
-import { useAction } from "next-safe-action/hook";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -26,8 +25,12 @@ export function UploadZone({ children }) {
   const uploadProgress = useRef([]);
   const params = useParams();
   const folders = params?.folders ?? [];
-  const folderPath = folders.join("/");
   const { toast, dismiss, update } = useToast();
+  const { createFolder } = useVaultContext((s) => s);
+
+  const isDefaultFolder = ["inbox", "exports", "transactions"].includes(
+    folders.at(0)
+  );
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -47,21 +50,6 @@ export function UploadZone({ children }) {
       });
     }
   }, [showProgress, progress, toastId]);
-
-  const isDefaultFolder = ["inbox", "exports", "transactions"].includes(
-    folders.at(0)
-  );
-
-  const createFolder = useAction(createFolderAction, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title:
-          "The folder already exists in the current directory. Please use a different name.",
-      });
-    },
-  });
 
   const onDrop = async (files) => {
     // Set default progress
@@ -149,25 +137,7 @@ export function UploadZone({ children }) {
 
       {!isDefaultFolder && (
         <ContextMenuContent>
-          <ContextMenuItem
-            onClick={() =>
-              createFolder.execute({
-                path: folderPath,
-                name: "Untitled folder",
-              })
-            }
-          >
-            Upload file
-          </ContextMenuItem>
-
-          <ContextMenuItem
-            onClick={() =>
-              createFolder.execute({
-                path: folderPath,
-                name: "Untitled folder",
-              })
-            }
-          >
+          <ContextMenuItem onClick={createFolder}>
             Create folder
           </ContextMenuItem>
         </ContextMenuContent>

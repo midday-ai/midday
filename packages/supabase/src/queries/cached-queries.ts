@@ -171,6 +171,7 @@ export const getVault = async (params) => {
     ["vault", teamId],
     {
       tags: [`vault_${teamId}`],
+      revalidate: 10,
     }
   )(params);
 };

@@ -10,9 +10,9 @@
         "check:types": "tsc --noEmit"
     },
     "dependencies": {
-        "@trigger.dev/react": "^2.3.5",
-        "@trigger.dev/sdk": "^2.3.5",
-        "@trigger.dev/supabase": "^2.3.5"
+        "@trigger.dev/react": "^2.3.6",
+        "@trigger.dev/sdk": "^2.3.6",
+        "@trigger.dev/supabase": "^2.3.6"
     }
 }
   

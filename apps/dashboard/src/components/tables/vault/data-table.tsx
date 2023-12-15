@@ -1,8 +1,6 @@
 "use client";
 
-import { createFolderAction } from "@/actions/create-folder-action";
-import { deleteFileAction } from "@/actions/delete-file-action";
-import { deleteFolderAction } from "@/actions/delete-folder-action";
+import { useVaultContext } from "@/store/vault/hook";
 import {
   Table,
   TableBody,
@@ -10,68 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hook";
-import { useOptimistic } from "react";
 import { DataTableRow } from "./data-table-row";
 
-export function DataTable({ data, teamId }) {
-  const { toast } = useToast();
-
-  const [optimisticData, setOptimisticData] = useOptimistic(
-    data,
-    (state, { action, ...item }) => {
-      switch (action) {
-        case "delete":
-          return state.filter(({ id }) => id !== item.id);
-        case "delete-folder":
-          return state.filter(({ name }) => name !== item.name);
-        case "update":
-          return state.map((d) => (d.id === item.id ? item : d));
-        default:
-          return [...state, item];
-      }
-    }
-  );
-
-  const deleteFile = useAction(deleteFileAction, {
-    onExecute: ({ id }) => {
-      setOptimisticData({ action: "delete", id });
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
-      });
-    },
-  });
-
-  const deleteFolder = useAction(deleteFolderAction, {
-    onExecute: ({ id }) => {
-      setOptimisticData({ action: "delete-folder", id });
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
-      });
-    },
-  });
-
-  const createFolder = useAction(createFolderAction, {
-    onExecute: () => {
-      setOptimisticData({ id: "new" });
-    },
-    onError: () => {
-      toast({
-        duration: 3500,
-        title:
-          "The folder already exists in the current directory. Please use a different name.",
-      });
-    },
-  });
+export function DataTable({ teamId }) {
+  const data = useVaultContext((s) => s.data);
 
   return (
     <Table>
@@ -86,15 +26,8 @@ export function DataTable({ data, teamId }) {
         </TableRow>
       </TableHeader>
       <TableBody className="border-r-0 border-l-0">
-        {optimisticData?.map((row) => (
-          <DataTableRow
-            key={row.name}
-            data={row}
-            teamId={teamId}
-            deleteFile={(params) => deleteFile.execute(params)}
-            deleteFolder={(params) => deleteFolder.execute(params)}
-            createFolder={(params) => createFolder.execute(params)}
-          />
+        {data?.map((row) => (
+          <DataTableRow key={row.name} data={row} teamId={teamId} />
         ))}
       </TableBody>
     </Table>
