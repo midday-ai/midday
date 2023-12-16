@@ -16,18 +16,21 @@ import { cn } from "@midday/ui/utils";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { FilePreview } from "./file-preview";
 
 const Item = ({ file, onDelete, id }) => {
   return (
     <div className="flex items-center justify-between">
       <div className="flex space-x-4 items-center">
-        <HoverCard openDelay={300}>
+        <HoverCard openDelay={200}>
           <HoverCardTrigger>
             <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center overflow-hidden cursor-pointer">
-              <iframe
-                src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
-                title={file.name}
-                className="w-[40px] h-[40px] pointer-none"
+              <FilePreview
+                src={`/api/proxy?filePath=vault/${file.path}`}
+                className="w-[40px] h-[40px]"
+                name={file.name}
+                type={file.type}
+                preview
               />
             </div>
           </HoverCardTrigger>
@@ -36,10 +39,10 @@ const Item = ({ file, onDelete, id }) => {
             side="left"
             sideOffset={55}
           >
-            <iframe
-              src={`/api/proxy?filePath=vault/${file.path}#toolbar=0`}
-              title={file.name}
-              className="w-80 h-full"
+            <FilePreview
+              src={`/api/proxy?filePath=vault/${file.path}`}
+              name={file.name}
+              type={file.type}
             />
           </HoverCardContent>
         </HoverCard>

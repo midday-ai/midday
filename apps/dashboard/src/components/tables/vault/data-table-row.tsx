@@ -5,6 +5,7 @@ import { deleteFileAction } from "@/actions/delete-file-action";
 import { deleteFolderAction } from "@/actions/delete-folder-action";
 import { shareFileAction } from "@/actions/share-file-action";
 import { FileIcon } from "@/components/file-icon";
+import { FilePreview, isSupportedFilePreview } from "@/components/file-preview";
 import { useI18n } from "@/locales/client";
 import { useVaultContext } from "@/store/vault/hook";
 import { formatSize } from "@/utils/format";
@@ -178,16 +179,16 @@ export function DataTableRow({ data, teamId }) {
     },
   });
 
+  const filePreviewSupported = isSupportedFilePreview(data?.metadata?.mimetype);
+
   return (
     <AlertDialog>
       <ContextMenu>
         <ContextMenuTrigger asChild>
           <TableRow className="h-[45px] cursor-default">
             <TableCell>
-              <HoverCard openDelay={300}>
-                <HoverCardTrigger
-                  disabled={data?.metadata?.mimetype !== "application/pdf"}
-                >
+              <HoverCard openDelay={200}>
+                <HoverCardTrigger>
                   <div className="flex items-center space-x-2">
                     <FileIcon
                       mimetype={data?.metadata?.mimetype}
@@ -209,12 +210,12 @@ export function DataTableRow({ data, teamId }) {
                     )}
                   </div>
                 </HoverCardTrigger>
-                {data?.metadata?.mimetype === "application/pdf" && (
+                {filePreviewSupported && (
                   <HoverCardContent className="w-70 h-[350px]">
-                    <iframe
-                      src={`/api/proxy?filePath=vault/${teamId}/${filepath}#toolbar=0`}
-                      title={data.name}
-                      className="w-80 h-full"
+                    <FilePreview
+                      src={`/api/proxy?filePath=vault/${teamId}/${filepath}`}
+                      name={data.name}
+                      type={data?.metadata?.mimetype}
                     />
                   </HoverCardContent>
                 )}

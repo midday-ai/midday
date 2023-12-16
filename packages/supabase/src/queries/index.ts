@@ -229,7 +229,7 @@ export async function getTransactionsQuery(
       *,
       assigned:assigned_id(*),
       enrichment:enrichment_id(category),
-      attachments(id,size,name,path)
+      attachments(*)
     `,
       { count: "exact" }
     )
@@ -318,7 +318,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       *,
       assigned:assigned_id(*),
       enrichment:enrichment_id(category),
-      attachments(id,size,name,path)
+      attachments(*)
     `
     )
     .eq("id", id)
@@ -491,7 +491,6 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     : [
         { name: "inbox", isFolder: true },
         { name: "exports", isFolder: true },
-        { name: "transactions", isFolder: true },
       ];
 
   let basePath = teamId;
@@ -507,6 +506,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const filteredData =
     data
       ?.filter((file) => file.name !== EMPTY_FOLDER_PLACEHOLDER_FILE_NAME)
+      .filter((file) => file.name !== "transactions")
       .map((item) => ({ ...item, isFolder: !item.id })) ?? [];
 
   const mergedMap = new Map(
