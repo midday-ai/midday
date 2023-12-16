@@ -199,7 +199,7 @@ type GetTransactionsParams = {
     search?: string;
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
-    category?: "include" | "exclude";
+    category?: "include" | "exclude" | string;
     type?: "income" | "expense";
     date: {
       from?: string;
@@ -267,11 +267,16 @@ export async function getTransactionsQuery(
     `);
   }
 
+  if (category) {
+    query.filter("category", "eq", category);
+    // .or('country_id.eq.1,name.eq.Beijing', { referenceTable: 'enrichment_id' })
+  }
+
   if (category === "exclude") {
     query.is("category", null).is("enrichment_id", null);
   }
 
-  if (category === "include") {
+  if (category === "include" || category === "uncategorized") {
     query.not("category", "is", null);
   }
 

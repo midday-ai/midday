@@ -18,6 +18,7 @@ type Props = {
   className?: string;
   preview?: boolean;
   src: string;
+  downloadUrl: string;
 };
 
 export const isSupportedFilePreview = (type: FileType) => {
@@ -36,22 +37,29 @@ export const isSupportedFilePreview = (type: FileType) => {
   switch (type) {
     case FileType.Pdf:
       return true;
-
     default:
       return false;
   }
 };
 
-export function FilePreview({ src, className, name, type, preview }: Props) {
+export function FilePreview({
+  src,
+  className,
+  name,
+  type,
+  preview,
+  downloadUrl,
+}: Props) {
   const [isLoaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  let content;
 
   const handleOnLoaded = () => {
     setTimeout(() => {
       setLoaded(true);
     }, 150);
   };
-
-  let content;
 
   if (type?.startsWith("image")) {
     content = (
@@ -65,6 +73,7 @@ export function FilePreview({ src, className, name, type, preview }: Props) {
           src={src}
           className="object-contain"
           alt={name}
+          onError={() => setError(true)}
           onLoad={handleOnLoaded}
         />
       </div>
@@ -73,10 +82,19 @@ export function FilePreview({ src, className, name, type, preview }: Props) {
 
   if (type === FileType.Pdf) {
     content = (
-      <div className={cn("overflow-hidden w-[300px] h-[317px]", className)}>
+      <div
+        className={cn(
+          "overflow-hidden",
+          !preview && "w-[300px] h-[317px]",
+          className
+        )}
+      >
         <iframe
           src={`${src}#toolbar=0`}
-          className={cn("-ml-[3px] -mt-[3px] w-[305px] h-[327px]", className)}
+          className={cn(
+            !preview && "-ml-[3px] -mt-[3px] w-[305px] h-[327px]",
+            className
+          )}
           title={name}
           onLoad={handleOnLoaded}
         />
@@ -108,13 +126,15 @@ export function FilePreview({ src, className, name, type, preview }: Props) {
               exit={{ y: -50, opacity: 0 }}
               transition={{ delay: 0.04 }}
             >
-              <Button
-                variant="secondary"
-                className="w-[32px] h-[32px] bg-black/60 hover:bg-black"
-                size="icon"
-              >
-                <Icons.FileDownload />
-              </Button>
+              <a href={downloadUrl} download>
+                <Button
+                  variant="secondary"
+                  className="w-[32px] h-[32px] bg-black/60 hover:bg-black"
+                  size="icon"
+                >
+                  <Icons.FileDownload />
+                </Button>
+              </a>
             </motion.div>
           </div>
         </AnimatePresence>
@@ -123,13 +143,18 @@ export function FilePreview({ src, className, name, type, preview }: Props) {
       <Skeleton
         className={cn(
           "absolute top-0 left-0 z-50 pointer-events-none w-full h-full",
-          isLoaded && "hidden"
+          isLoaded && "hidden",
+          error && "hidden"
         )}
       />
       <div
-        className={cn("bg-primary/10 w-full h-full", !isLoaded && "opacity-0")}
+        className={cn(
+          "bg-primary/10 w-full h-full items-center flex justify-center",
+          !isLoaded && "opacity-0",
+          error && "opacity-1 bg-transparent"
+        )}
       >
-        {content}
+        {error ? <Icons.Image size={16} /> : content}
       </div>
     </div>
   );

@@ -1,18 +1,21 @@
 import { getSpending } from "@midday/supabase/cached-queries";
+import Link from "next/link";
 import { Category } from "../category";
 import { spendingData } from "./data";
 import { SpendingChart } from "./spending-chart";
 
 function SpendingCategoryList({ categories }) {
   return (
-    <ul className="absolute left-8 bottom-8 space-y-2">
+    <ul className="absolute z-10 left-8 bottom-8 space-y-2">
       {categories.map(({ category }) => (
         <li key={category}>
-          <Category
-            key={category}
-            name={category}
-            className="text-sm text-[#606060] space-x-3"
-          />
+          <Link href={`/transactions?filter=${JSON.stringify({ category })}`}>
+            <Category
+              key={category}
+              name={category}
+              className="text-sm text-[#606060] space-x-3"
+            />
+          </Link>
         </li>
       ))}
     </ul>

@@ -10,13 +10,13 @@ export function formatSize(bytes: number): string {
 
   const unitIndex = Math.max(
     0,
-    Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1),
+    Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
   );
 
   return Intl.NumberFormat(locale, {
     style: "unit",
     unit: units[unitIndex],
-  }).format(bytes / 1024 ** unitIndex);
+  }).format(+Math.round(bytes / 1024 ** unitIndex));
 }
 
 type FormatAmountParams = {

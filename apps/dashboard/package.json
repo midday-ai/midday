@@ -52,7 +52,7 @@
     "@t3-oss/env-nextjs": "^0.7.1",
     "@types/node": "^20.10.4",
     "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.17",
+    "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"
   }
 }

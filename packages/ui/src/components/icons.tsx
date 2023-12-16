@@ -29,6 +29,7 @@ import {
   MdOutlineDescription,
   MdOutlineDifference,
   MdOutlineFileDownload,
+  MdOutlineInsertPhoto,
   MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
   MdOutlineListAlt,
@@ -417,4 +418,5 @@ export const Icons = {
   Error: MdErrorOutline,
   OpenInFull: MdOutlineOpenInFull,
   FileDownload: MdOutlineFileDownload,
+  Image: MdOutlineInsertPhoto,
 };

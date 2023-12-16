@@ -16,9 +16,11 @@ import { cn } from "@midday/ui/utils";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { FilePreview } from "./file-preview";
+import { FilePreview, isSupportedFilePreview } from "./file-preview";
 
 const Item = ({ file, onDelete, id }) => {
+  const filePreviewSupported = isSupportedFilePreview(file.type);
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex space-x-4 items-center">
@@ -34,27 +36,24 @@ const Item = ({ file, onDelete, id }) => {
               />
             </div>
           </HoverCardTrigger>
-          <HoverCardContent
-            className="w-70 h-[350px]"
-            side="left"
-            sideOffset={55}
-          >
-            <FilePreview
-              src={`/api/proxy?filePath=vault/${file.path}`}
-              name={file.name}
-              type={file.type}
-            />
-          </HoverCardContent>
+          {filePreviewSupported && (
+            <HoverCardContent
+              className="w-70 h-[350px]"
+              side="left"
+              sideOffset={55}
+            >
+              <FilePreview
+                src={`/api/proxy?filePath=vault/${file.path}`}
+                downloadUrl={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
+                name={file.name}
+                type={file.type}
+              />
+            </HoverCardContent>
+          )}
         </HoverCard>
 
         <div className="flex flex-col space-y-0.5 w-80">
-          <a
-            href={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
-            download
-            className="truncate"
-          >
-            {file.name}
-          </a>
+          <span className="truncate">{file.name}</span>
           <span className="text-xs text-[#606060]">
             {file.size && formatSize(file.size)}
           </span>

@@ -214,6 +214,7 @@ export function DataTableRow({ data, teamId }) {
                   <HoverCardContent className="w-70 h-[350px]">
                     <FilePreview
                       src={`/api/proxy?filePath=vault/${teamId}/${filepath}`}
+                      downloadUrl={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
                       name={data.name}
                       type={data?.metadata?.mimetype}
                     />
