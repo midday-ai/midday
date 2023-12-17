@@ -36,6 +36,9 @@ export function Toaster() {
                     <div className="flex space-x-2 items-center">
                       {props?.variant && (
                         <div className="w-[20px] h-[20px]">
+                          {props.variant === "ai" && (
+                            <Icons.AI className="text-[#0064D9]" />
+                          )}
                           {props?.variant === "success" && <Icons.Check />}
                           {props?.variant === "error" && (
                             <Icons.Error className="text-[#FF3638]" />

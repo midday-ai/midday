@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 
 function RowsSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center space-x-4">
         <Skeleton className="h-9 w-9 rounded-full" />
         <Skeleton className="h-3.5 w-[130px]" />
@@ -128,8 +128,8 @@ export function ConnectBankModal({ countryCode }) {
 
     setFilteredResults(
       results.filter((bank) =>
-        bank.name.toLowerCase().includes(value.toLowerCase()),
-      ),
+        bank.name.toLowerCase().includes(value.toLowerCase())
+      )
     );
   };
 
@@ -140,9 +140,8 @@ export function ConnectBankModal({ countryCode }) {
           <DialogHeader>
             <DialogTitle>Connect bank</DialogTitle>
             <DialogDescription>
-              Select your bank and follow the steps below, we will have access
-              to 2 years of historical transactions and will have access for 6
-              months. We will notify you once you need to connect again.
+              Start by selecting your business bank, once authenticated you can
+              select which accounts you want to link to your account.
             </DialogDescription>
 
             <div>
@@ -153,7 +152,7 @@ export function ConnectBankModal({ countryCode }) {
                 className="my-2"
                 onChange={(evt) => handleFilterBanks(evt.target.value)}
               />
-              <div className="space-y-6 pt-4 h-[400px] overflow-auto scrollbar-hide">
+              <div className="space-y-4 pt-4 h-[400px] overflow-auto scrollbar-hide">
                 {loading && <RowsSkeleton />}
                 {filteredResults?.map((bank) => {
                   return (
@@ -167,7 +166,17 @@ export function ConnectBankModal({ countryCode }) {
                   );
                 })}
                 {!loading && filteredResults.length === 0 && (
-                  <p>No banks found</p>
+                  <div className="flex flex-col items-center justify-center min-h-[300px]">
+                    <p className="font-medium mb-2">No banks found</p>
+                    <p className="text-sm text-center text-[#878787]">
+                      We could not find any banks matching your
+                      <br /> criteria let us know which bank you are looking for
+                      <br />
+                      <a href="mailto:support@midday.ai" className="underline">
+                        support@midday.ai
+                      </a>
+                    </p>
+                  </div>
                 )}
               </div>
             </div>

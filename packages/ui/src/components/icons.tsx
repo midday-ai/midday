@@ -3,6 +3,7 @@ import { Settings } from "lucide-react";
 import {
   MdApartment,
   MdArrowRight,
+  MdAutoAwesome,
   MdBarChart,
   MdCelebration,
   MdCreateNewFolder,
@@ -421,4 +422,5 @@ export const Icons = {
   FileDownload: MdOutlineFileDownload,
   Image: MdOutlineInsertPhoto,
   Security: MdSecurity,
+  AI: MdAutoAwesome,
 };

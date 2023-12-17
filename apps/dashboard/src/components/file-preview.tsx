@@ -71,10 +71,8 @@ export function FilePreview({
   if (type?.startsWith("image")) {
     content = (
       <div
-        className={cn(
-          `flex items-center justify-center  w-[${width}px] h-[${height}px]`,
-          className
-        )}
+        className={cn("flex items-center justify-center", className)}
+        style={{ width, height }}
       >
         <img
           src={src}
@@ -89,12 +87,15 @@ export function FilePreview({
 
   if (type === FileType.Pdf) {
     content = (
-      <iframe
-        src={`${src}#toolbar=0`}
-        className={cn(`w-[${width}px] h-[${height}px]`, className)}
-        title={name}
-        onLoad={handleOnLoaded}
-      />
+      <div style={{ width, height: height + 3 }} className="overflow-hidden">
+        <iframe
+          src={`${src}#toolbar=0`}
+          className=" -ml-[3px]"
+          style={{ width, height }}
+          title={name}
+          onLoad={handleOnLoaded}
+        />
+      </div>
     );
   }
 
@@ -165,7 +166,7 @@ export function FilePreview({
           name={name}
           type={type}
           downloadUrl={downloadUrl}
-          width={620}
+          width={560}
           height={650}
           disableFullscreen
         />

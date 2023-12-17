@@ -20,24 +20,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
 import { useEffect, useState } from "react";
-import { CategoryIcon } from "./category";
-
-const categories = [
-  "office_supplies",
-  "travel",
-  "rent",
-  "income",
-  "software",
-  "transfer",
-  "meals",
-  "equipment",
-  "activity",
-  "other",
-  "taxes",
-  "internet_and_telephone",
-  "facilities_expenses",
-  "uncategorized",
-];
+import { CategoryIcon, categories } from "./category";
 
 export function SelectCategory({ id, name, selectedId, isLoading }) {
   const [value, setValue] = useState();
@@ -60,15 +43,26 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
     if (transactions?.data?.length) {
       toast({
         duration: 6000,
-        title: `Do you want to mark ${
+        variant: "ai",
+        title: "Midday AI",
+        description: `Do you want to mark ${
           transactions?.data?.length
         } similar transactions form ${name} as ${t(
           `categories.${value}`
         )} too?`,
-        action: (
-          <ToastAction altText="Yes" onClick={handleUpdateSimilar}>
-            Yes
-          </ToastAction>
+        footer: (
+          <div className="flex space-x-2">
+            <ToastAction altText="Cancel" className="pl-5 pr-5">
+              Cancel
+            </ToastAction>
+            <ToastAction
+              altText="Yes"
+              onClick={handleUpdateSimilar}
+              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Yes
+            </ToastAction>
+          </div>
         ),
       });
     }
@@ -93,7 +87,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>
-              {categories.map((category) => (
+              {Object.values(categories).map((category) => (
                 <SelectItem key={category} value={category}>
                   <div className="flex space-x-2">
                     <CategoryIcon name={category} />

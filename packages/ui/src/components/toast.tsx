@@ -30,6 +30,7 @@ const toastVariants = cva(
         error: "border bg-secondary text-foreground",
         success: "border bg-secondary text-foreground",
         progress: "border bg-secondary text-foreground",
+        ai: "border bg-secondary text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
