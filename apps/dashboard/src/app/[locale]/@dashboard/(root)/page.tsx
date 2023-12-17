@@ -4,6 +4,7 @@ import { Realtime } from "@/components/charts/realtime";
 import { Spending } from "@/components/charts/spending";
 import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import { Cookies } from "@/utils/constants";
 import {
   getBankConnectionsByTeamId,
   getUser,
@@ -11,6 +12,7 @@ import {
 import { cn } from "@midday/ui/utils";
 import { startOfMonth, startOfYear } from "date-fns";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -26,8 +28,12 @@ const defaultValue = {
 export default async function Overview({ searchParams }) {
   const { data: userData } = await getUser();
   const { data } = await getBankConnectionsByTeamId();
+  const chartPeriod = cookies().has(Cookies.ChartPeriod)
+    ? JSON.parse(cookies().get(Cookies.ChartPeriod)?.value)
+    : {};
 
   const value = {
+    ...chartPeriod,
     ...(searchParams.from && { from: searchParams.from }),
     ...(searchParams.to && { to: searchParams.to }),
     period: searchParams.period,

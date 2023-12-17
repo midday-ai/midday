@@ -1,5 +1,6 @@
 "use client";
 
+import { changeChartPeriodAction } from "@/actions/change-chart-period-action";
 import { DateRangePicker } from "@midday/ui/date-range-picker";
 import {
   Select,
@@ -10,10 +11,18 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { format } from "date-fns";
+import { useAction } from "next-safe-action/hook";
 import { parseAsString, useQueryStates } from "next-usequerystate";
 
 export function ChartPeriod({ initialValue, defaultValue, disabled }) {
   let placeholder;
+
+  const { execute } = useAction(changeChartPeriodAction);
+
+  const handleChangePeriod = (params) => {
+    setState(params);
+    execute(params);
+  };
 
   const [state, setState] = useQueryStates(
     {
@@ -53,7 +62,7 @@ export function ChartPeriod({ initialValue, defaultValue, disabled }) {
           to: state?.to && new Date(state.to),
         }}
         onSelect={(range) => {
-          setState({
+          handleChangePeriod({
             from: range?.from ? new Date(range.from).toISOString() : null,
             to: range?.to ? new Date(range.to).toISOString() : null,
           });
@@ -63,7 +72,7 @@ export function ChartPeriod({ initialValue, defaultValue, disabled }) {
       <Select
         disabled={disabled}
         defaultValue={state.period}
-        onValueChange={(period) => setState({ period })}
+        onValueChange={(period) => handleChangePeriod({ period })}
       >
         <SelectTrigger className="w-[130px] font-medium">
           <SelectValue placeholder="Monthly" />

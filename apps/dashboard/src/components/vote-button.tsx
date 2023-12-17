@@ -2,18 +2,17 @@
 
 import { voteAction } from "@/actions/vote-action";
 import { Button } from "@midday/ui/button";
-import { Loader2 } from "lucide-react";
 import { ChevronUp } from "lucide-react";
 import { useOptimistic, useTransition } from "react";
 
 export function VoteButton({ count, id }) {
-  const [isPending, startTransition] = useTransition();
+  const [_, startTransition] = useTransition();
 
   const [optimisticCount, addOptimisticCount] = useOptimistic(
     count,
     (prevCount) => {
       return +prevCount + 1;
-    },
+    }
   );
 
   const handleVote = () => {
