@@ -1,4 +1,3 @@
-import { ExportButton } from "@/components/export-button";
 import { Filter } from "@/components/filter";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
 import { Table } from "@/components/tables/transactions";
@@ -32,7 +31,6 @@ export default async function Transactions({
     <>
       <div className="flex justify-between py-6">
         <Filter sections={sections} />
-        <ExportButton />
       </div>
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>

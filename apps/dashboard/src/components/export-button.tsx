@@ -5,7 +5,7 @@ import { Button } from "@midday/ui/button";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export function ExportButton() {
+export function ExportButton({ totalMissingAttachments }) {
   const [isOpen, setOpen] = useState();
 
   const searchParams = useSearchParams();
@@ -23,7 +23,11 @@ export function ExportButton() {
       >
         Export
       </Button>
-      <ExportTransactionsModal isOpen={isOpen} setOpen={setOpen} />
+      <ExportTransactionsModal
+        isOpen={isOpen}
+        setOpen={setOpen}
+        totalMissingAttachments={totalMissingAttachments}
+      />
     </>
   );
 }

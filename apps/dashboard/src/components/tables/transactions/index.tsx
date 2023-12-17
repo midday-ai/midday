@@ -1,3 +1,4 @@
+import { ExportButton } from "@/components/export-button";
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { getTransactions, getUser } from "@midday/supabase/cached-queries";
@@ -35,7 +36,10 @@ export async function Table({
   const hasNextPage = meta.count + 1 * page > pageSize;
 
   return (
-    <>
+    <div className="relative">
+      <div className="absolute right-0 -top-14">
+        <ExportButton totalMissingAttachments={meta.totalMissingAttachments} />
+      </div>
       <DataTable
         data={data}
         teamId={userData.team_id}
@@ -65,6 +69,6 @@ export async function Table({
           currency={meta.currency}
         />
       )}
-    </>
+    </div>
   );
 }

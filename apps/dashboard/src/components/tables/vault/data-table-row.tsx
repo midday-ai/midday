@@ -86,7 +86,7 @@ function RowTitle({ isEditing, name: initialName, path, href }) {
     },
   });
 
-  const handleOnBlur = (evt) => {
+  const handleOnBlur = () => {
     createFolder.execute({ path, name });
   };
 
@@ -213,8 +213,10 @@ export function DataTableRow({ data, teamId }) {
                 {filePreviewSupported && (
                   <HoverCardContent className="w-70 h-[350px]">
                     <FilePreview
+                      width={300}
+                      height={315}
                       src={`/api/proxy?filePath=vault/${teamId}/${filepath}`}
-                      downloadUrl={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
+                      downloadUrl={`/api/download/file?path=${filepath}&filename=${data.name}`}
                       name={data.name}
                       type={data?.metadata?.mimetype}
                     />

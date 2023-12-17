@@ -10,12 +10,13 @@ const alertVariants = cva(
         default: "bg-background text-foreground",
         destructive:
           "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+        warning: "dark:border-[#4a2800] dark:bg-[#1f1400]",
       },
     },
     defaultVariants: {
       variant: "default",
     },
-  },
+  }
 );
 
 const Alert = React.forwardRef<
