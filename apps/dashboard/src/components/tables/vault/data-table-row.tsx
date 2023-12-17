@@ -252,7 +252,7 @@ export function DataTableRow({ data, teamId }) {
                               onClick={() =>
                                 shareFile.execute({
                                   filepath,
-                                  expireIn: ms("1 week"),
+                                  expireIn: ms("7d"),
                                 })
                               }
                             >
@@ -262,7 +262,7 @@ export function DataTableRow({ data, teamId }) {
                               onClick={() =>
                                 shareFile.execute({
                                   filepath,
-                                  expireIn: ms("1 month"),
+                                  expireIn: ms("30d"),
                                 })
                               }
                             >
@@ -272,7 +272,7 @@ export function DataTableRow({ data, teamId }) {
                               onClick={() =>
                                 shareFile.execute({
                                   filepath,
-                                  expireIn: ms("1 year"),
+                                  expireIn: ms("1y"),
                                 })
                               }
                             >

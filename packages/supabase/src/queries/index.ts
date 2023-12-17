@@ -199,7 +199,7 @@ type GetTransactionsParams = {
     search?: string;
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
-    category?: "include" | "exclude" | string;
+    categories?: string[];
     type?: "income" | "expense";
     date: {
       from?: string;
@@ -218,7 +218,7 @@ export async function getTransactionsQuery(
     search,
     status,
     attachments,
-    category,
+    categories,
     type,
   } = filter || {};
 
@@ -228,7 +228,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      enrichment:enrichment_id(category),
+      enrichment:transaction_enrichments(category),
       attachments(*)
     `,
       { count: "exact" }
@@ -267,16 +267,25 @@ export async function getTransactionsQuery(
     `);
   }
 
-  if (category) {
-    query.filter("category", "eq", category);
-    // .or('country_id.eq.1,name.eq.Beijing', { referenceTable: 'enrichment_id' })
+  if (categories) {
+    query.select(
+      `
+      *,
+      assigned:assigned_id(*),
+      enrichment:transaction_enrichments!inner(category),
+      attachments(*)
+    `
+    );
+
+    const matchCategory = categories
+      .map((category) => `category.eq.${category}`)
+      .join(",");
+
+    // .filter(matchCategory) TODO: Filter on user assigned category
+    query.or(matchCategory, { referencedTable: "enrichment" });
   }
 
-  if (category === "exclude") {
-    query.is("category", null).is("enrichment_id", null);
-  }
-
-  if (category === "include" || category === "uncategorized") {
+  if (categories?.includes("uncategorized")) {
     query.not("category", "is", null);
   }
 
@@ -290,7 +299,7 @@ export async function getTransactionsQuery(
 
   const { data, count } = await query.range(from, to).throwOnError();
 
-  // Only calculate total amount when a fitler is applied
+  // Only calculate total amount when a filters are applied
   // Investigate pg functions
   const totalAmount = filter
     ? (await query.limit(10000000))?.data?.reduce(

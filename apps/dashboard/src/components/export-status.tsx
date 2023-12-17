@@ -19,15 +19,15 @@ import { useEffect, useState } from "react";
 const options = [
   {
     label: "Expire in 1 week",
-    expireIn: ms("1 week"),
+    expireIn: ms("7d"),
   },
   {
     label: "Expire in 1 month",
-    expireIn: ms("1 month"),
+    expireIn: ms("30d"),
   },
   {
     label: "Expire in 1 year",
-    expireIn: ms("1 year"),
+    expireIn: ms("1y"),
   },
 ];
 
@@ -39,22 +39,21 @@ export function ExportStatus() {
   const status = statuses?.at(0);
 
   const shareFile = useAction(shareFileAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
     onSuccess: async (url) => {
-      try {
-        await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(url);
 
-        toast({
-          duration: 2500,
-          title: "Copied URL to clipboard.",
-          variant: "success",
-        });
-      } catch {
-        toast({
-          duration: 2500,
-          variant: "error",
-          title: "Something went wrong pleaase try again.",
-        });
-      }
+      toast({
+        duration: 2500,
+        title: "Copied URL to clipboard.",
+        variant: "success",
+      });
     },
   });
 
@@ -62,8 +61,8 @@ export function ExportStatus() {
     dismiss(id);
   };
 
-  const handleOnShare = ({ id, expireIn }) => {
-    shareFile.execute({ expireIn, filepath: "exports/export-123.zip" });
+  const handleOnShare = ({ id, expireIn, filename }) => {
+    shareFile.execute({ expireIn, filepath: `exports/${filename}` });
     dismiss(id);
   };
 
@@ -103,11 +102,15 @@ export function ExportStatus() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="z-[100]">
-                {options.map((option) => (
+                {options.map((option, idx) => (
                   <DropdownMenuItem
-                    key={option.expireIn}
+                    key={idx.toString()}
                     onClick={() =>
-                      handleOnShare({ id, expireIn: option.expireIn })
+                      handleOnShare({
+                        id,
+                        expireIn: option.expireIn,
+                        filename: status?.data?.fileName,
+                      })
                     }
                   >
                     {option.label}

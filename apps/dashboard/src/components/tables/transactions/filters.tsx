@@ -1,5 +1,6 @@
 "use client";
 
+import { categories } from "@/components/category";
 import { SectionType } from "@/components/filter";
 import {
   endOfDay,
@@ -121,24 +122,13 @@ export const sections = [
     ],
   },
   {
-    id: "category",
-    label: "Category",
+    id: "categories",
+    label: "Categories",
     icon: Archive,
-    type: SectionType.radio,
-    defaultValue: "all",
-    options: [
-      {
-        id: "all",
-        label: "All",
-      },
-      {
-        id: "include",
-        label: "Has category",
-      },
-      {
-        id: "exclude",
-        label: "No category",
-      },
-    ],
+    type: SectionType.checkbox,
+    options: Object.keys(categories).map((category) => ({
+      id: category,
+      translationKey: `categories.${category}`,
+    })),
   },
 ];

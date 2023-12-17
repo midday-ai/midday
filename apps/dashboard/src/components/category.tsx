@@ -4,77 +4,69 @@ import { useI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
 
+export const categories = {
+  travel: "travel",
+  office_supplies: "office_supplies",
+  meals: "meals",
+  software: "software",
+  rent: "rent",
+  income: "income",
+  equipment: "equipment",
+  transfer: "transfer",
+  internet_and_telephone: "internet_and_telephone",
+  facilities_expenses: "facilities_expenses",
+  activity: "activity",
+  uncategorized: "uncategorized",
+  taxes: "taxes",
+  other: "other",
+};
+
 export const mapCategoryColor = (name: string) => {
-  switch (name) {
-    case "travel":
-      return "#ABDD1D";
-    case "office_supplies":
-      return "#BB4647";
-    case "meals":
-      return "#1ADBDB";
-    case "software":
-      return "#0064D9";
-    case "rent":
-      return "#A843CB";
-    case "income":
-      return "#00C969";
-    case "equipment":
-      return "#E9BE26";
-    case "transfer":
-      return "#FF902B";
-    case "internet_and_telephone":
-      return "#FF8976";
-    case "facilities_expenses":
-      return "#A8AABC";
-    case "activity":
-      return "#E5E926";
-    case "uncategorized":
-      return "#606060";
-    case "taxes":
-      return "#B39CD0";
-    case "other":
-      return "#F5F5F3";
-    default:
-      return;
-  }
+  return {
+    [categories.travel]: "#ABDD1D",
+    [categories.office_supplies]: "#BB4647",
+    [categories.meals]: "#1ADBDB",
+    [categories.software]: "#0064D9",
+    [categories.rent]: "#A843CB",
+    [categories.income]: "#00C969",
+    [categories.equipment]: "#E9BE26",
+    [categories.transfer]: "#FF902B",
+    [categories.internet_and_telephone]: "#FF8976",
+    [categories.facilities_expenses]: "#A8AABC",
+    [categories.activity]: "#E5E926",
+    [categories.uncategorized]: "#606060",
+    [categories.taxes]: "#B39CD0",
+    [categories.other]: "#F5F5F3",
+  }[name];
 };
 
 export function CategoryIcon({ name, size = 18 }) {
   const color = mapCategoryColor(name);
 
-  switch (name) {
-    case "travel":
-      return <Icons.FlightTakeoff style={{ color }} size={size} />;
-    case "office_supplies":
-      return <Icons.Desk style={{ color }} size={size} />;
-    case "meals":
-      return <Icons.FastFood style={{ color }} size={size} />;
-    case "software":
-      return <Icons.Save style={{ color }} size={size} />;
-    case "rent":
-      return <Icons.HomeWork style={{ color }} size={size} />;
-    case "income":
-      return <Icons.Payments style={{ color }} size={size} />;
-    case "equipment":
-      return <Icons.Devices style={{ color }} size={size} />;
-    case "transfer":
-      return <Icons.AccountBalance style={{ color }} size={size} />;
-    case "other": {
-      return <Icons.Category style={{ color }} size={size} />;
-    }
-    case "activity":
-      return <Icons.Celebration style={{ color }} size={size} />;
-    case "uncategorized":
-      return <Icons.Difference style={{ color }} size={size} />;
-    case "taxes":
-      return <Icons.Apartment style={{ color }} size={size} />;
-    case "internet_and_telephone":
-      return <Icons.Sensors style={{ color }} size={size} />;
-    case "facilities_expenses":
-      return <Icons.DynamicForm style={{ color }} size={size} />;
-    default:
-      return null;
-  }
+  return {
+    [categories.travel]: <Icons.FlightTakeoff style={{ color }} size={size} />,
+    [categories.office_supplies]: <Icons.Desk style={{ color }} size={size} />,
+    [categories.meals]: <Icons.FastFood style={{ color }} size={size} />,
+    [categories.software]: <Icons.Save style={{ color }} size={size} />,
+    [categories.rent]: <Icons.HomeWork style={{ color }} size={size} />,
+    [categories.income]: <Icons.Payments style={{ color }} size={size} />,
+    [categories.equipment]: <Icons.Devices style={{ color }} size={size} />,
+    [categories.transfer]: (
+      <Icons.AccountBalance style={{ color }} size={size} />
+    ),
+    [categories.other]: <Icons.Category style={{ color }} size={size} />,
+    [categories.activity]: <Icons.Celebration style={{ color }} size={size} />,
+    [categories.uncategorized]: (
+      <Icons.Difference style={{ color }} size={size} />
+    ),
+    [categories.taxes]: <Icons.Apartment style={{ color }} size={size} />,
+    [categories.internet_and_telephone]: (
+      <Icons.Sensors style={{ color }} size={size} />
+    ),
+    [categories.facilities_expenses]: (
+      <Icons.DynamicForm style={{ color }} size={size} />
+    ),
+  }[name];
 }
 
 export function Category({ name, className }) {

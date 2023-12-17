@@ -20,15 +20,18 @@ export const getTransactions = async (params) => {
     return null;
   }
 
-  return unstable_cache(
-    async () => {
-      return getTransactionsQuery(supabase, { ...params, teamId });
-    },
-    ["transactions", teamId],
-    {
-      tags: [`transactions_${teamId}`],
-    }
-  )(params);
+  return getTransactionsQuery(supabase, { ...params, teamId });
+
+  // return unstable_cache(
+  //   async () => {
+  //     return getTransactionsQuery(supabase, { ...params, teamId });
+  //   },
+  //   ["transactions", teamId],
+  //   {
+  //     tags: [`transactions_${teamId}`],
+  //     revalidate: 10,
+  //   }
+  // )(params);
 };
 
 export const getUser = async () => {

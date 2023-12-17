@@ -16,13 +16,13 @@ export function Header() {
       <Link href="https://app.midday.ai">
         <button
           type="button"
-          className="relative rounded-lg overflow-hidden dark:p-[1px] border border-primary dark:border-0"
+          className="relative rounded-lg overflow-hidden dark:p-[1px] border border-primary dark:border-0 font-semibold text-[14px] h-[40px]"
           style={{
             background:
               "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
           }}
         >
-          <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-primary px-8 h-[39px] h-full font-normal">
+          <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-primary px-8 h-[39px] h-full">
             {t("signIn")}
           </span>
         </button>

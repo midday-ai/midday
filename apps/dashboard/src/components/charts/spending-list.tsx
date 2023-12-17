@@ -9,7 +9,11 @@ function SpendingCategoryList({ categories }) {
     <ul className="absolute z-10 left-8 bottom-8 space-y-2">
       {categories.map(({ category }) => (
         <li key={category}>
-          <Link href={`/transactions?filter=${JSON.stringify({ category })}`}>
+          <Link
+            href={`/transactions?filter=${JSON.stringify({
+              categories: [category],
+            })}`}
+          >
             <Category
               key={category}
               name={category}

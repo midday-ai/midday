@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Input } from "@midday/ui/input";
@@ -35,7 +36,8 @@ type SelectedOption = {
 
 type Option = {
   id: string;
-  label: string;
+  label?: string;
+  translationKey?: string;
   from?: Date;
   to?: Date;
   description?: string;
@@ -44,7 +46,8 @@ type Option = {
 
 type Section = {
   id: string;
-  label: string;
+  label?: string;
+  translationKey?: string;
   type: SectionType;
   options: Option[];
   storage?: string;
@@ -57,6 +60,7 @@ type Props = {
 };
 
 export function Filter({ sections }: Props) {
+  const t = useI18n();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -82,7 +86,7 @@ export function Filter({ sections }: Props) {
 
   useEffect(() => {
     const storageKey = sections.find(
-      (section) => section.id === activeId,
+      (section) => section.id === activeId
     )?.storage;
     const saved = storageKey && localStorage.getItem(storageKey);
 
@@ -135,7 +139,7 @@ export function Filter({ sections }: Props) {
 
     if (option.single) {
       const defaultValue = sections.find(
-        (section) => section.id === filter,
+        (section) => section.id === filter
       )?.defaultValue;
 
       if (value === defaultValue) {
@@ -153,7 +157,7 @@ export function Filter({ sections }: Props) {
 
   const handleOnSearch = (
     evt: React.KeyboardEvent<HTMLInputElement>,
-    storage?: string,
+    storage?: string
   ) => {
     if (evt.key === "Enter") {
       setOpen(false);
@@ -207,7 +211,7 @@ export function Filter({ sections }: Props) {
         if (filter.from && filter.to) {
           return `${format(new Date(filter.from), "MMM d, yyyy")} - ${format(
             new Date(filter.to),
-            "MMM d, yyyy",
+            "MMM d, yyyy"
           )}`;
         }
 
@@ -227,7 +231,10 @@ export function Filter({ sections }: Props) {
         }
 
         if (filter.length) {
-          return section?.options?.find((o) => o.id === filter.at(0))?.label;
+          const option = section?.options?.find((o) => o.id === filter.at(0));
+          return option?.translationKey
+            ? t(option?.translationKey)
+            : option?.label;
         }
       }
     }
@@ -261,7 +268,7 @@ export function Filter({ sections }: Props) {
                     <Button
                       className={cn(
                         "rounded-md w-[190px] items-center justify-start relative mb-1.5 group",
-                        isActive && "bg-secondary",
+                        isActive && "bg-secondary"
                       )}
                       variant="ghost"
                     >
@@ -269,7 +276,7 @@ export function Filter({ sections }: Props) {
                       <p
                         className={cn(
                           "p-sm font-normal ml-2 text-primary",
-                          isActive && "bg-secondary",
+                          isActive && "bg-secondary"
                         )}
                       >
                         {label}
@@ -278,7 +285,7 @@ export function Filter({ sections }: Props) {
                         size={16}
                         className={cn(
                           "absolute right-2 invisible group-hover:visible",
-                          isActive && "visible",
+                          isActive && "visible"
                         )}
                       />
                     </Button>
@@ -403,45 +410,49 @@ export function Filter({ sections }: Props) {
                     className="p-4 w-[480px] space-y-4"
                     key={section.id}
                   >
-                    {sections
-                      ?.filter(
-                        (section) => section.type === SectionType.checkbox,
-                      )
-                      .find((section) => section.id === activeId)
-                      ?.options?.map((option) => {
-                        const isChecked = Boolean(
-                          filters[activeId]?.includes(option.id.toLowerCase()),
-                        );
+                    <div className="max-h-[268px] overflow-auto flex flex-col space-y-2">
+                      {sections
+                        ?.filter(
+                          (section) => section.type === SectionType.checkbox
+                        )
+                        .find((section) => section.id === activeId)
+                        ?.options?.map((option) => {
+                          const isChecked = Boolean(
+                            filters[activeId]?.includes(option.id.toLowerCase())
+                          );
 
-                        return (
-                          <div
-                            className="items-top flex space-x-2"
-                            key={option.id}
-                          >
-                            <Checkbox
-                              id={option.id}
-                              checked={isChecked}
-                              onCheckedChange={() =>
-                                toggleFilter({
-                                  filter: activeId!,
-                                  value: option.id,
-                                })
-                              }
-                            />
-                            <div className="grid gap-1.5 leading-none">
-                              <label
-                                htmlFor={option.id}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {option.label}
-                              </label>
-                              <p className="text-xs text-muted-foreground">
-                                {option?.description}
-                              </p>
+                          return (
+                            <div
+                              className="items-top flex space-x-2"
+                              key={option.id}
+                            >
+                              <Checkbox
+                                id={option.id}
+                                checked={isChecked}
+                                onCheckedChange={() =>
+                                  toggleFilter({
+                                    filter: activeId!,
+                                    value: option.id,
+                                  })
+                                }
+                              />
+                              <div className="grid gap-1.5 leading-none">
+                                <label
+                                  htmlFor={option.id}
+                                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                >
+                                  {option.translationKey
+                                    ? t(option.translationKey)
+                                    : option.label}
+                                </label>
+                                <p className="text-xs text-muted-foreground">
+                                  {option?.description}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                    </div>
                   </Tabs.TabsContent>
                 );
               }
@@ -465,7 +476,7 @@ export function Filter({ sections }: Props) {
                     >
                       {sections
                         ?.filter(
-                          (section) => section.type === SectionType.radio,
+                          (section) => section.type === SectionType.radio
                         )
                         .find((section) => section.id === activeId)
                         ?.options?.map((option) => {

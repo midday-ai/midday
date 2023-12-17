@@ -19,5 +19,7 @@ export const shareFileAction = action(shareFileSchema, async (value) => {
     },
   });
 
+  console.log(response);
+
   return response?.data?.signedUrl;
 });
