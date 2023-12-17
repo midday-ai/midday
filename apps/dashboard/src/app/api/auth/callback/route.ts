@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
   const returnTo = requestUrl.searchParams.get("return_to");
   const provider = requestUrl.searchParams.get("provider");
   const mfaSetupVisited = cookieStore.has(Cookies.MfaSetupVisited);
+  const onboardingVisited = cookieStore.has(Cookies.OnboardingVisited);
 
   if (provider) {
     cookieStore.set(Cookies.PrefferedSignInProvider, provider);
@@ -24,7 +25,7 @@ export async function GET(req: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  if (!mfaSetupVisited) {
+  if (!mfaSetupVisited && onboardingVisited) {
     cookieStore.set(Cookies.MfaSetupVisited, "true");
     return NextResponse.redirect(`${requestUrl.origin}/mfa/setup`);
   }

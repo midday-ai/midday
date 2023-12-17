@@ -2,6 +2,7 @@ import { createClient } from "@midday/supabase/middleware";
 import { get } from "@vercel/edge-config";
 import { createI18nMiddleware } from "next-international/middleware";
 import { NextRequest, NextResponse } from "next/server";
+import { Cookies } from "./utils/constants";
 
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en", "sv"],
@@ -47,6 +48,13 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname !== "/mfa/verify"
   ) {
     return NextResponse.redirect(`${url.origin}/mfa/verify`);
+  }
+
+  if (
+    request.nextUrl.pathname === "/onboarding" &&
+    !response.cookies.has(Cookies.OnboardingVisited)
+  ) {
+    response.cookies.set(Cookies.OnboardingVisited, "true");
   }
 
   return response;
