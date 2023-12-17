@@ -291,7 +291,7 @@ export function DataTableRow({ data, teamId }) {
                         <a
                           href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
                           download
-                          className="truncate"
+                          className="truncate w-full"
                         >
                           Download
                         </a>
@@ -299,7 +299,7 @@ export function DataTableRow({ data, teamId }) {
                         <a
                           href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
                           download
-                          className="truncate"
+                          className="truncate w-full"
                         >
                           Download
                         </a>

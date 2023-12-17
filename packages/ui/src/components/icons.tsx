@@ -43,6 +43,7 @@ import {
   MdRefresh,
   MdSave,
   MdSearch,
+  MdSecurity,
   MdSensors,
   MdTopic,
   MdTrendingDown,
@@ -419,4 +420,5 @@ export const Icons = {
   OpenInFull: MdOutlineOpenInFull,
   FileDownload: MdOutlineFileDownload,
   Image: MdOutlineInsertPhoto,
+  Security: MdSecurity,
 };

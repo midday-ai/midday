@@ -45,7 +45,9 @@ export async function UserMenu() {
             </Link>
 
             <DropdownMenuItem>
-              <Link href="?feedback">Feedback</Link>
+              <Link href="?feedback" className="w-full">
+                Feedback
+              </Link>
               <DropdownMenuShortcut>⌘F</DropdownMenuShortcut>
             </DropdownMenuItem>
 

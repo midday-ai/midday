@@ -1,5 +1,6 @@
 "use client";
 
+import { signOutAction } from "@/actions/sign-out-action";
 import { Button } from "@midday/ui/button";
 import {
   CommandDialog,
@@ -14,8 +15,9 @@ import { Icons } from "@midday/ui/icons";
 import { DialogProps } from "@radix-ui/react-alert-dialog";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { useTheme } from "next-themes";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const navigation = [
   {
@@ -27,6 +29,21 @@ const navigation = [
     name: "Transactions",
     path: "/transactions",
     icon: () => <Icons.Transactions size={20} />,
+  },
+  {
+    name: "Vault",
+    path: "/vault",
+    icon: Icons.Files,
+  },
+  {
+    name: "Inbox",
+    path: "/vault/inbox",
+    icon: Icons.FolderSpecial,
+  },
+  {
+    name: "Exports",
+    path: "/vault/exports",
+    icon: Icons.DriveFileMove,
   },
   {
     name: "Apps",
@@ -52,6 +69,11 @@ const settings = [
     icon: Icons.Peolple,
   },
   {
+    name: "Security",
+    path: "/settings/security",
+    icon: Icons.Security,
+  },
+  {
     name: "Notifications",
     path: "/settings/notifications",
     icon: Icons.Notifications,
@@ -65,20 +87,67 @@ const settings = [
 
 export function CommandMenu({ ...props }: DialogProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-    };
+  const handleSignOut = async () => {
+    signOutAction();
+    router.refresh();
+  };
 
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  useHotkeys("ctrl+k", () => setOpen((open) => !open));
+  useHotkeys("meta+k", () => setOpen((open) => !open));
+
+  useHotkeys("meta+o", (evt) => {
+    evt.preventDefault();
+    router.push("/onboarding");
+  });
+
+  useHotkeys("ctrl+o", (evt) => {
+    evt.preventDefault();
+    router.push("/onboarding");
+  });
+
+  useHotkeys("meta+s", (evt) => {
+    evt.preventDefault();
+    router.push("/settings");
+  });
+
+  useHotkeys("ctrl+s", (evt) => {
+    evt.preventDefault();
+    router.push("/settings");
+  });
+
+  useHotkeys("ctrl+meta+p", (evt) => {
+    evt.preventDefault();
+    router.push("/profile");
+  });
+
+  useHotkeys("shift+meta+p", (evt) => {
+    evt.preventDefault();
+    router.push("/profile");
+  });
+
+  useHotkeys("ctrl+meta+q", (evt) => {
+    evt.preventDefault();
+    handleSignOut();
+  });
+
+  useHotkeys("shift+meta+q", (evt) => {
+    evt.preventDefault();
+    handleSignOut();
+  });
+
+  useHotkeys("ctrl+f", (evt) => {
+    evt.preventDefault();
+    router.push(`${pathname}?feedback`);
+  });
+
+  useHotkeys("meta+f", (evt) => {
+    evt.preventDefault();
+    router.push(`${pathname}?feedback`);
+  });
 
   const runCommand = useCallback((command: () => unknown) => {
     setOpen(false);
