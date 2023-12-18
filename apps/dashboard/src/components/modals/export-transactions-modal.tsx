@@ -47,7 +47,7 @@ export function ExportTransactionsModal({
           <DialogHeader className="mb-8">
             <DialogTitle>Export</DialogTitle>
 
-            {totalMissingAttachments && (
+            {totalMissingAttachments > 0 && (
               <div className="pb-4">
                 <Alert variant="warning">
                   <AlertDescription>
