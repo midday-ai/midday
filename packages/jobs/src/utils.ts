@@ -45,7 +45,7 @@ export const transformTransactions = (transactions, { teamId, accountId }) =>
     name: capitalCase(data.additionalInformation),
     original: data.additionalInformation,
     method: mapTransactionMethod(data.proprietaryBankTransactionCode),
-    internal_id: data.internalTransactionId,
+    internal_id: `${teamId}_${data.internalTransactionId}`,
     amount: data.transactionAmount.amount,
     currency: data.transactionAmount.currency,
     bank_account_id: accountId,

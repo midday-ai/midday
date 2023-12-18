@@ -24,8 +24,6 @@ client.defineJob({
 
     const { transactions } = await getTransactions(accountId);
 
-    await io.logger.error(JSON.stringify(transactions, null, 2));
-
     // Update bank account last_accessed
     await io.supabase.client
       .from("bank_accounts")
