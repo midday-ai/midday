@@ -56,7 +56,7 @@ export function TransactionDetails({
   }, [data]);
 
   return (
-    <div className="border h-full min-h-[calc(100vh-150px)] w-full p-6">
+    <div className="border h-full min-h-[calc(100vh-150px)] w-full p-6 bg-background">
       <div className="sticky top-12">
         <div className="flex justify-between mb-8">
           <div className="flex-1 flex-col">

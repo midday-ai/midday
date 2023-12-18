@@ -33,7 +33,7 @@ export async function Table({
     return <NoResults hasFilters={hasFilters} />;
   }
 
-  const hasNextPage = meta.count + 1 * page > pageSize;
+  const hasNextPage = meta.count / (page + 1) > pageSize;
 
   return (
     <div className="relative">

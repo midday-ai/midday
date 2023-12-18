@@ -1,3 +1,4 @@
+import { ErrorFallback } from "@/components/error-fallback";
 import { Filter } from "@/components/filter";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
 import { Table } from "@/components/tables/transactions";
@@ -6,6 +7,7 @@ import { Loading } from "@/components/tables/transactions/loading";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
 import { Metadata } from "next";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -34,18 +36,20 @@ export default async function Transactions({
       </div>
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>
-        <Suspense
-          fallback={<Loading collapsed={Boolean(transactionId)} />}
-          key={page}
-        >
-          <Table
-            filter={filter}
-            page={page}
-            sort={sort}
-            noAccounts={empty}
-            initialTransactionId={searchParams.id}
-          />
-        </Suspense>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense
+            fallback={<Loading collapsed={Boolean(transactionId)} />}
+            key={page}
+          >
+            <Table
+              filter={filter}
+              page={page}
+              sort={sort}
+              noAccounts={empty}
+              initialTransactionId={searchParams.id}
+            />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {!isOpen && empty && <TransactionsModal />}
