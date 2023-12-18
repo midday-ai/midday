@@ -6,7 +6,7 @@ import { SpendingChart } from "./spending-chart";
 
 function SpendingCategoryList({ categories }) {
   return (
-    <ul className="absolute z-10 left-8 bottom-8 space-y-2">
+    <ul className="absolute z-10 left-8 bottom-8 space-y-2 invisible xl:visible">
       {categories.map(({ category }) => (
         <li key={category}>
           <Link

@@ -9,16 +9,16 @@ export function ExportButton({ totalMissingAttachments }) {
   const [isOpen, setOpen] = useState();
 
   const searchParams = useSearchParams();
-  const hasFilters =
-    searchParams.get("filter") &&
-    Object.keys(JSON.parse(searchParams.get("filter"))).length > 0;
+  const hasDate = searchParams.get("filter")
+    ? JSON.parse(searchParams.get("filter"))?.date
+    : null;
 
   return (
     <>
       <Button
         className="space-x-2"
-        variant={hasFilters ? "default" : "outline"}
-        disabled={!hasFilters}
+        variant={hasDate ? "default" : "outline"}
+        disabled={!hasDate}
         onClick={() => setOpen(true)}
       >
         Export

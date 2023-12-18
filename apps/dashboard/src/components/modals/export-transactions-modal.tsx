@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import Link from "next/link";
@@ -23,6 +24,8 @@ export function ExportTransactionsModal({
   setOpen,
   totalMissingAttachments,
 }) {
+  const { toast } = useToast();
+
   const searchParams = useSearchParams();
   const { setExportId } = useExportStore();
   const filter = searchParams.get("filter");
@@ -31,6 +34,13 @@ export function ExportTransactionsModal({
   const { execute, status } = useAction(exportTransactionsAction, {
     onSuccess: ({ id }) => {
       setExportId(id);
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
     },
   });
 
