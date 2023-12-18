@@ -63,6 +63,7 @@ export async function getSubscriberPreferences({
     `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences`,
     {
       method: "GET",
+      cache: "no-cache",
       headers: {
         Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
       },
@@ -91,6 +92,7 @@ export async function updateSubscriberPreference({
     `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences/${templateId}`,
     {
       method: "PATCH",
+      cache: "no-cache",
       headers: {
         Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
         "Content-Type": "application/json",

@@ -10,6 +10,7 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
   const res = await fetch(
     "https://app.loops.so/api/newsletter-form/clna1p09j00d3l60og56gj3u1",
     {
+      cache: "no-cache",
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -19,7 +20,7 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
         userGroup,
         country,
       }),
-    },
+    }
   );
 
   const json = await res.json();

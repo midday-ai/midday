@@ -37,7 +37,7 @@ client.defineJob({
       .insert(
         transformTransactions(transactions?.booked, {
           accountId: recordId, // Bank account record id
-          teamId: teamId,
+          teamId,
         })
       )
       .select();

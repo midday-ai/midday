@@ -21,6 +21,7 @@ const keys = {
 async function getRefreshToken(refresh: string) {
   const res = await fetch(`${baseUrl}/api/v2/token/refresh/`, {
     method: "POST",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
     },
@@ -55,6 +56,7 @@ async function getAccessToken() {
 
   const res = await fetch(`${baseUrl}/api/v2/token/new/`, {
     method: "POST",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
     },
@@ -86,6 +88,7 @@ export async function getBanks(countryCode: string) {
   const res = await fetch(
     `${baseUrl}/api/v2/institutions/?country=${countryCode.toLowerCase()}`,
     {
+      cache: "no-cache",
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -102,6 +105,7 @@ export async function createEndUserAgreement(institutionId: string) {
 
   const res = await fetch(`${baseUrl}/api/v2/agreements/enduser/`, {
     method: "POST",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -132,6 +136,7 @@ export async function buildLink({
 
   const res = await fetch(`${baseUrl}/api/v2/requisitions/`, {
     method: "POST",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -152,6 +157,7 @@ export async function getAccountDetails(id: string) {
   const [account, details] = await Promise.all([
     fetch(`${baseUrl}/api/v2/accounts/${id}/`, {
       method: "GET",
+      cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -159,6 +165,7 @@ export async function getAccountDetails(id: string) {
     }),
     fetch(`${baseUrl}/api/v2/accounts/${id}/details/`, {
       method: "GET",
+      cache: "no-cache",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -180,6 +187,7 @@ export async function getAccountBalancesById(id: string) {
 
   const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/balances/`, {
     method: "GET",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -203,6 +211,7 @@ export async function getAccounts({
 
   const res = await fetch(`${baseUrl}/api/v2/requisitions/${accountId}/`, {
     method: "GET",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -242,6 +251,7 @@ export async function getTransactions(accountId: string) {
   const result = await fetch(
     `${baseUrl}/api/v2/accounts/${accountId}/transactions/`,
     {
+      cache: "no-cache",
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -258,6 +268,7 @@ export async function getRequisitions() {
 
   const result = await fetch(`${baseUrl}/api/v2/requisitions/`, {
     method: "GET",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
@@ -272,6 +283,7 @@ export async function deleteRequisition(id: string) {
 
   const result = await fetch(`${baseUrl}/api/v2/requisitions/${id}/`, {
     method: "DELETE",
+    cache: "no-cache",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
