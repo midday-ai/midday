@@ -25,7 +25,6 @@
     "@trigger.dev/nextjs": "^2.3.6",
     "@vercel/edge-config": "^0.4.1",
     "@vercel/speed-insights": "^1.0.2",
-    "@vercel/toolbar": "^0.1.6",
     "@zip.js/zip.js": "2.7.32",
     "change-case": "^5.3.0",
     "fast-csv": "^4.3.6",

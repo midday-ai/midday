@@ -1,4 +1,3 @@
-import { StaffToolbar } from "@/components/staff-toolbar";
 import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
@@ -7,7 +6,7 @@ import { cn } from "@midday/ui/utils";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Instrument_Sans } from "next/font/google";
-import { type ReactElement, Suspense } from "react";
+import { type ReactElement } from "react";
 
 const fontSans = Instrument_Sans({
   subsets: ["latin"],
@@ -49,10 +48,6 @@ export default function Layout({
           {children}
           <SpeedInsights />
           <Toaster />
-
-          <Suspense>
-            <StaffToolbar />
-          </Suspense>
         </ThemeProvider>
       </body>
     </html>
