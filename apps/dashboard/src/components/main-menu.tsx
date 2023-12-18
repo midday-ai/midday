@@ -21,6 +21,16 @@ export function MainMenu() {
       icon: () => <Icons.Transactions size={22} />,
     },
     {
+      path: "/invoices",
+      name: "Invoices",
+      icon: () => <Icons.Invoice size={22} />,
+    },
+    {
+      path: "/timer",
+      name: "Timer",
+      icon: () => <Icons.Timer size={22} />,
+    },
+    {
       path: "/vault",
       name: "Vault",
       icon: () => <Icons.Files size={22} />,

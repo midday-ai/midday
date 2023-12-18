@@ -31,6 +31,16 @@ const navigation = [
     icon: () => <Icons.Transactions size={20} />,
   },
   {
+    name: "Invoices",
+    path: "/invoices",
+    icon: Icons.Invoice,
+  },
+  {
+    name: "Timer",
+    path: "/timer",
+    icon: Icons.Timer,
+  },
+  {
     name: "Vault",
     path: "/vault",
     icon: Icons.Files,

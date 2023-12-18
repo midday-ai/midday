@@ -1,6 +1,6 @@
 import { Icons } from "@midday/ui/icons";
 
-export default function Invoice() {
+export default function Timer() {
   return (
     <div className="h-[calc(100vh-300px)] flex items-center justify-center">
       <div className="flex flex-col items-center">
