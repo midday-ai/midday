@@ -48,7 +48,7 @@ client.defineJob({
         }),
         {
           onConflict: "internal_id",
-          ignoreDuplicates: false,
+          ignoreDuplicates: true,
         }
       )
       .select();

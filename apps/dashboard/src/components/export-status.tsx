@@ -72,7 +72,7 @@ export function ExportStatus() {
         title: "Exporting transactions.",
         variant: "progress",
         description: "Please do not close browser until completed",
-        duration: Infinity,
+        duration: 8000,
         progress: 0,
       });
 
