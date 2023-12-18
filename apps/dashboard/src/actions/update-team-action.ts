@@ -15,5 +15,5 @@ export const updateTeamAction = action(
     revalidatePathFunc(revalidatePath);
 
     return team;
-  },
+  }
 );

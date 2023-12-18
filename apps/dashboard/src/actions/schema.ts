@@ -98,3 +98,8 @@ export const shareFileSchema = z.object({
   filepath: z.string(),
   expireIn: z.number(),
 });
+
+export const voteSchema = z.object({
+  revalidatePath: z.string(),
+  id: z.string(),
+});

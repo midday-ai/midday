@@ -26,6 +26,7 @@ export const getTransactions = async (params) => {
     },
     ["transactions", teamId],
     {
+      revalidate: 180,
       tags: [`transactions_${teamId}`],
     }
   )(params);
@@ -47,6 +48,7 @@ export const getUser = async () => {
     ["user", userId],
     {
       tags: [`user_${userId}`],
+      revalidate: 3600,
     }
   )(userId);
 };
@@ -67,6 +69,7 @@ export const getBankConnectionsByTeamId = async () => {
     ["bank_connections", teamId],
     {
       tags: [`bank_connections_${teamId}`],
+      revalidate: 3600,
     }
   )(teamId);
 };
@@ -88,6 +91,7 @@ export const getTeamBankAccounts = async () => {
     ["bank_accounts", teamId],
     {
       tags: [`bank_accounts_${teamId}`],
+      revalidate: 180,
     }
   )(teamId);
 };
@@ -109,6 +113,7 @@ export const getTeamMembers = async () => {
     ["team_members", teamId],
     {
       tags: [`bank_members_${teamId}`],
+      revalidate: 180,
     }
   )(teamId);
 };
@@ -129,6 +134,7 @@ export const getSpending = async (params) => {
     ["spending", teamId],
     {
       tags: [`spending_${teamId}`],
+      revalidate: 180,
     }
   )(params);
 };
@@ -150,6 +156,7 @@ export const getMetrics = async (params) => {
     ["metrics", teamId],
     {
       tags: [`metrics_${teamId}`],
+      revalidate: 180,
     }
   )(params);
 };
@@ -171,6 +178,7 @@ export const getVault = async (params) => {
     ["vault", teamId],
     {
       tags: [`vault_${teamId}`],
+      revalidate: 3600,
     }
   )(params);
 };
