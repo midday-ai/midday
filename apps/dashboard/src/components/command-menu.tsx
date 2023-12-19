@@ -26,8 +26,8 @@ const navigation = [
     icon: Icons.Overview,
   },
   {
-    name: "Inbox",
-    path: "/inbox",
+    name: "Inbound",
+    path: "/inbound",
     icon: Icons.Inbox2,
   },
   {

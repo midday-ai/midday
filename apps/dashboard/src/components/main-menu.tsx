@@ -16,8 +16,8 @@ export function MainMenu() {
       icon: () => <Icons.Overview size={22} />,
     },
     {
-      path: "/bills",
-      name: "Bills",
+      path: "/inbound",
+      name: "Inbound",
       icon: () => <Icons.Inbox2 size={22} />,
     },
     {

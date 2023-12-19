@@ -1,6 +1,6 @@
 import { Icons } from "@midday/ui/icons";
 
-export default function Bills() {
+export default function Inbound() {
   return (
     <div className="h-[calc(100vh-300px)] flex items-center justify-center">
       <div className="flex flex-col items-center">
