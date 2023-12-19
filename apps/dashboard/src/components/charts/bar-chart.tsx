@@ -140,14 +140,17 @@ export function BarChart({ data }) {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) =>
-              formatAmount({
-                maximumFractionDigits: 0,
-                minimumFractionDigits: 0,
-                currency: data.summary.currency,
-                amount: value,
-              })
-            }
+            tickFormatter={(value) => {
+              if (data.summary.currency) {
+                return formatAmount({
+                  maximumFractionDigits: 0,
+                  minimumFractionDigits: 0,
+                  currency: data.summary.currency,
+                  amount: value,
+                });
+              }
+              return 0;
+            }}
             tick={{
               fill: "#606060",
               fontSize: 12,

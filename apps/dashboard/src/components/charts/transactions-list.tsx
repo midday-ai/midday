@@ -47,6 +47,14 @@ export async function TransactionsList({ type, disabled }) {
         },
       });
 
+  if (!data?.length) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-sm text-[#606060]">No transactions found</p>
+      </div>
+    );
+  }
+
   return (
     <ul className="bullet-none divide-y">
       {data?.map((transaction) => {
