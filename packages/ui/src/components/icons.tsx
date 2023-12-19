@@ -31,6 +31,7 @@ import {
   MdOutlineDifference,
   MdOutlineFileDownload,
   MdOutlineHandyman,
+  MdOutlineInbox,
   MdOutlineInsertPhoto,
   MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
@@ -139,6 +140,7 @@ export const Icons = {
   ),
   Settings: MdOutlineTune,
   Inbox: ArchiveIcon,
+  Inbox2: MdOutlineInbox,
   Check: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

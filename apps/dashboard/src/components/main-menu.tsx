@@ -16,6 +16,11 @@ export function MainMenu() {
       icon: () => <Icons.Overview size={22} />,
     },
     {
+      path: "/inbox",
+      name: "Inbox",
+      icon: () => <Icons.Inbox2 size={22} />,
+    },
+    {
       path: "/transactions",
       name: "Transactions",
       icon: () => <Icons.Transactions size={22} />,

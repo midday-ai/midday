@@ -508,12 +508,7 @@ type GetVaultParams = {
 export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { teamId, path } = params;
 
-  const defaultFolders = path
-    ? []
-    : [
-        { name: "inbox", isFolder: true },
-        { name: "exports", isFolder: true },
-      ];
+  const defaultFolders = path ? [] : [{ name: "exports", isFolder: true }];
 
   let basePath = teamId;
 

@@ -49,8 +49,6 @@ export default {
   folders: {
     all: "All",
     exports: "Exports",
-    inbox: "Inbox",
-    transactions: "Transactions",
   },
   mfa_status: {
     verified: "Verified",

@@ -26,6 +26,11 @@ const navigation = [
     icon: Icons.Overview,
   },
   {
+    name: "Inbox",
+    path: "/inbox",
+    icon: Icons.Inbox2,
+  },
+  {
     name: "Transactions",
     path: "/transactions",
     icon: () => <Icons.Transactions size={20} />,
@@ -44,11 +49,6 @@ const navigation = [
     name: "Vault",
     path: "/vault",
     icon: Icons.Files,
-  },
-  {
-    name: "Inbox",
-    path: "/vault/inbox",
-    icon: Icons.FolderSpecial,
   },
   {
     name: "Exports",

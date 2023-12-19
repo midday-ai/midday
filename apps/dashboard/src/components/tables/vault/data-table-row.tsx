@@ -59,10 +59,6 @@ export const translatedFolderName = (t: any, folder: string) => {
   switch (folder) {
     case "all":
       return t("folders.all");
-    case "inbox":
-      return t("folders.inbox");
-    case "transactions":
-      return t("folders.transactions");
     case "exports":
       return t("folders.exports");
     default:
@@ -123,9 +119,7 @@ export function DataTableRow({ data, teamId }) {
   const { deleteItem, createFolder } = useVaultContext((s) => s);
 
   const folders = params?.folders ?? [];
-  const isDefaultFolder = ["inbox", "exports", "transactions"].includes(
-    data.name
-  );
+  const isDefaultFolder = ["exports"].includes(data.name);
 
   const disableActions = ["transactions"].includes(folders?.at(0));
   const folderPath = folders.join("/");

@@ -5,14 +5,6 @@ export function FileIcon({ mimetype, name, isFolder }) {
     return <Icons.DriveFileMove size={16} className="text-[#878787]" />;
   }
 
-  if (name === "inbox") {
-    return <Icons.FolderSpecial size={16} className="text-[#878787]" />;
-  }
-
-  if (name === "transactions") {
-    return <Icons.Topic size={16} className="text-[#878787]" />;
-  }
-
   if (mimetype?.startsWith("image")) {
     return <Icons.BrokenImage size={16} className="text-[#878787]" />;
   }
