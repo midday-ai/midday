@@ -43,7 +43,7 @@ const ToolTipContent = ({ payload = {} }) => {
               {formatAmount({
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
-                currency: current?.payload?.current.currency,
+                currency: current?.payload?.current.currency || "USD",
                 amount: current?.payload?.current.value || 0,
               })}
             </p>
@@ -67,7 +67,7 @@ const ToolTipContent = ({ payload = {} }) => {
             <p className="font-medium text-[13px]">
               {formatAmount({
                 amount: previous?.payload?.previous.value || 0,
-                currency: previous?.payload?.current.currency,
+                currency: previous?.payload?.current.currency || "USD",
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
               })}
