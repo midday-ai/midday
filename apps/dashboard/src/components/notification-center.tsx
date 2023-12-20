@@ -8,7 +8,7 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 function EmptyState({ description }) {
   return (
@@ -65,7 +65,6 @@ function TransactionNotification({
 }
 
 export function NotificationCenter() {
-  const hasSeen = useRef(false);
   const [isOpen, setOpen] = useState(false);
   const {
     hasUnseenNotificaitons,

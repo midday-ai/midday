@@ -1,6 +1,5 @@
 import { Chart } from "@/components/charts/chart";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
-import { Realtime } from "@/components/charts/realtime";
 import { Spending } from "@/components/charts/spending";
 import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
@@ -57,8 +56,6 @@ export default async function Overview({ searchParams }) {
           <Spending disabled={empty} />
           <Transactions disabled={empty} />
         </div>
-
-        <Realtime teamId={userData.team_id} />
       </div>
       {!isOpen && empty && <OverviewModal />}
     </>

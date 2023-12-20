@@ -15,12 +15,6 @@ body {
   --sidebar-width: 662px;
 }
 
-@media (min-width: 1280px) {
-  :root {
-    --sidebar-width: 827px;
-  }
-}
-
 .skeleton-box {
   background-color: hsl(var(--border));
   color: hsl(var(--border)) !important;

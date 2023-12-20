@@ -18,7 +18,12 @@ export function MainMenu() {
     {
       path: "/inbound",
       name: "Inbound",
-      icon: () => <Icons.Inbox2 size={22} />,
+      icon: () => (
+        <div className="relative">
+          <div className="w-1.5 h-1.5 bg-[#d98d00] rounded-full absolute -top-[5px] -right-[5px]" />
+          <Icons.Inbox2 size={22} />
+        </div>
+      ),
     },
     {
       path: "/transactions",
