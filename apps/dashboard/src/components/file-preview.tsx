@@ -160,14 +160,14 @@ export function FilePreview({
         </div>
       </div>
 
-      <DialogContent>
+      <DialogContent className="w-[90vw] max-w-2xl">
         <FilePreview
           src={src}
           name={name}
           type={type}
           downloadUrl={downloadUrl}
-          width={560}
-          height={650}
+          width={680}
+          height={900}
           disableFullscreen
         />
       </DialogContent>

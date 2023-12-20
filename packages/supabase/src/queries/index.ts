@@ -369,8 +369,6 @@ export async function getSimilarTransactions(
     .select("id, amount, team_id", { count: "exact" })
     .eq("name", name)
     .eq("team_id", teamId)
-    .is("category", null)
-    .is("enrichment_id", null)
     .throwOnError();
 }
 

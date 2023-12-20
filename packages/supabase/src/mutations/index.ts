@@ -142,8 +142,6 @@ export async function updateSimilarTransactions(supabase: Client, id: string) {
     .update({ category: transaction.data.category })
     .eq("name", transaction.data.name)
     .eq("team_id", userData?.team_id)
-    .is("category", null)
-    .is("enrichment_id", null)
     .select("id, team_id");
 }
 
