@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const CONFIG = {
-  min: 0,
-  max: 20000,
-};
+const max = 20000;
 
 const Character = ({ className, key, value }) => {
   return (
@@ -23,7 +20,7 @@ const Character = ({ className, key, value }) => {
 
 const InnerCounter = ({ currency, pad, value, locale }) => {
   const padCount = pad
-    ? CONFIG.max.toFixed(2).toString().length - value.toString().length
+    ? max.toFixed(2).toString().length - value.toString().length
     : 0;
 
   const paddedValue = value
@@ -89,6 +86,12 @@ export function Counter({
   const [value, setValue] = useState(initalValue - lastPeriodAmount);
 
   useEffect(() => {
+    if (value !== initalValue) {
+      setValue(initalValue);
+    }
+  }, [initalValue]);
+
+  useEffect(() => {
     if (!hasRunned.current) {
       setValue((prev) => prev + lastPeriodAmount);
       hasRunned.current = true;
@@ -97,8 +100,8 @@ export function Counter({
 
   return (
     <>
-      <InnerCounter pad value={value} currency={currency} locale={locale} />
-      <InnerCounter pad value={value} currency={currency} locale={locale} />
+      <InnerCounter value={value} currency={currency} locale={locale} />
+      <InnerCounter value={value} currency={currency} locale={locale} />
     </>
   );
 }
