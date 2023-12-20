@@ -20,7 +20,10 @@ export function MainMenu() {
       name: "Inbound",
       icon: () => (
         <div className="relative">
-          <div className="w-1.5 h-1.5 bg-[#d98d00] rounded-full absolute -top-[5px] -right-[5px]" />
+          <span className="relative flex h-[6px] w-[6px] absolute top-[0px] -right-[23px]">
+            <span className="animate-[ping_1s_ease-in-out_3] absolute inline-flex h-full w-full rounded-full bg-[#d98d00] opacity-75" />
+            <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-[#d98d00]" />
+          </span>
           <Icons.Inbox2 size={22} />
         </div>
       ),
