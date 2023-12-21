@@ -50,13 +50,6 @@ export async function UserMenu() {
               </Link>
               <DropdownMenuShortcut>⌘F</DropdownMenuShortcut>
             </DropdownMenuItem>
-
-            <Link href="/onboarding">
-              <DropdownMenuItem>
-                Onboarding
-                <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </Link>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <div className="flex flex-row justify-between items-center p-2">

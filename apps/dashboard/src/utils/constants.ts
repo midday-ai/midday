@@ -4,6 +4,5 @@ export const Cookies = {
   ChartType: "chart-type",
   ChartPeriod: "chart-period",
   TransactionsPeriod: "transactions-period",
-  OnboardingVisited: "onboarding-visited",
   MfaSetupVisited: "mfa-setup-visited",
 };

@@ -25,7 +25,7 @@ export function EnrollMFA() {
       });
 
       if (verify.data) {
-        router.replace("/onboarding");
+        router.replace("/");
       }
     }
   };
@@ -53,7 +53,7 @@ export function EnrollMFA() {
       factorId,
     });
 
-    router.push("/onboarding");
+    router.push("/");
   };
 
   return (

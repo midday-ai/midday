@@ -50,13 +50,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${url.origin}/mfa/verify`);
   }
 
-  if (
-    request.nextUrl.pathname === "/onboarding" &&
-    !response.cookies.has(Cookies.OnboardingVisited)
-  ) {
-    response.cookies.set(Cookies.OnboardingVisited, "true");
-  }
-
   return response;
 }
 

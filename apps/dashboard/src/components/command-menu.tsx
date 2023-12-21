@@ -109,16 +109,6 @@ export function CommandMenu({ ...props }: DialogProps) {
   useHotkeys("ctrl+k", () => setOpen((open) => !open));
   useHotkeys("meta+k", () => setOpen((open) => !open));
 
-  useHotkeys("meta+o", (evt) => {
-    evt.preventDefault();
-    router.push("/onboarding");
-  });
-
-  useHotkeys("ctrl+o", (evt) => {
-    evt.preventDefault();
-    router.push("/onboarding");
-  });
-
   useHotkeys("meta+s", (evt) => {
     evt.preventDefault();
     router.push("/settings");

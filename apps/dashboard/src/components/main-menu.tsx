@@ -20,7 +20,7 @@ export function MainMenu() {
       name: "Inbound",
       icon: () => (
         <div className="relative">
-          <span className="relative flex h-[6px] w-[6px] absolute top-[0px] -right-[23px]">
+          <span className="flex h-[6px] w-[6px] absolute top-[0px] -right-[23px]">
             <span className="animate-[ping_1s_ease-in-out_3] absolute inline-flex h-full w-full rounded-full bg-[#d98d00] opacity-75" />
             <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-[#d98d00]" />
           </span>
@@ -66,7 +66,6 @@ export function MainMenu() {
         {items.map((item) => {
           const { path, icon: Icon, name } = item;
           const isActive =
-            (pathname === "/onboarding" && path === "/") ||
             (pathname === "/" && path === "/") ||
             (pathname !== "/" && path.startsWith(`/${part}`));
 
