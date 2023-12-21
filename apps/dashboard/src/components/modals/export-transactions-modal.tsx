@@ -25,7 +25,6 @@ export function ExportTransactionsModal({
   totalMissingAttachments,
 }) {
   const { toast } = useToast();
-
   const searchParams = useSearchParams();
   const { setExportId } = useExportStore();
   const filter = searchParams.get("filter");

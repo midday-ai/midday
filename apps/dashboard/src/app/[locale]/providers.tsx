@@ -11,7 +11,7 @@ type ProviderProps = {
 
 export function Providers({ locale, children }: ProviderProps) {
   return (
-    <I18nProviderClient locale={locale}>
+    <I18nProviderClient locale={locale} fallback={<div />}>
       <TriggerProvider
         publicApiKey={process.env.NEXT_PUBLIC_TRIGGER_API_KEY!}
         apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}

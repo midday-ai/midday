@@ -82,8 +82,9 @@ const DropdownMenuItem = React.forwardRef<
   React.ElementRef<typeof DropdownMenuPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     inset?: boolean;
+    asDialogTrigger?: boolean;
   }
->(({ className, inset, ...props }, ref) => (
+>(({ className, inset, asDialogTrigger, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
@@ -91,6 +92,7 @@ const DropdownMenuItem = React.forwardRef<
       inset && "pl-8",
       className
     )}
+    {...(asDialogTrigger && { onSelect: (evt) => evt.preventDefault() })}
     {...props}
   />
 ));

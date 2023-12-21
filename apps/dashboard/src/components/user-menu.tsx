@@ -25,7 +25,9 @@ export async function UserMenu() {
           <Avatar className="rounded-full w-8 h-8">
             <AvatarImage src={userData?.avatar_url} />
             <AvatarFallback>
-              <span className="text-xs">{userData?.full_name?.charAt(0)}</span>
+              <span className="text-xs">
+                {userData?.full_name?.charAt(0)?.toUpperCase()}
+              </span>
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
@@ -33,7 +35,7 @@ export async function UserMenu() {
           <DropdownMenuLabel>
             <div className="flex justify-between items-center">
               <span className="truncate">{userData.full_name}</span>
-              <div className="border py-1 px-3 rounded-full text-xs bg-foreground text-background">
+              <div className="border py-0.5 px-3 rounded-full text-[11px] text-background bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000]">
                 Beta
               </div>
             </div>
@@ -45,6 +47,13 @@ export async function UserMenu() {
               <DropdownMenuItem>
                 Profile
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </Link>
+
+            <Link href="/settings/members">
+              <DropdownMenuItem>
+                Members
+                <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
               </DropdownMenuItem>
             </Link>
 

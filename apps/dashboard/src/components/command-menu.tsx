@@ -114,9 +114,19 @@ export function CommandMenu({ ...props }: DialogProps) {
     router.push("/settings");
   });
 
-  useHotkeys("ctrl+s", (evt) => {
+  useHotkeys("ctrl+m", (evt) => {
     evt.preventDefault();
-    router.push("/settings");
+    router.push("/settings/members");
+  });
+
+  useHotkeys("meta+m", (evt) => {
+    evt.preventDefault();
+    router.push("/settings/members");
+  });
+
+  useHotkeys("ctrl+t", (evt) => {
+    evt.preventDefault();
+    router.push("/team");
   });
 
   useHotkeys("ctrl+meta+p", (evt) => {

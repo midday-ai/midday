@@ -1,10 +1,11 @@
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import { MainMenu } from "./main-menu";
+import { TeamMenu } from "./team-menu";
 
 export function Sidebar() {
   return (
-    <aside className="w-[70px] h-screen flex-shrink-0 flex-col justify-between flex sticky top-0 ml-4">
+    <aside className="h-screen flex-shrink-0 flex-col justify-between flex sticky top-0 ml-4 pb-4 items-center">
       <div className="flex flex-col items-center justify-center xl:items-start xl:justify-start">
         <div className="mt-6 xl:ml-4">
           <Link href="/">
@@ -13,6 +14,8 @@ export function Sidebar() {
         </div>
         <MainMenu />
       </div>
+
+      <TeamMenu />
     </aside>
   );
 }
