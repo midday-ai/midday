@@ -5,6 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
@@ -28,7 +29,17 @@ export async function UserMenu() {
             </AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" sideOffset={10} align="end">
+        <DropdownMenuContent className="w-[240px]" sideOffset={10} align="end">
+          <DropdownMenuLabel>
+            <div className="flex justify-between items-center">
+              <span className="truncate">{userData.full_name}</span>
+              <div className="border py-1 px-3 rounded-full text-xs bg-foreground text-background">
+                Beta
+              </div>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+
           <DropdownMenuGroup>
             <Link href="/profile">
               <DropdownMenuItem>
