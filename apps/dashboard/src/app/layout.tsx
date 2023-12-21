@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
@@ -39,16 +38,9 @@ export default function Layout({
   return (
     <html lang={params.locale} suppressHydrationWarning>
       <body className={cn(fontSans.variable, "whitespace-pre-line")}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-          <SpeedInsights />
-          <Toaster />
-        </ThemeProvider>
+        {children}
+        <SpeedInsights />
+        <Toaster />
       </body>
     </html>
   );

@@ -30,7 +30,7 @@
     "fast-csv": "^4.3.6",
     "framer-motion": "^10.16.16",
     "ms": "^2.1.3",
-    "next": "14.0.5-canary.17",
+    "next": "14.0.4",
     "next-international": "^1.1.4",
     "next-safe-action": "^5.2.3",
     "next-themes": "^0.2.1",

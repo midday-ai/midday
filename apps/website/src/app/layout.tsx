@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@/components/theme-provider";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { cn } from "@midday/ui/utils";
@@ -38,14 +37,7 @@ export default function Layout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={cn(fontSans.variable, "whitespace-pre-line")}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        {children}
         <Analytics />
       </body>
     </html>
