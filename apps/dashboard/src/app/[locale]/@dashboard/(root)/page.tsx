@@ -38,8 +38,12 @@ export default async function Overview({ searchParams }) {
     period: searchParams.period,
   };
 
-  const isOpen = Boolean(searchParams.step);
-  const empty = !data?.length;
+  // NOTE: error is when a user cancel gocardless authentication
+  const isOpen = Boolean(searchParams.step) && !searchParams.error;
+
+  const empty =
+    !data?.length ||
+    (Boolean(searchParams.error) && Boolean(searchParams.step));
 
   return (
     <>

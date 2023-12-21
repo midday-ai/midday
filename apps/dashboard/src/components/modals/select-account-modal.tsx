@@ -59,7 +59,8 @@ export function SelectAccountModal({ countryCode }) {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
-  const isOpen = searchParams.get("step") === "account";
+  const isOpen =
+    searchParams.get("step") === "account" && !searchParams.has("error");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -172,8 +173,8 @@ export function SelectAccountModal({ countryCode }) {
                                   ? field.onChange([...field.value, account.id])
                                   : field.onChange(
                                       field.value?.filter(
-                                        (value) => value !== account.id,
-                                      ),
+                                        (value) => value !== account.id
+                                      )
                                     );
                               }}
                             />
