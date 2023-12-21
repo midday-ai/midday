@@ -7,10 +7,6 @@ body {
   outline: none;
 }
 
-.steps-gradient {
-  background: linear-gradient(180deg,#121212 0%, #2C2C2C 40%, #2C2C2C 100%);
-}
-
 :root {
   --sidebar-width: 662px;
 

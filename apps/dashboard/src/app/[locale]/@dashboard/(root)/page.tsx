@@ -39,11 +39,11 @@ export default async function Overview({ searchParams }) {
   };
 
   const isOpen = Boolean(searchParams.step);
-  const empty = !data?.length && !isOpen;
+  const empty = !data?.length;
 
   return (
     <>
-      <div className={cn(empty && "opacity-20 pointer-events-none")}>
+      <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
         <div className="h-[450px]">
           <ChartSelectors value={value} defaultValue={defaultValue} />
 

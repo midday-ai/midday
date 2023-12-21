@@ -45,7 +45,7 @@ export default function Closed() {
             </div>
 
             <p className="font-medium pb-1 text-2xl text-[#606060]">
-              You can't login yet but keep a lookout in your email for when we
+              You can't log in yet, but keep a lookout in your email for when we
               open up for beta testing.
             </p>
 
