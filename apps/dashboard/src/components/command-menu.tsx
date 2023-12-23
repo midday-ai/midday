@@ -129,6 +129,11 @@ export function CommandMenu({ ...props }: DialogProps) {
     router.push("/team");
   });
 
+  useHotkeys("ctrl+a", (evt) => {
+    evt.preventDefault();
+    router.push("/apps");
+  });
+
   useHotkeys("ctrl+meta+p", (evt) => {
     evt.preventDefault();
     router.push("/profile");

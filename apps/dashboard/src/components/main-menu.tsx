@@ -20,10 +20,7 @@ export function MainMenu() {
       name: "Inbound",
       icon: () => (
         <div className="relative">
-          <span className="flex h-[6px] w-[6px] absolute -top-[3px] -right-[7px]">
-            <span className="animate-[ping_1s_ease-in-out_3] absolute inline-flex h-full w-full rounded-full bg-[#d98d00] opacity-75" />
-            <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-[#d98d00]" />
-          </span>
+          <div className="w-1.5 h-1.5 bg-[#d98d00] rounded-full absolute -top-1 -right-1" />
           <Icons.Inbox2 size={22} />
         </div>
       ),
@@ -49,11 +46,6 @@ export function MainMenu() {
       icon: () => <Icons.Files size={22} />,
     },
     {
-      path: "/apps",
-      name: "Apps",
-      icon: () => <Icons.Apps size={22} />,
-    },
-    {
       path: "/settings",
       name: "Settings",
       icon: () => <Icons.Settings size={22} />,
@@ -70,18 +62,22 @@ export function MainMenu() {
             (pathname !== "/" && path.startsWith(`/${part}`));
 
           return (
-            <li
+            <Link
               key={path}
-              className={cn(
-                "rounded-lg border border-transparent w-[55px] h-[45px] flex items-center justify-center",
-                isActive &&
-                  "bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]"
-              )}
+              href={path}
+              className="flex space-x-3 p-0 items-center"
             >
-              <Link href={path} className="flex space-x-3 p-0 items-center">
+              <li
+                className={cn(
+                  "rounded-lg border border-transparent w-[55px] h-[45px] flex items-center justify-center",
+                  "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+                  isActive &&
+                    "bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]"
+                )}
+              >
                 <Icon />
-              </Link>
-            </li>
+              </li>
+            </Link>
           );
         })}
       </ul>

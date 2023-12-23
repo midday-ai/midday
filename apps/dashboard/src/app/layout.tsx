@@ -37,7 +37,9 @@ export default function Layout({
 }) {
   return (
     <html lang={params.locale} suppressHydrationWarning>
-      <body className={cn(fontSans.variable, "whitespace-pre-line")}>
+      <body
+        className={cn(fontSans.variable, "whitespace-pre-line overscroll-none")}
+      >
         {children}
         <SpeedInsights />
         <Toaster />

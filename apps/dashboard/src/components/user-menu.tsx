@@ -64,6 +64,13 @@ export async function UserMenu() {
               </DropdownMenuItem>
             </Link>
 
+            <Link href="/apps">
+              <DropdownMenuItem>
+                Apps
+                <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </Link>
+
             <DropdownMenuItem>
               <Link href="?feedback" className="w-full">
                 Feedback
