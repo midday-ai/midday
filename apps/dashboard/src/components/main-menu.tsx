@@ -53,7 +53,7 @@ export function MainMenu() {
   ];
 
   return (
-    <nav className="mt-6 ml-1">
+    <nav className="mt-6">
       <ul className="flex flex-col gap-0.5">
         {items.map((item) => {
           const { path, icon: Icon, name } = item;
@@ -69,7 +69,7 @@ export function MainMenu() {
             >
               <li
                 className={cn(
-                  "rounded-lg border border-transparent w-[55px] h-[45px] flex items-center justify-center",
+                  "rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
                   "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                   isActive &&
                     "bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]"

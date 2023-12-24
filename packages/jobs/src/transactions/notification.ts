@@ -109,8 +109,6 @@ client.defineJob({
 
     if (emailEvents?.length) {
       triggerBulk(emailEvents);
-      await io.logger.log(`Sending emails: ${emailEvents.length}`);
-      await io.logger.log(`Emails: ${JSON.stringify(emailEvents, null, 2)}`);
     }
   },
 });

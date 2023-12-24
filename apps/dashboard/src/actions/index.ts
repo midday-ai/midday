@@ -63,6 +63,9 @@ export async function createBankAccountsAction(accounts) {
   const { data } = await createBankAccounts(supabase, accounts);
   const teamId = data.at(0).team_id;
 
+  // TODO: Send event to trigger.dev
+  // Kick off initial fetch and setup scheduler
+
   revalidateTag(`bank_connections_${teamId}`);
 
   return data;

@@ -12,7 +12,8 @@ export async function Chart({ value, defaultValue, disabled }) {
     ? chartData
     : await getMetrics({ ...defaultValue, ...value, type });
 
-  const lastPeriodAmount = data.result[data.result.length - 1]?.current?.value;
+  const lastPeriodAmount =
+    data?.result[data.result?.length - 1]?.current?.value;
 
   return (
     <div className="relative mt-28">

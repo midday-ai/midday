@@ -242,7 +242,7 @@ export function Filter({ sections }: Props) {
 
   return (
     <div className="flex items-center">
-      <Popover open={isOpen} onOpenChange={setOpen} size>
+      <Popover open={isOpen} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="space-x-2">
             <span>Add filter</span>

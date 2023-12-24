@@ -89,9 +89,8 @@ export function SelectAccountModal({ countryCode }) {
         },
       }));
 
+    // Change to use safe-action and listen to loading and disable modal close and button
     await createBankAccountsAction(accountsWithDetails);
-
-    router.push(`${pathname}?step=desktop`);
   }
 
   useEffect(() => {

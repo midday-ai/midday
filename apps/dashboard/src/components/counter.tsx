@@ -34,7 +34,7 @@ const InnerCounter = ({ currency, pad, value, locale }) => {
   })
     .format(paddedValue)
     .split("")
-    .map((character, index) => {
+    .map((character) => {
       if (!Number.isNaN(parseInt(character, 10)) && i < padCount) {
         i++;
         return "0";
@@ -100,8 +100,12 @@ export function Counter({
 
   return (
     <>
-      <InnerCounter value={value} currency={currency} locale={locale} />
-      <InnerCounter value={value} currency={currency} locale={locale} />
+      {value > 0 && (
+        <InnerCounter value={value} currency={currency} locale={locale} />
+      )}
+      {value > 0 && (
+        <InnerCounter value={value} currency={currency} locale={locale} />
+      )}
     </>
   );
 }
