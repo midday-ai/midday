@@ -1,6 +1,6 @@
 "use client";
 
-import { createBankAccountsAction } from "@/actions";
+import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
@@ -21,8 +21,10 @@ import {
   FormLabel,
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
+import { useToast } from "@midday/ui/use-toast";
 import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hook";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -54,6 +56,8 @@ function RowsSkeleton() {
 }
 
 export function SelectAccountModal({ countryCode }) {
+  const { toast } = useToast();
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const [accounts, setAccounts] = useState([]);
@@ -61,6 +65,16 @@ export function SelectAccountModal({ countryCode }) {
   const pathname = usePathname();
   const isOpen =
     searchParams.get("step") === "account" && !searchParams.has("error");
+
+  const action = useAction(connectBankAccountAction, {
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -89,8 +103,7 @@ export function SelectAccountModal({ countryCode }) {
         },
       }));
 
-    // Change to use safe-action and listen to loading and disable modal close and button
-    await createBankAccountsAction(accountsWithDetails);
+    action.execute(accountsWithDetails);
   }
 
   useEffect(() => {

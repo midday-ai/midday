@@ -103,3 +103,8 @@ export const voteSchema = z.object({
   revalidatePath: z.string(),
   id: z.string(),
 });
+
+export const connectBankAccountSchema = z.object({
+  accountId: z.string(),
+  id: z.string(),
+});

@@ -13,7 +13,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.3.2",
+    "@hookform/resolvers": "^3.3.3",
     "@midday/gocardless": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/kv": "workspace:*",

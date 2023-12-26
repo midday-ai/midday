@@ -3,13 +3,11 @@
 import { env } from "@/env.mjs";
 import { getUser } from "@midday/supabase/cached-queries";
 import {
-  createBankAccounts,
   createEnrichmentTransaction,
   updateSimilarTransactions,
   updateTransaction,
 } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { revalidateTag } from "next/cache";
 import { invalidateCacheAction } from "./invalidate-cache-action";
 
 const baseUrl = "https://api.resend.com";
@@ -56,19 +54,6 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
   const json = await res.json();
 
   return json;
-}
-
-export async function createBankAccountsAction(accounts) {
-  const supabase = await createClient();
-  const { data } = await createBankAccounts(supabase, accounts);
-  const teamId = data.at(0).team_id;
-
-  // TODO: Send event to trigger.dev
-  // Kick off initial fetch and setup scheduler
-
-  revalidateTag(`bank_connections_${teamId}`);
-
-  return data;
 }
 
 export async function updateTransactionAction(id: string, payload: any) {

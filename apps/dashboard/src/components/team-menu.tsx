@@ -68,8 +68,8 @@ export async function TeamMenu() {
               </DialogFooter>
             </div>
           </DialogContent>
-          <DropdownMenuItem>Members</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          {/* <DropdownMenuItem>Members</DropdownMenuItem>
+          <DropdownMenuItem>Settings</DropdownMenuItem> */}
         </Dialog>
       </DropdownMenuContent>
     </DropdownMenu>
