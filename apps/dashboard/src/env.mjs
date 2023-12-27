@@ -28,7 +28,7 @@ export const env = createEnv({
   client: {
     NEXT_PUBLIC_SUPABASE_URL: z.string(),
     NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string(),
-    NEXT_PUBLIC_APPLICATION_IDENTIFIER: z.string(),
+    NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string(),
     NEXT_PUBLIC_SUPABASE_ID: z.string(),
     NEXT_PUBLIC_TRIGGER_API_KEY: z.string(),
   },
@@ -48,8 +48,8 @@ export const env = createEnv({
     NOVU_API_KEY: process.env.NOVU_API_KEY,
     KV_REST_API_URL: process.env.KV_REST_API_URL,
     KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN,
-    NEXT_PUBLIC_APPLICATION_IDENTIFIER:
-      process.env.NEXT_PUBLIC_APPLICATION_IDENTIFIER,
+    NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
+      process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,

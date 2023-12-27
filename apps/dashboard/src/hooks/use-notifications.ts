@@ -19,7 +19,7 @@ export function useNotifications() {
             ...notification,
             read: true,
           };
-        }),
+        })
       );
 
       headlessService.markAllMessagesAsRead({
@@ -43,7 +43,7 @@ export function useNotifications() {
           }
 
           return notification;
-        }),
+        })
       );
 
       headlessService.markNotificationsAsRead({
@@ -75,7 +75,7 @@ export function useNotifications() {
         prevNotifications.map((notification) => ({
           ...notification,
           seen: true,
-        })),
+        }))
       );
       headlessService.markAllMessagesAsSeen({
         listener: () => {},
@@ -91,7 +91,7 @@ export function useNotifications() {
       } = await supabase.auth.getSession();
       const { data: userData } = await getUserQuery(
         supabase,
-        session?.user?.id,
+        session?.user?.id
       );
 
       if (userData) {
@@ -117,7 +117,8 @@ export function useNotifications() {
   useEffect(() => {
     if (subscriberId && !headlessServiceRef.current) {
       const headlessService = new HeadlessService({
-        applicationIdentifier: process.env.NEXT_PUBLIC_APPLICATION_IDENTIFIER!,
+        applicationIdentifier:
+          process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER!,
         subscriberId,
       });
 
@@ -137,7 +138,7 @@ export function useNotifications() {
     markMessageAsRead,
     markAllMessagesAsSeen,
     hasUnseenNotificaitons: notifications.some(
-      (notification) => !notification.seen,
+      (notification) => !notification.seen
     ),
     notifications,
   };

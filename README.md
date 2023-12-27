@@ -6,8 +6,6 @@
 <p align="center">
     The financial OS for your business
     <br />
-    <a href="https://midday.ai"><strong>Learn more »</strong></a>
-    <br />
     <br />
     <a href="#">Discord</a>
     ·
