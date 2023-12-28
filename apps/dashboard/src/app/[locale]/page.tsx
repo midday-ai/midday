@@ -45,7 +45,7 @@ export default async function Overview({ searchParams }) {
     <>
       <div className={cn(empty && "opacity-20 pointer-events-none")}>
         <div className="h-[450px]">
-          <ChartSelectors value={value} defaultValue={defaultValue} />
+          <ChartSelectors defaultValue={defaultValue} />
 
           <Suspense>
             <Chart value={value} defaultValue={defaultValue} disabled={empty} />

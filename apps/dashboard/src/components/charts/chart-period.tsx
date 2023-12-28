@@ -9,15 +9,15 @@ import { format } from "date-fns";
 import { useAction } from "next-safe-action/hook";
 import { parseAsString, useQueryStates } from "next-usequerystate";
 
-export function ChartPeriod({ defaultValue, value, disabled }) {
+export function ChartPeriod({ defaultValue, disabled }) {
   let placeholder;
 
   const { execute } = useAction(changeChartPeriodAction);
 
   const [state, setState] = useQueryStates(
     {
-      from: parseAsString.withDefault(value?.from || defaultValue?.from),
-      to: parseAsString.withDefault(value?.to || defaultValue?.to),
+      from: parseAsString.withDefault(undefined),
+      to: parseAsString.withDefault(undefined),
     },
     {
       shallow: false,
@@ -40,15 +40,25 @@ export function ChartPeriod({ defaultValue, value, disabled }) {
   }
 
   const handleChangePeriod = (params) => {
-    const range = {
-      ...state,
-      ...(params.from && { from: params.from }),
-      ...(params.to && { to: params.to }),
-    };
+    const prevRange = state;
 
-    execute(range);
-    setState(range);
+    if (params.from || params.to) {
+      const range = {
+        ...prevRange,
+        ...params,
+      };
+
+      setState(range);
+      execute(range);
+    } else {
+      setState({
+        from: "",
+        to: "",
+      });
+    }
   };
+
+  const date = state.from || state.to ? state : defaultValue;
 
   return (
     <div className="flex space-x-4">
@@ -63,7 +73,7 @@ export function ChartPeriod({ defaultValue, value, disabled }) {
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[450px] mt-2 pt-1" align="end">
-          <MonthRangePicker setDate={handleChangePeriod} date={state} />
+          <MonthRangePicker setDate={handleChangePeriod} date={date} />
         </PopoverContent>
       </Popover>
     </div>

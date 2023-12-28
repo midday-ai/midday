@@ -3,13 +3,13 @@ import { ChartType } from "@/components/charts/chart-type";
 import { Cookies } from "@/utils/constants";
 import { cookies } from "next/headers";
 
-export async function ChartSelectors({ value, defaultValue }) {
+export async function ChartSelectors({ defaultValue }) {
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit_loss";
 
   return (
     <div className="flex justify-between mt-6">
       <ChartType initialValue={chartType} />
-      <ChartPeriod value={value} defaultValue={defaultValue} />
+      <ChartPeriod defaultValue={defaultValue} />
     </div>
   );
 }

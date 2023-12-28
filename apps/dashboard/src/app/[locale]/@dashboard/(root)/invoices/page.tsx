@@ -9,7 +9,7 @@ export default function Invoice() {
           <h2 className="font-medium text-lg">Invoice is work in progress</h2>
           <p className="text-[#606060] text-sm">
             We are currently working on our invoice feature
-            <br /> In the meantime you can check out our
+            <br /> In the meantime you can check our
             <br />
             <a
               href="https://midday-ai.notion.site/86823a9c0e2d4da6976d499df27cdfe3?v=b480460de3664974b01e4a098e50de54"
