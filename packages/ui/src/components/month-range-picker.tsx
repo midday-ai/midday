@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useState } from "react";
 import { cn } from "../utils";
 import { Button } from "./button";
-import { buttonVariants } from "./button";
 
 const monthsNumber = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
@@ -109,26 +108,35 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
     const isRange = isSelected && !isSelectedDate;
 
     return (
-      <Button
+      <button
+        type="button"
         key={month}
-        variant="ghost"
         className={cn(
-          "!text-xs font-normal mb-2",
-          isSelectedDate && buttonVariants({ variant: "default" }),
-          isSelectedDate &&
-            "!rounded-md hover:bg-primary hover:text-primary-foreground",
-          isRange && buttonVariants({ variant: "secondary" }),
-          isRange &&
-            "hover:bg-secondary hover:text-secondary-foreground !rounded-none",
-          isStart && "!rounded-none !rounded-l-md",
-          isEnd && "!rounded-none !rounded-r-md",
+          "!w-[40px] !h-[40px] m-0 pr-[60px] rounded-none mb-1.5 bg-transparent",
+          isStart && toDate && "bg-secondary rounded-l-full",
+          isEnd && "bg-secondary rounded-r-full pr-0",
+          isRange && "bg-secondary"
         )}
         onClick={() => handleMonthClick(monthStart)}
       >
-        {new Intl.DateTimeFormat("en-US", { month: "short" }).format(
-          monthStart,
-        )}
-      </Button>
+        <div
+          className={cn(
+            "flex items-center justify-center !w-[40px] !h-[40px] !text-xs font-medium hover:rounded-full border border-transparent hover:border-primary",
+            isSelectedDate && "bg-primary text-primary-foreground",
+            isSelectedDate &&
+              "rounded-full hover:bg-primary hover:text-primary-foreground",
+
+            isStart && "",
+            isEnd && ""
+          )}
+        >
+          <span>
+            {new Intl.DateTimeFormat("en-US", { month: "short" }).format(
+              monthStart
+            )}
+          </span>
+        </div>
+      </button>
     );
   };
 
@@ -163,10 +171,10 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
       </div>
 
       <div className="flex mt-4 justify-between">
-        <div className="grid grid-cols-3 w-[47%]">
+        <div className="grid grid-cols-3">
           {renderYear(today.getFullYear() + yearOffset)}
         </div>
-        <div className="grid grid-cols-3 w-[47%]">
+        <div className="grid grid-cols-3">
           {renderYear(today.getFullYear() + yearOffset + 1)}
         </div>
       </div>

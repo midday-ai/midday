@@ -46,7 +46,7 @@ export async function TeamMenu() {
           <DropdownMenuItem asDialogTrigger className="border-b-[1px]">
             <DialogTrigger className="w-full p-1 flex items-center space-x-2">
               <Icons.Add />
-              <span>Create team</span>
+              <span className="font-medium text-sm">Create team</span>
             </DialogTrigger>
           </DropdownMenuItem>
           <DialogContent className="max-w-[455px]">
@@ -75,7 +75,7 @@ export async function TeamMenu() {
             return (
               <DropdownMenuItem key={team.id}>
                 <div className="flex justify-between w-full p-1">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-2 items-center">
                     <Avatar className="rounded-sm w-[24px] h-[24px]">
                       <AvatarImage src={team.logo_url} />
                       <AvatarFallback className="rounded-sm w-[24px] h-[24px]">
@@ -85,7 +85,7 @@ export async function TeamMenu() {
                         </span>
                       </AvatarFallback>
                     </Avatar>
-                    <span>{team.name}</span>
+                    <span className="text-sm">{team.name}</span>
                   </div>
                   {team.id === userData.team.id && <Icons.Check />}
                 </div>

@@ -9,7 +9,7 @@ export async function ChartSelectors({ value, defaultValue }) {
   return (
     <div className="flex justify-between mt-6">
       <ChartType initialValue={chartType} />
-      <ChartPeriod initialValue={value} defaultValue={defaultValue} />
+      <ChartPeriod value={value} defaultValue={defaultValue} />
     </div>
   );
 }

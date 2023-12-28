@@ -9,15 +9,15 @@ import { format } from "date-fns";
 import { useAction } from "next-safe-action/hook";
 import { parseAsString, useQueryStates } from "next-usequerystate";
 
-export function ChartPeriod({ initialValue, defaultValue, disabled }) {
+export function ChartPeriod({ defaultValue, value, disabled }) {
   let placeholder;
 
   const { execute } = useAction(changeChartPeriodAction);
 
   const [state, setState] = useQueryStates(
     {
-      from: parseAsString.withDefault(initialValue?.from ?? undefined),
-      to: parseAsString.withDefault(initialValue?.to ?? undefined),
+      from: parseAsString.withDefault(value?.from || defaultValue?.from),
+      to: parseAsString.withDefault(value?.to || defaultValue?.to),
     },
     {
       shallow: false,
