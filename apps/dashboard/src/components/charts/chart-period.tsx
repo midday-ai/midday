@@ -16,8 +16,8 @@ export function ChartPeriod({ defaultValue, disabled }) {
 
   const [state, setState] = useQueryStates(
     {
-      from: parseAsString.withDefault(undefined),
-      to: parseAsString.withDefault(undefined),
+      from: parseAsString.withDefault(""),
+      to: parseAsString.withDefault(""),
     },
     {
       shallow: false,

@@ -14,8 +14,8 @@ enum balanceType {
 }
 
 const keys = {
-  accessToken: "go_cardless_access_token",
-  refreshToken: "go_cardless_refresh_token",
+  accessToken: "go_cardless_access_token_2",
+  refreshToken: "go_cardless_refresh_token_2",
 };
 
 async function getRefreshToken(refresh: string) {
@@ -37,7 +37,7 @@ async function getRefreshToken(refresh: string) {
     nx: true,
   });
 
-  return result;
+  return result.access;
 }
 
 async function getAccessToken() {
@@ -79,7 +79,7 @@ async function getAccessToken() {
     }),
   ]);
 
-  return result;
+  return result.access;
 }
 
 export async function getBanks(countryCode: string) {
