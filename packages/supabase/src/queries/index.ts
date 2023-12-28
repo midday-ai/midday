@@ -272,7 +272,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      enrichment:transaction_enrichments(category),
+      enrichment:transaction_enrichments!inner(category),
       attachments(*)
     `
     );
@@ -282,7 +282,7 @@ export async function getTransactionsQuery(
       .join(",");
 
     query
-      .or(matchCategory)
+      // .or(matchCategory)
       .or(matchCategory, { referencedTable: "enrichment" });
   }
 

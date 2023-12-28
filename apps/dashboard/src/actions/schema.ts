@@ -116,3 +116,18 @@ const bankAccount = z.object({
 });
 
 export const connectBankAccountSchema = z.array(bankAccount);
+
+export const sendFeedbackSchema = z.object({
+  feedback: z.string(),
+});
+
+export const updateTransactionSchema = z.object({
+  id: z.string(),
+  note: z.string().optional(),
+  category: z.string().optional(),
+  assigned_id: z.string().optional(),
+});
+
+export const updateSimilarTransactionsSchema = z.object({
+  id: z.string(),
+});

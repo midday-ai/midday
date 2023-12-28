@@ -1,19 +1,13 @@
 "use client";
 
-import { updateTransactionAction } from "@/actions";
+import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { Textarea } from "@midday/ui/textarea";
-import { startTransition, useState } from "react";
+import { useAction } from "next-safe-action/hook";
+import { useState } from "react";
 
 export function Note({ id, defaultValue }) {
   const [value, setValue] = useState(defaultValue);
-
-  const handleOnBlur = () => {
-    startTransition(() => {
-      updateTransactionAction(id, {
-        note: value,
-      });
-    });
-  };
+  const action = useAction(updateTransactionAction);
 
   return (
     <Textarea
@@ -23,7 +17,12 @@ export function Note({ id, defaultValue }) {
       autoFocus
       placeholder="Note"
       className="min-h-[100px] resize-none"
-      onBlur={handleOnBlur}
+      onBlur={() =>
+        action.execute({
+          id,
+          note: value,
+        })
+      }
       onChange={(evt) => setValue(evt.target.value)}
     />
   );

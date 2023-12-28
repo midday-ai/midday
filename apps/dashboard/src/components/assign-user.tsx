@@ -1,4 +1,6 @@
-import { updateTransactionAction } from "@/actions";
+"use client";
+
+import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { createClient } from "@midday/supabase/client";
 import {
   getCurrentUserTeamQuery,
@@ -13,21 +15,15 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
-import { startTransition, useEffect, useState } from "react";
+import { useAction } from "next-safe-action/hook";
+import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 
 export function AssignUser({ id, selectedId, isLoading }) {
+  const action = useAction(updateTransactionAction);
   const [value, setValue] = useState();
   const supabase = createClient();
   const [users, setUsers] = useState([]);
-
-  const handleOnValueChange = (value: string) => {
-    startTransition(() => {
-      updateTransactionAction(id, {
-        assigned_id: value,
-      });
-    });
-  };
 
   useEffect(() => {
     setValue(selectedId);
@@ -53,7 +49,15 @@ export function AssignUser({ id, selectedId, isLoading }) {
             <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
           </div>
         ) : (
-          <Select value={value} onValueChange={handleOnValueChange}>
+          <Select
+            value={value}
+            onValueChange={(assigned_id) => {
+              action.execute({
+                id,
+                assigned_id,
+              });
+            }}
+          >
             <SelectTrigger id="assign" className="line-clamp-1 truncate">
               <SelectValue placeholder="Select" />
             </SelectTrigger>

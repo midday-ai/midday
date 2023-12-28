@@ -32,7 +32,8 @@ client.defineJob({
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
       await scheduler.unregister(ctx.source.id);
-      // TODO: Delete requisitions
+
+      return;
     }
 
     const { transactions } = await getTransactions(data?.account_id);

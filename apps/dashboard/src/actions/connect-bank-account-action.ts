@@ -19,7 +19,7 @@ export const connectBankAccountAction = action(
     const { data } = await createBankAccounts(supabase, accounts);
 
     const promisses = data?.map(async (account) => {
-      // Fetch transactions
+      // Fetch transactions for each account
       const { transactions } = await getTransactions(account.account_id);
 
       // Update bank account last_accessed

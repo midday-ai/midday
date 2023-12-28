@@ -1,7 +1,5 @@
-import {
-  updateSimilarTransactionsAction,
-  updateTransactionAction,
-} from "@/actions";
+import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
+import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
 import {
@@ -19,6 +17,7 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hook";
 import { useEffect, useState } from "react";
 import { CategoryIcon, categories } from "./category";
 
@@ -27,13 +26,11 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
   const supabase = createClient();
   const t = useI18n();
   const { toast } = useToast();
+  const updateTransaction = useAction(updateTransactionAction);
+  const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
 
-  const handleUpdateSimilar = () => {
-    updateSimilarTransactionsAction(id);
-  };
-
-  const handleOnValueChange = async (value: string) => {
-    await updateTransactionAction(id, { category: value });
+  const handleOnValueChange = async (category: string) => {
+    updateTransaction.execute({ id, category });
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name,
@@ -48,7 +45,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
         description: `Do you want to mark ${
           transactions?.data?.length
         } similar transactions form ${name} as ${t(
-          `categories.${value}`
+          `categories.${category}`
         )} too?`,
         footer: (
           <div className="flex space-x-2">
@@ -57,7 +54,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
             </ToastAction>
             <ToastAction
               altText="Yes"
-              onClick={handleUpdateSimilar}
+              onClick={() => updateSimilarTransactions.execute({ id })}
               className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Yes
