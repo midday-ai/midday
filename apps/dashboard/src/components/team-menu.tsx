@@ -1,4 +1,4 @@
-import { getUser } from "@midday/supabase/cached-queries";
+import { getTeams, getUser } from "@midday/supabase/cached-queries";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -14,14 +14,14 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 
 export async function TeamMenu() {
   const { data: userData } = await getUser();
+  const { data: teamsData } = await getTeams();
 
   return (
     <DropdownMenu>
@@ -43,8 +43,11 @@ export async function TeamMenu() {
         side="top"
       >
         <Dialog>
-          <DropdownMenuItem asDialogTrigger>
-            <DialogTrigger>Create team</DialogTrigger>
+          <DropdownMenuItem asDialogTrigger className="border-b-[1px]">
+            <DialogTrigger className="w-full p-1 flex items-center space-x-2">
+              <Icons.Add />
+              <span>Create team</span>
+            </DialogTrigger>
           </DropdownMenuItem>
           <DialogContent className="max-w-[455px]">
             <div className="p-4">
@@ -68,8 +71,27 @@ export async function TeamMenu() {
               </DialogFooter>
             </div>
           </DialogContent>
-          {/* <DropdownMenuItem>Members</DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem> */}
+          {teamsData.map(({ team }) => {
+            return (
+              <DropdownMenuItem key={team.id}>
+                <div className="flex justify-between w-full p-1">
+                  <div className="flex space-x-2">
+                    <Avatar className="rounded-sm w-[24px] h-[24px]">
+                      <AvatarImage src={team.logo_url} />
+                      <AvatarFallback className="rounded-sm w-[24px] h-[24px]">
+                        <span className="text-xs">
+                          {team.name?.charAt(0)?.toUpperCase()}
+                          {team.name?.charAt(1)?.toUpperCase()}
+                        </span>
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{team.name}</span>
+                  </div>
+                  {team.id === userData.team.id && <Icons.Check />}
+                </div>
+              </DropdownMenuItem>
+            );
+          })}
         </Dialog>
       </DropdownMenuContent>
     </DropdownMenu>

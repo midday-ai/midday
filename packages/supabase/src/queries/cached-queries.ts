@@ -6,6 +6,7 @@ import {
   getSpendingQuery,
   getTeamBankAccountsQuery,
   getTeamMembersQuery,
+  getTeamsByUserIdQuery,
   getTransactionsQuery,
   getUserQuery,
   getVaultQuery,
@@ -181,4 +182,26 @@ export const getVault = async (params) => {
       revalidate: 3600,
     }
   )(params);
+};
+
+export const getTeams = async () => {
+  const supabase = createClient();
+
+  const user = await getUser();
+  const userId = user?.data?.id;
+
+  if (!userId) {
+    return;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTeamsByUserIdQuery(supabase, userId);
+    },
+    ["teams", userId],
+    {
+      tags: [`teams_${userId}`],
+      revalidate: 10,
+    }
+  )();
 };

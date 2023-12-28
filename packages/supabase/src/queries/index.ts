@@ -592,3 +592,16 @@ export async function getVaultRecursiveQuery(
 
   return items;
 }
+
+export async function getTeamsByUserIdQuery(supabase: Client, userId: string) {
+  return supabase
+    .from("users_on_team")
+    .select(
+      `
+      id,
+      role,
+      team:team_id(*)`
+    )
+    .eq("user_id", userId)
+    .throwOnError();
+}

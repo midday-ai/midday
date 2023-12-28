@@ -12,7 +12,7 @@ export async function GET(req) {
   } = await supabase.auth.getSession();
 
   return fetch(
-    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${filePath}?wefwef`,
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${filePath}`,
     {
       cache: "no-cache",
       headers: {

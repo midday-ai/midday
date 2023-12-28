@@ -1,6 +1,7 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { Settings } from "lucide-react";
 import {
+  MdAdd,
   MdApartment,
   MdArrowRight,
   MdAutoAwesome,
@@ -429,4 +430,5 @@ export const Icons = {
   AI: MdAutoAwesome,
   Timer: MdOutlineTimer,
   WorkInProgress: MdOutlineHandyman,
+  Add: MdAdd,
 };

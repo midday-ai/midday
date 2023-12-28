@@ -39,23 +39,6 @@ export async function sendFeeback(formData: FormData) {
   return json;
 }
 
-export async function subscribeEmail(formData: FormData, userGroup: string) {
-  const email = formData.get("email");
-
-  const res = await fetch(env.LOOPS_ENDPOINT, {
-    method: "POST",
-    cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, userGroup }),
-  });
-
-  const json = await res.json();
-
-  return json;
-}
-
 export async function updateTransactionAction(id: string, payload: any) {
   const supabase = await createClient();
   const { data } = await updateTransaction(supabase, id, payload);

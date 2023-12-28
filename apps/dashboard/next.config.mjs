@@ -2,10 +2,13 @@ import "./src/env.mjs";
 
 /** @type {import("next").NextConfig} */
 const config = {
-  // output: "standalone",
   reactStrictMode: true,
   images: {
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "service.midday.ai",
+      },
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
