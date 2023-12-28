@@ -36,9 +36,9 @@ export function MainMenu() {
       icon: () => <Icons.Invoice size={22} />,
     },
     {
-      path: "/timer",
-      name: "Timer",
-      icon: () => <Icons.Timer size={22} />,
+      path: "/tracker",
+      name: "Tracker",
+      icon: () => <Icons.Tracker size={22} />,
     },
     {
       path: "/vault",

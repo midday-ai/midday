@@ -50,17 +50,10 @@ export async function UserMenu() {
               </DropdownMenuItem>
             </Link>
 
-            <Link href="/settings/members">
+            <Link href="/profile/teams">
               <DropdownMenuItem>
-                Members
+                Teams
                 <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </Link>
-
-            <Link href="/settings">
-              <DropdownMenuItem>
-                Settings
-                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
               </DropdownMenuItem>
             </Link>
 

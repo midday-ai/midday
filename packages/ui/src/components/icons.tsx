@@ -428,7 +428,7 @@ export const Icons = {
   Image: MdOutlineInsertPhoto,
   Security: MdSecurity,
   AI: MdAutoAwesome,
-  Timer: MdOutlineTimer,
+  Tracker: MdOutlineTimer,
   WorkInProgress: MdOutlineHandyman,
   Add: MdAdd,
 };

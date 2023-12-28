@@ -41,9 +41,9 @@ const navigation = [
     icon: Icons.Invoice,
   },
   {
-    name: "Timer",
-    path: "/timer",
-    icon: Icons.Timer,
+    name: "Tracker",
+    path: "/tracker",
+    icon: Icons.Tracker,
   },
   {
     name: "Vault",
@@ -126,7 +126,7 @@ export function CommandMenu({ ...props }: DialogProps) {
 
   useHotkeys("ctrl+t", (evt) => {
     evt.preventDefault();
-    router.push("/team");
+    router.push("/profile/teams");
   });
 
   useHotkeys("ctrl+a", (evt) => {
