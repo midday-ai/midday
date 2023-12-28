@@ -2,9 +2,8 @@
 
 import { AssignedUser } from "@/components/assigned-user";
 import { Category } from "@/components/category";
+import { FormatAmount } from "@/components/format-amount";
 import { TransactionMethod } from "@/components/transaction-method";
-import { useCurrentLocale } from "@/locales/client";
-import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
@@ -38,7 +37,6 @@ export function Row({ children, onSelect, selected }) {
 }
 
 export function DataTableRow({ collapsed, onSelect, data, selected }) {
-  const locale = useCurrentLocale();
   const fullfilled = data.attachments.length > 0;
 
   return (
@@ -51,11 +49,7 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
 
       <DataTableCell className="w-[200px]">
         <span className={cn("text-sm", data.amount > 0 && "text-[#00C969]")}>
-          {formatAmount({
-            amount: data.amount,
-            currency: data.currency,
-            locale,
-          })}
+          <FormatAmount amount={data.amount} currency={data.currency} />
         </span>
       </DataTableCell>
 

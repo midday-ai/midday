@@ -1,9 +1,9 @@
-import { formatAmount } from "@/utils/format";
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import Link from "next/link";
+import { FormatAmount } from "../format-amount";
 import { transactionList } from "./data";
 
 export function TransactionsListHeader() {
@@ -85,11 +85,10 @@ export async function TransactionsList({ type, disabled }) {
                     transaction?.amount > 0 && "text-[#00C969]"
                   )}
                 >
-                  {formatAmount({
-                    locale: "en",
-                    amount: transaction.amount,
-                    currency: transaction.currency,
-                  })}
+                  <FormatAmount
+                    amount={transaction.amount}
+                    currency={transaction.currency}
+                  />
                 </span>
               </div>
 

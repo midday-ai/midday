@@ -1,7 +1,5 @@
 "use client";
 
-import { useCurrentLocale } from "@/locales/client";
-import { formatAmount } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
 import {
@@ -18,6 +16,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
+import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 
@@ -28,7 +27,6 @@ export function TransactionDetails({
 }) {
   const [data, setData] = useState(initialData);
   const supabase = createClient();
-  const locale = useCurrentLocale();
   const [isLoading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -86,11 +84,10 @@ export function TransactionDetails({
                       data?.amount > 0 && "text-[#00C969]"
                     )}
                   >
-                    {formatAmount({
-                      amount: data?.amount,
-                      currency: data?.currency,
-                      locale,
-                    })}
+                    <FormatAmount
+                      amount={data?.amount}
+                      currency={data?.currency}
+                    />
                   </span>
                 )}
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
-import { formatAmount, getClientLocale } from "@/utils/format";
+import { useCurrentLocale, useI18n } from "@/locales/client";
+import { formatAmount } from "@/utils/format";
 import {
   Cell,
   Label,
@@ -14,7 +14,7 @@ import { CategoryIcon, mapCategoryColor } from "../category";
 
 const ToolTipContent = ({ payload = [] }) => {
   const t = useI18n();
-  const locale = getClientLocale();
+  const locale = useCurrentLocale();
   const item = payload.at(0)?.payload;
 
   return (
@@ -42,6 +42,8 @@ const ToolTipContent = ({ payload = [] }) => {
 };
 
 export function SpendingChart({ categories, currency, totalAmount }) {
+  const locale = useCurrentLocale();
+
   return (
     <ResponsiveContainer width="100%">
       <PieChart width={250} height={250}>
@@ -60,6 +62,7 @@ export function SpendingChart({ categories, currency, totalAmount }) {
               currency,
               maximumFractionDigits: 0,
               minimumFractionDigits: 0,
+              locale,
             })}
             position="center"
             fontSize={23}

@@ -1,8 +1,8 @@
 import { Counter } from "@/components/counter";
-import { formatAmount } from "@/utils/format";
 import { getMetrics } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
 import { cookies } from "next/headers";
+import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";
 import { chartData } from "./data";
 
@@ -23,17 +23,16 @@ export async function Chart({ value, defaultValue, disabled }) {
             value={data.summary.currentTotal}
             currency={data.summary.currency}
             lastPeriodAmount={lastPeriodAmount}
-            locale="sv-SE"
           />
         </h1>
         <p className={cn("text-sm text-[#606060]", disabled && "skeleton-box")}>
           vs{" "}
-          {formatAmount({
-            amount: data.summary.prevTotal || 0,
-            currency: data.summary.currency,
-            maximumFractionDigits: 0,
-            minimumFractionDigits: 0,
-          })}{" "}
+          <FormatAmount
+            maximumFractionDigits={0}
+            minimumFractionDigits={0}
+            amount={data.summary.prevTotal || 0}
+            currency={data.summary.currency}
+          />{" "}
           last period
         </p>
       </div>

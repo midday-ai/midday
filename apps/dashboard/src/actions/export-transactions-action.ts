@@ -16,6 +16,7 @@ export const exportTransactionsAction = action(
         from,
         to,
         teamId: user.data.team_id,
+        locale: user.data.locale,
       },
     });
 

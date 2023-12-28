@@ -32,7 +32,6 @@ const options = [
 ];
 
 export function ExportStatus() {
-  return null;
   const { toast, dismiss, update } = useToast();
   const [toastId, setToastId] = useState(null);
   const { exportId, setExportId } = useExportStore();

@@ -37,7 +37,6 @@ export function DisplayName({ fullName }) {
   const onSubmit = form.handleSubmit(async (data) => {
     action.execute({
       full_name: data.full_name,
-      revalidatePath: data.path,
     });
   });
 

@@ -1,12 +1,8 @@
-export function getClientLocale() {
-  return navigator.languages && navigator.languages.length >= 0
-    ? navigator.languages[0]
-    : "en-US";
-}
+import { useCurrentLocale } from "@/locales/client";
 
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];
-  const locale = getClientLocale();
+  const locale = useCurrentLocale();
 
   const unitIndex = Math.max(
     0,

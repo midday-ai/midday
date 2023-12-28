@@ -1,6 +1,6 @@
 "use client";
 
-import { useI18n } from "@/locales/client";
+import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { format } from "date-fns";
 import {
@@ -17,6 +17,7 @@ import { Status } from "./status";
 
 const ToolTipContent = ({ payload = {} }) => {
   const t = useI18n();
+  const locale = useCurrentLocale();
   const [current, previous] = payload;
 
   return (
@@ -43,8 +44,9 @@ const ToolTipContent = ({ payload = {} }) => {
               {formatAmount({
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
-                currency: current?.payload?.current.currency || "USD",
+                currency: current?.payload?.current.currency,
                 amount: current?.payload?.current.value || 0,
+                locale,
               })}
             </p>
           </div>
@@ -67,9 +69,10 @@ const ToolTipContent = ({ payload = {} }) => {
             <p className="font-medium text-[13px]">
               {formatAmount({
                 amount: previous?.payload?.previous.value || 0,
-                currency: previous?.payload?.current.currency || "USD",
+                currency: previous?.payload?.current.currency,
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
+                locale,
               })}
             </p>
           </div>
@@ -91,6 +94,8 @@ const ToolTipContent = ({ payload = {} }) => {
 };
 
 export function BarChart({ data }) {
+  const locale = useCurrentLocale();
+
   const formattedData = data.result.map((item) => ({
     ...item,
     meta: data.meta,
@@ -147,6 +152,7 @@ export function BarChart({ data }) {
                   minimumFractionDigits: 0,
                   currency: data.summary.currency,
                   amount: value,
+                  locale,
                 });
               }
               return 0;

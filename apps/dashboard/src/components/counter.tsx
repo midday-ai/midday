@@ -1,5 +1,6 @@
 "use client";
 
+import { useCurrentLocale } from "@/locales/client";
 import { useEffect, useRef, useState } from "react";
 
 const max = 20000;
@@ -79,9 +80,9 @@ const InnerCounter = ({ currency, pad, value, locale }) => {
 export function Counter({
   value: initalValue,
   currency,
-  locale,
   lastPeriodAmount = 0,
 }) {
+  const locale = useCurrentLocale();
   const hasRunned = useRef(false);
   const [value, setValue] = useState(initalValue - lastPeriodAmount);
 

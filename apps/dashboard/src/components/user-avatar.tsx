@@ -30,7 +30,7 @@ export function UserAvatar({ userId, avatarUrl, fullName }) {
     });
 
     if (url) {
-      action.execute({ avatar_url: url, revalidatePath: "/profile" });
+      action.execute({ avatar_url: url });
     }
   };
 

@@ -96,8 +96,16 @@ export async function updateTransaction(
 }
 
 export async function updateUser(supabase: Client, data: any) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-  return supabase.from("users").update(data).eq("id", userData?.id).select();
+  const {
+    data: { session },
+  } = await getSession(supabase);
+
+  return supabase
+    .from("users")
+    .update(data)
+    .eq("id", session?.user?.id)
+    .select()
+    .single();
 }
 
 export async function deleteUser(supabase: Client) {

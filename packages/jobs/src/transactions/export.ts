@@ -19,13 +19,14 @@ client.defineJob({
       from: z.coerce.date(),
       to: z.coerce.date(),
       teamId: z.string(),
+      locale: z.string(),
     }),
   }),
   integrations: { supabase },
   run: async (payload, io) => {
     const client = await io.supabase.client;
-    const locale = "en-us";
-    const { from, to, teamId } = payload;
+
+    const { from, to, teamId, locale } = payload;
 
     const filePath = `export-${format(new Date(from), "y-M-d")}-${format(
       new Date(to),
