@@ -78,7 +78,7 @@ function Row({ id, name, logo, onSelect }) {
         </div>
       </div>
       <Button variant="outline" onClick={handleOnSelect}>
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue"}
+        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
       </Button>
     </div>
   );
