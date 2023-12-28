@@ -2,16 +2,17 @@
 
 import { deleteBankAccount } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { revalidatePath as revalidatePathFunc } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
 import { deleteBankAccountSchema } from "./schema";
 
 export const deleteBankAccountAction = action(
   deleteBankAccountSchema,
-  async ({ revalidatePath, id }) => {
+  async ({ id }) => {
     const supabase = createClient();
-    await deleteBankAccount(supabase, id);
+    const { data } = await deleteBankAccount(supabase, id);
 
-    revalidatePathFunc(revalidatePath);
-  },
+    revalidateTag(`bank_accounts_${data.team_id}`);
+    revalidateTag(`bank_connections_${data.team_id}`);
+  }
 );

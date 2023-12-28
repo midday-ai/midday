@@ -1,6 +1,7 @@
 "use client";
 
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
+import { FormatAmount } from "@/components/format-amount";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
@@ -22,6 +23,7 @@ import {
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
+import { cn } from "@midday/ui/utils";
 import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
@@ -57,7 +59,6 @@ function RowsSkeleton() {
 
 export function SelectAccountModal({ countryCode }) {
   const { toast } = useToast();
-
   const searchParams = useSearchParams();
   const router = useRouter();
   const [accounts, setAccounts] = useState([]);
@@ -74,6 +75,7 @@ export function SelectAccountModal({ countryCode }) {
         title: "Something went wrong pleaase try again.",
       });
     },
+    onSuccess: () => router.push(pathname),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -92,15 +94,11 @@ export function SelectAccountModal({ countryCode }) {
         bic: account.bic,
         bban: account.bban,
         currency: account.currency,
-        details: account.details,
         iban: account.iban,
         owner_name: capitalCase(account.ownerName),
-        bank: {
-          agreement_id: account.agreement_id,
-          institution_id: account.institution_id,
-          name: account.bank.name,
-          logo_url: account.bank.logo,
-        },
+        institution_id: account.institution_id,
+        bank_name: account.bank.name,
+        logo_url: account.bank.logo,
       }));
 
     action.execute(accountsWithDetails);
@@ -149,11 +147,6 @@ export function SelectAccountModal({ countryCode }) {
                   control={form.control}
                   name="accounts"
                   render={({ field }) => {
-                    const formattedAmount = new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: account.balances.available.currency,
-                    }).format(account.balances.available.amount);
-
                     return (
                       <FormItem
                         key={account.id}
@@ -171,7 +164,11 @@ export function SelectAccountModal({ countryCode }) {
                               {account.iban}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {account.bank.name} - {formattedAmount}
+                              {account.bank.name} -{" "}
+                              <FormatAmount
+                                currency={account.balances.available.currency}
+                                amount={account.balances.available.amount}
+                              />
                             </p>
                           </div>
                         </FormLabel>
@@ -200,12 +197,12 @@ export function SelectAccountModal({ countryCode }) {
 
               <div className="pt-4">
                 <Button
-                  className="w-full"
+                  className={cn("w-full")}
                   type="submit"
-                  disabled={form.formState.isSubmitting}
+                  disabled={action.status === "executing"}
                 >
-                  {form.formState.isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                  {action.status === "executing" ? (
+                    <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
                   ) : (
                     "Save"
                   )}

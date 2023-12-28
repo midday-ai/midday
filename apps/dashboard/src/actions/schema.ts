@@ -18,7 +18,6 @@ export type UpdateTeamFormValues = z.infer<typeof updateTeamSchema>;
 
 export const deleteBankAccountSchema = z.object({
   id: z.string().uuid(),
-  revalidatePath: z.string(),
 });
 
 export type DeleteBankAccountFormValues = z.infer<
@@ -103,7 +102,17 @@ export const voteSchema = z.object({
   id: z.string(),
 });
 
-export const connectBankAccountSchema = z.object({
-  accountId: z.string(),
-  id: z.string(),
+const bankAccount = z.object({
+  account_id: z.string(),
+  bank_name: z.string(),
+  currency: z.string(),
+  name: z.string(),
+  owner_name: z.string(),
+  institution_id: z.string(),
+  logo_url: z.string().optional(),
+  bban: z.string().optional(),
+  bic: z.string().optional(),
+  iban: z.string().optional(),
 });
+
+export const connectBankAccountSchema = z.array(bankAccount);

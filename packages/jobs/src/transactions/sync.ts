@@ -1,8 +1,7 @@
-import { getTransactions } from "@midday/gocardless";
+import { getTransactions, transformTransactions } from "@midday/gocardless";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-import { transformTransactions } from "../utils";
 import { scheduler } from "./scheduler";
 
 client.defineJob({
@@ -29,7 +28,6 @@ client.defineJob({
       .eq("id", ctx.source.id);
 
     revalidateTag(`bank_accounts_${teamId}`);
-    await io.logger.info(`bank_accounts_${teamId}`);
 
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
@@ -65,13 +63,6 @@ client.defineJob({
         payload: {
           teamId,
           transactions: transactionsData,
-        },
-      });
-
-      await io.sendEvent("💅 Enrich Transactions", {
-        name: Events.TRANSACTIONS_ENCRICHMENT,
-        payload: {
-          teamId,
         },
       });
     }

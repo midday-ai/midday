@@ -6,8 +6,11 @@ import { remove } from "../utils/storage";
 export async function createBankAccounts(supabase: Client, accounts) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
   // Get first account to create a bank connection
+  const account = accounts.at(0);
   const bankConnection = await createBankConnection(supabase, {
-    ...accounts.at(0).bank,
+    institution_id: account.institution_id,
+    name: account.bank_name,
+    logo_url: account.logo_url,
     team_id: userData?.team_id,
   });
 
@@ -30,11 +33,22 @@ export async function createBankAccounts(supabase: Client, accounts) {
     .select();
 }
 
-export async function createBankConnection(supabase: Client, bank: any) {
+type CreateBankConnectionPayload = {
+  institution_id: string;
+  team_id: string;
+  name: string;
+  logo_url: string;
+  provider?: "gocardless" | "plaid";
+};
+
+export async function createBankConnection(
+  supabase: Client,
+  data: CreateBankConnectionPayload
+) {
   return await supabase
     .from("bank_connections")
     .insert({
-      ...bank,
+      ...data,
       expires_at: addDays(new Date(), 180).toDateString(),
       provider: "gocardless",
     })
@@ -133,7 +147,12 @@ export async function deleteTeam(supabase: Client) {
 }
 
 export async function deleteBankAccount(supabase: Client, id: string) {
-  return await supabase.from("bank_accounts").delete().eq("id", id);
+  return await supabase
+    .from("bank_accounts")
+    .delete()
+    .eq("id", id)
+    .select()
+    .single();
 }
 
 export async function updateSimilarTransactions(supabase: Client, id: string) {

@@ -1,4 +1,3 @@
-export * from "./encrichment";
 export * from "./export";
 export * from "./notification";
 export * from "./scheduler";

@@ -1,5 +1,4 @@
 export const Jobs = {
-  TRANSACTIONS_ENCRICHMENT: "transactions-encrichment",
   TRANSACTIONS_EXPORT: "transactions-export",
   TRANSACTIONS_INITIAL_SYNC: "transactions-initial-sync",
   TRANSACTIONS_NOTIFICATION: "transactions-notification",
@@ -9,7 +8,6 @@ export const Jobs = {
 
 export const Events = {
   TRANSACTIONS_INITIAL_SYNC: "transactions.initial.sync",
-  TRANSACTIONS_ENCRICHMENT: "transactions.encrichment",
   TRANSACTIONS_EXPORT: "transactions.export",
   TRANSACTIONS_NOTIFICATION: "transactions.notification",
 };
