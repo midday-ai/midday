@@ -45,10 +45,22 @@ export function DataTableRow({ collapsed, onSelect, data, selected }) {
         {data.date && format(new Date(data.date), "MMM d")}
       </DataTableCell>
 
-      <DataTableCell className="w-[430px] space-x-2">{data.name}</DataTableCell>
+      <DataTableCell
+        className={cn(
+          "w-[430px] space-x-2",
+          data.category === "income" && "text-[#00C969]"
+        )}
+      >
+        {data.name}
+      </DataTableCell>
 
       <DataTableCell className="w-[200px]">
-        <span className={cn("text-sm", data.amount > 0 && "text-[#00C969]")}>
+        <span
+          className={cn(
+            "text-sm",
+            data.category === "income" && "text-[#00C969]"
+          )}
+        >
           <FormatAmount amount={data.amount} currency={data.currency} />
         </span>
       </DataTableCell>

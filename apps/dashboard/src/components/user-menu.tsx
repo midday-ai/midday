@@ -43,14 +43,14 @@ export async function UserMenu() {
           <DropdownMenuSeparator />
 
           <DropdownMenuGroup>
-            <Link href="/profile">
+            <Link href="/account">
               <DropdownMenuItem>
-                Profile
+                Account
                 <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
               </DropdownMenuItem>
             </Link>
 
-            <Link href="/profile/teams">
+            <Link href="/account/teams">
               <DropdownMenuItem>
                 Teams
                 <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>

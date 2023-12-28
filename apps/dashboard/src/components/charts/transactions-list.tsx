@@ -71,7 +71,7 @@ export async function TransactionsList({ type, disabled }) {
                   className={cn(
                     "text-sm",
                     disabled && "skeleton-box",
-                    transaction?.amount > 0 && "text-[#00C969]"
+                    transaction?.category === "income" && "text-[#00C969]"
                   )}
                 >
                   {transaction.name}
@@ -82,7 +82,7 @@ export async function TransactionsList({ type, disabled }) {
                   className={cn(
                     "text-sm",
                     disabled && "skeleton-box",
-                    transaction?.amount > 0 && "text-[#00C969]"
+                    transaction?.category === "income" && "text-[#00C969]"
                   )}
                 >
                   <FormatAmount

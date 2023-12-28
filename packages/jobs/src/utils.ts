@@ -35,20 +35,25 @@ export async function processPromisesBatch(
   return results;
 }
 
-export const transformTransactions = (transactions, { teamId, accountId }) =>
+export const transformTransactions = (transactions, { teamId, accountId }) => {
   // We want to insert transactions in reversed order so the incremental id in supabase is correct
-  transactions?.reverse().map((data) => ({
-    transaction_id: data.transactionId,
-    reference: data.entryReference,
-    booking_date: data.bookingDate,
-    date: data.valueDate,
-    name: capitalCase(data.additionalInformation),
-    original: data.additionalInformation,
-    method: mapTransactionMethod(data.proprietaryBankTransactionCode),
-    internal_id: `${teamId}_${data.internalTransactionId}`,
-    amount: data.transactionAmount.amount,
-    currency: data.transactionAmount.currency,
-    bank_account_id: accountId,
-    category: data.transactionAmount.amount > 0 ? "income" : null,
-    team_id: teamId,
-  }));
+  return transactions?.reverse().map((data) => {
+    const method = mapTransactionMethod(data.proprietaryBankTransactionCode);
+
+    return {
+      transaction_id: data.transactionId,
+      reference: data.entryReference,
+      booking_date: data.bookingDate,
+      date: data.valueDate,
+      name: capitalCase(data.additionalInformation),
+      original: data.additionalInformation,
+      method,
+      internal_id: `${teamId}_${data.internalTransactionId}`,
+      amount: data.transactionAmount.amount,
+      currency: data.transactionAmount.currency,
+      bank_account_id: accountId,
+      category: data.transactionAmount.amount > 0 ? "income" : null,
+      team_id: teamId,
+    };
+  });
+};

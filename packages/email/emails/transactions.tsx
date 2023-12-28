@@ -25,6 +25,7 @@ type Transaction = {
   amount: number;
   name: string;
   currency: string;
+  category?: string;
 };
 
 interface TransactionsEmailEmailProps {
@@ -47,6 +48,7 @@ const defaultTransactions = [
     amount: 1000,
     currency: "USD",
     name: "H23504959",
+    category: "income",
   },
   {
     id: "3",
@@ -189,7 +191,7 @@ export const TransactionsEmail = ({
                         href={`${baseAppUrl}/transactions?id=${transaction.id}`}
                         className={cn(
                           "text-[#121212]",
-                          transaction.amount > 0 && "text-[#00C969]"
+                          transaction?.category === "income" && "text-[#00C969]"
                         )}
                       >
                         <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
@@ -201,7 +203,7 @@ export const TransactionsEmail = ({
                       <Text
                         className={cn(
                           "text-[14px] m-0 p-0 mt-1 pb-1",
-                          transaction.amount > 0 && "text-[#00C969]"
+                          data?.category === "income" && "text-[#00C969]"
                         )}
                       >
                         {Intl.NumberFormat(locale, {

@@ -150,7 +150,9 @@ export async function getSpendingQuery(
   }
 
   const { data, count } = await query.range(0, 10000000);
-  const totalAmount = data?.reduce((amount, item) => item.amount + amount, 0);
+  const totalAmount = data
+    ?.filter((item) => item.category !== "transfer")
+    ?.reduce((amount, item) => item.amount + amount, 0);
 
   const combinedValues = {};
 
@@ -182,7 +184,6 @@ export async function getSpendingQuery(
           amount: +Math.abs(amount).toFixed(2),
         };
       })
-      .filter((item) => item.category !== "transfer")
       .sort((a, b) => b.amount - a.amount),
   };
 }
@@ -261,7 +262,6 @@ export async function getTransactionsQuery(
   if (status?.includes("fullfilled") || attachments === "include") {
     query.select(`
       *,
-      currency,
       assigned:assigned_id(*),
       attachments!inner(id,size,name)
     `);
@@ -272,7 +272,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      enrichment:transaction_enrichments!inner(category),
+      enrichment:transaction_enrichments(category),
       attachments(*)
     `
     );
@@ -281,8 +281,9 @@ export async function getTransactionsQuery(
       .map((category) => `category.eq.${category}`)
       .join(",");
 
-    // .filter(matchCategory) TODO: Filter on user assigned category
-    query.or(matchCategory, { referencedTable: "enrichment" });
+    query
+      .or(matchCategory)
+      .or(matchCategory, { referencedTable: "enrichment" });
   }
 
   if (categories?.includes("uncategorized")) {
@@ -291,10 +292,12 @@ export async function getTransactionsQuery(
 
   if (type === "expense") {
     query.lt("amount", 0);
+    query.neq("category", "transfer");
   }
 
   if (type === "income") {
     query.gt("amount", 0);
+    query.neq("category", "transfer");
   }
 
   const { data, count } = await query.range(from, to).throwOnError();
@@ -349,7 +352,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
 
   return {
     ...data,
-    category: data?.enrichment?.category || "uncategorized",
+    category: data?.category || data?.enrichment?.category || "uncategorized",
   };
 }
 
@@ -402,7 +405,8 @@ export async function getMetricsQuery(
     .order("order", { ascending: false })
     .limit(1000000)
     .gte("date", previousFromDate.toDateString())
-    .lte("date", to);
+    .lte("date", to)
+    .neq("category", "transfer");
 
   if (type === "income") {
     query.gt("amount", 0);

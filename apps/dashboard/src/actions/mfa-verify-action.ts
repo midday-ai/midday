@@ -16,7 +16,7 @@ export const mfaVerifyAction = action(
       code,
     });
 
-    revalidatePath("/settings/security");
+    revalidatePath("/account/security");
 
     return data;
   }

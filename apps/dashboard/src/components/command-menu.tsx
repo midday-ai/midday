@@ -69,8 +69,8 @@ const navigation = [
 
 const settings = [
   {
-    name: "Profile",
-    path: "/profile",
+    name: "Account",
+    path: "/account",
     icon: Icons.Person,
   },
   {
@@ -80,7 +80,7 @@ const settings = [
   },
   {
     name: "Security",
-    path: "/settings/security",
+    path: "/account/security",
     icon: Icons.Security,
   },
   {
@@ -126,7 +126,7 @@ export function CommandMenu({ ...props }: DialogProps) {
 
   useHotkeys("ctrl+t", (evt) => {
     evt.preventDefault();
-    router.push("/profile/teams");
+    router.push("/account/teams");
   });
 
   useHotkeys("ctrl+a", (evt) => {
@@ -136,12 +136,12 @@ export function CommandMenu({ ...props }: DialogProps) {
 
   useHotkeys("ctrl+meta+p", (evt) => {
     evt.preventDefault();
-    router.push("/profile");
+    router.push("/account");
   });
 
   useHotkeys("shift+meta+p", (evt) => {
     evt.preventDefault();
-    router.push("/profile");
+    router.push("/account");
   });
 
   useHotkeys("ctrl+meta+q", (evt) => {

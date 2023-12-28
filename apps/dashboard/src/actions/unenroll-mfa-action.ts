@@ -18,7 +18,7 @@ export const unenrollMfaAction = action(
       throw Error(error.message);
     }
 
-    revalidatePath("/settings/security");
+    revalidatePath("/account/security");
 
     return data;
   }

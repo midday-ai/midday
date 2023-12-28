@@ -7,10 +7,10 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Profile Settings | Midday",
+  title: "Account Settings | Midday",
 };
 
-export default async function Profile() {
+export default async function Account() {
   const { data: userData } = await getUser();
 
   return (
