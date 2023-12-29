@@ -201,7 +201,7 @@ export const getTeams = async () => {
     ["teams", userId],
     {
       tags: [`teams_${userId}`],
-      revalidate: 10,
+      revalidate: 180,
     }
   )();
 };

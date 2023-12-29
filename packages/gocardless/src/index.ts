@@ -320,7 +320,6 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
     return {
       transaction_id: data.transactionId,
       reference: data.entryReference,
-      booking_date: data.bookingDate,
       date: data.valueDate,
       name: capitalCase(data.additionalInformation),
       original: data.additionalInformation,

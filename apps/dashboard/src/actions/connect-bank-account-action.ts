@@ -1,7 +1,7 @@
 "use server";
 
 import { getTransactions, transformTransactions } from "@midday/gocardless";
-import { Events, scheduler } from "@midday/jobs";
+import { scheduler } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -18,7 +18,7 @@ export const connectBankAccountAction = action(
 
     const { data } = await createBankAccounts(supabase, accounts);
 
-    const promisses = data?.map(async (account) => {
+    const promises = data?.map(async (account) => {
       // Fetch transactions for each account
       const { transactions } = await getTransactions(account.account_id);
 
@@ -31,15 +31,12 @@ export const connectBankAccountAction = action(
         .eq("id", account.id);
 
       // Create transactions
-      await supabase
-        .from("transactions")
-        .insert(
-          transformTransactions(transactions?.booked, {
-            accountId: account.id, // Bank account row id
-            teamId,
-          })
-        )
-        .select();
+      await supabase.from("transactions").insert(
+        transformTransactions(transactions?.booked, {
+          accountId: account.id, // Bank account row id
+          teamId,
+        })
+      );
 
       // Schedule sync for each account
       await scheduler.register(account.id, {
@@ -52,7 +49,7 @@ export const connectBankAccountAction = action(
       return;
     });
 
-    await Promise.all(promisses);
+    await Promise.all(promises);
 
     revalidateTag(`bank_connections_${teamId}`);
     revalidateTag(`transactions_${teamId}`);

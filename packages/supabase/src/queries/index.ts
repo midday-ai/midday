@@ -135,8 +135,7 @@ export async function getSpendingQuery(
       `
       currency,
       category,
-      amount,
-      enrichment:enrichment_id(category)
+      amount
     `
     )
     .order("order", { ascending: false })
@@ -157,9 +156,9 @@ export async function getSpendingQuery(
   const combinedValues = {};
 
   for (const item of data) {
-    const { category, amount, currency, enrichment } = item;
+    const { category, amount, currency } = item;
 
-    const key = category || enrichment?.category || "uncategorized";
+    const key = category || "uncategorized";
 
     if (combinedValues[key]) {
       combinedValues[key].amount += amount;
@@ -175,11 +174,9 @@ export async function getSpendingQuery(
       currency: data?.at(0)?.currency,
     },
     data: Object.entries(combinedValues)
-      .map(([category, { amount, currency, enrichment }]) => {
+      .map(([category, { amount, currency }]) => {
         return {
-          category: !category
-            ? "uncategorized"
-            : category || enrichment?.category,
+          category: category || "uncategorized",
           currency,
           amount: +Math.abs(amount).toFixed(2),
         };
@@ -229,7 +226,6 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      enrichment:transaction_enrichments(category),
       attachments(*)
     `,
       { count: "exact" }
@@ -272,22 +268,20 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      enrichment:transaction_enrichments!inner(category),
       attachments(*)
     `
     );
 
     const matchCategory = categories
-      .map((category) => `category.eq.${category}`)
+      .map((category) => {
+        if (category === "uncategorized") {
+          return "category.is.null";
+        }
+        return `category.eq.${category}`;
+      })
       .join(",");
 
-    query
-      // .or(matchCategory)
-      .or(matchCategory, { referencedTable: "enrichment" });
-  }
-
-  if (categories?.includes("uncategorized")) {
-    query.not("category", "is", null);
+    query.or(matchCategory);
   }
 
   if (type === "expense") {
@@ -296,8 +290,7 @@ export async function getTransactionsQuery(
   }
 
   if (type === "income") {
-    query.gt("amount", 0);
-    query.neq("category", "transfer");
+    query.eq("category", "income");
   }
 
   const { data, count } = await query.range(from, to).throwOnError();
@@ -327,10 +320,7 @@ export async function getTransactionsQuery(
     },
     data: data?.map((transaction) => ({
       ...transaction,
-      category:
-        transaction?.category ||
-        transaction?.enrichment?.category ||
-        "uncategorized",
+      category: transaction?.category || "uncategorized",
     })),
   };
 }
@@ -342,7 +332,6 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       `
       *,
       assigned:assigned_id(*),
-      enrichment:enrichment_id(category),
       attachments(*)
     `
     )
@@ -352,7 +341,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
 
   return {
     ...data,
-    category: data?.category || data?.enrichment?.category || "uncategorized",
+    category: data?.category || "uncategorized",
   };
 }
 
@@ -409,7 +398,7 @@ export async function getMetricsQuery(
     .neq("category", "transfer");
 
   if (type === "income") {
-    query.gt("amount", 0);
+    query.eq("category", "income");
   }
 
   const { data } = await query.throwOnError();
