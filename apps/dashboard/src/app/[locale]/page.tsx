@@ -4,10 +4,7 @@ import { Spending } from "@/components/charts/spending";
 import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Cookies } from "@/utils/constants";
-import {
-  getBankConnectionsByTeamId,
-  getUser,
-} from "@midday/supabase/cached-queries";
+import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
 import { startOfMonth, startOfYear } from "date-fns";
 import { Metadata } from "next";
@@ -25,7 +22,6 @@ const defaultValue = {
 };
 
 export default async function Overview({ searchParams }) {
-  const { data: userData } = await getUser();
   const { data } = await getBankConnectionsByTeamId();
   const chartPeriod = cookies().has(Cookies.ChartPeriod)
     ? JSON.parse(cookies().get(Cookies.ChartPeriod)?.value)

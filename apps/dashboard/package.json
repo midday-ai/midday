@@ -23,6 +23,7 @@
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.22.0",
     "@trigger.dev/nextjs": "^2.3.8",
+    "@uidotdev/usehooks": "^2.4.1",
     "@vercel/edge-config": "^0.4.1",
     "@vercel/speed-insights": "^1.0.2",
     "@zip.js/zip.js": "2.7.32",
@@ -44,6 +45,7 @@
     "recharts": "^2.10.3",
     "sharp": "^0.33.1",
     "tus-js-client": "^4.0.1",
+    "use-long-press": "^3.2.0",
     "zod": "^3.22.4",
     "zustand": "^4.4.7"
   },

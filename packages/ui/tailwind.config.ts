@@ -54,6 +54,14 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        jiggle: {
+          "0%": {
+            transform: "rotate(-4deg)",
+          },
+          "50%": {
+            transform: "rotate(4deg)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

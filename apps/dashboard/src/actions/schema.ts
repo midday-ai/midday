@@ -131,3 +131,10 @@ export const updateTransactionSchema = z.object({
 export const updateSimilarTransactionsSchema = z.object({
   id: z.string(),
 });
+
+export const updaterMenuSchema = z.array(
+  z.object({
+    path: z.string(),
+    name: z.string(),
+  })
+);

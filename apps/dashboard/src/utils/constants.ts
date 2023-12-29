@@ -5,4 +5,5 @@ export const Cookies = {
   ChartPeriod: "chart-period",
   TransactionsPeriod: "transactions-period",
   MfaSetupVisited: "mfa-setup-visited",
+  MenuConfig: "menu-config",
 };
