@@ -22,12 +22,12 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: 📤 Pull Vercel Environment Information
-        run: bun vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information
-        run: bun vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
-        run: bun vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: |
-          bun vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bun vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` app.midday.ai
+          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` app.midday.ai
