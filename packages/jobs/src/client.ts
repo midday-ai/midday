@@ -3,7 +3,7 @@ import { TriggerClient } from "@trigger.dev/sdk";
 import { Supabase } from "@trigger.dev/supabase";
 
 export const client = new TriggerClient({
-  id: "midday-CpkS",
+  id: "midday-G6Yq",
   apiKey: process.env.TRIGGER_API_KEY,
   apiUrl: process.env.TRIGGER_API_URL,
 });
