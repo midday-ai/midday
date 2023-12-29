@@ -11,8 +11,9 @@ import { Events, Jobs } from "../constants";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_EXPORT,
-  name: "🗄️ Transactions - Export",
+  name: "Transactions - Export",
   version: "1.0.2",
+  enabled: false,
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_EXPORT,
     schema: z.object({

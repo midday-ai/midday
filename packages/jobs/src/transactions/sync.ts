@@ -6,10 +6,11 @@ import { scheduler } from "./scheduler";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC,
-  name: "🔄 Transactions - Latest Transactions",
+  name: "Transactions - Sync Transactions",
   version: "1.0.2",
   trigger: scheduler,
   integrations: { supabase },
+  enabled: false,
   run: async (_, io, ctx) => {
     const { data } = await io.supabase.client
       .from("bank_accounts")
