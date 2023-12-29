@@ -1,6 +1,7 @@
 "use client";
 
 import { signOutAction } from "@/actions/sign-out-action";
+import { useMenuStore } from "@/store/menu";
 import { Button } from "@midday/ui/button";
 import {
   CommandDialog,
@@ -100,6 +101,7 @@ export function CommandMenu({ ...props }: DialogProps) {
   const pathname = usePathname();
   const { setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const { toggleCustomizing } = useMenuStore();
 
   const handleSignOut = async () => {
     signOutAction();
@@ -225,6 +227,10 @@ export function CommandMenu({ ...props }: DialogProps) {
           <CommandSeparator />
 
           <CommandGroup heading="Appearance">
+            <CommandItem onSelect={() => runCommand(() => toggleCustomizing())}>
+              <Icons.DashboardCustomize className="mr-2 h-4 w-4" />
+              Customize menu
+            </CommandItem>
             <CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
               <SunIcon className="mr-2 h-4 w-4" />
               Light

@@ -1,6 +1,7 @@
 "use client";
 
 import { updateMenuAction } from "@/actions/update-menu-action";
+import { useMenuStore } from "@/store/menu";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
@@ -63,12 +64,20 @@ const defaultItems = [
   },
 ];
 
-const Item = ({ item, isActive, isCustomizing, onRemove, disableRemove }) => {
+const Item = ({
+  item,
+  isActive,
+  isCustomizing,
+  onRemove,
+  disableRemove,
+  onDragEnd,
+}) => {
   const y = useMotionValue(0);
   const Icon = icons[item.path];
 
   return (
     <Reorder.Item
+      onDragEnd={onDragEnd}
       key={item.path}
       value={item}
       id={item.path}
@@ -112,27 +121,49 @@ const Item = ({ item, isActive, isCustomizing, onRemove, disableRemove }) => {
   );
 };
 
+const listVariant = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+    },
+  },
+};
+
+const itemVariant = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1 },
+};
+
 export function MainMenu({ initialItems }) {
-  const [isCustomizing, setCustomizing] = useState(false);
   const [items, setItems] = useState(initialItems ?? defaultItems);
+  const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
   const part = pathname?.split("/")[1];
   const updateMenu = useAction(updateMenuAction);
 
+  const hiddenItems = defaultItems.filter(
+    (item) => !items.some((i) => i.path === item.path)
+  );
+
   const onReorder = (items) => {
     setItems(items);
-    // TODO: debounce?
+  };
+
+  const onDragEnd = () => {
     updateMenu.execute(items);
   };
 
   const onRemove = (path: string) => {
     setItems((prevItems) => prevItems.filter((item) => item.path !== path));
-
     updateMenu.execute(items.filter((item) => item.path !== path));
+  };
 
-    if (items.length === 2) {
-      setCustomizing(false);
-    }
+  const onAdd = (item) => {
+    const updatedItems = [...items, item];
+    setItems(updatedItems);
+    updateMenu.execute(updatedItems);
   };
 
   const bind = useLongPress(
@@ -149,32 +180,75 @@ export function MainMenu({ initialItems }) {
   });
 
   return (
-    <AnimatePresence>
-      <nav className="mt-6" {...bind()} ref={ref}>
-        <Reorder.Group
-          axis="y"
-          onReorder={onReorder}
-          values={items}
-          className="flex flex-col gap-1.5"
-        >
-          {items.map((item) => {
-            const isActive =
-              (pathname === "/" && item.path === "/") ||
-              (pathname !== "/" && item.path.startsWith(`/${part}`));
+    <div className="mt-6" {...bind()} ref={ref}>
+      <AnimatePresence>
+        <nav>
+          <Reorder.Group
+            axis="y"
+            onReorder={onReorder}
+            values={items}
+            className="flex flex-col gap-1.5"
+          >
+            {items.map((item) => {
+              const isActive =
+                (pathname === "/" && item.path === "/") ||
+                (pathname !== "/" && item.path.startsWith(`/${part}`));
 
-            return (
-              <Item
-                key={item.path}
-                item={item}
-                isActive={isActive}
-                isCustomizing={isCustomizing}
-                onRemove={onRemove}
-                disableRemove={items.length === 1}
-              />
-            );
-          })}
-        </Reorder.Group>
-      </nav>
-    </AnimatePresence>
+              return (
+                <Item
+                  key={item.path}
+                  item={item}
+                  isActive={isActive}
+                  isCustomizing={isCustomizing}
+                  onRemove={onRemove}
+                  disableRemove={items.length === 1}
+                  onDragEnd={onDragEnd}
+                />
+              );
+            })}
+          </Reorder.Group>
+        </nav>
+      </AnimatePresence>
+
+      {hiddenItems.length > 0 && isCustomizing && (
+        <nav className="border-t-[1px] mt-6 pt-6">
+          <motion.ul
+            variants={listVariant}
+            initial="hidden"
+            animate="show"
+            className="flex flex-col gap-1.5"
+          >
+            {hiddenItems.map((item) => {
+              const Icon = icons[item.path];
+
+              return (
+                <motion.li
+                  variants={itemVariant}
+                  key={item.path}
+                  className={cn(
+                    "rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
+                    "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+                    "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
+                  )}
+                >
+                  <div className="relative">
+                    <Button
+                      onClick={() => onAdd(item)}
+                      variant="ghost"
+                      size="icon"
+                      className="absolute -left-4 -top-4 w-4 h-4 p-0 rounded-full bg-border hover:bg-border hover:scale-150 z-10 transition-all"
+                    >
+                      <Icons.Add className="w-3 h-3" />
+                    </Button>
+
+                    <Icon />
+                  </div>
+                </motion.li>
+              );
+            })}
+          </motion.ul>
+        </nav>
+      )}
+    </div>
   );
 }

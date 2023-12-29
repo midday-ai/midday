@@ -29,6 +29,7 @@ import {
   MdOutlineAccountBalanceWallet,
   MdOutlineBrokenImage,
   MdOutlineCategory,
+  MdOutlineDashboardCustomize,
   MdOutlineDescription,
   MdOutlineDifference,
   MdOutlineFileDownload,
@@ -421,4 +422,5 @@ export const Icons = {
   Tracker: MdOutlineTimer,
   WorkInProgress: MdOutlineHandyman,
   Add: MdAdd,
+  DashboardCustomize: MdOutlineDashboardCustomize,
 };
