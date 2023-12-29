@@ -2,6 +2,7 @@ import { Cookies } from "@/utils/constants";
 import { Icons } from "@midday/ui/icons";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { Suspense } from "react";
 import { MainMenu } from "./main-menu";
 import { TeamMenu } from "./team-menu";
 
@@ -21,7 +22,9 @@ export function Sidebar() {
         <MainMenu initialItems={initialItems} />
       </div>
 
-      <TeamMenu />
+      <Suspense>
+        <TeamMenu />
+      </Suspense>
     </aside>
   );
 }
