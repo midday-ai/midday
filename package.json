@@ -27,6 +27,6 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "vercel": "33.0.1"
+    "vercel": "32.5.3"
   }
 }
