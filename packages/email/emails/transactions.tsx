@@ -203,7 +203,7 @@ export const TransactionsEmail = ({
                       <Text
                         className={cn(
                           "text-[14px] m-0 p-0 mt-1 pb-1",
-                          data?.category === "income" && "text-[#00C969]"
+                          transaction?.category === "income" && "text-[#00C969]"
                         )}
                       >
                         {Intl.NumberFormat(locale, {
