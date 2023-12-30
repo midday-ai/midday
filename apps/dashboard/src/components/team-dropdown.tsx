@@ -1,8 +1,8 @@
 "use client";
 
 import { changeTeamAction } from "@/actions/change-team-action";
+import { CreateTeamModal } from "@/components/modals/create-team-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { useAction } from "next-safe-action/hook";
 
 export function TeamDropdown({ selectedTeam, teams }) {
@@ -51,28 +50,9 @@ export function TeamDropdown({ selectedTeam, teams }) {
               <span className="font-medium text-sm">Create team</span>
             </DialogTrigger>
           </DropdownMenuItem>
-          <DialogContent className="max-w-[455px]">
-            <div className="p-4">
-              <DialogHeader>
-                <DialogTitle>Create team</DialogTitle>
-                <DialogDescription>
-                  For example, you can use the name of your company or
-                  department.
-                </DialogDescription>
-              </DialogHeader>
 
-              <div className="mt-6 mb-6">
-                <Input placeholder="Team Name" />
-              </div>
+          <CreateTeamModal />
 
-              <DialogFooter>
-                <div className="space-x-4">
-                  <Button variant="outline">Cancel</Button>
-                  <Button>Continue</Button>
-                </div>
-              </DialogFooter>
-            </div>
-          </DialogContent>
           {teams.map(({ team }) => {
             return (
               <DropdownMenuItem

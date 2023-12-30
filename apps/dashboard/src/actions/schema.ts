@@ -142,3 +142,7 @@ export const updaterMenuSchema = z.array(
 export const changeTeamSchema = z.object({
   teamId: z.string(),
 });
+
+export const createTeamSchema = z.object({
+  name: z.string(),
+});

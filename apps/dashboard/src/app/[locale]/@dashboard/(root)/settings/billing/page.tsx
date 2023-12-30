@@ -2,13 +2,16 @@ import { TeamMembers } from "@/components/team-members";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Members | Midday",
+  title: "Billing | Midday",
 };
 
-export default async function Members() {
+export default async function Billing() {
   return (
     <div className="space-y-12">
-      <TeamMembers />
+      <div>Plan</div>
+      <div>Payment Method</div>
+      <div>Add-Ons</div>
+      <div>Billing Address</div>
     </div>
   );
 }

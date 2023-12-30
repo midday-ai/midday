@@ -237,3 +237,45 @@ export async function deleteAttachment(supabase: Client, id: string) {
 
   return data;
 }
+
+type CreateTeamParams = {
+  name: string;
+};
+
+export async function createTeam(supabase: Client, params: CreateTeamParams) {
+  const {
+    data: { session },
+  } = await getSession(supabase);
+
+  if (!session) {
+    return;
+  }
+
+  const { data: teamData } = await supabase
+    .from("teams")
+    .insert({
+      name: params.name,
+    })
+    .select()
+    .single();
+
+  const { data: userData } = await supabase
+    .from("users_on_team")
+    .insert({
+      user_id: session?.user.id,
+      team_id: teamData?.id,
+      role: "admin",
+    })
+    .select()
+    .single();
+
+  console.log({
+    ...teamData,
+    ...userData,
+  });
+
+  return {
+    ...teamData,
+    ...userData,
+  };
+}

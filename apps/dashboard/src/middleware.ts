@@ -18,7 +18,7 @@ export async function middleware(request: NextRequest) {
   const { data } = await supabase.auth.getSession();
 
   // Not authenticated
-  if (!data.session && request.nextUrl.pathname !== "/") {
+  if (!data?.session && request.nextUrl.pathname !== "/") {
     const encodedSearchParams = `${request.nextUrl.pathname.substring(1)}${
       request.nextUrl.search
     }`;
@@ -30,8 +30,8 @@ export async function middleware(request: NextRequest) {
 
   // Check if in beta list
   if (
-    data.session &&
-    !(await get("beta"))?.includes(data.session.user.id) &&
+    data?.session &&
+    !(await get("beta"))?.includes(data?.session.user.id) &&
     request.nextUrl.pathname !== "/closed"
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
