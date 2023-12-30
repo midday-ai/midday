@@ -22,6 +22,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.22.0",
+    "@tanstack/react-table": "^8.11.2",
     "@trigger.dev/nextjs": "^2.3.8",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/edge-config": "^0.4.1",

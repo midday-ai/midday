@@ -69,19 +69,6 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   return getUserQuery(supabase, session?.user?.id);
 }
 
-export async function getMembersByTeamId(supabase: Client, teamId: string) {
-  return supabase
-    .from("members")
-    .select(
-      `
-      *,
-      team:teams(*)
-    `
-    )
-    .eq("team_id", teamId)
-    .throwOnError();
-}
-
 export async function getBankConnectionsByTeamIdQuery(
   supabase: Client,
   teamId: string
@@ -110,7 +97,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
     .select(
       `
       id,
-      user:users(id,full_name,avatar_url)
+      user:users(id,full_name,avatar_url,email)
     `
     )
     .eq("team_id", teamId)

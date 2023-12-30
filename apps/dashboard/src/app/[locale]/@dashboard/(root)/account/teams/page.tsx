@@ -1,3 +1,5 @@
+import { TeamsTable } from "@/components/tables/teams/table";
+import { getTeams } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -5,5 +7,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Teams() {
-  return <div className="space-y-12"></div>;
+  const { data } = await getTeams();
+
+  return (
+    <div className="space-y-12">
+      <TeamsTable data={data} />
+    </div>
+  );
 }

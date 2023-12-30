@@ -269,11 +269,6 @@ export async function createTeam(supabase: Client, params: CreateTeamParams) {
     .select()
     .single();
 
-  console.log({
-    ...teamData,
-    ...userData,
-  });
-
   return {
     ...teamData,
     ...userData,

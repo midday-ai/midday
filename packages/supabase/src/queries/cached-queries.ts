@@ -113,7 +113,7 @@ export const getTeamMembers = async () => {
     },
     ["team_members", teamId],
     {
-      tags: [`bank_members_${teamId}`],
+      tags: [`team_members${teamId}`],
       revalidate: 180,
     }
   )(teamId);

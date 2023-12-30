@@ -3,15 +3,7 @@
 import { changeTeamAction } from "@/actions/change-team-action";
 import { CreateTeamModal } from "@/components/modals/create-team-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@midday/ui/dialog";
+import { Dialog, DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
