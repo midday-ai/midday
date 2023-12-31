@@ -76,7 +76,7 @@ const settings = [
   },
   {
     name: "Team",
-    path: "/settings",
+    path: "/account/teams",
     icon: Icons.Peolple,
   },
   {

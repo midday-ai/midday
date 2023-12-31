@@ -1,6 +1,8 @@
 "use client";
 
+import { changeTeamAction } from "@/actions/change-team-action";
 import { CreateTeamModal } from "@/components/modals/create-team-modal";
+import { useI18n } from "@/locales/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -35,6 +37,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { useAction } from "next-safe-action/hook";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
 export type Payment = {
@@ -47,7 +51,10 @@ export type Payment = {
 export const columns: ColumnDef<Payment>[] = [
   {
     id: "team",
+    accessorKey: "team.name",
     cell: ({ row }) => {
+      const t = useI18n();
+
       return (
         <div>
           <div className="flex items-center space-x-4">
@@ -64,7 +71,7 @@ export const columns: ColumnDef<Payment>[] = [
                 {row.original.team.name}
               </span>
               <span className="text-sm text-[#606060]">
-                {row.original.role}
+                {t(`roles.${row.original.role}`)}
               </span>
             </div>
           </div>
@@ -75,13 +82,34 @@ export const columns: ColumnDef<Payment>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original;
+      const router = useRouter();
+      const manageTeam = useAction(changeTeamAction, {
+        onSuccess: () => router.push("/settings"),
+      });
+
+      const viewTeam = useAction(changeTeamAction, {
+        onSuccess: () => router.push("/"),
+      });
 
       return (
         <div className="flex justify-end">
           <div className="flex space-x-3 items-center">
-            <Button variant="outline">View</Button>
-            <Button variant="outline">Manage</Button>
+            <Button
+              variant="outline"
+              onClick={() => viewTeam.execute({ teamId: row.original.team.id })}
+            >
+              View
+            </Button>
+            {row.original.role === "admin" && (
+              <Button
+                variant="outline"
+                onClick={() =>
+                  manageTeam.execute({ teamId: row.original.team.id })
+                }
+              >
+                Manage
+              </Button>
+            )}
           </div>
         </div>
       );
@@ -123,9 +151,9 @@ export function TeamsTable({ data }) {
         <div className="flex items-center pb-4 space-x-4">
           <Input
             placeholder="Search..."
-            value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+            value={(table.getColumn("team")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
-              table.getColumn("email")?.setFilterValue(event.target.value)
+              table.getColumn("team")?.setFilterValue(event.target.value)
             }
           />
           <DialogTrigger asChild>
@@ -140,6 +168,7 @@ export function TeamsTable({ data }) {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-transparent"
                 >
                   {row.getAllCells().map((cell) => (
                     <TableCell

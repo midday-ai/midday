@@ -202,7 +202,7 @@ export function MembersTable({ data }) {
                   <TableHead
                     key={header.id}
                     className={cn(
-                      "border-r-[0px] py-4",
+                      "border-r-[0px] py-4 hover:bg-transparent",
                       header.column.columnDef?.meta?.className
                     )}
                   >
@@ -224,6 +224,7 @@ export function MembersTable({ data }) {
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
+                className="hover:bg-transparent"
               >
                 {row.getAllCells().map((cell) => (
                   <TableCell
