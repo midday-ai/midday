@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -68,6 +69,8 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     id: "member",
+    accessorKey: "user.full_name",
+    header: () => "Select all",
     cell: ({ row }) => {
       return (
         <div>
@@ -96,22 +99,25 @@ export const columns: ColumnDef<Payment>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original;
+      const t = useI18n();
 
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            <span className="text-sm text-[#606060]">Owner</span>
+            <span className="text-sm text-[#606060]">
+              {t(`roles.${row.original.role}`)}
+            </span>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            {row.original.role === "admin" && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <span className="sr-only">Open menu</span>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {/* <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem
                   onClick={() => navigator.clipboard.writeText(payment.id)}
                 >
@@ -119,9 +125,10 @@ export const columns: ColumnDef<Payment>[] = [
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>View customer</DropdownMenuItem>
-                <DropdownMenuItem>View payment details</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenuItem>View payment details</DropdownMenuItem> */}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       );
@@ -161,16 +168,17 @@ export function MembersTable({ data }) {
     <div className="w-full">
       <div className="flex items-center pb-4 space-x-4">
         <Input
+          className="flex-1"
           placeholder="Search..."
-          value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("member")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("email")?.setFilterValue(event.target.value)
+            table.getColumn("member")?.setFilterValue(event.target.value)
           }
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline">
-              <span>Roles</span> <ChevronDown className="ml-2 h-4 w-4" />
+              <span>All Roles</span> <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -196,7 +204,7 @@ export function MembersTable({ data }) {
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
+            <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead
@@ -240,7 +248,7 @@ export function MembersTable({ data }) {
               </TableRow>
             ))
           ) : (
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
               <TableCell colSpan={columns.length} className="h-24 text-center">
                 No results.
               </TableCell>

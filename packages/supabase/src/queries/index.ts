@@ -97,6 +97,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
     .select(
       `
       id,
+      role,
       user:users(id,full_name,avatar_url,email)
     `
     )

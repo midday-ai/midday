@@ -150,6 +150,7 @@ export function TeamsTable({ data }) {
       <div className="w-full">
         <div className="flex items-center pb-4 space-x-4">
           <Input
+            className="flex-1"
             placeholder="Search..."
             value={(table.getColumn("team")?.getFilterValue() as string) ?? ""}
             onChange={(event) =>
@@ -157,7 +158,7 @@ export function TeamsTable({ data }) {
             }
           />
           <DialogTrigger asChild>
-            <Button>Create</Button>
+            <Button>Create team</Button>
           </DialogTrigger>
           <CreateTeamModal />
         </div>
@@ -187,7 +188,7 @@ export function TeamsTable({ data }) {
                 </TableRow>
               ))
             ) : (
-              <TableRow>
+              <TableRow className="hover:bg-transparent">
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"

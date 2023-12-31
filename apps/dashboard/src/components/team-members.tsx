@@ -21,7 +21,7 @@ export async function TeamMembers() {
         <MembersTable data={members} />
       </TabsContent>
 
-      <TabsContent value="pending"></TabsContent>
+      <TabsContent value="pending">Pending</TabsContent>
     </Tabs>
   );
 }
