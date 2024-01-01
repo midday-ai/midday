@@ -6,7 +6,7 @@ import { OverviewModal } from "@/components/modals/overview-modal";
 import { Cookies } from "@/utils/constants";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
-import { startOfMonth, startOfYear } from "date-fns";
+import { startOfMonth, subMonths } from "date-fns";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 const defaultValue = {
-  from: startOfYear(startOfMonth(new Date())).toISOString(),
+  from: subMonths(startOfMonth(new Date()), 12).toISOString(),
   to: new Date().toISOString(),
   period: "monthly",
 };
