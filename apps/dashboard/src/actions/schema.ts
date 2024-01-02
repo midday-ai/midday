@@ -161,3 +161,7 @@ export const deleteTeamMemberSchema = z.object({
 export const leaveTeamSchema = z.object({
   teamId: z.string(),
 });
+
+export const deleteTeamSchema = z.object({
+  teamId: z.string(),
+});

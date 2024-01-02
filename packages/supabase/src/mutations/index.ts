@@ -164,9 +164,8 @@ export async function updateUserTeamRole(
     .single();
 }
 
-export async function deleteTeam(supabase: Client) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-  return supabase.from("teams").delete().eq("id", userData?.team_id);
+export async function deleteTeam(supabase: Client, teamId: string) {
+  return supabase.from("teams").delete().eq("id", teamId);
 }
 
 type DeleteTeamMemberParams = {

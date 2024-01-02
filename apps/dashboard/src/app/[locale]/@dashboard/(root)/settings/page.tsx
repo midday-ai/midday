@@ -19,7 +19,7 @@ export default async function Account() {
         logoUrl={userData?.team?.logo_url}
       />
       <TeamName name={userData?.team?.name} />
-      <DeleteTeam name={userData?.team?.name} />
+      <DeleteTeam name={userData?.team?.name} teamId={userData?.team.id} />
     </div>
   );
 }

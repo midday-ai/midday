@@ -21,10 +21,14 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Loader2 } from "lucide-react";
-import { useTransition } from "react";
+import { useAction } from "next-safe-action/hook";
+import { useRouter } from "next/navigation";
 
-export function DeleteTeam() {
-  const [isPending, startTransition] = useTransition();
+export function DeleteTeam({ teamId }) {
+  const router = useRouter();
+  const deleteTeam = useAction(deleteTeamAction, {
+    onSuccess: () => router.push("/"),
+  });
 
   return (
     <Card className="border-destructive">
@@ -58,13 +62,11 @@ export function DeleteTeam() {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => startTransition(() => deleteTeamAction())}
-              >
-                {isPending ? (
+              <AlertDialogAction onClick={() => deleteTeam.execute({ teamId })}>
+                {deleteTeam.status === "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Continue"
+                  "Confirm"
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>

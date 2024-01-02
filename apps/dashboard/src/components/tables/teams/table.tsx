@@ -56,24 +56,22 @@ export const columns: ColumnDef<Payment>[] = [
       const t = useI18n();
 
       return (
-        <div>
-          <div className="flex items-center space-x-4">
-            <Avatar className="rounded-full w-8 h-8">
-              <AvatarImage src={row.original.team?.logo_url} />
-              <AvatarFallback>
-                <span className="text-xs">
-                  {row.original.team.name?.charAt(0)?.toUpperCase()}
-                </span>
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">
-                {row.original.team.name}
+        <div className="flex items-center space-x-4">
+          <Avatar className="rounded-full w-8 h-8">
+            <AvatarImage src={row.original.team?.logo_url} />
+            <AvatarFallback>
+              <span className="text-xs">
+                {row.original.team.name?.charAt(0)?.toUpperCase()}
               </span>
-              <span className="text-sm text-[#606060]">
-                {t(`roles.${row.original.role}`)}
-              </span>
-            </div>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">
+              {row.original.team.name}
+            </span>
+            <span className="text-sm text-[#606060]">
+              {t(`roles.${row.original.role}`)}
+            </span>
           </div>
         </div>
       );
