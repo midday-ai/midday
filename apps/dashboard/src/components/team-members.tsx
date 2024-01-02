@@ -19,7 +19,7 @@ export async function TeamMembers() {
       </TabsList>
 
       <TabsContent value="members">
-        <MembersTable data={data} role={userData.role} />
+        <MembersTable data={data} currentUser={userData} />
       </TabsContent>
 
       <TabsContent value="pending">Pending</TabsContent>

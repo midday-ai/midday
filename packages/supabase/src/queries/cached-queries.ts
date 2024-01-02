@@ -50,7 +50,7 @@ export const getUser = async () => {
     ["user", userId],
     {
       tags: [`user_${userId}`],
-      revalidate: 10,
+      revalidate: 180,
     }
   )(userId);
 };
@@ -134,7 +134,7 @@ export const getTeamMembers = async () => {
     ["team_members", teamId],
     {
       tags: [`team_members_${teamId}`],
-      revalidate: 180,
+      revalidate: 10,
     }
   )(teamId);
 };

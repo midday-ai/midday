@@ -13,8 +13,8 @@ import {
   useMotionValue,
 } from "framer-motion";
 import { useAction } from "next-safe-action/hook";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLongPress } from "use-long-press";
 
@@ -74,50 +74,53 @@ const Item = ({
 }) => {
   const y = useMotionValue(0);
   const Icon = icons[item.path];
+  const router = useRouter();
 
   return (
-    <Reorder.Item
-      onDragEnd={onDragEnd}
-      key={item.path}
-      value={item}
-      id={item.path}
-      style={{ y }}
-      className={cn(
-        "relative rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
-        "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
-        isActive && "bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
-        isCustomizing && "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
-      )}
-    >
-      <motion.div
-        className="relative"
-        initial={{ opacity: 1 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      >
-        {!disableRemove && isCustomizing && (
-          <Button
-            onClick={() => onRemove(item.path)}
-            variant="ghost"
-            size="icon"
-            className="absolute -left-4 -top-4 w-4 h-4 p-0 rounded-full bg-border hover:bg-border hover:scale-150 z-10 transition-all"
-          >
-            <Icons.Remove className="w-3 h-3" />
-          </Button>
+    <button type="button" onClick={() => router.push(item.path)}>
+      <Reorder.Item
+        onDragEnd={onDragEnd}
+        key={item.path}
+        value={item}
+        id={item.path}
+        style={{ y }}
+        className={cn(
+          "relative rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
+          "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+          isActive && "bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+          isCustomizing &&
+            "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
         )}
-
-        <Link
-          href={item.path}
-          className={cn(
-            "flex space-x-3 p-0 items-center",
-            isCustomizing &&
-              "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none"
-          )}
+      >
+        <motion.div
+          className="relative"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <Icon />
-        </Link>
-      </motion.div>
-    </Reorder.Item>
+          {!disableRemove && isCustomizing && (
+            <Button
+              onClick={() => onRemove(item.path)}
+              variant="ghost"
+              size="icon"
+              className="absolute -left-4 -top-4 w-4 h-4 p-0 rounded-full bg-border hover:bg-border hover:scale-150 z-10 transition-all"
+            >
+              <Icons.Remove className="w-3 h-3" />
+            </Button>
+          )}
+
+          <div
+            className={cn(
+              "flex space-x-3 p-0 items-center",
+              isCustomizing &&
+                "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none"
+            )}
+          >
+            <Icon />
+          </div>
+        </motion.div>
+      </Reorder.Item>
+    </button>
   );
 };
 

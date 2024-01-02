@@ -34,7 +34,12 @@ export async function UserMenu() {
         <DropdownMenuContent className="w-[240px]" sideOffset={10} align="end">
           <DropdownMenuLabel>
             <div className="flex justify-between items-center">
-              <span className="truncate">{userData.full_name}</span>
+              <div className="flex flex-col">
+                <span className="truncate">{userData.full_name}</span>
+                <span className="truncate text-xs text-[#606060] font-normal">
+                  {userData.email}
+                </span>
+              </div>
               <div className="border py-0.5 px-3 rounded-full text-[11px] font-normal">
                 Beta
               </div>

@@ -2,6 +2,8 @@
 
 import { changeUserRoleAction } from "@/actions/change-user-role-action";
 import { deleteTeamMemberAction } from "@/actions/delete-team-member-action";
+import { leaveTeamAction } from "@/actions/leave-team-action";
+
 import { useI18n } from "@/locales/client";
 import {
   AlertDialog,
@@ -132,17 +134,29 @@ export const columns: ColumnDef<Payment>[] = [
         },
       });
 
+      const leaveTeam = useAction(leaveTeamAction, {
+        onError: () => {
+          toast({
+            duration: 3500,
+            variant: "error",
+            title:
+              "You cannot leave since you are the only remaining owner of the team. Delete this team instead.",
+          });
+        },
+      });
+
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            {table.options.meta.role === "owner" ? (
+            {table.options.meta.currentUser.role === "owner" &&
+            table.options.meta.totalOwners > 1 ? (
               <Select
                 value={row.original.role}
                 onValueChange={(role) => {
                   changeUserRole.execute({
                     userId: row.original.user.id,
                     teamId: row.original.team_id,
-                    role,
+                    role: table.options.meta.currentUser.role,
                   });
                 }}
               >
@@ -160,7 +174,7 @@ export const columns: ColumnDef<Payment>[] = [
               </span>
             )}
 
-            {table.options.meta.role === "owner" && (
+            {table.options.meta.currentUser.role === "owner" && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
@@ -169,42 +183,90 @@ export const columns: ColumnDef<Payment>[] = [
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <AlertDialog>
-                    <DropdownMenuItem
-                      className="text-destructive"
-                      asDialogTrigger
-                    >
-                      <AlertDialogTrigger>Remove Member</AlertDialogTrigger>
-                    </DropdownMenuItem>
+                  {table.options.meta.currentUser.user.id !==
+                    row.original.user.id && (
+                    <AlertDialog>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        asDialogTrigger
+                      >
+                        <AlertDialogTrigger>Remove Member</AlertDialogTrigger>
+                      </DropdownMenuItem>
 
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          You are about to remove the following Team Member, are
-                          you sure you want to continue?
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          disabled={deleteTeamMember.status === "executing"}
-                          onClick={() =>
-                            deleteTeamMember.execute({
-                              userId: row.original.user.id,
-                              teamId: row.original.team_id,
-                            })
-                          }
-                        >
-                          {deleteTeamMember.status === "executing" ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            "Confirm"
-                          )}
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Remove Team Member
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You are about to remove the following Team Member,
+                            are you sure you want to continue?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            disabled={deleteTeamMember.status === "executing"}
+                            onClick={() =>
+                              deleteTeamMember.execute({
+                                userId: row.original.user.id,
+                                teamId: row.original.team_id,
+                              })
+                            }
+                          >
+                            {deleteTeamMember.status === "executing" ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Confirm"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+
+                  {table.options.meta.currentUser.user.id ===
+                    row.original.user.id && (
+                    <AlertDialog>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        asDialogTrigger
+                      >
+                        <AlertDialogTrigger>Leave Team</AlertDialogTrigger>
+                      </DropdownMenuItem>
+
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Leave Team</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            You are about to leave Holo. In order to regain
+                            access at a later time, a Team Owner must invite
+                            you.
+                            <p className="mt-4">
+                              Are you sure you want to continue?
+                            </p>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            disabled={leaveTeam.status === "executing"}
+                            onClick={() =>
+                              leaveTeam.execute({
+                                teamId: row.original.team_id,
+                              })
+                            }
+                          >
+                            {leaveTeam.status === "executing" ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              "Confirm"
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -218,7 +280,7 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function MembersTable({ data, role }) {
+export function MembersTable({ data, currentUser }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -233,7 +295,8 @@ export function MembersTable({ data, role }) {
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     meta: {
-      role,
+      currentUser,
+      totalOwners: data.filter((member) => member.role === "owner").length,
     },
     state: {
       sorting,

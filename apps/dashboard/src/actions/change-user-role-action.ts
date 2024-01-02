@@ -14,8 +14,7 @@ export const changeUserRoleAction = action(
     const { data: userData } = await getTeamUser();
 
     if (userData.role !== "owner") {
-      // Error
-      return;
+      throw Error("You don't have permission to perform this action");
     }
 
     const { data } = await updateUserTeamRole(supabase, payload);

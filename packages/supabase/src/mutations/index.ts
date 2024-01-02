@@ -141,7 +141,7 @@ export async function updateTeam(supabase: Client, data: any) {
     .select();
 }
 
-type UpdateUserTeamRolePayload = {
+type UpdateUserTeamRoleParams = {
   role: "owner" | "member";
   userId: string;
   teamId: string;
@@ -149,9 +149,9 @@ type UpdateUserTeamRolePayload = {
 
 export async function updateUserTeamRole(
   supabase: Client,
-  payload: UpdateUserTeamRolePayload
+  params: UpdateUserTeamRoleParams
 ) {
-  const { role, userId, teamId } = payload;
+  const { role, userId, teamId } = params;
 
   return supabase
     .from("users_on_team")
@@ -169,20 +169,20 @@ export async function deleteTeam(supabase: Client) {
   return supabase.from("teams").delete().eq("id", userData?.team_id);
 }
 
-type DeleteTeamMemberPayload = {
+type DeleteTeamMemberParams = {
   userId: string;
   teamId: string;
 };
 
 export async function deleteTeamMember(
   supabase: Client,
-  payload: DeleteTeamMemberPayload
+  params: DeleteTeamMemberParams
 ) {
   return supabase
     .from("users_on_team")
     .delete()
-    .eq("user_id", payload.userId)
-    .eq("team_id", payload.teamId)
+    .eq("user_id", params.userId)
+    .eq("team_id", params.teamId)
     .select()
     .single();
 }
@@ -314,4 +314,19 @@ export async function createTeam(supabase: Client, params: CreateTeamParams) {
     ...teamData,
     ...userData,
   };
+}
+
+type LeaveTeamParams = {
+  userId: string;
+  teamId: string;
+};
+
+export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
+  return supabase
+    .from("users_on_team")
+    .delete()
+    .eq("team_id", params.teamId)
+    .eq("user_id", params.userId)
+    .select()
+    .single();
 }
