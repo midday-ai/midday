@@ -13,7 +13,7 @@ export const changeUserRoleAction = action(
     const supabase = createClient();
     const { data: userData } = await getTeamUser();
 
-    if (userData.role !== "admin") {
+    if (userData.role !== "owner") {
       // Error
       return;
     }

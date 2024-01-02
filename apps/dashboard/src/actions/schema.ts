@@ -150,7 +150,7 @@ export const createTeamSchema = z.object({
 export const changeUserRoleSchema = z.object({
   userId: z.string(),
   teamId: z.string(),
-  role: z.enum(["admin", "member"]),
+  role: z.enum(["owner", "member"]),
 });
 
 export const deleteTeamMemberSchema = z.object({

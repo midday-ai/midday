@@ -13,8 +13,6 @@ export const deleteTeamMemberAction = action(
 
     const { data } = await deleteTeamMember(supabase, params);
 
-    console.log(data);
-
     revalidateTag(`team_members_${data.team_id}`);
 
     return data;

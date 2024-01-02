@@ -305,6 +305,13 @@ body {
 }
 
 
+/* Desktop App */
+html.todesktop {
+  user-select: none;
+  -webkit-user-select: none;
+}
 
-
+html.todesktop header {
+  -webkit-app-region: drag;
+}
 

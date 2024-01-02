@@ -118,24 +118,24 @@ export const columns: ColumnDef<Payment>[] = [
       });
 
       const deleteTeamMember = useAction(deleteTeamMemberAction, {
-        // onSuccess: () =>
-        //   toast({
-        //     title: "Team role has been updated.",
-        //     duration: 3500,
-        //   }),
-        // onError: () => {
-        //   toast({
-        //     duration: 3500,
-        //     variant: "error",
-        //     title: "Something went wrong pleaase try again.",
-        //   });
-        // },
+        onSuccess: () =>
+          toast({
+            title: "Team member removed.",
+            duration: 3500,
+          }),
+        onError: () => {
+          toast({
+            duration: 3500,
+            variant: "error",
+            title: "Something went wrong pleaase try again.",
+          });
+        },
       });
 
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            {table.options.meta.role === "admin" ? (
+            {table.options.meta.role === "owner" ? (
               <Select
                 value={row.original.role}
                 onValueChange={(role) => {
@@ -150,7 +150,7 @@ export const columns: ColumnDef<Payment>[] = [
                   <SelectValue placeholder={t(`roles.${row.original.role}`)} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="owner">Owner</SelectItem>
                   <SelectItem value="member">Member</SelectItem>
                 </SelectContent>
               </Select>
@@ -160,7 +160,7 @@ export const columns: ColumnDef<Payment>[] = [
               </span>
             )}
 
-            {table.options.meta.role === "admin" && (
+            {table.options.meta.role === "owner" && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">

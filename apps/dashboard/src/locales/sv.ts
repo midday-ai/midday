@@ -55,7 +55,7 @@ export default {
     unverified: "Overifierad",
   },
   roles: {
-    admin: "Admin",
+    owner: "Ägare",
     member: "Medlem",
   },
 } as const;

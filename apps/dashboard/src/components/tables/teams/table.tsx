@@ -100,7 +100,7 @@ export const columns: ColumnDef<Payment>[] = [
             >
               View
             </Button>
-            {row.original.role === "admin" && (
+            {row.original.role === "owner" && (
               <Button
                 variant="outline"
                 onClick={() =>

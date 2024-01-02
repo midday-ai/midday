@@ -142,7 +142,7 @@ export async function updateTeam(supabase: Client, data: any) {
 }
 
 type UpdateUserTeamRolePayload = {
-  role: "admin" | "member";
+  role: "owner" | "member";
   userId: string;
   teamId: string;
 };
@@ -305,7 +305,7 @@ export async function createTeam(supabase: Client, params: CreateTeamParams) {
     .insert({
       user_id: session?.user.id,
       team_id: teamData?.id,
-      role: "admin",
+      role: "owner",
     })
     .select()
     .single();

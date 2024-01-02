@@ -55,7 +55,7 @@ export default {
     unverified: "Unverified",
   },
   roles: {
-    admin: "Admin",
+    owner: "Owner",
     member: "Member",
   },
 } as const;
