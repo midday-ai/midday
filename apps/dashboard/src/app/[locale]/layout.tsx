@@ -1,5 +1,4 @@
 import { getUser } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { Providers } from "./providers";
 
 export default async function Layout({
@@ -15,10 +14,10 @@ export default async function Layout({
 }) {
   let content = login;
 
-  const { data } = await getUser();
+  const user = await getUser();
 
-  if (data) {
-    content = data.team ? dashboard : teams;
+  if (user?.data) {
+    content = user?.data.team ? dashboard : teams;
   }
 
   return <Providers locale={locale}>{content}</Providers>;

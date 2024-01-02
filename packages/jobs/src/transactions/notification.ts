@@ -108,7 +108,11 @@ client.defineJob({
     );
 
     if (emailEvents?.length) {
-      triggerBulk(emailEvents);
+      try {
+        triggerBulk(emailEvents);
+      } catch (error) {
+        await io.logger.error(JSON.stringify(error, null, 2));
+      }
     }
   },
 });
