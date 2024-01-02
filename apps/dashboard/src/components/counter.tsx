@@ -99,6 +99,19 @@ export function Counter({
     }
   }, [lastPeriodAmount, hasRunned]);
 
+  useEffect(() => {
+    if (window.todesktop) {
+      setTimeout(() => {
+        const notification = new Notification("Hooray! You just got paid 💰", {
+          body: "Your invoice for 84,600.00 SEK just got paid!",
+          sound: "./cash.mp3",
+        });
+
+        setValue((prev) => prev + 84600);
+      }, 3000);
+    }
+  }, []);
+
   return (
     <>
       {value > 0 && (

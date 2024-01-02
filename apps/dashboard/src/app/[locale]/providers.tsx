@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { platform } from "@todesktop/client-core";
 import { TriggerProvider } from "@trigger.dev/react";
-import { ReactNode, useEffect } from "react";
+import { ReactNode } from "react";
 
 type ProviderProps = {
   locale: string;
@@ -12,15 +12,6 @@ type ProviderProps = {
 };
 
 export function Providers({ locale, children }: ProviderProps) {
-  useEffect(() => {
-    if (window.todesktop) {
-      const notification = new Notification("Invoice paid 💰", {
-        body: "Your invoice for 33400 SEK just got paid!",
-        sound: "./cash.mp3",
-      });
-    }
-  }, []);
-
   return (
     <I18nProviderClient locale={locale}>
       <TriggerProvider

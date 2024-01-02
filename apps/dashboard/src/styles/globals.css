@@ -304,7 +304,6 @@ body {
 	transition: color 0.5s 1s;
 }
 
-
 /* Desktop App */
 html.todesktop {
   user-select: none;
@@ -313,5 +312,9 @@ html.todesktop {
 
 html.todesktop header {
   -webkit-app-region: drag;
+}
+
+html.todesktop aside {
+  margin-top: 10px;
 }
 
