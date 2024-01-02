@@ -28,7 +28,9 @@ export default async function Teams() {
           </div>
 
           <div className="mb-2">Teams</div>
+
           <SelectTeamTable data={data} />
+
           <div className="text-center mt-6">
             <Link href="/create" className="text-sm">
               Create team
