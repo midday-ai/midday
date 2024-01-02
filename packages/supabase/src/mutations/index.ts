@@ -169,6 +169,24 @@ export async function deleteTeam(supabase: Client) {
   return supabase.from("teams").delete().eq("id", userData?.team_id);
 }
 
+type DeleteTeamMemberPayload = {
+  userId: string;
+  teamId: string;
+};
+
+export async function deleteTeamMember(
+  supabase: Client,
+  payload: DeleteTeamMemberPayload
+) {
+  return supabase
+    .from("users_on_team")
+    .delete()
+    .eq("user_id", payload.userId)
+    .eq("team_id", payload.teamId)
+    .select()
+    .single();
+}
+
 export async function deleteBankAccount(supabase: Client, id: string) {
   return await supabase
     .from("bank_accounts")

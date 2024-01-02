@@ -1,6 +1,7 @@
 "use client";
 
 import { changeUserRoleAction } from "@/actions/change-user-role-action";
+import { deleteTeamMemberAction } from "@/actions/delete-team-member-action";
 import { useI18n } from "@/locales/client";
 import {
   AlertDialog,
@@ -54,6 +55,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import * as React from "react";
 
@@ -100,7 +102,7 @@ export const columns: ColumnDef<Payment>[] = [
       const t = useI18n();
       const { toast } = useToast();
 
-      const action = useAction(changeUserRoleAction, {
+      const changeUserRole = useAction(changeUserRoleAction, {
         onSuccess: () =>
           toast({
             title: "Team role has been updated.",
@@ -115,6 +117,21 @@ export const columns: ColumnDef<Payment>[] = [
         },
       });
 
+      const deleteTeamMember = useAction(deleteTeamMemberAction, {
+        // onSuccess: () =>
+        //   toast({
+        //     title: "Team role has been updated.",
+        //     duration: 3500,
+        //   }),
+        // onError: () => {
+        //   toast({
+        //     duration: 3500,
+        //     variant: "error",
+        //     title: "Something went wrong pleaase try again.",
+        //   });
+        // },
+      });
+
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
@@ -122,7 +139,7 @@ export const columns: ColumnDef<Payment>[] = [
               <Select
                 value={row.original.role}
                 onValueChange={(role) => {
-                  action.execute({
+                  changeUserRole.execute({
                     userId: row.original.user.id,
                     teamId: row.original.team_id,
                     role,
@@ -153,35 +170,37 @@ export const columns: ColumnDef<Payment>[] = [
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem className="text-destructive">
-                        Remove Member
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
+                    <DropdownMenuItem
+                      className="text-destructive"
+                      asDialogTrigger
+                    >
+                      <AlertDialogTrigger>Remove Member</AlertDialogTrigger>
+                    </DropdownMenuItem>
+
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>Remove Team Member</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete your account and remove your data from our
-                          servers.
+                          You are about to remove the following Team Member, are
+                          you sure you want to continue?
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction
-                        // onClick={() =>
-                        //   startTransition(() => deleteUserAction())
-                        // }
+                          disabled={deleteTeamMember.status === "executing"}
+                          onClick={() =>
+                            deleteTeamMember.execute({
+                              userId: row.original.user.id,
+                              teamId: row.original.team_id,
+                            })
+                          }
                         >
-                          Continue
-                          {/* {isPending ? (
+                          {deleteTeamMember.status === "executing" ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
-                            "Continue"
-                          )} */}
+                            "Confirm"
+                          )}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
