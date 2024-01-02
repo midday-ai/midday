@@ -26,9 +26,6 @@ export function SelectTeamTable({ data }) {
                 </Avatar>
                 <div className="flex flex-col">
                   <span className="font-medium text-sm">{row.team.name}</span>
-                  {/* <span className="text-sm text-[#606060]">
-                    {t(`roles.${row.role}`)}
-                  </span> */}
                 </div>
               </div>
             </TableCell>

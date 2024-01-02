@@ -14,7 +14,7 @@
     "@formatjs/intl": "^2.9.9",
     "@react-email/render": "0.0.9",
     "@react-email/components": "0.0.11",
-    "date-fns": "^2.30.0",
+    "date-fns": "^3.0.6",
     "react-email": "1.9.5"
   },
   "devDependencies": {

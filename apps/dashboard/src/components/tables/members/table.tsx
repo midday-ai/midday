@@ -147,15 +147,18 @@ export const columns: ColumnDef<Payment>[] = [
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            {table.options.meta.currentUser.role === "owner" &&
-            table.options.meta.totalOwners > 1 ? (
+            {(table.options.meta.currentUser.role === "owner" &&
+              table.options.meta.currentUser.user.id !==
+                row.original.user.id) ||
+            (table.options.meta.currentUser.role === "owner" &&
+              table.options.meta.totalOwners > 1) ? (
               <Select
                 value={row.original.role}
                 onValueChange={(role) => {
                   changeUserRole.execute({
                     userId: row.original.user.id,
                     teamId: row.original.team_id,
-                    role: table.options.meta.currentUser.role,
+                    role,
                   });
                 }}
               >
