@@ -19,7 +19,7 @@ export default async function Transactions({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const { data } = await getBankConnectionsByTeamId();
+  const bankConnections = await getBankConnectionsByTeamId();
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
   const transactionId = searchParams?.id;
   const filter =
@@ -27,7 +27,7 @@ export default async function Transactions({
   const sort = searchParams?.sort?.split(":");
 
   const isOpen = Boolean(searchParams.step);
-  const empty = !data?.length && !isOpen;
+  const empty = !bankConnections?.data?.length && !isOpen;
 
   return (
     <>

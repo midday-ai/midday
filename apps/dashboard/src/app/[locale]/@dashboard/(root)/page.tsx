@@ -22,7 +22,7 @@ const defaultValue = {
 };
 
 export default async function Overview({ searchParams }) {
-  const { data } = await getBankConnectionsByTeamId();
+  const bankConnections = await getBankConnectionsByTeamId();
   const chartPeriod = cookies().has(Cookies.ChartPeriod)
     ? JSON.parse(cookies().get(Cookies.ChartPeriod)?.value)
     : {};
@@ -38,7 +38,7 @@ export default async function Overview({ searchParams }) {
   const isOpen = Boolean(searchParams.step) && !searchParams.error;
 
   const empty =
-    !data?.length ||
+    !bankConnections?.data?.length ||
     (Boolean(searchParams.error) && Boolean(searchParams.step));
 
   return (
