@@ -1,10 +1,11 @@
 import { MembersTable } from "@/components/tables/members/table";
-import { getTeamMembers } from "@midday/supabase/cached-queries";
+import { getTeamMembers, getTeamUser } from "@midday/supabase/cached-queries";
 import { Button } from "@midday/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 
 export async function TeamMembers() {
-  const members = await getTeamMembers();
+  const { data } = await getTeamMembers();
+  const { data: userData } = await getTeamUser();
 
   return (
     <Tabs defaultValue="members">
@@ -18,7 +19,7 @@ export async function TeamMembers() {
       </TabsList>
 
       <TabsContent value="members">
-        <MembersTable data={members} />
+        <MembersTable data={data} role={userData.role} />
       </TabsContent>
 
       <TabsContent value="pending">Pending</TabsContent>

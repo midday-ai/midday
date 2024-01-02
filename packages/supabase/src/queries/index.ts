@@ -98,13 +98,45 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
       `
       id,
       role,
+      team_id,
       user:users(id,full_name,avatar_url,email)
     `
     )
     .eq("team_id", teamId)
+    .order("created_at")
     .throwOnError();
 
-  return data;
+  return {
+    data,
+  };
+}
+
+type GetTeamUserParams = {
+  teamId: string;
+  userId: string;
+};
+
+export async function getTeamUserQuery(
+  supabase: Client,
+  params: GetTeamUserParams
+) {
+  const { data } = await supabase
+    .from("users_on_team")
+    .select(
+      `
+      id,
+      role,
+      user:users(id,full_name,avatar_url,email)
+    `
+    )
+    .eq("team_id", params.teamId)
+    .eq("user_id", params.userId)
+    .throwOnError()
+    .single();
+
+  return {
+    data,
+  };
 }
 
 type GetSpendingParams = {

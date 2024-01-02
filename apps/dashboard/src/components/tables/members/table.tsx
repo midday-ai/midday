@@ -1,9 +1,20 @@
 "use client";
 
+import { changeUserRoleAction } from "@/actions/change-user-role-action";
 import { useI18n } from "@/locales/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -15,6 +26,15 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Input } from "@midday/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -22,18 +42,19 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
   ColumnDef,
   ColumnFiltersState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronDown, MoreHorizontal } from "lucide-react";
+import { useAction } from "next-safe-action/hook";
 import * as React from "react";
 
 export type Payment = {
@@ -44,29 +65,6 @@ export type Payment = {
 };
 
 export const columns: ColumnDef<Payment>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    meta: {
-      className: "w-[40px]",
-    },
-  },
   {
     id: "member",
     accessorKey: "user.full_name",
@@ -98,17 +96,54 @@ export const columns: ColumnDef<Payment>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const t = useI18n();
+      const { toast } = useToast();
+
+      const action = useAction(changeUserRoleAction, {
+        onSuccess: () =>
+          toast({
+            title: "Team role has been updated.",
+            duration: 3500,
+          }),
+        onError: () => {
+          toast({
+            duration: 3500,
+            variant: "error",
+            title: "Something went wrong pleaase try again.",
+          });
+        },
+      });
 
       return (
         <div className="flex justify-end">
           <div className="flex space-x-2 items-center">
-            <span className="text-sm text-[#606060]">
-              {t(`roles.${row.original.role}`)}
-            </span>
+            {table.options.meta.role === "admin" ? (
+              <Select
+                value={row.original.role}
+                onValueChange={(role) => {
+                  action.execute({
+                    userId: row.original.user.id,
+                    teamId: row.original.team_id,
+                    role,
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t(`roles.${row.original.role}`)} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="member">Member</SelectItem>
+                </SelectContent>
+              </Select>
+            ) : (
+              <span className="text-sm text-[#606060]">
+                {t(`roles.${row.original.role}`)}
+              </span>
+            )}
 
-            {row.original.role === "admin" && (
+            {table.options.meta.role === "admin" && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
@@ -117,15 +152,40 @@ export const columns: ColumnDef<Payment>[] = [
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {/* <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => navigator.clipboard.writeText(payment.id)}
-                >
-                  Copy payment ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>View customer</DropdownMenuItem>
-                <DropdownMenuItem>View payment details</DropdownMenuItem> */}
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive">
+                        Remove Member
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          Are you absolutely sure?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently
+                          delete your account and remove your data from our
+                          servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                        // onClick={() =>
+                        //   startTransition(() => deleteUserAction())
+                        // }
+                        >
+                          Continue
+                          {/* {isPending ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "Continue"
+                          )} */}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </DropdownMenuContent>
               </DropdownMenu>
             )}
@@ -139,14 +199,11 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function MembersTable({ data }) {
+export function MembersTable({ data, role }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({
     data,
@@ -156,11 +213,12 @@ export function MembersTable({ data }) {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
+    meta: {
+      role,
+    },
     state: {
       sorting,
       columnFilters,
-      rowSelection,
     },
   });
 
@@ -175,34 +233,10 @@ export function MembersTable({ data }) {
             table.getColumn("member")?.setFilterValue(event.target.value)
           }
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">
-              <span>All Roles</span> <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuCheckboxItem
-            // checked={column.getIsVisible()}
-            // onCheckedChange={(value) =>
-            //   column.toggleVisibility(!!value)
-            // }
-            >
-              Admin
-            </DropdownMenuCheckboxItem>
-            <DropdownMenuCheckboxItem
-            // checked={column.getIsVisible()}
-            // onCheckedChange={(value) =>
-            //   column.toggleVisibility(!!value)
-            // }
-            >
-              Member
-            </DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button>Invite member</Button>
       </div>
       <Table>
-        <TableHeader>
+        {/* <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {headerGroup.headers.map((header) => {
@@ -225,7 +259,7 @@ export function MembersTable({ data }) {
               })}
             </TableRow>
           ))}
-        </TableHeader>
+        </TableHeader> */}
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (

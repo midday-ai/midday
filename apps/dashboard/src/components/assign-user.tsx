@@ -32,8 +32,12 @@ export function AssignUser({ id, selectedId, isLoading }) {
   useEffect(() => {
     async function getUsers() {
       const { data: userData } = await getCurrentUserTeamQuery(supabase);
-      const data = await getTeamMembersQuery(supabase, userData?.team_id);
-      setUsers(data);
+      const { data: membersData } = await getTeamMembersQuery(
+        supabase,
+        userData?.team_id
+      );
+
+      setUsers(membersData);
     }
 
     getUsers();
@@ -63,7 +67,7 @@ export function AssignUser({ id, selectedId, isLoading }) {
             </SelectTrigger>
 
             <SelectContent>
-              {users.map(({ user }) => (
+              {users?.map(({ user }) => (
                 <SelectItem key={user.id} value={user.id}>
                   <AssignedUser user={user} />
                 </SelectItem>

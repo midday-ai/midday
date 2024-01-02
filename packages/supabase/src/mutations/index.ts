@@ -141,6 +141,29 @@ export async function updateTeam(supabase: Client, data: any) {
     .select();
 }
 
+type UpdateUserTeamRolePayload = {
+  role: "admin" | "member";
+  userId: string;
+  teamId: string;
+};
+
+export async function updateUserTeamRole(
+  supabase: Client,
+  payload: UpdateUserTeamRolePayload
+) {
+  const { role, userId, teamId } = payload;
+
+  return supabase
+    .from("users_on_team")
+    .update({
+      role,
+    })
+    .eq("user_id", userId)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}
+
 export async function deleteTeam(supabase: Client) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
   return supabase.from("teams").delete().eq("id", userData?.team_id);
