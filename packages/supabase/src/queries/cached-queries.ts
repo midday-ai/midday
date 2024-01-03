@@ -5,6 +5,7 @@ import {
   getMetricsQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
+  getTeamInvitesQuery,
   getTeamMembersQuery,
   getTeamUserQuery,
   getTeamsByUserIdQuery,
@@ -222,6 +223,28 @@ export const getTeams = async () => {
     {
       tags: [`teams_${userId}`],
       revalidate: 180,
+    }
+  )();
+};
+
+export const getTeamInvites = async () => {
+  const supabase = createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTeamInvitesQuery(supabase, teamId);
+    },
+    ["team", "invites", teamId],
+    {
+      tags: [`team_invites_${teamId}`],
+      revalidate: 10,
     }
   )();
 };

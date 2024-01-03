@@ -17,6 +17,13 @@ import {
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -70,7 +77,7 @@ export function InviteTeamMembersModal() {
                   key={field.id}
                   name={`invites.${index}.email`}
                   render={({ field }) => (
-                    <FormItem className="w-full">
+                    <FormItem className="flex-1">
                       <FormControl>
                         <Input
                           placeholder="jane@example.com"
@@ -86,9 +93,28 @@ export function InviteTeamMembersModal() {
                   )}
                 />
 
-                <Button variant="outline" className="font-normal">
-                  Member
-                </Button>
+                <FormField
+                  control={form.control}
+                  name={`invites.${index}.role`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="owner">Owner</SelectItem>
+                          <SelectItem value="member">Member</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
               </div>
             ))}
 

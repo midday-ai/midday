@@ -28,7 +28,7 @@ export const inviteTeamMembersAction = action(
       invited_by: user.data.id,
     }));
 
-    //   Check if not already member/invited
+    // TODO: Check if not already member/invited
     const { data: invtesData } = await supabase
       .from("user_invites")
       .insert(data)
