@@ -30,7 +30,7 @@ export async function TeamMembers() {
       </TabsContent>
 
       <TabsContent value="pending">
-        <PendingInvitesTable data={teamInvitesData} />
+        <PendingInvitesTable data={teamInvitesData} currentUser={userData} />
       </TabsContent>
     </Tabs>
   );

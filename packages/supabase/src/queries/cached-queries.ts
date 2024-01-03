@@ -244,7 +244,7 @@ export const getTeamInvites = async () => {
     ["team", "invites", teamId],
     {
       tags: [`team_invites_${teamId}`],
-      revalidate: 10,
+      revalidate: 180,
     }
   )();
 };

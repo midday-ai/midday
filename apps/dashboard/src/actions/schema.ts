@@ -178,3 +178,5 @@ export const inviteTeamMembersSchema = z.object({
 export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
+
+export const deleteInviteSchema = z.object({ id: z.string() });

@@ -6,6 +6,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { renderAsync } from "@react-email/components";
 import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { Resend } from "resend";
 import { action } from "./safe-action";
 import { inviteTeamMembersSchema } from "./schema";
@@ -33,6 +34,8 @@ export const inviteTeamMembersAction = action(
       .from("user_invites")
       .insert(data)
       .select("email, code, user:invited_by(*), team:team_id(*)");
+
+    revalidateTag(`team_invites_${user.data.team_id}`);
 
     const emails = invtesData.map(async (invites) => ({
       from: "Midday <middaybot@midday.ai>",
