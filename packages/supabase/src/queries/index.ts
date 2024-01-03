@@ -626,3 +626,11 @@ export async function getTeamInvitesQuery(supabase: Client, teamId: string) {
     .eq("team_id", teamId)
     .throwOnError();
 }
+
+export async function getUserInvitesQuery(supabase: Client, email: string) {
+  return supabase
+    .from("user_invites")
+    .select("id, email, code, role, user:invited_by(*), team:team_id(*)")
+    .eq("email", email)
+    .throwOnError();
+}

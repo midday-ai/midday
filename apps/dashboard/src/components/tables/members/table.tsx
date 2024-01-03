@@ -18,34 +18,22 @@ import {
 } from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Dialog, DialogTrigger } from "@midday/ui/dialog";
+import { Dialog } from "@midday/ui/dialog";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Input } from "@midday/ui/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
@@ -57,9 +45,10 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
+import { useRouter } from "next/navigation";
 import * as React from "react";
 
 export type Payment = {
@@ -103,6 +92,7 @@ export const columns: ColumnDef<Payment>[] = [
     id: "actions",
     cell: ({ row, table }) => {
       const t = useI18n();
+      const router = useRouter();
       const { toast } = useToast();
 
       const changeUserRole = useAction(changeUserRoleAction, {
@@ -136,6 +126,7 @@ export const columns: ColumnDef<Payment>[] = [
       });
 
       const leaveTeam = useAction(leaveTeamAction, {
+        onSuccess: () => router.push("/teams"),
         onError: () => {
           toast({
             duration: 3500,
@@ -182,7 +173,6 @@ export const columns: ColumnDef<Payment>[] = [
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -243,7 +233,7 @@ export const columns: ColumnDef<Payment>[] = [
                         <AlertDialogHeader>
                           <AlertDialogTitle>Leave Team</AlertDialogTitle>
                           <AlertDialogDescription>
-                            You are about to leave Holo. In order to regain
+                            You are about to leave this team. In order to regain
                             access at a later time, a Team Owner must invite
                             you.
                             <p className="mt-4">
@@ -258,6 +248,7 @@ export const columns: ColumnDef<Payment>[] = [
                             onClick={() =>
                               leaveTeam.execute({
                                 teamId: row.original.team_id,
+                                role: row.original.role,
                               })
                             }
                           >
@@ -286,6 +277,7 @@ export const columns: ColumnDef<Payment>[] = [
 
 export function MembersTable({ data, currentUser }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [isOpen, onOpenChange] = React.useState(false);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
@@ -319,38 +311,12 @@ export function MembersTable({ data, currentUser }) {
             table.getColumn("member")?.setFilterValue(event.target.value)
           }
         />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Invite member</Button>
-          </DialogTrigger>
-          <InviteTeamMembersModal />
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+          <Button onClick={() => onOpenChange(true)}>Invite member</Button>
+          <InviteTeamMembersModal onOpenChange={onOpenChange} />
         </Dialog>
       </div>
       <Table>
-        {/* <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    className={cn(
-                      "border-r-[0px] py-4 hover:bg-transparent",
-                      header.column.columnDef?.meta?.className
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader> */}
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (

@@ -1,5 +1,5 @@
 import { TeamsTable } from "@/components/tables/teams/table";
-import { getTeams } from "@midday/supabase/cached-queries";
+import { getTeams, getUserInvites } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,11 +7,17 @@ export const metadata: Metadata = {
 };
 
 export default async function Teams() {
-  const { data } = await getTeams();
+  const { data: teamsData } = await getTeams();
+  const { data: invitesData } = await getUserInvites();
 
   return (
     <div className="space-y-12">
-      <TeamsTable data={data} />
+      <TeamsTable
+        data={[
+          ...teamsData,
+          ...invitesData.map((invite) => ({ ...invite, isInvite: true })),
+        ]}
+      />
     </div>
   );
 }

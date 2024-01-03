@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import { LogSnagProvider } from "@logsnag/next";
 import "@midday/ui/globals.css";
 import { cn } from "@midday/ui/utils";
 import { Analytics } from "@vercel/analytics/react";
@@ -36,6 +37,12 @@ export default function Layout({
 }) {
   return (
     <html lang={locale} suppressHydrationWarning>
+      <head>
+        <LogSnagProvider
+          token={process.env.LOGSNAG_TOKEN!}
+          project={process.env.LOGSNAG_PROJECT!}
+        />
+      </head>
       <body className={cn(fontSans.variable, "whitespace-pre-line")}>
         {children}
         <Analytics />

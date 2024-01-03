@@ -25,6 +25,20 @@ const messages = {
     "transactions.amount": "Amount",
     "transactions.date": "Date",
     "transactions.description": "Description",
+    "invite.subject":
+      "{invitedByName} invited you to the {teamName} team on Midday",
+    "invite.preview": "Join {teamName} on Midday",
+    "invite.title1": "Join",
+    "invite.title2": "on",
+    "invite.link1": "has invited you to the",
+    "invite.link2": "on",
+    "invite.join": "Join the team",
+    "invite.link3": "or copy and paste this URL into your browser",
+    "invite.footer1": "This invitation was intended for",
+    "invite.footer2": "This invite was sent from",
+    "invite.footer3": "located in",
+    "invite.footer4":
+      "If you were not expecting this invitation, you can ignore this email. If you are concerned about your account's safety, please reply to this email to get in touch with us.",
   },
   sv: {
     "notifications.transaction":
@@ -50,6 +64,19 @@ const messages = {
     "transactions.amount": "Belopp",
     "transactions.date": "Datum",
     "transactions.description": "Beskrivning",
+    "invite.subject": "{invitedByName} bjöd in dig till {teamName} på Midday",
+    "invite.preview": "Gå med i {teamName} på Midday",
+    "invite.title1": "Gå med",
+    "invite.title2": "på",
+    "invite.link1": "har bjudit in dig till",
+    "invite.link2": "på",
+    "invite.join": "Gå med",
+    "invite.link3": "eller kopiera och klistra in denna URL i din webbläsare",
+    "invite.footer1": "Denna inbjudan var avsedd för",
+    "invite.footer2": "Denna inbjudan skickades från",
+    "invite.footer3": "belägen i",
+    "invite.footer4":
+      "Om du inte väntade dig den här inbjudan kan du ignorera det här e-postmeddelandet. Om du är orolig för ditt kontos säkerhet, vänligen svara på det här e-postmeddelandet för att komma i kontakt med oss.",
   },
 };
 

@@ -24,12 +24,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
+import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useFieldArray, useForm } from "react-hook-form";
 
-export function InviteTeamMembersModal() {
-  const inviteMembers = useAction(inviteTeamMembersAction);
+export function InviteTeamMembersModal({ onOpenChange }) {
+  const { toast } = useToast();
+
+  const inviteMembers = useAction(inviteTeamMembersAction, {
+    onSuccess: () => {
+      onOpenChange(false);
+
+      toast({
+        title: "Successfully invited Team Members.",
+        duration: 3500,
+      });
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
 
   const form = useForm<InviteTeamMembersFormValues>({
     resolver: zodResolver(inviteTeamMembersSchema),

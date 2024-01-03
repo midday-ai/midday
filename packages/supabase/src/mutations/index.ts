@@ -321,6 +321,14 @@ type LeaveTeamParams = {
 };
 
 export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
+  await supabase
+    .from("users")
+    .update({
+      team_id: null,
+    })
+    .eq("id", params.userId)
+    .eq("team_id", params.teamId);
+
   return supabase
     .from("users_on_team")
     .delete()

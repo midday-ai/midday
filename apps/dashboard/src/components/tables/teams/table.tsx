@@ -1,42 +1,46 @@
 "use client";
 
+import { acceptInviteAction } from "@/actions/accept-invite-action";
 import { changeTeamAction } from "@/actions/change-team-action";
+import { declineInviteAction } from "@/actions/decline-invite-action";
+import { leaveTeamAction } from "@/actions/leave-team-action";
 import { CreateTeamModal } from "@/components/modals/create-team-modal";
 import { useI18n } from "@/locales/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
 import { Dialog, DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Input } from "@midday/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
   ColumnDef,
   ColumnFiltersState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useRouter } from "next/navigation";
 import * as React from "react";
@@ -81,6 +85,7 @@ export const columns: ColumnDef<Payment>[] = [
     id: "actions",
     cell: ({ row }) => {
       const router = useRouter();
+      const { toast } = useToast();
       const manageTeam = useAction(changeTeamAction, {
         onSuccess: () => router.push("/settings"),
       });
@@ -88,6 +93,43 @@ export const columns: ColumnDef<Payment>[] = [
       const viewTeam = useAction(changeTeamAction, {
         onSuccess: () => router.push("/"),
       });
+
+      const leaveTeam = useAction(leaveTeamAction, {
+        onSuccess: () => router.push("/teams"),
+        onError: () => {
+          toast({
+            duration: 3500,
+            variant: "error",
+            title:
+              "You cannot leave since you are the only remaining owner of the team. Delete this team instead.",
+          });
+        },
+      });
+
+      const declineInvite = useAction(declineInviteAction);
+      const acceptInvite = useAction(acceptInviteAction);
+
+      if (row.original.isInvite) {
+        return (
+          <div className="flex justify-end">
+            <div className="flex space-x-3 items-center">
+              <Button
+                variant="outline"
+                onClick={() => declineInvite.execute({ id: row.original.id })}
+              >
+                Decline
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={() => acceptInvite.execute({ id: row.original.id })}
+              >
+                Accept
+              </Button>
+            </div>
+          </div>
+        );
+      }
 
       return (
         <div className="flex justify-end">
@@ -108,6 +150,54 @@ export const columns: ColumnDef<Payment>[] = [
                 Manage
               </Button>
             )}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <AlertDialog>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    asDialogTrigger
+                  >
+                    <AlertDialogTrigger>Leave Team</AlertDialogTrigger>
+                  </DropdownMenuItem>
+
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Leave Team</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        You are about to leave this team. In order to regain
+                        access at a later time, a Team Owner must invite you.
+                        <p className="mt-4">
+                          Are you sure you want to continue?
+                        </p>
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        disabled={leaveTeam.status === "executing"}
+                        onClick={() =>
+                          leaveTeam.execute({
+                            teamId: row.original.team.id,
+                          })
+                        }
+                      >
+                        {leaveTeam.status === "executing" ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "Confirm"
+                        )}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       );
@@ -123,8 +213,6 @@ export function TeamsTable({ data }) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
 
   const table = useReactTable({

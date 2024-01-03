@@ -3,47 +3,17 @@
 import { deleteInviteAction } from "@/actions/delete-invite-action";
 import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
 import { useI18n } from "@/locales/client";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Dialog, DialogTrigger } from "@midday/ui/dialog";
+import { Dialog } from "@midday/ui/dialog";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Input } from "@midday/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@midday/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
@@ -55,8 +25,7 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDown, MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import * as React from "react";
 
@@ -150,6 +119,7 @@ export const columns: ColumnDef<Payment>[] = [
 ];
 
 export function PendingInvitesTable({ data, currentUser }) {
+  const [isOpen, onOpenChange] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -183,38 +153,12 @@ export function PendingInvitesTable({ data, currentUser }) {
             table.getColumn("member")?.setFilterValue(event.target.value)
           }
         />
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>Invite member</Button>
-          </DialogTrigger>
-          <InviteTeamMembersModal />
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+          <Button onClick={() => onOpenChange(true)}>Invite member</Button>
+          <InviteTeamMembersModal onOpenChange={onOpenChange} />
         </Dialog>
       </div>
       <Table>
-        {/* <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="hover:bg-transparent">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    className={cn(
-                      "border-r-[0px] py-4 hover:bg-transparent",
-                      header.column.columnDef?.meta?.className
-                    )}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader> */}
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
@@ -238,8 +182,16 @@ export function PendingInvitesTable({ data, currentUser }) {
             ))
           ) : (
             <TableRow className="hover:bg-transparent">
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+              <TableCell
+                colSpan={columns.length}
+                className="h-[360px] text-center"
+              >
+                <h2 className="font-medium mb-1">
+                  No Pending Invitations Found
+                </h2>
+                <span className="text-[#606060]">
+                  Use the button above to invite a Team Member.
+                </span>
               </TableCell>
             </TableRow>
           )}

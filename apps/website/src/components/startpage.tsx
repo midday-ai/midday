@@ -2,6 +2,7 @@
 
 import { subscribeEmail } from "@/actions/subscribeEmail";
 import { useScopedI18n } from "@/locales/client";
+import { useLogSnag } from "@logsnag/next";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -44,6 +45,7 @@ function SubmitButton() {
 export function StartPage() {
   const t = useScopedI18n("startpage");
   const [isSubmitted, setSubmitted] = useState(false);
+  const { setUserId, track, identify } = useLogSnag();
 
   return (
     <div className="h-screen relative min-h-[770px] md:min-h-[1100px] dark:md:min-h-[1180px]">
@@ -81,6 +83,19 @@ export function StartPage() {
             <form
               action={async (formData) => {
                 await subscribeEmail(formData, "pre-launch");
+                const email = formData.get("email")?.toString();
+
+                track({
+                  channel: "acquisition",
+                  event: "User Joined Waitlist",
+                  notify: true,
+                  icon: "⭐",
+                  user_id: email,
+                  properties: {
+                    email,
+                  },
+                });
+
                 setSubmitted(true);
               }}
             >

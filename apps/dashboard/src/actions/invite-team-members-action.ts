@@ -2,23 +2,26 @@
 
 import { env } from "@/env.mjs";
 import InviteEmail from "@midday/email/emails/invite";
+import { getI18n } from "@midday/email/locales";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { renderAsync } from "@react-email/components";
 import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
+import { headers } from "next/headers";
 import { Resend } from "resend";
 import { action } from "./safe-action";
 import { inviteTeamMembersSchema } from "./schema";
 
 const resend = new Resend(env.RESEND_API_KEY);
-import { headers } from "next/headers";
 
 export const inviteTeamMembersAction = action(
   inviteTeamMembersSchema,
   async ({ invites }) => {
     const supabase = createClient();
     const user = await getUser();
+
+    const { t } = getI18n({ locale: user.data.locale });
 
     const location = headers().get("x-vercel-ip-city") ?? "Unknown";
     const ip = headers().get("x-forwarded-for") ?? "127.0.0.1";
@@ -40,7 +43,15 @@ export const inviteTeamMembersAction = action(
     const emails = invtesData.map(async (invites) => ({
       from: "Midday <middaybot@midday.ai>",
       to: [invites.email],
-      subject: `${invites.user.full_name} invited you to the ${invites.team.name} team on Midday`,
+      subject: t(
+        {
+          id: "invite.subject",
+        },
+        {
+          invitedByName: invites.user.full_name,
+          teamName: invites.team.name,
+        }
+      ),
       html: await renderAsync(
         InviteEmail({
           invitedByEmail: invites.user.email,
@@ -50,6 +61,7 @@ export const inviteTeamMembersAction = action(
           inviteCode: invites.code,
           ip,
           location,
+          locale: user.data.locale,
         })
       ),
     }));

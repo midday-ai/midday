@@ -160,6 +160,7 @@ export const deleteTeamMemberSchema = z.object({
 
 export const leaveTeamSchema = z.object({
   teamId: z.string(),
+  role: z.enum(["owner", "member"]),
 });
 
 export const deleteTeamSchema = z.object({
@@ -180,3 +181,5 @@ export type InviteTeamMembersFormValues = z.infer<
 >;
 
 export const deleteInviteSchema = z.object({ id: z.string() });
+export const acceptInviteSchema = z.object({ id: z.string() });
+export const declineInviteSchema = z.object({ id: z.string() });

@@ -1,7 +1,7 @@
 "use server";
 
+import { LogSnag } from "@logsnag/next/server";
 import { getCountryCode } from "@midday/location";
-import { track } from "@vercel/analytics/server";
 
 export async function subscribeEmail(formData: FormData, userGroup: string) {
   const email = formData.get("email");
@@ -24,10 +24,6 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
   );
 
   const json = await res.json();
-
-  if (email) {
-    track("Subscribe", { email: email?.toString() });
-  }
 
   return json;
 }

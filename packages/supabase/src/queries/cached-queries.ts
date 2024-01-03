@@ -10,6 +10,7 @@ import {
   getTeamUserQuery,
   getTeamsByUserIdQuery,
   getTransactionsQuery,
+  getUserInvitesQuery,
   getUserQuery,
   getVaultQuery,
 } from "../queries";
@@ -51,7 +52,7 @@ export const getUser = async () => {
     ["user", userId],
     {
       tags: [`user_${userId}`],
-      revalidate: 180,
+      revalidate: 10,
     }
   )(userId);
 };
@@ -222,7 +223,7 @@ export const getTeams = async () => {
     ["teams", userId],
     {
       tags: [`teams_${userId}`],
-      revalidate: 180,
+      revalidate: 10,
     }
   )();
 };
@@ -244,6 +245,24 @@ export const getTeamInvites = async () => {
     ["team", "invites", teamId],
     {
       tags: [`team_invites_${teamId}`],
+      revalidate: 180,
+    }
+  )();
+};
+
+export const getUserInvites = async () => {
+  const supabase = createClient();
+
+  const user = await getUser();
+  const email = user?.data?.email;
+
+  return unstable_cache(
+    async () => {
+      return getUserInvitesQuery(supabase, email);
+    },
+    ["user", "invites", email],
+    {
+      tags: [`user_invites_${email}`],
       revalidate: 180,
     }
   )();
