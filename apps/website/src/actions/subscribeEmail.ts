@@ -38,7 +38,6 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
     });
 
     logsnag.track({
-      channel: "acquisition",
       event: "User Joined Waitlist",
       notify: true,
       icon: "⭐",
