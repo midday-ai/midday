@@ -27,9 +27,13 @@ export default async function InviteMembers() {
 
           <div className="flex items-center justify-between mt-3 space-x-2">
             <Input
-              placeholder="Ex: Acme Marketing or Acme Co"
+              placeholder="jane@example.com"
               required
+              type="email"
               autocomplete="off"
+              autocapitalize="none"
+              autocorrect="off"
+              spellcheck="false"
             />
 
             <Button variant="outline" className="font-normal">

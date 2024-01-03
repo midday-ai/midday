@@ -3,6 +3,7 @@
 import { changeUserRoleAction } from "@/actions/change-user-role-action";
 import { deleteTeamMemberAction } from "@/actions/delete-team-member-action";
 import { leaveTeamAction } from "@/actions/leave-team-action";
+import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
 import { useI18n } from "@/locales/client";
 import {
   AlertDialog,
@@ -17,6 +18,7 @@ import {
 } from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { Dialog, DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -317,7 +319,12 @@ export function MembersTable({ data, currentUser }) {
             table.getColumn("member")?.setFilterValue(event.target.value)
           }
         />
-        <Button>Invite member</Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Invite member</Button>
+          </DialogTrigger>
+          <InviteTeamMembersModal />
+        </Dialog>
       </div>
       <Table>
         {/* <TableHeader>

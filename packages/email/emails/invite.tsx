@@ -17,35 +17,37 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface InviteUserEmailProps {
-  userImage?: string;
+interface InviteEmailProps {
   email?: string;
   invitedByEmail?: string;
   invitedByName?: string;
   teamName?: string;
-  teamImage?: string;
-  inviteLink?: string;
+  inviteCode?: string;
   ip?: string;
   location?: string;
 }
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
+    ? "https://midday.ai"
+    : "http://localhost:3000";
 
-export const InviteUserEmail = ({
-  userImage = "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+const baseAppUrl =
+  process.env.VERCEL_ENV === "production"
+    ? "https://app.midday.ai"
+    : "http://localhost:3001";
+
+export const InviteEmail = ({
   invitedByEmail = "bukinoshita@example.com",
   invitedByName = "Pontus Abrahamsson",
   email = "pontus@lostisland.co",
   teamName = "Acme Co",
-  teamImage = "https://service.midday.ai/storage/v1/object/public/avatars/dd6a039e-d071-423a-9a4d-9ba71325d890/Screenshot%202023-12-29%20at%2023.33.10.png",
-  inviteLink = "https://app.midday.ai/invite/jnwe9203frnwefl239jweflasn1230oqef",
+  inviteCode = "jnwe9203frnwefl239jweflasn1230oqef",
   ip = "204.13.186.218",
   location = "São Paulo, Brazil",
-}: InviteUserEmailProps) => {
+}: InviteEmailProps) => {
   const previewText = `Join ${teamName} on Midday`;
+  const inviteLink = `${baseAppUrl}/invite/${inviteCode}`;
 
   return (
     <Html>
@@ -74,7 +76,7 @@ export const InviteUserEmail = ({
           <Container className="mx-auto my-[80px] w-[465px] rounded p-[20px]">
             <Section className="mt-[32px]">
               <Img
-                src={`${baseUrl}/logo.png`}
+                src={`${baseUrl}/email/logo.png`}
                 width="45"
                 height="45"
                 alt="Midday"
@@ -96,34 +98,6 @@ export const InviteUserEmail = ({
               ) has invited you to the <strong>{teamName}</strong> team on{" "}
               <strong>Midday</strong>.
             </Text>
-            <Section className="my-10">
-              <Row>
-                <Column align="right">
-                  <Img
-                    className="rounded-full"
-                    src={userImage}
-                    width="64"
-                    height="64"
-                  />
-                </Column>
-                <Column align="center">
-                  <Img
-                    src={`${baseUrl}/arrow.png`}
-                    width="12"
-                    height="9"
-                    alt="invited you to"
-                  />
-                </Column>
-                <Column align="left">
-                  <Img
-                    className="rounded-full"
-                    src={teamImage}
-                    width="64"
-                    height="64"
-                  />
-                </Column>
-              </Row>
-            </Section>
             <Section className="mb-[42px] mt-[32px] text-center">
               <Button
                 className="rounded bg-black px-[20px] py-[12px] text-center text-[12px] font-semibold text-white no-underline"
@@ -158,4 +132,4 @@ export const InviteUserEmail = ({
   );
 };
 
-export default InviteUserEmail;
+export default InviteEmail;

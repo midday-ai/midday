@@ -45,6 +45,7 @@
     "react-hotkeys-hook": "^4.4.1",
     "react-pin-field": "^3.1.4",
     "recharts": "^2.10.3",
+    "resend": "^2.1.0",
     "sharp": "^0.33.1",
     "tus-js-client": "^4.0.1",
     "use-long-press": "^3.2.0",
