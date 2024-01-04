@@ -1,6 +1,6 @@
 "use client";
 
-import { subscribeEmail } from "@/actions/subscribeEmail";
+import { subscribeAction } from "@/actions/subscribe-action";
 import { useScopedI18n } from "@/locales/client";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
@@ -80,8 +80,8 @@ export function StartPage() {
           ) : (
             <form
               action={async (formData) => {
-                await subscribeEmail(formData, "pre-launch");
                 setSubmitted(true);
+                await subscribeAction(formData, "pre-launch");
 
                 setTimeout(() => {
                   setSubmitted(false);

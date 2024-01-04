@@ -8,7 +8,7 @@ const logsnag = new LogSnag({
   project: process.env.LOGSNAG_PROJECT!,
 });
 
-export async function subscribeEmail(formData: FormData, userGroup: string) {
+export async function subscribeAction(formData: FormData, userGroup: string) {
   const email = formData.get("email");
   const country = await getCountryCode();
 
@@ -42,7 +42,8 @@ export async function subscribeEmail(formData: FormData, userGroup: string) {
       notify: true,
       icon: "⭐",
       user_id: email?.toString(),
-      properties: {
+      channel: "waitlist",
+      tags: {
         email: email?.toString(),
       },
     });
