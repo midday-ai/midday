@@ -5,14 +5,13 @@ import {
   getTeamMembers,
   getTeamUser,
 } from "@midday/supabase/cached-queries";
-import { Button } from "@midday/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 
 export async function TeamMembers() {
   // TODO: Move to each list and suspense with fallback
-  const { data: teamMembersData } = await getTeamMembers();
-  const { data: userData } = await getTeamUser();
-  const { data: teamInvitesData } = await getTeamInvites();
+  const teamMembers = await getTeamMembers();
+  const user = await getTeamUser();
+  const teamInvites = await getTeamInvites();
 
   return (
     <Tabs defaultValue="members">
@@ -26,11 +25,14 @@ export async function TeamMembers() {
       </TabsList>
 
       <TabsContent value="members">
-        <MembersTable data={teamMembersData} currentUser={userData} />
+        <MembersTable data={teamMembers?.data} currentUser={user?.data} />
       </TabsContent>
 
       <TabsContent value="pending">
-        <PendingInvitesTable data={teamInvitesData} currentUser={userData} />
+        <PendingInvitesTable
+          data={teamInvites?.data}
+          currentUser={user?.data}
+        />
       </TabsContent>
     </Tabs>
   );

@@ -184,7 +184,7 @@ export const columns: ColumnDef<Payment>[] = [
                         onClick={() =>
                           leaveTeam.execute({
                             teamId: row.original.team.id,
-                            redirectTo: "/teams",
+                            role: row.original.role,
                           })
                         }
                       >

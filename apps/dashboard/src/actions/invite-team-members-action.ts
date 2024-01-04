@@ -32,10 +32,18 @@ export const inviteTeamMembersAction = action(
       invited_by: user.data.id,
     }));
 
-    // TODO: Check if not already member/invited
+    // TODO: Filter out members and previous invited emails
+    const filteredInvites = data.filter((invite) => {
+      if (invite.email === user.data.email) {
+        return false;
+      }
+
+      return true;
+    });
+
     const { data: invtesData } = await supabase
       .from("user_invites")
-      .insert(data)
+      .insert(filteredInvites)
       .select("email, code, user:invited_by(*), team:team_id(*)");
 
     revalidateTag(`team_invites_${user.data.team_id}`);

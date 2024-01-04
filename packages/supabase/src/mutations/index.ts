@@ -360,17 +360,18 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
     });
 
     // Set current team
-    await supabase
+    const { data } = await supabase
       .from("users")
       .update({
         team_id: inviteDate?.team_id,
       })
-      .eq("id", session?.user.id);
+      .eq("id", session?.user.id)
+      .select();
 
     // remove invite
     await supabase.from("user_invites").delete().eq("code", code);
 
-    return { success: true };
+    return data;
   }
 
   return null;

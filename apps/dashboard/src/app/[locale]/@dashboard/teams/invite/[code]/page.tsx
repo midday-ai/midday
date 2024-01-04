@@ -2,6 +2,7 @@ import { joinTeamByInviteCode } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { revalidateTag } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -10,9 +11,13 @@ export default async function InviteCode({ params }) {
   const { code } = params;
 
   if (code) {
-    const data = await joinTeamByInviteCode(supabase, code);
+    const user = await joinTeamByInviteCode(supabase, code);
 
-    if (data?.success) {
+    if (user?.data) {
+      revalidateTag(`team_members_${user.data?.team_id}`);
+      revalidateTag(`user_${user.data.id}`);
+      revalidateTag(`teams_${user.data.id}`);
+
       redirect("/");
     }
   }
@@ -63,8 +68,8 @@ export default async function InviteCode({ params }) {
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-4">
-              <Link href="https://midday.ai" className="w-full">
-                <Button className="w-full">Back to home page</Button>
+              <Link href="/" className="w-full">
+                <Button className="w-full">Go to teams</Button>
               </Link>
             </div>
           </div>
