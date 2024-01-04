@@ -15,6 +15,8 @@ export const env = createEnv({
     NOVU_API_KEY: z.string(),
     KV_REST_API_URL: z.string(),
     KV_REST_API_TOKEN: z.string(),
+    LOGSNAG_TOKEN: z.string(),
+    LOGSNAG_PROJECT: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -51,6 +53,8 @@ export const env = createEnv({
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
+    LOGSNAG_TOKEN: process.env.LOGSNAG_TOKEN,
+    LOGSNAG_PROJECT: process.env.LOGSNAG_PROJECT,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
