@@ -1,5 +1,9 @@
 import { addDays } from "date-fns";
-import { getCurrentUserTeamQuery, getSession } from "../queries";
+import {
+  getCurrentUserTeamQuery,
+  getSession,
+  getUserInviteQuery,
+} from "../queries";
 import { Client, Database } from "../types";
 import { remove } from "../utils/storage";
 
@@ -336,4 +340,38 @@ export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
     .eq("user_id", params.userId)
     .select()
     .single();
+}
+
+export async function joinTeamByInviteCode(supabase: Client, code: string) {
+  const {
+    data: { session },
+  } = await getSession(supabase);
+  const { data: inviteDate } = await getUserInviteQuery(supabase, {
+    code,
+    email: session?.user?.email,
+  });
+
+  if (inviteDate) {
+    // Add user team
+    await supabase.from("users_on_team").insert({
+      user_id: session?.user.id,
+      team_id: inviteDate?.team_id,
+      role: inviteDate.role,
+    });
+
+    // Set current team
+    await supabase
+      .from("users")
+      .update({
+        team_id: inviteDate?.team_id,
+      })
+      .eq("id", session?.user.id);
+
+    // remove invite
+    await supabase.from("user_invites").delete().eq("code", code);
+
+    return { success: true };
+  }
+
+  return null;
 }

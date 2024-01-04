@@ -50,7 +50,7 @@ export const InviteEmail = ({
   locale = "en",
 }: InviteEmailProps) => {
   const { t } = getI18n({ locale });
-  const inviteLink = `${baseAppUrl}/invite/${inviteCode}`;
+  const inviteLink = `${baseAppUrl}/teams/invite/${inviteCode}`;
 
   return (
     <Html>

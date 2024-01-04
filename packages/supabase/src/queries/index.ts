@@ -634,3 +634,20 @@ export async function getUserInvitesQuery(supabase: Client, email: string) {
     .eq("email", email)
     .throwOnError();
 }
+
+type GetUserInviteQueryParams = {
+  code: string;
+  email: string;
+};
+
+export async function getUserInviteQuery(
+  supabase: Client,
+  params: GetUserInviteQueryParams
+) {
+  return supabase
+    .from("user_invites")
+    .select("*")
+    .eq("code", params.code)
+    .eq("email", params.email)
+    .single();
+}
