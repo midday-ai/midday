@@ -5,5 +5,11 @@ export async function TeamMenu() {
   const { data: userData } = await getUser();
   const { data: teamsData } = await getTeams();
 
-  return <TeamDropdown selectedTeamId={userData?.team?.id} teams={teamsData} />;
+  return (
+    <TeamDropdown
+      selectedTeamId={userData?.team?.id}
+      teams={teamsData}
+      key={userData?.team?.id}
+    />
+  );
 }
