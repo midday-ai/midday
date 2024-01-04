@@ -27,9 +27,10 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
-export function InviteTeamMembersModal({ onOpenChange }) {
+export function InviteTeamMembersModal({ onOpenChange, isOpen }) {
   const { toast } = useToast();
 
   const inviteMembers = useAction(inviteTeamMembersAction, {
@@ -61,6 +62,10 @@ export function InviteTeamMembersModal({ onOpenChange }) {
       ],
     },
   });
+
+  useEffect(() => {
+    form.reset();
+  }, [isOpen]);
 
   const onSubmit = form.handleSubmit((data) => {
     inviteMembers.execute({

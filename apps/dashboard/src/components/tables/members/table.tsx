@@ -313,7 +313,7 @@ export function MembersTable({ data, currentUser }) {
         />
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
           <Button onClick={() => onOpenChange(true)}>Invite member</Button>
-          <InviteTeamMembersModal onOpenChange={onOpenChange} />
+          <InviteTeamMembersModal onOpenChange={onOpenChange} isOpen={isOpen} />
         </Dialog>
       </div>
       <Table>
