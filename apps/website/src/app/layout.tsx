@@ -39,8 +39,8 @@ export default function Layout({
     <html lang={locale} suppressHydrationWarning>
       <head>
         <LogSnagProvider
-          token={process.env.LOGSNAG_TOKEN!}
-          project={process.env.LOGSNAG_PROJECT!}
+          token={process.env.NEXT_PUBLIC_LOGSNAG_TOKEN!}
+          project={process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!}
         />
       </head>
       <body className={cn(fontSans.variable, "whitespace-pre-line")}>

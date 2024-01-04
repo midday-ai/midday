@@ -2,6 +2,7 @@
 
 import { subscribeAction } from "@/actions/subscribe-action";
 import { useScopedI18n } from "@/locales/client";
+import { useLogSnag } from "@logsnag/next";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -44,6 +45,7 @@ function SubmitButton() {
 export function StartPage() {
   const t = useScopedI18n("startpage");
   const [isSubmitted, setSubmitted] = useState(false);
+  const { track, identify } = useLogSnag();
 
   return (
     <div className="h-screen relative min-h-[770px] md:min-h-[1100px] dark:md:min-h-[1180px]">
@@ -82,6 +84,24 @@ export function StartPage() {
               action={async (formData) => {
                 setSubmitted(true);
                 await subscribeAction(formData, "pre-launch");
+                const email = formData.get("email") as string;
+
+                track({
+                  event: "User Joined Waitlist",
+                  notify: true,
+                  icon: "⭐",
+                  user_id: email?.toString(),
+                  channel: "waitlist",
+                  tags: {
+                    email,
+                  },
+                });
+
+                // logsnag.insight.increment({
+                //   title: "User Waitlist Count",
+                //   value: 1,
+                //   icon: "👨",
+                // });
 
                 setTimeout(() => {
                   setSubmitted(false);
