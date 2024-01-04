@@ -141,10 +141,12 @@ export const updaterMenuSchema = z.array(
 
 export const changeTeamSchema = z.object({
   teamId: z.string(),
+  redirectTo: z.string(),
 });
 
 export const createTeamSchema = z.object({
   name: z.string(),
+  redirectTo: z.string().optional(),
 });
 
 export const changeUserRoleSchema = z.object({
@@ -160,6 +162,7 @@ export const deleteTeamMemberSchema = z.object({
 
 export const leaveTeamSchema = z.object({
   teamId: z.string(),
+  redirectTo: z.string().optional(),
   role: z.enum(["owner", "member"]),
 });
 
@@ -174,6 +177,7 @@ export const inviteTeamMembersSchema = z.object({
       role: z.enum(["owner", "member"]),
     })
   ),
+  redirectTo: z.string().optional(),
 });
 
 export type InviteTeamMembersFormValues = z.infer<

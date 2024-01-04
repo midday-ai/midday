@@ -7,11 +7,14 @@ import { redirect } from "next/navigation";
 import { action } from "./safe-action";
 import { changeTeamSchema } from "./schema";
 
-export const changeTeamAction = action(changeTeamSchema, async ({ teamId }) => {
-  const supabase = createClient();
-  const user = await updateUser(supabase, { team_id: teamId });
+export const changeTeamAction = action(
+  changeTeamSchema,
+  async ({ teamId, redirectTo }) => {
+    const supabase = createClient();
+    const user = await updateUser(supabase, { team_id: teamId });
 
-  revalidateTag(`user_${user.data.id}`);
+    revalidateTag(`user_${user.data.id}`);
 
-  redirect("/");
-});
+    redirect(redirectTo);
+  }
+);

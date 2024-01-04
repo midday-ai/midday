@@ -27,7 +27,7 @@ import { useRouter } from "next/navigation";
 export function DeleteTeam({ teamId }) {
   const router = useRouter();
   const deleteTeam = useAction(deleteTeamAction, {
-    onSuccess: () => router.push("/"),
+    onSuccess: () => router.push("/teams"),
   });
 
   return (

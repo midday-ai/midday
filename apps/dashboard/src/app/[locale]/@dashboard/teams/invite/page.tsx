@@ -1,7 +1,5 @@
-import { getTeams } from "@midday/supabase/cached-queries";
-import { Button } from "@midday/ui/button";
+import { InviteForm } from "@/components/invite-form";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import Link from "next/link";
 
 export default async function InviteMembers() {
@@ -25,26 +23,7 @@ export default async function InviteMembers() {
             <p className="text-sm">Invite new members by email address</p>
           </div>
 
-          <div className="flex items-center justify-between mt-3 space-x-2">
-            <Input
-              placeholder="jane@example.com"
-              required
-              type="email"
-              autocomplete="off"
-              autocapitalize="none"
-              autocorrect="off"
-              spellcheck="false"
-            />
-
-            <Button variant="outline" className="font-normal">
-              Member
-            </Button>
-          </div>
-
-          <div className="flex items-center justify-between mt-8">
-            <Button variant="ghost">Skip this step</Button>
-            <Button>Next</Button>
-          </div>
+          <InviteForm />
         </div>
       </div>
     </div>

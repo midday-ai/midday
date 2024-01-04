@@ -4,9 +4,20 @@ import { ConnectBankModal } from "@/components/modals/connect-bank-modal";
 import { SelectAccountModal } from "@/components/modals/select-account-modal";
 import { Sidebar } from "@/components/sidebar";
 import { getCountryCode } from "@midday/location";
+import { getUser } from "@midday/supabase/cached-queries";
+import { redirect } from "next/navigation";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const user = await getUser();
   const countryCode = getCountryCode();
+
+  if (!user?.data?.team) {
+    redirect("/teams");
+  }
 
   return (
     <div className="flex">

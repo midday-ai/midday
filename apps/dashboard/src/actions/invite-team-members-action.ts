@@ -6,9 +6,9 @@ import { getI18n } from "@midday/email/locales";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { renderAsync } from "@react-email/components";
-import { revalidatePath } from "next/cache";
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { Resend } from "resend";
 import { action } from "./safe-action";
 import { inviteTeamMembersSchema } from "./schema";
@@ -17,7 +17,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 export const inviteTeamMembersAction = action(
   inviteTeamMembersSchema,
-  async ({ invites }) => {
+  async ({ invites, redirectTo }) => {
     const supabase = createClient();
     const user = await getUser();
 
@@ -69,5 +69,9 @@ export const inviteTeamMembersAction = action(
     const htmlEmails = await Promise.all(emails);
 
     await resend.batch.send(htmlEmails);
+
+    if (redirectTo) {
+      redirect(redirectTo);
+    }
   }
 );

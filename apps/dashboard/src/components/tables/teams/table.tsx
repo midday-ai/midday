@@ -42,7 +42,6 @@ import {
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
-import { useRouter } from "next/navigation";
 import * as React from "react";
 
 export type Payment = {
@@ -84,18 +83,11 @@ export const columns: ColumnDef<Payment>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      const router = useRouter();
       const { toast } = useToast();
-      const manageTeam = useAction(changeTeamAction, {
-        onSuccess: () => router.push("/settings"),
-      });
-
-      const viewTeam = useAction(changeTeamAction, {
-        onSuccess: () => router.push("/"),
-      });
+      const manageTeam = useAction(changeTeamAction);
+      const viewTeam = useAction(changeTeamAction);
 
       const leaveTeam = useAction(leaveTeamAction, {
-        onSuccess: () => router.push("/teams"),
         onError: () => {
           toast({
             duration: 3500,
@@ -136,7 +128,12 @@ export const columns: ColumnDef<Payment>[] = [
           <div className="flex space-x-3 items-center">
             <Button
               variant="outline"
-              onClick={() => viewTeam.execute({ teamId: row.original.team.id })}
+              onClick={() =>
+                viewTeam.execute({
+                  teamId: row.original.team.id,
+                  redirectTo: "/",
+                })
+              }
             >
               View
             </Button>
@@ -144,7 +141,10 @@ export const columns: ColumnDef<Payment>[] = [
               <Button
                 variant="outline"
                 onClick={() =>
-                  manageTeam.execute({ teamId: row.original.team.id })
+                  manageTeam.execute({
+                    teamId: row.original.team.id,
+                    redirectTo: "/settings",
+                  })
                 }
               >
                 Manage
@@ -184,6 +184,7 @@ export const columns: ColumnDef<Payment>[] = [
                         onClick={() =>
                           leaveTeam.execute({
                             teamId: row.original.team.id,
+                            redirectTo: "/teams",
                           })
                         }
                       >

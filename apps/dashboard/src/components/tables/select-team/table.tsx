@@ -34,7 +34,12 @@ export function SelectTeamTable({ data }) {
                 <div className="flex space-x-3 items-center">
                   <Button
                     variant="outline"
-                    onClick={() => changeTeam.execute({ teamId: row.team.id })}
+                    onClick={() =>
+                      changeTeam.execute({
+                        teamId: row.team.id,
+                        redirectTo: "/",
+                      })
+                    }
                   >
                     Launch
                   </Button>

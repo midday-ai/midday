@@ -12,9 +12,11 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hook";
 import { useState } from "react";
 
-export function CreateTeamModal() {
+export function CreateTeamModal({ onOpenChange }) {
   const [name, setName] = useState("");
-  const createTeam = useAction(createTeamAction);
+  const createTeam = useAction(createTeamAction, {
+    onSuccess: () => onOpenChange(false),
+  });
 
   return (
     <DialogContent className="max-w-[455px]">

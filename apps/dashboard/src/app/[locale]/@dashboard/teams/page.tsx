@@ -8,7 +8,7 @@ export default async function Teams() {
   const { data } = await getTeams();
 
   if (!data.length > 0) {
-    redirect("/create");
+    redirect("/teams/create");
   }
 
   return (
@@ -32,7 +32,7 @@ export default async function Teams() {
           <SelectTeamTable data={data} />
 
           <div className="text-center mt-6">
-            <Link href="/create" className="text-sm">
+            <Link href="/teams/create" className="text-sm">
               Create team
             </Link>
           </div>

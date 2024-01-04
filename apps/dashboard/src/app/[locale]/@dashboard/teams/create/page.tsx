@@ -1,7 +1,5 @@
-import { getTeams } from "@midday/supabase/cached-queries";
-import { Button } from "@midday/ui/button";
+import { CreateTeamForm } from "@/components/create-team-form";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import Link from "next/link";
 
 export default async function CreateTeam() {
@@ -30,14 +28,7 @@ export default async function CreateTeam() {
             </p>
           </div>
 
-          <Input
-            className="mt-3"
-            placeholder="Ex: Acme Marketing or Acme Co"
-            required
-            autocomplete="off"
-          />
-
-          <Button className="mt-6">Next</Button>
+          <CreateTeamForm />
         </div>
       </div>
     </div>
