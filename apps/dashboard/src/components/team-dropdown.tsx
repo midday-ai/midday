@@ -4,82 +4,92 @@ import { changeTeamAction } from "@/actions/change-team-action";
 import { CreateTeamModal } from "@/components/modals/create-team-modal";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Dialog, DialogTrigger } from "@midday/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
+import { Dialog } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
+import { useClickAway } from "@uidotdev/usehooks";
+import { motion } from "framer-motion";
 import { useAction } from "next-safe-action/hook";
 import { useState } from "react";
 
-export function TeamDropdown({ selectedTeam, teams }) {
+export function TeamDropdown({ selectedTeamId: initialId, teams }) {
+  const [selectedId, setSelectedId] = useState(initialId);
+  const [isActive, setActive] = useState(false);
   const [isOpen, onOpenChange] = useState(false);
   const changeTeam = useAction(changeTeamAction);
 
+  const sortedTeams = [...teams, { team: { id: "add" } }].sort((a, b) => {
+    if (a.team.id === selectedId) return -1;
+    if (b.team.id === selectedId) return 1;
+
+    return a.team.id - b.team.id;
+  });
+
+  const ref = useClickAway(() => {
+    setActive(false);
+  });
+
+  const toggleActive = () => setActive((prev) => !prev);
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Avatar className="rounded-sm w-9 h-9">
-          <AvatarImage src={selectedTeam?.logo_url} />
-          <AvatarFallback className="rounded-sm w-9 h-9">
-            <span className="text-xs">
-              {selectedTeam?.name?.charAt(0)?.toUpperCase()}
-              {selectedTeam?.name?.charAt(1)?.toUpperCase()}
-            </span>
-          </AvatarFallback>
-        </Avatar>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent
-        className="w-[240px]"
-        sideOffset={15}
-        align="start"
-        side="top"
-      >
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-          <DropdownMenuItem asDialogTrigger className="border-b-[1px]">
-            <Button
-              className="w-full p-1 flex items-center space-x-2 justify-start"
-              variant="ghost"
-              onClick={() => onOpenChange(true)}
-            >
-              <Icons.Add />
-              <span className="font-medium text-sm">Create team</span>
-            </Button>
-          </DropdownMenuItem>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <motion.div ref={ref} layout className="w-[32px] h-[32px] relative">
+        {sortedTeams.map(({ team }, index) => (
+          <motion.div
+            key={team.id}
+            className="w-[32px] h-[32px] left-0 drop-shadow-sm overflow-hidden absolute"
+            style={{ zIndex: -index }}
+            initial={{
+              scale: `${100 - index * 16}%`,
+              y: index * 5,
+            }}
+            {...(isActive && {
+              animate: {
+                y: -(32 + 10) * index,
+                scale: "100%",
+              },
+            })}
+          >
+            {team.id === "add" ? (
+              <>
+                <Button
+                  className="w-[32px] h-[32px]"
+                  size="icon"
+                  variant="outline"
+                  onClick={() => {
+                    onOpenChange(true);
+                    setActive(false);
+                  }}
+                >
+                  <Icons.Add />
+                </Button>
 
-          <CreateTeamModal onOpenChange={onOpenChange} />
-
-          {teams.map(({ team }) => {
-            return (
-              <DropdownMenuItem
-                key={team.id}
-                onClick={() =>
-                  changeTeam.execute({ teamId: team.id, redirectTo: "/" })
-                }
+                <CreateTeamModal onOpenChange={onOpenChange} />
+              </>
+            ) : (
+              <Avatar
+                className="w-[32px] h-[32px] rounded-sm border border-[#DCDAD2] dark:border-[#2C2C2C]"
+                onClick={() => {
+                  if (index === 0) {
+                    toggleActive();
+                  } else {
+                    setSelectedId(team.id);
+                    setActive(false);
+                    changeTeam.execute({ teamId: team.id, redirectTo: "/" });
+                  }
+                }}
               >
-                <div className="flex justify-between w-full p-1">
-                  <div className="flex space-x-2 items-center">
-                    <Avatar className="rounded-sm w-[24px] h-[24px]">
-                      <AvatarImage src={team.logo_url} />
-                      <AvatarFallback className="rounded-sm w-[24px] h-[24px]">
-                        <span className="text-xs">
-                          {team.name?.charAt(0)?.toUpperCase()}
-                          {team.name?.charAt(1)?.toUpperCase()}
-                        </span>
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">{team.name}</span>
-                  </div>
-                  {team.id === selectedTeam.id && <Icons.Check />}
-                </div>
-              </DropdownMenuItem>
-            );
-          })}
-        </Dialog>
-      </DropdownMenuContent>
-    </DropdownMenu>
+                <AvatarImage src={team?.logo_url} />
+                <AvatarFallback className="rounded-sm w-[32px] h-[32px]">
+                  <span className="text-xs">
+                    {team?.name?.charAt(0)?.toUpperCase()}
+                    {team?.name?.charAt(1)?.toUpperCase()}
+                  </span>
+                </AvatarFallback>
+              </Avatar>
+            )}
+          </motion.div>
+        ))}
+      </motion.div>
+    </Dialog>
   );
 }
