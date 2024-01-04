@@ -97,12 +97,6 @@ export function StartPage() {
                   },
                 });
 
-                // logsnag.insight.increment({
-                //   title: "User Waitlist Count",
-                //   value: 1,
-                //   icon: "👨",
-                // });
-
                 setTimeout(() => {
                   setSubmitted(false);
                 }, 5000);
