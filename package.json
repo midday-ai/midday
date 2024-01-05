@@ -23,7 +23,7 @@
   "dependencies": {
     "@biomejs/biome": "1.4.1",
     "@manypkg/cli": "^0.21.1",
-    "turbo": "^1.11.2",
+    "turbo": "^1.11.3",
     "typescript": "^5.3.3"
   }
 }
