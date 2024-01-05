@@ -65,7 +65,7 @@ export function FilePreview({
   const handleOnLoaded = () => {
     setTimeout(() => {
       setLoaded(true);
-    }, 150);
+    }, 450);
   };
 
   if (type?.startsWith("image")) {
@@ -86,14 +86,18 @@ export function FilePreview({
   }
 
   if (type === FileType.Pdf) {
+    // NOTE: onLoad event is not working
+    handleOnLoaded();
+
     content = (
-      <div style={{ width, height: height + 3 }} className="overflow-hidden">
+      <div
+        style={{ width: width - 5, height: height - 5 }}
+        className="overflow-hidden flex items-center align-center"
+      >
         <iframe
           src={`${src}#toolbar=0`}
-          className=" -ml-[3px]"
           style={{ width, height }}
           title={name}
-          onLoad={handleOnLoaded}
         />
       </div>
     );
@@ -122,22 +126,24 @@ export function FilePreview({
                   </DialogTrigger>
                 </motion.div>
               )}
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ delay: 0.04 }}
-              >
-                <a href={downloadUrl} download>
-                  <Button
-                    variant="secondary"
-                    className="w-[32px] h-[32px] bg-black/60 hover:bg-black"
-                    size="icon"
-                  >
-                    <Icons.FileDownload />
-                  </Button>
-                </a>
-              </motion.div>
+              {downloadUrl && (
+                <motion.div
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -50, opacity: 0 }}
+                  transition={{ delay: 0.04 }}
+                >
+                  <a href={downloadUrl} download>
+                    <Button
+                      variant="secondary"
+                      className="w-[32px] h-[32px] bg-black/60 hover:bg-black"
+                      size="icon"
+                    >
+                      <Icons.FileDownload />
+                    </Button>
+                  </a>
+                </motion.div>
+              )}
             </div>
           </AnimatePresence>
         )}

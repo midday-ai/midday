@@ -1,5 +1,9 @@
 import { Icons } from "@midday/ui/icons";
 
+export const metadata: Metadata = {
+  title: "Invoices | Midday",
+};
+
 export default function Invoice() {
   return (
     <div className="h-[calc(100vh-300px)] flex items-center justify-center">

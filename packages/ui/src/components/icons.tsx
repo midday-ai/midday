@@ -29,6 +29,7 @@ import {
   MdOutlineAccountBalanceWallet,
   MdOutlineBrokenImage,
   MdOutlineCategory,
+  MdOutlineContentCopy,
   MdOutlineDashboardCustomize,
   MdOutlineDescription,
   MdOutlineDifference,
@@ -423,4 +424,5 @@ export const Icons = {
   WorkInProgress: MdOutlineHandyman,
   Add: MdAdd,
   DashboardCustomize: MdOutlineDashboardCustomize,
+  Copy: MdOutlineContentCopy,
 };

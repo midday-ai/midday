@@ -1,4 +1,9 @@
 import { Icons } from "@midday/ui/icons";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Tracker | Midday",
+};
 
 export default function Tracker() {
   return (

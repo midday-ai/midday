@@ -25,9 +25,9 @@ const icons = {
   "/tracker": () => <Icons.Tracker size={22} />,
   "/vault": () => <Icons.Files size={22} />,
   "/settings": () => <Icons.Settings size={22} />,
-  "/inbound": () => (
+  "/inbox": () => (
     <div className="relative">
-      {/* <div className="w-1.5 h-1.5 bg-[#d98d00] rounded-full absolute -top-1 -right-1" /> */}
+      <div className="w-1.5 h-1.5 bg-[#d98d00] rounded-full absolute -top-1 -right-1" />
       <Icons.Inbox2 size={22} />
     </div>
   ),
@@ -39,8 +39,8 @@ const defaultItems = [
     name: "Overview",
   },
   {
-    path: "/inbound",
-    name: "Inbound",
+    path: "/inbox",
+    name: "Inbox",
   },
   {
     path: "/transactions",
