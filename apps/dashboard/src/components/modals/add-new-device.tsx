@@ -5,7 +5,7 @@ import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { cn } from "@midday/ui/utils";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";

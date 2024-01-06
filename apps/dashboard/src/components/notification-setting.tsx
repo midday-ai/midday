@@ -1,7 +1,7 @@
 "use client";
 
 import { Checkbox } from "@midday/ui/checkbox";
-import { useOptimisticAction } from "next-safe-action/hook";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 export function NotificationSetting({
   id,

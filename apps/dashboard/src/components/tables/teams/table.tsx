@@ -41,7 +41,7 @@ import {
 } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
 
 export type Payment = {

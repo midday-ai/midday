@@ -33,15 +33,17 @@ export function InboxView({ items }) {
             </TabsTrigger>
           </TabsList>
 
-          <CopyInput value="inbox.23rwef@midday.ai" />
+          <div>
+            <CopyInput value="inbox.23rwef@midday.ai" />
+          </div>
         </div>
 
         <div className="flex flex-row space-x-8">
           <div className="w-full">
-            <TabsContent value="all" className="m-0">
+            <TabsContent value="all" className="m-0  h-full">
               <InboxList items={items} selectedId={selectedId} />
             </TabsContent>
-            <TabsContent value="completed" className="m-0">
+            <TabsContent value="completed" className="m-0  h-full">
               <InboxList
                 items={items.filter((item) => item.status === "completed")}
                 selectedId={selectedId}

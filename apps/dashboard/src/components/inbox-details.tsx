@@ -10,19 +10,35 @@ import {
 import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
 import { Separator } from "@midday/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
+import { useToast } from "@midday/ui/use-toast";
 import format from "date-fns/format";
 import { Archive, MoreVertical, Trash2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { FilePreview } from "./file-preview";
 import { InboxToolbar } from "./inbox-toolbar";
 
 export function InboxDetails({ item }) {
   const router = useRouter();
+  const { toast } = useToast();
 
   const updateInbox = useAction(updateInboxAction, {
     onSuccess: () => router.push("/inbox"),
   });
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/inbox?id=${item.id}`
+      );
+
+      toast({
+        duration: 4000,
+        title: "Copied URL to clipboard.",
+        variant: "success",
+      });
+    } catch {}
+  };
 
   return (
     <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
@@ -42,7 +58,9 @@ export function InboxDetails({ item }) {
                 <span className="sr-only">Archive</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Archive</TooltipContent>
+            <TooltipContent className="px-3 py-1.5 text-xs">
+              Archive
+            </TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -58,7 +76,9 @@ export function InboxDetails({ item }) {
                 <span className="sr-only">Move to trash</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>Move to trash</TooltipContent>
+            <TooltipContent className="px-3 py-1.5 text-xs">
+              Move to trash
+            </TooltipContent>
           </Tooltip>
         </div>
 
@@ -72,7 +92,9 @@ export function InboxDetails({ item }) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem>Download</DropdownMenuItem>
-              <DropdownMenuItem>Copy URL</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCopyUrl}>
+                Copy URL
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

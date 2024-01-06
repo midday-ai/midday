@@ -26,7 +26,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";

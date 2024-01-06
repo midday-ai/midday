@@ -4,7 +4,7 @@ import { createTeamAction } from "@/actions/create-team-action";
 import { Button } from "@midday/ui/button";
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 

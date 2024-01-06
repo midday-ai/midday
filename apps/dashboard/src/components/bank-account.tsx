@@ -4,7 +4,7 @@ import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { formatDistanceToNow } from "date-fns";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 
 export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
   const action = useAction(deleteBankAccountAction);

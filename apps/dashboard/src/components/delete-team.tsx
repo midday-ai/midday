@@ -21,7 +21,7 @@ import {
   CardTitle,
 } from "@midday/ui/card";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 
 export function DeleteTeam({ teamId }) {

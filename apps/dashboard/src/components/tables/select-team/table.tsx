@@ -4,7 +4,7 @@ import { changeTeamAction } from "@/actions/change-team-action";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 
 export function SelectTeamTable({ data }) {
   const changeTeam = useAction(changeTeamAction);

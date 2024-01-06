@@ -16,7 +16,7 @@ import {
   subMonths,
   subYears,
 } from "date-fns";
-import { useOptimisticAction } from "next-safe-action/hook";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 const options = [
   {
@@ -48,7 +48,7 @@ export function SpendingPeriod({ initialPeriod }) {
     initialPeriod,
     (_, newState) => {
       return newState;
-    },
+    }
   );
 
   return (

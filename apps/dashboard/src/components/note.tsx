@@ -2,7 +2,7 @@
 
 import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { Textarea } from "@midday/ui/textarea";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
 export function Note({ id, defaultValue }) {

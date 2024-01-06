@@ -21,7 +21,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 
 export function DisplayName({ fullName }) {

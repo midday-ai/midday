@@ -9,7 +9,7 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
 export function CreateTeamModal({ onOpenChange }) {

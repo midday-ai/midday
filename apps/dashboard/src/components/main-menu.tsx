@@ -12,7 +12,7 @@ import {
   motion,
   useMotionValue,
 } from "framer-motion";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -25,12 +25,7 @@ const icons = {
   "/tracker": () => <Icons.Tracker size={22} />,
   "/vault": () => <Icons.Files size={22} />,
   "/settings": () => <Icons.Settings size={22} />,
-  "/inbox": () => (
-    <div className="relative">
-      <div className="w-1.5 h-1.5 bg-[#d98d00] rounded-full absolute -top-1 -right-1" />
-      <Icons.Inbox2 size={22} />
-    </div>
-  ),
+  "/inbox": () => <Icons.Inbox2 size={22} />,
 };
 
 const defaultItems = [

@@ -14,7 +14,7 @@ import {
 } from "@midday/ui/dialog";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";

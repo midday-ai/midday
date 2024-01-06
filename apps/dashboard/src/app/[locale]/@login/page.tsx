@@ -199,7 +199,11 @@ export default async function Login() {
 
             <p className="text-xs text-[#878787]">
               By clicking continue, you acknowledge that you have read and
-              understood, and agree to Midday's and{" "}
+              understood, and agree to Midday's{" "}
+              <a href="https://midday.ai/terms" className="underline">
+                Terms of Service
+              </a>{" "}
+              and{" "}
               <a href="https://midday.ai/policy" className="underline">
                 Privacy Policy
               </a>

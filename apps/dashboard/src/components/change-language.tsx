@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 
 export function ChangeLanguage() {
   const action = useAction(updateUserAction);

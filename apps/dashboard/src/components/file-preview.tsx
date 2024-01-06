@@ -150,7 +150,7 @@ export function FilePreview({
 
         <Skeleton
           className={cn(
-            "absolute top-0 left-0 z-50 pointer-events-none w-full h-full",
+            "absolute top-0 left-0 z-20 pointer-events-none w-full h-full",
             isLoaded && "hidden",
             error && "hidden"
           )}

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 

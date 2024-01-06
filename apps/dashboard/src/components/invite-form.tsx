@@ -19,13 +19,11 @@ import {
 } from "@midday/ui/select";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useFieldArray, useForm } from "react-hook-form";
 
 export function InviteForm() {
-  const router = useRouter();
   const { toast } = useToast();
 
   const inviteMembers = useAction(inviteTeamMembersAction, {

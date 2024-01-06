@@ -6,7 +6,7 @@ import { Icons } from "@midday/ui/icons";
 import { MonthRangePicker } from "@midday/ui/month-range-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "next-usequerystate";
 
 export function ChartPeriod({ defaultValue, disabled }) {

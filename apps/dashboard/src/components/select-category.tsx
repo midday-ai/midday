@@ -17,7 +17,7 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { CategoryIcon, categories } from "./category";
 

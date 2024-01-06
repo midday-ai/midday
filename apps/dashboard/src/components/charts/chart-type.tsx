@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useOptimisticAction } from "next-safe-action/hook";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 const options = ["profit_loss", "income"];
 

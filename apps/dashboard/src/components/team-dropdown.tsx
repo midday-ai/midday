@@ -8,7 +8,7 @@ import { Dialog } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
 export function TeamDropdown({ selectedTeamId: initialId, teams }) {

@@ -4,7 +4,7 @@ import { updateInboxAction } from "@/actions/inbox/update";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 
 export function InboxList({ items, selectedId }) {
@@ -18,6 +18,14 @@ export function InboxList({ items, selectedId }) {
       updateInbox.execute({ id: item.id, read: true });
     }
   };
+
+  if (!items.length) {
+    return (
+      <div className="h-full w-full flex items-center justify-center">
+        No results.
+      </div>
+    );
+  }
 
   return (
     <ScrollArea className="h-[calc(100vh-180px)]">

@@ -13,7 +13,7 @@ import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import ms from "ms";
-import { useAction } from "next-safe-action/hook";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 const options = [
