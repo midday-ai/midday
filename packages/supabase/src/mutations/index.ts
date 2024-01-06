@@ -376,3 +376,23 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
 
   return null;
 }
+
+type UpdateInboxByIdParams = {
+  id: string;
+  read?: boolean;
+  status: "new" | "in_progress" | "completed" | "deleted" | "archived";
+};
+
+export async function updateInboxById(
+  supabase: Client,
+  params: UpdateInboxByIdParams
+) {
+  const { id, ...data } = params;
+
+  return await supabase
+    .from("inbox")
+    .update(data)
+    .eq("id", id)
+    .select()
+    .single();
+}

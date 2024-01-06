@@ -187,3 +187,11 @@ export type InviteTeamMembersFormValues = z.infer<
 export const deleteInviteSchema = z.object({ id: z.string() });
 export const acceptInviteSchema = z.object({ id: z.string() });
 export const declineInviteSchema = z.object({ id: z.string() });
+
+export const updateInboxSchema = z.object({
+  id: z.string(),
+  read: z.boolean().optional(),
+  status: z
+    .enum(["new", "in_progress", "completed", "archived", "deleted"])
+    .optional(),
+});

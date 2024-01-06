@@ -40,6 +40,7 @@ import {
   MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
   MdOutlineListAlt,
+  MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
   MdOutlineTimer,
@@ -425,4 +426,5 @@ export const Icons = {
   Add: MdAdd,
   DashboardCustomize: MdOutlineDashboardCustomize,
   Copy: MdOutlineContentCopy,
+  InboxEmpty: MdOutlineMoveToInbox,
 };

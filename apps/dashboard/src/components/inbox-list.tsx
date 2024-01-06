@@ -1,12 +1,23 @@
 "use client";
 
+import { updateInboxAction } from "@/actions/inbox/update";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { useAction } from "next-safe-action/hook";
 import { useRouter } from "next/navigation";
 
 export function InboxList({ items, selectedId }) {
   const router = useRouter();
+  const updateInbox = useAction(updateInboxAction);
+
+  const handleOnSelect = (item) => {
+    router.push(`/inbox?id=${item.id}`);
+
+    if (!item.read) {
+      updateInbox.execute({ id: item.id, read: true });
+    }
+  };
 
   return (
     <ScrollArea className="h-[calc(100vh-180px)]">
@@ -14,7 +25,7 @@ export function InboxList({ items, selectedId }) {
         {items.map((item) => (
           <button
             type="button"
-            onClick={() => router.push(`/inbox?id=${item.id}`)}
+            onClick={() => handleOnSelect(item)}
             key={item.id}
             className={cn(
               "flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all",
@@ -26,7 +37,7 @@ export function InboxList({ items, selectedId }) {
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
                   <div className="font-semibold">{item.name}</div>
-                  {item.status === "new" && (
+                  {!item.read && (
                     <span className="flex h-1.5 w-1.5 rounded-full bg-[#d98d00]" />
                   )}
                 </div>

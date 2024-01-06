@@ -280,7 +280,7 @@ export const getInbox = async (params) => {
     },
     ["inbox", teamId],
     {
-      tags: [`inbox${teamId}`],
+      tags: [`inbox_${teamId}`],
       revalidate: 10,
     }
   )(params);

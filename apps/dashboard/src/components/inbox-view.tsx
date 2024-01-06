@@ -6,14 +6,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import { useSearchParams } from "next/navigation";
 import { CopyInput } from "./copy-input";
+import { InboxEmpty } from "./inbox-empty";
 
 export function InboxView({ items }) {
   const searchParams = useSearchParams();
   const selectedId = searchParams.has("id")
     ? searchParams.get("id")
-    : items.at(0).id;
+    : items?.at(0)?.id;
 
   const selectedItems = items.find((item) => item.id === selectedId);
+
+  if (!items.length) {
+    return <InboxEmpty />;
+  }
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -44,7 +49,7 @@ export function InboxView({ items }) {
             </TabsContent>
           </div>
 
-          <InboxDetails mail={selectedItems} />
+          <InboxDetails item={selectedItems} />
         </div>
       </Tabs>
     </TooltipProvider>

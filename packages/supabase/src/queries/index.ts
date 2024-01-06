@@ -668,9 +668,11 @@ export async function getInboxQuery(
   const query = supabase
     .from("inbox")
     .select("*", { count: "exact" })
-    .eq("team_id", teamId);
+    .eq("team_id", teamId)
+    .neq("status", "deleted")
+    .neq("status", "archived");
 
-  const { data, count } = await query.range(from, to).throwOnError();
+  const { data, count } = await query.range(from, to);
 
   return {
     data,
