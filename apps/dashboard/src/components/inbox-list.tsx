@@ -3,14 +3,10 @@
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export function InboxList({ items }) {
+export function InboxList({ items, selectedId }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const selectedId = searchParams.has("id")
-    ? searchParams.get("id")
-    : items.at(0).id;
 
   return (
     <ScrollArea className="h-[calc(100vh-180px)]">

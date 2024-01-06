@@ -1,8 +1,18 @@
 import { Cookies } from "@/utils/constants";
+import { LogSnag } from "@logsnag/next/server";
 import { createClient } from "@midday/supabase/server";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+
+// await logsnag.identify({
+//   user_id: "user-123",
+//   properties: {
+//     name: "John Doe",
+//     email: "john@doe.com",
+//     plan: "premium",
+//   }
+// });
 
 export const runtime = "edge";
 export const preferredRegion = "fra1";

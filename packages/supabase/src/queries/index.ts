@@ -651,3 +651,29 @@ export async function getUserInviteQuery(
     .eq("email", params.email)
     .single();
 }
+
+type GetInboxQueryParams = {
+  teamId: string;
+  status: "completed" | "in_progress" | "new";
+  from?: number;
+  to?: number;
+};
+
+export async function getInboxQuery(
+  supabase: Client,
+  params: GetInboxQueryParams
+) {
+  const { from = 0, to = 10, teamId } = params;
+
+  const query = supabase
+    .from("inbox")
+    .select("*", { count: "exact" })
+    .eq("team_id", teamId);
+
+  const { data, count } = await query.range(from, to).throwOnError();
+
+  return {
+    data,
+    count,
+  };
+}

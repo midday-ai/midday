@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
   getBankConnectionsByTeamIdQuery,
+  getInboxQuery,
   getMetricsQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
@@ -266,4 +267,21 @@ export const getUserInvites = async () => {
       revalidate: 180,
     }
   )();
+};
+
+export const getInbox = async (params) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getInboxQuery(supabase, { ...params, teamId });
+    },
+    ["inbox", teamId],
+    {
+      tags: [`inbox${teamId}`],
+      revalidate: 10,
+    }
+  )(params);
 };

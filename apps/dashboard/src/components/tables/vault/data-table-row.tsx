@@ -169,7 +169,7 @@ export function DataTableRow({ data, teamId }) {
           title: `Copied URL for ${data.name} to clipboard.`,
           variant: "success",
         });
-      } catch (err) {}
+      } catch {}
     },
   });
 
