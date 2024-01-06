@@ -12,7 +12,7 @@ import { Separator } from "@midday/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import format from "date-fns/format";
-import { Archive, MoreVertical, Trash2 } from "lucide-react";
+import { MoreVertical, Trash2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { FilePreview } from "./file-preview";
@@ -44,24 +44,6 @@ export function InboxDetails({ item }) {
     <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!item}
-                onClick={() =>
-                  updateInbox.execute({ id: item.id, status: "archived" })
-                }
-              >
-                <Archive className="h-4 w-4" />
-                <span className="sr-only">Archive</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="px-3 py-1.5 text-xs">
-              Archive
-            </TooltipContent>
-          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -115,7 +97,9 @@ export function InboxDetails({ item }) {
               </Avatar>
               <div className="grid gap-1">
                 <div className="font-semibold">{item.name}</div>
-                <div className="line-clamp-1 text-xs">{item.subject}</div>
+                <div className="line-clamp-1 text-xs">
+                  {item.attachment_name}
+                </div>
               </div>
             </div>
             {item.date && (
@@ -125,9 +109,11 @@ export function InboxDetails({ item }) {
             )}
           </div>
           <Separator />
-          <div className="flex-1 whitespace-pre-wrap p-4 text-sm relative">
+
+          <div className="relative h-full">
             <FilePreview
-              src={item?.attachment_url}
+              src={`/api/proxy?filePath=vault/${item.attachment_path}`}
+              name={item.name}
               type="application/pdf"
               width={680}
               height={900}

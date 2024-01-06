@@ -62,10 +62,7 @@ export function InboxList({ items, selectedId }) {
                   })}
                 </div>
               </div>
-              <div className="text-xs font-medium">{item.subject}</div>
-            </div>
-            <div className="line-clamp-2 text-xs text-muted-foreground">
-              {item.text.substring(0, 300)}
+              <div className="text-xs font-medium">{item.attachment_name}</div>
             </div>
           </button>
         ))}

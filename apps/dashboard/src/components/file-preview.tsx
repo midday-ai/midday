@@ -19,7 +19,7 @@ type Props = {
   className?: string;
   preview?: boolean;
   src: string;
-  downloadUrl: string;
+  downloadUrl?: string;
   width: number;
   height: number;
   disableFullscreen?: boolean;
