@@ -3,6 +3,7 @@ import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Spending } from "@/components/charts/spending";
 import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import { Inbox } from "@/components/widgets/inbox";
 import { Cookies } from "@/utils/constants";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
@@ -55,6 +56,7 @@ export default async function Overview({ searchParams }) {
         <div className="flex space-x-8 mt-14">
           <Spending disabled={empty} />
           <Transactions disabled={empty} />
+          <Inbox disabled={empty} />
         </div>
       </div>
       {!isOpen && empty && <OverviewModal />}

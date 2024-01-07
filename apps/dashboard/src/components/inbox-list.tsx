@@ -1,24 +1,11 @@
 "use client";
 
-import { updateInboxAction } from "@/actions/inbox/update";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 
-export function InboxList({ items, selectedId }) {
-  const router = useRouter();
-  const updateInbox = useAction(updateInboxAction);
-
-  const handleOnSelect = (item) => {
-    router.push(`/inbox?id=${item.id}`);
-
-    if (!item.read) {
-      updateInbox.execute({ id: item.id, read: true });
-    }
-  };
-
+export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
   if (!items.length) {
     return (
       <div className="h-full w-full flex items-center justify-center">
@@ -33,7 +20,13 @@ export function InboxList({ items, selectedId }) {
         {items.map((item) => (
           <button
             type="button"
-            onClick={() => handleOnSelect(item)}
+            onClick={() => {
+              setSelectedId(item.id);
+
+              if (!item.read) {
+                updateInbox({ id: item.id, read: true });
+              }
+            }}
             key={item.id}
             className={cn(
               "flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all",
@@ -46,7 +39,7 @@ export function InboxList({ items, selectedId }) {
                 <div className="flex items-center gap-2">
                   <div className="font-semibold">{item.name}</div>
                   {!item.read && (
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#d98d00]" />
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />
                   )}
                 </div>
                 <div

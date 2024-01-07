@@ -31,6 +31,10 @@ export default {
     en: "Engelska",
     sv: "Svenska",
   },
+  inbox_filter: {
+    all: "Alla",
+    completed: "Färdiga",
+  },
   spending_period: {
     this_month: "Den här månaden",
     last_month: "Förra månaden",

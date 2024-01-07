@@ -42,6 +42,10 @@ export default {
     income: "Income",
     expense: "Expense",
   },
+  inbox_filter: {
+    all: "All",
+    completed: "Completed",
+  },
   chart_type: {
     profit_loss: "Profit/Loss",
     income: "Income",

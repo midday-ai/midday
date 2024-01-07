@@ -33,7 +33,18 @@ export function InboxView({
     updateInboxAction,
     items,
     (state, payload) => {
-      // Mark as read
+      if (payload.read) {
+        return items.map((item) => {
+          if (item.id === payload.id) {
+            return {
+              ...item,
+              read: true,
+            };
+          }
+
+          return item;
+        });
+      }
 
       if (payload.status === "delete") {
         return state.filter((item) => item.id === payload.id);
@@ -42,7 +53,11 @@ export function InboxView({
       return state;
     },
     {
-      onSuccess: () => router.push("/inbox"),
+      onSuccess: (_, input) => {
+        if (input.status === "deleted") {
+          router.push("/inbox");
+        }
+      },
     }
   );
 
@@ -132,7 +147,12 @@ export function InboxView({
             />
 
             <TabsContent value="all" className="m-0  h-full">
-              <InboxList items={optimisticData} selectedId={selectedId} />
+              <InboxList
+                items={optimisticData}
+                selectedId={selectedId}
+                updateInbox={execute}
+                setSelectedId={setSelectedId}
+              />
             </TabsContent>
             <TabsContent value="completed" className="m-0  h-full">
               <InboxList
@@ -140,6 +160,8 @@ export function InboxView({
                   (item) => item.status === "completed"
                 )}
                 selectedId={selectedId}
+                updateInbox={execute}
+                setSelectedId={setSelectedId}
               />
             </TabsContent>
           </div>

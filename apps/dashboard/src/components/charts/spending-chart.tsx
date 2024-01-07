@@ -46,13 +46,13 @@ export function SpendingChart({ categories, currency, totalAmount }) {
 
   return (
     <ResponsiveContainer width="100%">
-      <PieChart width={250} height={250}>
+      <PieChart width={190} height={190}>
         <Pie
           stroke="none"
           isAnimationActive={false}
           data={categories}
-          innerRadius={210 / 2}
-          outerRadius={250 / 2}
+          innerRadius={160 / 2}
+          outerRadius={190 / 2}
           fill="#8884d8"
           dataKey="amount"
         >
