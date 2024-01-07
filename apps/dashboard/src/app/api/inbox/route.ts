@@ -14,7 +14,10 @@ export async function POST(req: Request) {
   const res = await request.json();
   const ip = headers().get("x-forwarded-for");
 
+  console.log("body", res);
+
   if (ips.includes(ip)) {
+    console.log("verified");
   }
   // Get email
   // match email to team in db

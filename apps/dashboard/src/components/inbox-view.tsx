@@ -67,7 +67,7 @@ export function InboxView({
   }, [teamId, supabase]);
 
   useEffect(() => {
-    const currentIndex = items.findIndex((row) => row.id === selectedId);
+    const currentIndex = items?.findIndex((row) => row.id === selectedId);
 
     const keyDownHandler = (evt: KeyboardEvent) => {
       if (selectedId && evt.key === "ArrowDown") {
