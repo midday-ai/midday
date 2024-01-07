@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenuContent,
@@ -87,7 +87,6 @@ export function InboxDetails({ item, updateInbox }) {
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm">
               <Avatar>
-                <AvatarImage alt={item.name} src={item.logo_url} />
                 <AvatarFallback>
                   {item.name
                     .split(" ")

@@ -3,25 +3,26 @@ import { headers } from "next/headers";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-const ips = [
+const ipRange = [
   "3.134.147.250",
   "50.31.156.6",
   "50.31.156.77",
   "18.217.206.57",
-  "127.0.0.1",
 ];
 
 export async function POST(req: Request) {
   const res = await req.json();
-  const ip = headers().get("x-forwarded-for");
+  const clientIP = headers().get("x-forwarded-for");
 
-  console.log("body", res);
+  console.log("clientIP", clientIP);
 
-  if (ips.includes(ip)) {
+  if (ipRange.includes(clientIP)) {
     const email = res.To;
     const [inboxId] = email.split("@");
 
     console.log(inboxId);
+
+    console.log("body", res);
   }
   // match inboxId to team in db
   // get all attachments
