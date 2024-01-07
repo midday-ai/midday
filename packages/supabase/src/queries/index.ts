@@ -534,7 +534,8 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const filteredData =
     data
       ?.filter((file) => file.name !== EMPTY_FOLDER_PLACEHOLDER_FILE_NAME)
-      .filter((file) => file.name !== "transactions")
+      // NOTE: Exclude transactions and inbox folder
+      .filter((file) => !["transactions", "inbox"].includes(file.name))
       .map((item) => ({ ...item, isFolder: !item.id })) ?? [];
 
   const mergedMap = new Map(

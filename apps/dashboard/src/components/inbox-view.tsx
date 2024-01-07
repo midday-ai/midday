@@ -126,9 +126,8 @@ export function InboxView({
             <InboxUpdates
               show={Boolean(updates)}
               onRefresh={() => {
-                router.refresh();
+                router.push("/inbox");
                 setUpdates(false);
-                // TODO: Invalidate cache
               }}
             />
 

@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
+// https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
   "3.134.147.250",
   "50.31.156.6",
@@ -13,8 +14,6 @@ const ipRange = [
 export async function POST(req: Request) {
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for");
-
-  console.log("clientIP", clientIP);
 
   if (ipRange.includes(clientIP)) {
     const email = res.To;

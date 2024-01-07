@@ -62,7 +62,7 @@ export function InboxList({ items, selectedId }) {
                   })}
                 </div>
               </div>
-              <div className="text-xs font-medium">{item.attachment_name}</div>
+              <div className="text-xs font-medium">{item?.attachment_name}</div>
             </div>
           </button>
         ))}

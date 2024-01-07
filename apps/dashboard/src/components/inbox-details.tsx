@@ -68,7 +68,7 @@ export function InboxDetails({ item, updateInbox }) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
                 <a
-                  href={`/api/download/file?path=inbox/${item.attachment_name}&filename=${item.attachment_name}`}
+                  href={`/api/download/file?path=inbox/${item?.attachment_name}&filename=${item?.attachment_name}`}
                   download
                 >
                   Download
@@ -109,7 +109,7 @@ export function InboxDetails({ item, updateInbox }) {
 
           <div className="relative h-full">
             <FilePreview
-              src={`/api/proxy?filePath=vault/${item.attachment_path}`}
+              src={`/api/proxy?filePath=vault/${item?.attachment_path}`}
               name={item.name}
               type="application/pdf"
               width={680}
