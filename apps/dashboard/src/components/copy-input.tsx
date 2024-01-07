@@ -26,7 +26,7 @@ export function CopyInput({ value }: Props) {
 
   return (
     <div className="flex items-center relative w-full rounded-md border border-input py-2 px-4">
-      <div className="pr-7 text-[#878787] text-sm">inbox.23rwef@midday.ai</div>
+      <div className="pr-7 text-[#878787] text-sm">{value}</div>
       <button type="button" onClick={handleClipboard}>
         <motion.div
           className="absolute right-4 top-2.5"

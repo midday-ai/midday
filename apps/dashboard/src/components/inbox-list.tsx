@@ -57,7 +57,7 @@ export function InboxList({ items, selectedId }) {
                       : "text-muted-foreground"
                   )}
                 >
-                  {formatDistanceToNow(new Date(item.date), {
+                  {formatDistanceToNow(new Date(item.created_at), {
                     addSuffix: true,
                   })}
                 </div>

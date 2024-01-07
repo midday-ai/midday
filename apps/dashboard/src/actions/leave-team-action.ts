@@ -19,8 +19,6 @@ export const leaveTeamAction = action(
       (member) => member.role === "owner"
     ).length;
 
-    console.log(role);
-
     if (role === "owner" && totalOwners === 1) {
       throw Error("Action not allowed");
     }

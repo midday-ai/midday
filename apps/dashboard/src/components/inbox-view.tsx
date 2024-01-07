@@ -1,23 +1,106 @@
 "use client";
 
+import { updateInboxAction } from "@/actions/inbox/update";
 import { InboxDetails } from "@/components/inbox-details";
 import { InboxList } from "@/components/inbox-list";
+import { InboxUpdates } from "@/components/inbox-updates";
+import { createClient } from "@midday/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
-import { useSearchParams } from "next/navigation";
+import { useOptimisticAction } from "next-safe-action/hooks";
+import { useQueryState } from "next-usequerystate";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
 import { InboxEmpty } from "./inbox-empty";
 
-export function InboxView({ items }) {
-  const searchParams = useSearchParams();
-  const selectedId = searchParams.has("id")
-    ? searchParams.get("id")
-    : items?.at(0)?.id;
+export function InboxView({
+  items,
+  inboxId,
+  teamId,
+  selectedId: initialSelectedId,
+}) {
+  const [updates, setUpdates] = useState();
+  const supabase = createClient();
+  const router = useRouter();
 
-  const selectedItems = items.find((item) => item.id === selectedId);
+  const [selectedId, setSelectedId] = useQueryState("id", {
+    defaultValue: initialSelectedId,
+    shallow: true,
+  });
 
-  if (!items.length) {
-    return <InboxEmpty />;
+  const { execute, optimisticData } = useOptimisticAction(
+    updateInboxAction,
+    items,
+    (state, payload) => {
+      // Mark as read
+
+      if (payload.status === "delete") {
+        return state.filter((item) => item.id === payload.id);
+      }
+
+      return state;
+    },
+    {
+      onSuccess: () => router.push("/inbox"),
+    }
+  );
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "inbox",
+          filter: `team_id=eq.${teamId}`,
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setUpdates(true);
+          }
+        }
+      )
+      .subscribe();
+  }, [teamId, supabase]);
+
+  useEffect(() => {
+    const currentIndex = items.findIndex((row) => row.id === selectedId);
+
+    const keyDownHandler = (evt: KeyboardEvent) => {
+      if (selectedId && evt.key === "ArrowDown") {
+        evt.preventDefault();
+        const nextItem = items.at(currentIndex + 1);
+
+        if (nextItem) {
+          setSelectedId(nextItem.id);
+        }
+      }
+
+      if (selectedId && evt.key === "ArrowUp") {
+        evt.preventDefault();
+
+        const prevItem = items.at(currentIndex - 1);
+
+        if (currentIndex > 0 && prevItem) {
+          setSelectedId(prevItem.id);
+        }
+      }
+    };
+
+    document.addEventListener("keydown", keyDownHandler);
+
+    return () => {
+      document.removeEventListener("keydown", keyDownHandler);
+    };
+  }, [selectedId, items, setSelectedId]);
+
+  const selectedItems = optimisticData?.find((item) => item.id === selectedId);
+
+  if (!optimisticData?.length) {
+    return <InboxEmpty inboxId={inboxId} />;
   }
 
   return (
@@ -34,24 +117,35 @@ export function InboxView({ items }) {
           </TabsList>
 
           <div>
-            <CopyInput value="inbox.23rwef@midday.ai" />
+            <CopyInput value={`${inboxId}@inbox.midday.ai`} />
           </div>
         </div>
 
         <div className="flex flex-row space-x-8">
-          <div className="w-full">
+          <div className="w-full h-full relative overflow-hidden">
+            <InboxUpdates
+              show={Boolean(updates)}
+              onRefresh={() => {
+                router.refresh();
+                setUpdates(false);
+                // TODO: Invalidate cache
+              }}
+            />
+
             <TabsContent value="all" className="m-0  h-full">
-              <InboxList items={items} selectedId={selectedId} />
+              <InboxList items={optimisticData} selectedId={selectedId} />
             </TabsContent>
             <TabsContent value="completed" className="m-0  h-full">
               <InboxList
-                items={items.filter((item) => item.status === "completed")}
+                items={optimisticData.filter(
+                  (item) => item.status === "completed"
+                )}
                 selectedId={selectedId}
               />
             </TabsContent>
           </div>
 
-          <InboxDetails item={selectedItems} />
+          <InboxDetails item={selectedItems} updateInbox={execute} />
         </div>
       </Tabs>
     </TooltipProvider>

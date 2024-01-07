@@ -43,6 +43,7 @@ import {
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
+  MdOutlineRefresh,
   MdOutlineTimer,
   MdOutlineTune,
   MdPayments,

@@ -672,7 +672,8 @@ export async function getInboxQuery(
     })
     .eq("team_id", teamId)
     .neq("status", "deleted")
-    .neq("status", "archived");
+    .neq("status", "archived")
+    .order("created_at", { ascending: false });
 
   const { data, count } = await query.range(from, to);
 

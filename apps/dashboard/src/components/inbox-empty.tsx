@@ -1,7 +1,7 @@
 import { Icons } from "@midday/ui/icons";
 import { CopyInput } from "./copy-input";
 
-export function InboxEmpty() {
+export function InboxEmpty({ inboxId }) {
   return (
     <div className="h-[calc(100vh-150px)] flex items-center justify-center">
       <div className="flex flex-col items-center w-[330px]">
@@ -14,7 +14,7 @@ export function InboxEmpty() {
           </p>
         </div>
 
-        <CopyInput value="inbox.23rwef@midday.ai" />
+        <CopyInput value={`${inboxId}@inbox.midday.ai`} />
       </div>
     </div>
   );

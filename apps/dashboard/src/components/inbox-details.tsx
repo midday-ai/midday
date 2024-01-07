@@ -1,6 +1,5 @@
 "use client";
 
-import { updateInboxAction } from "@/actions/inbox/update";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -18,13 +17,9 @@ import { useRouter } from "next/navigation";
 import { FilePreview } from "./file-preview";
 import { InboxToolbar } from "./inbox-toolbar";
 
-export function InboxDetails({ item }) {
+export function InboxDetails({ item, updateInbox }) {
   const router = useRouter();
   const { toast } = useToast();
-
-  const updateInbox = useAction(updateInboxAction, {
-    onSuccess: () => router.push("/inbox"),
-  });
 
   const handleCopyUrl = async () => {
     try {
@@ -50,9 +45,7 @@ export function InboxDetails({ item }) {
                 variant="ghost"
                 size="icon"
                 disabled={!item}
-                onClick={() =>
-                  updateInbox.execute({ id: item.id, status: "deleted" })
-                }
+                onClick={() => updateInbox({ id: item.id, status: "deleted" })}
               >
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Move to trash</span>
@@ -73,7 +66,14 @@ export function InboxDetails({ item }) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Download</DropdownMenuItem>
+              <DropdownMenuItem>
+                <a
+                  href={`/api/download/file?path=inbox/${item.attachment_name}&filename=${item.attachment_name}`}
+                  download
+                >
+                  Download
+                </a>
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleCopyUrl}>
                 Copy URL
               </DropdownMenuItem>
@@ -102,11 +102,9 @@ export function InboxDetails({ item }) {
                 </div>
               </div>
             </div>
-            {item.date && (
-              <div className="ml-auto text-xs text-muted-foreground">
-                {format(new Date(item.date), "PPpp")}
-              </div>
-            )}
+            <div className="ml-auto text-xs text-muted-foreground">
+              {format(new Date(item.created_at), "PPpp")}
+            </div>
           </div>
           <Separator />
 
