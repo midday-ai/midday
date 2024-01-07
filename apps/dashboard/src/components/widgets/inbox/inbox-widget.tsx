@@ -1,3 +1,4 @@
+import { CopyInput } from "@/components/copy-input";
 import { getUser, getinboxs } from "@midday/supabase/cached-queries";
 import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
@@ -5,36 +6,6 @@ import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import Link from "next/link";
 import { inboxData } from "./data";
-
-export function InboxHeader() {
-  return (
-    <div className="flex  p-3 border-b-[1px]">
-      <span className="font-medium text-sm w-[50%]">Description</span>
-      <span className="font-medium text-sm w-[35%]">Amount</span>
-      <span className="font-medium text-sm">Status</span>
-    </div>
-  );
-}
-
-export function InboxSkeleton() {
-  return (
-    <div className="divide-y">
-      {[...Array(6)].map((_, index) => (
-        <div
-          key={index.toString()}
-          className="flex justify-between px-3 items-center h-[44px]"
-        >
-          <div className="w-[60%]">
-            <Skeleton className="h-4 w-[50%]" />
-          </div>
-          <div className="w-[40%]">
-            <Skeleton className="w-[60%] h-4 align-start" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 export async function InboxWidget({ filter, disabled }) {
   const supabase = createClient();
@@ -49,8 +20,19 @@ export async function InboxWidget({ filter, disabled }) {
       });
 
   if (!data?.length) {
-    // TODO: Empty state
-    return;
+    return (
+      <div className="flex flex-col space-y-4 items-center justify-center h-full text-center">
+        <div>
+          <CopyInput value={`${user?.data?.team?.inbox_id}@inbox.midday.ai`} />
+        </div>
+
+        <p className="text-sm text-[#606060]">
+          Use this email for online purchases to seamlessly
+          <br />
+          match receipts againsts transactions.
+        </p>
+      </div>
+    );
   }
 
   return (

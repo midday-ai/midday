@@ -9,8 +9,9 @@ export function InboxEmpty({ inboxId }) {
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">Magic Inbox</h2>
           <p className="text-[#606060] text-sm">
-            Use this email for online purchases to seamlessly reconcile receipts
-            and invoices with your transactions for easy accounting preparation.
+            Use this email for online purchases to seamlessly
+            <br />
+            match receipts againsts transactions.
           </p>
         </div>
 
