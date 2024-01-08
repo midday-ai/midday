@@ -1,0 +1,100 @@
+"use client";
+
+import { createClient } from "@midday/supabase/client";
+import { getTransactionsQuery } from "@midday/supabase/queries";
+import { Combobox } from "@midday/ui/combobox";
+import { Icons } from "@midday/ui/icons";
+import { format } from "date-fns";
+import { useEffect, useState } from "react";
+import { useDebounce } from "usehooks-ts";
+import { FormatAmount } from "./format-amount";
+
+export function SelectTransaction({
+  placeholder,
+  onSelect,
+  teamId,
+  latestTransactions,
+  selectedItem,
+}) {
+  const supabase = createClient();
+  const [items, setItems] = useState(latestTransactions);
+  const [isFetching, setFetching] = useState(false);
+  const [isHidden, setHidden] = useState(true);
+  const [value, setValue] = useState<string>("");
+  const debouncedValue = useDebounce<string>(value, 200);
+
+  const handleFocus = () => {
+    setHidden(false);
+  };
+
+  const handleChange = (query) => {
+    setValue(query);
+
+    if (query.length > 0) {
+      setFetching(true);
+    } else {
+      setFetching(false);
+    }
+  };
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const { data } = await getTransactionsQuery(supabase, {
+          teamId,
+          to: 25,
+          from: 0,
+          filter: {
+            search: debouncedValue,
+            fuzzy: true,
+          },
+        });
+
+        setFetching(false);
+
+        setItems(data);
+      } catch {
+        setFetching(false);
+      }
+    }
+
+    if (debouncedValue.length > 0) {
+      fetchData();
+    }
+  }, [debouncedValue]);
+
+  return (
+    <div className="flex items-center w-full relative">
+      <Icons.Search className="w-[22px] h-[22px] absolute left-4" />
+      <Combobox
+        onFocus={handleFocus}
+        hidden={isHidden}
+        placeholder={placeholder}
+        className="w-full border-0 bg-transparent px-12"
+        value={value}
+        onValueChange={handleChange}
+        options={items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          component: () => (
+            <div className="text-white flex w-full">
+              <div className="w-[50%] line-clamp-1 text-ellipsis overflow-hidden pr-8">
+                {item.name}
+              </div>
+              <div className="w-[70px]">
+                {format(new Date(item.date), "d MMM")}
+              </div>
+              <div className="flex-1 text-right">
+                <FormatAmount amount={item.amount} currency={item.currency} />
+              </div>
+            </div>
+          ),
+        }))}
+        isFetching={isFetching}
+      />
+      {selectedItem && (
+        <Icons.Close className="w-[20px] h-[20px] absolute right-4" />
+      )}
+    </div>
+  );
+}

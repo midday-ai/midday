@@ -24,6 +24,7 @@
     "./card": "./src/components/card.tsx",
     "./context-menu": "./src/components/context-menu.tsx",
     "./collapsible": "./src/components/collapsible.tsx",
+    "./combobox": "./src/components/combobox.tsx",
     "./carousel": "./src/components/carousel.tsx",
     "./alert": "./src/components/alert.tsx",
     "./alert-dialog": "./src/components/alert-dialog.tsx",

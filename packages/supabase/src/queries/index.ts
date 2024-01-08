@@ -215,6 +215,7 @@ type GetTransactionsParams = {
   };
   filter: {
     search?: string;
+    fuzzy?: boolean;
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
     categories?: string[];
@@ -238,6 +239,7 @@ export async function getTransactionsQuery(
     attachments,
     categories,
     type,
+    fuzzy,
   } = filter || {};
 
   const query = supabase
@@ -264,7 +266,11 @@ export async function getTransactionsQuery(
     query.lte("date", date.to);
   }
 
-  if (search) {
+  if (search && fuzzy) {
+    query.ilike("name", `%${search}%`);
+  }
+
+  if (search && !fuzzy) {
     query.textSearch("name", search, {
       type: "websearch",
       config: "english",

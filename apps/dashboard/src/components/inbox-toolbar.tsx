@@ -1,11 +1,10 @@
 "use client";
 
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { SelectTransaction } from "./select-transaction";
 
-export function InboxToolbar({ item }) {
+export function InboxToolbar({ item, teamId, latestTransactions }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -17,29 +16,18 @@ export function InboxToolbar({ item }) {
   return (
     <AnimatePresence>
       <motion.div
-        className="h-12 fixed bottom-14 right-[215px] z-50 w-[380px]"
+        className="h-12 fixed bottom-14 right-[200px] z-50 w-[400px]"
         animate={{ y: show ? 0 : 150 }}
         initial={{ y: 150 }}
       >
-        <div className="backdrop-filter backdrop-blur-lg flex h-12 dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
-          <div>
-            <div className="flex items-center">
-              {item.status === "completed" ? (
-                <Icons.Check className="w-[22px] h-[22px]" />
-              ) : (
-                <Icons.Search className="w-[22px] h-[22px]" />
-              )}
-              <Input
-                placeholder="Select transaction"
-                className="w-full border-0"
-                value={
-                  item.status === "completed"
-                    ? "Google • €15.60 • Nov 1"
-                    : undefined
-                }
-              />
-            </div>
-          </div>
+        <div className="backdrop-filter backdrop-blur-lg flex h-12 dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
+          <SelectTransaction
+            placeholder="Select transaction"
+            onSelect={(transaction) => console.log(transaction)}
+            latestTransactions={latestTransactions}
+            teamId={teamId}
+            selectedItem={item?.transactionId}
+          />
         </div>
       </motion.div>
     </AnimatePresence>

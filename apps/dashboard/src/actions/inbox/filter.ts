@@ -17,8 +17,6 @@ export const changeInboxFilterAction = action(
       value: status,
     });
 
-    console.log(`inbox_${user?.data?.team_id}`);
-
     revalidateTag(`inbox_${user?.data?.team_id}`);
 
     return status;

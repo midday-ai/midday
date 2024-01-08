@@ -28,6 +28,7 @@ import {
   MdMoreHoriz,
   MdOutlineAccountBalanceWallet,
   MdOutlineBrokenImage,
+  MdOutlineCancel,
   MdOutlineCategory,
   MdOutlineContentCopy,
   MdOutlineDashboardCustomize,
@@ -428,4 +429,5 @@ export const Icons = {
   DashboardCustomize: MdOutlineDashboardCustomize,
   Copy: MdOutlineContentCopy,
   InboxEmpty: MdOutlineMoveToInbox,
+  Cancel: MdOutlineCancel,
 };

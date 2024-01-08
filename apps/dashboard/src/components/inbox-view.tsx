@@ -19,6 +19,7 @@ export function InboxView({
   inboxId,
   teamId,
   selectedId: initialSelectedId,
+  latestTransactions,
   onRefresh,
 }) {
   const [updates, setUpdates] = useState();
@@ -89,37 +90,6 @@ export function InboxView({
       .subscribe();
   }, [teamId, supabase]);
 
-  useEffect(() => {
-    const currentIndex = items?.findIndex((row) => row.id === selectedId);
-
-    const keyDownHandler = (evt: KeyboardEvent) => {
-      if (selectedId && evt.key === "ArrowDown") {
-        evt.preventDefault();
-        const nextItem = items.at(currentIndex + 1);
-
-        if (nextItem) {
-          setSelectedId(nextItem.id);
-        }
-      }
-
-      if (selectedId && evt.key === "ArrowUp") {
-        evt.preventDefault();
-
-        const prevItem = items.at(currentIndex - 1);
-
-        if (currentIndex > 0 && prevItem) {
-          setSelectedId(prevItem.id);
-        }
-      }
-    };
-
-    document.addEventListener("keydown", keyDownHandler);
-
-    return () => {
-      document.removeEventListener("keydown", keyDownHandler);
-    };
-  }, [selectedId, items, setSelectedId]);
-
   const selectedItems = optimisticData?.find((item) => item.id === selectedId);
 
   if (!optimisticData?.length) {
@@ -149,7 +119,6 @@ export function InboxView({
             <InboxUpdates
               show={Boolean(updates)}
               onRefresh={() => {
-                // router.push("/inbox");
                 onRefresh();
                 setUpdates(false);
               }}
@@ -175,7 +144,12 @@ export function InboxView({
             </TabsContent>
           </div>
 
-          <InboxDetails item={selectedItems} updateInbox={updateInbox} />
+          <InboxDetails
+            item={selectedItems}
+            latestTransactions={latestTransactions}
+            updateInbox={updateInbox}
+            teamId={teamId}
+          />
         </div>
       </Tabs>
     </TooltipProvider>

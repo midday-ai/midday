@@ -313,3 +313,8 @@ html.todesktop {
 html.todesktop header {
   -webkit-app-region: drag;
 }
+
+html.todesktop,
+html.todesktop div {
+  cursor: default !important;
+}

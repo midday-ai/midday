@@ -3,7 +3,6 @@
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
-import { useAction } from "next-safe-action/hooks";
 
 export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
   if (!items.length) {
