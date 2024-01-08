@@ -123,7 +123,7 @@ export function SelectTransaction({
         options={options}
         isFetching={isFetching}
       />
-      {selectedTransaction && (
+      {!isFetching && selectedTransaction && (
         <Icons.Close
           className="w-[20px] h-[20px] absolute right-4"
           onClick={handleOnRemove}
