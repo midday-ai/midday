@@ -23,7 +23,7 @@ export function InboxToolbar({ item, teamId, latestTransactions }) {
         <div className="backdrop-filter backdrop-blur-lg flex h-12 dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
           <SelectTransaction
             placeholder="Select transaction"
-            onSelect={(transaction) => console.log(transaction)}
+            // onSelect={(transaction) => console.log(transaction)}
             latestTransactions={latestTransactions}
             teamId={teamId}
             selectedItem={item?.transactionId}
