@@ -674,7 +674,7 @@ export async function getInboxQuery(
 
   const query = supabase
     .from("inbox")
-    .select("*", {
+    .select("*, transaction:transaction_id(id, amount, currency, name, date)", {
       count: "exact",
     })
     .eq("team_id", teamId)

@@ -77,6 +77,11 @@ export function InboxView({
         (payload) => {
           if (payload.eventType === "INSERT") {
             setUpdates(true);
+
+            // If nothing in inbox yet
+            if (!optimisticData?.length) {
+              onRefresh();
+            }
           }
 
           if (

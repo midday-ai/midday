@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { SelectTransaction } from "./select-transaction";
 
-export function InboxToolbar({ item, teamId, latestTransactions }) {
+export function InboxToolbar({ item, teamId, latestTransactions, onSelect }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -23,10 +23,11 @@ export function InboxToolbar({ item, teamId, latestTransactions }) {
         <div className="backdrop-filter backdrop-blur-lg flex h-12 dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
           <SelectTransaction
             placeholder="Select transaction"
-            // onSelect={(transaction) => console.log(transaction)}
             latestTransactions={latestTransactions}
             teamId={teamId}
-            selectedItem={item?.transactionId}
+            inboxId={item.id}
+            selectedTransaction={item?.transaction}
+            onSelect={onSelect}
           />
         </div>
       </motion.div>

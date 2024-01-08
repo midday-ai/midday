@@ -1,5 +1,6 @@
 "use client";
 
+import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
@@ -36,7 +37,10 @@ export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center">
                 <div className="flex items-center gap-2">
-                  <div className="font-semibold">{item.name}</div>
+                  <div className="flex items-center space-x-2">
+                    <div className="font-semibold">{item.name}</div>
+                    {item.status === "completed" && <Icons.Check />}
+                  </div>
                   {!item.read && (
                     <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />
                   )}

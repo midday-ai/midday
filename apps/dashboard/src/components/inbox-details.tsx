@@ -12,11 +12,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import format from "date-fns/format";
 import { MoreVertical, Trash2 } from "lucide-react";
- import { FilePreview } from "./file-preview";
+import { FilePreview } from "./file-preview";
 import { InboxToolbar } from "./inbox-toolbar";
 
-export function InboxDetails({ item, updateInbox, teamId, latestTransactions }) {
-   const { toast } = useToast();
+export function InboxDetails({
+  item,
+  updateInbox,
+  teamId,
+  latestTransactions,
+}) {
+  const { toast } = useToast();
 
   const handleCopyUrl = async () => {
     try {
@@ -85,7 +90,7 @@ export function InboxDetails({ item, updateInbox, teamId, latestTransactions }) 
             <div className="flex items-start gap-4 text-sm">
               <Avatar>
                 <AvatarFallback>
-                  {item.name?
+                  {item?.name
                     .split(" ")
                     .map((chunk) => chunk[0])
                     .join("")}
@@ -116,7 +121,13 @@ export function InboxDetails({ item, updateInbox, teamId, latestTransactions }) 
             />
           </div>
 
-          <InboxToolbar item={item} key={item.id} teamId={teamId} latestTransactions={latestTransactions}/>
+          <InboxToolbar
+            item={item}
+            key={item.id}
+            teamId={teamId}
+            latestTransactions={latestTransactions}
+            onSelect={updateInbox}
+          />
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">

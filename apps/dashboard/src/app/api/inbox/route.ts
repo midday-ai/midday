@@ -1,27 +1,36 @@
+import { createClient } from "@midday/supabase/server";
 import { headers } from "next/headers";
 
 export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
-// NOTE: https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
+// https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
   "3.134.147.250",
   "50.31.156.6",
   "50.31.156.77",
   "18.217.206.57",
+  "127.0.0.1",
 ];
 
 export async function POST(req: Request) {
+  const supabase = createClient();
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for");
 
-  if (ipRange.includes(clientIP)) {
-    const email = res.To;
+  if (res?.To && ipRange.includes(clientIP)) {
+    const email = res?.To;
     const [inboxId] = email.split("@");
+
+    const { data: teamData } = await supabase
+      .from("teams")
+      .select("id")
+      .eq("inbox_id", inboxId)
+      .single();
   }
-  // match inboxId to team in db
   // get all attachments
-  // Save attachment in vault/inbox
+  // save each in inbox vault
+  // save in documents
   // save in inbox with Sender, email, attachment_url, team_id
   return Response.json({ success: true });
 }
