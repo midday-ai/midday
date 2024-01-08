@@ -1,4 +1,5 @@
 import { ErrorFallback } from "@/components/error-fallback";
+import { Cookies } from "@/utils/constants";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
@@ -6,7 +7,7 @@ import { InboxHeader } from "./inbox-header";
 import { InboxWidget } from "./inbox-widget";
 
 export async function Inbox({ disabled }) {
-  const filter = cookies().get("inbox-filter")?.value ?? "all";
+  const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
 
   return (
     <div className="flex-1 border p-8 relative">

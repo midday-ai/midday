@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTransactionsPeriodAction } from "@/actions/change-transactions-period-action";
+import { changeInboxFilterAction } from "@/actions/inbox/filter";
 import { useI18n } from "@/locales/client";
 import {
   DropdownMenu,
@@ -16,7 +16,7 @@ const options = ["all", "completed"];
 export function InboxHeader({ filter, disabled }) {
   const t = useI18n();
   const { execute, optimisticData } = useOptimisticAction(
-    changeTransactionsPeriodAction,
+    changeInboxFilterAction,
     filter,
     (_, newState) => {
       return newState;

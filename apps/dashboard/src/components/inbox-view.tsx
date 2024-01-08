@@ -19,6 +19,7 @@ export function InboxView({
   inboxId,
   teamId,
   selectedId: initialSelectedId,
+  onRefresh,
 }) {
   const [updates, setUpdates] = useState();
   const supabase = createClient();
@@ -29,7 +30,7 @@ export function InboxView({
     shallow: true,
   });
 
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
     items,
     (state, payload) => {
@@ -62,7 +63,7 @@ export function InboxView({
   );
 
   useEffect(() => {
-    const channel = supabase
+    supabase
       .channel("changes")
       .on(
         "postgres_changes",
@@ -75,6 +76,13 @@ export function InboxView({
         (payload) => {
           if (payload.eventType === "INSERT") {
             setUpdates(true);
+          }
+
+          if (
+            payload.eventType === "DELETE" ||
+            payload.eventType === "UPDATE"
+          ) {
+            onRefresh();
           }
         }
       )
@@ -141,7 +149,8 @@ export function InboxView({
             <InboxUpdates
               show={Boolean(updates)}
               onRefresh={() => {
-                router.push("/inbox");
+                // router.push("/inbox");
+                onRefresh();
                 setUpdates(false);
               }}
             />
@@ -150,7 +159,7 @@ export function InboxView({
               <InboxList
                 items={optimisticData}
                 selectedId={selectedId}
-                updateInbox={execute}
+                updateInbox={updateInbox}
                 setSelectedId={setSelectedId}
               />
             </TabsContent>
@@ -160,13 +169,13 @@ export function InboxView({
                   (item) => item.status === "completed"
                 )}
                 selectedId={selectedId}
-                updateInbox={execute}
+                updateInbox={updateInbox}
                 setSelectedId={setSelectedId}
               />
             </TabsContent>
           </div>
 
-          <InboxDetails item={selectedItems} updateInbox={execute} />
+          <InboxDetails item={selectedItems} updateInbox={updateInbox} />
         </div>
       </Tabs>
     </TooltipProvider>

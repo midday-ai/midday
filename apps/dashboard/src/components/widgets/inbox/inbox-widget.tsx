@@ -1,22 +1,18 @@
 import { CopyInput } from "@/components/copy-input";
-import { getUser, getinboxs } from "@midday/supabase/cached-queries";
-import { getInboxQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { cn } from "@midday/ui/utils";
+import { getInbox, getUser } from "@midday/supabase/cached-queries";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import Link from "next/link";
 import { inboxData } from "./data";
 
 export async function InboxWidget({ filter, disabled }) {
-  const supabase = createClient();
   const user = await getUser();
 
   const { data } = disabled
     ? inboxData
-    : await getInboxQuery(supabase, {
+    : await getInbox({
         to: 3,
         from: 0,
-        teamId: user.data.team_id,
+        status: filter,
       });
 
   if (!data?.length) {

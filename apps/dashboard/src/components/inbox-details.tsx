@@ -88,7 +88,7 @@ export function InboxDetails({ item, updateInbox }) {
             <div className="flex items-start gap-4 text-sm">
               <Avatar>
                 <AvatarFallback>
-                  {item.name
+                  {item.name?
                     .split(" ")
                     .map((chunk) => chunk[0])
                     .join("")}

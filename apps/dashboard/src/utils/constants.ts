@@ -6,4 +6,5 @@ export const Cookies = {
   TransactionsPeriod: "transactions-period",
   MfaSetupVisited: "mfa-setup-visited",
   MenuConfig: "menu-config",
+  InboxFilter: "inbox-filter",
 };

@@ -655,7 +655,7 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  status: "completed" | "in_progress" | "new";
+  status: "completed" | "deleted" | "archived";
   from?: number;
   to?: number;
 };
@@ -664,7 +664,7 @@ export async function getInboxQuery(
   supabase: Client,
   params: GetInboxQueryParams
 ) {
-  const { from = 0, to = 10, teamId } = params;
+  const { from = 0, to = 10, teamId, status } = params;
 
   const query = supabase
     .from("inbox")
@@ -675,6 +675,10 @@ export async function getInboxQuery(
     .neq("status", "deleted")
     .neq("status", "archived")
     .order("created_at", { ascending: false });
+
+  if (status === "completed") {
+    query.not("transaction_id", "is", null);
+  }
 
   const { data, count } = await query.range(from, to);
 
