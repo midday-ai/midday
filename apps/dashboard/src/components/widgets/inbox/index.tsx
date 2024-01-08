@@ -4,7 +4,7 @@ import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { InboxHeader } from "./inbox-header";
-import { InboxWidget } from "./inbox-widget";
+import { InboxSkeleton, InboxWidget } from "./inbox-widget";
 
 export async function Inbox({ disabled }) {
   const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
@@ -15,7 +15,7 @@ export async function Inbox({ disabled }) {
 
       <div className="h-[350px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense>
+          <Suspense fallback={<InboxSkeleton />}>
             <InboxWidget disabled={disabled} filter={filter} />
           </Suspense>
         </ErrorBoundary>

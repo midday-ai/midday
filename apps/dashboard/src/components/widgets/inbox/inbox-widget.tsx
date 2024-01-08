@@ -1,8 +1,38 @@
 import { CopyInput } from "@/components/copy-input";
 import { getInbox, getUser } from "@midday/supabase/cached-queries";
+import { Skeleton } from "@midday/ui/skeleton";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import Link from "next/link";
 import { inboxData } from "./data";
+
+export function InboxSkeleton() {
+  return (
+    <div className="flex flex-col gap-4 pt-8">
+      {[...Array(4)].map((_, index) => (
+        <div
+          className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all h-[74px]"
+          key={index.toString()}
+        >
+          <div className="flex w-full flex-col gap-1">
+            <div className="flex items-center">
+              <div className="flex items-center gap-2">
+                <div className="font-semibold">
+                  <Skeleton className="h-3 w-[140px]" />
+                </div>
+              </div>
+              <div className="ml-auto text-xs text-muted-foreground">
+                <Skeleton className="h-3 w-[40px]" />
+              </div>
+            </div>
+            <div className="text-xs font-medium">
+              <Skeleton className="h-2 w-[110px]" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export async function InboxWidget({ filter, disabled }) {
   const user = await getUser();

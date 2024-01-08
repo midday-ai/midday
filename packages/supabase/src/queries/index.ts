@@ -201,7 +201,7 @@ export async function getSpendingQuery(
           amount: +Math.abs(amount).toFixed(2),
         };
       })
-      .sort((a, b) => b.amount - a.amount),
+      .sort((a, b) => a.category.length - b.category.length),
   };
 }
 
