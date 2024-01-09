@@ -70,7 +70,7 @@ export function InboxDetails({
             <DropdownMenuContent align="end">
               <DropdownMenuItem>
                 <a
-                  href={`/api/download/file?path=inbox/${item?.attachment_name}&filename=${item?.attachment_name}`}
+                  href={`/api/download/file?path=inbox/${item?.file_name}&filename=${item?.file_name}`}
                   download
                 >
                   Download
@@ -98,9 +98,7 @@ export function InboxDetails({
               </Avatar>
               <div className="grid gap-1">
                 <div className="font-semibold">{item.name}</div>
-                <div className="line-clamp-1 text-xs">
-                  {item.attachment_name}
-                </div>
+                <div className="line-clamp-1 text-xs">{item.file_name}</div>
               </div>
             </div>
             <div className="ml-auto text-xs text-muted-foreground">
@@ -111,7 +109,7 @@ export function InboxDetails({
 
           <div className="relative h-full">
             <FilePreview
-              src={`/api/proxy?filePath=vault/${item?.attachment_path}`}
+              src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
               name={item.name}
               type="application/pdf"
               width={680}

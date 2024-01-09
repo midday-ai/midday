@@ -83,7 +83,7 @@ export async function InboxWidget({ filter, disabled }) {
                 })}
               </div>
             </div>
-            <div className="text-xs font-medium">{item?.attachment_name}</div>
+            <div className="text-xs font-medium">{item?.file_name}</div>
           </div>
         </Link>
       ))}

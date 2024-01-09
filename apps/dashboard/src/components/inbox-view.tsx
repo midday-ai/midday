@@ -22,7 +22,7 @@ export function InboxView({
   latestTransactions,
   onRefresh,
 }) {
-  const [updates, setUpdates] = useState();
+  const [updates, setUpdates] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 

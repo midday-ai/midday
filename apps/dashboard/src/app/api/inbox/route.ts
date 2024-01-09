@@ -1,7 +1,15 @@
+import {
+  NotificationTypes,
+  TriggerEvents,
+  triggerBulk,
+} from "@midday/notification";
 import { createClient } from "@midday/supabase/server";
+import { decode } from "base64-arraybuffer";
+import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const maxDuration = 300; // 5min
 export const dynamic = "force-dynamic";
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
@@ -14,7 +22,7 @@ const ipRange = [
 ];
 
 export async function POST(req: Request) {
-  const supabase = createClient();
+  const supabase = createClient({ admin: true });
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for");
 
@@ -30,26 +38,67 @@ export async function POST(req: Request) {
 
     const attachments = res.Attachments;
 
-    const ppromises = attachments.map(async (attachment) => {
-      const { data, error } = await supabase.storage
-        .from("avatars")
+    const records = attachments.map(async (attachment) => {
+      const { data } = await supabase.storage
+        .from("vault")
         .upload(
-          `vault/${teamData.id}/inbox/${attachment.name}`,
-          attachment.Content,
+          `${teamData.id}/inbox/${attachment.Name}`,
+          decode(attachment.Content),
           {
             contentType: attachment.ContentType,
+            upsert: true,
           }
         );
 
-      console.log(error);
-      return data;
+      return {
+        email: res.FromFull.Email,
+        name: res.FromFull.Name,
+        text: res.TextBody,
+        html: res.HtmlBody,
+        subject: res.Subject,
+        team_id: teamData.id,
+        file_path: data.path.split("/"),
+        file_name: attachment.Name,
+        content_type: attachment.ContentType,
+      };
     });
 
-    console.log(await Promise.all(ppromises));
+    const insertData = await Promise.all(records);
+
+    const { data: inboxData } = await supabase
+      .from("inbox")
+      .insert(insertData)
+      .select();
+
+    revalidateTag(`inbox_${teamData.id}`);
+
+    const { data: usersData } = await supabase
+      .from("users_on_team")
+      .select("team_id, user:user_id(id, full_name, avatar_url, email, locale)")
+      .eq("team_id", teamData.id);
+
+    const notificationEvents = await Promise.all(
+      usersData?.map(async ({ user, team_id }) => {
+        return inboxData.map((inbox) => ({
+          name: TriggerEvents.InboxNewInApp,
+          payload: {
+            recordId: inbox.id,
+            description: `${inbox.name} - ${inbox.subject}`,
+            type: NotificationTypes.Inbox,
+          },
+          user: {
+            subscriberId: user.id,
+            teamId: team_id,
+            email: user.email,
+            fullName: user.full_name,
+            avatarUrl: user.avatar_url,
+          },
+        }));
+      })
+    );
+
+    triggerBulk(notificationEvents.flat());
   }
-  // get all attachments
-  // save each in inbox vault
-  // save in documents
-  // save in inbox with Sender, email, attachment_url, team_id
+
   return Response.json({ success: true });
 }

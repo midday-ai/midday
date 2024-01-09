@@ -16,6 +16,7 @@ export const env = createEnv({
     KV_REST_API_URL: z.string(),
     KV_REST_API_TOKEN: z.string(),
     LOGSNAG_PRIVATE_TOKEN: z.string(),
+    SUPABASE_SERVICE_KEY: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -57,6 +58,7 @@ export const env = createEnv({
     NEXT_PUBLIC_LOGSNAG_TOKEN: process.env.NEXT_PUBLIC_LOGSNAG_TOKEN,
     NEXT_PUBLIC_LOGSNAG_PROJECT: process.env.NEXT_PUBLIC_LOGSNAG_PROJECT,
     LOGSNAG_PRIVATE_TOKEN: process.env.LOGSNAG_PRIVATE_TOKEN,
+    SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

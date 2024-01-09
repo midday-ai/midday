@@ -2,12 +2,20 @@ import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
 import { Database } from "../types";
 
-export const createClient = () => {
+type CreateClientOptions = {
+  admin?: boolean;
+};
+
+export const createClient = (options: CreateClientOptions) => {
   const cookieStore = cookies();
+
+  const key = options?.admin
+    ? process.env.SUPABASE_SERVICE_KEY!
+    : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    key,
     {
       auth: {
         autoRefreshToken: false,

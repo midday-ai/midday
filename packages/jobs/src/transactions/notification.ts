@@ -1,6 +1,10 @@
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
-import { TriggerEvents, triggerBulk } from "@midday/notification";
+import {
+  NotificationTypes,
+  TriggerEvents,
+  triggerBulk,
+} from "@midday/notification";
 import { renderAsync } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -41,8 +45,9 @@ client.defineJob({
 
         return transactions.map((transaction) => ({
           name: TriggerEvents.TransactionNewInApp,
+          type: NotificationTypes.Transaction,
           payload: {
-            transactionId: transaction.id,
+            recordId: transaction.id,
             description: t(
               { id: "notifications.transaction" },
               {

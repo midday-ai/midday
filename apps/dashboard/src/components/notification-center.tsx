@@ -21,47 +21,89 @@ function EmptyState({ description }) {
   );
 }
 
-function TransactionNotification({
+function NotificationItem({
   id,
   setOpen,
   description,
   createdAt,
-  transactionId,
+  recordId,
   markMessageAsRead,
+  type,
 }) {
-  return (
-    <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
-      <Link
-        className="flex flex items-between justify-between space-x-4 "
-        onClick={() => setOpen(false)}
-        href={`/transactions?id=${transactionId}`}
-      >
-        <div>
-          <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
-            <Icons.Transactions />
-          </div>
-        </div>
-        <div>
-          <p className="text-sm">{description}</p>
-          <span className="text-xs text-[#606060]">
-            {formatDistanceToNow(new Date(createdAt))} ago
-          </span>
-        </div>
-      </Link>
-      {markMessageAsRead && (
-        <div>
-          <Button
-            size="icon"
-            variant="secondary"
-            className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
-            onClick={() => markMessageAsRead(id)}
+  switch (type) {
+    case "transaction":
+      return (
+        <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
+          <Link
+            className="flex flex items-between justify-between space-x-4 "
+            onClick={() => setOpen(false)}
+            href={`/transactions?id=${recordId}`}
           >
-            <Icons.Inventory2 />
-          </Button>
+            <div>
+              <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
+                <Icons.Transactions />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm">{description}</p>
+              <span className="text-xs text-[#606060]">
+                {formatDistanceToNow(new Date(createdAt))} ago
+              </span>
+            </div>
+          </Link>
+          {markMessageAsRead && (
+            <div>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                onClick={() => markMessageAsRead(id)}
+              >
+                <Icons.Inventory2 />
+              </Button>
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );
+      );
+
+    case "inbox":
+      return (
+        <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
+          <Link
+            className="flex flex items-between justify-between space-x-4 "
+            onClick={() => setOpen(false)}
+            href={`/inbox?id=${recordId}`}
+          >
+            <div>
+              <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
+                <Icons.Transactions />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm">{description}</p>
+              <span className="text-xs text-[#606060]">
+                {formatDistanceToNow(new Date(createdAt))} ago
+              </span>
+            </div>
+          </Link>
+          {markMessageAsRead && (
+            <div>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                onClick={() => markMessageAsRead(id)}
+              >
+                <Icons.Inventory2 />
+              </Button>
+            </div>
+          )}
+        </div>
+      );
+
+    default:
+      return null;
+  }
 }
 
 export function NotificationCenter() {
@@ -140,14 +182,15 @@ export function NotificationCenter() {
                 <div className="divide-y">
                   {unreadNotifications.map((notification) => {
                     return (
-                      <TransactionNotification
+                      <NotificationItem
                         key={notification.id}
                         id={notification.id}
                         markMessageAsRead={markMessageAsRead}
                         setOpen={setOpen}
                         description={notification.payload.description}
                         createdAt={notification.createdAt}
-                        transactionId={notification.payload.transactionId}
+                        recordId={notification.payload.recordId}
+                        type={notification.payload.type}
                       />
                     );
                   })}
@@ -178,7 +221,7 @@ export function NotificationCenter() {
                 <div className="divide-y">
                   {archivedNotifications.map((notification) => {
                     return (
-                      <TransactionNotification
+                      <NotificationItem
                         key={notification.id}
                         setOpen={setOpen}
                         description={notification.payload.description}

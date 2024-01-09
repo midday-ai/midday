@@ -6,6 +6,12 @@ const API_ENDPOINT = "https://api.novu.co/v1";
 export enum TriggerEvents {
   TransactionNewInApp = "transaction_new_in_app",
   TransactionNewEmail = "transaction_new_email",
+  InboxNewInApp = "inbox_new_in_app",
+}
+
+export enum NotificationTypes {
+  Transaction = "transaction",
+  Inbox = "inbox",
 }
 
 type TriggerUser = {
