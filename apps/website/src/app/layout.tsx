@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-import { LogSnagProvider } from "@logsnag/next";
+import { LogSnagProvider } from "@midday/events/client";
 import "@midday/ui/globals.css";
 import { cn } from "@midday/ui/utils";
 import { Analytics } from "@vercel/analytics/react";

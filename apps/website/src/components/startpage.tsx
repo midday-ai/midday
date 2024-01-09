@@ -2,7 +2,8 @@
 
 import { subscribeAction } from "@/actions/subscribe-action";
 import { useScopedI18n } from "@/locales/client";
-import { useLogSnag } from "@logsnag/next";
+import { useLogSnag } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { Icons } from "@midday/ui/icons";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
@@ -45,7 +46,7 @@ function SubmitButton() {
 export function StartPage() {
   const t = useScopedI18n("startpage");
   const [isSubmitted, setSubmitted] = useState(false);
-  const { track, identify } = useLogSnag();
+  const { track } = useLogSnag();
 
   return (
     <div className="h-screen relative min-h-[770px] md:min-h-[1100px] dark:md:min-h-[1180px]">
@@ -87,11 +88,11 @@ export function StartPage() {
                 const email = formData.get("email") as string;
 
                 track({
-                  event: "User Joined Waitlist",
+                  event: LogEvents.Waitlist.name,
                   notify: true,
-                  icon: "⭐",
+                  icon: LogEvents.Waitlist.icon,
                   user_id: email?.toString(),
-                  channel: "waitlist",
+                  channel: LogEvents.Waitlist.channel,
                   tags: {
                     email,
                   },

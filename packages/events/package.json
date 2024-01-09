@@ -1,0 +1,24 @@
+{
+    "name": "@midday/events",
+    "version": "1.0.0",
+    "main": "src/index.ts",
+    "private": true,
+    "sideEffects": false,
+    "scripts": {
+      "clean": "rm -rf .turbo node_modules",
+      "lint": "biome check .",
+      "format": "biome --write .",
+      "check:types": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@logsnag/next": "^1.0.2"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.3"
+    },
+    "exports": {
+        "./server": "./src/server.ts",
+        "./client": "./src/client.ts",
+        "./events": "./src/events.ts"
+    }
+  }

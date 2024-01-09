@@ -14,9 +14,9 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
-    "@logsnag/next": "^1.0.2",
     "@midday/gocardless": "workspace:*",
     "@midday/jobs": "workspace:*",
+    "@midday/events": "workspace:*",
     "@midday/kv": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/notification": "workspace:*",

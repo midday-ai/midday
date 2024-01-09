@@ -226,7 +226,8 @@ export function NotificationCenter() {
                         setOpen={setOpen}
                         description={notification.payload.description}
                         createdAt={notification.createdAt}
-                        transactionId={notification.payload.transactionId}
+                        recordId={notification.payload.recordId}
+                        type={notification.payload.type}
                       />
                     );
                   })}

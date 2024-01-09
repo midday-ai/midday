@@ -1,12 +1,6 @@
 "use server";
 
-import { LogSnag } from "@logsnag/next/server";
 import { getCountryCode } from "@midday/location";
-
-const logsnag = new LogSnag({
-  token: process.env.LOGSNAG_PRIVATE_TOKEN!,
-  project: process.env.LOGSNAG_PROJECT!,
-});
 
 export async function subscribeAction(formData: FormData, userGroup: string) {
   const email = formData.get("email") as string;
@@ -27,12 +21,6 @@ export async function subscribeAction(formData: FormData, userGroup: string) {
       }),
     }
   );
-
-  logsnag.insight.increment({
-    title: "User Waitlist Count",
-    value: 1,
-    icon: "👨",
-  });
 
   const json = await res.json();
 
