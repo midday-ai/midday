@@ -189,6 +189,7 @@ export const acceptInviteSchema = z.object({ id: z.string() });
 export const declineInviteSchema = z.object({ id: z.string() });
 
 export const inboxFilter = z.enum([
+  "all",
   "unhandled",
   "handled",
   "archived",
@@ -202,4 +203,4 @@ export const updateInboxSchema = z.object({
   transaction_id: z.string().nullable().optional(),
 });
 
-export const changeInboxFilterChema = inboxFilter.optional();
+export const changeInboxFilterSchema = inboxFilter.optional();

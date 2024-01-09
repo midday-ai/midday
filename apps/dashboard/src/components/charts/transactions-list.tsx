@@ -11,7 +11,7 @@ export function TransactionsListHeader() {
     <div className="flex  p-3 border-b-[1px]">
       <span className="font-medium text-sm w-[50%]">Description</span>
       <span className="font-medium text-sm w-[35%]">Amount</span>
-      <span className="font-medium text-sm">Status</span>
+      <span className="font-medium text-sm ml-auto">Status</span>
     </div>
   );
 }
@@ -27,7 +27,7 @@ export function TransactionsListSkeleton() {
           <div className="w-[60%]">
             <Skeleton className="h-4 w-[50%]" />
           </div>
-          <div className="w-[40%]">
+          <div className="w-[40%] ml-auto">
             <Skeleton className="w-[60%] h-4 align-start" />
           </div>
         </div>
@@ -92,7 +92,9 @@ export async function TransactionsList({ type, disabled }) {
                 </span>
               </div>
 
-              {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
+              <div className="ml-auto">
+                {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
+              </div>
             </Link>
           </li>
         );
