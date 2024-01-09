@@ -248,7 +248,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      attachments(*)
+      attachments:transaction_attachments(*)
     `,
       { count: "exact" }
     )
@@ -278,14 +278,14 @@ export async function getTransactionsQuery(
   }
 
   if (attachments === "exclude" || status?.includes("unfullfilled")) {
-    query.filter("attachments.id", "is", null);
+    query.filter("transaction_attachments.id", "is", null);
   }
 
   if (status?.includes("fullfilled") || attachments === "include") {
     query.select(`
       *,
       assigned:assigned_id(*),
-      attachments!inner(id,size,name)
+      transaction_attachments!inner(id,size,name)
     `);
   }
 
@@ -294,7 +294,7 @@ export async function getTransactionsQuery(
       `
       *,
       assigned:assigned_id(*),
-      attachments(*)
+      attachments:transaction_attachments(*)
     `
     );
 
@@ -358,7 +358,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       `
       *,
       assigned:assigned_id(*),
-      attachments(*)
+      attachments:transaction_attachments(*)
     `
     )
     .eq("id", id)

@@ -1,10 +1,11 @@
 import { ErrorFallback } from "@/components/error-fallback";
+import { InboxSkeleton } from "@/components/inbox-list";
 import { Cookies } from "@/utils/constants";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { InboxHeader } from "./inbox-header";
-import { InboxSkeleton, InboxWidget } from "./inbox-widget";
+import { InboxWidget } from "./inbox-widget";
 
 export async function Inbox({ disabled }) {
   const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
@@ -15,7 +16,7 @@ export async function Inbox({ disabled }) {
 
       <div className="h-[350px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<InboxSkeleton />}>
+          <Suspense fallback={<InboxSkeleton numberOfItems={4} />}>
             <InboxWidget disabled={disabled} filter={filter} />
           </Suspense>
         </ErrorBoundary>

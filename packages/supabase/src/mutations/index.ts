@@ -231,7 +231,7 @@ export async function createAttachments(
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
   const { data } = await supabase
-    .from("attachments")
+    .from("transaction_attachments")
     .insert(
       attachments.map((attachment) => ({
         ...attachment,
@@ -268,7 +268,7 @@ export async function createEnrichmentTransaction(
 
 export async function deleteAttachment(supabase: Client, id: string) {
   const { data } = await supabase
-    .from("attachments")
+    .from("transaction_attachments")
     .delete()
     .eq("id", id)
     .select("id, transaction_id, name, team_id")

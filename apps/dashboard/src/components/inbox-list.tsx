@@ -2,8 +2,43 @@
 
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+
+export function InboxSkeleton({ numberOfItems }) {
+  return (
+    <div className="flex flex-col gap-4 pt-8">
+      {[...Array(numberOfItems)].map((_, index) => (
+        <div
+          className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all h-[74px]"
+          key={index.toString()}
+        >
+          <div className="flex w-full flex-col gap-1">
+            <div className="flex items-center mb-1">
+              <div className="flex items-center gap-2">
+                <div className="font-semibold">
+                  <Skeleton className="h-3 w-[140px]" />
+                </div>
+              </div>
+              <div className="ml-auto text-xs text-muted-foreground">
+                <Skeleton className="h-3 w-[40px]" />
+              </div>
+            </div>
+            <div className="flex">
+              <div className="text-xs font-medium">
+                <Skeleton className="h-2 w-[110px]" />
+              </div>
+              <div className="ml-auto text-xs font-medium">
+                <Skeleton className="h-2 w-[60px]" />
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
   if (!items.length) {
@@ -35,7 +70,7 @@ export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
             )}
           >
             <div className="flex w-full flex-col gap-1">
-              <div className="flex items-center">
+              <div className="flex items-center mb-1">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center space-x-2">
                     <div className="font-semibold">{item.name}</div>
@@ -58,7 +93,10 @@ export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
                   })}
                 </div>
               </div>
-              <div className="text-xs font-medium">{item?.file_name}</div>
+              <div className="flex">
+                <div className="text-xs font-medium">{item?.file_name}</div>
+                <div className="ml-auto text-xs font-medium">€134.50</div>
+              </div>
             </div>
           </button>
         ))}
