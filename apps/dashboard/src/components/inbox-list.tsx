@@ -74,7 +74,7 @@ export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
                 <div className="flex items-center gap-2">
                   <div className="flex items-center space-x-2">
                     <div className="font-semibold">{item.name}</div>
-                    {item.status === "completed" && <Icons.Check />}
+                    {item.status === "handled" && <Icons.Check />}
                   </div>
                   {!item.read && (
                     <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />

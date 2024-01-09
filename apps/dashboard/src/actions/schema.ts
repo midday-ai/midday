@@ -189,9 +189,8 @@ export const acceptInviteSchema = z.object({ id: z.string() });
 export const declineInviteSchema = z.object({ id: z.string() });
 
 export const inboxFilter = z.enum([
-  "all",
-  "new",
-  "completed",
+  "unhandled",
+  "handled",
   "archived",
   "deleted",
 ]);

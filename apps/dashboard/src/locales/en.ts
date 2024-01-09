@@ -44,7 +44,7 @@ export default {
   },
   inbox_filter: {
     all: "All",
-    completed: "Completed",
+    handled: "Handled",
   },
   chart_type: {
     profit_loss: "Profit/Loss",

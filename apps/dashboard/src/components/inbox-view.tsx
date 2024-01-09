@@ -143,8 +143,8 @@ export function InboxView({
             <TabsTrigger className="p-0" value="all">
               All
             </TabsTrigger>
-            <TabsTrigger className="p-0" value="completed">
-              Completed
+            <TabsTrigger className="p-0" value="handled">
+              Handled
             </TabsTrigger>
           </TabsList>
 
@@ -171,10 +171,10 @@ export function InboxView({
                 setSelectedId={setSelectedId}
               />
             </TabsContent>
-            <TabsContent value="completed" className="m-0 h-full">
+            <TabsContent value="handled" className="m-0 h-full">
               <InboxList
                 items={optimisticData.filter(
-                  (item) => item.status === "completed"
+                  (item) => item.status === "handled"
                 )}
                 selectedId={selectedId}
                 updateInbox={updateInbox}

@@ -30,7 +30,7 @@ export function SelectTransaction({
     onSelect({
       id: inboxId,
       transaction_id: id,
-      status: "completed",
+      status: "handled",
       read: true,
     });
   };
@@ -41,7 +41,7 @@ export function SelectTransaction({
     onSelect({
       id: inboxId,
       transaction_id: null,
-      status: "new",
+      status: "unhandled",
     });
   };
 

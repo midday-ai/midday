@@ -2,7 +2,6 @@ import { createClient } from "@midday/supabase/middleware";
 import { get } from "@vercel/edge-config";
 import { createI18nMiddleware } from "next-international/middleware";
 import { NextRequest, NextResponse } from "next/server";
-import { Cookies } from "./utils/constants";
 
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en", "sv"],
@@ -14,13 +13,26 @@ export async function middleware(request: NextRequest) {
   const response = I18nMiddleware(request);
   const { supabase } = createClient(request, response);
   const url = new URL("/", request.url);
+  const nextUrl = request.nextUrl;
+
+  const pathnameLocale = nextUrl.pathname.split("/", 2)?.[1];
+
+  // Remove the locale from the pathname
+  const pathnameWithoutLocale = nextUrl.pathname.slice(
+    pathnameLocale.length + 1
+  );
+
+  // Create a new URL without the locale in the pathname
+  const newUrl = new URL(pathnameWithoutLocale || "/", request.url);
 
   const { data } = await supabase.auth.getSession();
 
+  console.log(newUrl);
+
   // Not authenticated
-  if (!data?.session && request.nextUrl.pathname !== "/") {
-    const encodedSearchParams = `${request.nextUrl.pathname.substring(1)}${
-      request.nextUrl.search
+  if (!data?.session && newUrl.pathname !== "/") {
+    const encodedSearchParams = `${newUrl.pathname.substring(1)}${
+      newUrl.search
     }`;
 
     url.searchParams.append("return_to", encodedSearchParams);
@@ -32,7 +44,7 @@ export async function middleware(request: NextRequest) {
   if (
     data?.session &&
     !(await get("beta"))?.includes(data?.session.user.id) &&
-    request.nextUrl.pathname !== "/closed"
+    newUrl.pathname !== "/closed"
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
   }
@@ -45,7 +57,7 @@ export async function middleware(request: NextRequest) {
     mfaData &&
     mfaData.nextLevel === "aal2" &&
     mfaData.nextLevel !== mfaData.currentLevel &&
-    request.nextUrl.pathname !== "/mfa/verify"
+    nextUrl.pathname !== "/mfa/verify"
   ) {
     return NextResponse.redirect(`${url.origin}/mfa/verify`);
   }

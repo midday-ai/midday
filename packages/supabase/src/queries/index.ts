@@ -661,7 +661,7 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  status: "completed" | "deleted" | "archived";
+  status: "handled" | "deleted" | "archived";
   from?: number;
   to?: number;
 };
@@ -682,7 +682,7 @@ export async function getInboxQuery(
     .neq("status", "archived")
     .order("created_at", { ascending: false });
 
-  if (status === "completed") {
+  if (status === "handled") {
     query.not("transaction_id", "is", null);
   }
 
