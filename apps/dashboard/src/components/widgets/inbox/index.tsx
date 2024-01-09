@@ -16,7 +16,9 @@ export async function Inbox({ disabled }) {
 
       <div className="h-[350px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<InboxSkeleton numberOfItems={4} />}>
+          <Suspense
+            fallback={<InboxSkeleton numberOfItems={4} className="pt-8" />}
+          >
             <InboxWidget disabled={disabled} filter={filter} />
           </Suspense>
         </ErrorBoundary>

@@ -2,9 +2,10 @@
 
 import { updateInboxAction } from "@/actions/inbox/update";
 import { InboxDetails } from "@/components/inbox-details";
-import { InboxList } from "@/components/inbox-list";
+import { InboxList, InboxSkeleton } from "@/components/inbox-list";
 import { InboxUpdates } from "@/components/inbox-updates";
 import { createClient } from "@midday/supabase/client";
+import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import { useOptimisticAction } from "next-safe-action/hooks";
@@ -13,6 +14,37 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
 import { InboxEmpty } from "./inbox-empty";
+
+export function InboxViewSkeleton() {
+  return (
+    <div>
+      <div className="flex items-center justify-between py-2 mb-4 mt-2">
+        <div className="space-x-4 flex">
+          <div>
+            <Skeleton className="h-3 w-[80px]" />
+          </div>
+          <div>
+            <Skeleton className="h-3 w-[100px]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-row space-x-8">
+        <div className="w-full h-full relative overflow-hidden">
+          <div className="h-[calc(100vh-180px)]">
+            <div className="flex flex-col gap-4 pt-0">
+              <InboxSkeleton numberOfItems={12} />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
+          wfwef
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function InboxView({
   items,
@@ -129,7 +161,7 @@ export function InboxView({
               }}
             />
 
-            <TabsContent value="all" className="m-0  h-full">
+            <TabsContent value="all" className="m-0 h-full">
               <InboxList
                 items={optimisticData}
                 selectedId={selectedId}
@@ -137,7 +169,7 @@ export function InboxView({
                 setSelectedId={setSelectedId}
               />
             </TabsContent>
-            <TabsContent value="completed" className="m-0  h-full">
+            <TabsContent value="completed" className="m-0 h-full">
               <InboxList
                 items={optimisticData.filter(
                   (item) => item.status === "completed"

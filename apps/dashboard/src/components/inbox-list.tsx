@@ -6,9 +6,9 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 
-export function InboxSkeleton({ numberOfItems }) {
+export function InboxSkeleton({ numberOfItems, className }) {
   return (
-    <div className="flex flex-col gap-4 pt-8">
+    <div className={cn("flex flex-col gap-4", className)}>
       {[...Array(numberOfItems)].map((_, index) => (
         <div
           className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all h-[74px]"
