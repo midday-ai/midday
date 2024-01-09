@@ -1,7 +1,7 @@
 "use client";
 
 import { updateInboxAction } from "@/actions/inbox/update";
-import { InboxDetails } from "@/components/inbox-details";
+import { InboxDetails, InboxDetailsSkeleton } from "@/components/inbox-details";
 import { InboxList, InboxSkeleton } from "@/components/inbox-list";
 import { InboxUpdates } from "@/components/inbox-updates";
 import { createClient } from "@midday/supabase/client";
@@ -18,7 +18,7 @@ import { InboxEmpty } from "./inbox-empty";
 export function InboxViewSkeleton() {
   return (
     <div>
-      <div className="flex items-center justify-between py-2 mb-4 mt-2">
+      <div className="flex items-center justify-between py-2 mb-6 mt-2">
         <div className="space-x-4 flex">
           <div>
             <Skeleton className="h-3 w-[80px]" />
@@ -26,6 +26,10 @@ export function InboxViewSkeleton() {
           <div>
             <Skeleton className="h-3 w-[100px]" />
           </div>
+        </div>
+
+        <div>
+          <Skeleton className="w-[245px] rounded-sm h-[30px]" />
         </div>
       </div>
 
@@ -38,9 +42,7 @@ export function InboxViewSkeleton() {
           </div>
         </div>
 
-        <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
-          wfwef
-        </div>
+        <InboxDetailsSkeleton />
       </div>
     </div>
   );

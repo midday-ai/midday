@@ -15,7 +15,7 @@ export function InboxSkeleton({ numberOfItems, className }) {
           key={index.toString()}
         >
           <div className="flex w-full flex-col gap-1">
-            <div className="flex items-center mb-1">
+            <div className="flex items-center mb-2.5">
               <div className="flex items-center gap-2">
                 <div className="font-semibold">
                   <Skeleton className="h-3 w-[140px]" />

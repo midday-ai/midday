@@ -8,12 +8,39 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
 import { Separator } from "@midday/ui/separator";
+import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import format from "date-fns/format";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { FilePreview } from "./file-preview";
 import { InboxToolbar } from "./inbox-toolbar";
+
+export function InboxDetailsSkeleton() {
+  return (
+    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
+      <div className="flex items-center py-2 h-[52px]">
+        <div className="flex items-center gap-2" />
+      </div>
+
+      <Separator />
+      <div className="flex flex-1 flex-col">
+        <div className="flex items-start p-4">
+          <div className="flex items-start gap-4 text-sm">
+            <Skeleton className="h-[40px] w-[40px] rounded-full" />
+            <div className="grid gap-1 space-y-1">
+              <Skeleton className="h-3 w-[100px]" />
+              <Skeleton className="h-2 w-[120px]" />
+            </div>
+          </div>
+          <Skeleton className="h-2 w-[100px] ml-auto" />
+        </div>
+
+        <Separator />
+      </div>
+    </div>
+  );
+}
 
 export function InboxDetails({
   item,

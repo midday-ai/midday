@@ -10,7 +10,6 @@ export const metadata: Metadata = {
 export default function InboxPage({ searchParams }) {
   return (
     <div className="flex-col flex">
-      {/* <InboxViewSkeleton /> */}
       <Suspense fallback={<InboxViewSkeleton />}>
         <Inbox selectedId={searchParams?.id} />
       </Suspense>
