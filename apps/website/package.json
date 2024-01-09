@@ -17,7 +17,7 @@
     "@logsnag/next": "^1.0.2",
     "@vercel/analytics": "^1.1.1",
     "next": "14.0.4",
-    "next-international": "^1.2.0",
+    "next-international": "1.1.4",
     "next-themes": "^0.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^20.10.6",
+    "@types/node": "^20.10.7",
     "@types/react": "^18.2.47",
     "@types/react-dom": "^18.2.18"
   }

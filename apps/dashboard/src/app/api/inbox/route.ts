@@ -27,6 +27,25 @@ export async function POST(req: Request) {
       .select("id")
       .eq("inbox_id", inboxId)
       .single();
+
+    const attachments = res.Attachments;
+
+    const ppromises = attachments.map(async (attachment) => {
+      const { data, error } = await supabase.storage
+        .from("avatars")
+        .upload(
+          `vault/${teamData.id}/inbox/${attachment.name}`,
+          attachment.Content,
+          {
+            contentType: attachment.ContentType,
+          }
+        );
+
+      console.log(error);
+      return data;
+    });
+
+    console.log(await Promise.all(ppromises));
   }
   // get all attachments
   // save each in inbox vault
