@@ -18,7 +18,7 @@ import { InboxToolbar } from "./inbox-toolbar";
 
 export function InboxDetailsSkeleton() {
   return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
+    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[660px]">
       <div className="flex items-center py-2 h-[52px]">
         <div className="flex items-center gap-2" />
       </div>
@@ -65,7 +65,7 @@ export function InboxDetails({
   };
 
   return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[720px]">
+    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[660px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>

@@ -17,5 +17,5 @@ export const createAttachmentsAction = action(
     revalidateTag(`transactions_${user.data.team_id}`);
 
     return data;
-  },
+  }
 );

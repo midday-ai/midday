@@ -28,7 +28,7 @@ const Item = ({ file, onDelete, id }) => {
           <HoverCardTrigger>
             <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center overflow-hidden cursor-pointer">
               <FilePreview
-                src={`/api/proxy?filePath=vault/${file.path}`}
+                src={`/api/proxy?filePath=vault/${file.path.join("/")}`}
                 name={file.name}
                 type={file.type}
                 preview
@@ -44,7 +44,7 @@ const Item = ({ file, onDelete, id }) => {
               sideOffset={55}
             >
               <FilePreview
-                src={`/api/proxy?filePath=vault/${file.path}`}
+                src={`/api/proxy?filePath=vault/${file.path.join("/")}`}
                 downloadUrl={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
                 name={file.name}
                 type={file.type}
@@ -95,12 +95,11 @@ export function Attachments({ id, data }) {
     setFiles((prev) => [...prev, ...acceptedFiles]);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
     const uploadedFiles = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
         const { path } = await uploadFile({
           bucket: "vault",
-          path: `${userData?.team_id}/transactions/${id}`,
+          path: [userData?.team_id, "transactions", id],
           file: acceptedFile,
         });
 

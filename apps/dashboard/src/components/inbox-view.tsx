@@ -143,6 +143,9 @@ export function InboxView({
             <TabsTrigger className="p-0" value="all">
               All
             </TabsTrigger>
+            <TabsTrigger className="p-0" value="in_progress">
+              In Progress
+            </TabsTrigger>
             <TabsTrigger className="p-0" value="handled">
               Handled
             </TabsTrigger>
@@ -166,6 +169,16 @@ export function InboxView({
             <TabsContent value="all" className="m-0 h-full">
               <InboxList
                 items={optimisticData}
+                selectedId={selectedId}
+                updateInbox={updateInbox}
+                setSelectedId={setSelectedId}
+              />
+            </TabsContent>
+            <TabsContent value="in_progress" className="m-0 h-full">
+              <InboxList
+                items={optimisticData.filter(
+                  (item) => item.status === "in_progress"
+                )}
                 selectedId={selectedId}
                 updateInbox={updateInbox}
                 setSelectedId={setSelectedId}

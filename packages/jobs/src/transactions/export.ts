@@ -84,7 +84,7 @@ client.defineJob({
 
             const { data } = await download(client, {
               bucket: "vault",
-              path: attachment.path,
+              path: attachment.path.join("/"),
             });
 
             return {

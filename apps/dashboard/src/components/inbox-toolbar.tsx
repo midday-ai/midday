@@ -16,7 +16,7 @@ export function InboxToolbar({ item, teamId, latestTransactions, onSelect }) {
   return (
     <AnimatePresence>
       <motion.div
-        className="h-12 fixed bottom-14 right-[200px] z-50 w-[400px]"
+        className="h-12 fixed bottom-14 right-[160px] z-50 w-[400px]"
         animate={{ y: show ? 0 : 150 }}
         initial={{ y: 150 }}
       >
