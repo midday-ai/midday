@@ -1,18 +1,20 @@
 {
-    "name": "@midday/jobs",
-    "version": "1.0.0",
-    "private": true,
-    "main": "src/index.ts",
-    "scripts": {
-        "clean": "rm -rf .turbo node_modules",
-        "lint": "biome check .",
-        "format": "biome format --write .",
-        "check:types": "tsc --noEmit"
-    },
-    "dependencies": {
-        "@trigger.dev/react": "^2.3.9",
-        "@trigger.dev/sdk": "^2.3.9",
-        "@trigger.dev/supabase": "^2.3.9"
-    }
+  "name": "@midday/jobs",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check:types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trigger.dev/openai": "latest",
+    "@trigger.dev/react": "^2.3.10",
+    "@trigger.dev/sdk": "^2.3.10",
+    "@trigger.dev/supabase": "^2.3.10",
+    "langchain": "^0.1.2",
+    "pdf-parse": "^1.1.1"
+  }
 }
-  

@@ -1,6 +1,7 @@
 import { eventTrigger } from "@trigger.dev/sdk";
+import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { z } from "zod";
-import { client, supabase } from "../client";
+import { client, openai, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
 client.defineJob({
@@ -13,15 +14,59 @@ client.defineJob({
       inboxId: z.string(),
     }),
   }),
-  integrations: { supabase },
+  integrations: {
+    supabase,
+    openai,
+  },
   run: async (payload, io) => {
-    const client = await io.supabase.client;
-    // get file_path and type
+    const { data: inboxData } = await io.supabase.client
+      .from("inbox")
+      .select()
+      .eq("id", payload.inboxId)
+      .single();
 
-    // If PDF
+    if (inboxData?.content_type === "application/pdf") {
+      const { data } = await io.supabase.client.storage
+        .from("vault")
+        .download(inboxData.file_path.join("/"));
 
-    // Get name, due date
-    // Get amount and strip
-    // Get currency
+      const loader = new PDFLoader(data, {
+        splitPages: false,
+        parsedItemSeparator: "",
+      });
+
+      const docs = await loader.load();
+
+      const completion = await io.openai.chat.completions.create("completion", {
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content:
+              "From this invoice data extract total amount, currency, due date, Issuer name and return it as JSON",
+          },
+          {
+            role: "user",
+            content: JSON.stringify(docs.at(0)?.pageContent),
+          },
+        ],
+      });
+
+      const response = completion.choices.at(0)?.message.content;
+
+      if (response) {
+        const data = JSON.parse(response);
+
+        await io.supabase.client
+          .from("inbox")
+          .update({
+            amount: data.total_amount?.replace(/[^0-9]/g, ""),
+            currency: data.currency,
+            issuer_name: data.issuer_name,
+            due_date: data.due_date && new Date(data.due_date),
+          })
+          .eq("id", payload.inboxId);
+      }
+    }
   },
 });
