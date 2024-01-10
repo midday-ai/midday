@@ -1,5 +1,6 @@
 import { CopyInput } from "@/components/copy-input";
 import { getInbox, getUser } from "@midday/supabase/cached-queries";
+import { Icons } from "@midday/ui/icons";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
 import Link from "next/link";
 import { inboxData } from "./data";
@@ -42,7 +43,10 @@ export async function InboxWidget({ filter, disabled }) {
           <div className="flex w-full flex-col gap-1">
             <div className="flex items-center mb-1">
               <div className="flex items-center gap-2">
-                <div className="font-semibold">{item.name}</div>
+                <div className="flex items-center space-x-2">
+                  <div className="font-semibold">{item.name}</div>
+                  {item.status === "handled" && <Icons.Check />}
+                </div>
                 {!item.read && (
                   <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />
                 )}

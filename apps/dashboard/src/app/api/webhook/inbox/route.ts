@@ -1,3 +1,5 @@
+import { Events } from "@midday/jobs";
+import { client } from "@midday/jobs/src/client";
 import {
   NotificationTypes,
   TriggerEvents,
@@ -98,6 +100,13 @@ export async function POST(req: Request) {
     );
 
     triggerBulk(notificationEvents.flat());
+
+    inboxData.map((inbox) => {
+      client.sendEvent({
+        name: Events.PROCESS_INBOX,
+        payload: { inboxId: inbox.id },
+      });
+    });
   }
 
   return Response.json({ success: true });
