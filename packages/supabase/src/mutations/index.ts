@@ -380,7 +380,7 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
 type UpdateInboxByIdParams = {
   id: string;
   read?: boolean;
-  status?: "unhandled" | "in_progress" | "handled" | "deleted" | "archived";
+  status?: "completed" | "archived";
   attachment_id?: string;
 };
 

@@ -188,18 +188,13 @@ export const deleteInviteSchema = z.object({ id: z.string() });
 export const acceptInviteSchema = z.object({ id: z.string() });
 export const declineInviteSchema = z.object({ id: z.string() });
 
-export const inboxFilter = z.enum([
-  "all",
-  "unhandled",
-  "handled",
-  "archived",
-  "deleted",
-]);
+export const inboxFilter = z.enum(["all", "completed", "archived", "deleted"]);
 
 export const updateInboxSchema = z.object({
   id: z.string(),
   read: z.boolean().optional(),
-  status: inboxFilter.optional(),
+  trash: z.boolean().optional(),
+  archived: z.boolean().optional(),
   transaction_id: z.string().nullable().optional(),
 });
 

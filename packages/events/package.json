@@ -11,7 +11,7 @@
       "check:types": "tsc --noEmit"
     },
     "dependencies": {
-        "@logsnag/next": "^1.0.2"
+        "@logsnag/next": "^1.0.3"
     },
     "devDependencies": {
         "typescript": "^5.3.3"

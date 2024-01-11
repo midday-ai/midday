@@ -1,9 +1,11 @@
 import {
+  addDays,
   addMonths,
   addWeeks,
   differenceInMonths,
   differenceInWeeks,
   format,
+  isWithinInterval,
   subYears,
 } from "date-fns";
 import { Client } from "../types";
@@ -661,7 +663,7 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  status: "handled" | "deleted" | "archived";
+  status: "completed" | "archived";
   from?: number;
   to?: number;
 };
@@ -678,18 +680,29 @@ export async function getInboxQuery(
       count: "exact",
     })
     .eq("team_id", teamId)
-    .neq("status", "deleted")
-    .neq("status", "archived")
+    .eq("archived", false)
+    .eq("trash", false)
     .order("created_at", { ascending: false });
 
-  if (status === "handled") {
+  if (status === "completed") {
     query.not("transaction_id", "is", null);
   }
 
   const { data, count } = await query.range(from, to);
 
   return {
-    data,
+    data: data?.map((item) => {
+      const pending = isWithinInterval(new Date(), {
+        start: new Date(item.created_at),
+        end: addDays(new Date(item.created_at), 3),
+      });
+
+      return {
+        ...item,
+        pending,
+        review: !pending && !item.transaction_id,
+      };
+    }),
     count,
   };
 }

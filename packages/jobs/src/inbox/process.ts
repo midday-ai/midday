@@ -60,7 +60,7 @@ client.defineJob({
         await io.supabase.client
           .from("inbox")
           .update({
-            amount: data.total_amount?.replace(/[^0-9]/g, ""),
+            amount: data.total_amount?.replace(/[^\d.]/g, ""),
             currency: data.currency,
             issuer_name: data.issuer_name,
             due_date: data.due_date && new Date(data.due_date),

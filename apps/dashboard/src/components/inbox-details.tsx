@@ -11,9 +11,10 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import format from "date-fns/format";
+import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { FilePreview } from "./file-preview";
+import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
 
 export function InboxDetailsSkeleton() {
@@ -33,7 +34,10 @@ export function InboxDetailsSkeleton() {
               <Skeleton className="h-2 w-[120px]" />
             </div>
           </div>
-          <Skeleton className="h-2 w-[100px] ml-auto" />
+          <div className="grid gap-1 ml-auto text-right">
+            <Skeleton className="h-2 w-[100px] ml-auto" />
+            <Skeleton className="h-2 w-[50px] ml-auto" />
+          </div>
         </div>
 
         <Separator />
@@ -74,7 +78,7 @@ export function InboxDetails({
                 variant="ghost"
                 size="icon"
                 disabled={!item}
-                onClick={() => updateInbox({ id: item.id, status: "deleted" })}
+                onClick={() => updateInbox({ id: item.id, trash: true })}
               >
                 <Trash2 className="h-4 w-4" />
                 <span className="sr-only">Move to trash</span>
@@ -128,8 +132,13 @@ export function InboxDetails({
                 <div className="line-clamp-1 text-xs">{item.file_name}</div>
               </div>
             </div>
-            <div className="ml-auto text-xs text-muted-foreground">
-              {format(new Date(item.created_at), "PPpp")}
+            <div className="grid gap-1 ml-auto text-right">
+              <div className="text-xs text-muted-foreground">
+                {format(new Date(item.created_at), "PPpp")}
+              </div>
+              <div className="line-clamp-1 text-xs">
+                <FormatAmount amount={item.amount} currency={item.currency} />
+              </div>
             </div>
           </div>
           <Separator />

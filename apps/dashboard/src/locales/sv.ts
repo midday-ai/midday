@@ -33,7 +33,7 @@ export default {
   },
   inbox_filter: {
     all: "Alla",
-    handled: "Hanterade",
+    completed: "Slutförda",
   },
   spending_period: {
     this_month: "Den här månaden",

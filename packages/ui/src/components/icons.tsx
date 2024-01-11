@@ -36,6 +36,7 @@ import {
   MdOutlineDifference,
   MdOutlineFileDownload,
   MdOutlineHandyman,
+  MdOutlineHourglassTop,
   MdOutlineInbox,
   MdOutlineInsertPhoto,
   MdOutlineIntegrationInstructions,
@@ -430,4 +431,5 @@ export const Icons = {
   Copy: MdOutlineContentCopy,
   InboxEmpty: MdOutlineMoveToInbox,
   Cancel: MdOutlineCancel,
+  Pending: MdOutlineHourglassTop,
 };

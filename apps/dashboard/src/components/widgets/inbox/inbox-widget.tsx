@@ -1,4 +1,5 @@
 import { CopyInput } from "@/components/copy-input";
+import { InboxStatus } from "@/components/inbox-status";
 import { getInbox, getUser } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
@@ -59,7 +60,9 @@ export async function InboxWidget({ filter, disabled }) {
             </div>
             <div className="flex">
               <div className="text-xs font-medium">{item?.file_name}</div>
-              <div className="ml-auto text-xs font-medium">€134.50</div>
+              <div className="ml-auto">
+                <InboxStatus item={item} />
+              </div>
             </div>
           </div>
         </Link>

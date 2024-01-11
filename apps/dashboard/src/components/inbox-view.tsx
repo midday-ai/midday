@@ -26,6 +26,9 @@ export function InboxViewSkeleton() {
           <div>
             <Skeleton className="h-3 w-[100px]" />
           </div>
+          <div>
+            <Skeleton className="h-3 w-[100px]" />
+          </div>
         </div>
 
         <div>
@@ -82,15 +85,15 @@ export function InboxView({
         });
       }
 
-      if (payload.status === "delete") {
+      if (payload.trash) {
         return state.filter((item) => item.id === payload.id);
       }
 
       return state;
     },
     {
-      onSuccess: (_, input) => {
-        if (input.status === "deleted") {
+      onExecute: (input) => {
+        if (input.trash) {
           router.push("/inbox");
         }
       },
@@ -143,11 +146,11 @@ export function InboxView({
             <TabsTrigger className="p-0" value="all">
               All
             </TabsTrigger>
-            <TabsTrigger className="p-0" value="in_progress">
-              In Progress
+            <TabsTrigger className="p-0" value="pending">
+              Pending
             </TabsTrigger>
-            <TabsTrigger className="p-0" value="handled">
-              Handled
+            <TabsTrigger className="p-0" value="completed">
+              Completed
             </TabsTrigger>
           </TabsList>
 
@@ -174,21 +177,21 @@ export function InboxView({
                 setSelectedId={setSelectedId}
               />
             </TabsContent>
-            <TabsContent value="in_progress" className="m-0 h-full">
+
+            <TabsContent value="pending" className="m-0 h-full">
               <InboxList
                 items={optimisticData.filter(
-                  (item) => item.status === "in_progress"
+                  (item) => item.pending || item.review
                 )}
                 selectedId={selectedId}
                 updateInbox={updateInbox}
                 setSelectedId={setSelectedId}
               />
             </TabsContent>
-            <TabsContent value="handled" className="m-0 h-full">
+
+            <TabsContent value="completed" className="m-0 h-full">
               <InboxList
-                items={optimisticData.filter(
-                  (item) => item.status === "handled"
-                )}
+                items={optimisticData.filter((item) => item.transaction_id)}
                 selectedId={selectedId}
                 updateInbox={updateInbox}
                 setSelectedId={setSelectedId}

@@ -5,6 +5,7 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { InboxStatus } from "./inbox-status";
 
 export function InboxSkeleton({ numberOfItems, className }) {
   return (
@@ -95,7 +96,9 @@ export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
               </div>
               <div className="flex">
                 <div className="text-xs font-medium">{item?.file_name}</div>
-                <div className="ml-auto text-xs font-medium">€134.50</div>
+                <div className="ml-auto">
+                  <InboxStatus item={item} />
+                </div>
               </div>
             </div>
           </button>

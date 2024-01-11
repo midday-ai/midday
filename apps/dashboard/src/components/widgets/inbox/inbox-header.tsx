@@ -11,7 +11,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["all", "handled"];
+const options = ["all", "completed"];
 
 export function InboxHeader({ filter, disabled }) {
   const t = useI18n();
