@@ -86,7 +86,7 @@ export function InboxView({
       }
 
       if (payload.trash) {
-        return state.filter((item) => item.id === payload.id);
+        return state.filter((item) => item.id !== payload.id);
       }
 
       return state;

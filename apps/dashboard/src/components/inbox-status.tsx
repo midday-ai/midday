@@ -1,3 +1,5 @@
+"use client";
+
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -20,7 +22,7 @@ export function InboxStatus({ item }) {
     return (
       <TooltipProvider delayDuration={0}>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <div className="flex space-x-1 items-center">
               <Icons.Pending />
               <span>Pending</span>
@@ -40,7 +42,7 @@ export function InboxStatus({ item }) {
   return (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <div className="flex space-x-1 items-center">
             <Icons.Error />
             <span>Needs review</span>
