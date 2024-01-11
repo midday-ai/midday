@@ -26,7 +26,7 @@ export async function InboxWidget({ filter, disabled }) {
         <p className="text-sm text-[#606060]">
           Use this email for online purchases to seamlessly
           <br />
-          match receipts againsts transactions.
+          match invoices againsts transactions.
         </p>
       </div>
     );

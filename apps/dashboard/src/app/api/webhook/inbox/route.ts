@@ -20,7 +20,6 @@ const ipRange = [
   "50.31.156.6",
   "50.31.156.77",
   "18.217.206.57",
-  "127.0.0.1",
 ];
 
 export async function POST(req: Request) {
@@ -55,13 +54,12 @@ export async function POST(req: Request) {
       return {
         email: res.FromFull.Email,
         name: res.FromFull.Name,
-        text: res.TextBody,
-        html: res.HtmlBody,
         subject: res.Subject,
         team_id: teamData.id,
         file_path: data.path.split("/"),
         file_name: attachment.Name,
         content_type: attachment.ContentType,
+        size: attachment.ContentLength,
       };
     });
 
