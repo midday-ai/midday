@@ -299,6 +299,7 @@ export async function createTeam(supabase: Client, params: CreateTeamParams) {
     .from("teams")
     .insert({
       name: params.name,
+      created_by: session?.user.id,
     })
     .select()
     .single();

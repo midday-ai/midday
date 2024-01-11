@@ -19,7 +19,7 @@ export function InboxViewSkeleton() {
   return (
     <div>
       <div className="flex items-center justify-between py-2 mb-6 mt-2">
-        <div className="space-x-4 flex">
+        <div className="space-x-4 flex mt-3">
           <div>
             <Skeleton className="h-3 w-[80px]" />
           </div>

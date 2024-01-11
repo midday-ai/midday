@@ -12,11 +12,11 @@ export function InboxSkeleton({ numberOfItems, className }) {
     <div className={cn("flex flex-col gap-4", className)}>
       {[...Array(numberOfItems)].map((_, index) => (
         <div
-          className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all h-[74px]"
+          className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all h-[82px]"
           key={index.toString()}
         >
           <div className="flex w-full flex-col gap-1">
-            <div className="flex items-center mb-2.5">
+            <div className="flex items-center mb-4">
               <div className="flex items-center gap-2">
                 <div className="font-semibold">
                   <Skeleton className="h-3 w-[140px]" />
