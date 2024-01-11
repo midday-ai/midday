@@ -30,6 +30,7 @@ export default async function Teams() {
           <div className="mb-2">Teams</div>
 
           <SelectTeamTable data={data} />
+          {/* TODO Pending invites */}
 
           <div className="text-center mt-6">
             <Link href="/teams/create" className="text-sm">

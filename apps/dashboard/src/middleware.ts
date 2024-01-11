@@ -55,7 +55,7 @@ export async function middleware(request: NextRequest) {
     mfaData &&
     mfaData.nextLevel === "aal2" &&
     mfaData.nextLevel !== mfaData.currentLevel &&
-    nextUrl.pathname !== "/mfa/verify"
+    newUrl.pathname !== "/mfa/verify"
   ) {
     return NextResponse.redirect(`${url.origin}/mfa/verify`);
   }
