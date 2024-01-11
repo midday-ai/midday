@@ -35,7 +35,8 @@ export async function POST(req: Request) {
       .from("teams")
       .select("id")
       .eq("inbox_id", inboxId)
-      .single();
+      .single()
+      .throwOnError();
 
     const attachments = res.Attachments;
 
