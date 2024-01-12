@@ -333,7 +333,7 @@ export async function getTransactionsQuery(
     : 0;
 
   const totalMissingAttachments = data?.reduce((acc, currentItem) => {
-    if (currentItem.attachments.length === 0) {
+    if (currentItem.attachments?.length === 0) {
       return acc + 1;
     }
     return acc;

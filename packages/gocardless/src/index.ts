@@ -322,7 +322,6 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       reference: data.entryReference,
       date: data.valueDate,
       name: capitalCase(data.additionalInformation),
-      original: data.additionalInformation,
       method,
       internal_id: `${teamId}_${data.internalTransactionId}`,
       amount: data.transactionAmount.amount,

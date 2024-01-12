@@ -8,8 +8,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
@@ -20,11 +18,7 @@ import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 
-export function TransactionDetails({
-  transactionId,
-  onClose,
-  data: initialData,
-}) {
+export function TransactionDetails({ transactionId, data: initialData }) {
   const [data, setData] = useState(initialData);
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
@@ -44,7 +38,6 @@ export function TransactionDetails({
         setLoading(false);
       } catch {
         setLoading(false);
-        onClose();
       }
     }
 
@@ -54,87 +47,75 @@ export function TransactionDetails({
   }, [data]);
 
   return (
-    <div className="border h-full min-h-[calc(100vh-150px)] w-full p-6 bg-background">
-      <div className="sticky top-12">
-        <div className="flex justify-between mb-8">
-          <div className="flex-1 flex-col">
-            {isLoading ? (
-              <Skeleton className="w-[10%] h-[14px] rounded-full mt-1 mb-6" />
-            ) : (
-              <span className="text-[#606060] text-xs">
-                {data?.date && format(new Date(data.date), "MMM d, Y")}
-              </span>
-            )}
+    <>
+      <div className="flex justify-between mb-8">
+        <div className="flex-1 flex-col">
+          {isLoading ? (
+            <Skeleton className="w-[10%] h-[14px] rounded-full mt-1 mb-6" />
+          ) : (
+            <span className="text-[#606060] text-xs">
+              {data?.date && format(new Date(data.date), "MMM d, y")}
+            </span>
+          )}
 
-            <h2 className="mt-4 mb-3">
+          <h2 className="mt-4 mb-3">
+            {isLoading ? (
+              <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
+            ) : (
+              data?.name
+            )}
+          </h2>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col w-full">
               {isLoading ? (
-                <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
+                <Skeleton className="w-[50%] h-[30px] rounded-md mb-2" />
               ) : (
-                data?.name
+                <span
+                  className={cn(
+                    "text-4xl",
+                    data?.category === "income" && "text-[#00C969]"
+                  )}
+                >
+                  <FormatAmount
+                    amount={data?.amount}
+                    currency={data?.currency}
+                  />
+                </span>
               )}
-            </h2>
-            <div className="flex justify-between items-center">
-              <div className="flex flex-col w-full">
-                {isLoading ? (
-                  <Skeleton className="w-[50%] h-[30px] rounded-md mb-2" />
-                ) : (
-                  <span
-                    className={cn(
-                      "text-4xl",
-                      data?.category === "income" && "text-[#00C969]"
-                    )}
-                  >
-                    <FormatAmount
-                      amount={data?.amount}
-                      currency={data?.currency}
-                    />
-                  </span>
-                )}
-              </div>
             </div>
           </div>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="p-0 m-0 w-4 h-4"
-            onClick={onClose}
-          >
-            <Icons.Close className="w-4 h-4" />
-          </Button>
         </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
-          <SelectCategory
-            isLoading={isLoading}
-            name={data?.name}
-            id={transactionId}
-            selectedId={data?.category ?? undefined}
-          />
-
-          <AssignUser
-            isLoading={isLoading}
-            id={transactionId}
-            selectedId={data?.assigned?.id ?? undefined}
-          />
-        </div>
-
-        <Accordion type="multiple" defaultValue={["attachment"]}>
-          <AccordionItem value="attachment">
-            <AccordionTrigger>Attachment</AccordionTrigger>
-            <AccordionContent>
-              <Attachments id={data?.id} data={data?.attachments} />
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="note">
-            <AccordionTrigger>Note</AccordionTrigger>
-            <AccordionContent>
-              <Note id={transactionId} defaultValue={data?.note} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
       </div>
-    </div>
+
+      <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
+        <SelectCategory
+          isLoading={isLoading}
+          name={data?.name}
+          id={transactionId}
+          selectedId={data?.category ?? undefined}
+        />
+        <AssignUser
+          isLoading={isLoading}
+          id={transactionId}
+          selectedId={data?.assigned?.id ?? undefined}
+        />
+      </div>
+
+      <Accordion type="multiple" defaultValue={["attachment"]}>
+        <AccordionItem value="attachment">
+          <AccordionTrigger>Attachment</AccordionTrigger>
+          <AccordionContent>
+            <Attachments id={data?.id} data={data?.attachments} />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="note">
+          <AccordionTrigger>Note</AccordionTrigger>
+          <AccordionContent>
+            <Note id={transactionId} defaultValue={data?.note} />
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
   );
 }

@@ -1,113 +1,60 @@
-"use client";
-
 import { AssignedUser } from "@/components/assigned-user";
 import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionMethod } from "@/components/transaction-method";
 import { Icons } from "@midday/ui/icons";
+import { TableCell, TableRow } from "@midday/ui/table";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
-import { motion } from "framer-motion";
 
 export function DataTableCell({ children, className }) {
+  return <TableCell className={className}>{children}</TableCell>;
+}
+
+export function Row({ onClick, children }) {
   return (
-    <div
-      className={cn(
-        className,
-        "h-[45px] px-4 py-2 border-r last:border-none truncate overflow-hidden text-sm flex items-center"
-      )}
-    >
+    <TableRow className="h-[45px]" onClick={onClick}>
       {children}
-    </div>
+    </TableRow>
   );
 }
 
-export function Row({ children, onSelect, selected }) {
-  return (
-    <div
-      className={cn(
-        "flex items-center h-[45px] hover:bg-secondary border-t",
-        selected && "bg-secondary"
-      )}
-      onClick={onSelect}
-    >
-      {children}
-    </div>
-  );
-}
-
-export function DataTableRow({ collapsed, onSelect, data, selected }) {
-  const fullfilled = data.attachments.length > 0;
+export function DataTableRow({ row, setOpen }) {
+  const fullfilled = row?.attachments?.length > 0;
 
   return (
-    <Row onSelect={() => onSelect(data.id)} selected={selected}>
-      <DataTableCell className="w-[100px]">
-        {data.date && format(new Date(data.date), "MMM d")}
+    <Row key={row.id} onClick={() => setOpen(row.id)}>
+      <DataTableCell>
+        {row?.date && format(new Date(row.date), "MMM d")}
       </DataTableCell>
-
       <DataTableCell
         className={cn(
-          "w-[430px] space-x-2",
-          data.category === "income" && "text-[#00C969]"
+          "space-x-2",
+          row.category === "income" && "text-[#00C969]"
         )}
       >
-        {data.name}
+        {row.name}
       </DataTableCell>
-
-      <DataTableCell className="w-[200px]">
+      <DataTableCell>
         <span
           className={cn(
             "text-sm",
-            data.category === "income" && "text-[#00C969]"
+            row.category === "income" && "text-[#00C969]"
           )}
         >
-          <FormatAmount amount={data.amount} currency={data.currency} />
+          <FormatAmount amount={row.amount} currency={row.currency} />
         </span>
       </DataTableCell>
-
-      <motion.div
-        className="border-r"
-        initial={false}
-        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 200 }}
-        transition={{
-          duration: 0.25,
-          ease: "easeInOut",
-        }}
-      >
-        <DataTableCell className="w-[200px]">
-          <Category name={data.category} />
-        </DataTableCell>
-      </motion.div>
-
-      <motion.div
-        className="border-r"
-        initial={false}
-        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 150 }}
-        transition={{
-          duration: 0.25,
-          ease: "easeInOut",
-        }}
-      >
-        <DataTableCell>
-          <TransactionMethod method={data.method} />
-        </DataTableCell>
-      </motion.div>
-
-      <motion.div
-        className="border-r"
-        initial={false}
-        animate={{ opacity: collapsed ? 0 : 1, width: collapsed ? 0 : 200 }}
-        transition={{
-          duration: 0.25,
-          ease: "easeInOut",
-        }}
-      >
-        <DataTableCell className="w-[120px]">
-          <AssignedUser user={data.assigned} />
-        </DataTableCell>
-      </motion.div>
-
-      <DataTableCell className="w-[100px]">
+      <DataTableCell>
+        <Category name={row.category} />
+      </DataTableCell>
+      <DataTableCell>
+        <TransactionMethod method={row.method} />
+      </DataTableCell>
+      <DataTableCell>
+        <AssignedUser user={row.assigned} />
+      </DataTableCell>
+      <DataTableCell>
         {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
       </DataTableCell>
     </Row>

@@ -37,16 +37,13 @@ export default async function Transactions({
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense
-            fallback={<Loading collapsed={Boolean(transactionId)} />}
-            key={page}
-          >
+          <Suspense fallback={<Loading />} key={page}>
             <Table
               filter={filter}
               page={page}
               sort={sort}
               noAccounts={empty}
-              initialTransactionId={searchParams.id}
+              initialTransactionId={transactionId}
             />
           </Suspense>
         </ErrorBoundary>

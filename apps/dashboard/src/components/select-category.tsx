@@ -80,7 +80,11 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
           </div>
         ) : (
           <Select value={value} onValueChange={handleOnValueChange}>
-            <SelectTrigger id="category" className="line-clamp-1 truncate">
+            <SelectTrigger
+              id="category"
+              className="line-clamp-1 truncate"
+              onKeyDown={(evt) => evt.preventDefault()}
+            >
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent>

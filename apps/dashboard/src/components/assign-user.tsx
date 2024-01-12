@@ -62,7 +62,11 @@ export function AssignUser({ id, selectedId, isLoading }) {
               });
             }}
           >
-            <SelectTrigger id="assign" className="line-clamp-1 truncate">
+            <SelectTrigger
+              id="assign"
+              className="line-clamp-1 truncate"
+              onKeyDown={(evt) => evt.preventDefault()}
+            >
               <SelectValue placeholder="Select" />
             </SelectTrigger>
 

@@ -101,8 +101,8 @@ export function InboxView({
   );
 
   useEffect(() => {
-    supabase
-      .channel("changes")
+    const channel = supabase
+      .channel("realtime_inbox")
       .on(
         "postgres_changes",
         {
@@ -130,6 +130,10 @@ export function InboxView({
         }
       )
       .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [teamId, supabase]);
 
   const selectedItems = optimisticData?.find((item) => item.id === selectedId);

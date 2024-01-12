@@ -34,8 +34,8 @@ export function TransactionsModal() {
             </h2>
             <p className="text-[#878787] text-sm">
               Get real-time data and be able to see which transactions are
-              missing receipts, categorize, upload, and set the correct tax
-              rate. Export & deliver everything neatly to your accountant.
+              missing receipts and categorize. Export & deliver everything
+              neatly to your accountant.
             </p>
           </div>
 

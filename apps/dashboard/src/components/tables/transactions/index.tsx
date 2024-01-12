@@ -28,8 +28,9 @@ export async function Table({
 
   if (!data?.length) {
     if (noAccounts) {
-      return <Loading collapsed={false} />;
+      return <Loading />;
     }
+
     return <NoResults hasFilters={hasFilters} />;
   }
 
