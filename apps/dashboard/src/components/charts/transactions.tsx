@@ -16,7 +16,7 @@ export async function Transactions({ disabled }) {
     <div className="flex-1 border p-8 relative">
       <TransactionsPeriod type={type} disabled={disabled} />
 
-      <div className="h-[350px] mt-8">
+      <div className="mt-8">
         <TransactionsListHeader />
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<TransactionsListSkeleton />}>

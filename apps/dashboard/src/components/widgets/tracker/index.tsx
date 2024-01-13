@@ -4,23 +4,23 @@ import { Cookies } from "@/utils/constants";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { InboxHeader } from "./inbox-header";
-import { InboxWidget } from "./inbox-widget";
+import { TrackerHeader } from "./tracker-header";
+import { TrackerWidget } from "./tracker-widget";
 
-export async function Inbox({ disabled }) {
+export async function Tracker({ disabled }) {
   const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
 
   return (
     <div className="flex-1 border p-8 relative h-full">
-      <InboxHeader filter={filter} disabled={disabled} />
+      <TrackerHeader filter={filter} disabled={disabled} />
 
-      <div className="h-[350px]">
+      <div className="mt-10">
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense
             key={filter}
             fallback={<InboxSkeleton numberOfItems={4} className="pt-8" />}
           >
-            <InboxWidget disabled={disabled} filter={filter} />
+            <TrackerWidget />
           </Suspense>
         </ErrorBoundary>
       </div>

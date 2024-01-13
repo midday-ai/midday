@@ -54,7 +54,7 @@ export function SpendingPeriod({ initialPeriod }) {
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="text-2xl">Spending</h2>
+        <h2 className="text-lg">Spending</h2>
       </div>
 
       <DropdownMenu>

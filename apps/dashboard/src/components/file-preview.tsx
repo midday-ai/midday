@@ -65,7 +65,7 @@ export function FilePreview({
   const handleOnLoaded = () => {
     setTimeout(() => {
       setLoaded(true);
-    }, 450);
+    }, 50);
   };
 
   if (type?.startsWith("image")) {

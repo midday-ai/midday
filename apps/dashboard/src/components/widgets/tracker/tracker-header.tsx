@@ -1,6 +1,6 @@
 "use client";
 
-import { changeTransactionsPeriodAction } from "@/actions/change-transactions-period-action";
+import { changeInboxFilterAction } from "@/actions/inbox/filter";
 import { useI18n } from "@/locales/client";
 import {
   DropdownMenu,
@@ -11,13 +11,13 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["all", "income", "expense"];
+const options = ["all", "completed"];
 
-export function TransactionsPeriod({ type, disabled }) {
+export function TrackerHeader({ filter, disabled }) {
   const t = useI18n();
   const { execute, optimisticData } = useOptimisticAction(
-    changeTransactionsPeriodAction,
-    type,
+    changeInboxFilterAction,
+    filter,
     (_, newState) => {
       return newState;
     }
@@ -26,13 +26,14 @@ export function TransactionsPeriod({ type, disabled }) {
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="text-lg">Transactions</h2>
+        <h2 className="text-lg">Tracker</h2>
+        <span className="font-medium text-[#878787]">165h</span>
       </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger disabled={disabled}>
           <div className="flex items-center space-x-2">
-            <span>{t(`transactions_period.${optimisticData}`)}</span>
+            <span>{t(`inbox_filter.${optimisticData}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
@@ -43,7 +44,7 @@ export function TransactionsPeriod({ type, disabled }) {
               onCheckedChange={() => execute(option)}
               checked={option === optimisticData}
             >
-              {t(`transactions_period.${option}`)}
+              {t(`inbox_filter.${option}`)}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>

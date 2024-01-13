@@ -26,7 +26,7 @@ export function InboxHeader({ filter, disabled }) {
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="text-2xl">Inbox</h2>
+        <h2 className="text-lg">Inbox</h2>
       </div>
 
       <DropdownMenu>

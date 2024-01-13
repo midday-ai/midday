@@ -1,13 +1,11 @@
 import { Chart } from "@/components/charts/chart";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
-import { Spending } from "@/components/charts/spending";
-import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
-import { Inbox } from "@/components/widgets/inbox";
+import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
-import { startOfMonth, subMonths } from "date-fns";
+import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
@@ -27,6 +25,14 @@ export default async function Overview({ searchParams }) {
   const chartPeriod = cookies().has(Cookies.ChartPeriod)
     ? JSON.parse(cookies().get(Cookies.ChartPeriod)?.value)
     : {};
+
+  const initialPeriod = cookies().has("spending-period")
+    ? JSON.parse(cookies().get("spending-period")?.value)
+    : {
+        id: "this_month",
+        from: startOfYear(new Date()).toISOString(),
+        to: new Date().toISOString(),
+      };
 
   const value = {
     ...chartPeriod,
@@ -53,10 +59,8 @@ export default async function Overview({ searchParams }) {
           </Suspense>
         </div>
 
-        <div className="flex space-x-8 mt-14">
-          <Spending disabled={empty} />
-          <Transactions disabled={empty} />
-          <Inbox disabled={empty} />
+        <div className="mt-14">
+          <Widgets initialPeriod={initialPeriod} />
         </div>
       </div>
       {!isOpen && empty && <OverviewModal />}
