@@ -24,17 +24,17 @@ export function Widgets({ empty, initialPeriod }) {
         <CarouselNext className="static p-0 border-none hover:bg-transparent" />
       </div>
 
-      <CarouselContent className="w-full -ml-12">
-        <CarouselItem className="md:basis-1/2 lg:basis-1/3 pl-12">
+      <CarouselContent className="w-[calc(100%40px)] -ml-[40px]">
+        <CarouselItem className="basis-1/3 pl-[40px]">
           <Spending disabled={empty} initialPeriod={initialPeriod} />
         </CarouselItem>
-        <CarouselItem className="md:basis-1/2 lg:basis-1/3 pl-12">
+        <CarouselItem className="basis-1/3 pl-[40px]">
           <Transactions disabled={empty} />
         </CarouselItem>
-        <CarouselItem className="md:basis-1/2 lg:basis-1/3 pl-12">
-          <Tracker disabled={empty} />
+        <CarouselItem className="basis-1/3 pl-[40px]">
+          <Tracker />
         </CarouselItem>
-        <CarouselItem className="md:basis-1/2 lg:basis-1/3 pl-12">
+        <CarouselItem className="basis-1/3 pl-[40px]">
           <Inbox disabled={empty} />
         </CarouselItem>
       </CarouselContent>

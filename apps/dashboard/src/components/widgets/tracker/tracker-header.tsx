@@ -1,54 +1,36 @@
 "use client";
 
-import { changeInboxFilterAction } from "@/actions/inbox/filter";
 import { useI18n } from "@/locales/client";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
+import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["all", "completed"];
-
-export function TrackerHeader({ filter, disabled }) {
+export function TrackerHeader() {
   const t = useI18n();
-  const { execute, optimisticData } = useOptimisticAction(
-    changeInboxFilterAction,
-    filter,
-    (_, newState) => {
-      return newState;
-    }
-  );
 
   return (
     <div className="flex justify-between">
       <div>
         <h2 className="text-lg">Tracker</h2>
-        <span className="font-medium text-[#878787]">165h</span>
+        <span className="text-[#878787]">165h</span>
       </div>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger disabled={disabled}>
-          <div className="flex items-center space-x-2">
-            <span>{t(`inbox_filter.${optimisticData}`)}</span>
-            <Icons.ChevronDown />
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[130px]">
-          {options.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option}
-              onCheckedChange={() => execute(option)}
-              checked={option === optimisticData}
-            >
-              {t(`inbox_filter.${option}`)}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center border rounded-md h-9">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="p-0 w-6 h-6 hover:bg-transparent mr-4 ml-2"
+        >
+          <Icons.ChevronLeft className="w-6 h-6" />
+        </Button>
+        <span>January</span>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="p-0 w-6 h-6 hover:bg-transparent ml-4 mr-2"
+        >
+          <Icons.ChevronRight className="w-6 h-6" />
+        </Button>
+      </div>
     </div>
   );
 }
