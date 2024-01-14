@@ -1,9 +1,9 @@
 "use client";
 
-import { TransactionSheet } from "@/components/sheets/transaction-sheet";
+import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Table, TableBody } from "@midday/ui/table";
-import { useQueryState } from "next-usequerystate";
+import { parseAsString, useQueryStates } from "next-usequerystate";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { DataTableHeader } from "./data-table-header";
@@ -16,53 +16,59 @@ type Item = {
 type ItemsProps = {
   data: Item[];
   teamId?: string;
-  initialTransactionId: string;
+  initialDate: string;
 };
 
-export function DataTable({ data, teamId, initialTransactionId }: ItemsProps) {
+export function DataTable({ data, teamId, initialDate }: ItemsProps) {
   const supabase = createClient();
   const router = useRouter();
-  const [transactionId, setTransactionId] = useQueryState("id", {
-    defaultValue: initialTransactionId,
-    shallow: false,
-  });
-
-  const selectedTransaction = data.find(
-    (transaction) => transaction.id === transactionId
+  const [params, setParams] = useQueryStates(
+    {
+      date: parseAsString,
+      id: parseAsString,
+    },
+    {
+      shallow: true,
+    }
   );
+
+  const selectedItem = data?.find((d) => d.id === params.id);
 
   const setOpen = (id: string | boolean) => {
     if (id) {
-      setTransactionId(id);
+      setParams({ id });
     } else {
-      setTransactionId(null);
+      setParams({
+        id: null,
+        date: null,
+      });
     }
   };
 
   useEffect(() => {
-    const currentIndex = data.findIndex((row) => row.id === transactionId);
+    const currentIndex = data?.findIndex((row) => row.id === params.id);
 
     const keyDownHandler = (evt: KeyboardEvent) => {
-      if (transactionId && evt.key === "ArrowDown") {
+      if (params && evt.key === "ArrowDown") {
         evt.preventDefault();
         const nextItem = data.at(currentIndex + 1);
 
         if (nextItem) {
-          setTransactionId(nextItem.id);
+          setParams({ id: nextItem.id });
         }
       }
 
-      if (transactionId && evt.key === "Escape") {
-        setTransactionId(null);
+      if (params && evt.key === "Escape") {
+        setParams(null);
       }
 
-      if (transactionId && evt.key === "ArrowUp") {
+      if (params && evt.key === "ArrowUp") {
         evt.preventDefault();
 
         const prevItem = data.at(currentIndex - 1);
 
         if (currentIndex > 0 && prevItem) {
-          setTransactionId(prevItem.id);
+          setParams({ id: prevItem.id });
         }
       }
     };
@@ -72,17 +78,17 @@ export function DataTable({ data, teamId, initialTransactionId }: ItemsProps) {
     return () => {
       document.removeEventListener("keydown", keyDownHandler);
     };
-  }, [transactionId, data, setTransactionId]);
+  }, [params, data, setParams]);
 
   useEffect(() => {
     const channel = supabase
-      .channel("realtime_transactions")
+      .channel("realtime_tracker")
       .on(
         "postgres_changes",
         {
           event: "INSERT",
           schema: "public",
-          table: "transactions",
+          table: "tracker",
           filter: `team_id=eq.${teamId}`,
         },
         () => {
@@ -108,11 +114,10 @@ export function DataTable({ data, teamId, initialTransactionId }: ItemsProps) {
         </TableBody>
       </Table>
 
-      <TransactionSheet
-        isOpen={Boolean(transactionId)}
+      <TrackerSheet
+        isOpen={Boolean(params.id)}
         setOpen={setOpen}
-        data={selectedTransaction}
-        transactionId={transactionId}
+        date={params.date}
       />
     </>
   );

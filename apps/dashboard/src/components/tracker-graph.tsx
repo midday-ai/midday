@@ -1,6 +1,23 @@
+"use client";
+
+import { parseAsString, useQueryStates } from "next-usequerystate";
 import { TrackerMonthGraph } from "./tracker-month-graph";
 
 export function TrackerGraph() {
+  const [params, setParams] = useQueryStates(
+    {
+      date: parseAsString,
+      id: parseAsString,
+    },
+    {
+      shallow: true,
+    }
+  );
+
+  const onSelect = (params) => {
+    setParams(params);
+  };
+
   return (
     <div>
       <div className="mt-8">
@@ -9,13 +26,13 @@ export function TrackerGraph() {
       </div>
 
       <div className="flex row space-x-[45px] mt-8">
-        <TrackerMonthGraph date={new Date().toString()} />
-        <TrackerMonthGraph date={new Date().toString()} />
-        <TrackerMonthGraph date={new Date().toString()} />
-        <TrackerMonthGraph date={new Date().toString()} />
-        <TrackerMonthGraph date={new Date().toString()} />
-        <TrackerMonthGraph date={new Date().toString()} />
-        <TrackerMonthGraph date={new Date().toString()} />
+        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
+        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
+        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
+        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
+        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
+        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
+        {/* <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} /> */}
       </div>
     </div>
   );

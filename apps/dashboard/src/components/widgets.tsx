@@ -24,7 +24,7 @@ export function Widgets({ empty, initialPeriod }) {
         <CarouselNext className="static p-0 border-none hover:bg-transparent" />
       </div>
 
-      <CarouselContent className="w-[calc(100%40px)] -ml-[40px]">
+      <CarouselContent className="-ml-[40px]">
         <CarouselItem className="basis-1/3 pl-[40px]">
           <Spending disabled={empty} initialPeriod={initialPeriod} />
         </CarouselItem>

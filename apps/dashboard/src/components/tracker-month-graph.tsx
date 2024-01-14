@@ -1,16 +1,33 @@
+"use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
-import { eachDayOfInterval, endOfMonth, format, startOfMonth } from "date-fns";
+import {
+  eachDayOfInterval,
+  endOfMonth,
+  format,
+  formatISO,
+  startOfMonth,
+} from "date-fns";
 
-export function TrackerMonthGraph({ date, data }) {
+export function TrackerMonthGraph({ date, data, onSelect }) {
   const result = eachDayOfInterval({
     start: startOfMonth(new Date(date)),
     end: endOfMonth(new Date(date)),
   });
+
+  const handleOnSelect = ({ date, id }) => {
+    if (onSelect) {
+      onSelect({
+        id,
+        date: formatISO(date, { representation: "date" }),
+      });
+    }
+  };
 
   const rows = result.map((day, i) => (
     <HoverCard key={i.toString()} openDelay={80} closeDelay={20}>
@@ -43,12 +60,16 @@ export function TrackerMonthGraph({ date, data }) {
                   <span className="text-xs">PA</span>
                 </AvatarFallback>
               </Avatar>
-              <div className="flex flex-col">
+              <button
+                className="flex flex-col"
+                type="button"
+                onClick={() => handleOnSelect({ id: "123", date: day })}
+              >
                 <span className="text-xs">Project X</span>
                 <span className="text-xs text-[#878787]">
                   Webflow Development
                 </span>
-              </div>
+              </button>
             </div>
             <div className="ml-auto">
               <span className="text-xs">7h</span>
