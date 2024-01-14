@@ -1,3 +1,4 @@
+import { CommandMenu } from "@/components/command-menu";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { ConnectBankModal } from "@/components/modals/connect-bank-modal";
@@ -31,6 +32,7 @@ export default async function Layout({
       <ConnectBankModal countryCode={countryCode} />
       <SelectAccountModal countryCode={countryCode} />
       <ExportStatus />
+      <CommandMenu />
     </div>
   );
 }
