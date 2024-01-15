@@ -318,8 +318,6 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
     const method = mapTransactionMethod(data.proprietaryBankTransactionCode);
 
     return {
-      transaction_id: data.transactionId,
-      reference: data.entryReference,
       date: data.valueDate,
       name: capitalCase(data.additionalInformation),
       method,
