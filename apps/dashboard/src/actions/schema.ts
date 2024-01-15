@@ -110,9 +110,6 @@ const bankAccount = z.object({
   owner_name: z.string(),
   institution_id: z.string(),
   logo_url: z.string().optional(),
-  bban: z.string().optional(),
-  bic: z.string().optional(),
-  iban: z.string().optional(),
 });
 
 export const connectBankAccountSchema = z.array(bankAccount);

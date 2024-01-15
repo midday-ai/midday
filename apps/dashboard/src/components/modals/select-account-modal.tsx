@@ -90,11 +90,8 @@ export function SelectAccountModal({ countryCode }) {
       .map((id) => accounts.find((account) => account.id === id))
       .map((account) => ({
         account_id: account.id,
-        name: capitalCase(account.name || account.iban),
-        bic: account.bic,
-        bban: account.bban,
+        name: capitalCase(account.name),
         currency: account.currency,
-        iban: account.iban,
         owner_name: capitalCase(account.ownerName),
         institution_id: account.institution_id,
         bank_name: account.bank.name,
@@ -161,7 +158,7 @@ export function SelectAccountModal({ countryCode }) {
                           </Avatar>
                           <div className="ml-4 space-y-1">
                             <p className="text-sm font-medium leading-none mb-1">
-                              {account.iban}
+                              {capitalCase(account.name)}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {account.bank.name} -{" "}

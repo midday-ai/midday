@@ -27,9 +27,6 @@ export async function createBankAccounts(supabase: Client, accounts) {
         team_id: userData?.team_id,
         created_by: userData.id,
         name: account.name,
-        bban: account.bban,
-        iban: account.iban,
-        bic: account.bic,
         currency: account.currency,
         owner_name: account.owner_name,
       }))
