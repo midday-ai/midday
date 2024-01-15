@@ -3,8 +3,8 @@
 import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Table, TableBody } from "@midday/ui/table";
-import { parseAsString, useQueryStates } from "next-usequerystate";
 import { useRouter } from "next/navigation";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect } from "react";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";

@@ -7,7 +7,7 @@ import { MonthRangePicker } from "@midday/ui/month-range-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "next-usequerystate";
+import { parseAsString, useQueryStates } from "nuqs";
 
 export function ChartPeriod({ defaultValue, disabled }) {
   let placeholder;

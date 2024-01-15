@@ -1,6 +1,6 @@
 "use client";
 
-import { parseAsString, useQueryStates } from "next-usequerystate";
+import { parseAsString, useQueryStates } from "nuqs";
 import { TrackerMonthGraph } from "./tracker-month-graph";
 
 export function TrackerGraph({ data }) {

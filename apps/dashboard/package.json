@@ -39,7 +39,7 @@
     "next-international": "1.2.3",
     "next-safe-action": "6.0.1",
     "next-themes": "^0.2.1",
-    "next-usequerystate": "^1.15.1",
+    "nuqs": "^1.15.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.3",
-    "@types/node": "^20.11.1",
+    "@types/node": "^20.11.2",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"

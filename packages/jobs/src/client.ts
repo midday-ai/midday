@@ -12,7 +12,7 @@ export const client = new TriggerClient({
 export const supabase = new Supabase<Database>({
   id: "supabase",
   projectId: process.env.NEXT_PUBLIC_SUPABASE_ID!,
-  supabaseKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  supabaseKey: process.env.SUPABASE_SERVICE_KEY!,
 });
 
 export const openai = new OpenAI({

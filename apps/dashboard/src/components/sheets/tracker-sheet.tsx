@@ -10,7 +10,7 @@ import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { formatISO } from "date-fns";
-import { parseAsString, useQueryStates } from "next-usequerystate";
+import { parseAsString, useQueryStates } from "nuqs";
 import React from "react";
 
 export function TrackerSheet({ setOpen, isOpen, records }) {

@@ -3,8 +3,8 @@
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Table, TableBody } from "@midday/ui/table";
-import { useQueryState } from "next-usequerystate";
 import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";
