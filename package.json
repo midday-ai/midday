@@ -21,8 +21,8 @@
     "check:types": "turbo typecheck"
   },
   "dependencies": {
-    "@biomejs/biome": "1.5.1",
-    "@manypkg/cli": "^0.21.1",
+    "@biomejs/biome": "1.5.2",
+    "@manypkg/cli": "^0.21.2",
     "turbo": "^1.11.3",
     "typescript": "^5.3.3"
   }

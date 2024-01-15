@@ -1,5 +1,6 @@
-import { AssignedUser } from "@/components/assigned-user";
 import { FormatAmount } from "@/components/format-amount";
+import { ProjectMembers } from "@/components/project-members";
+import { TrackerStatus } from "@/components/tracker-status";
 import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { cn } from "@midday/ui/utils";
@@ -24,9 +25,11 @@ export function DataTableRow({ row, setOpen }) {
       <DataTableCell>{row.time}</DataTableCell>
       <DataTableCell>{row.description}</DataTableCell>
       <DataTableCell>
-        <AssignedUser user={row.assigned} />
+        <ProjectMembers members={row.members} />
       </DataTableCell>
-      <DataTableCell>{row.status}</DataTableCell>
+      <DataTableCell>
+        <TrackerStatus status={row.status} />
+      </DataTableCell>
     </Row>
   );
 }

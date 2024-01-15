@@ -4,7 +4,6 @@ import { MenuOption, useCommandStore } from "@/store/command";
 import { CommandDialog } from "@midday/ui/command";
 import { DialogProps } from "@radix-ui/react-alert-dialog";
 import { usePathname, useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { CommandNavigation } from "./navigation";
 import { CommandTracker } from "./tracker";

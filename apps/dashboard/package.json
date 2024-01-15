@@ -31,7 +31,7 @@
     "@vercel/speed-insights": "^1.0.3",
     "@zip.js/zip.js": "2.7.32",
     "base64-arraybuffer": "^1.0.2",
-    "change-case": "^5.4.1",
+    "change-case": "^5.4.2",
     "fast-csv": "^5.0.0",
     "framer-motion": "^10.18.0",
     "ms": "^2.1.3",
@@ -58,8 +58,8 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.3",
-    "@types/node": "^20.11.0",
-    "@types/react": "^18.2.47",
+    "@types/node": "^20.11.1",
+    "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"
   }

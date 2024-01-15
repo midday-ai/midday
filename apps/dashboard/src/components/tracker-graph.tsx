@@ -3,7 +3,7 @@
 import { parseAsString, useQueryStates } from "next-usequerystate";
 import { TrackerMonthGraph } from "./tracker-month-graph";
 
-export function TrackerGraph() {
+export function TrackerGraph({ data }) {
   const [params, setParams] = useQueryStates(
     {
       date: parseAsString,
@@ -26,13 +26,42 @@ export function TrackerGraph() {
       </div>
 
       <div className="flex row space-x-[45px] mt-8">
-        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
-        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
-        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
-        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
-        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
-        <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} />
-        {/* <TrackerMonthGraph date={new Date().toString()} onSelect={onSelect} /> */}
+        <TrackerMonthGraph
+          disableButton
+          date="2023-07-01"
+          onSelect={onSelect}
+          records={data}
+        />
+        <TrackerMonthGraph
+          disableButton
+          date="2023-08-01"
+          onSelect={onSelect}
+          records={data}
+        />
+        <TrackerMonthGraph
+          disableButton
+          date="2023-09-01"
+          onSelect={onSelect}
+          records={data}
+        />
+        <TrackerMonthGraph
+          disableButton
+          date="2023-11-01"
+          onSelect={onSelect}
+          records={data}
+        />
+        <TrackerMonthGraph
+          disableButton
+          date="2023-12-01"
+          onSelect={onSelect}
+          records={data}
+        />
+        <TrackerMonthGraph
+          disableButton
+          date="2024-01-01"
+          onSelect={onSelect}
+          records={data}
+        />
       </div>
     </div>
   );

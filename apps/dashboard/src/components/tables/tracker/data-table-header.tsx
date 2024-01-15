@@ -77,13 +77,11 @@ export function DataTableHeader() {
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
-            onClick={() => createSortQuery("assigned")}
+            onClick={() => createSortQuery("members")}
           >
-            <span>Assigned</span>
-            {"assigned" === column && value === "asc" && (
-              <ArrowDown size={16} />
-            )}
-            {"assigned" === column && value === "desc" && <ArrowUp size={16} />}
+            <span>Members</span>
+            {"members" === column && value === "asc" && <ArrowDown size={16} />}
+            {"members" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
         <TableHead>

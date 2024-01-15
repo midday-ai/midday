@@ -1,6 +1,7 @@
 import { CommandMenu } from "@/components/command-menu";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
+import { HotKeys } from "@/components/hot-keys";
 import { ConnectBankModal } from "@/components/modals/connect-bank-modal";
 import { SelectAccountModal } from "@/components/modals/select-account-modal";
 import { Sidebar } from "@/components/sidebar";
@@ -33,6 +34,7 @@ export default async function Layout({
       <SelectAccountModal countryCode={countryCode} />
       <ExportStatus />
       <CommandMenu />
+      <HotKeys />
     </div>
   );
 }

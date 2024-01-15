@@ -19,7 +19,7 @@ type ItemsProps = {
   initialDate: string;
 };
 
-export function DataTable({ data, teamId, initialDate }: ItemsProps) {
+export function DataTable({ data, teamId, records }: ItemsProps) {
   const supabase = createClient();
   const router = useRouter();
   const [params, setParams] = useQueryStates(
@@ -32,8 +32,6 @@ export function DataTable({ data, teamId, initialDate }: ItemsProps) {
     }
   );
 
-  const selectedItem = data?.find((d) => d.id === params.id);
-
   const setOpen = (id: string | boolean) => {
     if (id) {
       setParams({ id });
@@ -44,41 +42,6 @@ export function DataTable({ data, teamId, initialDate }: ItemsProps) {
       });
     }
   };
-
-  useEffect(() => {
-    const currentIndex = data?.findIndex((row) => row.id === params.id);
-
-    const keyDownHandler = (evt: KeyboardEvent) => {
-      if (params && evt.key === "ArrowDown") {
-        evt.preventDefault();
-        const nextItem = data.at(currentIndex + 1);
-
-        if (nextItem) {
-          setParams({ id: nextItem.id });
-        }
-      }
-
-      if (params && evt.key === "Escape") {
-        setParams(null);
-      }
-
-      if (params && evt.key === "ArrowUp") {
-        evt.preventDefault();
-
-        const prevItem = data.at(currentIndex - 1);
-
-        if (currentIndex > 0 && prevItem) {
-          setParams({ id: prevItem.id });
-        }
-      }
-    };
-
-    document.addEventListener("keydown", keyDownHandler);
-
-    return () => {
-      document.removeEventListener("keydown", keyDownHandler);
-    };
-  }, [params, data, setParams]);
 
   useEffect(() => {
     const channel = supabase
@@ -118,6 +81,7 @@ export function DataTable({ data, teamId, initialDate }: ItemsProps) {
         isOpen={Boolean(params.id)}
         setOpen={setOpen}
         date={params.date}
+        records={records}
       />
     </>
   );

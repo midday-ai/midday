@@ -15,10 +15,339 @@ export const metadata: Metadata = {
   title: "Tracker | Midday",
 };
 
+const records = {
+  "2023-07-04": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2023-08-12": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2023-10-12": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2023-11-21": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2024-01-01": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2024-01-08": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2024-01-09": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2024-01-13": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+    {
+      id: "2",
+      description: "Design",
+      time: 7,
+      user: {
+        id: "1",
+        full_name: "Viktor Hofte",
+        avatar_url:
+          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+      },
+    },
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2024-01-14": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+  "2024-01-15": [
+    {
+      id: "1",
+      description: "Development",
+      time: 7,
+      user: {
+        id: "1",
+        working: true,
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+
+    {
+      id: "3",
+      description: "Development",
+      time: 1,
+      user: {
+        id: "1",
+        full_name: "Pontus Abrahamsson",
+        avatar_url:
+          "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+      },
+    },
+  ],
+};
+
 export default function Tracker() {
   return (
     <div>
-      <TrackerGraph />
+      <TrackerGraph data={records} />
 
       <div className="mt-14 mb-6 flex items-center justify-between">
         <h2 className="text-xl">Projects</h2>
@@ -41,7 +370,7 @@ export default function Tracker() {
       </div>
 
       <Suspense>
-        <Table />
+        <Table records={records} />
       </Suspense>
     </div>
   );

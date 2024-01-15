@@ -62,4 +62,8 @@ export default {
     owner: "Owner",
     member: "Member",
   },
+  tracker_status: {
+    in_progress: "In progress",
+    completed: "Completed",
+  },
 } as const;

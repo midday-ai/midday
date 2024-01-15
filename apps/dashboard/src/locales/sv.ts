@@ -62,4 +62,8 @@ export default {
     owner: "Ägare",
     member: "Medlem",
   },
+  tracker_status: {
+    in_progress: "Pågående",
+    completed: "Färdig",
+  },
 } as const;

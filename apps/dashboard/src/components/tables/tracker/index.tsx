@@ -3,12 +3,10 @@ import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/tracker/data-table";
 import { getUser } from "@midday/supabase/cached-queries";
 import { getPagination } from "@midday/supabase/queries";
-// import { NoResults } from "./empty-states";
-// import { Loading } from "./loading";
 
 const pageSize = 50;
 
-export async function Table({ page, sort, initialTrackerId }) {
+export async function Table({ page, initialTrackerId, records }) {
   const { to, from } = getPagination(page, pageSize);
   const { data: userData } = await getUser();
   const { data, meta } = {
@@ -20,6 +18,14 @@ export async function Table({ page, sort, initialTrackerId }) {
         time: 85,
         description: "Product Design",
         status: "in_progress",
+        members: [
+          {
+            id: "1",
+            full_name: "Viktor Hofte",
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+        ],
       },
       {
         id: "2",
@@ -27,6 +33,27 @@ export async function Table({ page, sort, initialTrackerId }) {
         time: 85,
         description: "Product Design",
         status: "in_progress",
+        members: [
+          {
+            id: "1",
+            full_name: "Pontus Abrahamsson",
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+          {
+            id: "1",
+            full_name: "Viktor Hofte",
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+          {
+            id: "1",
+            full_name: "Viktor Hofte",
+            working: true,
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+        ],
       },
       {
         id: "3",
@@ -34,6 +61,14 @@ export async function Table({ page, sort, initialTrackerId }) {
         time: 85,
         description: "Product Design",
         status: "in_progress",
+        members: [
+          {
+            id: "1",
+            full_name: "Viktor Hofte",
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+        ],
       },
       {
         id: "4",
@@ -41,6 +76,14 @@ export async function Table({ page, sort, initialTrackerId }) {
         time: 85,
         description: "Product Design",
         status: "in_progress",
+        members: [
+          {
+            id: "1",
+            full_name: "Viktor Hofte",
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+        ],
       },
       {
         id: "5",
@@ -55,6 +98,29 @@ export async function Table({ page, sort, initialTrackerId }) {
         time: 85,
         description: "Product Design",
         status: "in_progress",
+        members: [
+          {
+            id: "1",
+            full_name: "Viktor Hofte",
+            working: true,
+            avatar_url:
+              "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
+          },
+        ],
+      },
+      {
+        id: "6",
+        name: "Project X",
+        time: 85,
+        description: "Product Design",
+        status: "completed",
+      },
+      {
+        id: "7",
+        name: "Project X",
+        time: 85,
+        description: "Product Design",
+        status: "completed",
       },
     ],
   };
@@ -71,6 +137,7 @@ export async function Table({ page, sort, initialTrackerId }) {
         data={data}
         teamId={userData.team_id}
         initialTrackerId={initialTrackerId}
+        records={records}
       />
 
       <Pagination
