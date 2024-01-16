@@ -13,7 +13,7 @@ client.defineJob({
   run: async (_, io, ctx) => {
     const { data } = await io.supabase.client
       .from("bank_accounts")
-      .select("id,team_id,account_id")
+      .select("id, team_id, account_id")
       .eq("id", ctx.source.id)
       .single();
 
@@ -39,7 +39,7 @@ client.defineJob({
     const { transactions } = await getTransactions(data?.account_id);
 
     const { data: transactionsData, error } = await io.supabase.client
-      .from("transactions")
+      .from("decrypted_transactions")
       .upsert(
         transformTransactions(transactions?.booked, {
           accountId: data?.id,
@@ -50,7 +50,7 @@ client.defineJob({
           ignoreDuplicates: true,
         }
       )
-      .select();
+      .select("*, name:decrypted_name");
 
     if (transactionsData && transactionsData.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);

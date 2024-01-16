@@ -25,10 +25,10 @@
     "@novu/headless": "^0.22.0",
     "@tanstack/react-table": "^8.11.6",
     "@todesktop/client-core": "^1.2.4",
-    "@trigger.dev/nextjs": "^2.3.11",
+    "@trigger.dev/nextjs": "^2.3.12",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/edge-config": "^0.4.1",
-    "@vercel/speed-insights": "^1.0.3",
+    "@vercel/speed-insights": "^1.0.4",
     "@zip.js/zip.js": "2.7.32",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.2",
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.3",
-    "@types/node": "^20.11.2",
+    "@types/node": "^20.11.4",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"
