@@ -103,10 +103,10 @@ export async function updateTransaction(
   data: any
 ) {
   return supabase
-    .from("transactions")
+    .from("decrypted_transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, team_id, name")
+    .select("id, category, team_id, name:decrypted_name")
     .single();
 }
 
@@ -200,15 +200,15 @@ export async function updateSimilarTransactions(supabase: Client, id: string) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
   const transaction = await supabase
-    .from("transactions")
-    .select("name, category")
+    .from("decrypted_transactions")
+    .select("name:decrypted_name, category")
     .eq("id", id)
     .single();
 
   return supabase
-    .from("transactions")
+    .from("decrypted_transactions")
     .update({ category: transaction.data.category })
-    .eq("name", transaction.data.name)
+    .eq("decrypted_name", transaction.data.name)
     .eq("team_id", userData?.team_id)
     .select("id, team_id");
 }

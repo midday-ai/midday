@@ -4,7 +4,7 @@ export const EMPTY_FOLDER_PLACEHOLDER_FILE_NAME = ".emptyFolderPlaceholder";
 
 type UploadParams = {
   file: File;
-  path: string;
+  path: string[];
   bucket: string;
 };
 
@@ -13,15 +13,14 @@ export async function upload(
   { file, path, bucket }: UploadParams
 ) {
   const storage = client.storage.from(bucket);
-  const fullPath = `${path}/${file.name}`;
 
-  const result = await storage.upload(fullPath, file, {
+  const result = await storage.upload(path.join("/"), file, {
     upsert: true,
     cacheControl: "3600",
   });
 
   if (!result.error) {
-    return storage.getPublicUrl(fullPath).data.publicUrl;
+    return storage.getPublicUrl(path.join("/")).data.publicUrl;
   }
 
   throw result.error;

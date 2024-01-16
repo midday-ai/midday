@@ -18,7 +18,7 @@ export const updateTransactionAction = action(
     const teamId = user.data.team_id;
     const { data } = await updateTransaction(supabase, id, payload);
 
-    // Add category to global enrichment_transactions
+    // Add category to global transaction_enrichments
     if (data?.category) {
       createEnrichmentTransaction(supabase, {
         name: data.name,

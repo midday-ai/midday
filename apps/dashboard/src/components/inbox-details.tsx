@@ -144,15 +144,17 @@ export function InboxDetails({
           <Separator />
 
           <div className="relative h-full">
-            <FilePreview
-              src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
-              name={item.name}
-              type="application/pdf"
-              width={680}
-              height={900}
-              disableFullscreen
-              key={item.id}
-            />
+            {item?.file_path && (
+              <FilePreview
+                src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
+                name={item.name}
+                type="application/pdf"
+                width={680}
+                height={900}
+                disableFullscreen
+                key={item.id}
+              />
+            )}
           </div>
 
           <InboxToolbar

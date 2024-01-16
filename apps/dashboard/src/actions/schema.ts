@@ -53,7 +53,7 @@ export const changeTransactionsPeriodSchema = z.enum([
 
 export const createAttachmentsSchema = z.array(
   z.object({
-    path: z.string(),
+    path: z.array(z.string()),
     name: z.string(),
     size: z.number(),
     transaction_id: z.string(),

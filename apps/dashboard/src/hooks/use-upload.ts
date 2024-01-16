@@ -19,7 +19,7 @@ export function useUpload() {
 
     return {
       url,
-      path: `${path}/${file.name}`,
+      path,
     };
   };
 

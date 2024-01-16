@@ -76,8 +76,8 @@ export async function getBankConnectionsByTeamIdQuery(
   teamId: string
 ) {
   return supabase
-    .from("bank_connections")
-    .select("*")
+    .from("decrypted_bank_connections")
+    .select("*, name:decrypted_name")
     .eq("team_id", teamId)
     .throwOnError();
 }
@@ -87,8 +87,10 @@ export async function getTeamBankAccountsQuery(
   teamId: string
 ) {
   return supabase
-    .from("bank_accounts")
-    .select("*, bank:bank_connection_id(*)")
+    .from("decrypted_bank_accounts")
+    .select(
+      "*, owner_name:decrypted_owner_name, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
+    )
     .eq("team_id", teamId)
     .throwOnError();
 }
@@ -245,10 +247,11 @@ export async function getTransactionsQuery(
   } = filter || {};
 
   const query = supabase
-    .from("transactions")
+    .from("decrypted_transactions")
     .select(
       `
       *,
+      name:decrypted_name,
       assigned:assigned_id(*),
       attachments:transaction_attachments(*)
     `,
@@ -269,11 +272,11 @@ export async function getTransactionsQuery(
   }
 
   if (search && fuzzy) {
-    query.ilike("name", `%${search}%`);
+    query.ilike("decrypted_name", `%${search}%`);
   }
 
   if (search && !fuzzy) {
-    query.textSearch("name", search, {
+    query.textSearch("decrypted_name", search, {
       type: "websearch",
       config: "english",
     });
@@ -295,6 +298,7 @@ export async function getTransactionsQuery(
     query.select(
       `
       *,
+      name:decrypted_name,
       assigned:assigned_id(*),
       attachments:transaction_attachments(*)
     `
@@ -355,10 +359,11 @@ export async function getTransactionsQuery(
 
 export async function getTransactionQuery(supabase: Client, id: string) {
   const { data } = await supabase
-    .from("transactions")
+    .from("decrypted_transactions")
     .select(
       `
       *,
+      name:decrypted_name,
       assigned:assigned_id(*),
       attachments:transaction_attachments(*)
     `
@@ -385,9 +390,9 @@ export async function getSimilarTransactions(
   const { name, teamId } = params;
 
   return supabase
-    .from("transactions")
+    .from("decrypted_transactions")
     .select("id, amount, team_id", { count: "exact" })
-    .eq("name", name)
+    .eq("decrypted_name", name)
     .eq("team_id", teamId)
     .throwOnError();
 }
@@ -675,10 +680,13 @@ export async function getInboxQuery(
   const { from = 0, to = 10, teamId, status } = params;
 
   const query = supabase
-    .from("inbox")
-    .select("*, transaction:transaction_id(id, amount, currency, name, date)", {
-      count: "exact",
-    })
+    .from("decrypted_inbox")
+    .select(
+      "*, subject:decrypted_subject, issuer_name:decrypted_issuer_name, name:decrypted_name, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
+      {
+        count: "exact",
+      }
+    )
     .eq("team_id", teamId)
     .eq("archived", false)
     .eq("trash", false)
