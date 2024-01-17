@@ -60,7 +60,11 @@ client.defineJob({
         const { data: updatedInboxData } = await io.supabase.client
           .from("inbox")
           .update({
-            amount: data.total_amount?.replace(/[^\d.]/g, ""),
+            // match any character that is not a digit, comma, or dot, and replaces
+            // those characters with an empty string also replace comma with a dot
+            amount: data.total_amount
+              ?.replace(/[^\d.,]/g, "")
+              .replace(/,/g, "."),
             currency: data.currency,
             issuer_name: data.issuer_name,
             due_date: data.due_date && new Date(data.due_date),

@@ -30,16 +30,17 @@ client.defineJob({
   run: async (payload, io) => {
     // NOTE: All inbox reciepts and invoices amount are
     // saved with positive values while transactions have signed values
-    const { data: transactionData } = await io.supabase.client
+    const { data: transactionData, error } = await io.supabase.client
       .from("decrypted_transactions")
       .select(
         "id, name:decrypted_name, team_id, attachments:transaction_attachments(*)"
       )
       .eq("amount", Math.abs(payload.amount))
       .eq("team_id", payload.teamId)
-      // .eq("team_id", body.record.team_id)
       .filter("transaction_attachments.id", "is", null)
       .gte("created_at", subDays(new Date(), 45).toISOString());
+
+    await io.logger.error("error", JSON.stringify(error, null, 2));
 
     await io.logger.error(
       "transactionData",
