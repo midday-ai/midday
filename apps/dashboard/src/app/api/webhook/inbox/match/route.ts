@@ -1,4 +1,5 @@
 import { env } from "@/env.mjs";
+import { getI18n } from "@midday/email/locales";
 import {
   NotificationTypes,
   TriggerEvents,
@@ -24,6 +25,14 @@ export async function POST(req: Request) {
   const supabase = createClient({ admin: true });
 
   const body = await req.json();
+
+  const { data: transactionData } = await supabase
+    .from("decrypted_transactions")
+    .select("id, name:decrypted_name")
+    .eq("id", body.record.id)
+    .eq("team_id", body.record.team_id)
+    .single()
+    .throwOnError();
 
   // NOTE: All inbox reciepts and invoices amount are saved with positive values while transactions have signed values
   const { data: inboxData } = await supabase
@@ -63,24 +72,36 @@ export async function POST(req: Request) {
 
     const { data: usersData } = await supabase
       .from("users_on_team")
-      .select("id, team_id, user:user_id(id, avatar_url, full_name, email)")
+      .select(
+        "id, role, team_id, locale, user:users(id,full_name,avatar_url,email"
+      )
       .eq("team_id", body.record.team_id);
 
-    const notificationEvents = usersData.map((user) => ({
-      name: TriggerEvents.MatchNewInApp,
-      payload: {
-        recordId: updatedInboxData.transaction_id,
-        description: `We just matched the transaction “Vercel Pro $40” against “${updatedInboxData.file_name}”`,
-        type: NotificationTypes.Match,
-      },
-      user: {
-        subscriberId: user.id,
-        teamId: updatedInboxData.team_id,
-        email: user.email,
-        fullName: user.full_name,
-        avatarUrl: user.avatar_url,
-      },
-    }));
+    const notificationEvents = usersData.map(({ user }) => {
+      const { t } = getI18n({ locale: user.locale });
+
+      return {
+        name: TriggerEvents.MatchNewInApp,
+        payload: {
+          recordId: updatedInboxData.transaction_id,
+          description: t(
+            { id: "notifications.match" },
+            {
+              transactionName: transactionData.name,
+              fileName: updatedInboxData.file_name,
+            }
+          ),
+          type: NotificationTypes.Match,
+        },
+        user: {
+          subscriberId: user.id,
+          teamId: updatedInboxData.team_id,
+          email: user.email,
+          fullName: user.full_name,
+          avatarUrl: user.avatar_url,
+        },
+      };
+    });
 
     if (notificationEvents?.length) {
       triggerBulk(notificationEvents.flat());

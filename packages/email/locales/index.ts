@@ -2,6 +2,8 @@ import { createIntl } from "@formatjs/intl";
 
 const messages = {
   en: {
+    "notifications.match":
+      "We just matched the transaction “${transactionName}” against “${fileName}”",
     "notifications.transaction":
       "You have a new transaction of {amount} from {from}",
     "transactions.subject": "New transactions",
@@ -41,6 +43,8 @@ const messages = {
       "If you were not expecting this invitation, you can ignore this email. If you are concerned about your account's safety, please reply to this email to get in touch with us.",
   },
   sv: {
+    "notifications.match":
+      "Vi matchade precis transaktionen “${transactionName}” mot “${fileName}”",
     "notifications.transaction":
       "Du har en ny transaktion på {amount} från {from}",
     "transactions.subject": "Nya transaktioner",
