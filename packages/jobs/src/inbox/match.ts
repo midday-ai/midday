@@ -21,6 +21,7 @@ client.defineJob({
     schema: z.object({
       inboxId: z.string(),
       amount: z.number(),
+      teamId: z.string(),
     }),
   }),
   integrations: {
@@ -35,6 +36,7 @@ client.defineJob({
         "id, name:decrypted_name, team_id, attachments:transaction_attachments(*)"
       )
       .eq("amount", Math.abs(payload.amount))
+      .eq("team_id", payload.teamId)
       // .eq("team_id", body.record.team_id)
       .filter("transaction_attachments.id", "is", null)
       .gte("created_at", subDays(new Date(), 45).toISOString());
@@ -51,6 +53,7 @@ client.defineJob({
       const { data: inboxData } = await io.supabase.client
         .from("inbox")
         .select("*")
+        .eq("team_id", payload.teamId)
         .eq("id", payload.inboxId);
 
       await io.logger.error("inboxData", JSON.stringify(inboxData, null, 2));

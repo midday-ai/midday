@@ -74,6 +74,7 @@ client.defineJob({
           payload: {
             teamId: updatedInboxData.team_id,
             inboxId: updatedInboxData.id,
+            amount: updatedInboxData.amount,
           },
         });
       }
