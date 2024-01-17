@@ -125,7 +125,10 @@ export function InboxView({
             payload.eventType === "DELETE" ||
             payload.eventType === "UPDATE"
           ) {
+            // Refetch cached data
             onRefresh();
+            // Refetch client
+            router.refresh();
           }
         }
       )
