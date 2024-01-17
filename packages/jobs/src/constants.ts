@@ -5,6 +5,7 @@ export const Jobs = {
   TRANSACTION_SCHEDULER: "transaction-scheduler",
   TRANSACTIONS_SYNC: "transactions-sync",
   PROCESS_INBOX: "process-inbox",
+  MATCH_INBOX: "match-inbox",
 };
 
 export const Events = {
@@ -12,4 +13,5 @@ export const Events = {
   TRANSACTIONS_EXPORT: "transactions.export",
   TRANSACTIONS_NOTIFICATION: "transactions.notification",
   PROCESS_INBOX: "process.inbox",
+  MATCH_INBOX: "match.inbox",
 };

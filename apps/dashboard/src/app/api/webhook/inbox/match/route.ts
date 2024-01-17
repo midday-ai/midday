@@ -34,7 +34,8 @@ export async function POST(req: Request) {
     .single()
     .throwOnError();
 
-  // NOTE: All inbox reciepts and invoices amount are saved with positive values while transactions have signed values
+  // NOTE: All inbox reciepts and invoices amount are
+  // saved with positive values while transactions have signed values
   const { data: inboxData } = await supabase
     .from("inbox")
     .select("*")

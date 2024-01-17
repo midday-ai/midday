@@ -6,7 +6,7 @@ import { Events, Jobs } from "../constants";
 
 client.defineJob({
   id: Jobs.PROCESS_INBOX,
-  name: "Process Inbox",
+  name: "Inbox - Process",
   version: "0.0.1",
   trigger: eventTrigger({
     name: Events.PROCESS_INBOX,
@@ -43,7 +43,7 @@ client.defineJob({
           {
             role: "system",
             content:
-              "From this invoice data extract total amount, currency, due date, Issuer name and return it as JSON",
+              "From this invoice data extract total amount, currency, due date, issuer name and return it as JSON",
           },
           {
             role: "user",
@@ -57,7 +57,7 @@ client.defineJob({
       if (response) {
         const data = JSON.parse(response);
 
-        await io.supabase.client
+        const { data: updatedInboxData } = await io.supabase.client
           .from("inbox")
           .update({
             amount: data.total_amount?.replace(/[^\d.]/g, ""),
@@ -65,7 +65,16 @@ client.defineJob({
             issuer_name: data.issuer_name,
             due_date: data.due_date && new Date(data.due_date),
           })
-          .eq("id", payload.inboxId);
+          .eq("id", payload.inboxId)
+          .select("*");
+
+        await io.sendEvent("Match Inbox", {
+          name: Events.MATCH_INBOX,
+          payload: {
+            teamId: updatedInboxData.team_id,
+            inboxId: updatedInboxData.id,
+          },
+        });
       }
     }
   },

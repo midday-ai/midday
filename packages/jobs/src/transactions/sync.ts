@@ -6,7 +6,7 @@ import { scheduler } from "./scheduler";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC,
-  name: "Transactions - Sync Transactions",
+  name: "Transactions - Sync",
   version: "0.0.1",
   trigger: scheduler,
   integrations: { supabase },
