@@ -25,7 +25,7 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
 
     const { url } = await uploadFile({
       bucket: "avatars",
-      path: teamId,
+      path: [teamId, selectedFile[0]?.name],
       file: selectedFile[0] as File,
     });
 

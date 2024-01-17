@@ -18,6 +18,7 @@ export const env = createEnv({
     LOGSNAG_PRIVATE_TOKEN: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
+    API_ROUTE_SECRET: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -61,6 +62,7 @@ export const env = createEnv({
     LOGSNAG_PRIVATE_TOKEN: process.env.LOGSNAG_PRIVATE_TOKEN,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

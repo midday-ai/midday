@@ -25,7 +25,7 @@
     "@novu/headless": "^0.22.0",
     "@tanstack/react-table": "^8.11.6",
     "@todesktop/client-core": "^1.2.4",
-    "@trigger.dev/nextjs": "^2.3.12",
+    "@trigger.dev/nextjs": "^2.3.13",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/edge-config": "^0.4.1",
     "@vercel/speed-insights": "^1.0.4",
@@ -58,7 +58,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.3",
-    "@types/node": "^20.11.4",
+    "@types/node": "^20.11.5",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"

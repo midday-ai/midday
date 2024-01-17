@@ -25,7 +25,7 @@ export function UserAvatar({ userId, avatarUrl, fullName }) {
 
     const { url } = await uploadFile({
       bucket: "avatars",
-      path: userId,
+      path: [userId, selectedFile[0]?.name],
       file: selectedFile[0] as File,
     });
 

@@ -380,6 +380,7 @@ type UpdateInboxByIdParams = {
   read?: boolean;
   status?: "completed" | "archived";
   attachment_id?: string;
+  transaction_id?: string;
 };
 
 export async function updateInboxById(

@@ -31,7 +31,7 @@ export function InboxStatus({ item }) {
           <TooltipContent sideOffset={20} className="text-xs">
             <p>
               We will try to match against incoming <br />
-              transactions for up to 7 days
+              transactions for up to 45 days
             </p>
           </TooltipContent>
         </Tooltip>

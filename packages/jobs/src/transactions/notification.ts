@@ -45,9 +45,9 @@ client.defineJob({
 
         return transactions.map((transaction) => ({
           name: TriggerEvents.TransactionNewInApp,
-          type: NotificationTypes.Transaction,
           payload: {
             recordId: transaction.id,
+            type: NotificationTypes.Transaction,
             description: t(
               { id: "notifications.transaction" },
               {
