@@ -39,6 +39,11 @@ client.defineJob({
       .filter("transaction_attachments.id", "is", null)
       .gte("created_at", subDays(new Date(), 45).toISOString());
 
+    await io.logger.error(
+      "transactionData",
+      JSON.stringify(transactionData, null, 2)
+    );
+
     // NOTE: If we match more than one transaction record we can't be sure of a match
     if (transactionData?.length === 1) {
       const transaction = transactionData.at(0);
@@ -47,6 +52,8 @@ client.defineJob({
         .from("inbox")
         .select("*")
         .eq("id", payload.inboxId);
+
+      await io.logger.error("inboxData", JSON.stringify(inboxData, null, 2));
 
       const { data: attachmentData } = await io.supabase.client
         .from("transaction_attachments")
@@ -78,6 +85,8 @@ client.defineJob({
         )
         .eq("team_id", inboxData.team_id);
 
+      await io.logger.error("usersData", JSON.stringify(usersData, null, 2));
+
       const notificationEvents = usersData?.map(({ user }) => {
         const { t } = getI18n({ locale: user.locale });
 
@@ -103,6 +112,11 @@ client.defineJob({
           },
         };
       });
+
+      await io.logger.error(
+        "notificationEvents",
+        JSON.stringify(notificationEvents, null, 2)
+      );
 
       if (notificationEvents?.length) {
         triggerBulk(notificationEvents.flat());

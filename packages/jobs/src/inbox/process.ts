@@ -66,7 +66,12 @@ client.defineJob({
             due_date: data.due_date && new Date(data.due_date),
           })
           .eq("id", payload.inboxId)
-          .select("*");
+          .select();
+
+        await io.logger.error(
+          "updatedInboxData",
+          JSON.stringify(updatedInboxData, null, 2)
+        );
 
         await io.sendEvent("Match Inbox", {
           name: Events.MATCH_INBOX,

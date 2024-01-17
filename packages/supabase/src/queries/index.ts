@@ -702,7 +702,7 @@ export async function getInboxQuery(
     data: data?.map((item) => {
       const pending = isWithinInterval(new Date(), {
         start: new Date(item.created_at),
-        end: addDays(new Date(item.created_at), 3),
+        end: addDays(new Date(item.created_at), 45),
       });
 
       return {
