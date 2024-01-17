@@ -50,14 +50,12 @@ client.defineJob({
         .eq("team_id", payload.teamId)
         .eq("id", payload.inboxId);
 
-      await io.logger.log("inboxData", JSON.stringify(inboxData, null, 2));
-
       const { data: attachmentData } = await io.supabase.client
         .from("transaction_attachments")
         .insert({
           type: inboxData.content_type,
           path: inboxData.file_path,
-          transaction_id: body.record.id,
+          transaction_id: transaction.id,
           team_id: inboxData.team_id,
           size: inboxData.size,
           name: inboxData.file_name,
