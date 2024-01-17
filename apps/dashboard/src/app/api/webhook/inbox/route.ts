@@ -67,9 +67,9 @@ export async function POST(req: Request) {
     const insertData = await Promise.all(records);
 
     const { data: inboxData } = await supabase
-      .from("inbox")
+      .from("decrypted_inbox")
       .insert(insertData)
-      .select();
+      .select("*, name:decrypted_name, subject:decrypted_subject");
 
     revalidateTag(`inbox_${teamData.id}`);
 
