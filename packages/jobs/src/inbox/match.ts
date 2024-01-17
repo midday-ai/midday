@@ -35,7 +35,7 @@ client.defineJob({
       .select(
         "id, name:decrypted_name, team_id, attachments:transaction_attachments(*)"
       )
-      .eq("amount", Math.abs(payload.amount))
+      .eq("amount", -Math.abs(payload.amount))
       .eq("team_id", payload.teamId)
       .filter("transaction_attachments.id", "is", null)
       .gte("created_at", subDays(new Date(), 45).toISOString());
