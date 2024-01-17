@@ -48,7 +48,8 @@ client.defineJob({
         .from("inbox")
         .select("*")
         .eq("team_id", payload.teamId)
-        .eq("id", payload.inboxId);
+        .eq("id", payload.inboxId)
+        .single();
 
       const { data: attachmentData } = await io.supabase.client
         .from("transaction_attachments")
