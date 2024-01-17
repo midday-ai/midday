@@ -28,6 +28,7 @@ client.defineJob({
     supabase,
   },
   run: async (payload, io) => {
+    await io.logger.log("inboxData", -Math.abs(payload.amount));
     // NOTE: All inbox reciepts and invoices amount are
     // saved with positive values while transactions have signed values
     const { data: transactionData, error } = await io.supabase.client
@@ -40,9 +41,9 @@ client.defineJob({
       .filter("transaction_attachments.id", "is", null)
       .gte("created_at", subDays(new Date(), 45).toISOString());
 
-    await io.logger.error("error", JSON.stringify(error, null, 2));
+    await io.logger.log("error", JSON.stringify(error, null, 2));
 
-    await io.logger.error(
+    await io.logger.log(
       "transactionData",
       JSON.stringify(transactionData, null, 2)
     );
@@ -57,7 +58,7 @@ client.defineJob({
         .eq("team_id", payload.teamId)
         .eq("id", payload.inboxId);
 
-      await io.logger.error("inboxData", JSON.stringify(inboxData, null, 2));
+      await io.logger.log("inboxData", JSON.stringify(inboxData, null, 2));
 
       const { data: attachmentData } = await io.supabase.client
         .from("transaction_attachments")
@@ -89,7 +90,7 @@ client.defineJob({
         )
         .eq("team_id", inboxData.team_id);
 
-      await io.logger.error("usersData", JSON.stringify(usersData, null, 2));
+      await io.logger.log("usersData", JSON.stringify(usersData, null, 2));
 
       const notificationEvents = usersData?.map(({ user }) => {
         const { t } = getI18n({ locale: user.locale });
@@ -117,7 +118,7 @@ client.defineJob({
         };
       });
 
-      await io.logger.error(
+      await io.logger.log(
         "notificationEvents",
         JSON.stringify(notificationEvents, null, 2)
       );

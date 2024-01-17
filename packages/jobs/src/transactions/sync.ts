@@ -69,7 +69,7 @@ client.defineJob({
     }
 
     if (error) {
-      await io.logger.error(JSON.stringify(error, null, 2));
+      await io.logger.log(JSON.stringify(error, null, 2));
     }
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
