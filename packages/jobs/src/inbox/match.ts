@@ -28,10 +28,9 @@ client.defineJob({
     supabase,
   },
   run: async (payload, io) => {
-    await io.logger.log("inboxData", -Math.abs(payload.amount));
     // NOTE: All inbox reciepts and invoices amount are
     // saved with positive values while transactions have signed values
-    const { data: transactionData, error } = await io.supabase.client
+    const { data: transactionData } = await io.supabase.client
       .from("decrypted_transactions")
       .select(
         "id, name:decrypted_name, team_id, attachments:transaction_attachments(*)"
@@ -40,13 +39,6 @@ client.defineJob({
       .eq("team_id", payload.teamId)
       .filter("transaction_attachments.id", "is", null)
       .gte("created_at", subDays(new Date(), 45).toISOString());
-
-    await io.logger.log("error", JSON.stringify(error, null, 2));
-
-    await io.logger.log(
-      "transactionData",
-      JSON.stringify(transactionData, null, 2)
-    );
 
     // NOTE: If we match more than one transaction record we can't be sure of a match
     if (transactionData?.length === 1) {
