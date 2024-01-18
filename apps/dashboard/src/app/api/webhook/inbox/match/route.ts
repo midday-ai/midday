@@ -106,9 +106,7 @@ export async function POST(req: Request) {
       };
     });
 
-    if (notificationEvents?.length) {
-      triggerBulk(notificationEvents.flat());
-    }
+    triggerBulk(notificationEvents?.flat());
   }
 
   return NextResponse.json({ message: "success" });

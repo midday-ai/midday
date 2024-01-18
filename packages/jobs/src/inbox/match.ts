@@ -77,15 +77,12 @@ client.defineJob({
       revalidateTag(`transactions_${inboxData.team_id}`);
       revalidateTag(`inbox_${inboxData.team_id}`);
 
-      const { data: usersData, error } = await io.supabase.client
+      const { data: usersData } = await io.supabase.client
         .from("users_on_team")
         .select(
           "id, role, team_id, user:users(id, full_name, avatar_url, email, locale)"
         )
         .eq("team_id", inboxData.team_id);
-
-      await io.logger.log("usersData", JSON.stringify(usersData, null, 2));
-      await io.logger.log("usersData error", JSON.stringify(error, null, 2));
 
       const notificationEvents = usersData?.map(({ user }) => {
         const { t } = getI18n({ locale: user.locale });
@@ -113,14 +110,7 @@ client.defineJob({
         };
       });
 
-      await io.logger.log(
-        "notificationEvents",
-        JSON.stringify(notificationEvents, null, 2)
-      );
-
-      if (notificationEvents?.length) {
-        triggerBulk(notificationEvents.flat());
-      }
+      triggerBulk(notificationEvents?.flat());
     }
   },
 });
