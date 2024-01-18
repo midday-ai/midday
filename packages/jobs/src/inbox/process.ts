@@ -43,7 +43,7 @@ client.defineJob({
           {
             role: "system",
             content:
-              "From this invoice extract total amount, due date, issuer name and currency transform currency value to currency code format and return it as JSON if you are unsure of the extracted value return null",
+              "From this invoice extract total amount, due date, issuer name and currency transform currency value to currency code format and if you are unsure of the extracted value return null. Return the response in JSON format",
           },
           {
             role: "user",
@@ -56,6 +56,8 @@ client.defineJob({
 
       if (response) {
         const data = JSON.parse(response);
+
+        await io.logger.log("data", JSON.stringify(data, null, 2));
 
         const { data: updatedInboxData } = await io.supabase.client
           .from("inbox")
