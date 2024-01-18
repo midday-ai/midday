@@ -65,6 +65,7 @@ client.defineJob({
             // match any character that is not a digit, comma, or dot, and replaces
             // those characters with an empty string also replace comma with a dot
             amount: data?.total_amount
+              .toString()
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
             currency: data?.currency?.toUpperCase(),
