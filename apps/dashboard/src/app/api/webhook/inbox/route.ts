@@ -71,6 +71,15 @@ export async function POST(req: Request) {
       .insert(insertData)
       .select("*, name:decrypted_name, subject:decrypted_subject");
 
+    inboxData.map((inbox) => {
+      client.sendEvent({
+        name: Events.PROCESS_INBOX,
+        payload: {
+          inboxId: inbox.id,
+        },
+      });
+    });
+
     revalidateTag(`inbox_${teamData.id}`);
 
     const { data: usersData } = await supabase
@@ -98,14 +107,7 @@ export async function POST(req: Request) {
       })
     );
 
-    triggerBulk(notificationEvents.flat());
-
-    inboxData.map((inbox) => {
-      client.sendEvent({
-        name: Events.PROCESS_INBOX,
-        payload: { inboxId: inbox.id },
-      });
-    });
+    triggerBulk(notificationEvents?.flat());
   }
 
   return Response.json({ success: true });
