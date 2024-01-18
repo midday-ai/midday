@@ -80,7 +80,7 @@ client.defineJob({
       const { data: usersData, error } = await io.supabase.client
         .from("users_on_team")
         .select(
-          "id, role, team_id, locale, user:users(id,full_name,avatar_url,email)"
+          "id, role, team_id, user:users(id, full_name, avatar_url, email, locale)"
         )
         .eq("team_id", inboxData.team_id);
 
