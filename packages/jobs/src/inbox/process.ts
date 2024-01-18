@@ -57,6 +57,8 @@ client.defineJob({
       if (response) {
         const data = JSON.parse(response);
 
+        await io.logger.log("data", JSON.stringify(data, null, 2));
+
         const { data: updatedInboxData } = await io.supabase.client
           .from("inbox")
           .update({
@@ -72,6 +74,11 @@ client.defineJob({
           .eq("id", payload.inboxId)
           .select()
           .single();
+
+        await io.logger.log(
+          "updatedInboxData",
+          JSON.stringify(updatedInboxData, null, 2)
+        );
 
         await io.sendEvent("Match Inbox", {
           name: Events.MATCH_INBOX,
