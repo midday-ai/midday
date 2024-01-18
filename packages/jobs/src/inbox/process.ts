@@ -43,7 +43,7 @@ client.defineJob({
           {
             role: "system",
             content:
-              "From this invoice data extract total amount, due date, issuer name and currency transform currency value to currency code format and return it as JSON if you are unsure of the extracted value return null",
+              "From this invoice extract total amount, due date, issuer name and currency transform currency value to currency code format and return it as JSON if you are unsure of the extracted value return null",
           },
           {
             role: "user",
@@ -62,12 +62,12 @@ client.defineJob({
           .update({
             // match any character that is not a digit, comma, or dot, and replaces
             // those characters with an empty string also replace comma with a dot
-            amount: data.total_amount
+            amount: data?.totalAmount
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
-            currency: data.currency?.toUpperCase(),
-            issuer_name: data.issuer_name,
-            due_date: data.due_date && new Date(data.due_date),
+            currency: data?.currency?.toUpperCase(),
+            issuer_name: data?.issuerName,
+            due_date: data?.dueDate && new Date(data.dueDate),
           })
           .eq("id", payload.inboxId)
           .select()
