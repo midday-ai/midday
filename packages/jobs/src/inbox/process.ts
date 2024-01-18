@@ -43,7 +43,7 @@ client.defineJob({
           {
             role: "system",
             content:
-              "From this invoice extract total amount, due date, issuer name, currency and transform currency value to currency code format. Return the response in JSON format",
+              "You are a invoice parser. From this invoice extract total amount, due date, issuer name, currency and transform currency value to currency code and return it as currency. Return the response in JSON format",
           },
           {
             role: "user",
@@ -67,7 +67,7 @@ client.defineJob({
             amount: data?.total_amount
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
-            currency: data?.currency_code?.toUpperCase(),
+            currency: data?.currency?.toUpperCase(),
             issuer_name: data?.issuer_name,
             due_date: data?.due_date && new Date(data.due_date),
           })
