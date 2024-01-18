@@ -32,21 +32,8 @@ type TriggerPayload = {
 };
 
 export async function trigger(data: TriggerPayload) {
-  return novu.trigger(data.name, {
-    to: {
-      ...data.user,
-      //   Prefix subscriber id with team id
-      subscriberId: `${data.user.teamId}_${data.user.subscriberId}`,
-    },
-    payload: data.payload,
-    tenant: data.tenant,
-  });
-}
-
-export async function triggerBulk(events: TriggerPayload[]) {
-  return novu.bulkTrigger(
-    events.map((data) => ({
-      name: data.name,
+  try {
+    await novu.trigger(data.name, {
       to: {
         ...data.user,
         //   Prefix subscriber id with team id
@@ -54,8 +41,29 @@ export async function triggerBulk(events: TriggerPayload[]) {
       },
       payload: data.payload,
       tenant: data.tenant,
-    }))
-  );
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function triggerBulk(events: TriggerPayload[]) {
+  try {
+    await novu.bulkTrigger(
+      events.map((data) => ({
+        name: data.name,
+        to: {
+          ...data.user,
+          //   Prefix subscriber id with team id
+          subscriberId: `${data.user.teamId}_${data.user.subscriberId}`,
+        },
+        payload: data.payload,
+        tenant: data.tenant,
+      }))
+    );
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 type GetSubscriberPreferencesParams = {
