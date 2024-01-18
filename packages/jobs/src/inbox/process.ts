@@ -65,7 +65,7 @@ client.defineJob({
             amount: data?.total_amount
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
-            currency: data?.currency?.toUpperCase(),
+            currency: data?.currency_code?.toUpperCase(),
             issuer_name: data?.issuer_name,
             due_date: data?.due_date && new Date(data.due_date),
           })
