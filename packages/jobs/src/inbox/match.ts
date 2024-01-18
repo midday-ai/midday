@@ -80,7 +80,7 @@ client.defineJob({
       const { data: usersData } = await io.supabase.client
         .from("users_on_team")
         .select(
-          "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
+          "id, team_id, user:users(id, full_name, avatar_url, email, locale, team_id)"
         )
         .eq("team_id", inboxData.team_id);
 
@@ -102,15 +102,13 @@ client.defineJob({
           },
           user: {
             subscriberId: user.id,
-            teamId: updatedInboxData.team_id,
+            teamId: user.team_id,
             email: user.email,
             fullName: user.full_name,
             avatarUrl: user.avatar_url,
           },
         };
       });
-
-      await io.logger.debug("notificationEvents", notificationEvents?.flat());
 
       triggerBulk(notificationEvents?.flat());
     }

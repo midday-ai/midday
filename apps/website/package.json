@@ -15,7 +15,7 @@
     "@midday/location": "workspace:*",
     "@midday/ui": "workspace:*",
     "@logsnag/next": "^1.0.3",
-    "@vercel/analytics": "^1.1.1",
+    "@vercel/analytics": "^1.1.2",
     "next": "14.0.4",
     "next-international": "1.2.3",
     "next-themes": "^0.2.1",
