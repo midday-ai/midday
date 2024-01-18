@@ -15,8 +15,8 @@ enum balanceType {
 }
 
 const keys = {
-  accessToken: "go_cardless_access_token",
-  refreshToken: "go_cardless_refresh_token",
+  accessToken: "go_cardless_access_token_v2",
+  refreshToken: "go_cardless_refresh_token_v2",
 };
 
 async function getRefreshToken(refresh: string) {
