@@ -43,7 +43,7 @@ client.defineJob({
           {
             role: "system",
             content:
-              "From this invoice data extract total amount, currency, due date, issuer name, transform currency to currency code and return it as JSON if you are unsure of the extracted value return null",
+              "From this invoice data extract total amount, due date, issuer name and currency transform currency value to currency code format and return it as JSON if you are unsure of the extracted value return null",
           },
           {
             role: "user",
