@@ -43,7 +43,7 @@ client.defineJob({
           {
             role: "system",
             content:
-              "From this invoice extract total amount, due date, issuer name and currency transform currency value to currency code format and if you are unsure of the extracted value return null. Return the response in JSON format",
+              "From this invoice extract total amount, due date, issuer name, currency and transform currency value to currency code format. Return the response in JSON format",
           },
           {
             role: "user",
@@ -57,19 +57,17 @@ client.defineJob({
       if (response) {
         const data = JSON.parse(response);
 
-        await io.logger.log("data", JSON.stringify(data, null, 2));
-
         const { data: updatedInboxData } = await io.supabase.client
           .from("inbox")
           .update({
             // match any character that is not a digit, comma, or dot, and replaces
             // those characters with an empty string also replace comma with a dot
-            amount: data?.totalAmount
+            amount: data?.total_amount
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
             currency: data?.currency?.toUpperCase(),
-            issuer_name: data?.issuerName,
-            due_date: data?.dueDate && new Date(data.dueDate),
+            issuer_name: data?.issuer_name,
+            due_date: data?.due_date && new Date(data.due_date),
           })
           .eq("id", payload.inboxId)
           .select()
