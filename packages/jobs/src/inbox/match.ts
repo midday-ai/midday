@@ -80,7 +80,7 @@ client.defineJob({
       const { data: usersData } = await io.supabase.client
         .from("users_on_team")
         .select(
-          "id, role, team_id, user:users(id, full_name, avatar_url, email, locale)"
+          "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
         )
         .eq("team_id", inboxData.team_id);
 
@@ -109,6 +109,8 @@ client.defineJob({
           },
         };
       });
+
+      await io.logger.debug("notificationEvents", notificationEvents?.flat());
 
       triggerBulk(notificationEvents?.flat());
     }
