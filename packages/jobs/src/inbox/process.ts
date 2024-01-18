@@ -37,15 +37,13 @@ client.defineJob({
 
       const docs = await loader.load();
 
-      await io.logger.log("pdf", JSON.stringify(docs, null, 2));
-
       const completion = await io.openai.chat.completions.create("completion", {
         model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
             content:
-              "From this invoice data extract total amount, currency, due date, issuer name, and return it as JSON",
+              "From this invoice data extract total amount, currency, due date, issuer name, transform currency to currency code and return it as JSON if you are unsure of the extracted value return null",
           },
           {
             role: "user",
@@ -67,7 +65,7 @@ client.defineJob({
             amount: data.total_amount
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
-            currency: data.currency,
+            currency: data.currency?.toUpperCase(),
             issuer_name: data.issuer_name,
             due_date: data.due_date && new Date(data.due_date),
           })
