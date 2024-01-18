@@ -84,6 +84,8 @@ client.defineJob({
         )
         .eq("team_id", inboxData.team_id);
 
+      await io.logger.log("usersData", JSON.stringify(usersData, null, 2));
+
       const notificationEvents = usersData?.map(({ user }) => {
         const { t } = getI18n({ locale: user.locale });
 
@@ -109,6 +111,11 @@ client.defineJob({
           },
         };
       });
+
+      await io.logger.log(
+        "notificationEvents",
+        JSON.stringify(notificationEvents, null, 2)
+      );
 
       if (notificationEvents?.length) {
         triggerBulk(notificationEvents.flat());
