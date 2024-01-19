@@ -11,16 +11,13 @@
     "export": "email export"
   },
   "dependencies": {
-    "@formatjs/intl": "^2.9.9",
-    "@react-email/render": "0.0.9",
-    "@react-email/components": "0.0.11",
+    "@formatjs/intl": "^2.9.11",
+    "@react-email/components": "0.0.14",
+    "@react-email/tailwind": "0.0.14",
     "date-fns": "^3.2.0",
-    "react-email": "1.9.5"
+    "react-email": "2.0.0"
   },
   "devDependencies": {
     "typescript": "^5.3.3"
-  },
-  "overrides": {
-    "@react-email/render": "0.0.9"
   }
 }

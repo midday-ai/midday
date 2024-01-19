@@ -1,7 +1,6 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { motion } from "framer-motion";
 import { useState } from "react";
 

@@ -12,9 +12,9 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@logsnag/next": "^1.0.3",
     "@midday/location": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@logsnag/next": "^1.0.3",
     "@vercel/analytics": "^1.1.2",
     "next": "14.1.0",
     "next-international": "1.2.3",

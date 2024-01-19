@@ -5,12 +5,12 @@
     "private": true,
     "sideEffects": false,
     "scripts": {
-      "clean": "rm -rf .turbo node_modules",
-      "lint": "biome check .",
-      "format": "biome --write .",
-      "check:types": "tsc --noEmit"
+        "clean": "rm -rf .turbo node_modules",
+        "lint": "biome check .",
+        "format": "biome --write .",
+        "check:types": "tsc --noEmit"
     },
     "devDependencies": {
         "typescript": "^5.3.3"
     }
-  }
+}

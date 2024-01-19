@@ -5,16 +5,16 @@
     "private": true,
     "sideEffects": false,
     "scripts": {
-      "clean": "rm -rf .turbo node_modules",
-      "lint": "biome check .",
-      "format": "biome --write .",
-      "check:types": "tsc --noEmit"
+        "clean": "rm -rf .turbo node_modules",
+        "lint": "biome check .",
+        "format": "biome --write .",
+        "check:types": "tsc --noEmit"
     },
     "dependencies": {
-      "@midday/kv": "workspace:*",
-      "change-case": "^5.3.0"
+        "@midday/kv": "workspace:*",
+        "change-case": "^5.3.0"
     },
     "devDependencies": {
         "typescript": "^5.3.3"
     }
-  }
+}

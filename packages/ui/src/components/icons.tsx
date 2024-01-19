@@ -30,6 +30,7 @@ import {
   MdInventory2,
   MdMoreHoriz,
   MdOutlineAccountBalanceWallet,
+  MdOutlineArrowDownward,
   MdOutlineBrokenImage,
   MdOutlineCancel,
   MdOutlineCategory,
@@ -448,4 +449,5 @@ export const Icons = {
   PlayCircle: MdPlayCircle,
   PauseCircle: MdPauseCircle,
   MoreVertical: MdOutlineMoreVert,
+  ArrowDown: MdOutlineArrowDownward,
 };

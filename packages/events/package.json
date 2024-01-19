@@ -5,10 +5,10 @@
     "private": true,
     "sideEffects": false,
     "scripts": {
-      "clean": "rm -rf .turbo node_modules",
-      "lint": "biome check .",
-      "format": "biome --write .",
-      "check:types": "tsc --noEmit"
+        "clean": "rm -rf .turbo node_modules",
+        "lint": "biome check .",
+        "format": "biome --write .",
+        "check:types": "tsc --noEmit"
     },
     "dependencies": {
         "@logsnag/next": "^1.0.3"
@@ -21,4 +21,4 @@
         "./client": "./src/client.ts",
         "./events": "./src/events.ts"
     }
-  }
+}

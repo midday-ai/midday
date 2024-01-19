@@ -4,7 +4,8 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "tooling/*"
+    "tooling/*",
+    "packages/email/.react-email"
   ],
   "scripts": {
     "build": "turbo build",
