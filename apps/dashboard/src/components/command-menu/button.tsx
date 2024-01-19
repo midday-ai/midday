@@ -9,7 +9,7 @@ export function CommandMenuButton() {
   return (
     <Button
       variant="outline"
-      className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 border-0 p-0 hover:bg-transparent font-normal"
+      className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 border-0 p-0 hover:bg-transparent font-normal todesktop:hidden"
       onClick={() => setOpen()}
     >
       <span className="hidden lg:inline-flex">Search for or jump to</span>

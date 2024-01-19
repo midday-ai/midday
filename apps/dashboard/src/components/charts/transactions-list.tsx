@@ -37,7 +37,7 @@ export function TransactionsListSkeleton() {
 }
 
 export async function TransactionsList({ type, disabled }) {
-  const { data } = disabled
+  const transactions = disabled
     ? transactionList
     : await getTransactions({
         to: 5,
@@ -47,7 +47,7 @@ export async function TransactionsList({ type, disabled }) {
         },
       });
 
-  if (!data?.length) {
+  if (!transactions?.data?.length) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-sm text-[#606060]">No transactions found</p>
@@ -57,7 +57,7 @@ export async function TransactionsList({ type, disabled }) {
 
   return (
     <ul className="bullet-none divide-y">
-      {data?.map((transaction) => {
+      {transactions?.data?.map((transaction) => {
         const fullfilled = transaction?.attachments?.length > 0;
 
         return (

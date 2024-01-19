@@ -27,11 +27,9 @@ function SpendingCategoryList({ categories }) {
 }
 
 export async function SpendingList({ initialPeriod, disabled }) {
-  const { data, meta } = disabled
-    ? spendingData
-    : await getSpending(initialPeriod);
+  const spending = disabled ? spendingData : await getSpending(initialPeriod);
 
-  if (!data?.length) {
+  if (!spending?.data?.length) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-sm text-[#606060]">No transactions found</p>
@@ -41,11 +39,11 @@ export async function SpendingList({ initialPeriod, disabled }) {
 
   return (
     <>
-      <SpendingCategoryList categories={data} />
+      <SpendingCategoryList categories={spending?.data} />
       <SpendingChart
-        categories={data}
-        currency={meta.currency}
-        totalAmount={meta.totalAmount}
+        categories={spending?.data}
+        currency={spending?.meta.currency}
+        totalAmount={spending?.meta.totalAmount}
       />
     </>
   );

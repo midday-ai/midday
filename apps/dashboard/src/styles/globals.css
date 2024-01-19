@@ -1,6 +1,8 @@
 html,
 body {
   height: 100%;
+  user-select: none;
+  -webkit-user-select: none
 }
 
 *:focus {
@@ -314,7 +316,20 @@ html.todesktop header {
   -webkit-app-region: drag;
 }
 
+html.todesktop header .no-drag {
+  -webkit-app-region: no-drag;
+}
+
 html.todesktop,
 html.todesktop div {
   cursor: default !important;
+}
+
+html.todesktop,
+html.todesktop.div {
+  cursor: default !important;
+}
+
+html.todesktop a {
+  cursor: pointer !important;
 }

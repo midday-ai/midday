@@ -3,17 +3,35 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 
 export function GithubSignIn() {
   const supabase = createClient();
 
   const handleSignIn = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        redirectTo: `${location.origin}/api/auth/callback?provider=github`,
-      },
-    });
+    if (isDesktopApp()) {
+      const redirectTo = new URL("/api/auth/callback", location.origin);
+
+      redirectTo.searchParams.append("provider", "github");
+      redirectTo.searchParams.append("client", "desktop");
+
+      await supabase.auth.signInWithOAuth({
+        provider: "github",
+        options: {
+          redirectTo: redirectTo.toString(),
+          queryParams: {
+            client: "desktop",
+          },
+        },
+      });
+    } else {
+      await supabase.auth.signInWithOAuth({
+        provider: "github",
+        options: {
+          redirectTo: `${location.origin}/api/auth/callback?provider=github`,
+        },
+      });
+    }
   };
 
   return (

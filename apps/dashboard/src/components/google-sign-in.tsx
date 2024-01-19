@@ -3,6 +3,7 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useSearchParams } from "next/navigation";
 
 export function GoogleSignIn() {
@@ -11,20 +12,37 @@ export function GoogleSignIn() {
   const returnTo = searchParams.get("return_to");
 
   const handleSignIn = async () => {
-    const redirectTo = new URL("/api/auth/callback", location.origin);
+    if (isDesktopApp()) {
+      const redirectTo = new URL("/api/auth/callback", location.origin);
 
-    if (returnTo) {
-      redirectTo.searchParams.append("return_to", returnTo);
+      redirectTo.searchParams.append("provider", "google");
+      redirectTo.searchParams.append("client", "desktop");
+
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectTo.toString(),
+          queryParams: {
+            client: "desktop",
+          },
+        },
+      });
+    } else {
+      const redirectTo = new URL("/api/auth/callback", location.origin);
+
+      if (returnTo) {
+        redirectTo.searchParams.append("return_to", returnTo);
+      }
+
+      redirectTo.searchParams.append("provider", "google");
+
+      await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectTo.toString(),
+        },
+      });
     }
-
-    redirectTo.searchParams.append("provider", "google");
-
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectTo.toString(),
-      },
-    });
   };
 
   return (

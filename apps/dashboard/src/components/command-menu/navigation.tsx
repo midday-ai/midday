@@ -1,3 +1,5 @@
+"use client";
+
 import { signOutAction } from "@/actions/sign-out-action";
 import { useCommandStore } from "@/store/command";
 import { useMenuStore } from "@/store/menu";
@@ -95,6 +97,7 @@ const settings = [
 
 export function CommandNavigation() {
   const { toggleCustomizing } = useMenuStore();
+  const { setTheme } = useTheme();
   const { isOpen, setOpen } = useCommandStore();
   const router = useRouter();
 

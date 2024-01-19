@@ -72,7 +72,7 @@ export function AssignUser({ id, selectedId, isLoading }) {
 
             <SelectContent>
               {users?.map(({ user }) => (
-                <SelectItem key={user.id} value={user.id}>
+                <SelectItem key={user?.id} value={user?.id}>
                   <AssignedUser user={user} />
                 </SelectItem>
               ))}

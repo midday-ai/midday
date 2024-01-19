@@ -13,9 +13,18 @@ export async function GET(req: NextRequest) {
   const cookieStore = cookies();
   const requestUrl = new URL(req.url);
   const code = requestUrl.searchParams.get("code");
+  const client = requestUrl.searchParams.get("client");
   const returnTo = requestUrl.searchParams.get("return_to");
   const provider = requestUrl.searchParams.get("provider");
   const mfaSetupVisited = cookieStore.has(Cookies.MfaSetupVisited);
+
+  if (client === "desktop") {
+    // return NextResponse.redirect(
+    //   `midday://code=${code}&mfa_visited=${mfaSetupVisited}`
+    // );
+
+    return NextResponse.redirect(`${requestUrl.origin}?code=${code}`);
+  }
 
   if (provider) {
     cookieStore.set(Cookies.PrefferedSignInProvider, provider);
@@ -24,6 +33,7 @@ export async function GET(req: NextRequest) {
   if (code) {
     const supabase = createClient(cookieStore);
     await supabase.auth.exchangeCodeForSession(code);
+
     const {
       data: { session },
     } = await supabase.auth.getSession();
