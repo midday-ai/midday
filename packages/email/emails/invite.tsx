@@ -1,7 +1,6 @@
 import {
   Body,
   Button,
-  Column,
   Container,
   Font,
   Head,
@@ -49,7 +48,7 @@ export const InviteEmail = ({
   location = "São Paulo, Brazil",
   locale = "en",
 }: InviteEmailProps) => {
-  // const { t } = getI18n({ locale });
+  const { t } = getI18n({ locale });
   const inviteLink = `${baseAppUrl}/teams/invite/${inviteCode}`;
 
   return (
@@ -73,10 +72,10 @@ export const InviteEmail = ({
           fontWeight={500}
         />
       </Head>
-      {/* <Preview>{t({ id: "invite.preview" }, { teamName })}</Preview> */}
+      <Preview>{t("invite.preview", { teamName })}</Preview>
       <Tailwind>
-        <Body className="bg-[#F6F6F3] my-auto mx-auto font-sans">
-          <Container className="mx-auto my-[80px] w-[465px] rounded p-[20px]">
+        <Body className="bg-[#fff] my-auto mx-auto font-sans">
+          <Container className="mx-auto my-[80px] max-w-[465px] rounded p-[20px]">
             <Section className="mt-[32px]">
               <Img
                 src={`${baseUrl}/email/logo.png`}
@@ -87,11 +86,12 @@ export const InviteEmail = ({
               />
             </Section>
             <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-black">
-              {/* {t({ id: "invite.title1" })} <strong>{teamName}</strong>{" "}
-              {t({ id: "invite.title2" })} <strong>Midday</strong> */}
+              {t("cows", { count: 3 })}
+              {/* {t("invite.title1")} <strong>{teamName}</strong>{" "}
+              {t("invite.title2")} <strong>Midday</strong> */}
             </Heading>
 
-            {/* <Text className="text-[14px] leading-[24px] text-black">
+            <Text className="text-[14px] leading-[24px] text-black">
               {invitedByName} (
               <Link
                 href={`mailto:${invitedByEmail}`}
@@ -99,20 +99,20 @@ export const InviteEmail = ({
               >
                 {invitedByEmail}
               </Link>
-              ) {t({ id: "invite.link1" })} <strong>{teamName}</strong>{" "}
-              {t({ id: "invite.link2" })} <strong>Midday</strong>.
-            </Text> */}
+              ) {t("invite.link1")} <strong>{teamName}</strong>{" "}
+              {t("invite.link2")} <strong>Midday</strong>.
+            </Text>
             <Section className="mb-[42px] mt-[32px] text-center">
               <Button
                 className="rounded bg-black px-[20px] py-[12px] text-center text-[12px] font-semibold text-white no-underline"
                 href={inviteLink}
               >
-                {/* {t({ id: "invite.join" })} */}
+                {t("invite.join")}
               </Button>
             </Section>
 
-            {/* <Text className="text-[14px] leading-[24px] text-black">
-              {t({ id: "invite.link3" })}:{" "}
+            <Text className="text-[14px] leading-[24px] text-black break-all">
+              {t("invite.link3")}:{" "}
               <Link href={inviteLink} className="text-black no-underline">
                 {inviteLink}
               </Link>
@@ -120,15 +120,14 @@ export const InviteEmail = ({
 
             <Section>
               <Text className="text-[12px] leading-[24px] text-[#666666]">
-                {t({ id: "invite.footer1" })}{" "}
+                {t("invite.footer1")}{" "}
                 <span className="text-black">{email}</span>.{" "}
-                {t({ id: "invite.footer2" })}{" "}
-                <span className="text-black">{ip}</span>{" "}
-                {t({ id: "invite.footer3" })}{" "}
+                {t("invite.footer2")} <span className="text-black">{ip}</span>{" "}
+                {t("invite.footer3")}{" "}
                 <span className="text-black">{location}</span>.{" "}
-                {t({ id: "invite.footer4" })}
+                {t("invite.footer4")}
               </Text>
-            </Section> */}
+            </Section>
           </Container>
         </Body>
       </Tailwind>

@@ -1,5 +1,11 @@
 {
     "extends": "../../tsconfig.json",
-    "include": ["src", "*.ts"]
+    "include": ["src", "*.ts"],
+    "compilerOptions": {
+      "baseUrl": ".",
+      "paths": {
+        "@midday/ui/*": ["../ui/src/*"]
+      },
+    }
   }
   

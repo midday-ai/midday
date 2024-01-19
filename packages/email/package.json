@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
-    "@formatjs/intl": "^2.9.11",
     "@react-email/components": "0.0.14",
     "@react-email/tailwind": "0.0.14",
     "date-fns": "^3.2.0",

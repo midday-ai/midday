@@ -84,10 +84,10 @@ export const TransactionsEmail = ({
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);
 
-  const previewText = t(
-    { id: "transactions.preview" },
-    { firstName: "Pontus", numberOfTransactions: transactions.length }
-  );
+  const previewText = t("transactions.preview", {
+    firstName: "Pontus",
+    numberOfTransactions: transactions.length,
+  });
 
   return (
     <Html>
@@ -112,9 +112,9 @@ export const TransactionsEmail = ({
       </Head>
       <Preview>{previewText}</Preview>
       <Tailwind>
-        <Body className="bg-[#F6F6F3] my-auto mx-auto font-sans">
+        <Body className="bg-[#fff] my-auto mx-auto font-sans">
           <br />
-          <Container className="border border-solid border-[#DCDAD2] rounded my-[40px] mx-auto p-[20px] w-[560px]">
+          <Container className="border border-solid border-[#DCDAD2] rounded my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Section className="mt-[32px]">
               <Img
                 src={`${baseUrl}/logo.png`}
@@ -125,28 +125,26 @@ export const TransactionsEmail = ({
               />
             </Section>
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              {t({ id: "transactions.title1" })}
+              {t("transactions.title1")}
               <span className="font-semibold">
-                {t(
-                  { id: "transactions.title2" },
-                  { numberOfTransactions: transactions.length }
-                )}{" "}
+                {t("transactions.title2", {
+                  numberOfTransactions: transactions.length,
+                })}{" "}
               </span>
-              {t({ id: "transactions.title3" })} <br />
-              {t({ id: "transactions.title4" })}.
+              {t("transactions.title3")} <br />
+              {t("transactions.title4")}.
             </Heading>
             <Text className="text-[#121212] text-[14px] leading-[24px]">
-              {t({ id: "transactions.description1" }, { firstName })},
+              {t("transactions.description1", { firstName })},
               <br />
               <br />
-              {t({ id: "transactions.description2" })}{" "}
+              {t("transactions.description2")}{" "}
               <span className="font-semibold">
-                {t(
-                  { id: "transactions.description3" },
-                  { numberOfTransactions: transactions.length }
-                )}{" "}
+                {t("transactions.description3", {
+                  numberOfTransactions: transactions.length,
+                })}{" "}
               </span>
-              {t({ id: "transactions.description4" })}.
+              {t("transactions.description4")}.
             </Text>
 
             <br />
@@ -159,17 +157,17 @@ export const TransactionsEmail = ({
                 <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#DCDAD2] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      {t({ id: "transactions.date" })}
+                      {t("transactions.date")}
                     </Text>
                   </th>
                   <th align="left" style={{ width: "50%" }}>
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      {t({ id: "transactions.description" })}
+                      {t("transactions.description")}
                     </Text>
                   </th>
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
-                      {t({ id: "transactions.amount" })}
+                      {t("transactions.amount")}
                     </Text>
                   </th>
                 </tr>
@@ -220,21 +218,20 @@ export const TransactionsEmail = ({
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
                 className="bg-[#000000] rounded-xl text-primary text-[12px] text-white font-semibold no-underline text-center px-6 py-3"
-                href={`${baseAppUrl}/transactions?from_id=${
-                  transactions.at(0)?.id
-                }`}
+                href={`${baseAppUrl}/transactions?from_id=${transactions.at(0)
+                  ?.id}`}
               >
-                {t({ id: "transactions.button" })}
+                {t("transactions.button")}
               </Button>
             </Section>
             <Hr className="border-0 border-b-[1px] border-solid border-[#DCDAD2] my-[45px] mx-0 w-full" />
             <Text className="text-[#878787] text-[12px] leading-[24px]">
-              {t({ id: "transactions.footer" })}
+              {t("transactions.footer")}
             </Text>
 
             <Link href={`${baseAppUrl}/settings/notifications`}>
               <Text className="text-[#878787] text-[12px] underline">
-                {t({ id: "transactions.settings" })}
+                {t("transactions.settings")}
               </Text>
             </Link>
           </Container>

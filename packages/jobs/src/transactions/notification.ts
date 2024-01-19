@@ -98,7 +98,7 @@ client.defineJob({
         return {
           name: TriggerEvents.TransactionNewEmail,
           payload: {
-            subject: t({ id: "transactions.subject" }),
+            subject: t("transactions.subject"),
             html,
           },
           user: {
