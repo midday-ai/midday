@@ -49,7 +49,7 @@ export const InviteEmail = ({
   location = "São Paulo, Brazil",
   locale = "en",
 }: InviteEmailProps) => {
-  const { t } = getI18n({ locale });
+  // const { t } = getI18n({ locale });
   const inviteLink = `${baseAppUrl}/teams/invite/${inviteCode}`;
 
   return (
@@ -73,7 +73,7 @@ export const InviteEmail = ({
           fontWeight={500}
         />
       </Head>
-      <Preview>{t({ id: "invite.preview" }, { teamName })}</Preview>
+      {/* <Preview>{t({ id: "invite.preview" }, { teamName })}</Preview> */}
       <Tailwind>
         <Body className="bg-[#F6F6F3] my-auto mx-auto font-sans">
           <Container className="mx-auto my-[80px] w-[465px] rounded p-[20px]">
@@ -87,11 +87,11 @@ export const InviteEmail = ({
               />
             </Section>
             <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-black">
-              {t({ id: "invite.title1" })} <strong>{teamName}</strong>{" "}
-              {t({ id: "invite.title2" })} <strong>Midday</strong>
+              {/* {t({ id: "invite.title1" })} <strong>{teamName}</strong>{" "}
+              {t({ id: "invite.title2" })} <strong>Midday</strong> */}
             </Heading>
 
-            <Text className="text-[14px] leading-[24px] text-black">
+            {/* <Text className="text-[14px] leading-[24px] text-black">
               {invitedByName} (
               <Link
                 href={`mailto:${invitedByEmail}`}
@@ -101,17 +101,17 @@ export const InviteEmail = ({
               </Link>
               ) {t({ id: "invite.link1" })} <strong>{teamName}</strong>{" "}
               {t({ id: "invite.link2" })} <strong>Midday</strong>.
-            </Text>
+            </Text> */}
             <Section className="mb-[42px] mt-[32px] text-center">
               <Button
                 className="rounded bg-black px-[20px] py-[12px] text-center text-[12px] font-semibold text-white no-underline"
                 href={inviteLink}
               >
-                {t({ id: "invite.join" })}
+                {/* {t({ id: "invite.join" })} */}
               </Button>
             </Section>
 
-            <Text className="text-[14px] leading-[24px] text-black">
+            {/* <Text className="text-[14px] leading-[24px] text-black">
               {t({ id: "invite.link3" })}:{" "}
               <Link href={inviteLink} className="text-black no-underline">
                 {inviteLink}
@@ -128,7 +128,7 @@ export const InviteEmail = ({
                 <span className="text-black">{location}</span>.{" "}
                 {t({ id: "invite.footer4" })}
               </Text>
-            </Section>
+            </Section> */}
           </Container>
         </Body>
       </Tailwind>
