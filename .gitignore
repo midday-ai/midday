@@ -44,7 +44,4 @@ yarn-error.log*
 .turbo
 
 # react-email
-.react-email/*
-
-# exception to the rule
-!.react-email/.gitkeep 
+.react-email

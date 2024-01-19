@@ -5,7 +5,7 @@
     "packages/*",
     "apps/*",
     "tooling/*",
-    "packages/email/.react-email"
+    "packages/email/*"
   ],
   "scripts": {
     "build": "turbo build",
