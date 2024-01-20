@@ -79,7 +79,7 @@ const baseAppUrl =
 export const TransactionsEmail = ({
   fullName = "Viktor Hofte",
   transactions = defaultTransactions,
-  locale = "en",
+  locale = "sv",
 }: TransactionsEmailEmailProps) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);
@@ -132,7 +132,7 @@ export const TransactionsEmail = ({
                 })}{" "}
               </span>
               {t("transactions.title3")} <br />
-              {t("transactions.title4")}.
+              {t("transactions.title4")}
             </Heading>
             <Text className="text-[#121212] text-[14px] leading-[24px]">
               {t("transactions.description1", { firstName })},
@@ -144,7 +144,7 @@ export const TransactionsEmail = ({
                   numberOfTransactions: transactions.length,
                 })}{" "}
               </span>
-              {t("transactions.description4")}.
+              {t("transactions.description4")}
             </Text>
 
             <br />
@@ -217,18 +217,15 @@ export const TransactionsEmail = ({
 
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
-                className="bg-[#000000] rounded-xl text-primary text-[12px] text-white font-semibold no-underline text-center px-6 py-3"
-                href={`${baseAppUrl}/transactions?from_id=${transactions.at(0)
-                  ?.id}`}
+                className="bg-[#000000] rounded-md text-primary text-[12px] text-white font-semibold no-underline text-center px-6 py-3"
+                href={`${baseAppUrl}/transactions?from_id=${
+                  transactions.at(0)?.id
+                }`}
               >
                 {t("transactions.button")}
               </Button>
             </Section>
             <Hr className="border-0 border-b-[1px] border-solid border-[#E8E7E1] my-[45px] mx-0 w-full" />
-            <Text className="text-[#878787] text-[12px] leading-[24px]">
-              {t("transactions.footer")}
-            </Text>
-
             <Link href={`${baseAppUrl}/settings/notifications`}>
               <Text className="text-[#878787] text-[12px] underline">
                 {t("transactions.settings")}

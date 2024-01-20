@@ -9,25 +9,29 @@ function translations(locale: string, params: any) {
         "notifications.match": `We matched the transaction “${params?.transactionName}” against “${params?.fileName}”`,
         "notifications.transaction": `You have a new transaction of ${params?.amount} from ${params?.from}`,
         "transactions.subject": "New transactions",
-        "transactions.preview": `Hi ${params?.firstName}, We found ${params?.numberOfTransactions} ${
-          params?.numberOfTransactions > 1 ? "transactions" : "transaction"
-        } thats missing receipts. Feel free to attach them to ease your own or your accountants work for upcoming declerations.`,
+        "transactions.preview": `Hi ${params?.firstName}, You have ${
+          params?.numberOfTransactions
+        } ${
+          params?.numberOfTransactions > 1
+            ? "new transactions"
+            : "new transaction"
+        }`,
         "transactions.title1": "You have ",
         "transactions.title2": `${params?.numberOfTransactions} ${
-          params?.numberOfTransactions > 1 ? "transactions" : "transaction"
+          params?.numberOfTransactions > 1
+            ? "new transactions"
+            : "new transaction"
         }`,
-        "transactions.title3": "thats missing",
-        "transactions.title4": "receipts",
         "transactions.description1": `Hi ${params?.firstName}`,
         "transactions.description2": "We found",
         "transactions.description3": `${params?.numberOfTransactions} ${
-          params?.numberOfTransactions > 1 ? "transactions" : "transaction"
+          params?.numberOfTransactions > 1
+            ? "new transactions"
+            : "new transaction"
         }`,
         "transactions.description4":
-          "thats missing receipts. Feel free to attach them to ease your own or your accountants work for upcoming declerations",
+          "on your account, we will try to match those against receipts in your inbox for up to 45 days. You can also attach those manually.",
         "transactions.button": "View transactions",
-        "transactions.footer":
-          " Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim vitae mauris auctor blandit id et nibh.",
         "transactions.settings": "Notification preferences",
         "transactions.amount": "Amount",
         "transactions.date": "Date",
@@ -51,22 +55,28 @@ function translations(locale: string, params: any) {
         "notifications.match": `Vi matchade transaktionen “${params?.transactionName}” mot “${params?.fileName}”`,
         "notifications.transaction": `"Du har en ny transaktion på ${params?.amount} från ${params?.from}`,
         "transactions.subject": "Nya transaktioner",
-        "transactions.preview": `Hej ${params?.firstName}, Vi hittade ${params?.numberOfTransactions} ${
-          params?.numberOfTransactions > 1 ? "transaktioner" : "transaktion"
-        } som saknar kvitton. Bifoga dem gärna för att underlätta ditt eget eller dina revisorers arbete inför kommande deklarationer.`,
+        "transactions.preview": `Hej ${params?.firstName}, Vi hittade ${
+          params?.numberOfTransactions
+        } ${
+          params?.numberOfTransactions > 1
+            ? "nya transaktioner"
+            : "nya transaktion"
+        } .`,
         "transactions.title1": "Du har ",
         "transactions.title2": `${params?.numberOfTransactions} ${
-          params?.numberOfTransactions > 1 ? "transaktioner" : "transaktion"
+          params?.numberOfTransactions > 1
+            ? "nya transaktioner"
+            : "nya transaktion"
         }`,
-        "transactions.title3": "som saknar",
-        "transactions.title4": "kvitton",
         "transactions.description1": `Hej ${params?.firstName}`,
         "transactions.description2": "Vi hittade",
         "transactions.description3": `${params?.numberOfTransactions} ${
-          params?.numberOfTransactions > 1 ? "transaktioner" : "transaktion"
+          params?.numberOfTransactions > 1
+            ? "nya transaktioner"
+            : "nya transaktion"
         }`,
         "transactions.description4":
-          "som saknar kvitton. Bifoga dem gärna för att underlätta ditt eget eller dina revisorers arbete inför kommande deklarationer",
+          "på ditt konto som vi försöker matcha mot kvitton i din inkorg i upp till 45 dagar. Du kan också bifoga dem manuellt.",
         "transactions.button": "Visa transaktioner",
         "transactions.footer":
           " Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim vitae mauris auctor blandit id et nibh.",

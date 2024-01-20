@@ -105,7 +105,7 @@ export const InviteEmail = ({
             </Text>
             <Section className="mb-[42px] mt-[32px] text-center">
               <Button
-                className="rounded bg-black px-[20px] py-[12px] text-center text-[12px] font-semibold text-white no-underline"
+                className="rounded-md bg-black px-[20px] py-[12px] text-center text-[12px] font-semibold text-white no-underline"
                 href={inviteLink}
               >
                 {t("invite.join")}

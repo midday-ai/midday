@@ -37,6 +37,7 @@ export function DesktopUpdate() {
     }
 
     if (status === "update-downloaded") {
+      setStatus(null);
       todesktopUpdater.restartAndInstall();
     }
   };
