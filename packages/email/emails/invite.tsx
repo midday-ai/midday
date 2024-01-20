@@ -5,6 +5,7 @@ import {
   Font,
   Head,
   Heading,
+  Hr,
   Html,
   Img,
   Link,
@@ -75,7 +76,7 @@ export const InviteEmail = ({
       <Preview>{t("invite.preview", { teamName })}</Preview>
       <Tailwind>
         <Body className="bg-[#fff] my-auto mx-auto font-sans">
-          <Container className="mx-auto my-[80px] max-w-[465px] rounded p-[20px]">
+          <Container className="border border-solid border-[#E8E7E1] rounded my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Section className="mt-[32px]">
               <Img
                 src={`${baseUrl}/email/logo.png`}
@@ -117,6 +118,8 @@ export const InviteEmail = ({
                 {inviteLink}
               </Link>
             </Text>
+
+            <Hr className="border-0 border-b-[1px] border-solid border-[#E8E7E1] my-[45px] mx-0 w-full" />
 
             <Section>
               <Text className="text-[12px] leading-[24px] text-[#666666]">

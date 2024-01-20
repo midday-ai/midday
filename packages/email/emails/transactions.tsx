@@ -114,7 +114,7 @@ export const TransactionsEmail = ({
       <Tailwind>
         <Body className="bg-[#fff] my-auto mx-auto font-sans">
           <br />
-          <Container className="border border-solid border-[#DCDAD2] rounded my-[40px] mx-auto p-[20px] max-w-[560px]">
+          <Container className="border border-solid border-[#E8E7E1] rounded my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Section className="mt-[32px]">
               <Img
                 src={`${baseUrl}/logo.png`}
@@ -154,7 +154,7 @@ export const TransactionsEmail = ({
               className="border-collapse w-full"
             >
               <thead style={{ width: "100%" }}>
-                <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#DCDAD2] h-[45px]">
+                <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#E8E7E1] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
                       {t("transactions.date")}
@@ -177,7 +177,7 @@ export const TransactionsEmail = ({
                 {transactions?.map((transaction) => (
                   <tr
                     key={transaction.id}
-                    className="border-0 border-b-[1px] border-solid border-[#DCDAD2] h-[45px]"
+                    className="border-0 border-b-[1px] border-solid border-[#E8E7E1] h-[45px]"
                   >
                     <td align="left">
                       <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
@@ -224,7 +224,7 @@ export const TransactionsEmail = ({
                 {t("transactions.button")}
               </Button>
             </Section>
-            <Hr className="border-0 border-b-[1px] border-solid border-[#DCDAD2] my-[45px] mx-0 w-full" />
+            <Hr className="border-0 border-b-[1px] border-solid border-[#E8E7E1] my-[45px] mx-0 w-full" />
             <Text className="text-[#878787] text-[12px] leading-[24px]">
               {t("transactions.footer")}
             </Text>
