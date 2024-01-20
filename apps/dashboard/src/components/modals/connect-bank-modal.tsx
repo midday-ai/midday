@@ -16,6 +16,7 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -112,8 +113,10 @@ export function ConnectBankModal({ countryCode }) {
   const handleCreateEndUserAgreement = async (institutionId: string) => {
     const data = await createEndUserAgreement(institutionId);
 
+    const redirectBase = isDesktopApp() ? "midday://" : location.origin;
+
     const { link } = await buildLink({
-      redirect: `${location.origin}/${pathname}?step=account`,
+      redirect: `${redirectBase}/${pathname}?step=account`,
       institutionId,
       agreement: data.id,
     });

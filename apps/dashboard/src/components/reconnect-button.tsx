@@ -3,6 +3,7 @@
 import { buildLink, createEndUserAgreement } from "@midday/gocardless";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useRouter } from "next/navigation";
 
 export function ReconnectButton({ id, institutionId }) {
@@ -12,7 +13,9 @@ export function ReconnectButton({ id, institutionId }) {
     const data = await createEndUserAgreement(institutionId);
 
     const { link } = await buildLink({
-      redirect: `${location.origin}/api/gocardless?id=${id}`,
+      redirect: `${
+        location.origin
+      }/api/gocardless?id=${id}&desktop=${isDesktopApp()}`,
       institutionId,
       agreement: data.id,
     });

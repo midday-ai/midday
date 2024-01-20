@@ -10,9 +10,14 @@ export async function GET(req) {
   const supabase = createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
+  const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
     await updateBankConnection(supabase, id);
+  }
+
+  if (isDesktop === "true") {
+    return NextResponse.redirect("midday://");
   }
 
   return NextResponse.redirect(requestUrl.origin);
