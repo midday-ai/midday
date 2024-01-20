@@ -10,7 +10,7 @@ import { TrackerControl } from "./tracker-contol";
 
 export function Header() {
   return (
-    <header className="border-b-[1px] flex justify-between py-4 items-center">
+    <header className="border-b-[1px] flex justify-between py-4 items-center todesktop:sticky todesktop:top-0 todesktop:bg-background todesktop:z-10 todesktop:border-none">
       <DesktopTrafficLight />
       <BrowserNavigation />
       <CommandMenuButton />

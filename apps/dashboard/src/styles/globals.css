@@ -334,7 +334,7 @@ html.todesktop a {
   cursor: pointer !important;
 }
 
-.update {
+.update-available {
   background: #68A7FF;
   width: 12px;
   height: 12px;
@@ -342,7 +342,7 @@ html.todesktop a {
   position: relative;
 }
 
-.update svg{
+.update-available svg {
   position: absolute;
   width: 12px;
   height: 12px;
@@ -350,38 +350,38 @@ html.todesktop a {
   left: 0;
 }
 
-.update svg path.svg-update{
+.update-available svg path.svg-update{
   opacity: 1;
   transform: scale(1);
 }
 
-.update svg circle.svg-progress{
+.update-available svg circle.svg-progress{
   stroke-dashoffset: 16px;
   stroke-dasharray: 16px;
   transform: rotate(270deg);
   transform-origin: center;
 }
 
-.update.progress svg path.svg-update,
-.update.refresh svg path.svg-update {
+.update-available.progress svg path.svg-update,
+.update-available.update-downloaded svg path.svg-update {
   opacity: 0;
   transform: scale(.5);
 }
 
-.update.progress svg circle.svg-progress {
+.update-available.progress svg circle.svg-progress {
   stroke-dashoffset: 0px;
   transform: rotate(270deg);
   transition: all 4s linear;
 }
 
-.update svg path.svg-refresh{
+.update-available svg path.svg-refresh{
   opacity: 0;
   transform: scale(.2) rotate(-135deg);
   transition: all .3s ease;
   transform-origin: center;
 }
 
-.update.refresh svg path.svg-refresh{
+.update-available.update-downloaded svg path.svg-refresh{
   opacity: 1;
   transform: scale(1) rotate(0);
 }
