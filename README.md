@@ -7,7 +7,7 @@
     The financial OS for your business
     <br />
     <br />
-    <a href="#">Discord</a>
+    <a href="https://discord.gg/ZmqcvWKH">Discord</a>
     ·
     <a href="https://midday.ai">Website</a>
     ·

@@ -1,9 +1,18 @@
-import { nativeTheme } from "@todesktop/client-core";
+import { object, platform } from "@todesktop/client-core";
 
 async function main() {
-  //   await nativeWindow.setBackgroundColor({}, "#1f2023");
-  //   await nativeWindow.getBackgroundColor({}); // "#1f2023"
-  //   await nativeTheme.setThemeSource(isDarkMode ? "dark" : "light");
+  // Menu items
+  await object.on("open-x", () => {
+    platform.os.openURL("https://x.com/middayai");
+  });
+
+  await object.on("open-discord", () => {
+    platform.os.openURL("https://discord.gg/ZmqcvWKH");
+  });
+
+  await object.on("open-github", () => {
+    platform.os.openURL("https://github.com/midday-ai/midday");
+  });
 }
 
 main();
