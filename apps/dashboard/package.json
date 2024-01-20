@@ -53,7 +53,7 @@
     "use-long-press": "^3.2.0",
     "usehooks-ts": "^2.9.5",
     "zod": "^3.22.4",
-    "zustand": "^4.4.7"
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
