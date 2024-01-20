@@ -6,9 +6,9 @@ import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { TriggerProvider } from "@trigger.dev/react";
 import { ReactNode } from "react";
 
+// We need to import it here because this is the first
+// client component
 if (isDesktopApp()) {
-  // We need to import it here because this is the first
-  // client component
   require("@/desktop/main");
 }
 

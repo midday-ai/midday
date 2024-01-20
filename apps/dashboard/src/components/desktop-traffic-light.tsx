@@ -8,17 +8,11 @@ import {
 } from "@midday/ui/tooltip";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export function DesktopTrafficLight() {
-  const [hasUpdate, setUpdate] = useState();
+  const [hasUpdate, setUpdate] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setUpdate(true);
-    }, 2000);
-  }, []);
 
   const handleOnDownload = () => {
     setStatus("progress");

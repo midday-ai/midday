@@ -4,14 +4,16 @@ import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 export function NotionSignIn() {
+  const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
-  const searchParams = useSearchParams();
-  const returnTo = searchParams.get("return_to");
 
   const handleSignIn = async () => {
+    setLoading(true);
+
     if (isDesktopApp()) {
       const redirectTo = new URL("/api/auth/callback", location.origin);
 
@@ -28,18 +30,10 @@ export function NotionSignIn() {
         },
       });
     } else {
-      const redirectTo = new URL("/api/auth/callback", location.origin);
-
-      if (returnTo) {
-        redirectTo.searchParams.append("return_to", returnTo);
-      }
-
-      redirectTo.searchParams.append("provider", "notion");
-
       await supabase.auth.signInWithOAuth({
         provider: "notion",
         options: {
-          redirectTo: redirectTo.toString(),
+          redirectTo: `${location.origin}/api/auth/callback?provider=notion`,
         },
       });
     }
@@ -50,8 +44,14 @@ export function NotionSignIn() {
       onClick={handleSignIn}
       className="active:scale-[0.98] rounded-xl bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px] w-full"
     >
-      <Icons.Notion />
-      <span>Continue with Notion</span>
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <>
+          <Icons.Notion />
+          <span>Continue with Notion</span>
+        </>
+      )}
     </Button>
   );
 }

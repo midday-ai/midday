@@ -4,14 +4,19 @@ import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export function GoogleSignIn() {
+  const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
   const searchParams = useSearchParams();
   const returnTo = searchParams.get("return_to");
 
   const handleSignIn = async () => {
+    setLoading(true);
+
     if (isDesktopApp()) {
       const redirectTo = new URL("/api/auth/callback", location.origin);
 
@@ -50,8 +55,14 @@ export function GoogleSignIn() {
       onClick={handleSignIn}
       className="active:scale-[0.98] rounded-xl bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px] w-full"
     >
-      <Icons.Google />
-      <span>Continue with Google</span>
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <>
+          <Icons.Google />
+          <span>Continue with Google</span>
+        </>
+      )}
     </Button>
   );
 }
