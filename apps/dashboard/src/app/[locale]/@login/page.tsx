@@ -1,5 +1,5 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
-import { DesktopSignIn } from "@/components/desktop-sign-in";
+import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
 import { DesktopSignInVerifyCode } from "@/components/desktop-sign-in-verify-code";
 import { FigmaSignIn } from "@/components/figma-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
@@ -23,6 +23,10 @@ export default async function Login(params) {
 
   if (code) {
     return <DesktopSignInVerifyCode code={code} />;
+  }
+
+  if (params?.searchParams?.return_to === "desktop/command") {
+    return <DesktopCommandMenuSignIn />;
   }
 
   const cookieStore = cookies();

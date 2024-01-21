@@ -1,9 +1,9 @@
+import { createClient } from "@midday/supabase/client";
 import {
   globalShortcut,
   nativeWindow,
   object,
   platform,
-  screen,
 } from "@todesktop/client-core";
 
 const windows = {
@@ -35,6 +35,29 @@ async function main() {
 
     if (await nativeWindow.isVisible({ ref: winRef })) {
       await nativeWindow.hide({ ref: winRef });
+    }
+  });
+
+  // NOTE: Check if command menu is focued
+  nativeWindow.on("focus", async () => {
+    const winRef = await object.retrieve({ id: windows.command });
+
+    if (
+      winRef?.id === windows.command &&
+      (await nativeWindow.isVisible({ ref: winRef }))
+    ) {
+      if (window.location.pathname !== "/desktop/command") {
+        window.location.pathname = "/desktop/command";
+      } else {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          window.location.pathname = "/";
+        }
+      }
     }
   });
 }
