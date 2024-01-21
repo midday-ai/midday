@@ -95,7 +95,7 @@ const settings = [
   },
 ];
 
-export function CommandNavigation() {
+export function CommandRoot() {
   const { toggleCustomizing } = useMenuStore();
   const { setTheme } = useTheme();
   const { isOpen, setOpen } = useCommandStore();

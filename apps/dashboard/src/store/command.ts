@@ -1,20 +1,22 @@
 import { create } from "zustand";
 
 export enum MenuOption {
-  Navigation = "navigation",
+  Root = "root",
+  RootDesktop = "root-desktop",
   Tracker = "tracker",
+  AI = "ai",
 }
 
 interface CommandState {
   isOpen: boolean;
   setOpen: (menu?: MenuOption) => void;
   setMenu: (menu: MenuOption) => void;
-  menu: MenuOption;
+  selected: MenuOption;
 }
 
 export const useCommandStore = create<CommandState>()((set) => ({
   isOpen: false,
-  menu: MenuOption.Navigation,
-  setOpen: (menu) => set((state) => ({ isOpen: !state.isOpen, menu })),
-  setMenu: (menu) => set({ menu }),
+  selected: undefined,
+  setOpen: (selected) => set((state) => ({ isOpen: !state.isOpen, selected })),
+  setMenu: (selected) => set({ selected }),
 }));

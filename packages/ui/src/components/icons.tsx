@@ -1,8 +1,11 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
 import { Settings } from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
+import { FiGithub } from "react-icons/fi";
 import {
   MdAdd,
   MdApartment,
+  MdArrowBack,
   MdArrowLeft,
   MdArrowRight,
   MdAutoAwesome,
@@ -38,6 +41,7 @@ import {
   MdOutlineDashboardCustomize,
   MdOutlineDescription,
   MdOutlineDifference,
+  MdOutlineExitToApp,
   MdOutlineFileDownload,
   MdOutlineHandyman,
   MdOutlineHourglassTop,
@@ -50,7 +54,6 @@ import {
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
-  MdOutlineRefresh,
   MdOutlineTimer,
   MdOutlineTune,
   MdPause,
@@ -71,11 +74,17 @@ import {
   MdTrendingDown,
   MdTrendingUp,
 } from "react-icons/md";
+import { PiDiscordLogo } from "react-icons/pi";
 
 export const Icons = {
-  LogoSmall: () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={32} height={32} fill="none">
-      <title>Midday</title>
+  LogoSmall: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={32}
+      height={32}
+      fill="none"
+      {...props}
+    >
       <path
         fill="currentColor"
         fillRule="evenodd"
@@ -109,6 +118,9 @@ export const Icons = {
   Transactions: MdOutlineListAlt,
   Invoice: MdOutlineDescription,
   Files: MdOutlineInventory2,
+  X: FaXTwitter,
+  Discord: PiDiscordLogo,
+  GithubOutline: FiGithub,
   Apple: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -450,4 +462,6 @@ export const Icons = {
   PauseCircle: MdPauseCircle,
   MoreVertical: MdOutlineMoreVert,
   ArrowDown: MdOutlineArrowDownward,
+  ArrowBack: MdArrowBack,
+  ExitToApp: MdOutlineExitToApp,
 };

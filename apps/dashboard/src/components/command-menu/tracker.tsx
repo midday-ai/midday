@@ -1,3 +1,4 @@
+import { BackButton } from "@/components/command-menu/back-button";
 import { useCommandStore } from "@/store/command";
 import { useTrackerStore } from "@/store/tracker";
 import { Button } from "@midday/ui/button";
@@ -34,9 +35,10 @@ export function CommandTracker() {
   const { setOpen } = useCommandStore();
 
   return (
-    <div>
-      <div className="p-3">
-        <h2>Tracker</h2>
+    <div className="h-full">
+      <div className="p-5 flex items-center space-x-3">
+        <BackButton />
+        <h2>Time Tracker</h2>
       </div>
       <CommandList>
         <CommandGroup>
@@ -75,9 +77,11 @@ export function CommandTracker() {
         </CommandGroup>
       </CommandList>
 
-      <div className="flex relative m-3">
-        <Input placeholder="Add new project" className="h-[40px]" />
-        <Button className="h-[24px] absolute right-2 top-2">Add</Button>
+      <div className="flex fixed w-full bottom-14">
+        <div className="ml-4 mr-4 w-full">
+          <Input placeholder="Add new project" className="h-[40px]" />
+          <Button className="h-[24px] absolute right-6 top-2">Add</Button>
+        </div>
       </div>
     </div>
   );

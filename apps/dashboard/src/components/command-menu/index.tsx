@@ -3,20 +3,41 @@
 import { MenuOption, useCommandStore } from "@/store/command";
 import { CommandDialog } from "@midday/ui/command";
 import { DialogProps } from "@radix-ui/react-alert-dialog";
+import { motion } from "framer-motion";
 import { usePathname, useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
-import { CommandNavigation } from "./navigation";
+import { CommandAI } from "./ai";
+import { CommandRoot } from "./root";
+import { CommandRootDesktop } from "./root-desktop";
 import { CommandTracker } from "./tracker";
 
-const CommandComponent = ({ menu = MenuOption.Navigation }) => {
-  return {
-    [MenuOption.Navigation]: <CommandNavigation />,
+export const CommandComponent = ({ selected = MenuOption.Root }) => {
+  const { setMenu } = useCommandStore();
+
+  const Component = {
+    [MenuOption.Root]: <CommandRoot />,
+    [MenuOption.RootDesktop]: <CommandRootDesktop />,
     [MenuOption.Tracker]: <CommandTracker />,
-  }[menu];
+    [MenuOption.AI]: <CommandAI />,
+  }[selected];
+
+  useHotkeys("ctrl+backspace", () => setMenu(MenuOption.RootDesktop));
+
+  return (
+    <motion.div
+      className="h-full"
+      key={selected}
+      initial={{ scale: 0.98, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      exit={{ scale: 0.98, opacity: 0 }}
+    >
+      {Component}
+    </motion.div>
+  );
 };
 
 export function CommandMenu(props: DialogProps) {
-  const { isOpen, setOpen, menu, setMenu } = useCommandStore();
+  const { isOpen, setOpen, selected, setMenu } = useCommandStore();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -25,7 +46,7 @@ export function CommandMenu(props: DialogProps) {
 
   return (
     <CommandDialog open={isOpen} onOpenChange={setOpen}>
-      <CommandComponent menu={menu} />
+      <CommandComponent selected={selected} />
     </CommandDialog>
   );
 }

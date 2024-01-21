@@ -2,7 +2,7 @@ html,
 body {
   height: 100%;
   user-select: none;
-  -webkit-user-select: none
+  -webkit-user-select: none;
 }
 
 *:focus {
