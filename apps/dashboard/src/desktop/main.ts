@@ -38,7 +38,7 @@ async function main() {
     }
   });
 
-  // NOTE: Check if command menu is focued
+  // Auth state for command menu
   nativeWindow.on("focus", async () => {
     const winRef = await object.retrieve({ id: windows.command });
 
@@ -47,6 +47,7 @@ async function main() {
       (await nativeWindow.isVisible({ ref: winRef }))
     ) {
       if (window.location.pathname !== "/desktop/command") {
+        // TODO: Fix redirect from middleware if command
         window.location.pathname = "/desktop/command";
       } else {
         const supabase = createClient();

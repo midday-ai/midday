@@ -18,7 +18,7 @@ export default function CommandDesktop() {
 
   return (
     <Command>
-      <CommandComponent selected={selected ?? MenuOption.RootDesktop} />
+      <CommandComponent selected={selected ?? MenuOption.Root} />
       <div className="fixed flex px-3 bottom-0 h-[45px] w-full border-t-[1px] items-center bg-background">
         <DropdownMenu>
           <DropdownMenuTrigger>

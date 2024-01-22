@@ -1,174 +1,149 @@
 "use client";
 
-import { signOutAction } from "@/actions/sign-out-action";
-import { useCommandStore } from "@/store/command";
-import { useMenuStore } from "@/store/menu";
+import { useNotifications } from "@/hooks/use-notifications";
+import { MenuOption, useCommandStore } from "@/store/command";
 import {
-  CommandDialog,
   CommandEmpty,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
-import { DialogProps } from "@radix-ui/react-alert-dialog";
-import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
-import { useTheme } from "next-themes";
-import { usePathname, useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { Skeleton } from "@midday/ui/skeleton";
+import { MoveUpRight } from "lucide-react";
 
 const navigation = [
   {
     name: "Overview",
     path: "/",
-    icon: Icons.Overview,
   },
   {
     name: "Inbox",
     path: "/inbox",
-    icon: Icons.Inbox2,
   },
   {
     name: "Transactions",
     path: "/transactions",
-    icon: () => <Icons.Transactions size={20} />,
   },
   {
     name: "Invoices",
     path: "/invoices",
-    icon: Icons.Invoice,
   },
   {
     name: "Tracker",
     path: "/tracker",
-    icon: Icons.Tracker,
   },
   {
     name: "Vault",
     path: "/vault",
-    icon: Icons.Files,
   },
   {
     name: "Exports",
     path: "/vault/exports",
-    icon: Icons.DriveFileMove,
   },
   {
     name: "Apps",
     path: "/apps",
-    icon: Icons.Apps,
   },
   {
     name: "Settings",
     path: "/settings",
-    icon: Icons.Settings,
   },
 ];
 
-const settings = [
-  {
-    name: "Account",
-    path: "/account",
-    icon: Icons.Person,
-  },
-  {
-    name: "Team",
-    path: "/account/teams",
-    icon: Icons.Peolple,
-  },
-  {
-    name: "Security",
-    path: "/account/security",
-    icon: Icons.Security,
-  },
-  {
-    name: "Notifications",
-    path: "/settings/notifications",
-    icon: Icons.Notifications,
-  },
-  {
-    name: "Bank Accounts",
-    path: "/settings/connected",
-    icon: Icons.AccountBalance,
-  },
-];
+function CommandLatestNotifications() {
+  const { notifications, isLoading } = useNotifications();
 
-export function CommandRoot() {
-  const { toggleCustomizing } = useMenuStore();
-  const { setTheme } = useTheme();
-  const { isOpen, setOpen } = useCommandStore();
-  const router = useRouter();
-
-  const runCommand = (command: () => unknown) => {
-    setOpen();
-    command();
+  const handleOnSelect = ({ type, recordId }) => {
+    return {
+      transaction: window.location.replace(
+        `midday:///transactions?id=${recordId}`
+      ),
+      inbox: window.location.replace(`midday:///inbox?id=${recordId}`),
+      match: window.location.replace(`midday:///transactions?id=${recordId}`),
+    }[type];
   };
 
-  const handleSignOut = async () => {
-    signOutAction();
-    router.refresh();
-  };
+  if (isLoading) {
+    return (
+      <CommandGroup heading="Latest Notifications">
+        {[...Array(6)].map((_, index) => (
+          <CommandItem key={index.toString()}>
+            <Skeleton className="h-3 w-[340px]" />
+          </CommandItem>
+        ))}
+      </CommandGroup>
+    );
+  }
 
   return (
-    <>
-      <CommandInput placeholder="Type a command or search..." />
+    <CommandGroup heading="Latest Notifications">
+      {notifications.map((notification) => (
+        <CommandItem
+          key={notification?.id}
+          value={notification?.id}
+          onSelect={() => handleOnSelect(notification?.payload)}
+        >
+          {notification.payload.description}
+        </CommandItem>
+      ))}
+    </CommandGroup>
+  );
+}
+
+export function CommandRoot() {
+  const { setMenu } = useCommandStore();
+
+  return (
+    <div>
+      <CommandInput
+        placeholder="Type a command or search..."
+        autoFocus
+        className="backdrop-filter backdrop-blur-lg"
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        <CommandGroup heading="Navigation">
-          {navigation.map(({ path, icon: Icon, name }) => (
-            <CommandItem
-              key={path}
-              onSelect={() => {
-                router.push(path);
-                setOpen();
-              }}
-            >
-              <div className="flex space-x-2">
-                <Icon className="h-4 w-4" />
-                <span>{name}</span>
-              </div>
-            </CommandItem>
-          ))}
+
+        <CommandGroup heading="Suggestion">
+          <CommandItem onSelect={() => setMenu(MenuOption.AI)}>
+            <Icons.AI className="mr-2 h-[20px] w-[20px] text-[#0091ff]" />
+            <div className="flex items-center justify-between w-full">
+              <span>Ask Midday AI...</span>
+
+              <span
+                className="relative rounded-lg overflow-hidden border dark:p-[1px] dark:border-none"
+                style={{
+                  background:
+                    "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
+                }}
+              >
+                <span className="flex items-center py-[3px] px-3 rounded-[7px] bg-background text-[10px] h-full font-normal">
+                  Experimental
+                </span>
+              </span>
+            </div>
+          </CommandItem>
+          <CommandItem onSelect={() => setMenu(MenuOption.Tracker)}>
+            <Icons.Tracker className="mr-2 h-[20px] w-[20px]" />
+            <span>Time Tracker</span>
+          </CommandItem>
         </CommandGroup>
 
-        <CommandSeparator />
+        <CommandLatestNotifications />
 
-        <CommandGroup heading="Settings">
-          {settings.map(({ path, icon: Icon, name }) => (
+        <CommandGroup heading="Navigation" className="pb-6">
+          {navigation.map((item) => (
             <CommandItem
-              key={path}
-              onSelect={() => {
-                router.push(path);
-                setOpen();
-              }}
+              key={item.path}
+              onSelect={() => window.location.replace(`midday://${item.path}`)}
             >
-              <div className="flex space-x-2">
-                <Icon className="h-4 w-4" />
-                <span>{name}</span>
-              </div>
+              <MoveUpRight className="mr-2 h-4 w-4" />
+              <span>{item.name}</span>
             </CommandItem>
           ))}
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Appearance">
-          <CommandItem onSelect={() => runCommand(() => toggleCustomizing())}>
-            <Icons.DashboardCustomize className="mr-2 h-4 w-4" />
-            Customize menu
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
-            <SunIcon className="mr-2 h-4 w-4" />
-            Light
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => setTheme("dark"))}>
-            <MoonIcon className="mr-2 h-4 w-4" />
-            Dark
-          </CommandItem>
         </CommandGroup>
       </CommandList>
-    </>
+    </div>
   );
 }

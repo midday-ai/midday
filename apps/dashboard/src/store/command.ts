@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 export enum MenuOption {
   Root = "root",
-  RootDesktop = "root-desktop",
   Tracker = "tracker",
   AI = "ai",
 }

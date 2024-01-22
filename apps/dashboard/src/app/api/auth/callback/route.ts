@@ -19,10 +19,6 @@ export async function GET(req: NextRequest) {
   const mfaSetupVisited = cookieStore.has(Cookies.MfaSetupVisited);
 
   if (client === "desktop") {
-    // return NextResponse.redirect(
-    //   `midday://code=${code}&mfa_visited=${mfaSetupVisited}`
-    // );
-
     return NextResponse.redirect(`${requestUrl.origin}?code=${code}`);
   }
 

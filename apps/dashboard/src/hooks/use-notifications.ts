@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 export function useNotifications() {
   const supabase = createClient();
+  const [isLoading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
   const [subscriberId, setSubscriberId] = useState();
   const headlessServiceRef = useRef<HeadlessService>();
@@ -61,6 +62,7 @@ export function useNotifications() {
       headlessService.fetchNotifications({
         listener: ({}) => {},
         onSuccess: (response) => {
+          setLoading(false);
           setNotifications(response.data);
         },
       });
@@ -134,6 +136,7 @@ export function useNotifications() {
   }, [fetchNotifications, subscriberId]);
 
   return {
+    isLoading,
     markAllMessagesAsRead,
     markMessageAsRead,
     markAllMessagesAsSeen,
