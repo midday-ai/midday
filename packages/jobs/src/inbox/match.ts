@@ -91,13 +91,10 @@ client.defineJob({
           name: TriggerEvents.MatchNewInApp,
           payload: {
             recordId: updatedInboxData.transaction_id,
-            description: t(
-              { id: "notifications.match" },
-              {
-                transactionName: transaction.name,
-                fileName: updatedInboxData.file_name,
-              }
-            ),
+            description: t("notifications.match", {
+              transactionName: transaction.name,
+              fileName: updatedInboxData.file_name,
+            }),
             type: NotificationTypes.Match,
           },
           user: {

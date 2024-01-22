@@ -87,12 +87,12 @@ export function Attachments({ id, data }) {
   const { uploadFile } = useUpload();
 
   const handleOnDelete = async (id: string) => {
-    setFiles((files) => files.filter((file) => file.id !== id));
+    setFiles((files) => files.filter((file) => file?.id !== id));
     await deleteAttachmentAction(id);
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
-    setFiles((prev) => [...prev, ...acceptedFiles]);
+    // setFiles((prev) => [...prev, ...acceptedFiles]);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const uploadedFiles = await Promise.all(
@@ -160,7 +160,7 @@ export function Attachments({ id, data }) {
             key={file.name}
             id={id}
             file={file}
-            onDelete={() => handleOnDelete(file.id)}
+            onDelete={() => handleOnDelete(file?.id)}
           />
         ))}
       </ul>

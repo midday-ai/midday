@@ -48,16 +48,13 @@ client.defineJob({
           payload: {
             recordId: transaction.id,
             type: NotificationTypes.Transaction,
-            description: t(
-              { id: "notifications.transaction" },
-              {
-                amount: Intl.NumberFormat(user.locale, {
-                  style: "currency",
-                  currency: transaction.currency,
-                }).format(transaction.amount),
-                from: transaction.name,
-              }
-            ),
+            description: t("notifications.transaction", {
+              amount: Intl.NumberFormat(user.locale, {
+                style: "currency",
+                currency: transaction.currency,
+              }).format(transaction.amount),
+              from: transaction.name,
+            }),
           },
           user: {
             subscriberId: user.id,

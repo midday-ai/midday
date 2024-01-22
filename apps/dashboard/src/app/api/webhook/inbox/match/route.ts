@@ -87,13 +87,10 @@ export async function POST(req: Request) {
         name: TriggerEvents.MatchNewInApp,
         payload: {
           recordId: updatedInboxData.transaction_id,
-          description: t(
-            { id: "notifications.match" },
-            {
-              transactionName: transactionData.name,
-              fileName: updatedInboxData.file_name,
-            }
-          ),
+          description: t("notifications.match", {
+            transactionName: transactionData.name,
+            fileName: updatedInboxData.file_name,
+          }),
           type: NotificationTypes.Match,
         },
         user: {

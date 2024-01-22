@@ -4,11 +4,22 @@ import {
   nativeWindow,
   object,
   platform,
+  tray,
 } from "@todesktop/client-core";
 
 const windows = {
   command: "XEVrd9yvoaSgNhFr6GqYX",
 };
+
+function formatTime(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  const formattedHours = String(hours).padStart(2, "0");
+  const formattedMinutes = String(minutes).padStart(2, "0");
+
+  return `${formattedHours}:${formattedMinutes}`;
+}
 
 async function main() {
   // Menu items
@@ -48,6 +59,7 @@ async function main() {
     ) {
       if (window.location.pathname !== "/desktop/command") {
         // TODO: Fix redirect from middleware if command
+
         window.location.pathname = "/desktop/command";
       } else {
         const supabase = createClient();
@@ -61,6 +73,19 @@ async function main() {
       }
     }
   });
+
+  // Timer
+  function startTimer() {
+    let remainingTime = 60;
+    setInterval(() => {
+      // Set the tray title to the remaining time
+      tray.setTitle(formatTime(remainingTime));
+
+      remainingTime += 1;
+    }, 1000);
+  }
+
+  startTimer();
 }
 
 main();

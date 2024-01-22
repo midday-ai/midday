@@ -85,7 +85,7 @@ function CommandLatestNotifications() {
           value={notification?.id}
           onSelect={() => handleOnSelect(notification?.payload)}
         >
-          {notification.payload.description}
+          {notification?.payload?.description}
         </CommandItem>
       ))}
     </CommandGroup>
@@ -127,6 +127,10 @@ export function CommandRoot() {
           <CommandItem onSelect={() => setMenu(MenuOption.Tracker)}>
             <Icons.Tracker className="mr-2 h-[20px] w-[20px]" />
             <span>Time Tracker</span>
+          </CommandItem>
+          <CommandItem onSelect={() => window.location.replace("midday://")}>
+            <MoveUpRight className="mr-2 h-4 w-4" />
+            <span>Open Midday</span>
           </CommandItem>
         </CommandGroup>
 
