@@ -7,6 +7,11 @@ type ResumableUploadParmas = {
   onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
 };
 
+export function stripSpecialCharacters(inputString: string) {
+  // Use a regular expression to replace all non-alphanumeric characters except hyphen, space, and parentheses with an empty string
+  return inputString.replace(/[^a-zA-Z0-9\- ()]/g, "");
+}
+
 export async function resumableUpload(
   client: SupabaseClient,
   { file, path, bucket, onProgress }: ResumableUploadParmas
@@ -15,7 +20,9 @@ export async function resumableUpload(
     data: { session },
   } = await client.auth.getSession();
 
-  const fullPath = decodeURIComponent([...path, file.name].join("/"));
+  const fullPath = decodeURIComponent(
+    [...path, stripSpecialCharacters(file.name)].join("/")
+  );
 
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {

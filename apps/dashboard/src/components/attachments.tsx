@@ -4,6 +4,7 @@ import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
 import { formatSize } from "@/utils/format";
+import { stripSpecialCharacters } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
@@ -99,15 +100,17 @@ export function Attachments({ id, data }) {
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const uploadedFiles = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
+        const filename = stripSpecialCharacters(acceptedFile.name);
+
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [userData?.team_id, "transactions", id, acceptedFile.name],
+          path: [userData?.team_id, "transactions", id, filename],
           file: acceptedFile,
         });
 
         return {
           path,
-          name: acceptedFile.name,
+          name: filename,
           size: acceptedFile.size,
           transaction_id: id,
           type: acceptedFile.type,
