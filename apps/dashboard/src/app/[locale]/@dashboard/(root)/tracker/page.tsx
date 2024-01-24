@@ -36,7 +36,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -71,7 +71,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -107,7 +107,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -143,7 +143,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -179,7 +179,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -215,7 +215,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -251,7 +251,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {
@@ -287,7 +287,7 @@ const records = {
         id: "1",
         full_name: "Viktor Hofte",
         avatar_url:
-          "https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
+          "https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg",
       },
     },
     {

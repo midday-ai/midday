@@ -117,7 +117,7 @@ export function TrackerMonthGraph({
               <div className="flex items-center">
                 <div className="flex space-x-2 items-center">
                   <Avatar className="rounded-full w-5 h-5">
-                    <AvatarImage src="https://service.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg" />
+                    <AvatarImage src="https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg" />
                     <AvatarFallback>
                       <span className="text-xs">VH</span>
                     </AvatarFallback>

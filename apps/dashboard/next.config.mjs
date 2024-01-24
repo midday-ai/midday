@@ -7,7 +7,7 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "service.midday.ai",
+        hostname: "api.midday.ai",
       },
       {
         protocol: "https",
