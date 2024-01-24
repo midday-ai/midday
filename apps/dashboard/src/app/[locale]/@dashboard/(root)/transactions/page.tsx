@@ -37,7 +37,10 @@ export default async function Transactions({
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<Loading />} key={page}>
+          <Suspense
+            fallback={<Loading />}
+            key={JSON.stringify({ page, filter, sort })}
+          >
             <Table
               filter={filter}
               page={page}

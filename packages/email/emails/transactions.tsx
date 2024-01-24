@@ -221,6 +221,7 @@ export const TransactionsEmail = ({
                 href={`${baseAppUrl}/transactions?filter=${JSON.stringify({
                   date: {
                     from: transactions.at(0)?.date,
+                    to: transactions[transactions.length - 1]?.date,
                   },
                 })}`}
               >

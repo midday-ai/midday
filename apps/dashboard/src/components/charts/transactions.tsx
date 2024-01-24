@@ -19,7 +19,7 @@ export async function Transactions({ disabled }) {
       <div className="mt-8">
         <TransactionsListHeader />
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<TransactionsListSkeleton />}>
+          <Suspense key={type} fallback={<TransactionsListSkeleton />}>
             <TransactionsList type={type} disabled={disabled} />
           </Suspense>
         </ErrorBoundary>
