@@ -289,6 +289,7 @@ export async function getTransactionsQuery(
   if (status?.includes("fullfilled") || attachments === "include") {
     query.select(`
       *,
+      name:decrypted_name,
       assigned:assigned_id(*),
       transaction_attachments!inner(id,size,name)
     `);
