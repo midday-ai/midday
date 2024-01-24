@@ -79,6 +79,7 @@ const Item = ({
         value={item}
         id={item.path}
         style={{ y }}
+        layoutRoot
         className={cn(
           "relative rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
           "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",

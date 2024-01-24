@@ -4,6 +4,7 @@ export enum MenuOption {
   Root = "root",
   Tracker = "tracker",
   AI = "ai",
+  Notifications = "notifications",
 }
 
 interface CommandState {

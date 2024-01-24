@@ -34,7 +34,7 @@
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.2",
     "fast-csv": "^5.0.0",
-    "framer-motion": "^10.18.0",
+    "framer-motion": "^11.0.2",
     "ms": "^2.1.3",
     "next": "14.1.0",
     "next-international": "1.2.3",
@@ -60,7 +60,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.7.3",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.5",
+    "@types/node": "^20.11.6",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"

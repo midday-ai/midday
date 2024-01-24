@@ -53,7 +53,7 @@ function translations(locale: string, params: any) {
     case "sv":
       return {
         "notifications.match": `Vi matchade transaktionen “${params?.transactionName}” mot “${params?.fileName}”`,
-        "notifications.transaction": `"Du har en ny transaktion på ${params?.amount} från ${params?.from}`,
+        "notifications.transaction": `Du har en ny transaktion på ${params?.amount} från ${params?.from}`,
         "transactions.subject": "Nya transaktioner",
         "transactions.preview": `Hej ${params?.firstName}, Vi hittade ${
           params?.numberOfTransactions

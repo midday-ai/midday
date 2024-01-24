@@ -1,6 +1,5 @@
 "use client";
 
-import { useNotifications } from "@/hooks/use-notifications";
 import { MenuOption, useCommandStore } from "@/store/command";
 import {
   CommandEmpty,
@@ -10,7 +9,6 @@ import {
   CommandList,
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
 import { MoveUpRight } from "lucide-react";
 
 const navigation = [
@@ -52,46 +50,6 @@ const navigation = [
   },
 ];
 
-function CommandLatestNotifications() {
-  const { notifications, isLoading } = useNotifications();
-
-  const handleOnSelect = ({ type, recordId }) => {
-    return {
-      transaction: window.location.replace(
-        `midday:///transactions?id=${recordId}`
-      ),
-      inbox: window.location.replace(`midday:///inbox?id=${recordId}`),
-      match: window.location.replace(`midday:///transactions?id=${recordId}`),
-    }[type];
-  };
-
-  if (isLoading) {
-    return (
-      <CommandGroup heading="Latest Notifications">
-        {[...Array(6)].map((_, index) => (
-          <CommandItem key={index.toString()}>
-            <Skeleton className="h-3 w-[340px]" />
-          </CommandItem>
-        ))}
-      </CommandGroup>
-    );
-  }
-
-  return (
-    <CommandGroup heading="Latest Notifications">
-      {notifications.map((notification) => (
-        <CommandItem
-          key={notification?.id}
-          value={notification?.id}
-          onSelect={() => handleOnSelect(notification?.payload)}
-        >
-          {notification?.payload?.description}
-        </CommandItem>
-      ))}
-    </CommandGroup>
-  );
-}
-
 export function CommandRoot() {
   const { setMenu } = useCommandStore();
 
@@ -132,9 +90,11 @@ export function CommandRoot() {
             <MoveUpRight className="mr-2 h-4 w-4" />
             <span>Open Midday</span>
           </CommandItem>
+          <CommandItem onSelect={() => setMenu(MenuOption.Notifications)}>
+            <Icons.Notifications size={18} className="mr-2" />
+            <span>Latest Notifications</span>
+          </CommandItem>
         </CommandGroup>
-
-        <CommandLatestNotifications />
 
         <CommandGroup heading="Navigation" className="pb-6">
           {navigation.map((item) => (
