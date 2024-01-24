@@ -127,7 +127,7 @@ export async function deleteUser(supabase: Client) {
   const {
     data: { session },
   } = await getSession(supabase);
-  // await supabase.auth.admin.deleteUser(session?.user.id);
+  await supabase.auth.admin.deleteUser(session?.user.id);
   // TODO: Delete files etc
   await supabase.from("users").delete().eq("id", session?.user.id);
   await supabase.auth.signOut();

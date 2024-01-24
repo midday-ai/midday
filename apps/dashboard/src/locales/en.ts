@@ -66,4 +66,9 @@ export default {
     in_progress: "In progress",
     completed: "Completed",
   },
+  notifications: {
+    inbox: "Receive notifications about new items in your inbox.",
+    match: "Receive notifications about matches.",
+    transactions: "Receive notifications about new transactions.",
+  },
 } as const;

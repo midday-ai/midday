@@ -1,6 +1,9 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { Checkbox } from "@midday/ui/checkbox";
+import { Label } from "@midday/ui/label";
+import { Switch } from "@midday/ui/switch";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 export function NotificationSetting({
@@ -12,6 +15,7 @@ export function NotificationSetting({
   type,
   updateSubscriberPreferenceAction,
 }) {
+  const t = useI18n();
   const { execute, optimisticData } = useOptimisticAction(
     updateSubscriberPreferenceAction,
     { enabled },
@@ -35,18 +39,18 @@ export function NotificationSetting({
   };
 
   return (
-    <div className="flex items-center space-x-2 mb-3">
-      <Checkbox
+    <div className="flex flex-row items-center justify-between border-b-[1px] pb-4 mb-4">
+      <div className="space-y-0.5">
+        <Label htmlFor={id}>{name}</Label>
+        <p className="text-sm text-[#606060]">
+          {t(`notifications.${name.toLowerCase()}`)}
+        </p>
+      </div>
+      <Switch
         id={id}
         checked={optimisticData.enabled}
         onCheckedChange={onChange}
       />
-      <label
-        htmlFor={id}
-        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-      >
-        {name}
-      </label>
     </div>
   );
 }

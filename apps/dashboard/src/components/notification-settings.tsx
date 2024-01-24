@@ -58,12 +58,12 @@ export async function NotificationSettings() {
   return (
     <div className="flex space-y-4 flex-col">
       <div>
-        <h2 className="mb-2">Web</h2>
+        <h2 className="mb-2">In-App Notifications</h2>
         {inAppSettings}
       </div>
 
       <div>
-        <h2 className="mb-2">Email</h2>
+        <h2 className="mb-2">Email Notifications</h2>
         {emailSettings}
       </div>
     </div>
