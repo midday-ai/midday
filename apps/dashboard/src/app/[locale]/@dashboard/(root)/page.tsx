@@ -60,7 +60,7 @@ export default async function Overview({ searchParams }) {
         </div>
 
         <div className="mt-14">
-          <Widgets initialPeriod={initialPeriod} />
+          <Widgets initialPeriod={initialPeriod} disabled={empty} />
         </div>
       </div>
       {!isOpen && empty && <OverviewModal />}

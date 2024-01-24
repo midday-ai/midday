@@ -2,9 +2,14 @@ import { joinTeamByInviteCode } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { Metadata } from "next";
 import { revalidateTag } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Join team | Midday",
+};
 
 export default async function InviteCode({ params }) {
   const supabase = createClient();

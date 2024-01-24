@@ -19,7 +19,7 @@ type Props = React.HTMLAttributes<HTMLDivElement> & {
 };
 
 export const MonthRangePicker = ({ date, setDate }: Props) => {
-  const [yearOffset, setYearOffset] = useState<number>(0);
+  const [yearOffset, setYearOffset] = useState<number>(-1);
 
   const today = new Date();
   const fromDate = date?.from ? new Date(date.from) : null;

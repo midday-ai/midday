@@ -4,7 +4,7 @@ import { Category } from "../category";
 import { spendingData } from "./data";
 import { SpendingChart } from "./spending-chart";
 
-function SpendingCategoryList({ categories }) {
+function SpendingCategoryList({ categories, period }) {
   return (
     <ul className="absolute z-10 left-8 bottom-8 space-y-2 invisible xl:visible">
       {categories.map(({ category }) => (
@@ -12,6 +12,7 @@ function SpendingCategoryList({ categories }) {
           <Link
             href={`/transactions?filter=${JSON.stringify({
               categories: [category],
+              date: { from: period?.from, to: period?.to },
             })}`}
           >
             <Category
@@ -39,7 +40,10 @@ export async function SpendingList({ initialPeriod, disabled }) {
 
   return (
     <>
-      <SpendingCategoryList categories={spending?.data} />
+      <SpendingCategoryList
+        categories={spending?.data}
+        period={initialPeriod}
+      />
       <SpendingChart
         categories={spending?.data}
         currency={spending?.meta.currency}

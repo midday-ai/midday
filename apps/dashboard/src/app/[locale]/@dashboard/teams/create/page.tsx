@@ -1,6 +1,11 @@
 import { CreateTeamForm } from "@/components/create-team-form";
 import { Icons } from "@midday/ui/icons";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Create Team | Midday",
+};
 
 export default async function CreateTeam() {
   return (

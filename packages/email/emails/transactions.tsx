@@ -218,9 +218,11 @@ export const TransactionsEmail = ({
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
                 className="bg-[#000000] rounded-md text-primary text-[12px] text-white font-semibold no-underline text-center px-6 py-3"
-                href={`${baseAppUrl}/transactions?from_id=${
-                  transactions.at(0)?.id
-                }`}
+                href={`${baseAppUrl}/transactions?filter=${JSON.stringify({
+                  date: {
+                    from: transactions.at(0)?.date,
+                  },
+                })}`}
               >
                 {t("transactions.button")}
               </Button>

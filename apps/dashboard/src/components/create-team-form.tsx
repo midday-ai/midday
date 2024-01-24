@@ -20,6 +20,10 @@ export function CreateTeamForm() {
         required
         autoComplete="off"
         onChange={(evt) => setName(evt.target.value)}
+        onKeyDown={(evt) => {
+          if (evt.key === "Enter")
+            createTeam.execute({ name, redirectTo: "/teams/invite" });
+        }}
       />
 
       <Button

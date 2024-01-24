@@ -1,6 +1,11 @@
 import { InviteForm } from "@/components/invite-form";
 import { Icons } from "@midday/ui/icons";
+import { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Invite Team Member | Midday",
+};
 
 export default async function InviteMembers() {
   return (

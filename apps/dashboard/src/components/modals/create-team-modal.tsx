@@ -33,6 +33,10 @@ export function CreateTeamModal({ onOpenChange }) {
             autoFocus
             placeholder="Team Name"
             onChange={(evt) => setName(evt.target.value)}
+            onKeyDown={(evt) => {
+              console.log(evt.key);
+              if (evt.key === "Enter") createTeam.execute({ name });
+            }}
           />
         </div>
 

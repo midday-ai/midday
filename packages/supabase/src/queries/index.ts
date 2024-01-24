@@ -331,7 +331,7 @@ export async function getTransactionsQuery(
   // Only calculate total amount when a filters are applied
   // Investigate pg functions
   const totalAmount = filter
-    ? (await query.limit(10000000))?.data?.reduce(
+    ? (await query.limit(10000000).neq("category", "transfer"))?.data?.reduce(
         (amount, item) => item.amount + amount,
         0
       )
@@ -461,6 +461,7 @@ export async function getMetricsQuery(
 
   const result = sum.reduce((acc, item) => {
     const key = format(new Date(item.date), "y");
+
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -468,10 +469,13 @@ export async function getMetricsQuery(
     return acc;
   }, {});
 
-  const [prevData, currentData] = Object.values(result);
+  const [prevData, currentData, nextDate = []] = Object.values(result);
+
+  // NOTE: If dates spans over years
+  const combinedData = [...currentData, ...nextDate];
 
   const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
-  const currentTotal = currentData?.reduce(
+  const currentTotal = combinedData?.reduce(
     (value, item) => item.value + value,
     0
   );
@@ -496,13 +500,13 @@ export async function getMetricsQuery(
     result: range.map((date) => {
       const currentKey = format(date, dateFormat);
       const previousKey = format(subYears(date, 1), dateFormat);
-      const current = currentData?.find((p) => p.key === currentKey);
+      const current = combinedData?.find((p) => p.key === currentKey);
       const currentValue = current?.value ?? 0;
       const previous = prevData?.find((p) => p.key === previousKey);
       const previousValue = previous?.value ?? 0;
 
       return {
-        date: date.toDateString(),
+        date: date.toISOString(),
         previous: {
           date: subYears(date, 1).toISOString(),
           value: previousValue ?? 0,

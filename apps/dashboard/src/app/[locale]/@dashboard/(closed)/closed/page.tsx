@@ -2,6 +2,12 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Private beta | Midday",
+};
+
 export default function Closed() {
   return (
     <div>

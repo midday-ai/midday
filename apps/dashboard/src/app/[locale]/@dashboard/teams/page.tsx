@@ -1,8 +1,13 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { getTeams } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
+import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Teams | Midday",
+};
 
 export default async function Teams() {
   const { data } = await getTeams();
