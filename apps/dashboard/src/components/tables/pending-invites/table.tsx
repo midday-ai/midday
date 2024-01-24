@@ -18,7 +18,6 @@ import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -121,15 +120,11 @@ export const columns: ColumnDef<Payment>[] = [
 export function PendingInvitesTable({ data, currentUser }) {
   const [isOpen, onOpenChange] = React.useState(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
 
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -138,7 +133,6 @@ export function PendingInvitesTable({ data, currentUser }) {
     },
     state: {
       sorting,
-      columnFilters,
     },
   });
 

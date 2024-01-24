@@ -26,7 +26,7 @@ export const inviteTeamMembersAction = action(
     const location = headers().get("x-vercel-ip-city") ?? "Unknown";
     const ip = headers().get("x-forwarded-for") ?? "127.0.0.1";
 
-    const data = invites.map((invite) => ({
+    const data = invites?.map((invite) => ({
       ...invite,
       team_id: user.data.team_id,
       invited_by: user.data.id,
@@ -48,18 +48,13 @@ export const inviteTeamMembersAction = action(
 
     revalidateTag(`team_invites_${user.data.team_id}`);
 
-    const emails = invtesData.map(async (invites) => ({
+    const emails = invtesData?.map(async (invites) => ({
       from: "Midday <middaybot@midday.ai>",
       to: [invites.email],
-      subject: t(
-        {
-          id: "invite.subject",
-        },
-        {
-          invitedByName: invites.user.full_name,
-          teamName: invites.team.name,
-        }
-      ),
+      subject: t("invite.subject", {
+        invitedByName: invites.user.full_name,
+        teamName: invites.team.name,
+      }),
       html: await renderAsync(
         InviteEmail({
           invitedByEmail: invites.user.email,

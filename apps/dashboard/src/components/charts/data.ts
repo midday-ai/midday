@@ -234,21 +234,6 @@ export const spendingData = {
   },
   data: [
     {
-      category: "travel",
-      currency: "SEK",
-      amount: 300,
-    },
-    {
-      category: "office_supplies",
-      currency: "SEK",
-      amount: 50,
-    },
-    {
-      category: "software",
-      currency: "SEK",
-      amount: 240,
-    },
-    {
       category: "rent",
       currency: "SEK",
       amount: 130,
@@ -259,19 +244,34 @@ export const spendingData = {
       amount: 200,
     },
     {
-      category: "transfer",
-      currency: "SEK",
-      amount: 30,
-    },
-    {
       category: "other",
       currency: "SEK",
       amount: 123,
     },
     {
+      category: "travel",
+      currency: "SEK",
+      amount: 300,
+    },
+    {
+      category: "transfer",
+      currency: "SEK",
+      amount: 30,
+    },
+    {
+      category: "software",
+      currency: "SEK",
+      amount: 240,
+    },
+    {
       category: "equipment",
       currency: "SEK",
       amount: 123,
+    },
+    {
+      category: "office_supplies",
+      currency: "SEK",
+      amount: 50,
     },
     {
       category: "uncategorized",
