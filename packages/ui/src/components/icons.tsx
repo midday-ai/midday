@@ -41,6 +41,7 @@ import {
   MdOutlineDashboardCustomize,
   MdOutlineDescription,
   MdOutlineDifference,
+  MdOutlineEmail,
   MdOutlineExitToApp,
   MdOutlineFileDownload,
   MdOutlineHandyman,
@@ -54,6 +55,7 @@ import {
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
+  MdOutlineTask,
   MdOutlineTimer,
   MdOutlineTune,
   MdPause,
@@ -464,4 +466,6 @@ export const Icons = {
   ArrowDown: MdOutlineArrowDownward,
   ArrowBack: MdArrowBack,
   ExitToApp: MdOutlineExitToApp,
+  Match: MdOutlineTask,
+  Email: MdOutlineEmail,
 };

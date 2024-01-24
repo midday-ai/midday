@@ -50,6 +50,11 @@ export function UploadZone({ children }) {
   }, [showProgress, progress, toastId]);
 
   const onDrop = async (files) => {
+    // NOTE: If onDropRejected
+    if (!files.length) {
+      return;
+    }
+
     // Set default progress
     uploadProgress.current = files.map(() => 0);
 
@@ -104,7 +109,33 @@ export function UploadZone({ children }) {
     }
   };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    onDropRejected: ([reject]) => {
+      console.log(reject?.errors);
+      if (reject?.errors.find(({ code }) => code === "file-too-large")) {
+        toast({
+          duration: 2500,
+          variant: "error",
+          title: "File size to large.",
+        });
+      }
+
+      if (reject?.errors.find(({ code }) => code === "file-invalid-type")) {
+        toast({
+          duration: 2500,
+          variant: "error",
+          title: "File type not supported.",
+        });
+      }
+    },
+    maxSize: 3000000, // 3MB
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", ".jpeg"],
+      "application/pdf": [".pdf"],
+    },
+  });
 
   return (
     <ContextMenu>

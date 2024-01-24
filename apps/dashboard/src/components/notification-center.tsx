@@ -76,7 +76,7 @@ function NotificationItem({
           >
             <div>
               <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
-                <Icons.Transactions />
+                <Icons.Email />
               </div>
             </div>
             <div>
@@ -111,7 +111,7 @@ function NotificationItem({
           >
             <div>
               <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
-                <Icons.Transactions />
+                <Icons.Match />
               </div>
             </div>
             <div>

@@ -70,7 +70,7 @@ export function AssignUser({ id, selectedId, isLoading }) {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="overflow-y-auto max-h-[200px]">
               {users?.map(({ user }) => (
                 <SelectItem key={user?.id} value={user?.id}>
                   <AssignedUser user={user} />
