@@ -166,7 +166,7 @@ export function FilePreview({
         </div>
       </div>
 
-      <DialogContent className="w-[90vw] max-w-2xl">
+      <DialogContent className="w-[90vw] max-w-2xl p-0">
         <FilePreview
           src={src}
           name={name}

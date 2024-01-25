@@ -9,4 +9,9 @@ export const LogEvents = {
     icon: "🌝",
     channel: "login",
   },
+  Registered: {
+    name: "User Registered",
+    icon: "🎓",
+    channel: "registered",
+  },
 };
