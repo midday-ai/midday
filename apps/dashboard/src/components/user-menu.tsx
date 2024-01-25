@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import Link from "next/link";
-import { FeedbackModal } from "./modals/feedback-modal";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 
@@ -68,13 +67,6 @@ export async function UserMenu() {
                 <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
               </DropdownMenuItem>
             </Link>
-
-            <DropdownMenuItem>
-              <Link href="?feedback" className="w-full">
-                Feedback
-              </Link>
-              <DropdownMenuShortcut>⌘F</DropdownMenuShortcut>
-            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <div className="flex flex-row justify-between items-center p-2">
@@ -85,7 +77,6 @@ export async function UserMenu() {
           <SignOut />
         </DropdownMenuContent>
       </DropdownMenu>
-      <FeedbackModal />
     </>
   );
 }

@@ -121,10 +121,7 @@ export function InboxView({
             }
           }
 
-          if (
-            payload.eventType === "DELETE" ||
-            payload.eventType === "UPDATE"
-          ) {
+          if (payload.eventType === "UPDATE") {
             // Refetch cached data
             onRefresh();
             // Refetch client
