@@ -1,7 +1,5 @@
 import { createClient } from "@midday/supabase/server";
 
-export const dynamic = "force-dynamic";
-
 export async function GET(req) {
   const supabase = createClient();
   const requestUrl = new URL(req.url);

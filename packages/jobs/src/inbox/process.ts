@@ -66,7 +66,8 @@ client.defineJob({
               .toString()
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
-            currency: data?.currency?.toUpperCase(),
+            // TODO: Guard currency values
+            currency: data?.currency_code?.toUpperCase(),
             issuer_name: data?.issuer_name,
             due_date: data?.due_date && new Date(data.due_date),
           })

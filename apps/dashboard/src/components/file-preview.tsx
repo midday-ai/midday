@@ -63,17 +63,12 @@ export function FilePreview({
   let content;
 
   const handleOnLoaded = () => {
-    setTimeout(() => {
-      setLoaded(true);
-    }, 50);
+    setLoaded(true);
   };
 
   if (type?.startsWith("image")) {
     content = (
-      <div
-        className={cn("flex items-center justify-center", className)}
-        style={{ width, height }}
-      >
+      <div className={cn("flex items-center justify-center", className)}>
         <img
           src={src}
           className="object-contain"
@@ -86,18 +81,19 @@ export function FilePreview({
   }
 
   if (type === FileType.Pdf) {
-    // NOTE: onLoad event is not working
-    handleOnLoaded();
-
     content = (
-      <div
-        style={{ width: width - 5, height: height - 5 }}
-        className="overflow-hidden flex items-center align-center"
-      >
+      <div style={{ width, height }} className="overflow-hidden">
         <iframe
           src={`${src}#toolbar=0`}
-          style={{ width, height }}
+          style={{ width: width + 5, height }}
+          className="-ml-[8px] -mt-[8px]"
           title={name}
+          onLoad={() => {
+            // We can't get the onLoad event for the embeded pdf in the webview
+            setTimeout(() => {
+              setLoaded(true);
+            }, 200);
+          }}
         />
       </div>
     );
@@ -108,7 +104,7 @@ export function FilePreview({
       <div className={cn(className, "relative")}>
         {!preview && isLoaded && (
           <AnimatePresence>
-            <div className="absolute bottom-2 left-2 flex space-x-2">
+            <div className="absolute bottom-4 left-2 flex space-x-2">
               {!disableFullscreen && (
                 <motion.div
                   initial={{ y: 50, opacity: 0 }}
@@ -150,7 +146,7 @@ export function FilePreview({
 
         <Skeleton
           className={cn(
-            "absolute top-0 left-0 z-20 pointer-events-none w-full h-full",
+            "absolute top-0 left-0 z-20 pointer-events-none w-full h-full rounded-none",
             isLoaded && "hidden",
             error && "hidden"
           )}
@@ -166,14 +162,14 @@ export function FilePreview({
         </div>
       </div>
 
-      <DialogContent className="w-[90vw] max-w-2xl p-0">
+      <DialogContent className="p-0 max-w-[680px]">
         <FilePreview
           src={src}
           name={name}
           type={type}
           downloadUrl={downloadUrl}
           width={680}
-          height={900}
+          height={780}
           disableFullscreen
         />
       </DialogContent>

@@ -205,10 +205,10 @@ export function DataTableRow({ data, teamId }) {
                   </div>
                 </HoverCardTrigger>
                 {filePreviewSupported && (
-                  <HoverCardContent className="w-70 h-[350px] p-0">
+                  <HoverCardContent className="w-[273px] h-[358px] p-0 overflow-hidden">
                     <FilePreview
-                      width={300}
-                      height={375}
+                      width={280}
+                      height={365}
                       src={`/api/proxy?filePath=vault/${teamId}/${filepath}`}
                       downloadUrl={`/api/download/file?path=${filepath}&filename=${data.name}`}
                       name={data.name}

@@ -28,20 +28,20 @@ const Item = ({ file, onDelete, id }) => {
       <div className="flex space-x-4 items-center">
         <HoverCard openDelay={200}>
           <HoverCardTrigger>
-            <div className="rounded-md border w-[40px] h-[40px] flex items-center justify-center overflow-hidden cursor-pointer">
+            <div className="rounded-md border w-[40px] h-[40px] overflow-hidden cursor-pointer">
               <FilePreview
                 src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
                 name={file.name}
                 type={file.type}
                 preview
-                width={40}
-                height={40}
+                width={45}
+                height={100}
               />
             </div>
           </HoverCardTrigger>
           {filePreviewSupported && (
             <HoverCardContent
-              className="w-70 h-[350px]"
+              className="w-[273px] h-[358px] p-0 overflow-hidden"
               side="left"
               sideOffset={55}
             >
@@ -50,8 +50,8 @@ const Item = ({ file, onDelete, id }) => {
                 downloadUrl={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
                 name={file.name}
                 type={file.type}
-                width={300}
-                height={315}
+                width={280}
+                height={365}
               />
             </HoverCardContent>
           )}
