@@ -16,6 +16,16 @@ export const deleteAttachmentAction = action(
 
     revalidateTag(`transactions_${user.data.team_id}`);
 
+    // Find inbox by attachment_id and delete attachment_id
+    await supabase
+      .from("inbox")
+      .update({
+        transaction_id: null,
+      })
+      .eq("transaction_id", data.transaction_id);
+
+    revalidateTag(`inbox_${user.data.team_id}`);
+
     return data;
-  },
+  }
 );

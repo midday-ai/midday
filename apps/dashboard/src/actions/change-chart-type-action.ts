@@ -2,6 +2,7 @@
 
 import { Cookies } from "@/utils/constants";
 import { getUser } from "@midday/supabase/cached-queries";
+import ms from "ms";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { action } from "./safe-action";
@@ -15,6 +16,7 @@ export const changeChartTypeAction = action(
     cookies().set({
       name: Cookies.ChartType,
       value,
+      expires: ms("2y"),
     });
 
     revalidateTag(`chart_${user.data.team_id}`);

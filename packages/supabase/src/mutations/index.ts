@@ -5,7 +5,6 @@ import {
   getUserInviteQuery,
 } from "../queries";
 import { Client, Database } from "../types";
-import { remove } from "../utils/storage";
 
 export async function createBankAccounts(supabase: Client, accounts) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
@@ -270,11 +269,6 @@ export async function deleteAttachment(supabase: Client, id: string) {
     .eq("id", id)
     .select("id, transaction_id, name, team_id")
     .single();
-
-  remove(supabase, {
-    bucket: "vault",
-    path: `${data.team_id}/transactions/${data.transaction_id}/${data.name}`,
-  });
 
   return data;
 }

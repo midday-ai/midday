@@ -41,8 +41,8 @@ export const changeSpendingPeriodSchema = z.object({
 
 export const changeChartTypeSchema = z.enum(["profit_loss", "income"]);
 export const changeChartPeriodSchema = z.object({
-  from: z.string().datetime().optional(),
-  to: z.string().datetime().optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
 
 export const changeTransactionsPeriodSchema = z.enum([

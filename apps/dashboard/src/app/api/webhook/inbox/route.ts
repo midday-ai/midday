@@ -71,14 +71,16 @@ export async function POST(req: Request) {
       .insert(insertData)
       .select("*, name:decrypted_name, subject:decrypted_subject");
 
-    inboxData.map((inbox) => {
-      client.sendEvent({
-        name: Events.PROCESS_INBOX,
-        payload: {
-          inboxId: inbox.id,
-        },
-      });
-    });
+    await Promise.all(
+      inboxData.map((inbox) =>
+        client.sendEvent({
+          name: Events.PROCESS_INBOX,
+          payload: {
+            inboxId: inbox.id,
+          },
+        })
+      )
+    );
 
     revalidateTag(`inbox_${teamData.id}`);
 
