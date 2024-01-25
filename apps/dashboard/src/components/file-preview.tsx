@@ -81,6 +81,11 @@ export function FilePreview({
   }
 
   if (type === FileType.Pdf) {
+    // NOTE: On SSR onLoad is not fired
+    setTimeout(() => {
+      setLoaded(true);
+    }, 1000);
+
     content = (
       <div style={{ width, height }} className="overflow-hidden">
         <iframe
@@ -88,6 +93,7 @@ export function FilePreview({
           style={{ width: width + 5, height }}
           className="-ml-[8px] -mt-[8px]"
           title={name}
+          loading="lazy"
           onLoad={() => {
             // We can't get the onLoad event for the embeded pdf in the webview
             setTimeout(() => {

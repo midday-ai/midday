@@ -4,6 +4,10 @@ import { z } from "zod";
 import { client, openai, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
+function isOnlyLetters(value: string) {
+  return /^[a-zA-Z]+$/.test(value);
+}
+
 client.defineJob({
   id: Jobs.PROCESS_INBOX,
   name: "Inbox - Process",
@@ -66,8 +70,10 @@ client.defineJob({
               .toString()
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
-            // TODO: Guard currency values
-            currency: data?.currency_code?.toUpperCase(),
+            // NOTE: Guard currency, can only be currency code
+            currency:
+              isOnlyLetters(data?.currency_code) &&
+              data?.currency_code?.toUpperCase(),
             issuer_name: data?.issuer_name,
             due_date: data?.due_date && new Date(data.due_date),
           })

@@ -37,7 +37,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
       teamId: userData?.team_id,
     });
 
-    if (transactions?.data?.length) {
+    if (transactions?.data?.length > 1) {
       toast({
         duration: 6000,
         variant: "ai",
