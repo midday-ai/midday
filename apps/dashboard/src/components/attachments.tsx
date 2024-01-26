@@ -13,6 +13,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
+import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import { X } from "lucide-react";
@@ -29,14 +30,18 @@ const Item = ({ file, onDelete, id }) => {
         <HoverCard openDelay={200}>
           <HoverCardTrigger>
             <div className="rounded-md border w-[40px] h-[40px] overflow-hidden cursor-pointer">
-              <FilePreview
-                src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-                name={file.name}
-                type={file.type}
-                preview
-                width={45}
-                height={100}
-              />
+              {file.isUploading ? (
+                <Skeleton className="w-full h-full" />
+              ) : (
+                <FilePreview
+                  src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
+                  name={file.name}
+                  type={file.type}
+                  preview
+                  width={45}
+                  height={100}
+                />
+              )}
             </div>
           </HoverCardTrigger>
           {filePreviewSupported && (
@@ -95,7 +100,15 @@ export function Attachments({ id, data }) {
   };
 
   const onDrop = async (acceptedFiles: Array<Attachment>) => {
-    // setFiles((prev) => [...prev, ...acceptedFiles]);
+    setFiles((prev) => [
+      ...prev,
+      ...acceptedFiles.map((a) => ({
+        name: stripSpecialCharacters(a.name),
+        size: a.size,
+        type: a.type,
+        isUploading: true,
+      })),
+    ]);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const uploadedFiles = await Promise.all(
