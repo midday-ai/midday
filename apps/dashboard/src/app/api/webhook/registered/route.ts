@@ -1,13 +1,13 @@
-import { env } from "@/env.mjs";
-import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
-import LoopsClient from "loops";
-import { headers } from "next/headers";
+// import { env } from "@/env.mjs";
+// import { LogEvents } from "@midday/events/events";
+// import { logsnag } from "@midday/events/server";
+// import LoopsClient from "loops";
+// import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-const loops = new LoopsClient(env.LOOPS_API_KEY);
+// const loops = new LoopsClient(env.LOOPS_API_KEY);
 
 export async function POST(req: Request) {
   // const key = headers().get("x-api-key");
