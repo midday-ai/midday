@@ -18,12 +18,11 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
-  console.log("body", body);
-
   const email = body.record.email;
 
   const found = await loops.findContact(email);
-  const [firstName, lastName] = body.record.full_name.split(" ");
+  const [firstName, lastName] =
+    body.record.raw_user_meta_data.full_name.split(" ");
 
   if (found.length > 0) {
     const userId = found?.at(0)?.id;
