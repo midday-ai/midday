@@ -18,6 +18,8 @@ export async function POST(req: Request) {
 
   const body = await req.json();
 
+  console.log("katt", body);
+
   const email = body.record.email;
 
   const found = await loops.findContact(email);
@@ -25,6 +27,7 @@ export async function POST(req: Request) {
 
   if (found.length > 0) {
     const userId = found?.at(0)?.id;
+    console.log("katt 2", userId);
 
     await loops.updateContact(email, {
       userId,
