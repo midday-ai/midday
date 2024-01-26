@@ -38,11 +38,8 @@ import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
@@ -275,28 +272,16 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function MembersTable({ data, currentUser }) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function DataTable({ data, currentUser }) {
   const [isOpen, onOpenChange] = React.useState(false);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
 
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     meta: {
       currentUser,
       totalOwners: data.filter((member) => member.role === "owner").length,
-    },
-    state: {
-      sorting,
-      columnFilters,
     },
   });
 

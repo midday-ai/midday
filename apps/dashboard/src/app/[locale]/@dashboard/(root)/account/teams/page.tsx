@@ -1,23 +1,16 @@
-import { TeamsTable } from "@/components/tables/teams/table";
-import { getTeams, getUserInvites } from "@midday/supabase/cached-queries";
+import { TeamsTable } from "@/components/tables/teams";
+import { TeamsSkeleton } from "@/components/tables/teams/table";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Teams | Midday",
 };
 
-export default async function Teams() {
-  const { data: teamsData } = await getTeams();
-  const { data: invitesData } = await getUserInvites();
-
+export default function Teams() {
   return (
-    <div className="space-y-12">
-      <TeamsTable
-        data={[
-          ...teamsData,
-          ...invitesData.map((invite) => ({ ...invite, isInvite: true })),
-        ]}
-      />
-    </div>
+    <Suspense fallback={<TeamsSkeleton />}>
+      <TeamsTable />
+    </Suspense>
   );
 }

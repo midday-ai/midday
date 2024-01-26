@@ -27,16 +27,14 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Input } from "@midday/ui/input";
+import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
@@ -209,84 +207,95 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function TeamsTable({ data }) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [rowSelection, setRowSelection] = React.useState({});
+export function TeamsSkeleton() {
+  return (
+    <div className="w-full">
+      <DataTableHeader />
 
+      <Table>
+        <TableBody>
+          {[...Array(6)].map((_, index) => (
+            <TableRow key={index.toString()} className="hover:bg-transparent">
+              <TableCell className={cn("border-r-[0px] py-4")}>
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="rounded-full w-8 h-8" />
+
+                  <div className="flex flex-col space-y-2">
+                    <Skeleton className="w-[200px] h-3" />
+                    <Skeleton className="w-[150px] h-2" />
+                  </div>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export function DataTableHeader({ table }) {
+  return (
+    <Dialog>
+      <div className="flex items-center pb-4 space-x-4">
+        <Input
+          className="flex-1"
+          placeholder="Search..."
+          value={(table?.getColumn("team")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table?.getColumn("team")?.setFilterValue(event.target.value)
+          }
+        />
+        <DialogTrigger asChild>
+          <Button>Create team</Button>
+        </DialogTrigger>
+        <CreateTeamModal />
+      </div>
+    </Dialog>
+  );
+}
+
+export function DataTable({ data }) {
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      rowSelection,
-    },
   });
 
   return (
-    <Dialog>
-      <div className="w-full">
-        <div className="flex items-center pb-4 space-x-4">
-          <Input
-            className="flex-1"
-            placeholder="Search..."
-            value={(table.getColumn("team")?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn("team")?.setFilterValue(event.target.value)
-            }
-          />
-          <DialogTrigger asChild>
-            <Button>Create team</Button>
-          </DialogTrigger>
-          <CreateTeamModal />
-        </div>
-        <Table>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-transparent"
-                >
-                  {row.getAllCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={cn(
-                        "border-r-[0px] py-4",
-                        cell.column.columnDef.meta?.className
-                      )}
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow className="hover:bg-transparent">
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
+    <div className="w-full">
+      <DataTableHeader table={table} />
+      <Table>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                data-state={row.getIsSelected() && "selected"}
+                className="hover:bg-transparent"
+              >
+                {row.getAllCells().map((cell) => (
+                  <TableCell
+                    key={cell.id}
+                    className={cn(
+                      "border-r-[0px] py-4",
+                      cell.column.columnDef.meta?.className
+                    )}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </Dialog>
+            ))
+          ) : (
+            <TableRow className="hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
   );
 }

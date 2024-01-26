@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Input } from "@midday/ui/input";
+import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
@@ -20,8 +21,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
@@ -42,19 +41,15 @@ export const columns: ColumnDef<Payment>[] = [
     header: () => "Select all",
     cell: ({ row }) => {
       return (
-        <div>
-          <div className="flex items-center space-x-4">
-            <Avatar className="rounded-full w-8 h-8">
-              <AvatarFallback>
-                <span className="text-xs">P</span>
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium text-sm">Pending Invitation</span>
-              <span className="text-sm text-[#606060]">
-                {row.original.email}
-              </span>
-            </div>
+        <div className="flex items-center space-x-4">
+          <Avatar className="rounded-full w-8 h-8">
+            <AvatarFallback>
+              <span className="text-xs">P</span>
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium text-sm">Pending Invitation</span>
+            <span className="text-sm text-[#606060]">{row.original.email}</span>
           </div>
         </div>
       );
@@ -117,41 +112,68 @@ export const columns: ColumnDef<Payment>[] = [
   },
 ];
 
-export function PendingInvitesTable({ data, currentUser }) {
-  const [isOpen, onOpenChange] = React.useState(false);
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+export function PendingInvitesSkeleton() {
+  return (
+    <div className="w-full">
+      <DataTableHeader />
 
+      <Table>
+        <TableBody>
+          {[...Array(6)].map((_, index) => (
+            <TableRow key={index.toString()} className="hover:bg-transparent">
+              <TableCell className={cn("border-r-[0px] py-4")}>
+                <div className="flex items-center space-x-4">
+                  <Skeleton className="rounded-full w-8 h-8" />
+
+                  <div className="flex flex-col space-y-2">
+                    <Skeleton className="w-[200px] h-3" />
+                    <Skeleton className="w-[150px] h-2" />
+                  </div>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+export function DataTableHeader({ table }) {
+  const [isOpen, onOpenChange] = React.useState(false);
+
+  return (
+    <div className="flex items-center pb-4 space-x-4">
+      <Input
+        className="flex-1"
+        placeholder="Search..."
+        value={(table?.getColumn("member")?.getFilterValue() as string) ?? ""}
+        onChange={(event) =>
+          table?.getColumn("member")?.setFilterValue(event.target.value)
+        }
+      />
+      <Dialog open={isOpen} onOpenChange={onOpenChange}>
+        <Button onClick={() => onOpenChange(true)}>Invite member</Button>
+        <InviteTeamMembersModal onOpenChange={onOpenChange} isOpen={isOpen} />
+      </Dialog>
+    </div>
+  );
+}
+
+export function DataTable({ data, currentUser }) {
   const table = useReactTable({
     data,
     columns,
-    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     meta: {
       currentUser,
-    },
-    state: {
-      sorting,
     },
   });
 
   return (
     <div className="w-full">
-      <div className="flex items-center pb-4 space-x-4">
-        <Input
-          className="flex-1"
-          placeholder="Search..."
-          value={(table.getColumn("member")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("member")?.setFilterValue(event.target.value)
-          }
-        />
-        <Dialog open={isOpen} onOpenChange={onOpenChange}>
-          <Button onClick={() => onOpenChange(true)}>Invite member</Button>
-          <InviteTeamMembersModal onOpenChange={onOpenChange} isOpen={isOpen} />
-        </Dialog>
-      </div>
+      <DataTableHeader table={table} />
+
       <Table>
         <TableBody>
           {table.getRowModel().rows?.length ? (
