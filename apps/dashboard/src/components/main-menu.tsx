@@ -72,7 +72,14 @@ const Item = ({
   const router = useRouter();
 
   return (
-    <button type="button" onClick={() => router.push(item.path)}>
+    <button
+      type="button"
+      onClick={() => {
+        if (!isCustomizing) {
+          router.push(item.path);
+        }
+      }}
+    >
       <Reorder.Item
         onDragEnd={onDragEnd}
         key={item.path}

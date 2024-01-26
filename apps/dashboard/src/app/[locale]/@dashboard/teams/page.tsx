@@ -1,9 +1,11 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
+import { UserMenu } from "@/components/user-menu";
 import { getTeams } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Teams | Midday",
@@ -17,12 +19,18 @@ export default async function Teams() {
   }
 
   return (
-    <div>
-      <header className="w-full absolute left-0 right-0">
+    <>
+      <header className="w-full absolute left-0 right-0 flex justify-between items-center">
         <div className="ml-5 mt-4 md:ml-10 md:mt-10">
           <Link href="/">
             <Icons.Logo />
           </Link>
+        </div>
+
+        <div className="mr-5 mt-4 md:mr-10 md:mt-10">
+          <Suspense>
+            <UserMenu onlySignOut />
+          </Suspense>
         </div>
       </header>
 
@@ -44,6 +52,6 @@ export default async function Teams() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

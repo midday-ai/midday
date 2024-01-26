@@ -1,7 +1,9 @@
 import { InviteForm } from "@/components/invite-form";
+import { UserMenu } from "@/components/user-menu";
 import { Icons } from "@midday/ui/icons";
 import { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Invite Team Member | Midday",
@@ -9,12 +11,18 @@ export const metadata: Metadata = {
 
 export default async function InviteMembers() {
   return (
-    <div>
-      <header className="w-full absolute left-0 right-0">
+    <>
+      <header className="w-full absolute left-0 right-0 flex justify-between items-center">
         <div className="ml-5 mt-4 md:ml-10 md:mt-10">
           <Link href="/">
             <Icons.Logo />
           </Link>
+        </div>
+
+        <div className="mr-5 mt-4 md:mr-10 md:mt-10">
+          <Suspense>
+            <UserMenu onlySignOut />
+          </Suspense>
         </div>
       </header>
 
@@ -31,6 +39,6 @@ export default async function InviteMembers() {
           <InviteForm />
         </div>
       </div>
-    </div>
+    </>
   );
 }
