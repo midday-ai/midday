@@ -103,19 +103,21 @@ export function SelectAccountModal({ countryCode }) {
 
   useEffect(() => {
     async function fetchData() {
-      const accounts = await getAccounts({
+      const data = await getAccounts({
         accountId: searchParams.get("ref"),
         countryCode,
       });
 
-      setAccounts(accounts);
+      setAccounts(data);
       setLoading(false);
 
-      // Set default accounts to checked
-      form.reset({ accounts: accounts.map((account) => account.id) });
+      // Set first accounts to checked
+      if (!form.formState.isValid) {
+        form.reset({ accounts: [data.at(0).id] });
+      }
     }
 
-    if (isOpen) {
+    if (isOpen && !accounts.length) {
       fetchData();
     }
   }, [isOpen]);
