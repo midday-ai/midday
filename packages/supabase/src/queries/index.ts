@@ -291,7 +291,7 @@ export async function getTransactionsQuery(
       *,
       name:decrypted_name,
       assigned:assigned_id(*),
-      transaction_attachments!inner(id,size,name)
+      attachments:transaction_attachments!inner(id,size,name)
     `);
   }
 
@@ -469,7 +469,8 @@ export async function getMetricsQuery(
     return acc;
   }, {});
 
-  const [prevData, currentData, nextDate = []] = Object.values(result);
+  const [prevData = [], currentData = [], nextDate = []] =
+    Object.values(result);
 
   // NOTE: If dates spans over years
   const combinedData = [...currentData, ...nextDate];
