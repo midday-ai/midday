@@ -1,6 +1,5 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
 import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
-import { DesktopSignInVerifyCode } from "@/components/desktop-sign-in-verify-code";
 import { FigmaSignIn } from "@/components/figma-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
@@ -19,12 +18,6 @@ import Link from "next/link";
 import { userAgent } from "next/server";
 
 export default async function Login(params) {
-  const code = params?.searchParams?.code;
-
-  if (code) {
-    return <DesktopSignInVerifyCode code={code} />;
-  }
-
   if (params?.searchParams?.return_to === "desktop/command") {
     return <DesktopCommandMenuSignIn />;
   }

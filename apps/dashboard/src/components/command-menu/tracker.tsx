@@ -77,7 +77,7 @@ export function CommandTracker() {
         </CommandGroup>
       </CommandList>
 
-      <div className="flex fixed w-full bottom-14">
+      <div className="flex fixed w-full bottom-6 left-0 right-0 todesktop:bottom-14">
         <div className="ml-4 mr-4 w-full">
           <Input placeholder="Add new project" className="h-[40px]" />
           <Button className="h-[24px] absolute right-6 top-2">Add</Button>

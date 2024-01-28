@@ -1,4 +1,4 @@
-import { ExportButton } from "@/components/export-button";
+// import { ExportButton } from "@/components/export-button";
 import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { getTransactions, getUser } from "@midday/supabase/cached-queries";
@@ -38,9 +38,9 @@ export async function Table({
 
   return (
     <div className="relative">
-      <div className="absolute right-0 -top-14">
+      {/* <div className="absolute right-0 -top-14">
         <ExportButton totalMissingAttachments={meta.totalMissingAttachments} />
-      </div>
+      </div> */}
       <DataTable
         data={data}
         teamId={userData.team_id}

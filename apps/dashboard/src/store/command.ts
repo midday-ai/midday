@@ -5,6 +5,7 @@ export enum MenuOption {
   Tracker = "tracker",
   AI = "ai",
   Notifications = "notifications",
+  Feedback = "feedback",
 }
 
 interface CommandState {

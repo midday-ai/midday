@@ -9,6 +9,7 @@ import {
   CommandList,
 } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { MoveUpRight } from "lucide-react";
 
 const navigation = [
@@ -86,13 +87,19 @@ export function CommandRoot() {
             <Icons.Tracker className="mr-2 h-[20px] w-[20px]" />
             <span>Time Tracker</span>
           </CommandItem>
-          <CommandItem onSelect={() => window.location.replace("midday://")}>
-            <MoveUpRight className="mr-2 h-4 w-4" />
-            <span>Open Midday</span>
-          </CommandItem>
+          {isDesktopApp() && (
+            <CommandItem onSelect={() => window.location.replace("midday://")}>
+              <MoveUpRight className="mr-2 h-4 w-4" />
+              <span>Open Midday</span>
+            </CommandItem>
+          )}
           <CommandItem onSelect={() => setMenu(MenuOption.Notifications)}>
             <Icons.Notifications size={18} className="mr-2" />
             <span>Latest Notifications</span>
+          </CommandItem>
+          <CommandItem onSelect={() => setMenu(MenuOption.Feedback)}>
+            <Icons.QuestionAnswer size={18} className="mr-2" />
+            <span>Send Feedback</span>
           </CommandItem>
         </CommandGroup>
 

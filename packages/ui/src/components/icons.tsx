@@ -55,6 +55,7 @@ import {
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
+  MdOutlineQuestionAnswer,
   MdOutlineTask,
   MdOutlineTimer,
   MdOutlineTune,
@@ -468,4 +469,5 @@ export const Icons = {
   ExitToApp: MdOutlineExitToApp,
   Match: MdOutlineTask,
   Email: MdOutlineEmail,
+  QuestionAnswer: MdOutlineQuestionAnswer,
 };

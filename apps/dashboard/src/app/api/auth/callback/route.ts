@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const mfaSetupVisited = cookieStore.has(Cookies.MfaSetupVisited);
 
   if (client === "desktop") {
-    return NextResponse.redirect(`${requestUrl.origin}?code=${code}`);
+    return NextResponse.redirect(`${requestUrl.origin}/verify?code=${code}`);
   }
 
   if (provider) {

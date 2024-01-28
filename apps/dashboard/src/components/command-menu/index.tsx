@@ -5,6 +5,7 @@ import { CommandDialog } from "@midday/ui/command";
 import { motion } from "framer-motion";
 import { useHotkeys } from "react-hotkeys-hook";
 import { CommandAI } from "./ai";
+import { CommandFeedback } from "./feedback";
 import { CommandNotifications } from "./notifications";
 import { CommandRoot } from "./root";
 import { CommandTracker } from "./tracker";
@@ -17,6 +18,7 @@ export const CommandComponent = ({ selected = MenuOption.Root }) => {
     [MenuOption.Tracker]: <CommandTracker />,
     [MenuOption.AI]: <CommandAI />,
     [MenuOption.Notifications]: <CommandNotifications />,
+    [MenuOption.Feedback]: <CommandFeedback />,
   }[selected];
 
   useHotkeys("ctrl+backspace", () => setMenu(MenuOption.Root));
