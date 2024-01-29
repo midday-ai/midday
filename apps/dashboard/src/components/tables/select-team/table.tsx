@@ -33,7 +33,6 @@ export function SelectTeamTable({ data }) {
               <div className="flex justify-end">
                 <div className="flex space-x-3 items-center">
                   <Button
-                    disabled={changeTeam.status === "executing"}
                     variant="outline"
                     onClick={() =>
                       changeTeam.execute({

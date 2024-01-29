@@ -205,7 +205,7 @@ export function DataTable<TData, TValue>({
       </Table>
 
       {hasNextPage && (
-        <div className="flex items-center justify-center mt-8" ref={ref}>
+        <div className="flex items-center justify-center mt-6" ref={ref}>
           <div className="flex items-center space-x-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             <span className="text-sm text-[#606060]">Loading...</span>
