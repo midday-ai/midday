@@ -2,18 +2,24 @@
 
 import { updateUserTeamRole } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { revalidateTag } from "next/cache";
+import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { action } from "./safe-action";
 import { changeUserRoleSchema } from "./schema";
 
 export const changeUserRoleAction = action(
   changeUserRoleSchema,
-  async (payload) => {
+  async ({ userId, teamId, role }) => {
     const supabase = createClient();
 
-    const { data } = await updateUserTeamRole(supabase, payload);
+    const { data } = await updateUserTeamRole(supabase, {
+      userId,
+      teamId,
+      role,
+    });
 
-    revalidateTag(`team_members_${payload.teamId}`);
+    if (revalidatePath) {
+      revalidatePathFunc(revalidatePath);
+    }
 
     return data;
   }

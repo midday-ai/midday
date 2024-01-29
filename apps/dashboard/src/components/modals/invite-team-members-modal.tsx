@@ -39,6 +39,7 @@ export function InviteTeamMembersModal({ onOpenChange, isOpen }) {
 
       toast({
         title: "Successfully invited Team Members.",
+        variant: "success",
         duration: 3500,
       });
     },

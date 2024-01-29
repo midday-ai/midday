@@ -147,11 +147,13 @@ export const changeUserRoleSchema = z.object({
   userId: z.string(),
   teamId: z.string(),
   role: z.enum(["owner", "member"]),
+  revalidatePath: z.string().optional(),
 });
 
 export const deleteTeamMemberSchema = z.object({
   userId: z.string(),
   teamId: z.string(),
+  revalidatePath: z.string().optional(),
 });
 
 export const leaveTeamSchema = z.object({

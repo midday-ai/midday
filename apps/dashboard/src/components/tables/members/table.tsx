@@ -142,6 +142,7 @@ export const columns: ColumnDef[] = [
                     userId: row.original.user.id,
                     teamId: row.original.team_id,
                     role,
+                    revalidatePath: "/settings/members",
                   });
                 }}
               >
@@ -195,6 +196,7 @@ export const columns: ColumnDef[] = [
                               deleteTeamMember.execute({
                                 userId: row.original.user.id,
                                 teamId: row.original.team_id,
+                                revalidatePath: "/settings/members",
                               })
                             }
                           >
