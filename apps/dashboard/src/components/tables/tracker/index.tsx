@@ -1,13 +1,9 @@
-import { ExportButton } from "@/components/export-button";
-import { Pagination } from "@/components/pagination";
 import { DataTable } from "@/components/tables/tracker/data-table";
 import { getUser } from "@midday/supabase/cached-queries";
-import { getPagination } from "@midday/supabase/queries";
 
 const pageSize = 50;
 
 export async function Table({ page, initialTrackerId, records }) {
-  const { to, from } = getPagination(page, pageSize);
   const { data: userData } = await getUser();
   const { data, meta } = {
     meta: null,
@@ -138,15 +134,6 @@ export async function Table({ page, initialTrackerId, records }) {
         teamId={userData.team_id}
         initialTrackerId={initialTrackerId}
         records={records}
-      />
-
-      <Pagination
-        page={page}
-        count={meta?.count}
-        to={to}
-        from={from}
-        hasNextPage={hasNextPage}
-        className="mt-4"
       />
     </div>
   );

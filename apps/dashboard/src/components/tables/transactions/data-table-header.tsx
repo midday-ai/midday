@@ -1,13 +1,14 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import { Checkbox } from "@midday/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export function DataTableHeader() {
+export function DataTableHeader({ table }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -36,6 +37,18 @@ export function DataTableHeader() {
   return (
     <TableHeader>
       <TableRow className="h-[45px]">
+        <TableHead className="w-[50px]">
+          <Checkbox
+            checked={
+              table?.getIsAllPageRowsSelected() ||
+              (table?.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+          />
+        </TableHead>
+
         <TableHead className="w-[100px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"

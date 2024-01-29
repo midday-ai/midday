@@ -63,10 +63,7 @@ export const createAttachmentsSchema = z.array(
 
 export const deleteAttachmentSchema = z.string();
 
-export const exportTransactionsSchema = z.object({
-  from: z.coerce.date(),
-  to: z.coerce.date(),
-});
+export const exportTransactionsSchema = z.array(z.string());
 
 export const deleteFileSchema = z.object({
   id: z.string(),

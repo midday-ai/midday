@@ -1,5 +1,4 @@
 import { writeToString } from "@fast-csv/format";
-import { getTransactionsQuery } from "@midday/supabase/queries";
 import { download } from "@midday/supabase/storage";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
@@ -16,8 +15,7 @@ client.defineJob({
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_EXPORT,
     schema: z.object({
-      from: z.coerce.date(),
-      to: z.coerce.date(),
+      transactionIds: z.array(z.string()),
       teamId: z.string(),
       locale: z.string(),
     }),
@@ -26,12 +24,9 @@ client.defineJob({
   run: async (payload, io) => {
     const client = await io.supabase.client;
 
-    const { from, to, teamId, locale } = payload;
+    const { transactionIds, teamId, locale } = payload;
 
-    const filePath = `export-${format(new Date(from), "y-M-d")}-${format(
-      new Date(to),
-      "y-M-d"
-    )}`;
+    const filePath = `export-${new Date().toISOString()}`;
 
     const path = `${teamId}/exports`;
     const fileName = `${filePath}.zip`;
@@ -44,17 +39,18 @@ client.defineJob({
       },
     });
 
-    const { data, meta } = await getTransactionsQuery(client, {
-      teamId,
-      from: 0,
-      to: 100000,
-      filter: {
-        date: {
-          from: from.toDateString(),
-          to: to.toDateString(),
-        },
-      },
-    });
+    const { data, count } = await client
+      .from("decrypted_transactions")
+      .select(
+        `
+        *,
+        name:decrypted_name,
+        attachments:transaction_attachments(*)
+      `,
+        { count: "exact" }
+      )
+      .in("id", transactionIds)
+      .eq("team_id", teamId);
 
     await generateExport.update("generate-export-transaction", {
       state: "loading",
@@ -71,10 +67,10 @@ client.defineJob({
     });
 
     const attachments = await Promise.allSettled(
-      data.flatMap((transaction, idx) => {
+      data?.flatMap((transaction, idx) => {
         const rowId = idx + 1;
 
-        return transaction?.attachments.map(
+        return transaction?.attachments?.map(
           async (attachment, idx2: number) => {
             const extension = attachment.name.split(".").pop();
             const name =
@@ -145,8 +141,8 @@ client.defineJob({
 
     zipWriter.add("transactions.csv", new TextReader(csv));
 
-    attachments.map((attachment) => {
-      if (attachment?.value.blob) {
+    attachments?.map((attachment) => {
+      if (attachment?.value?.blob) {
         zipWriter.add(
           attachment.value.name,
           new BlobReader(attachment.value.blob)
@@ -178,7 +174,7 @@ client.defineJob({
         filePath,
         fileName,
         progress: 100,
-        totalItems: meta.count,
+        totalItems: count,
       },
     });
   },

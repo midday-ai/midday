@@ -87,7 +87,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
             >
               <SelectValue placeholder="Select" />
             </SelectTrigger>
-            <SelectContent className="overflow-y-auto max-h-[200px]">
+            <SelectContent className="overflow-y-auto max-h-[350px]">
               {Object.values(categories).map((category) => (
                 <SelectItem key={category} value={category}>
                   <div className="flex space-x-2">

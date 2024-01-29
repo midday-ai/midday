@@ -1,6 +1,5 @@
 "use client";
 
-import { Pagination } from "@/components/pagination";
 import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
@@ -12,16 +11,7 @@ import {
 } from "@midday/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 
-export function BottomBar({
-  from,
-  to,
-  page,
-  count,
-  show,
-  totalAmount,
-  hasNextPage,
-  currency,
-}) {
+export function BottomBar({ count, show, totalAmount, hasNextPage, currency }) {
   const locale = useCurrentLocale();
 
   return (
@@ -54,14 +44,9 @@ export function BottomBar({
               })}
             </span>
           </div>
+
           <div>
-            <Pagination
-              page={page}
-              count={count}
-              from={from}
-              to={to}
-              hasNextPage={hasNextPage}
-            />
+            <span className="text-sm">{count} Transactions</span>
           </div>
         </div>
       </motion.div>

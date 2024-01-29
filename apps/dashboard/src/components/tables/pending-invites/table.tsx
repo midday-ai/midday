@@ -162,6 +162,7 @@ export function DataTableHeader({ table }) {
 
 export function DataTable({ data, currentUser }) {
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
