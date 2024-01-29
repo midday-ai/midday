@@ -48,14 +48,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 
-export type Payment = {
-  id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
-};
-
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef[] = [
   {
     id: "member",
     accessorKey: "user.full_name",
@@ -276,6 +269,7 @@ export function DataTable({ data, currentUser }) {
   const [isOpen, onOpenChange] = React.useState(false);
 
   const table = useReactTable({
+    getRowId: (row) => row.id,
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),

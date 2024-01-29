@@ -1,6 +1,11 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { UserMenu } from "@/components/user-menu";
-import { getTeams } from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
+import {
+  getTeamsByUserIdQuery,
+  // getUserInvitesQuery,
+} from "@midday/supabase/queries";
+import { createClient } from "@midday/supabase/server";
 import { Icons } from "@midday/ui/icons";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -12,9 +17,15 @@ export const metadata: Metadata = {
 };
 
 export default async function Teams() {
-  const { data } = await getTeams();
+  const supabase = createClient();
+  const user = await getUser();
 
-  if (!data.length > 0) {
+  const [teams, invites] = await Promise.all([
+    getTeamsByUserIdQuery(supabase, user?.data?.id),
+    // getUserInvitesQuery(supabase, user.data?.email),
+  ]);
+
+  if (!teams.data.length > 0) {
     redirect("/teams/create");
   }
 
@@ -42,7 +53,7 @@ export default async function Teams() {
 
           <div className="mb-2">Teams</div>
 
-          <SelectTeamTable data={data} />
+          <SelectTeamTable data={teams.data} />
           {/* TODO Pending invites */}
 
           <div className="text-center mt-6">

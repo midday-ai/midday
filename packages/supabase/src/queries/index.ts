@@ -130,6 +130,7 @@ export async function getTeamUserQuery(
       `
       id,
       role,
+      team_id,
       user:users(id,full_name,avatar_url,email)
     `
     )

@@ -3,14 +3,17 @@
 import { getTeamMembers, getUser } from "@midday/supabase/cached-queries";
 import { leaveTeam } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
-import { revalidateTag } from "next/cache";
+import {
+  revalidatePath as revalidatePathFunc,
+  revalidateTag,
+} from "next/cache";
 import { redirect } from "next/navigation";
 import { action } from "./safe-action";
 import { leaveTeamSchema } from "./schema";
 
 export const leaveTeamAction = action(
   leaveTeamSchema,
-  async ({ teamId, role, redirectTo }) => {
+  async ({ teamId, role, redirectTo, revalidatePath }) => {
     const supabase = createClient();
     const user = await getUser();
     const { data: teamMembersData } = await getTeamMembers();
@@ -23,14 +26,17 @@ export const leaveTeamAction = action(
       throw Error("Action not allowed");
     }
 
-    const { data } = await leaveTeam(supabase, {
+    const { data, error } = await leaveTeam(supabase, {
       teamId,
       userId: user.data.id,
     });
 
-    revalidateTag(`team_members_${data.team_id}`);
     revalidateTag(`user_${user.data.id}`);
     revalidateTag(`teams_${user.data.id}`);
+
+    if (revalidatePath) {
+      revalidatePathFunc(revalidatePath);
+    }
 
     if (redirectTo) {
       redirect(redirectTo);

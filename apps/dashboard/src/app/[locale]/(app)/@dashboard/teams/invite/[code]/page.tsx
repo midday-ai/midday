@@ -18,11 +18,9 @@ export default async function InviteCode({ params }) {
   if (code) {
     const user = await joinTeamByInviteCode(supabase, code);
 
-    if (user?.data) {
-      revalidateTag(`team_members_${user.data?.team_id}`);
-      revalidateTag(`user_${user.data.id}`);
-      revalidateTag(`teams_${user.data.id}`);
-
+    if (user) {
+      revalidateTag(`user_${user.id}`);
+      revalidateTag(`teams_${user.id}`);
       redirect("/");
     }
   }

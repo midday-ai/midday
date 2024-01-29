@@ -94,7 +94,10 @@ export const columns: ColumnDef<Payment>[] = [
                   <DropdownMenuItem
                     className="text-destructive"
                     onClick={() =>
-                      deleteInvite.execute({ id: row.original.id })
+                      deleteInvite.execute({
+                        id: row.original.id,
+                        revalidatePath: "settings/members",
+                      })
                     }
                   >
                     Remove

@@ -338,27 +338,29 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
   const {
     data: { session },
   } = await getSession(supabase);
-  const { data: inviteDate } = await getUserInviteQuery(supabase, {
+
+  const { data: inviteData } = await getUserInviteQuery(supabase, {
     code,
     email: session?.user?.email,
   });
 
-  if (inviteDate) {
+  if (inviteData) {
     // Add user team
     await supabase.from("users_on_team").insert({
       user_id: session?.user.id,
-      team_id: inviteDate?.team_id,
-      role: inviteDate.role,
+      team_id: inviteData?.team_id,
+      role: inviteData.role,
     });
 
     // Set current team
     const { data } = await supabase
       .from("users")
       .update({
-        team_id: inviteDate?.team_id,
+        team_id: inviteData?.team_id,
       })
       .eq("id", session?.user.id)
-      .select();
+      .select()
+      .single();
 
     // remove invite
     await supabase.from("user_invites").delete().eq("code", code);

@@ -158,6 +158,7 @@ export const leaveTeamSchema = z.object({
   teamId: z.string(),
   redirectTo: z.string().optional(),
   role: z.enum(["owner", "member"]),
+  revalidatePath: z.string().optional(),
 });
 
 export const deleteTeamSchema = z.object({
@@ -172,15 +173,25 @@ export const inviteTeamMembersSchema = z.object({
     })
   ),
   redirectTo: z.string().optional(),
+  revalidatePath: z.string().optional(),
 });
 
 export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
 
-export const deleteInviteSchema = z.object({ id: z.string() });
-export const acceptInviteSchema = z.object({ id: z.string() });
-export const declineInviteSchema = z.object({ id: z.string() });
+export const deleteInviteSchema = z.object({
+  id: z.string(),
+  revalidatePath: z.string().optional(),
+});
+export const acceptInviteSchema = z.object({
+  id: z.string(),
+  revalidatePath: z.string().optional(),
+});
+export const declineInviteSchema = z.object({
+  id: z.string(),
+  revalidatePath: z.string().optional(),
+});
 
 export const inboxFilter = z.enum(["all", "completed", "archived", "deleted"]);
 

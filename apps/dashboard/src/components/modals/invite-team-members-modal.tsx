@@ -71,6 +71,7 @@ export function InviteTeamMembersModal({ onOpenChange, isOpen }) {
     inviteMembers.execute({
       // Remove invites without email (last appended invite validation)
       invites: data.invites.filter((invite) => invite.email !== undefined),
+      revalidatePath: "/settings/members",
     });
   });
 

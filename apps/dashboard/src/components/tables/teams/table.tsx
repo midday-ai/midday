@@ -105,14 +105,24 @@ export const columns: ColumnDef<Payment>[] = [
             <div className="flex space-x-3 items-center">
               <Button
                 variant="outline"
-                onClick={() => declineInvite.execute({ id: row.original.id })}
+                onClick={() =>
+                  declineInvite.execute({
+                    id: row.original.id,
+                    revalidatePath: "/account/teams",
+                  })
+                }
               >
                 Decline
               </Button>
 
               <Button
                 variant="outline"
-                onClick={() => acceptInvite.execute({ id: row.original.id })}
+                onClick={() =>
+                  acceptInvite.execute({
+                    id: row.original.id,
+                    revalidatePath: "/account/teams",
+                  })
+                }
               >
                 Accept
               </Button>
@@ -183,6 +193,7 @@ export const columns: ColumnDef<Payment>[] = [
                           leaveTeam.execute({
                             teamId: row.original.team.id,
                             role: row.original.role,
+                            revalidatePath: "/account/teams",
                           })
                         }
                       >

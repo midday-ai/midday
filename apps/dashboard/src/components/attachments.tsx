@@ -146,7 +146,6 @@ export function Attachments({ id, data }) {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     onDropRejected: ([reject]) => {
-      console.log(reject?.errors);
       if (reject?.errors.find(({ code }) => code === "file-too-large")) {
         toast({
           duration: 2500,

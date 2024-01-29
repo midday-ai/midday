@@ -6,7 +6,7 @@ import { getI18n } from "@midday/email/locales";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { renderAsync } from "@react-email/components";
-import { revalidateTag } from "next/cache";
+import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Resend } from "resend";
@@ -17,7 +17,7 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 export const inviteTeamMembersAction = action(
   inviteTeamMembersSchema,
-  async ({ invites, redirectTo }) => {
+  async ({ invites, redirectTo, revalidatePath }) => {
     const supabase = createClient();
     const user = await getUser();
 
@@ -46,8 +46,6 @@ export const inviteTeamMembersAction = action(
       .insert(filteredInvites)
       .select("email, code, user:invited_by(*), team:team_id(*)");
 
-    revalidateTag(`team_invites_${user.data.team_id}`);
-
     const emails = invtesData?.map(async (invites) => ({
       from: "Midday <middaybot@midday.ai>",
       to: [invites.email],
@@ -72,6 +70,10 @@ export const inviteTeamMembersAction = action(
     const htmlEmails = await Promise.all(emails);
 
     await resend.batch.send(htmlEmails);
+
+    if (revalidatePath) {
+      revalidatePathFunc(revalidatePath);
+    }
 
     if (redirectTo) {
       redirect(redirectTo);
