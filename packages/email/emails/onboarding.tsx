@@ -77,7 +77,7 @@ const baseAppUrl =
     ? "https://app.midday.ai"
     : "http://localhost:3001";
 
-export const TransactionsEmail = ({
+export const OnboardingEmail = ({
   fullName = "Viktor Hofte",
   transactions = defaultTransactions,
   locale = "sv",
@@ -237,4 +237,4 @@ export const TransactionsEmail = ({
   );
 };
 
-export default TransactionsEmail;
+export default OnboardingEmail;

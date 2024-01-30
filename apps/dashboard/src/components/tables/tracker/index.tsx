@@ -1,9 +1,9 @@
 import { DataTable } from "@/components/tables/tracker/data-table";
 import { getUser } from "@midday/supabase/cached-queries";
 
-const pageSize = 50;
+const pageSize = 20;
 
-export async function Table({ page, initialTrackerId, records }) {
+export async function Table({ page, initialTrackerId }) {
   const { data: userData } = await getUser();
   const { data, meta } = {
     meta: null,
@@ -37,13 +37,13 @@ export async function Table({ page, initialTrackerId, records }) {
               "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
           },
           {
-            id: "1",
+            id: "2",
             full_name: "Viktor Hofte",
             avatar_url:
               "https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c",
           },
           {
-            id: "1",
+            id: "3",
             full_name: "Viktor Hofte",
             working: true,
             avatar_url:
@@ -105,14 +105,14 @@ export async function Table({ page, initialTrackerId, records }) {
         ],
       },
       {
-        id: "6",
+        id: "7",
         name: "Project X",
         time: 85,
         description: "Product Design",
         status: "completed",
       },
       {
-        id: "7",
+        id: "8",
         name: "Project X",
         time: 85,
         description: "Product Design",
@@ -133,7 +133,7 @@ export async function Table({ page, initialTrackerId, records }) {
         data={data}
         teamId={userData.team_id}
         initialTrackerId={initialTrackerId}
-        records={records}
+        records={data}
       />
     </div>
   );

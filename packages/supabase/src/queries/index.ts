@@ -722,3 +722,45 @@ export async function getInboxQuery(
     count,
   };
 }
+
+type GetTrackerProjectsQueryParams = {
+  teamId: string;
+  to: number;
+  from?: number;
+  sort?: {
+    column: string;
+    value: "asc" | "desc";
+  };
+  filter?: {
+    status?: "in_progress" | "completed";
+  };
+};
+
+export async function getTrackerProjectsQuery(
+  supabase: Client,
+  params: GetTrackerProjectsQueryParams
+) {
+  const { from = 0, to, filter, sort, teamId } = params;
+  const { status } = filter || {};
+
+  const query = supabase
+    .from("tracker_projects")
+    .select("*", { count: "exact" })
+    .eq("team_id", teamId);
+
+  if (sort) {
+    const [column, value] = sort;
+    query.order(column, { ascending: value === "asc" });
+  } else {
+    query.order("order", { ascending: false });
+  }
+
+  const { data, count } = await query.range(from, to).throwOnError();
+
+  return {
+    meta: {
+      count,
+    },
+    data,
+  };
+}

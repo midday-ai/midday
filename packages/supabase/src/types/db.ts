@@ -248,35 +248,123 @@ export interface Database {
           }
         ]
       }
+      tracker_entries: {
+        Row: {
+          created_at: string
+          currency: string | null
+          description: string | null
+          duration: number | null
+          id: string
+          project: string | null
+          rate: number | null
+          start: string | null
+          stop: string | null
+          team_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          duration?: number | null
+          id?: string
+          project?: string | null
+          rate?: number | null
+          start?: string | null
+          stop?: string | null
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          duration?: number | null
+          id?: string
+          project?: string | null
+          rate?: number | null
+          start?: string | null
+          stop?: string | null
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_entries_project_fkey"
+            columns: ["project"]
+            isOneToOne: false
+            referencedRelation: "tracker_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_entries_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       tracker_projects: {
         Row: {
+          billable: boolean | null
           created_at: string
+          currency: string | null
+          description: string | null
           id: string
+          manager: string | null
+          name: string
+          rate: number | null
+          status: Database["public"]["Enums"]["trackerStatus"]
+          team_id: string | null
         }
         Insert: {
+          billable?: boolean | null
           created_at?: string
+          currency?: string | null
+          description?: string | null
           id?: string
+          manager?: string | null
+          name: string
+          rate?: number | null
+          status?: Database["public"]["Enums"]["trackerStatus"]
+          team_id?: string | null
         }
         Update: {
+          billable?: boolean | null
           created_at?: string
+          currency?: string | null
+          description?: string | null
           id?: string
+          manager?: string | null
+          name?: string
+          rate?: number | null
+          status?: Database["public"]["Enums"]["trackerStatus"]
+          team_id?: string | null
         }
-        Relationships: []
-      }
-      tracker_records: {
-        Row: {
-          created_at: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tracker_projects_manager_fkey"
+            columns: ["manager"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_projects_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       transaction_attachments: {
         Row: {
@@ -335,21 +423,21 @@ export interface Database {
       }
       transaction_enrichments: {
         Row: {
-          category: Database["public"]["Enums"]["transactionCategories"]
+          category: Database["public"]["Enums"]["transactionCategories"] | null
           created_at: string
           created_by: string | null
           id: string
           name: string | null
         }
         Insert: {
-          category: Database["public"]["Enums"]["transactionCategories"]
+          category?: Database["public"]["Enums"]["transactionCategories"] | null
           created_at?: string
           created_by?: string | null
           id?: string
           name?: string | null
         }
         Update: {
-          category?: Database["public"]["Enums"]["transactionCategories"]
+          category?: Database["public"]["Enums"]["transactionCategories"] | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -374,7 +462,6 @@ export interface Database {
           created_at: string
           currency: string
           date: string
-          flow: Database["public"]["Enums"]["transactionFlow"] | null
           id: string
           internal_id: string
           method: Database["public"]["Enums"]["transactionMethods"]
@@ -392,7 +479,6 @@ export interface Database {
           created_at?: string
           currency: string
           date: string
-          flow?: Database["public"]["Enums"]["transactionFlow"] | null
           id?: string
           internal_id: string
           method: Database["public"]["Enums"]["transactionMethods"]
@@ -410,7 +496,6 @@ export interface Database {
           created_at?: string
           currency?: string
           date?: string
-          flow?: Database["public"]["Enums"]["transactionFlow"] | null
           id?: string
           internal_id?: string
           method?: Database["public"]["Enums"]["transactionMethods"]
@@ -849,7 +934,6 @@ export interface Database {
           currency: string | null
           date: string | null
           decrypted_name: string | null
-          flow: Database["public"]["Enums"]["transactionFlow"] | null
           id: string | null
           internal_id: string | null
           method: Database["public"]["Enums"]["transactionMethods"] | null
@@ -868,7 +952,6 @@ export interface Database {
           currency?: string | null
           date?: string | null
           decrypted_name?: never
-          flow?: Database["public"]["Enums"]["transactionFlow"] | null
           id?: string | null
           internal_id?: string | null
           method?: Database["public"]["Enums"]["transactionMethods"] | null
@@ -887,7 +970,6 @@ export interface Database {
           currency?: string | null
           date?: string | null
           decrypted_name?: never
-          flow?: Database["public"]["Enums"]["transactionFlow"] | null
           id?: string | null
           internal_id?: string | null
           method?: Database["public"]["Enums"]["transactionMethods"] | null
@@ -1007,24 +1089,24 @@ export interface Database {
       }
     }
     Enums: {
-      bankProviders: "gocardless" | "plaid"
+      bankProviders: "gocardless" | "plaid" | "teller"
       teamRoles: "owner" | "member"
+      trackerStatus: "in_progress" | "completed"
       transactionCategories:
-        | "office_supplies"
         | "travel"
+        | "office_supplies"
+        | "meals"
+        | "software"
         | "rent"
         | "income"
-        | "software"
-        | "transfer"
-        | "meals"
         | "equipment"
+        | "transfer"
+        | "internet_and_telephone"
+        | "facilities_expenses"
         | "activity"
         | "uncategorized"
         | "taxes"
         | "other"
-        | "internet_and_telephone"
-        | "facilities_expenses"
-      transactionFlow: "inflow" | "outflow"
       transactionMethods:
         | "payment"
         | "card_purchase"

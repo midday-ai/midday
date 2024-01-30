@@ -370,7 +370,7 @@ export default function Tracker() {
       </div>
 
       <Suspense>
-        <Table records={records} />
+        <Table />
       </Suspense>
     </div>
   );

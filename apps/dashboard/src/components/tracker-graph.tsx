@@ -1,9 +1,24 @@
 "use client";
 
+import {
+  eachDayOfInterval,
+  eachWeekOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isAfter,
+  isBefore,
+  lastDayOfWeek,
+  startOfISOWeek,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
+} from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
-import { TrackerMonthGraph } from "./tracker-month-graph";
 
 export function TrackerGraph({ data }) {
+  const weekStartsOn = 1; // Monday
+
   const [params, setParams] = useQueryStates(
     {
       date: parseAsString,
@@ -18,6 +33,22 @@ export function TrackerGraph({ data }) {
     setParams(params);
   };
 
+  const firstDay = startOfMonth(subMonths(new Date(), 6));
+  const lastDay = endOfMonth(new Date());
+
+  const weeks = eachWeekOfInterval(
+    {
+      start: startOfMonth(subMonths(new Date(), 6)),
+      end: endOfMonth(new Date()),
+    },
+    { weekStartsOn }
+  );
+
+  const days = eachDayOfInterval({
+    start: startOfWeek(new Date(), { weekStartsOn }),
+    end: lastDayOfWeek(new Date(), { weekStartsOn }),
+  }).map((day) => format(day, "iii"));
+
   return (
     <div>
       <div className="mt-8">
@@ -25,43 +56,64 @@ export function TrackerGraph({ data }) {
         <div className="text-[#F5F5F3] text-4xl">294</div>
       </div>
 
-      <div className="flex row space-x-[45px] mt-8">
-        <TrackerMonthGraph
-          disableButton
-          date="2023-07-01"
-          onSelect={onSelect}
-          records={data}
-        />
-        <TrackerMonthGraph
-          disableButton
-          date="2023-08-01"
-          onSelect={onSelect}
-          records={data}
-        />
-        <TrackerMonthGraph
-          disableButton
-          date="2023-09-01"
-          onSelect={onSelect}
-          records={data}
-        />
-        <TrackerMonthGraph
-          disableButton
-          date="2023-11-01"
-          onSelect={onSelect}
-          records={data}
-        />
-        <TrackerMonthGraph
-          disableButton
-          date="2023-12-01"
-          onSelect={onSelect}
-          records={data}
-        />
-        <TrackerMonthGraph
-          disableButton
-          date="2024-01-01"
-          onSelect={onSelect}
-          records={data}
-        />
+      <div className="flex gap-5 mt-8">
+        <div className="flex flex-col justify-between mr-4">
+          {days.map((day) => (
+            <div className="h-[28px]" key={day}>
+              <span className="text-xs text-[#878787]">{day}</span>
+            </div>
+          ))}
+        </div>
+
+        {weeks.map((day, index) => {
+          const daysInWeek = eachDayOfInterval({
+            start: startOfWeek(day, { weekStartsOn }),
+            end: endOfWeek(day, { weekStartsOn }),
+          });
+
+          return (
+            <div key={day.toISOString()}>
+              <div className="flex flex-col gap-5">
+                {daysInWeek.map((dayInWeek) => {
+                  if (
+                    isBefore(dayInWeek, firstDay) ||
+                    isAfter(dayInWeek, lastDay)
+                  ) {
+                    return (
+                      <time
+                        key={dayInWeek.toISOString()}
+                        dateTime={dayInWeek.toISOString()}
+                        className="w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white transition-colors"
+                      >
+                        <div className="w-[20px] h-[20px] rounded-full bg-[#878787]/10 group-hover:bg-white relative text-blue-500">
+                          {/* {format(dayInWeek, "EEEEE")} */}
+                        </div>
+                      </time>
+                    );
+                  }
+
+                  return (
+                    <time
+                      key={dayInWeek.toISOString()}
+                      dateTime={dayInWeek.toISOString()}
+                      className="w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white transition-colors"
+                    >
+                      <div className="w-[20px] h-[20px] rounded-full bg-[#878787]/30 group-hover:bg-white relative">
+                        {/* {format(dayInWeek, "EEEEE")} */}
+                      </div>
+                    </time>
+                  );
+                })}
+
+                {/* {index % 4 === 0 && (
+                  <div className="flex justify-center">
+                    <span>katt</span>
+                  </div>
+                )} */}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
