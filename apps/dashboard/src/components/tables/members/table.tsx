@@ -90,6 +90,7 @@ export const columns: ColumnDef[] = [
           toast({
             title: "Team role has been updated.",
             duration: 3500,
+            variant: "success",
           }),
         onError: () => {
           toast({
@@ -105,6 +106,7 @@ export const columns: ColumnDef[] = [
           toast({
             title: "Team member removed.",
             duration: 3500,
+            variant: "success",
           }),
         onError: () => {
           toast({

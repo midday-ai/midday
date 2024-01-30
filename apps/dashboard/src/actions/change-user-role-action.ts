@@ -8,7 +8,7 @@ import { changeUserRoleSchema } from "./schema";
 
 export const changeUserRoleAction = action(
   changeUserRoleSchema,
-  async ({ userId, teamId, role }) => {
+  async ({ userId, teamId, role, revalidatePath }) => {
     const supabase = createClient();
 
     const { data } = await updateUserTeamRole(supabase, {

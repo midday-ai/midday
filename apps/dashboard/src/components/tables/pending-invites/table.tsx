@@ -66,6 +66,7 @@ export const columns: ColumnDef<Payment>[] = [
           toast({
             title: "Team invite removed.",
             duration: 3500,
+            variant: "success",
           }),
         onError: () => {
           toast({

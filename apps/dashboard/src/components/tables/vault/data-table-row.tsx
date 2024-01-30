@@ -76,6 +76,7 @@ function RowTitle({ isEditing, name: initialName, path, href }) {
     onError: () => {
       toast({
         duration: 3500,
+        variant: "error",
         title:
           "The folder already exists in the current directory. Please use a different name.",
       });

@@ -327,6 +327,9 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       bank_account_id: accountId,
       category: data.transactionAmount.amount > 0 ? "income" : null,
       team_id: teamId,
+      // counter_party_name: transaction.creditorName ?? transaction.debtorName,
+      // currency_exchange_rate: currencyExchange?.rate,
+      // currency_target: currencyExchange?.currency,
     };
   });
 };

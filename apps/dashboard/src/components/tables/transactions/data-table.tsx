@@ -74,17 +74,21 @@ export function DataTable<TData, TValue>({
   });
 
   const loadMoreData = async () => {
-    const formatedFrom = from + 1;
+    const formatedFrom = from;
     const to = formatedFrom + pageSize * 2;
 
-    const { data, meta } = await loadMore({
-      from: formatedFrom,
-      to,
-    });
+    try {
+      const { data, meta } = await loadMore({
+        from: formatedFrom,
+        to,
+      });
 
-    setData((prev) => [...prev, ...data]);
-    setFrom(to);
-    setHasNextPage(meta.count > to);
+      setData((prev) => [...prev, ...data]);
+      setFrom(to);
+      setHasNextPage(meta.count > to);
+    } catch {
+      setHasNextPage(false);
+    }
   };
 
   const [transactionId, setTransactionId] = useQueryState("id", {
@@ -109,6 +113,10 @@ export function DataTable<TData, TValue>({
       loadMoreData();
     }
   }, [inView]);
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   useEffect(() => {
     const currentIndex = data.findIndex((row) => row.id === transactionId);
