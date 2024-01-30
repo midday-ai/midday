@@ -13,6 +13,7 @@ export async function Table({
   sort,
   noAccounts,
   initialTransactionId,
+  query,
 }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { data: userData } = await getUser();
@@ -24,6 +25,10 @@ export async function Table({
     from: 0,
     filter,
     sort,
+    search: {
+      query,
+      fuzzy: true,
+    },
   });
 
   async function loadMore({ from, to }) {
@@ -34,6 +39,10 @@ export async function Table({
       from,
       filter,
       sort,
+      search: {
+        query,
+        fuzzy: true,
+      },
     });
   }
 

@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@trigger.dev/openai": "latest",
-    "@trigger.dev/react": "^2.3.16",
-    "@trigger.dev/sdk": "^2.3.16",
-    "@trigger.dev/supabase": "^2.3.16",
-    "langchain": "^0.1.9",
+    "@trigger.dev/react": "^2.3.17",
+    "@trigger.dev/sdk": "^2.3.17",
+    "@trigger.dev/supabase": "^2.3.17",
+    "langchain": "^0.1.10",
     "pdf-parse": "^1.1.1"
   }
 }

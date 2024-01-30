@@ -26,7 +26,7 @@
     "@tanstack/react-table": "^8.11.7",
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.2.4",
-    "@trigger.dev/nextjs": "^2.3.16",
+    "@trigger.dev/nextjs": "^2.3.17",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/edge-config": "^0.4.1",
     "@vercel/speed-insights": "^1.0.9",
@@ -62,7 +62,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.8.0",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.10",
+    "@types/node": "^20.11.11",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"

@@ -242,6 +242,32 @@ export function Filter({ sections }: Props) {
 
   return (
     <div className="flex items-center">
+      <div className="flex space-x-2">
+        {Object.keys(filters).map((optionId) => {
+          const section = sections.find((o) => o.id === optionId);
+
+          return (
+            <div className="flex space-x-2" key={optionId}>
+              <Button
+                variant="secondary"
+                className="flex space-x-2 bg-secondary"
+              >
+                <X size={14} onClick={() => handleDeleteFilter(optionId)} />
+                <p onClick={() => handleOpenSection(section?.id)}>
+                  {section && renderFilter(section)}
+                </p>
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+
+      {!Object.keys(filters).length && (
+        <span className="text-sm text-[#606060]">No filters applied</span>
+      )}
+
+      <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
+
       <Popover open={isOpen} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="space-x-2">
@@ -251,7 +277,7 @@ export function Filter({ sections }: Props) {
         </PopoverTrigger>
         <PopoverContent
           className="w-[650px] rounded-xl mt-2.5 p-0 overflow-hidden"
-          align="start"
+          align="end"
         >
           <Tabs.Root
             defaultValue="date"
@@ -501,32 +527,6 @@ export function Filter({ sections }: Props) {
           </Tabs.Root>
         </PopoverContent>
       </Popover>
-
-      <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
-
-      {!Object.keys(filters).length && (
-        <span className="text-sm text-[#606060]">No filters applied</span>
-      )}
-
-      <div className="flex space-x-2">
-        {Object.keys(filters).map((optionId) => {
-          const section = sections.find((o) => o.id === optionId);
-
-          return (
-            <div className="flex space-x-2" key={optionId}>
-              <Button
-                variant="secondary"
-                className="flex space-x-2 bg-secondary"
-              >
-                <X size={14} onClick={() => handleDeleteFilter(optionId)} />
-                <p onClick={() => handleOpenSection(section?.id)}>
-                  {section && renderFilter(section)}
-                </p>
-              </Button>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

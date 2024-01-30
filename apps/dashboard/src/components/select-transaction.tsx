@@ -70,8 +70,8 @@ export function SelectTransaction({
           teamId,
           to: 25,
           from: 0,
-          filter: {
-            search: debouncedValue,
+          search: {
+            query: debouncedValue,
             fuzzy: true,
           },
         });

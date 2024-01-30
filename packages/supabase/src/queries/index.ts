@@ -218,9 +218,11 @@ type GetTransactionsParams = {
     column: string;
     value: "asc" | "desc";
   };
-  filter: {
-    search?: string;
+  search?: {
+    query?: string;
     fuzzy?: boolean;
+  };
+  filter: {
     status?: "fullfilled" | "unfullfilled";
     attachments?: "include" | "exclude";
     categories?: string[];
@@ -236,16 +238,8 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams
 ) {
-  const { from = 0, to, filter, sort, teamId } = params;
-  const {
-    date = {},
-    search,
-    status,
-    attachments,
-    categories,
-    type,
-    fuzzy,
-  } = filter || {};
+  const { from = 0, to, filter, sort, teamId, search } = params;
+  const { date = {}, status, attachments, categories, type } = filter || {};
 
   const query = supabase
     .from("decrypted_transactions")
@@ -272,12 +266,12 @@ export async function getTransactionsQuery(
     query.lte("date", date.to);
   }
 
-  if (search && fuzzy) {
-    query.ilike("decrypted_name", `%${search}%`);
+  if (search?.query && search?.fuzzy) {
+    query.ilike("decrypted_name", `%${search.query}%`);
   }
 
-  if (search && !fuzzy) {
-    query.textSearch("decrypted_name", search, {
+  if (search?.query && !search?.fuzzy) {
+    query.textSearch("decrypted_name", search.query, {
       type: "websearch",
       config: "english",
     });

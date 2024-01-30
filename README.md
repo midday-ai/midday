@@ -35,8 +35,8 @@ View what's currently in progress, and what's planned for the future: [Midday Ro
 ### Hosting
 
 - Supabase (database, storage, realtime, auth)
-- Vercel (Website, edge-config, kv, analytics and metrics)
-- Fly.io (dashboard)
+- Vercel (Website, edge-config, analytics and metrics)
+- Upstash (redis)
 
 ### Services
 
@@ -45,5 +45,7 @@ View what's currently in progress, and what's planned for the future: [Midday Ro
 - Novu (notifications)
 - Github Actions (CI/CD)
 - GoCardLess (Bank connection EU)
-- Plaid (Bank connection US)
+- Plaid (Bank connection in Canada)
 - Loops (Marketing email)
+- LogSnag (Events)
+- Teller (Bank connection in the US)

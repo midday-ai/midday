@@ -1,6 +1,7 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { Filter } from "@/components/filter";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
+import { SearchField } from "@/components/search-field";
 import { Table } from "@/components/tables/transactions";
 import { sections } from "@/components/tables/transactions/filters";
 import { Loading } from "@/components/tables/transactions/loading";
@@ -32,6 +33,7 @@ export default async function Transactions({
   return (
     <>
       <div className="flex justify-between py-6">
+        <SearchField />
         <Filter sections={sections} />
       </div>
 
@@ -47,6 +49,7 @@ export default async function Transactions({
               sort={sort}
               noAccounts={empty}
               initialTransactionId={transactionId}
+              query={searchParams?.q}
             />
           </Suspense>
         </ErrorBoundary>
