@@ -53,7 +53,7 @@ export function DesktopUpdate() {
           <TooltipProvider delayDuration={50}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="w-[11px] h-[11px] bg-[#7aafd3] rounded-full flex items-center justify-center hidden todesktop:flex">
+                <div className="w-[11px] h-[11px] bg-[#7aafd3] rounded-full flex items-center justify-center invisible todesktop:visible">
                   <button
                     className={cn("update-available", status)}
                     type="button"

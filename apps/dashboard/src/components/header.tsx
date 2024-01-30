@@ -1,4 +1,5 @@
 import { CommandMenuButton } from "@/components/command-menu/button";
+import { DesktopCommandMenuButton } from "@/components/command-menu/button-desktop";
 import { NotificationCenter } from "@/components/notification-center";
 import { ReconnectBank } from "@/components/reconnect-bank";
 import { UserMenu } from "@/components/user-menu";
@@ -16,6 +17,7 @@ export function Header() {
       <CommandMenuButton />
 
       <div className="flex space-x-2 no-drag">
+        <DesktopCommandMenuButton />
         <TrackerControl />
         <Suspense>
           <ReconnectBank />

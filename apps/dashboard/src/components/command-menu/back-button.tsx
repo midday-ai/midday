@@ -26,7 +26,7 @@ export function BackButton() {
         </TooltipTrigger>
         <TooltipContent
           sideOffset={-5}
-          className="text-xs p-0 flex items-center py-1 h-7 px-2 hidden todesktop:flex"
+          className="text-xs p-0 flex items-center py-1 h-7 px-2 invisible todesktop:visible"
           side="left"
         >
           <div className="flex items-center space-x-1 mr-2">

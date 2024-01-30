@@ -67,6 +67,8 @@ client.defineJob({
       })
     );
 
+    await io.logger.debug("notification_events", notificationEvents);
+
     if (notificationEvents?.length) {
       triggerBulk(notificationEvents.flat());
       await io.logger.log(
@@ -108,6 +110,8 @@ client.defineJob({
         };
       })
     );
+
+    await io.logger.debug("email_events", emailEvents);
 
     if (emailEvents?.length) {
       try {

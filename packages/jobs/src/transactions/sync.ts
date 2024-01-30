@@ -11,11 +11,14 @@ client.defineJob({
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    const { data } = await io.supabase.client
+    const { data, error: bankAccountError } = await io.supabase.client
       .from("bank_accounts")
       .select("id, team_id, account_id")
       .eq("id", ctx.source.id)
       .single();
+
+    await io.logger.debug("bank_accounts", data);
+    await io.logger.debug("bank_accounts error", bankAccountError);
 
     const teamId = data?.team_id;
 
@@ -38,6 +41,8 @@ client.defineJob({
 
     const { transactions } = await getTransactions(data?.account_id);
 
+    await io.logger.debug("transactions", transactions);
+
     const { data: transactionsData, error } = await io.supabase.client
       .from("decrypted_transactions")
       .upsert(
@@ -51,6 +56,9 @@ client.defineJob({
         }
       )
       .select("*, name:decrypted_name");
+
+    await io.logger.debug("decrypted_transactions", transactionsData);
+    await io.logger.debug("decrypted_transactions error", error);
 
     if (transactionsData && transactionsData.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);
