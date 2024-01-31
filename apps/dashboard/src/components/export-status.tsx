@@ -86,7 +86,7 @@ export function ExportStatus() {
     if (status?.data?.progress === 100) {
       const { id } = toast({
         title: "Export completed",
-        description: `Your export is ready based on ${status?.data?.totalItems} transactions.`,
+        description: `Your export is ready based on ${status?.data?.totalItems} transactions. It's stored in your Vault.`,
         duration: Infinity,
         footer: (
           <div className="mt-4 flex space-x-4">
@@ -97,7 +97,7 @@ export function ExportStatus() {
                   variant="secondary"
                   className="border space-x-2"
                 >
-                  <span>Get URL</span>
+                  <span>Share URL</span>
                   <Icons.ChevronDown />
                 </Button>
               </DropdownMenuTrigger>

@@ -20,7 +20,7 @@ export async function UserMenu({ onlySignOut }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="rounded-full w-8 h-8">
+        <Avatar className="rounded-full w-8 h-8 cursor-pointer">
           <AvatarImage src={userData?.avatar_url} />
           <AvatarFallback>
             <span className="text-xs">

@@ -52,11 +52,6 @@ export function HotKeys() {
     handleSignOut();
   });
 
-  useHotkeys("ctrl+f", (evt) => {
-    evt.preventDefault();
-    router.push(`${pathname}?feedback`);
-  });
-
   useHotkeys("meta+f", (evt) => {
     evt.preventDefault();
     router.push(`${pathname}?feedback`);

@@ -267,14 +267,24 @@ export async function getTransactionsQuery(
   }
 
   if (search?.query && search?.fuzzy) {
-    query.ilike("decrypted_name", `%${search.query}%`);
+    if (!Number.isNaN(parseInt(search.query))) {
+      // NOTE: amount_text is a pg_function that casts amount to text
+      query.like("amount_text", `%${search.query}%`);
+    } else {
+      query.ilike("decrypted_name", `%${search.query}%`);
+    }
   }
 
   if (search?.query && !search?.fuzzy) {
-    query.textSearch("decrypted_name", search.query, {
-      type: "websearch",
-      config: "english",
-    });
+    if (!Number.isNaN(parseInt(search.query))) {
+      // NOTE: amount_text is a pg_function that casts amount to text
+      query.like("amount_text", `%${search.query}%`);
+    } else {
+      query.textSearch("decrypted_name", search.query, {
+        type: "websearch",
+        config: "english",
+      });
+    }
   }
 
   if (attachments === "exclude" || status?.includes("unfullfilled")) {

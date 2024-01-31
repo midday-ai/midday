@@ -67,7 +67,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }) {
               </>
             ) : (
               <Avatar
-                className="w-[32px] h-[32px] rounded-sm border border-[#DCDAD2] dark:border-[#2C2C2C]"
+                className="w-[32px] h-[32px] rounded-sm border border-[#DCDAD2] dark:border-[#2C2C2C] cursor-pointer"
                 onClick={() => {
                   if (index === 0) {
                     toggleActive();
