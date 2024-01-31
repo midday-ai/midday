@@ -108,7 +108,11 @@ export function SelectAccountModal({ countryCode }) {
         countryCode,
       });
 
-      setAccounts(data);
+      setAccounts(
+        data.sort((a, b) =>
+          a.balances?.available - b.balances?.available ? 1 : -1
+        )
+      );
       setLoading(false);
 
       // Set first accounts to checked
@@ -121,6 +125,20 @@ export function SelectAccountModal({ countryCode }) {
       fetchData();
     }
   }, [isOpen]);
+
+  const accountName = (account) => {
+    if (account?.name) {
+      return capitalCase(account.name);
+    }
+
+    if (account?.product) {
+      return account.product;
+    }
+
+    if (account?.bank?.name) {
+      return account.bank.name;
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
@@ -155,12 +173,12 @@ export function SelectAccountModal({ countryCode }) {
                           <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
                             <AvatarImage
                               src={account.bank.logo}
-                              alt={account.bank.name}
+                              alt={account?.bank?.name}
                             />
                           </Avatar>
                           <div className="ml-4 space-y-1">
                             <p className="text-sm font-medium leading-none mb-1">
-                              {capitalCase(account.name)}
+                              {accountName(account)}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {account.bank.name} -{" "}
