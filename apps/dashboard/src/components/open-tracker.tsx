@@ -1,18 +1,14 @@
 "use client";
 
-import { MenuOption, useCommandStore } from "@/store/command";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { useQueryState } from "nuqs";
 
 export function OpenTracker() {
-  const { setOpen } = useCommandStore();
+  const [_, setOpen] = useQueryState("create");
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={() => setOpen(MenuOption.Tracker)}
-    >
+    <Button variant="outline" size="icon" onClick={() => setOpen("project")}>
       <Icons.Add />
     </Button>
   );

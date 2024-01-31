@@ -52,10 +52,5 @@ export function HotKeys() {
     handleSignOut();
   });
 
-  useHotkeys("meta+f", (evt) => {
-    evt.preventDefault();
-    router.push(`${pathname}?feedback`);
-  });
-
   return null;
 }

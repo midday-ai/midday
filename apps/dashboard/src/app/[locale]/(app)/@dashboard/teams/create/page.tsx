@@ -1,4 +1,4 @@
-import { CreateTeamForm } from "@/components/create-team-form";
+import { CreateTeamForm } from "@/components/forms/create-team-form";
 import { UserMenu } from "@/components/user-menu";
 import { Icons } from "@midday/ui/icons";
 import { Metadata } from "next";

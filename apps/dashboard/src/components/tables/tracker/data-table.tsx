@@ -1,5 +1,6 @@
 "use client";
 
+import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Table, TableBody } from "@midday/ui/table";
@@ -83,6 +84,8 @@ export function DataTable({ data, teamId, records }: ItemsProps) {
         date={params.date}
         records={records}
       />
+
+      <TrackerCreateSheet />
     </>
   );
 }

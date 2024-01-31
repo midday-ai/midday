@@ -1,4 +1,4 @@
-import { InviteForm } from "@/components/invite-form";
+import { InviteForm } from "@/components/forms/invite-form";
 import { UserMenu } from "@/components/user-menu";
 import { Icons } from "@midday/ui/icons";
 import { Metadata } from "next";
