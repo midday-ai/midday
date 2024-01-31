@@ -55,7 +55,7 @@
     "sharp": "^0.33.2",
     "tus-js-client": "^4.0.1",
     "use-long-press": "^3.2.0",
-    "usehooks-ts": "^2.10.0",
+    "usehooks-ts": "^2.11.0",
     "zod": "^3.22.4",
     "zustand": "^4.5.0"
   },
@@ -63,7 +63,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.8.0",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.13",
+    "@types/node": "^20.11.14",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"
