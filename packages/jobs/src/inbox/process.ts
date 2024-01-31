@@ -61,6 +61,10 @@ client.defineJob({
       if (response) {
         const data = JSON.parse(response);
 
+        await io.logger.debug("open ai result", data);
+
+        const currency = data?.currency || data?.currency_code;
+
         const { data: updatedInboxData } = await io.supabase.client
           .from("inbox")
           .update({
@@ -71,9 +75,7 @@ client.defineJob({
               ?.replace(/[^\d.,]/g, "")
               .replace(/,/g, "."),
             // NOTE: Guard currency, can only be currency code
-            currency:
-              isOnlyLetters(data?.currency_code) &&
-              data?.currency_code?.toUpperCase(),
+            currency: isOnlyLetters(currency) && currency?.toUpperCase(),
             issuer_name: data?.issuer_name,
             due_date: data?.due_date && new Date(data.due_date),
           })
@@ -81,14 +83,18 @@ client.defineJob({
           .select()
           .single();
 
-        await io.sendEvent("Match Inbox", {
-          name: Events.MATCH_INBOX,
-          payload: {
-            teamId: updatedInboxData.team_id,
-            inboxId: updatedInboxData.id,
-            amount: updatedInboxData.amount,
-          },
-        });
+        if (updatedInboxData) {
+          await io.sendEvent("Match Inbox", {
+            name: Events.MATCH_INBOX,
+            payload: {
+              teamId: updatedInboxData.team_id,
+              inboxId: updatedInboxData.id,
+              amount: updatedInboxData.amount,
+            },
+          });
+
+          await io.logger.debug("updated inbox", updatedInboxData);
+        }
       }
     }
   },
