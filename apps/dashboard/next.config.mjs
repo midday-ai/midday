@@ -1,6 +1,8 @@
 import path from "path";
 import "./src/env.mjs";
 
+import withBundleAnalyzer from "@next/bundle-analyzer";
+
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
@@ -32,8 +34,11 @@ const config = {
     ignoreBuildErrors: true,
   },
   experimental: {
+    taint: true,
     outputFileTracingRoot: path.resolve("../../"),
   },
 };
 
-export default config;
+export default withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+})(config);
