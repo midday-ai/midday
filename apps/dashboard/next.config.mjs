@@ -1,3 +1,4 @@
+import path from "path";
 import "./src/env.mjs";
 
 /** @type {import("next").NextConfig} */
@@ -29,6 +30,9 @@ const config = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  experimental: {
+    outputFileTracingRoot: path.resolve("../../"),
   },
 };
 

@@ -74,15 +74,6 @@ export const sections = [
     ],
   },
   {
-    id: "search",
-    storage: "search_orders",
-    label: "Keywords",
-    icon: Search,
-    type: SectionType.search,
-    placeholder: "Search for transactions, amount...",
-    options: [],
-  },
-  {
     id: "status",
     label: "Status",
     icon: Tag,

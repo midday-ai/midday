@@ -6,7 +6,7 @@
     "build": "NODE_ENV=production next build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=midday-G6Yq",
-    "dev": "next dev -p 3001",
+    "dev": "next dev --turbo -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
     "start": "next start",
@@ -62,7 +62,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.8.0",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.11",
+    "@types/node": "^20.11.13",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"
