@@ -101,7 +101,7 @@ export function SelectAccountModal({ countryCode }) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const accountsWithDetails = values.accounts
-      .map((id) => accounts.find((account) => account.id === id))
+      .map((id) => accounts?.find((account) => account.id === id))
       .map((account) => ({
         account_id: account.id,
         name: getAccountName(account),
@@ -181,11 +181,18 @@ export function SelectAccountModal({ countryCode }) {
                               {getAccountName(account)}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {account.bank.name} -{" "}
-                              <FormatAmount
-                                currency={account.balances.available.currency}
-                                amount={account.balances.available.amount}
-                              />
+                              {account.bank.name}
+                              {account.balances.available && (
+                                <>
+                                  -{" "}
+                                  <FormatAmount
+                                    currency={
+                                      account.balances.available.currency
+                                    }
+                                    amount={account.balances.available.amount}
+                                  />
+                                </>
+                              )}
                             </p>
                           </div>
                         </FormLabel>

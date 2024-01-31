@@ -225,15 +225,16 @@ export async function getAccounts({
     data.accounts?.map(async (id) => {
       const accountData = await getAccountDetails(id);
       const { balances } = await getAccountBalancesById(id);
+      console.log(balances);
 
       return {
         ...accountData,
         bank: banks.find((bank) => bank.id === accountData.institution_id),
         balances: {
-          available: balances.find(
+          available: balances?.find(
             (balance) => balance.balanceType === balanceType.interimAvailable
           )?.balanceAmount,
-          boked: balances.find(
+          boked: balances?.find(
             (balance) => balance.balanceType === balanceType.interimBooked
           )?.balanceAmount,
         },
@@ -242,7 +243,7 @@ export async function getAccounts({
   );
 
   return result.sort((a, b) =>
-    a.balances.available - b.balances.available ? 1 : -1
+    a.balances?.available - b.balances?.available ? 1 : -1
   );
 }
 
