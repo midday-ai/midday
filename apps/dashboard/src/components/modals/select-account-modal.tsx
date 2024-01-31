@@ -85,17 +85,31 @@ export function SelectAccountModal({ countryCode }) {
     },
   });
 
+  const getAccountName = (account) => {
+    if (account?.name) {
+      return capitalCase(account.name);
+    }
+
+    if (account?.product) {
+      return account.product;
+    }
+
+    if (account?.bank?.name) {
+      return account.bank.name;
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const accountsWithDetails = values.accounts
       .map((id) => accounts.find((account) => account.id === id))
       .map((account) => ({
         account_id: account.id,
-        name: capitalCase(account.name),
+        name: getAccountName(account),
         currency: account.currency,
-        owner_name: capitalCase(account.ownerName),
+        owner_name: account?.ownerName && capitalCase(account.ownerName),
         institution_id: account.institution_id,
-        bank_name: account.bank.name,
-        logo_url: account.bank.logo,
+        bank_name: account?.bank?.name,
+        logo_url: account?.bank?.logo,
       }));
 
     action.execute(accountsWithDetails);
@@ -125,20 +139,6 @@ export function SelectAccountModal({ countryCode }) {
       fetchData();
     }
   }, [isOpen]);
-
-  const accountName = (account) => {
-    if (account?.name) {
-      return capitalCase(account.name);
-    }
-
-    if (account?.product) {
-      return account.product;
-    }
-
-    if (account?.bank?.name) {
-      return account.bank.name;
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
@@ -178,7 +178,7 @@ export function SelectAccountModal({ countryCode }) {
                           </Avatar>
                           <div className="ml-4 space-y-1">
                             <p className="text-sm font-medium leading-none mb-1">
-                              {accountName(account)}
+                              {getAccountName(account)}
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {account.bank.name} -{" "}
