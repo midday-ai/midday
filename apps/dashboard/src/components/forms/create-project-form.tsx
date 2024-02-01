@@ -4,7 +4,7 @@ import { createProjectAction } from "@/actions/project/create-project-action";
 import { createProjectSchema } from "@/actions/schema";
 import { useCurrentLocale } from "@/locales/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { currencies } from "@midday/location";
+import { currencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import {
