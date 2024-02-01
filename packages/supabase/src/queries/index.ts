@@ -744,7 +744,7 @@ export async function getTrackerProjectsQuery(
   supabase: Client,
   params: GetTrackerProjectsQueryParams
 ) {
-  const { from = 0, to, filter, sort, teamId } = params;
+  const { from = 0, to = 10, filter, sort, teamId } = params;
   const { status } = filter || {};
 
   const query = supabase
@@ -756,10 +756,10 @@ export async function getTrackerProjectsQuery(
     const [column, value] = sort;
     query.order(column, { ascending: value === "asc" });
   } else {
-    query.order("order", { ascending: false });
+    query.order("created_at", { ascending: false });
   }
 
-  const { data, count } = await query.range(from, to).throwOnError();
+  const { data, count } = await query.range(from, to);
 
   return {
     meta: {

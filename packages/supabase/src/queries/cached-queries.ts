@@ -10,6 +10,7 @@ import {
   getTeamMembersQuery,
   getTeamUserQuery,
   getTeamsByUserIdQuery,
+  getTrackerProjectsQuery,
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
@@ -281,6 +282,23 @@ export const getInbox = async (params) => {
     ["inbox", teamId],
     {
       tags: [`inbox_${teamId}`],
+      revalidate: 180,
+    }
+  )(params);
+};
+
+export const getTrackerProjects = async (params) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getTrackerProjectsQuery(supabase, { ...params, teamId });
+    },
+    ["tracker_projects", teamId],
+    {
+      tags: [`tracker_projects_${teamId}`],
       revalidate: 180,
     }
   )(params);

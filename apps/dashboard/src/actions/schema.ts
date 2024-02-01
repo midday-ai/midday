@@ -218,3 +218,12 @@ export const trackerAddRecordSchema = z.object({
 });
 
 export type TrackerAddRecordSchema = z.infer<typeof trackerAddRecordSchema>;
+
+export const createProjectSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.string().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+});

@@ -225,7 +225,6 @@ export async function getAccounts({
     data.accounts?.map(async (id) => {
       const accountData = await getAccountDetails(id);
       const { balances } = await getAccountBalancesById(id);
-      console.log(balances);
 
       return {
         ...accountData,

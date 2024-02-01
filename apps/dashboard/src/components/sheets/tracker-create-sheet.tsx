@@ -7,7 +7,7 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useQueryState } from "nuqs";
 import React from "react";
 
-export function TrackerCreateSheet() {
+export function TrackerCreateSheet({ currencyCode }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [openValue, setOpen] = useQueryState("create");
 
@@ -21,7 +21,7 @@ export function TrackerCreateSheet() {
             <h2 className="text-xl">Create Project</h2>
           </SheetHeader>
 
-          <CreateProjectForm />
+          <CreateProjectForm currencyCode={currencyCode} setOpen={setOpen} />
         </SheetContent>
       </Sheet>
     );
@@ -41,7 +41,7 @@ export function TrackerCreateSheet() {
           <h2 className="text-xl">Create Project</h2>
         </DrawerHeader>
 
-        <CreateProjectForm />
+        <CreateProjectForm currencyCode={currencyCode} setOpen={setOpen} />
       </DrawerContent>
     </Drawer>
   );

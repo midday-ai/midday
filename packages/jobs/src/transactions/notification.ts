@@ -115,7 +115,7 @@ client.defineJob({
 
     if (emailEvents?.length) {
       try {
-        triggerBulk(emailEvents);
+        triggerBulk(emailEvents.flat());
       } catch (error) {
         await io.logger.debug(error);
       }
