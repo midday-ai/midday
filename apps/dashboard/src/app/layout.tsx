@@ -1,4 +1,3 @@
-import { StaffToolbar } from "@/components/staff-toolbar";
 import "@/styles/globals.css";
 import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
@@ -43,7 +42,6 @@ export default function Layout({
       >
         {children}
         <SpeedInsights />
-        <StaffToolbar />
         <Toaster />
       </body>
     </html>

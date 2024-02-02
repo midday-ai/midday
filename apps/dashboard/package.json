@@ -31,7 +31,6 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/edge-config": "^0.4.1",
     "@vercel/speed-insights": "^1.0.9",
-    "@vercel/toolbar": "^0.1.10",
     "@zip.js/zip.js": "2.7.34",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.2",
