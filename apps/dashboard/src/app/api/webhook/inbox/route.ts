@@ -61,6 +61,7 @@ export async function POST(req: Request) {
         file_name: attachment.Name,
         content_type: attachment.ContentType,
         size: attachment.ContentLength,
+        html: res.html,
       };
     });
 
