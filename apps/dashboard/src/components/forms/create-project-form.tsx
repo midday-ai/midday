@@ -59,7 +59,6 @@ export function CreateProjectForm({ currencyCode, setOpen }) {
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       currency: currencyCode,
-      revalidatePath: "/tracker",
     },
   });
 

@@ -3,6 +3,7 @@
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
+import { Spinner } from "@midday/ui/spinner";
 import {
   Table,
   TableBody,
@@ -214,10 +215,10 @@ export function DataTable<TData, TValue>({
 
       {hasNextPage && (
         <div className="flex items-center justify-center mt-6" ref={ref}>
-          <div className="flex items-center space-x-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            <span className="text-sm text-[#606060]">Loading...</span>
-          </div>
+          <Button variant="outline" className="space-x-2 px-6 py-5">
+            <Spinner />
+            <span className="text-sm text-[#606060]">Loading more...</span>
+          </Button>
         </div>
       )}
 

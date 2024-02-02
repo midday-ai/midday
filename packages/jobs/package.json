@@ -14,7 +14,7 @@
     "@trigger.dev/react": "^2.3.17",
     "@trigger.dev/sdk": "^2.3.17",
     "@trigger.dev/supabase": "^2.3.17",
-    "langchain": "^0.1.10",
+    "langchain": "^0.1.12",
     "pdf-parse": "^1.1.1"
   }
 }
