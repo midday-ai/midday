@@ -304,7 +304,9 @@ export function DataTableRow({ data, teamId }) {
                     </DropdownMenuItem>
                     {!disableActions && !isDefaultFolder && (
                       <AlertDialogTrigger asChild>
-                        <DropdownMenuItem>Delete</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">
+                          Delete
+                        </DropdownMenuItem>
                       </AlertDialogTrigger>
                     )}
                   </DropdownMenuContent>
@@ -381,7 +383,9 @@ export function DataTableRow({ data, teamId }) {
           </ContextMenuItem>
           {!disableActions && !isDefaultFolder && (
             <AlertDialogTrigger asChild>
-              <ContextMenuItem>Delete</ContextMenuItem>
+              <ContextMenuItem className="text-destructive">
+                Delete
+              </ContextMenuItem>
             </AlertDialogTrigger>
           )}
         </ContextMenuContent>

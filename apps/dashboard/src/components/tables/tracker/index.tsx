@@ -6,7 +6,7 @@ const pageSize = 20;
 
 export async function Table({ page, initialTrackerId }) {
   const { currencyCode } = getCountryInfo();
-  const trackerProjects = await getTrackerProjects();
+  const trackerProjects = await getTrackerProjects({ to: 25 });
 
   //   if (!data?.length) {
   //     return <NoResults hasFilters={hasFilters} />;
