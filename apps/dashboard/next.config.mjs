@@ -33,10 +33,6 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    taint: true,
-    outputFileTracingRoot: path.resolve("../../"),
-  },
 };
 
 export default withBundleAnalyzer({

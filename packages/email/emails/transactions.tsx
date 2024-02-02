@@ -86,7 +86,7 @@ export const TransactionsEmail = ({
   const firstName = fullName.split(" ").at(0);
 
   const previewText = t("transactions.preview", {
-    firstName: "Pontus",
+    firstName,
     numberOfTransactions: transactions.length,
   });
 

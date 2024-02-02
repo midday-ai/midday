@@ -49,7 +49,7 @@ export function DataTableHeader({ table }) {
           />
         </TableHead>
 
-        <TableHead className="w-[100px]">
+        <TableHead className="w-[120px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -89,8 +89,10 @@ export function DataTableHeader({ table }) {
             onClick={() => createSortQuery("category")}
           >
             <span>Category</span>
-            {"method" === column && value === "asc" && <ArrowDown size={16} />}
-            {"method" === column && value === "desc" && <ArrowUp size={16} />}
+            {"category" === column && value === "asc" && (
+              <ArrowDown size={16} />
+            )}
+            {"category" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
         <TableHead className="w-[200px]">

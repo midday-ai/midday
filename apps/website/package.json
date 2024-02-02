@@ -8,7 +8,7 @@
     "dev": "next dev -p 3000",
     "lint": "next lint",
     "format": "biome format --write .",
-    "start": "next start --turbo",
+    "start": "next start",
     "check:types": "tsc --noEmit"
   },
   "dependencies": {

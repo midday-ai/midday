@@ -8,7 +8,7 @@ import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { cn } from "@midday/ui/utils";
 import { ColumnDef } from "@tanstack/react-table";
-import { format } from "date-fns";
+import { format, isSameYear } from "date-fns";
 
 export type Payment = {
   id: string;
@@ -33,7 +33,11 @@ export const columns: ColumnDef<Payment>[] = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => {
-      return row?.original.date && format(new Date(row.original.date), "MMM d");
+      if (isSameYear(new Date(), new Date(row.original.date))) {
+        return format(new Date(row.original.date), "MMM d");
+      }
+
+      return format(new Date(row.original.date), "P");
     },
   },
   {

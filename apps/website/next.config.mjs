@@ -10,9 +10,6 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    outputFileTracingRoot: path.resolve("../../"),
-  },
 };
 
 export default config;

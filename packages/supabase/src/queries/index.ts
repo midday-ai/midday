@@ -249,14 +249,24 @@ export async function getTransactionsQuery(
       name:decrypted_name,
       assigned:assigned_id(*),
       attachments:transaction_attachments(*)
-    `,
+      `,
       { count: "exact" }
     )
     .eq("team_id", teamId);
 
   if (sort) {
     const [column, value] = sort;
-    query.order(column, { ascending: value === "asc" });
+
+    if (column === "attachment") {
+      // TODO: Order by attachment i.e status
+      // query.order("transaction_attachments", {
+      //   ascending: value === "asc",
+      // });
+    } else if (column === "assigned") {
+      query.order("assigned_id", { ascending: value === "asc" });
+    } else {
+      query.order(column, { ascending: value === "asc" });
+    }
   } else {
     query.order("order", { ascending: false });
   }

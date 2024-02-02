@@ -186,10 +186,12 @@ export const deleteInviteSchema = z.object({
   id: z.string(),
   revalidatePath: z.string().optional(),
 });
+
 export const acceptInviteSchema = z.object({
   id: z.string(),
   revalidatePath: z.string().optional(),
 });
+
 export const declineInviteSchema = z.object({
   id: z.string(),
   revalidatePath: z.string().optional(),
@@ -226,4 +228,18 @@ export const createProjectSchema = z.object({
   billable: z.boolean().optional().default(false),
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
+});
+
+export const updateProjectSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  description: z.string().optional(),
+  estimate: z.string().optional(),
+  billable: z.boolean().optional().default(false),
+  rate: z.number().min(1).optional(),
+  currency: z.string().optional(),
+});
+
+export const deleteProjectSchema = z.object({
+  id: z.string().uuid(),
 });
