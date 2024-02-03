@@ -1,5 +1,7 @@
 "use client";
 
+import { deleteProjectAction } from "@/actions/project/delete-project-action";
+import { updateProjectAction } from "@/actions/project/update-project-action";
 import { ProjectMembers } from "@/components/project-members";
 import { TrackerStatus } from "@/components/tracker-status";
 import {
@@ -26,6 +28,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
 
 export function DataTableCell({ children, className }) {
   return <TableCell className={className}>{children}</TableCell>;
@@ -41,6 +44,26 @@ export function Row({ onClick, children }) {
 
 export function DataTableRow({ row, setOpen }) {
   const { toast } = useToast();
+
+  const deleteAction = useAction(deleteProjectAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const updateAction = useAction(updateProjectAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
 
   const handleSearch = async (id: string) => {
     try {
@@ -76,7 +99,16 @@ export function DataTableRow({ row, setOpen }) {
               <Icons.MoreHoriz />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-42" sideOffset={10} align="end">
-              <DropdownMenuItem>Mark as complete</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  updateAction.execute({
+                    id: row.id,
+                    status: "completed",
+                  })
+                }
+              >
+                Mark as complete
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleSearch(row.id)}>
                 Share URL
               </DropdownMenuItem>
@@ -100,7 +132,11 @@ export function DataTableRow({ row, setOpen }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction>Continue</AlertDialogAction>
+          <AlertDialogAction
+            onClick={() => deleteAction.execute({ id: row.id })}
+          >
+            Continue
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

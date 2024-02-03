@@ -4,9 +4,12 @@ import { getTrackerProjects } from "@midday/supabase/cached-queries";
 
 const pageSize = 20;
 
-export async function Table({ page, initialTrackerId }) {
+export async function Table({ page, initialTrackerId, status }) {
   const { currencyCode } = getCountryInfo();
-  const trackerProjects = await getTrackerProjects({ to: 25 });
+  const trackerProjects = await getTrackerProjects({
+    to: 25,
+    filter: { status },
+  });
 
   //   if (!data?.length) {
   //     return <NoResults hasFilters={hasFilters} />;

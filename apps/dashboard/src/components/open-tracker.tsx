@@ -8,8 +8,10 @@ export function OpenTracker() {
   const [_, setOpen] = useQueryState("create");
 
   return (
-    <Button variant="outline" size="icon" onClick={() => setOpen("project")}>
-      <Icons.Add />
-    </Button>
+    <div>
+      <Button variant="outline" size="icon" onClick={() => setOpen("project")}>
+        <Icons.Add />
+      </Button>
+    </div>
   );
 }

@@ -762,6 +762,10 @@ export async function getTrackerProjectsQuery(
     .select("*", { count: "exact" })
     .eq("team_id", teamId);
 
+  if (status) {
+    query.eq("status", status);
+  }
+
   if (sort) {
     const [column, value] = sort;
     query.order(column, { ascending: value === "asc" });
