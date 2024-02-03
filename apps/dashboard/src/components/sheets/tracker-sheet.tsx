@@ -9,28 +9,14 @@ import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { formatISO } from "date-fns";
-import { parseAsString, useQueryStates } from "nuqs";
 import React from "react";
 
-export function TrackerSheet({ setOpen, isOpen, records }) {
+export function TrackerSheet({ setParams, isOpen, records, params }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-
-  const [params, setParams] = useQueryStates(
-    {
-      date: parseAsString.withDefault(
-        formatISO(new Date(), { representation: "date" })
-      ),
-      id: parseAsString,
-    },
-    {
-      shallow: true,
-    }
-  );
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={setOpen}>
+      <Sheet open={isOpen} onOpenChange={() => setParams({ projectId: null })}>
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
             <h2 className="text-xl">

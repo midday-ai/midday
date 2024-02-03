@@ -1,7 +1,7 @@
 "use client";
 
-import { createProjectAction } from "@/actions/project/create-project-action";
-import { createProjectSchema } from "@/actions/schema";
+import { updateProjectAction } from "@/actions/project/update-project-action";
+import { updateProjectSchema } from "@/actions/schema";
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,19 +13,26 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
+export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const form = useForm<z.infer<typeof createProjectSchema>>({
-    resolver: zodResolver(createProjectSchema),
+  const form = useForm<z.infer<typeof updateProjectSchema>>({
+    resolver: zodResolver(updateProjectSchema),
     defaultValues: {
-      currency: currencyCode,
+      id: data?.id,
+      name: data?.name ?? undefined,
+      description: data?.description ?? undefined,
+      rate: data?.rate ?? undefined,
+      status: data?.status ?? undefined,
+      billable: data?.billable ?? undefined,
+      estimate: data?.estimate ?? undefined,
+      currency: (data?.currency || currencyCode) ?? undefined,
     },
   });
 
-  const action = useAction(createProjectAction, {
-    onSuccess: () => setParams({ create: null }),
+  const action = useAction(updateProjectAction, {
+    onSuccess: () => setParams({ update: null, projectId: null }),
     onError: () => {
       toast({
         duration: 3500,
@@ -37,16 +44,19 @@ export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={() => setParams({ create: null })}>
+      <Sheet
+        open={isOpen}
+        onOpenChange={() => setParams({ update: null, projectId: null })}
+      >
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
-            <h2 className="text-xl">Create Project</h2>
+            <h2 className="text-xl">Update Project</h2>
           </SheetHeader>
 
           <TrackerProjectForm
+            form={form}
             isSaving={action.status === "executing"}
             onSubmit={action.execute}
-            form={form}
           />
         </SheetContent>
       </Sheet>
@@ -58,19 +68,19 @@ export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setParams({ create: null });
+          setParams({ update: null, projectId: null });
         }
       }}
     >
       <DrawerContent className="p-6">
         <DrawerHeader className="mb-8 flex justify-between items-center flex-row">
-          <h2 className="text-xl">Create Project</h2>
+          <h2 className="text-xl">Update Project</h2>
         </DrawerHeader>
 
         <TrackerProjectForm
+          form={form}
           isSaving={action.status === "executing"}
           onSubmit={action.execute}
-          form={form}
         />
       </DrawerContent>
     </Drawer>

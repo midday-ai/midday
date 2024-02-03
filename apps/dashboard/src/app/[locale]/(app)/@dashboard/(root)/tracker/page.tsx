@@ -1,5 +1,6 @@
 import { OpenTracker } from "@/components/open-tracker";
 import { Table } from "@/components/tables/tracker";
+import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerChangeStatus } from "@/components/tracker-change-status";
 import { TrackerGraph } from "@/components/tracker-graph";
 import { Metadata } from "next";
@@ -341,6 +342,7 @@ const records = {
 export default function Tracker({ searchParams }) {
   const status = searchParams?.status;
   const initialTrackerId = searchParams?.id;
+  const sort = searchParams?.sort?.split(":");
 
   return (
     <div>
@@ -354,8 +356,12 @@ export default function Tracker({ searchParams }) {
         </div>
       </div>
 
-      <Suspense key={status}>
-        <Table status={status} initialTrackerId={initialTrackerId} />
+      <Suspense key={`${status}-${status}`} fallback={<Loading />}>
+        <Table
+          status={status}
+          sort={sort}
+          initialTrackerId={initialTrackerId}
+        />
       </Suspense>
     </div>
   );

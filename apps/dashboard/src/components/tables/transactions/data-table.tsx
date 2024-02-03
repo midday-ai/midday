@@ -18,7 +18,6 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";

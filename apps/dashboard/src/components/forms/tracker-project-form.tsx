@@ -1,9 +1,7 @@
 "use client";
 
-import { createProjectAction } from "@/actions/project/create-project-action";
 import { createProjectSchema } from "@/actions/schema";
 import { useCurrentLocale } from "@/locales/client";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { currencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
@@ -26,45 +24,22 @@ import {
 } from "@midday/ui/select";
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
-import { useToast } from "@midday/ui/use-toast";
 import { CurrencyInput } from "headless-currency-input";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 const uniqueCurrencies = () => {
   const uniqueSet = new Set(Object.values(currencies));
   return [...uniqueSet];
 };
 
-export function CreateProjectForm({ currencyCode, setOpen }) {
+export function TrackerProjectForm({ onSubmit, isSaving, form }) {
   const locale = useCurrentLocale();
-  const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast();
-
-  const action = useAction(createProjectAction, {
-    onSuccess: () => setOpen(null),
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
-      });
-    },
-  });
-
-  const form = useForm<z.infer<typeof createProjectSchema>>({
-    resolver: zodResolver(createProjectSchema),
-    defaultValues: {
-      currency: currencyCode,
-    },
-  });
+  const [isOpen, setIsOpen] = useState(Boolean(form.getValues("billable")));
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(action.execute)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
           name="name"
@@ -175,7 +150,7 @@ export function CreateProjectForm({ currencyCode, setOpen }) {
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a verified email to display" />
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-[300px]">
@@ -196,12 +171,8 @@ export function CreateProjectForm({ currencyCode, setOpen }) {
         </Collapsible>
 
         <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
-          <Button className="w-full" disabled={action.status === "executing"}>
-            {action.status === "executing" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Save"
-            )}
+          <Button className="w-full" disabled={isSaving}>
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
           </Button>
         </div>
       </form>

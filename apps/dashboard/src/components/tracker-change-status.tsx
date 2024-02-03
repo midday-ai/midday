@@ -15,8 +15,16 @@ export function TrackerChangeStatus() {
     defaultValue: "all",
   });
 
+  const handleChangeStatus = (value: string) => {
+    if (value === "all") {
+      setStatus(null);
+    } else {
+      setStatus(value);
+    }
+  };
+
   return (
-    <Select onValueChange={setStatus} value={status}>
+    <Select onValueChange={handleChangeStatus} value={status}>
       <SelectTrigger className="min-w-[120px]">
         <SelectValue placeholder="All" />
       </SelectTrigger>

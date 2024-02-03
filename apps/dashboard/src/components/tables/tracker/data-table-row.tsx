@@ -1,7 +1,6 @@
 "use client";
 
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
-import { updateProjectAction } from "@/actions/project/update-project-action";
 import { ProjectMembers } from "@/components/project-members";
 import { TrackerStatus } from "@/components/tracker-status";
 import {
@@ -42,7 +41,7 @@ export function Row({ onClick, children }) {
   );
 }
 
-export function DataTableRow({ row, setOpen }) {
+export function DataTableRow({ row, setParams }) {
   const { toast } = useToast();
 
   const deleteAction = useAction(deleteProjectAction, {
@@ -55,20 +54,10 @@ export function DataTableRow({ row, setOpen }) {
     },
   });
 
-  const updateAction = useAction(updateProjectAction, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
-      });
-    },
-  });
-
-  const handleSearch = async (id: string) => {
+  const handleShareURL = async (id: string) => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/tracker?id=${id}`
+        `${window.location.origin}/tracker?projectId=${id}`
       );
 
       toast({
@@ -81,64 +70,59 @@ export function DataTableRow({ row, setOpen }) {
 
   return (
     <AlertDialog>
-      <Row>
-        <DataTableCell>{row.name}</DataTableCell>
-        <DataTableCell>
-          {/* TODO: Transform to readable time from minutes */}
-          {row.estimate ? `${row.time ?? 0}/${row.estimate}` : row.time} h
-        </DataTableCell>
-        <DataTableCell>{row.description}</DataTableCell>
-        <DataTableCell>
-          <ProjectMembers members={row.members} />
-        </DataTableCell>
-        <DataTableCell className="flex justify-between items-center">
-          <TrackerStatus status={row.status} />
+      <DropdownMenu>
+        <Row onClick={() => setParams({ projectId: row.id })}>
+          <DataTableCell>{row.name}</DataTableCell>
+          <DataTableCell>
+            {/* TODO: Transform to readable time from minutes */}
+            {row.estimate ? `${row.time ?? 0}/${row.estimate}` : row.time} h
+          </DataTableCell>
+          <DataTableCell>{row.description}</DataTableCell>
+          <DataTableCell>
+            <ProjectMembers members={row.members} />
+          </DataTableCell>
+          <DataTableCell className="flex justify-between items-center">
+            <TrackerStatus status={row.status} />
 
-          <DropdownMenu>
             <DropdownMenuTrigger>
               <Icons.MoreHoriz />
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-42" sideOffset={10} align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  updateAction.execute({
-                    id: row.id,
-                    status: "completed",
-                  })
-                }
-              >
-                Mark as complete
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSearch(row.id)}>
-                Share URL
-              </DropdownMenuItem>
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-destructive">
-                  Delete
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </DataTableCell>
-      </Row>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete this
-            project.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => deleteAction.execute({ id: row.id })}
+          </DataTableCell>
+        </Row>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this
+              project.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteAction.execute({ id: row.id })}
+            >
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+        <DropdownMenuContent className="w-42" sideOffset={10} align="end">
+          <DropdownMenuItem
+            onClick={() => setParams({ update: true, projectId: row.id })}
           >
-            Continue
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleShareURL(row.id)}>
+            Share URL
+          </DropdownMenuItem>
+
+          <AlertDialogTrigger asChild>
+            <DropdownMenuItem className="text-destructive">
+              Delete
+            </DropdownMenuItem>
+          </AlertDialogTrigger>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </AlertDialog>
   );
 }

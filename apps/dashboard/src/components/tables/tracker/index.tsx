@@ -1,30 +1,42 @@
 import { DataTable } from "@/components/tables/tracker/data-table";
 import { getCountryInfo } from "@midday/location";
 import { getTrackerProjects } from "@midday/supabase/cached-queries";
+import { EmptyState } from "./empty-state";
 
-const pageSize = 20;
+const pageSize = 10;
 
-export async function Table({ page, initialTrackerId, status }) {
+export async function Table({ page, initialTrackerId, status, sort }) {
   const { currencyCode } = getCountryInfo();
-  const trackerProjects = await getTrackerProjects({
-    to: 25,
+  const { data, meta } = await getTrackerProjects({
+    from: 0,
+    to: pageSize,
+    sort,
     filter: { status },
   });
 
-  //   if (!data?.length) {
-  //     return <NoResults hasFilters={hasFilters} />;
-  //   }
+  async function loadMore({ from, to }) {
+    "use server";
 
-  const hasNextPage = trackerProjects?.meta?.count / (page + 1) > pageSize;
+    return getTrackerProjects({
+      to,
+      from,
+      sort,
+      filter: { status },
+    });
+  }
+
+  if (!data?.length) {
+    return <EmptyState currencyCode={currencyCode} />;
+  }
 
   return (
-    <div className="relative">
-      <DataTable
-        records={trackerProjects?.data}
-        initialTrackerId={initialTrackerId}
-        currencyCode={currencyCode}
-        hasNextPage={hasNextPage}
-      />
-    </div>
+    <DataTable
+      data={data}
+      initialTrackerId={initialTrackerId}
+      currencyCode={currencyCode}
+      pageSize={pageSize}
+      loadMore={loadMore}
+      meta={meta}
+    />
   );
 }
