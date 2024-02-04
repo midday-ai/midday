@@ -33,7 +33,7 @@ export default async function Transactions({
   return (
     <>
       <div className="flex justify-between py-6">
-        <SearchField />
+        <SearchField placeholder="Search transactions" />
         <Filter sections={sections} />
       </div>
 

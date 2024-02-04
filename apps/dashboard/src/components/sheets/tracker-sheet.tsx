@@ -9,26 +9,35 @@ import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
+import { intervalToDuration } from "date-fns";
 import React from "react";
 
-export function TrackerSheet({ setParams, isOpen, records, params }) {
+export function TrackerSheet({ setParams, isOpen, records, params, data }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  const duration = intervalToDuration({
+    start: 0,
+    end: data?.total_duration * 1000,
+  });
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={() => setParams({ projectId: null })}>
+      <Sheet
+        open={isOpen}
+        onOpenChange={() => setParams({ projectId: null, date: null })}
+      >
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
             <h2 className="text-xl">
-              Project X <span className="text-[#878787]">85h</span>
+              {data?.name}{" "}
+              <span className="text-[#878787]">{duration.hours ?? 0}h</span>
             </h2>
-
-            <Icons.MoreVertical className="w-5 h-5" />
           </SheetHeader>
 
           <ScrollArea className="h-full p-0">
             <TrackerSelect
               date={params.date}
+              onSelect={(date) => setParams({ date })}
               className="w-full justify-center mb-8"
             />
 
@@ -54,21 +63,21 @@ export function TrackerSheet({ setParams, isOpen, records, params }) {
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setOpen(false);
+          setParams({ projectId: null, date: null });
         }
       }}
     >
       <DrawerContent className="p-6">
         <DrawerHeader className="mb-8 flex justify-between items-center flex-row">
           <h2 className="text-xl">
-            Project X <span className="text-[#878787]">85h</span>
+            {data?.name}{" "}
+            <span className="text-[#878787]">{duration.hours ?? 0}h</span>
           </h2>
-
-          <Icons.MoreVertical className="w-5 h-5" />
         </DrawerHeader>
 
         <TrackerSelect
           date={params.date}
+          onSelect={(date) => setParams({ date })}
           className="w-full justify-center mb-8"
         />
 

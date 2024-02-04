@@ -1,5 +1,6 @@
 "use client";
 
+import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
 import {
@@ -11,6 +12,7 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
@@ -22,6 +24,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
   const [data, setData] = useState(initialData);
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
+  const updaateTransaction = useAction(updateTransactionAction);
 
   useEffect(() => {
     if (initialData) {
@@ -45,6 +48,10 @@ export function TransactionDetails({ transactionId, data: initialData }) {
       fetchData();
     }
   }, [data]);
+
+  const handleOnAssign = (assigned_id: string) => {
+    updaateTransaction.execute({ assigned_id, id: data.id });
+  };
 
   return (
     <>
@@ -98,6 +105,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
           isLoading={isLoading}
           id={transactionId}
           selectedId={data?.assigned?.id ?? undefined}
+          onSelect={handleOnAssign}
         />
       </div>
 

@@ -99,6 +99,7 @@ export function DataTable({
         params={params}
         setParams={setParams}
         records={data}
+        data={selectedProject}
       />
 
       <TrackerCreateSheet

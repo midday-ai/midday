@@ -5,13 +5,17 @@ import { EmptyState } from "./empty-state";
 
 const pageSize = 10;
 
-export async function Table({ page, initialTrackerId, status, sort }) {
+export async function Table({ page, initialTrackerId, status, sort, query }) {
   const { currencyCode } = getCountryInfo();
   const { data, meta } = await getTrackerProjects({
     from: 0,
     to: pageSize,
     sort,
     filter: { status },
+    search: {
+      query,
+      fuzzy: true,
+    },
   });
 
   async function loadMore({ from, to }) {

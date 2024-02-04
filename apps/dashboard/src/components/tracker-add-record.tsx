@@ -4,6 +4,7 @@ import {
   TrackerAddRecordSchema,
   trackerAddRecordSchema,
 } from "@/actions/schema";
+import { AssignUser } from "@/components/assign-user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -81,14 +82,15 @@ export function TrackerAddRecord() {
                     name={`records.${index}.assingedId`}
                     render={({ field }) => (
                       <FormItem className="w-full">
-                        <FormLabel>Assigned</FormLabel>
-                        <FormControl>
+                        {/* <FormControl>
                           <Input
                             placeholder="Assigned"
                             {...field}
                             type="number"
                           />
-                        </FormControl>
+                        </FormControl> */}
+
+                        <AssignUser />
 
                         <FormMessage />
                       </FormItem>

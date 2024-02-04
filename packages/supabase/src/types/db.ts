@@ -130,6 +130,7 @@ export interface Database {
           email: string | null
           file_name: string | null
           file_path: string[] | null
+          html: string | null
           id: string
           issuer_name: string | null
           name: string | null
@@ -151,6 +152,7 @@ export interface Database {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          html?: string | null
           id?: string
           issuer_name?: string | null
           name?: string | null
@@ -172,6 +174,7 @@ export interface Database {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          html?: string | null
           id?: string
           issuer_name?: string | null
           name?: string | null
@@ -318,8 +321,8 @@ export interface Database {
           created_at: string
           currency: string | null
           description: string | null
+          estimate: number | null
           id: string
-          manager: string | null
           name: string
           rate: number | null
           status: Database["public"]["Enums"]["trackerStatus"]
@@ -330,8 +333,8 @@ export interface Database {
           created_at?: string
           currency?: string | null
           description?: string | null
+          estimate?: number | null
           id?: string
-          manager?: string | null
           name: string
           rate?: number | null
           status?: Database["public"]["Enums"]["trackerStatus"]
@@ -342,21 +345,14 @@ export interface Database {
           created_at?: string
           currency?: string | null
           description?: string | null
+          estimate?: number | null
           id?: string
-          manager?: string | null
           name?: string
           rate?: number | null
           status?: Database["public"]["Enums"]["trackerStatus"]
           team_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "tracker_projects_manager_fkey"
-            columns: ["manager"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tracker_projects_team_id_fkey"
             columns: ["team_id"]
@@ -793,6 +789,7 @@ export interface Database {
           content_type: string | null
           created_at: string | null
           currency: string | null
+          decrypted_html: string | null
           decrypted_issuer_name: string | null
           decrypted_name: string | null
           decrypted_subject: string | null
@@ -800,6 +797,7 @@ export interface Database {
           email: string | null
           file_name: string | null
           file_path: string[] | null
+          html: string | null
           id: string | null
           issuer_name: string | null
           name: string | null
@@ -817,6 +815,7 @@ export interface Database {
           content_type?: string | null
           created_at?: string | null
           currency?: string | null
+          decrypted_html?: never
           decrypted_issuer_name?: never
           decrypted_name?: never
           decrypted_subject?: never
@@ -824,6 +823,7 @@ export interface Database {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          html?: string | null
           id?: string | null
           issuer_name?: string | null
           name?: string | null
@@ -841,6 +841,7 @@ export interface Database {
           content_type?: string | null
           created_at?: string | null
           currency?: string | null
+          decrypted_html?: never
           decrypted_issuer_name?: never
           decrypted_name?: never
           decrypted_subject?: never
@@ -848,6 +849,7 @@ export interface Database {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          html?: string | null
           id?: string | null
           issuer_name?: string | null
           name?: string | null
@@ -1012,6 +1014,12 @@ export interface Database {
       }
     }
     Functions: {
+      amount_text: {
+        Args: {
+          "": unknown
+        }
+        Returns: string
+      }
       generate_id: {
         Args: {
           size: number

@@ -224,17 +224,18 @@ export type TrackerAddRecordSchema = z.infer<typeof trackerAddRecordSchema>;
 export const createProjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
-  estimate: z.string().optional(),
+  estimate: z.number().optional(),
   billable: z.boolean().optional().default(false),
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
+  status: z.enum(["in_progress", "completed"]),
 });
 
 export const updateProjectSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1).optional(),
   description: z.string().optional(),
-  estimate: z.string().optional(),
+  estimate: z.number().optional(),
   billable: z.boolean().optional().default(false),
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),

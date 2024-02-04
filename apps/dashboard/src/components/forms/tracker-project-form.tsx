@@ -47,7 +47,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input {...field} autoFocus />
+                <Input {...field} />
               </FormControl>
               <FormDescription>
                 This is the project display name.
@@ -74,23 +74,57 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="estimate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Time Estimate</FormLabel>
-              <FormControl>
-                <Input placeholder="0" {...field} type="number" min={0} />
-              </FormControl>
-              <FormDescription>
-                Set a goal for how long your project should take to complete and
-                track its progress.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="flex space-x-4 mt-4">
+          <FormField
+            control={form.control}
+            name="estimate"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Time Estimate</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="0"
+                    {...field}
+                    type="number"
+                    min={0}
+                    onChange={(evt) => field.onChange(+evt.target.value)}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Set a goal for how long your project should take to complete
+                  in hours.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="status"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Collapsible open={isOpen}>
           <FormItem className="flex justify-between items-center">

@@ -18,15 +18,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
+import { intervalToDuration } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 
 export function DataTableCell({ children, className }) {
@@ -68,18 +65,25 @@ export function DataTableRow({ row, setParams }) {
     } catch {}
   };
 
+  const duration = intervalToDuration({
+    start: 0,
+    end: row.total_duration * 1000,
+  });
+
   return (
     <AlertDialog>
       <DropdownMenu>
         <Row onClick={() => setParams({ projectId: row.id })}>
           <DataTableCell>{row.name}</DataTableCell>
           <DataTableCell>
-            {/* TODO: Transform to readable time from minutes */}
-            {row.estimate ? `${row.time ?? 0}/${row.estimate}` : row.time} h
+            <span className="text-sm">
+              {duration.hours ?? "00"}:{duration.minutes ?? "00"}:
+              {duration.seconds ?? "00"}
+            </span>
           </DataTableCell>
           <DataTableCell>{row.description}</DataTableCell>
           <DataTableCell>
-            <ProjectMembers members={row.members} />
+            {/* <ProjectMembers members={row.members} /> */}
           </DataTableCell>
           <DataTableCell className="flex justify-between items-center">
             <TrackerStatus status={row.status} />

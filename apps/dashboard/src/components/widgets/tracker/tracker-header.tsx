@@ -13,7 +13,10 @@ export function TrackerHeader() {
         <span className="text-[#878787]">165h</span>
       </div>
 
-      <TrackerSelect date={new Date().toDateString()} />
+      <TrackerSelect
+        date={new Date().toDateString()}
+        onSelect={(date) => console.log(date)}
+      />
     </div>
   );
 }

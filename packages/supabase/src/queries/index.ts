@@ -745,6 +745,10 @@ type GetTrackerProjectsQueryParams = {
     column: string;
     value: "asc" | "desc";
   };
+  search?: {
+    query?: string;
+    fuzzy?: boolean;
+  };
   filter?: {
     status?: "in_progress" | "completed";
   };
@@ -754,21 +758,29 @@ export async function getTrackerProjectsQuery(
   supabase: Client,
   params: GetTrackerProjectsQueryParams
 ) {
-  const { from = 0, to = 10, filter, sort, teamId } = params;
+  const { from = 0, to = 10, filter, sort, teamId, search } = params;
   const { status } = filter || {};
 
   const query = supabase
     .from("tracker_projects")
-    .select("*", { count: "exact" })
+    .select("*, total_duration", { count: "exact" })
     .eq("team_id", teamId);
 
   if (status) {
     query.eq("status", status);
   }
 
+  if (search?.query && search?.fuzzy) {
+    query.ilike("name", `%${search.query}%`);
+  }
+
   if (sort) {
     const [column, value] = sort;
-    query.order(column, { ascending: value === "asc" });
+    if (column === "time") {
+      query.order("total_duration", { ascending: value === "asc" });
+    } else {
+      query.order(column, { ascending: value === "asc" });
+    }
   } else {
     query.order("created_at", { ascending: false });
   }

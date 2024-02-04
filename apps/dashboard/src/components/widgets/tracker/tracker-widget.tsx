@@ -228,7 +228,7 @@ export function TrackerWidget() {
   const [currentDate, setDate] = useState(new Date().toString());
 
   const onSelect = ({ id, date }) => {
-    router.push(`/tracker?id=${id}&date=${date}`);
+    router.push(`/tracker?projectId=${id}&date=${date}`);
   };
 
   return (

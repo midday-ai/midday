@@ -1,6 +1,5 @@
 "use client";
 
-import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { createClient } from "@midday/supabase/client";
 import {
   getCurrentUserTeamQuery,
@@ -15,12 +14,10 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 
-export function AssignUser({ id, selectedId, isLoading }) {
-  const action = useAction(updateTransactionAction);
+export function AssignUser({ id, selectedId, isLoading, onSelect }) {
   const [value, setValue] = useState();
   const supabase = createClient();
   const [users, setUsers] = useState([]);
@@ -53,15 +50,7 @@ export function AssignUser({ id, selectedId, isLoading }) {
             <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
           </div>
         ) : (
-          <Select
-            value={value}
-            onValueChange={(assigned_id) => {
-              action.execute({
-                id,
-                assigned_id,
-              });
-            }}
-          >
+          <Select value={value} onValueChange={onSelect}>
             <SelectTrigger
               id="assign"
               className="line-clamp-1 truncate"

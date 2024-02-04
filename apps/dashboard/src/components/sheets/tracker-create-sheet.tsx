@@ -6,6 +6,7 @@ import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
+import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
@@ -21,6 +22,7 @@ export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       currency: currencyCode,
+      status: "in_progress",
     },
   });
 
@@ -43,11 +45,13 @@ export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
             <h2 className="text-xl">Create Project</h2>
           </SheetHeader>
 
-          <TrackerProjectForm
-            isSaving={action.status === "executing"}
-            onSubmit={action.execute}
-            form={form}
-          />
+          <ScrollArea className="h-full p-0 pb-28">
+            <TrackerProjectForm
+              isSaving={action.status === "executing"}
+              onSubmit={action.execute}
+              form={form}
+            />
+          </ScrollArea>
         </SheetContent>
       </Sheet>
     );
