@@ -12,7 +12,14 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { intervalToDuration } from "date-fns";
 import React from "react";
 
-export function TrackerSheet({ setParams, isOpen, records, params, data }) {
+export function TrackerSheet({
+  setParams,
+  isOpen,
+  records,
+  params,
+  data,
+  user,
+}) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const duration = intervalToDuration({
@@ -50,8 +57,12 @@ export function TrackerSheet({ setParams, isOpen, records, params, data }) {
               currentProjectId={params.id}
             />
 
-            <TrackerRecords data={records[params.date]} date={params.date} />
-            <TrackerAddRecord />
+            <TrackerRecords
+              data={records[params.date]}
+              date={params.date}
+              projectId={data?.id}
+            />
+            <TrackerAddRecord assignedId={user.id} projectId={data?.id} />
           </ScrollArea>
         </SheetContent>
       </Sheet>
@@ -90,7 +101,7 @@ export function TrackerSheet({ setParams, isOpen, records, params, data }) {
           currentProjectId={params.id}
         />
         <TrackerRecords data={records[params.date]} date={params.date} />
-        <TrackerAddRecord />
+        <TrackerAddRecord assignedId={user.id} projectId={data?.id} />
       </DrawerContent>
     </Drawer>
   );

@@ -56,11 +56,7 @@ export function CommandRoot() {
 
   return (
     <div>
-      <CommandInput
-        placeholder="Type a command or search..."
-        autoFocus
-        className="backdrop-filter backdrop-blur-lg"
-      />
+      <CommandInput placeholder="Type a command or search..." autoFocus />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 

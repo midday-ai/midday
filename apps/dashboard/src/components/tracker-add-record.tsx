@@ -1,5 +1,6 @@
 "use client";
 
+import { createEntriesAction } from "@/actions/project/create-entries-action";
 import {
   TrackerAddRecordSchema,
   trackerAddRecordSchema,
@@ -17,27 +18,42 @@ import {
 } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useForm } from "react-hook-form";
 
-export function TrackerAddRecord() {
+export function TrackerAddRecord({ assignedId, projectId }) {
+  const { toast } = useToast();
+
+  const createEntries = useAction(createEntriesAction, {
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
   const form = useForm<TrackerAddRecordSchema>({
     resolver: zodResolver(trackerAddRecordSchema),
     defaultValues: {
       records: [
         {
-          time: 0,
-          assignedId: undefined,
-          descriptionId: undefined,
+          assigned_id: assignedId,
+          project_id: projectId,
+          time: undefined,
+          description: undefined,
         },
       ],
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    // inviteMembers.execute({
-    //   // Remove invites without email (last appended invite validation)
-    //   invites: data.invites.filter((invite) => invite.email !== undefined),
-    // });
+    console.log(data.records);
+    createEntries.execute(
+      data.records.map((record) => ({ ...record, project_id: projectId }))
+    );
   });
 
   const { fields, append } = useFieldArray({
@@ -69,9 +85,16 @@ export function TrackerAddRecord() {
                       <FormItem className="w-full">
                         <FormLabel>Hours</FormLabel>
                         <FormControl>
-                          <Input placeholder="Hours" {...field} />
+                          <Input
+                            {...field}
+                            placeholder="0"
+                            type="number"
+                            min={0}
+                            onChange={(evt) => {
+                              field.onChange(+evt.target.value);
+                            }}
+                          />
                         </FormControl>
-
                         <FormMessage />
                       </FormItem>
                     )}
@@ -79,35 +102,27 @@ export function TrackerAddRecord() {
 
                   <FormField
                     control={form.control}
-                    name={`records.${index}.assingedId`}
-                    render={({ field }) => (
-                      <FormItem className="w-full">
-                        {/* <FormControl>
-                          <Input
-                            placeholder="Assigned"
-                            {...field}
-                            type="number"
-                          />
-                        </FormControl> */}
-
-                        <AssignUser />
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    name={`records.${index}.assigned_id`}
+                    render={({ field }) => {
+                      return (
+                        <FormItem className="w-full">
+                          <AssignUser selectedId={field.value} />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </div>
 
                 <FormField
                   control={form.control}
-                  name={`records.${index}.descriptionId`}
+                  name={`records.${index}.description`}
                   render={({ field }) => (
                     <FormItem className="w-full">
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Input placeholder="Description" {...field} />
                       </FormControl>
-
                       <FormMessage />
                     </FormItem>
                   )}
@@ -119,7 +134,7 @@ export function TrackerAddRecord() {
           <button
             type="button"
             className="flex space-x-2 items-center text-sm font-medium"
-            onClick={() => append({ time: 0 })}
+            onClick={() => append(defaultEntry)}
           >
             <Icons.Add />
             Add item

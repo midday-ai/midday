@@ -23,7 +23,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@next/bundle-analyzer": "^14.1.0",
-    "@novu/headless": "^0.22.0",
+    "@novu/headless": "^0.23.0",
     "@tanstack/react-table": "^8.11.8",
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.2.4",
@@ -34,6 +34,7 @@
     "@zip.js/zip.js": "2.7.34",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.2",
+    "dub": "^0.6.0",
     "fast-csv": "^5.0.0",
     "framer-motion": "^11.0.3",
     "headless-currency-input": "^1.1.0",
@@ -56,7 +57,7 @@
     "sharp": "^0.33.2",
     "tus-js-client": "^4.0.1",
     "use-long-press": "^3.2.0",
-    "usehooks-ts": "2.10.0",
+    "usehooks-ts": "2.12.1",
     "zod": "^3.22.4",
     "zustand": "^4.5.0"
   },
@@ -65,7 +66,7 @@
     "@t3-oss/env-nextjs": "^0.8.0",
     "@todesktop/tailwind-variants": "^1.0.1",
     "@types/node": "^20.11.16",
-    "@types/react": "^18.2.51",
+    "@types/react": "^18.2.52",
     "@types/react-dom": "^18.2.18",
     "typescript": "^5.3.3"
   }

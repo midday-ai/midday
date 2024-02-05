@@ -10,6 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           // { path: "/settings/billing", label: "Billing" },
           { path: "/settings/connected", label: "Bank Accounts" },
           { path: "/settings/members", label: "Members" },
+          { path: "/settings/reports", label: "Reports" },
           { path: "/settings/notifications", label: "Notifications" },
         ]}
       />

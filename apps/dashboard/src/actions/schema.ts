@@ -245,3 +245,14 @@ export const updateProjectSchema = z.object({
 export const deleteProjectSchema = z.object({
   id: z.string().uuid(),
 });
+
+export const projectEntry = z.object({
+  duration: z.number(),
+  assigned_id: z.string(),
+  project_id: z.string(),
+  description: z.string().optional(),
+  start: z.string().datetime(),
+  stop: z.string().datetime().optional(),
+});
+
+export const createEntriesSchema = z.array(projectEntry);

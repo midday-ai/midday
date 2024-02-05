@@ -74,18 +74,18 @@ async function main() {
     }
   });
 
-  // Timer
-  function startTimer() {
-    let remainingTime = 60;
-    setInterval(() => {
-      // Set the tray title to the remaining time
-      tray.setTitle(formatTime(remainingTime));
+  // // Timer
+  // function startTimer() {
+  //   let remainingTime = 60;
+  //   setInterval(() => {
+  //     // Set the tray title to the remaining time
+  //     tray.setTitle(formatTime(remainingTime));
 
-      remainingTime += 1;
-    }, 1000);
-  }
+  //     remainingTime += 1;
+  //   }, 1000);
+  // }
 
-  startTimer();
+  // startTimer();
 }
 
 main();

@@ -1,14 +1,16 @@
 "use client";
 
 import { Icons } from "@midday/ui/icons";
+import { cn } from "@midday/ui/utils";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
 type Props = {
   value: string;
+  className?: string;
 };
 
-export function CopyInput({ value }: Props) {
+export function CopyInput({ value, className }: Props) {
   const [isCopied, setCopied] = useState(false);
 
   const handleClipboard = async () => {
@@ -24,7 +26,12 @@ export function CopyInput({ value }: Props) {
   };
 
   return (
-    <div className="flex items-center relative w-full rounded-md border border-input py-2 px-4">
+    <div
+      className={cn(
+        "flex items-center relative w-full rounded-md border border-input py-2 px-4",
+        className
+      )}
+    >
       <div className="pr-7 text-[#878787] text-sm">{value}</div>
       <button type="button" onClick={handleClipboard}>
         <motion.div

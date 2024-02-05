@@ -73,6 +73,7 @@ import {
   MdSearch,
   MdSecurity,
   MdSensors,
+  MdSignalCellularAlt,
   MdTopic,
   MdTrendingDown,
   MdTrendingUp,
@@ -470,4 +471,5 @@ export const Icons = {
   Match: MdOutlineTask,
   Email: MdOutlineEmail,
   QuestionAnswer: MdOutlineQuestionAnswer,
+  Click: MdSignalCellularAlt,
 };

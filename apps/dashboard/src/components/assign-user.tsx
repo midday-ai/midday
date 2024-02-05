@@ -17,7 +17,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 
-export function AssignUser({ id, selectedId, isLoading, onSelect }) {
+export function AssignUser({ selectedId, isLoading, onSelect }) {
   const [value, setValue] = useState();
   const supabase = createClient();
   const [users, setUsers] = useState([]);

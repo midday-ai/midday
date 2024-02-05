@@ -1,5 +1,6 @@
 import { ChartPeriod } from "@/components/charts/chart-period";
 import { ChartType } from "@/components/charts/chart-type";
+// import { ShareReport } from "@/components/share-report";
 import { Cookies } from "@/utils/constants";
 import { cookies } from "next/headers";
 
@@ -9,7 +10,11 @@ export async function ChartSelectors({ defaultValue }) {
   return (
     <div className="flex justify-between mt-6">
       <ChartType initialValue={chartType} />
-      <ChartPeriod defaultValue={defaultValue} />
+
+      <div className="flex space-x-2">
+        <ChartPeriod defaultValue={defaultValue} />
+        {/* <ShareReport /> */}
+      </div>
     </div>
   );
 }

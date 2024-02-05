@@ -1,12 +1,13 @@
 import { DataTable } from "@/components/tables/tracker/data-table";
 import { getCountryInfo } from "@midday/location";
-import { getTrackerProjects } from "@midday/supabase/cached-queries";
+import { getTrackerProjects, getUser } from "@midday/supabase/cached-queries";
 import { EmptyState } from "./empty-state";
 
 const pageSize = 10;
 
 export async function Table({ page, initialTrackerId, status, sort, query }) {
   const { currencyCode } = getCountryInfo();
+  const { data: userData } = await getUser();
   const { data, meta } = await getTrackerProjects({
     from: 0,
     to: pageSize,
@@ -41,6 +42,7 @@ export async function Table({ page, initialTrackerId, status, sort, query }) {
       pageSize={pageSize}
       loadMore={loadMore}
       meta={meta}
+      user={userData}
     />
   );
 }

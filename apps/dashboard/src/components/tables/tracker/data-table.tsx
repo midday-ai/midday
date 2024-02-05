@@ -30,6 +30,7 @@ export function DataTable({
   pageSize,
   meta,
   loadMore,
+  user,
 }: ItemsProps) {
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
@@ -100,6 +101,7 @@ export function DataTable({
         setParams={setParams}
         records={data}
         data={selectedProject}
+        user={user}
       />
 
       <TrackerCreateSheet

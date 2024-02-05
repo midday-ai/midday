@@ -394,3 +394,12 @@ html.todesktop a {
     opacity: 0;
   }
 }
+
+/* Desktop Command menu */
+html.todesktop-panel {
+  background-color: rgba(000,000,000,.3);
+}
+
+html.todesktop-panel body {
+  background-color: transparent !important;
+}
