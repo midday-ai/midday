@@ -256,3 +256,10 @@ export const projectEntry = z.object({
 });
 
 export const createEntriesSchema = z.array(projectEntry);
+
+export const createReportSchema = z.object({
+  baseUrl: z.string().url(),
+  from: z.string().datetime(),
+  to: z.string().datetime(),
+  type: changeChartTypeSchema,
+});

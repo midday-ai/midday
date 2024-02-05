@@ -1,5 +1,6 @@
 "use client";
 
+import { createReportAction } from "@/actions/report/create-report-action";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -10,35 +11,39 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { useToast } from "@midday/ui/use-toast";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useState } from "react";
 import { CopyInput } from "./copy-input";
 
-export function ShareReport() {
+export function ShareReport({ defaultValue, type }) {
   const [isOpen, setOpen] = useState(false);
   const { toast, dismiss } = useToast();
 
-  const handleOnClose = () => {
-    setOpen(false);
+  const createReport = useAction(createReportAction, {
+    onSuccess: (data) => {
+      setOpen(false);
 
-    const { id } = toast({
-      title: "Report published",
-      description: "Your report is ready to share.",
-      variant: "success",
-      footer: (
-        <div className="mt-4 space-x-2 flex w-full">
-          <CopyInput
-            value="https://go.midday.ai/mj8hf2w"
-            className="border-[#2C2C2C] w-full"
-          />
+      const { id } = toast({
+        title: "Report published",
+        description: "Your report is ready to share.",
+        variant: "success",
+        footer: (
+          <div className="mt-4 space-x-2 flex w-full">
+            <CopyInput
+              value={data.short_link}
+              className="border-[#2C2C2C] w-full"
+            />
 
-          <Link href="/report/mj8hf2w" onClick={() => dismiss(id)}>
-            <Button>View</Button>
-          </Link>
-        </div>
-      ),
-    });
-  };
+            <Link href={data.short_link} onClick={() => dismiss(id)}>
+              <Button>View</Button>
+            </Link>
+          </div>
+        ),
+      });
+    },
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
@@ -51,15 +56,29 @@ export function ShareReport() {
           <DialogHeader>
             <DialogTitle>Share report</DialogTitle>
             <DialogDescription>
-              Publish the chosen profit/loss period by simply sharing this URL.
+              Publish the chosen period and then you can share it whit the
+              unique URL.
             </DialogDescription>
-
-            <CopyInput value="https://go.midday.ai/mj8hf2w" />
           </DialogHeader>
 
           <DialogFooter>
-            <Button className="w-full" onClick={handleOnClose}>
-              Publish
+            <Button
+              disabled={createReport.status === "executing"}
+              className="w-full"
+              onClick={() =>
+                createReport.execute({
+                  baseUrl: window.origin,
+                  from: defaultValue.from,
+                  to: defaultValue.to,
+                  type,
+                })
+              }
+            >
+              {createReport.status === "executing" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Publish"
+              )}
             </Button>
           </DialogFooter>
         </div>
