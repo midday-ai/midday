@@ -26,7 +26,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/node": "^20.11.16",
-    "@types/react": "^18.2.53",
+    "@types/react": "^18.2.54",
     "@types/react-dom": "^18.2.18"
   }
 }

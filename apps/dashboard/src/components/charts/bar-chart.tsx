@@ -57,10 +57,10 @@ const ToolTipContent = ({ payload = {} }) => {
               ? current?.payload?.current?.date &&
                 `Week ${format(
                   new Date(current.payload.current.date),
-                  "ww, Y"
+                  "ww, y"
                 )}`
               : current?.payload?.current?.date &&
-                format(new Date(current.payload.current.date), "MMM, Y")}
+                format(new Date(current.payload.current.date), "MMM, y")}
           </p>
         </div>
 
@@ -83,10 +83,10 @@ const ToolTipContent = ({ payload = {} }) => {
               ? previous?.payload?.previous?.date &&
                 `Week ${format(
                   new Date(previous.payload.previous.date),
-                  "ww, Y"
+                  "ww, y"
                 )}`
               : previous?.payload?.previous?.date &&
-                format(new Date(previous.payload.previous.date), "MMM, Y")}
+                format(new Date(previous.payload.previous.date), "MMM, y")}
           </p>
         </div>
       </div>
