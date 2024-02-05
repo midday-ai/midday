@@ -9,12 +9,35 @@ import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Report | Midday",
-  robots: {
-    index: false,
-  },
-};
+// export const metadata: Metadata = {
+//   title: "Report | Midday",
+// robots: {
+//   index: false,
+// },
+// };
+
+export async function generateMetadata({ params }): Promise<Metadata> {
+  const supabase = createClient({ admin: true });
+
+  const { data } = await supabase
+    .from("reports")
+    .select("*, team:team_id(name)")
+    .eq("id", params.id)
+    .single();
+
+  const period = `${format(new Date(data.from), "LLL dd, y")} - ${format(
+    new Date(data.to),
+    "LLL dd, y"
+  )}`;
+
+  return {
+    title: `Report for ${data.team.name} (${period})`,
+    description: `Profit/Loss report for ${data.team.name} based on the period ${period}`,
+    robots: {
+      index: false,
+    },
+  };
+}
 
 export default async function Report({ params }) {
   const supabase = createClient({ admin: true });
