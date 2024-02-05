@@ -259,7 +259,7 @@ export const createEntriesSchema = z.array(projectEntry);
 
 export const createReportSchema = z.object({
   baseUrl: z.string().url(),
-  from: z.string().datetime(),
-  to: z.string().datetime(),
+  from: z.string(),
+  to: z.string(),
   type: changeChartTypeSchema,
 });
