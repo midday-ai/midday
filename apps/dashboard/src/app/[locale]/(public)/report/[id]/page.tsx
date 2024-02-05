@@ -68,20 +68,19 @@ export default async function Report({ params }) {
         </div>
       </div>
 
-      <div className="justify-center items-center w-full flex mt-[180px]">
+      <div className="justify-center items-center w-full flex mt-[60px] md:mt-[180px]">
         <div className="w-[1200px]">
-          <div className="relative mt-28">
-            <div className="absolute -top-[110px] space-y-2">
-              <h1 className="text-3xl">
-                <Counter
-                  value={metricsData.summary.currentTotal}
-                  currency={metricsData.summary.currency}
-                  lastPeriodAmount={lastPeriodAmount}
-                />
-              </h1>
-            </div>
-
-            <div className="absolute  -top-[110px] right-0 hidden md:block">
+          <div>
+            <div className="flex flex-col space-y-2 items-start mb-16">
+              <div>
+                <h1 className="text-3xl">
+                  <Counter
+                    value={metricsData.summary.currentTotal}
+                    currency={metricsData.summary.currency}
+                    lastPeriodAmount={lastPeriodAmount}
+                  />
+                </h1>
+              </div>
               <div className="text-[#878787]">
                 {format(new Date(data.from), "LLL dd, y")} -{" "}
                 {format(new Date(data.to), "LLL dd, y")}

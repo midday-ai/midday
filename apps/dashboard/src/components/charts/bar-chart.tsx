@@ -1,5 +1,6 @@
 "use client";
 
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { format } from "date-fns";
@@ -95,6 +96,7 @@ const ToolTipContent = ({ payload = {} }) => {
 
 export function BarChart({ data }) {
   const locale = useCurrentLocale();
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const formattedData = data.result.map((item) => ({
     ...item,
@@ -107,7 +109,7 @@ export function BarChart({ data }) {
 
   return (
     <div className="relative">
-      <div className="flex space-x-4 absolute right-0 -top-10">
+      <div className="flex space-x-4 absolute right-0 -top-10 hidden md:flex">
         <div className="flex space-x-2 items-center">
           <span className="w-2 h-2 rounded-full bg-[#F5F5F3]" />
           <span className="text-sm text-[#606060]">Chosen Period</span>
@@ -140,29 +142,31 @@ export function BarChart({ data }) {
               fontFamily: "var(--font-sans)",
             }}
           />
-          <YAxis
-            stroke="#888888"
-            fontSize={12}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(value) => {
-              if (data.summary.currency) {
-                return formatAmount({
-                  maximumFractionDigits: 0,
-                  minimumFractionDigits: 0,
-                  currency: data.summary.currency,
-                  amount: value,
-                  locale,
-                });
-              }
-              return 0;
-            }}
-            tick={{
-              fill: "#606060",
-              fontSize: 12,
-              fontFamily: "var(--font-sans)",
-            }}
-          />
+          {isDesktop && (
+            <YAxis
+              stroke="#888888"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => {
+                if (data.summary.currency) {
+                  return formatAmount({
+                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 0,
+                    currency: data.summary.currency,
+                    amount: value,
+                    locale,
+                  });
+                }
+                return 0;
+              }}
+              tick={{
+                fill: "#606060",
+                fontSize: 12,
+                fontFamily: "var(--font-sans)",
+              }}
+            />
+          )}
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
