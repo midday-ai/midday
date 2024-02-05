@@ -14,12 +14,17 @@ import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { CopyInput } from "./copy-input";
 
 export function ShareReport({ defaultValue, type }) {
   const [isOpen, setOpen] = useState(false);
   const { toast, dismiss } = useToast();
+
+  const searchParams = useSearchParams();
+  const from = searchParams?.get("from") ?? defaultValue.from;
+  const to = searchParams?.get("to") ?? defaultValue.to;
 
   const createReport = useAction(createReportAction, {
     onSuccess: (data) => {
@@ -68,8 +73,8 @@ export function ShareReport({ defaultValue, type }) {
               onClick={() =>
                 createReport.execute({
                   baseUrl: window.origin,
-                  from: defaultValue.from,
-                  to: defaultValue.to,
+                  from,
+                  to,
                   type,
                 })
               }
