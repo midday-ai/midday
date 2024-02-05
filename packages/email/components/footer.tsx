@@ -10,7 +10,7 @@ import {
 import React from "react";
 
 type Props = {
-  baseUrl: string;
+  baseUrl?: string;
 };
 
 export function Footer({ baseUrl }: Props) {

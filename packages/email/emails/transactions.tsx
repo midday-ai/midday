@@ -229,7 +229,7 @@ export const TransactionsEmail = ({
                 {t("transactions.button")}
               </Button>
             </Section>
-            <Footer />
+            <Footer baseUrl={baseUrl} />
           </Container>
         </Body>
       </Tailwind>

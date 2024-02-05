@@ -16,6 +16,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { Footer } from "../components/footer";
 import { getI18n } from "../locales";
 
 interface InviteEmailProps {
@@ -31,8 +32,8 @@ interface InviteEmailProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai"
-    : "http://localhost:3000";
+    ? "https://midday.ai/email"
+    : "http://localhost:3000/email";
 
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
@@ -79,17 +80,16 @@ export const InviteEmail = ({
           <Container className="border border-solid border-[#E8E7E1] rounded my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Section className="mt-[32px]">
               <Img
-                src={`${baseUrl}/email/logo.png`}
+                src={`${baseUrl}/logo.png`}
                 width="45"
                 height="45"
                 alt="Midday"
                 className="my-0 mx-auto"
               />
             </Section>
-            <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-black">
-              {t("cows", { count: 3 })}
-              {/* {t("invite.title1")} <strong>{teamName}</strong>{" "}
-              {t("invite.title2")} <strong>Midday</strong> */}
+            <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-black text-center">
+              {t("invite.title1")} <strong>{teamName}</strong>{" "}
+              {t("invite.title2")} <strong>Midday</strong>
             </Heading>
 
             <Text className="text-[14px] leading-[24px] text-black">
@@ -131,6 +131,8 @@ export const InviteEmail = ({
                 {t("invite.footer4")}
               </Text>
             </Section>
+
+            <Footer baseUrl={baseUrl} />
           </Container>
         </Body>
       </Tailwind>

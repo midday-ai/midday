@@ -8,7 +8,7 @@
     "format": "biome format --write .",
     "check:types": "tsc --noEmit",
     "dev": "email dev -p 3003",
-    "export": "email export"
+    "build": "email export --outDir=public"
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
