@@ -28,7 +28,11 @@ export async function middleware(request: NextRequest) {
   const { data } = await supabase.auth.getSession();
 
   // Not authenticated
-  if (!data?.session && newUrl.pathname !== "/") {
+  if (
+    !data?.session &&
+    newUrl.pathname !== "/" &&
+    !newUrl.pathname.includes("/report")
+  ) {
     const encodedSearchParams = `${newUrl.pathname.substring(1)}${
       newUrl.search
     }`;
