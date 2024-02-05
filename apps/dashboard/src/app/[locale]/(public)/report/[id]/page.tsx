@@ -96,7 +96,10 @@ export default async function Report({ params }) {
         <div>
           <p className="text-[#878787] text-sm">
             Powered by{" "}
-            <a href="https://midday.ai" className="text-black dark:text-white">
+            <a
+              href="https://midday.ai?utm_source=report"
+              className="text-black dark:text-white"
+            >
               Midday
             </a>
           </p>
