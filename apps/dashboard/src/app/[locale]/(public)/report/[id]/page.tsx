@@ -9,21 +9,18 @@ import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
 
-// export const metadata: Metadata = {
-//   title: "Report | Midday",
-// robots: {
-//   index: false,
-// },
-// };
-
 export async function generateMetadata({ params }): Promise<Metadata> {
   const supabase = createClient({ admin: true });
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("reports")
     .select("*, team:team_id(name)")
     .eq("id", params.id)
     .single();
+
+  if (error) {
+    return;
+  }
 
   const period = `${format(new Date(data.from), "LLL dd, y")} - ${format(
     new Date(data.to),
@@ -100,7 +97,7 @@ export default async function Report({ params }) {
         <div>
           <p className="text-[#878787] text-sm">
             Powered by{" "}
-            <a href="https://midday.ai" className="text-white">
+            <a href="https://midday.ai" className="text-black dark:text-white">
               Midday
             </a>
           </p>
