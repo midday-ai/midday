@@ -1,6 +1,7 @@
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
+// import { Events, client } from "@midday/jobs";
 import LoopsClient from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -20,13 +21,26 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   const email = body.record.email;
+  const fullName = body.record.raw_user_meta_data.full_name;
+
+  // NOTE: Start onboarding email (enable once live)
+  // client.sendEvent({
+  //   name: Events.ONBOARDING_EMAILS,
+  //   payload: {
+  //     fullName,
+  //     email,
+  //   },
+  // });
 
   const found = await loops.findContact(email);
-  const [firstName, lastName] =
-    body.record.raw_user_meta_data.full_name.split(" ");
+  const [firstName, lastName] = fullName.split(" ");
 
   if (found.length > 0) {
     const userId = found?.at(0)?.id;
+
+    if (!userId) {
+      return null;
+    }
 
     await loops.updateContact(email, {
       userId,
