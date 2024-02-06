@@ -16,7 +16,8 @@ type Props = {
 export function Footer({ baseUrl }: Props) {
   return (
     <Section>
-      <Hr />
+      <Hr className="dark:border-[#242424]" />
+
       <br />
 
       <Text className="text-[21px] font-regular">
@@ -25,65 +26,99 @@ export function Footer({ baseUrl }: Props) {
 
       <br />
 
-      <Row>
-        <Column className="align-top">
-          <Row>
-            <Text className="font-medium">Product</Text>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Features</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Pricing</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Story</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Updates</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Download</Link>
-          </Row>
-        </Column>
-        <Column className="align-top">
-          <Row>
-            <Text className="font-medium">Resources</Text>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Roadmap</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Github</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Support</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Updates</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Privacy policy</Link>
-          </Row>
-        </Column>
-        <Column className="align-top">
-          <Row>
-            <Text className="font-medium">Solutions</Text>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Self hosted</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">SaaS hosting</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">Open startup</Link>
-          </Row>
-          <Row className="mb-1.5">
-            <Link className="text-[#707070] text-[14px]">OSS Friends</Link>
-          </Row>
-        </Column>
-      </Row>
+      <div className="text-[0]">
+        <div className="inline-block w-full md:w-1/3 lg:w-1/3 align-top">
+          <div>
+            <Row>
+              <Text className="font-medium">Product</Text>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Features
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Pricing
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Story
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Updates
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Download
+              </Link>
+            </Row>
+          </div>
+        </div>
+        <div className="inline-block w-full md:w-1/3 lg:w-1/3 align-top">
+          <div>
+            <Row>
+              <Text className="font-medium">Resources</Text>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Roadmap
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Github
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Support
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Updates
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Privacy policy
+              </Link>
+            </Row>
+          </div>
+        </div>
+        <div className="inline-block w-full md:w-1/3 lg:w-1/3 align-top">
+          <div>
+            <Row>
+              <Text className="font-medium">Solutions</Text>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Self hosted
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                SaaS hosting
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                Open startup
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+                OSS Friends
+              </Link>
+            </Row>
+          </div>
+        </div>
+      </div>
 
       <br />
       <br />
@@ -129,7 +164,7 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Text className="text-[#B8B8B8] text-xs">
+        <Text className="text-[#B8B8B8] dark:text-[#414141] text-xs">
           Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus
           convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum
           nisl, sed faucibus neque.
@@ -144,10 +179,16 @@ export function Footer({ baseUrl }: Props) {
           width="100"
           height="28"
           alt="Midday"
+          className="visible dark:invisible"
+        />
+        <Img
+          src={`${baseUrl}/logo-footer-dark.png`}
+          width="100"
+          height="28"
+          alt="Midday"
+          className="invisible dark:visible"
         />
       </Row>
-
-      <br />
     </Section>
   );
 }

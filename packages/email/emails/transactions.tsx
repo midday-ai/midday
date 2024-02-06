@@ -6,9 +6,7 @@ import {
   Font,
   Head,
   Heading,
-  Hr,
   Html,
-  Img,
   Link,
   Preview,
   Section,
@@ -18,6 +16,7 @@ import {
 import { format } from "date-fns";
 import * as React from "react";
 import { Footer } from "../components/footer";
+import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
 
 type Transaction = {
@@ -92,40 +91,35 @@ export const TransactionsEmail = ({
 
   return (
     <Html>
-      <Head>
-        <Font
-          fontFamily="Instrument Sans"
-          fallbackFontFamily="Helvetica"
-          webFont={{
-            url: "https://fonts.gstatic.com/s/instrumentsans/v1/pxiTypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr0She1ZuWi3hKpA.woff2",
-            format: "woff2",
-          }}
-        />
-        <Font
-          fontFamily="Instrument Sans"
-          fallbackFontFamily="Helvetica"
-          webFont={{
-            url: "https://fonts.gstatic.com/s/instrumentsans/v1/pximypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr-yp2JGEJOH9npST3-TfykywN2u7ZWwU.woff2",
-            format: "woff2",
-          }}
-          fontWeight={500}
-        />
-      </Head>
-      <Preview>{previewText}</Preview>
       <Tailwind>
-        <Body className="bg-[#fff] my-auto mx-auto font-sans">
+        <Head>
+          <meta name="color-scheme" content="light dark" />
+          <meta name="supported-color-schemes" content="light dark" />
+          <Font
+            fontFamily="Instrument Sans"
+            fallbackFontFamily="Helvetica"
+            webFont={{
+              url: "https://fonts.gstatic.com/s/instrumentsans/v1/pxiTypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr0She1ZuWi3hKpA.woff2",
+              format: "woff2",
+            }}
+          />
+          <Font
+            fontFamily="Instrument Sans"
+            fallbackFontFamily="Helvetica"
+            webFont={{
+              url: "https://fonts.gstatic.com/s/instrumentsans/v1/pximypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr-yp2JGEJOH9npST3-TfykywN2u7ZWwU.woff2",
+              format: "woff2",
+            }}
+            fontWeight={500}
+          />
+        </Head>
+        <Preview>{previewText}</Preview>
+
+        <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
           <br />
-          <Container className="border border-solid border-[#E8E7E1] rounded my-[40px] mx-auto p-[20px] max-w-[560px]">
-            <Section className="mt-[32px]">
-              <Img
-                src={`${baseUrl}/logo.png`}
-                width="45"
-                height="45"
-                alt="Midday"
-                className="my-0 mx-auto"
-              />
-            </Section>
-            <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
+          <Container className="border border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
+            <Logo baseUrl={baseUrl} />
+            <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               {t("transactions.title1")}
               <span className="font-semibold">
                 {t("transactions.title2", {
@@ -135,7 +129,7 @@ export const TransactionsEmail = ({
               {t("transactions.title3")} <br />
               {t("transactions.title4")}
             </Heading>
-            <Text className="text-[#121212] text-[14px] leading-[24px]">
+            <Text className="text-[#121212] dark:text-[#F5F5F3] text-[14px] leading-[24px]">
               {t("transactions.description1", { firstName })},
               <br />
               <br />
@@ -155,7 +149,7 @@ export const TransactionsEmail = ({
               className="border-collapse w-full"
             >
               <thead style={{ width: "100%" }}>
-                <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#E8E7E1] h-[45px]">
+                <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#E8E7E1] dark:border-[#242424] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
                       {t("transactions.date")}
@@ -178,7 +172,7 @@ export const TransactionsEmail = ({
                 {transactions?.map((transaction) => (
                   <tr
                     key={transaction.id}
-                    className="border-0 border-b-[1px] border-solid border-[#E8E7E1] h-[45px]"
+                    className="border-0 border-b-[1px] border-solid border-[#E8E7E1] dark:border-[#242424] h-[45px]"
                   >
                     <td align="left">
                       <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
@@ -189,8 +183,9 @@ export const TransactionsEmail = ({
                       <Link
                         href={`${baseAppUrl}/transactions?id=${transaction.id}`}
                         className={cn(
-                          "text-[#121212]",
-                          transaction?.category === "income" && "text-[#00C969]"
+                          "text-[#121212] dark:text-[#F5F5F3]",
+                          transaction?.category === "income" &&
+                            "!text-[#00C969]"
                         )}
                       >
                         <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
@@ -201,8 +196,9 @@ export const TransactionsEmail = ({
                     <td align="left">
                       <Text
                         className={cn(
-                          "text-[14px] m-0 p-0 mt-1 pb-1",
-                          transaction?.category === "income" && "text-[#00C969]"
+                          "text-[14px] m-0 p-0 mt-1 pb-1 text-[#121212] dark:text-[#F5F5F3]",
+                          transaction?.category === "income" &&
+                            "!text-[#00C969]"
                         )}
                       >
                         {Intl.NumberFormat(locale, {
@@ -218,7 +214,7 @@ export const TransactionsEmail = ({
 
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
-                className="bg-[#000000] rounded-md text-primary text-[12px] text-white font-semibold no-underline text-center px-6 py-3"
+                className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] dark:text-[#F5F5F3] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212] dark:border-[#F5F5F3]"
                 href={`${baseAppUrl}/transactions?filter=${JSON.stringify({
                   date: {
                     from: transactions.at(0)?.date,

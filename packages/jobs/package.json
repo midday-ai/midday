@@ -12,6 +12,7 @@
   "dependencies": {
     "@trigger.dev/openai": "latest",
     "@trigger.dev/react": "^2.3.17",
+    "@trigger.dev/resend": "^2.3.17",
     "@trigger.dev/sdk": "^2.3.17",
     "@trigger.dev/supabase": "^2.3.17",
     "langchain": "0.1.10",

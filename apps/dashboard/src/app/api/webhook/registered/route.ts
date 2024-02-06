@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 const loops = new LoopsClient(env.LOOPS_API_KEY);
 
+// NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
   const key = headers().get("x-api-key");
 

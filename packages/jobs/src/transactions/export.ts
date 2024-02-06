@@ -2,7 +2,6 @@ import { writeToString } from "@fast-csv/format";
 import { download } from "@midday/supabase/storage";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
-import { format } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
