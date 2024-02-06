@@ -13,10 +13,10 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { Column } from "../../components/column";
-import { Footer } from "../../components/footer";
-import { GetStarted } from "../../components/get-started";
-import { Logo } from "../../components/logo";
+import { Column } from "../components/column";
+import { Footer } from "../components/footer";
+import { GetStarted } from "../components/get-started";
+import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
@@ -27,11 +27,9 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const TimeTrackerEmail = ({
-  fullName = "Viktor Hofte",
-}: OverviewProps) => {
+export const VaultEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Boost your productivity with our advanced time-tracking tool. With insightful project overviews and seamless collaboration amongst your team, you’re set up for optimal efficiency.`;
+  const text = `Hi ${firstName}, There’s no need to scramble for things across devices or different drives. Keep all of your files, such as contracts and agreements safe in one place.`;
 
   return (
     <Html>
@@ -64,30 +62,30 @@ export const TimeTrackerEmail = ({
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Time track your projects
+              Store your files securely
             </Heading>
 
             <br />
 
             <Img
-              src={`${baseUrl}/time-tracker-header.png`}
+              src={`${baseUrl}/vault-header.png`}
               alt="Vault"
-              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
+              className="my-0 mx-auto block dark:hidden max-w-[305px] w-full"
             />
 
             <Img
-              src={`${baseUrl}/time-tracker-header-dark.png`}
+              src={`${baseUrl}/vault-header-dark.png`}
               alt="Vault"
-              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
+              className="my-0 mx-auto hidden dark:block w-full max-w-[305px] max-h-[308px]"
             />
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              Boost your productivity with our advanced time-tracking tool. With
-              insightful project overviews and seamless collaboration amongst
-              your team, you’re set up for optimal efficiency.
+              There’s no need to scramble for things across devices or different
+              drives. Keep all of your files, such as contracts and agreements
+              safe in one place.
             </Text>
 
             <br />
@@ -95,21 +93,21 @@ export const TimeTrackerEmail = ({
 
             <Section>
               <Column
-                title="Create a project and invite"
-                description="Start by creating projects. If you have a larger team, no worries, invite them too."
-                imgSrc={`${baseUrl}/tracker-project.png`}
+                title="Upload your files"
+                description="Easily drag and drop your files to upload."
+                imgSrc={`${baseUrl}/vault-upload.png`}
               />
 
               <Column
-                title="Track your hours"
-                description="Mark your days and fill in your tracking record. You can also add your hourly fee to be able to forecast earnings."
-                imgSrc={`${baseUrl}/tracker-log.png`}
+                title="Create structure"
+                description="Create folders and keep a neat and tidy structure."
+                imgSrc={`${baseUrl}/vault-structure.png`}
               />
 
               <Column
-                title="See total time spent"
-                description="Keep a great overview of your and your teams spent time. Connect those hours to your invoice later for your ease and as a bonus your client gets a great overview."
-                imgSrc={`${baseUrl}/tracker-overview.png`}
+                title="Have everything in one place"
+                description="Instead of having important documents scattered locally or on different drives, store them safely in Midday."
+                imgSrc={`${baseUrl}/vault-overview.png`}
               />
             </Section>
 
@@ -127,4 +125,4 @@ export const TimeTrackerEmail = ({
   );
 };
 
-export default TimeTrackerEmail;
+export default VaultEmail;

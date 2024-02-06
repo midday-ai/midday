@@ -14,9 +14,9 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { Footer } from "../../components/footer";
-import { GetStarted } from "../../components/get-started";
-import { Logo } from "../../components/logo";
+import { Footer } from "../components/footer";
+import { GetStarted } from "../components/get-started";
+import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
@@ -65,7 +65,7 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               Get started with Midday
             </Heading>
 
-            <Img
+            {/* <Img
               src={`${baseUrl}/financial-overview-header.png`}
               width="597"
               height="301"
@@ -158,7 +158,7 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
                   <Text className="text-[#707070]">Powered by OpenAI</Text>
                 </Column>
               </Row>
-            </Section>
+            </Section> */}
 
             <br />
 

@@ -13,10 +13,10 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { Column } from "../../components/column";
-import { Footer } from "../../components/footer";
-import { GetStarted } from "../../components/get-started";
-import { Logo } from "../../components/logo";
+import { Column } from "../components/column";
+import { Footer } from "../components/footer";
+import { GetStarted } from "../components/get-started";
+import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
@@ -27,9 +27,11 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const TimeTrackerEmail = ({
+  fullName = "Viktor Hofte",
+}: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
+  const text = `Hi ${firstName}, Boost your productivity with our advanced time-tracking tool. With insightful project overviews and seamless collaboration amongst your team, you’re set up for optimal efficiency.`;
 
   return (
     <Html>
@@ -62,20 +64,20 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Welcome to Midday
+              Time track your projects
             </Heading>
 
             <br />
 
             <Img
-              src={`${baseUrl}/financial-overview-header.png`}
-              alt="Overview"
+              src={`${baseUrl}/time-tracker-header.png`}
+              alt="Vault"
               className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
             />
 
             <Img
-              src={`${baseUrl}/financial-overview-header-dark.png`}
-              alt="Overview"
+              src={`${baseUrl}/time-tracker-header-dark.png`}
+              alt="Vault"
               className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
             />
 
@@ -83,10 +85,9 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              We connect to the majority of banks worldwide, making it easier
-              for you to keep track of all your expenses and income in one
-              place. Filter and compare different time periods to better track
-              your business.
+              Boost your productivity with our advanced time-tracking tool. With
+              insightful project overviews and seamless collaboration amongst
+              your team, you’re set up for optimal efficiency.
             </Text>
 
             <br />
@@ -94,28 +95,21 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
 
             <Section>
               <Column
-                title="Live profit/loss"
-                description="Keep track of your income and profit/loss. If you want you can export
-          the data for a shareable profit/loss."
-                imgSrc={`${baseUrl}/profit-loss.png`}
+                title="Create a project and invite"
+                description="Start by creating projects. If you have a larger team, no worries, invite them too."
+                imgSrc={`${baseUrl}/tracker-project.png`}
               />
 
               <Column
-                title="Spending"
-                description="Effortlessly boost productivity and collaboration with our
-                advanced time tracking solution: gain insightful project
-                overviews and foster seamless collaboration amongst your
-                team for optimal efficiency and success."
-                imgSrc={`${baseUrl}/spending.png`}
+                title="Track your hours"
+                description="Mark your days and fill in your tracking record. You can also add your hourly fee to be able to forecast earnings."
+                imgSrc={`${baseUrl}/tracker-log.png`}
               />
 
               <Column
-                title="Ask Midday anything"
-                description="Understand your biggest spendings and your biggest incomes.
-                Ask Midday to find transactions without receipts or see
-                revenue patterns."
-                footer="Powered by OpenAI"
-                imgSrc={`${baseUrl}/midday-ai.png`}
+                title="See total time spent"
+                description="Keep a great overview of your and your teams spent time. Connect those hours to your invoice later for your ease and as a bonus your client gets a great overview."
+                imgSrc={`${baseUrl}/tracker-overview.png`}
               />
             </Section>
 
@@ -133,4 +127,4 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   );
 };
 
-export default WelcomeEmail;
+export default TimeTrackerEmail;

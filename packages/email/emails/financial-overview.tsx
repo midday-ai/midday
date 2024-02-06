@@ -13,10 +13,10 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { Column } from "../../components/column";
-import { Footer } from "../../components/footer";
-import { GetStarted } from "../../components/get-started";
-import { Logo } from "../../components/logo";
+import { Column } from "../components/column";
+import { Footer } from "../components/footer";
+import { GetStarted } from "../components/get-started";
+import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
@@ -64,7 +64,7 @@ export const FinancialOverviewEmail = ({
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Welcome to Midday
+              Financial overview
             </Heading>
 
             <br />

@@ -13,10 +13,10 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { Column } from "../../components/column";
-import { Footer } from "../../components/footer";
-import { GetStarted } from "../../components/get-started";
-import { Logo } from "../../components/logo";
+import { Column } from "../components/column";
+import { Footer } from "../components/footer";
+import { GetStarted } from "../components/get-started";
+import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
@@ -27,11 +27,9 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const PreAccountingEmail = ({
-  fullName = "Viktor Hofte",
-}: OverviewProps) => {
+export const InboxEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Always have to dig up old receipts and invoices when your accountant asks for it? No more, with Midday everything is gathered, neatly structured and connected to transactions.`;
+  const text = `Hi ${firstName}, With your own personalised email address together with Midday AI, you get automatic matching of incoming invoices or receipts to the correct transaction. When it comes time to export, all of your transactions and attachments are ready to go.`;
 
   return (
     <Html>
@@ -64,21 +62,18 @@ export const PreAccountingEmail = ({
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Pre-accounting made easy for you <br />
-              and your accountants
+              Magic Inbox
             </Heading>
 
-            <br />
-
             <Img
-              src={`${baseUrl}/pre-accounting-header.png`}
-              alt="Vault"
+              src={`${baseUrl}/magic-inbox-header.png`}
+              alt="Overview"
               className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
             />
 
             <Img
-              src={`${baseUrl}/pre-accounting-header-dark.png`}
-              alt="Vault"
+              src={`${baseUrl}/magic-inbox-header-dark.png`}
+              alt="Overview"
               className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
             />
 
@@ -86,9 +81,10 @@ export const PreAccountingEmail = ({
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              Always have to dig up old receipts and invoices when your
-              accountant asks for it? No more, with Midday everything is
-              gathered, neatly structured and connected to transactions.
+              With your own personalised email address together with Midday AI,
+              you get automatic matching of incoming invoices or receipts to the
+              correct transaction. When it comes time to export, all of your
+              transactions and attachments are ready to go.
             </Text>
 
             <br />
@@ -96,21 +92,21 @@ export const PreAccountingEmail = ({
 
             <Section>
               <Column
-                title="Categorize your transactions"
-                description="Many transactions will automatically be categorized when added to Midday but sometimes you have to do it yourself. Midday will learn and be better with time. Everything to be able show better and better spending data."
-                imgSrc={`${baseUrl}/pre-accounting-categories.png`}
+                title="Use your personilized email"
+                description="Copy your personilized Midday email and add it as a receipient to any purchase or subscription."
+                imgSrc={`${baseUrl}/inbox-email.png`}
               />
 
               <Column
-                title="Use inbox or manually upload receipts"
-                description="Either you can use our magic inbox to automatically link receipts to your transactions or you can attach them yourself. In the end either will help you been on top and organized when your accountant is asking for them."
-                imgSrc={`${baseUrl}/pre-accounting-attachments.png`}
+                title="Automatic mapping to an existing transaction"
+                description="When the receipt or invoice is recieved, Midday automatically scans the invoice and finds the transaction. Voila, your transaction now has a the right attachment. "
+                imgSrc={`${baseUrl}/inbox-mapping.png`}
               />
 
               <Column
-                title="Export to your accountant"
-                description="Select any timeframe you want and export your transactions, now with the attached receipt or invoice. Midday will also notify you if you export something has a missing attachment."
-                imgSrc={`${baseUrl}/pre-accounting-export.png`}
+                title="Export"
+                description="Select any timeframe you want and export your transactions, now with the attached receipt or invoice."
+                imgSrc={`${baseUrl}/inbox-export.png`}
               />
             </Section>
 
@@ -128,4 +124,4 @@ export const PreAccountingEmail = ({
   );
 };
 
-export default PreAccountingEmail;
+export default InboxEmail;
