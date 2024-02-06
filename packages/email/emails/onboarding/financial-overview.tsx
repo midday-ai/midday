@@ -59,7 +59,7 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
 
         <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
           <br />
-          <Container className="border border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
+          <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Financial Overview
@@ -70,7 +70,7 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               width="597"
               height="301"
               alt="Overview"
-              className="my-0 mx-auto block dark:hidden"
+              className="my-0 mx-auto block dark:hidden w-auto"
             />
 
             <Img
@@ -78,7 +78,7 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               width="597"
               height="301"
               alt="Overview"
-              className="my-0 mx-auto hidden dark:block"
+              className="my-0 mx-auto hidden dark:block w-auto"
             />
 
             <span className="font-medium">Hi {firstName},</span>
