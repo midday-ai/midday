@@ -40,21 +40,25 @@ export const FinancialOverviewEmail = ({
           <meta name="color-scheme" content="light dark" />
           <meta name="supported-color-schemes" content="light dark" />
           <Font
-            fontFamily="Instrument Sans"
+            fontFamily="Geist"
             fallbackFontFamily="Helvetica"
             webFont={{
-              url: "https://fonts.gstatic.com/s/instrumentsans/v1/pxiTypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr0She1ZuWi3hKpA.woff2",
+              url: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.1/files/geist-sans-latin-400-normal.woff2",
               format: "woff2",
             }}
+            fontWeight={400}
+            fontStyle="normal"
           />
+
           <Font
-            fontFamily="Instrument Sans"
+            fontFamily="Geist"
             fallbackFontFamily="Helvetica"
             webFont={{
-              url: "https://fonts.gstatic.com/s/instrumentsans/v1/pximypc9vsFDm051Uf6KVwgkfoSxQ0GsQv8ToedPibnr-yp2JGEJOH9npST3-TfykywN2u7ZWwU.woff2",
+              url: "https://cdn.jsdelivr.net/npm/@fontsource/geist-sans@5.0.1/files/geist-sans-latin-500-normal.woff2",
               format: "woff2",
             }}
             fontWeight={500}
+            fontStyle="normal"
           />
         </Head>
         <Preview>{text}</Preview>
