@@ -28,7 +28,7 @@ const baseUrl =
 
 export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
+  const text = `Hi ${firstName}, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia lacus non fermentum commodo. Quisque accumsan varius finibus. Sed nibh felis, varius ultrices turpis non, pharetra feugiat odio. Integer pharetra sem at nunc commodo, et semper metus fringilla. Phasellus a condimentum erat. Suspendisse potenti. Sed lobortis, metus eu facilisis ullamcorper, mauris risus interdum magna, vitae commodo ante nunc vel nisl. Aliquam erat volutpat. Aliquam et egestas lacus, quis aliquam ipsum. Nam accumsan lorem nisi, a rutrum augue porttitor vel. In hac habitasse platea dictumst. Donec efficitur, nulla eget bibendum sollicitudin, neque ipsum interdum sem, non imperdiet est leo laoreet magna. Etiam urna ligula, vestibulum nec libero id, ultricies egestas lorem.`;
 
   return (
     <Html>
@@ -63,61 +63,45 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Welcome to Midday
             </Heading>
-            {/* 
-            <br />
-
-            <Img
-              src={`${baseUrl}/financial-overview-header.png`}
-              alt="Overview"
-              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
-            />
-
-            <Img
-              src={`${baseUrl}/financial-overview-header-dark.png`}
-              alt="Overview"
-              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
-            />
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              We connect to the majority of banks worldwide, making it easier
-              for you to keep track of all your expenses and income in one
-              place. Filter and compare different time periods to better track
-              your business.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras
+              lacinia lacus non fermentum commodo. Quisque accumsan varius
+              finibus. Sed nibh felis, varius ultrices turpis non, pharetra
+              feugiat odio. Integer pharetra sem at nunc commodo, et semper
+              metus fringilla. Phasellus a condimentum erat. Suspendisse
+              potenti. Sed lobortis, metus eu facilisis ullamcorper, mauris
+              risus interdum magna, vitae commodo ante nunc vel nisl. Aliquam
+              erat volutpat. Aliquam et egestas lacus, quis aliquam ipsum. Nam
+              accumsan lorem nisi, a rutrum augue porttitor vel. In hac
+              habitasse platea dictumst. Donec efficitur, nulla eget bibendum
+              sollicitudin, neque ipsum interdum sem, non imperdiet est leo
+              laoreet magna. Etiam urna ligula, vestibulum nec libero id,
+              ultricies egestas lorem.
             </Text>
 
             <br />
+
+            <Img
+              src={`${baseUrl}/founders.jpg`}
+              alt="Founders"
+              className="my-0 mx-auto block w-full"
+            />
+
+            <Text className="text-[#707070] dark:text-[#878787]">
+              Best regards, founders
+            </Text>
+
+            <Img
+              src={`${baseUrl}/signature-dark.png`}
+              alt="Signature"
+              className="block w-full w-[143px] h-[20px]"
+            />
+
             <br />
-
-            <Section>
-              <Column
-                title="Live profit/loss"
-                description="Keep track of your income and profit/loss. If you want you can export
-          the data for a shareable profit/loss."
-                imgSrc={`${baseUrl}/profit-loss.png`}
-              />
-
-              <Column
-                title="Spending"
-                description="Effortlessly boost productivity and collaboration with our
-                advanced time tracking solution: gain insightful project
-                overviews and foster seamless collaboration amongst your
-                team for optimal efficiency and success."
-                imgSrc={`${baseUrl}/spending.png`}
-              />
-
-              <Column
-                title="Ask Midday anything"
-                description="Understand your biggest spendings and your biggest incomes.
-                Ask Midday to find transactions without receipts or see
-                revenue patterns."
-                footer="Powered by OpenAI"
-                imgSrc={`${baseUrl}/midday-ai.png`}
-              />
-            </Section> */}
-
             <br />
 
             <GetStarted />

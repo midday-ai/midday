@@ -1,6 +1,5 @@
 import {
   Body,
-  Column,
   Container,
   Font,
   Head,
@@ -14,6 +13,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { Column } from "../components/column";
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
@@ -27,9 +27,11 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const GetStartedEmail = ({
+  fullName = "Viktor Hofte",
+}: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
+  const text = `Hi ${firstName}, Lets get started! Follow the steps below and you’ll be up to speed in no time.`;
 
   return (
     <Html>
@@ -65,100 +67,56 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               Get started with Midday
             </Heading>
 
-            {/* <Img
-              src={`${baseUrl}/financial-overview-header.png`}
-              width="597"
-              height="301"
-              alt="Overview"
-              className="my-0 mx-auto block dark:hidden"
+            <br />
+
+            <Img
+              src={`${baseUrl}/get-started-header.png`}
+              alt="Get Started"
+              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
             />
 
             <Img
-              src={`${baseUrl}/financial-overview-header-dark.png`}
-              width="597"
-              height="301"
-              alt="Overview"
-              className="my-0 mx-auto hidden dark:block"
+              src={`${baseUrl}/get-started-header-dark.png`}
+              alt="Get Started"
+              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
             />
+
+            <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              We connect to the majority of banks worldwide, making it easier
-              for you to keep track of all your expenses and income in one
-              place. Filter and compare different time periods to better track
-              your business.
+              Lets get started! Follow the steps below and you’ll be up to speed
+              in no time.
             </Text>
 
             <br />
             <br />
 
             <Section>
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/profit-loss.png`}
-                    width="245"
-                    height="159"
-                    alt="Profit/Loss"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">
-                    Live profit/loss
-                  </Text>
-                  <Text className="text-[#707070]">
-                    Keep track of your income and profit/loss. If you want you
-                    can export the data for a shareable profit/loss.
-                  </Text>
-                </Column>
-              </Row>
-              <br />
+              <Column
+                title="Invite your team"
+                description="Invite your team or a collegue that you think should have access to Midday."
+                imgSrc={`${baseUrl}/get-started-invite.png`}
+              />
 
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/spending.png`}
-                    width="245"
-                    height="159"
-                    alt="Spending"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">Spending</Text>
-                  <Text className="text-[#707070]">
-                    Effortlessly boost productivity and collaboration with our
-                    advanced time tracking solution: gain insightful project
-                    overviews and foster seamless collaboration amongst your
-                    team for optimal efficiency and success.
-                  </Text>
-                </Column>
-              </Row>
+              <Column
+                title="Connect your bank"
+                description="In order to get insights of your income, profit and loss, spending as well as the rest of financial overview you can connect your bank."
+                imgSrc={`${baseUrl}/get-started-connect.png`}
+              />
 
-              <br />
+              <Column
+                title="Run your bussiness smarter"
+                description="Midday helps you see your bussiness full financial picture, track your projects with ease, see forecasted earnings, store important documents and takes the hassle out of preparing exports for your accountant"
+                imgSrc={`${baseUrl}/get-started-overview.png`}
+              />
 
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/midday-ai.png`}
-                    width="245"
-                    height="159"
-                    alt="Midday AI"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">
-                    Ask Midday anything
-                  </Text>
-                  <Text className="text-[#707070]">
-                    Understand your biggest spendings and your biggest incomes.
-                    Ask Midday to find transactions without receipts or see
-                    revenue patterns.
-                  </Text>
-
-                  <Text className="text-[#707070]">Powered by OpenAI</Text>
-                </Column>
-              </Row>
-            </Section> */}
+              <Column
+                title="Download Mac app"
+                description="We like apps alot so we made Midday into one. We’ve tailored it as much as we can for a native experince but feel free to reach out if you find bugs or parts we can do better."
+                imgSrc={`${baseUrl}/get-started-download.png`}
+              />
+            </Section>
 
             <br />
 
@@ -174,4 +132,4 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   );
 };
 
-export default OverviewEmail;
+export default GetStartedEmail;
