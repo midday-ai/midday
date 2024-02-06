@@ -1,6 +1,5 @@
 import {
   Body,
-  Column,
   Container,
   Font,
   Head,
@@ -14,6 +13,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { Column } from "../../components/column";
 import { Footer } from "../../components/footer";
 import { GetStarted } from "../../components/get-started";
 import { Logo } from "../../components/logo";
@@ -27,9 +27,11 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const PreAccountingEmail = ({
+  fullName = "Viktor Hofte",
+}: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
+  const text = `Hi ${firstName}, Always have to dig up old receipts and invoices when your accountant asks for it? No more, with Midday everything is gathered, neatly structured and connected to transactions.`;
 
   return (
     <Html>
@@ -62,102 +64,54 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Pre-Accounting
+              Pre-accounting made easy for you <br />
+              and your accountants
             </Heading>
 
+            <br />
+
             <Img
-              src={`${baseUrl}/financial-overview-header.png`}
-              width="597"
-              height="301"
-              alt="Overview"
-              className="my-0 mx-auto block dark:hidden"
+              src={`${baseUrl}/pre-accounting-header.png`}
+              alt="Vault"
+              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
             />
 
             <Img
-              src={`${baseUrl}/financial-overview-header-dark.png`}
-              width="597"
-              height="301"
-              alt="Overview"
-              className="my-0 mx-auto hidden dark:block"
+              src={`${baseUrl}/pre-accounting-header-dark.png`}
+              alt="Vault"
+              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
             />
+
+            <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              We connect to the majority of banks worldwide, making it easier
-              for you to keep track of all your expenses and income in one
-              place. Filter and compare different time periods to better track
-              your business.
+              Always have to dig up old receipts and invoices when your
+              accountant asks for it? No more, with Midday everything is
+              gathered, neatly structured and connected to transactions.
             </Text>
 
             <br />
             <br />
 
             <Section>
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/profit-loss.png`}
-                    width="245"
-                    height="159"
-                    alt="Profit/Loss"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">
-                    Live profit/loss
-                  </Text>
-                  <Text className="text-[#707070]">
-                    Keep track of your income and profit/loss. If you want you
-                    can export the data for a shareable profit/loss.
-                  </Text>
-                </Column>
-              </Row>
-              <br />
+              <Column
+                title="Categorize your transactions"
+                description="Many transactions will automatically be categorized when added to Midday but sometimes you have to do it yourself. Midday will learn and be better with time. Everything to be able show better and better spending data."
+                imgSrc={`${baseUrl}/pre-accounting-categories.png`}
+              />
 
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/spending.png`}
-                    width="245"
-                    height="159"
-                    alt="Spending"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">Spending</Text>
-                  <Text className="text-[#707070]">
-                    Effortlessly boost productivity and collaboration with our
-                    advanced time tracking solution: gain insightful project
-                    overviews and foster seamless collaboration amongst your
-                    team for optimal efficiency and success.
-                  </Text>
-                </Column>
-              </Row>
+              <Column
+                title="Use inbox or manually upload receipts"
+                description="Either you can use our magic inbox to automatically link receipts to your transactions or you can attach them yourself. In the end either will help you been on top and organized when your accountant is asking for them."
+                imgSrc={`${baseUrl}/pre-accounting-attachments.png`}
+              />
 
-              <br />
-
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/midday-ai.png`}
-                    width="245"
-                    height="159"
-                    alt="Midday AI"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">
-                    Ask Midday anything
-                  </Text>
-                  <Text className="text-[#707070]">
-                    Understand your biggest spendings and your biggest incomes.
-                    Ask Midday to find transactions without receipts or see
-                    revenue patterns.
-                  </Text>
-
-                  <Text className="text-[#707070]">Powered by OpenAI</Text>
-                </Column>
-              </Row>
+              <Column
+                title="Export to your accountant"
+                description="Select any timeframe you want and export your transactions, now with the attached receipt or invoice. Midday will also notify you if you export something has a missing attachment."
+                imgSrc={`${baseUrl}/pre-accounting-export.png`}
+              />
             </Section>
 
             <br />
@@ -174,4 +128,4 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   );
 };
 
-export default OverviewEmail;
+export default PreAccountingEmail;

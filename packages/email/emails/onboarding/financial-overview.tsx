@@ -1,6 +1,5 @@
 import {
   Body,
-  Column,
   Container,
   Font,
   Head,
@@ -14,6 +13,7 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
+import { Column } from "../../components/column";
 import { Footer } from "../../components/footer";
 import { GetStarted } from "../../components/get-started";
 import { Logo } from "../../components/logo";
@@ -27,7 +27,9 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const FinancialOverviewEmail = ({
+  fullName = "Viktor Hofte",
+}: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
 
@@ -62,24 +64,24 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Financial Overview
+              Welcome to Midday
             </Heading>
+
+            <br />
 
             <Img
               src={`${baseUrl}/financial-overview-header.png`}
-              width="597"
-              height="301"
               alt="Overview"
-              className="my-0 mx-auto block dark:hidden w-auto"
+              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
             />
 
             <Img
               src={`${baseUrl}/financial-overview-header-dark.png`}
-              width="597"
-              height="301"
               alt="Overview"
-              className="my-0 mx-auto hidden dark:block w-auto"
+              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
             />
+
+            <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
@@ -93,71 +95,30 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
             <br />
 
             <Section>
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/profit-loss.png`}
-                    width="245"
-                    height="159"
-                    alt="Profit/Loss"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">
-                    Live profit/loss
-                  </Text>
-                  <Text className="text-[#707070]">
-                    Keep track of your income and profit/loss. If you want you
-                    can export the data for a shareable profit/loss.
-                  </Text>
-                </Column>
-              </Row>
-              <br />
+              <Column
+                title="Live profit/loss"
+                description="Keep track of your income and profit/loss. If you want you can export
+          the data for a shareable profit/loss."
+                imgSrc={`${baseUrl}/profit-loss.png`}
+              />
 
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/spending.png`}
-                    width="245"
-                    height="159"
-                    alt="Spending"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">Spending</Text>
-                  <Text className="text-[#707070]">
-                    Effortlessly boost productivity and collaboration with our
-                    advanced time tracking solution: gain insightful project
-                    overviews and foster seamless collaboration amongst your
-                    team for optimal efficiency and success.
-                  </Text>
-                </Column>
-              </Row>
+              <Column
+                title="Spending"
+                description="Effortlessly boost productivity and collaboration with our
+                advanced time tracking solution: gain insightful project
+                overviews and foster seamless collaboration amongst your
+                team for optimal efficiency and success."
+                imgSrc={`${baseUrl}/spending.png`}
+              />
 
-              <br />
-
-              <Row>
-                <Column className="mr-4 block">
-                  <Img
-                    src={`${baseUrl}/midday-ai.png`}
-                    width="245"
-                    height="159"
-                    alt="Midday AI"
-                  />
-                </Column>
-                <Column className="align-top">
-                  <Text className="pt-0 mt-0 font-medium">
-                    Ask Midday anything
-                  </Text>
-                  <Text className="text-[#707070]">
-                    Understand your biggest spendings and your biggest incomes.
-                    Ask Midday to find transactions without receipts or see
-                    revenue patterns.
-                  </Text>
-
-                  <Text className="text-[#707070]">Powered by OpenAI</Text>
-                </Column>
-              </Row>
+              <Column
+                title="Ask Midday anything"
+                description="Understand your biggest spendings and your biggest incomes.
+                Ask Midday to find transactions without receipts or see
+                revenue patterns."
+                footer="Powered by OpenAI"
+                imgSrc={`${baseUrl}/midday-ai.png`}
+              />
             </Section>
 
             <br />
@@ -174,4 +135,4 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   );
 };
 
-export default OverviewEmail;
+export default FinancialOverviewEmail;

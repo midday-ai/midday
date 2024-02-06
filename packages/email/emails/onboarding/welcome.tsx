@@ -65,6 +65,8 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               Welcome to Midday
             </Heading>
 
+            <br />
+
             <Img
               src={`${baseUrl}/financial-overview-header.png`}
               alt="Overview"
