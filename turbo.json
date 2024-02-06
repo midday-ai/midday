@@ -7,7 +7,7 @@
 		},
 		"build": {
 			"dependsOn": ["^build"],
-			"outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
+			"outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**", "storybook-static/**"]
 		},
 		"start": {
 			"cache": false
