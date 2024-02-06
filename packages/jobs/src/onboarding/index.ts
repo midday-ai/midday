@@ -39,7 +39,7 @@ client.defineJob({
     const welcome = await io.resend.emails.send("welcome", {
       to: payload.email,
       subject: "Welcome to Midday",
-      from: "pontus@midday.ai",
+      from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(WelcomeEmail({ fullName: payload.fullName })),
     });
 
@@ -48,7 +48,7 @@ client.defineJob({
     const getStarted = await io.resend.emails.send("get-started", {
       to: payload.email,
       subject: "Get Started",
-      from: "pontus@midday.ai",
+      from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(GetStartedEmail({ fullName: payload.fullName })),
     });
 
@@ -59,7 +59,7 @@ client.defineJob({
       {
         to: payload.email,
         subject: "Financial Overview",
-        from: "pontus@midday.ai",
+        from: "Pontus from Midday <pontus@midday.ai>",
         html: await renderAsync(
           FinancialOverViewEmail({ fullName: payload.fullName })
         ),
@@ -71,7 +71,7 @@ client.defineJob({
     const magicInbox = await io.resend.emails.send("magic-inbox", {
       to: payload.email,
       subject: "Magic Inbox",
-      from: "pontus@midday.ai",
+      from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(InboxEmail({ fullName: payload.fullName })),
     });
 
@@ -80,7 +80,7 @@ client.defineJob({
     const preAccounting = await io.resend.emails.send("pre-accounting", {
       to: payload.email,
       subject: "Pre-Accounting",
-      from: "pontus@midday.ai",
+      from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
         PreAccountingEmail({ fullName: payload.fullName })
       ),
@@ -91,7 +91,7 @@ client.defineJob({
     const vault = await io.resend.emails.send("vault", {
       to: payload.email,
       subject: "Store your files securely",
-      from: "pontus@midday.ai",
+      from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(VaultEmail({ fullName: payload.fullName })),
     });
 
@@ -100,7 +100,7 @@ client.defineJob({
     const timeTracker = await io.resend.emails.send("time-tracker", {
       to: payload.email,
       subject: "Time track your projects",
-      from: "pontus@midday.ai",
+      from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(TimeTrackEmail({ fullName: payload.fullName })),
     });
 
