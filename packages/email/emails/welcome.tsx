@@ -57,7 +57,6 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
         <Preview>{text}</Preview>
 
         <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
-          <br />
           <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[600px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
