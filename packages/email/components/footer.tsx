@@ -1,5 +1,6 @@
 import {
   Column,
+  Heading,
   Hr,
   Img,
   Link,
@@ -8,6 +9,7 @@ import {
   Text,
 } from "@react-email/components";
 import React from "react";
+import { TripleColumn, SingleColumn } from "responsive-react-email";
 
 type Props = {
   baseUrl?: string;
@@ -15,7 +17,7 @@ type Props = {
 
 export function Footer({ baseUrl }: Props) {
   return (
-    <Section>
+    <Section className="w-full">
       <Hr className="dark:border-[#242424]" />
 
       <br />
@@ -26,9 +28,12 @@ export function Footer({ baseUrl }: Props) {
 
       <br />
 
-      <div className="text-[0]">
-        <div className="inline-block w-full md:w-1/3 lg:w-1/3 align-top">
-          <div>
+      <TripleColumn
+        pX={0}
+        pY={0}
+        styles={{ textAlign: "left" }}
+        columnOneContent={
+          <Section className="text-left p-0 m-0">
             <Row>
               <Text className="font-medium">Product</Text>
             </Row>
@@ -57,10 +62,11 @@ export function Footer({ baseUrl }: Props) {
                 Download
               </Link>
             </Row>
-          </div>
-        </div>
-        <div className="inline-block w-full md:w-1/3 lg:w-1/3 align-top">
-          <div>
+          </Section>
+        }
+        columnOneStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
+        columnTwoContent={
+          <Section className="text-left p-0 m-0">
             <Row>
               <Text className="font-medium">Resources</Text>
             </Row>
@@ -89,10 +95,11 @@ export function Footer({ baseUrl }: Props) {
                 Privacy policy
               </Link>
             </Row>
-          </div>
-        </div>
-        <div className="inline-block w-full md:w-1/3 lg:w-1/3 align-top">
-          <div>
+          </Section>
+        }
+        columnTwoStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
+        columnThreeContent={
+          <Section className="text-left p-0 m-0">
             <Row>
               <Text className="font-medium">Solutions</Text>
             </Row>
@@ -116,9 +123,10 @@ export function Footer({ baseUrl }: Props) {
                 OSS Friends
               </Link>
             </Row>
-          </div>
-        </div>
-      </div>
+          </Section>
+        }
+        columnThreeStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
+      />
 
       <br />
       <br />

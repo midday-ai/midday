@@ -81,7 +81,7 @@ export const InviteEmail = ({
         <Preview>{t("invite.preview", { teamName })}</Preview>
 
         <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
-          <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
+          <Container className="border-0 md:border-1 border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[600px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="mx-0 my-[30px] p-0 text-[24px] font-normal text-[#121212] dark:text-[#F5F5F3] text-center">
               {t("invite.title1")} <strong>{teamName}</strong>{" "}

@@ -16,7 +16,8 @@
     "@react-email/components": "0.0.14",
     "@react-email/tailwind": "0.0.14",
     "date-fns": "^3.3.1",
-    "react-email": "2.0.0"
+    "react-email": "2.0.0",
+    "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
     "typescript": "^5.3.3"

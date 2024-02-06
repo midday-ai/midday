@@ -1,4 +1,10 @@
-import { Column as TwColumn, Img, Row, Text } from "@react-email/components";
+import {
+  Column as TwColumn,
+  Img,
+  Row,
+  Text,
+  Section,
+} from "@react-email/components";
 import React from "react";
 
 type Props = {
@@ -8,17 +14,21 @@ type Props = {
   footer?: string;
 };
 
-export function Column({ title, description, imgSrc, footer }: Props) {
+export function Column({ title, description, footer, imgSrc }: Props) {
   return (
-    <Row className="mb-8">
-      <TwColumn className="md:mr-6 block w-full">
-        <Img src={imgSrc} alt={title} className="md:w-[245px] w-full" />
-      </TwColumn>
-      <TwColumn className="align-top w-full mt-4 block md:table-cell">
-        <Text className="pt-0 m-0 font-medium">{title}</Text>
-        <Text className="text-[#707070] p-0 m-0">{description}</Text>
-        <Text className="text-[#707070] p-0 mt-2">{footer}</Text>
-      </TwColumn>
-    </Row>
+    <Section className="text-left p-0 m-0 text-left">
+      <Section className="p-0 m-0 w-full w-full w-[265px] inline-block align-top box-border mb-4 md:mb-0 text-left">
+        <Section className="text-left p-0 m-0 pb-10">
+          <Img src={imgSrc} alt={title} className="w-[245px]" />
+        </Section>
+      </Section>
+      <Section className="inline-block align-top box-border w-full w-[280px] text-left">
+        <Section className="text-left p-0 m-0">
+          <Text className="pt-0 m-0 font-medium mb-2">{title}</Text>
+          <Text className="text-[#707070] p-0 m-0">{description}</Text>
+          <Text className="text-[#707070] p-0 mt-2">{footer}</Text>
+        </Section>
+      </Section>
+    </Section>
   );
 }
