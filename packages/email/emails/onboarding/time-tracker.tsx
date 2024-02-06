@@ -27,7 +27,7 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
 
@@ -62,7 +62,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
           <Container className="border border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Welcome to Midday
+              Time Tracker
             </Heading>
 
             <Img
@@ -174,4 +174,4 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   );
 };
 
-export default WelcomeEmail;
+export default OverviewEmail;

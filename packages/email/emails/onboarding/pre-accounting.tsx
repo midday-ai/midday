@@ -62,7 +62,7 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
           <Container className="border border-solid border-[#E8E7E1] dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[560px]">
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Financial Overview
+              Pre-Accounting
             </Heading>
 
             <Img
@@ -70,7 +70,15 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               width="597"
               height="301"
               alt="Overview"
-              className="my-0 mx-auto"
+              className="my-0 mx-auto block dark:hidden"
+            />
+
+            <Img
+              src={`${baseUrl}/financial-overview-header-dark.png`}
+              width="597"
+              height="301"
+              alt="Overview"
+              className="my-0 mx-auto hidden dark:block"
             />
 
             <span className="font-medium">Hi {firstName},</span>
@@ -152,7 +160,11 @@ export const OverviewEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               </Row>
             </Section>
 
+            <br />
+
             <GetStarted />
+
+            <br />
 
             <Footer baseUrl={baseUrl} />
           </Container>

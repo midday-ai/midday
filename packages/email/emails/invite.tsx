@@ -115,8 +115,7 @@ export const InviteEmail = ({
               </Link>
             </Text>
 
-            <Hr className="border-0 border-b-[1px] border-solid border-[#E8E7E1] my-[45px] mx-0 w-full dark:border-[#242424]" />
-
+            <br />
             <Section>
               <Text className="text-[12px] leading-[24px] text-[#666666]">
                 {t("invite.footer1")}{" "}
@@ -132,6 +131,8 @@ export const InviteEmail = ({
                 . {t("invite.footer4")}
               </Text>
             </Section>
+
+            <br />
 
             <Footer baseUrl={baseUrl} />
           </Container>

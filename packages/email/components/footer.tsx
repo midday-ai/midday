@@ -125,38 +125,46 @@ export function Footer({ baseUrl }: Props) {
 
       <Row>
         <Column className="align-middle w-[40px]">
-          <Img
-            src={`${baseUrl}/x.png`}
-            width="22"
-            height="22"
-            alt="Midday on X"
-          />
+          <Link href="https://go.midday.ai/lS72Toq">
+            <Img
+              src={`${baseUrl}/x.png`}
+              width="22"
+              height="22"
+              alt="Midday on X"
+            />
+          </Link>
         </Column>
         <Column className="align-middle w-[40px]">
-          <Img
-            src={`${baseUrl}/producthunt.png`}
-            width="22"
-            height="22"
-            alt="Midday on Producthunt"
-          />
+          <Link href="https://go.midday.ai/7rhA3rz">
+            <Img
+              src={`${baseUrl}/producthunt.png`}
+              width="22"
+              height="22"
+              alt="Midday on Producthunt"
+            />
+          </Link>
         </Column>
 
         <Column className="align-middle w-[40px]">
-          <Img
-            src={`${baseUrl}/discord.png`}
-            width="22"
-            height="22"
-            alt="Midday on Discord"
-          />
+          <Link href="https://go.midday.ai/anPiuRx">
+            <Img
+              src={`${baseUrl}/discord.png`}
+              width="22"
+              height="22"
+              alt="Midday on Discord"
+            />
+          </Link>
         </Column>
 
         <Column className="align-middle">
-          <Img
-            src={`${baseUrl}/github.png`}
-            width="22"
-            height="22"
-            alt="Midday on Github"
-          />
+          <Link href="https://go.midday.ai/UmCgADb">
+            <Img
+              src={`${baseUrl}/github.png`}
+              width="22"
+              height="22"
+              alt="Midday on Github"
+            />
+          </Link>
         </Column>
       </Row>
 
@@ -174,20 +182,22 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Img
-          src={`${baseUrl}/logo-footer.png`}
-          width="100"
-          height="28"
-          alt="Midday"
-          className="visible dark:invisible"
-        />
-        <Img
-          src={`${baseUrl}/logo-footer-dark.png`}
-          width="100"
-          height="28"
-          alt="Midday"
-          className="invisible dark:visible"
-        />
+        <Link href="https://go.midday.ai/FZwOHud">
+          <Img
+            src={`${baseUrl}/logo-footer.png`}
+            width="100"
+            height="28"
+            alt="Midday"
+            className="block dark:hidden"
+          />
+          <Img
+            src={`${baseUrl}/logo-footer-dark.png`}
+            width="100"
+            height="28"
+            alt="Midday"
+            className="hidden dark:block"
+          />
+        </Link>
       </Row>
     </Section>
   );
