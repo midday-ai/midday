@@ -16,7 +16,7 @@ export function Logo({ baseUrl }) {
         width="45"
         height="45"
         alt="Midday"
-        className="my-0 mx-auto invisible dark:visibl"
+        className="my-0 mx-auto invisible dark:visible"
       />
     </Section>
   );
