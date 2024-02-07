@@ -46,7 +46,7 @@ export function UserAvatar({ userId, avatarUrl, fullName }) {
         </CardHeader>
 
         <Avatar
-          className="rounded-full w-16 h-16 flex items-center justify-center bg-muted cursor-pointer"
+          className="rounded-full w-16 h-16 flex items-center justify-center bg-accent cursor-pointer"
           onClick={() => inputRef?.current?.click()}
         >
           {isLoading ? (

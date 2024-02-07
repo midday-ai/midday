@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 function EmptyState({ description }) {
   return (
     <div className="h-[460px] flex items-center justify-center flex-col space-y-4">
-      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+      <div className="w-12 h-12 rounded-full bg-accent flex items-center justify-center">
         <Icons.Inbox size={18} />
       </div>
       <p className="text-[#606060] text-sm">{description}</p>
@@ -200,7 +200,7 @@ export function NotificationCenter() {
             <Button
               variant="secondary"
               size="icon"
-              className="rounded-full bg-ransparent hover:bg-muted"
+              className="rounded-full bg-ransparent hover:bg-accent"
               onClick={() => setOpen(false)}
             >
               <Icons.SettingsCog className="text-[#606060]" size={16} />

@@ -28,7 +28,7 @@ export function CopyInput({ value, className }: Props) {
   return (
     <div
       className={cn(
-        "flex items-center relative w-full rounded-md border border-input py-2 px-4",
+        "flex items-center relative w-full rounded-md border border py-2 px-4",
         className
       )}
     >

@@ -159,7 +159,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                     <FormLabel>Hourly Rate</FormLabel>
                     <FormControl>
                       <CurrencyInput
-                        className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none"
+                        className="flex h-9 w-full rounded-md border border bg-transparent px-3 py-2 text-sm focus-visible:outline-none"
                         onValueChange={(values) => {
                           field.onChange(values.floatValue);
                         }}

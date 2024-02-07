@@ -18,7 +18,7 @@ export function BackButton() {
         <TooltipTrigger asChild>
           <button
             type="button"
-            className="items-center rounded border bg-muted p-1"
+            className="items-center rounded border bg-accent p-1"
             onClick={() => setMenu(MenuOption.Root)}
           >
             <Icons.ArrowBack />
@@ -30,10 +30,10 @@ export function BackButton() {
           side="left"
         >
           <div className="flex items-center space-x-1 mr-2">
-            <kbd className="rounded border bg-muted px-1.5 font-mono">
+            <kbd className="rounded border bg-accent px-1.5 font-mono">
               <span className="text-[9px]">ctrl</span>
             </kbd>
-            <kbd className="rounded border bg-muted px-1.5 font-mono text-[12px]">
+            <kbd className="rounded border bg-accent px-1.5 font-mono text-[12px]">
               <span>⌫</span>
             </kbd>
           </div>

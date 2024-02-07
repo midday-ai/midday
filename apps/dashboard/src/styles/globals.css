@@ -93,7 +93,7 @@ body {
 
 .pin-field {
   border: 1px solid hsl(var(--border));
-  background-color: hsl(var(--secondary));
+  background-color: hsl(var(--accent));
   border-right: none;
   font-size: 2rem;
   height: 4rem;

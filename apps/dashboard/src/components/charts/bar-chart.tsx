@@ -4,6 +4,7 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { format } from "date-fns";
+import { useTheme } from "next-themes";
 import {
   Bar,
   BarChart as BaseBarChart,
@@ -40,7 +41,7 @@ const ToolTipContent = ({ payload = {} }) => {
       <div className="p-4">
         <div className="flex justify-between mb-2">
           <div className="flex items-center justify-center space-x-2">
-            <div className="w-[8px] h-[8px] rounded-full bg-[#F5F5F3]" />
+            <div className="w-[8px] h-[8px] rounded-full bg-[#121212] dark:bg-[#F5F5F3]" />
             <p className="font-medium text-[13px]">
               {formatAmount({
                 maximumFractionDigits: 0,
@@ -66,7 +67,7 @@ const ToolTipContent = ({ payload = {} }) => {
 
         <div className="flex justify-between">
           <div className="flex items-center justify-center space-x-2">
-            <div className="w-[8px] h-[8px] rounded-full bg-[#606060]" />
+            <div className="w-[8px] h-[8px] rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
             <p className="font-medium text-[13px]">
               {formatAmount({
                 amount: previous?.payload?.previous.value || 0,
@@ -97,6 +98,7 @@ const ToolTipContent = ({ payload = {} }) => {
 export function BarChart({ data }) {
   const locale = useCurrentLocale();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { theme } = useTheme();
 
   const formattedData = data.result.map((item) => ({
     ...item,
@@ -111,11 +113,11 @@ export function BarChart({ data }) {
     <div className="relative">
       <div className="flex space-x-4 absolute right-0 -top-10 hidden md:flex">
         <div className="flex space-x-2 items-center">
-          <span className="w-2 h-2 rounded-full bg-[#F5F5F3]" />
-          <span className="text-sm text-[#606060]">Chosen Period</span>
+          <span className="w-2 h-2 rounded-full bg-[#121212] dark:bg-[#F5F5F3]" />
+          <span className="text-sm text-[#606060]">Current Period</span>
         </div>
         <div className="flex space-x-2 items-center">
-          <span className="w-2 h-2 rounded-full bg-[#606060]" />
+          <span className="w-2 h-2 rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
           <span className="text-sm text-[#606060]">Last Period</span>
         </div>
       </div>
@@ -170,7 +172,7 @@ export function BarChart({ data }) {
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
-            stroke="#2C2C2C"
+            stroke={theme === "dark" ? "#2C2C2C" : "#DCDAD2"}
           />
           <Tooltip content={ToolTipContent} cursor={false} />
 
@@ -178,7 +180,13 @@ export function BarChart({ data }) {
             {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={+entry.previous.value > 0 ? "#323232" : "#41191A"}
+                fill={
+                  +entry.previous.value > 0
+                    ? theme === "dark"
+                      ? "#323232"
+                      : "#C6C6C6"
+                    : "#41191A"
+                }
               />
             ))}
           </Bar>
@@ -187,7 +195,13 @@ export function BarChart({ data }) {
             {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={+entry.current.value > 0 ? "#F5F5F3" : "#FF3638"}
+                fill={
+                  +entry.current.value > 0
+                    ? theme === "dark"
+                      ? "#F5F5F3"
+                      : "#121212"
+                    : "#FF3638"
+                }
               />
             ))}
           </Bar>

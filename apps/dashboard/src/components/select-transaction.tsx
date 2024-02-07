@@ -93,7 +93,7 @@ export function SelectTransaction({
     id: item.id,
     name: item.name,
     component: () => (
-      <div className="text-white flex w-full">
+      <div className="dark:text-white flex w-full">
         <div className="w-[50%] line-clamp-1 text-ellipsis overflow-hidden pr-8">
           {item.name}
         </div>

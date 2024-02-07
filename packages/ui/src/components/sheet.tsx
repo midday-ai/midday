@@ -62,7 +62,7 @@ const SheetContent = React.forwardRef<
       className={cn(sheetVariants({ side }), className)}
       {...props}
     >
-      <div className="border w-full h-full bg-[#121212] rounded-xl p-6 relative overflow-hidden">
+      <div className="border w-full h-full bg-[#FAFAF9] dark:bg-[#121212] rounded-xl p-6 relative overflow-hidden">
         {children}
       </div>
     </SheetPrimitive.Content>

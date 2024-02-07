@@ -67,7 +67,7 @@ export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
             className={cn(
               "flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all",
               selectedId === item.id &&
-                "bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]"
+                "bg-accent border-[#DCDAD2] dark:border-[#2C2C2C]"
             )}
           >
             <div className="flex w-full flex-col gap-1">
