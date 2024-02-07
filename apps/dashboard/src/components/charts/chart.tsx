@@ -16,8 +16,8 @@ export async function Chart({ value, defaultValue, disabled }) {
     data?.result[data.result?.length - 1]?.current?.value;
 
   return (
-    <div className="relative mt-28">
-      <div className="absolute -top-[110px] space-y-2">
+    <div className="relative mt-32">
+      <div className="absolute -top-[120px] space-y-2">
         <h1 className={cn("text-3xl", disabled && "skeleton-box")}>
           <Counter
             value={data.summary.currentTotal}
