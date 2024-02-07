@@ -2,13 +2,10 @@ import {
   Body,
   Container,
   Font,
-  Head,
   Heading,
   Html,
   Img,
   Preview,
-  Row,
-  Section,
   Tailwind,
   Text,
 } from "@react-email/components";
@@ -33,7 +30,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   return (
     <Html>
       <Tailwind>
-        <Head>
+        <head>
           <meta name="color-scheme" content="light dark" />
           <meta name="supported-color-schemes" content="light dark" />
 
@@ -58,7 +55,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
             fontWeight={500}
             fontStyle="normal"
           />
-        </Head>
+        </head>
         <Preview>{text}</Preview>
 
         <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">

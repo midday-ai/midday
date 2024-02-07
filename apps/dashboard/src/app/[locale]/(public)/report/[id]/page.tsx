@@ -1,5 +1,4 @@
 import { BarChart } from "@/components/charts/bar-chart";
-import { Chart } from "@/components/charts/chart";
 import { Counter } from "@/components/counter";
 import { getMetricsQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
@@ -19,7 +18,7 @@ export async function generateMetadata({ params }): Promise<Metadata> {
     .single();
 
   if (error) {
-    return;
+    return {};
   }
 
   const period = `${format(new Date(data.from), "LLL dd, y")} - ${format(

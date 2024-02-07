@@ -5,12 +5,9 @@ import {
   Font,
   Head,
   Heading,
-  Hr,
   Html,
-  Img,
   Link,
   Preview,
-  Row,
   Section,
   Tailwind,
   Text,
@@ -57,7 +54,7 @@ export const InviteEmail = ({
   return (
     <Html>
       <Tailwind>
-        <Head>
+        <head>
           <meta name="color-scheme" content="light dark" />
           <meta name="supported-color-schemes" content="light dark" />
           <Font
@@ -81,7 +78,7 @@ export const InviteEmail = ({
             fontWeight={500}
             fontStyle="normal"
           />
-        </Head>
+        </head>
         <Preview>{t("invite.preview", { teamName })}</Preview>
 
         <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">

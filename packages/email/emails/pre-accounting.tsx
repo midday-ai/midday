@@ -7,7 +7,6 @@ import {
   Html,
   Img,
   Preview,
-  Row,
   Section,
   Tailwind,
   Text,
@@ -36,7 +35,7 @@ export const PreAccountingEmail = ({
   return (
     <Html>
       <Tailwind>
-        <Head>
+        <head>
           <meta name="color-scheme" content="light dark" />
           <meta name="supported-color-schemes" content="light dark" />
           <Font
@@ -60,7 +59,7 @@ export const PreAccountingEmail = ({
             fontWeight={500}
             fontStyle="normal"
           />
-        </Head>
+        </head>
         <Preview>{text}</Preview>
 
         <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
