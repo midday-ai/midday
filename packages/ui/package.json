@@ -20,16 +20,16 @@
     "build": "bunx tailwindcss -i ./src/globals.css -o ./src/tailwind.css && storybook build"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^7.6.13",
-    "@storybook/addon-interactions": "^7.6.13",
-    "@storybook/addon-links": "^7.6.13",
-    "@storybook/addon-themes": "^7.6.13",
-    "@storybook/react-vite": "^7.6.13",
+    "@storybook/addon-essentials": "^8.0.0-beta.1",
+    "@storybook/addon-interactions": "^8.0.0-beta.1",
+    "@storybook/addon-links": "^8.0.0-beta.1",
+    "@storybook/addon-themes": "^8.0.0-beta.1",
+    "@storybook/react-vite": "^8.0.0-beta.1",
     "autoprefixer": "^10.4.17",
     "concurrently": "^8.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "storybook": "^7.6.13",
+    "storybook": "^8.0.0-beta.1",
     "typescript": "^5.3.3"
   },
   "exports": {

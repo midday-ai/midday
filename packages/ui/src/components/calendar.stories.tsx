@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import React from "react";
 import { Calendar } from "./calendar";
 
 const meta: Meta<typeof Calendar> = {
