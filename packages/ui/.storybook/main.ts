@@ -16,8 +16,16 @@ const config: StorybookConfig = {
   },
   addons: [
     "@storybook/addon-links",
-    "@storybook/addon-essentials",
-    "@storybook/addon-interactions",
+    {
+      name: "@storybook/addon-essentials",
+      options: {
+        backgrounds: false,
+        outline: false,
+        measure: false,
+        viewport: false,
+      },
+    },
+    "@storybook/addon-themes",
   ],
   docs: {
     autodocs: "tag",
