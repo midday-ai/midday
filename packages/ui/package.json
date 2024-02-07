@@ -17,7 +17,7 @@
     "dev": "concurrently 'bun:watch:*'",
     "watch:storybook": "storybook dev -p 6006",
     "watch:tailwind": "bunx tailwindcss -i ./src/globals.css -o ./src/tailwind.css --watch",
-    "build": "storybook build"
+    "build": "bunx tailwindcss -i ./src/globals.css -o ./src/tailwind.css && storybook build"
   },
   "devDependencies": {
     "@storybook/addon-essentials": "^7.6.13",
