@@ -49,7 +49,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
-    "react-hook-form": "^7.50.0",
+    "react-hook-form": "^7.50.1",
     "react-hotkeys-hook": "^4.5.0",
     "react-intersection-observer": "^9.7.0",
     "react-pin-field": "^3.1.5",
@@ -58,7 +58,7 @@
     "sharp": "^0.33.2",
     "tus-js-client": "^4.0.1",
     "use-long-press": "^3.2.0",
-    "usehooks-ts": "2.12.1",
+    "usehooks-ts": "2.13.0",
     "zod": "^3.22.4",
     "zustand": "^4.5.0"
   },
