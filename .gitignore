@@ -48,3 +48,4 @@ yarn-error.log*
 
 # Storybook
 storybook-static
+tailwind.css
