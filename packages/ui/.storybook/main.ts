@@ -9,24 +9,12 @@ function getAbsolutePath(value: string): any {
   return dirname(require.resolve(join(value, "package.json")));
 }
 const config: StorybookConfig = {
-  stories: ["../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
+  stories: ["../src/**/*.mdx", "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
-  addons: [
-    "@storybook/addon-links",
-    {
-      name: "@storybook/addon-essentials",
-      options: {
-        backgrounds: false,
-        outline: false,
-        measure: false,
-        viewport: false,
-      },
-    },
-    "@storybook/addon-themes",
-  ],
+  addons: ["@storybook/addon-links", "@storybook/addon-essentials"],
   docs: {
     autodocs: "tag",
   },
