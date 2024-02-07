@@ -45,7 +45,7 @@ const InnerCounter = ({ currency, pad, value, locale }) => {
     .join("");
 
   return (
-    <div className="counter">
+    <div className="counter font-mono">
       <fieldset>
         <h2>
           <span className="sr-only">{renderValue}</span>
