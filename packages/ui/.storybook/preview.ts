@@ -1,12 +1,10 @@
 import { withThemeByClassName } from "@storybook/addon-themes";
-import type { Preview } from "@storybook/react";
-import "../src/tailwind.css";
+import type { Preview, ReactRenderer } from "@storybook/react";
+
+import "../src/globals.css";
 
 const preview: Preview = {
   parameters: {
-    backgrounds: {
-      disable: true,
-    },
     actions: { argTypesRegex: "^on[A-Z].*" },
     controls: {
       matchers: {
@@ -16,7 +14,7 @@ const preview: Preview = {
     },
   },
   decorators: [
-    withThemeByClassName({
+    withThemeByClassName<ReactRenderer>({
       themes: {
         light: "light",
         dark: "dark",
