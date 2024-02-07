@@ -14,9 +14,9 @@
     "lint": "biome check .",
     "format": "biome --write .",
     "check:types": "tsc --noEmit",
-    "dev": "watch:storybook",
-    "watch:storybook": "storybook dev -p 6006",
+    "dev": "concurrently \"bun watch:tailwind\" \"bun watch:storybook\"",
     "watch:tailwind": "bunx tailwindcss -i ./src/globals.css -o ./src/tailwind.css --watch",
+    "watch:storybook": "storybook dev -p 6006",
     "build": "bunx tailwindcss -i ./src/globals.css -o ./src/tailwind.css && storybook build"
   },
   "devDependencies": {
@@ -101,6 +101,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@storybook/addon-styling": "^1.3.7",
+    "@storybook/addon-themes": "^7.6.13",
     "@storybook/manager-api": "^7.6.13",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
