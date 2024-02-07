@@ -6,6 +6,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        fontFamily: {
+          sans: "var(--font-geist-sans)",
+          mono: "var(--font-geist-mono)",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

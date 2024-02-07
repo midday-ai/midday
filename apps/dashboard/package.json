@@ -37,6 +37,7 @@
     "dub": "^0.6.0",
     "fast-csv": "^5.0.0",
     "framer-motion": "^11.0.3",
+    "geist": "^1.2.2",
     "headless-currency-input": "^1.1.0",
     "loops": "0.2.1",
     "ms": "^2.1.3",

@@ -3,16 +3,10 @@ import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
 import { cn } from "@midday/ui/utils";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { Instrument_Sans } from "next/font/google";
 import { type ReactElement } from "react";
-
-const fontSans = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  adjustFontFallback: false,
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.midday.ai"),
@@ -38,7 +32,10 @@ export default function Layout({
   return (
     <html lang={params.locale} suppressHydrationWarning>
       <body
-        className={cn(fontSans.variable, "whitespace-pre-line overscroll-none")}
+        className={cn(
+          `${GeistSans.variable} ${GeistMono.variable}`,
+          "whitespace-pre-line overscroll-none"
+        )}
       >
         {children}
         <SpeedInsights />

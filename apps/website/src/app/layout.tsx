@@ -3,16 +3,10 @@ import { LogSnagProvider } from "@midday/events/client";
 import "@midday/ui/globals.css";
 import { cn } from "@midday/ui/utils";
 import { Analytics } from "@vercel/analytics/react";
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { Instrument_Sans } from "next/font/google";
 import type { ReactElement } from "react";
-
-const fontSans = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-  adjustFontFallback: false,
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://midday.ai"),
@@ -43,7 +37,12 @@ export default function Layout({
           project={process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!}
         />
       </head>
-      <body className={cn(fontSans.variable, "whitespace-pre-line")}>
+      <body
+        className={cn(
+          `${GeistSans.variable} ${GeistMono.variable}`,
+          "whitespace-pre-line"
+        )}
+      >
         {children}
         <Analytics />
       </body>
