@@ -9,7 +9,6 @@ import { revalidateTag } from "next/cache";
 export const createEntriesAction = action(
   createEntriesSchema,
   async (params) => {
-    console.log(params);
     const supabase = createClient();
     const user = await getUser();
 

@@ -20,17 +20,18 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 
-export function TrackerAddRecord({ assignedId, projectId }) {
+export function TrackerAddRecord({ assignedId, projectId, date }) {
   const { toast } = useToast();
 
   const defaultEntry = {
     assigned_id: assignedId,
     project_id: projectId,
-    duration: 0,
+    duration: undefined,
     description: undefined,
-    start: new Date().toISOString(),
+    start: (date && new Date(date).toISOString()) || new Date().toISOString(),
   };
 
   const createEntries = useAction(createEntriesAction, {
@@ -52,7 +53,11 @@ export function TrackerAddRecord({ assignedId, projectId }) {
 
   const onSubmit = form.handleSubmit((data) => {
     createEntries.execute(
-      data.records.map((record) => ({ ...record, project_id: projectId }))
+      data.records.map((record) => ({
+        ...record,
+        project_id: projectId,
+        duration: record.duration * 3600,
+      }))
     );
   });
 
@@ -63,7 +68,7 @@ export function TrackerAddRecord({ assignedId, projectId }) {
 
   return (
     <div className="h-full mb-[120px] mt-8">
-      <div className="sticky top-0 bg-background z-20">
+      <div className="sticky top-0 bg-[#FAFAF9] dark:bg-[#121212] z-20">
         <div className="flex justify-between items-center border-b-[1px] pb-3">
           <h2>Add record</h2>
         </div>
@@ -76,11 +81,11 @@ export function TrackerAddRecord({ assignedId, projectId }) {
         >
           <div className="mb-3">
             {fields.map((_, index) => (
-              <div>
+              <div key={index.toString()}>
                 <div className="flex space-x-4 mb-4 mt-4">
                   <FormField
                     control={form.control}
-                    name={`records.${index}.time`}
+                    name={`records.${index}.duration`}
                     render={({ field }) => (
                       <FormItem className="w-full">
                         <FormLabel>Hours</FormLabel>

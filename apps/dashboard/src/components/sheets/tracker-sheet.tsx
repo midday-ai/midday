@@ -62,7 +62,12 @@ export function TrackerSheet({
               date={params.date}
               projectId={data?.id}
             />
-            <TrackerAddRecord assignedId={user.id} projectId={data?.id} />
+            <TrackerAddRecord
+              assignedId={user.id}
+              projectId={data?.id}
+              date={params.date}
+              key={params.date}
+            />
           </ScrollArea>
         </SheetContent>
       </Sheet>

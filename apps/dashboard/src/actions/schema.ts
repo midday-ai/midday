@@ -235,6 +235,7 @@ export const deleteProjectSchema = z.object({
 });
 
 export const projectEntry = z.object({
+  id: z.string().optional(),
   duration: z.number(),
   assigned_id: z.string(),
   project_id: z.string(),

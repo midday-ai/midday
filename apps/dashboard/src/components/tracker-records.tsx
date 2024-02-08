@@ -4,7 +4,7 @@ import { format } from "date-fns/format";
 export function TrackerRecords({ data, date }) {
   return (
     <div>
-      <div className="mt-8 sticky top-0 bg-background z-20">
+      <div className="mt-8 z-20">
         <div className="flex justify-between items-center border-b-[1px] pb-3">
           <span>{format(new Date(date), "MMM d")}</span>
           <span>
