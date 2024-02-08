@@ -11,6 +11,7 @@ on:
     paths:
       - apps/website/**
       - packages/**
+      - "!packages/email/**"
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
