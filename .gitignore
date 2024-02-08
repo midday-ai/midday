@@ -46,6 +46,7 @@ yarn-error.log*
 # react-email
 .react-email
 packages/email/public
+!packages/email/.react-email/.gitkeep
 
 # Storybook
 storybook-static
