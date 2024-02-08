@@ -25,6 +25,14 @@ import { useFieldArray, useForm } from "react-hook-form";
 export function TrackerAddRecord({ assignedId, projectId }) {
   const { toast } = useToast();
 
+  const defaultEntry = {
+    assigned_id: assignedId,
+    project_id: projectId,
+    duration: 0,
+    description: undefined,
+    start: new Date().toISOString(),
+  };
+
   const createEntries = useAction(createEntriesAction, {
     onError: () => {
       toast({
@@ -38,19 +46,11 @@ export function TrackerAddRecord({ assignedId, projectId }) {
   const form = useForm<TrackerAddRecordSchema>({
     resolver: zodResolver(trackerAddRecordSchema),
     defaultValues: {
-      records: [
-        {
-          assigned_id: assignedId,
-          project_id: projectId,
-          time: undefined,
-          description: undefined,
-        },
-      ],
+      records: [defaultEntry],
     },
   });
 
   const onSubmit = form.handleSubmit((data) => {
-    console.log(data.records);
     createEntries.execute(
       data.records.map((record) => ({ ...record, project_id: projectId }))
     );
@@ -75,7 +75,7 @@ export function TrackerAddRecord({ assignedId, projectId }) {
           className="h-full relative"
         >
           <div className="mb-3">
-            {fields.map((field, index) => (
+            {fields.map((_, index) => (
               <div>
                 <div className="flex space-x-4 mb-4 mt-4">
                   <FormField

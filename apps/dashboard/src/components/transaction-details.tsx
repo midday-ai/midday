@@ -79,7 +79,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
               ) : (
                 <span
                   className={cn(
-                    "text-4xl",
+                    "text-4xl font-mono",
                     data?.category === "income" && "text-[#00C969]"
                   )}
                 >

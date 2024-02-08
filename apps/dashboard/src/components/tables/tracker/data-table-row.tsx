@@ -82,9 +82,9 @@ export function DataTableRow({ row, setParams }) {
             </span>
           </DataTableCell>
           <DataTableCell>{row.description}</DataTableCell>
-          <DataTableCell>
-            {/* <ProjectMembers members={row.members} /> */}
-          </DataTableCell>
+          {/* <DataTableCell> */}
+          {/* <ProjectMembers members={row.members} /> */}
+          {/* </DataTableCell> */}
           <DataTableCell className="flex justify-between items-center">
             <TrackerStatus status={row.status} />
 

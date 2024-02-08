@@ -73,7 +73,7 @@ export function DataTableHeader() {
             )}
           </Button>
         </TableHead>
-        <TableHead className="w-[320px]">
+        {/* <TableHead className="w-[320px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
@@ -83,7 +83,7 @@ export function DataTableHeader() {
             {"members" === column && value === "asc" && <ArrowDown size={16} />}
             {"members" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
-        </TableHead>
+        </TableHead> */}
         <TableHead>
           <Button
             className="p-0 hover:bg-transparent space-x-2"

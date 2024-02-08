@@ -209,18 +209,6 @@ export const updateInboxSchema = z.object({
 
 export const changeInboxFilterSchema = inboxFilter.optional();
 
-export const trackerAddRecordSchema = z.object({
-  records: z.array(
-    z.object({
-      time: z.number().optional(),
-      assignedId: z.string().optional(),
-      descriptionId: z.string().optional(),
-    })
-  ),
-});
-
-export type TrackerAddRecordSchema = z.infer<typeof trackerAddRecordSchema>;
-
 export const createProjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
@@ -263,3 +251,9 @@ export const createReportSchema = z.object({
   to: z.string(),
   type: changeChartTypeSchema,
 });
+
+export const trackerAddRecordSchema = z.object({
+  records: z.array(projectEntry),
+});
+
+export type TrackerAddRecordSchema = z.infer<typeof trackerAddRecordSchema>;
