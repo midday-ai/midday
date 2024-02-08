@@ -26,7 +26,7 @@ const baseUrl =
     : "http://localhost:3000/email";
 
 export const FinancialOverviewEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "Pontus Abrahamsson",
 }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
