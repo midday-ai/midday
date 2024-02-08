@@ -8,7 +8,7 @@
     "format": "biome format --write .",
     "check:types": "tsc --noEmit",
     "dev": "email dev -p 3003",
-    "build": "email build --dir=public",
+    "build": "email build",
     "start": "email start"
   },
   "dependencies": {
