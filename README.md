@@ -49,3 +49,7 @@ View what's currently in progress, and what's planned for the future: [Midday Ro
 - Loops (Marketing email)
 - LogSnag (Events)
 - Teller (Bank connection in the US)
+
+## Repo Activity
+
+<!-- ![Repo Activity](https://repobeats.axiom.co/api/embed/ "Repobeats analytics image") -->
