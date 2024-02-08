@@ -4,7 +4,9 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import { Fragment, useState } from "react";
+import Invoice1Light from "./invoice-1-light.png";
 import Invoice1 from "./invoice-1.png";
+import Invoice2Light from "./invoice-2-light.png";
 import Invoice2 from "./invoice-2.png";
 
 // export const metadata: Metadata = {
@@ -12,8 +14,8 @@ import Invoice2 from "./invoice-2.png";
 // };
 
 const images = [
-  { id: 1, src: Invoice1 },
-  { id: 2, src: Invoice2 },
+  { id: 1, src: Invoice1, src2: Invoice1Light },
+  { id: 2, src: Invoice2, src2: Invoice2Light },
 ];
 
 export default function Invoice() {
@@ -29,12 +31,25 @@ export default function Invoice() {
         {images.map((image) => (
           <Fragment key={image.id}>
             <Image
+              quality={100}
               src={image.src}
               width={486}
               height={251}
-              alt="Invoice"
+              alt="Overview"
               className={cn(
-                "w-full opacity-0 absolute transition-all",
+                "w-full opacity-0 absolute transition-all hidden dark:block",
+                image.id === activeId && "opacity-1"
+              )}
+            />
+
+            <Image
+              quality={100}
+              src={image.src2}
+              width={486}
+              height={251}
+              alt="Overview"
+              className={cn(
+                "w-full opacity-0 absolute transition-all block dark:hidden",
                 image.id === activeId && "opacity-1"
               )}
             />

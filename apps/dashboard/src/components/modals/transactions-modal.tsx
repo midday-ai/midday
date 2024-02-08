@@ -43,6 +43,7 @@ export function TransactionsModal() {
             {images.map((image) => (
               <Fragment key={image.id}>
                 <Image
+                  quality={100}
                   src={image.src}
                   width={486}
                   height={251}
@@ -54,6 +55,7 @@ export function TransactionsModal() {
                 />
 
                 <Image
+                  quality={100}
                   src={image.src2}
                   width={486}
                   height={251}

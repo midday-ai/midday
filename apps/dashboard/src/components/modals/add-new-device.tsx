@@ -82,7 +82,15 @@ export function AddNewDeviceModal() {
         <div className="p-6">
           <div className="flex items-center justify-center mt-8">
             <div className="w-[190px] h-[190px] bg-white rounded-md">
-              {qr && <Image src={qr} alt="qr" width={190} height={190} />}
+              {qr && (
+                <Image
+                  src={qr}
+                  alt="qr"
+                  width={190}
+                  height={190}
+                  quality={100}
+                />
+              )}
             </div>
           </div>
 
