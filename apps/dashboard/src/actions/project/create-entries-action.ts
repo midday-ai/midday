@@ -3,13 +3,13 @@
 import { action } from "@/actions/safe-action";
 import { createEntriesSchema } from "@/actions/schema";
 import { getUser } from "@midday/supabase/cached-queries";
-import { createProject } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 
 export const createEntriesAction = action(
   createEntriesSchema,
   async (params) => {
+    console.log(params);
     const supabase = createClient();
     const user = await getUser();
 
@@ -20,7 +20,8 @@ export const createEntriesAction = action(
 
     const { data, error } = await supabase
       .from("tracker_entries")
-      .insert(entries);
+      .upsert(entries)
+      .select();
 
     console.log(data, error);
 

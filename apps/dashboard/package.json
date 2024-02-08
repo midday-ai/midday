@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@t3-oss/env-nextjs": "^0.8.0",
+    "@t3-oss/env-nextjs": "^0.9.2",
     "@todesktop/tailwind-variants": "^1.0.1",
     "@types/node": "^20.11.16",
     "@types/react": "^18.2.55",

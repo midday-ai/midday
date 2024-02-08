@@ -1,17 +1,18 @@
+import FinancialOverViewEmail from "@midday/email/emails/financial-overview";
+import GetStartedEmail from "@midday/email/emails/get-started";
+import InboxEmail from "@midday/email/emails/inbox";
+import PreAccountingEmail from "@midday/email/emails/pre-accounting";
+import TimeTrackEmail from "@midday/email/emails/time-tracker";
+import VaultEmail from "@midday/email/emails/vault";
 import WelcomeEmail from "@midday/email/emails/welcome";
 import { renderAsync } from "@react-email/components";
 import { Resend } from "@trigger.dev/resend";
-import { client } from "../client";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { Events } from "../constants";
-import { z } from "zod";
 import ms from "ms";
-import GetStartedEmail from "@midday/email/emails/get-started";
-import FinancialOverViewEmail from "@midday/email/emails/financial-overview";
-import InboxEmail from "@midday/email/emails/inbox";
-import PreAccountingEmail from "@midday/email/emails/pre-accounting";
-import VaultEmail from "@midday/email/emails/vault";
-import TimeTrackEmail from "@midday/email/emails/time-tracker";
+import { nanoid } from "nanoid";
+import { z } from "zod";
+import { client } from "../client";
+import { Events } from "../constants";
 
 const resend = new Resend({
   id: "resend",
@@ -41,6 +42,9 @@ client.defineJob({
       subject: "Welcome to Midday",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(WelcomeEmail({ fullName: payload.fullName })),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
     });
 
     await io.wait("wait-1", isTestOrDev ? 10 : ms("1d")); // 1 day
@@ -50,6 +54,9 @@ client.defineJob({
       subject: "Get Started",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(GetStartedEmail({ fullName: payload.fullName })),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
     });
 
     await io.wait("wait-2", isTestOrDev ? 10 : ms("2d")); // 2 day
@@ -63,6 +70,9 @@ client.defineJob({
         html: await renderAsync(
           FinancialOverViewEmail({ fullName: payload.fullName })
         ),
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
       }
     );
 
@@ -73,6 +83,9 @@ client.defineJob({
       subject: "Magic Inbox",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(InboxEmail({ fullName: payload.fullName })),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
     });
 
     await io.wait("wait-4", isTestOrDev ? 10 : ms("4d")); // 4 day
@@ -84,6 +97,9 @@ client.defineJob({
       html: await renderAsync(
         PreAccountingEmail({ fullName: payload.fullName })
       ),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
     });
 
     await io.wait("wait-5", isTestOrDev ? 10 : ms("5d")); // 5 day
@@ -93,6 +109,9 @@ client.defineJob({
       subject: "Store your files securely",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(VaultEmail({ fullName: payload.fullName })),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
     });
 
     await io.wait("wait-6", isTestOrDev ? 10 : ms("6d")); // 6 day
@@ -102,6 +121,9 @@ client.defineJob({
       subject: "Time track your projects",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(TimeTrackEmail({ fullName: payload.fullName })),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
     });
 
     return {
