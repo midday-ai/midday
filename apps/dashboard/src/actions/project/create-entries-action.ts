@@ -15,6 +15,7 @@ export const createEntriesAction = action(
     const entries = params.map((entry) => ({
       ...entry,
       team_id: user.data.team_id,
+      // end: start + duracton in seconds
     }));
 
     const { data, error } = await supabase

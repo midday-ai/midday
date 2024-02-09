@@ -100,9 +100,15 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
             </Text>
 
             <Img
+              src={`${baseUrl}/signature.png`}
+              alt="Signature"
+              className="block w-full w-[143px] h-[20px] dark:hidden"
+            />
+
+            <Img
               src={`${baseUrl}/signature-dark.png`}
               alt="Signature"
-              className="block w-full w-[143px] h-[20px]"
+              className="w-full w-[143px] h-[20px] hidden dark:block"
             />
 
             <br />

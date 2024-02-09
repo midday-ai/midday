@@ -45,10 +45,11 @@ View what's currently in progress, and what's planned for the future: [Midday Ro
 - Novu (notifications)
 - Github Actions (CI/CD)
 - GoCardLess (Bank connection EU)
-- Plaid (Bank connection in Canada)
+- Plaid (Bank connection in Canada and US)
+- Teller (Bank connection in the US)
 - Loops (Marketing email)
 - LogSnag (Events)
-- Teller (Bank connection in the US)
+- Dub (Short URLs)
 
 ## Repo Activity
 

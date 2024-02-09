@@ -9,7 +9,7 @@ import {
   Text,
 } from "@react-email/components";
 import React from "react";
-import { TripleColumn, SingleColumn } from "responsive-react-email";
+import { SingleColumn, TripleColumn } from "responsive-react-email";
 
 type Props = {
   baseUrl?: string;
@@ -194,14 +194,12 @@ export function Footer({ baseUrl }: Props) {
           <Img
             src={`${baseUrl}/logo-footer.png`}
             width="100"
-            height="28"
             alt="Midday"
             className="block dark:hidden"
           />
           <Img
             src={`${baseUrl}/logo-footer-dark.png`}
             width="100"
-            height="28"
             alt="Midday"
             className="hidden dark:block"
           />
