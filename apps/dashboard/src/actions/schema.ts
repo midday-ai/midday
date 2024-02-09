@@ -245,14 +245,13 @@ export const createReportSchema = z.object({
   type: changeChartTypeSchema,
 });
 
-export const createEntriesSchema = z.object({
+export const updateEntriesSchema = z.object({
   id: z.string().optional(),
-  duration: z.number(),
-  assigned_id: z.string(),
-  project_id: z.string(),
+  action: z.enum(["update", "create", "delete"]),
+  duration: z.number().optional(),
+  assigned_id: z.string().optional(),
+  project_id: z.string().optional(),
   description: z.string().optional(),
-  start: z.string().datetime(),
+  start: z.string().datetime().optional(),
   stop: z.string().datetime().optional(),
 });
-
-export const updateEntriesSchema = createEntriesSchema;

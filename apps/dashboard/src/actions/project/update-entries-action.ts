@@ -9,18 +9,22 @@ import { revalidateTag } from "next/cache";
 export const updateEntriesAction = action(
   updateEntriesSchema,
   async (params) => {
-    // const supabase = createClient();
-    // const user = await getUser();
-    // await supabase.from("tracker_projects").delete().eq("id", params.id);
-    // revalidateTag(`tracker_projects_${user.data.team_id}`);
+    const { action, ...payload } = params;
 
     const supabase = createClient();
     const user = await getUser();
 
+    if (action === "delete") {
+      await supabase.from("tracker_entries").delete().eq("id", params.id);
+      revalidateTag(`tracker_projects_${user.data.team_id}`);
+
+      return;
+    }
+
     const { data, error } = await supabase
       .from("tracker_entries")
       .upsert({
-        ...params,
+        ...payload,
         team_id: user.data.team_id,
       })
       .select();

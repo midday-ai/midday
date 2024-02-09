@@ -6,24 +6,25 @@ export function TrackerEntriesList({ data }) {
   const { execute: updateEntries, optimisticData } = useOptimisticAction(
     updateEntriesAction,
     data,
-    (state, payload) => {
-      //   if (payload.read) {
-      //     return items.map((item) => {
-      //       if (item.id === payload.id) {
-      //         return {
-      //           ...item,
-      //           read: true,
-      //         };
-      //       }
-      //       return item;
-      //     });
-      //   }
-      //   if (payload.trash) {
-      //     return state.filter((item) => item.id !== payload.id);
-      //   }
-      //   return state;
-      // },
-      // {
+    (state, { action, ...payload }) => {
+      switch (action) {
+        case "update":
+          return data.map((item) => {
+            if (item.id === payload.id) {
+              return {
+                ...item,
+                ...payload,
+              };
+            }
+            return item;
+          });
+
+        case "delete":
+          return state.filter((item) => item.id !== payload.id);
+
+        default:
+          return state;
+      }
     }
   );
 
@@ -32,9 +33,9 @@ export function TrackerEntriesList({ data }) {
       key={record.id}
       duration={record.duration}
       assignedId={record.assigned_id}
-      onCreate={() => updateEntries({ type: "create" })}
-      onDelete={(id) => updateEntries({ type: "delete", id })}
-      onChange={(params) => updateEntries({ type: "update", ...params })}
+      onCreate={() => updateEntries({ action: "create" })}
+      onDelete={() => updateEntries({ action: "delete", id: record.id })}
+      onChange={(params) => updateEntries({ action: "update", ...params })}
     />
   ));
 }
