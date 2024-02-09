@@ -234,7 +234,18 @@ export const deleteProjectSchema = z.object({
   id: z.string().uuid(),
 });
 
-export const projectEntry = z.object({
+export const deleteEntriesSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const createReportSchema = z.object({
+  baseUrl: z.string().url(),
+  from: z.string(),
+  to: z.string(),
+  type: changeChartTypeSchema,
+});
+
+export const createEntriesSchema = z.object({
   id: z.string().optional(),
   duration: z.number(),
   assigned_id: z.string(),
@@ -244,17 +255,4 @@ export const projectEntry = z.object({
   stop: z.string().datetime().optional(),
 });
 
-export const createEntriesSchema = z.array(projectEntry);
-
-export const createReportSchema = z.object({
-  baseUrl: z.string().url(),
-  from: z.string(),
-  to: z.string(),
-  type: changeChartTypeSchema,
-});
-
-export const trackerAddRecordSchema = z.object({
-  records: z.array(projectEntry),
-});
-
-export type TrackerAddRecordSchema = z.infer<typeof trackerAddRecordSchema>;
+export const updateEntriesSchema = createEntriesSchema;

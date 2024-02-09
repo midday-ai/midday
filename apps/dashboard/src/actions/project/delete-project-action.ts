@@ -3,7 +3,6 @@
 import { action } from "@/actions/safe-action";
 import { deleteProjectSchema } from "@/actions/schema";
 import { getUser } from "@midday/supabase/cached-queries";
-import { deleteProject } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 

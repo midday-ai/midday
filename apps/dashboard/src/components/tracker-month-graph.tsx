@@ -13,6 +13,7 @@ import {
   endOfMonth,
   format,
   formatISO,
+  isSameDay,
   startOfMonth,
 } from "date-fns";
 
@@ -66,7 +67,9 @@ export function TrackerMonthGraph({
                 className={cn(
                   "w-[20px] h-[20px] rounded-full bg-[#878787]/30 group-hover:bg-white relative",
                   hasRecords || isActive ? "bg-white" : "",
-                  isTracking && isoDate === "2024-01-15" && "!bg-[#00C969]"
+                  isTracking &&
+                    isSameDay(new Date(), isoDate) &&
+                    "!bg-[#00C969]"
                 )}
               />
             </div>

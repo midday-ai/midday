@@ -12,15 +12,13 @@ export const createEntriesAction = action(
     const supabase = createClient();
     const user = await getUser();
 
-    const entries = params.map((entry) => ({
-      ...entry,
-      team_id: user.data.team_id,
-      // end: start + duracton in seconds
-    }));
-
     const { data, error } = await supabase
       .from("tracker_entries")
-      .upsert(entries)
+      .insert({
+        ...params,
+        team_id: user.data.team_id,
+        // end: start + duracton in seconds
+      })
       .select();
 
     console.log(data, error);

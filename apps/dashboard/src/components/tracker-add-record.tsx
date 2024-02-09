@@ -1,11 +1,12 @@
 "use client";
 
+import { TrackerEntriesList } from "@/components/tracker-entries-list";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsById } from "@midday/supabase/queries";
 import { useEffect, useState } from "react";
 import { RecordSkeleton, UpdateRecordForm } from "./forms/update-record.form";
 
-export function TrackerAddRecord({ assignedId, projectId, date, teamId }) {
+export function TrackerAddRecord({ projectId, date, teamId }) {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [records, setRecords] = useState();
@@ -34,19 +35,12 @@ export function TrackerAddRecord({ assignedId, projectId, date, teamId }) {
     <div className="h-full mb-[120px] mt-8">
       <div className="sticky top-0 bg-[#FAFAF9] dark:bg-[#121212] z-20">
         <div className="flex justify-between items-center border-b-[1px] pb-3">
-          <h2>Add record</h2>
+          <h2>Add time</h2>
         </div>
       </div>
 
       {isLoading && <RecordSkeleton />}
-
-      {records?.map((record) => (
-        <UpdateRecordForm
-          key={record.id}
-          duration={record.duration}
-          assignedId={record.assigned_id}
-        />
-      ))}
+      <TrackerEntriesList data={records} />
     </div>
   );
 }

@@ -65,7 +65,7 @@ export function TrackerGraph({ data }) {
           ))}
         </div>
 
-        {weeks.map((day, index) => {
+        {weeks.map((day) => {
           const daysInWeek = eachDayOfInterval({
             start: startOfWeek(day, { weekStartsOn }),
             end: endOfWeek(day, { weekStartsOn }),

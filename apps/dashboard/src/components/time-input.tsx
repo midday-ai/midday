@@ -17,9 +17,10 @@ const toHHMMSS = (secs: number) => {
 type Props = {
   defaultValue?: number;
   onChange: (seconds: number) => void;
+  className?: string;
 };
 
-export function TimeInput({ defaultValue, onChange }: Props) {
+export function TimeInput({ defaultValue, onChange, className }: Props) {
   const [value, setValue] = useState(
     (defaultValue && toHHMMSS(defaultValue)) ?? "0:00:00"
   );
@@ -59,5 +60,12 @@ export function TimeInput({ defaultValue, onChange }: Props) {
     return 0;
   };
 
-  return <Input onChange={handleOnChange} onBlur={onBlur} value={value} />;
+  return (
+    <Input
+      onChange={handleOnChange}
+      onBlur={onBlur}
+      value={value}
+      className={className}
+    />
+  );
 }
