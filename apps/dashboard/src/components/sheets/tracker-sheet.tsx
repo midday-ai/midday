@@ -67,6 +67,7 @@ export function TrackerSheet({
               projectId={data?.id}
               date={params.date}
               key={params.date}
+              teamId={user.team_id}
             />
           </ScrollArea>
         </SheetContent>

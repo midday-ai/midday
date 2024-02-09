@@ -90,7 +90,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
             <br />
 
             <Img
-              src={`${baseUrl}/founders.jpg`}
+              src={`${baseUrl}/founders.jpeg`}
               alt="Founders"
               className="my-0 mx-auto block w-full"
             />

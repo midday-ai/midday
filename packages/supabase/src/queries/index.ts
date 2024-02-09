@@ -794,3 +794,21 @@ export async function getTrackerProjectsQuery(
     data,
   };
 }
+
+type GetTrackerRecordsByIdParams = {
+  teamId: string;
+  date: string;
+  projectId: string;
+};
+
+export async function getTrackerRecordsById(
+  supabase: Client,
+  params: GetTrackerRecordsByIdParams
+) {
+  return supabase
+    .from("tracker_entries")
+    .select("*")
+    .eq("project_id", params.projectId)
+    .eq("team_id", params.teamId)
+    .eq("start", params.date);
+}
