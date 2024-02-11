@@ -21,8 +21,6 @@ export const updateEntriesAction = action(
       return;
     }
 
-    console.log(payload);
-
     await supabase
       .from("tracker_entries")
       .upsert({

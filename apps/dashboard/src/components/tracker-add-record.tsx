@@ -4,12 +4,20 @@ import { TrackerEntriesList } from "@/components/tracker-entries-list";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsById } from "@midday/supabase/queries";
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { RecordSkeleton } from "./forms/update-record.form";
 
 export function TrackerAddRecord({ projectId, date, teamId }) {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
-  const [records, setRecords] = useState();
+  const [records, setRecords] = useState([
+    {
+      id: uuidv4(),
+      project_id: projectId,
+      duration: 0,
+      date,
+    },
+  ]);
 
   async function fetchData() {
     try {
@@ -18,7 +26,8 @@ export function TrackerAddRecord({ projectId, date, teamId }) {
         date,
         teamId,
       });
-      setLoading(false);
+
+      // setLoading(false);
       setRecords(data);
     } catch {
       setLoading(false);
@@ -39,10 +48,11 @@ export function TrackerAddRecord({ projectId, date, teamId }) {
         </div>
       </div>
 
-      {isLoading && <RecordSkeleton />}
+      {/* {isLoading && <RecordSkeleton />} */}
 
       <TrackerEntriesList
         data={records}
+        date={date}
         projectId={projectId}
         fetchData={fetchData}
       />

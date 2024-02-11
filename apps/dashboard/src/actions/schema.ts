@@ -248,6 +248,7 @@ export const createReportSchema = z.object({
 export const updateEntriesSchema = z.object({
   id: z.string().uuid().optional(),
   action: z.enum(["update", "create", "delete"]),
+  date: z.string().optional(),
   duration: z.number().optional(),
   assigned_id: z.string().optional(),
   project_id: z.string().optional(),

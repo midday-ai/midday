@@ -1,8 +1,9 @@
 import { updateEntriesAction } from "@/actions/project/update-entries-action";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import { v4 as uuidv4 } from "uuid";
 import { UpdateRecordForm } from "./forms/update-record.form";
 
-export function TrackerEntriesList({ data, projectId, fetchData }) {
+export function TrackerEntriesList({ data, projectId, fetchData, date }) {
   const { execute: updateEntries, optimisticData } = useOptimisticAction(
     updateEntriesAction,
     data,
@@ -34,22 +35,38 @@ export function TrackerEntriesList({ data, projectId, fetchData }) {
     }
   );
 
+  const handleOnCreate = () => {
+    updateEntries({
+      action: "create",
+      id: uuidv4(),
+      project_id: projectId,
+      duration: 0,
+    });
+  };
+
+  const handleOnDelete = (id: string) => {
+    updateEntries({ action: "delete", id });
+  };
+
+  const handleOnChange = (params) => {
+    updateEntries({
+      action: "update",
+      project_id: projectId,
+      duration: 0,
+      date,
+      ...params,
+    });
+  };
+
   return optimisticData?.map((record) => (
     <UpdateRecordForm
+      id={record.id}
       key={record.id}
       duration={record.duration}
       assignedId={record.assigned_id}
-      onCreate={() =>
-        updateEntries({
-          action: "create",
-          project_id: projectId,
-          duration: 0,
-        })
-      }
-      onDelete={() => updateEntries({ action: "delete", id: record.id })}
-      onChange={(params) =>
-        updateEntries({ action: "update", id: record.id, ...params })
-      }
+      onCreate={handleOnCreate}
+      onDelete={handleOnDelete}
+      onChange={handleOnChange}
     />
   ));
 }
