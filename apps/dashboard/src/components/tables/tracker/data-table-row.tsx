@@ -1,8 +1,8 @@
 "use client";
 
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
-import { ProjectMembers } from "@/components/project-members";
 import { TrackerStatus } from "@/components/tracker-status";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +23,6 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
-import { intervalToDuration } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 
 export function DataTableCell({ children, className }) {
@@ -65,11 +64,6 @@ export function DataTableRow({ row, setParams }) {
     } catch {}
   };
 
-  const duration = intervalToDuration({
-    start: 0,
-    end: row.total_duration * 1000,
-  });
-
   return (
     <AlertDialog>
       <DropdownMenu>
@@ -77,14 +71,11 @@ export function DataTableRow({ row, setParams }) {
           <DataTableCell>{row.name}</DataTableCell>
           <DataTableCell>
             <span className="text-sm">
-              {duration.hours ?? "00"}:{duration.minutes ?? "00"}:
-              {duration.seconds ?? "00"}
+              {secondsToHoursAndMinutes(row?.total_duration)}
             </span>
           </DataTableCell>
           <DataTableCell>{row.description}</DataTableCell>
-          {/* <DataTableCell> */}
-          {/* <ProjectMembers members={row.members} /> */}
-          {/* </DataTableCell> */}
+
           <DataTableCell className="flex justify-between items-center">
             <TrackerStatus status={row.status} />
 

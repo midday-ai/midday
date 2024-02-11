@@ -5,11 +5,10 @@ import { TrackerMonthGraph } from "@/components/tracker-month-graph";
 import { TrackerRecords } from "@/components/tracker-records";
 import { TrackerSelect } from "@/components/tracker-select";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
-import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { intervalToDuration } from "date-fns";
 import React from "react";
 
 export function TrackerSheet({
@@ -22,11 +21,6 @@ export function TrackerSheet({
 }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
-  const duration = intervalToDuration({
-    start: 0,
-    end: data?.total_duration * 1000,
-  });
-
   if (isDesktop) {
     return (
       <Sheet
@@ -37,7 +31,9 @@ export function TrackerSheet({
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
             <h2 className="text-xl">
               {data?.name}{" "}
-              <span className="text-[#878787]">{duration.hours ?? 0}h</span>
+              <span className="text-[#878787]">
+                {secondsToHoursAndMinutes(data?.total_duration)}
+              </span>
             </h2>
           </SheetHeader>
 
@@ -62,6 +58,7 @@ export function TrackerSheet({
               date={params.date}
               projectId={data?.id}
             />
+
             <TrackerAddRecord
               assignedId={user.id}
               projectId={data?.id}
@@ -88,7 +85,9 @@ export function TrackerSheet({
         <DrawerHeader className="mb-8 flex justify-between items-center flex-row">
           <h2 className="text-xl">
             {data?.name}{" "}
-            <span className="text-[#878787]">{duration.hours ?? 0}h</span>
+            <span className="text-[#878787]">
+              {secondsToHoursAndMinutes(data?.total_duration)}
+            </span>
           </h2>
         </DrawerHeader>
 

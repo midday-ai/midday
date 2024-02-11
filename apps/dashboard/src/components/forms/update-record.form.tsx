@@ -39,6 +39,7 @@ export function UpdateRecordForm({
   onDelete,
   onCreate,
   onChange,
+  canRemove,
 }) {
   return (
     <div className="mb-12">
@@ -79,13 +80,15 @@ export function UpdateRecordForm({
           Add
         </button>
 
-        <button
-          type="button"
-          className="text-sm font-medium"
-          onClick={() => onDelete(id)}
-        >
-          Remove
-        </button>
+        {canRemove && (
+          <button
+            type="button"
+            className="text-sm font-medium"
+            onClick={() => onDelete(id)}
+          >
+            Remove
+          </button>
+        )}
       </div>
     </div>
   );

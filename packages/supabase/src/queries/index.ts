@@ -810,5 +810,6 @@ export async function getTrackerRecordsById(
     .select("*")
     .eq("project_id", params.projectId)
     .eq("team_id", params.teamId)
-    .eq("date", params.date);
+    .eq("date", params.date)
+    .order("created_at");
 }
