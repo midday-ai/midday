@@ -33,7 +33,6 @@ export function RecordSkeleton() {
 }
 
 export function UpdateRecordForm({
-  id,
   duration,
   assignedId,
   onDelete,
@@ -48,14 +47,14 @@ export function UpdateRecordForm({
           <TimeInput
             className="mt-1"
             defaultValue={duration}
-            onChange={(seconds) => onChange({ id, duration: seconds })}
+            onChange={(seconds) => onChange({ duration: seconds })}
           />
         </div>
 
         <div className="w-full">
           <AssignUser
             selectedId={assignedId}
-            onSelect={(assignedId) => onChange({ id, assignedId })}
+            onSelect={(assignedId) => onChange({ assignedId })}
           />
         </div>
       </div>
@@ -65,7 +64,7 @@ export function UpdateRecordForm({
         <Input
           className="mt-1"
           placeholder="Description"
-          onBlur={(evt) => onChange({ id, description: evt.target.value })}
+          onBlur={(evt) => onChange({ description: evt.target.value })}
         />
       </div>
 
@@ -82,7 +81,7 @@ export function UpdateRecordForm({
         <button
           type="button"
           className="text-sm font-medium"
-          onClick={() => onDelete(id)}
+          onClick={onDelete}
         >
           Remove
         </button>

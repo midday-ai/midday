@@ -4,28 +4,28 @@ import { TrackerEntriesList } from "@/components/tracker-entries-list";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsById } from "@midday/supabase/queries";
 import { useEffect, useState } from "react";
-import { RecordSkeleton, UpdateRecordForm } from "./forms/update-record.form";
+import { RecordSkeleton } from "./forms/update-record.form";
 
 export function TrackerAddRecord({ projectId, date, teamId }) {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [records, setRecords] = useState();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await getTrackerRecordsById(supabase, {
-          projectId,
-          date,
-          teamId,
-        });
-        setLoading(false);
-        setRecords(data);
-      } catch {
-        setLoading(false);
-      }
+  async function fetchData() {
+    try {
+      const { data } = await getTrackerRecordsById(supabase, {
+        projectId,
+        date,
+        teamId,
+      });
+      setLoading(false);
+      setRecords(data);
+    } catch {
+      setLoading(false);
     }
+  }
 
+  useEffect(() => {
     if (!records) {
       fetchData();
     }
@@ -40,7 +40,12 @@ export function TrackerAddRecord({ projectId, date, teamId }) {
       </div>
 
       {isLoading && <RecordSkeleton />}
-      <TrackerEntriesList data={records} />
+
+      <TrackerEntriesList
+        data={records}
+        projectId={projectId}
+        fetchData={fetchData}
+      />
     </div>
   );
 }
