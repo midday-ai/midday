@@ -8,7 +8,7 @@ import { TimeInput } from "../time-input";
 export function RecordSkeleton() {
   return (
     <div className="mb-12">
-      <div className="flex space-x-4 mb-4 mt-4">
+      <div className="flex space-x-4 mb-5 mt-4">
         <div className="w-full">
           <Label>Time</Label>
           <Skeleton className="h-9 w-full" />

@@ -8,7 +8,7 @@ import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
 import { formatISO } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";

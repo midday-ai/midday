@@ -51,6 +51,10 @@ export async function Table({
       return <Loading />;
     }
 
+    if (query.length) {
+      return <NoResults hasFilters />;
+    }
+
     return <NoResults hasFilters={hasFilters} />;
   }
 
