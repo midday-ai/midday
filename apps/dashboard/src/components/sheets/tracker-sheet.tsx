@@ -1,25 +1,52 @@
 "use client";
 
-import { TrackerAddRecord } from "@/components/tracker-add-record";
 import { TrackerMonthGraph } from "@/components/tracker-month-graph";
-import { TrackerRecords } from "@/components/tracker-records";
 import { TrackerSelect } from "@/components/tracker-select";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { secondsToHoursAndMinutes } from "@/utils/format";
+import { createClient } from "@midday/supabase/client";
+import { getTrackerRecordsByRange } from "@midday/supabase/queries";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import React from "react";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import React, { useEffect, useState } from "react";
+import { TrackerEntriesList } from "../tracker-entries-list";
 
-export function TrackerSheet({
-  setParams,
-  isOpen,
-  records,
-  params,
-  data,
-  user,
-}) {
+export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const supabase = createClient();
+  const [isLoading, setLoading] = useState(true);
+  const [records, setRecords] = useState();
+
+  const { date, projectId } = params;
+
+  async function fetchData() {
+    try {
+      const { data } = await getTrackerRecordsByRange(supabase, {
+        projectId,
+        from: formatISO(startOfMonth(new Date(date)), {
+          representation: "date",
+        }),
+        to: formatISO(endOfMonth(new Date(date)), { representation: "date" }),
+        teamId: user.team_id,
+      });
+
+      setLoading(false);
+
+      if (data) {
+        setRecords(data);
+      }
+    } catch {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (isOpen && !records) {
+      fetchData();
+    }
+  }, [date, isOpen]);
 
   if (isDesktop) {
     return (
@@ -30,16 +57,16 @@ export function TrackerSheet({
         <SheetContent>
           <SheetHeader className="mb-8 flex justify-between items-center flex-row">
             <h2 className="text-xl">
-              {data?.name}{" "}
+              {project?.name}{" "}
               <span className="text-[#878787]">
-                {secondsToHoursAndMinutes(data?.total_duration)}
+                {secondsToHoursAndMinutes(project?.total_duration)}
               </span>
             </h2>
           </SheetHeader>
 
           <ScrollArea className="h-full p-0">
             <TrackerSelect
-              date={params.date}
+              date={date}
               onSelect={(date) => setParams({ date })}
               className="w-full justify-center mb-8"
             />
@@ -47,24 +74,18 @@ export function TrackerSheet({
             <TrackerMonthGraph
               disableHover
               showCurrentDate
-              date={params.date}
+              date={date}
               onSelect={setParams}
-              records={records}
-              currentProjectId={params.id}
+              data={records}
+              projectId={projectId}
             />
 
-            <TrackerRecords
-              data={records[params.date]}
-              date={params.date}
-              projectId={data?.id}
-            />
-
-            <TrackerAddRecord
-              assignedId={user.id}
-              projectId={data?.id}
-              date={params.date}
-              key={params.date}
-              teamId={user.team_id}
+            <TrackerEntriesList
+              data={records}
+              date={date}
+              projectId={projectId}
+              defaultAssignedId={user.id}
+              isLoading={isLoading}
             />
           </ScrollArea>
         </SheetContent>
@@ -84,9 +105,9 @@ export function TrackerSheet({
       <DrawerContent className="p-6">
         <DrawerHeader className="mb-8 flex justify-between items-center flex-row">
           <h2 className="text-xl">
-            {data?.name}{" "}
+            {project?.name}{" "}
             <span className="text-[#878787]">
-              {secondsToHoursAndMinutes(data?.total_duration)}
+              {secondsToHoursAndMinutes(project?.total_duration)}
             </span>
           </h2>
         </DrawerHeader>
@@ -97,16 +118,15 @@ export function TrackerSheet({
           className="w-full justify-center mb-8"
         />
 
-        <TrackerMonthGraph
+        {/* <TrackerMonthGraph
           disableHover
           showCurrentDate
           date={params.date}
           onSelect={setParams}
-          records={records}
-          currentProjectId={params.id}
-        />
-        <TrackerRecords data={records[params.date]} date={params.date} />
-        <TrackerAddRecord assignedId={user.id} projectId={data?.id} />
+          data={[]}
+          projectId={params.id}
+        /> */}
+        {/* <TrackerAddRecord assignedId={user.id} projectId={data?.id} /> */}
       </DrawerContent>
     </Drawer>
   );

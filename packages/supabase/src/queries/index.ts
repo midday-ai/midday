@@ -795,21 +795,37 @@ export async function getTrackerProjectsQuery(
   };
 }
 
-type GetTrackerRecordsByIdParams = {
+type GetTrackerRecordsByRangeParams = {
   teamId: string;
-  date: string;
+  from: string;
+  to: string;
   projectId: string;
 };
 
-export async function getTrackerRecordsById(
+export async function getTrackerRecordsByRange(
   supabase: Client,
-  params: GetTrackerRecordsByIdParams
+  params: GetTrackerRecordsByRangeParams
 ) {
-  return supabase
+  const { data } = await supabase
     .from("tracker_entries")
-    .select("*")
+    .select("*, assigned:assigned_id(id, full_name, avatar_url)")
     .eq("project_id", params.projectId)
     .eq("team_id", params.teamId)
-    .eq("date", params.date)
+    .gte("date", params.from)
+    .lte("date", params.to)
     .order("created_at");
+
+  const result = data.reduce((acc, item) => {
+    const key = item.date;
+
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(item);
+    return acc;
+  }, {});
+
+  return {
+    data: result,
+  };
 }

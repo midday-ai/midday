@@ -99,8 +99,7 @@ export function DataTable({
         isOpen={Boolean(params.projectId) && !params.update}
         params={params}
         setParams={setParams}
-        records={data}
-        data={selectedProject}
+        project={selectedProject}
         user={user}
       />
 

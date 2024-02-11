@@ -20,9 +20,9 @@ import {
 export function TrackerMonthGraph({
   date,
   onSelect,
-  records,
+  data,
   showCurrentDate,
-  currentProjectId,
+  projectId,
   disableHover,
   disableButton,
 }) {
@@ -36,7 +36,7 @@ export function TrackerMonthGraph({
   const handleOnSelect = (params) => {
     if (onSelect) {
       onSelect({
-        id: params.id || currentProjectId,
+        id: params.id || projectId,
         date: formatISO(params.date, { representation: "date" }),
       });
     }
@@ -45,8 +45,7 @@ export function TrackerMonthGraph({
   const rows = result.map((day, i) => {
     const isoDate = formatISO(day, { representation: "date" });
     const isActive = showCurrentDate && isoDate === date;
-    const foundRecords = records[isoDate];
-    const hasRecords = foundRecords?.length > 0;
+    const hasRecords = data && data[isoDate];
 
     return (
       <HoverCard key={i.toString()} openDelay={250} closeDelay={150}>

@@ -26,7 +26,9 @@ export async function Table({ initialTrackerId, status, sort, query }) {
       to,
       from,
       sort,
-      filter: { status },
+      filter: {
+        status,
+      },
     });
   }
 
