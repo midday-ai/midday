@@ -832,7 +832,15 @@ export async function getTrackerRecordsByRange(
     return acc;
   }, {});
 
+  const totalDuration = data?.reduce(
+    (duration, item) => item.duration + duration,
+    0
+  );
+
   return {
+    meta: {
+      totalDuration,
+    },
     data: result,
   };
 }

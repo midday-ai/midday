@@ -13,11 +13,12 @@ export function Tracker() {
   const supabase = createClient();
   const [date, setDate] = useState(new Date().toString());
   const [data, setData] = useState();
+  const [meta, setMeta] = useState();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const { data } = await getTrackerRecordsByRange(supabase, {
+        const { data, meta } = await getTrackerRecordsByRange(supabase, {
           from: formatISO(startOfMonth(new Date(date)), {
             representation: "date",
           }),
@@ -26,6 +27,7 @@ export function Tracker() {
         });
 
         if (data) {
+          setMeta(meta);
           setData(data);
         }
       } catch {}
@@ -36,7 +38,11 @@ export function Tracker() {
 
   return (
     <div className="flex-1 border p-8 relative h-full">
-      <TrackerHeader date={date} setDate={setDate} />
+      <TrackerHeader
+        date={date}
+        setDate={setDate}
+        totalDuration={meta?.totalDuration}
+      />
 
       <div className="mt-10">
         <ErrorBoundary errorComponent={ErrorFallback}>

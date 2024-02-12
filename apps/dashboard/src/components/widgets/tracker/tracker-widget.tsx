@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 export function TrackerWidget({ data, date }) {
   const router = useRouter();
 
-  const onSelect = ({ id, date }) => {
-    router.push(`/tracker?projectId=${id}&date=${date}`);
+  const onSelect = ({ projectId, date }) => {
+    router.push(`/tracker?projectId=${projectId}&date=${date}`);
   };
 
   return (
