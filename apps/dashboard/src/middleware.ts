@@ -42,10 +42,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Check if in beta list
+  // Check if in beta list by email
   if (
     data?.session &&
-    !(await get("beta"))?.includes(data?.session.user.id) &&
+    !(await get("beta"))?.includes(data?.session.user.email) &&
     newUrl.pathname !== "/closed"
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
