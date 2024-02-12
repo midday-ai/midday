@@ -23,8 +23,6 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const [records, setData] = useState();
   const { toast } = useToast();
 
-  const { date, projectId } = params;
-
   const { execute } = useAction(updateEntriesAction, {
     onError: () => {
       // TODO: Delete latest entry
@@ -35,7 +33,10 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
       });
     },
     onSuccess: async (params) => {
-      await fetchData(params.date);
+      await fetchData({
+        date: params.date,
+        projectId: params.project_id,
+      });
     },
   });
 
@@ -78,14 +79,14 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
     updateEntries({ ...payload, id: -Math.random() });
   };
 
-  async function fetchData(selectedDate) {
+  async function fetchData({ date, projectId }) {
     try {
       const { data } = await getTrackerRecordsByRange(supabase, {
         projectId,
-        from: formatISO(startOfMonth(new Date(selectedDate)), {
+        from: formatISO(startOfMonth(new Date(date)), {
           representation: "date",
         }),
-        to: formatISO(endOfMonth(new Date(selectedDate)), {
+        to: formatISO(endOfMonth(new Date(date)), {
           representation: "date",
         }),
         teamId: user.team_id,
@@ -103,10 +104,12 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
   useEffect(() => {
     if (isOpen) {
-      fetchData(date);
+      fetchData(params);
     }
     // TODO: Only fetch when month change
-  }, [date, isOpen]);
+  }, [params, isOpen]);
+
+  const { date, projectId } = params;
 
   if (isDesktop) {
     return (
