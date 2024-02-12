@@ -21,6 +21,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [records, setData] = useState();
+  const [totalDuration, setTotalDuration] = useState(0);
   const { toast } = useToast();
 
   const { execute } = useAction(updateEntriesAction, {
@@ -81,7 +82,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
   async function fetchData({ date, projectId }) {
     try {
-      const { data } = await getTrackerRecordsByRange(supabase, {
+      const { data, meta } = await getTrackerRecordsByRange(supabase, {
         projectId,
         from: formatISO(startOfMonth(new Date(date)), {
           representation: "date",
@@ -93,6 +94,8 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
       });
 
       setLoading(false);
+
+      setTotalDuration(meta.totalDuration);
 
       if (data) {
         setData(data);
@@ -122,7 +125,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
             <h2 className="text-xl">
               {project?.name}{" "}
               <span className="text-[#878787]">
-                {secondsToHoursAndMinutes(project?.total_duration)}
+                {secondsToHoursAndMinutes(totalDuration)}
               </span>
             </h2>
           </SheetHeader>

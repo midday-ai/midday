@@ -13,7 +13,6 @@ export function TrackerDayCard({
   data,
   outOfRange,
   onSelect,
-  disableButton,
   disableHover,
   isActive,
   isTracking,
@@ -32,7 +31,6 @@ export function TrackerDayCard({
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
           onClick={() => onSelect({ date })}
-          disabled={disableButton}
         >
           <div
             className={cn(

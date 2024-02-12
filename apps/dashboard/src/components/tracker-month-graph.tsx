@@ -22,7 +22,6 @@ export function TrackerMonthGraph({
   showCurrentDate,
   projectId,
   disableHover,
-  disableButton,
 }) {
   const weekStartsOn = 1;
   const { isTracking } = useTrackerStore();
@@ -63,7 +62,6 @@ export function TrackerMonthGraph({
           date={dayInWeek}
           data={data && data[isoDate]}
           disableHover={disableHover}
-          disableButton={disableButton}
           onSelect={handleOnSelect}
           isActive={
             showCurrentDate && isSameDay(new Date(dayInWeek), currentDate)
