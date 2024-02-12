@@ -113,7 +113,8 @@ export function SelectTransaction({
         onFocus={handleFocus}
         hidden={isHidden}
         placeholder={placeholder}
-        className="w-full border-0 bg-transparent px-12"
+        className="w-full border-0 bg-transparent px-12 placeholder:text-muted-foreground dark:placeholder:text-foreground"
+        classNameList="bottom-[44px]"
         value={value}
         defaultValue={selectedTransaction?.name}
         onValueChange={handleChange}

@@ -1,27 +1,67 @@
 "use client";
 
+import { createProjectAction } from "@/actions/project/create-project-action";
+import { createClient } from "@midday/supabase/client";
+import { getTrackerProjectsQuery } from "@midday/supabase/queries";
 import { Combobox } from "@midday/ui/combobox";
-import { useState } from "react";
+import { Icons } from "@midday/ui/icons";
+import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect, useState } from "react";
 
-export function TrackerSelectProject() {
+export function TrackerSelectProject({ setParams }) {
+  const { toast } = useToast();
+  const supabase = createClient();
   const [value, setValue] = useState("");
   const [data, setData] = useState([]);
 
-  const onSelect = (selected) => {
-    console.log(selected);
+  const action = useAction(createProjectAction, {
+    onSuccess: (project) => {
+      setParams({ projectId: project.id });
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  async function fetchData() {
+    const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
+      teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
+      to: 100,
+    });
+
+    setData(projectsData);
+  }
+
+  useEffect(() => {
+    if (!data.length) {
+      fetchData();
+    }
+  }, [data]);
+
+  const onSelect = (project) => {
+    setParams({ projectId: project.id });
   };
 
   return (
-    <Combobox
-      placeholder="Search or create project"
-      className="w-full relative"
-      classNameList="top-[50px] bottom-0 h-[100px]"
-      value={value}
-      onValueChange={setValue}
-      onSelect={onSelect}
-      options={[{ id: "1", name: "Hej" }]}
-      hidden={false}
-      onCreate={() => {}}
-    />
+    <div className="relative">
+      <Icons.Search className="absolute pointer-events-none left-3 top-[12px] z-[51]" />
+
+      <Combobox
+        placeholder="Search or create project"
+        className="w-full relative pl-9"
+        classNameList="top-[37px] rounded-none rounded-b-md"
+        value={value}
+        onValueChange={setValue}
+        onSelect={onSelect}
+        options={data}
+        hidden={false}
+        onCreate={(name) => action.execute({ name })}
+      />
+    </div>
   );
 }

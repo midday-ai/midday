@@ -139,7 +139,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
           {params.projectId === "new" && (
             <div className="mb-6">
-              <TrackerSelectProject />
+              <TrackerSelectProject setParams={setParams} />
             </div>
           )}
 

@@ -139,14 +139,13 @@ export const Combobox = React.forwardRef<HTMLInputElement, Props>(
             )}
           </div>
 
-          <CommandList
-            hidden={hidden}
-            className={cn(
-              "absolute z-50 bg-background w-full border rounded-md bottom-[44px] left-0 right-0",
-              classNameList
-            )}
-          >
-            <CommandGroup className="max-h-[145px] overflow-auto">
+          <CommandList hidden={hidden}>
+            <CommandGroup
+              className={cn(
+                "absolute w-full bg-background z-50 max-h-[250px] overflow-auto border border-t-0 rounded-md",
+                classNameList
+              )}
+            >
               {options?.map(({ component: Component, ...option }) => {
                 return (
                   <CommandItem

@@ -216,7 +216,7 @@ export const createProjectSchema = z.object({
   billable: z.boolean().optional().default(false),
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]),
+  status: z.enum(["in_progress", "completed"]).optional(),
 });
 
 export const updateProjectSchema = z.object({
@@ -227,7 +227,7 @@ export const updateProjectSchema = z.object({
   billable: z.boolean().optional().default(false),
   rate: z.number().min(1).optional(),
   currency: z.string().optional(),
-  status: z.enum(["in_progress", "completed"]),
+  status: z.enum(["in_progress", "completed"]).optional(),
 });
 
 export const deleteProjectSchema = z.object({
