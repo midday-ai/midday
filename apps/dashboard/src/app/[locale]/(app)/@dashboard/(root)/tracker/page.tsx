@@ -342,7 +342,6 @@ const records = {
 
 export default function Tracker({ searchParams }) {
   const status = searchParams?.status;
-  const initialTrackerId = searchParams?.id;
   const sort = searchParams?.sort?.split(":");
 
   return (
@@ -358,12 +357,7 @@ export default function Tracker({ searchParams }) {
       </div>
 
       <Suspense key={`${status}-${status}`} fallback={<Loading />}>
-        <Table
-          status={status}
-          sort={sort}
-          initialTrackerId={initialTrackerId}
-          query={searchParams?.q}
-        />
+        <Table status={status} sort={sort} query={searchParams?.q} />
       </Suspense>
     </div>
   );

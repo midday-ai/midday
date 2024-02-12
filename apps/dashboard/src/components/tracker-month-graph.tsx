@@ -26,12 +26,12 @@ export function TrackerMonthGraph({
 }) {
   const weekStartsOn = 1;
   const { isTracking } = useTrackerStore();
-  const day = new Date(date);
+  const currentDate = new Date(date);
 
   const weeks = eachWeekOfInterval(
     {
-      start: startOfMonth(new Date()),
-      end: endOfMonth(new Date()),
+      start: startOfMonth(currentDate),
+      end: endOfMonth(currentDate),
     },
     { weekStartsOn }
   );
@@ -59,13 +59,14 @@ export function TrackerMonthGraph({
 
       return (
         <TrackerDayCard
+          key={isoDate}
           date={dayInWeek}
           data={data && data[isoDate]}
           disableHover={disableHover}
           disableButton={disableButton}
           onSelect={handleOnSelect}
           isActive={
-            showCurrentDate && isSameDay(new Date(dayInWeek), new Date(date))
+            showCurrentDate && isSameDay(new Date(dayInWeek), currentDate)
           }
           isTracking={isTracking && isSameDay(new Date(dayInWeek), new Date())}
           outOfRange={

@@ -27,14 +27,10 @@ export function TimeInput({ defaultValue, onChange, className }: Props) {
 
   const handleOnChange = (evt) => {
     setValue(evt.target.value);
-  };
 
-  const onBlur = (evt) => {
     const value = evt.target.value;
     const seconds = Math.max(0, getSecondsFromHHMMSS(value));
 
-    const time = toHHMMSS(seconds);
-    setValue(time);
     onChange(+seconds);
   };
 
@@ -61,11 +57,6 @@ export function TimeInput({ defaultValue, onChange, className }: Props) {
   };
 
   return (
-    <Input
-      onChange={handleOnChange}
-      onBlur={onBlur}
-      value={value}
-      className={className}
-    />
+    <Input onChange={handleOnChange} value={value} className={className} />
   );
 }

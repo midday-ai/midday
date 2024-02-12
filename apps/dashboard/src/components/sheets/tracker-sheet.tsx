@@ -10,6 +10,7 @@ import { getTrackerRecordsByRange } from "@midday/supabase/queries";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
+import { useToast } from "@midday/ui/use-toast";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
@@ -20,8 +21,23 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [records, setData] = useState();
+  const { toast } = useToast();
 
-  const { execute } = useAction(updateEntriesAction);
+  const { date, projectId } = params;
+
+  const { execute } = useAction(updateEntriesAction, {
+    onError: () => {
+      // TODO: Delete latest entry
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+    onSuccess: async (params) => {
+      await fetchData(params.date);
+    },
+  });
 
   const updateEntries = ({ action, ...payload }) => {
     switch (action) {
@@ -30,13 +46,13 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
         const items = [...data, payload];
 
         setData((prev) => ({ ...prev, [date]: items }));
-        return items;
+        break;
       }
       case "delete": {
         const items =
           records && records[date]?.filter((item) => item.id !== payload.id);
         setData((prev) => ({ ...prev, [date]: items }));
-        return items;
+        break;
       }
       default:
         return records;
@@ -45,12 +61,11 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
   const handleOnDelete = (id: string) => {
     const paylaod = { action: "delete", id };
-
     execute(paylaod);
     updateEntries(paylaod);
   };
 
-  const handleOnCreate = (params) => {
+  const handleOnCreate = async (params) => {
     const payload = {
       action: "create",
       project_id: projectId,
@@ -60,35 +75,35 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
     };
 
     execute(payload);
-    updateEntries(payload);
+    updateEntries({ ...payload, id: -Math.random() });
   };
 
-  const { date, projectId } = params;
+  async function fetchData(selectedDate) {
+    try {
+      const { data } = await getTrackerRecordsByRange(supabase, {
+        projectId,
+        from: formatISO(startOfMonth(new Date(selectedDate)), {
+          representation: "date",
+        }),
+        to: formatISO(endOfMonth(new Date(selectedDate)), {
+          representation: "date",
+        }),
+        teamId: user.team_id,
+      });
+
+      setLoading(false);
+
+      if (data) {
+        setData(data);
+      }
+    } catch {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await getTrackerRecordsByRange(supabase, {
-          projectId,
-          from: formatISO(startOfMonth(new Date(date)), {
-            representation: "date",
-          }),
-          to: formatISO(endOfMonth(new Date(date)), { representation: "date" }),
-          teamId: user.team_id,
-        });
-
-        setLoading(false);
-
-        if (data) {
-          setData(data);
-        }
-      } catch {
-        setLoading(false);
-      }
-    }
-
     if (isOpen) {
-      fetchData();
+      fetchData(date);
     }
     // TODO: Only fetch when month change
   }, [date, isOpen]);
@@ -131,6 +146,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
               user={user}
               onCreate={handleOnCreate}
               onDelete={handleOnDelete}
+              isLoading={isLoading}
             />
           </ScrollArea>
         </SheetContent>

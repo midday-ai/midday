@@ -18,16 +18,20 @@ export const updateEntriesAction = action(
       await supabase.from("tracker_entries").delete().eq("id", params.id);
       revalidateTag(`tracker_projects_${user.data.team_id}`);
 
-      return;
+      return Promise.resolve(params);
     }
 
-    await supabase.from("tracker_entries").upsert({
+    const { error } = await supabase.from("tracker_entries").upsert({
       ...payload,
       team_id: user.data.team_id,
     });
 
+    if (error) {
+      throw Error("Something went wrong.");
+    }
+
     revalidateTag(`tracker_projects_${user.data.team_id}`);
 
-    return;
+    return Promise.resolve(params);
   }
 );

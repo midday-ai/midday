@@ -27,7 +27,7 @@ export function TrackerDayCard({
 
   return (
     <HoverCard openDelay={250} closeDelay={150}>
-      <HoverCardTrigger asButton>
+      <HoverCardTrigger asChild>
         <button
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
@@ -55,7 +55,7 @@ export function TrackerDayCard({
               >
                 <span
                   className={cn(
-                    "text-xs absolute top-9 invisible group-hover:visible w-[50px] text-center -ml-[25px]",
+                    "text-xs absolute top-8 invisible group-hover:visible w-[50px] text-center -ml-[25px]",
                     isActive && "visible"
                   )}
                 >
