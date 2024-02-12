@@ -1,5 +1,6 @@
 "use client";
 
+import { updateEntriesAction } from "@/actions/project/update-entries-action";
 import { TrackerMonthGraph } from "@/components/tracker-month-graph";
 import { TrackerSelect } from "@/components/tracker-select";
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -10,6 +11,7 @@ import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { TrackerEntriesList } from "../tracker-entries-list";
 
@@ -17,35 +19,78 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
-  const [records, setRecords] = useState();
+  const [records, setData] = useState();
+
+  const { execute } = useAction(updateEntriesAction);
+
+  const updateEntries = ({ action, ...payload }) => {
+    switch (action) {
+      case "create": {
+        const data = (records && records[date]) ?? [];
+        const items = [...data, payload];
+
+        setData((prev) => ({ ...prev, [date]: items }));
+        return items;
+      }
+      case "delete": {
+        const items =
+          records && records[date]?.filter((item) => item.id !== payload.id);
+        setData((prev) => ({ ...prev, [date]: items }));
+        return items;
+      }
+      default:
+        return records;
+    }
+  };
+
+  const handleOnDelete = (id: string) => {
+    const paylaod = { action: "delete", id };
+
+    execute(paylaod);
+    updateEntries(paylaod);
+  };
+
+  const handleOnCreate = (params) => {
+    const payload = {
+      action: "create",
+      project_id: projectId,
+      assigned: user,
+      date,
+      ...params,
+    };
+
+    execute(payload);
+    updateEntries(payload);
+  };
 
   const { date, projectId } = params;
 
-  async function fetchData() {
-    try {
-      const { data } = await getTrackerRecordsByRange(supabase, {
-        projectId,
-        from: formatISO(startOfMonth(new Date(date)), {
-          representation: "date",
-        }),
-        to: formatISO(endOfMonth(new Date(date)), { representation: "date" }),
-        teamId: user.team_id,
-      });
-
-      setLoading(false);
-
-      if (data) {
-        setRecords(data);
-      }
-    } catch {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
-    if (isOpen && !records) {
+    async function fetchData() {
+      try {
+        const { data } = await getTrackerRecordsByRange(supabase, {
+          projectId,
+          from: formatISO(startOfMonth(new Date(date)), {
+            representation: "date",
+          }),
+          to: formatISO(endOfMonth(new Date(date)), { representation: "date" }),
+          teamId: user.team_id,
+        });
+
+        setLoading(false);
+
+        if (data) {
+          setData(data);
+        }
+      } catch {
+        setLoading(false);
+      }
+    }
+
+    if (isOpen) {
       fetchData();
     }
+    // TODO: Only fetch when month change
   }, [date, isOpen]);
 
   if (isDesktop) {
@@ -81,11 +126,11 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
             />
 
             <TrackerEntriesList
-              data={records}
+              data={(records && records[date]) ?? []}
               date={date}
-              projectId={projectId}
-              defaultAssignedId={user.id}
-              isLoading={isLoading}
+              user={user}
+              onCreate={handleOnCreate}
+              onDelete={handleOnDelete}
             />
           </ScrollArea>
         </SheetContent>
@@ -118,15 +163,22 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
           className="w-full justify-center mb-8"
         />
 
-        {/* <TrackerMonthGraph
+        <TrackerMonthGraph
           disableHover
           showCurrentDate
-          date={params.date}
+          date={date}
           onSelect={setParams}
-          data={[]}
-          projectId={params.id}
-        /> */}
-        {/* <TrackerAddRecord assignedId={user.id} projectId={data?.id} /> */}
+          data={records}
+          projectId={projectId}
+        />
+
+        <TrackerEntriesList
+          data={(records && records[date]) ?? []}
+          date={date}
+          user={user}
+          onCreate={handleOnCreate}
+          onDelete={handleOnDelete}
+        />
       </DrawerContent>
     </Drawer>
   );

@@ -51,7 +51,7 @@ export function UpdateRecordForm({
         </span>
         <Button
           variant="outline"
-          className="ml-auto hidden group-hover:block"
+          className="ml-auto hidden group-hover:block text-xs h-7 p-0 px-2"
           onClick={() => onDelete(id)}
         >
           Remove

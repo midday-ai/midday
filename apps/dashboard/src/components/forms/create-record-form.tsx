@@ -1,52 +1,97 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
-import { Label } from "@midday/ui/label";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { AssignUser } from "../assign-user";
 import { TimeInput } from "../time-input";
 
-export function CreateRecordForm({ duration, assignedId }) {
+const formSchema = z.object({
+  duration: z.number().min(1),
+  assigned_id: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export function CreateRecordForm({ userId, onCreate }) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      assigned_id: userId,
+    },
+  });
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    onCreate(values);
+  }
+
   return (
-    <div className="mb-12">
-      <span>Add time</span>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="mb-12 mt-6">
+        <span>Add time</span>
 
-      <div className="flex space-x-4 mb-4 mt-4">
-        <div className="w-full">
-          <Label className="text-xs">Time</Label>
-          <TimeInput
-            className="mt-1"
-            defaultValue={duration}
-            // onChange={(seconds) => onChange({ id, duration: seconds })}
+        <div className="flex space-x-4 mb-4 mt-2">
+          <FormField
+            control={form.control}
+            name="duration"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="text-xs">Time</FormLabel>
+                <FormControl>
+                  <TimeInput
+                    onChange={(seconds) => {
+                      field.onChange(+seconds);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="assigned_id"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="text-xs">Assign</FormLabel>
+                <FormControl>
+                  <AssignUser
+                    selectedId={form.watch("assigned_id")}
+                    onSelect={(assignedId: string) => {
+                      if (assignedId) {
+                        field.onChange(assignedId);
+                      }
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
           />
         </div>
 
-        <div className="w-full">
-          <AssignUser
-            selectedId={assignedId}
-            // onSelect={(assignedId) => onChange({ id, assignedId })}
-          />
-        </div>
-      </div>
-
-      <div className="w-full">
-        <Label className="text-xs">Description</Label>
-        <Input
-          className="mt-1"
-          placeholder="Description"
-          //   onBlur={(evt) => onChange({ id, description: evt.target.value })}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-xs">Description</FormLabel>
+              <FormControl>
+                <Input placeholder="Description" {...field} />
+              </FormControl>
+            </FormItem>
+          )}
         />
-      </div>
 
-      <div className="flex mt-3 justify-between">
-        <Button className="w-full">Add</Button>
-        {/* <button
-          type="button"
-          className="flex space-x-2 items-center text-sm font-medium"
-          //   onClick={onCreate}
-        >
-          <Icons.Add />
-          Add
-        </button> */}
-      </div>
-    </div>
+        <div className="flex mt-6 justify-between">
+          <Button className="w-full">Add</Button>
+        </div>
+      </form>
+    </Form>
   );
 }

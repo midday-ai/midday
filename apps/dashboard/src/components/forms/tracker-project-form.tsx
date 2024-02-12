@@ -1,6 +1,5 @@
 "use client";
 
-import { createProjectSchema } from "@/actions/schema";
 import { useCurrentLocale } from "@/locales/client";
 import { currencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";

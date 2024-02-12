@@ -23,9 +23,6 @@ export function Loading() {
             <TableCell className="w-[430px]">
               <Skeleton className="h-3.5 w-[50%]" />
             </TableCell>
-            <TableCell className="w-[320px]">
-              <Skeleton className="h-3.5 w-[50%]" />
-            </TableCell>
 
             <TableCell>
               <Skeleton className="h-3.5 w-[50%]" />

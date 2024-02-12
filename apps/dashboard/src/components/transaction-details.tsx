@@ -9,6 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import { Label } from "@midday/ui/label";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
@@ -101,12 +102,16 @@ export function TransactionDetails({ transactionId, data: initialData }) {
           id={transactionId}
           selectedId={data?.category ?? undefined}
         />
-        <AssignUser
-          isLoading={isLoading}
-          id={transactionId}
-          selectedId={data?.assigned?.id ?? undefined}
-          onSelect={handleOnAssign}
-        />
+
+        <div>
+          <Label htmlFor="assign">Assign</Label>
+
+          <AssignUser
+            isLoading={isLoading}
+            selectedId={data?.assigned?.id ?? undefined}
+            onSelect={handleOnAssign}
+          />
+        </div>
       </div>
 
       <Accordion type="multiple" defaultValue={["attachment"]}>

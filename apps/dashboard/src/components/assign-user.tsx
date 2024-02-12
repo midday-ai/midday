@@ -5,7 +5,6 @@ import {
   getCurrentUserTeamQuery,
   getTeamMembersQuery,
 } from "@midday/supabase/queries";
-import { Label } from "@midday/ui/label";
 import {
   Select,
   SelectContent,
@@ -42,8 +41,6 @@ export function AssignUser({ selectedId, isLoading, onSelect }) {
 
   return (
     <div className="relative">
-      <Label htmlFor="assign">Assign</Label>
-
       <div className="mt-1">
         {isLoading ? (
           <div className="h-[36px] border rounded-md">

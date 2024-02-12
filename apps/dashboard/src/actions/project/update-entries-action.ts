@@ -21,14 +21,10 @@ export const updateEntriesAction = action(
       return;
     }
 
-    await supabase
-      .from("tracker_entries")
-      .upsert({
-        ...payload,
-        team_id: user.data.team_id,
-      })
-      .single()
-      .select();
+    await supabase.from("tracker_entries").upsert({
+      ...payload,
+      team_id: user.data.team_id,
+    });
 
     revalidateTag(`tracker_projects_${user.data.team_id}`);
 
