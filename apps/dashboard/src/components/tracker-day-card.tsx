@@ -30,7 +30,7 @@ export function TrackerDayCard({
         <button
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
-          onClick={() => onSelect({ date })}
+          onClick={() => onSelect({ date, projectId: "new" })}
         >
           <div
             className={cn(
@@ -53,7 +53,7 @@ export function TrackerDayCard({
               >
                 <span
                   className={cn(
-                    "text-xs absolute top-8 invisible group-hover:visible w-[50px] text-center -ml-[25px]",
+                    "text-[11px] absolute top-7 invisible group-hover:visible w-[50px] text-center -ml-[25px]",
                     isActive && "visible"
                   )}
                 >

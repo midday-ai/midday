@@ -6,15 +6,17 @@ import {
   endOfMonth,
   endOfWeek,
   format,
+  formatISO,
   isAfter,
   isBefore,
+  isSameDay,
   lastDayOfWeek,
-  startOfISOWeek,
   startOfMonth,
   startOfWeek,
   subMonths,
 } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
+import { TrackerDayCard } from "./tracker-day-card";
 
 export function TrackerGraph({ data }) {
   const weekStartsOn = 1; // Monday
@@ -22,7 +24,7 @@ export function TrackerGraph({ data }) {
   const [params, setParams] = useQueryStates(
     {
       date: parseAsString,
-      id: parseAsString,
+      projectId: parseAsString,
     },
     {
       shallow: true,
@@ -33,30 +35,33 @@ export function TrackerGraph({ data }) {
     setParams(params);
   };
 
-  const firstDay = startOfMonth(subMonths(new Date(), 6));
-  const lastDay = endOfMonth(new Date());
+  const currentDate = new Date();
+  const firstDay = startOfMonth(subMonths(currentDate, 6));
+  const lastDay = endOfMonth(currentDate);
 
   const weeks = eachWeekOfInterval(
     {
-      start: startOfMonth(subMonths(new Date(), 6)),
-      end: endOfMonth(new Date()),
+      start: startOfMonth(subMonths(currentDate, 6)),
+      end: endOfMonth(currentDate),
     },
     { weekStartsOn }
   );
 
   const days = eachDayOfInterval({
-    start: startOfWeek(new Date(), { weekStartsOn }),
-    end: lastDayOfWeek(new Date(), { weekStartsOn }),
+    start: startOfWeek(currentDate, { weekStartsOn }),
+    end: lastDayOfWeek(currentDate, { weekStartsOn }),
   }).map((day) => format(day, "iii"));
 
+  const isTracking = false;
+
   return (
-    <div>
+    <div className="w-full">
       <div className="mt-8">
         <h2 className="font-medium text-[#878787] text-xl mb-2">Total hours</h2>
         <div className="text-[#F5F5F3] text-4xl">294</div>
       </div>
 
-      <div className="flex gap-5 mt-8">
+      <div className="flex gap-4 mt-8">
         <div className="flex flex-col justify-between mr-4">
           {days.map((day) => (
             <div className="h-[28px]" key={day}>
@@ -73,35 +78,27 @@ export function TrackerGraph({ data }) {
 
           return (
             <div key={day.toISOString()}>
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-6">
                 {daysInWeek.map((dayInWeek) => {
-                  if (
-                    isBefore(dayInWeek, firstDay) ||
-                    isAfter(dayInWeek, lastDay)
-                  ) {
-                    return (
-                      <time
-                        key={dayInWeek.toISOString()}
-                        dateTime={dayInWeek.toISOString()}
-                        className="w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white transition-colors"
-                      >
-                        <div className="w-[20px] h-[20px] rounded-full bg-[#878787]/10 group-hover:bg-white relative text-blue-500">
-                          {/* {format(dayInWeek, "EEEEE")} */}
-                        </div>
-                      </time>
-                    );
-                  }
+                  const isoDate = formatISO(dayInWeek, {
+                    representation: "date",
+                  });
 
                   return (
-                    <time
-                      key={dayInWeek.toISOString()}
-                      dateTime={dayInWeek.toISOString()}
-                      className="w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white transition-colors"
-                    >
-                      <div className="w-[20px] h-[20px] rounded-full bg-[#878787]/30 group-hover:bg-white relative">
-                        {/* {format(dayInWeek, "EEEEE")} */}
-                      </div>
-                    </time>
+                    <TrackerDayCard
+                      key={isoDate}
+                      date={isoDate}
+                      data={data && data[isoDate]}
+                      onSelect={onSelect}
+                      isTracking={
+                        isTracking &&
+                        isSameDay(new Date(dayInWeek), currentDate)
+                      }
+                      outOfRange={
+                        isBefore(dayInWeek, firstDay) ||
+                        isAfter(dayInWeek, lastDay)
+                      }
+                    />
                   );
                 })}
               </div>
