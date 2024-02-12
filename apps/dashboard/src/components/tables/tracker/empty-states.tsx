@@ -3,9 +3,17 @@
 import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { Button } from "@midday/ui/button";
 import { useRouter } from "next/navigation";
+import { parseAsString, useQueryStates } from "nuqs";
 
 export function EmptyState({ currencyCode }) {
-  const router = useRouter();
+  const [params, setParams] = useQueryStates(
+    {
+      create: parseAsString,
+    },
+    {
+      shallow: true,
+    }
+  );
 
   return (
     <div className="flex items-center justify-center ">
@@ -18,20 +26,21 @@ export function EmptyState({ currencyCode }) {
           </p>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => router.push("/tracker?create=project")}
-        >
+        <Button variant="outline" onClick={() => setParams({ create: "true" })}>
           Create project
         </Button>
       </div>
 
-      <TrackerCreateSheet currencyCode={currencyCode} />
+      <TrackerCreateSheet
+        setParams={setParams}
+        currencyCode={currencyCode}
+        isOpen={Boolean(params.create)}
+      />
     </div>
   );
 }
 
-export function NoResults({ currencyCode }) {
+export function NoResults() {
   const router = useRouter();
 
   return (
@@ -48,8 +57,6 @@ export function NoResults({ currencyCode }) {
           Clear filters
         </Button>
       </div>
-
-      <TrackerCreateSheet currencyCode={currencyCode} />
     </div>
   );
 }

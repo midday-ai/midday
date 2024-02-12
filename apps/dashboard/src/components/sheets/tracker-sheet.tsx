@@ -15,6 +15,7 @@ import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { TrackerEntriesList } from "../tracker-entries-list";
+import { TrackerSelectProject } from "../tracker-select-project";
 
 export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -106,8 +107,12 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   }
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && params.projectId !== "new") {
       fetchData(params);
+    }
+
+    if (params.projectId === "new") {
+      setLoading(false);
     }
     // TODO: Only fetch when month change
   }, [params, isOpen]);
@@ -121,14 +126,22 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
         onOpenChange={() => setParams({ projectId: null, date: null })}
       >
         <SheetContent>
-          <SheetHeader className="mb-8 flex justify-between items-center flex-row">
-            <h2 className="text-xl">
-              {project?.name}{" "}
-              <span className="text-[#878787]">
-                {secondsToHoursAndMinutes(totalDuration)}
-              </span>
-            </h2>
-          </SheetHeader>
+          {params.projectId !== "new" && (
+            <SheetHeader className="mb-8 flex justify-between items-center flex-row">
+              <h2 className="text-xl">
+                {project?.name}{" "}
+                <span className="text-[#878787]">
+                  {secondsToHoursAndMinutes(totalDuration)}
+                </span>
+              </h2>
+            </SheetHeader>
+          )}
+
+          {params.projectId === "new" && (
+            <div className="mb-6">
+              <TrackerSelectProject />
+            </div>
+          )}
 
           <ScrollArea className="h-full p-0">
             <TrackerSelect

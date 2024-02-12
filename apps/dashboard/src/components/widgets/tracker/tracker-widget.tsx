@@ -14,6 +14,8 @@ export function TrackerWidget({ data, date }) {
 
     if (projectId) {
       params.set("projectId", projectId);
+    } else {
+      params.set("projectId", "new");
     }
 
     router.push(`/tracker?${params.toString()}`);

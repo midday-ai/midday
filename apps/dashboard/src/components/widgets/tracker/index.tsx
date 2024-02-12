@@ -15,6 +15,7 @@ export function Tracker() {
   const [data, setData] = useState();
   const [meta, setMeta] = useState();
 
+  // TODO: Make request in rsc
   useEffect(() => {
     async function fetchData() {
       try {
@@ -23,7 +24,7 @@ export function Tracker() {
             representation: "date",
           }),
           to: formatISO(endOfMonth(new Date(date)), { representation: "date" }),
-          teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+          teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
         });
 
         if (data) {

@@ -25,6 +25,7 @@ type Props = {
   isSaving?: boolean;
   isFetching?: boolean;
   className?: string;
+  classNameList?: string;
   defaultValue?: string;
   disabled?: boolean;
   autoFocus?: boolean;
@@ -49,6 +50,7 @@ export const Combobox = React.forwardRef<HTMLInputElement, Props>(
       autoFocus,
       className,
       hidden: initialHidden,
+      classNameList,
     },
     ref
   ) => {
@@ -114,7 +116,7 @@ export const Combobox = React.forwardRef<HTMLInputElement, Props>(
 
     return (
       <div className="relative w-full" ref={parentRef}>
-        <Command hidden className="bg-transparent">
+        <Command hidden className="bg-transparent rounded-sm">
           <div className="relative">
             <CommandPrimitive.Input
               ref={ref}
@@ -126,7 +128,7 @@ export const Combobox = React.forwardRef<HTMLInputElement, Props>(
               onFocus={handleFocus}
               placeholder={placeholder}
               className={cn(
-                "flex h-10 w-full rounded-md border border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground dark:placeholder:text-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+                "flex h-10 w-full rounded-md border border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground",
                 loading && "skeleton-line self-start block",
                 className
               )}
@@ -139,7 +141,10 @@ export const Combobox = React.forwardRef<HTMLInputElement, Props>(
 
           <CommandList
             hidden={hidden}
-            className="absolute z-50 bg-background w-full border rounded-md bottom-[44px] left-0 right-0"
+            className={cn(
+              "absolute z-50 bg-background w-full border rounded-md bottom-[44px] left-0 right-0",
+              classNameList
+            )}
           >
             <CommandGroup className="max-h-[145px] overflow-auto">
               {options?.map(({ component: Component, ...option }) => {
