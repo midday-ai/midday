@@ -806,14 +806,21 @@ export async function getTrackerRecordsByRange(
   supabase: Client,
   params: GetTrackerRecordsByRangeParams
 ) {
-  const { data } = await supabase
+  const query = supabase
     .from("tracker_entries")
-    .select("*, assigned:assigned_id(id, full_name, avatar_url)")
-    .eq("project_id", params.projectId)
+    .select(
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)"
+    )
     .eq("team_id", params.teamId)
     .gte("date", params.from)
     .lte("date", params.to)
     .order("created_at");
+
+  if (params.projectId) {
+    query.eq("project_id", params.projectId);
+  }
+
+  const { data } = await query;
 
   const result = data.reduce((acc, item) => {
     const key = item.date;

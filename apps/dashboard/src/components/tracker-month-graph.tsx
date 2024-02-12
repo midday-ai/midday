@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrackerStore } from "@/store/tracker";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   HoverCard,
@@ -45,7 +46,12 @@ export function TrackerMonthGraph({
   const rows = result.map((day, i) => {
     const isoDate = formatISO(day, { representation: "date" });
     const isActive = showCurrentDate && isoDate === date;
-    const hasRecords = data && data[isoDate];
+    const records = data && data[isoDate];
+
+    const totalDuration = records?.reduce(
+      (duration, item) => item.duration + duration,
+      0
+    );
 
     return (
       <HoverCard key={i.toString()} openDelay={250} closeDelay={150}>
@@ -65,7 +71,7 @@ export function TrackerMonthGraph({
               <div
                 className={cn(
                   "w-[20px] h-[20px] rounded-full bg-[#878787]/30 group-hover:bg-white relative",
-                  hasRecords || isActive ? "bg-white" : "",
+                  records || isActive ? "bg-white" : "",
                   isTracking &&
                     isSameDay(new Date(), isoDate) &&
                     "!bg-[#00C969]"
@@ -91,48 +97,46 @@ export function TrackerMonthGraph({
           >
             <div className="flex justify-between border-b-[1px] pl-3 pr-3 py-2.5 items-center">
               <span className="text-xs">Total</span>
-              <span className="text-xs font-medium">16h</span>
+              <span className="text-xs font-medium">
+                {secondsToHoursAndMinutes(totalDuration)}
+              </span>
             </div>
             <div className="p-3 flex flex-col space-y-3">
-              <div className="flex items-center">
-                <div className="flex space-x-2 items-center">
-                  <Avatar className="rounded-full w-5 h-5">
-                    <AvatarImage src="https://lh3.googleusercontent.com/a/ACg8ocI0Te8WfHr_8nHOdWtt7H2JNOEt6f6Rr_wBNWknzp_Qlk4=s96-c" />
-                    <AvatarFallback>
-                      <span className="text-xs">PA</span>
-                    </AvatarFallback>
-                  </Avatar>
-                  <button
-                    className="flex flex-col"
-                    type="button"
-                    onClick={() => handleOnSelect({ id: "123", date: day })}
-                  >
-                    <span className="text-xs">Project X</span>
-                    <span className="text-xs text-[#878787]">Development</span>
-                  </button>
-                </div>
-                <div className="ml-auto">
-                  <span className="text-xs">7h</span>
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <div className="flex space-x-2 items-center">
-                  <Avatar className="rounded-full w-5 h-5">
-                    <AvatarImage src="https://api.midday.ai/storage/v1/object/public/avatars/efea0311-0786-4f70-9b5a-63e3efa5d319/EEA53AB2-6294-45ED-8D24-B9B43A1C2B7A.jpg" />
-                    <AvatarFallback>
-                      <span className="text-xs">VH</span>
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="text-xs">Project X</span>
-                    <span className="text-xs text-[#878787]">Design</span>
+              {records?.map((record) => {
+                return (
+                  <div key={record.id} className="flex items-center">
+                    <div className="flex space-x-2 items-center">
+                      <Avatar className="rounded-full w-5 h-5">
+                        <AvatarImage src={record?.assigned?.avatar_url} />
+                        <AvatarFallback>
+                          <span className="text-xs">
+                            {record?.assigned?.full_name
+                              ?.charAt(0)
+                              ?.toUpperCase()}
+                          </span>
+                        </AvatarFallback>
+                      </Avatar>
+                      <button
+                        className="flex flex-col"
+                        type="button"
+                        onClick={() =>
+                          handleOnSelect({ id: record.project.id, date: day })
+                        }
+                      >
+                        <span className="text-xs">{record.project?.name}</span>
+                        <span className="text-xs text-[#878787]">
+                          {record?.description}
+                        </span>
+                      </button>
+                    </div>
+                    <div className="ml-auto">
+                      <span className="text-xs">
+                        {secondsToHoursAndMinutes(record.duration)}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div className="ml-auto">
-                  <span className="text-xs">7h</span>
-                </div>
-              </div>
+                );
+              })}
             </div>
           </HoverCardContent>
         )}

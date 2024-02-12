@@ -1,11 +1,8 @@
 "use client";
 
 import { TrackerSelect } from "@/components/tracker-select";
-import { useI18n } from "@/locales/client";
 
-export function TrackerHeader() {
-  const t = useI18n();
-
+export function TrackerHeader({ date, setDate }) {
   return (
     <div className="flex justify-between">
       <div>
@@ -13,10 +10,7 @@ export function TrackerHeader() {
         <span className="text-[#878787]">165h</span>
       </div>
 
-      <TrackerSelect
-        date={new Date().toDateString()}
-        onSelect={(date) => console.log(date)}
-      />
+      <TrackerSelect date={date} onSelect={setDate} />
     </div>
   );
 }
