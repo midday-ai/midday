@@ -36,13 +36,13 @@ export function TrackerDayCard({
         >
           <div
             className={cn(
-              "w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white transition-colors",
+              "w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white",
               isActive && "border-white"
             )}
           >
             <time
               dateTime={new Date(date).toISOString()}
-              className="w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white transition-colors"
+              className="w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white"
             >
               <div
                 className={cn(

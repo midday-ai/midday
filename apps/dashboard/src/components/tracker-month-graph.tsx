@@ -36,8 +36,8 @@ export function TrackerMonthGraph({
     { weekStartsOn }
   );
 
-  const firstDay = startOfMonth(new Date());
-  const lastDay = endOfMonth(new Date());
+  const firstDay = startOfMonth(new Date(date));
+  const lastDay = endOfMonth(new Date(date));
 
   const handleOnSelect = (params) => {
     if (onSelect) {
