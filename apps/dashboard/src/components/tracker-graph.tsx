@@ -104,12 +104,6 @@ export function TrackerGraph({ data }) {
                     </time>
                   );
                 })}
-
-                {/* {index % 4 === 0 && (
-                  <div className="flex justify-center">
-                    <span>katt</span>
-                  </div>
-                )} */}
               </div>
             </div>
           );

@@ -15,7 +15,7 @@
     "@trigger.dev/resend": "^2.3.17",
     "@trigger.dev/sdk": "^2.3.17",
     "@trigger.dev/supabase": "^2.3.17",
-    "langchain": "0.1.16",
+    "langchain": "0.1.17",
     "nanoid": "^5.0.5",
     "pdf-parse": "^1.1.1"
   }
