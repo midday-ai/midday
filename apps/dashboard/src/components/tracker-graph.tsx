@@ -1,5 +1,8 @@
 "use client";
 
+import { secondsToHoursAndMinutes } from "@/utils/format";
+import { createClient } from "@midday/supabase/client";
+import { getTrackerRecordsByRange } from "@midday/supabase/queries";
 import {
   eachDayOfInterval,
   eachWeekOfInterval,
@@ -16,10 +19,40 @@ import {
   subMonths,
 } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
+import { useEffect, useState } from "react";
 import { TrackerDayCard } from "./tracker-day-card";
 
-export function TrackerGraph({ data }) {
+export function TrackerGraph() {
+  const [data, setData] = useState();
+  const [meta, setMeta] = useState();
   const weekStartsOn = 1; // Monday
+  const supabase = createClient();
+
+  const currentDate = new Date();
+
+  const start = startOfMonth(subMonths(currentDate, 6));
+  const end = endOfMonth(currentDate);
+
+  useEffect(() => {
+    async function fetchData() {
+      const { data, meta } = await getTrackerRecordsByRange(supabase, {
+        from: formatISO(start, {
+          representation: "date",
+        }),
+        to: formatISO(end, {
+          representation: "date",
+        }),
+        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
+      });
+
+      setData(data);
+      setMeta(meta);
+    }
+
+    if (!data) {
+      fetchData();
+    }
+  }, [data]);
 
   const [params, setParams] = useQueryStates(
     {
@@ -35,14 +68,13 @@ export function TrackerGraph({ data }) {
     setParams(params);
   };
 
-  const currentDate = new Date();
   const firstDay = startOfMonth(subMonths(currentDate, 6));
   const lastDay = endOfMonth(currentDate);
 
   const weeks = eachWeekOfInterval(
     {
-      start: startOfMonth(subMonths(currentDate, 6)),
-      end: endOfMonth(currentDate),
+      start,
+      end,
     },
     { weekStartsOn }
   );
@@ -58,7 +90,9 @@ export function TrackerGraph({ data }) {
     <div className="w-full">
       <div className="mt-8">
         <h2 className="font-medium text-[#878787] text-xl mb-2">Total hours</h2>
-        <div className="text-[#F5F5F3] text-4xl">294</div>
+        <div className="text-[#F5F5F3] text-4xl">
+          {secondsToHoursAndMinutes(meta?.totalDuration)}
+        </div>
       </div>
 
       <div className="flex gap-4 mt-8">

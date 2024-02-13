@@ -17,7 +17,7 @@ export default function Tracker({ searchParams }) {
 
   return (
     <div>
-      <TrackerGraph data={[]} />
+      <TrackerGraph />
 
       <div className="mt-14 mb-6 flex items-center justify-between">
         <SearchField placeholder="Search projects" />
