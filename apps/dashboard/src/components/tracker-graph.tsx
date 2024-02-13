@@ -52,7 +52,7 @@ export function TrackerGraph() {
     if (!data) {
       fetchData();
     }
-  }, [data]);
+  }, []);
 
   const [params, setParams] = useQueryStates(
     {
