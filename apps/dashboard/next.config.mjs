@@ -1,5 +1,4 @@
-import path from "path";
-import "./src/env.mjs";
+//  import "./src/env.mjs";
 
 import withBundleAnalyzer from "@next/bundle-analyzer";
 
@@ -33,6 +32,7 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // output: "standalone",
 };
 
 export default withBundleAnalyzer({

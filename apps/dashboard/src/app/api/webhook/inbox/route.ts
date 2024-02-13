@@ -10,7 +10,7 @@ import { decode } from "base64-arraybuffer";
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 
-export const runtime = "nodejs";
+// export const runtime = "nodejs";
 export const maxDuration = 300; // 5min
 export const dynamic = "force-dynamic";
 

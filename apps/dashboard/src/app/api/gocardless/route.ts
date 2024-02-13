@@ -3,8 +3,8 @@ import { createClient } from "@midday/supabase/server";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
-export const preferredRegion = "fra1";
-export const runtime = "edge";
+// export const preferredRegion = "fra1";
+// export const runtime = "edge";
 
 export async function GET(req) {
   const supabase = createClient();
