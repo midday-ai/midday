@@ -95,7 +95,7 @@ export function TrackerGraph() {
         </div>
       </div>
 
-      <div className="flex gap-4 mt-8">
+      <div className="flex gap-4 mt-8 justify-between">
         <div className="flex flex-col justify-between mr-4">
           {days.map((day) => (
             <div className="h-[28px]" key={day}>
