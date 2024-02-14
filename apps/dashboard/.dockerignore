@@ -1,0 +1,35 @@
+# Dependency directories
+node_modules
+**/node_modules
+
+# Log files
+*.log
+
+# Version control
+.git
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.idea/
+.vscode/
+
+# Build outputs
+dist/
+build/
+out/
+.coverage/
+.turbo/
+.next/
+
+# Documentation & Tests
+*.md
+LICENSE
+test/
+tests/
+__tests__/
+
+# Environment configs
+.env*

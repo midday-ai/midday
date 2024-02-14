@@ -23,7 +23,7 @@ export function TrackerMonthGraph({
   projectId,
   disableHover,
 }) {
-  const weekStartsOn = 1;
+  const weekStartsOn = 1; // NOTE: Monday, should be a user setting
   const { isTracking } = useTrackerStore();
   const currentDate = new Date(date);
 

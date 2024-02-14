@@ -64,5 +64,5 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
   },
-  skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation: true,
 });

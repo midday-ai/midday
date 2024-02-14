@@ -25,7 +25,7 @@ import { TrackerDayCard } from "./tracker-day-card";
 export function TrackerGraph() {
   const [data, setData] = useState();
   const [meta, setMeta] = useState();
-  const weekStartsOn = 1; // Monday
+  const weekStartsOn = 1; // NOTE: Monday, should be a user setting
   const supabase = createClient();
 
   const currentDate = new Date();

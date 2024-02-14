@@ -4,8 +4,8 @@ import { createClient } from "@midday/supabase/server";
 import { download } from "@midday/supabase/storage";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 
-export const preferredRegion = "fra1";
-export const runtime = "edge";
+// export const preferredRegion = "fra1";
+// export const runtime = "edge";
 export const dynamic = "force-dynamic";
 
 export async function GET(req, res) {

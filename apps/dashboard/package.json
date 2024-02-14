@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "NODE_ENV=production next build",
+    "build": "next build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=midday-G6Yq",
     "dev": "next dev -p 3001",
@@ -22,7 +22,6 @@
     "@midday/notification": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@next/bundle-analyzer": "^14.1.0",
     "@novu/headless": "^0.23.1",
     "@tanstack/react-table": "^8.11.8",
     "@todesktop/client-active-win": "^0.15.0",

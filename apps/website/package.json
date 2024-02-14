@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "NODE_ENV=production next build",
+    "build": "next build",
     "clean": "git clean -xdf .next .turbo node_modules",
     "dev": "next dev -p 3000",
     "lint": "next lint",
