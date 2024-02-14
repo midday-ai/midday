@@ -21,9 +21,17 @@ export const updateEntriesAction = action(
       return Promise.resolve(params);
     }
 
+    const { data: projectData } = await supabase
+      .from("tracker_projects")
+      .select("id, rate, currency")
+      .eq("id", params.project_id)
+      .single();
+
     const { error } = await supabase.from("tracker_entries").upsert({
       ...payload,
       team_id: user.data.team_id,
+      rate: projectData?.rate,
+      currency: projectData?.currency,
     });
 
     if (error) {
