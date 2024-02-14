@@ -12,7 +12,7 @@ export async function InboxWidget({ filter, disabled }) {
   const { data } = disabled
     ? inboxData
     : await getInbox({
-        to: 3,
+        to: 2,
         from: 0,
         status: filter,
       });

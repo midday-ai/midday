@@ -1,4 +1,4 @@
-import { ChangeLanguage } from "@/components/change-language";
+// import { ChangeLanguage } from "@/components/change-language";
 import { ChangeTheme } from "@/components/change-theme";
 import { DeleteAccount } from "@/components/delete-account";
 import { DisplayName } from "@/components/display-name";
@@ -21,7 +21,7 @@ export default async function Account() {
         avatarUrl={userData?.avatar_url}
       />
       <DisplayName fullName={userData.full_name} />
-      <ChangeLanguage />
+      {/* <ChangeLanguage /> */}
       <ChangeTheme />
       <DeleteAccount />
     </div>

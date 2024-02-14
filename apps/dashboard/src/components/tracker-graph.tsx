@@ -5,6 +5,7 @@ import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByRange } from "@midday/supabase/queries";
 import {
   eachDayOfInterval,
+  eachMonthOfInterval,
   eachWeekOfInterval,
   endOfMonth,
   endOfWeek,
@@ -68,9 +69,6 @@ export function TrackerGraph() {
     setParams(params);
   };
 
-  const firstDay = startOfMonth(subMonths(currentDate, 6));
-  const lastDay = endOfMonth(currentDate);
-
   const weeks = eachWeekOfInterval(
     {
       start,
@@ -78,6 +76,11 @@ export function TrackerGraph() {
     },
     { weekStartsOn }
   );
+
+  const months = eachMonthOfInterval({
+    start,
+    end,
+  });
 
   const days = eachDayOfInterval({
     start: startOfWeek(currentDate, { weekStartsOn }),
@@ -95,7 +98,7 @@ export function TrackerGraph() {
         </div>
       </div>
 
-      <div className="flex gap-4 mt-8 justify-between">
+      <div className="flex gap-2 mt-8 justify-between">
         <div className="flex flex-col justify-between mr-4">
           {days.map((day) => (
             <div className="h-[28px]" key={day}>
@@ -112,7 +115,7 @@ export function TrackerGraph() {
 
           return (
             <div key={day.toISOString()}>
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
                 {daysInWeek.map((dayInWeek) => {
                   const isoDate = formatISO(dayInWeek, {
                     representation: "date",
@@ -120,6 +123,7 @@ export function TrackerGraph() {
 
                   return (
                     <TrackerDayCard
+                      selectProject
                       key={isoDate}
                       date={isoDate}
                       data={data && data[isoDate]}
@@ -129,8 +133,7 @@ export function TrackerGraph() {
                         isSameDay(new Date(dayInWeek), currentDate)
                       }
                       outOfRange={
-                        isBefore(dayInWeek, firstDay) ||
-                        isAfter(dayInWeek, lastDay)
+                        isBefore(dayInWeek, start) || isAfter(dayInWeek, end)
                       }
                     />
                   );
@@ -139,6 +142,17 @@ export function TrackerGraph() {
             </div>
           );
         })}
+      </div>
+
+      <div className="flex w-full mt-6 pl-10">
+        {months.map((month) => (
+          <div
+            key={month.toDateString()}
+            className="basis-1/6 text-center text-[#878787] text-sm"
+          >
+            {format(month, "MMM")}
+          </div>
+        ))}
       </div>
     </div>
   );

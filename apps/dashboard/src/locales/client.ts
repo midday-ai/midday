@@ -2,7 +2,7 @@
 
 import { createI18nClient } from "next-international/client";
 
-export const languages = ["en", "sv"];
+export const languages = ["en"];
 
 export const {
   useScopedI18n,
@@ -12,5 +12,5 @@ export const {
   useI18n,
 } = createI18nClient({
   en: () => import("./en"),
-  sv: () => import("./sv"),
+  // sv: () => import("./sv"),
 });

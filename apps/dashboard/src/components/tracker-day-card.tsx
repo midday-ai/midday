@@ -16,6 +16,7 @@ export function TrackerDayCard({
   disableHover,
   isActive,
   isTracking,
+  selectProject,
 }) {
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
@@ -24,13 +25,21 @@ export function TrackerDayCard({
 
   const hoverEnabled = !disableHover && data;
 
+  const handleOnClick = () => {
+    if (selectProject) {
+      onSelect({ date, projectId: "new" });
+    } else {
+      onSelect({ date });
+    }
+  };
+
   return (
     <HoverCard openDelay={250} closeDelay={150}>
       <HoverCardTrigger asChild>
         <button
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
-          onClick={() => onSelect({ date, projectId: "new" })}
+          onClick={handleOnClick}
         >
           <div
             className={cn(
@@ -94,7 +103,9 @@ export function TrackerDayCard({
                     <button
                       className="flex flex-col"
                       type="button"
-                      onClick={() => onSelect({ id: record.project.id, date })}
+                      onClick={() =>
+                        onSelect({ projectId: record.project.id, date })
+                      }
                     >
                       <span className="text-xs">{record.project?.name}</span>
                       <span className="text-xs text-[#878787]">

@@ -29,10 +29,10 @@ const navigation = [
     name: "Invoices",
     path: "/invoices",
   },
-  {
-    name: "Tracker",
-    path: "/tracker",
-  },
+  // {
+  //   name: "Tracker",
+  //   path: "/tracker",
+  // },
   {
     name: "Vault",
     path: "/vault",
@@ -79,10 +79,10 @@ export function CommandRoot() {
               </span>
             </div>
           </CommandItem>
-          <CommandItem onSelect={() => setMenu(MenuOption.Tracker)}>
+          {/* <CommandItem onSelect={() => setMenu(MenuOption.Tracker)}>
             <Icons.Tracker className="mr-2 h-[20px] w-[20px]" />
             <span>Time Tracker</span>
-          </CommandItem>
+          </CommandItem> */}
           {isDesktopApp() && (
             <CommandItem onSelect={() => window.location.replace("midday://")}>
               <MoveUpRight className="mr-2 h-4 w-4" />
