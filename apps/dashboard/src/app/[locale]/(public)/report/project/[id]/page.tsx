@@ -1,5 +1,7 @@
-import { TrackerGraph } from "@/components/tracker-graph";
+import { TrackerGraph } from "@/components/tracker-graph/tracker-graph";
+import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
+import { endOfMonth, formatISO, startOfMonth, subMonths } from "date-fns";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
@@ -27,12 +29,28 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 
 export default async function ProjectReport({ params, searchParams }) {
   const supabase = createClient({ admin: true });
+  const date = searchParams?.date;
+  const currentDate = date ? new Date(date) : new Date();
+  const numberOfMonths = 6;
+  const start = startOfMonth(subMonths(currentDate, numberOfMonths));
+  const end = endOfMonth(currentDate);
 
-  const { data, error } = await supabase
+  const { data: reportData, error } = await supabase
     .from("tracker_reports")
     .select("*, project:project_id(id, name)")
     .eq("id", params.id)
     .single();
+
+  const { data, meta } = await getTrackerRecordsByRangeQuery(supabase, {
+    projectId: reportData.project.id,
+    teamId: reportData.team_id,
+    from: formatISO(start, {
+      representation: "date",
+    }),
+    to: formatISO(end, {
+      representation: "date",
+    }),
+  });
 
   if (error) {
     return notFound();
@@ -42,7 +60,7 @@ export default async function ProjectReport({ params, searchParams }) {
     <div className="h-screen flex flex-col pl-4 pr-4">
       <div className="flex items-center justify-center w-full h-[80px] border-b-[1px]">
         <div className="flex items-center flex-col">
-          <div>{data.project.name}</div>
+          <div>{reportData.project.name}</div>
           <span className="text-[#878787]">Time Report</span>
         </div>
       </div>
@@ -50,9 +68,14 @@ export default async function ProjectReport({ params, searchParams }) {
       <div className="justify-center w-full flex px-8 h-full mt-6">
         <div className="max-w-[1400px]">
           <TrackerGraph
-            date={searchParams?.date}
-            projectId={data.project.id}
             isTracking
+            data={data}
+            meta={meta}
+            date={currentDate}
+            start={start}
+            end={end}
+            numberOfMonths={numberOfMonths}
+            projectId={reportData.project.id}
           />
         </div>
       </div>

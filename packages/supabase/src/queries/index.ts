@@ -820,8 +820,7 @@ export async function getTrackerRecordsByRangeQuery(
     query.eq("project_id", params.projectId);
   }
 
-  const { data } = await query;
-
+  const { data, error } = await query;
   const result = data.reduce((acc, item) => {
     const key = item.date;
 
