@@ -6,7 +6,7 @@ import { TrackerSelect } from "@/components/tracker-select";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
-import { getTrackerRecordsByRange } from "@midday/supabase/queries";
+import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
@@ -85,7 +85,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
     try {
       setLoading(true);
 
-      const { data, meta } = await getTrackerRecordsByRange(supabase, {
+      const { data, meta } = await getTrackerRecordsByRangeQuery(supabase, {
         projectId,
         from: formatISO(startOfMonth(new Date(date)), {
           representation: "date",
@@ -150,7 +150,10 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
           {params.projectId === "new" && (
             <div className="mb-6">
-              <TrackerSelectProject setParams={setParams} />
+              <TrackerSelectProject
+                setParams={setParams}
+                teamId={user.team_id}
+              />
             </div>
           )}
 

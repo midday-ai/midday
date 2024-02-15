@@ -1,55 +1,16 @@
-"use client";
-
 import { ErrorFallback } from "@/components/error-fallback";
-import { createClient } from "@midday/supabase/client";
-import { getTrackerRecordsByRange } from "@midday/supabase/queries";
-import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
-import { useEffect, useState } from "react";
-import { TrackerHeader } from "./tracker-header";
+import { Suspense } from "react";
 import { TrackerWidget } from "./tracker-widget";
 
 export function Tracker() {
-  const supabase = createClient();
-  const [date, setDate] = useState(new Date().toString());
-  const [data, setData] = useState();
-  const [meta, setMeta] = useState();
-
-  // TODO: Make request in rsc
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data, meta } = await getTrackerRecordsByRange(supabase, {
-          from: formatISO(startOfMonth(new Date(date)), {
-            representation: "date",
-          }),
-          to: formatISO(endOfMonth(new Date(date)), { representation: "date" }),
-          teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
-        });
-
-        if (data) {
-          setMeta(meta);
-          setData(data);
-        }
-      } catch {}
-    }
-
-    fetchData();
-  }, [date]);
-
   return (
     <div className="flex-1 border p-8 relative h-full">
-      <TrackerHeader
-        date={date}
-        setDate={setDate}
-        totalDuration={meta?.totalDuration}
-      />
-
-      <div className="mt-10">
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <TrackerWidget data={data} date={date} />
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary errorComponent={ErrorFallback}>
+        <Suspense>
+          <TrackerWidget />
+        </Suspense>
+      </ErrorBoundary>
     </div>
   );
 }

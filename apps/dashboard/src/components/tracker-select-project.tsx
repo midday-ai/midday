@@ -9,7 +9,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-export function TrackerSelectProject({ setParams }) {
+export function TrackerSelectProject({ setParams, teamId }) {
   const { toast } = useToast();
   const supabase = createClient();
   const [value, setValue] = useState("");
@@ -30,7 +30,7 @@ export function TrackerSelectProject({ setParams }) {
 
   async function fetchData() {
     const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
-      teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
+      teamId,
       to: 100,
     });
 

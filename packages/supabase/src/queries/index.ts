@@ -802,7 +802,7 @@ type GetTrackerRecordsByRangeParams = {
   projectId: string;
 };
 
-export async function getTrackerRecordsByRange(
+export async function getTrackerRecordsByRangeQuery(
   supabase: Client,
   params: GetTrackerRecordsByRangeParams
 ) {

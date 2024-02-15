@@ -1,25 +1,18 @@
-"use client";
+import { getTrackerRecordsByRange } from "@midday/supabase/cached-queries";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { TrackerBlah } from "./tracker-blah";
 
-import { TrackerMonthGraph } from "@/components/tracker-month-graph";
-import { useRouter, useSearchParams } from "next/navigation";
+export async function TrackerWidget() {
+  const currentDate = new Date();
 
-export function TrackerWidget({ data, date }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const { data, meta } = await getTrackerRecordsByRange({
+    from: formatISO(startOfMonth(new Date(currentDate)), {
+      representation: "date",
+    }),
+    to: formatISO(endOfMonth(new Date(currentDate)), {
+      representation: "date",
+    }),
+  });
 
-  const onSelect = ({ projectId, date }) => {
-    const params = new URLSearchParams(searchParams);
-
-    params.set("date", date);
-
-    if (projectId) {
-      params.set("projectId", projectId);
-    } else {
-      params.set("projectId", "new");
-    }
-
-    router.push(`/tracker?${params.toString()}`);
-  };
-
-  return <TrackerMonthGraph date={date} onSelect={onSelect} data={data} />;
+  return <TrackerBlah data={data} meta={meta} date={currentDate} />;
 }

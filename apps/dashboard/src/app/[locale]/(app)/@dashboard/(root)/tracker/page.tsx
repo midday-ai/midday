@@ -4,6 +4,7 @@ import { Table } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerChangeStatus } from "@/components/tracker-change-status";
 import { TrackerGraph } from "@/components/tracker-graph";
+import { getUser } from "@midday/supabase/cached-queries";
 import { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -11,13 +12,14 @@ export const metadata: Metadata = {
   title: "Tracker | Midday",
 };
 
-export default function Tracker({ searchParams }) {
+export default async function Tracker({ searchParams }) {
   const status = searchParams?.status;
   const sort = searchParams?.sort?.split(":");
+  const user = await getUser();
 
   return (
     <div>
-      <TrackerGraph />
+      <TrackerGraph teamId={user?.data.team_id} />
 
       <div className="mt-14 mb-6 flex items-center justify-between">
         <SearchField placeholder="Search projects" />

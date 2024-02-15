@@ -2,7 +2,7 @@
 
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
-import { getTrackerRecordsByRange } from "@midday/supabase/queries";
+import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import {
   eachDayOfInterval,
   eachMonthOfInterval,
@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import { TrackerDayCard } from "./tracker-day-card";
 import { TrackerPagination } from "./tracker-pagination";
 
-export function TrackerGraph() {
+export function TrackerGraph({ teamId }) {
   const [data, setData] = useState();
   const [meta, setMeta] = useState();
   const weekStartsOn = 1; // TODO: Monday - should be user setting
@@ -53,10 +53,10 @@ export function TrackerGraph() {
   );
 
   async function fetchData() {
-    const { data, meta } = await getTrackerRecordsByRange(supabase, {
+    const { data, meta } = await getTrackerRecordsByRangeQuery(supabase, {
       from: params.from,
       to: params.to,
-      teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
+      teamId,
     });
 
     setData(data);

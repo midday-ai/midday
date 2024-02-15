@@ -11,6 +11,7 @@ import {
   getTeamUserQuery,
   getTeamsByUserIdQuery,
   getTrackerProjectsQuery,
+  getTrackerRecordsByRangeQuery,
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
@@ -299,6 +300,23 @@ export const getTrackerProjects = async (params) => {
     ["tracker_projects", teamId],
     {
       tags: [`tracker_projects_${teamId}`],
+      revalidate: 180,
+    }
+  )(params);
+};
+
+export const getTrackerRecordsByRange = async (params) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getTrackerRecordsByRangeQuery(supabase, { ...params, teamId });
+    },
+    ["tracker_records", teamId],
+    {
+      tags: [`tracker_records_${teamId}`],
       revalidate: 180,
     }
   )(params);
