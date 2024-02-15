@@ -2,15 +2,22 @@
 
 import { TrackerMonthGraph } from "@/components/tracker-month-graph";
 import { useRouter, useSearchParams } from "next/navigation";
+import { parseAsString, useQueryState } from "nuqs";
 import { TrackerHeader } from "./tracker-header";
 
-export function TrackerBlah({ date, data, meta }) {
+export function TrackerWrapper({ date: initialDate, data, meta }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const [date, setDate] = useQueryState(
+    "date",
+    parseAsString.withDefault(initialDate)
+  );
 
   const onSelect = ({ projectId, date }) => {
     const params = new URLSearchParams(searchParams);
     params.set("date", date);
+
     if (projectId) {
       params.set("projectId", projectId);
     } else {
@@ -23,7 +30,7 @@ export function TrackerBlah({ date, data, meta }) {
     <div>
       <TrackerHeader
         date={date}
-        // setDate={setDate}
+        setDate={(d) => setDate(d, { shallow: false })}
         totalDuration={meta?.totalDuration}
       />
 

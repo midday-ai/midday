@@ -1,9 +1,9 @@
 import { getTrackerRecordsByRange } from "@midday/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
-import { TrackerBlah } from "./tracker-blah";
+import { TrackerWrapper } from "./tracker-wrapper";
 
-export async function TrackerWidget() {
-  const currentDate = new Date();
+export async function TrackerWidget({ date }) {
+  const currentDate = date ?? new Date();
 
   const { data, meta } = await getTrackerRecordsByRange({
     from: formatISO(startOfMonth(new Date(currentDate)), {
@@ -14,5 +14,5 @@ export async function TrackerWidget() {
     }),
   });
 
-  return <TrackerBlah data={data} meta={meta} date={currentDate} />;
+  return <TrackerWrapper data={data} meta={meta} date={currentDate} />;
 }

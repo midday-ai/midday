@@ -11,7 +11,7 @@ import { Transactions } from "./charts/transactions";
 import { Inbox } from "./widgets/inbox";
 import { Tracker } from "./widgets/tracker";
 
-export function Widgets({ disabled, initialPeriod }) {
+export function Widgets({ disabled, initialPeriod, searchParams }) {
   return (
     <Carousel
       className="w-full flex flex-col"
@@ -32,7 +32,7 @@ export function Widgets({ disabled, initialPeriod }) {
           <Transactions disabled={disabled} />
         </CarouselItem>
         <CarouselItem className="basis-1/3 pl-[40px]">
-          <Tracker />
+          <Tracker date={searchParams?.date} />
         </CarouselItem>
         <CarouselItem className="basis-1/3 pl-[40px]">
           <Inbox disabled={disabled} />
