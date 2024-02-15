@@ -61,7 +61,7 @@ export function TrackerDayCard({
                   outOfRange && "bg-[#878787]/10",
                   isActive && "bg-white",
                   data && "bg-white",
-                  isTracking && "bg-[#00C969]",
+                  isTracking && "!bg-[#00C969]",
                   isSameDay(new Date(), date) && "bg-[#878787]/30"
                 )}
               >
