@@ -840,6 +840,8 @@ export async function getTrackerRecordsByRange(
   return {
     meta: {
       totalDuration,
+      from: params.from,
+      to: params.to,
     },
     data: result,
   };

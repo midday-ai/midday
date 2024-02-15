@@ -22,64 +22,81 @@ import {
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { TrackerDayCard } from "./tracker-day-card";
+import { TrackerPagination } from "./tracker-pagination";
 
 export function TrackerGraph() {
   const [data, setData] = useState();
   const [meta, setMeta] = useState();
-  const weekStartsOn = 1; // Monday
+  const weekStartsOn = 1; // TODO: Monday - should be user setting
+  const numberOfMonths = 6;
   const supabase = createClient();
-
   const currentDate = new Date();
-
-  const start = startOfMonth(subMonths(currentDate, 6));
-  const end = endOfMonth(currentDate);
-
-  useEffect(() => {
-    async function fetchData() {
-      const { data, meta } = await getTrackerRecordsByRange(supabase, {
-        from: formatISO(start, {
-          representation: "date",
-        }),
-        to: formatISO(end, {
-          representation: "date",
-        }),
-        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
-      });
-
-      setData(data);
-      setMeta(meta);
-    }
-
-    if (!data) {
-      fetchData();
-    }
-  }, []);
 
   const [params, setParams] = useQueryStates(
     {
       date: parseAsString,
       projectId: parseAsString,
+      from: parseAsString.withDefault(
+        formatISO(startOfMonth(subMonths(currentDate, numberOfMonths)), {
+          representation: "date",
+        })
+      ),
+      to: parseAsString.withDefault(
+        formatISO(endOfMonth(currentDate), {
+          representation: "date",
+        })
+      ),
     },
     {
       shallow: true,
     }
   );
 
+  async function fetchData() {
+    const { data, meta } = await getTrackerRecordsByRange(supabase, {
+      from: params.from,
+      to: params.to,
+      teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890", // TODO: Fix
+    });
+
+    setData(data);
+    setMeta(meta);
+  }
+
+  useEffect(() => {
+    if (!data) {
+      fetchData();
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (meta && meta?.from !== params.from) {
+      fetchData();
+    }
+  }, [params.from, params.to, meta]);
+
   const onSelect = (params) => {
     setParams(params);
   };
 
+  const onChangePeriod = ({ from, to }) => {
+    setParams({
+      from,
+      to,
+    });
+  };
+
   const weeks = eachWeekOfInterval(
     {
-      start,
-      end,
+      start: params.from,
+      end: params.to,
     },
     { weekStartsOn }
   );
 
   const months = eachMonthOfInterval({
-    start,
-    end,
+    start: params.from,
+    end: params.to,
   });
 
   const days = eachDayOfInterval({
@@ -91,11 +108,21 @@ export function TrackerGraph() {
 
   return (
     <div className="w-full">
-      <div className="mt-8">
-        <h2 className="font-medium text-[#878787] text-xl mb-2">Total hours</h2>
-        <div className="text-[#F5F5F3] text-4xl">
-          {secondsToHoursAndMinutes(meta?.totalDuration)}
+      <div className="flex justify-between items-center mt-8">
+        <div>
+          <h2 className="font-medium text-[#878787] text-xl mb-2">
+            Total hours
+          </h2>
+          <div className="text-[#F5F5F3] text-4xl">
+            {secondsToHoursAndMinutes(meta?.totalDuration)}
+          </div>
         </div>
+
+        <TrackerPagination
+          numberOfMonths={numberOfMonths}
+          onChange={onChangePeriod}
+          startDate={params.from}
+        />
       </div>
 
       <div className="flex gap-2 mt-8 justify-between">
@@ -115,7 +142,7 @@ export function TrackerGraph() {
 
           return (
             <div key={day.toISOString()}>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-6">
                 {daysInWeek.map((dayInWeek) => {
                   const isoDate = formatISO(dayInWeek, {
                     representation: "date",
@@ -133,7 +160,8 @@ export function TrackerGraph() {
                         isSameDay(new Date(dayInWeek), currentDate)
                       }
                       outOfRange={
-                        isBefore(dayInWeek, start) || isAfter(dayInWeek, end)
+                        isBefore(dayInWeek, params.from) ||
+                        isAfter(dayInWeek, params.to)
                       }
                     />
                   );

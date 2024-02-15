@@ -19,7 +19,7 @@ const formSchema = z.object({
   description: z.string().optional(),
 });
 
-export function CreateRecordForm({ userId, onCreate }) {
+export function CreateRecordForm({ userId, onCreate, projectId }) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -89,7 +89,9 @@ export function CreateRecordForm({ userId, onCreate }) {
         />
 
         <div className="flex mt-6 justify-between">
-          <Button className="w-full">Add</Button>
+          <Button className="w-full" disabled={projectId === "new"}>
+            Add
+          </Button>
         </div>
       </form>
     </Form>

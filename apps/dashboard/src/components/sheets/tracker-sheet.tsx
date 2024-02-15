@@ -11,7 +11,7 @@ import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useToast } from "@midday/ui/use-toast";
-import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { endOfMonth, formatISO, isSameMonth, startOfMonth } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useState } from "react";
 import { TrackerEntriesList } from "../tracker-entries-list";
@@ -22,7 +22,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const [records, setData] = useState();
-  const [totalDuration, setTotalDuration] = useState(0);
+  const [meta, setMeta] = useState();
   const { toast } = useToast();
 
   const { execute } = useAction(updateEntriesAction, {
@@ -83,6 +83,8 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
   async function fetchData({ date, projectId }) {
     try {
+      setLoading(true);
+
       const { data, meta } = await getTrackerRecordsByRange(supabase, {
         projectId,
         from: formatISO(startOfMonth(new Date(date)), {
@@ -95,8 +97,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
       });
 
       setLoading(false);
-
-      setTotalDuration(meta.totalDuration);
+      setMeta(meta);
 
       if (data) {
         setData(data);
@@ -107,14 +108,24 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   }
 
   useEffect(() => {
-    if (isOpen && params.projectId !== "new") {
+    // NOTE Fetch when new month
+    if (
+      !isLoading &&
+      meta &&
+      !isSameMonth(new Date(meta.from), new Date(params.date))
+    ) {
+      fetchData(params);
+    }
+  }, [meta, params]);
+
+  useEffect(() => {
+    if (isOpen && params.projectId !== "new" && !records) {
       fetchData(params);
     }
 
     if (params.projectId === "new") {
       setLoading(false);
     }
-    // TODO: Only fetch when month change
   }, [params, isOpen]);
 
   const { date, projectId } = params;
@@ -131,7 +142,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
               <h2 className="text-xl">
                 {project?.name}{" "}
                 <span className="text-[#878787]">
-                  {secondsToHoursAndMinutes(totalDuration)}
+                  {secondsToHoursAndMinutes(meta?.totalDuration)}
                 </span>
               </h2>
             </SheetHeader>
@@ -166,6 +177,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
               onCreate={handleOnCreate}
               onDelete={handleOnDelete}
               isLoading={isLoading}
+              projectId={projectId}
             />
           </ScrollArea>
         </SheetContent>
@@ -213,6 +225,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
           user={user}
           onCreate={handleOnCreate}
           onDelete={handleOnDelete}
+          projectId={projectId}
         />
       </DrawerContent>
     </Drawer>

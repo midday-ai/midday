@@ -12,7 +12,7 @@
     },
     "dependencies": {
         "@midday/kv": "workspace:*",
-        "change-case": "^5.3.0"
+        "change-case": "^5.4.3"
     },
     "devDependencies": {
         "typescript": "^5.3.3"

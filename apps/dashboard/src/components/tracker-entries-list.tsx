@@ -10,6 +10,7 @@ export function TrackerEntriesList({
   isLoading,
   onCreate,
   onDelete,
+  projectId,
 }) {
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
@@ -36,7 +37,11 @@ export function TrackerEntriesList({
         />
       ))}
 
-      <CreateRecordForm userId={user.id} onCreate={onCreate} />
+      <CreateRecordForm
+        userId={user.id}
+        onCreate={onCreate}
+        projectId={projectId}
+      />
     </div>
   );
 }

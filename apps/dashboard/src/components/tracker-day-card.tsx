@@ -6,7 +6,7 @@ import {
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
 import { cn } from "@midday/ui/utils";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 
 export function TrackerDayCard({
   date,
@@ -44,7 +44,8 @@ export function TrackerDayCard({
           <div
             className={cn(
               "w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white",
-              isActive && "border-white"
+              isActive && "border-white",
+              isSameDay(new Date(), date) && "border-[#878787]/30"
             )}
           >
             <time
@@ -57,7 +58,8 @@ export function TrackerDayCard({
                   outOfRange && "bg-[#878787]/10",
                   isActive && "bg-white",
                   data && "bg-white",
-                  isTracking && "bg-[#00C969]"
+                  isTracking && "bg-[#00C969]",
+                  isSameDay(new Date(), date) && "bg-[#878787]/30"
                 )}
               >
                 <span
