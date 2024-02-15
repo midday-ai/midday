@@ -21,7 +21,6 @@ export async function TrackerGraph({ date, projectId }) {
 
   return (
     <TrackerGraphComponent
-      isTracking={isTracking}
       data={data}
       meta={meta}
       date={currentDate}

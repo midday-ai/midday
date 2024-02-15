@@ -2,6 +2,7 @@ import { TrackerGraph } from "@/components/tracker-graph/tracker-graph";
 import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { endOfMonth, formatISO, startOfMonth, subMonths } from "date-fns";
+import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
