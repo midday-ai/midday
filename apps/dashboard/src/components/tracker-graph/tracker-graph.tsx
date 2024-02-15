@@ -118,7 +118,7 @@ export function TrackerGraph({
                       onSelect={onSelect}
                       projectId={projectId}
                       isTracking={
-                        isTracking && isSameDay(new Date(dayInWeek), date)
+                        isTracking && isSameDay(new Date(dayInWeek), new Date())
                       }
                       outOfRange={
                         isBefore(dayInWeek, start) || isAfter(dayInWeek, end)
