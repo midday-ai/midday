@@ -14,15 +14,16 @@ export function TrackerWrapper({ date: initialDate, data, meta }) {
     parseAsString.withDefault(initialDate)
   );
 
-  const onSelect = ({ projectId, date }) => {
+  const onSelect = ({ projectId, day }) => {
     const params = new URLSearchParams(searchParams);
-    params.set("date", date);
+    params.set("day", day);
 
     if (projectId) {
       params.set("projectId", projectId);
     } else {
       params.set("projectId", "new");
     }
+
     router.push(`/tracker?${params.toString()}`);
   };
 
@@ -30,7 +31,7 @@ export function TrackerWrapper({ date: initialDate, data, meta }) {
     <div>
       <TrackerHeader
         date={date}
-        setDate={(d) => setDate(d, { shallow: false })}
+        setDate={(d: string) => setDate(d, { shallow: false })}
         totalDuration={meta?.totalDuration}
       />
 

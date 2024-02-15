@@ -42,7 +42,7 @@ export function TrackerMonthGraph({
     if (onSelect) {
       onSelect({
         projectId: params.projectId || projectId,
-        date: formatISO(params.date, { representation: "date" }),
+        day: formatISO(params.day, { representation: "date" }),
       });
     }
   };

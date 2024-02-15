@@ -39,6 +39,7 @@ export const updateEntriesAction = action(
     }
 
     revalidateTag(`tracker_projects_${user.data.team_id}`);
+    revalidateTag(`tracker_entries_${user.data.team_id}`);
 
     return Promise.resolve(params);
   }

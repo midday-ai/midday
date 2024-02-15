@@ -27,6 +27,13 @@ export function ShareReport({ defaultValue, type }) {
   const to = searchParams?.get("to") ?? defaultValue.to;
 
   const createReport = useAction(createReportAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
     onSuccess: (data) => {
       setOpen(false);
 
@@ -72,7 +79,7 @@ export function ShareReport({ defaultValue, type }) {
               className="w-full"
               onClick={() =>
                 createReport.execute({
-                  baseUrl: window.origin,
+                  baseUrl: window.location.origin,
                   from,
                   to,
                   type,

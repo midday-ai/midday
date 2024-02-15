@@ -6,7 +6,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       bank_accounts: {
@@ -216,6 +216,47 @@ export interface Database {
           }
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          from: string | null
+          id: string
+          link_id: string | null
+          short_link: string | null
+          team_id: string | null
+          to: string | null
+          type: Database["public"]["Enums"]["reportTypes"] | null
+        }
+        Insert: {
+          created_at?: string
+          from?: string | null
+          id?: string
+          link_id?: string | null
+          short_link?: string | null
+          team_id?: string | null
+          to?: string | null
+          type?: Database["public"]["Enums"]["reportTypes"] | null
+        }
+        Update: {
+          created_at?: string
+          from?: string | null
+          id?: string
+          link_id?: string | null
+          short_link?: string | null
+          team_id?: string | null
+          to?: string | null
+          type?: Database["public"]["Enums"]["reportTypes"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       teams: {
         Row: {
           created_at: string
@@ -253,48 +294,62 @@ export interface Database {
       }
       tracker_entries: {
         Row: {
+          assigned_id: string | null
+          billed: boolean | null
           created_at: string
           currency: string | null
+          date: string | null
           description: string | null
           duration: number | null
           id: string
-          project: string | null
+          project_id: string | null
           rate: number | null
           start: string | null
           stop: string | null
           team_id: string | null
-          user_id: string | null
+          project_members: Record<string, unknown> | null
         }
         Insert: {
+          assigned_id?: string | null
+          billed?: boolean | null
           created_at?: string
           currency?: string | null
+          date?: string | null
           description?: string | null
           duration?: number | null
           id?: string
-          project?: string | null
+          project_id?: string | null
           rate?: number | null
           start?: string | null
           stop?: string | null
           team_id?: string | null
-          user_id?: string | null
         }
         Update: {
+          assigned_id?: string | null
+          billed?: boolean | null
           created_at?: string
           currency?: string | null
+          date?: string | null
           description?: string | null
           duration?: number | null
           id?: string
-          project?: string | null
+          project_id?: string | null
           rate?: number | null
           start?: string | null
           stop?: string | null
           team_id?: string | null
-          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "tracker_entries_project_fkey"
-            columns: ["project"]
+            foreignKeyName: "tracker_entries_assigned_id_fkey"
+            columns: ["assigned_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_entries_project_id_fkey"
+            columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "tracker_projects"
             referencedColumns: ["id"]
@@ -304,13 +359,6 @@ export interface Database {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "tracker_entries_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
@@ -327,6 +375,8 @@ export interface Database {
           rate: number | null
           status: Database["public"]["Enums"]["trackerStatus"]
           team_id: string | null
+          project_members: Record<string, unknown> | null
+          total_duration: number | null
         }
         Insert: {
           billable?: boolean | null
@@ -355,6 +405,48 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: "tracker_projects_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tracker_reports: {
+        Row: {
+          created_at: string
+          id: string
+          link_id: string | null
+          project_id: string | null
+          short_link: string | null
+          team_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link_id?: string | null
+          project_id?: string | null
+          short_link?: string | null
+          team_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link_id?: string | null
+          project_id?: string | null
+          short_link?: string | null
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_tracker_reports_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "tracker_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "public_tracker_reports_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1079,6 +1171,27 @@ export interface Database {
         }
         Returns: string
       }
+      project_members:
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: {
+              id: string
+              avatar_url: string
+              full_name: string
+            }[]
+          }
+        | {
+            Args: {
+              "": unknown
+            }
+            Returns: {
+              id: string
+              avatar_url: string
+              full_name: string
+            }[]
+          }
       set_limit: {
         Args: {
           "": number
@@ -1095,9 +1208,16 @@ export interface Database {
         }
         Returns: unknown
       }
+      total_duration: {
+        Args: {
+          "": unknown
+        }
+        Returns: number
+      }
     }
     Enums: {
       bankProviders: "gocardless" | "plaid" | "teller"
+      reportTypes: "profit_loss" | "income"
       teamRoles: "owner" | "member"
       trackerStatus: "in_progress" | "completed"
       transactionCategories:

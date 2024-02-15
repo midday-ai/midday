@@ -49,7 +49,7 @@ export function DataTable({
 
   const [params, setParams] = useQueryStates(
     {
-      date: parseAsString.withDefault(
+      day: parseAsString.withDefault(
         formatISO(new Date(), { representation: "date" })
       ),
       projectId: parseAsString,

@@ -17,6 +17,7 @@ export function TrackerDayCard({
   isActive,
   isTracking,
   selectProject,
+  projectId,
 }) {
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
@@ -27,9 +28,9 @@ export function TrackerDayCard({
 
   const handleOnClick = () => {
     if (selectProject) {
-      onSelect({ date, projectId: "new" });
+      onSelect({ day: date, projectId: "new" });
     } else {
-      onSelect({ date });
+      onSelect({ day: date });
     }
   };
 
@@ -40,6 +41,8 @@ export function TrackerDayCard({
           className="w-[35px] flex items-center justify-center group relative"
           type="button"
           onClick={handleOnClick}
+          // NOTE: If specific project view, i.e time report
+          disabled={projectId}
         >
           <div
             className={cn(
@@ -105,11 +108,19 @@ export function TrackerDayCard({
                     <button
                       className="flex flex-col"
                       type="button"
+                      // NOTE: If specific project view, i.e time report
+                      disabled={projectId}
                       onClick={() =>
-                        onSelect({ projectId: record.project.id, date })
+                        onSelect({ projectId: record.project.id, day: date })
                       }
                     >
-                      <span className="text-xs">{record.project?.name}</span>
+                      {projectId ? (
+                        <span className="text-xs">
+                          {record.assigned?.full_name}
+                        </span>
+                      ) : (
+                        <span className="text-xs">{record.project?.name}</span>
+                      )}
                       <span className="text-xs text-[#878787]">
                         {record?.description}
                       </span>

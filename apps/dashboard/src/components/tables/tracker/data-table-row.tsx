@@ -1,6 +1,8 @@
 "use client";
 
+import { createProjectReport } from "@/actions/project/create-project-report";
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
+import { CopyInput } from "@/components/copy-input";
 import { TrackerStatus } from "@/components/tracker-status";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
@@ -14,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
+import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +27,7 @@ import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
+import Link from "next/link";
 
 export function DataTableCell({ children, className }) {
   return <TableCell className={className}>{children}</TableCell>;
@@ -38,7 +42,36 @@ export function Row({ onClick, children }) {
 }
 
 export function DataTableRow({ row, setParams }) {
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
+
+  const createReport = useAction(createProjectReport, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+    onSuccess: (data) => {
+      const { id } = toast({
+        title: "Time Report Published",
+        description: "Your report is ready to share.",
+        variant: "success",
+        footer: (
+          <div className="mt-4 space-x-2 flex w-full">
+            <CopyInput
+              value={data.short_link}
+              className="border-[#2C2C2C] w-full"
+            />
+
+            <Link href={data.short_link} onClick={() => dismiss(id)}>
+              <Button>View</Button>
+            </Link>
+          </div>
+        ),
+      });
+    },
+  });
 
   const deleteAction = useAction(deleteProjectAction, {
     onError: () => {
@@ -49,20 +82,6 @@ export function DataTableRow({ row, setParams }) {
       });
     },
   });
-
-  const handleShareURL = async (id: string) => {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/tracker?projectId=${id}`
-      );
-
-      toast({
-        duration: 4000,
-        title: "Copied URL to clipboard.",
-        variant: "success",
-      });
-    } catch {}
-  };
 
   return (
     <AlertDialog>
@@ -107,8 +126,15 @@ export function DataTableRow({ row, setParams }) {
           >
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleShareURL(row.id)}>
-            Share URL
+          <DropdownMenuItem
+            onClick={() =>
+              createReport.execute({
+                projectId: row.id,
+                baseUrl: window.location.origin,
+              })
+            }
+          >
+            Share Report
           </DropdownMenuItem>
 
           <AlertDialogTrigger asChild>

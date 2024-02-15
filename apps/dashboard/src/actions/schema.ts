@@ -245,6 +245,11 @@ export const createReportSchema = z.object({
   type: changeChartTypeSchema,
 });
 
+export const createProjectReportSchema = z.object({
+  baseUrl: z.string().url(),
+  projectId: z.string().uuid(),
+});
+
 export const updateEntriesSchema = z.object({
   id: z.string().uuid().optional(),
   action: z.enum(["update", "create", "delete"]),

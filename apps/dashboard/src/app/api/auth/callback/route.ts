@@ -39,7 +39,6 @@ export async function GET(req: NextRequest) {
 
       await logsnag.track({
         event: LogEvents.SignedIn.name,
-        notify: true,
         icon: LogEvents.SignedIn.icon,
         user_id: email,
         channel: LogEvents.SignedIn.channel,

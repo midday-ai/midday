@@ -2,31 +2,29 @@
 
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { addMonths, format, formatISO, subMonths } from "date-fns";
+import {
+  addMonths,
+  format,
+  formatISO,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
 
 export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
-  const currentDate = new Date(startDate);
-
   const selectPrevPeriod = () => {
-    onChange({
-      from: formatISO(subMonths(currentDate, numberOfMonths), {
+    onChange(
+      formatISO(startOfMonth(subMonths(startDate, numberOfMonths)), {
         representation: "date",
-      }),
-      to: formatISO(startDate, {
-        representation: "date",
-      }),
-    });
+      })
+    );
   };
 
   const selectNextPeriod = () => {
-    onChange({
-      from: formatISO(addMonths(currentDate, numberOfMonths), {
+    onChange(
+      formatISO(startOfMonth(addMonths(startDate, numberOfMonths)), {
         representation: "date",
-      }),
-      to: formatISO(addMonths(currentDate, numberOfMonths * 2), {
-        representation: "date",
-      }),
-    });
+      })
+    );
   };
 
   return (
@@ -40,8 +38,8 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
         <Icons.ChevronLeft className="w-6 h-6" />
       </Button>
       <span className="w-full text-center">
-        {format(subMonths(currentDate, numberOfMonths), "MMM")} -{" "}
-        {format(currentDate, "MMM")}
+        {format(subMonths(startDate, numberOfMonths), "MMM")} -{" "}
+        {format(startDate, "MMM")}
       </span>
       <Button
         variant="ghost"

@@ -110,8 +110,10 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
                   sideOffset={10}
                   align="end"
                 >
-                  <DropdownMenuItem onClick={() => handleShareURL(data.id)}>
-                    Share URL
+                  <DropdownMenuItem
+                  // onClick={() => handleShareURL(data.id)}
+                  >
+                    Share Report
                   </DropdownMenuItem>
 
                   <AlertDialogTrigger asChild>

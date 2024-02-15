@@ -25,6 +25,8 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const [meta, setMeta] = useState();
   const { toast } = useToast();
 
+  const { day, projectId } = params;
+
   const { execute } = useAction(updateEntriesAction, {
     onError: () => {
       // TODO: Delete latest entry
@@ -36,7 +38,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
     },
     onSuccess: async (params) => {
       await fetchData({
-        date: params.date,
+        day: params.date,
         projectId: params.project_id,
       });
     },
@@ -45,16 +47,16 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   const updateEntries = ({ action, ...payload }) => {
     switch (action) {
       case "create": {
-        const data = (records && records[date]) ?? [];
+        const data = (records && records[day]) ?? [];
         const items = [...data, payload];
 
-        setData((prev) => ({ ...prev, [date]: items }));
+        setData((prev) => ({ ...prev, [day]: items }));
         break;
       }
       case "delete": {
         const items =
-          records && records[date]?.filter((item) => item.id !== payload.id);
-        setData((prev) => ({ ...prev, [date]: items }));
+          records && records[day]?.filter((item) => item.id !== payload.id);
+        setData((prev) => ({ ...prev, [day]: items }));
         break;
       }
       default:
@@ -73,7 +75,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
       action: "create",
       project_id: projectId,
       assigned: user,
-      date,
+      date: day,
       ...params,
     };
 
@@ -81,16 +83,14 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
     updateEntries({ ...payload, id: -Math.random() });
   };
 
-  async function fetchData({ date, projectId }) {
+  async function fetchData({ day, projectId }) {
     try {
-      setLoading(true);
-
       const { data, meta } = await getTrackerRecordsByRangeQuery(supabase, {
         projectId,
-        from: formatISO(startOfMonth(new Date(date)), {
+        from: formatISO(startOfMonth(new Date(day)), {
           representation: "date",
         }),
-        to: formatISO(endOfMonth(new Date(date)), {
+        to: formatISO(endOfMonth(new Date(day)), {
           representation: "date",
         }),
         teamId: user.team_id,
@@ -109,11 +109,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
   useEffect(() => {
     // NOTE Fetch when new month
-    if (
-      !isLoading &&
-      meta &&
-      !isSameMonth(new Date(meta.from), new Date(params.date))
-    ) {
+    if (meta && !isSameMonth(new Date(meta.from), new Date(params.day))) {
       fetchData(params);
     }
   }, [meta, params]);
@@ -128,13 +124,11 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
     }
   }, [params, isOpen]);
 
-  const { date, projectId } = params;
-
   if (isDesktop) {
     return (
       <Sheet
         open={isOpen}
-        onOpenChange={() => setParams({ projectId: null, date: null })}
+        onOpenChange={() => setParams({ projectId: null, day: null })}
       >
         <SheetContent>
           {params.projectId !== "new" && (
@@ -159,23 +153,23 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
           <ScrollArea className="h-full p-0">
             <TrackerSelect
-              date={date}
-              onSelect={(date) => setParams({ date })}
+              date={day}
+              onSelect={(day) => setParams({ day })}
               className="w-full justify-center mb-8"
             />
 
             <TrackerMonthGraph
               disableHover
               showCurrentDate
-              date={date}
+              date={day}
               onSelect={setParams}
               data={records}
               projectId={projectId}
             />
 
             <TrackerEntriesList
-              data={(records && records[date]) ?? []}
-              date={date}
+              data={(records && records[day]) ?? []}
+              date={day}
               user={user}
               onCreate={handleOnCreate}
               onDelete={handleOnDelete}
@@ -193,7 +187,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setParams({ projectId: null, date: null });
+          setParams({ projectId: null, day: null });
         }
       }}
     >
@@ -208,23 +202,23 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
         </DrawerHeader>
 
         <TrackerSelect
-          date={params.date}
-          onSelect={(date) => setParams({ date })}
+          date={params.day}
+          onSelect={(day) => setParams({ day })}
           className="w-full justify-center mb-8"
         />
 
         <TrackerMonthGraph
           disableHover
           showCurrentDate
-          date={date}
+          date={day}
           onSelect={setParams}
           data={records}
           projectId={projectId}
         />
 
         <TrackerEntriesList
-          data={(records && records[date]) ?? []}
-          date={date}
+          data={(records && records[day]) ?? []}
+          date={day}
           user={user}
           onCreate={handleOnCreate}
           onDelete={handleOnDelete}

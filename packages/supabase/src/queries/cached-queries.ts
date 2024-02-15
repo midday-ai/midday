@@ -314,9 +314,9 @@ export const getTrackerRecordsByRange = async (params) => {
     async () => {
       return getTrackerRecordsByRangeQuery(supabase, { ...params, teamId });
     },
-    ["tracker_records", teamId],
+    ["tracker_entries", teamId],
     {
-      tags: [`tracker_records_${teamId}`],
+      tags: [`tracker_entries_${teamId}`],
       revalidate: 180,
     }
   )(params);
