@@ -22,7 +22,9 @@ export const connectBankAccountAction = action(
 
     const promises = data?.map(async (account) => {
       // Fetch transactions for each account
-      const { transactions } = await getTransactions(account.account_id);
+      const { transactions } = await getTransactions({
+        accountId: account.account_id,
+      });
 
       // Update bank account last_accessed
       await supabase
