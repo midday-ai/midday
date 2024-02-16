@@ -351,6 +351,7 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       currency_rate: currencyExchange?.rate,
       currency_source: currencyExchange?.currency,
       balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
+      status: "posted",
     };
   });
 };
