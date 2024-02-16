@@ -1,7 +1,8 @@
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
-// import { Events, client } from "@midday/jobs";
+import { Events, client } from "@midday/jobs";
+import { get } from "@vercel/edge-config";
 import LoopsClient from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -23,14 +24,18 @@ export async function POST(req: Request) {
   const email = body.record.email;
   const fullName = body.record.raw_user_meta_data.full_name;
 
-  // NOTE: Start onboarding email (enable once live)
-  // client.sendEvent({
-  //   name: Events.ONBOARDING_EMAILS,
-  //   payload: {
-  //     fullName,
-  //     email,
-  //   },
-  // });
+  // NOTE: Start onboarding email for enabled beta users
+  const isBeta = (await get("beta"))?.includes(email);
+
+  if (isBeta) {
+    client.sendEvent({
+      name: Events.ONBOARDING_EMAILS,
+      payload: {
+        fullName,
+        email,
+      },
+    });
+  }
 
   const found = await loops.findContact(email);
   const [firstName, lastName] = fullName.split(" ");
