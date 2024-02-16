@@ -314,22 +314,43 @@ export const mapTransactionMethod = (method: string) => {
 
 export const transformTransactions = (transactions, { teamId, accountId }) => {
   // We want to insert transactions in reversed order so the incremental id in supabase is correct
-  return transactions?.reverse().map((data) => {
-    const method = mapTransactionMethod(data.proprietaryBankTransactionCode);
+  return transactions?.reverse().map((transaction) => {
+    const method = mapTransactionMethod(
+      transaction.proprietaryBankTransactionCode
+    );
+
+    let currencyExchange: { rate: number; currency: string } | undefined;
+
+    if (Array.isArray(transaction.currencyExchange)) {
+      const rate = Number.parseFloat(
+        transaction.currencyExchange.at(0)?.exchangeRate ?? ""
+      );
+
+      if (rate) {
+        const currency = transaction.currencyExchange.at(0)?.sourceCurrency;
+
+        if (currency) {
+          currencyExchange = {
+            rate,
+            currency,
+          };
+        }
+      }
+    }
 
     return {
-      date: data.valueDate,
-      name: capitalCase(data.additionalInformation),
+      date: transaction.valueDate,
+      name: capitalCase(transaction.additionalInformation),
       method,
-      internal_id: `${teamId}_${data.internalTransactionId}`,
-      amount: data.transactionAmount.amount,
-      currency: data.transactionAmount.currency,
+      internal_id: `${teamId}_${transaction.internalTransactionId}`,
+      amount: transaction.transactionAmount.amount,
+      currency: transaction.transactionAmount.currency,
       bank_account_id: accountId,
-      category: data.transactionAmount.amount > 0 ? "income" : null,
+      category: transaction.transactionAmount.amount > 0 ? "income" : null,
       team_id: teamId,
-      // counter_party_name: transaction.creditorName ?? transaction.debtorName,
-      // currency_exchange_rate: currencyExchange?.rate,
-      // currency_target: currencyExchange?.currency,
+      currency_rate: currencyExchange?.rate,
+      currency_source: currencyExchange?.currency,
+      balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
     };
   });
 };
