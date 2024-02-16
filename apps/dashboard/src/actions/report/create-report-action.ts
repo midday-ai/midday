@@ -2,6 +2,8 @@
 
 import { action } from "@/actions/safe-action";
 import { createReportSchema } from "@/actions/schema";
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import Dub from "dub";
@@ -37,6 +39,13 @@ export const createReportAction = action(createReportSchema, async (params) => {
     .eq("id", data.id)
     .select("*")
     .single();
+
+  logsnag.track({
+    event: LogEvents.OverviewReport.name,
+    icon: LogEvents.OverviewReport.icon,
+    user_id: user.data.email,
+    channel: LogEvents.OverviewReport.channel,
+  });
 
   return linkData;
 });

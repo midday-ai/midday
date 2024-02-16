@@ -35,23 +35,19 @@ export async function GET(req: NextRequest) {
     } = await supabase.auth.getSession();
 
     if (session) {
-      const email = session.user.email;
+      const userId = session.user.id;
 
       await logsnag.track({
         event: LogEvents.SignedIn.name,
         icon: LogEvents.SignedIn.icon,
-        user_id: email,
+        user_id: userId,
         channel: LogEvents.SignedIn.channel,
-        tags: {
-          email,
-        },
       });
 
       await logsnag.identify({
-        user_id: session.user.email,
+        user_id: userId,
         properties: {
           name: session.user.user_metadata?.full_name,
-          email,
         },
       });
     }

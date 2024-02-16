@@ -30,7 +30,9 @@ export async function ConnectedAccounts() {
       <CardFooter className="flex justify-between">
         <div />
         <Link href="?step=bank">
-          <Button>Connect bank</Button>
+          <Button data-event="Connect Bank" data-icon="🏦" data-channel="bank">
+            Connect bank
+          </Button>
         </Link>
       </CardFooter>
     </Card>

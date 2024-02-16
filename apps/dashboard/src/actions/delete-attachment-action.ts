@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { deleteAttachment } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -25,6 +27,13 @@ export const deleteAttachmentAction = action(
       .eq("transaction_id", data.transaction_id);
 
     revalidateTag(`inbox_${user.data.team_id}`);
+
+    logsnag.track({
+      event: LogEvents.DeleteAttachment.name,
+      icon: LogEvents.DeleteAttachment.icon,
+      user_id: user.data.email,
+      channel: LogEvents.DeleteAttachment.channel,
+    });
 
     return data;
   }

@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
@@ -17,6 +19,13 @@ export const declineInviteAction = action(
     if (revalidatePath) {
       revalidatePathFunc(revalidatePath);
     }
+
+    logsnag.track({
+      event: LogEvents.DeclineInvite.name,
+      icon: LogEvents.DeclineInvite.icon,
+      user_id: user.data.email,
+      channel: LogEvents.DeclineInvite.channel,
+    });
 
     return id;
   }

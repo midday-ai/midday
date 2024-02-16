@@ -85,7 +85,13 @@ export function OverviewModal() {
               ))}
             </div>
             <Link href="?step=bank">
-              <Button>Connect bank</Button>
+              <Button
+                data-event="Connect Bank"
+                data-icon="🏦"
+                data-channel="bank"
+              >
+                Connect bank
+              </Button>
             </Link>
           </div>
         </div>

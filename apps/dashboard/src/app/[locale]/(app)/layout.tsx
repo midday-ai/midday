@@ -1,3 +1,4 @@
+import { SetUserIdServerComponent } from "@logsnag/next";
 import { createClient } from "@midday/supabase/server";
 import { Providers } from "../providers";
 
@@ -15,7 +16,12 @@ export default async function Layout({
   } = await supabase.auth.getSession();
 
   if (session) {
-    return dashboard;
+    return (
+      <>
+        {dashboard}
+        <SetUserIdServerComponent userId={session.user.id} />
+      </>
+    );
   }
 
   return login;

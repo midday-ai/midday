@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { updateUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
@@ -14,6 +16,13 @@ export const changeTeamAction = action(
     const user = await updateUser(supabase, { team_id: teamId });
 
     revalidateTag(`user_${user.data.id}`);
+
+    logsnag.track({
+      event: LogEvents.ChangeTeam.name,
+      icon: LogEvents.ChangeTeam.icon,
+      user_id: user.data.email,
+      channel: LogEvents.ChangeTeam.channel,
+    });
 
     redirect(redirectTo);
   }

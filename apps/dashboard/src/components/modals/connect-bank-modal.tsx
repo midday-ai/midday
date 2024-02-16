@@ -78,7 +78,13 @@ function Row({ id, name, logo, onSelect }) {
           <p className="text-sm font-medium leading-none">{name}</p>
         </div>
       </div>
-      <Button variant="outline" onClick={handleOnSelect}>
+      <Button
+        variant="outline"
+        onClick={handleOnSelect}
+        data-event="Bank Selected"
+        data-icon="🏦"
+        data-channel="bank"
+      >
         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
       </Button>
     </div>

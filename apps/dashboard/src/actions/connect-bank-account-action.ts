@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { getTransactions, transformTransactions } from "@midday/gocardless";
 import { scheduler } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -55,6 +57,13 @@ export const connectBankAccountAction = action(
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
     revalidateTag(`metrics_${teamId}`);
+
+    logsnag.track({
+      event: LogEvents.ConnectBankCompleted.name,
+      icon: LogEvents.ConnectBankCompleted.icon,
+      user_id: user.data.email,
+      channel: LogEvents.ConnectBankCompleted.channel,
+    });
 
     return;
   }

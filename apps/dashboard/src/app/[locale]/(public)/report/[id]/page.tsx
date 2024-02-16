@@ -7,6 +7,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
+export const fetchCache = "force-cache";
 
 export async function generateMetadata({ params }): Promise<Metadata> {
   const supabase = createClient({ admin: true });

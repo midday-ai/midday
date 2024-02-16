@@ -98,7 +98,9 @@ const ToolTipContent = ({ payload = {} }) => {
 export function BarChart({ data }) {
   const locale = useCurrentLocale();
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme();
+
+  console.log(resolvedTheme);
 
   const formattedData = data.result.map((item) => ({
     ...item,
@@ -172,7 +174,7 @@ export function BarChart({ data }) {
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
-            stroke={theme === "dark" ? "#2C2C2C" : "#DCDAD2"}
+            stroke={resolvedTheme === "dark" ? "#2C2C2C" : "#DCDAD2"}
           />
           <Tooltip content={ToolTipContent} cursor={false} />
 
@@ -182,7 +184,7 @@ export function BarChart({ data }) {
                 key={`cell-${index}`}
                 fill={
                   +entry.previous.value > 0
-                    ? theme === "dark"
+                    ? resolvedTheme === "dark"
                       ? "#323232"
                       : "#C6C6C6"
                     : "#41191A"
@@ -197,7 +199,7 @@ export function BarChart({ data }) {
                 key={`cell-${index}`}
                 fill={
                   +entry.current.value > 0
-                    ? theme === "dark"
+                    ? resolvedTheme === "dark"
                       ? "#F5F5F3"
                       : "#121212"
                     : "#FF3638"

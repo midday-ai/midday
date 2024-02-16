@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { deleteUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { redirect } from "next/navigation";
@@ -10,7 +12,14 @@ export const deleteUserAction = async () => {
     admin: true,
   });
 
-  await deleteUser(supabase);
+  const userId = await deleteUser(supabase);
+
+  logsnag.track({
+    event: LogEvents.DeleteUser.name,
+    icon: LogEvents.DeleteUser.icon,
+    user_id: userId,
+    channel: LogEvents.DeleteUser.channel,
+  });
 
   redirect("/");
 };

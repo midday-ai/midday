@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import { LogSnagProvider } from "@midday/events/client";
 import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
 import { cn } from "@midday/ui/utils";
@@ -31,6 +32,12 @@ export default function Layout({
 }) {
   return (
     <html lang={params.locale} suppressHydrationWarning>
+      <head>
+        <LogSnagProvider
+          token={process.env.NEXT_PUBLIC_LOGSNAG_TOKEN!}
+          project={process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!}
+        />
+      </head>
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,

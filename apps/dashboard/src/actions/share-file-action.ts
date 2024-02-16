@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { share } from "@midday/supabase/storage";
@@ -17,6 +19,13 @@ export const shareFileAction = action(shareFileSchema, async (value) => {
     options: {
       download: true,
     },
+  });
+
+  logsnag.track({
+    event: LogEvents.ShareFile.name,
+    icon: LogEvents.ShareFile.icon,
+    user_id: user.data.id,
+    channel: LogEvents.ShareFile.channel,
   });
 
   return response?.data?.signedUrl;

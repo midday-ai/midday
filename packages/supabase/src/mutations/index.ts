@@ -130,6 +130,8 @@ export async function deleteUser(supabase: Client) {
   // TODO: Delete files etc
   await supabase.from("users").delete().eq("id", session?.user.id);
   await supabase.auth.signOut();
+
+  return session?.user.id;
 }
 
 export async function updateTeam(supabase: Client, data: any) {

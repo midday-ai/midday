@@ -2,7 +2,7 @@ const bars = Array(12).fill(0);
 
 export const Spinner = ({ size = 16 }) => {
   return (
-    <div data-icon="">
+    <div className="loading-parent">
       <div
         className="loading-wrapper"
         data-visible

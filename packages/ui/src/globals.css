@@ -138,7 +138,7 @@
   width: var(--spinner-size);
 }
 
-[data-icon] {
+.loading-parent {
   display: flex;
   height: 16px;
   width: 16px;
