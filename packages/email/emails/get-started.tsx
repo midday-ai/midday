@@ -22,8 +22,8 @@ interface OverviewProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
-    : "http://localhost:3000/email";
+    ? "https://email.midday.ai/static"
+    : "http://localhost:3003/static";
 
 export const GetStartedEmail = ({
   fullName = "Viktor Hofte",
