@@ -20,8 +20,8 @@ interface OverviewProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://email.midday.ai/static"
-    : "http://localhost:3003/static";
+    ? "https://midday.ai/email"
+    : "http://localhost:3000/email";
 
 export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
@@ -72,19 +72,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras
-              lacinia lacus non fermentum commodo. Quisque accumsan varius
-              finibus. Sed nibh felis, varius ultrices turpis non, pharetra
-              feugiat odio. Integer pharetra sem at nunc commodo, et semper
-              metus fringilla. Phasellus a condimentum erat. Suspendisse
-              potenti. Sed lobortis, metus eu facilisis ullamcorper, mauris
-              risus interdum magna, vitae commodo ante nunc vel nisl. Aliquam
-              erat volutpat. Aliquam et egestas lacus, quis aliquam ipsum. Nam
-              accumsan lorem nisi, a rutrum augue porttitor vel. In hac
-              habitasse platea dictumst. Donec efficitur, nulla eget bibendum
-              sollicitudin, neque ipsum interdum sem, non imperdiet est leo
-              laoreet magna. Etiam urna ligula, vestibulum nec libero id,
-              ultricies egestas lorem.
+              Welcome to Midday! I'm Pontus, one of the founders.
             </Text>
 
             <br />

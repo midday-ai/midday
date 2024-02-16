@@ -23,8 +23,8 @@ interface OverviewProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://email.midday.ai/static"
-    : "http://localhost:3003/static";
+    ? "https://midday.ai/email"
+    : "http://localhost:3000/email";
 
 export const PreAccountingEmail = ({
   fullName = "Viktor Hofte",
