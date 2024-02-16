@@ -5,6 +5,7 @@ import {
   Heading,
   Html,
   Img,
+  Link,
   Preview,
   Tailwind,
   Text,
@@ -73,6 +74,21 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212] dark:text-[#F5F5F3]">
               Welcome to Midday! I'm Pontus, one of the founders.
+              <br />
+              <br />
+              It's really important to us that you have a great expericen
+              ramping up.
+              <br />
+              <br />
+              If you have any questions, ideas, or general feedback, don't
+              hesitate to email me at pontus@midday.ai or you can{" "}
+              <Link
+                href="https://cal.com/pontus-midday/15min"
+                className="text-[#121212] dark:text-[#F5F5F3] underline"
+              >
+                schedule a call with me here
+              </Link>
+              .
             </Text>
 
             <br />

@@ -1,6 +1,5 @@
 import {
   Column,
-  Heading,
   Hr,
   Img,
   Link,
@@ -9,7 +8,7 @@ import {
   Text,
 } from "@react-email/components";
 import React from "react";
-import { SingleColumn, TripleColumn } from "responsive-react-email";
+import { TripleColumn } from "responsive-react-email";
 
 type Props = {
   baseUrl?: string;
@@ -181,9 +180,7 @@ export function Footer({ baseUrl }: Props) {
 
       <Row>
         <Text className="text-[#B8B8B8] dark:text-[#414141] text-xs">
-          Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus
-          convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum
-          nisl, sed faucibus neque.
+          Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
         </Text>
       </Row>
 
