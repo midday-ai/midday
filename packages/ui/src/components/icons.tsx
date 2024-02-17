@@ -51,6 +51,7 @@ import {
   MdOutlineIntegrationInstructions,
   MdOutlineInventory2,
   MdOutlineListAlt,
+  MdOutlineLocalAtm,
   MdOutlineMoreVert,
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
@@ -472,4 +473,5 @@ export const Icons = {
   Email: MdOutlineEmail,
   QuestionAnswer: MdOutlineQuestionAnswer,
   Click: MdSignalCellularAlt,
+  Salery: MdOutlineLocalAtm,
 };

@@ -7,6 +7,7 @@ export default {
     internet_and_telephone: "Internet & Telephone",
     rent: "Rent",
     equipment: "Equipment",
+    salery: "Salery",
     income: "Income",
     transfer: "Transfer",
     activity: "Activity",
