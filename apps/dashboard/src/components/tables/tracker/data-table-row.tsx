@@ -106,12 +106,14 @@ export function DataTableRow({ row, setParams }) {
           </DataTableCell>
           <DataTableCell>{row.description}</DataTableCell>
 
-          <DataTableCell className="flex justify-between items-center">
-            <TrackerStatus status={row.status} />
+          <DataTableCell>
+            <div className="flex justify-between items-center">
+              <TrackerStatus status={row.status} />
 
-            <DropdownMenuTrigger>
-              <Icons.MoreHoriz />
-            </DropdownMenuTrigger>
+              <DropdownMenuTrigger>
+                <Icons.MoreHoriz />
+              </DropdownMenuTrigger>
+            </div>
           </DataTableCell>
         </Row>
         <AlertDialogContent>

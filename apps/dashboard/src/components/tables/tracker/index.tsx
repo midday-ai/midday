@@ -33,11 +33,11 @@ export async function Table({ status, sort, query }) {
   }
 
   if (!data?.length && !query?.length) {
-    return <EmptyState currencyCode={currencyCode} />;
+    return <EmptyState currencyCode={currencyCode} user={userData} />;
   }
 
   if (!data?.length && query?.length) {
-    return <NoResults currencyCode={currencyCode} />;
+    return <NoResults currencyCode={currencyCode} user={userData} />;
   }
 
   return (

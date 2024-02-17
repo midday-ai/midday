@@ -13,7 +13,7 @@ import {
 import { useHotkeys } from "react-hotkeys-hook";
 
 export function TrackerSelect({ date, className, onSelect }) {
-  const currentDate = new Date(date);
+  const currentDate = date ? new Date(date) : new Date();
 
   const selectPrevMonth = () => {
     onSelect(

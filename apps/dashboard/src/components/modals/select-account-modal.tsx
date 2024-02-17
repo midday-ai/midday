@@ -122,11 +122,8 @@ export function SelectAccountModal({ countryCode }) {
         countryCode,
       });
 
-      setAccounts(
-        data.sort((a, b) =>
-          a.balances?.available - b.balances?.available ? 1 : -1
-        )
-      );
+      setAccounts(data);
+
       setLoading(false);
 
       // Set first accounts to checked

@@ -1,14 +1,21 @@
 "use client";
 
 import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
+import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { Button } from "@midday/ui/button";
+import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 
-export function EmptyState({ currencyCode }) {
+export function EmptyState({ currencyCode, user }) {
   const [params, setParams] = useQueryStates(
     {
       create: parseAsString,
+      projectId: parseAsString,
+      update: parseAsString,
+      day: parseAsString.withDefault(
+        formatISO(new Date(), { representation: "date" })
+      ),
     },
     {
       shallow: true,
@@ -36,12 +43,33 @@ export function EmptyState({ currencyCode }) {
         currencyCode={currencyCode}
         isOpen={Boolean(params.create)}
       />
+
+      <TrackerSheet
+        isOpen={Boolean(params.projectId) && !params.update}
+        params={params}
+        setParams={setParams}
+        user={user}
+      />
     </div>
   );
 }
 
-export function NoResults() {
+export function NoResults({ currencyCode, user }) {
   const router = useRouter();
+
+  const [params, setParams] = useQueryStates(
+    {
+      create: parseAsString,
+      projectId: parseAsString,
+      update: parseAsString,
+      day: parseAsString.withDefault(
+        formatISO(new Date(), { representation: "date" })
+      ),
+    },
+    {
+      shallow: true,
+    }
+  );
 
   return (
     <div className="flex items-center justify-center ">
@@ -56,6 +84,19 @@ export function NoResults() {
         <Button variant="outline" onClick={() => router.push("/tracker")}>
           Clear filters
         </Button>
+
+        <TrackerCreateSheet
+          setParams={setParams}
+          currencyCode={currencyCode}
+          isOpen={Boolean(params.create)}
+        />
+
+        <TrackerSheet
+          isOpen={Boolean(params.projectId) && !params.update}
+          params={params}
+          setParams={setParams}
+          user={user}
+        />
       </div>
     </div>
   );

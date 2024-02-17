@@ -12,6 +12,7 @@ export function TrackerEntriesList({
   onDelete,
   projectId,
 }) {
+  const currentDate = date ? new Date(date) : new Date();
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
     0
@@ -20,7 +21,7 @@ export function TrackerEntriesList({
   return (
     <div>
       <div className="flex justify-between border-b-[1px] mt-12 mb-4 pb-2">
-        <span>{format(new Date(date), "LLL d")}</span>
+        <span>{format(currentDate, "LLL d")}</span>
         <span>{secondsToHoursAndMinutes(totalDuration)}</span>
       </div>
 
