@@ -103,10 +103,10 @@ const bankAccount = z.object({
   account_id: z.string(),
   bank_name: z.string(),
   currency: z.string(),
-  name: z.string(),
-  owner_name: z.string(),
   institution_id: z.string(),
+  name: z.string(),
   logo_url: z.string().optional(),
+  owner_name: z.string().optional(),
 });
 
 export const connectBankAccountSchema = z.array(bankAccount);
