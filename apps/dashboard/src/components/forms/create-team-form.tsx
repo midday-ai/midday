@@ -19,6 +19,9 @@ export function CreateTeamForm() {
         placeholder="Ex: Acme Marketing or Acme Co"
         required
         autoComplete="off"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck="false"
         onChange={(evt) => setName(evt.target.value)}
         onKeyDown={(evt) => {
           if (evt.key === "Enter")

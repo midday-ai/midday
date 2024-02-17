@@ -46,7 +46,13 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input
+                  {...field}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                />
               </FormControl>
               <FormDescription>
                 This is the project display name.
@@ -87,6 +93,10 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                     type="number"
                     min={0}
                     onChange={(evt) => field.onChange(+evt.target.value)}
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
                   />
                 </FormControl>
                 <FormDescription>

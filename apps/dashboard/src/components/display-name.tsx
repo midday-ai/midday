@@ -58,7 +58,15 @@ export function DisplayName({ fullName }) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Input {...field} className="max-w-[300px]" />
+                    <Input
+                      {...field}
+                      className="max-w-[300px]"
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
+                      maxlength="32"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

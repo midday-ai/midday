@@ -160,6 +160,10 @@ export function ConnectBankModal({ countryCode }) {
                 type="search"
                 className="my-2"
                 onChange={(evt) => handleFilterBanks(evt.target.value)}
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
               />
               <div className="space-y-4 pt-4 h-[400px] overflow-auto scrollbar-hide">
                 {loading && <RowsSkeleton />}

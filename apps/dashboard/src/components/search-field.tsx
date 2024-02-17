@@ -27,6 +27,10 @@ export function SearchField({ placeholder }) {
         className="pl-9 w-full"
         defaultValue={search}
         onChange={handleSearch}
+        autoComplete="off"
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck="false"
       />
     </div>
   );

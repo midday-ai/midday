@@ -12,6 +12,8 @@ export const unenrollMfaAction = action(
 
     const { data, error } = await supabase.auth.mfa.unenroll({
       factorId,
+      friendlyName: "Midday",
+      issuer: "app.midday.ai",
     });
 
     if (error) {

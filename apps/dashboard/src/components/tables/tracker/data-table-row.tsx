@@ -2,6 +2,7 @@
 
 import { createProjectReport } from "@/actions/project/create-project-report";
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
+import { updateProjectAction } from "@/actions/project/update-project-action";
 import { CopyInput } from "@/components/copy-input";
 import { TrackerStatus } from "@/components/tracker-status";
 import { secondsToHoursAndMinutes } from "@/utils/format";
@@ -83,6 +84,16 @@ export function DataTableRow({ row, setParams }) {
     },
   });
 
+  const updateAction = useAction(updateProjectAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
   return (
     <AlertDialog>
       <DropdownMenu>
@@ -126,6 +137,18 @@ export function DataTableRow({ row, setParams }) {
           >
             Edit
           </DropdownMenuItem>
+          {row.status !== "completed" && (
+            <DropdownMenuItem
+              onClick={() =>
+                updateAction.execute({
+                  id: row.id,
+                  status: "completed",
+                })
+              }
+            >
+              Mark as complete
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             onClick={() =>
               createReport.execute({

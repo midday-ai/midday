@@ -34,6 +34,8 @@ export function EnrollMFA() {
     async function enroll() {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
+        friendlyName: "Midday",
+        issuer: "app.midday.ai",
       });
 
       if (error) {

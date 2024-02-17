@@ -79,7 +79,14 @@ export function CommandTracker() {
 
       <div className="flex fixed w-full bottom-6 left-0 right-0 todesktop:bottom-14">
         <div className="ml-4 mr-4 w-full">
-          <Input placeholder="Add new project" className="h-[40px]" />
+          <Input
+            placeholder="Add new project"
+            className="h-[40px]"
+            autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="false"
+          />
           <Button className="h-[24px] absolute right-6 top-2">Add</Button>
         </div>
       </div>

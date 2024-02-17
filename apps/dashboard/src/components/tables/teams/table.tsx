@@ -256,6 +256,10 @@ export function DataTableHeader({ table }) {
           onChange={(event) =>
             table?.getColumn("team")?.setFilterValue(event.target.value)
           }
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck="false"
         />
         <DialogTrigger asChild>
           <Button>Create team</Button>

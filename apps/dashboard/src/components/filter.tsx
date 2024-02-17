@@ -372,6 +372,10 @@ export function Filter({ sections }: Props) {
                     <Input
                       placeholder={section?.placeholder}
                       autoFocus
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck="false"
                       onKeyDown={(evt) => handleOnSearch(evt, section?.storage)}
                       onChange={(evt) => setQuery(evt.target.value)}
                       value={query}

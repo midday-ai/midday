@@ -293,6 +293,10 @@ export function DataTable({ data, currentUser }) {
           onChange={(event) =>
             table.getColumn("member")?.setFilterValue(event.target.value)
           }
+          autoComplete="off"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck="false"
         />
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
           <Button onClick={() => onOpenChange(true)}>Invite member</Button>

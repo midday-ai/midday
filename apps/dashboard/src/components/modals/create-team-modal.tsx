@@ -36,6 +36,10 @@ export function CreateTeamModal({ onOpenChange }) {
             onKeyDown={(evt) => {
               if (evt.key === "Enter") createTeam.execute({ name });
             }}
+            autoComplete="off"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="false"
           />
         </div>
 
