@@ -71,10 +71,10 @@ export function TrackerGraph({
     <div className="w-full">
       <div className="flex justify-between items-center mt-8">
         <div>
-          <h2 className="font-medium text-[#878787] text-xl mb-2">
+          <h2 className="font-medium text-[#707070] dark:text-[#878787] text-xl mb-2">
             Total hours
           </h2>
-          <div className="text-[#F5F5F3] text-4xl">
+          <div className="text-[#121212] dark:text-[#F5F5F3] text-4xl">
             {secondsToHoursAndMinutes(meta?.totalDuration)}
           </div>
         </div>
