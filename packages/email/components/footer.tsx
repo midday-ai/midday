@@ -37,27 +37,42 @@ export function Footer({ baseUrl }: Props) {
               <Text className="font-medium">Product</Text>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
-                Features
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/fhEy5CL"
+              >
+                Homepage
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/KKEB90F"
+              >
                 Pricing
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/Wa3TxOy"
+              >
                 Story
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/jr5dX4W"
+              >
                 Updates
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/sXJM9Qv"
+              >
                 Download
               </Link>
             </Row>
@@ -70,27 +85,42 @@ export function Footer({ baseUrl }: Props) {
               <Text className="font-medium">Resources</Text>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/aTNyqQH"
+              >
                 Roadmap
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/UmCgADb"
+              >
                 Github
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/J2j4CM2"
+              >
                 Support
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
-                Updates
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/rofdWKi"
+              >
+                Terms of service
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/TJIL5mQ"
+              >
                 Privacy policy
               </Link>
             </Row>
@@ -103,22 +133,34 @@ export function Footer({ baseUrl }: Props) {
               <Text className="font-medium">Solutions</Text>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
-                Self hosted
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/cduCp4l"
+              >
                 SaaS hosting
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/yrQlSIz"
+              >
+                Self hosted
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/Dd7M8cl"
+              >
                 Open startup
               </Link>
             </Row>
             <Row className="mb-1.5">
-              <Link className="text-[#707070] dark:text-[#878787] text-[14px]">
+              <Link
+                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                href="https://go.midday.ai/M2Hv420"
+              >
                 OSS Friends
               </Link>
             </Row>

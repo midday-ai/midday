@@ -53,6 +53,7 @@ export function CategoryIcon({ name, size = 18 }) {
     [categories.rent]: <Icons.HomeWork style={{ color }} size={size} />,
     [categories.income]: <Icons.Payments style={{ color }} size={size} />,
     [categories.equipment]: <Icons.Devices style={{ color }} size={size} />,
+    [categories.salery]: <Icons.Salery style={{ color }} size={size} />,
     [categories.transfer]: (
       <Icons.AccountBalance style={{ color }} size={size} />
     ),

@@ -60,14 +60,14 @@
     "use-long-press": "^3.2.0",
     "usehooks-ts": "2.14.0",
     "zod": "^3.22.4",
-    "zustand": "^4.5.0"
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.9.2",
     "@todesktop/tailwind-variants": "^1.0.1",
     "@types/node": "^20.11.19",
-    "@types/react": "^18.2.55",
+    "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
     "typescript": "^5.3.3"
   }
