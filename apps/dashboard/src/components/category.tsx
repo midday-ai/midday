@@ -12,7 +12,7 @@ export const categories = {
   rent: "rent",
   income: "income",
   equipment: "equipment",
-  salery: "salery",
+  salary: "salary",
   transfer: "transfer",
   internet_and_telephone: "internet_and_telephone",
   facilities_expenses: "facilities_expenses",
@@ -31,7 +31,7 @@ export const mapCategoryColor = (name: string) => {
     [categories.rent]: "#A843CB",
     [categories.income]: "#00C969",
     [categories.equipment]: "#E9BE26",
-    [categories.salery]: "#D3E500",
+    [categories.salary]: "#D3E500",
     [categories.transfer]: "#FF902B",
     [categories.internet_and_telephone]: "#FF8976",
     [categories.facilities_expenses]: "#A8AABC",
@@ -53,7 +53,7 @@ export function CategoryIcon({ name, size = 18 }) {
     [categories.rent]: <Icons.HomeWork style={{ color }} size={size} />,
     [categories.income]: <Icons.Payments style={{ color }} size={size} />,
     [categories.equipment]: <Icons.Devices style={{ color }} size={size} />,
-    [categories.salery]: <Icons.Salery style={{ color }} size={size} />,
+    [categories.salary]: <Icons.Salary style={{ color }} size={size} />,
     [categories.transfer]: (
       <Icons.AccountBalance style={{ color }} size={size} />
     ),

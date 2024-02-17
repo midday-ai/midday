@@ -7,7 +7,7 @@ export default {
     internet_and_telephone: "Internet och telefon",
     rent: "Hyra",
     equipment: "Utrustning",
-    salery: "Lön",
+    salary: "Lön",
     income: "Inkomst",
     transfer: "Överföring",
     activity: "Aktivitet",

@@ -100,8 +100,6 @@ export function BarChart({ data }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { resolvedTheme } = useTheme();
 
-  console.log(resolvedTheme);
-
   const formattedData = data.result.map((item) => ({
     ...item,
     meta: data.meta,

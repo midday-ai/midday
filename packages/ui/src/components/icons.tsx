@@ -473,5 +473,5 @@ export const Icons = {
   Email: MdOutlineEmail,
   QuestionAnswer: MdOutlineQuestionAnswer,
   Click: MdSignalCellularAlt,
-  Salery: MdOutlineLocalAtm,
+  Salary: MdOutlineLocalAtm,
 };
