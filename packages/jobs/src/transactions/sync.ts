@@ -71,9 +71,11 @@ client.defineJob({
     }
 
     if (error) {
-      await io.logger.debug(error);
+      await io.logger.debug(error.message);
     }
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
+
+    await io.logger.debug(transactions);
   },
 });
