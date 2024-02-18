@@ -1,5 +1,4 @@
 import { getTransactions, transformTransactions } from "@midday/gocardless";
-import { formatISO, subDays } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
@@ -39,10 +38,6 @@ client.defineJob({
 
     const { transactions } = await getTransactions({
       accountId: data?.account_id,
-      // NOTE: Get latest 14 days
-      date_to: formatISO(subDays(new Date(), 14), {
-        representation: "date",
-      }),
     });
 
     const { data: transactionsData, error } = await io.supabase.client

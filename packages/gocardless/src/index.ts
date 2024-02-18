@@ -248,33 +248,22 @@ export async function getAccounts({
 
 type GetTransactionsParams = {
   accountId: string;
-  date_from?: string;
-  date_to?: string;
 };
 
 export async function getTransactions(params: GetTransactionsParams) {
   const token = await getAccessToken();
 
-  const url = new URL(
-    `${baseUrl}/api/v2/accounts/${params.accountId}/transactions/`
+  const result = await fetch(
+    `${baseUrl}/api/v2/accounts/${params.accountId}/transactions/`,
+    {
+      cache: "no-cache",
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
-
-  if (params.date_from) {
-    url.searchParams.append("date_from", params.date_from);
-  }
-
-  if (params.date_to) {
-    url.searchParams.append("date_from", params.date_to);
-  }
-
-  const result = await fetch(url.toString(), {
-    cache: "no-cache",
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
   return result.json();
 }
