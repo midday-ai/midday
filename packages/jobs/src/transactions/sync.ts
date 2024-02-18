@@ -11,8 +11,6 @@ client.defineJob({
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    await io.logger.debug("Account id", ctx.source.id);
-
     const { data } = await io.supabase.client
       .from("bank_accounts")
       .select("id, team_id, account_id")
@@ -28,8 +26,6 @@ client.defineJob({
         last_accessed: new Date().toISOString(),
       })
       .eq("id", ctx.source.id);
-
-    revalidateTag(`bank_accounts_${teamId}`);
 
     if (!data) {
       await io.logger.error(`Bank account not found: ${ctx.source.id}`);
@@ -73,6 +69,8 @@ client.defineJob({
         },
       });
     }
+
+    revalidateTag(`bank_accounts_${teamId}`);
 
     if (error) {
       await io.logger.debug("error", error);
