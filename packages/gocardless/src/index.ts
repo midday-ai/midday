@@ -316,6 +316,16 @@ export const mapTransactionMethod = (method: string) => {
   }
 };
 
+const transformName = (transaction) => {
+  if (transaction.additionalInformation) {
+    return capitalCase(transaction.additionalInformation);
+  }
+
+  if (transaction.remittanceInformationUnstructured) {
+    return capitalCase(transaction.remittanceInformationUnstructured);
+  }
+};
+
 export const transformTransactions = (transactions, { teamId, accountId }) => {
   // We want to insert transactions in reversed order so the incremental id in supabase is correct
   return transactions?.reverse().map((transaction) => {
@@ -344,7 +354,7 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
 
     return {
       date: transaction.valueDate,
-      name: capitalCase(transaction.additionalInformation),
+      name: transformName(transaction),
       method,
       internal_id: `${teamId}_${transaction.internalTransactionId}`,
       amount: transaction.transactionAmount.amount,
