@@ -11,6 +11,8 @@ client.defineJob({
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
+    await io.logger.debug("Account id", ctx.source.id);
+
     const { data } = await io.supabase.client
       .from("bank_accounts")
       .select("id, team_id, account_id")
@@ -39,6 +41,8 @@ client.defineJob({
     const { transactions } = await getTransactions({
       accountId: data?.account_id,
     });
+
+    await io.logger.debug("Transactions fetched", transactions);
 
     const { data: transactionsData, error } = await io.supabase.client
       .from("decrypted_transactions")
@@ -75,7 +79,5 @@ client.defineJob({
     }
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
-
-    await io.logger.debug("transactions", transactions);
   },
 });
