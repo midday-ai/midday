@@ -317,11 +317,11 @@ export const mapTransactionMethod = (method: string) => {
 };
 
 const transformName = (transaction) => {
-  if (transaction.additionalInformation) {
+  if (transaction?.additionalInformation) {
     return capitalCase(transaction.additionalInformation);
   }
 
-  if (transaction.remittanceInformationUnstructured) {
+  if (transaction?.remittanceInformationUnstructured) {
     return capitalCase(transaction.remittanceInformationUnstructured);
   }
 };
