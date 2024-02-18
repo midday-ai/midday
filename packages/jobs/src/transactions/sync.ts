@@ -40,24 +40,19 @@ client.defineJob({
       accountId: data?.account_id,
     });
 
-    const { data: transactionsData, error: transactionsError } =
-      await io.supabase.client
-        .from("decrypted_transactions")
-        .upsert(
-          transformTransactions(transactions?.booked, {
-            accountId: data?.id,
-            teamId,
-          }),
-          {
-            onConflict: "internal_id",
-            ignoreDuplicates: true,
-          }
-        )
-        .select("*, name:decrypted_name");
-
-    if (transactionsError) {
-      await io.logger.debug(transactionsError);
-    }
+    const { data: transactionsData, error } = await io.supabase.client
+      .from("decrypted_transactions")
+      .upsert(
+        transformTransactions(transactions?.booked, {
+          accountId: data?.id,
+          teamId,
+        }),
+        {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        }
+      )
+      .select("*, name:decrypted_name");
 
     if (transactionsData && transactionsData.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);
