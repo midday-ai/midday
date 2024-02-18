@@ -4,14 +4,7 @@ import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
   ColumnDef,
   flexRender,
@@ -29,12 +22,6 @@ import { ExportBar } from "./export-bar";
 
 type Item = {
   id: string;
-};
-
-type ItemsProps = {
-  data: Item[];
-  teamId?: string;
-  initialTransactionId: string;
 };
 
 interface DataTableProps<TData, TValue> {
@@ -97,7 +84,7 @@ export function DataTable<TData, TValue>({
   });
 
   const selectedTransaction = data.find(
-    (transaction) => transaction.id === transactionId
+    (transaction) => transaction?.id === transactionId
   );
 
   const setOpen = (id: string | boolean) => {

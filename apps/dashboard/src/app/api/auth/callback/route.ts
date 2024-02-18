@@ -41,6 +41,7 @@ export async function GET(req: NextRequest) {
         event: LogEvents.SignedIn.name,
         icon: LogEvents.SignedIn.icon,
         user_id: userId,
+        notify: true,
         channel: LogEvents.SignedIn.channel,
       });
 
