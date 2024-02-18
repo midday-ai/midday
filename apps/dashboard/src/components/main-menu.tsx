@@ -13,6 +13,7 @@ import {
   useMotionValue,
 } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -72,11 +73,11 @@ const Item = ({
   const router = useRouter();
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        if (!isCustomizing) {
-          router.push(item.path);
+    <Link
+      href={item.path}
+      onClick={(evt) => {
+        if (isCustomizing) {
+          evt.preventDefault();
         }
       }}
     >
@@ -124,7 +125,7 @@ const Item = ({
           </div>
         </motion.div>
       </Reorder.Item>
-    </button>
+    </Link>
   );
 };
 

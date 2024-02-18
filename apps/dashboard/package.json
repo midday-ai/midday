@@ -13,6 +13,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@baselime/node-opentelemetry": "^0.3.8",
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/gocardless": "workspace:*",

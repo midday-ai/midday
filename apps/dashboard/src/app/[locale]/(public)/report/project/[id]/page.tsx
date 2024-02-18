@@ -70,7 +70,6 @@ export default async function ProjectReport({ params, searchParams }) {
       <div className="justify-center w-full flex px-8 h-full mt-6">
         <div className="max-w-[1400px]">
           <TrackerGraph
-            isTracking
             data={data}
             meta={meta}
             date={currentDate}
