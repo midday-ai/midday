@@ -26,7 +26,7 @@ const baseUrl =
 
 export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras lacinia lacus non fermentum commodo. Quisque accumsan varius finibus. Sed nibh felis, varius ultrices turpis non, pharetra feugiat odio. Integer pharetra sem at nunc commodo, et semper metus fringilla. Phasellus a condimentum erat. Suspendisse potenti. Sed lobortis, metus eu facilisis ullamcorper, mauris risus interdum magna, vitae commodo ante nunc vel nisl. Aliquam erat volutpat. Aliquam et egestas lacus, quis aliquam ipsum. Nam accumsan lorem nisi, a rutrum augue porttitor vel. In hac habitasse platea dictumst. Donec efficitur, nulla eget bibendum sollicitudin, neque ipsum interdum sem, non imperdiet est leo laoreet magna. Etiam urna ligula, vestibulum nec libero id, ultricies egestas lorem.`;
+  const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
 
   return (
     <Html>
@@ -76,7 +76,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               Welcome to Midday! I'm Pontus, one of the founders.
               <br />
               <br />
-              It's really important to us that you have a great expericen
+              It's really important to us that you have a great experience
               ramping up.
               <br />
               <br />
