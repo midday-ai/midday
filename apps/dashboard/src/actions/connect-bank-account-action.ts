@@ -26,6 +26,14 @@ export const connectBankAccountAction = action(
         accountId: account.account_id,
       });
 
+      // Schedule sync for each account
+      await scheduler.register(account.id, {
+        type: "interval",
+        options: {
+          seconds: 3600, // every 1h
+        },
+      });
+
       // Update bank account last_accessed
       await supabase
         .from("bank_accounts")
@@ -35,20 +43,16 @@ export const connectBankAccountAction = action(
         .eq("id", account.id);
 
       // Create transactions
-      await supabase.from("transactions").insert(
+      await supabase.from("transactions").upsert(
         transformTransactions(transactions?.booked, {
           accountId: account.id, // Bank account row id
           teamId,
-        })
+        }),
+        {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        }
       );
-
-      // Schedule sync for each account
-      await scheduler.register(account.id, {
-        type: "interval",
-        options: {
-          seconds: 3600, // every 1h
-        },
-      });
 
       return;
     });
