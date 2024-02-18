@@ -1,3 +1,4 @@
+import { env } from "@/env.mjs";
 import { Events } from "@midday/jobs";
 import { client } from "@midday/jobs/src/client";
 import {
@@ -7,12 +8,16 @@ import {
 } from "@midday/notification";
 import { createClient } from "@midday/supabase/server";
 import { decode } from "base64-arraybuffer";
+import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
+import { Resend } from "resend";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5min
 export const dynamic = "force-dynamic";
+
+const resend = new Resend(env.RESEND_API_KEY);
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
@@ -33,12 +38,30 @@ export async function POST(req: Request) {
 
     const { data: teamData } = await supabase
       .from("teams")
-      .select("id")
+      .select("id, email")
       .eq("inbox_id", inboxId)
       .single()
       .throwOnError();
 
     const attachments = res.Attachments;
+
+    // NOTE: Send original email to company email
+    if (teamData.email) {
+      await resend.emails.send({
+        from: `${res.FromFull.Name} <inbox@midday.ai>`,
+        to: [teamData.email],
+        subject: res.Subject,
+        text: res.TextBody,
+        html: res.HtmlBody,
+        attachments: attachments.map((a) => ({
+          filename: a.Name,
+          content: a.Content,
+        })),
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
+      });
+    }
 
     const records = attachments.map(async (attachment) => {
       const { data } = await supabase.storage

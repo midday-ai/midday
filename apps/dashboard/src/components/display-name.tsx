@@ -65,7 +65,7 @@ export function DisplayName({ fullName }) {
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      maxlength="32"
+                      maxLength="32"
                     />
                   </FormControl>
                   <FormMessage />

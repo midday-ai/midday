@@ -35,6 +35,7 @@ export function TeamEmail({ email }) {
   });
 
   const onSubmit = form.handleSubmit(async (data) => {
+    console.log(data);
     action.execute(data);
   });
 
@@ -53,7 +54,7 @@ export function TeamEmail({ email }) {
           <CardContent>
             <FormField
               control={form.control}
-              name="name"
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
@@ -64,7 +65,6 @@ export function TeamEmail({ email }) {
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      maxlength="32"
                       type="email"
                     />
                   </FormControl>
