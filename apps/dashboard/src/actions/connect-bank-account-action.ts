@@ -43,7 +43,7 @@ export const connectBankAccountAction = action(
         .eq("id", account.id);
 
       // Create transactions
-      await supabase.from("transactions").upsert(
+      const { error } = await supabase.from("transactions").upsert(
         transformTransactions(transactions?.booked, {
           accountId: account.id, // Bank account row id
           teamId,
@@ -53,6 +53,8 @@ export const connectBankAccountAction = action(
           ignoreDuplicates: true,
         }
       );
+
+      console.error("Error - [Import Transactions]", error);
 
       return;
     });
