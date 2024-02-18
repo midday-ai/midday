@@ -19,6 +19,8 @@ client.defineJob({
 
     const teamId = data?.team_id;
 
+    await io.logger.debug("Team id", teamId);
+
     // Update bank account last_accessed
     await io.supabase.client
       .from("bank_accounts")
@@ -40,18 +42,19 @@ client.defineJob({
 
     await io.logger.debug("Transactions fetched", transactions);
 
+    const formattedTransactions = transformTransactions(transactions?.booked, {
+      accountId: data?.id,
+      teamId,
+    });
+
+    await io.logger.debug("Formatted transactions", formattedTransactions);
+
     const { data: transactionsData, error } = await io.supabase.client
       .from("decrypted_transactions")
-      .upsert(
-        transformTransactions(transactions?.booked, {
-          accountId: data?.id,
-          teamId,
-        }),
-        {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        }
-      )
+      .upsert(formattedTransactions, {
+        onConflict: "internal_id",
+        ignoreDuplicates: true,
+      })
       .select("*, name:decrypted_name");
 
     if (transactionsData && transactionsData.length > 0) {
