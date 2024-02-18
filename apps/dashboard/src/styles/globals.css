@@ -58,6 +58,10 @@ body {
   --ease: var(--back);
 }
 
+.pdf-viewer canvas {
+  margin-top: -4px;
+}
+
 .skeleton-box {
   background-color: hsl(var(--border));
   color: hsl(var(--border)) !important;

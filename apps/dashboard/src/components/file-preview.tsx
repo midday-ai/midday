@@ -7,6 +7,9 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 enum FileType {
   Pdf = "application/pdf",
@@ -57,10 +60,19 @@ export function FilePreview({
   height,
   disableFullscreen,
 }: Props) {
+  let content;
+
+  const [numPages, setNumPages] = useState<number>(0);
   const [isLoaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  let content;
+  const onDocumentLoadSuccess = ({
+    numPages: nextNumPages,
+  }: {
+    numPages: number;
+  }) => {
+    setNumPages(nextNumPages);
+  };
 
   const handleOnLoaded = () => {
     setLoaded(true);
@@ -81,26 +93,27 @@ export function FilePreview({
   }
 
   if (type === FileType.Pdf) {
-    // NOTE: On SSR onLoad is not fired
-    setTimeout(() => {
-      setLoaded(true);
-    }, 1000);
-
     content = (
-      <div style={{ width, height }} className="overflow-hidden">
-        <iframe
-          src={`${src}#toolbar=0`}
-          style={{ width: width + 5, height }}
-          className="-ml-[8px] -mt-[8px]"
-          title={name}
-          loading="lazy"
-          onLoad={() => {
-            // We can't get the onLoad event for the embeded pdf in the webview
-            setTimeout(() => {
-              setLoaded(true);
-            }, 200);
-          }}
-        />
+      <div style={{ width, height }} className="pdf-viewer">
+        <Document
+          file={src}
+          onLoadSuccess={onDocumentLoadSuccess}
+          renderMode="canvas"
+        >
+          <div className="overflow-auto" style={{ height }}>
+            {Array.from(new Array(numPages), (_, index) => (
+              <Page
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+                width={width}
+                onLoadSuccess={() => setLoaded(true)}
+                onRenderError={() => setLoaded(true)}
+                renderAnnotationLayer={false}
+                renderTextLayer={false}
+              />
+            ))}
+          </div>
+        </Document>
       </div>
     );
   }
