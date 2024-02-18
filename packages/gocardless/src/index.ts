@@ -355,7 +355,7 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
     return {
       date: transaction.valueDate,
       name: transformName(transaction),
-      method,
+      method: method || "unknown",
       internal_id: `${teamId}_${transaction.internalTransactionId}`,
       amount: transaction.transactionAmount.amount,
       currency: transaction.transactionAmount.currency,
