@@ -2,6 +2,7 @@
 
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
+import { Skeleton } from "@midday/ui/skeleton";
 import {
   Cell,
   Label,
@@ -41,7 +42,7 @@ const ToolTipContent = ({ payload = [] }) => {
   );
 };
 
-export function SpendingChart({ categories, currency, totalAmount }) {
+export function SpendingChart({ categories, currency, totalAmount, disabled }) {
   const locale = useCurrentLocale();
 
   return (
@@ -56,19 +57,21 @@ export function SpendingChart({ categories, currency, totalAmount }) {
           fill="#8884d8"
           dataKey="amount"
         >
-          <Label
-            value={formatAmount({
-              amount: totalAmount,
-              currency,
-              maximumFractionDigits: 0,
-              minimumFractionDigits: 0,
-              locale,
-            })}
-            position="center"
-            fontSize={23}
-            fill="hsl(var(--foreground))"
-            fontFamily="var(--font-sans)"
-          />
+          {!disabled && (
+            <Label
+              value={formatAmount({
+                amount: totalAmount,
+                currency,
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0,
+                locale,
+              })}
+              position="center"
+              fontSize={23}
+              fill="hsl(var(--foreground))"
+              fontFamily="var(--font-sans)"
+            />
+          )}
 
           {categories?.map(({ category }, index) => (
             <Cell key={`cell-${index}`} fill={mapCategoryColor(category)} />

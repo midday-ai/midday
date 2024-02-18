@@ -47,7 +47,7 @@ export function TeamEmail({ email }) {
             <CardTitle>Team Email</CardTitle>
             <CardDescription>
               This is your team's email. It's used to forward emails from the
-              inbox and company wide information.
+              inbox and company information.
             </CardDescription>
           </CardHeader>
 

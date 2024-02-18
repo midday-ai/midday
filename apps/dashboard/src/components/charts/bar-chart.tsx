@@ -95,7 +95,7 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function BarChart({ data }) {
+export function BarChart({ data, disabled }) {
   const locale = useCurrentLocale();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { resolvedTheme } = useTheme();
@@ -156,7 +156,7 @@ export function BarChart({ data }) {
                     maximumFractionDigits: 0,
                     minimumFractionDigits: 0,
                     currency: data.summary.currency,
-                    amount: value,
+                    amount: disabled ? 0 : value,
                     locale,
                   });
                 }

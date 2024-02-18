@@ -45,6 +45,7 @@ export async function SpendingList({ initialPeriod, disabled }) {
         period={initialPeriod}
       />
       <SpendingChart
+        disabled={disabled}
         categories={spending?.data}
         currency={spending?.meta.currency}
         totalAmount={spending?.meta.totalAmount}

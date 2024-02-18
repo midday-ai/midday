@@ -36,7 +36,7 @@ export async function Chart({ value, defaultValue, disabled }) {
           last period
         </p>
       </div>
-      <BarChart data={data} />
+      <BarChart data={data} disabled={disabled} />
     </div>
   );
 }
