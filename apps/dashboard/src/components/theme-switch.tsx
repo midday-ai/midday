@@ -37,7 +37,7 @@ export const ThemeSwitch = () => {
         ))}
       </select>
 
-      <div className="absolute left-2">
+      <div className="absolute left-2 pointer-events-none">
         <ThemeIcon currentTheme={theme as Theme} />
       </div>
 
