@@ -475,7 +475,7 @@ export async function getMetricsQuery(
       .values(),
   ];
 
-  const result = sum.reduce((acc, item) => {
+  const result = sum?.reduce((acc, item) => {
     const key = format(new Date(item.date), "y");
 
     if (!acc[key]) {
@@ -820,8 +820,8 @@ export async function getTrackerRecordsByRangeQuery(
     query.eq("project_id", params.projectId);
   }
 
-  const { data, error } = await query;
-  const result = data.reduce((acc, item) => {
+  const { data } = await query;
+  const result = data?.reduce((acc, item) => {
     const key = item.date;
 
     if (!acc[key]) {

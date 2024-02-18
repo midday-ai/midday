@@ -146,7 +146,7 @@ export function UploadZone({ children }) {
           <div className="absolute top-0 bottom-0 right-0 left-0 z-50 pointer-events-none">
             <div
               className={cn(
-                "bg-[#1A1A1A] h-full flex items-center justify-center text-center invisible",
+                "dark:bg-[#1A1A1A] h-full flex items-center justify-center text-center invisible",
                 isDragActive && "visible"
               )}
             >
