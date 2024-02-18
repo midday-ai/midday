@@ -123,6 +123,7 @@ export function InboxDetails({
                 <AvatarFallback>
                   {item?.name
                     .split(" ")
+                    .slice(0, 2)
                     .map((chunk) => chunk[0])
                     .join("")}
                 </AvatarFallback>

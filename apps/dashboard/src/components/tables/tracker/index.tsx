@@ -3,7 +3,7 @@ import { getCountryInfo } from "@midday/location";
 import { getTrackerProjects, getUser } from "@midday/supabase/cached-queries";
 import { EmptyState, NoResults } from "./empty-states";
 
-const pageSize = 10;
+const pageSize = 20;
 
 export async function Table({ status, sort, query }) {
   const { currencyCode } = getCountryInfo();
@@ -24,7 +24,7 @@ export async function Table({ status, sort, query }) {
 
     return getTrackerProjects({
       to,
-      from,
+      from: from + 1,
       sort,
       filter: {
         status,

@@ -36,7 +36,7 @@ export async function Table({
 
     return getTransactions({
       to,
-      from,
+      from: from + 1,
       filter,
       sort,
       search: {
