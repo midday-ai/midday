@@ -8,7 +8,6 @@ import WelcomeEmail from "@midday/email/emails/welcome";
 import { renderAsync } from "@react-email/components";
 import { Resend } from "@trigger.dev/resend";
 import { eventTrigger } from "@trigger.dev/sdk";
-import ms from "ms";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { client } from "../client";
@@ -47,7 +46,7 @@ client.defineJob({
       },
     });
 
-    await io.wait("wait-1", isTestOrDev ? 10 : ms("1d")); // 1 day
+    await io.wait("wait-1", isTestOrDev ? 10 : 60 * 60 * 24); // 1 day
 
     const getStarted = await io.resend.emails.send("get-started", {
       to: payload.email,
@@ -59,7 +58,7 @@ client.defineJob({
       },
     });
 
-    await io.wait("wait-2", isTestOrDev ? 10 : ms("2d")); // 2 day
+    await io.wait("wait-2", isTestOrDev ? 10 : 60 * 60 * 24 * 2); // 2 day
 
     const financialOverview = await io.resend.emails.send(
       "financial-overview",
@@ -76,7 +75,7 @@ client.defineJob({
       }
     );
 
-    await io.wait("wait-3", isTestOrDev ? 10 : ms("3d")); // 3 day
+    await io.wait("wait-3", isTestOrDev ? 10 : 60 * 60 * 24 * 3); // 3 day
 
     const magicInbox = await io.resend.emails.send("magic-inbox", {
       to: payload.email,
@@ -88,7 +87,7 @@ client.defineJob({
       },
     });
 
-    await io.wait("wait-4", isTestOrDev ? 10 : ms("4d")); // 4 day
+    await io.wait("wait-4", isTestOrDev ? 10 : 60 * 60 * 24 * 4); // 4 day
 
     const preAccounting = await io.resend.emails.send("pre-accounting", {
       to: payload.email,
@@ -102,7 +101,7 @@ client.defineJob({
       },
     });
 
-    await io.wait("wait-5", isTestOrDev ? 10 : ms("5d")); // 5 day
+    await io.wait("wait-5", isTestOrDev ? 10 : 60 * 60 * 24 * 5); // 5 day
 
     const vault = await io.resend.emails.send("vault", {
       to: payload.email,
@@ -114,7 +113,7 @@ client.defineJob({
       },
     });
 
-    await io.wait("wait-6", isTestOrDev ? 10 : ms("6d")); // 6 day
+    await io.wait("wait-6", isTestOrDev ? 10 : 60 * 60 * 24 * 6); // 6 day
 
     const timeTracker = await io.resend.emails.send("time-tracker", {
       to: payload.email,

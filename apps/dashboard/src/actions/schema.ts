@@ -10,6 +10,7 @@ export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
 export const updateTeamSchema = z.object({
   name: z.string().min(2).max(32).optional(),
+  email: z.string().email().optional(),
   logo_url: z.string().url().optional(),
   revalidatePath: z.string(),
 });
