@@ -69,7 +69,9 @@ client.defineJob({
       }
     );
 
-    if (transactionsData && transactionsData.length > 0) {
+    await io.logger.debug("Inserted transactions", transactionsData);
+
+    if (transactionsData && transactionsData?.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);
 
       await io.sendEvent("🔔 Send notifications", {
