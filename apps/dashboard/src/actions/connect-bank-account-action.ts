@@ -12,6 +12,8 @@ import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
 import { connectBankAccountSchema } from "./schema";
 
+const BATCH_LIMIT = 500;
+
 export const connectBankAccountAction = action(
   connectBankAccountSchema,
   async (accounts) => {
@@ -51,12 +53,16 @@ export const connectBankAccountAction = action(
         }
       );
 
-      await processPromisesBatch(formattedTransactions, 500, async (batch) => {
-        await supabase.from("transactions").upsert(batch, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        });
-      });
+      await processPromisesBatch(
+        formattedTransactions,
+        BATCH_LIMIT,
+        async (batch) => {
+          await supabase.from("transactions").upsert(batch, {
+            onConflict: "internal_id",
+            ignoreDuplicates: true,
+          });
+        }
+      );
 
       return;
     });
