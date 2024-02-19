@@ -32,9 +32,6 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
     <Html>
       <Tailwind>
         <head>
-          <meta name="color-scheme" content="light dark" />
-          <meta name="supported-color-schemes" content="light dark" />
-
           <Font
             fontFamily="Geist"
             fallbackFontFamily="Helvetica"
@@ -59,20 +56,20 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
         </head>
         <Preview>{text}</Preview>
 
-        <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
+        <Body className="bg-[#fff] my-auto mx-auto font-sans">
           <Container
-            className="border-transparent md:border-[#E8E7E1] md:dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[600px]"
+            className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
             <Logo baseUrl={baseUrl} />
-            <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
+            <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Welcome to Midday
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
-            <Text className="text-[#121212] dark:text-[#F5F5F3]">
+            <Text className="text-[#121212]">
               Welcome to Midday! I'm Pontus, one of the founders.
               <br />
               <br />
@@ -84,7 +81,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               hesitate to email me at pontus@midday.ai or you can{" "}
               <Link
                 href="https://cal.com/pontus-midday/15min"
-                className="text-[#121212] dark:text-[#F5F5F3] underline"
+                className="text-[#121212] underline"
               >
                 schedule a call with me here
               </Link>
@@ -99,21 +96,19 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
               className="my-0 mx-auto block w-full"
             />
 
-            <Text className="text-[#707070] dark:text-[#878787]">
-              Best regards, founders
-            </Text>
+            <Text className="text-[#707070]">Best regards, founders</Text>
 
             <Img
               src={`${baseUrl}/signature.png`}
               alt="Signature"
-              className="block w-full w-[143px] h-[20px] dark:hidden"
+              className="block w-full w-[143px] h-[20px]"
             />
 
-            <Img
+            {/* <Img
               src={`${baseUrl}/signature-dark.png`}
               alt="Signature"
               className="w-full w-[143px] h-[20px] hidden dark:block"
-            />
+            /> */}
 
             <br />
             <br />

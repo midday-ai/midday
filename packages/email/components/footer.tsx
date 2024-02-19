@@ -17,7 +17,7 @@ type Props = {
 export function Footer({ baseUrl }: Props) {
   return (
     <Section className="w-full">
-      <Hr className="dark:border-[#242424]" />
+      <Hr />
 
       <br />
 
@@ -38,7 +38,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/fhEy5CL"
               >
                 Homepage
@@ -46,7 +46,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/KKEB90F"
               >
                 Pricing
@@ -54,7 +54,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/Wa3TxOy"
               >
                 Story
@@ -62,7 +62,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/jr5dX4W"
               >
                 Updates
@@ -70,7 +70,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/sXJM9Qv"
               >
                 Download
@@ -86,7 +86,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/aTNyqQH"
               >
                 Roadmap
@@ -94,7 +94,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/UmCgADb"
               >
                 Github
@@ -102,7 +102,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/J2j4CM2"
               >
                 Support
@@ -110,7 +110,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/rofdWKi"
               >
                 Terms of service
@@ -118,7 +118,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/TJIL5mQ"
               >
                 Privacy policy
@@ -134,7 +134,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/cduCp4l"
               >
                 SaaS hosting
@@ -142,7 +142,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/yrQlSIz"
               >
                 Self hosted
@@ -150,7 +150,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/Dd7M8cl"
               >
                 Open startup
@@ -158,7 +158,7 @@ export function Footer({ baseUrl }: Props) {
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] dark:text-[#878787] text-[14px]"
+                className="text-[#707070] text-[14px]"
                 href="https://go.midday.ai/M2Hv420"
               >
                 OSS Friends
@@ -221,7 +221,7 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Text className="text-[#B8B8B8] dark:text-[#414141] text-xs">
+        <Text className="text-[#B8B8B8] text-xs">
           Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
         </Text>
       </Row>
@@ -234,13 +234,7 @@ export function Footer({ baseUrl }: Props) {
             src={`${baseUrl}/logo-footer.png`}
             width="100"
             alt="Midday"
-            className="block dark:hidden"
-          />
-          <Img
-            src={`${baseUrl}/logo-footer-dark.png`}
-            width="100"
-            alt="Midday"
-            className="hidden dark:block"
+            className="block"
           />
         </Link>
       </Row>

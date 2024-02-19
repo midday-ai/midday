@@ -36,8 +36,6 @@ export const TimeTrackerEmail = ({
     <Html>
       <Tailwind>
         <head>
-          <meta name="color-scheme" content="light dark" />
-          <meta name="supported-color-schemes" content="light dark" />
           <Font
             fontFamily="Geist"
             fallbackFontFamily="Helvetica"
@@ -62,13 +60,13 @@ export const TimeTrackerEmail = ({
         </head>
         <Preview>{text}</Preview>
 
-        <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
+        <Body className="bg-[#fff] my-auto mx-auto font-sans">
           <Container
-            className="border-transparent md:border-[#E8E7E1] md:dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[600px]"
+            className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
             <Logo baseUrl={baseUrl} />
-            <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
+            <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Time track your projects
             </Heading>
 
@@ -77,19 +75,13 @@ export const TimeTrackerEmail = ({
             <Img
               src={`${baseUrl}/time-tracker-header.png`}
               alt="Vault"
-              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
-            />
-
-            <Img
-              src={`${baseUrl}/time-tracker-header-dark.png`}
-              alt="Vault"
-              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
+              className="my-0 mx-auto block max-w-[597px] w-full"
             />
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
-            <Text className="text-[#121212] dark:text-[#F5F5F3]">
+            <Text className="text-[#121212]">
               Boost your productivity with our advanced time-tracking tool. With
               insightful project overviews and seamless collaboration amongst
               your team, you’re set up for optimal efficiency.

@@ -92,8 +92,6 @@ export const TransactionsEmail = ({
     <Html>
       <Tailwind>
         <head>
-          <meta name="color-scheme" content="light dark" />
-          <meta name="supported-color-schemes" content="light dark" />
           <Font
             fontFamily="Geist"
             fallbackFontFamily="Helvetica"
@@ -118,13 +116,13 @@ export const TransactionsEmail = ({
         </head>
         <Preview>{previewText}</Preview>
 
-        <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
+        <Body className="bg-[#fff] my-auto mx-auto font-sans">
           <Container
-            className="border-transparent md:border-[#E8E7E1] md:dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[600px]"
+            className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
             <Logo baseUrl={baseUrl} />
-            <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
+            <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               {t("transactions.title1")}
               <span className="font-semibold">
                 {t("transactions.title2", {
@@ -134,7 +132,7 @@ export const TransactionsEmail = ({
               {t("transactions.title3")} <br />
               {t("transactions.title4")}
             </Heading>
-            <Text className="text-[#121212] dark:text-[#F5F5F3] text-[14px] leading-[24px]">
+            <Text className="text-[#121212] text-[14px] leading-[24px]">
               {t("transactions.description1", { firstName })},
               <br />
               <br />
@@ -154,7 +152,7 @@ export const TransactionsEmail = ({
               className="border-collapse w-full"
             >
               <thead style={{ width: "100%" }}>
-                <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#E8E7E1] dark:border-[#242424] h-[45px]">
+                <tr className="border-0 border-t-[1px] border-b-[1px] border-solid border-[#E8E7E1] h-[45px]">
                   <th align="left">
                     <Text className="text-[14px] font-semibold m-0 p-0">
                       {t("transactions.date")}
@@ -177,7 +175,7 @@ export const TransactionsEmail = ({
                 {transactions?.map((transaction) => (
                   <tr
                     key={transaction.id}
-                    className="border-0 border-b-[1px] border-solid border-[#E8E7E1] dark:border-[#242424] h-[45px]"
+                    className="border-0 border-b-[1px] border-solid border-[#E8E7E1] h-[45px]"
                   >
                     <td align="left">
                       <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
@@ -188,7 +186,7 @@ export const TransactionsEmail = ({
                       <Link
                         href={`${baseAppUrl}/transactions?id=${transaction.id}`}
                         className={cn(
-                          "text-[#121212] dark:text-[#F5F5F3]",
+                          "text-[#121212]",
                           transaction?.category === "income" &&
                             "!text-[#00C969]"
                         )}
@@ -201,7 +199,7 @@ export const TransactionsEmail = ({
                     <td align="left">
                       <Text
                         className={cn(
-                          "text-[14px] m-0 p-0 mt-1 pb-1 text-[#121212] dark:text-[#F5F5F3]",
+                          "text-[14px] m-0 p-0 mt-1 pb-1 text-[#121212]",
                           transaction?.category === "income" &&
                             "!text-[#00C969]"
                         )}
@@ -221,7 +219,7 @@ export const TransactionsEmail = ({
 
             <Section className="text-center mt-[32px] mb-[32px]">
               <Button
-                className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] dark:text-[#F5F5F3] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212] dark:border-[#F5F5F3]"
+                className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
                 href={`${baseAppUrl}/transactions?filter=${JSON.stringify({
                   date: {
                     from: transactions.at(0)?.date,

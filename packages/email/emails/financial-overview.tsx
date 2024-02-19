@@ -35,8 +35,6 @@ export const FinancialOverviewEmail = ({
     <Html>
       <Tailwind>
         <head>
-          <meta name="color-scheme" content="light dark" />
-          <meta name="supported-color-schemes" content="light dark" />
           <Font
             fontFamily="Geist"
             fallbackFontFamily="Helvetica"
@@ -61,13 +59,13 @@ export const FinancialOverviewEmail = ({
         </head>
         <Preview>{text}</Preview>
 
-        <Body className="bg-[#fff] dark:bg-[#121212] my-auto mx-auto font-sans">
+        <Body className="bg-[#fff] my-auto mx-auto font-sans">
           <Container
-            className="border-transparent md:border-[#E8E7E1] md:dark:border-[#242424] my-[40px] mx-auto p-[20px] max-w-[600px]"
+            className="border-transparent md:border-[#E8E7E1] my-[40px] mx-auto p-[20px] max-w-[600px]"
             style={{ borderStyle: "solid", borderWidth: 1 }}
           >
             <Logo baseUrl={baseUrl} />
-            <Heading className="text-[#121212] dark:text-[#F5F5F3] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
+            <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
               Financial overview
             </Heading>
 
@@ -76,19 +74,13 @@ export const FinancialOverviewEmail = ({
             <Img
               src={`${baseUrl}/financial-overview-header.png`}
               alt="Overview"
-              className="my-0 mx-auto block dark:hidden max-w-[597px] w-full"
-            />
-
-            <Img
-              src={`${baseUrl}/financial-overview-header-dark.png`}
-              alt="Overview"
-              className="my-0 mx-auto hidden dark:block w-full max-w-[597px] max-h-[301px]"
+              className="my-0 mx-auto block max-w-[597px] w-full"
             />
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
-            <Text className="text-[#121212] dark:text-[#F5F5F3]">
+            <Text className="text-[#121212]">
               We connect to the majority of banks worldwide, making it easier
               for you to keep track of all your expenses and income in one
               place. Filter and compare different time periods to better track

@@ -35,7 +35,6 @@ export function TeamEmail({ email }) {
   });
 
   const onSubmit = form.handleSubmit(async (data) => {
-    console.log(data);
     action.execute(data);
   });
 
@@ -75,6 +74,7 @@ export function TeamEmail({ email }) {
           </CardContent>
 
           <CardFooter className="flex justify-between">
+            <div />
             <Button type="submit" disabled={action.status === "executing"}>
               {action.status === "executing" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

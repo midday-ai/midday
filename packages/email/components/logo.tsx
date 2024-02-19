@@ -9,14 +9,7 @@ export function Logo({ baseUrl }) {
         width="45"
         height="45"
         alt="Midday"
-        className="my-0 mx-auto block dark:hidden"
-      />
-      <Img
-        src={`${baseUrl}/logo-dark.png`}
-        width="45"
-        height="45"
-        alt="Midday"
-        className="my-0 mx-auto hidden dark:block"
+        className="my-0 mx-auto block"
       />
     </Section>
   );

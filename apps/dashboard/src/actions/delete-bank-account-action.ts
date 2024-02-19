@@ -12,8 +12,8 @@ export const deleteBankAccountAction = action(
   deleteBankAccountSchema,
   async ({ id }) => {
     const supabase = createClient();
-    const { data, error } = await deleteBankAccount(supabase, id);
-    console.log(error);
+    const { data } = await deleteBankAccount(supabase, id);
+
     revalidateTag(`bank_accounts_${data.team_id}`);
     revalidateTag(`bank_connections_${data.team_id}`);
 
