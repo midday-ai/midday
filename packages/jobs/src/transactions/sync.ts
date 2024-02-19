@@ -80,5 +80,7 @@ client.defineJob({
     revalidateTag(`bank_accounts_${teamId}`);
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
+
+    return;
   },
 });
