@@ -1,10 +1,10 @@
 "use server";
 
+import { processPromisesBatch } from "@/utils/process";
 import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
 import { getTransactions, transformTransactions } from "@midday/gocardless";
 import { scheduler } from "@midday/jobs";
-import { processPromisesBatch } from "@midday/jobs/src/utils";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -53,6 +53,8 @@ export const connectBankAccountAction = action(
         }
       );
 
+      // NOTE: We will get all the transactions at once so
+      // we need to guard against massive payloads
       await processPromisesBatch(
         formattedTransactions,
         BATCH_LIMIT,
