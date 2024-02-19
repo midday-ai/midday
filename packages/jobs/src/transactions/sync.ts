@@ -1,11 +1,9 @@
 import { getTransactions, transformTransactions } from "@midday/gocardless";
+import { formatISO, subMonths } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-import { processPromisesBatch } from "../utils";
 import { scheduler } from "./scheduler";
-
-const BATCH_LIMIT = 100;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC,
@@ -39,43 +37,30 @@ client.defineJob({
       return;
     }
 
-    // TODO: Limit this to last 30 days
     const { transactions } = await getTransactions({
       accountId: data?.account_id,
+      // NOTE: GET last 30 days transactions
+      date_to: formatISO(subMonths(new Date(), 1), {
+        representation: "date",
+      }),
     });
-
-    await io.logger.debug("Transactions fetched", transactions);
 
     const formattedTransactions = transformTransactions(transactions?.booked, {
       accountId: data?.id,
       teamId,
     });
 
-    await io.logger.debug("Formatted transactions", formattedTransactions);
+    const { error, data: transactionsData } = await io.supabase.client
+      .from("decrypted_transactions")
+      .upsert(formattedTransactions, {
+        onConflict: "internal_id",
+        ignoreDuplicates: true,
+      })
+      .select("*, name:decrypted_name");
 
-    const transactionsData = await processPromisesBatch(
-      formattedTransactions,
-      BATCH_LIMIT,
-      async (batch) => {
-        console.log("Transactions batch", batch);
-
-        const { data, error } = await io.supabase.client
-          .from("decrypted_transactions")
-          .upsert(batch, {
-            onConflict: "internal_id",
-            ignoreDuplicates: true,
-          })
-          .select("*, name:decrypted_name");
-
-        if (error) {
-          console.log("Transactions batch error", error);
-        }
-
-        return data;
-      }
-    );
-
-    await io.logger.debug("Inserted transactions", transactionsData);
+    if (error) {
+      await io.logger.debug("Transactions batch error", error);
+    }
 
     // if (transactionsData && transactionsData?.length > 0) {
     //   await io.logger.log(`Sending notifications: ${transactionsData.length}`);
@@ -94,8 +79,6 @@ client.defineJob({
     revalidateTag(`metrics_${teamId}`);
     revalidateTag(`bank_accounts_${teamId}`);
 
-    if (transactionsData) {
-      await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
-    }
+    await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
   },
 });
