@@ -321,12 +321,12 @@ const transformName = (transaction) => {
     return capitalCase(transaction.additionalInformation);
   }
 
-  if (transaction?.remittanceInformationUnstructured) {
-    return capitalCase(transaction.remittanceInformationUnstructured);
-  }
-
   if (transaction?.remittanceInformationStructured) {
     return capitalCase(transaction.remittanceInformationStructured);
+  }
+
+  if (transaction?.remittanceInformationUnstructured) {
+    return capitalCase(transaction.remittanceInformationUnstructured);
   }
 
   console.log("No transaction name", transaction);
