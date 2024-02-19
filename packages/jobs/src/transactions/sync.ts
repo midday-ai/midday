@@ -76,10 +76,6 @@ client.defineJob({
     if (transactionsData && transactionsData.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);
 
-      revalidateTag(`transactions_${teamId}`);
-      revalidateTag(`spending_${teamId}`);
-      revalidateTag(`metrics_${teamId}`);
-
       await io.sendEvent("🔔 Send notifications", {
         name: Events.TRANSACTIONS_NOTIFICATION,
         payload: {
@@ -89,6 +85,9 @@ client.defineJob({
       });
     }
 
+    revalidateTag(`transactions_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
     revalidateTag(`bank_accounts_${teamId}`);
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
