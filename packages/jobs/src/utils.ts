@@ -1,9 +1,9 @@
 export async function processPromisesBatch(items, limit, fn) {
   const batches = [];
-  let result = [];
+  let result: any = [];
 
   // Split the items into batches
-  for (let i = 0; i < items.length; i += limit) {
+  for (let i = 0; i < items?.length; i += limit) {
     batches.push(items.slice(i, i + limit));
   }
 

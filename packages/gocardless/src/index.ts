@@ -333,24 +333,24 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       transaction.proprietaryBankTransactionCode
     );
 
-    // let currencyExchange: { rate: number; currency: string } | undefined;
+    let currencyExchange: { rate: number; currency: string } | undefined;
 
-    // if (Array.isArray(transaction.currencyExchange)) {
-    //   const rate = Number.parseFloat(
-    //     transaction.currencyExchange.at(0)?.exchangeRate ?? ""
-    //   );
+    if (Array.isArray(transaction.currencyExchange)) {
+      const rate = Number.parseFloat(
+        transaction.currencyExchange.at(0)?.exchangeRate ?? ""
+      );
 
-    //   if (rate) {
-    //     const currency = transaction.currencyExchange.at(0)?.sourceCurrency;
+      if (rate) {
+        const currency = transaction.currencyExchange.at(0)?.sourceCurrency;
 
-    //     if (currency) {
-    //       currencyExchange = {
-    //         rate,
-    //         currency,
-    //       };
-    //     }
-    //   }
-    // }
+        if (currency) {
+          currencyExchange = {
+            rate,
+            currency,
+          };
+        }
+      }
+    }
 
     return {
       date: transaction.valueDate,
@@ -362,8 +362,8 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       bank_account_id: accountId,
       category: transaction.transactionAmount.amount > 0 ? "income" : null,
       team_id: teamId,
-      // currency_rate: currencyExchange?.rate,
-      // currency_source: currencyExchange?.currency,
+      currency_rate: currencyExchange?.rate,
+      currency_source: currencyExchange?.currency,
       balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
       status: "posted",
     };
