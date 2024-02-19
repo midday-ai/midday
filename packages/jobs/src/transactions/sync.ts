@@ -2,7 +2,10 @@ import { getTransactions, transformTransactions } from "@midday/gocardless";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
+import { processPromisesBatch } from "../utils";
 import { scheduler } from "./scheduler";
+
+const BATCH_LIMIT = 100;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC,
@@ -49,13 +52,25 @@ client.defineJob({
 
     await io.logger.debug("Formatted transactions", formattedTransactions);
 
-    const { data: transactionsData, error } = await io.supabase.client
-      .from("decrypted_transactions")
-      .upsert(formattedTransactions, {
-        onConflict: "internal_id",
-        ignoreDuplicates: true,
-      })
-      .select("*, name:decrypted_name");
+    const { data: transactionsData, error } = await processPromisesBatch(
+      formattedTransactions,
+      BATCH_LIMIT,
+      async (batch) => {
+        const { data } = await io.supabase.client
+          .from("decrypted_transactions")
+          .upsert(batch, {
+            onConflict: "internal_id",
+            ignoreDuplicates: true,
+          })
+          .select("*, name:decrypted_name");
+
+        return data;
+      }
+    );
+
+    if (error) {
+      await io.logger.debug("error", error);
+    }
 
     if (transactionsData && transactionsData.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);
@@ -74,10 +89,6 @@ client.defineJob({
     }
 
     revalidateTag(`bank_accounts_${teamId}`);
-
-    if (error) {
-      await io.logger.debug("error", error);
-    }
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
   },

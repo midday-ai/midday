@@ -4,6 +4,7 @@ import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
 import { getTransactions, transformTransactions } from "@midday/gocardless";
 import { scheduler } from "@midday/jobs";
+import { processPromisesBatch } from "@midday/jobs/src/utils";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -42,19 +43,25 @@ export const connectBankAccountAction = action(
         })
         .eq("id", account.id);
 
-      // Create transactions
-      const { error } = await supabase.from("transactions").upsert(
-        transformTransactions(transactions?.booked, {
+      const formattedTransactions = transformTransactions(
+        transactions?.booked,
+        {
           accountId: account.id, // Bank account row id
           teamId,
-        }),
-        {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
         }
       );
 
-      console.error("Error - [Import Transactions]", error);
+      await processPromisesBatch(formattedTransactions, 500, async (batch) => {
+        const { data } = await supabase
+          .from("decrypted_transactions")
+          .upsert(batch, {
+            onConflict: "internal_id",
+            ignoreDuplicates: true,
+          })
+          .select("*, name:decrypted_name");
+
+        return data;
+      });
 
       return;
     });
