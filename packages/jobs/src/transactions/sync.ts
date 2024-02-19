@@ -52,7 +52,7 @@ client.defineJob({
 
     await io.logger.debug("Formatted transactions", formattedTransactions);
 
-    const { data: transactionsData, error } = await processPromisesBatch(
+    const transactionsData = await processPromisesBatch(
       formattedTransactions,
       BATCH_LIMIT,
       async (batch) => {
