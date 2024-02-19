@@ -57,17 +57,13 @@ client.defineJob({
       formattedTransactions,
       BATCH_LIMIT,
       async (batch) => {
-        const { data, error } = await io.supabase.client
+        const { data } = await io.supabase.client
           .from("decrypted_transactions")
           .upsert(batch, {
             onConflict: "internal_id",
             ignoreDuplicates: true,
           })
           .select("*, name:decrypted_name");
-
-        if (error) {
-          await io.logger.debug("error", error);
-        }
 
         return data;
       }
@@ -90,6 +86,8 @@ client.defineJob({
     revalidateTag(`metrics_${teamId}`);
     revalidateTag(`bank_accounts_${teamId}`);
 
-    await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
+    if (transactionsData) {
+      await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
+    }
   },
 });
