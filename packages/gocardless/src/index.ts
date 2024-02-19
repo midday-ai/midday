@@ -325,6 +325,10 @@ const transformName = (transaction) => {
     return capitalCase(transaction.remittanceInformationUnstructured);
   }
 
+  if (transaction?.remittanceInformationStructured) {
+    return capitalCase(transaction.remittanceInformationStructured);
+  }
+
   console.log("No transaction name", transaction);
 };
 
