@@ -77,17 +77,17 @@ client.defineJob({
 
     await io.logger.debug("Inserted transactions", transactionsData);
 
-    // if (transactionsData && transactionsData?.length > 0) {
-    //   await io.logger.log(`Sending notifications: ${transactionsData.length}`);
+    if (transactionsData && transactionsData?.length > 0) {
+      await io.logger.log(`Sending notifications: ${transactionsData.length}`);
 
-    //   await io.sendEvent("🔔 Send notifications", {
-    //     name: Events.TRANSACTIONS_NOTIFICATION,
-    //     payload: {
-    //       teamId,
-    //       transactions: transactionsData,
-    //     },
-    //   });
-    // }
+      await io.sendEvent("🔔 Send notifications", {
+        name: Events.TRANSACTIONS_NOTIFICATION,
+        payload: {
+          teamId,
+          transactions: transactionsData,
+        },
+      });
+    }
 
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
