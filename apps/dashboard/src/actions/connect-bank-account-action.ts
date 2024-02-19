@@ -52,15 +52,10 @@ export const connectBankAccountAction = action(
       );
 
       await processPromisesBatch(formattedTransactions, 500, async (batch) => {
-        const { data } = await supabase
-          .from("decrypted_transactions")
-          .upsert(batch, {
-            onConflict: "internal_id",
-            ignoreDuplicates: true,
-          })
-          .select("*, name:decrypted_name");
-
-        return data;
+        await supabase.from("transactions").upsert(batch, {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        });
       });
 
       return;
