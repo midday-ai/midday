@@ -57,7 +57,9 @@ client.defineJob({
       formattedTransactions,
       BATCH_LIMIT,
       async (batch) => {
-        const { data } = await io.supabase.client
+        console.log("Transactions batch", batch);
+
+        const { data, error } = await io.supabase.client
           .from("decrypted_transactions")
           .upsert(batch, {
             onConflict: "internal_id",
@@ -65,23 +67,27 @@ client.defineJob({
           })
           .select("*, name:decrypted_name");
 
+        if (error) {
+          console.log("Transactions batch error", error);
+        }
+
         return data;
       }
     );
 
     await io.logger.debug("Inserted transactions", transactionsData);
 
-    if (transactionsData && transactionsData?.length > 0) {
-      await io.logger.log(`Sending notifications: ${transactionsData.length}`);
+    // if (transactionsData && transactionsData?.length > 0) {
+    //   await io.logger.log(`Sending notifications: ${transactionsData.length}`);
 
-      await io.sendEvent("🔔 Send notifications", {
-        name: Events.TRANSACTIONS_NOTIFICATION,
-        payload: {
-          teamId,
-          transactions: transactionsData,
-        },
-      });
-    }
+    //   await io.sendEvent("🔔 Send notifications", {
+    //     name: Events.TRANSACTIONS_NOTIFICATION,
+    //     payload: {
+    //       teamId,
+    //       transactions: transactionsData,
+    //     },
+    //   });
+    // }
 
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);

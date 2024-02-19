@@ -324,6 +324,8 @@ const transformName = (transaction) => {
   if (transaction?.remittanceInformationUnstructured) {
     return capitalCase(transaction.remittanceInformationUnstructured);
   }
+
+  console.log("No transaction name");
 };
 
 export const transformTransactions = (transactions, { teamId, accountId }) => {

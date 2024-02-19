@@ -1,4 +1,4 @@
-export async function processPromisesBatch(items, limit, fn) {
+export async function processPromisesBatch(items: any, limit: number, fn) {
   const batches = [];
   let result: any = [];
 
