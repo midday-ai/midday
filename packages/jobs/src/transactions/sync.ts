@@ -39,6 +39,7 @@ client.defineJob({
       return;
     }
 
+    // TODO: Limit this to last 30 days
     const { transactions } = await getTransactions({
       accountId: data?.account_id,
     });
@@ -56,7 +57,7 @@ client.defineJob({
       formattedTransactions,
       BATCH_LIMIT,
       async (batch) => {
-        const { data } = await io.supabase.client
+        const { data, error } = await io.supabase.client
           .from("decrypted_transactions")
           .upsert(batch, {
             onConflict: "internal_id",
@@ -64,13 +65,13 @@ client.defineJob({
           })
           .select("*, name:decrypted_name");
 
+        if (error) {
+          await io.logger.debug("error", error);
+        }
+
         return data;
       }
     );
-
-    if (error) {
-      await io.logger.debug("error", error);
-    }
 
     if (transactionsData && transactionsData.length > 0) {
       await io.logger.log(`Sending notifications: ${transactionsData.length}`);
