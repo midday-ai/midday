@@ -20,8 +20,6 @@ client.defineJob({
 
     const teamId = data?.team_id;
 
-    await io.logger.debug("Team id", teamId);
-
     // Update bank account last_accessed
     await io.supabase.client
       .from("bank_accounts")
@@ -63,7 +61,9 @@ client.defineJob({
     }
 
     if (transactionsData && transactionsData?.length > 0) {
-      await io.logger.log(`Sending notifications: ${transactionsData.length}`);
+      revalidateTag(`transactions_${teamId}`);
+      revalidateTag(`spending_${teamId}`);
+      revalidateTag(`metrics_${teamId}`);
 
       await io.sendEvent("🔔 Send notifications", {
         name: Events.TRANSACTIONS_NOTIFICATION,
@@ -74,9 +74,6 @@ client.defineJob({
       });
     }
 
-    revalidateTag(`transactions_${teamId}`);
-    revalidateTag(`spending_${teamId}`);
-    revalidateTag(`metrics_${teamId}`);
     revalidateTag(`bank_accounts_${teamId}`);
 
     await io.logger.info(`Transactions Created: ${transactionsData?.length}`);

@@ -20,6 +20,10 @@ const Character = ({ className, value }) => {
 };
 
 const InnerCounter = ({ currency, pad, value, locale }) => {
+  if (!currency) {
+    return null;
+  }
+
   const padCount = pad
     ? max.toFixed(2).toString().length - value.toString().length
     : 0;
