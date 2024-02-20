@@ -1,5 +1,6 @@
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { getTransactions, getUser } from "@midday/supabase/cached-queries";
+import { cookies } from "next/headers";
 import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
@@ -17,6 +18,9 @@ export async function Table({
 }) {
   const hasFilters = Object.keys(filter).length > 0;
   const { data: userData } = await getUser();
+  const initialColumnVisibility = JSON.parse(
+    cookies().get("transactions-columns")?.value || "[]"
+  );
 
   // NOTE: When we have a filter we want to show all results so users can select
   // And handle all in once (export etc)
@@ -51,7 +55,7 @@ export async function Table({
       return <Loading />;
     }
 
-    if (query.length) {
+    if (query?.length) {
       return <NoResults hasFilters />;
     }
 
@@ -63,6 +67,7 @@ export async function Table({
   return (
     <DataTable
       teamId={userData.team_id}
+      initialColumnVisibility={initialColumnVisibility}
       initialTransactionId={initialTransactionId}
       columns={columns}
       data={data}

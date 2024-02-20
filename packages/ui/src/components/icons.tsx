@@ -57,10 +57,12 @@ import {
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
   MdOutlineQuestionAnswer,
+  MdOutlineSettings,
   MdOutlineTask,
   MdOutlineTimer,
   MdOutlineToll,
   MdOutlineTune,
+  MdOutlineVisibility,
   MdPause,
   MdPauseCircle,
   MdPayments,
@@ -174,7 +176,7 @@ export const Icons = {
       </defs>
     </svg>
   ),
-  Settings: MdOutlineTune,
+  Settings: MdOutlineSettings,
   Inbox: ArchiveIcon,
   Inbox2: MdOutlineInbox,
   Check: (props: any) => (
@@ -476,4 +478,5 @@ export const Icons = {
   Click: MdSignalCellularAlt,
   Salary: MdOutlineLocalAtm,
   Fees: MdOutlineToll,
+  Tune: MdOutlineTune,
 };

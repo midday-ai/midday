@@ -1,5 +1,7 @@
 "use client";
 
+import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
+import { ColumnVisibility } from "@/components/column-visibility";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
@@ -7,6 +9,7 @@ import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import {
   ColumnDef,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -39,6 +42,7 @@ export function DataTable<TData, TValue>({
   meta,
   hasFilters,
   hasNextPage: initialHasNextPage,
+  initialColumnVisibility,
   page,
 }: DataTableProps<TData, TValue>) {
   const supabase = createClient();
@@ -48,6 +52,9 @@ export function DataTable<TData, TValue>({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    initialColumnVisibility ?? {}
+  );
 
   const table = useReactTable({
     getRowId: (row) => row.id,
@@ -55,8 +62,10 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
     state: {
       rowSelection,
+      columnVisibility,
     },
   });
 
@@ -94,6 +103,13 @@ export function DataTable<TData, TValue>({
       setTransactionId(null);
     }
   };
+
+  useEffect(() => {
+    updateColumnVisibilityAction({
+      key: "transactions-columns",
+      data: columnVisibility,
+    });
+  }, [columnVisibility]);
 
   useEffect(() => {
     if (inView) {
@@ -163,7 +179,10 @@ export function DataTable<TData, TValue>({
   }, [supabase, router, teamId]);
 
   return (
-    <div className="rounded-md mb-8">
+    <div className="rounded-md mb-8 relative">
+      <div className="absolute -top-[60px] right-0">
+        <ColumnVisibility columns={table.getAllLeafColumns()} />
+      </div>
       <Table>
         <DataTableHeader table={table} />
 

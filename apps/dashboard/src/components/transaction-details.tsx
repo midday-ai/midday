@@ -70,6 +70,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
           ) : (
             <div className="flex items-center justify-between">
               <TransactionBankAccount
+                size={20}
                 name={data?.bank_account?.name}
                 logoUrl={data?.bank_account?.bank_connection?.logo_url}
               />

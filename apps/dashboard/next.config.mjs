@@ -21,6 +21,10 @@ const config = {
         protocol: "https",
         hostname: "avatars.slack-edge.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn-logos.gocardless.com",
+      },
     ],
   },
   transpilePackages: ["@midday/ui", "@midday/jobs", "@midday/tailwind"],

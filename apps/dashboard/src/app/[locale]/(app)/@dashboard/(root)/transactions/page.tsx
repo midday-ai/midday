@@ -34,7 +34,11 @@ export default async function Transactions({
     <>
       <div className="flex justify-between py-6">
         <SearchField placeholder="Search transactions" />
-        <Filter sections={sections} />
+
+        {/* NOTE: ColumnFilter widht + 10px */}
+        <div className="mr-[46px]">
+          <Filter sections={sections} />
+        </div>
       </div>
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>
