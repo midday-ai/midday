@@ -4,6 +4,7 @@ export default {
     travel: "Resa",
     software: "Mjukvara",
     office_supplies: "Kontorsmaterial",
+    fees: "Avgifter",
     internet_and_telephone: "Internet och telefon",
     rent: "Hyra",
     equipment: "Utrustning",

@@ -18,6 +18,7 @@ export const categories = {
   facilities_expenses: "facilities_expenses",
   activity: "activity",
   uncategorized: "uncategorized",
+  fees: "fees",
   taxes: "taxes",
   other: "other",
 };
@@ -36,6 +37,7 @@ export const mapCategoryColor = (name: string) => {
     [categories.internet_and_telephone]: "#FF8976",
     [categories.facilities_expenses]: "#A8AABC",
     [categories.activity]: "#E5E926",
+    [categories.fees]: "#40B9FE",
     [categories.uncategorized]: "#606060",
     [categories.taxes]: "#B39CD0",
     [categories.other]: "#F5F5F3",
@@ -50,6 +52,7 @@ export function CategoryIcon({ name, size = 18 }) {
     [categories.office_supplies]: <Icons.Desk style={{ color }} size={size} />,
     [categories.meals]: <Icons.FastFood style={{ color }} size={size} />,
     [categories.software]: <Icons.Save style={{ color }} size={size} />,
+    [categories.fees]: <Icons.Fees style={{ color }} size={size} />,
     [categories.rent]: <Icons.HomeWork style={{ color }} size={size} />,
     [categories.income]: <Icons.Payments style={{ color }} size={size} />,
     [categories.equipment]: <Icons.Devices style={{ color }} size={size} />,

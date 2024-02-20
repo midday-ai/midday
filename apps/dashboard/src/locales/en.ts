@@ -4,6 +4,7 @@ export default {
     travel: "Travel",
     software: "Software",
     office_supplies: "Office Supplies",
+    fees: "Fees",
     internet_and_telephone: "Internet & Telephone",
     rent: "Rent",
     equipment: "Equipment",

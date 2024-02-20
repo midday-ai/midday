@@ -59,6 +59,7 @@ import {
   MdOutlineQuestionAnswer,
   MdOutlineTask,
   MdOutlineTimer,
+  MdOutlineToll,
   MdOutlineTune,
   MdPause,
   MdPauseCircle,
@@ -474,4 +475,5 @@ export const Icons = {
   QuestionAnswer: MdOutlineQuestionAnswer,
   Click: MdSignalCellularAlt,
   Salary: MdOutlineLocalAtm,
+  Fees: MdOutlineToll,
 };
