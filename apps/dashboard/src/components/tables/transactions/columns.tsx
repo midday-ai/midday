@@ -6,6 +6,12 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionMethod } from "@/components/transaction-method";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { cn } from "@midday/ui/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, isSameYear } from "date-fns";
@@ -99,7 +105,22 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => {
       const fullfilled = row?.original?.attachments?.length > 0;
 
-      return fullfilled ? <Icons.Check /> : <Icons.AlertCircle />;
+      if (fullfilled) {
+        return <Icons.Check />;
+      }
+
+      return (
+        <TooltipProvider delayDuration={50}>
+          <Tooltip>
+            <TooltipTrigger>
+              <Icons.AlertCircle />
+            </TooltipTrigger>
+            <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={5}>
+              Missing attachment
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     },
   },
 ];

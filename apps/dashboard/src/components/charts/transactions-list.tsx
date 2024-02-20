@@ -1,6 +1,12 @@
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { cn } from "@midday/ui/utils";
 import Link from "next/link";
 import { FormatAmount } from "../format-amount";
@@ -13,6 +19,25 @@ export function TransactionsListHeader() {
       <span className="font-medium text-sm w-[35%]">Amount</span>
       <span className="font-medium text-sm ml-auto">Status</span>
     </div>
+  );
+}
+
+function TransactionStatus({ fullfilled }) {
+  if (fullfilled) {
+    return <Icons.Check />;
+  }
+
+  return (
+    <TooltipProvider delayDuration={50}>
+      <Tooltip>
+        <TooltipTrigger>
+          <Icons.AlertCircle />
+        </TooltipTrigger>
+        <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={5}>
+          Missing attachment
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 }
 
@@ -93,7 +118,7 @@ export async function TransactionsList({ type, disabled }) {
               </div>
 
               <div className="ml-auto">
-                {fullfilled ? <Icons.Check /> : <Icons.AlertCircle />}
+                <TransactionStatus fullfilled={fullfilled} />
               </div>
             </Link>
           </li>
