@@ -4,6 +4,12 @@ import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { cn } from "@midday/ui/utils";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
@@ -70,62 +76,79 @@ const Item = ({
 }) => {
   const y = useMotionValue(0);
   const Icon = icons[item.path];
-  const router = useRouter();
 
   return (
-    <Link
-      href={item.path}
-      onClick={(evt) => {
-        if (isCustomizing) {
-          evt.preventDefault();
-        }
-      }}
-    >
-      <Reorder.Item
-        onDragEnd={onDragEnd}
-        key={item.path}
-        value={item}
-        id={item.path}
-        style={{ y }}
-        layoutRoot
-        className={cn(
-          "relative rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
-          "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
-          isActive &&
-            "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
-          isCustomizing &&
-            "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
-        )}
+    <TooltipProvider delayDuration={70}>
+      <Link
+        href={item.path}
+        onClick={(evt) => {
+          if (isCustomizing) {
+            evt.preventDefault();
+          }
+        }}
+        onMouseDown={(evt) => {
+          if (isCustomizing) {
+            evt.preventDefault();
+          }
+        }}
       >
-        <motion.div
-          className="relative"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          {!disableRemove && isCustomizing && (
-            <Button
-              onClick={() => onRemove(item.path)}
-              variant="ghost"
-              size="icon"
-              className="absolute -left-4 -top-4 w-4 h-4 p-0 rounded-full bg-border hover:bg-border hover:scale-150 z-10 transition-all"
+        <Tooltip>
+          <TooltipTrigger>
+            <Reorder.Item
+              onDragEnd={onDragEnd}
+              key={item.path}
+              value={item}
+              id={item.path}
+              style={{ y }}
+              layoutRoot
+              className={cn(
+                "relative rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
+                "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
+                isActive &&
+                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+                isCustomizing &&
+                  "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
+              )}
             >
-              <Icons.Remove className="w-3 h-3" />
-            </Button>
-          )}
+              <motion.div
+                className="relative"
+                initial={{ opacity: 1 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {!disableRemove && isCustomizing && (
+                  <Button
+                    onClick={() => onRemove(item.path)}
+                    variant="ghost"
+                    size="icon"
+                    className="absolute -left-4 -top-4 w-4 h-4 p-0 rounded-full bg-border hover:bg-border hover:scale-150 z-10 transition-all"
+                  >
+                    <Icons.Remove className="w-3 h-3" />
+                  </Button>
+                )}
 
-          <div
-            className={cn(
-              "flex space-x-3 p-0 items-center",
-              isCustomizing &&
-                "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none"
-            )}
+                <div
+                  className={cn(
+                    "flex space-x-3 p-0 items-center",
+                    isCustomizing &&
+                      "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none"
+                  )}
+                >
+                  <Icon />
+                </div>
+              </motion.div>
+            </Reorder.Item>
+          </TooltipTrigger>
+          <TooltipContent
+            side="left"
+            className="px-3 py-1.5 text-xs"
+            sideOffset={10}
           >
-            <Icon />
-          </div>
-        </motion.div>
-      </Reorder.Item>
-    </Link>
+            {item.name}
+          </TooltipContent>
+        </Tooltip>
+      </Link>
+    </TooltipProvider>
   );
 };
 
