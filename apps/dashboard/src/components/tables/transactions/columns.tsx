@@ -92,7 +92,6 @@ export const columns: ColumnDef<Payment>[] = [
     cell: ({ row }) => {
       return (
         <TransactionBankAccount
-          size={20}
           name={row.original?.bank_account?.name}
           logoUrl={row.original?.bank_account?.bank_connection?.logo_url}
         />
