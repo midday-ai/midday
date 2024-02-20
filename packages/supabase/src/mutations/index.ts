@@ -197,6 +197,27 @@ export async function deleteBankAccount(supabase: Client, id: string) {
     .single();
 }
 
+type UpdateBankAccountParams = {
+  id: string;
+  teamId: string;
+  name: string;
+};
+
+export async function updateBankAccount(
+  supabase: Client,
+  params: UpdateBankAccountParams
+) {
+  const { id, teamId, ...data } = params;
+
+  return await supabase
+    .from("bank_accounts")
+    .update(data)
+    .eq("id", id)
+    .eq("team_id", teamId)
+    .select()
+    .single();
+}
+
 export async function updateSimilarTransactions(supabase: Client, id: string) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 

@@ -248,7 +248,8 @@ export async function getTransactionsQuery(
       *,
       name:decrypted_name,
       assigned:assigned_id(*),
-      attachments:transaction_attachments(*)
+      attachments:transaction_attachments(*),
+      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
       `,
       { count: "exact" }
     )
@@ -306,7 +307,8 @@ export async function getTransactionsQuery(
       *,
       name:decrypted_name,
       assigned:assigned_id(*),
-      attachments:transaction_attachments!inner(id,size,name)
+      attachments:transaction_attachments!inner(id,size,name),
+      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `);
   }
 
@@ -316,7 +318,8 @@ export async function getTransactionsQuery(
       *,
       name:decrypted_name,
       assigned:assigned_id(*),
-      attachments:transaction_attachments(*)
+      attachments:transaction_attachments(*),
+      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `
     );
 
@@ -382,7 +385,8 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       *,
       name:decrypted_name,
       assigned:assigned_id(*),
-      attachments:transaction_attachments(*)
+      attachments:transaction_attachments(*),
+      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `
     )
     .eq("id", id)

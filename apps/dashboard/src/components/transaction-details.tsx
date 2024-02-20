@@ -20,6 +20,7 @@ import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
+import { TransactionBankAccount } from "./transaction-bank-account";
 
 export function TransactionDetails({ transactionId, data: initialData }) {
   const [data, setData] = useState(initialData);
@@ -59,14 +60,26 @@ export function TransactionDetails({ transactionId, data: initialData }) {
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
-            <Skeleton className="w-[10%] h-[14px] rounded-full mt-1 mb-6" />
+            <div className="flex items-center justify-between  mt-1 mb-6">
+              <div className="flex space-x-2 items-center">
+                <Skeleton className="h-5 w-5 rounded-full" />
+                <Skeleton className="w-[100px] h-[14px] rounded-full" />
+              </div>
+              <Skeleton className="w-[10%] h-[14px] rounded-full" />
+            </div>
           ) : (
-            <span className="text-[#606060] text-xs">
-              {data?.date && format(new Date(data.date), "MMM d, y")}
-            </span>
+            <div className="flex items-center justify-between">
+              <TransactionBankAccount
+                name={data?.bank_account?.name}
+                logoUrl={data?.bank_account?.bank_connection?.logo_url}
+              />
+              <span className="text-[#606060] text-xs">
+                {data?.date && format(new Date(data.date), "MMM d, y")}
+              </span>
+            </div>
           )}
 
-          <h2 className="mt-4 mb-3">
+          <h2 className="mt-6 mb-3">
             {isLoading ? (
               <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
             ) : (

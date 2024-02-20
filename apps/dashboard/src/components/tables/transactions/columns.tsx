@@ -3,6 +3,7 @@
 import { AssignedUser } from "@/components/assigned-user";
 import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
+import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
@@ -83,6 +84,18 @@ export const columns: ColumnDef<Payment>[] = [
     header: "Category",
     cell: ({ row }) => {
       return <Category name={row.original.category} />;
+    },
+  },
+  {
+    accessorKey: "bank_account",
+    header: "Bank Account",
+    cell: ({ row }) => {
+      return (
+        <TransactionBankAccount
+          name={row.original?.bank_account?.name}
+          logoUrl={row.original?.bank_account?.bank_connection?.logo_url}
+        />
+      );
     },
   },
   {

@@ -38,7 +38,6 @@ export async function BankAccountList() {
           bank_name={account.bank.name}
           name={account.name}
           logo={account.bank.logo_url}
-          currency={account.currency}
         />
       ))}
     </div>

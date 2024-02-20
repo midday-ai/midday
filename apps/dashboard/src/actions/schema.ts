@@ -22,6 +22,11 @@ export const deleteBankAccountSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const updateBankAccountSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().optional(),
+});
+
 export type DeleteBankAccountFormValues = z.infer<
   typeof deleteBankAccountSchema
 >;
