@@ -20,7 +20,14 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 
-export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
+export function BankAccount({
+  id,
+  name,
+  bank_name,
+  logo,
+  last_accessed,
+  currency,
+}) {
   const [isOpen, setOpen] = useState(false);
   const delteAccount = useAction(deleteBankAccountAction);
 
@@ -33,7 +40,7 @@ export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
         <div className="ml-4 flex flex-col">
           <p className="text-sm font-medium leading-none mb-1">{name}</p>
           <span className="text-xs font-medium text-[#606060]">
-            {bank_name}
+            {bank_name} - {currency}
           </span>
           <span className="text-xs text-[#606060]">
             Last accessed {formatDistanceToNow(new Date(last_accessed))} ago
