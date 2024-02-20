@@ -36,7 +36,7 @@ export default async function Transactions({
         <SearchField placeholder="Search transactions" />
 
         {/* NOTE: ColumnFilter widht + 10px */}
-        <div className="mr-[46px]">
+        <div className={cn(!empty && "mr-[46px]")}>
           <Filter sections={sections} />
         </div>
       </div>

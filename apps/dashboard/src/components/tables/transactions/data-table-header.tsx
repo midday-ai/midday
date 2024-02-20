@@ -168,7 +168,7 @@ export function DataTableHeader({ table }) {
           </TableHead>
         )}
 
-        {isVisible("status") && (
+        {isVisible("amount") && (
           <TableHead>
             <Button
               className="p-0 hover:bg-transparent space-x-2"
