@@ -20,6 +20,8 @@ client.defineJob({
 
     const teamId = data?.team_id;
 
+    await io.logger.debug("Team id", teamId);
+
     // Update bank account last_accessed
     await io.supabase.client
       .from("bank_accounts")

@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
     const { data: teamData } = await supabase
       .from("teams")
-      .select("id, email")
+      .select("id, inbox_email")
       .eq("inbox_id", inboxId)
       .single()
       .throwOnError();
@@ -46,10 +46,10 @@ export async function POST(req: Request) {
     const attachments = res.Attachments;
 
     // NOTE: Send original email to company email
-    if (teamData.email) {
+    if (teamData?.inbox_email) {
       await resend.emails.send({
         from: `${res.FromFull.Name} <inbox@midday.ai>`,
-        to: [teamData.email],
+        to: [teamData.inbox_email],
         subject: res.Subject,
         text: res.TextBody,
         html: res.HtmlBody,

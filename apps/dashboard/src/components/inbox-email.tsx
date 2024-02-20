@@ -24,12 +24,12 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 
-export function TeamEmail({ email }) {
+export function InboxEmail({ email }) {
   const action = useAction(updateTeamAction);
   const form = useForm<UpdateTeamFormValues>({
     resolver: zodResolver(updateTeamSchema),
     defaultValues: {
-      email,
+      inbox_email: email,
       revalidatePath: "/settings",
     },
   });
@@ -43,17 +43,16 @@ export function TeamEmail({ email }) {
       <form onSubmit={onSubmit}>
         <Card>
           <CardHeader>
-            <CardTitle>Team Email</CardTitle>
+            <CardTitle>Inbox Forwarding</CardTitle>
             <CardDescription>
-              This is your team's email. It's used to forward emails from the
-              inbox and company information.
+              Automatically forward Inox messages to another email.
             </CardDescription>
           </CardHeader>
 
           <CardContent>
             <FormField
               control={form.control}
-              name="email"
+              name="inbox_email"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
