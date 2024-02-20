@@ -69,6 +69,18 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
     setValue(selectedId);
   }, [selectedId]);
 
+  const sortedCategories = Object.values(categories).sort((a, b) => {
+    if (a === value) {
+      return -1;
+    }
+
+    if (b === value) {
+      return 1;
+    }
+
+    return a.localeCompare(b);
+  });
+
   return (
     <div className="relative">
       <Label htmlFor="category">Category</Label>
@@ -88,7 +100,7 @@ export function SelectCategory({ id, name, selectedId, isLoading }) {
               <SelectValue placeholder="Select" />
             </SelectTrigger>
             <SelectContent className="overflow-y-auto max-h-[350px]">
-              {Object.values(categories).map((category) => (
+              {sortedCategories.map((category) => (
                 <SelectItem key={category} value={category}>
                   <div className="flex space-x-2">
                     <CategoryIcon name={category} />
