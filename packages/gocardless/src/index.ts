@@ -340,6 +340,16 @@ const transformName = (transaction) => {
     return capitalCase(transaction.remittanceInformationUnstructured);
   }
 
+  if (transaction?.creditorName) {
+    return capitalCase(transaction.creditorName);
+  }
+
+  if (transaction?.remittanceInformationUnstructuredArray?.at(0)) {
+    return capitalCase(
+      transaction.remittanceInformationUnstructuredArray?.at(0)
+    );
+  }
+
   console.log("No transaction name", transaction);
 };
 
