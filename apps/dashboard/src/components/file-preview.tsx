@@ -123,7 +123,7 @@ export function FilePreview({
       <div className={cn(className, "relative")}>
         {!preview && isLoaded && (
           <AnimatePresence>
-            <div className="absolute bottom-4 left-2 flex space-x-2">
+            <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
               {!disableFullscreen && (
                 <motion.div
                   initial={{ y: 50, opacity: 0 }}
