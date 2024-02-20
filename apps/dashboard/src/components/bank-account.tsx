@@ -6,7 +6,14 @@ import { Button } from "@midday/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 
-export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
+export function BankAccount({
+  id,
+  name,
+  bank_name,
+  logo,
+  last_accessed,
+  currency,
+}) {
   const action = useAction(deleteBankAccountAction);
 
   return (
@@ -18,7 +25,7 @@ export function BankAccount({ id, name, bank_name, logo, last_accessed }) {
         <div className="ml-4 flex flex-col">
           <p className="text-sm font-medium leading-none mb-1">{name}</p>
           <span className="text-xs font-medium text-[#606060]">
-            {bank_name}
+            {bank_name} - {currency}
           </span>
           <span className="text-xs text-[#606060]">
             Last accessed {formatDistanceToNow(new Date(last_accessed))} ago
