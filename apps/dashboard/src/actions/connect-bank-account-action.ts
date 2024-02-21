@@ -75,6 +75,7 @@ export const connectBankAccountAction = action(
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
     revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`bank_accounts_${teamId}`);
 
     logsnag.track({
       event: LogEvents.ConnectBankCompleted.name,
