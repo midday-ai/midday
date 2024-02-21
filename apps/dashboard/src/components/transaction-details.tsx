@@ -108,6 +108,12 @@ export function TransactionDetails({ transactionId, data: initialData }) {
         </div>
       </div>
 
+      {data.description && (
+        <div className="rounded-lg border dark:bg-[#1A1A1A]/95 px-4 py-3 text-sm text-popover-foreground">
+          {data.description}
+        </div>
+      )}
+
       <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
         <SelectCategory
           isLoading={isLoading}

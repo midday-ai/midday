@@ -52,11 +52,28 @@ export const columns: ColumnDef<Payment>[] = [
     header: "Description",
     cell: ({ row }) => {
       return (
-        <span
-          className={cn(row.original.category === "income" && "text-[#00C969]")}
-        >
-          {row.original.name}
-        </span>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span
+                className={cn(
+                  row.original.category === "income" && "text-[#00C969]"
+                )}
+              >
+                {row.original.name}
+              </span>
+            </TooltipTrigger>
+            {row.original?.description && (
+              <TooltipContent
+                className="px-3 py-1.5 text-xs"
+                side="left"
+                sideOffset={10}
+              >
+                {row.original.description}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
       );
     },
   },
