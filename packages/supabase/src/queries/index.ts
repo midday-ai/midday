@@ -449,7 +449,7 @@ export async function getMetricsQuery(
     .limit(1000000)
     .gte("date", previousFromDate.toDateString())
     .lte("date", to)
-    .neq("category", "transfer");
+    .or("category.neq.transfer,category.is.null");
 
   if (type === "income") {
     query.eq("category", "income");
@@ -489,11 +489,11 @@ export async function getMetricsQuery(
     return acc;
   }, {});
 
-  const [prevData = [], currentData = [], nextDate = []] =
+  const [prevData = [], currentData = [], nextData = []] =
     Object.values(result);
 
   // NOTE: If dates spans over years
-  const combinedData = [...currentData, ...nextDate];
+  const combinedData = [...currentData, ...nextData];
 
   const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
   const currentTotal = combinedData?.reduce(

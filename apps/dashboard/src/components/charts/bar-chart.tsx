@@ -111,7 +111,7 @@ export function BarChart({ data, disabled }) {
 
   return (
     <div className="relative">
-      <div className="flex space-x-4 absolute right-0 -top-10 hidden md:flex">
+      <div className="space-x-4 absolute right-0 -top-10 hidden md:flex">
         <div className="flex space-x-2 items-center">
           <span className="w-2 h-2 rounded-full bg-[#121212] dark:bg-[#F5F5F3]" />
           <span className="text-sm text-[#606060]">Current Period</span>

@@ -12,9 +12,6 @@ export async function Chart({ value, defaultValue, disabled }) {
     ? chartData
     : await getMetrics({ ...defaultValue, ...value, type });
 
-  const lastPeriodAmount =
-    data?.result[data.result?.length - 1]?.current?.value;
-
   return (
     <div className="relative mt-32">
       <div className="absolute -top-[120px] space-y-2">
@@ -22,7 +19,6 @@ export async function Chart({ value, defaultValue, disabled }) {
           <Counter
             value={data.summary.currentTotal}
             currency={data.summary.currency}
-            lastPeriodAmount={lastPeriodAmount}
           />
         </h1>
         <p className={cn("text-sm text-[#606060]", disabled && "skeleton-box")}>
