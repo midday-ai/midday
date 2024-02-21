@@ -29,7 +29,9 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 
   return {
     title: `Report for ${data.team.name} (${period})`,
-    description: `Profit report for ${data.team.name} based on the period ${period}`,
+    description: `${data.type === "profit" ? "Profit" : "Revenue"} report for ${
+      data.team.name
+    } based on the period ${period}`,
     robots: {
       index: false,
     },
@@ -61,7 +63,9 @@ export default async function Report({ params }) {
       <div className="flex items-center justify-center w-full h-[80px] border-b-[1px]">
         <div className="flex items-center flex-col">
           <div>{data.team.name}</div>
-          <span className="text-[#878787]">Profit</span>
+          <span className="text-[#878787]">
+            {data.type === "profit" ? "Profit" : "Revenue"}
+          </span>
         </div>
       </div>
 
