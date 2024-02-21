@@ -29,7 +29,7 @@ export async function generateMetadata({ params }): Promise<Metadata> {
 
   return {
     title: `Report for ${data.team.name} (${period})`,
-    description: `Profit/Loss report for ${data.team.name} based on the period ${period}`,
+    description: `Profit report for ${data.team.name} based on the period ${period}`,
     robots: {
       index: false,
     },
@@ -56,15 +56,12 @@ export default async function Report({ params }) {
     type: data.type,
   });
 
-  const lastPeriodAmount =
-    metricsData?.result[metricsData.result?.length - 1]?.current?.value;
-
   return (
     <div className="h-screen flex flex-col pl-4 pr-4">
       <div className="flex items-center justify-center w-full h-[80px] border-b-[1px]">
         <div className="flex items-center flex-col">
           <div>{data.team.name}</div>
-          <span className="text-[#878787]">Profit/Loss</span>
+          <span className="text-[#878787]">Profit</span>
         </div>
       </div>
 
@@ -77,7 +74,6 @@ export default async function Report({ params }) {
                   <Counter
                     value={metricsData.summary.currentTotal}
                     currency={metricsData.summary.currency}
-                    lastPeriodAmount={lastPeriodAmount}
                   />
                 </h1>
               </div>

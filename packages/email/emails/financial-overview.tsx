@@ -92,9 +92,9 @@ export const FinancialOverviewEmail = ({
 
             <Section>
               <Column
-                title="Live profit/loss"
-                description="Keep track of your income and profit/loss. If you want you can export
-          the data for a shareable profit/loss."
+                title="Live profit/revenue"
+                description="Keep track of your income and profit/revenue. If you want you can export
+          the data for a shareable profit/revenue."
                 imgSrc={`${baseUrl}/profit-loss.png`}
               />
 

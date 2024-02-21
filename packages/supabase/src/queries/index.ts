@@ -422,7 +422,7 @@ type GetMetricsParams = {
   teamId: string;
   from: string;
   to: string;
-  type?: "income" | "profit_loss";
+  type?: "revenue" | "profit";
   period?: "weekly" | "monthly";
 };
 
@@ -448,10 +448,13 @@ export async function getMetricsQuery(
     .order("order", { ascending: false })
     .limit(1000000)
     .gte("date", previousFromDate.toDateString())
-    .lte("date", to)
-    .or("category.neq.transfer,category.is.null");
+    .lte("date", to);
 
-  if (type === "income") {
+  if (type === "profit") {
+    query.or("category.neq.transfer,category.is.null");
+  }
+
+  if (type === "revenue") {
     query.eq("category", "income");
   }
 

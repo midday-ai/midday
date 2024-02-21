@@ -33,9 +33,9 @@ export function OverviewModal() {
               Get insights of your business you didn't know
             </h2>
             <p className="text-[#878787] text-sm">
-              View real-time profit/loss as well as revenue numbers. Compare to
-              previous years. See what you spend your money on and where you can
-              save.
+              View real-time profit/revenue as well as revenue numbers. Compare
+              to previous years. See what you spend your money on and where you
+              can save.
             </p>
           </div>
 

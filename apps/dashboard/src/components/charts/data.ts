@@ -5,7 +5,7 @@ export const chartData = {
     prevTotal: Math.floor(Math.random() * 100000) + 800000,
   },
   meta: {
-    type: "profit_loss",
+    type: "profit",
     period: "monthly",
     currency: "SEK",
   },

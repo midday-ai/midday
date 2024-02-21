@@ -7,7 +7,7 @@ import { BarChart } from "./bar-chart";
 import { chartData } from "./data";
 
 export async function Chart({ value, defaultValue, disabled }) {
-  const type = cookies().get("chart-type")?.value ?? "profit_loss";
+  const type = cookies().get("chart-type")?.value ?? "profit";
   const data = disabled
     ? chartData
     : await getMetrics({ ...defaultValue, ...value, type });

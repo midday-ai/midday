@@ -49,8 +49,8 @@ export default {
     outcome: "Utgifter",
   },
   chart_type: {
-    profit_loss: "Vinst/Förlust",
-    income: "Inkomst",
+    profit: "Vinst",
+    revenue: "Omsättning",
   },
   folders: {
     all: "Alla",

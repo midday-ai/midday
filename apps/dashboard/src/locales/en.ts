@@ -49,8 +49,8 @@ export default {
     completed: "Completed",
   },
   chart_type: {
-    profit_loss: "Profit/Loss",
-    income: "Income",
+    profit: "Profit",
+    revenue: "Revenue",
   },
   folders: {
     all: "All",

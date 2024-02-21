@@ -11,7 +11,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["profit_loss", "income"];
+const options = ["profit", "revenue"];
 
 export function ChartType({ initialValue, disabled }) {
   const t = useI18n();
