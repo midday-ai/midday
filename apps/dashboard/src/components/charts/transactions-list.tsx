@@ -1,15 +1,7 @@
+import { TransactionListItem } from "@/components/charts/transaction-list-item";
+import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { getTransactions } from "@midday/supabase/cached-queries";
-import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { cn } from "@midday/ui/utils";
-import Link from "next/link";
-import { FormatAmount } from "../format-amount";
 import { transactionList } from "./data";
 
 export function TransactionsListHeader() {
@@ -19,25 +11,6 @@ export function TransactionsListHeader() {
       <span className="font-medium text-sm w-[35%]">Amount</span>
       <span className="font-medium text-sm ml-auto">Status</span>
     </div>
-  );
-}
-
-function TransactionStatus({ fullfilled }) {
-  if (fullfilled) {
-    return <Icons.Check />;
-  }
-
-  return (
-    <TooltipProvider delayDuration={50}>
-      <Tooltip>
-        <TooltipTrigger>
-          <Icons.AlertCircle />
-        </TooltipTrigger>
-        <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={5}>
-          Missing attachment
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
   );
 }
 
@@ -81,46 +54,14 @@ export async function TransactionsList({ type, disabled }) {
   }
 
   return (
-    <ul className="bullet-none divide-y">
+    <ul className="bullet-none divide-y cursor-pointer">
       {transactions?.data?.map((transaction) => {
-        const fullfilled = transaction?.attachments?.length > 0;
-
         return (
           <li key={transaction.id}>
-            <Link
-              href={`/transactions?id=${transaction.id}`}
-              className="flex p-3"
-            >
-              <div className="w-[50%] flex space-x-2">
-                <span
-                  className={cn(
-                    "text-sm",
-                    disabled && "skeleton-box",
-                    transaction?.category === "income" && "text-[#00C969]"
-                  )}
-                >
-                  {transaction.name}
-                </span>
-              </div>
-              <div className="w-[35%]">
-                <span
-                  className={cn(
-                    "text-sm",
-                    disabled && "skeleton-box",
-                    transaction?.category === "income" && "text-[#00C969]"
-                  )}
-                >
-                  <FormatAmount
-                    amount={transaction.amount}
-                    currency={transaction.currency}
-                  />
-                </span>
-              </div>
-
-              <div className="ml-auto">
-                <TransactionStatus fullfilled={fullfilled} />
-              </div>
-            </Link>
+            <TransactionListItem
+              transaction={transaction}
+              disabled={disabled}
+            />
           </li>
         );
       })}
