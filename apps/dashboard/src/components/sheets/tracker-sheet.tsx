@@ -109,7 +109,11 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
 
   useEffect(() => {
     // NOTE Fetch when new month
-    if (meta && !isSameMonth(new Date(meta.from), new Date(params.day))) {
+    if (
+      meta &&
+      !isSameMonth(new Date(meta.from), new Date(params.day)) &&
+      params.projectId !== "new"
+    ) {
       fetchData(params);
     }
   }, [meta, params]);
@@ -123,6 +127,12 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
       setLoading(false);
     }
   }, [params, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setData();
+    }
+  }, [isOpen]);
 
   if (isDesktop) {
     return (

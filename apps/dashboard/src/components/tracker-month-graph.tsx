@@ -41,7 +41,7 @@ export function TrackerMonthGraph({
   const handleOnSelect = (params) => {
     if (onSelect) {
       onSelect({
-        projectId: params.projectId || projectId,
+        projectId: params.projectId || projectId || "new",
         day: formatISO(params.day, { representation: "date" }),
       });
     }
