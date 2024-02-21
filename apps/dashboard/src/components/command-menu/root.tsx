@@ -11,6 +11,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { MoveUpRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const navigation = [
   {
@@ -52,7 +53,8 @@ const navigation = [
 ];
 
 export function CommandRoot() {
-  const { setMenu } = useCommandStore();
+  const { setMenu, setOpen } = useCommandStore();
+  const router = useRouter();
 
   return (
     <div>
@@ -100,15 +102,31 @@ export function CommandRoot() {
         </CommandGroup>
 
         <CommandGroup heading="Navigation" className="pb-6">
-          {navigation.map((item) => (
-            <CommandItem
-              key={item.path}
-              onSelect={() => window.location.replace(`midday://${item.path}`)}
-            >
-              <MoveUpRight className="mr-2 h-4 w-4" />
-              <span>{item.name}</span>
-            </CommandItem>
-          ))}
+          {isDesktopApp() &&
+            navigation.map((item) => (
+              <CommandItem
+                key={item.path}
+                onSelect={() =>
+                  window.location.replace(`midday://${item.path}`)
+                }
+              >
+                <MoveUpRight className="mr-2 h-4 w-4" />
+                <span>{item.name}</span>
+              </CommandItem>
+            ))}
+          {!isDesktopApp() &&
+            navigation.map((item) => (
+              <CommandItem
+                key={item.path}
+                onSelect={() => {
+                  router.push(item.path);
+                  setOpen();
+                }}
+              >
+                <Icons.ArrowForward className="mr-2 h-4 w-4" />
+                <span>{item.name}</span>
+              </CommandItem>
+            ))}
         </CommandGroup>
       </CommandList>
     </div>

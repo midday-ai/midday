@@ -34,6 +34,7 @@ import {
   MdMoreHoriz,
   MdOutlineAccountBalanceWallet,
   MdOutlineArrowDownward,
+  MdOutlineArrowForward,
   MdOutlineBrokenImage,
   MdOutlineCancel,
   MdOutlineCategory,
@@ -479,4 +480,5 @@ export const Icons = {
   Salary: MdOutlineLocalAtm,
   Fees: MdOutlineToll,
   Tune: MdOutlineTune,
+  ArrowForward: MdOutlineArrowForward,
 };
