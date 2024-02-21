@@ -1,11 +1,11 @@
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
+import Image from "next/image";
 
-export function TransactionBankAccount({ logoUrl, name }) {
+export function TransactionBankAccount({ logoUrl, name, size = 20 }) {
   return (
     <div className="flex space-x-2 mt-1 items-center">
-      <Avatar className="w-[20px] h-[20px]">
-        <AvatarImage src={logoUrl} alt={name} />
-      </Avatar>
+      <div className="rounded-full overflow-hidden">
+        <Image src={logoUrl} alt={name} width={size} height={size} />
+      </div>
       <span className="text-sm">{name}</span>
     </div>
   );

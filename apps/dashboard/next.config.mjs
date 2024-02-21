@@ -7,23 +7,7 @@ const config = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "api.midday.ai",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-      {
-        protocol: "https",
-        hostname: "cdn.nordigen.com",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.slack-edge.com",
-      },
-      {
-        protocol: "https",
-        hostname: "cdn-logos.gocardless.com",
+        hostname: "**",
       },
     ],
   },

@@ -1,5 +1,5 @@
 import { getUser } from "@midday/supabase/cached-queries";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,6 +10,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import Image from "next/image";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
@@ -21,7 +22,14 @@ export async function UserMenu({ onlySignOut }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="rounded-full w-8 h-8 cursor-pointer">
-          <AvatarImage src={userData?.avatar_url} />
+          {userData?.avatar_url && (
+            <Image
+              src={userData?.avatar_url}
+              alt={userData.full_name}
+              width={32}
+              height={32}
+            />
+          )}
           <AvatarFallback>
             <span className="text-xs">
               {userData?.full_name?.charAt(0)?.toUpperCase()}
