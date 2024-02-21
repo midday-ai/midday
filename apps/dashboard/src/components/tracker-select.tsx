@@ -12,7 +12,7 @@ import {
 } from "date-fns";
 import { useHotkeys } from "react-hotkeys-hook";
 
-export function TrackerSelect({ date, className, onSelect }) {
+export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
   const currentDate = date ? new Date(date) : new Date();
 
   const selectPrevMonth = () => {
@@ -32,6 +32,10 @@ export function TrackerSelect({ date, className, onSelect }) {
   };
 
   const selectPrevDay = () => {
+    if (disableKeyboard) {
+      return null;
+    }
+
     onSelect(
       formatISO(subDays(currentDate, 1), {
         representation: "date",
@@ -40,6 +44,10 @@ export function TrackerSelect({ date, className, onSelect }) {
   };
 
   const selectNextDay = () => {
+    if (disableKeyboard) {
+      return null;
+    }
+
     onSelect(
       formatISO(addDays(currentDate, 1), {
         representation: "date",

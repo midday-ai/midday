@@ -13,7 +13,7 @@ export function TrackerHeader({ date, setDate, totalDuration }) {
         </span>
       </div>
 
-      <TrackerSelect date={date} onSelect={setDate} />
+      <TrackerSelect date={date} onSelect={setDate} disableKeyboard />
     </div>
   );
 }
