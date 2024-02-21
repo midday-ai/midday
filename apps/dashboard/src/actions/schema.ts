@@ -250,6 +250,7 @@ export const createReportSchema = z.object({
   from: z.string(),
   to: z.string(),
   type: changeChartTypeSchema,
+  expiresAt: z.string().datetime().optional(),
 });
 
 export const createProjectReportSchema = z.object({

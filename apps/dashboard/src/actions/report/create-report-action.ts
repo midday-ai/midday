@@ -21,6 +21,7 @@ export const createReportAction = action(createReportSchema, async (params) => {
       from: params.from,
       to: params.to,
       type: params.type,
+      expire_at: params.expiresAt,
     })
     .select("*")
     .single();
@@ -28,6 +29,7 @@ export const createReportAction = action(createReportSchema, async (params) => {
   const link = await dub.links.create({
     url: `${params.baseUrl}/report/${data.id}`,
     rewrite: true,
+    expiresAt: params.expiresAt,
   });
 
   const { data: linkData } = await supabase
