@@ -72,6 +72,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
               <TransactionBankAccount
                 name={data?.bank_account?.name}
                 logoUrl={data?.bank_account?.bank_connection?.logo_url}
+                className="text-[#606060] text-xs"
               />
               <span className="text-[#606060] text-xs">
                 {data?.date && format(new Date(data.date), "MMM d, y")}
