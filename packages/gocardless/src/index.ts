@@ -353,6 +353,19 @@ const transformName = (transaction) => {
   console.log("No transaction name", transaction);
 };
 
+const transformDescription = (transaction, name) => {
+  if (transaction?.remittanceInformationUnstructuredArray?.length) {
+    const text = transaction?.remittanceInformationUnstructuredArray.join(" ");
+    const description = capitalCase(text);
+
+    // NOTE: Sometimes the description is the same as name
+    // Let's skip that and just save if they are not the same
+    if (description !== name) {
+      return description;
+    }
+  }
+};
+
 export const transformTransactions = (transactions, { teamId, accountId }) => {
   // We want to insert transactions in reversed order so the incremental id in supabase is correct
   return transactions?.reverse().map((transaction) => {
@@ -379,9 +392,11 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       }
     }
 
+    const name = transformName(transaction);
+
     return {
       date: transaction.valueDate,
-      name: transformName(transaction),
+      name,
       method: method || "unknown",
       internal_id: `${teamId}_${transaction.internalTransactionId}`,
       amount: transaction.transactionAmount.amount,
@@ -392,6 +407,7 @@ export const transformTransactions = (transactions, { teamId, accountId }) => {
       currency_rate: currencyExchange?.rate,
       currency_source: currencyExchange?.currency,
       balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
+      description: transformDescription(transaction, name),
       status: "posted",
     };
   });
