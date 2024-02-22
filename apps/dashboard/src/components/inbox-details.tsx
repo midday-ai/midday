@@ -16,7 +16,7 @@ import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FilePreview } from "./file-preview";
 import { InboxToolbar } from "./inbox-toolbar";
 
@@ -70,6 +70,11 @@ export function InboxDetails({
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [isLoaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    setLoaded(true);
+    setError(false);
+  }, [item.id]);
 
   const handleCopyUrl = async () => {
     try {
@@ -156,7 +161,10 @@ export function InboxDetails({
                 <Image
                   width={40}
                   height={40}
-                  onError={setError}
+                  onError={() => {
+                    setLoading(false);
+                    setError(true);
+                  }}
                   className={cn(
                     "rounded-full overflow-hidden",
                     // NOTE: Can't be hidden because onLoad is not fired
