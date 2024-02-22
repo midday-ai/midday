@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenuContent,
@@ -13,6 +13,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
@@ -53,6 +55,7 @@ export function InboxDetails({
   latestTransactions,
 }) {
   const { toast } = useToast();
+  const [hasError, setError] = useState(false);
 
   const handleCopyUrl = async () => {
     try {
@@ -119,18 +122,29 @@ export function InboxDetails({
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm">
-              <Avatar>
-                <AvatarFallback>
-                  {item?.name
-                    .split(" ")
-                    .slice(0, 2)
-                    .map((chunk) => chunk[0])
-                    .join("")}
-                </AvatarFallback>
-                <AvatarImage
+              {hasError && (
+                <Avatar>
+                  <AvatarFallback>
+                    {item?.name
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((chunk) => chunk[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+
+              {!hasError && (
+                <Image
+                  width={40}
+                  height={40}
+                  onError={setError}
+                  // NOTE: Some icons do have borders
+                  className="rounded-full overflow-hidden"
                   src={`/api/avatar/${item.email?.split("@")?.at(1)}`}
                 />
-              </Avatar>
+              )}
+
               <div className="grid gap-1">
                 <div className="font-semibold">{item.name}</div>
                 <div className="line-clamp-1 text-xs">{item.file_name}</div>
