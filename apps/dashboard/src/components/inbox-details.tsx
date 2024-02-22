@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenuContent,
@@ -127,6 +127,10 @@ export function InboxDetails({
                     .map((chunk) => chunk[0])
                     .join("")}
                 </AvatarFallback>
+                <AvatarImage
+                  src={`/api/avatar/${item.email?.split("@")?.at(1)}`}
+                  alt="Figma"
+                />
               </Avatar>
               <div className="grid gap-1">
                 <div className="font-semibold">{item.name}</div>
