@@ -170,7 +170,9 @@ export function InboxDetails({
                     // NOTE: Can't be hidden because onLoad is not fired
                     isLoading && "absolute -left-[100px]"
                   )}
-                  src={`/api/avatar/${extractRootDomainFromEmail(item.email)}`}
+                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${extractRootDomainFromEmail(
+                    item.email
+                  )}&size=128`}
                   alt={item.name}
                   placeholder={undefined}
                   onLoad={() => setLoading(false)}

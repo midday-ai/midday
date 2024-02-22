@@ -60,7 +60,6 @@
     "resend": "^3.2.0",
     "sharp": "^0.33.2",
     "tus-js-client": "^4.0.1",
-    "url-metadata": "^3.5.6",
     "use-long-press": "^3.2.0",
     "usehooks-ts": "2.15.0",
     "zod": "^3.22.4",
