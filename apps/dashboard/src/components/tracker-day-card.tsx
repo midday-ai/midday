@@ -48,7 +48,10 @@ export function TrackerDayCard({
             className={cn(
               "w-[28px] h-[28px] rounded-full border flex items-center justify-center border-transparent group-hover:border-white",
               isActive && "border-white",
-              isSameDay(new Date(), date) && "border-[#878787]/30"
+              isSameDay(new Date(), date) && "border-[#878787]/30",
+              isSameDay(new Date(), date) &&
+                data &&
+                "border-[#121212] dark:border-white"
             )}
           >
             <time
@@ -60,10 +63,10 @@ export function TrackerDayCard({
                   "w-[20px] h-[20px] rounded-full bg-[#121212]/30 dark:bg-[#878787]/30 group-hover:bg-[#121212] dark:group-hover:bg-white relative",
                   outOfRange && "bg-[#121212]/10 dark:bg-[#878787]/10",
                   isActive && "bg-[#121212] dark:bg-white",
-                  data && "bg-[#121212] dark:bg-white",
                   isTracking && "!bg-[#00C969]",
                   isSameDay(new Date(), date) &&
-                    "bg-[#121212]/30 dark:bg-[#878787]/30"
+                    "bg-[#121212]/30 dark:bg-[#878787]/30",
+                  data && "bg-[#121212] dark:bg-white"
                 )}
               >
                 <span
