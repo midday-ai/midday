@@ -11,13 +11,24 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
+import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { FilePreview } from "./file-preview";
-import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
+
+function extractRootDomainFromEmail(email) {
+  const url = email?.split("@")?.at(1);
+
+  const domain = url.match(
+    /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/im
+  )[1];
+  const parts = domain.split(".").reverse();
+  const rootDomain = `${parts[1]}.${parts[0]}`;
+  return rootDomain;
+}
 
 export function InboxDetailsSkeleton() {
   return (
@@ -56,6 +67,7 @@ export function InboxDetails({
 }) {
   const { toast } = useToast();
   const [hasError, setError] = useState(false);
+  const [isLoading, setLoading] = useState(true);
   const [isLoaded, setLoaded] = useState(false);
 
   const handleCopyUrl = async () => {
@@ -122,8 +134,12 @@ export function InboxDetails({
       {item ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
-            <div className="flex items-start gap-4 text-sm">
-              {hasError && (
+            <div className="flex items-start gap-4 text-sm relative">
+              {isLoading && (
+                <Skeleton className="w-[40px] h-[40px] rounded-full" />
+              )}
+
+              {!isLoading && hasError && (
                 <Avatar>
                   <AvatarFallback>
                     {item?.name
@@ -140,9 +156,15 @@ export function InboxDetails({
                   width={40}
                   height={40}
                   onError={setError}
-                  // NOTE: Some icons do have borders
-                  className="rounded-full overflow-hidden"
-                  src={`/api/avatar/${item.email?.split("@")?.at(1)}`}
+                  className={cn(
+                    "rounded-full overflow-hidden",
+                    // NOTE: Can't be hidden because onLoad is not fired
+                    isLoading && "absolute -left-[100px]"
+                  )}
+                  src={`/api/avatar/${extractRootDomainFromEmail(item.email)}`}
+                  alt={item.name}
+                  placeholder={undefined}
+                  onLoad={() => setLoading(false)}
                 />
               )}
 
@@ -155,9 +177,10 @@ export function InboxDetails({
               <div className="text-xs text-muted-foreground">
                 {format(new Date(item.created_at), "PPpp")}
               </div>
-              <div className="line-clamp-1 text-xs">
+              {/* NOTE: Current solution is not reliable regarding currency */}
+              {/* <div className="line-clamp-1 text-xs">
                 <FormatAmount amount={item.amount} currency={item.currency} />
-              </div>
+              </div> */}
             </div>
           </div>
           <Separator />
