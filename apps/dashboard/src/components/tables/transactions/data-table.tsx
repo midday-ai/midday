@@ -183,6 +183,7 @@ export function DataTable<TData, TValue>({
       <div className="absolute -top-[60px] right-0">
         <ColumnVisibility columns={table.getAllLeafColumns()} />
       </div>
+
       <Table>
         <DataTableHeader table={table} />
 
