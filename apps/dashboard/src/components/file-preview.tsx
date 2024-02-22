@@ -26,6 +26,7 @@ type Props = {
   width: number;
   height: number;
   disableFullscreen?: boolean;
+  onLoaded?: () => void;
 };
 
 export const isSupportedFilePreview = (type: FileType) => {
@@ -59,6 +60,7 @@ export function FilePreview({
   width,
   height,
   disableFullscreen,
+  onLoaded,
 }: Props) {
   let content;
 
@@ -71,11 +73,19 @@ export function FilePreview({
   }: {
     numPages: number;
   }) => {
+    if (onLoaded) {
+      onLoaded(true);
+    }
+
     setNumPages(nextNumPages);
   };
 
   const handleOnLoaded = () => {
     setLoaded(true);
+
+    if (onLoaded) {
+      onLoaded(true);
+    }
   };
 
   if (type?.startsWith("image")) {

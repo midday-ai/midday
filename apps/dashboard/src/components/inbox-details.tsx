@@ -56,6 +56,7 @@ export function InboxDetails({
 }) {
   const { toast } = useToast();
   const [hasError, setError] = useState(false);
+  const [isLoaded, setLoaded] = useState(false);
 
   const handleCopyUrl = async () => {
     try {
@@ -171,6 +172,7 @@ export function InboxDetails({
                 height={900}
                 disableFullscreen
                 key={item.id}
+                onLoaded={setLoaded}
               />
             )}
           </div>
@@ -181,6 +183,7 @@ export function InboxDetails({
             teamId={teamId}
             latestTransactions={latestTransactions}
             onSelect={updateInbox}
+            isLoaded={isLoaded}
           />
         </div>
       ) : (
