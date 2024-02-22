@@ -45,6 +45,7 @@ import {
   MdOutlineEmail,
   MdOutlineExitToApp,
   MdOutlineFileDownload,
+  MdOutlineForwardToInbox,
   MdOutlineHandyman,
   MdOutlineHourglassTop,
   MdOutlineInbox,
@@ -481,4 +482,5 @@ export const Icons = {
   Fees: MdOutlineToll,
   Tune: MdOutlineTune,
   ArrowForward: MdOutlineArrowForward,
+  Forwarded: MdOutlineForwardToInbox,
 };

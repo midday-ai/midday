@@ -133,6 +133,16 @@ export async function POST(req: Request) {
           "X-Entity-Ref-ID": nanoid(),
         },
       });
+
+      // NOTE: If we end up here the email was forwarded
+      await supabase.from("inbox").upsert(
+        inboxData.map((inbox) => ({
+          id: inbox.id,
+          forwarded_to: teamData.inbox_email,
+        }))
+      );
+
+      revalidateTag(`inbox_${teamData.id}`);
     }
   }
 
