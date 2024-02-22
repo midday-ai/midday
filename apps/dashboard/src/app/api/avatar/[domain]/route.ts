@@ -24,8 +24,6 @@ export async function GET(req) {
     .sort((a, b) => b?.sizes?.split("x")?.at(0) - a?.sizes?.split("x")?.at(0))
     ?.at(0);
 
-  console.log(favicon);
-
   const link = getFaviconURL({ href: favicon?.href, url });
   const logo = await (await fetch(link)).arrayBuffer();
 
