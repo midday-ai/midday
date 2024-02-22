@@ -1,3 +1,4 @@
+import { StatusWidget } from "@/components/status-widget";
 import { getUser } from "@midday/supabase/cached-queries";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import {
@@ -12,6 +13,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 
@@ -53,6 +55,7 @@ export async function UserMenu({ onlySignOut }) {
                 </div>
               </div>
             </DropdownMenuLabel>
+
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
@@ -77,6 +80,7 @@ export async function UserMenu({ onlySignOut }) {
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
+
             <DropdownMenuSeparator />
             <div className="flex flex-row justify-between items-center p-2">
               <p className="text-sm">Theme</p>
@@ -85,6 +89,15 @@ export async function UserMenu({ onlySignOut }) {
             <DropdownMenuSeparator />
           </>
         )}
+
+        <DropdownMenuItem>
+          <Suspense>
+            <StatusWidget />
+          </Suspense>
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
         <SignOut />
       </DropdownMenuContent>
     </DropdownMenu>

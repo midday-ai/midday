@@ -24,6 +24,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@novu/headless": "^0.23.1",
+    "@openstatus/react": "^0.0.3",
     "@tanstack/react-table": "^8.12.0",
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.2.5",
