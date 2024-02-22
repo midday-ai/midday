@@ -129,7 +129,6 @@ export function InboxDetails({
                 </AvatarFallback>
                 <AvatarImage
                   src={`/api/avatar/${item.email?.split("@")?.at(1)}`}
-                  alt="Figma"
                 />
               </Avatar>
               <div className="grid gap-1">

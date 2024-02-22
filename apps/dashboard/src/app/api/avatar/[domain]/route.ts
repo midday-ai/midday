@@ -20,7 +20,6 @@ export async function GET(req) {
 
   const { url, favicons } = await getMetadata(`http://${domain}`);
 
-  // NOTE: Get the biggest favicon by size
   const favicon = favicons
     .filter((f) => f.sizes !== undefined)
     .sort((a, b) => b.sizes.split("x")?.at(0) - a.sizes.split("x")?.at(0))
