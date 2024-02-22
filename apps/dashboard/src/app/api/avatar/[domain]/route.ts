@@ -3,7 +3,7 @@ import getMetadata from "url-metadata";
 export const runtime = "edge";
 
 const getFaviconURL = ({ href, url }) => {
-  if (href.startsWith("http")) {
+  if (href?.startsWith("http")) {
     return href;
   }
 
@@ -21,9 +21,10 @@ export async function GET(req) {
   const { url, favicons } = await getMetadata(`http://${domain}`);
 
   const favicon = favicons
-    .filter((f) => f.sizes !== undefined)
-    .sort((a, b) => b.sizes.split("x")?.at(0) - a.sizes.split("x")?.at(0))
+    .sort((a, b) => b?.sizes?.split("x")?.at(0) - a?.sizes?.split("x")?.at(0))
     ?.at(0);
+
+  console.log(favicon);
 
   const link = getFaviconURL({ href: favicon?.href, url });
   const logo = await (await fetch(link)).arrayBuffer();
