@@ -10,31 +10,38 @@ export async function StatusWidget() {
     return {
       operational: {
         label: "Operational",
-        color: "bg-green",
+        color: "bg-green-500",
+        color2: "bg-green-400",
       },
       degraded_performance: {
         label: "Degraded Performance",
-        color: "bg-yellow",
+        color: "bg-yellow-500",
+        color2: "bg-yellow-400",
       },
       partial_outage: {
         label: "Partial Outage",
-        color: "bg-yellow",
+        color: "bg-yellow-500",
+        color2: "bg-yellow-400",
       },
       major_outage: {
         label: "Major Outage",
-        color: "bg-red",
+        color: "bg-red-500",
+        color2: "bg-red-400",
       },
       unknown: {
         label: "Unknown",
-        color: "bg-gray",
+        color: "bg-gray-500",
+        color2: "bg-gray-400",
       },
       incident: {
         label: "Incident",
-        color: "bg-yellow",
+        color: "bg-yellow-500",
+        color2: "bg-yellow-400",
       },
       under_maintenance: {
         label: "Under Maintenance",
-        color: "bg-gray",
+        color: "bg-gray-500",
+        color2: "bg-gray-400",
       },
     }[level];
   };
@@ -56,13 +63,13 @@ export async function StatusWidget() {
         <span
           class={cn(
             "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-            `${level.color}-400`
+            level.color2
           )}
         />
         <span
           class={cn(
             "relative inline-flex rounded-full h-1.5 w-1.5",
-            `${level.color}-500`
+            level.color
           )}
         />
       </span>
