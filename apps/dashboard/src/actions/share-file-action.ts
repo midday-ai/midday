@@ -5,8 +5,11 @@ import { logsnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { share } from "@midday/supabase/storage";
+import Dub from "dub";
 import { action } from "./safe-action";
 import { shareFileSchema } from "./schema";
+
+const dub = new Dub({ projectSlug: "midday" });
 
 export const shareFileAction = action(shareFileSchema, async (value) => {
   const supabase = createClient();
@@ -28,5 +31,10 @@ export const shareFileAction = action(shareFileSchema, async (value) => {
     channel: LogEvents.ShareFile.channel,
   });
 
-  return response?.data?.signedUrl;
+  const link = await dub.links.create({
+    url: response?.data?.signedUrl,
+    rewrite: true,
+  });
+
+  return link?.shortLink;
 });
