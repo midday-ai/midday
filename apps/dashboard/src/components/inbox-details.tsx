@@ -190,7 +190,7 @@ export function InboxDetails({
                     side="left"
                     sideOffset={10}
                   >
-                    Email forwarded to {item.forwarded_to}
+                    Forwarded to {item.forwarded_to}
                   </TooltipContent>
                 </Tooltip>
               )}
