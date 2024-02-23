@@ -10,6 +10,10 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
+// NOTE: GoCardLess serverAction needs this currently
+// (Fetch accounts takes up to 20s and default limit is 15s)
+export const maxDuration = 30;
+
 export const metadata: Metadata = {
   title: "Overview | Midday",
 };
