@@ -177,7 +177,7 @@ export function SelectAccountModal({ countryCode }) {
                               {getAccountName(account)}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {account.bank.name}
+                              {account.bank.name} - {account?.currency}
                             </p>
                           </div>
                         </FormLabel>
@@ -213,7 +213,7 @@ export function SelectAccountModal({ countryCode }) {
                   {action.status === "executing" ? (
                     <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
                   ) : (
-                    "Save"
+                    "Save Acounts"
                   )}
                 </Button>
               </div>
