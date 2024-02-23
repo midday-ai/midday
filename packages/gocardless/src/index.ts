@@ -350,6 +350,10 @@ const transformName = (transaction) => {
     );
   }
 
+  if (transaction?.debtorName) {
+    return capitalCase(transaction?.debtorName);
+  }
+
   console.log("No transaction name", transaction);
 };
 
