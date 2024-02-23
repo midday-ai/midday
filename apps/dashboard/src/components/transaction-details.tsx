@@ -1,8 +1,14 @@
 "use client";
 
+import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
 import { updateTransactionAction } from "@/actions/update-transaction-action";
+import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
+import {
+  getCurrentUserTeamQuery,
+  getSimilarTransactions,
+} from "@midday/supabase/queries";
 import {
   Accordion,
   AccordionContent,
@@ -11,6 +17,8 @@ import {
 } from "@midday/ui/accordion";
 import { Label } from "@midday/ui/label";
 import { Skeleton } from "@midday/ui/skeleton";
+import { ToastAction } from "@midday/ui/toast";
+import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
@@ -24,9 +32,12 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 
 export function TransactionDetails({ transactionId, data: initialData }) {
   const [data, setData] = useState(initialData);
+  const { toast } = useToast();
+  const t = useI18n();
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
-  const updaateTransaction = useAction(updateTransactionAction);
+  const updateTransaction = useAction(updateTransactionAction);
+  const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
 
   useEffect(() => {
     if (initialData) {
@@ -52,7 +63,44 @@ export function TransactionDetails({ transactionId, data: initialData }) {
   }, [data]);
 
   const handleOnAssign = (assigned_id: string) => {
-    updaateTransaction.execute({ assigned_id, id: data.id });
+    updateTransaction.execute({ assigned_id, id: data.id });
+  };
+
+  const handleOnChangeCategory = async (category: string) => {
+    updateTransaction.execute({ id: data.id, category });
+
+    const { data: userData } = await getCurrentUserTeamQuery(supabase);
+    const transactions = await getSimilarTransactions(supabase, {
+      name: data?.name,
+      teamId: userData?.team_id,
+    });
+
+    if (transactions?.data?.length > 1) {
+      toast({
+        duration: 6000,
+        variant: "ai",
+        title: "Midday AI",
+        description: `Do you want to mark ${
+          transactions?.data?.length
+        } similar transactions form ${data?.name} as ${t(
+          `categories.${category}`
+        )} too?`,
+        footer: (
+          <div className="flex space-x-2">
+            <ToastAction altText="Cancel" className="pl-5 pr-5">
+              Cancel
+            </ToastAction>
+            <ToastAction
+              altText="Yes"
+              onClick={() => updateSimilarTransactions.execute({ id: data.id })}
+              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Yes
+            </ToastAction>
+          </div>
+        ),
+      });
+    }
   };
 
   return (
@@ -116,15 +164,25 @@ export function TransactionDetails({ transactionId, data: initialData }) {
       )}
 
       <div className="grid grid-cols-2 gap-4 mt-6 mb-2">
-        <SelectCategory
-          isLoading={isLoading}
-          name={data?.name}
-          id={transactionId}
-          selectedId={data?.category ?? undefined}
-        />
+        <div>
+          <Label htmlFor="category" className="mb-2 block">
+            Category
+          </Label>
+
+          <SelectCategory
+            placeholder="Select"
+            isLoading={isLoading}
+            name={data?.name}
+            id={transactionId}
+            selectedId={data?.category ?? undefined}
+            onChange={handleOnChangeCategory}
+          />
+        </div>
 
         <div>
-          <Label htmlFor="assign">Assign</Label>
+          <Label htmlFor="assign" className="mb-2 block">
+            Assign
+          </Label>
 
           <AssignUser
             isLoading={isLoading}

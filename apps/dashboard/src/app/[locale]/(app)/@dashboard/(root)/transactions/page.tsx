@@ -1,10 +1,9 @@
 import { ErrorFallback } from "@/components/error-fallback";
-import { Filter } from "@/components/filter";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
 import { SearchField } from "@/components/search-field";
 import { Table } from "@/components/tables/transactions";
-import { sections } from "@/components/tables/transactions/filters";
 import { Loading } from "@/components/tables/transactions/loading";
+import { TransactionsActions } from "@/components/transactions-actions";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
 import { Metadata } from "next";
@@ -34,11 +33,7 @@ export default async function Transactions({
     <>
       <div className="flex justify-between py-6">
         <SearchField placeholder="Search transactions" />
-
-        {/* NOTE: ColumnFilter widht + 10px */}
-        <div className={cn(!empty && "mr-[46px]")}>
-          <Filter sections={sections} />
-        </div>
+        <TransactionsActions />
       </div>
 
       <div className={cn(empty && "opacity-20 pointer-events-none")}>

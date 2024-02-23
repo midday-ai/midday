@@ -1,8 +1,8 @@
 "use client";
 
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
-import { ColumnVisibility } from "@/components/column-visibility";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
+import { useTransactionsStore } from "@/store/transactions";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
@@ -52,6 +52,7 @@ export function DataTable<TData, TValue>({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
+  const { setColumns, setTransactionIds } = useTransactionsStore();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {}
   );
@@ -103,6 +104,14 @@ export function DataTable<TData, TValue>({
       setTransactionId(null);
     }
   };
+
+  useEffect(() => {
+    setColumns(table.getAllLeafColumns());
+  }, [columnVisibility]);
+
+  useEffect(() => {
+    setTransactionIds(Object.keys(rowSelection));
+  }, [rowSelection]);
 
   useEffect(() => {
     updateColumnVisibilityAction({
@@ -180,10 +189,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="rounded-md mb-8 relative">
-      <div className="absolute -top-[60px] right-0">
-        <ColumnVisibility columns={table.getAllLeafColumns()} />
-      </div>
-
       <Table>
         <DataTableHeader table={table} />
 
@@ -237,7 +242,7 @@ export function DataTable<TData, TValue>({
 
       {meta.count > 0 && (
         <BottomBar
-          show={hasFilters && !table.getFilteredSelectedRowModel().rows.length}
+          show={hasFilters && !Object.keys(rowSelection).length}
           page={page}
           count={meta.count}
           hasNextPage={hasNextPage}
@@ -247,7 +252,7 @@ export function DataTable<TData, TValue>({
       )}
 
       <ExportBar
-        selected={table.getFilteredSelectedRowModel().rows.length}
+        selected={Object.keys(rowSelection).length}
         deselectAll={() => table.toggleAllPageRowsSelected(false)}
         transactionIds={Object.keys(rowSelection)}
       />

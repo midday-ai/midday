@@ -129,6 +129,8 @@ export const updateTransactionSchema = z.object({
   assigned_id: z.string().optional(),
 });
 
+export const bulkUpdateTransactionsSchema = z.array(updateTransactionSchema);
+
 export const updateSimilarTransactionsSchema = z.object({
   id: z.string(),
 });

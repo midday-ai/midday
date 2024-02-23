@@ -41,31 +41,29 @@ export function AssignUser({ selectedId, isLoading, onSelect }) {
 
   return (
     <div className="relative">
-      <div className="mt-1">
-        {isLoading ? (
-          <div className="h-[36px] border rounded-md">
-            <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
-          </div>
-        ) : (
-          <Select value={value} onValueChange={onSelect}>
-            <SelectTrigger
-              id="assign"
-              className="line-clamp-1 truncate"
-              onKeyDown={(evt) => evt.preventDefault()}
-            >
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
+      {isLoading ? (
+        <div className="h-[36px] border rounded-md">
+          <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
+        </div>
+      ) : (
+        <Select value={value} onValueChange={onSelect}>
+          <SelectTrigger
+            id="assign"
+            className="line-clamp-1 truncate"
+            onKeyDown={(evt) => evt.preventDefault()}
+          >
+            <SelectValue placeholder="Select" />
+          </SelectTrigger>
 
-            <SelectContent className="overflow-y-auto max-h-[200px]">
-              {users?.map(({ user }) => (
-                <SelectItem key={user?.id} value={user?.id}>
-                  <AssignedUser user={user} />
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-      </div>
+          <SelectContent className="overflow-y-auto max-h-[200px]">
+            {users?.map(({ user }) => (
+              <SelectItem key={user?.id} value={user?.id}>
+                <AssignedUser user={user} />
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   );
 }

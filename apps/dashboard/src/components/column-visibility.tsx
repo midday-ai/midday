@@ -1,9 +1,12 @@
+import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 
-export function ColumnVisibility({ columns }) {
+export function ColumnVisibility() {
+  const { columns } = useTransactionsStore();
+
   return (
     <Popover>
       <PopoverTrigger asChild>
