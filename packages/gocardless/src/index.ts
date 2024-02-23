@@ -184,21 +184,6 @@ export async function getAccountDetails(id: string) {
   };
 }
 
-// export async function getAccountBalancesById(id: string) {
-//   const token = await getAccessToken();
-
-//   const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/balances/`, {
-//     method: "GET",
-//     cache: "no-cache",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-
-//   return account.json();
-// }
-
 type GetAccountsOptions = {
   accountId: string;
   countryCode: string;
@@ -209,7 +194,6 @@ export async function getAccounts({
   countryCode,
 }: GetAccountsOptions) {
   const token = await getAccessToken();
-  // TODO: Cache banks by currencyCode
   const banks = await getBanks(countryCode);
 
   const res = await fetch(`${baseUrl}/api/v2/requisitions/${accountId}/`, {
@@ -234,9 +218,7 @@ export async function getAccounts({
     })
   );
 
-  return result.sort((a, b) =>
-    a.balances?.available - b.balances?.available ? 1 : -1
-  );
+  return result;
 }
 
 type GetTransactionsParams = {

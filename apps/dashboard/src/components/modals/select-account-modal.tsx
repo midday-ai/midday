@@ -1,7 +1,6 @@
 "use client";
 
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
-import { FormatAmount } from "@/components/format-amount";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
