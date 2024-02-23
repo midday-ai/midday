@@ -50,7 +50,7 @@ export async function StatusWidget() {
 
   return (
     <a
-      class="flex justify-between items-center w-full"
+      className="flex justify-between items-center w-full"
       href="https://midday.openstatus.dev"
       target="_blank"
       rel="noreferrer"
@@ -59,15 +59,15 @@ export async function StatusWidget() {
         <p className="text-sm">{level.label}</p>
       </div>
 
-      <span class="relative ml-auto flex h-1.5 w-1.5">
+      <span className="relative ml-auto flex h-1.5 w-1.5">
         <span
-          class={cn(
+          className={cn(
             "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
             level.color2
           )}
         />
         <span
-          class={cn(
+          className={cn(
             "relative inline-flex rounded-full h-1.5 w-1.5",
             level.color
           )}
