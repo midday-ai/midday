@@ -17,6 +17,7 @@ enum balanceType {
 const keys = {
   accessToken: "go_cardless_access_token_v2",
   refreshToken: "go_cardless_refresh_token_v2",
+  banks: "go_cardless_banks",
 };
 
 async function getRefreshToken(refresh: string) {
@@ -208,6 +209,7 @@ export async function getAccounts({
   countryCode,
 }: GetAccountsOptions) {
   const token = await getAccessToken();
+  // TODO: Cache banks by currencyCode
   const banks = await getBanks(countryCode);
 
   const res = await fetch(`${baseUrl}/api/v2/requisitions/${accountId}/`, {
@@ -224,19 +226,19 @@ export async function getAccounts({
   const result = await Promise.all(
     data.accounts?.map(async (id) => {
       const accountData = await getAccountDetails(id);
-      const { balances } = await getAccountBalancesById(id);
+      // const { balances } = await getAccountBalancesById(id);
 
       return {
         ...accountData,
         bank: banks.find((bank) => bank.id === accountData.institution_id),
-        balances: {
-          available: balances?.find(
-            (balance) => balance.balanceType === balanceType.interimAvailable
-          )?.balanceAmount,
-          boked: balances?.find(
-            (balance) => balance.balanceType === balanceType.interimBooked
-          )?.balanceAmount,
-        },
+        // balances: {
+        //   available: balances?.find(
+        //     (balance) => balance.balanceType === balanceType.interimAvailable
+        //   )?.balanceAmount,
+        //   boked: balances?.find(
+        //     (balance) => balance.balanceType === balanceType.interimBooked
+        //   )?.balanceAmount,
+        // },
       };
     })
   );
