@@ -179,17 +179,6 @@ export function SelectAccountModal({ countryCode }) {
                             </p>
                             <p className="text-xs text-muted-foreground">
                               {account.bank.name}
-                              {/* {account.balances.available && (
-                                <>
-                                  -{" "}
-                                  <FormatAmount
-                                    currency={
-                                      account.balances.available.currency
-                                    }
-                                    amount={account.balances.available.amount}
-                                  />
-                                </>
-                              )} */}
                             </p>
                           </div>
                         </FormLabel>

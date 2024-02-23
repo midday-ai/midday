@@ -184,20 +184,20 @@ export async function getAccountDetails(id: string) {
   };
 }
 
-export async function getAccountBalancesById(id: string) {
-  const token = await getAccessToken();
+// export async function getAccountBalancesById(id: string) {
+//   const token = await getAccessToken();
 
-  const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/balances/`, {
-    method: "GET",
-    cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
+//   const account = await fetch(`${baseUrl}/api/v2/accounts/${id}/balances/`, {
+//     method: "GET",
+//     cache: "no-cache",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: `Bearer ${token}`,
+//     },
+//   });
 
-  return account.json();
-}
+//   return account.json();
+// }
 
 type GetAccountsOptions = {
   accountId: string;
@@ -226,19 +226,10 @@ export async function getAccounts({
   const result = await Promise.all(
     data.accounts?.map(async (id) => {
       const accountData = await getAccountDetails(id);
-      // const { balances } = await getAccountBalancesById(id);
 
       return {
         ...accountData,
         bank: banks.find((bank) => bank.id === accountData.institution_id),
-        // balances: {
-        //   available: balances?.find(
-        //     (balance) => balance.balanceType === balanceType.interimAvailable
-        //   )?.balanceAmount,
-        //   boked: balances?.find(
-        //     (balance) => balance.balanceType === balanceType.interimBooked
-        //   )?.balanceAmount,
-        // },
       };
     })
   );
