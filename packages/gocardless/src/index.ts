@@ -344,14 +344,14 @@ const transformName = (transaction) => {
     return capitalCase(transaction.creditorName);
   }
 
+  if (transaction?.debtorName) {
+    return capitalCase(transaction?.debtorName);
+  }
+
   if (transaction?.remittanceInformationUnstructuredArray?.at(0)) {
     return capitalCase(
       transaction.remittanceInformationUnstructuredArray?.at(0)
     );
-  }
-
-  if (transaction?.debtorName) {
-    return capitalCase(transaction?.debtorName);
   }
 
   console.log("No transaction name", transaction);

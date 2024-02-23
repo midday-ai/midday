@@ -9,7 +9,7 @@ import { Client, Database } from "../types";
 export async function createBankAccounts(supabase: Client, accounts) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
   // Get first account to create a bank connection
-  const account = accounts.at(0);
+  const account = accounts?.at(0);
   const bankConnection = await createBankConnection(supabase, {
     institution_id: account.institution_id,
     name: account.bank_name,
