@@ -48,6 +48,7 @@
     "next-safe-action": "6.1.0",
     "next-themes": "^0.2.1",
     "nuqs": "^1.17.0",
+    "openai": "^4.28.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
