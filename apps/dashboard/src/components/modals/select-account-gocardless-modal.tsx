@@ -56,7 +56,7 @@ function RowsSkeleton() {
   );
 }
 
-export function SelectAccountModal({ countryCode }) {
+export function SelectAccountGoCardLessModal({ countryCode }) {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -64,7 +64,8 @@ export function SelectAccountModal({ countryCode }) {
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
   const isOpen =
-    searchParams.get("step") === "account" && !searchParams.has("error");
+    searchParams.get("step") === "select-account-gocardless" &&
+    !searchParams.has("error");
 
   const action = useAction(connectBankAccountAction, {
     onError: () => {
@@ -146,7 +147,7 @@ export function SelectAccountModal({ countryCode }) {
           <DialogHeader className="mb-8">
             <DialogTitle>Select accounts</DialogTitle>
             <DialogDescription>
-              Select the accounts you want to sync with Midday.
+              Select the accounts you want to link with Midday.
             </DialogDescription>
           </DialogHeader>
 
@@ -213,7 +214,7 @@ export function SelectAccountModal({ countryCode }) {
                   {action.status === "executing" ? (
                     <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
                   ) : (
-                    "Save Acounts"
+                    "Save"
                   )}
                 </Button>
               </div>

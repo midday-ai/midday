@@ -1,9 +1,7 @@
-import { Button } from "@midday/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";

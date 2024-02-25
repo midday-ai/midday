@@ -2,8 +2,9 @@ import { CommandMenu } from "@/components/command-menu";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
-import { ConnectBankModal } from "@/components/modals/connect-bank-modal";
-import { SelectAccountModal } from "@/components/modals/select-account-modal";
+import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-modal";
+import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
+import { SelectAccountGoCardLessModal } from "@/components/modals/select-account-gocardless-modal";
 import { Sidebar } from "@/components/sidebar";
 import { getCountryCode } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -30,8 +31,9 @@ export default async function Layout({
         {children}
       </div>
 
-      <ConnectBankModal countryCode={countryCode} />
-      <SelectAccountModal countryCode={countryCode} />
+      <ConnectTransactionsModal countryCode={countryCode} />
+      <ConnectGoCardLessModal countryCode={countryCode} />
+      <SelectAccountGoCardLessModal countryCode={countryCode} />
       <ExportStatus />
       <CommandMenu />
       <HotKeys />

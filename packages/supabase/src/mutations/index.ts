@@ -38,7 +38,7 @@ type CreateBankConnectionPayload = {
   team_id: string;
   name: string;
   logo_url: string;
-  provider?: "gocardless" | "plaid";
+  provider: "gocardless" | "plaid" | "teller";
 };
 
 export async function createBankConnection(
@@ -50,7 +50,6 @@ export async function createBankConnection(
     .insert({
       ...data,
       expires_at: addDays(new Date(), 180).toDateString(),
-      provider: "gocardless",
     })
     .select()
     .single();
