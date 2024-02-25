@@ -1,6 +1,6 @@
 import { processPromisesBatch } from "@/utils/process";
 import { getTransactions, transformTransactions } from "@midday/gocardless";
-import { eventTrigger } from "@trigger.dev/sdk";
+import { eventTrigger, isTriggerError } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
@@ -34,7 +34,6 @@ client.defineJob({
 
     const promises = accounts?.map(async (account) => {
       // Fetch transactions for each account
-      // This should be a facade for different providers
       const { transactions } = await getTransactions({
         accountId: account.account_id,
       });
@@ -55,7 +54,7 @@ client.defineJob({
         }
       );
 
-      // NOTE: We will get all the transactions at once so
+      // NOTE: We will get all the transactions at once for each account so
       // we need to guard against massive payloads
       await processPromisesBatch(
         formattedTransactions,
@@ -69,7 +68,11 @@ client.defineJob({
       );
     });
 
-    await Promise.all(promises);
+    try {
+      await Promise.all(promises);
+    } catch {
+      throw Error("Something went wrong");
+    }
 
     revalidateTag(`bank_connections_${teamId}`);
     revalidateTag(`transactions_${teamId}`);

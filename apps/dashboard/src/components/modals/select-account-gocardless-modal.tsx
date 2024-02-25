@@ -21,9 +21,8 @@ import {
   FormLabel,
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
-import { useEventDetails } from "@trigger.dev/react";
 import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -31,10 +30,25 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
 const formSchema = z.object({
   accounts: z.array(z.string()).refine((value) => value.some((item) => item)),
 });
+
+const getAccountName = (account) => {
+  if (account?.name) {
+    return capitalCase(account.name);
+  }
+
+  if (account?.product) {
+    return account.product;
+  }
+
+  if (account?.bank?.name) {
+    return account.bank.name;
+  }
+};
 
 function RowsSkeleton() {
   return (
@@ -59,11 +73,13 @@ function RowsSkeleton() {
 
 export function SelectAccountGoCardLessModal({ countryCode }) {
   const { toast } = useToast();
-  const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const pathname = usePathname();
+  const [eventId, setEventId] = useState<string>();
+
   const isOpen =
     searchParams.get("step") === "select-account-gocardless" &&
     !searchParams.has("error");
@@ -76,8 +92,14 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: () => router.push(pathname),
+    onSuccess: (data) => {
+      if (data.id) {
+        setEventId(data.id);
+      }
+    },
   });
+
+  const onClose = () => router.push(pathname);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,20 +107,6 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
       accounts: [],
     },
   });
-
-  const getAccountName = (account) => {
-    if (account?.name) {
-      return capitalCase(account.name);
-    }
-
-    if (account?.product) {
-      return account.product;
-    }
-
-    if (account?.bank?.name) {
-      return account.bank.name;
-    }
-  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const accountsWithDetails = values.accounts
@@ -126,7 +134,6 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
       });
 
       setAccounts(data);
-
       setLoading(false);
 
       // Set first accounts to checked
@@ -141,88 +148,120 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
   }, [isOpen]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         onPointerDownOutside={(event) => event.preventDefault()}
         onEscapeKeyDown={(event) => event.preventDefault()}
       >
         <div className="p-4">
-          <DialogHeader className="mb-8">
-            <DialogTitle>Select accounts</DialogTitle>
-            <DialogDescription>
-              Select accounts you want to link with Midday.
-            </DialogDescription>
-          </DialogHeader>
+          <Tabs
+            defaultValue="select-accounts"
+            value={eventId ? "loading" : "select-accounts"}
+          >
+            <TabsContent value="select-accounts">
+              <>
+                <DialogHeader className="mb-8">
+                  <DialogTitle>Select accounts</DialogTitle>
+                  <DialogDescription>
+                    Select accounts you want to link with Midday.
+                  </DialogDescription>
+                </DialogHeader>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              {loading && <RowsSkeleton />}
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-6"
+                  >
+                    {loading && <RowsSkeleton />}
 
-              {accounts.map((account) => (
-                <FormField
-                  key={account.id}
-                  control={form.control}
-                  name="accounts"
-                  render={({ field }) => {
-                    return (
-                      <FormItem
+                    {accounts.map((account) => (
+                      <FormField
                         key={account.id}
-                        className="flex justify-between"
+                        control={form.control}
+                        name="accounts"
+                        render={({ field }) => {
+                          return (
+                            <FormItem
+                              key={account.id}
+                              className="flex justify-between"
+                            >
+                              <FormLabel className="flex items-between">
+                                <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
+                                  <AvatarImage
+                                    src={account.bank.logo}
+                                    alt={account?.bank?.name}
+                                  />
+                                </Avatar>
+                                <div className="ml-4 space-y-1">
+                                  <p className="text-sm font-medium leading-none mb-1">
+                                    {getAccountName(account)}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {account.bank.name} ({account?.currency})
+                                  </p>
+                                </div>
+                              </FormLabel>
+
+                              <div>
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(account.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([
+                                            ...field.value,
+                                            account.id,
+                                          ])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== account.id
+                                            )
+                                          );
+                                    }}
+                                  />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          );
+                        }}
+                      />
+                    ))}
+
+                    <div className="pt-4">
+                      <Button
+                        className="w-full"
+                        type="submit"
+                        disabled={connectBankAction.status === "executing"}
                       >
-                        <FormLabel className="flex items-between">
-                          <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                            <AvatarImage
-                              src={account.bank.logo}
-                              alt={account?.bank?.name}
-                            />
-                          </Avatar>
-                          <div className="ml-4 space-y-1">
-                            <p className="text-sm font-medium leading-none mb-1">
-                              {getAccountName(account)}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {account.bank.name} - {account?.currency}
-                            </p>
-                          </div>
-                        </FormLabel>
+                        {connectBankAction.status === "executing" ? (
+                          <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
+                        ) : (
+                          "Save"
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </>
+            </TabsContent>
 
-                        <div>
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(account.id)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([...field.value, account.id])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== account.id
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                        </div>
-                      </FormItem>
-                    );
-                  }}
+            <TabsContent value="loading">
+              <DialogHeader className="mb-8">
+                <DialogTitle>Loading transactions</DialogTitle>
+                <DialogDescription>
+                  We are now loading transactions from you bank account.
+                </DialogDescription>
+              </DialogHeader>
+
+              {eventId && (
+                <LoadingTransactionsEvent
+                  eventId={eventId}
+                  setEventId={setEventId}
+                  onClose={onClose}
                 />
-              ))}
-
-              <div className="pt-4">
-                <Button
-                  className={cn("w-full")}
-                  type="submit"
-                  disabled={connectBankAction.status === "executing"}
-                >
-                  {connectBankAction.status === "executing" ? (
-                    <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Form>
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>
