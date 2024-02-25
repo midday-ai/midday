@@ -7,8 +7,8 @@ import OpenAI from "openai";
 const openai = new OpenAI();
 
 export async function InsightsWidget() {
-  const user = await getUser();
-  const teamId = user.data.team_id;
+  const userData = await getUser();
+  const teamId = userData?.data.team_id;
 
   const type = "revenue";
 
@@ -21,7 +21,7 @@ export async function InsightsWidget() {
         period: "monthly",
       });
 
-      if (metrics.summary.currentTotal > 0) {
+      if (metrics?.summary.currentTotal > 0) {
         const content = metrics.result.map(
           (period) =>
             `${format(new Date(period.current.date), "MMMM")} ${Math.round(
@@ -53,7 +53,7 @@ export async function InsightsWidget() {
       revalidate: 86400, // NOTE: 1d
       tags: [`insights_${teamId}`],
     }
-  )(type);
+  )(type, teamId);
 
   return <Typewriter text={result} />;
 }

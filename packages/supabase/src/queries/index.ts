@@ -173,7 +173,7 @@ export async function getSpendingQuery(
     query.lte("date", params.to);
   }
 
-  const { data, count } = await query.range(0, 10000000);
+  const { data, count } = await query.range(0, 1000000);
   const totalAmount = data
     ?.filter((item) => item.category !== "transfer")
     ?.reduce((amount, item) => item.amount + amount, 0);
@@ -353,7 +353,7 @@ export async function getTransactionsQuery(
   // Investigate pg functions
   const totalAmount =
     Object.keys(filter).length > 0
-      ? (await query.limit(10000000).neq("category", "transfer"))?.data?.reduce(
+      ? (await query.limit(1000000).neq("category", "transfer"))?.data?.reduce(
           (amount, item) => item.amount + amount,
           0
         )

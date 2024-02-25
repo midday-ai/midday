@@ -6,7 +6,7 @@ import { TrackerWrapper } from "./tracker-wrapper";
 
 export async function TrackerWidget({ date }) {
   const currentDate = date ?? new Date();
-  const { data: userData } = await getUser();
+  const userData = await getUser();
   const { currencyCode } = getCountryInfo();
 
   const { data, meta } = await getTrackerRecordsByRange({
@@ -23,7 +23,7 @@ export async function TrackerWidget({ date }) {
       data={data}
       meta={meta}
       date={currentDate}
-      user={userData}
+      user={userData?.data}
       currencyCode={currencyCode}
     />
   );
