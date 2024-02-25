@@ -9,7 +9,13 @@ export function Insights() {
       <h2 className="text-lg">Insights</h2>
       <div className="h-[350px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense>
+          <Suspense
+            fallback={
+              <h1 className="text-[#878787] font-mono text-2xl mt-8">
+                Loading...
+              </h1>
+            }
+          >
             <InsightsWidget />
           </Suspense>
         </ErrorBoundary>

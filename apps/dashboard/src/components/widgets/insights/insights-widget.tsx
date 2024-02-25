@@ -1,3 +1,4 @@
+import { Typewriter } from "@/components/typewriter";
 import { getMetrics, getUser } from "@midday/supabase/cached-queries";
 import { format, startOfMonth, startOfYear, subMonths } from "date-fns";
 import { unstable_cache } from "next/cache";
@@ -54,5 +55,5 @@ export async function InsightsWidget() {
     }
   )(type);
 
-  return <h2 className="text-[#878787] font-mono text-2xl mt-8">{result}</h2>;
+  return <Typewriter text={result} />;
 }
