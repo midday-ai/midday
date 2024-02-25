@@ -23,6 +23,7 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
+import { useEventDetails } from "@trigger.dev/react";
 import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
@@ -67,7 +68,7 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
     searchParams.get("step") === "select-account-gocardless" &&
     !searchParams.has("error");
 
-  const action = useAction(connectBankAccountAction, {
+  const connectBankAction = useAction(connectBankAccountAction, {
     onError: () => {
       toast({
         duration: 3500,
@@ -106,13 +107,15 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
         account_id: account.id,
         name: getAccountName(account),
         currency: account.currency,
-        owner_name: account?.ownerName && capitalCase(account.ownerName),
         institution_id: account.institution_id,
         bank_name: account?.bank?.name,
         logo_url: account?.bank?.logo,
       }));
 
-    action.execute(accountsWithDetails);
+    connectBankAction.execute({
+      provider: "gocardless",
+      accounts: accountsWithDetails,
+    });
   }
 
   useEffect(() => {
@@ -147,7 +150,7 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
           <DialogHeader className="mb-8">
             <DialogTitle>Select accounts</DialogTitle>
             <DialogDescription>
-              Select the accounts you want to link with Midday.
+              Select accounts you want to link with Midday.
             </DialogDescription>
           </DialogHeader>
 
@@ -209,9 +212,9 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
                 <Button
                   className={cn("w-full")}
                   type="submit"
-                  disabled={action.status === "executing"}
+                  disabled={connectBankAction.status === "executing"}
                 >
-                  {action.status === "executing" ? (
+                  {connectBankAction.status === "executing" ? (
                     <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
                   ) : (
                     "Save"

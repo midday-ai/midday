@@ -156,7 +156,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
               >
                 <Icons.ArrowBack />
               </button>
-              <DialogTitle className="m-0 p-0">Search bank</DialogTitle>
+              <DialogTitle className="m-0 p-0">Search Bank</DialogTitle>
             </div>
             <DialogDescription>
               Start by selecting your business bank, once authenticated you can
