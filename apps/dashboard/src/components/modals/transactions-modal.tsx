@@ -84,7 +84,7 @@ export function TransactionsModal() {
                 />
               ))}
             </div>
-            <Link href="?step=bank">
+            <Link href="?step=connect">
               <Button
                 data-event="Connect Bank"
                 data-icon="🏦"

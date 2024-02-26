@@ -40,7 +40,7 @@ export function BankAccount({
         <div className="ml-4 flex flex-col">
           <p className="text-sm font-medium leading-none mb-1">{name}</p>
           <span className="text-xs font-medium text-[#606060]">
-            {bank_name} - {currency}
+            {bank_name} ({currency})
           </span>
           <span className="text-xs text-[#606060]">
             Last accessed {formatDistanceToNow(new Date(last_accessed))} ago

@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
+import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
@@ -91,14 +92,14 @@ function Row({ id, name, logo, onSelect }) {
   );
 }
 
-export function ConnectBankModal({ countryCode }) {
+export function ConnectGoCardLessModal({ countryCode }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
-  const isOpen = searchParams.get("step") === "bank";
+  const isOpen = searchParams.get("step") === "gocardless";
 
   useEffect(() => {
     async function fetchData() {
@@ -122,7 +123,7 @@ export function ConnectBankModal({ countryCode }) {
     const redirectBase = isDesktopApp() ? "midday://" : location.origin;
 
     const { link } = await buildLink({
-      redirect: `${redirectBase}/${pathname}?step=account`,
+      redirect: `${redirectBase}/${pathname}?step=select-account-gocardless`,
       institutionId,
       agreement: data.id,
     });
@@ -147,16 +148,24 @@ export function ConnectBankModal({ countryCode }) {
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle>Connect bank</DialogTitle>
+            <div className="flex space-x-4 items-center mb-4">
+              <button
+                type="button"
+                className="items-center rounded border bg-accent p-1"
+                onClick={() => router.back()}
+              >
+                <Icons.ArrowBack />
+              </button>
+              <DialogTitle className="m-0 p-0">Search Bank</DialogTitle>
+            </div>
             <DialogDescription>
               Start by selecting your business bank, once authenticated you can
-              select which accounts you want to link to your account.
+              select which accounts you want to link to Midday.
             </DialogDescription>
 
             <div>
               <Input
                 placeholder="Search bank"
-                autoComplete={false}
                 type="search"
                 className="my-2"
                 onChange={(evt) => handleFilterBanks(evt.target.value)}

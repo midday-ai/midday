@@ -89,7 +89,7 @@ export async function getTeamBankAccountsQuery(
   return supabase
     .from("decrypted_bank_accounts")
     .select(
-      "*, owner_name:decrypted_owner_name, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
+      "*, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
     )
     .eq("team_id", teamId)
     .throwOnError();

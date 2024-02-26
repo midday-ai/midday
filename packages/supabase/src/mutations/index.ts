@@ -10,11 +10,13 @@ export async function createBankAccounts(supabase: Client, accounts) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
   // Get first account to create a bank connection
   const account = accounts?.at(0);
+
   const bankConnection = await createBankConnection(supabase, {
     institution_id: account.institution_id,
     name: account.bank_name,
     logo_url: account.logo_url,
     team_id: userData?.team_id,
+    provider: account.provider,
   });
 
   return supabase
@@ -27,7 +29,6 @@ export async function createBankAccounts(supabase: Client, accounts) {
         created_by: userData.id,
         name: account.name,
         currency: account.currency,
-        owner_name: account.owner_name,
       }))
     )
     .select();
@@ -38,7 +39,7 @@ type CreateBankConnectionPayload = {
   team_id: string;
   name: string;
   logo_url: string;
-  provider?: "gocardless" | "plaid";
+  provider: "gocardless" | "plaid" | "teller";
 };
 
 export async function createBankConnection(
@@ -50,7 +51,6 @@ export async function createBankConnection(
     .insert({
       ...data,
       expires_at: addDays(new Date(), 180).toDateString(),
-      provider: "gocardless",
     })
     .select()
     .single();

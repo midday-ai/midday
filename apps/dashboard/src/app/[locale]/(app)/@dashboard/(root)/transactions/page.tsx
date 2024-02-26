@@ -19,6 +19,7 @@ export default async function Transactions({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  // TODO: Check if there are transactions instead
   const bankConnections = await getBankConnectionsByTeamId();
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
   const transactionId = searchParams?.id;

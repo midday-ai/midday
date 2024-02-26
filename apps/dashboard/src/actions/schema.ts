@@ -113,10 +113,12 @@ const bankAccount = z.object({
   institution_id: z.string(),
   name: z.string(),
   logo_url: z.string().optional(),
-  owner_name: z.string().optional(),
 });
 
-export const connectBankAccountSchema = z.array(bankAccount);
+export const connectBankAccountSchema = z.object({
+  accounts: z.array(bankAccount),
+  provider: z.enum(["gocardless", "plaid", "teller"]),
+});
 
 export const sendFeedbackSchema = z.object({
   feedback: z.string(),
