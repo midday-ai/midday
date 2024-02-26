@@ -20,7 +20,7 @@ export function EmptyStateInvoice() {
     <div className="h-[calc(100vh-200px)] w-full">
       <div className="mt-8 flex flex-col items-center justify-center h-full">
         <div className="text-[#878787] rounded-md py-1.5 px-3 border text-sm mb-8">
-          Comming soon
+          Coming soon
         </div>
 
         <div className="pb-8 relative h-[251px] w-[486px]">

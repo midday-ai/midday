@@ -103,7 +103,7 @@ export function ConnectTransactionsModal({ countryCode }) {
 
                           {bank.disabled && (
                             <div className="text-[#878787] rounded-md py-1 px-2 border text-[10px]">
-                              Comming soon
+                              Coming soon
                             </div>
                           )}
                         </div>
