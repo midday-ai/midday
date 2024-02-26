@@ -36,6 +36,7 @@ export default function Layout({
         <LogSnagProvider
           token={process.env.NEXT_PUBLIC_LOGSNAG_TOKEN!}
           project={process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!}
+          disableTracking={Boolean(process.env.NEXT_PUBLIC_LOGSNAG_DISABLED!)}
         />
       </head>
       <body

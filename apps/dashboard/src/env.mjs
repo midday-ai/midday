@@ -41,6 +41,7 @@ export const env = createEnv({
     NEXT_PUBLIC_TELLER_ENVIRONMENT: z.string(),
     NEXT_PUBLIC_PLAID_PUBLIC_KEY: z.string(),
     NEXT_PUBLIC_PLAID_ENVIRONMENT: z.string(),
+    NEXT_PUBLIC_LOGSNAG_DISABLED: z.boolean().optional(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -72,6 +73,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
+    NEXT_PUBLIC_LOGSNAG_DISABLED: process.env.NEXT_PUBLIC_LOGSNAG_DISABLED,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

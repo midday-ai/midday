@@ -2,7 +2,7 @@
 
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccounts } from "@midday/gocardless";
+import { gocardless } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -128,7 +128,7 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getAccounts({
+      const data = await gocardless.getAccounts({
         accountId: searchParams.get("ref"),
         countryCode,
       });

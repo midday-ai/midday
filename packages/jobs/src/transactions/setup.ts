@@ -1,5 +1,5 @@
 import { processPromisesBatch } from "@/utils/process";
-import { getTransactions, transformTransactions } from "@midday/gocardless";
+import { gocardless } from "@midday/providers";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
@@ -34,7 +34,7 @@ client.defineJob({
 
     const promises = accounts?.map(async (account) => {
       // Fetch transactions for each account
-      const { transactions } = await getTransactions({
+      const { transactions } = await gocardless.getTransactions({
         accountId: account.account_id,
       });
 
@@ -46,7 +46,7 @@ client.defineJob({
         },
       });
 
-      const formattedTransactions = transformTransactions(
+      const formattedTransactions = gocardless.transformTransactions(
         transactions?.booked,
         {
           accountId: account.id, // Bank account record id

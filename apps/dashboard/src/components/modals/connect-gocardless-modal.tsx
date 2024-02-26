@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  buildLink,
-  createEndUserAgreement,
-  getBanks,
-} from "@midday/gocardless";
+import { gocardless } from "@midday/providers";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -103,7 +99,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
 
   useEffect(() => {
     async function fetchData() {
-      const banks = await getBanks(countryCode);
+      const banks = await gocardless.getBanks(countryCode);
       setLoading(false);
 
       if (banks.length > 0) {
@@ -118,11 +114,11 @@ export function ConnectGoCardLessModal({ countryCode }) {
   }, [isOpen]);
 
   const handleCreateEndUserAgreement = async (institutionId: string) => {
-    const data = await createEndUserAgreement(institutionId);
+    const data = await gocardless.createEndUserAgreement(institutionId);
 
     const redirectBase = isDesktopApp() ? "midday://" : location.origin;
 
-    const { link } = await buildLink({
+    const { link } = await gocardless.buildLink({
       redirect: `${redirectBase}/${pathname}?step=select-account-gocardless`,
       institutionId,
       agreement: data.id,

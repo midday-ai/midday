@@ -1,5 +1,5 @@
 {
-    "name": "@midday/gocardless",
+    "name": "@midday/providers",
     "version": "1.0.0",
     "main": "src/index.ts",
     "private": true,

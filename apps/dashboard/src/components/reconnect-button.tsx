@@ -1,6 +1,6 @@
 "use client";
 
-import { buildLink, createEndUserAgreement } from "@midday/gocardless";
+import { buildLink, createEndUserAgreement } from "@midday/providers";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
