@@ -9,11 +9,6 @@ const ONE_HOUR = 3600;
 const ACCESS_VALID_FOR_DAYS = 180;
 const MAX_HISTORICAL_DAYS = 730;
 
-enum balanceType {
-  interimBooked = "interimBooked",
-  interimAvailable = "interimAvailable",
-}
-
 const keys = {
   accessToken: "go_cardless_access_token_v2",
   refreshToken: "go_cardless_refresh_token_v2",

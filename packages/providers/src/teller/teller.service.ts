@@ -1,8 +1,7 @@
 export class TellerService
   implements IAccountConnectionProvider, IInstitutionProvider
 {
-  constructor() // private readonly logger: Logger,
-  // private readonly prisma: PrismaClient,
+  constructor() // private readonly prisma: PrismaClient, // private readonly logger: Logger,
   // private readonly teller: TellerApi,
   // private readonly etl: IETL<AccountConnection>,
   // private readonly crypto: CryptoService,
@@ -94,8 +93,7 @@ export class TellerService
     // })
   }
 
-  async handleEnrollment() // userId: User['id'],
-  // institution: Pick<TellerTypes.Institution, 'name' | 'id'>,
+  async handleEnrollment() // institution: Pick<TellerTypes.Institution, 'name' | 'id'>, // userId: User['id'],
   // enrollment: TellerTypes.Enrollment
   {
     // const connections = await this.prisma.accountConnection.findMany({
