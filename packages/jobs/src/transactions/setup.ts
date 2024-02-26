@@ -1,6 +1,6 @@
 import { processPromisesBatch } from "@/utils/process";
 import { getTransactions, transformTransactions } from "@midday/gocardless";
-import { eventTrigger, isTriggerError } from "@trigger.dev/sdk";
+import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
@@ -70,7 +70,8 @@ client.defineJob({
 
     try {
       await Promise.all(promises);
-    } catch {
+    } catch (error) {
+      await io.logger.error(error);
       throw Error("Something went wrong");
     }
 
