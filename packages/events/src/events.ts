@@ -54,6 +54,26 @@ export const LogEvents = {
     icon: "🏦",
     channel: "bank",
   },
+  ConnectBankProvider: {
+    name: "Connect Bank Provider",
+    icon: "🏦",
+    channel: "bank",
+  },
+  ConnectBankCanceled: {
+    name: "Connect Bank Canceled",
+    icon: "🏦",
+    channel: "bank",
+  },
+  ConnectBankAuthorized: {
+    name: "Connect Bank Authorized",
+    icon: "🏦",
+    channel: "bank",
+  },
+  ConnectBankFailed: {
+    name: "Connect Bank Failed",
+    icon: "🏦",
+    channel: "bank",
+  },
   DeleteBank: {
     name: "Delete Bank",
     icon: "🏦",

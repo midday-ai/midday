@@ -1,6 +1,7 @@
 "use client";
 
-import { env } from "@/env.mjs";
+import { useLogSnag } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import {
   Dialog,
@@ -9,44 +10,87 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import {
-  Tabs,
-  TabsContent,
-  //  TabsList, TabsTrigger
-} from "@midday/ui/tabs";
+import { Tabs, TabsContent } from "@midday/ui/tabs";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { usePlaidLink } from "react-plaid-link";
-import { useTellerConnect } from "teller-connect-react";
+import { TellerConnectOptions, useTellerConnect } from "teller-connect-react";
 import GoCardLessLogo from "./gocardless.png";
 import PlaidLogo from "./plaid.png";
 import TellerLogo from "./teller.png";
 
 export function ConnectTransactionsModal({ countryCode }) {
+  const { track } = useLogSnag();
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const isOpen = searchParams.get("step") === "connect";
 
   const { open: openTeller, ready: tellerReady } = useTellerConnect({
-    applicationId: env.NEXT_PUBLIC_TELLER_APPLICATION_ID,
-    environment: env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
+    applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
+    environment: process.env
+      .NEXT_PUBLIC_TELLER_ENVIRONMENT as TellerConnectOptions["environment"],
     appearance: "system",
-    onExit: () => router.push("?step=connect"),
+    onExit: () => {
+      track({
+        event: LogEvents.ConnectBankCanceled.name,
+        icon: LogEvents.ConnectBankCanceled.icon,
+        channel: LogEvents.ConnectBankCanceled.channel,
+        tags: {
+          provider: "teller",
+        },
+      });
+
+      router.push("?step=connect");
+    },
     onSuccess: (authorization) => {
       console.log(authorization);
       // Save your access token here
+      // connectBankAccountAction()
+
+      track({
+        event: LogEvents.ConnectBankAuthorized.name,
+        icon: LogEvents.ConnectBankAuthorized.icon,
+        channel: LogEvents.ConnectBankAuthorized.channel,
+        tags: {
+          provider: "teller",
+        },
+      });
     },
+    // onFailure: () => {},
   });
 
   const { open: openPlaid, ready: plaidReady } = usePlaidLink({
     token: "",
-    publicKey: env.NEXT_PUBLIC_PLAID_PUBLIC_KEY,
-    env: env.NEXT_PUBLIC_PLAID_ENVIRONMENT,
+    publicKey: process.env.NEXT_PUBLIC_PLAID_PUBLIC_KEY!,
+    env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
     clientName: "Midday",
     product: ["transactions"],
     onSuccess: (public_token, metadata) => {
+      console.log(public_token, metadata);
       // Save your access token here
+      // connectBankAccountAction()
+
+      track({
+        event: LogEvents.ConnectBankAuthorized.name,
+        icon: LogEvents.ConnectBankAuthorized.icon,
+        channel: LogEvents.ConnectBankAuthorized.channel,
+        tags: {
+          provider: "plaid",
+        },
+      });
+    },
+    onExit: () => {
+      track({
+        event: LogEvents.ConnectBankCanceled.name,
+        icon: LogEvents.ConnectBankCanceled.icon,
+        channel: LogEvents.ConnectBankCanceled.channel,
+        tags: {
+          provider: "plaid",
+        },
+      });
+
+      router.push("?step=connect");
     },
   });
 
@@ -57,7 +101,18 @@ export function ConnectTransactionsModal({ countryCode }) {
       description:
         "More than 2,500 connected banks in 31 countries across the UK and Europe.",
       logo: GoCardLessLogo,
-      onClick: () => router.push("?step=gocardless"),
+      onClick: () => {
+        track({
+          event: LogEvents.ConnectBankProvider.name,
+          icon: LogEvents.ConnectBankProvider.icon,
+          channel: LogEvents.ConnectBankProvider.channel,
+          tags: {
+            provider: "gocardless",
+          },
+        });
+
+        router.push("?step=gocardless");
+      },
     },
     {
       id: "teller",
@@ -65,7 +120,18 @@ export function ConnectTransactionsModal({ countryCode }) {
       description:
         "With Teller we can connect to  instantly with more than 5,000 financial institutions in the US.",
       logo: TellerLogo,
-      onClick: () => openTeller(),
+      onClick: () => {
+        track({
+          event: LogEvents.ConnectBankProvider.name,
+          icon: LogEvents.ConnectBankProvider.icon,
+          channel: LogEvents.ConnectBankProvider.channel,
+          tags: {
+            provider: "teller",
+          },
+        });
+
+        openTeller();
+      },
       disabled: !tellerReady,
     },
     {
@@ -73,7 +139,18 @@ export function ConnectTransactionsModal({ countryCode }) {
       name: "Plaid (US, Canada, UK)",
       description: `12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`,
       logo: PlaidLogo,
-      onClick: () => openPlaid(),
+      onClick: () => {
+        track({
+          event: LogEvents.ConnectBankProvider.name,
+          icon: LogEvents.ConnectBankProvider.icon,
+          channel: LogEvents.ConnectBankProvider.channel,
+          tags: {
+            provider: "plaid",
+          },
+        });
+
+        openPlaid();
+      },
       disabled: !plaidReady,
     },
   ];
