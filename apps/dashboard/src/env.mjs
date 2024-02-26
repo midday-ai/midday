@@ -37,6 +37,10 @@ export const env = createEnv({
     NEXT_PUBLIC_TRIGGER_API_KEY: z.string(),
     NEXT_PUBLIC_LOGSNAG_TOKEN: z.string(),
     NEXT_PUBLIC_LOGSNAG_PROJECT: z.string(),
+    NEXT_PUBLIC_TELLER_APPLICATION_ID: z.string(),
+    NEXT_PUBLIC_TELLER_ENVIRONMENT: z.string(),
+    NEXT_PUBLIC_PLAID_PUBLIC_KEY: z.string(),
+    NEXT_PUBLIC_PLAID_ENVIRONMENT: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -46,6 +50,11 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_ID: process.env.NEXT_PUBLIC_SUPABASE_ID,
+    NEXT_PUBLIC_TELLER_APPLICATION_ID:
+      process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID,
+    NEXT_PUBLIC_TELLER_ENVIRONMENT: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
+    NEXT_PUBLIC_PLAID_PUBLIC_KEY: process.env.NEXT_PUBLIC_PLAID_PUBLIC_KEY,
+    NEXT_PUBLIC_PLAID_ENVIRONMENT: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,

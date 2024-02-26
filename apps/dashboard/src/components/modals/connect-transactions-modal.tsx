@@ -1,5 +1,6 @@
 "use client";
 
+import { env } from "@/env.mjs";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import {
   Dialog,
@@ -15,6 +16,8 @@ import {
 } from "@midday/ui/tabs";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePlaidLink } from "react-plaid-link";
+import { useTellerConnect } from "teller-connect-react";
 import GoCardLessLogo from "./gocardless.png";
 import PlaidLogo from "./plaid.png";
 import TellerLogo from "./teller.png";
@@ -24,6 +27,28 @@ export function ConnectTransactionsModal({ countryCode }) {
   const router = useRouter();
   const pathname = usePathname();
   const isOpen = searchParams.get("step") === "connect";
+
+  const { open: openTeller, ready: tellerReady } = useTellerConnect({
+    applicationId: env.NEXT_PUBLIC_TELLER_APPLICATION_ID,
+    environment: env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
+    appearance: "system",
+    onExit: () => router.push("?step=connect"),
+    onSuccess: (authorization) => {
+      console.log(authorization);
+      // Save your access token here
+    },
+  });
+
+  const { open: openPlaid, ready: plaidReady } = usePlaidLink({
+    token: "",
+    publicKey: env.NEXT_PUBLIC_PLAID_PUBLIC_KEY,
+    env: env.NEXT_PUBLIC_PLAID_ENVIRONMENT,
+    clientName: "Midday",
+    product: ["transactions"],
+    onSuccess: (public_token, metadata) => {
+      // Save your access token here
+    },
+  });
 
   const banks = [
     {
@@ -40,14 +65,16 @@ export function ConnectTransactionsModal({ countryCode }) {
       description:
         "With Teller we can connect to  instantly with more than 5,000 financial institutions in the US.",
       logo: TellerLogo,
-      disabled: true,
+      onClick: () => openTeller(),
+      disabled: !tellerReady,
     },
     {
       id: "plaid",
       name: "Plaid (US, Canada, UK)",
       description: `12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`,
       logo: PlaidLogo,
-      disabled: true,
+      onClick: () => openPlaid(),
+      disabled: !plaidReady,
     },
   ];
 
