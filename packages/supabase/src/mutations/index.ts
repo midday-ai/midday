@@ -111,27 +111,28 @@ export async function updateTransaction(
 
 export async function updateUser(supabase: Client, data: any) {
   const {
-    data: { session },
-  } = await getSession(supabase);
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return supabase
     .from("users")
     .update(data)
-    .eq("id", session?.user?.id)
+    .eq("id", user?.id)
     .select()
     .single();
 }
 
 export async function deleteUser(supabase: Client) {
   const {
-    data: { session },
-  } = await getSession(supabase);
-  await supabase.auth.admin.deleteUser(session?.user.id);
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  await supabase.auth.admin.deleteUser(user.id);
   // TODO: Delete files etc
-  await supabase.from("users").delete().eq("id", session?.user.id);
+  await supabase.from("users").delete().eq("id", user.id);
   await supabase.auth.signOut();
 
-  return session?.user.id;
+  return user.id;
 }
 
 export async function updateTeam(supabase: Client, data: any) {
@@ -302,10 +303,10 @@ type CreateTeamParams = {
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
   const {
-    data: { session },
-  } = await getSession(supabase);
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (!session) {
+  if (!user) {
     return;
   }
 
@@ -320,7 +321,7 @@ export async function createTeam(supabase: Client, params: CreateTeamParams) {
   const { data: userData } = await supabase
     .from("users_on_team")
     .insert({
-      user_id: session?.user.id,
+      user_id: user.id,
       team_id: teamData?.id,
       role: "owner",
     })
@@ -358,18 +359,18 @@ export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
 
 export async function joinTeamByInviteCode(supabase: Client, code: string) {
   const {
-    data: { session },
-  } = await getSession(supabase);
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: inviteData } = await getUserInviteQuery(supabase, {
     code,
-    email: session?.user?.email,
+    email: user?.email,
   });
 
   if (inviteData) {
     // Add user team
     await supabase.from("users_on_team").insert({
-      user_id: session?.user.id,
+      user_id: user.id,
       team_id: inviteData?.team_id,
       role: inviteData.role,
     });
@@ -380,7 +381,7 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
       .update({
         team_id: inviteData?.team_id,
       })
-      .eq("id", session?.user.id)
+      .eq("id", user.id)
       .select()
       .single();
 

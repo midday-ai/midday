@@ -9,13 +9,10 @@ import { voteSchema } from "./schema";
 export const voteAction = action(voteSchema, async ({ revalidatePath, id }) => {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  const hasUser = await client.sadd(
-    `apps:v2:${id}:user:${session.user.id}`,
-    true
-  );
+  const hasUser = await client.sadd(`apps:v2:${id}:user:${user.id}`, true);
 
   if (!hasUser) {
     throw new Error("You have already voted");

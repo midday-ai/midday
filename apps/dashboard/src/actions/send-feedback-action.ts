@@ -14,8 +14,8 @@ export const sendFeebackAction = action(
   async ({ feedback }) => {
     const supabase = createClient();
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const res = await fetch(`${baseUrl}/email`, {
       method: "POST",
@@ -28,7 +28,7 @@ export const sendFeebackAction = action(
         from: "feedback@midday.ai",
         to: "pontus@midday.ai",
         subject: "Feedback",
-        text: `${feedback} \nName: ${session?.user?.user_metadata?.name} \nEmail: ${session?.user?.email}`,
+        text: `${feedback} \nName: ${user?.user_metadata?.name} \nEmail: ${user?.email}`,
       }),
     });
 
@@ -37,7 +37,7 @@ export const sendFeebackAction = action(
     logsnag.track({
       event: LogEvents.SendFeedback.name,
       icon: LogEvents.SendFeedback.icon,
-      user_id: session.user.id,
+      user_id: user.id,
       channel: LogEvents.SendFeedback.channel,
     });
 

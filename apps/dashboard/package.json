@@ -31,7 +31,7 @@
     "@todesktop/runtime": "^1.6.1",
     "@trigger.dev/nextjs": "^2.3.18",
     "@uidotdev/usehooks": "^2.4.1",
-    "@vercel/edge-config": "^1.0.2",
+    "@vercel/edge-config": "^1.1.0",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.35",
     "base64-arraybuffer": "^1.0.2",

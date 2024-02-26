@@ -31,11 +31,11 @@ export async function GET(req: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
-    if (session) {
-      const userId = session.user.id;
+    if (user) {
+      const userId = user.id;
 
       await logsnag.track({
         event: LogEvents.SignedIn.name,
@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
       await logsnag.identify({
         user_id: userId,
         properties: {
-          name: session.user.user_metadata?.full_name,
+          name: user.user_metadata?.full_name,
         },
       });
     }

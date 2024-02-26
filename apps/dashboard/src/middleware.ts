@@ -25,11 +25,11 @@ export async function middleware(request: NextRequest) {
   // Create a new URL without the locale in the pathname
   const newUrl = new URL(pathnameWithoutLocale || "/", request.url);
 
-  const { data } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getUser();
 
   // Not authenticated
   if (
-    !data?.session &&
+    !data?.user &&
     newUrl.pathname !== "/" &&
     !newUrl.pathname.includes("/report")
   ) {
@@ -44,8 +44,8 @@ export async function middleware(request: NextRequest) {
 
   // Check if in beta list by email
   if (
-    data?.session &&
-    !(await get("beta"))?.includes(data?.session.user.email) &&
+    data?.user &&
+    !(await get("beta"))?.includes(data?.user.email) &&
     newUrl.pathname !== "/closed"
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));

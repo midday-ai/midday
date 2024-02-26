@@ -45,10 +45,6 @@ export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
 
-export async function getSession(supabase: Client) {
-  return supabase.auth.getSession();
-}
-
 export async function getUserQuery(supabase: Client, userId: string) {
   return supabase
     .from("users")
@@ -65,10 +61,10 @@ export async function getUserQuery(supabase: Client, userId: string) {
 
 export async function getCurrentUserTeamQuery(supabase: Client) {
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return getUserQuery(supabase, session?.user?.id);
+  return getUserQuery(supabase, user?.id);
 }
 
 export async function getBankConnectionsByTeamIdQuery(

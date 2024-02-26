@@ -8,8 +8,8 @@ import { revalidateTag } from "next/cache";
 export async function signOutAction() {
   const supabase = createClient();
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   await supabase.auth.signOut({
     scope: "local",
@@ -18,9 +18,9 @@ export async function signOutAction() {
   logsnag.track({
     event: LogEvents.SignOut.name,
     icon: LogEvents.SignOut.icon,
-    user_id: session.user.id,
+    user_id: user.id,
     channel: LogEvents.SignOut.channel,
   });
 
-  revalidateTag(`user_${session.user.id}`);
+  revalidateTag(`user_${user.id}`);
 }

@@ -17,9 +17,6 @@ export const createClient = (options: CreateClientOptions) => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key,
     {
-      auth: {
-        autoRefreshToken: false,
-      },
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value;

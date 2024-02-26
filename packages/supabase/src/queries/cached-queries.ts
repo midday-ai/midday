@@ -41,8 +41,11 @@ export const getTransactions = async (params) => {
 
 export const getUser = async () => {
   const supabase = createClient();
-  const { data } = await supabase.auth.getSession();
-  const userId = data.session?.user.id;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const userId = user?.id;
 
   if (!userId) {
     return null;

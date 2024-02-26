@@ -1,6 +1,5 @@
 import { SetUserIdServerComponent } from "@logsnag/next";
 import { createClient } from "@midday/supabase/server";
-import { Providers } from "../providers";
 
 export default async function Layout({
   dashboard,
@@ -12,14 +11,14 @@ export default async function Layout({
   const supabase = createClient();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (session) {
+  if (user) {
     return (
       <>
         {dashboard}
-        <SetUserIdServerComponent userId={session.user.id} />
+        <SetUserIdServerComponent userId={user.id} />
       </>
     );
   }
