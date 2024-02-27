@@ -67,7 +67,9 @@ export async function POST(req: Request) {
     }
 
     const records = attachments.map(async (attachment) => {
-      const { data } = await supabase.storage
+      console.log(attachment);
+
+      const { data, error } = await supabase.storage
         .from("vault")
         .upload(
           `${teamData.id}/inbox/${attachment.Name}`,
@@ -77,6 +79,8 @@ export async function POST(req: Request) {
             upsert: true,
           }
         );
+
+      console.log(error);
 
       return {
         email: res.FromFull.Email,
