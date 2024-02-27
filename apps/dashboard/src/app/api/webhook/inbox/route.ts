@@ -46,6 +46,26 @@ export async function POST(req: Request) {
     const attachments = res.Attachments;
     const subject = res.Subject ?? "No subject";
 
+    try {
+      // NOTE: Send original email to company email
+      await resend.emails.send({
+        from: `${res.FromFull.Name} <inbox@midday.ai>`,
+        to: [teamData.inbox_email],
+        subject,
+        text: res.TextBody,
+        html: res.HtmlBody,
+        attachments: attachments.map((a) => ({
+          filename: a.Name,
+          content: a.Content,
+        })),
+        headers: {
+          "X-Entity-Ref-ID": nanoid(),
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
     const records = attachments.map(async (attachment) => {
       const { data } = await supabase.storage
         .from("vault")
@@ -118,23 +138,7 @@ export async function POST(req: Request) {
 
     triggerBulk(notificationEvents?.flat());
 
-    // NOTE: Send original email to company email
     if (teamData?.inbox_email) {
-      await resend.emails.send({
-        from: `${res.FromFull.Name} <inbox@midday.ai>`,
-        to: [teamData.inbox_email],
-        subject,
-        text: res.TextBody,
-        html: res.HtmlBody,
-        attachments: attachments.map((a) => ({
-          filename: a.Name,
-          content: a.Content,
-        })),
-        headers: {
-          "X-Entity-Ref-ID": nanoid(),
-        },
-      });
-
       // NOTE: If we end up here the email was forwarded
       await supabase.from("inbox").upsert(
         inboxData.map((inbox) => ({
