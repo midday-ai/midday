@@ -45,42 +45,19 @@ export async function POST(req: Request) {
 
     const attachments = res.Attachments;
     const subject = res.Subject ?? "No subject";
-
-    try {
-      // NOTE: Send original email to company email
-      await resend.emails.send({
-        from: `${res.FromFull.Name} <inbox@midday.ai>`,
-        to: [teamData.inbox_email],
-        subject,
-        text: res.TextBody,
-        html: res.HtmlBody,
-        attachments: attachments.map((a) => ({
-          filename: a.Name,
-          content: a.Content,
-        })),
-        headers: {
-          "X-Entity-Ref-ID": nanoid(),
-        },
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    const contentType = "application/pdf";
 
     const records = attachments.map(async (attachment) => {
-      console.log(attachment);
-
-      const { data, error } = await supabase.storage
+      const { data } = await supabase.storage
         .from("vault")
         .upload(
           `${teamData.id}/inbox/${attachment.Name}`,
           decode(attachment.Content),
           {
-            contentType: attachment.ContentType,
+            contentType,
             upsert: true,
           }
         );
-
-      console.log(error);
 
       return {
         email: res.FromFull.Email,
@@ -89,7 +66,7 @@ export async function POST(req: Request) {
         team_id: teamData.id,
         file_path: data.path.split("/"),
         file_name: attachment.Name,
-        content_type: attachment.ContentType,
+        content_type: contentType,
         size: attachment.ContentLength,
         html: res.HtmlBody,
       };
@@ -143,6 +120,26 @@ export async function POST(req: Request) {
     triggerBulk(notificationEvents?.flat());
 
     if (teamData?.inbox_email) {
+      try {
+        // NOTE: Send original email to company email
+        await resend.emails.send({
+          from: `${res.FromFull.Name} <inbox@midday.ai>`,
+          to: [teamData.inbox_email],
+          subject,
+          text: res.TextBody,
+          html: res.HtmlBody,
+          attachments: attachments.map((a) => ({
+            filename: a.Name,
+            content: a.Content,
+          })),
+          headers: {
+            "X-Entity-Ref-ID": nanoid(),
+          },
+        });
+      } catch (error) {
+        console.log(error);
+      }
+
       // NOTE: If we end up here the email was forwarded
       await supabase.from("inbox").upsert(
         inboxData.map((inbox) => ({
