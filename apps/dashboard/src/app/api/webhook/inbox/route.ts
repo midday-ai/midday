@@ -48,10 +48,12 @@ export async function POST(req: Request) {
     const contentType = "application/pdf";
 
     const records = attachments.map(async (attachment) => {
+      const fileName = `${nanoid()}.pdf`;
+
       const { data } = await supabase.storage
         .from("vault")
         .upload(
-          `${teamData.id}/inbox/${attachment.Name}`,
+          `${teamData.id}/inbox/${fileName}`,
           decode(attachment.Content),
           {
             contentType,
@@ -65,7 +67,7 @@ export async function POST(req: Request) {
         subject,
         team_id: teamData.id,
         file_path: data.path.split("/"),
-        file_name: attachment.Name,
+        file_name: fileName,
         content_type: contentType,
         size: attachment.ContentLength,
         html: res.HtmlBody,
