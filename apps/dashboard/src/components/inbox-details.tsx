@@ -75,7 +75,7 @@ export function InboxDetails({
   useEffect(() => {
     setLoaded(true);
     setError(false);
-  }, [item.id]);
+  }, [item?.id]);
 
   const handleCopyUrl = async () => {
     try {
