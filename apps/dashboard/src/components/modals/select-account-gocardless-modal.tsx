@@ -161,7 +161,7 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
             <TabsContent value="select-accounts">
               <>
                 <DialogHeader className="mb-8">
-                  <DialogTitle>Select accounts</DialogTitle>
+                  <DialogTitle>Select Accounts</DialogTitle>
                   <DialogDescription>
                     Select accounts you want to link with Midday.
                   </DialogDescription>

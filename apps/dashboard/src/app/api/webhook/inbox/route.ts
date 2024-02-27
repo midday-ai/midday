@@ -44,6 +44,7 @@ export async function POST(req: Request) {
       .throwOnError();
 
     const attachments = res.Attachments;
+    const subject = res.Subject ?? "No subject";
 
     const records = attachments.map(async (attachment) => {
       const { data } = await supabase.storage
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
       return {
         email: res.FromFull.Email,
         name: res.FromFull.Name,
-        subject: res.Subject,
+        subject,
         team_id: teamData.id,
         file_path: data.path.split("/"),
         file_name: attachment.Name,
@@ -122,7 +123,7 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from: `${res.FromFull.Name} <inbox@midday.ai>`,
         to: [teamData.inbox_email],
-        subject: res.Subject,
+        subject,
         text: res.TextBody,
         html: res.HtmlBody,
         attachments: attachments.map((a) => ({
