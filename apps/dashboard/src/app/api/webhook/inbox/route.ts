@@ -43,11 +43,11 @@ export async function POST(req: Request) {
       .single()
       .throwOnError();
 
-    const attachments = res.Attachments;
-    const subject = res.Subject ?? "No subject";
+    const attachments = res?.Attachments;
+    const subject = res.Subject.length > 0 ? res.Subject.length : "No subject";
     const contentType = "application/pdf";
 
-    const records = attachments.map(async (attachment) => {
+    const records = attachments?.map(async (attachment) => {
       const fileName = attachment.Name ?? `${nanoid()}.pdf`;
 
       const { data } = await supabase.storage.from("vault").upload(
@@ -74,52 +74,74 @@ export async function POST(req: Request) {
       };
     });
 
-    const insertData = await Promise.all(records);
+    if (records.length > 0) {
+      const insertData = await Promise.all(records);
 
-    const { data: inboxData } = await supabase
-      .from("decrypted_inbox")
-      .insert(insertData)
-      .select("*, name:decrypted_name, subject:decrypted_subject");
+      console.log(insertData);
 
-    await Promise.all(
-      inboxData.map((inbox) =>
-        client.sendEvent({
-          name: Events.PROCESS_INBOX,
-          payload: {
-            inboxId: inbox.id,
-          },
+      const { data: inboxData, error } = await supabase
+        .from("decrypted_inbox")
+        .insert(insertData)
+        .select("*, name:decrypted_name, subject:decrypted_subject");
+
+      console.log("inbox error", error);
+
+      await Promise.all(
+        inboxData?.map((inbox) =>
+          client.sendEvent({
+            name: Events.PROCESS_INBOX,
+            payload: {
+              inboxId: inbox.id,
+            },
+          })
+        )
+      );
+
+      console.log("inboxData", inboxData);
+
+      const { data: usersData } = await supabase
+        .from("users_on_team")
+        .select(
+          "team_id, user:user_id(id, full_name, avatar_url, email, locale)"
+        )
+        .eq("team_id", teamData.id);
+
+      const notificationEvents = await Promise.all(
+        usersData?.map(async ({ user, team_id }) => {
+          return inboxData?.map((inbox) => ({
+            name: TriggerEvents.InboxNewInApp,
+            payload: {
+              recordId: inbox.id,
+              description: `${inbox.name} - ${inbox.subject}`,
+              type: NotificationTypes.Inbox,
+            },
+            user: {
+              subscriberId: user.id,
+              teamId: team_id,
+              email: user.email,
+              fullName: user.full_name,
+              avatarUrl: user.avatar_url,
+            },
+          }));
         })
-      )
-    );
+      );
 
-    revalidateTag(`inbox_${teamData.id}`);
+      triggerBulk(notificationEvents?.flat());
 
-    const { data: usersData } = await supabase
-      .from("users_on_team")
-      .select("team_id, user:user_id(id, full_name, avatar_url, email, locale)")
-      .eq("team_id", teamData.id);
+      // NOTE: If we end up here the email was forwarded
+      try {
+        await supabase.from("inbox").upsert(
+          inboxData?.map((inbox) => ({
+            id: inbox.id,
+            forwarded_to: teamData.inbox_email,
+          }))
+        );
+      } catch (error) {
+        console.log(error);
+      }
 
-    const notificationEvents = await Promise.all(
-      usersData?.map(async ({ user, team_id }) => {
-        return inboxData.map((inbox) => ({
-          name: TriggerEvents.InboxNewInApp,
-          payload: {
-            recordId: inbox.id,
-            description: `${inbox.name} - ${inbox.subject}`,
-            type: NotificationTypes.Inbox,
-          },
-          user: {
-            subscriberId: user.id,
-            teamId: team_id,
-            email: user.email,
-            fullName: user.full_name,
-            avatarUrl: user.avatar_url,
-          },
-        }));
-      })
-    );
-
-    triggerBulk(notificationEvents?.flat());
+      revalidateTag(`inbox_${teamData.id}`);
+    }
 
     if (teamData?.inbox_email) {
       try {
@@ -130,7 +152,7 @@ export async function POST(req: Request) {
           subject,
           text: res.TextBody,
           html: res.HtmlBody,
-          attachments: attachments.map((a) => ({
+          attachments: attachments?.map((a) => ({
             filename: a.Name,
             content: a.Content,
           })),
@@ -141,16 +163,6 @@ export async function POST(req: Request) {
       } catch (error) {
         console.log(error);
       }
-
-      // NOTE: If we end up here the email was forwarded
-      await supabase.from("inbox").upsert(
-        inboxData.map((inbox) => ({
-          id: inbox.id,
-          forwarded_to: teamData.inbox_email,
-        }))
-      );
-
-      revalidateTag(`inbox_${teamData.id}`);
     }
   }
 
