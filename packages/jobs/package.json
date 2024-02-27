@@ -10,13 +10,12 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@google-cloud/documentai": "^8.2.0",
     "@trigger.dev/openai": "latest",
     "@trigger.dev/react": "^2.3.18",
     "@trigger.dev/resend": "^2.3.18",
     "@trigger.dev/sdk": "^2.3.18",
     "@trigger.dev/supabase": "^2.3.18",
-    "langchain": "0.1.21",
-    "nanoid": "^5.0.6",
-    "pdf-parse": "^1.1.1"
+    "nanoid": "^5.0.6"
   }
 }

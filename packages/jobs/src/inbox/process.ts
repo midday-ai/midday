@@ -1,12 +1,26 @@
 import { eventTrigger } from "@trigger.dev/sdk";
-import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import { z } from "zod";
-import { client, openai, supabase } from "../client";
+import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
-function isOnlyLetters(value: string) {
-  return /^[a-zA-Z]+$/.test(value);
-}
+const { DocumentProcessorServiceClient } =
+  require("@google-cloud/documentai").v1;
+
+const credentials = JSON.parse(
+  Buffer.from(process.env.GOOGLE_APPLICATION_CREDENTIALS!, "base64").toString(
+    "ascii"
+  )
+);
+
+const DocumentClient = new DocumentProcessorServiceClient({
+  apiEndpoint: "eu-documentai.googleapis.com",
+  credentials,
+});
+
+const findValue = (entities, type) => {
+  const found = entities.find((entry) => entry.type === type);
+  return found?.normalizedValue?.text || found?.mentionText;
+};
 
 client.defineJob({
   id: Jobs.PROCESS_INBOX,
@@ -20,7 +34,6 @@ client.defineJob({
   }),
   integrations: {
     supabase,
-    openai,
   },
   run: async (payload, io) => {
     const { data: inboxData } = await io.supabase.client
@@ -29,73 +42,62 @@ client.defineJob({
       .eq("id", payload.inboxId)
       .single();
 
-    if (inboxData?.content_type === "application/pdf") {
-      const { data } = await io.supabase.client.storage
-        .from("vault")
-        .download(inboxData.file_path.join("/"));
+    const contentType = inboxData?.content_type;
 
-      const loader = new PDFLoader(data, {
-        splitPages: false,
-        parsedItemSeparator: "",
-      });
+    switch (contentType) {
+      case "application/pdf":
+        {
+          const { data } = await io.supabase.client.storage
+            .from("vault")
+            .download(inboxData.file_path.join("/"));
 
-      const docs = await loader.load();
+          // Convert the image data to a Buffer and base64 encode it.
+          const buffer = await data?.arrayBuffer();
+          const encodedContent = Buffer.from(buffer).toString("base64");
 
-      const completion = await io.openai.chat.completions.create("completion", {
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a invoice parser. From this invoice extract total amount, due date, issuer name, currency and transform currency value to currency code and return it as currency. Return the response in JSON format",
-          },
-          {
-            role: "user",
-            content: JSON.stringify(docs.at(0)?.pageContent),
-          },
-        ],
-      });
-
-      const response = completion.choices.at(0)?.message.content;
-
-      if (response) {
-        const data = JSON.parse(response);
-
-        await io.logger.debug("open ai result", data);
-
-        const currency = data?.currency || data?.currency_code;
-
-        const { data: updatedInboxData } = await io.supabase.client
-          .from("inbox")
-          .update({
-            // match any character that is not a digit, comma, or dot, and replaces
-            // those characters with an empty string also replace comma with a dot
-            amount: data?.total_amount
-              .toString()
-              ?.replace(/[^\d.,]/g, "")
-              .replace(/,/g, "."),
-            // NOTE: Guard currency, can only be currency code
-            currency: isOnlyLetters(currency) && currency?.toUpperCase(),
-            issuer_name: data?.issuer_name,
-            due_date: data?.due_date && new Date(data.due_date),
-          })
-          .eq("id", payload.inboxId)
-          .select()
-          .single();
-
-        if (updatedInboxData) {
-          await io.sendEvent("Match Inbox", {
-            name: Events.MATCH_INBOX,
-            payload: {
-              teamId: updatedInboxData.team_id,
-              inboxId: updatedInboxData.id,
-              amount: updatedInboxData.amount,
+          const [result] = await DocumentClient.processDocument({
+            name: `projects/${credentials.project_id}/locations/eu/processors/${process.env.GOOGLE_APPLICATION_PROCESSOR_ID}`,
+            rawDocument: {
+              content: encodedContent,
+              mimeType: "application/pdf",
             },
           });
 
-          await io.logger.debug("updated inbox", updatedInboxData);
+          const entities = result.document.entities;
+          const currency = findValue(entities, "currency");
+          const dueDate = findValue(entities, "due_date");
+          const issuerName = findValue(entities, "supplier_name");
+          const amount = findValue(entities, "total_amount");
+
+          const { data: updatedInboxData } = await io.supabase.client
+            .from("inbox")
+            .update({
+              amount,
+              currency,
+              issuer_name: issuerName,
+              due_date: dueDate && new Date(dueDate),
+            })
+            .eq("id", payload.inboxId)
+            .select()
+            .single();
+
+          if (updatedInboxData) {
+            await io.sendEvent("Match Inbox", {
+              name: Events.MATCH_INBOX,
+              payload: {
+                teamId: updatedInboxData.team_id,
+                inboxId: updatedInboxData.id,
+                amount: updatedInboxData.amount,
+              },
+            });
+
+            await io.logger.debug("updated inbox", updatedInboxData);
+          }
         }
-      }
+        break;
+
+      default:
+        return io.logger.debug(`Not a supported content type: ${contentType}`);
     }
   },
 });

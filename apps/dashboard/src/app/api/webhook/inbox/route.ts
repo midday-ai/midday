@@ -48,18 +48,18 @@ export async function POST(req: Request) {
     const contentType = "application/pdf";
 
     const records = attachments.map(async (attachment) => {
-      const fileName = `${nanoid()}.pdf`;
+      const fileName = attachment.Name ?? `${nanoid()}.pdf`;
 
-      const { data } = await supabase.storage
-        .from("vault")
-        .upload(
-          `${teamData.id}/inbox/${fileName}`,
-          decode(attachment.Content),
-          {
-            contentType,
-            upsert: true,
-          }
-        );
+      const { data } = await supabase.storage.from("vault").upload(
+        // NOTE: Invoices can have the same name so we need to
+        // ensure with a unique folder
+        `${teamData.id}/inbox/${nanoid()}/${fileName}`,
+        decode(attachment.Content),
+        {
+          contentType,
+          upsert: true,
+        }
+      );
 
       return {
         email: res.FromFull.Email,

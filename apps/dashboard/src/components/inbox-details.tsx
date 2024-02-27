@@ -18,6 +18,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FilePreview } from "./file-preview";
+import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
 
 function extractRootDomainFromEmail(email) {
@@ -188,22 +189,32 @@ export function InboxDetails({
               <div className="text-xs text-muted-foreground">
                 {format(new Date(item.created_at), "PPpp")}
               </div>
-              {item.forwarded_to && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="ml-auto mt-1">
+
+              <div className="flex space-x-2 items-center ml-auto mt-1">
+                {item.currency && (
+                  <div className="line-clamp-1 text-xs">
+                    <FormatAmount
+                      amount={item.amount}
+                      currency={item.currency}
+                    />
+                  </div>
+                )}
+
+                {item.forwarded_to && (
+                  <Tooltip>
+                    <TooltipTrigger>
                       <Icons.Forwarded />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    className="px-3 py-1.5 text-xs"
-                    side="left"
-                    sideOffset={10}
-                  >
-                    Forwarded to {item.forwarded_to}
-                  </TooltipContent>
-                </Tooltip>
-              )}
+                    </TooltipTrigger>
+                    <TooltipContent
+                      className="px-3 py-1.5 text-xs"
+                      side="left"
+                      sideOffset={8}
+                    >
+                      Forwarded to {item.forwarded_to}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
             </div>
           </div>
           <Separator />
