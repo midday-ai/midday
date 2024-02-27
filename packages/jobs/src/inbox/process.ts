@@ -64,10 +64,10 @@ client.defineJob({
           });
 
           const entities = result.document.entities;
-          const currency = findValue(entities, "currency");
-          const dueDate = findValue(entities, "due_date");
-          const issuerName = findValue(entities, "supplier_name");
-          const amount = findValue(entities, "total_amount");
+          const currency = findValue(entities, "currency") ?? null;
+          const dueDate = findValue(entities, "due_date") ?? null;
+          const issuerName = findValue(entities, "supplier_name") ?? null;
+          const amount = findValue(entities, "total_amount") ?? null;
 
           const { data: updatedInboxData } = await io.supabase.client
             .from("inbox")
