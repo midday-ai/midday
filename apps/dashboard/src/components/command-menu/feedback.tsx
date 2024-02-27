@@ -45,7 +45,7 @@ export function CommandFeedback() {
               <Button
                 type="button"
                 onClick={() => action.execute({ feedback: value })}
-                disabled={action.status === "executing"}
+                disabled={value.length === 0 || action.status === "executing"}
               >
                 {action.status === "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

@@ -159,7 +159,8 @@ export async function getSpendingQuery(
       amount
     `
     )
-    .order("order", { ascending: false })
+    .order("date", { ascending: false })
+    .order("name", { ascending: false })
     .eq("team_id", params.teamId)
     .lt("amount", 0)
     .throwOnError();
@@ -266,7 +267,9 @@ export async function getTransactionsQuery(
       query.order(column, { ascending: value === "asc" });
     }
   } else {
-    query.order("order", { ascending: false });
+    query
+      .order("date", { ascending: false })
+      .order("name", { ascending: false });
   }
 
   if (date?.from && date?.to) {
@@ -445,7 +448,8 @@ export async function getMetricsQuery(
     `
     )
     .eq("team_id", teamId)
-    .order("order", { ascending: false })
+    .order("date", { ascending: false })
+    .order("name", { ascending: false })
     .limit(1000000)
     .gte("date", previousFromDate.toDateString())
     .lte("date", to);
