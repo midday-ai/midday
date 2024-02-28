@@ -27,6 +27,11 @@ const ipRange = [
   "18.217.206.57",
 ];
 
+export function stripSpecialCharacters(inputString: string) {
+  // Use a regular expression to replace all non-alphanumeric characters except hyphen, space, dot,and parentheses with an empty string
+  return inputString.replace(/[^a-zA-Z0-9\s.()-]/g, "");
+}
+
 export async function POST(req: Request) {
   const supabase = createClient({ admin: true });
   const res = await req.json();
@@ -50,28 +55,36 @@ export async function POST(req: Request) {
     const records = attachments?.map(async (attachment) => {
       const fileName = attachment.Name ?? `${nanoid()}.pdf`;
 
-      const { data } = await supabase.storage.from("vault").upload(
-        // NOTE: Invoices can have the same name so we need to
-        // ensure with a unique folder
-        `${teamData.id}/inbox/${nanoid()}/${fileName}`,
-        decode(attachment.Content),
-        {
-          contentType,
-          upsert: true,
-        }
-      );
+      try {
+        const { data, error } = await supabase.storage.from("vault").upload(
+          // NOTE: Invoices can have the same name so we need to
+          // ensure with a unique folder
+          `${teamData.id}/inbox/${nanoid()}/${stripSpecialCharacters(
+            fileName
+          )}`,
+          decode(attachment.Content),
+          {
+            contentType,
+            upsert: true,
+          }
+        );
 
-      return {
-        email: res.FromFull.Email,
-        name: res.FromFull.Name,
-        subject,
-        team_id: teamData.id,
-        file_path: data.path.split("/"),
-        file_name: fileName,
-        content_type: contentType,
-        size: attachment.ContentLength,
-        html: res.HtmlBody,
-      };
+        console.log("Upload error", error);
+
+        return {
+          email: res.FromFull.Email,
+          name: res.FromFull.Name,
+          subject,
+          team_id: teamData.id,
+          file_path: data.path.split("/"),
+          file_name: fileName,
+          content_type: contentType,
+          size: attachment.ContentLength,
+          html: res.HtmlBody,
+        };
+      } catch (error) {
+        console.log(error);
+      }
     });
 
     if (records.length > 0) {
