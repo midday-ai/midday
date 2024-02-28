@@ -11,7 +11,8 @@ export function InboxEmpty({ inboxId }) {
           <p className="text-[#606060] text-sm">
             Use this email for online purchases to seamlessly
             <br />
-            match invoices againsts transactions.
+            match attached invoices againsts transactions. We will also forward
+            all emails to you.
           </p>
         </div>
 

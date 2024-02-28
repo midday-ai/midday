@@ -89,19 +89,6 @@ export function InboxView({
         return state.filter((item) => item.id !== payload.id);
       }
 
-      // if (payload.transaction_id) {
-      //   return items.map((item) => {
-      //     if (item.id === payload.id) {
-      //       return {
-      //         ...item,
-      //         transaction_id: payload.transaction_id,
-      //       };
-      //     }
-
-      //     return item;
-      //   });
-      // }
-
       return state;
     },
     {
