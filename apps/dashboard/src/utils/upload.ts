@@ -1,3 +1,5 @@
+import { stripSpecialCharacters } from "@midday/utils";
+import { SupabaseClient } from "@supabase/supabase-js";
 import * as tus from "tus-js-client";
 
 type ResumableUploadParmas = {
@@ -6,11 +8,6 @@ type ResumableUploadParmas = {
   bucket: string;
   onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
 };
-
-export function stripSpecialCharacters(inputString: string) {
-  // Use a regular expression to replace all non-alphanumeric characters except hyphen, space, dot,and parentheses with an empty string
-  return inputString.replace(/[^a-zA-Z0-9\s.()-]/g, "");
-}
 
 export async function resumableUpload(
   client: SupabaseClient,

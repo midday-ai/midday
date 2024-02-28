@@ -7,6 +7,7 @@ import {
   triggerBulk,
 } from "@midday/notification";
 import { createClient } from "@midday/supabase/server";
+import { stripSpecialCharacters } from "@midday/utils";
 import { decode } from "base64-arraybuffer";
 import { nanoid } from "nanoid";
 import { revalidateTag } from "next/cache";
@@ -26,11 +27,6 @@ const ipRange = [
   "50.31.156.77",
   "18.217.206.57",
 ];
-
-export function stripSpecialCharacters(inputString: string) {
-  // Use a regular expression to replace all non-alphanumeric characters except hyphen, space, dot,and parentheses with an empty string
-  return inputString.replace(/[^a-zA-Z0-9\s.()-]/g, "");
-}
 
 export async function POST(req: Request) {
   const supabase = createClient({ admin: true });

@@ -23,6 +23,7 @@
     "@midday/notification": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
+    "@midday/utils": "workspace:*",
     "@novu/headless": "^0.23.1",
     "@openstatus/react": "^0.0.3",
     "@tanstack/react-table": "^8.13.0",

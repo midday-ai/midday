@@ -4,7 +4,6 @@ import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
 import { formatSize } from "@/utils/format";
-import { stripSpecialCharacters } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
@@ -16,6 +15,7 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
+import { stripSpecialCharacters } from "@midday/utils";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
