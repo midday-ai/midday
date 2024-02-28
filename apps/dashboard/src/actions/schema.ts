@@ -13,7 +13,7 @@ export const updateTeamSchema = z.object({
   email: z.string().email().optional(),
   inbox_email: z.string().email().optional(),
   logo_url: z.string().url().optional(),
-  revalidatePath: z.string(),
+  revalidatePath: z.string().optional(),
 });
 
 export type UpdateTeamFormValues = z.infer<typeof updateTeamSchema>;

@@ -61,12 +61,7 @@ export function InboxDetailsSkeleton() {
   );
 }
 
-export function InboxDetails({
-  item,
-  updateInbox,
-  teamId,
-  latestTransactions,
-}) {
+export function InboxDetails({ item, updateInbox, teamId }) {
   const { toast } = useToast();
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(true);
@@ -238,7 +233,6 @@ export function InboxDetails({
             item={item}
             key={item.id}
             teamId={teamId}
-            latestTransactions={latestTransactions}
             onSelect={updateInbox}
             isLoaded={isLoaded}
           />

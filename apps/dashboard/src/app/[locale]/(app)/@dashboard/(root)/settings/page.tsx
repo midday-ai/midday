@@ -1,5 +1,4 @@
 import { DeleteTeam } from "@/components/delete-team";
-import { InboxEmail } from "@/components/inbox-email";
 import { TeamAvatar } from "@/components/team-avatar";
 import { TeamName } from "@/components/team-name";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -20,7 +19,6 @@ export default async function Account() {
         logoUrl={userData?.team?.logo_url}
       />
       <TeamName name={userData?.team?.name} />
-      <InboxEmail email={userData?.team?.inbox_email} />
       <DeleteTeam name={userData?.team?.name} teamId={userData?.team.id} />
     </div>
   );

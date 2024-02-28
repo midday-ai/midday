@@ -4,13 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { SelectTransaction } from "./select-transaction";
 
-export function InboxToolbar({
-  item,
-  teamId,
-  latestTransactions,
-  onSelect,
-  isLoaded,
-}) {
+export function InboxToolbar({ item, teamId, onSelect, isLoaded }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -29,7 +23,6 @@ export function InboxToolbar({
         <div className="backdrop-filter backdrop-blur-lg h-12 dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
           <SelectTransaction
             placeholder="Select transaction"
-            latestTransactions={latestTransactions}
             teamId={teamId}
             inboxId={item.id}
             selectedTransaction={item?.transaction}

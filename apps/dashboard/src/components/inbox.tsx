@@ -1,8 +1,4 @@
-import {
-  getInbox,
-  getTransactions,
-  getUser,
-} from "@midday/supabase/cached-queries";
+import { getInbox, getUser } from "@midday/supabase/cached-queries";
 import { revalidateTag } from "next/cache";
 import { InboxView } from "./inbox-view";
 
@@ -17,14 +13,6 @@ async function onRefresh() {
 export async function Inbox({ selectedId: initialSelectedId }) {
   const user = await getUser();
 
-  const transactions = await getTransactions({
-    from: 0,
-    to: 10,
-    filter: {
-      attachments: "exclude",
-    },
-  });
-
   // TODO: Fix Infinite Scroll
   const inbox = await getInbox({
     to: 10000,
@@ -37,10 +25,9 @@ export async function Inbox({ selectedId: initialSelectedId }) {
       key={selectedId}
       items={inbox?.data}
       inboxId={user?.data?.team?.inbox_id}
-      teamId={user?.data?.team?.id}
+      team={user?.data?.team}
       selectedId={selectedId}
       onRefresh={onRefresh}
-      latestTransactions={transactions?.data}
     />
   );
 }

@@ -14,6 +14,7 @@ import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
 import { InboxEmpty } from "./inbox-empty";
+import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
 export function InboxViewSkeleton() {
   return (
@@ -54,9 +55,8 @@ export function InboxViewSkeleton() {
 export function InboxView({
   items,
   inboxId,
-  teamId,
+  team,
   selectedId: initialSelectedId,
-  latestTransactions,
   onRefresh,
 }) {
   const [updates, setUpdates] = useState(false);
@@ -109,7 +109,7 @@ export function InboxView({
           event: "*",
           schema: "public",
           table: "inbox",
-          filter: `team_id=eq.${teamId}`,
+          filter: `team_id=eq.${team.id}`,
         },
         (payload) => {
           if (payload.eventType === "INSERT") {
@@ -134,7 +134,7 @@ export function InboxView({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [teamId, supabase]);
+  }, [team, supabase]);
 
   const selectedItems = optimisticData?.find((item) => item.id === selectedId);
 
@@ -158,8 +158,10 @@ export function InboxView({
             </TabsTrigger>
           </TabsList>
 
-          <div>
+          <div className="flex space-x-2">
             <CopyInput value={`${inboxId}@inbox.midday.ai`} />
+
+            <InboxSettingsModal email={team?.inbox_email} />
           </div>
         </div>
 
@@ -185,7 +187,7 @@ export function InboxView({
             <TabsContent value="pending" className="m-0 h-full">
               <InboxList
                 items={optimisticData.filter(
-                  (item) => item.pending || item.review
+                  (item) => item.pending && !item.transaction_id
                 )}
                 selectedId={selectedId}
                 updateInbox={updateInbox}
@@ -205,9 +207,8 @@ export function InboxView({
 
           <InboxDetails
             item={selectedItems}
-            latestTransactions={latestTransactions}
             updateInbox={updateInbox}
-            teamId={teamId}
+            teamId={team.id}
           />
         </div>
       </Tabs>

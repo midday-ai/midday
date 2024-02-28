@@ -14,11 +14,10 @@ export function SelectTransaction({
   onSelect,
   inboxId,
   teamId,
-  latestTransactions,
   selectedTransaction,
 }) {
   const supabase = createClient();
-  const [items, setItems] = useState(latestTransactions);
+  const [items, setItems] = useState([]);
   const [isFetching, setFetching] = useState(false);
   const [isHidden, setHidden] = useState(true);
   const [value, setValue] = useState<string>("");
@@ -41,10 +40,6 @@ export function SelectTransaction({
       id: inboxId,
       transaction_id: null,
     });
-  };
-
-  const handleFocus = () => {
-    setHidden(false);
   };
 
   const handleChange = (query) => {
@@ -110,7 +105,6 @@ export function SelectTransaction({
       <Icons.Search className="w-[22px] h-[22px] absolute left-4" />
       <Combobox
         key={selectedTransaction?.id}
-        onFocus={handleFocus}
         hidden={isHidden}
         placeholder={placeholder}
         className="w-full border-0 bg-transparent px-12 placeholder:text-muted-foreground dark:placeholder:text-foreground"
