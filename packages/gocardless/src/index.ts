@@ -347,7 +347,7 @@ const transformDescription = (transaction, name) => {
 
 export const transformTransactions = (transactions, { teamId, accountId }) => {
   // We want to insert transactions in reversed order so the incremental id in supabase is correct
-  return transactions?.reverse().map((transaction) => {
+  return transactions?.map((transaction) => {
     const method = mapTransactionMethod(
       transaction.proprietaryBankTransactionCode
     );

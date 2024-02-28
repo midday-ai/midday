@@ -23,11 +23,11 @@ const findValue = (entities, type) => {
 };
 
 client.defineJob({
-  id: Jobs.PROCESS_INBOX,
-  name: "Inbox - Process",
+  id: Jobs.PROCESS_DOCUMENT,
+  name: "Inbox - Document",
   version: "0.0.1",
   trigger: eventTrigger({
-    name: Events.PROCESS_INBOX,
+    name: Events.PROCESS_DOCUMENT,
     schema: z.object({
       inboxId: z.string(),
     }),
@@ -68,6 +68,13 @@ client.defineJob({
           const dueDate = findValue(entities, "due_date") ?? null;
           const issuerName = findValue(entities, "supplier_name") ?? null;
           const amount = findValue(entities, "total_amount") ?? null;
+          //   invoice_date: findValue(entities, "invoice_date"),
+          //   invoice_id: findValue(entities, "invoice_id"),
+          //   receiver_email: findValue(entities, "receiver_email"),
+          //   total_amount: findValue(entities, "total_amount"),
+          //   net_amount: findValue(entities, "net_amount"),
+          //   supplier_email: findValue(entities, "supplier_email"),
+          //   supplier_address: findValue(entities, "supplier_address"),
 
           const { data: updatedInboxData } = await io.supabase.client
             .from("inbox")

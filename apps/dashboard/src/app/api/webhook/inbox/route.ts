@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       await Promise.all(
         inboxData?.map((inbox) =>
           client.sendEvent({
-            name: Events.PROCESS_INBOX,
+            name: Events.PROCESS_DOCUMENT,
             payload: {
               inboxId: inbox.id,
             },
