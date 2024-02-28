@@ -32,7 +32,7 @@ export function InsightsWidget() {
         {examples.map((example) => (
           <li
             key={example.id}
-            className="rounded-lg dark:bg-secondary bg-background p-3 py-2 text-sm text-[#606060] hover:opacity-80 transition-all cursor-default"
+            className="rounded-lg dark:bg-secondary bg-[#F2F1EF] p-3 py-2 text-sm text-[#606060] hover:opacity-80 transition-all cursor-default"
           >
             <button onClick={() => setOpen(MenuOption.AI)} type="button">
               {example.label}
