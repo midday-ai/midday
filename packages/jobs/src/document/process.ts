@@ -24,7 +24,7 @@ const findValue = (entities, type) => {
 
 client.defineJob({
   id: Jobs.PROCESS_DOCUMENT,
-  name: "Inbox - Document",
+  name: "Document - Process",
   version: "0.0.1",
   trigger: eventTrigger({
     name: Events.PROCESS_DOCUMENT,
