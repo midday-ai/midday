@@ -106,27 +106,31 @@ export async function POST(req: Request) {
         )
         .eq("team_id", teamData.id);
 
-      const notificationEvents = await Promise.all(
-        usersData?.map(async ({ user, team_id }) => {
-          return inboxData?.map((inbox) => ({
-            name: TriggerEvents.InboxNewInApp,
-            payload: {
-              recordId: inbox.id,
-              description: `${inbox.name} - ${inbox.subject}`,
-              type: NotificationTypes.Inbox,
-            },
-            user: {
-              subscriberId: user.id,
-              teamId: team_id,
-              email: user.email,
-              fullName: user.full_name,
-              avatarUrl: user.avatar_url,
-            },
-          }));
-        })
-      );
+      try {
+        const notificationEvents = await Promise.all(
+          usersData?.map(async ({ user, team_id }) => {
+            return inboxData?.map((inbox) => ({
+              name: TriggerEvents.InboxNewInApp,
+              payload: {
+                recordId: inbox.id,
+                description: `${inbox.name} - ${inbox.subject}`,
+                type: NotificationTypes.Inbox,
+              },
+              user: {
+                subscriberId: user.id,
+                teamId: team_id,
+                email: user.email,
+                fullName: user.full_name,
+                avatarUrl: user.avatar_url,
+              },
+            }));
+          })
+        );
 
-      triggerBulk(notificationEvents?.flat());
+        triggerBulk(notificationEvents?.flat());
+      } catch (error) {
+        console.log(error);
+      }
 
       // NOTE: If we end up here the email was forwarded
       try {
