@@ -306,7 +306,7 @@ export async function getTransactionsQuery(
     query.select(`
       *,
       name:decrypted_name,
-      description:decrypted_description
+      description:decrypted_description,
       assigned:assigned_id(*),
       attachments:transaction_attachments!inner(id,size,name),
       bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))

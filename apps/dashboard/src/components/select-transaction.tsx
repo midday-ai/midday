@@ -19,7 +19,6 @@ export function SelectTransaction({
   const supabase = createClient();
   const [items, setItems] = useState([]);
   const [isFetching, setFetching] = useState(false);
-  const [isHidden, setHidden] = useState(true);
   const [value, setValue] = useState<string>("");
   const debouncedValue = useDebounce<string>(value, 200);
 
@@ -65,6 +64,9 @@ export function SelectTransaction({
           teamId,
           to: 25,
           from: 0,
+          filter: {
+            attachments: "exclude",
+          },
           search: {
             query: debouncedValue,
             fuzzy: true,
@@ -104,11 +106,9 @@ export function SelectTransaction({
     <div className="flex items-center w-full relative">
       <Icons.Search className="w-[22px] h-[22px] absolute left-4" />
       <Combobox
-        key={selectedTransaction?.id}
-        hidden={isHidden}
         placeholder={placeholder}
         className="w-full border-0 bg-transparent px-12 placeholder:text-muted-foreground dark:placeholder:text-foreground"
-        classNameList="bottom-[44px]"
+        classNameList="bottom-[45px] pt-3"
         value={value}
         defaultValue={selectedTransaction?.name}
         onValueChange={handleChange}

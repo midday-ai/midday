@@ -11,9 +11,9 @@ import {
 export function InboxStatus({ item }) {
   if (item?.transaction_id) {
     return (
-      <div className="flex space-x-1 items-center">
+      <div className="flex space-x-1 items-center py-1 px-2">
         <Icons.Check />
-        <span>Completed</span>
+        <span className="text-xs">Completed</span>
       </div>
     );
   }

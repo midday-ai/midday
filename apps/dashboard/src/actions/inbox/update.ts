@@ -11,6 +11,8 @@ export const updateInboxAction = action(updateInboxSchema, async (params) => {
 
   const { data: inboxData } = await updateInboxById(supabase, params);
 
+  let data = inboxData;
+
   if (params.transaction_id) {
     const { data: attachmentData } = await supabase
       .from("transaction_attachments")
@@ -25,22 +27,26 @@ export const updateInboxAction = action(updateInboxSchema, async (params) => {
       .select()
       .single();
 
-    await updateInboxById(supabase, {
+    const { data: updatedData } = await updateInboxById(supabase, {
       id: params.id,
       attachment_id: attachmentData.id,
     });
 
     revalidateTag(`transactions_${inboxData.team_id}`);
+
+    data = updatedData;
   } else {
-    await supabase
+    const { data: deletedData } = await supabase
       .from("transaction_attachments")
       .delete()
       .eq("id", inboxData.attachment_id);
 
     revalidateTag(`transactions_${inboxData.team_id}`);
+
+    data = deletedData;
   }
 
   revalidateTag(`inbox_${inboxData.team_id}`);
 
-  return inboxData;
+  return data;
 });
