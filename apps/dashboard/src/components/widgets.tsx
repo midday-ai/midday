@@ -27,13 +27,13 @@ export function Widgets({ disabled, initialPeriod, searchParams }) {
 
       <CarouselContent className="-ml-[40px]">
         <CarouselItem className="basis-1/3 pl-[40px]">
+          <Insights />
+        </CarouselItem>
+        <CarouselItem className="basis-1/3 pl-[40px]">
           <Spending disabled={disabled} initialPeriod={initialPeriod} />
         </CarouselItem>
         <CarouselItem className="basis-1/3 pl-[40px]">
           <Tracker date={searchParams?.date} />
-        </CarouselItem>
-        <CarouselItem className="basis-1/3 pl-[40px]">
-          <Insights />
         </CarouselItem>
         <CarouselItem className="basis-1/3 pl-[40px]">
           <Transactions disabled={disabled} />

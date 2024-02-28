@@ -1,59 +1,55 @@
-import { Typewriter } from "@/components/typewriter";
-import { getMetrics, getUser } from "@midday/supabase/cached-queries";
-import { format, startOfMonth, startOfYear, subMonths } from "date-fns";
-import { unstable_cache } from "next/cache";
-import OpenAI from "openai";
+"use client";
 
-const openai = new OpenAI();
+import { MenuOption, useCommandStore } from "@/store/command";
+import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
 
-export async function InsightsWidget() {
-  const userData = await getUser();
-  const teamId = userData?.data.team_id;
+const examples = [
+  {
+    id: 1,
+    label: "How much money did I earn last month?",
+  },
+  {
+    id: 2,
+    label: "What did I spend on software last year?",
+  },
+  {
+    id: 3,
+    label: "Show me all transactions without receipts last month",
+  },
+  {
+    id: 4,
+    label: "Show me all recurring costs this year",
+  },
+];
 
-  const type = "revenue";
+export function InsightsWidget() {
+  const { setOpen } = useCommandStore();
 
-  const result = await unstable_cache(
-    async () => {
-      const metrics = await getMetrics({
-        type: type,
-        from: subMonths(startOfMonth(new Date()), 12).toISOString(),
-        to: new Date().toISOString(),
-        period: "monthly",
-      });
-
-      if (metrics?.summary.currentTotal > 0) {
-        const content = metrics.result.map(
-          (period) =>
-            `${format(new Date(period.current.date), "MMMM")} ${Math.round(
-              period.current.value
-            )} ${period.current.currency}`
-        );
-
-        const chatCompletion = await openai.chat.completions.create({
-          messages: [
-            {
-              role: "system",
-              content: `
-                ${content.join("\n")} \n
-                You are a forecast bot that forecasts this months ${type} based on the last 12 months of ${type}, only return the forecast result, also tell if the bussiness is doing well. But keep it around 250 characters`,
-            },
-          ],
-          temperature: 1,
-          max_tokens: 100,
-          model: "gpt-3.5-turbo",
-        });
-
-        return chatCompletion.choices.at(0)?.message?.content;
-      }
-
-      return `We currently lack sufficient data to accurately forecast your ${type}. As you continue to get more transactions, we will be able to provide more precise insights and updates.`;
-    },
-    ["insights", teamId],
-    {
-      revalidate: 86400, // NOTE: 1d
-      tags: [`insights_${teamId}`],
-    }
-  )(type, teamId);
-
-  return <Typewriter text={result} />;
+  return (
+    <div className="flex flex-col h-full">
+      <ul className="flex h-full flex-col justify-center items-center space-y-3">
+        {examples.map((example) => (
+          <li
+            key={example.id}
+            className="rounded-lg dark:bg-secondary bg-background p-3 py-2 text-sm text-[#606060] hover:opacity-80 transition-all cursor-default"
+          >
+            <button onClick={() => setOpen(MenuOption.AI)} type="button">
+              {example.label}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <div className="relative">
+          <Input
+            placeholder="Ask Midday AI a question..."
+            className="w-full mt-auto mb-8 h-11 rounded-lg cursor-pointer"
+            onFocus={() => setOpen(MenuOption.AI)}
+          />
+          <Icons.LogoIcon className="absolute right-3 bottom-3 pointer-events-none" />
+        </div>
+      </div>
+    </div>
+  );
 }
