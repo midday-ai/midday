@@ -7,18 +7,22 @@ import { Input } from "@midday/ui/input";
 const examples = [
   {
     id: 1,
-    label: "How much money did I earn last month?",
+    label: `What's my business burn rate?`,
   },
   {
     id: 2,
-    label: "What did I spend on software last year?",
+    label: "How much money did I earn last month?",
   },
   {
     id: 3,
-    label: "Show me all transactions without receipts last month",
+    label: "What did I spend on software last year?",
   },
   {
     id: 4,
+    label: "Show me all transactions without receipts last month",
+  },
+  {
+    id: 5,
     label: "Show me all recurring costs this year",
   },
 ];
