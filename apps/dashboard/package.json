@@ -39,7 +39,7 @@
     "change-case": "^5.4.3",
     "dub": "^0.8.0",
     "fast-csv": "^5.0.1",
-    "framer-motion": "^11.0.6",
+    "framer-motion": "^11.0.7",
     "geist": "^1.2.2",
     "headless-currency-input": "^1.1.0",
     "loops": "0.3.0",
@@ -71,7 +71,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.9.2",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.22",
+    "@types/node": "^20.11.23",
     "@types/react": "^18.2.60",
     "@types/react-dom": "^18.2.19",
     "typescript": "^5.3.3"

@@ -56,11 +56,9 @@ export function EmptyStateInvoice() {
         <div className="flex justify-between items-center flex-col mt-8 text-center">
           <h2 className="font-medium mb-4">Create invoices</h2>
           <p className="text-sm text-[#878787]">
-            We’re working hard to reimagine the way invoicing gets done. Soon
-            <br />
-            we’ll be releasing web-based invoicing with extra features, such as
-            <br />
-            live collaboration and project sync.
+            Soon we’ll be releasing our invoicing service, <br /> which can be
+            based on your tracked time and automatically
+            <br /> matched against incoming transactions.
           </p>
         </div>
 
