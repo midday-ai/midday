@@ -8,7 +8,7 @@ export function CommandAI() {
   const { setMenu } = useCommandStore();
 
   return (
-    <div className="h-full">
+    <div className="h-[500px]">
       <div className="p-5 flex items-center space-x-3">
         <BackButton />
         <h2>Midday AI</h2>

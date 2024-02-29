@@ -1,4 +1,6 @@
 import { env } from "@/env.mjs";
+import { LogEvents } from "@midday/events/events";
+import { logsnag } from "@midday/events/server";
 import { Events } from "@midday/jobs";
 import { client } from "@midday/jobs/src/client";
 import {
@@ -65,7 +67,9 @@ export async function POST(req: Request) {
           }
         );
 
-        console.log("Upload error", error);
+        if (error) {
+          console.log("Upload error", error);
+        }
 
         return {
           email: res.FromFull.Email,
@@ -86,14 +90,14 @@ export async function POST(req: Request) {
     if (records.length > 0) {
       const insertData = await Promise.all(records);
 
-      console.log(insertData);
-
       const { data: inboxData, error } = await supabase
         .from("decrypted_inbox")
         .insert(insertData)
         .select("*, name:decrypted_name, subject:decrypted_subject");
 
-      console.log("inbox error", error);
+      if (error) {
+        console.log("inbox error", error);
+      }
 
       await Promise.all(
         inboxData?.map((inbox) =>
@@ -105,8 +109,6 @@ export async function POST(req: Request) {
           })
         )
       );
-
-      console.log("inboxData", inboxData);
 
       const { data: usersData } = await supabase
         .from("users_on_team")

@@ -3,8 +3,10 @@
 import { MenuOption, useCommandStore } from "@/store/command";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
+import { shuffle } from "@midday/utils";
+import { useEffect, useState } from "react";
 
-const examples = [
+const defaultExamples = [
   {
     id: 1,
     label: `What's my business burn rate?`,
@@ -25,15 +27,30 @@ const examples = [
     id: 5,
     label: "Show me all recurring costs this year",
   },
+  {
+    id: 6,
+    label: "Show me recurring services we paying for",
+  },
+  {
+    id: 7,
+    label: "What are our biggest expeend categories?",
+  },
 ];
 
 export function InsightsWidget() {
   const { setOpen } = useCommandStore();
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    // TODO: Get latest questions from localStorage
+    const randomExamples = shuffle(defaultExamples).slice(0, 5);
+    setItems(randomExamples);
+  }, []);
 
   return (
     <div className="flex flex-col h-full">
       <ul className="flex h-full flex-col justify-center items-center space-y-3">
-        {examples.map((example) => (
+        {items.map((example) => (
           <li
             key={example.id}
             className="rounded-lg dark:bg-secondary bg-[#F2F1EF] p-3 py-2 text-sm text-[#606060] hover:opacity-80 transition-all cursor-default"
