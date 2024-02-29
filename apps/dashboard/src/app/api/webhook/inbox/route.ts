@@ -35,6 +35,12 @@ export async function POST(req: Request) {
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for");
 
+  logsnag.track({
+    event: LogEvents.InboxInbound.name,
+    icon: LogEvents.InboxInbound.icon,
+    channel: LogEvents.InboxInbound.channel,
+  });
+
   if (res?.To && ipRange.includes(clientIP)) {
     const email = res?.To;
     const [inboxId] = email.split("@");

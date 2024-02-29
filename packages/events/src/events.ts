@@ -164,4 +164,9 @@ export const LogEvents = {
     icon: "💭",
     channel: "feedback",
   },
+  InboxInbound: {
+    name: "Inbox Inbound",
+    icon: "📥",
+    channel: "inbox",
+  },
 };
