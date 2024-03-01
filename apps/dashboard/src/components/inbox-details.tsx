@@ -17,7 +17,7 @@ import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { FilePreview } from "./file-preview";
+import { FilePreview, FileType } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
 
@@ -66,11 +66,6 @@ export function InboxDetails({ item, updateInbox, teamId }) {
   const [hasError, setError] = useState(false);
   const [isLoading, setLoading] = useState(true);
   const [isLoaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    setLoaded(true);
-    setError(false);
-  }, [item?.id]);
 
   const handleCopyUrl = async () => {
     try {
@@ -219,19 +214,17 @@ export function InboxDetails({ item, updateInbox, teamId }) {
               <FilePreview
                 src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
                 name={item.name}
-                type="application/pdf"
+                type={FileType.Pdf}
                 width={680}
                 height={900}
                 disableFullscreen
-                key={item.id}
-                onLoaded={setLoaded}
+                onLoaded={() => setLoaded(true)}
               />
             )}
           </div>
 
           <InboxToolbar
-            item={item}
-            key={item.id}
+            selectedItem={item}
             teamId={teamId}
             onSelect={updateInbox}
             isLoaded={isLoaded}

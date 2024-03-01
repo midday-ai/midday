@@ -274,23 +274,6 @@ export const getUserInvites = async () => {
   )();
 };
 
-export const getInbox = async (params) => {
-  const supabase = createClient();
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  return unstable_cache(
-    async () => {
-      return getInboxQuery(supabase, { ...params, teamId });
-    },
-    ["inbox", teamId],
-    {
-      tags: [`inbox_${teamId}`],
-      revalidate: 180,
-    }
-  )(params);
-};
-
 export const getTrackerProjects = async (params) => {
   const supabase = createClient();
   const user = await getUser();

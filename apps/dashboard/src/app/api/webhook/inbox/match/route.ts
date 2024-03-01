@@ -71,7 +71,6 @@ export async function POST(req: Request) {
     });
 
     revalidateTag(`transactions_${inbox.team_id}`);
-    revalidateTag(`inbox_${inbox.team_id}`);
 
     const { data: usersData } = await supabase
       .from("users_on_team")

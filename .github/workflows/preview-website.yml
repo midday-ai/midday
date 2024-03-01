@@ -20,7 +20,7 @@ jobs:
         uses: rlespinasse/github-slug-action@v4
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: "1.0.28"
+          bun-version: "1.0.29"
       - name: Install dependencies
         run: bun install --frozen-lockfile
       - name: 📤 Pull Vercel Environment Information

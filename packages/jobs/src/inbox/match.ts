@@ -75,7 +75,6 @@ client.defineJob({
       );
 
       revalidateTag(`transactions_${inboxData.team_id}`);
-      revalidateTag(`inbox_${inboxData.team_id}`);
 
       const { data: usersData } = await io.supabase.client
         .from("users_on_team")

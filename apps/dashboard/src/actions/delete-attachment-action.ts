@@ -26,8 +26,6 @@ export const deleteAttachmentAction = action(
       })
       .eq("transaction_id", data.transaction_id);
 
-    revalidateTag(`inbox_${user.data.team_id}`);
-
     logsnag.track({
       event: LogEvents.DeleteAttachment.name,
       icon: LogEvents.DeleteAttachment.icon,

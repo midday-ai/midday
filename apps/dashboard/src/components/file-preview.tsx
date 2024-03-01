@@ -8,10 +8,12 @@ import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
-enum FileType {
+export enum FileType {
   Pdf = "application/pdf",
   Heic = "image/heic",
 }
@@ -62,8 +64,6 @@ export function FilePreview({
   disableFullscreen,
   onLoaded,
 }: Props) {
-  let content;
-
   const [numPages, setNumPages] = useState<number>(0);
   const [isLoaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
@@ -74,8 +74,10 @@ export function FilePreview({
     numPages: number;
   }) => {
     if (onLoaded) {
-      onLoaded(true);
+      onLoaded();
     }
+
+    setLoaded(true);
 
     setNumPages(nextNumPages);
   };
@@ -84,49 +86,50 @@ export function FilePreview({
     setLoaded(true);
 
     if (onLoaded) {
-      onLoaded(true);
+      onLoaded();
     }
   };
 
-  if (type?.startsWith("image")) {
-    content = (
-      <div className={cn("flex items-center justify-center", className)}>
-        <img
-          src={src}
-          className="object-contain"
-          alt={name}
-          onError={() => setError(true)}
-          onLoad={handleOnLoaded}
-        />
-      </div>
-    );
-  }
+  const RenderComponent = () => {
+    if (type?.startsWith("image")) {
+      return (
+        <div className={cn("flex items-center justify-center", className)}>
+          <img
+            src={src}
+            className="object-contain"
+            alt={name}
+            onError={() => setError(true)}
+            onLoad={handleOnLoaded}
+          />
+        </div>
+      );
+    }
 
-  if (type === FileType.Pdf) {
-    content = (
-      <div style={{ width, height }} className="pdf-viewer">
-        <Document
-          file={src}
-          onLoadSuccess={onDocumentLoadSuccess}
-          renderMode="canvas"
-        >
-          <div className="overflow-auto" style={{ height }}>
-            {Array.from(new Array(numPages), (_, index) => (
-              <Page
-                key={`page_${index + 1}`}
-                pageNumber={index + 1}
-                width={width}
-                onLoadSuccess={() => setLoaded(true)}
-                onRenderError={() => setLoaded(true)}
-                renderAnnotationLayer={false}
-                renderTextLayer={false}
-              />
-            ))}
+    switch (type) {
+      case FileType.Pdf:
+        return (
+          <div style={{ width, height }} className="pdf-viewer">
+            <Document
+              file={src}
+              onLoadSuccess={onDocumentLoadSuccess}
+              // renderMode="canvas"
+            >
+              <div className="overflow-auto" style={{ height }}>
+                {Array.from(new Array(numPages), (_, index) => (
+                  <Page
+                    key={`page_${index + 1}`}
+                    pageNumber={index + 1}
+                    width={width}
+                  />
+                ))}
+              </div>
+            </Document>
           </div>
-        </Document>
-      </div>
-    );
-  }
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <Dialog>
@@ -187,7 +190,7 @@ export function FilePreview({
             error && "opacity-1 bg-transparent"
           )}
         >
-          {error ? <Icons.Image size={16} /> : content}
+          {error ? <Icons.Image size={16} /> : <RenderComponent type={type} />}
         </div>
       </div>
 

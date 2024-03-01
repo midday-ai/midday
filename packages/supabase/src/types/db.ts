@@ -130,6 +130,7 @@ export type Database = {
           email: string | null
           file_name: string | null
           file_path: string[] | null
+          forwarded_to: string | null
           html: string | null
           id: string
           issuer_name: string | null
@@ -152,6 +153,7 @@ export type Database = {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          forwarded_to?: string | null
           html?: string | null
           id?: string
           issuer_name?: string | null
@@ -174,6 +176,7 @@ export type Database = {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          forwarded_to?: string | null
           html?: string | null
           id?: string
           issuer_name?: string | null
@@ -201,14 +204,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inbox_transaction_id_fkey"
+            foreignKeyName: "public_inbox_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "decrypted_transactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inbox_transaction_id_fkey"
+            foreignKeyName: "public_inbox_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
@@ -219,6 +222,7 @@ export type Database = {
       reports: {
         Row: {
           created_at: string
+          expire_at: string | null
           from: string | null
           id: string
           link_id: string | null
@@ -229,6 +233,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          expire_at?: string | null
           from?: string | null
           id?: string
           link_id?: string | null
@@ -239,6 +244,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          expire_at?: string | null
           from?: string | null
           id?: string
           link_id?: string | null
@@ -482,24 +488,24 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "transaction_attachments_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transaction_attachments_transaction_id_fkey"
+            foreignKeyName: "public_transaction_attachments_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "decrypted_transactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transaction_attachments_transaction_id_fkey"
+            foreignKeyName: "public_transaction_attachments_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_attachments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           }
         ]
@@ -548,6 +554,7 @@ export type Database = {
           currency_rate: number | null
           currency_source: string | null
           date: string
+          description: string | null
           id: string
           internal_id: string
           manual: boolean | null
@@ -569,6 +576,7 @@ export type Database = {
           currency_rate?: number | null
           currency_source?: string | null
           date: string
+          description?: string | null
           id?: string
           internal_id: string
           manual?: boolean | null
@@ -590,6 +598,7 @@ export type Database = {
           currency_rate?: number | null
           currency_source?: string | null
           date?: string
+          description?: string | null
           id?: string
           internal_id?: string
           manual?: boolean | null
@@ -896,6 +905,7 @@ export type Database = {
           email: string | null
           file_name: string | null
           file_path: string[] | null
+          forwarded_to: string | null
           html: string | null
           id: string | null
           issuer_name: string | null
@@ -922,6 +932,7 @@ export type Database = {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          forwarded_to?: string | null
           html?: string | null
           id?: string | null
           issuer_name?: string | null
@@ -948,6 +959,7 @@ export type Database = {
           email?: string | null
           file_name?: string | null
           file_path?: string[] | null
+          forwarded_to?: string | null
           html?: string | null
           id?: string | null
           issuer_name?: string | null
@@ -975,14 +987,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inbox_transaction_id_fkey"
+            foreignKeyName: "public_inbox_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inbox_transaction_id_fkey"
+            foreignKeyName: "public_inbox_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "decrypted_transactions"
@@ -1037,7 +1049,9 @@ export type Database = {
           currency_rate: number | null
           currency_source: string | null
           date: string | null
+          decrypted_description: string | null
           decrypted_name: string | null
+          description: string | null
           id: string | null
           internal_id: string | null
           manual: boolean | null
@@ -1059,7 +1073,9 @@ export type Database = {
           currency_rate?: number | null
           currency_source?: string | null
           date?: string | null
+          decrypted_description?: never
           decrypted_name?: never
+          description?: string | null
           id?: string | null
           internal_id?: string | null
           manual?: boolean | null
@@ -1081,7 +1097,9 @@ export type Database = {
           currency_rate?: number | null
           currency_source?: string | null
           date?: string | null
+          decrypted_description?: never
           decrypted_name?: never
+          description?: string | null
           id?: string | null
           internal_id?: string | null
           manual?: boolean | null

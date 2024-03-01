@@ -160,8 +160,6 @@ export async function POST(req: Request) {
       } catch (error) {
         console.log(error);
       }
-
-      revalidateTag(`inbox_${teamData.id}`);
     }
 
     if (teamData?.inbox_email) {

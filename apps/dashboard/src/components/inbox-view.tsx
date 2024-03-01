@@ -9,7 +9,6 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 import { CopyInput } from "./copy-input";
@@ -57,11 +56,9 @@ export function InboxView({
   inboxId,
   team,
   selectedId: initialSelectedId,
-  onRefresh,
 }) {
   const [updates, setUpdates] = useState(false);
   const supabase = createClient();
-  const router = useRouter();
 
   const [selectedId, setSelectedId] = useQueryState("id", {
     defaultValue: initialSelectedId,
@@ -72,69 +69,70 @@ export function InboxView({
     updateInboxAction,
     items,
     (state, payload) => {
-      if (payload.read) {
-        return items.map((item) => {
-          if (item.id === payload.id) {
-            return {
-              ...item,
-              read: true,
-            };
-          }
-
-          return item;
-        });
-      }
-
       if (payload.trash) {
         return state.filter((item) => item.id !== payload.id);
       }
 
-      return state;
+      return items.map((item) => {
+        if (item.id === payload.id) {
+          return {
+            ...item,
+            ...payload,
+          };
+        }
+
+        return item;
+      });
     },
     {
       onExecute: (input) => {
         if (input.trash) {
-          router.push("/inbox");
+          const deleteIndex = optimisticData.findIndex(
+            (item) => item.id === input.id
+          );
+
+          const selectIndex = deleteIndex > 0 ? deleteIndex - 1 : 0;
+          setSelectedId(optimisticData?.at(selectIndex)?.id);
         }
       },
     }
   );
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("realtime_inbox")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "inbox",
-          filter: `team_id=eq.${team.id}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setUpdates(true);
+  // useEffect(() => {
+  //   const channel = supabase
+  //     .channel("realtime_inbox")
+  //     .on(
+  //       "postgres_changes",
+  //       {
+  //         event: "*",
+  //         schema: "public",
+  //         table: "inbox",
+  //         filter: `team_id=eq.${team.id}`,
+  //       },
+  //       (payload) => {
+  //         if (payload.eventType === "INSERT") {
+  //           setUpdates(true);
 
-            // If nothing in inbox yet
-            if (!optimisticData?.length) {
-              onRefresh();
-            }
-          }
+  //           // If nothing in inbox yet
+  //           if (!optimisticData?.length) {
+  //             onRefresh();
+  //           }
+  //         }
 
-          if (payload.eventType === "UPDATE") {
-            // Refetch cached data
-            onRefresh();
-            // Refetch client
-            router.refresh();
-          }
-        }
-      )
-      .subscribe();
+  //         // if (payload.eventType === "UPDATE") {
+  //         //   // Refetch cached data
+  //         //   onRefresh();
+  //         //   // Refetch client
+  //         //   router.refresh();
+  //         // }
+  //       }
+  //     )
+  //     .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [team, supabase]);
+  //   return () => {
+  //     supabase.removeChannel(channel);
+  //   };
+  // }, [team, supabase]);
 
   const selectedItems = optimisticData?.find((item) => item.id === selectedId);
 
@@ -160,7 +158,6 @@ export function InboxView({
 
           <div className="flex space-x-2">
             <CopyInput value={`${inboxId}@inbox.midday.ai`} />
-
             <InboxSettingsModal email={team?.inbox_email} />
           </div>
         </div>
@@ -170,7 +167,6 @@ export function InboxView({
             <InboxUpdates
               show={Boolean(updates)}
               onRefresh={() => {
-                onRefresh();
                 setUpdates(false);
               }}
             />

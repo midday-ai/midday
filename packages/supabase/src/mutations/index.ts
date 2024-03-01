@@ -408,12 +408,46 @@ export async function updateInboxById(
 ) {
   const { id, ...data } = params;
 
-  return await supabase
+  const inbox = await supabase
     .from("inbox")
     .update(data)
     .eq("id", id)
     .select()
     .single();
+
+  const { data: inboxData } = inbox;
+
+  if (inboxData && params.transaction_id) {
+    const { data: attachmentData } = await supabase
+      .from("transaction_attachments")
+      .insert({
+        type: inboxData.content_type,
+        path: inboxData.file_path,
+        transaction_id: params.transaction_id,
+        size: inboxData.size,
+        name: inboxData.file_name,
+      })
+      .select()
+      .single();
+
+    if (attachmentData) {
+      return supabase
+        .from("inbox")
+        .update({ attachment_id: attachmentData.id })
+        .eq("id", params.id)
+        .select()
+        .single();
+    }
+  } else {
+    if (inboxData?.attachment_id) {
+      return supabase
+        .from("transaction_attachments")
+        .delete()
+        .eq("id", inboxData.attachment_id);
+    }
+  }
+
+  return inbox;
 }
 
 type CreateProjectParams = {

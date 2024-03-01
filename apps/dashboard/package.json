@@ -13,7 +13,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@baselime/node-opentelemetry": "^0.3.8",
+    "@baselime/node-opentelemetry": "^0.3.9",
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/gocardless": "workspace:*",
@@ -39,7 +39,7 @@
     "change-case": "^5.4.3",
     "dub": "^0.8.0",
     "fast-csv": "^5.0.1",
-    "framer-motion": "^11.0.7",
+    "framer-motion": "^11.0.8",
     "geist": "^1.2.2",
     "headless-currency-input": "^1.1.0",
     "loops": "0.3.0",
@@ -58,7 +58,7 @@
     "react-intersection-observer": "^9.8.1",
     "react-pdf": "^7.7.1",
     "react-pin-field": "^3.1.5",
-    "recharts": "^2.12.1",
+    "recharts": "^2.12.2",
     "resend": "^3.2.0",
     "sharp": "^0.33.2",
     "tus-js-client": "^4.0.1",
@@ -71,8 +71,8 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.9.2",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.23",
-    "@types/react": "^18.2.60",
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.61",
     "@types/react-dom": "^18.2.19",
     "typescript": "^5.3.3"
   }
