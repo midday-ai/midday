@@ -6,12 +6,12 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 export enum FileType {
   Pdf = "application/pdf",
@@ -52,6 +52,66 @@ export const isSupportedFilePreview = (type: FileType) => {
   }
 };
 
+const RenderComponent = ({
+  type,
+  src,
+  className,
+  width,
+  height,
+  onLoaded,
+  setError,
+}) => {
+  const [numPages, setNumPages] = useState<number>(0);
+
+  const onDocumentLoadSuccess = ({
+    numPages: nextNumPages,
+  }: {
+    numPages: number;
+  }) => {
+    onLoaded(true);
+    setNumPages(nextNumPages);
+  };
+
+  const handleOnLoaded = () => {
+    onLoaded(true);
+  };
+
+  if (type?.startsWith("image")) {
+    return (
+      <div className={cn("flex items-center justify-center", className)}>
+        <img
+          src={src}
+          className="object-contain"
+          alt="Preview"
+          onError={() => setError(true)}
+          onLoad={handleOnLoaded}
+        />
+      </div>
+    );
+  }
+
+  switch (type) {
+    case FileType.Pdf:
+      return (
+        <div style={{ width, height }} className="pdf-viewer">
+          <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
+            <div className="overflow-auto" style={{ height }}>
+              {Array.from(new Array(numPages), (_, index) => (
+                <Page
+                  key={`page_${index + 1}`}
+                  pageNumber={index + 1}
+                  width={width}
+                />
+              ))}
+            </div>
+          </Document>
+        </div>
+      );
+    default:
+      return null;
+  }
+};
+
 export function FilePreview({
   src,
   className,
@@ -64,72 +124,12 @@ export function FilePreview({
   disableFullscreen,
   onLoaded,
 }: Props) {
-  const [numPages, setNumPages] = useState<number>(0);
   const [isLoaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
-  const onDocumentLoadSuccess = ({
-    numPages: nextNumPages,
-  }: {
-    numPages: number;
-  }) => {
-    if (onLoaded) {
-      onLoaded();
-    }
-
-    setLoaded(true);
-
-    setNumPages(nextNumPages);
-  };
-
-  const handleOnLoaded = () => {
-    setLoaded(true);
-
-    if (onLoaded) {
-      onLoaded();
-    }
-  };
-
-  const RenderComponent = () => {
-    if (type?.startsWith("image")) {
-      return (
-        <div className={cn("flex items-center justify-center", className)}>
-          <img
-            src={src}
-            className="object-contain"
-            alt={name}
-            onError={() => setError(true)}
-            onLoad={handleOnLoaded}
-          />
-        </div>
-      );
-    }
-
-    switch (type) {
-      case FileType.Pdf:
-        return (
-          <div style={{ width, height }} className="pdf-viewer">
-            <Document
-              file={src}
-              onLoadSuccess={onDocumentLoadSuccess}
-              // renderMode="canvas"
-            >
-              <div className="overflow-auto" style={{ height }}>
-                {Array.from(new Array(numPages), (_, index) => (
-                  <Page
-                    key={`page_${index + 1}`}
-                    pageNumber={index + 1}
-                    width={width}
-                  />
-                ))}
-              </div>
-            </Document>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
+  useEffect(() => {
+    setLoaded(false);
+  }, [src]);
 
   return (
     <Dialog>
@@ -190,7 +190,22 @@ export function FilePreview({
             error && "opacity-1 bg-transparent"
           )}
         >
-          {error ? <Icons.Image size={16} /> : <RenderComponent type={type} />}
+          {error ? (
+            <Icons.Image size={16} />
+          ) : (
+            <RenderComponent
+              type={type}
+              src={src}
+              className={className}
+              width={width}
+              height={height}
+              onLoaded={() => {
+                setLoaded(true);
+                onLoaded?.();
+              }}
+              setError={setError}
+            />
+          )}
         </div>
       </div>
 

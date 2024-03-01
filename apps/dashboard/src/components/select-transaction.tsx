@@ -4,7 +4,7 @@ import { createClient } from "@midday/supabase/client";
 import { getTransactionsQuery } from "@midday/supabase/queries";
 import { Combobox } from "@midday/ui/combobox";
 import { format } from "date-fns";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FormatAmount } from "./format-amount";
 
 export function SelectTransaction({
@@ -28,12 +28,14 @@ export function SelectTransaction({
   const handleOnSelect = (option) => {
     onSelect({
       id: inboxId,
-      transaction_id: option?.value,
+      transaction_id: option?.id,
     });
   };
 
   const handleChange = async (value: string) => {
     if (value.length > 0) {
+      setLoading(true);
+
       try {
         const { data } = await getTransactionsQuery(supabase, {
           teamId,
@@ -57,30 +59,31 @@ export function SelectTransaction({
   };
 
   const options = items.map((item) => ({
-    value: item.id,
-    label: item.name,
-    // component: () => (
-    //   <div className="dark:text-white flex w-full">
-    //     <div className="w-[50%] line-clamp-1 text-ellipsis overflow-hidden pr-8">
-    //       {item.name}
-    //     </div>
-    //     <div className="w-[70px]">{format(new Date(item.date), "d MMM")}</div>
-    //     <div className="flex-1 text-right">
-    //       <FormatAmount amount={item.amount} currency={item.currency} />
-    //     </div>
-    //   </div>
-    // ),
+    id: item.id,
+    name: item.name,
+    component: () => (
+      <div className="dark:text-white flex w-full">
+        <div className="w-[50%] line-clamp-1 text-ellipsis overflow-hidden pr-8">
+          {item.name}
+        </div>
+        <div className="w-[70px]">{format(new Date(item.date), "d MMM")}</div>
+        <div className="flex-1 text-right">
+          <FormatAmount amount={item.amount} currency={item.currency} />
+        </div>
+      </div>
+    ),
   }));
 
   const selectedValue = selectedTransaction && {
-    value: selectedTransaction.id,
-    label: selectedTransaction.name,
+    id: selectedTransaction.id,
+    name: selectedTransaction.name,
   };
 
   return (
     <Combobox
       placeholder={placeholder}
-      className="w-full border-0 bg-transparent px-12 placeholder:text-muted-foreground dark:placeholder:text-foreground"
+      className="w-full border-0 bg-transparent px-12"
+      classNameList="bottom-[60px]"
       onValueChange={handleChange}
       onSelect={handleOnSelect}
       onRemove={handleOnRemove}

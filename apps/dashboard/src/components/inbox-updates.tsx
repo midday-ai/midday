@@ -11,8 +11,7 @@ export function InboxUpdates({ show, onRefresh }) {
     >
       <Button
         onClick={onRefresh}
-        variant="secondary"
-        className="rounded-full space-x-2 hover:bg-secondary"
+        className="rounded-full border space-x-2 text-sm font-normal"
       >
         <Icons.Refresh />
         <span>Updates</span>

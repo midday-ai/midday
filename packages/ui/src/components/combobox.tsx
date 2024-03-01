@@ -1,6 +1,7 @@
 "use client";
 
 import { Command as CommandPrimitive } from "cmdk";
+import { Loader2 } from "lucide-react";
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "../utils/cn";
@@ -12,19 +13,21 @@ import {
 } from "./command";
 import { Icons } from "./icons";
 
-export type Option = Record<"value" | "label", string> & Record<string, string>;
+export type Option = Record<"id" | "name", string> & Record<string, string>;
 
 type AutoCompleteProps = {
   options: Option[];
   emptyMessage: string;
   value?: Option;
   onSelect?: (value?: Option) => void;
+  onCreate?: (value?: string) => void;
   onRemove?: () => void;
   onValueChange?: (value: string) => void;
   isLoading?: boolean;
   disabled?: boolean;
   placeholder?: string;
   className?: string;
+  classNameList?: string;
 };
 
 export const Combobox = ({
@@ -33,19 +36,33 @@ export const Combobox = ({
   value,
   onSelect,
   onRemove,
+  onCreate,
   disabled,
   className,
+  classNameList,
   isLoading = false,
   onValueChange,
 }: AutoCompleteProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<Option | undefined>(value as Option);
-  const [inputValue, setInputValue] = useState<string>(value?.label || "");
+  const [inputValue, setInputValue] = useState<string>(value?.name || "");
 
   const handleOnValueChange = (value: string) => {
     setInputValue(value);
     onValueChange?.(value);
+
+    if (value) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  };
+
+  const handleOnCreate = (value: string) => {
+    console.log(value);
+    handleOnValueChange(value);
+    onCreate?.(value);
   };
 
   const handleOnRemove = () => {
@@ -54,45 +71,20 @@ export const Combobox = ({
     onRemove?.();
   };
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLDivElement>) => {
-      const input = inputRef.current;
-      if (!input) {
-        return;
-      }
-
-      // Keep the options displayed when the user is typing
-      if (!isOpen && value?.label !== input.value) {
-        setOpen(true);
-      }
-
-      // This is not a default behaviour of the <input /> field
-      if (event.key === "Enter" && input.value !== "") {
-        const optionToSelect = options.find(
-          (option) => option.label === input.value
-        );
-
-        if (optionToSelect) {
-          setSelected(optionToSelect);
-          onSelect?.(optionToSelect);
-        }
-      }
-
-      if (event.key === "Escape") {
-        input.blur();
-      }
-    },
-    [isOpen, options, onSelect]
-  );
-
   const handleBlur = useCallback(() => {
     setOpen(false);
-    setInputValue(selected?.label);
+    setInputValue(selected?.name);
   }, [selected]);
+
+  const handleOnFocus = () => {
+    if (inputValue !== value?.name) {
+      setOpen(true);
+    }
+  };
 
   const handleSelectOption = useCallback(
     (selectedOption: Option) => {
-      setInputValue(selectedOption.label);
+      setInputValue(selectedOption.name);
 
       setSelected(selectedOption);
       onSelect?.(selectedOption);
@@ -107,7 +99,7 @@ export const Combobox = ({
   );
 
   return (
-    <CommandPrimitive onKeyDown={handleKeyDown} className="w-full">
+    <CommandPrimitive className="w-full">
       <div className="flex items-center w-full relative">
         <Icons.Search className="w-[22px] h-[22px] absolute left-4 pointer-events-none" />
 
@@ -116,11 +108,16 @@ export const Combobox = ({
           value={inputValue}
           onValueChange={handleOnValueChange}
           onBlur={handleBlur}
-          onFocus={() => setOpen(true)}
+          onFocus={handleOnFocus}
           placeholder={placeholder}
           disabled={disabled}
           className={className}
         />
+
+        {isLoading && (
+          <Loader2 className="w-[20px] h-[20px] absolute right-4 animate-spin text-dark-gray" />
+        )}
+
         {!isLoading && selected && (
           <Icons.Close
             className="w-[20px] h-[20px] absolute right-4"
@@ -130,37 +127,50 @@ export const Combobox = ({
       </div>
 
       <div className="relative w-full">
-        {isOpen ? (
-          <div className="absolute bottom-[60px] z-10 w-full rounded-xl outline-none animate-in fade-in-0 zoom-in-95 bg-accent">
-            <CommandList className="w-full rounded-lg">
-              {options.length > 0 && !isLoading ? (
-                <CommandGroup className="w-full max-h-[250px] overflow-auto">
-                  {options.map((option) => {
-                    const isSelected = selected?.value === option.value;
+        <CommandList
+          className="w-full outline-none animate-in fade-in-0 zoom-in-95"
+          hidden={!isOpen}
+        >
+          {inputValue?.length > 0 && (
+            <CommandGroup
+              className={cn(
+                "bg-background absolute z-10 w-full max-h-[250px] overflow-auto py-2 border rounded-xl",
+                classNameList
+              )}
+            >
+              {options.map(({ component: Component, ...option }) => {
+                return (
+                  <CommandItem
+                    key={option.id}
+                    value={`${option.name}_${option.id}`}
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                    onSelect={() => handleSelectOption(option)}
+                    className="flex items-center gap-2 w-full"
+                  >
+                    {Component ? <Component /> : option.name}
+                  </CommandItem>
+                );
+              })}
 
-                    return (
-                      <CommandItem
-                        key={option.value}
-                        value={option.label}
-                        onMouseDown={(event) => {
-                          event.preventDefault();
-                          event.stopPropagation();
-                        }}
-                        onSelect={() => handleSelectOption(option)}
-                        className={cn(
-                          "flex items-center gap-2 w-full"
-                          // isSelected && "bg-white"
-                        )}
-                      >
-                        {option.label}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              ) : null}
-            </CommandList>
-          </div>
-        ) : null}
+              {onCreate && (
+                <CommandItem
+                  key={inputValue}
+                  value={inputValue}
+                  onSelect={() => onCreate(inputValue)}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
+                >
+                  {`Create "${inputValue}"`}
+                </CommandItem>
+              )}
+            </CommandGroup>
+          )}
+        </CommandList>
       </div>
     </CommandPrimitive>
   );

@@ -16,7 +16,7 @@ import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FilePreview, FileType } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";

@@ -400,13 +400,14 @@ type UpdateInboxByIdParams = {
   status?: "completed" | "archived";
   attachment_id?: string;
   transaction_id?: string;
+  teamId: string;
 };
 
 export async function updateInboxById(
   supabase: Client,
   params: UpdateInboxByIdParams
 ) {
-  const { id, ...data } = params;
+  const { id, teamId, ...data } = params;
 
   const inbox = await supabase
     .from("inbox")
@@ -426,6 +427,7 @@ export async function updateInboxById(
         transaction_id: params.transaction_id,
         size: inboxData.size,
         name: inboxData.file_name,
+        team_id: teamId,
       })
       .select()
       .single();

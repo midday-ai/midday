@@ -11,7 +11,7 @@ import {
 export function InboxStatus({ item }) {
   if (item?.transaction_id) {
     return (
-      <div className="flex space-x-1 items-center py-1 px-2">
+      <div className="flex space-x-1 items-center py-1 px-2 h-[26px]">
         <Icons.Check />
         <span className="text-xs">Completed</span>
       </div>
@@ -23,7 +23,7 @@ export function InboxStatus({ item }) {
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2">
+            <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[26px]">
               <span>Pending</span>
             </div>
           </TooltipTrigger>
