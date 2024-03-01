@@ -58,7 +58,7 @@ export function InboxView({
   team,
   selectedId: initialSelectedId,
 }) {
-  const [updates, setUpdates] = useState(true);
+  const [updates, setUpdates] = useState(false);
   const supabase = createClient();
   const router = useRouter();
 
