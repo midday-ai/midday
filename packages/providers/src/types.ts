@@ -10,6 +10,11 @@ export type Transaction = {
   currency: string;
   date: string;
   internal_id: string;
+  bank_account_id: string;
+  team_id: string;
+  status: "posted" | "pending";
+  balance?: string | null;
+  category?: string | null;
   method: string;
   name: string;
   description?: string;
@@ -25,6 +30,7 @@ export type GetTransactionsParams = {
   accountId: string;
   dateFrom?: string;
   dateTo?: string;
+  accessToken?: string; // Teller
 };
 
 export type GetAccountsParams = {

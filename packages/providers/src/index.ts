@@ -1,4 +1,5 @@
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
+import { TellerProvider } from "./teller/teller-provider";
 import {
   GetAccountsParams,
   GetTransactionsParams,
@@ -13,20 +14,22 @@ export class TransactionProvider {
       case "gocardless":
         this.#provider = new GoCardLessProvider();
         break;
+      case "teller":
+        this.#provider = new TellerProvider();
+        break;
       case "plaid":
         throw Error("Not implemented");
-      case "teller":
-        throw Error("Not implemented");
+
       default:
         throw Error("No provider selected");
     }
   }
 
-  public async getTransactions(params: GetTransactionsParams) {
+  async getTransactions(params: GetTransactionsParams) {
     return this.#provider?.getTransactions(params);
   }
 
-  public async getAccounts(params: GetAccountsParams) {
+  async getAccounts(params: GetAccountsParams) {
     return this.#provider?.getAccounts(params);
   }
 }

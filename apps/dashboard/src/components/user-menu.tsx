@@ -73,12 +73,12 @@ export async function UserMenu({ onlySignOut }) {
                 </DropdownMenuItem>
               </Link>
 
-              <Link href="/apps">
+              {/* <Link href="/apps">
                 <DropdownMenuItem>
                   Apps
                   <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
                 </DropdownMenuItem>
-              </Link>
+              </Link> */}
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />

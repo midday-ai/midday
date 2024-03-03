@@ -1,21 +1,4 @@
-export type GoCardLessBuildLinkOptions = {
-  institutionId: string;
-  agreement: string;
-  redirect: string;
-};
-
-export type GoCardLessGetAccountsOptions = {
-  accountId: string;
-  countryCode?: string;
-};
-
-export type GoCardLessGetTransactionsParams = {
-  accountId: string;
-  dateFrom?: string;
-  dateTo?: string;
-};
-
-export type GoCardLessTransaction = {
+export type Transaction = {
   transactionAmount: { amount: string; currency: string };
   currencyExchange?: {
     exchangeRate: string;
@@ -44,25 +27,7 @@ export type GoCardLessTransaction = {
   };
 };
 
-export type GoCardLessRequisition = {
-  id: string;
-  redirect: string;
-  link: string;
-};
-
-export type GoCardLessAccount = {
-  id: string;
-  ownerName?: string;
-  ownerAddressUnstructured?: string;
-  name?: string;
-  displayName?: string;
-  details?: string;
-  status?: string;
-  usage?: string;
-  iban?: string;
-};
-
-export type GoCardLessBank = {
+export type Bank = {
   id: string;
   name: string;
   bic: string;
@@ -72,12 +37,130 @@ export type GoCardLessBank = {
 };
 
 export type GoCardLessTranformTransactionDescriptionParams = {
-  transaction: GoCardLessTransaction;
+  transaction: Transaction;
   name?: string;
 };
 
 export type GoCardLessTransformTransactionParams = {
-  transaction: GoCardLessTransaction;
+  transaction: Transaction;
   accountId: string;
   teamId: string;
+};
+
+export type GetRefreshTokenResponse = {
+  access: string;
+  access_expires: number;
+  refresh: string;
+  refresh_expires: number;
+};
+
+export type GetAccessTokenResponse = {
+  access: string;
+  access_expires: number;
+  refresh: string;
+  refresh_expires: number;
+};
+
+export type GetBanksResponse = Bank[];
+
+export type PostRequisitionsRequest = {
+  institutionId: string;
+  agreement: string;
+  redirect: string;
+};
+
+export type PostRequisitionsResponse = {
+  redirect: string;
+  institution_id: string;
+  agreement: string;
+  reference: string;
+  user_language: string;
+  ssn: string;
+  account_selection: boolean;
+  redirect_immediate: boolean;
+};
+
+export type PostCreateAgreementResponse = {
+  institution_id: string;
+  max_historical_days: number;
+  access_valid_for_days: number;
+  access_scope: string[];
+};
+
+export type GetAccountResponse = {
+  id: string;
+  created: string;
+  last_accessed: string;
+  iban?: string;
+  institution_id: string;
+  status: string;
+  owner_name?: string;
+};
+
+export type AccountDetails = {
+  account: {
+    resourceId: string;
+    iban: string;
+    currency: string;
+    ownerName: string;
+    name: string;
+    product: string;
+    cashAccountType: string;
+  };
+};
+
+export type GetAccountDetailsResponse = GetAccountResponse & AccountDetails;
+
+export type GetAccountsRequest = {
+  accountId: string;
+  countryCode: string;
+};
+
+export type Requestion = {
+  id: string;
+  created: string;
+  redirect: string;
+  status: string;
+  institution_id: string;
+  agreement: string;
+  reference: string;
+  accounts: string[];
+  user_language: string;
+  link: string;
+  ssn: string;
+  account_selection: boolean;
+  redirect_immediate: boolean;
+};
+
+export type GetRequisitionResponse = Requestion;
+
+export type GetRequisitionsResponse = {
+  count: number;
+  next: string;
+  previous: string;
+  result: Requestion[];
+};
+
+export type DeleteRequistionResponse = {
+  summary: string;
+  detail: string;
+  status_code: number;
+};
+
+export type GetAccountsResponse = GetAccountDetailsResponse &
+  {
+    bank?: Bank;
+  }[];
+
+export type GetTransactionsRequest = {
+  accountId: string;
+  dateFrom?: string;
+  dateTo?: string;
+};
+
+export type GetTransactionsResponse = {
+  transactions: {
+    booked: Transaction[];
+    posted: Transaction[];
+  };
 };
