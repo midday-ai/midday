@@ -4,6 +4,23 @@ export enum Providers {
   Gocardless = "gocardless",
 }
 
-export type GetTransactionsParams = {};
+export type Transaction = {
+  id: string;
+  description: string;
+  provider: Providers;
+};
 
-export type GetAccountsParams = {};
+export type Accounts = {
+  id: string;
+  provider: Providers;
+};
+
+export type GetTransactionsParams = {
+  accountId: string;
+  countryCode?: string;
+};
+
+export type GetAccountsParams = {
+  accountId: string;
+  countryCode?: string;
+};

@@ -82,7 +82,7 @@ export class GoCardLessApi {
     return result.access;
   }
 
-  public async getBanks(countryCode: string): Promise<GoCardLessBank[]> {
+  public async getBanks(countryCode?: string): Promise<GoCardLessBank[]> {
     try {
       const banks = await client.get(this.#banksCacheKey);
 
@@ -95,7 +95,7 @@ export class GoCardLessApi {
       const res = await fetch(
         `${
           this.#baseUrl
-        }/api/v2/institutions/?country=${countryCode.toLowerCase()}`,
+        }/api/v2/institutions/?country=${countryCode?.toLowerCase()}`,
         {
           method: "GET",
           headers: {
@@ -237,12 +237,12 @@ export class GoCardLessApi {
       `${this.#baseUrl}/api/v2/accounts/${params.accountId}/transactions/`
     );
 
-    if (params.date_from) {
-      url.searchParams.append("date_from", params.date_from);
+    if (params.dateFrom) {
+      url.searchParams.append("date_from", params.dateFrom);
     }
 
-    if (params.date_to) {
-      url.searchParams.append("date_from", params.date_to);
+    if (params.dateTo) {
+      url.searchParams.append("date_from", params.dateTo);
     }
 
     const result = await fetch(url.toString(), {

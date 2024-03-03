@@ -6,13 +6,13 @@ export type GoCardLessBuildLinkOptions = {
 
 export type GoCardLessGetAccountsOptions = {
   accountId: string;
-  countryCode: string;
+  countryCode?: string;
 };
 
 export type GoCardLessGetTransactionsParams = {
   accountId: string;
-  date_from?: string;
-  date_to?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 export type GoCardLessTransaction = {
@@ -26,6 +26,7 @@ export type GoCardLessTransaction = {
   remittanceInformationStructuredArray?: string[];
   remittanceInformationUnstructured?: string;
   remittanceInformationUnstructuredArray?: string[];
+  proprietaryBankTransactionCode?: string;
   entryReference?: string;
   transactionId?: string;
   internalTransactionId: string;
@@ -36,6 +37,11 @@ export type GoCardLessTransaction = {
   creditorAccount?: { iban?: string };
   debtorName?: string;
   debtorAccount?: { iban?: string };
+  balanceAfterTransaction?: {
+    balanceAmount?: {
+      amount: string;
+    };
+  };
 };
 
 export type GoCardLessRequisition = {
@@ -63,4 +69,15 @@ export type GoCardLessBank = {
   transaction_total_days: string;
   logo: string;
   countries: string[];
+};
+
+export type GoCardLessTranformTransactionDescriptionParams = {
+  transaction: GoCardLessTransaction;
+  name?: string;
+};
+
+export type GoCardLessTransformTransactionParams = {
+  transaction: GoCardLessTransaction;
+  accountId: string;
+  teamId: string;
 };
