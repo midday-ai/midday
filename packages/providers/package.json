@@ -1,0 +1,20 @@
+{
+    "name": "@midday/providers",
+    "version": "1.0.0",
+    "private": true,
+    "main": "src/index.ts",
+    "scripts": {
+        "clean": "rm -rf .turbo node_modules",
+        "lint": "biome check .",
+        "format": "biome format --write .",
+        "check:types": "tsc --noEmit",
+        "test": "bun test src"
+    },
+    "dependencies": {
+        "@midday/kv": "workspace:*",
+        "change-case": "^5.4.3"
+    },
+    "devDependencies": {
+        "@types/bun": "^1.0.8"
+    }
+}

@@ -13,7 +13,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@baselime/node-opentelemetry": "^0.3.9",
+    "@baselime/node-opentelemetry": "^0.4.0",
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/gocardless": "workspace:*",
@@ -49,7 +49,7 @@
     "next-international": "1.2.4",
     "next-safe-action": "6.1.0",
     "next-themes": "^0.2.1",
-    "nuqs": "^1.17.0",
+    "nuqs": "^1.17.1",
     "openai": "^4.28.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",

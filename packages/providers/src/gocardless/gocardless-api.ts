@@ -51,7 +51,7 @@ export class GoCardLessApi {
       return accessToken;
     }
 
-    if (refreshToken) {
+    if (typeof refreshToken === "string") {
       return this.#getRefreshToken(refreshToken);
     }
 
@@ -83,39 +83,37 @@ export class GoCardLessApi {
   }
 
   public async getBanks(countryCode?: string): Promise<GoCardLessBank[]> {
-    try {
-      const banks = await client.get(this.#banksCacheKey);
+    const banks: GoCardLessBank[] | null = await client.get(
+      this.#banksCacheKey
+    );
 
-      if (banks) {
-        return banks;
-      }
-
-      const token = await this.#getAccessToken();
-
-      const res = await fetch(
-        `${
-          this.#baseUrl
-        }/api/v2/institutions/?country=${countryCode?.toLowerCase()}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const result: GoCardLessBank[] = await res.json();
-
-      client.set(this.#banksCacheKey, result, {
-        ex: this.#oneHour,
-        nx: true,
-      });
-
-      return result;
-    } catch (error) {
-      console.log("getBanks", error);
+    if (banks) {
+      return banks;
     }
+
+    const token = await this.#getAccessToken();
+
+    const res = await fetch(
+      `${
+        this.#baseUrl
+      }/api/v2/institutions/?country=${countryCode?.toLowerCase()}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const result: GoCardLessBank[] = await res.json();
+
+    client.set(this.#banksCacheKey, result, {
+      ex: this.#oneHour,
+      nx: true,
+    });
+
+    return result;
   }
 
   public async buildLink({
@@ -123,26 +121,22 @@ export class GoCardLessApi {
     agreement,
     redirect,
   }: GoCardLessBuildLinkOptions) {
-    try {
-      const token = await this.#getAccessToken();
+    const token = await this.#getAccessToken();
 
-      const res = await fetch(`${this.#baseUrl}/api/v2/requisitions/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          redirect,
-          institution_id: institutionId,
-          agreement,
-        }),
-      });
+    const res = await fetch(`${this.#baseUrl}/api/v2/requisitions/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        redirect,
+        institution_id: institutionId,
+        agreement,
+      }),
+    });
 
-      return res.json();
-    } catch (error) {
-      console.log("buildLink", error);
-    }
+    return res.json();
   }
 
   public async createEndUserAgreement(institutionId: string) {
@@ -253,7 +247,9 @@ export class GoCardLessApi {
       },
     });
 
-    return result.json();
+    const response = await result.json();
+
+    return response?.transactions?.booked;
   }
 
   public async getRequisitions() {

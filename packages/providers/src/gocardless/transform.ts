@@ -54,6 +54,8 @@ export const transformTransactionName = (
   }
 
   console.log("No transaction name", transaction);
+
+  return "No information";
 };
 
 const transformDescription = ({
@@ -89,7 +91,7 @@ export const transformTransaction = ({
     );
 
     if (rate) {
-      const currency = transaction.currencyExchange.at(0)?.sourceCurrency;
+      const currency = transaction?.currencyExchange?.at(0)?.sourceCurrency;
 
       if (currency) {
         currencyExchange = {
@@ -103,7 +105,7 @@ export const transformTransaction = ({
   const name = transformTransactionName(transaction);
 
   return {
-    date: transaction.valueDate,
+    date: transaction.bookingDate,
     name,
     method,
     internal_id: `${teamId}_${transaction.internalTransactionId}`,

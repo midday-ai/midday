@@ -1,13 +1,18 @@
-export enum Providers {
-  Teller = "teller",
-  Plaid = "plaid",
-  Gocardless = "gocardless",
-}
+export type Providers = "teller" | "plaid" | "gocardless";
+
+export type TransactionProviderParams = {
+  provider: Providers;
+  environment?: "development" | "staging" | "production";
+};
 
 export type Transaction = {
-  id: string;
-  description: string;
-  provider: Providers;
+  amount: string;
+  currency: string;
+  date: string;
+  internal_id: string;
+  method: string;
+  name: string;
+  description?: string;
 };
 
 export type Accounts = {
@@ -16,8 +21,10 @@ export type Accounts = {
 };
 
 export type GetTransactionsParams = {
+  teamId: string;
   accountId: string;
-  countryCode?: string;
+  dateFrom?: string;
+  dateTo?: string;
 };
 
 export type GetAccountsParams = {

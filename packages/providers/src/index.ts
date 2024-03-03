@@ -1,25 +1,32 @@
-import { GetAccountsParams, GetTransactionsParams, Providers } from "./types";
+import { GoCardLessProvider } from "./gocardless/gocardless-provider";
+import {
+  GetAccountsParams,
+  GetTransactionsParams,
+  TransactionProviderParams,
+} from "./types";
 
-export class BankProvider {
-  // #provider: Providers;
+export class TransactionProvider {
+  #provider;
 
-  // constructor(provider: Providers) {
-  //   // this.#provider = provider;
-  // }
-
-  //   constructor(provider: Providers, params) {
-  //     return new registeredPartFactories[type](params);
-  //   }
+  constructor({ provider }: TransactionProviderParams) {
+    switch (provider) {
+      case "gocardless":
+        this.#provider = new GoCardLessProvider();
+        break;
+      case "plaid":
+        throw Error("Not implemented");
+      case "teller":
+        throw Error("Not implemented");
+      default:
+        throw Error("No provider selected");
+    }
+  }
 
   public async getTransactions(params: GetTransactionsParams) {
-    return;
+    return this.#provider?.getTransactions(params);
   }
 
   public async getAccounts(params: GetAccountsParams) {
-    return;
+    return this.#provider?.getAccounts(params);
   }
-
-  public async saveTransactions() {}
-
-  public async saveAccounts() {}
 }

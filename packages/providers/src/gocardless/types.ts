@@ -30,7 +30,7 @@ export type GoCardLessTransaction = {
   entryReference?: string;
   transactionId?: string;
   internalTransactionId: string;
-  bookingDate?: string;
+  bookingDate: string;
   valueDate?: string;
   additionalInformation?: string;
   creditorName?: string;

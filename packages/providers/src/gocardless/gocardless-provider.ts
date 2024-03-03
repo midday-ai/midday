@@ -1,4 +1,5 @@
-import { Provider } from "../indeface";
+import { Provider } from "../interface";
+import { GetAccountsParams, GetTransactionsParams } from "../types";
 import { GoCardLessApi } from "./gocardless-api";
 import { transformTransaction } from "./transform";
 
@@ -9,7 +10,7 @@ export class GoCardLessProvider implements Provider {
     this.#api = new GoCardLessApi();
   }
 
-  public async getTransactions(params) {
+  public async getTransactions(params: GetTransactionsParams) {
     const { dateFrom, dateTo, teamId, accountId } = params;
 
     const response = await this.#api.getTransactions({
@@ -27,7 +28,7 @@ export class GoCardLessProvider implements Provider {
     );
   }
 
-  public async getAccounts(params) {
+  public async getAccounts(params: GetAccountsParams) {
     const { accountId, countryCode } = params;
 
     const response = await this.#api.getAccounts({
