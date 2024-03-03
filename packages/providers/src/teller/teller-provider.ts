@@ -1,5 +1,5 @@
 import { Provider } from "../interface";
-import { GetAccountsParams, GetTransactionsParams } from "../types";
+import { GetAccountsRequest, GetTransactionsRequest } from "../types";
 import { TellerApi } from "./teller-api";
 import { transformTransaction } from "./transform";
 
@@ -10,9 +10,11 @@ export class TellerProvider implements Provider {
     this.#api = new TellerApi();
   }
 
-  async getTransactions(params: GetTransactionsParams) {
-    const { teamId, accountId, accessToken } = params;
-
+  async getTransactions({
+    teamId,
+    accountId,
+    accessToken,
+  }: GetTransactionsRequest) {
     if (!accessToken) {
       throw Error("accessToken missing");
     }
@@ -31,8 +33,7 @@ export class TellerProvider implements Provider {
     );
   }
 
-  async getAccounts(params: GetAccountsParams) {
-    // const { accountId, countryCode } = params;
+  async getAccounts({ accountId, countryCode }: GetAccountsRequest) {
     // const response = await this.#api.getAccounts({
     //   accountId,
     //   countryCode,

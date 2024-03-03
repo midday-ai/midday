@@ -1,8 +1,13 @@
 import { capitalCase } from "change-case";
 import {
-  GoCardLessTranformTransactionDescriptionParams,
-  GoCardLessTransaction,
-  GoCardLessTransformTransactionParams,
+  Account as BaseAccount,
+  Transaction as BaseTransaction,
+} from "../types";
+import {
+  Transaction,
+  TransactionDescriptionParams,
+  TransformAccountParams,
+  TransformTransactionParams,
 } from "./types";
 
 export const mapTransactionMethod = (method?: string) => {
@@ -23,9 +28,7 @@ export const mapTransactionMethod = (method?: string) => {
   }
 };
 
-export const transformTransactionName = (
-  transaction: GoCardLessTransaction
-) => {
+export const transformTransactionName = (transaction: Transaction) => {
   if (transaction?.additionalInformation) {
     return capitalCase(transaction.additionalInformation);
   }
@@ -61,7 +64,7 @@ export const transformTransactionName = (
 const transformDescription = ({
   transaction,
   name,
-}: GoCardLessTranformTransactionDescriptionParams) => {
+}: TransactionDescriptionParams) => {
   if (transaction?.remittanceInformationUnstructuredArray?.length) {
     const text = transaction?.remittanceInformationUnstructuredArray.join(" ");
     const description = capitalCase(text);
@@ -78,7 +81,7 @@ export const transformTransaction = ({
   transaction,
   teamId,
   accountId,
-}: GoCardLessTransformTransactionParams) => {
+}: TransformTransactionParams): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode
   );
@@ -119,5 +122,24 @@ export const transformTransaction = ({
     balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
     description: transformDescription({ transaction, name }),
     status: "posted",
+  };
+};
+
+export const transformAccount = ({
+  name,
+  currency,
+  userId,
+  teamId,
+  accountId,
+  bankConnectionId,
+}: TransformAccountParams): BaseAccount => {
+  return {
+    name,
+    created_by: userId,
+    team_id: teamId,
+    account_id: accountId,
+    currency,
+    bank_connection_id: bankConnectionId,
+    provider: "gocardless",
   };
 };

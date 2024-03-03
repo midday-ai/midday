@@ -97,22 +97,24 @@ export type GetAccountResponse = {
   owner_name?: string;
 };
 
+export type Account = {
+  resourceId: string;
+  iban: string;
+  currency: string;
+  ownerName: string;
+  name: string;
+  product: string;
+  cashAccountType: string;
+};
+
 export type AccountDetails = {
-  account: {
-    resourceId: string;
-    iban: string;
-    currency: string;
-    ownerName: string;
-    name: string;
-    product: string;
-    cashAccountType: string;
-  };
+  account: Account;
 };
 
 export type GetAccountDetailsResponse = GetAccountResponse & AccountDetails;
 
 export type GetAccountsRequest = {
-  accountId: string;
+  id: string;
   countryCode: string;
 };
 
@@ -147,10 +149,17 @@ export type DeleteRequistionResponse = {
   status_code: number;
 };
 
-export type GetAccountsResponse = GetAccountDetailsResponse &
-  {
-    bank?: Bank;
-  }[];
+export type GetAccountsResponse = {
+  id: string;
+  created: string;
+  last_accessed: string;
+  iban?: string;
+  institution_id: string;
+  status: string;
+  owner_name?: string;
+  account: Account;
+  bank?: Bank;
+}[];
 
 export type GetTransactionsRequest = {
   accountId: string;
@@ -163,4 +172,24 @@ export type GetTransactionsResponse = {
     booked: Transaction[];
     posted: Transaction[];
   };
+};
+
+export type TransactionDescriptionParams = {
+  transaction: Transaction;
+  name?: string;
+};
+
+export type TransformTransactionParams = {
+  transaction: Transaction;
+  teamId: string;
+  accountId: string;
+};
+
+export type TransformAccountParams = {
+  name: string;
+  currency: string;
+  teamId: string;
+  userId: string;
+  accountId: string;
+  bankConnectionId: string;
 };

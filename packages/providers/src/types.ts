@@ -18,14 +18,21 @@ export type Transaction = {
   method: string;
   name: string;
   description?: string;
+  currency_rate?: number;
+  currency_source?: string;
 };
 
-export type Accounts = {
-  id: string;
+export type Account = {
+  created_by: string;
+  team_id: string;
+  account_id: string;
+  name: string;
+  currency: string;
+  bank_connection_id: string;
   provider: Providers;
 };
 
-export type GetTransactionsParams = {
+export type GetTransactionsRequest = {
   teamId: string;
   accountId: string;
   dateFrom?: string;
@@ -33,7 +40,11 @@ export type GetTransactionsParams = {
   accessToken?: string; // Teller
 };
 
-export type GetAccountsParams = {
+export type GetAccountsRequest = {
+  id: string;
+  userId: string;
+  teamId: string;
   accountId: string;
-  countryCode?: string;
+  bankConnectionId: string;
+  countryCode?: string; // GoCardLess
 };

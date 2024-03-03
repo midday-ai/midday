@@ -96,7 +96,14 @@ export class GoCardLessApi {
     }
 
     const response = await this.#get<GetBanksResponse>(
-      `/api/v2/institutions/?country=${countryCode?.toLowerCase()}`
+      "/api/v2/institutions/",
+      null,
+      {
+        params: {
+          country: countryCode,
+          private_accounts_supported: false,
+        },
+      }
     );
 
     client.set(this.#banksCacheKey, response, {
@@ -146,12 +153,12 @@ export class GoCardLessApi {
   }
 
   async getAccounts({
-    accountId,
+    id,
     countryCode,
   }: GetAccountsRequest): Promise<GetAccountsResponse> {
     const [banks, response] = await Promise.all([
       this.getBanks(countryCode),
-      this.getRequestion(accountId),
+      this.getRequestion(id),
     ]);
 
     return Promise.all(
@@ -191,10 +198,8 @@ export class GoCardLessApi {
     return this.#get<GetRequisitionsResponse>("/api/v2/requisitions/");
   }
 
-  async getRequestion(accountId: string): Promise<GetRequisitionResponse> {
-    return this.#get<GetRequisitionResponse>(
-      `/api/v2/requisitions/${accountId}/`
-    );
+  async getRequestion(id: string): Promise<GetRequisitionResponse> {
+    return this.#get<GetRequisitionResponse>(`/api/v2/requisitions/${id}/`);
   }
 
   async deleteRequisition(id: string): Promise<DeleteRequistionResponse> {

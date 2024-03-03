@@ -1,7 +1,7 @@
 import { Provider } from "../interface";
-import { GetAccountsParams, GetTransactionsParams } from "../types";
+import { GetAccountsRequest, GetTransactionsRequest } from "../types";
 import { GoCardLessApi } from "./gocardless-api";
-import { transformTransaction } from "./transform";
+import { transformAccount, transformTransaction } from "./transform";
 
 export class GoCardLessProvider implements Provider {
   #api: GoCardLessApi;
@@ -10,9 +10,12 @@ export class GoCardLessProvider implements Provider {
     this.#api = new GoCardLessApi();
   }
 
-  async getTransactions(params: GetTransactionsParams) {
-    const { dateFrom, dateTo, teamId, accountId } = params;
-
+  async getTransactions({
+    dateFrom,
+    dateTo,
+    teamId,
+    accountId,
+  }: GetTransactionsRequest) {
     const response = await this.#api.getTransactions({
       dateFrom,
       dateTo,
@@ -28,14 +31,32 @@ export class GoCardLessProvider implements Provider {
     );
   }
 
-  async getAccounts(params: GetAccountsParams) {
-    const { accountId, countryCode } = params;
+  async getAccounts({
+    id,
+    countryCode,
+    teamId,
+    accountId,
+    userId,
+    bankConnectionId,
+  }: GetAccountsRequest) {
+    if (!countryCode) {
+      throw Error("No countryCode provided");
+    }
 
     const response = await this.#api.getAccounts({
-      accountId,
+      id,
       countryCode,
     });
 
-    return response;
+    return response.map(({ account }) =>
+      transformAccount({
+        name: account.name,
+        currency: account.currency,
+        teamId,
+        accountId,
+        bankConnectionId,
+        userId,
+      })
+    );
   }
 }
