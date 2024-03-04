@@ -50,6 +50,8 @@ client.defineJob({
       teamId,
     });
 
+    await io.logger.debug("Formatted transactions", formattedTransactions);
+
     const { error, data: transactionsData } = await io.supabase.client
       .from("decrypted_transactions")
       .upsert(formattedTransactions, {
