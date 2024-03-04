@@ -24,17 +24,17 @@ export const connectBankAccountAction = action(
         }))
       );
 
-      const event = await client.sendEvent({
-        name: Events.TRANSACTIONS_SETUP,
-        payload: {
-          teamId: user.data.team_id,
-          provider,
-          accounts: data.map((account) => ({
-            id: account.id,
-            account_id: account.account_id,
-          })),
-        },
-      });
+      // const event = await client.sendEvent({
+      //   name: Events.TRANSACTIONS_SETUP_V2,
+      //   payload: {
+      //     teamId: user.data.team_id,
+      //     provider,
+      //     accounts: data.map((account) => ({
+      //       id: account.id,
+      //       account_id: account.account_id,
+      //     })),
+      //   },
+      // });
 
       logsnag.track({
         event: LogEvents.ConnectBankCompleted.name,

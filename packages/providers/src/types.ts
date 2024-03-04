@@ -1,6 +1,6 @@
 export type Providers = "teller" | "plaid" | "gocardless";
 
-export type TransactionProviderParams = {
+export type ProviderParams = {
   provider: Providers;
   environment?: "development" | "staging" | "production";
 };
@@ -29,7 +29,7 @@ export type Institution = {
 };
 
 export type Account = {
-  account_id: string;
+  id: string;
   name: string;
   currency: string;
   provider: Providers;
@@ -46,7 +46,6 @@ export type GetTransactionsRequest = {
 };
 
 export type GetAccountsRequest = {
-  accountId: string;
   id?: string; // GoCardLess
   countryCode?: string; // GoCardLess
   accessToken?: string; // Teller

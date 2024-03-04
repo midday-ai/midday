@@ -143,15 +143,15 @@ const transformAccountName = (account: TransformAccountName) => {
 };
 
 export const transformAccount = ({
+  id,
   name,
   currency,
-  accountId,
   bank,
   product,
 }: TransformAccountParams): BaseAccount => {
   return {
+    id,
     name: transformAccountName({ name, bank, product }),
-    account_id: accountId,
     currency,
     institution: bank && {
       id: bank?.id,

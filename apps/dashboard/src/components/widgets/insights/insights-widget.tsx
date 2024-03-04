@@ -53,7 +53,7 @@ export function InsightsWidget() {
         {items.map((example) => (
           <li
             key={example.id}
-            className="rounded-lg dark:bg-secondary bg-[#F2F1EF] text-[12px] font-mono text-[#606060] hover:opacity-80 transition-all cursor-default"
+            className="rounded-lg dark:bg-secondary bg-[#F2F1EF] text-xs font-mono text-[#606060] hover:opacity-80 transition-all cursor-default"
           >
             <button
               onClick={() => setOpen(MenuOption.AI)}

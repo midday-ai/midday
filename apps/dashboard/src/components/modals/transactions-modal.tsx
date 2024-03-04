@@ -1,9 +1,8 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
-import Link from "next/link";
 import { Fragment, useState } from "react";
 import TransactionsScreenOneLight from "./transactions-1-light.png";
 import TransactionsScreenOne from "./transactions-1.png";
@@ -84,15 +83,8 @@ export function TransactionsModal() {
                 />
               ))}
             </div>
-            <Link href="?step=connect">
-              <Button
-                data-event="Connect Bank"
-                data-icon="🏦"
-                data-channel="bank"
-              >
-                Connect bank
-              </Button>
-            </Link>
+
+            <ConnectBankButton />
           </div>
         </div>
       </div>

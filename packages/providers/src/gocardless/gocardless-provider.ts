@@ -31,7 +31,7 @@ export class GoCardLessProvider implements Provider {
     );
   }
 
-  async getAccounts({ id, countryCode, accountId }: GetAccountsRequest) {
+  async getAccounts({ id, countryCode }: GetAccountsRequest) {
     if (!countryCode || !id) {
       throw Error("Missing params");
     }
@@ -41,11 +41,11 @@ export class GoCardLessProvider implements Provider {
       countryCode,
     });
 
-    return response.map(({ account, bank }) =>
+    return response.map(({ id, account, bank }) =>
       transformAccount({
+        id,
         name: account.name,
         currency: account.currency,
-        accountId,
         bank,
         product: account.product,
       })

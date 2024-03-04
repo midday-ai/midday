@@ -2,7 +2,7 @@ import {
   BankAccountList,
   BankAccountListSkeleton,
 } from "@/components/bank-account-list";
-import { Button } from "@midday/ui/button";
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import {
   Card,
   CardDescription,
@@ -29,11 +29,8 @@ export async function ConnectedAccounts() {
 
       <CardFooter className="flex justify-between">
         <div />
-        <Link href="?step=connect">
-          <Button data-event="Connect Bank" data-icon="🏦" data-channel="bank">
-            Connect bank
-          </Button>
-        </Link>
+
+        <ConnectBankButton />
       </CardFooter>
     </Card>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -84,15 +84,8 @@ export function OverviewModal() {
                 />
               ))}
             </div>
-            <Link href="?step=connect">
-              <Button
-                data-event="Connect Bank"
-                data-icon="🏦"
-                data-channel="bank"
-              >
-                Connect bank
-              </Button>
-            </Link>
+
+            <ConnectBank />
           </div>
         </div>
       </div>

@@ -30,7 +30,7 @@ export class GoCardLessApi {
   // Cache keys
   #accessTokenCacheKey = "gocardless_access_token";
   #refreshTokenCacheKey = "gocardless_refresh_token";
-  #banksCacheKey = "gocardless_banks_v4";
+  #banksCacheKey = "gocardless_banks";
 
   #oneHour = 3600;
 

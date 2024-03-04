@@ -20,6 +20,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
 function RowsSkeleton() {
@@ -99,7 +100,12 @@ export function ConnectGoCardLessModal({ countryCode }) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
-  const isOpen = searchParams.get("step") === "gocardless";
+
+  const [step, setStep] = useQueryState("step", {
+    shallow: true,
+  });
+
+  const isOpen = step === "gocardless";
 
   useEffect(() => {
     async function fetchData() {
@@ -144,7 +150,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
+    <Dialog open={isOpen} onOpenChange={() => setStep(null)}>
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
@@ -152,7 +158,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
               <button
                 type="button"
                 className="items-center rounded border bg-accent p-1"
-                onClick={() => router.back()}
+                onClick={() => setStep("connect")}
               >
                 <Icons.ArrowBack />
               </button>
@@ -187,17 +193,22 @@ export function ConnectGoCardLessModal({ countryCode }) {
                     />
                   );
                 })}
+
                 {!loading && filteredResults.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[300px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">
                       We could not find any banks matching your
                       <br /> criteria let us know which bank you are looking for
-                      <br />
-                      <a href="mailto:support@midday.ai" className="underline">
-                        support@midday.ai
-                      </a>
                     </p>
+
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => setStep("connect")}
+                    >
+                      Try another provider
+                    </Button>
                   </div>
                 )}
               </div>

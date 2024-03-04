@@ -1,27 +1,25 @@
 import { Provider } from "../interface";
 import { GetAccountsRequest, GetTransactionsRequest } from "../types";
-import { TellerApi } from "./teller-api";
+import { PlaidApi } from "./plaid-api";
 import { transformAccount, transformTransaction } from "./transform";
 
-export class TellerProvider implements Provider {
-  #api: TellerApi;
+export class PlaidProvider implements Provider {
+  #api: PlaidApi;
 
   constructor() {
-    this.#api = new TellerApi();
+    this.#api = new PlaidApi();
   }
 
   async getTransactions({
+    dateFrom,
+    dateTo,
     teamId,
     accountId,
-    accessToken,
   }: GetTransactionsRequest) {
-    if (!accessToken) {
-      throw Error("accessToken missing");
-    }
-
     const response = await this.#api.getTransactions({
+      dateFrom,
+      dateTo,
       accountId,
-      accessToken,
     });
 
     return response.map((transaction) =>
@@ -33,20 +31,23 @@ export class TellerProvider implements Provider {
     );
   }
 
-  async getAccounts({ accessToken }: GetAccountsRequest) {
-    if (!accessToken) {
-      throw Error("accessToken missing");
+  async getAccounts({ id, countryCode }: GetAccountsRequest) {
+    if (!countryCode || !id) {
+      throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccounts({ accessToken });
+    const response = await this.#api.getAccounts({
+      id,
+      countryCode,
+    });
 
-    return response.map((account) =>
+    return response.map(({ id, account, bank }) =>
       transformAccount({
-        id: account.id,
+        id,
         name: account.name,
         currency: account.currency,
-        enrolmentId: account.enrollment_id,
-        institution: account.institution,
+        bank,
+        product: account.product,
       })
     );
   }

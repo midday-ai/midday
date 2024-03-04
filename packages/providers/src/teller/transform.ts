@@ -80,15 +80,15 @@ export const transformTransaction = ({
 };
 
 export const transformAccount = ({
+  id,
   name,
   currency,
-  accountId,
   institution,
   enrolmentId,
 }: TransformAccountParams): BaseAccount => {
   return {
+    id,
     name,
-    account_id: accountId,
     currency,
     institution: {
       ...institution,

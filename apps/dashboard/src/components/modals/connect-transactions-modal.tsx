@@ -10,21 +10,44 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { Tabs, TabsContent } from "@midday/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { usePlaidLink } from "react-plaid-link";
 import { TellerConnectOptions, useTellerConnect } from "teller-connect-react";
+import CsvLogo from "./csv.png";
 import GoCardLessLogo from "./gocardless.png";
 import PlaidLogo from "./plaid.png";
 import TellerLogo from "./teller.png";
+import ZapierLogo from "./zapier.png";
+
+const imports = [
+  {
+    id: "zapier",
+    name: "Zapier",
+    description:
+      "With 6,000+ apps you can automate your process of importing transactions from your bank. For example using a SpreadSheet.",
+    logo: ZapierLogo,
+    disabled: true,
+  },
+  {
+    id: "csc",
+    name: "CSV",
+    description:
+      "Import transactions using a CSV file, you can also use this for backfilling.",
+    logo: CsvLogo,
+    disabled: true,
+  },
+];
 
 export function ConnectTransactionsModal() {
   const { track } = useLogSnag();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const isOpen = searchParams.get("step") === "connect";
+
+  const [step, setStep] = useQueryState("step", {
+    shallow: true,
+  });
+
+  const isOpen = step === "connect";
 
   const { open: openTeller, ready: tellerReady } = useTellerConnect({
     applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
@@ -32,6 +55,8 @@ export function ConnectTransactionsModal() {
       .NEXT_PUBLIC_TELLER_ENVIRONMENT as TellerConnectOptions["environment"],
     appearance: "system",
     onExit: () => {
+      setStep("connect");
+
       track({
         event: LogEvents.ConnectBankCanceled.name,
         icon: LogEvents.ConnectBankCanceled.icon,
@@ -41,12 +66,17 @@ export function ConnectTransactionsModal() {
         },
       });
 
-      router.push("?step=connect");
+      setStep("connect");
     },
     onSuccess: (authorization) => {
       console.log(authorization);
+
+      setStep("account");
+
       // Save your access token here
       // connectBankAccountAction()
+
+      // ?ref=b3b06174-e7a0-4cd4-ae64-8d966d58a305&step=account&provider=teller&token=test_token_4bxszkdl4z6ji
 
       track({
         event: LogEvents.ConnectBankAuthorized.name,
@@ -57,7 +87,9 @@ export function ConnectTransactionsModal() {
         },
       });
     },
-    // onFailure: () => {},
+    onFailure: () => {
+      setStep("connect");
+    },
   });
 
   const { open: openPlaid, ready: plaidReady } = usePlaidLink({
@@ -68,6 +100,9 @@ export function ConnectTransactionsModal() {
     product: ["transactions"],
     onSuccess: (public_token, metadata) => {
       console.log(public_token, metadata);
+
+      setStep("account");
+
       // Save your access token here
       // connectBankAccountAction()
 
@@ -81,6 +116,8 @@ export function ConnectTransactionsModal() {
       });
     },
     onExit: () => {
+      setStep("connect");
+
       track({
         event: LogEvents.ConnectBankCanceled.name,
         icon: LogEvents.ConnectBankCanceled.icon,
@@ -89,8 +126,6 @@ export function ConnectTransactionsModal() {
           provider: "plaid",
         },
       });
-
-      router.push("?step=connect");
     },
   });
 
@@ -111,7 +146,7 @@ export function ConnectTransactionsModal() {
           },
         });
 
-        router.push("?step=gocardless");
+        setStep("gocardless");
       },
     },
     {
@@ -131,6 +166,7 @@ export function ConnectTransactionsModal() {
         });
 
         openTeller();
+        setStep(null);
       },
       disabled: !tellerReady,
     },
@@ -156,28 +192,28 @@ export function ConnectTransactionsModal() {
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
+    <Dialog open={isOpen} onOpenChange={() => setStep(null)}>
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
             <DialogTitle>Connect Transactions</DialogTitle>
             <DialogDescription>
-              We use various providers based on your account location. If you
-              can't establish a connection, manual import is available as an
+              We use various providers to support as many banks as possible. If
+              you can't establish a connection, manual import is available as an
               alternative.
             </DialogDescription>
           </DialogHeader>
         </div>
 
         <Tabs defaultValue="banks" className="p-4 pt-0">
-          {/* <TabsList className="p-0 h-auto space-x-4 bg-transparent">
+          <TabsList className="p-0 h-auto space-x-4 bg-transparent">
             <TabsTrigger className="p-0" value="banks">
               Banks
             </TabsTrigger>
             <TabsTrigger className="p-0" value="import">
               Import
             </TabsTrigger>
-          </TabsList> */}
+          </TabsList>
 
           <TabsContent value="banks" className="space-y-4 mt-4">
             {banks.map((bank) => {
@@ -222,7 +258,48 @@ export function ConnectTransactionsModal() {
             })}
           </TabsContent>
 
-          <TabsContent value="import">import</TabsContent>
+          <TabsContent value="import" className="space-y-4 mt-4">
+            {imports.map((provider) => {
+              return (
+                <Card key={provider.id}>
+                  <button
+                    type="button"
+                    className="text-left"
+                    onClick={provider.onClick}
+                    disabled={provider.disabled}
+                  >
+                    <div className="flex space-x-2 items-center ml-4">
+                      <Image
+                        className="mt-4 self-start"
+                        src={provider.logo}
+                        width={40}
+                        height={40}
+                        alt={provider.name}
+                        quality={100}
+                      />
+
+                      <CardHeader className="p-4 pl-2">
+                        <div className="flex space-x-2">
+                          <CardTitle className="text-md mb-0">
+                            {provider.name}
+                          </CardTitle>
+
+                          {provider.disabled && (
+                            <div className="text-[#878787] rounded-md py-1 px-2 border text-[10px]">
+                              Coming soon
+                            </div>
+                          )}
+                        </div>
+                        <CardDescription className="text-sm">
+                          {provider.description}
+                        </CardDescription>
+                      </CardHeader>
+                    </div>
+                  </button>
+                </Card>
+              );
+            })}
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>

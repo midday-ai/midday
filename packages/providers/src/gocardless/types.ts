@@ -175,9 +175,9 @@ export type TransformTransactionParams = {
 };
 
 export type TransformAccountParams = {
+  id: string;
   name: string;
   currency: string;
-  accountId: string;
   product: string;
   bank?: Bank;
 };

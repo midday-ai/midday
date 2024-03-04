@@ -142,9 +142,9 @@ export type TransformTransaction = {
 };
 
 export type TransformAccountParams = {
+  id: string;
   name: string;
   currency: string;
-  accountId: string;
   enrolmentId: string;
   institution: Institution;
 };

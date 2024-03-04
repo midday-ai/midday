@@ -1,8 +1,8 @@
 "use client";
 
+import { getAccounts } from "@/actions/banks/get-accounts";
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -69,20 +69,22 @@ export function SelectBankAccountsModal({ countryCode }) {
     searchParams.get("step") === "account" && !searchParams.has("error");
 
   const provider = searchParams.get("provider");
+  const id = searchParams.get("ref");
+  const accessToken = searchParams.get("token");
 
   const connectBankAction = useAction(connectBankAccountAction, {
-    // onError: () => {
-    //   toast({
-    //     duration: 3500,
-    //     variant: "error",
-    //     title: "Something went wrong pleaase try again.",
-    //   });
-    // },
-    // onSuccess: (data) => {
-    //   if (data.id) {
-    //     setEventId(data.id);
-    //   }
-    // },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+    onSuccess: (data) => {
+      if (data.id) {
+        setEventId(data.id);
+      }
+    },
   });
 
   const onClose = () => router.push(pathname);
@@ -95,16 +97,6 @@ export function SelectBankAccountsModal({ countryCode }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // const accountsWithDetails = values.accounts
-    //   .map((id) => accounts?.find((account) => account.id === id))
-    //   .map((account) => ({
-    //     account_id: account.id,
-    //     name: getAccountName(account),
-    //     currency: account.currency,
-    //     institution_id: account.institution_id,
-    //     bank_name: account?.bank?.name,
-    //     logo_url: account?.bank?.logo,
-    //   }));
     // connectBankAction.execute({
     //   provider: "gocardless",
     //   accounts: accountsWithDetails,
@@ -113,22 +105,24 @@ export function SelectBankAccountsModal({ countryCode }) {
 
   useEffect(() => {
     async function fetchData() {
-      // const data = await getAccounts({
-      //   accountId: searchParams.get("ref"),
-      //   countryCode,
-      // });
+      const data = await getAccounts({
+        provider,
+        id,
+        countryCode,
+        accessToken,
+      });
 
-      // setAccounts(data);
+      setAccounts(data);
       setLoading(false);
 
-      // Set first accounts to checked
-      // if (!form.formState.isValid) {
-      //   form.reset({ accounts: [data.at(0).id] });
-      // }
+      // Set all accounts to checked
+      if (!form.formState.isValid) {
+        form.reset({ accounts: data.map((account) => account.id) });
+      }
     }
 
     if (isOpen && !accounts.length) {
-      // fetchData();
+      fetchData();
     }
   }, [isOpen]);
 
@@ -173,18 +167,17 @@ export function SelectBankAccountsModal({ countryCode }) {
                               <FormLabel className="flex items-between">
                                 <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
                                   <AvatarImage
-                                    src={account.bank.logo}
-                                    alt={account?.bank?.name}
+                                    src={account.institution.logo}
+                                    alt={account?.institution?.name}
                                   />
                                 </Avatar>
                                 <div className="ml-4 space-y-1">
                                   <p className="text-sm font-medium leading-none mb-1">
-                                    Name
-                                    {/* {getAccountName(account)} */}
+                                    {account.name}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    Bank Name (SEK)
-                                    {/* {account.bank.name} ({account?.currency}) */}
+                                    {account?.institution.name} (
+                                    {account?.currency})
                                   </p>
                                 </div>
                               </FormLabel>
