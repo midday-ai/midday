@@ -202,7 +202,7 @@ export class GoCardLessApi {
   }
 
   async deleteRequisition(id: string): Promise<DeleteRequistionResponse> {
-    return this.#delete<DeleteRequistionResponse>(
+    return this.#_delete<DeleteRequistionResponse>(
       `/api/v2/requisitions/${id}/`
     );
   }
@@ -244,7 +244,7 @@ export class GoCardLessApi {
     return api.post<TResponse>(path, body, config).then(({ data }) => data);
   }
 
-  async #delete<TResponse>(
+  async #_delete<TResponse>(
     path: string,
     params?: unknown,
     config?: AxiosRequestConfig

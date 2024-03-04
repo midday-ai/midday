@@ -17,6 +17,7 @@
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/gocardless": "workspace:*",
+    "@midday/providers": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/kv": "workspace:*",
     "@midday/location": "workspace:*",
