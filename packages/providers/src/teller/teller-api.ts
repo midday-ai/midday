@@ -60,13 +60,19 @@ export class TellerApi {
   }
 
   async #getApi(accessToken: string): Promise<AxiosInstance> {
-    const cert = JSON.parse(
-      Buffer.from(process.env.TELLER_CERTIFICATE!, "base64").toString("ascii")
-    );
+    const cert = Buffer.from(
+      process.env.TELLER_CERTIFICATE!,
+      "base64"
+    ).toString("ascii");
+
+    const key = Buffer.from(
+      process.env.TELLER_CERTIFICATE_PRIVATE_KEY!,
+      "base64"
+    ).toString("ascii");
 
     const agent = new https.Agent({
       cert,
-      key: process.env.TELLER_CERTIFICATE_KEY,
+      key,
     });
 
     if (!this.#api) {

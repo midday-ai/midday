@@ -132,6 +132,7 @@ export const transformAccount = ({
   teamId,
   accountId,
   bankConnectionId,
+  bank,
 }: TransformAccountParams): BaseAccount => {
   return {
     name,
@@ -140,6 +141,11 @@ export const transformAccount = ({
     account_id: accountId,
     currency,
     bank_connection_id: bankConnectionId,
+    institution: bank && {
+      id: bank?.id,
+      logo: bank?.logo,
+      name: bank?.name,
+    },
     provider: "gocardless",
   };
 };

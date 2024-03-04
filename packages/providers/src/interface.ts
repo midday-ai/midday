@@ -1,11 +1,13 @@
 import {
-  Accounts,
-  GetAccountsParams,
-  GetTransactionsParams,
-  Transaction,
+  GetAccountsRequest,
+  GetAccountsResponse,
+  GetTransactionsRequest,
+  GetTransactionsResponse,
 } from "./types";
 
 export interface Provider {
-  getTransactions: (params: GetTransactionsParams) => Promise<Transaction[]>;
-  getAccounts: (params: GetAccountsParams) => Promise<Accounts[]>;
+  getTransactions: (
+    params: GetTransactionsRequest
+  ) => Promise<GetTransactionsResponse>;
+  getAccounts: (params: GetAccountsRequest) => Promise<GetAccountsResponse>;
 }

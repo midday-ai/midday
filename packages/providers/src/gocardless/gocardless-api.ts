@@ -30,7 +30,7 @@ export class GoCardLessApi {
   // Cache keys
   #accessTokenCacheKey = "gocardless_access_token";
   #refreshTokenCacheKey = "gocardless_refresh_token";
-  #banksCacheKey = "gocardless_banks";
+  #banksCacheKey = "gocardless_banks_v4";
 
   #oneHour = 3600;
 
@@ -101,7 +101,6 @@ export class GoCardLessApi {
       {
         params: {
           country: countryCode,
-          private_accounts_supported: false,
         },
       }
     );
@@ -162,8 +161,8 @@ export class GoCardLessApi {
     ]);
 
     return Promise.all(
-      response.accounts?.map(async (id: string) => {
-        const accountDetails = await this.getAccountDetails(id);
+      response.accounts?.map(async (acountId: string) => {
+        const accountDetails = await this.getAccountDetails(acountId);
 
         return {
           ...accountDetails,

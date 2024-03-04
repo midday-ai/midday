@@ -39,8 +39,8 @@ export class GoCardLessProvider implements Provider {
     userId,
     bankConnectionId,
   }: GetAccountsRequest) {
-    if (!countryCode) {
-      throw Error("No countryCode provided");
+    if (!countryCode || !id) {
+      throw Error("Missing params");
     }
 
     const response = await this.#api.getAccounts({
@@ -48,7 +48,7 @@ export class GoCardLessProvider implements Provider {
       countryCode,
     });
 
-    return response.map(({ account }) =>
+    return response.map(({ account, bank }) =>
       transformAccount({
         name: account.name,
         currency: account.currency,
@@ -56,6 +56,7 @@ export class GoCardLessProvider implements Provider {
         accountId,
         bankConnectionId,
         userId,
+        bank,
       })
     );
   }

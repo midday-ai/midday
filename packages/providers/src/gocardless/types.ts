@@ -188,8 +188,9 @@ export type TransformTransactionParams = {
 export type TransformAccountParams = {
   name: string;
   currency: string;
-  teamId: string;
   userId: string;
+  teamId: string;
   accountId: string;
   bankConnectionId: string;
+  bank?: Bank;
 };

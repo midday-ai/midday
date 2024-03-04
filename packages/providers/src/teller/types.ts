@@ -85,6 +85,11 @@ export interface GetAccountBalancesRequest extends AuthenticatedRequest {
   accountId: string;
 }
 
+type Institution = {
+  name: string;
+  id: string;
+};
+
 interface BaseAccount {
   enrollment_id: string;
   links: {
@@ -92,10 +97,7 @@ interface BaseAccount {
     self: string;
     transactions: string;
   };
-  institution: {
-    name: string;
-    id: string;
-  };
+  institution: Institution;
   name: string;
   currency: string;
   id: string;
@@ -137,4 +139,15 @@ export type TransformTransaction = {
   transaction: Transaction;
   teamId: string;
   accountId: string;
+};
+
+export type TransformAccountParams = {
+  name: string;
+  currency: string;
+  teamId: string;
+  userId: string;
+  accountId: string;
+  bankConnectionId: string;
+  enrolmentId: string;
+  institution: Institution;
 };

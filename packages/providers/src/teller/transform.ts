@@ -1,6 +1,13 @@
 import { capitalCase } from "change-case";
-import { Transaction } from "../types";
-import { DetailCategory, TransformTransaction } from "./types";
+import {
+  Account as BaseAccount,
+  Transaction as BaseTransaction,
+} from "../types";
+import {
+  DetailCategory,
+  TransformAccountParams,
+  TransformTransaction,
+} from "./types";
 
 export const mapTransactionMethod = (method?: string) => {
   switch (method) {
@@ -39,8 +46,8 @@ export const mapTransactionMethod = (method?: string) => {
 
 export const mapTransactionCategory = (category?: DetailCategory) => {
   switch (category) {
-    case "accommodation":
-      break;
+    // case "accommodation":
+    //   break;
 
     default:
       return "uncategorized";
@@ -51,7 +58,7 @@ export const transformTransaction = ({
   transaction,
   teamId,
   accountId,
-}: TransformTransaction): Transaction => {
+}: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
 
   return {
@@ -69,5 +76,28 @@ export const transformTransaction = ({
     team_id: teamId,
     balance: transaction.running_balance,
     status: transaction?.status === "posted" ? "posted" : "pending",
+  };
+};
+
+export const transformAccount = ({
+  name,
+  currency,
+  userId,
+  teamId,
+  accountId,
+  bankConnectionId,
+  institution,
+  enrolmentId,
+}: TransformAccountParams): BaseAccount => {
+  return {
+    name,
+    created_by: userId,
+    team_id: teamId,
+    account_id: accountId,
+    currency,
+    bank_connection_id: bankConnectionId,
+    institution,
+    enrollment_id: enrolmentId,
+    provider: "teller",
   };
 };
