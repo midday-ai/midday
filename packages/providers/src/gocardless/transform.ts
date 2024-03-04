@@ -6,6 +6,7 @@ import {
 import {
   Transaction,
   TransactionDescriptionParams,
+  TransformAccountName,
   TransformAccountParams,
   TransformTransactionParams,
 } from "./types";
@@ -125,22 +126,33 @@ export const transformTransaction = ({
   };
 };
 
+const transformAccountName = (account: TransformAccountName) => {
+  if (account?.name) {
+    return capitalCase(account.name);
+  }
+
+  if (account?.product) {
+    return account.product;
+  }
+
+  if (account?.bank?.name) {
+    return account.bank.name;
+  }
+
+  return "No name";
+};
+
 export const transformAccount = ({
   name,
   currency,
-  userId,
-  teamId,
   accountId,
-  bankConnectionId,
   bank,
+  product,
 }: TransformAccountParams): BaseAccount => {
   return {
-    name,
-    created_by: userId,
-    team_id: teamId,
+    name: transformAccountName({ name, bank, product }),
     account_id: accountId,
     currency,
-    bank_connection_id: bankConnectionId,
     institution: bank && {
       id: bank?.id,
       logo: bank?.logo,

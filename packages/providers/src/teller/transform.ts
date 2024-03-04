@@ -82,21 +82,18 @@ export const transformTransaction = ({
 export const transformAccount = ({
   name,
   currency,
-  userId,
-  teamId,
   accountId,
-  bankConnectionId,
   institution,
   enrolmentId,
 }: TransformAccountParams): BaseAccount => {
   return {
     name,
-    created_by: userId,
-    team_id: teamId,
     account_id: accountId,
     currency,
-    bank_connection_id: bankConnectionId,
-    institution,
+    institution: {
+      ...institution,
+      logo: `https://teller.io/images/banks/${institution.id}.jpg`,
+    },
     enrollment_id: enrolmentId,
     provider: "teller",
   };

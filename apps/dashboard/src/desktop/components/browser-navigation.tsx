@@ -10,7 +10,7 @@ export function BrowserNavigation() {
   const [canGoBack, setCanGoBack] = useState(false);
 
   useEffect(() => {
-    webContents.on("navigate", async () => {
+    webContents.on("did-navigate", async () => {
       if (await webContents.canGoForward()) {
         setCanGoForward(true);
       } else {

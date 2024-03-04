@@ -36,17 +36,6 @@ export type Bank = {
   countries: string[];
 };
 
-export type GoCardLessTranformTransactionDescriptionParams = {
-  transaction: Transaction;
-  name?: string;
-};
-
-export type GoCardLessTransformTransactionParams = {
-  transaction: Transaction;
-  accountId: string;
-  teamId: string;
-};
-
 export type GetRefreshTokenResponse = {
   access: string;
   access_expires: number;
@@ -188,9 +177,13 @@ export type TransformTransactionParams = {
 export type TransformAccountParams = {
   name: string;
   currency: string;
-  userId: string;
-  teamId: string;
   accountId: string;
-  bankConnectionId: string;
+  product: string;
   bank?: Bank;
+};
+
+export type TransformAccountName = {
+  name: string;
+  bank?: Bank;
+  product: string;
 };

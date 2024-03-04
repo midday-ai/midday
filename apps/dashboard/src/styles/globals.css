@@ -232,7 +232,7 @@ body {
 .fraction .character__track span {
 	display: flex;
   flex-direction: column;
-  align-items: end;
+  align-items: flex-end;
   padding: calc((var(--line-height) - var(--font-size)) * 0.2) 0;
 }
 
@@ -260,7 +260,7 @@ body {
 .counter:last-of-type .fraction[data-value]::after {
 	display: flex;
   flex-direction: column;
-  align-items: end;
+  align-items: flex-end;
   padding: calc((var(--line-height) - var(--font-size)) * 0.2) 0;
   height: var(--line-height);
 }

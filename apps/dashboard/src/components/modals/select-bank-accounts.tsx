@@ -2,7 +2,7 @@
 
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccounts } from "@midday/gocardless";
+// import { getAccounts } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
@@ -23,7 +23,6 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { useToast } from "@midday/ui/use-toast";
-import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -35,20 +34,6 @@ import { LoadingTransactionsEvent } from "../loading-transactions-event";
 const formSchema = z.object({
   accounts: z.array(z.string()).refine((value) => value.some((item) => item)),
 });
-
-const getAccountName = (account) => {
-  if (account?.name) {
-    return capitalCase(account.name);
-  }
-
-  if (account?.product) {
-    return account.product;
-  }
-
-  if (account?.bank?.name) {
-    return account.bank.name;
-  }
-};
 
 function RowsSkeleton() {
   return (
@@ -71,7 +56,7 @@ function RowsSkeleton() {
   );
 }
 
-export function SelectAccountGoCardLessModal({ countryCode }) {
+export function SelectBankAccountsModal({ countryCode }) {
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
@@ -81,22 +66,23 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
   const [eventId, setEventId] = useState<string>();
 
   const isOpen =
-    searchParams.get("step") === "select-account-gocardless" &&
-    !searchParams.has("error");
+    searchParams.get("step") === "account" && !searchParams.has("error");
+
+  const provider = searchParams.get("provider");
 
   const connectBankAction = useAction(connectBankAccountAction, {
-    onError: () => {
-      toast({
-        duration: 3500,
-        variant: "error",
-        title: "Something went wrong pleaase try again.",
-      });
-    },
-    onSuccess: (data) => {
-      if (data.id) {
-        setEventId(data.id);
-      }
-    },
+    // onError: () => {
+    //   toast({
+    //     duration: 3500,
+    //     variant: "error",
+    //     title: "Something went wrong pleaase try again.",
+    //   });
+    // },
+    // onSuccess: (data) => {
+    //   if (data.id) {
+    //     setEventId(data.id);
+    //   }
+    // },
   });
 
   const onClose = () => router.push(pathname);
@@ -109,41 +95,40 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const accountsWithDetails = values.accounts
-      .map((id) => accounts?.find((account) => account.id === id))
-      .map((account) => ({
-        account_id: account.id,
-        name: getAccountName(account),
-        currency: account.currency,
-        institution_id: account.institution_id,
-        bank_name: account?.bank?.name,
-        logo_url: account?.bank?.logo,
-      }));
-
-    connectBankAction.execute({
-      provider: "gocardless",
-      accounts: accountsWithDetails,
-    });
+    // const accountsWithDetails = values.accounts
+    //   .map((id) => accounts?.find((account) => account.id === id))
+    //   .map((account) => ({
+    //     account_id: account.id,
+    //     name: getAccountName(account),
+    //     currency: account.currency,
+    //     institution_id: account.institution_id,
+    //     bank_name: account?.bank?.name,
+    //     logo_url: account?.bank?.logo,
+    //   }));
+    // connectBankAction.execute({
+    //   provider: "gocardless",
+    //   accounts: accountsWithDetails,
+    // });
   }
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getAccounts({
-        accountId: searchParams.get("ref"),
-        countryCode,
-      });
+      // const data = await getAccounts({
+      //   accountId: searchParams.get("ref"),
+      //   countryCode,
+      // });
 
-      setAccounts(data);
+      // setAccounts(data);
       setLoading(false);
 
       // Set first accounts to checked
-      if (!form.formState.isValid) {
-        form.reset({ accounts: [data.at(0).id] });
-      }
+      // if (!form.formState.isValid) {
+      //   form.reset({ accounts: [data.at(0).id] });
+      // }
     }
 
     if (isOpen && !accounts.length) {
-      fetchData();
+      // fetchData();
     }
   }, [isOpen]);
 
@@ -194,10 +179,12 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
                                 </Avatar>
                                 <div className="ml-4 space-y-1">
                                   <p className="text-sm font-medium leading-none mb-1">
-                                    {getAccountName(account)}
+                                    Name
+                                    {/* {getAccountName(account)} */}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {account.bank.name} ({account?.currency})
+                                    Bank Name (SEK)
+                                    {/* {account.bank.name} ({account?.currency}) */}
                                   </p>
                                 </div>
                               </FormLabel>

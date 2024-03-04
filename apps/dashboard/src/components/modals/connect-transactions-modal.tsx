@@ -19,7 +19,7 @@ import GoCardLessLogo from "./gocardless.png";
 import PlaidLogo from "./plaid.png";
 import TellerLogo from "./teller.png";
 
-export function ConnectTransactionsModal({ countryCode }) {
+export function ConnectTransactionsModal() {
   const { track } = useLogSnag();
   const searchParams = useSearchParams();
   const router = useRouter();

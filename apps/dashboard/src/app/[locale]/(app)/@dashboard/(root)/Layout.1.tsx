@@ -4,7 +4,6 @@ import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
 import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
-import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
 import { getCountryCode } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";

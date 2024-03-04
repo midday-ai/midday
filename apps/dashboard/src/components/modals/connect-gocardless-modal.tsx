@@ -123,7 +123,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
     const redirectBase = isDesktopApp() ? "midday://" : location.origin;
 
     const { link } = await buildLink({
-      redirect: `${redirectBase}/${pathname}?step=select-account-gocardless`,
+      redirect: `${redirectBase}/${pathname}?step=account&provider=gocardless`,
       institutionId,
       agreement: data.id,
     });

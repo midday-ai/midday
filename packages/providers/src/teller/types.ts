@@ -144,10 +144,7 @@ export type TransformTransaction = {
 export type TransformAccountParams = {
   name: string;
   currency: string;
-  teamId: string;
-  userId: string;
   accountId: string;
-  bankConnectionId: string;
   enrolmentId: string;
   institution: Institution;
 };

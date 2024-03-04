@@ -29,12 +29,9 @@ export type Institution = {
 };
 
 export type Account = {
-  created_by: string;
-  team_id: string;
   account_id: string;
   name: string;
   currency: string;
-  bank_connection_id: string;
   provider: Providers;
   institution?: Institution;
   enrollment_id?: string; // Teller
@@ -49,10 +46,7 @@ export type GetTransactionsRequest = {
 };
 
 export type GetAccountsRequest = {
-  userId: string;
-  teamId: string;
   accountId: string;
-  bankConnectionId: string;
   id?: string; // GoCardLess
   countryCode?: string; // GoCardLess
   accessToken?: string; // Teller
