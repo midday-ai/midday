@@ -18,7 +18,9 @@ export default async function Layout({
     return (
       <>
         {dashboard}
-        <SetUserIdServerComponent userId={user.id} />
+        {!process.env.NEXT_PUBLIC_LOGSNAG_DISABLED && (
+          <SetUserIdServerComponent userId={user.id} />
+        )}
       </>
     );
   }
