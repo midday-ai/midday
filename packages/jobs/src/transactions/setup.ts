@@ -1,5 +1,6 @@
 import { processPromisesBatch } from "@/utils/process";
-import { getTransactions, transformTransactions } from "@midday/gocardless";
+import { getTransactions } from "@midday/gocardless";
+import { transformTransactions } from "@midday/gocardless/src/transform";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";

@@ -1,4 +1,5 @@
-import { getTransactions, transformTransactions } from "@midday/gocardless";
+import { getTransactions } from "@midday/gocardless";
+import { transformTransactions } from "@midday/gocardless/src/transform";
 import { formatISO, subMonths } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
