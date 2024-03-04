@@ -17,5 +17,8 @@
     "@trigger.dev/sdk": "^2.3.18",
     "@trigger.dev/supabase": "^2.3.18",
     "nanoid": "^5.0.6"
+  },
+  "devDependencies": {
+    "request": "^2.88.2"
   }
 }
