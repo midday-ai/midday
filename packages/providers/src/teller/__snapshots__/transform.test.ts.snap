@@ -1,0 +1,33 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": "83.62",
+  "balance": null,
+  "bank_account_id": "123",
+  "category": "income",
+  "currency": "USD",
+  "date": "2024-03-05",
+  "internal_id": "123_txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Online Check Deposit",
+  "status": "pending",
+  "team_id": "123",
+}
+`;
+
+exports[`Transform card payment transaction 1`] = `
+{
+  "amount": "-68.90",
+  "balance": "83431.46",
+  "bank_account_id": "123",
+  "category": "uncategorized",
+  "currency": "USD",
+  "date": "2024-03-01",
+  "internal_id": "123_txn_os41r5u90e29shubl2005",
+  "method": "card_purchase",
+  "name": "Nordstrom",
+  "status": "posted",
+  "team_id": "123",
+}
+`;
