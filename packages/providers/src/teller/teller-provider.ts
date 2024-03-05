@@ -25,8 +25,6 @@ export class TellerProvider implements Provider {
       accessToken,
     });
 
-    console.log(JSON.stringify(response.at(5), null, 2));
-
     return response.map((transaction) =>
       transformTransaction({
         transaction,

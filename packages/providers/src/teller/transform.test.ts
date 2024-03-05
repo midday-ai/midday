@@ -62,3 +62,65 @@ test("Transform card payment transaction", () => {
     })
   ).toMatchSnapshot();
 });
+
+test("Transform income transaction", () => {
+  expect(
+    transformTransaction({
+      bankAccountId: "123",
+      teamId: "123",
+      transaction: {
+        type: "card_payment",
+        status: "posted",
+        running_balance: "83296.40",
+        links: {
+          self: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000/transactions/txn_os41r5u90e29shubl2002",
+          account: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000",
+        },
+        id: "txn_os41r5u90e29shubl2002",
+        details: {
+          processing_status: "complete",
+          counterparty: {
+            type: "organization",
+            name: "EXXON MOBIL",
+          },
+          category: "fuel",
+        },
+        description: "Exxon Mobil",
+        date: "2024-03-03",
+        amount: "-20.21",
+        account_id: "acc_os41qe3a66ks2djhss000",
+      },
+    })
+  ).toMatchSnapshot();
+});
+
+test("Transform type transfer", () => {
+  expect(
+    transformTransaction({
+      bankAccountId: "123",
+      teamId: "123",
+      transaction: {
+        type: "transfer",
+        status: "posted",
+        running_balance: "85897.25",
+        links: {
+          self: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000/transactions/txn_os41r5ua0e29shubl2001",
+          account: "https://api.teller.io/accounts/acc_os41qe3a66ks2djhss000",
+        },
+        id: "txn_os41r5ua0e29shubl2001",
+        details: {
+          processing_status: "complete",
+          counterparty: {
+            type: "person",
+            name: "YOURSELF",
+          },
+          category: "general",
+        },
+        description: "Recurring Transfer to Savings",
+        date: "2024-01-27",
+        amount: "-37.99",
+        account_id: "acc_os41qe3a66ks2djhss000",
+      },
+    })
+  ).toMatchSnapshot();
+});
