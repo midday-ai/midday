@@ -2,6 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
+import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { updateBankAccount } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -15,18 +16,22 @@ export const updateBankAccountAction = action(
     const supabase = createClient();
     const user = await getUser();
 
-    const { data } = await updateBankAccount(supabase, {
-      teamId: user.data.team_id,
-      ...params,
+    await client.sendEvent({
+      name: Events.TRANSACTIONS_MANUAL_SYNC,
+      payload: {
+        teamId: user.data.team_id,
+      },
     });
 
-    // TODO: Check enabled account, if none disable job otherwise start new based on team_id
-    // and initial sync for account_id
-
-    revalidateTag(`bank_accounts_${data.team_id}`);
-    revalidateTag(`bank_connections_${data.team_id}`);
-    revalidateTag(`transactions_${data.team_id}`);
-
+    // const { data } = await updateBankAccount(supabase, {
+    //   teamId: user.data.team_id,
+    //   ...params,
+    // });
+    // // TODO: Check enabled account, if none disable job otherwise start new based on team_id
+    // // and initial sync for account_id
+    // revalidateTag(`bank_accounts_${data.team_id}`);
+    // revalidateTag(`bank_connections_${data.team_id}`);
+    // revalidateTag(`transactions_${data.team_id}`);
     // logsnag.track({
     //   event: LogEvents.DeleteBank.name,
     //   icon: LogEvents.DeleteBank.icon,

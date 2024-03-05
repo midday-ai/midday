@@ -26,7 +26,6 @@ import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
 import {
   parseAsBoolean,
   parseAsString,

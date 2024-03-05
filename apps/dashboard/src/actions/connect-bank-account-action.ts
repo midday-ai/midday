@@ -2,7 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
-import { Events, client, scheduler } from "@midday/jobs";
+import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -43,23 +43,11 @@ export const connectBankAccountAction = action(
     }
 
     const event = await client.sendEvent({
-      name: Events.TRANSACTIONS_INITIAL_SYNC,
+      name: Events.TRANSACTIONS_MANUAL_SYNC,
       payload: {
         teamId,
       },
     });
-
-    try {
-      // Schedule a background per team
-      await scheduler.register(teamId, {
-        type: "interval",
-        options: {
-          seconds: 3600, // every 1h
-        },
-      });
-    } catch (error) {
-      console.log(error);
-    }
 
     logsnag.track({
       event: LogEvents.ConnectBankCompleted.name,

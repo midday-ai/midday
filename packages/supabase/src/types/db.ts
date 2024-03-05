@@ -15,36 +15,36 @@ export type Database = {
           bank_connection_id: string | null
           created_at: string
           created_by: string
-          currency: string | null
-          enabled: boolean | null
+          currency: string
+          enabled: boolean
           id: string
           last_accessed: string | null
           name: string | null
-          team_id: string | null
+          team_id: string
         }
         Insert: {
           account_id: string
           bank_connection_id?: string | null
           created_at?: string
           created_by: string
-          currency?: string | null
-          enabled?: boolean | null
+          currency: string
+          enabled?: boolean
           id?: string
           last_accessed?: string | null
           name?: string | null
-          team_id?: string | null
+          team_id: string
         }
         Update: {
           account_id?: string
           bank_connection_id?: string | null
           created_at?: string
           created_by?: string
-          currency?: string | null
-          enabled?: boolean | null
+          currency?: string
+          enabled?: boolean
           id?: string
           last_accessed?: string | null
           name?: string | null
-          team_id?: string | null
+          team_id?: string
         }
         Relationships: [
           {
@@ -84,11 +84,11 @@ export type Database = {
           enrollment_id: string | null
           expires_at: string | null
           id: string
-          institution_id: string | null
+          institution_id: string
           logo_url: string | null
-          name: string | null
-          provider: Database["public"]["Enums"]["bankProviders"] | null
-          team_id: string | null
+          name: string
+          provider: Database["public"]["Enums"]["bankProviders"]
+          team_id: string
         }
         Insert: {
           access_token?: string | null
@@ -96,11 +96,11 @@ export type Database = {
           enrollment_id?: string | null
           expires_at?: string | null
           id?: string
-          institution_id?: string | null
+          institution_id: string
           logo_url?: string | null
-          name?: string | null
-          provider?: Database["public"]["Enums"]["bankProviders"] | null
-          team_id?: string | null
+          name: string
+          provider: Database["public"]["Enums"]["bankProviders"]
+          team_id: string
         }
         Update: {
           access_token?: string | null
@@ -108,11 +108,11 @@ export type Database = {
           enrollment_id?: string | null
           expires_at?: string | null
           id?: string
-          institution_id?: string | null
+          institution_id?: string
           logo_url?: string | null
-          name?: string | null
-          provider?: Database["public"]["Enums"]["bankProviders"] | null
-          team_id?: string | null
+          name?: string
+          provider?: Database["public"]["Enums"]["bankProviders"]
+          team_id?: string
         }
         Relationships: [
           {
