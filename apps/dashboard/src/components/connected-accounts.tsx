@@ -10,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import Link from "next/link";
 import { Suspense } from "react";
 
 export async function ConnectedAccounts() {

@@ -12,7 +12,7 @@ import {
 } from "@midday/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import Image from "next/image";
-import { useQueryState } from "nuqs";
+import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { usePlaidLink } from "react-plaid-link";
 import { TellerConnectOptions, useTellerConnect } from "teller-connect-react";
 import CsvLogo from "./csv.png";
@@ -43,11 +43,20 @@ const imports = [
 export function ConnectTransactionsModal() {
   const { track } = useLogSnag();
 
-  const [step, setStep] = useQueryState("step", {
-    shallow: true,
-  });
+  const [params, setParams] = useQueryStates(
+    {
+      step: parseAsStringEnum(["connect", "account", "gocardless"]),
+      ref: parseAsString,
+      token: parseAsString,
+      enrollment_id: parseAsString,
+      provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
+    },
+    {
+      shallow: true,
+    }
+  );
 
-  const isOpen = step === "connect";
+  const isOpen = params.step === "connect";
 
   const { open: openTeller, ready: tellerReady } = useTellerConnect({
     applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
@@ -55,7 +64,7 @@ export function ConnectTransactionsModal() {
       .NEXT_PUBLIC_TELLER_ENVIRONMENT as TellerConnectOptions["environment"],
     appearance: "system",
     onExit: () => {
-      setStep("connect");
+      setParams({ step: "connect" });
 
       track({
         event: LogEvents.ConnectBankCanceled.name,
@@ -66,17 +75,15 @@ export function ConnectTransactionsModal() {
         },
       });
 
-      setStep("connect");
+      setParams({ step: "connect" });
     },
     onSuccess: (authorization) => {
-      console.log(authorization);
-
-      setStep("account");
-
-      // Save your access token here
-      // connectBankAccountAction()
-
-      // ?ref=b3b06174-e7a0-4cd4-ae64-8d966d58a305&step=account&provider=teller&token=test_token_4bxszkdl4z6ji
+      setParams({
+        step: "account",
+        provider: "teller",
+        token: authorization.accessToken,
+        enrollment_id: authorization.enrollment.id,
+      });
 
       track({
         event: LogEvents.ConnectBankAuthorized.name,
@@ -88,7 +95,7 @@ export function ConnectTransactionsModal() {
       });
     },
     onFailure: () => {
-      setStep("connect");
+      setParams({ step: "connect" });
     },
   });
 
@@ -101,10 +108,7 @@ export function ConnectTransactionsModal() {
     onSuccess: (public_token, metadata) => {
       console.log(public_token, metadata);
 
-      setStep("account");
-
-      // Save your access token here
-      // connectBankAccountAction()
+      setParams({ step: "account" });
 
       track({
         event: LogEvents.ConnectBankAuthorized.name,
@@ -116,7 +120,7 @@ export function ConnectTransactionsModal() {
       });
     },
     onExit: () => {
-      setStep("connect");
+      setParams({ step: "connect" });
 
       track({
         event: LogEvents.ConnectBankCanceled.name,
@@ -146,7 +150,7 @@ export function ConnectTransactionsModal() {
           },
         });
 
-        setStep("gocardless");
+        setParams({ step: "gocardless" });
       },
     },
     {
@@ -166,7 +170,7 @@ export function ConnectTransactionsModal() {
         });
 
         openTeller();
-        setStep(null);
+        setParams({ step: null });
       },
       disabled: !tellerReady,
     },
@@ -192,7 +196,18 @@ export function ConnectTransactionsModal() {
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => setStep(null)}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={() =>
+        setParams(
+          { step: null },
+          {
+            // NOTE: Rerender so the overview modal is visible
+            shallow: false,
+          }
+        )
+      }
+    >
       <DialogContent>
         <div className="p-4">
           <DialogHeader>

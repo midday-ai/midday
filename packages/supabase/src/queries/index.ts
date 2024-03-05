@@ -88,6 +88,8 @@ export async function getTeamBankAccountsQuery(
       "*, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
     )
     .eq("team_id", teamId)
+    .order("created_at", { ascending: true })
+    .order("name", { ascending: false })
     .throwOnError();
 }
 

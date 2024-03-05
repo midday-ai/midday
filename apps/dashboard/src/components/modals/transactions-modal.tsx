@@ -3,6 +3,7 @@
 import { ConnectBankButton } from "@/components/connect-bank-button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
+import { useQueryState } from "nuqs";
 import { Fragment, useState } from "react";
 import TransactionsScreenOneLight from "./transactions-1-light.png";
 import TransactionsScreenOne from "./transactions-1.png";
@@ -16,6 +17,15 @@ const images = [
 
 export function TransactionsModal() {
   const [activeId, setActive] = useState(1);
+
+  // When connect transactions is open
+  const [step] = useQueryState("step", {
+    shallow: false,
+  });
+
+  if (step) {
+    return null;
+  }
 
   return (
     <div

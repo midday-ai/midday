@@ -2,7 +2,6 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
   getBankConnectionsByTeamIdQuery,
-  getInboxQuery,
   getMetricsQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,

@@ -25,6 +25,7 @@ export const deleteBankAccountSchema = z.object({
 export const updateBankAccountSchema = z.object({
   id: z.string().uuid(),
   name: z.string().optional(),
+  enabled: z.boolean().optional(),
 });
 
 export type DeleteBankAccountFormValues = z.infer<
@@ -106,18 +107,23 @@ export const voteSchema = z.object({
   id: z.string(),
 });
 
-const bankAccount = z.object({
-  account_id: z.string(),
-  bank_name: z.string(),
-  currency: z.string(),
-  institution_id: z.string(),
-  name: z.string(),
-  logo_url: z.string().optional(),
-});
-
 export const connectBankAccountSchema = z.object({
-  accounts: z.array(bankAccount),
+  accessToken: z.string().optional(), // Teller
+  enrollmentId: z.string().optional(), // Teller
   provider: z.enum(["gocardless", "plaid", "teller"]),
+  accounts: z.array(
+    z.object({
+      account_id: z.string(),
+      bank_name: z.string(),
+      currency: z.string(),
+      name: z.string(),
+      institution_id: z.string(),
+      enabled: z.boolean(),
+      logo_url: z.string().optional(),
+      access_token: z.string().optional(),
+      enrollment_id: z.string().optional(),
+    })
+  ),
 });
 
 export const sendFeedbackSchema = z.object({

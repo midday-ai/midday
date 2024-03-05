@@ -1,35 +1,69 @@
 import { addDays } from "date-fns";
-import {
-  getCurrentUserTeamQuery,
-  getSession,
-  getUserInviteQuery,
-} from "../queries";
+import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import { Client, Database } from "../types";
 
-export async function createBankAccounts(supabase: Client, accounts) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+type CreateBankAccountsPayload = {
+  accounts: {
+    account_id: string;
+    institution_id: string;
+    logo_url: string;
+    name: string;
+    bank_name: string;
+    currency: string;
+    enabled: boolean;
+  }[];
+  accessToken?: string;
+  enrollmentId?: string;
+  teamId: string;
+  userId: string;
+  provider: "gocardless" | "teller" | "plaid";
+};
+
+export async function createBankAccounts(
+  supabase: Client,
+  {
+    accounts,
+    accessToken,
+    enrollmentId,
+    teamId,
+    userId,
+    provider,
+  }: CreateBankAccountsPayload
+) {
   // Get first account to create a bank connection
   const account = accounts?.at(0);
+
+  if (!account) {
+    return;
+  }
 
   const bankConnection = await createBankConnection(supabase, {
     institution_id: account.institution_id,
     name: account.bank_name,
     logo_url: account.logo_url,
-    team_id: userData?.team_id,
-    provider: account.provider,
+    team_id: teamId,
+    provider,
+    access_token: accessToken,
+    enrollment_id: enrollmentId,
   });
 
   return supabase
     .from("bank_accounts")
-    .insert(
-      accounts.map((account) => ({
-        account_id: account.account_id,
-        bank_connection_id: bankConnection?.data?.id,
-        team_id: userData?.team_id,
-        created_by: userData.id,
-        name: account.name,
-        currency: account.currency,
-      }))
+    .upsert(
+      accounts.map(
+        (account) => ({
+          account_id: account.account_id,
+          bank_connection_id: bankConnection?.data?.id,
+          team_id: teamId,
+          created_by: userId,
+          name: account.name,
+          currency: account.currency,
+          enabled: account.enabled,
+        }),
+        {
+          onConflict: "account_id",
+        }
+      )
     )
     .select();
 }
@@ -40,6 +74,8 @@ type CreateBankConnectionPayload = {
   name: string;
   logo_url: string;
   provider: "gocardless" | "plaid" | "teller";
+  access_token?: string;
+  enrollment_id?: string;
 };
 
 export async function createBankConnection(

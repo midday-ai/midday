@@ -2,10 +2,9 @@
 
 import { getAccounts } from "@/actions/banks/get-accounts";
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
+import { connectBankAccountSchema } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -21,19 +20,23 @@ import {
   FormLabel,
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Switch } from "@midday/ui/switch";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryStates,
+} from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
-
-const formSchema = z.object({
-  accounts: z.array(z.string()).refine((value) => value.some((item) => item)),
-});
 
 function RowsSkeleton() {
   return (
@@ -58,19 +61,31 @@ function RowsSkeleton() {
 
 export function SelectBankAccountsModal({ countryCode }) {
   const { toast } = useToast();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
 
-  const isOpen =
-    searchParams.get("step") === "account" && !searchParams.has("error");
+  const [params, setParams] = useQueryStates({
+    step: parseAsStringEnum(["connect", "account", "gocardless"]),
+    error: parseAsBoolean,
+    ref: parseAsString,
+    token: parseAsString,
+    enrollment_id: parseAsString,
+    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
+  });
 
-  const provider = searchParams.get("provider");
-  const id = searchParams.get("ref");
-  const accessToken = searchParams.get("token");
+  const { provider, step, error, token, ref, enrollment_id } = params;
+  const isOpen = step === "account" && !error;
+
+  const onClose = () => {
+    setParams(
+      { step: null },
+      {
+        // NOTE: Rerender so the overview modal is visible
+        shallow: false,
+      }
+    );
+  };
 
   const connectBankAction = useAction(connectBankAccountAction, {
     onError: () => {
@@ -87,29 +102,24 @@ export function SelectBankAccountsModal({ countryCode }) {
     },
   });
 
-  const onClose = () => router.push(pathname);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof connectBankAccountSchema>>({
+    resolver: zodResolver(connectBankAccountSchema),
     defaultValues: {
       accounts: [],
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    // connectBankAction.execute({
-    //   provider: "gocardless",
-    //   accounts: accountsWithDetails,
-    // });
+  async function onSubmit(values: z.infer<typeof connectBankAccountSchema>) {
+    connectBankAction.execute(values);
   }
 
   useEffect(() => {
     async function fetchData() {
       const data = await getAccounts({
         provider,
-        id,
+        id: ref,
         countryCode,
-        accessToken,
+        accessToken: token,
       });
 
       setAccounts(data);
@@ -117,14 +127,27 @@ export function SelectBankAccountsModal({ countryCode }) {
 
       // Set all accounts to checked
       if (!form.formState.isValid) {
-        form.reset({ accounts: data.map((account) => account.id) });
+        form.reset({
+          provider,
+          accessToken: token,
+          enrollmentId: enrollment_id,
+          accounts: data.map((account) => ({
+            account_id: account.id,
+            bank_name: account.institution.name,
+            currency: account.currency,
+            name: account.name,
+            institution_id: account.institution.id,
+            logo_url: account.institution?.logo,
+            enabled: true,
+          })),
+        });
       }
     }
 
     if (isOpen && !accounts.length) {
       fetchData();
     }
-  }, [isOpen]);
+  }, [isOpen, provider]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -142,7 +165,7 @@ export function SelectBankAccountsModal({ countryCode }) {
                 <DialogHeader className="mb-8">
                   <DialogTitle>Select Accounts</DialogTitle>
                   <DialogDescription>
-                    Select accounts you want to link with Midday.
+                    Select accounts you want to enable with Midday.
                   </DialogDescription>
                 </DialogHeader>
 
@@ -165,18 +188,19 @@ export function SelectBankAccountsModal({ countryCode }) {
                               className="flex justify-between"
                             >
                               <FormLabel className="flex items-between">
-                                <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                                  <AvatarImage
-                                    src={account.institution.logo}
-                                    alt={account?.institution?.name}
-                                  />
-                                </Avatar>
+                                <Image
+                                  src={account.institution?.logo}
+                                  alt={account?.institution?.name}
+                                  width={34}
+                                  height={34}
+                                  className="rounded-full overflow-hidden border"
+                                />
                                 <div className="ml-4 space-y-1">
                                   <p className="text-sm font-medium leading-none mb-1">
                                     {account.name}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {account?.institution.name} (
+                                    {account?.institution?.name} (
                                     {account?.currency})
                                   </p>
                                 </div>
@@ -184,19 +208,26 @@ export function SelectBankAccountsModal({ countryCode }) {
 
                               <div>
                                 <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(account.id)}
+                                  <Switch
+                                    checked={
+                                      field.value.find(
+                                        (value) =>
+                                          value.account_id === account.id
+                                      )?.enabled
+                                    }
                                     onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([
-                                            ...field.value,
-                                            account.id,
-                                          ])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== account.id
-                                            )
-                                          );
+                                      return field.onChange(
+                                        field.value.map((value) => {
+                                          if (value.account_id === account.id) {
+                                            return {
+                                              ...value,
+                                              enabled: checked,
+                                            };
+                                          }
+
+                                          return value;
+                                        })
+                                      );
                                     }}
                                   />
                                 </FormControl>

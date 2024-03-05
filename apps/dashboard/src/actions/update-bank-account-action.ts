@@ -20,6 +20,9 @@ export const updateBankAccountAction = action(
       ...params,
     });
 
+    // TODO: Check enabled account, if none disable job otherwise start new based on team_id
+    // and initial sync for account_id
+
     revalidateTag(`bank_accounts_${data.team_id}`);
     revalidateTag(`bank_connections_${data.team_id}`);
     revalidateTag(`transactions_${data.team_id}`);

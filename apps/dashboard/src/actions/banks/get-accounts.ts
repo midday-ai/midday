@@ -20,7 +20,6 @@ export async function getAccounts({
   const data = await api.getAccounts({
     id,
     countryCode,
-    provider,
     accessToken,
   });
 
