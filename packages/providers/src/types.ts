@@ -40,6 +40,7 @@ export type Account = {
 export type GetTransactionsRequest = {
   teamId: string;
   accountId: string;
+  bankAccountId: string;
   dateFrom?: string;
   dateTo?: string;
   accessToken?: string; // Teller

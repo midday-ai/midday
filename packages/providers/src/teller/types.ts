@@ -138,7 +138,7 @@ export type GetAccountsResponse = AccountWithBalances[];
 export type TransformTransaction = {
   transaction: Transaction;
   teamId: string;
-  accountId: string;
+  bankAccountId: string;
 };
 
 export type TransformAccountParams = {

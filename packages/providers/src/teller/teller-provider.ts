@@ -13,6 +13,7 @@ export class TellerProvider implements Provider {
   async getTransactions({
     teamId,
     accountId,
+    bankAccountId,
     accessToken,
   }: GetTransactionsRequest) {
     if (!accessToken) {
@@ -28,7 +29,7 @@ export class TellerProvider implements Provider {
       transformTransaction({
         transaction,
         teamId,
-        accountId,
+        bankAccountId,
       })
     );
   }

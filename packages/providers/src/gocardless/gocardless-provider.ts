@@ -15,6 +15,7 @@ export class GoCardLessProvider implements Provider {
     dateTo,
     teamId,
     accountId,
+    bankAccountId,
   }: GetTransactionsRequest) {
     const response = await this.#api.getTransactions({
       dateFrom,
@@ -26,7 +27,7 @@ export class GoCardLessProvider implements Provider {
       transformTransaction({
         transaction,
         teamId,
-        accountId,
+        bankAccountId,
       })
     );
   }

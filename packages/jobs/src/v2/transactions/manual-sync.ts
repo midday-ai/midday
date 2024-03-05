@@ -5,7 +5,7 @@ import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { Events, Jobs } from "../..//constants";
 import { client, supabase } from "../../client";
-import { scheduler } from "../../transactions";
+import { schedulerV2 } from "./scheduler";
 
 const BATCH_LIMIT = 300;
 
@@ -26,8 +26,8 @@ client.defineJob({
     const { teamId } = payload;
 
     try {
-      // Schedule a background per team
-      await scheduler.register(teamId, {
+      // NOTE: Schedule a background job per team
+      await schedulerV2.register(teamId, {
         type: "interval",
         options: {
           seconds: 3600, // every 1h
@@ -54,16 +54,25 @@ client.defineJob({
         teamId: account.team_id,
         accountId: account.account_id,
         accessToken: account.bank_connection?.access_token,
+        bankAccountId: account.id,
       });
 
       // NOTE: We will get all the transactions at once for each account so
       // we need to guard against massive payloads
       await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
-        // await supabase.from("transactions").upsert(batch, {
-        //   onConflict: "internal_id",
-        //   ignoreDuplicates: true,
-        // });
+        await supabase.from("transactions").upsert(batch, {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        });
       });
+
+      // Update bank account last_accessed
+      await io.supabase.client
+        .from("bank_accounts")
+        .update({
+          last_accessed: new Date().toISOString(),
+        })
+        .eq("id", account.id);
     });
 
     try {

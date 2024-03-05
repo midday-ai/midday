@@ -81,7 +81,7 @@ const transformDescription = ({
 export const transformTransaction = ({
   transaction,
   teamId,
-  accountId,
+  bankAccountId,
 }: TransformTransactionParams): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode
@@ -115,7 +115,7 @@ export const transformTransaction = ({
     internal_id: `${teamId}_${transaction.internalTransactionId}`,
     amount: transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
-    bank_account_id: accountId,
+    bank_account_id: bankAccountId,
     category: +transaction.transactionAmount.amount > 0 ? "income" : null,
     team_id: teamId,
     currency_rate: currencyExchange?.rate,

@@ -57,7 +57,7 @@ export const mapTransactionCategory = (category?: DetailCategory) => {
 export const transformTransaction = ({
   transaction,
   teamId,
-  accountId,
+  bankAccountId,
 }: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
 
@@ -68,7 +68,7 @@ export const transformTransaction = ({
     internal_id: `${teamId}_${transaction.id}`,
     amount: transaction.amount,
     currency: "USD",
-    bank_account_id: accountId,
+    bank_account_id: bankAccountId,
     category:
       +transaction.amount > 0
         ? "income"

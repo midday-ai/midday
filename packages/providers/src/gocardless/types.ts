@@ -171,7 +171,7 @@ export type TransactionDescriptionParams = {
 export type TransformTransactionParams = {
   transaction: Transaction;
   teamId: string;
-  accountId: string;
+  bankAccountId: string;
 };
 
 export type TransformAccountParams = {
