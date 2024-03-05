@@ -63,8 +63,8 @@ export const columns: ColumnDef<Payment>[] = [
                 <div className="flex space-x-2 items-center">
                   <span>{row.original.name}</span>
                   {row.original.status === "pending" && (
-                    <div className="border rounded-md text-xs py-0.5 px-2 text-[#878787]">
-                      Pending
+                    <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[26px] text-[#878787]">
+                      <span>Pending</span>
                     </div>
                   )}
                 </div>

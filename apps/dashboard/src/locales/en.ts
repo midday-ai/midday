@@ -23,6 +23,10 @@ export default {
     card_atm: "Card ATM",
     transfer: "Transfer",
     other: "Other",
+    ach: "Ach",
+    deposit: "Deposit",
+    wire: "Wire",
+    fee: "Fee",
   },
   language: {
     title: "Languages",
