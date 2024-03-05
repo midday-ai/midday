@@ -85,11 +85,11 @@ export function EditBankAccountModal({
                 )}
               />
 
-              <DialogFooter className="mt-6 w-full">
+              <DialogFooter className="mt-12 w-full">
                 <div className="space-y-4 w-full">
                   <Button
                     variant="outline"
-                    className="w-full bg-destructive hover:bg-destructive text-muted hover:text-muted"
+                    className="w-full border-destructive text-destructive hover:text-destructive hover:bg-transparent hover:border-destructive"
                     disabled={deleteAccount.status === "executing"}
                     onClick={() => deleteAccount.execute({ id })}
                   >

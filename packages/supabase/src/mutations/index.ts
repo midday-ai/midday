@@ -17,7 +17,6 @@ type CreateBankAccountsPayload = {
   teamId: string;
   userId: string;
   provider: "gocardless" | "teller" | "plaid";
-  expiresAt: string;
 };
 
 export async function createBankAccounts(
@@ -29,7 +28,6 @@ export async function createBankAccounts(
     teamId,
     userId,
     provider,
-    expiresAt,
   }: CreateBankAccountsPayload
 ) {
   // Get first account to create a bank connection
@@ -38,6 +36,13 @@ export async function createBankAccounts(
   if (!account) {
     return;
   }
+
+  // NOTE: GoCardLess connection expires after 180 days
+  const expiresAt =
+    provider === "gocardless"
+      ? addDays(new Date(), 180).toDateString()
+      : undefined;
+
   const bankConnection = await supabase
     .from("bank_connections")
     .insert({
@@ -89,6 +94,7 @@ type UpdateBankConnectionData = {
   teamId: string;
 };
 
+// NOTE: Only GoCardLess needs to be updated
 export async function updateBankConnection(
   supabase: Client,
   data: UpdateBankConnectionData
@@ -98,7 +104,6 @@ export async function updateBankConnection(
   return await supabase
     .from("bank_connections")
     .update({
-      // TODO: Add from outside
       expires_at: addDays(new Date(), 180).toDateString(),
     })
     .eq("team_id", teamId)

@@ -17,6 +17,11 @@ export async function ReconnectBank() {
     return null;
   }
 
+  // NOTE: No connections with expire_at (Only GoCardLess)
+  if (bankConnections?.data?.find((bank) => bank.expires_at === null)) {
+    return null;
+  }
+
   const hasWarningStatus = bankConnections?.data?.some(
     (bank) =>
       differenceInDays(new Date(bank.expires_at), new Date()) <= WARNING_DAYS

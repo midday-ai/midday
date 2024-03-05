@@ -52,6 +52,13 @@ client.defineJob({
         provider: account.bank_connection.provider,
       });
 
+      console.log({
+        teamId: account.team_id,
+        accountId: account.account_id,
+        accessToken: account.bank_connection?.access_token,
+        bankAccountId: account.id,
+      });
+
       const transactions = await provider.getTransactions({
         teamId: account.team_id,
         accountId: account.account_id,

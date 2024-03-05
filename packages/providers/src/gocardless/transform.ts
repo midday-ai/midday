@@ -11,8 +11,20 @@ import {
   TransformTransactionParams,
 } from "./types";
 
-export const mapTransactionMethod = (method?: string) => {
-  switch (method) {
+export const mapTransactionCategory = (transaction: Transaction) => {
+  if (+transaction.transactionAmount.amount > 0) {
+    return "income";
+  }
+
+  if (transaction?.proprietaryBankTransactionCode === "Transfer") {
+    return "transfer";
+  }
+
+  return "uncategorized";
+};
+
+export const mapTransactionMethod = (type?: string) => {
+  switch (type) {
     case "Payment":
     case "Bankgiro payment":
     case "Incoming foreign payment":
@@ -116,7 +128,7 @@ export const transformTransaction = ({
     amount: transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
     bank_account_id: bankAccountId,
-    category: +transaction.transactionAmount.amount > 0 ? "income" : null,
+    category: mapTransactionCategory(transaction),
     team_id: teamId,
     currency_rate: currencyExchange?.rate,
     currency_source: currencyExchange?.currency,

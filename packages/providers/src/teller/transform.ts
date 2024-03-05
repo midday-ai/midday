@@ -4,51 +4,69 @@ import {
   Transaction as BaseTransaction,
 } from "../types";
 import {
-  DetailCategory,
+  Transaction,
   TransformAccountParams,
   TransformTransaction,
 } from "./types";
 
-export const mapTransactionMethod = (method?: string) => {
-  switch (method) {
-    case "Payment":
-    case "Bankgiro payment":
-    case "Incoming foreign payment":
+export const mapTransactionMethod = (type?: string) => {
+  switch (type) {
+    case "payment":
+    case "bill_payment":
+    case "digital_payment":
       return "payment";
-    case "Card purchase":
-    case "Card foreign purchase":
+    case "card_payment":
       return "card_purchase";
-    case "Card ATM":
+    case "atm":
       return "card_atm";
-    case "Transfer":
+    case "transfer":
       return "transfer";
+    case "ach":
+      return "ach";
+    case "interest":
+      return "interest";
+    case "deposit":
+      return "deposit";
+    case "wire":
+      return "wire";
+    case "fee":
+      return "fee";
     default:
       return "other";
   }
 };
 
-// travel: "travel",
-// office_supplies: "office_supplies",
-// meals: "meals",
-// software: "software",
-// rent: "rent",
-// income: "income",
-// equipment: "equipment",
-// salary: "salary",
-// transfer: "transfer",
-// internet_and_telephone: "internet_and_telephone",
-// facilities_expenses: "facilities_expenses",
-// activity: "activity",
-// uncategorized: "uncategorized",
-// fees: "fees",
-// taxes: "taxes",
-// other: "other",
+export const mapTransactionCategory = (transaction: Transaction) => {
+  if (+transaction?.amount > 0) {
+    return "income";
+  }
 
-export const mapTransactionCategory = (category?: DetailCategory) => {
-  switch (category) {
-    // case "accommodation":
-    //   break;
+  if (transaction.type === "transfer") {
+    return "transfer";
+  }
 
+  switch (transaction?.details.category) {
+    case "bar":
+    case "dining":
+    case "groceries":
+      return "meals";
+    case "transport":
+    case "transportation":
+      return "travel";
+    case "tax":
+      return "taxes";
+    case "office":
+      return "office_supplies";
+    case "phone":
+      return "internet_and_telephone";
+    case "software":
+      return "software";
+    case "entertainment":
+    case "sport":
+      return "activity";
+    case "utilities":
+    case "electronics":
+      return "equipment";
     default:
       return "uncategorized";
   }
@@ -69,10 +87,7 @@ export const transformTransaction = ({
     amount: transaction.amount,
     currency: "USD",
     bank_account_id: bankAccountId,
-    category:
-      +transaction.amount > 0
-        ? "income"
-        : mapTransactionCategory(transaction?.details?.category),
+    category: mapTransactionCategory(transaction),
     team_id: teamId,
     balance: transaction.running_balance,
     status: transaction?.status === "posted" ? "posted" : "pending",

@@ -59,12 +59,6 @@ export const Combobox = ({
     }
   };
 
-  const handleOnCreate = (value: string) => {
-    console.log(value);
-    handleOnValueChange(value);
-    onCreate?.(value);
-  };
-
   const handleOnRemove = () => {
     setSelected(undefined);
     setInputValue("");
