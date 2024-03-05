@@ -108,8 +108,8 @@ export const voteSchema = z.object({
 });
 
 export const connectBankAccountSchema = z.object({
-  accessToken: z.string().optional(), // Teller
-  enrollmentId: z.string().optional(), // Teller
+  accessToken: z.string().nullable().optional(), // Teller
+  enrollmentId: z.string().nullable().optional(), // Teller
   provider: z.enum(["gocardless", "plaid", "teller"]),
   accounts: z.array(
     z.object({
@@ -120,8 +120,6 @@ export const connectBankAccountSchema = z.object({
       institution_id: z.string(),
       enabled: z.boolean(),
       logo_url: z.string().optional(),
-      access_token: z.string().optional(),
-      enrollment_id: z.string().optional(),
     })
   ),
 });

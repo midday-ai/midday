@@ -9,7 +9,7 @@ export const Jobs = {
   PROCESS_DOCUMENT: "process-document",
   MATCH_INBOX: "match-inbox",
   ONBOARDING_EMAILS: "onboarding-emails",
-  TRANSACTIONS_MANUAL_SYNC: "transactions-manual-sync",
+  TRANSACTIONS_INITIAL_SYNC: "transactions-manual-sync",
 };
 
 export const Events = {
@@ -19,5 +19,5 @@ export const Events = {
   PROCESS_DOCUMENT: "process.document",
   MATCH_INBOX: "match.inbox",
   ONBOARDING_EMAILS: "onboarding-emails",
-  TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
+  TRANSACTIONS_INITIAL_SYNC: "transactions.manual.sync",
 };

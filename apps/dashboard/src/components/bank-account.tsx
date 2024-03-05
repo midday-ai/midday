@@ -41,8 +41,13 @@ export function BankAccount({
             <span className="text-xs font-medium text-[#606060]">
               {bank_name} ({currency})
             </span>
+
             <span className="text-xs text-[#606060]">
-              Last accessed {formatDistanceToNow(new Date(last_accessed))} ago
+              {last_accessed
+                ? `Last accessed ${formatDistanceToNow(
+                    new Date(last_accessed)
+                  )} ago`
+                : "Never accessed"}
             </span>
           </div>
         </button>

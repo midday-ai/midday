@@ -17,6 +17,7 @@ type CreateBankAccountsPayload = {
   teamId: string;
   userId: string;
   provider: "gocardless" | "teller" | "plaid";
+  expiresAt: string;
 };
 
 export async function createBankAccounts(
@@ -28,6 +29,7 @@ export async function createBankAccounts(
     teamId,
     userId,
     provider,
+    expiresAt,
   }: CreateBankAccountsPayload
 ) {
   // Get first account to create a bank connection
@@ -36,16 +38,20 @@ export async function createBankAccounts(
   if (!account) {
     return;
   }
-
-  const bankConnection = await createBankConnection(supabase, {
-    institution_id: account.institution_id,
-    name: account.bank_name,
-    logo_url: account.logo_url,
-    team_id: teamId,
-    provider,
-    access_token: accessToken,
-    enrollment_id: enrollmentId,
-  });
+  const bankConnection = await supabase
+    .from("bank_connections")
+    .insert({
+      institution_id: account.institution_id,
+      name: account.bank_name,
+      logo_url: account.logo_url,
+      team_id: teamId,
+      provider,
+      access_token: accessToken,
+      enrollment_id: enrollmentId,
+      expires_at: expiresAt,
+    })
+    .select()
+    .single();
 
   return supabase
     .from("bank_accounts")
@@ -78,20 +84,6 @@ type CreateBankConnectionPayload = {
   enrollment_id?: string;
 };
 
-export async function createBankConnection(
-  supabase: Client,
-  data: CreateBankConnectionPayload
-) {
-  return await supabase
-    .from("bank_connections")
-    .insert({
-      ...data,
-      expires_at: addDays(new Date(), 180).toDateString(),
-    })
-    .select()
-    .single();
-}
-
 type UpdateBankConnectionData = {
   id: string;
   teamId: string;
@@ -106,6 +98,7 @@ export async function updateBankConnection(
   return await supabase
     .from("bank_connections")
     .update({
+      // TODO: Add from outside
       expires_at: addDays(new Date(), 180).toDateString(),
     })
     .eq("team_id", teamId)

@@ -2,7 +2,6 @@
 
 import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
-import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { updateBankAccount } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -15,14 +14,6 @@ export const updateBankAccountAction = action(
   async (params) => {
     const supabase = createClient();
     const user = await getUser();
-
-    // TODO: Remove
-    await client.sendEvent({
-      name: Events.TRANSACTIONS_MANUAL_SYNC,
-      payload: {
-        teamId: user.data.team_id,
-      },
-    });
 
     const { data } = await updateBankAccount(supabase, {
       teamId: user.data.team_id,

@@ -1,1 +1,2 @@
-export * from "./manual-sync";
+export * from "./initial-sync";
+export * from "./sync";

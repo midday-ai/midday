@@ -10,11 +10,11 @@ import { schedulerV2 } from "./scheduler";
 const BATCH_LIMIT = 300;
 
 client.defineJob({
-  id: Jobs.TRANSACTIONS_MANUAL_SYNC,
-  name: "Transactions - Manual Sync",
+  id: Jobs.TRANSACTIONS_INITIAL_SYNC,
+  name: "Transactions - Initial Sync",
   version: "0.0.1",
   trigger: eventTrigger({
-    name: Events.TRANSACTIONS_MANUAL_SYNC,
+    name: Events.TRANSACTIONS_INITIAL_SYNC,
     schema: z.object({
       teamId: z.string(),
     }),
@@ -26,7 +26,7 @@ client.defineJob({
     const { teamId } = payload;
 
     try {
-      // NOTE: Schedule a background job per team
+      // NOTE: Schedule a background job per team_id
       await schedulerV2.register(teamId, {
         type: "interval",
         options: {
@@ -43,7 +43,9 @@ client.defineJob({
         "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token, enrollment_id)"
       )
       .eq("team_id", teamId)
-      .eq("enabled", true);
+      .eq("enabled", true)
+      // NOTE: Only new accounts
+      .is("last_accessed", null);
 
     const promises = accountsData?.map(async (account) => {
       const provider = new Provider({
@@ -76,7 +78,9 @@ client.defineJob({
     });
 
     try {
-      await Promise.all(promises);
+      if (promises) {
+        await Promise.all(promises);
+      }
     } catch (error) {
       await io.logger.error(error);
       throw Error("Something went wrong");

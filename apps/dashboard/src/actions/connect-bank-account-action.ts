@@ -6,6 +6,7 @@ import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
+import { addDays } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
 import { connectBankAccountSchema } from "./schema";
@@ -18,6 +19,10 @@ export const connectBankAccountAction = action(
     const supabase = createClient();
 
     try {
+      // TODO: Get from providers (govardless - 180 days)
+      const expireAt =
+        provider === "gocardless" && addDays(new Date(), 180).toDateString();
+
       await createBankAccounts(supabase, {
         accessToken,
         enrollmentId,
@@ -25,6 +30,7 @@ export const connectBankAccountAction = action(
         userId: user.data.id,
         accounts,
         provider,
+        expireAt,
       });
     } catch (error) {
       console.log(error);
@@ -43,7 +49,7 @@ export const connectBankAccountAction = action(
     }
 
     const event = await client.sendEvent({
-      name: Events.TRANSACTIONS_MANUAL_SYNC,
+      name: Events.TRANSACTIONS_INITIAL_SYNC,
       payload: {
         teamId,
       },
