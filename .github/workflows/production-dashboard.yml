@@ -25,6 +25,8 @@ jobs:
       #   run: bun run lint --filter=@midday/dashboard
       # - name: 🪐 Check TypeScript
       #   run: bun run typecheck --filter=@midday/dashboard
+      - name: 🧪 Run unit tests
+        run: bun run test --filter=@midday/dashboard
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information

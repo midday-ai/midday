@@ -2,7 +2,6 @@ import { Provider } from "@midday/providers";
 import { client, supabase } from "../../client";
 import { Jobs } from "../../constants";
 import { scheduler } from "../../transactions";
-import { schedulerV2 } from "./scheduler";
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC_V2,
@@ -23,18 +22,9 @@ client.defineJob({
       .eq("team_id", teamId)
       .eq("enabled", true);
 
-    if (!accountsData?.length) {
-      // NOTE: If no enabled accounts found
-      // Unregister scheduler (enabled again when initial sync is runned)
-      schedulerV2.unregister(teamId);
-    }
-
     const promises = accountsData?.map(async (account) => {
       const provider = new Provider({
         provider: account.bank_connection.provider,
-        // date_to: formatISO(subMonths(new Date(), 1), {
-        //     representation: "date",
-        //   }),
       });
 
       //   const transactions = await provider.getTransactions({

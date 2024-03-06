@@ -34,7 +34,7 @@ client.defineJob({
         },
       });
     } catch (error) {
-      await io.logger.debug(`Error register new scheduler ${teamId}`);
+      await io.logger.debug(`Error register new scheduler for team: ${teamId}`);
     }
 
     const { data: accountsData } = await supabase
