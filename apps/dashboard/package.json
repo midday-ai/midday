@@ -36,7 +36,7 @@
     "@vercel/edge-config": "^1.1.0",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.37",
-    "ai": "^3.0.5",
+    "ai": "^3.0.6",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.3",
     "dub": "^0.8.0",
@@ -75,7 +75,7 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.9.2",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.24",
+    "@types/node": "^20.11.25",
     "@types/react": "^18.2.63",
     "@types/react-dom": "^18.2.20",
     "typescript": "^5.3.3"
