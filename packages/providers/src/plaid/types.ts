@@ -26,7 +26,6 @@ export type Institution = {
   id: string;
   name: string;
   logo?: string | null;
-  website?: string | null;
 };
 
 export type AccountWithintitution = AccountsGetResponse["accounts"][0] & {

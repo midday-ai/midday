@@ -50,7 +50,6 @@ export class PlaidApi {
         name: institution.data.institution.name,
         // NOTE: Currently not in use, base64 and usually unavailable
         logo: institution.data.institution?.logo ?? null,
-        website: institution.data.institution?.url ?? null,
       },
     }));
   }

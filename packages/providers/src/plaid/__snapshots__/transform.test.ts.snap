@@ -2,12 +2,16 @@
 
 exports[`Transform pending transaction 1`] = `
 {
-  "amount": 5.4,
+  "amount": -5.4,
   "balance": null,
   "bank_account_id": "123",
+  "category": "travel",
   "currency": "CAD",
   "date": "2024-02-24",
+  "description": null,
   "internal_id": "123_NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "method": "other",
+  "name": "Uber 063015 SF**POOL**",
   "status": "pending",
   "team_id": "123",
 }

@@ -82,6 +82,7 @@ export const transformTransaction = ({
   return {
     date: transaction.date,
     name: transaction.description && capitalCase(transaction.description),
+    description: null,
     method,
     internal_id: `${teamId}_${transaction.id}`,
     amount: +transaction.amount,

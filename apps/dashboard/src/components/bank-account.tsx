@@ -28,13 +28,15 @@ export function BankAccount({
           onClick={() => setOpen(true)}
           className="flex text-start items-center w-full"
         >
-          <Image
-            src={logo}
-            alt={name}
-            width={34}
-            height={34}
-            className="rounded-full"
-          />
+          {logo && (
+            <Image
+              src={logo}
+              alt={name}
+              width={34}
+              height={34}
+              className="rounded-full"
+            />
+          )}
 
           <div className="ml-4 flex flex-col">
             <p className="text-sm font-medium leading-none mb-1">{name}</p>

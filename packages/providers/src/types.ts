@@ -17,7 +17,7 @@ export type Transaction = {
   category?: string | null;
   method: string;
   name: string;
-  description?: string;
+  description?: string | null;
   currency_rate?: number;
   currency_source?: string;
 };

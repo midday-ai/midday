@@ -31,12 +31,11 @@ client.defineJob({
       })
       .eq("id", ctx.source.id);
 
-    // if (!data) {
-    //   await io.logger.error(`Bank account not found: ${ctx.source.id}`);
-    //   await scheduler.unregister(ctx.source.id);
+    if (!data) {
+      await io.logger.error(`Bank account not found: ${ctx.source.id}`);
 
-    //   return;
-    // }
+      return;
+    }
 
     const { transactions } = await getTransactions({
       accountId: data?.account_id,

@@ -1,75 +1,122 @@
 import { capitalCase } from "change-case";
+import { Transaction, TransactionCode } from "plaid";
 import {
   Account as BaseAccount,
   Transaction as BaseTransaction,
 } from "../types";
 import { TransformAccount, TransformTransaction } from "./types";
 
-export const mapTransactionMethod = (type?: string) => {
+export const mapTransactionMethod = (type?: TransactionCode | null) => {
   switch (type) {
-    case "payment":
-    case "bill_payment":
-    case "digital_payment":
+    case "bill payment":
       return "payment";
-    case "card_payment":
+    case "purchase":
       return "card_purchase";
     case "atm":
       return "card_atm";
     case "transfer":
       return "transfer";
-    case "ach":
-      return "ach";
     case "interest":
       return "interest";
-    case "deposit":
-      return "deposit";
-    case "wire":
-      return "wire";
-    case "fee":
+    case "bank charge":
       return "fee";
     default:
       return "other";
   }
 };
 
-export const mapTransactionCategory = (transaction: TransformTransaction) => {
-  if (+transaction?.amount > 0) {
+export const mapTransactionCategory = (transaction: Transaction) => {
+  // Positive values when money moves out of the account; negative values when money moves in.
+  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
+  if (transaction?.amount < 0) {
     return "income";
   }
 
-  if (transaction.type === "transfer") {
-    return "transfer";
+  if (transaction.personal_finance_category?.primary === "INCOME") {
+    return "income";
   }
 
-  if (transaction.type === "fee") {
+  if (
+    transaction.transaction_code === "bank charge" ||
+    transaction.personal_finance_category?.primary === "BANK_FEES"
+  ) {
     return "fees";
   }
 
-  switch (transaction?.details.category) {
-    case "bar":
-    case "dining":
-    case "groceries":
-      return "meals";
-    case "transport":
-    case "transportation":
-      return "travel";
-    case "tax":
-      return "taxes";
-    case "office":
-      return "office_supplies";
-    case "phone":
-      return "internet_and_telephone";
-    case "software":
-      return "software";
-    case "entertainment":
-    case "sport":
-      return "activity";
-    case "utilities":
-    case "electronics":
-      return "equipment";
-    default:
-      return "uncategorized";
+  if (
+    transaction.transaction_code === "transfer" ||
+    transaction.personal_finance_category?.primary === "TRANSFER_IN" ||
+    transaction.personal_finance_category?.primary === "TRANSFER_OUT"
+  ) {
+    return "transfer";
   }
+
+  if (transaction.personal_finance_category?.primary === "FOOD_AND_DRINK") {
+    return "meals";
+  }
+
+  if (
+    transaction.personal_finance_category?.primary === "TRANSPORTATION" ||
+    transaction.personal_finance_category?.primary === "TRAVEL"
+  ) {
+    return "travel";
+  }
+
+  if (
+    transaction.personal_finance_category?.detailed ===
+    "GENERAL_SERVICES_OTHER_GENERAL_SERVICES"
+  ) {
+    return "software";
+  }
+
+  if (
+    transaction.personal_finance_category?.detailed ===
+      "RENT_AND_UTILITIES_GAS_AND_ELECTRICITY" ||
+    transaction.personal_finance_category?.detailed ===
+      "RENT_AND_UTILITIES_SEWAGE_AND_WASTE_MANAGEMENT" ||
+    transaction.personal_finance_category?.detailed ===
+      "RENT_AND_UTILITIES_WATER" ||
+    transaction.personal_finance_category?.detailed ===
+      "RENT_AND_UTILITIES_OTHER_UTILITIES"
+  ) {
+    return "facilities_expenses";
+  }
+
+  if (
+    transaction.personal_finance_category?.detailed ===
+    "RENT_AND_UTILITIES_RENT"
+  ) {
+    return "rent";
+  }
+
+  if (
+    transaction.personal_finance_category?.detailed ===
+      "RENT_AND_UTILITIES_INTERNET_AND_CABLE" ||
+    transaction.personal_finance_category?.detailed ===
+      "RENT_AND_UTILITIES_TELEPHONE"
+  ) {
+    return "internet_and_telephone";
+  }
+
+  if (transaction.personal_finance_category?.primary === "HOME_IMPROVEMENT") {
+    return "office_supplies";
+  }
+
+  if (transaction.personal_finance_category?.primary === "ENTERTAINMENT") {
+    return "activity";
+  }
+
+  return "uncategorized";
+};
+
+const transformToSignedAmount = (amount: number) => {
+  // Positive values when money moves out of the account; negative values when money moves in.
+  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
+  if (amount > 0) {
+    return -amount;
+  }
+
+  return amount * -1;
 };
 
 export const transformTransaction = ({
@@ -77,20 +124,23 @@ export const transformTransaction = ({
   teamId,
   bankAccountId,
 }: TransformTransaction): BaseTransaction => {
-  // const method = mapTransactionMethod(transaction.type);
+  const method = mapTransactionMethod(transaction?.transaction_code);
 
   return {
     date: transaction.date,
-    // name: transaction.description && capitalCase(transaction.description),
-    // method,
+    name: transaction.name,
+    description: transaction?.original_description
+      ? capitalCase(transaction.original_description)
+      : null,
+    method,
     internal_id: `${teamId}_${transaction.transaction_id}`,
-    amount: +transaction.amount,
+    amount: transformToSignedAmount(transaction.amount),
     currency:
       transaction.iso_currency_code ||
       transaction.unofficial_currency_code ||
       "USD",
     bank_account_id: bankAccountId,
-    // category: mapTransactionCategory(transaction),
+    category: mapTransactionCategory(transaction),
     team_id: teamId,
     balance: null,
     status: transaction.pending ? "pending" : "posted",

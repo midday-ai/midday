@@ -119,7 +119,7 @@ export const connectBankAccountSchema = z.object({
       name: z.string(),
       institution_id: z.string(),
       enabled: z.boolean(),
-      logo_url: z.string().optional(),
+      logo_url: z.string().nullable().optional(),
     })
   ),
 });
