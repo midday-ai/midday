@@ -1,19 +1,20 @@
-// import {
-//   AuthenticatedRequest,
-//   GetAccountBalancesRequest,
-//   GetAccountBalancesResponse,
-//   GetAccountsResponse,
-//   GetTransactionsRequest,
-//   GetTransactionsResponse,
-// } from "./types";
 import {
   Configuration,
   CountryCode,
-  type ItemPublicTokenExchangeRequest,
+  ItemPublicTokenExchangeResponse,
+  LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
   PlaidEnvironments,
   Products,
+  TransactionsSyncResponse,
 } from "plaid";
+import {
+  GetAccountsRequest,
+  GetAccountsResponse,
+  GetTransactionsRequest,
+  ItemPublicTokenExchangeRequest,
+  LinkTokenCreateRequest,
+} from "./types";
 
 export class PlaidApi {
   #client: PlaidBaseApi;
@@ -23,8 +24,8 @@ export class PlaidApi {
       basePath: PlaidEnvironments.sandbox,
       baseOptions: {
         headers: {
-          "PLAID-CLIENT-ID": process.env.CLIENT_ID,
-          "PLAID-SECRET": process.env.SECRET,
+          "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
+          "PLAID-SECRET": process.env.PLAID_SECRET,
         },
       },
     });
@@ -34,41 +35,71 @@ export class PlaidApi {
 
   async getAccounts({
     accessToken,
-    accountId,
-  }: AuthenticatedRequest): Promise<GetAccountsResponse> {
-    return this.#client.accountsGet({
+    institutionId,
+  }: GetAccountsRequest): Promise<GetAccountsResponse> {
+    const accounts = await this.#client.accountsGet({
       access_token: accessToken,
-      options: {
-        account_ids: [accountId],
-      },
     });
+
+    const institution = await this.institutionsGetById(institutionId);
+    return accounts.data.accounts.map((account) => ({
+      ...account,
+      institution: {
+        id: institution.data.institution.institution_id,
+        name: institution.data.institution.name,
+        // NOTE: Currently not in use, base64 and usually unavailable
+        logo: institution.data.institution?.logo ?? null,
+        website: institution.data.institution?.url ?? null,
+      },
+    }));
   }
 
   async getTransactions({
     accessToken,
-  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
+  }: GetTransactionsRequest): Promise<
+    import("axios").AxiosResponse<TransactionsSyncResponse>
+  > {
     return this.#client.transactionsSync({
       access_token: accessToken,
     });
   }
 
-  async linkTokenCreate({ userId }) {
+  async linkTokenCreate({
+    userId,
+  }: LinkTokenCreateRequest): Promise<
+    import("axios").AxiosResponse<LinkTokenCreateResponse>
+  > {
     return this.#client.linkTokenCreate({
       client_id: process.env.PLAID_CLIENT_ID,
       secret: process.env.PLAID_SECRET,
       client_name: "Midday",
-      products: [Products.Auth, Products.Transactions],
+      products: [Products.Transactions],
       language: "en",
       country_codes: [CountryCode.Ca, CountryCode.Us],
+      transactions: {
+        days_requested: 730,
+      },
       user: {
-        client_user_id: new Date().getTime().toString(),
+        client_user_id: userId,
+      },
+    });
+  }
+
+  async institutionsGetById(institution_id: string) {
+    return this.#client.institutionsGetById({
+      institution_id,
+      country_codes: [CountryCode.Ca, CountryCode.Us],
+      options: {
+        include_auth_metadata: true,
       },
     });
   }
 
   async itemPublicTokenExchange({
     publicToken,
-  }: ItemPublicTokenExchangeRequest) {
+  }: ItemPublicTokenExchangeRequest): Promise<
+    import("axios").AxiosResponse<ItemPublicTokenExchangeResponse>
+  > {
     return this.#client.itemPublicTokenExchange({
       public_token: publicToken,
     });

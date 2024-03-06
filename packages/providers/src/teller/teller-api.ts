@@ -3,8 +3,6 @@ import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import {
   AuthenticatedRequest,
-  GetAccountBalancesRequest,
-  GetAccountBalancesResponse,
   GetAccountsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
@@ -15,38 +13,10 @@ export class TellerApi {
 
   #api: AxiosInstance | null = null;
 
-  async getAccountBalances({
-    accountId,
-    accessToken,
-  }: GetAccountBalancesRequest): Promise<GetAccountBalancesResponse> {
-    return this.#get<GetAccountBalancesResponse>(
-      `/accounts/${accountId}/balances`,
-      accessToken
-    );
-  }
-
   async getAccounts({
     accessToken,
   }: AuthenticatedRequest): Promise<GetAccountsResponse> {
-    const accounts = await this.#get<GetAccountsResponse>(
-      "/accounts",
-      accessToken
-    );
-
-    const accountsWithBalances = await Promise.all(
-      accounts.map(async (account) => {
-        const balance = await this.getAccountBalances({
-          accountId: account.id,
-          accessToken,
-        });
-        return {
-          ...account,
-          balance,
-        };
-      })
-    );
-
-    return accountsWithBalances;
+    return this.#get<GetAccountsResponse>("/accounts", accessToken);
   }
 
   async getTransactions({

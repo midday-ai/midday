@@ -2,11 +2,11 @@
 
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
+import Invoice1Light from "public/assets/invoice-1-light.png";
+import Invoice1 from "public/assets/invoice-1.png";
+import Invoice2Light from "public/assets/invoice-2-light.png";
+import Invoice2 from "public/assets/invoice-2.png";
 import { Fragment, useState } from "react";
-import Invoice1Light from "./invoice-1-light.png";
-import Invoice1 from "./invoice-1.png";
-import Invoice2Light from "./invoice-2-light.png";
-import Invoice2 from "./invoice-2.png";
 
 const images = [
   { id: 1, src: Invoice1, src2: Invoice1Light },

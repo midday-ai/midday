@@ -4,11 +4,11 @@ import { ConnectBankButton } from "@/components/connect-bank-button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import { useQueryState } from "nuqs";
+import OverViewScreenOneLight from "public/assets/overview-1-light.png";
+import OverViewScreenOne from "public/assets/overview-1.png";
+import OverViewScreenTwoLight from "public/assets/overview-2-light.png";
+import OverViewScreenTwo from "public/assets/overview-2.png";
 import { Fragment, useState } from "react";
-import OverViewScreenOneLight from "./overview-1-light.png";
-import OverViewScreenOne from "./overview-1.png";
-import OverViewScreenTwoLight from "./overview-2-light.png";
-import OverViewScreenTwo from "./overview-2.png";
 
 const images = [
   { id: 1, src: OverViewScreenOne, src2: OverViewScreenOneLight },

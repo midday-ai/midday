@@ -70,10 +70,13 @@ export function SelectBankAccountsModal({ countryCode }) {
     ref: parseAsString,
     token: parseAsString,
     enrollment_id: parseAsString,
+    institution_id: parseAsString,
     provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
   });
 
-  const { provider, step, error, token, ref, enrollment_id } = params;
+  const { provider, step, error, token, ref, enrollment_id, institution_id } =
+    params;
+
   const isOpen = step === "account" && !error;
 
   const onClose = () => {
@@ -119,6 +122,7 @@ export function SelectBankAccountsModal({ countryCode }) {
         id: ref,
         countryCode,
         accessToken: token,
+        institutionId: institution_id,
       });
 
       setAccounts(data);
@@ -137,7 +141,7 @@ export function SelectBankAccountsModal({ countryCode }) {
             name: account.name,
             institution_id: account.institution.id,
             logo_url: account.institution?.logo,
-            enabled: true,
+            enabled: false,
           })),
         });
       }
@@ -171,7 +175,7 @@ export function SelectBankAccountsModal({ countryCode }) {
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className="space-y-6 max-h-[320px] overflow-auto pb-[60px] relative scrollbar-hide"
                   >
                     {loading && <RowsSkeleton />}
 
@@ -186,15 +190,15 @@ export function SelectBankAccountsModal({ countryCode }) {
                               key={account.id}
                               className="flex justify-between"
                             >
-                              <FormLabel className="flex items-between">
-                                <Image
+                              <FormLabel className="flex items-between space-x-4">
+                                {/* <Image
                                   src={account.institution?.logo}
                                   alt={account?.institution?.name}
                                   width={34}
                                   height={34}
                                   className="rounded-full overflow-hidden border"
-                                />
-                                <div className="ml-4 space-y-1">
+                                /> */}
+                                <div className="space-y-1">
                                   <p className="text-sm font-medium leading-none mb-1">
                                     {account.name}
                                   </p>
@@ -237,11 +241,13 @@ export function SelectBankAccountsModal({ countryCode }) {
                       />
                     ))}
 
-                    <div className="pt-4">
+                    <div className="fixed bottom-6 left-6 right-6 z-10 bg-background pt-4">
                       <Button
                         className="w-full"
                         type="submit"
-                        disabled={connectBankAction.status === "executing"}
+                        // disabled={connectBankAction.status === "executing"}
+                        // Check for atleast one enabled account
+                        disabled
                       >
                         {connectBankAction.status === "executing" ? (
                           <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />

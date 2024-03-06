@@ -25,7 +25,7 @@ export type Transaction = {
 export type Institution = {
   id: string;
   name: string;
-  logo?: string; // GoCardLess
+  logo?: string | null;
 };
 
 export type Account = {
@@ -49,7 +49,8 @@ export type GetTransactionsRequest = {
 export type GetAccountsRequest = {
   id?: string; // GoCardLess
   countryCode?: string; // GoCardLess
-  accessToken?: string; // Teller
+  accessToken?: string; // Teller & Plaid
+  institutionId?: string; // Plaid
 };
 
 export type GetTransactionsResponse = Transaction[];

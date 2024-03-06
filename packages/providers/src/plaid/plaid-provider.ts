@@ -11,15 +11,16 @@ export class PlaidProvider implements Provider {
   }
 
   async getTransactions({
-    dateFrom,
-    dateTo,
+    accessToken,
     teamId,
     accountId,
   }: GetTransactionsRequest) {
+    if (!accessToken) {
+      throw Error("accessToken missing");
+    }
+
     const response = await this.#api.getTransactions({
-      dateFrom,
-      dateTo,
-      accountId,
+      accessToken,
     });
 
     return response.map((transaction) =>
@@ -31,24 +32,25 @@ export class PlaidProvider implements Provider {
     );
   }
 
-  async getAccounts({ id, countryCode }: GetAccountsRequest) {
-    if (!countryCode || !id) {
-      throw Error("Missing params");
+  async getAccounts({ accessToken, institutionId }: GetAccountsRequest) {
+    if (!accessToken || !institutionId) {
+      throw Error("accessToken or institutionId is missing");
     }
 
     const response = await this.#api.getAccounts({
-      id,
-      countryCode,
+      accessToken,
+      institutionId,
     });
 
-    return response.map(({ id, account, bank }) =>
-      transformAccount({
-        id,
+    return response?.map((account) => {
+      return transformAccount({
+        id: account.account_id,
         name: account.name,
-        currency: account.currency,
-        bank,
-        product: account.product,
-      })
-    );
+        currency:
+          account.balances.iso_currency_code ||
+          account.balances.unofficial_currency_code,
+        institution: account.institution,
+      });
+    });
   }
 }

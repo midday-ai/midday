@@ -62,16 +62,6 @@ export interface GetTransactionsRequest extends AuthenticatedRequest {
   accountId: string;
 }
 
-export type AccountBalance = {
-  account_id: string;
-  ledger: string;
-  available: string;
-  links: {
-    self: string;
-    account: string;
-  };
-};
-
 export type AuthenticationResponse = {
   token: string;
 };
@@ -79,11 +69,6 @@ export type AuthenticationResponse = {
 export type AuthenticatedRequest = {
   accessToken: string;
 };
-
-export type GetAccountBalancesResponse = AccountBalance;
-export interface GetAccountBalancesRequest extends AuthenticatedRequest {
-  accountId: string;
-}
 
 type Institution = {
   name: string;
@@ -129,11 +114,7 @@ interface CreditAccount extends BaseAccount {
 
 export type Account = DepositoryAccount | CreditAccount;
 
-export type AccountWithBalances = Account & {
-  balance: AccountBalance;
-};
-
-export type GetAccountsResponse = AccountWithBalances[];
+export type GetAccountsResponse = Account[];
 
 export type TransformTransaction = {
   transaction: Transaction;

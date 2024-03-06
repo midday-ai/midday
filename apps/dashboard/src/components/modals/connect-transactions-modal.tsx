@@ -13,13 +13,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import Image from "next/image";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
+import CsvLogo from "public/assets/csv.png";
+import GoCardLessLogo from "public/assets/gocardless.png";
+import PlaidLogo from "public/assets/plaid.png";
+import TellerLogo from "public/assets/teller.png";
+import ZapierLogo from "public/assets/zapier.png";
+import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { TellerConnectOptions, useTellerConnect } from "teller-connect-react";
-import CsvLogo from "./csv.png";
-import GoCardLessLogo from "./gocardless.png";
-import PlaidLogo from "./plaid.png";
-import TellerLogo from "./teller.png";
-import ZapierLogo from "./zapier.png";
 
 const imports = [
   {
@@ -42,6 +43,7 @@ const imports = [
 
 export function ConnectTransactionsModal() {
   const { track } = useLogSnag();
+  const [token, setToken] = useState();
 
   const [params, setParams] = useQueryStates(
     {
@@ -49,6 +51,7 @@ export function ConnectTransactionsModal() {
       ref: parseAsString,
       token: parseAsString,
       enrollment_id: parseAsString,
+      institution_id: parseAsString,
       provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
     },
     {
@@ -58,25 +61,25 @@ export function ConnectTransactionsModal() {
 
   const isOpen = params.step === "connect";
 
+  useEffect(() => {
+    async function createLinkToken() {
+      const response = await fetch("/api/plaid/create-link-token", {
+        method: "POST",
+      });
+      const { link_token } = await response.json();
+      setToken(link_token);
+    }
+
+    if (isOpen) {
+      createLinkToken();
+    }
+  }, [isOpen]);
+
   const { open: openTeller, ready: tellerReady } = useTellerConnect({
     applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
     environment: process.env
       .NEXT_PUBLIC_TELLER_ENVIRONMENT as TellerConnectOptions["environment"],
     appearance: "system",
-    onExit: () => {
-      setParams({ step: "connect" });
-
-      track({
-        event: LogEvents.ConnectBankCanceled.name,
-        icon: LogEvents.ConnectBankCanceled.icon,
-        channel: LogEvents.ConnectBankCanceled.channel,
-        tags: {
-          provider: "teller",
-        },
-      });
-
-      setParams({ step: "connect" });
-    },
     onSuccess: (authorization) => {
       setParams({
         step: "account",
@@ -94,21 +97,45 @@ export function ConnectTransactionsModal() {
         },
       });
     },
+    onExit: () => {
+      setParams({ step: "connect" });
+
+      track({
+        event: LogEvents.ConnectBankCanceled.name,
+        icon: LogEvents.ConnectBankCanceled.icon,
+        channel: LogEvents.ConnectBankCanceled.channel,
+        tags: {
+          provider: "teller",
+        },
+      });
+
+      setParams({ step: "connect" });
+    },
     onFailure: () => {
       setParams({ step: "connect" });
     },
   });
 
   const { open: openPlaid, ready: plaidReady } = usePlaidLink({
-    token: "",
+    token,
     publicKey: process.env.NEXT_PUBLIC_PLAID_PUBLIC_KEY!,
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
     clientName: "Midday",
     product: ["transactions"],
-    onSuccess: (public_token, metadata) => {
-      console.log(public_token, metadata);
+    onSuccess: async (public_token, metadata) => {
+      const response = await fetch("/api/plaid/exchange-public-token", {
+        method: "POST",
+        body: JSON.stringify({ public_token }),
+      });
 
-      setParams({ step: "account" });
+      const { access_token } = await response.json();
+
+      setParams({
+        step: "account",
+        provider: "plaid",
+        token: access_token,
+        institution_id: metadata.institution?.institution_id,
+      });
 
       track({
         event: LogEvents.ConnectBankAuthorized.name,
@@ -136,7 +163,7 @@ export function ConnectTransactionsModal() {
   const banks = [
     {
       id: "gocardless",
-      name: "GoCardless (Europe)",
+      name: "GoCardless (EU, UK)",
       description:
         "More than 2,500 connected banks in 31 countries across the UK and Europe.",
       logo: GoCardLessLogo,
@@ -176,7 +203,7 @@ export function ConnectTransactionsModal() {
     },
     {
       id: "plaid",
-      name: "Plaid (US, Canada, UK)",
+      name: "Plaid (US, Canada, UK, EU)",
       description: `12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`,
       logo: PlaidLogo,
       onClick: () => {
@@ -190,8 +217,9 @@ export function ConnectTransactionsModal() {
         });
 
         openPlaid();
+        setParams({ step: null });
       },
-      disabled: !plaidReady,
+      disabled: !plaidReady || !token,
     },
   ];
 
@@ -251,17 +279,10 @@ export function ConnectTransactionsModal() {
                       />
 
                       <CardHeader className="p-4 pl-2">
-                        <div className="flex space-x-2">
-                          <CardTitle className="text-md mb-0">
-                            {bank.name}
-                          </CardTitle>
+                        <CardTitle className="text-md mb-0">
+                          {bank.name}
+                        </CardTitle>
 
-                          {bank.disabled && (
-                            <div className="text-[#878787] rounded-md py-1 px-2 border text-[10px]">
-                              Coming soon
-                            </div>
-                          )}
-                        </div>
                         <CardDescription className="text-sm">
                           {bank.description}
                         </CardDescription>
