@@ -61,7 +61,7 @@ client.defineJob({
         formattedTransactions,
         BATCH_LIMIT,
         async (batch) => {
-          await supabase.from("transactions").upsert(batch, {
+          return supabase.from("transactions").upsert(batch, {
             onConflict: "internal_id",
             ignoreDuplicates: true,
           });

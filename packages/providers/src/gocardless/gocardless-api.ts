@@ -1,6 +1,7 @@
 import { client } from "@midday/kv";
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import { formatISO, subMonths } from "date-fns";
 import {
   DeleteRequistionResponse,
   GetAccessTokenResponse,
@@ -174,23 +175,18 @@ export class GoCardLessApi {
 
   async getTransactions({
     accountId,
-    dateFrom,
-    dateTo,
+    latest,
   }: GetTransactionsRequest): Promise<
     GetTransactionsResponse["transactions"]["booked"]
   > {
     const response = await this.#get<GetTransactionsResponse>(
       `/api/v2/accounts/${accountId}/transactions/`,
-      null,
-      {
-        params: {
-          date_from: dateFrom,
-          date_to: dateTo,
-        },
+      latest && {
+        date_to: formatISO(subMonths(new Date(), 1), {
+          representation: "date",
+        }),
       }
     );
-
-    console.log(JSON.stringify(response?.transactions?.booked, null, 2));
 
     return response?.transactions?.booked;
   }

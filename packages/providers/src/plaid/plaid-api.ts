@@ -57,22 +57,31 @@ export class PlaidApi {
   async getTransactions({
     accessToken,
     accountId,
+    latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     let added: Array<Transaction> = [];
     let cursor = undefined;
     let hasMore = true;
 
-    while (hasMore) {
+    if (latest) {
       const { data } = await this.#client.transactionsSync({
         access_token: accessToken,
-        cursor,
+        count: 500,
       });
 
       added = added.concat(data.added);
-      hasMore = data.has_more;
-      cursor = data.next_cursor;
-    }
+    } else {
+      while (hasMore) {
+        const { data } = await this.#client.transactionsSync({
+          access_token: accessToken,
+          cursor,
+        });
 
+        added = added.concat(data.added);
+        hasMore = data.has_more;
+        cursor = data.next_cursor;
+      }
+    }
     // NOTE: Plaid transactions for all accounts, we need to filter based on the
     // Provided accountId
     return added.filter((transaction) => transaction.account_id === accountId);

@@ -41,9 +41,8 @@ export type GetTransactionsRequest = {
   teamId: string;
   bankAccountId: string;
   accountId: string;
-  dateFrom?: string;
-  dateTo?: string;
-  accessToken?: string; // Teller
+  latest?: boolean;
+  accessToken?: string; // Teller & Plaid
 };
 
 export type GetAccountsRequest = {

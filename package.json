@@ -25,8 +25,8 @@
   "dependencies": {
     "@biomejs/biome": "1.5.3",
     "@manypkg/cli": "^0.21.2",
-    "turbo": "^1.12.4",
-    "typescript": "^5.3.3"
+    "turbo": "^1.12.5",
+    "typescript": "^5.4.2"
   },
   "resolutions": {
     "jackspeak": "2.1.1"

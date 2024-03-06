@@ -15,6 +15,7 @@ export class TellerProvider implements Provider {
     accountId,
     bankAccountId,
     accessToken,
+    latest,
   }: GetTransactionsRequest) {
     if (!accessToken) {
       throw Error("accessToken missing");
@@ -23,6 +24,7 @@ export class TellerProvider implements Provider {
     const response = await this.#api.getTransactions({
       accountId,
       accessToken,
+      latest,
     });
 
     return response.map((transaction) =>

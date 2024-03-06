@@ -1,5 +1,6 @@
 "use client";
 
+import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { Switch } from "@midday/ui/switch";
 import { formatDistanceToNow } from "date-fns";
@@ -7,6 +8,7 @@ import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { useState } from "react";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
+import { SyncTransactions } from "./sync-transactions";
 
 export function BankAccount({
   id,
@@ -18,7 +20,24 @@ export function BankAccount({
   enabled,
 }) {
   const [isOpen, setOpen] = useState(false);
+  const [eventId, setEventId] = useState<string>();
+  const [isLoading, setLoading] = useState(false);
+
   const updateAccount = useAction(updateBankAccountAction);
+
+  const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
+    onExecute: () => setLoading(true),
+    onSuccess: (data) => {
+      if (data.id) {
+        setEventId(data.id);
+      }
+
+      setTimeout(() => {
+        // NOTE: Wait to event status is EXECUTING
+        setLoading(false);
+      }, 1500);
+    },
+  });
 
   return (
     <div className="flex justify-between pt-6 items-center">
@@ -55,13 +74,23 @@ export function BankAccount({
         </button>
       </div>
 
-      <Switch
-        checked={enabled}
-        disabled={updateAccount.status === "executing"}
-        onCheckedChange={(enabled: boolean) => {
-          updateAccount.execute({ id, enabled });
-        }}
-      />
+      <div className="flex items-center space-x-4">
+        {enabled && (
+          <SyncTransactions
+            eventId={eventId}
+            onClick={() => manualSyncTransactions.execute({ accountId: id })}
+            isLoading={isLoading}
+          />
+        )}
+
+        <Switch
+          checked={enabled}
+          disabled={updateAccount.status === "executing"}
+          onCheckedChange={(enabled: boolean) => {
+            updateAccount.execute({ id, enabled });
+          }}
+        />
+      </div>
 
       <EditBankAccountModal
         id={id}

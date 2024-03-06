@@ -277,3 +277,7 @@ export const updateEntriesSchema = z.object({
   start: z.string().datetime().optional(),
   stop: z.string().datetime().optional(),
 });
+
+export const manualSyncTransactionsSchema = z.object({
+  accountId: z.string().uuid(),
+});

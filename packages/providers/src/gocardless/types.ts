@@ -152,8 +152,7 @@ export type GetAccountsResponse = {
 
 export type GetTransactionsRequest = {
   accountId: string;
-  dateFrom?: string;
-  dateTo?: string;
+  latest?: boolean;
 };
 
 export type GetTransactionsResponse = {

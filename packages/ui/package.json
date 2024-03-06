@@ -21,11 +21,11 @@
     "@storybook/addon-essentials": "^8.0.0-rc.0",
     "@storybook/addon-links": "^8.0.0-rc.0",
     "@storybook/react-vite": "^8.0.0-rc.0",
-    "autoprefixer": "^10.4.17",
+    "autoprefixer": "^10.4.18",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "storybook": "^8.0.0-rc.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   },
   "exports": {
     "./accordion": "./src/components/accordion.tsx",
@@ -74,7 +74,7 @@
     "./utils": "./src/utils"
   },
   "dependencies": {
-    "@mui/icons-material": "^5.15.11",
+    "@mui/icons-material": "^5.15.12",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -106,7 +106,7 @@
     "date-fns": "^3.3.1",
     "embla-carousel-react": "^8.0.0",
     "jsonfile": "^6.1.0",
-    "lucide-react": "^0.343.0",
+    "lucide-react": "^0.344.0",
     "postcss": "^8.4.35",
     "react-day-picker": "^8.10.0",
     "react-icons": "^5.0.1",

@@ -21,7 +21,6 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLongPress } from "use-long-press";
 

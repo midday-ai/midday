@@ -15,6 +15,7 @@ export class PlaidProvider implements Provider {
     teamId,
     accountId,
     bankAccountId,
+    latest,
   }: GetTransactionsRequest) {
     if (!accessToken || !accountId) {
       throw Error("accessToken or accountId is missing");
@@ -23,6 +24,7 @@ export class PlaidProvider implements Provider {
     const response = await this.#api.getTransactions({
       accessToken,
       accountId,
+      latest,
     });
 
     return response.map((transaction) =>

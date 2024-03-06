@@ -60,6 +60,7 @@ export type GetTransactionResponse = Transaction;
 
 export interface GetTransactionsRequest extends AuthenticatedRequest {
   accountId: string;
+  latest?: boolean;
 }
 
 export type AuthenticationResponse = {

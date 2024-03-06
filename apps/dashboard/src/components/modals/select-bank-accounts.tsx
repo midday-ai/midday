@@ -168,7 +168,9 @@ export function SelectBankAccountsModal({ countryCode }) {
                 <DialogHeader className="mb-8">
                   <DialogTitle>Select Accounts</DialogTitle>
                   <DialogDescription>
-                    Select accounts you want to enable with Midday.
+                    Choose the accounts from which you wish to receive
+                    transactions. You can enable or disable accounts in team
+                    settings later if needed.
                   </DialogDescription>
                 </DialogHeader>
 

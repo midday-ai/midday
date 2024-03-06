@@ -11,15 +11,13 @@ export class GoCardLessProvider implements Provider {
   }
 
   async getTransactions({
-    dateFrom,
-    dateTo,
     teamId,
     accountId,
     bankAccountId,
+    latest,
   }: GetTransactionsRequest) {
     const response = await this.#api.getTransactions({
-      dateFrom,
-      dateTo,
+      latest,
       accountId,
     });
 
@@ -41,8 +39,6 @@ export class GoCardLessProvider implements Provider {
       id,
       countryCode,
     });
-
-    console.log(JSON.stringify(response, null, 2));
 
     return response.map(transformAccount);
   }

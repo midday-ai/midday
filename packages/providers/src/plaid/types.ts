@@ -11,6 +11,7 @@ export type LinkTokenCreateRequest = {
 export type GetTransactionsRequest = {
   accessToken: string;
   accountId: string;
+  latest?: boolean;
 };
 
 export type GetAccountsRequest = {

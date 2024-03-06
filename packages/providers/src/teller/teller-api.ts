@@ -22,10 +22,14 @@ export class TellerApi {
   async getTransactions({
     accountId,
     accessToken,
+    latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     return this.#get<GetTransactionsResponse>(
       `/accounts/${accountId}/transactions`,
-      accessToken
+      accessToken,
+      latest && {
+        count: 500,
+      }
     );
   }
 
