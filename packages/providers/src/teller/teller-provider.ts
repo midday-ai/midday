@@ -41,14 +41,6 @@ export class TellerProvider implements Provider {
 
     const response = await this.#api.getAccounts({ accessToken });
 
-    return response.map((account) =>
-      transformAccount({
-        id: account.id,
-        name: account.name,
-        currency: account.currency,
-        enrolmentId: account.enrollment_id,
-        institution: account.institution,
-      })
-    );
+    return response.map(transformAccount);
   }
 }

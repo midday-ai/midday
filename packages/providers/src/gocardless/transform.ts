@@ -5,10 +5,10 @@ import {
 } from "../types";
 import {
   Transaction,
-  TransactionDescriptionParams,
+  TransactionDescription,
+  TransformAccount,
   TransformAccountName,
-  TransformAccountParams,
-  TransformTransactionParams,
+  TransformTransaction,
 } from "./types";
 
 export const mapTransactionCategory = (transaction: Transaction) => {
@@ -77,7 +77,7 @@ export const transformTransactionName = (transaction: Transaction) => {
 const transformDescription = ({
   transaction,
   name,
-}: TransactionDescriptionParams) => {
+}: TransactionDescription) => {
   if (transaction?.remittanceInformationUnstructuredArray?.length) {
     const text = transaction?.remittanceInformationUnstructuredArray.join(" ");
     const description = capitalCase(text);
@@ -94,7 +94,7 @@ export const transformTransaction = ({
   transaction,
   teamId,
   bankAccountId,
-}: TransformTransactionParams): BaseTransaction => {
+}: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode
   );
@@ -125,7 +125,7 @@ export const transformTransaction = ({
     name,
     method,
     internal_id: `${teamId}_${transaction.internalTransactionId}`,
-    amount: transaction.transactionAmount.amount,
+    amount: +transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
     bank_account_id: bankAccountId,
     category: mapTransactionCategory(transaction),
@@ -156,15 +156,17 @@ const transformAccountName = (account: TransformAccountName) => {
 
 export const transformAccount = ({
   id,
-  name,
-  currency,
+  account,
   bank,
-  product,
-}: TransformAccountParams): BaseAccount => {
+}: TransformAccount): BaseAccount => {
   return {
     id,
-    name: transformAccountName({ name, bank, product }),
-    currency,
+    name: transformAccountName({
+      name: account.name,
+      bank,
+      product: account.product,
+    }),
+    currency: account.currency,
     institution: bank && {
       id: bank?.id,
       logo: bank?.logo,

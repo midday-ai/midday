@@ -163,24 +163,18 @@ export type GetTransactionsResponse = {
   };
 };
 
-export type TransactionDescriptionParams = {
+export type TransactionDescription = {
   transaction: Transaction;
   name?: string;
 };
 
-export type TransformTransactionParams = {
+export type TransformTransaction = {
   transaction: Transaction;
   teamId: string;
   bankAccountId: string;
 };
 
-export type TransformAccountParams = {
-  id: string;
-  name: string;
-  currency: string;
-  product: string;
-  bank?: Bank;
-};
+export type TransformAccount = GetAccountsResponse[0];
 
 export type TransformAccountName = {
   name: string;

@@ -1,4 +1,8 @@
-import { AccountsGetResponse } from "plaid";
+import {
+  AccountsGetResponse,
+  Transaction,
+  TransactionsSyncResponse,
+} from "plaid";
 
 export type LinkTokenCreateRequest = {
   userId: string;
@@ -6,6 +10,7 @@ export type LinkTokenCreateRequest = {
 
 export type GetTransactionsRequest = {
   accessToken: string;
+  accountId: string;
 };
 
 export type GetAccountsRequest = {
@@ -30,9 +35,12 @@ export type AccountWithintitution = AccountsGetResponse["accounts"][0] & {
 
 export type GetAccountsResponse = AccountWithintitution[];
 
-export type TransformAccountParams = {
-  id: string;
-  name: string;
-  currency: string;
-  institution: Institution;
+export type TransformAccount = AccountWithintitution;
+
+export type TransformTransaction = {
+  teamId: string;
+  bankAccountId: string;
+  transaction: Transaction;
 };
+
+export type GetTransactionsResponse = TransactionsSyncResponse["added"];

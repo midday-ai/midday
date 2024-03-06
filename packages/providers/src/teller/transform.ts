@@ -3,11 +3,7 @@ import {
   Account as BaseAccount,
   Transaction as BaseTransaction,
 } from "../types";
-import {
-  Transaction,
-  TransformAccountParams,
-  TransformTransaction,
-} from "./types";
+import { Transaction, TransformAccount, TransformTransaction } from "./types";
 
 export const mapTransactionMethod = (type?: string) => {
   switch (type) {
@@ -88,7 +84,7 @@ export const transformTransaction = ({
     name: transaction.description && capitalCase(transaction.description),
     method,
     internal_id: `${teamId}_${transaction.id}`,
-    amount: transaction.amount,
+    amount: +transaction.amount,
     currency: "USD",
     bank_account_id: bankAccountId,
     category: mapTransactionCategory(transaction),
@@ -103,8 +99,8 @@ export const transformAccount = ({
   name,
   currency,
   institution,
-  enrolmentId,
-}: TransformAccountParams): BaseAccount => {
+  enrollment_id,
+}: TransformAccount): BaseAccount => {
   return {
     id,
     name,
@@ -113,7 +109,7 @@ export const transformAccount = ({
       ...institution,
       logo: `https://teller.io/images/banks/${institution.id}.jpg`,
     },
-    enrollment_id: enrolmentId,
+    enrollment_id: enrollment_id,
     provider: "teller",
   };
 };

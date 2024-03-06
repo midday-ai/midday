@@ -42,14 +42,6 @@ export class GoCardLessProvider implements Provider {
       countryCode,
     });
 
-    return response.map(({ id, account, bank }) =>
-      transformAccount({
-        id,
-        name: account.name,
-        currency: account.currency,
-        bank,
-        product: account.product,
-      })
-    );
+    return response.map(transformAccount);
   }
 }

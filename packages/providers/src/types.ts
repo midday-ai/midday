@@ -6,7 +6,7 @@ export type ProviderParams = {
 };
 
 export type Transaction = {
-  amount: string;
+  amount: number;
   currency: string;
   date: string;
   internal_id: string;
@@ -39,8 +39,8 @@ export type Account = {
 
 export type GetTransactionsRequest = {
   teamId: string;
-  accountId: string;
   bankAccountId: string;
+  accountId: string;
   dateFrom?: string;
   dateTo?: string;
   accessToken?: string; // Teller

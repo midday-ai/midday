@@ -1,0 +1,14 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": 5.4,
+  "balance": null,
+  "bank_account_id": "123",
+  "currency": "CAD",
+  "date": "2024-02-24",
+  "internal_id": "123_NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "status": "pending",
+  "team_id": "123",
+}
+`;

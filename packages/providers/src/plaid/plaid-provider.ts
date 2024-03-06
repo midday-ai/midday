@@ -14,20 +14,22 @@ export class PlaidProvider implements Provider {
     accessToken,
     teamId,
     accountId,
+    bankAccountId,
   }: GetTransactionsRequest) {
-    if (!accessToken) {
-      throw Error("accessToken missing");
+    if (!accessToken || !accountId) {
+      throw Error("accessToken or accountId is missing");
     }
 
     const response = await this.#api.getTransactions({
       accessToken,
+      accountId,
     });
 
     return response.map((transaction) =>
       transformTransaction({
         transaction,
         teamId,
-        accountId,
+        bankAccountId,
       })
     );
   }
@@ -42,15 +44,6 @@ export class PlaidProvider implements Provider {
       institutionId,
     });
 
-    return response?.map((account) => {
-      return transformAccount({
-        id: account.account_id,
-        name: account.name,
-        currency:
-          account.balances.iso_currency_code ||
-          account.balances.unofficial_currency_code,
-        institution: account.institution,
-      });
-    });
+    return response?.map(transformAccount);
   }
 }

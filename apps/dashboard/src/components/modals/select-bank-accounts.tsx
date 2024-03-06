@@ -191,13 +191,15 @@ export function SelectBankAccountsModal({ countryCode }) {
                               className="flex justify-between"
                             >
                               <FormLabel className="flex items-between space-x-4">
-                                {/* <Image
-                                  src={account.institution?.logo}
-                                  alt={account?.institution?.name}
-                                  width={34}
-                                  height={34}
-                                  className="rounded-full overflow-hidden border"
-                                /> */}
+                                {account?.institution?.logo && (
+                                  <Image
+                                    src={account.institution.logo}
+                                    alt={account?.institution?.name}
+                                    width={34}
+                                    height={34}
+                                    className="rounded-full overflow-hidden border"
+                                  />
+                                )}
                                 <div className="space-y-1">
                                   <p className="text-sm font-medium leading-none mb-1">
                                     {account.name}
@@ -245,9 +247,12 @@ export function SelectBankAccountsModal({ countryCode }) {
                       <Button
                         className="w-full"
                         type="submit"
-                        // disabled={connectBankAction.status === "executing"}
-                        // Check for atleast one enabled account
-                        disabled
+                        disabled={
+                          connectBankAction.status === "executing" ||
+                          !form
+                            .getValues("accounts")
+                            .find((account) => account.enabled)
+                        }
                       >
                         {connectBankAction.status === "executing" ? (
                           <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />

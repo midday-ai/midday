@@ -6,12 +6,13 @@ import {
   PlaidApi as PlaidBaseApi,
   PlaidEnvironments,
   Products,
-  TransactionsSyncResponse,
+  Transaction,
 } from "plaid";
 import {
   GetAccountsRequest,
   GetAccountsResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   ItemPublicTokenExchangeRequest,
   LinkTokenCreateRequest,
 } from "./types";
@@ -56,12 +57,26 @@ export class PlaidApi {
 
   async getTransactions({
     accessToken,
-  }: GetTransactionsRequest): Promise<
-    import("axios").AxiosResponse<TransactionsSyncResponse>
-  > {
-    return this.#client.transactionsSync({
-      access_token: accessToken,
-    });
+    accountId,
+  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
+    let added: Array<Transaction> = [];
+    let cursor = undefined;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { data } = await this.#client.transactionsSync({
+        access_token: accessToken,
+        cursor,
+      });
+
+      added = added.concat(data.added);
+      hasMore = data.has_more;
+      cursor = data.next_cursor;
+    }
+
+    // NOTE: Plaid transactions for all accounts, we need to filter based on the
+    // Provided accountId
+    return added.filter((transaction) => transaction.account_id === accountId);
   }
 
   async linkTokenCreate({

@@ -2,7 +2,7 @@
 
 exports[`Transform pending transaction 1`] = `
 {
-  "amount": "83.62",
+  "amount": 83.62,
   "balance": null,
   "bank_account_id": "123",
   "category": "income",
@@ -18,7 +18,7 @@ exports[`Transform pending transaction 1`] = `
 
 exports[`Transform card payment transaction 1`] = `
 {
-  "amount": "-68.90",
+  "amount": -68.9,
   "balance": "83431.46",
   "bank_account_id": "123",
   "category": "uncategorized",
@@ -34,7 +34,7 @@ exports[`Transform card payment transaction 1`] = `
 
 exports[`Transform income transaction 1`] = `
 {
-  "amount": "-20.21",
+  "amount": -20.21,
   "balance": "83296.40",
   "bank_account_id": "123",
   "category": "uncategorized",
@@ -50,7 +50,7 @@ exports[`Transform income transaction 1`] = `
 
 exports[`Transform type transfer 1`] = `
 {
-  "amount": "-37.99",
+  "amount": -37.99,
   "balance": "85897.25",
   "bank_account_id": "123",
   "category": "transfer",

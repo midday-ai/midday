@@ -2,7 +2,7 @@ import { Provider } from "@midday/providers";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
-  const provider = new Provider({ provider: "teller" });
+  const provider = new Provider({ provider: "plaid" });
 
   // const data = await provider.getTransactions({
   //   teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
@@ -22,9 +22,9 @@ export async function GET(req) {
 
   const data = await provider.getTransactions({
     teamId: "123",
-    accountId: "acc_os41qe3a66ks2djhss000",
-    accessToken: "test_token_53oy4vz2xfgl6",
+    accessToken: "access-sandbox-fa4c2b4c-1b25-4e66-a8be-504fa51bf5a3",
     bankAccountId: "a87e60b9-8323-4bab-8dc9-4ac9786b48a6",
+    accountId: "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
   });
 
   // const provider = new Provider({ provider: "gocardless" });
