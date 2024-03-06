@@ -48,6 +48,8 @@ export function SpendingChart({ categories, currency, totalAmount, disabled }) {
   return (
     <ResponsiveContainer width="100%">
       <PieChart width={200} height={200}>
+        <Tooltip content={ToolTipContent} />
+
         <Pie
           stroke="none"
           isAnimationActive={false}
@@ -77,7 +79,6 @@ export function SpendingChart({ categories, currency, totalAmount, disabled }) {
             <Cell key={`cell-${index}`} fill={mapCategoryColor(category)} />
           ))}
         </Pie>
-        <Tooltip content={ToolTipContent} />
       </PieChart>
     </ResponsiveContainer>
   );

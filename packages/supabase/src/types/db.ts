@@ -1290,6 +1290,11 @@ export type Database = {
         | "transfer"
         | "other"
         | "unknown"
+        | "ach"
+        | "interest"
+        | "deposit"
+        | "wire"
+        | "fee"
       transactionStatus: "posted" | "pending"
     }
     CompositeTypes: {
