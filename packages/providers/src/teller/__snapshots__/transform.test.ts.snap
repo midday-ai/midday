@@ -67,3 +67,18 @@ exports[`Transform type transfer 1`] = `
   "team_id": "123",
 }
 `;
+
+exports[`Transform accounts 1`] = `
+{
+  "currency": "USD",
+  "enrollment_id": "enr_os557c8pck2deoskak000",
+  "id": "acc_os557c2mge29shubl2000",
+  "institution": {
+    "id": "mercury",
+    "logo": "https://teller.io/images/banks/mercury.jpg",
+    "name": "Mercury",
+  },
+  "name": "Platinum Card",
+  "provider": "teller",
+}
+`;

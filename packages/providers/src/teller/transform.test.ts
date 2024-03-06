@@ -1,5 +1,5 @@
 import { expect, test } from "bun:test";
-import { transformTransaction } from "./transform";
+import { transformAccount, transformTransaction } from "./transform";
 
 test("Transform pending transaction", () => {
   expect(
@@ -121,6 +121,32 @@ test("Transform type transfer", () => {
         amount: "-37.99",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
+    })
+  ).toMatchSnapshot();
+});
+
+test("Transform accounts", () => {
+  expect(
+    transformAccount({
+      type: "credit",
+      subtype: "credit_card",
+      status: "open",
+      name: "Platinum Card",
+      links: {
+        transactions:
+          "https://api.teller.io/accounts/acc_os557c2mge29shubl2000/transactions",
+        self: "https://api.teller.io/accounts/acc_os557c2mge29shubl2000",
+        balances:
+          "https://api.teller.io/accounts/acc_os557c2mge29shubl2000/balances",
+      },
+      last_four: "6587",
+      institution: {
+        name: "Mercury",
+        id: "mercury",
+      },
+      id: "acc_os557c2mge29shubl2000",
+      enrollment_id: "enr_os557c8pck2deoskak000",
+      currency: "USD",
     })
   ).toMatchSnapshot();
 });

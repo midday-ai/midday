@@ -18,8 +18,8 @@ export type Transaction = {
   method: string;
   name: string;
   description?: string | null;
-  currency_rate?: number;
-  currency_source?: string;
+  currency_rate?: number | null;
+  currency_source?: string | null;
 };
 
 export type Institution = {

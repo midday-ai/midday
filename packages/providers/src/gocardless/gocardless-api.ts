@@ -190,6 +190,8 @@ export class GoCardLessApi {
       }
     );
 
+    console.log(JSON.stringify(response?.transactions?.booked, null, 2));
+
     return response?.transactions?.booked;
   }
 

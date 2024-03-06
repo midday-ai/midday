@@ -88,6 +88,8 @@ const transformDescription = ({
       return description;
     }
   }
+
+  return null;
 };
 
 export const transformTransaction = ({
@@ -130,9 +132,10 @@ export const transformTransaction = ({
     bank_account_id: bankAccountId,
     category: mapTransactionCategory(transaction),
     team_id: teamId,
-    currency_rate: currencyExchange?.rate,
-    currency_source: currencyExchange?.currency,
-    balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
+    currency_rate: currencyExchange?.rate || null,
+    currency_source: currencyExchange?.currency || null,
+    balance:
+      transaction?.balanceAfterTransaction?.balanceAmount?.amount || null,
     description: transformDescription({ transaction, name }),
     status: "posted",
   };

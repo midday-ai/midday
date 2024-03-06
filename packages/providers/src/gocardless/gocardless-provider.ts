@@ -42,6 +42,8 @@ export class GoCardLessProvider implements Provider {
       countryCode,
     });
 
+    console.log(JSON.stringify(response, null, 2));
+
     return response.map(transformAccount);
   }
 }
