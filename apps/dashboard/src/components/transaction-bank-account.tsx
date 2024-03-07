@@ -10,7 +10,7 @@ export function TransactionBankAccount({
   return (
     <div className="flex space-x-2 mt-1 items-center">
       {logoUrl && (
-        <div className="rounded-full overflow-hidden">
+        <div className="rounded-full overflow-hidden border border-1">
           <Image src={logoUrl} alt={name} width={size} height={size} />
         </div>
       )}

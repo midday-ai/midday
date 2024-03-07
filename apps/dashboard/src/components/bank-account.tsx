@@ -53,7 +53,7 @@ export function BankAccount({
               alt={name}
               width={34}
               height={34}
-              className="rounded-full"
+              className="rounded-full border border-1"
             />
           )}
 
