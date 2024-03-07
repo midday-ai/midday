@@ -3,6 +3,8 @@
 import { cn } from "@midday/ui/utils";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import Lottie from "lottie-react";
+import { useTheme } from "next-themes";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
 export function LoadingTransactionsEvent({
@@ -15,6 +17,7 @@ export function LoadingTransactionsEvent({
   const { statuses } = useEventRunStatuses(eventId);
   const status = statuses?.at(0);
   const [step, setStep] = useState(1);
+  const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     if (status?.data.step) {
@@ -39,7 +42,11 @@ export function LoadingTransactionsEvent({
     <div className="h-[250px]">
       <Lottie
         className="mb-6"
-        animationData={require("public/assets/setup-animation.json")}
+        animationData={
+          resolvedTheme === "dark"
+            ? require("public/assets/setup-animation.json")
+            : require("public/assets/setup-animation-dark.json")
+        }
         loop={true}
         style={{ width: 50, height: 50 }}
         rendererSettings={{
@@ -51,15 +58,30 @@ export function LoadingTransactionsEvent({
       </h2>
 
       <ul className="text-md text-[#878787] space-y-4 transition-all">
-        <li className={cn("opacity-20", step > 0 && "opacity-100")}>
+        <li
+          className={cn(
+            "opacity-50 dark:opacity-20",
+            step > 0 && "opacity-100"
+          )}
+        >
           Connecting bank
           {step === 1 && <span className="loading-ellipsis" />}
         </li>
-        <li className={cn("opacity-20", step > 1 && "opacity-100")}>
+        <li
+          className={cn(
+            "opacity-50 dark:opacity-20",
+            step > 1 && "opacity-100"
+          )}
+        >
           Getting transactions
           {step === 2 && <span className="loading-ellipsis" />}
         </li>
-        <li className={cn("opacity-20", step > 2 && "opacity-100")}>
+        <li
+          className={cn(
+            "opacity-50 dark:opacity-20",
+            step > 2 && "opacity-100"
+          )}
+        >
           Completed
           {step === 3 && <span className="loading-ellipsis" />}
         </li>
