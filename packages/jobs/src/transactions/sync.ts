@@ -1,87 +1,55 @@
-import { getTransactions } from "@midday/gocardless";
-import { transformTransactions } from "@midday/gocardless/src/transform";
-import { formatISO, subMonths } from "date-fns";
-import { revalidateTag } from "next/cache";
+import { Provider } from "@midday/providers";
 import { client, supabase } from "../client";
-import { Events, Jobs } from "../constants";
-import { scheduler } from "./scheduler";
+import { Jobs } from "../constants";
+import { schedulerV2 } from "./scheduler";
 
 client.defineJob({
-  id: Jobs.TRANSACTIONS_SYNC,
-  name: "Transactions - Sync",
+  id: Jobs.TRANSACTIONS_SYNC_V2,
+  name: "Transactions - Sync V2",
   version: "0.0.1",
-  trigger: scheduler,
+  trigger: schedulerV2,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    const { data } = await io.supabase.client
+    const supabase = await io.supabase.client;
+
+    const teamId = ctx.source?.id as string;
+
+    const { data: accountsData } = await supabase
       .from("bank_accounts")
-      .select("id, team_id, account_id")
-      .eq("id", ctx.source.id)
-      .single();
+      .select(
+        "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token, enrollment_id)"
+      )
+      .eq("team_id", teamId)
+      .eq("enabled", true);
 
-    const teamId = data?.team_id;
-
-    await io.logger.debug("Team id", teamId);
-
-    // Update bank account last_accessed
-    await io.supabase.client
-      .from("bank_accounts")
-      .update({
-        last_accessed: new Date().toISOString(),
-      })
-      .eq("id", ctx.source.id);
-
-    if (!data) {
-      await io.logger.error(`Bank account not found: ${ctx.source.id}`);
-
-      return;
-    }
-
-    const { transactions } = await getTransactions({
-      accountId: data?.account_id,
-      // NOTE: GET last 30 days transactions
-      date_to: formatISO(subMonths(new Date(), 1), {
-        representation: "date",
-      }),
-    });
-
-    const formattedTransactions = transformTransactions(transactions?.booked, {
-      accountId: data?.id,
-      teamId,
-    });
-
-    await io.logger.debug("Formatted transactions", formattedTransactions);
-
-    const { error, data: transactionsData } = await io.supabase.client
-      .from("decrypted_transactions")
-      .upsert(formattedTransactions, {
-        onConflict: "internal_id",
-        ignoreDuplicates: true,
-      })
-      .select("*, name:decrypted_name");
-
-    if (error) {
-      await io.logger.debug("Transactions batch error", error);
-    }
-
-    if (transactionsData && transactionsData?.length > 0) {
-      revalidateTag(`transactions_${teamId}`);
-      revalidateTag(`spending_${teamId}`);
-      revalidateTag(`metrics_${teamId}`);
-
-      await io.sendEvent("🔔 Send notifications", {
-        name: Events.TRANSACTIONS_NOTIFICATION,
-        payload: {
-          teamId,
-          transactions: transactionsData,
-        },
+    const promises = accountsData?.map(async (account) => {
+      const provider = new Provider({
+        provider: account.bank_connection.provider,
       });
+
+      //   const transactions = await provider.getTransactions({
+      //     teamId: account.team_id,
+      //     accountId: account.account_id,
+      //     accessToken: account.bank_connection?.access_token,
+      //   });
+
+      // NOTE: We will get all the transactions at once for each account so
+      // we need to guard against massive payloads
+      // await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
+      //   // await supabase.from("transactions").upsert(batch, {
+      //   //   onConflict: "internal_id",
+      //   //   ignoreDuplicates: true,
+      //   // });
+      // });
+    });
+
+    try {
+      if (promises) {
+        await Promise.all(promises);
+      }
+    } catch (error) {
+      await io.logger.error(error);
+      throw Error("Something went wrong");
     }
-
-    revalidateTag(`bank_accounts_${teamId}`);
-
-    await io.logger.info(`Transactions Created: ${transactionsData?.length}`);
-
-    return;
   },
 });

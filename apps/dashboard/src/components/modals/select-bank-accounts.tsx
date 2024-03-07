@@ -269,13 +269,6 @@ export function SelectBankAccountsModal({ countryCode }) {
             </TabsContent>
 
             <TabsContent value="loading">
-              <DialogHeader className="mb-8">
-                <DialogTitle>Loading transactions</DialogTitle>
-                <DialogDescription>
-                  We are now loading transactions from you bank account.
-                </DialogDescription>
-              </DialogHeader>
-
               {eventId && (
                 <LoadingTransactionsEvent
                   eventId={eventId}

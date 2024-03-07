@@ -13,7 +13,7 @@
     "clean:workspaces": "turbo clean",
     "dev": "turbo dev --parallel",
     "test": "turbo test --parallel",
-    "start:dashboard": "turbo dev --filter=@midday/dashboard",
+    "start:dashboard": "turbo start --filter=@midday/dashboard",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "dev:website": "turbo dev --filter=@midday/website",
     "dev:desktop": "turbo dev --filter=@midday/desktop",

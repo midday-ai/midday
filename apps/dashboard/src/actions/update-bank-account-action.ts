@@ -23,6 +23,7 @@ export const updateBankAccountAction = action(
     revalidateTag(`bank_accounts_${data.team_id}`);
     revalidateTag(`bank_connections_${data.team_id}`);
     revalidateTag(`transactions_${data.team_id}`);
+
     logsnag.track({
       event: LogEvents.DeleteBank.name,
       icon: LogEvents.DeleteBank.icon,

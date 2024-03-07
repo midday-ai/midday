@@ -1,10 +1,10 @@
 "use client";
 
-import {
-  buildLink,
-  createEndUserAgreement,
-  getBanks,
-} from "@midday/gocardless";
+// import {
+//   buildLink,
+//   createEndUserAgreement,
+//   getBanks,
+// } from "@midday/gocardless";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -94,6 +94,7 @@ function Row({ id, name, logo, onSelect }) {
 }
 
 export function ConnectGoCardLessModal({ countryCode }) {
+  return null;
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();

@@ -154,6 +154,11 @@ export const LogEvents = {
     icon: "🖼️",
     channel: "transaction",
   },
+  TransactionsManualSync: {
+    name: "Manual Sync",
+    icon: "🔁",
+    channel: "transaction",
+  },
   CreateFolder: {
     name: "Create Folder",
     icon: "📂",

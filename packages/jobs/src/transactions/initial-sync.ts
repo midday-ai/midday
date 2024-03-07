@@ -3,8 +3,8 @@ import { Provider } from "@midday/providers";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { Events, Jobs } from "../..//constants";
-import { client, supabase } from "../../client";
+import { client, supabase } from "../client";
+import { Events, Jobs } from "../constants";
 import { schedulerV2 } from "./scheduler";
 
 const BATCH_LIMIT = 300;
@@ -24,6 +24,13 @@ client.defineJob({
     const supabase = await io.supabase.client;
 
     const { teamId } = payload;
+
+    const settingUpAccount = await io.createStatus("setting-up-account-bank", {
+      label: "Setting up account",
+      data: {
+        step: "connecting_bank",
+      },
+    });
 
     try {
       // NOTE: Schedule a background job per team_id
@@ -77,6 +84,12 @@ client.defineJob({
         .eq("id", account.id);
     });
 
+    await settingUpAccount.update("setting-up-account-transactions", {
+      data: {
+        step: "getting_transactions",
+      },
+    });
+
     try {
       if (promises) {
         await Promise.all(promises);
@@ -92,5 +105,11 @@ client.defineJob({
     revalidateTag(`metrics_${teamId}`);
     revalidateTag(`bank_accounts_${teamId}`);
     revalidateTag(`insights_${teamId}`);
+
+    await settingUpAccount.update("setting-up-account-completed", {
+      data: {
+        step: "completed",
+      },
+    });
   },
 });

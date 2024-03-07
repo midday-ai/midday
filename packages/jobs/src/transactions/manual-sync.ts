@@ -3,8 +3,8 @@ import { Provider } from "@midday/providers";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
-import { Events, Jobs } from "../..//constants";
-import { client, supabase } from "../../client";
+import { client, supabase } from "../client";
+import { Events, Jobs } from "../constants";
 
 const BATCH_LIMIT = 300;
 
