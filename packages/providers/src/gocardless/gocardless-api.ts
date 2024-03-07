@@ -88,9 +88,9 @@ export class GoCardLessApi {
   }
 
   async getBanks(countryCode?: string): Promise<GetBanksResponse> {
-    const banks: GetBanksResponse | null = await client.get(
-      this.#banksCacheKey
-    );
+    const cacheKey = `${this.#banksCacheKey}_${countryCode}`;
+
+    const banks: GetBanksResponse | null = await client.get(cacheKey);
 
     if (banks) {
       return banks;
@@ -106,7 +106,7 @@ export class GoCardLessApi {
       }
     );
 
-    client.set(this.#banksCacheKey, response, {
+    client.set(cacheKey, response, {
       ex: this.#oneHour,
       nx: true,
     });
@@ -238,7 +238,8 @@ export class GoCardLessApi {
     body?: unknown,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
-    const api = await this.#getApi();
+    const token = await this.#getAccessToken();
+    const api = await this.#getApi(token);
     return api.post<TResponse>(path, body, config).then(({ data }) => data);
   }
 
@@ -247,7 +248,8 @@ export class GoCardLessApi {
     params?: unknown,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
-    const api = await this.#getApi();
+    const token = await this.#getAccessToken();
+    const api = await this.#getApi(token);
 
     return api
       .delete<TResponse>(path, { params, ...config })

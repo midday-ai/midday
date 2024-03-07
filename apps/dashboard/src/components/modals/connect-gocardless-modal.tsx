@@ -1,10 +1,7 @@
 "use client";
 
-// import {
-//   buildLink,
-//   createEndUserAgreement,
-//   getBanks,
-// } from "@midday/gocardless";
+import { createEndUserAgreementAction } from "@/actions/banks/create-end-user-agreement-action";
+import { getBanks } from "@/actions/banks/get-banks";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -19,6 +16,7 @@ import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
@@ -94,13 +92,15 @@ function Row({ id, name, logo, onSelect }) {
 }
 
 export function ConnectGoCardLessModal({ countryCode }) {
-  return null;
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
+
+  const redirectBase = isDesktopApp() ? "midday://" : location.origin;
+  const redirect = `${redirectBase}/${pathname}?step=account&provider=gocardless`;
+
+  const createEndUserAgreement = useAction(createEndUserAgreementAction);
 
   const [step, setStep] = useQueryState("step", {
     shallow: true,
@@ -110,7 +110,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
 
   useEffect(() => {
     async function fetchData() {
-      const banks = await getBanks(countryCode);
+      const banks = await getBanks({ countryCode });
       setLoading(false);
 
       if (banks.length > 0) {
@@ -123,20 +123,6 @@ export function ConnectGoCardLessModal({ countryCode }) {
       fetchData();
     }
   }, [isOpen]);
-
-  const handleCreateEndUserAgreement = async (institutionId: string) => {
-    const data = await createEndUserAgreement(institutionId);
-
-    const redirectBase = isDesktopApp() ? "midday://" : location.origin;
-
-    const { link } = await buildLink({
-      redirect: `${redirectBase}/${pathname}?step=account&provider=gocardless`,
-      institutionId,
-      agreement: data.id,
-    });
-
-    router.push(link);
-  };
 
   const handleFilterBanks = (value: string) => {
     if (!value) {
@@ -190,7 +176,12 @@ export function ConnectGoCardLessModal({ countryCode }) {
                       id={bank.id}
                       name={bank.name}
                       logo={bank.logo}
-                      onSelect={() => handleCreateEndUserAgreement(bank.id)}
+                      onSelect={() =>
+                        createEndUserAgreement.execute({
+                          institutionId: bank.id,
+                          redirect,
+                        })
+                      }
                     />
                   );
                 })}

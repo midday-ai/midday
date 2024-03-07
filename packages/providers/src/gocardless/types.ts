@@ -59,21 +59,28 @@ export type PostRequisitionsRequest = {
 };
 
 export type PostRequisitionsResponse = {
+  id: string;
+  created: string;
   redirect: string;
+  status: string;
   institution_id: string;
   agreement: string;
   reference: string;
-  user_language: string;
-  ssn: string;
+  accounts: string[];
+  link: string;
+  ssn: string | null;
   account_selection: boolean;
   redirect_immediate: boolean;
 };
 
 export type PostCreateAgreementResponse = {
+  id: string;
+  created: string;
   institution_id: string;
   max_historical_days: number;
   access_valid_for_days: number;
   access_scope: string[];
+  accepted: boolean;
 };
 
 export type GetAccountResponse = {

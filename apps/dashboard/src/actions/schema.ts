@@ -281,3 +281,8 @@ export const updateEntriesSchema = z.object({
 export const manualSyncTransactionsSchema = z.object({
   accountId: z.string().uuid(),
 });
+
+export const createEndUserAgreementSchema = z.object({
+  institutionId: z.string(),
+  redirect: z.string(),
+});
