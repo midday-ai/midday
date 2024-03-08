@@ -4,7 +4,6 @@ import {
   ItemPublicTokenExchangeResponse,
   LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
-  PlaidEnvironments,
   Products,
   Transaction,
 } from "plaid";
@@ -22,7 +21,7 @@ export class PlaidApi {
 
   constructor() {
     const configuration = new Configuration({
-      basePath: PlaidEnvironments.sandbox,
+      basePath: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT,
       baseOptions: {
         headers: {
           "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
