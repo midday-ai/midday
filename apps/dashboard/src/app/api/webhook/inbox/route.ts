@@ -118,9 +118,7 @@ export async function POST(req: Request) {
 
       const { data: usersData } = await supabase
         .from("users_on_team")
-        .select(
-          "team_id, user:user_id(id, full_name, avatar_url, email, locale)"
-        )
+        .select("team_id, user:users(id, full_name, avatar_url, email, locale)")
         .eq("team_id", teamData.id);
 
       try {

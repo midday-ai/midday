@@ -37,7 +37,7 @@ client.defineJob({
       await scheduler.register(teamId, {
         type: "interval",
         options: {
-          seconds: 3600, // every 1h
+          seconds: 3600 * 6, // every 8h
         },
       });
     } catch (error) {
