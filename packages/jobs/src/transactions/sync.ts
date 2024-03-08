@@ -38,6 +38,14 @@ client.defineJob({
         provider: account.bank_connection.provider,
       });
 
+      // Update bank account last_accessed
+      await io.supabase.client
+        .from("bank_accounts")
+        .update({
+          last_accessed: new Date().toISOString(),
+        })
+        .eq("id", account.id);
+
       return provider.getTransactions({
         teamId: account.team_id,
         accountId: account.account_id,
@@ -84,6 +92,8 @@ client.defineJob({
           revalidateTag(`spending_${teamId}`);
           revalidateTag(`metrics_${teamId}`);
         }
+
+        revalidateTag(`bank_accounts_${teamId}`);
       }
     } catch (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
