@@ -34,16 +34,23 @@ client.defineJob({
   run: async (payload, io) => {
     const { transactions, teamId } = payload;
 
-    const { data: usersData } = await io.supabase.client
+    const { data: usersData, error: usersError } = await io.supabase.client
       .from("users_on_team")
       .select(
         "team_id, user:users_on_team(id, full_name, avatar_url, email, locale)"
       )
       .eq("team_id", teamId);
 
+    if (usersError) {
+      await io.logger.error("Users Error", usersError);
+    }
+
+    await io.logger.debug("users", usersData);
+
     const notificationPromises = usersData?.map(async ({ user, team_id }) => {
       const { t } = getI18n({ locale: user.locale });
-      return transactions.map((transaction) => ({
+
+      return transactions?.map((transaction) => ({
         name: TriggerEvents.TransactionNewInApp,
         payload: {
           recordId: transaction.id,
