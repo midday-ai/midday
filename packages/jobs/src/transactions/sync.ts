@@ -14,7 +14,7 @@ client.defineJob({
 
     const teamId = ctx.source?.id as string;
 
-    const { data: accountsData } = await supabase
+    const { data: accountsData, error } = await supabase
       .from("bank_accounts")
       .select(
         "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token, enrollment_id)"
@@ -22,14 +22,16 @@ client.defineJob({
       .eq("team_id", teamId)
       .eq("enabled", true);
 
+    await io.logger.debug("Accounts", JSON.stringify(accountsData, null, 2));
+
+    if (error) {
+      await io.logger.error("Accounts Error", error);
+    }
+
     const promises = accountsData?.map(async (account) => {
       const provider = new Provider({
         provider: account.bank_connection.provider,
       });
-
-      if (!account) {
-        return;
-      }
 
       return provider.getTransactions({
         teamId: account.team_id,
@@ -43,19 +45,21 @@ client.defineJob({
       if (promises) {
         const transactions = await Promise.all(promises);
         await io.logger.debug("Transactions", transactions);
+
+        if (!transactions?.length) {
+          return null;
+        }
+
+        // const { error, data: transactionsData } = await supabase
+        //   .from("decrypted_transactions")
+        //   .upsert(transactions, {
+        //     onConflict: "internal_id",
+        //     ignoreDuplicates: true,
+        //   })
+        //   .select("*, name:decrypted_name");
       }
     } catch (error) {
       await io.logger.error(JSON.stringify(error, null, 2));
     }
-
-    // NOTE: We will get all the transactions at once for each account so
-    // we need to guard against massive payloads
-    // const { error, data: transactionsData } = await supabase
-    //   .from("decrypted_transactions")
-    //   .upsert(transactions, {
-    //     onConflict: "internal_id",
-    //     ignoreDuplicates: true,
-    //   })
-    //   .select("*, name:decrypted_name");
   },
 });
