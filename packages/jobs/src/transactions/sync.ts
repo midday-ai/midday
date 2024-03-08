@@ -1,13 +1,13 @@
 import { Provider } from "@midday/providers";
 import { client, supabase } from "../client";
 import { Jobs } from "../constants";
-import { schedulerV2 } from "./scheduler";
+import { scheduler } from "./scheduler";
 
 client.defineJob({
-  id: Jobs.TRANSACTIONS_SYNC_V2,
-  name: "Transactions - Sync V2",
+  id: Jobs.TRANSACTIONS_SYNC,
+  name: "Transactions - Sync",
   version: "0.0.1",
-  trigger: schedulerV2,
+  trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
     const supabase = await io.supabase.client;

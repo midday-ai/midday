@@ -5,7 +5,7 @@ import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-import { schedulerV2 } from "./scheduler";
+import { scheduler } from "./scheduler";
 
 const BATCH_LIMIT = 300;
 
@@ -34,7 +34,7 @@ client.defineJob({
 
     try {
       // NOTE: Schedule a background job per team_id
-      await schedulerV2.register(teamId, {
+      await scheduler.register(teamId, {
         type: "interval",
         options: {
           seconds: 3600, // every 1h
