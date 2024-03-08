@@ -182,7 +182,7 @@ export class GoCardLessApi {
     const response = await this.#get<GetTransactionsResponse>(
       `/api/v2/accounts/${accountId}/transactions/`,
       latest && {
-        date_to: formatISO(subMonths(new Date(), 1), {
+        date_from: formatISO(subMonths(new Date(), 1), {
           representation: "date",
         }),
       }

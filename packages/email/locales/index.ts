@@ -2,7 +2,7 @@ type Options = {
   locale: string;
 };
 
-function translations(locale: string, params: any) {
+function translations(locale: string, params?: any) {
   switch (locale) {
     case "en":
       return {
@@ -107,6 +107,6 @@ function translations(locale: string, params: any) {
 
 export function getI18n({ locale }: Options) {
   return {
-    t: (key: string, params: any) => translations(locale, params)[key],
+    t: (key: string, params?: any) => translations(locale, params)[key],
   };
 }
