@@ -1,33 +1,57 @@
 export type Providers = "teller" | "plaid" | "gocardless";
 
-export type TransactionProviderParams = {
+export type ProviderParams = {
   provider: Providers;
   environment?: "development" | "staging" | "production";
 };
 
 export type Transaction = {
-  amount: string;
+  amount: number;
   currency: string;
   date: string;
   internal_id: string;
+  bank_account_id: string;
+  team_id: string;
+  status: "posted" | "pending";
+  balance?: string | null;
+  category?: string | null;
   method: string;
   name: string;
-  description?: string;
+  description?: string | null;
+  currency_rate?: number | null;
+  currency_source?: string | null;
 };
 
-export type Accounts = {
+export type Institution = {
   id: string;
+  name: string;
+  logo?: string | null;
+};
+
+export type Account = {
+  id: string;
+  name: string;
+  currency: string;
   provider: Providers;
+  institution?: Institution;
+  enrollment_id?: string; // Teller
 };
 
-export type GetTransactionsParams = {
+export type GetTransactionsRequest = {
   teamId: string;
+  bankAccountId: string;
   accountId: string;
-  dateFrom?: string;
-  dateTo?: string;
+  latest?: boolean;
+  accessToken?: string; // Teller & Plaid
 };
 
-export type GetAccountsParams = {
-  accountId: string;
-  countryCode?: string;
+export type GetAccountsRequest = {
+  id?: string; // GoCardLess
+  countryCode?: string; // GoCardLess
+  accessToken?: string; // Teller & Plaid
+  institutionId?: string; // Plaid
 };
+
+export type GetTransactionsResponse = Transaction[];
+
+export type GetAccountsResponse = Account[];

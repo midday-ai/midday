@@ -117,11 +117,13 @@ export function TransactionDetails({ transactionId, data: initialData }) {
             </div>
           ) : (
             <div className="flex items-center justify-between">
-              <TransactionBankAccount
-                name={data?.bank_account?.name}
-                logoUrl={data?.bank_account?.bank_connection?.logo_url}
-                className="text-[#606060] text-xs"
-              />
+              {data?.bank_account?.bank_connection?.logo_url && (
+                <TransactionBankAccount
+                  name={data?.bank_account?.name}
+                  logoUrl={data.bank_account.bank_connection.logo_url}
+                  className="text-[#606060] text-xs"
+                />
+              )}
               <span className="text-[#606060] text-xs">
                 {data?.date && format(new Date(data.date), "MMM d, y")}
               </span>

@@ -15,36 +15,36 @@ export type Database = {
           bank_connection_id: string | null
           created_at: string
           created_by: string
-          currency: string | null
+          currency: string
+          enabled: boolean
           id: string
           last_accessed: string | null
           name: string | null
-          owner_name: string | null
-          team_id: string | null
+          team_id: string
         }
         Insert: {
           account_id: string
           bank_connection_id?: string | null
           created_at?: string
           created_by: string
-          currency?: string | null
+          currency: string
+          enabled?: boolean
           id?: string
           last_accessed?: string | null
           name?: string | null
-          owner_name?: string | null
-          team_id?: string | null
+          team_id: string
         }
         Update: {
           account_id?: string
           bank_connection_id?: string | null
           created_at?: string
           created_by?: string
-          currency?: string | null
+          currency?: string
+          enabled?: boolean
           id?: string
           last_accessed?: string | null
           name?: string | null
-          owner_name?: string | null
-          team_id?: string | null
+          team_id?: string
         }
         Relationships: [
           {
@@ -79,34 +79,40 @@ export type Database = {
       }
       bank_connections: {
         Row: {
+          access_token: string | null
           created_at: string
+          enrollment_id: string | null
           expires_at: string | null
           id: string
-          institution_id: string | null
+          institution_id: string
           logo_url: string | null
-          name: string | null
-          provider: Database["public"]["Enums"]["bankProviders"] | null
-          team_id: string | null
+          name: string
+          provider: Database["public"]["Enums"]["bankProviders"]
+          team_id: string
         }
         Insert: {
+          access_token?: string | null
           created_at?: string
+          enrollment_id?: string | null
           expires_at?: string | null
           id?: string
-          institution_id?: string | null
+          institution_id: string
           logo_url?: string | null
-          name?: string | null
-          provider?: Database["public"]["Enums"]["bankProviders"] | null
-          team_id?: string | null
+          name: string
+          provider: Database["public"]["Enums"]["bankProviders"]
+          team_id: string
         }
         Update: {
+          access_token?: string | null
           created_at?: string
+          enrollment_id?: string | null
           expires_at?: string | null
           id?: string
-          institution_id?: string | null
+          institution_id?: string
           logo_url?: string | null
-          name?: string | null
-          provider?: Database["public"]["Enums"]["bankProviders"] | null
-          team_id?: string | null
+          name?: string
+          provider?: Database["public"]["Enums"]["bankProviders"]
+          team_id?: string
         }
         Relationships: [
           {
@@ -779,11 +785,10 @@ export type Database = {
           created_by: string | null
           currency: string | null
           decrypted_name: string | null
-          decrypted_owner_name: string | null
+          enabled: boolean | null
           id: string | null
           last_accessed: string | null
           name: string | null
-          owner_name: string | null
           team_id: string | null
         }
         Insert: {
@@ -793,11 +798,10 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           decrypted_name?: never
-          decrypted_owner_name?: never
+          enabled?: boolean | null
           id?: string | null
           last_accessed?: string | null
           name?: string | null
-          owner_name?: string | null
           team_id?: string | null
         }
         Update: {
@@ -807,11 +811,10 @@ export type Database = {
           created_by?: string | null
           currency?: string | null
           decrypted_name?: never
-          decrypted_owner_name?: never
+          enabled?: boolean | null
           id?: string | null
           last_accessed?: string | null
           name?: string | null
-          owner_name?: string | null
           team_id?: string | null
         }
         Relationships: [
@@ -847,8 +850,10 @@ export type Database = {
       }
       decrypted_bank_connections: {
         Row: {
+          access_token: string | null
           created_at: string | null
           decrypted_name: string | null
+          enrollment_id: string | null
           expires_at: string | null
           id: string | null
           institution_id: string | null
@@ -858,8 +863,10 @@ export type Database = {
           team_id: string | null
         }
         Insert: {
+          access_token?: string | null
           created_at?: string | null
           decrypted_name?: never
+          enrollment_id?: string | null
           expires_at?: string | null
           id?: string | null
           institution_id?: string | null
@@ -869,8 +876,10 @@ export type Database = {
           team_id?: string | null
         }
         Update: {
+          access_token?: string | null
           created_at?: string | null
           decrypted_name?: never
+          enrollment_id?: string | null
           expires_at?: string | null
           id?: string | null
           institution_id?: string | null
@@ -1281,6 +1290,11 @@ export type Database = {
         | "transfer"
         | "other"
         | "unknown"
+        | "ach"
+        | "interest"
+        | "deposit"
+        | "wire"
+        | "fee"
       transactionStatus: "posted" | "pending"
     }
     CompositeTypes: {

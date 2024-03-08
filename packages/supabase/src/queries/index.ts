@@ -88,6 +88,8 @@ export async function getTeamBankAccountsQuery(
       "*, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
     )
     .eq("team_id", teamId)
+    .order("created_at", { ascending: true })
+    .order("name", { ascending: false })
     .throwOnError();
 }
 
@@ -318,7 +320,7 @@ export async function getTransactionsQuery(
       `
       *,
       name:decrypted_name,
-      description:decrypted_description
+      description:decrypted_description,
       assigned:assigned_id(*),
       attachments:transaction_attachments(*),
       bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))

@@ -11,11 +11,13 @@
   },
   "dependencies": {
     "@google-cloud/documentai": "^8.2.0",
-    "@trigger.dev/openai": "latest",
     "@trigger.dev/react": "^2.3.18",
     "@trigger.dev/resend": "^2.3.18",
     "@trigger.dev/sdk": "^2.3.18",
     "@trigger.dev/supabase": "^2.3.18",
     "nanoid": "^5.0.6"
+  },
+  "devDependencies": {
+    "request": "^2.88.2"
   }
 }

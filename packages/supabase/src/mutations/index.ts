@@ -1,35 +1,80 @@
 import { addDays } from "date-fns";
-import {
-  getCurrentUserTeamQuery,
-  getSession,
-  getUserInviteQuery,
-} from "../queries";
+import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import { Client, Database } from "../types";
 
-export async function createBankAccounts(supabase: Client, accounts) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+type CreateBankAccountsPayload = {
+  accounts: {
+    account_id: string;
+    institution_id: string;
+    logo_url: string;
+    name: string;
+    bank_name: string;
+    currency: string;
+    enabled: boolean;
+  }[];
+  accessToken?: string;
+  enrollmentId?: string;
+  teamId: string;
+  userId: string;
+  provider: "gocardless" | "teller" | "plaid";
+};
+
+export async function createBankAccounts(
+  supabase: Client,
+  {
+    accounts,
+    accessToken,
+    enrollmentId,
+    teamId,
+    userId,
+    provider,
+  }: CreateBankAccountsPayload
+) {
   // Get first account to create a bank connection
   const account = accounts?.at(0);
 
-  const bankConnection = await createBankConnection(supabase, {
-    institution_id: account.institution_id,
-    name: account.bank_name,
-    logo_url: account.logo_url,
-    team_id: userData?.team_id,
-    provider: account.provider,
-  });
+  if (!account) {
+    return;
+  }
+
+  // NOTE: GoCardLess connection expires after 180 days
+  const expiresAt =
+    provider === "gocardless"
+      ? addDays(new Date(), 180).toDateString()
+      : undefined;
+
+  const bankConnection = await supabase
+    .from("bank_connections")
+    .insert({
+      institution_id: account.institution_id,
+      name: account.bank_name,
+      logo_url: account.logo_url,
+      team_id: teamId,
+      provider,
+      access_token: accessToken,
+      enrollment_id: enrollmentId,
+      expires_at: expiresAt,
+    })
+    .select()
+    .single();
 
   return supabase
     .from("bank_accounts")
-    .insert(
-      accounts.map((account) => ({
-        account_id: account.account_id,
-        bank_connection_id: bankConnection?.data?.id,
-        team_id: userData?.team_id,
-        created_by: userData.id,
-        name: account.name,
-        currency: account.currency,
-      }))
+    .upsert(
+      accounts.map(
+        (account) => ({
+          account_id: account.account_id,
+          bank_connection_id: bankConnection?.data?.id,
+          team_id: teamId,
+          created_by: userId,
+          name: account.name,
+          currency: account.currency,
+          enabled: account.enabled,
+        }),
+        {
+          onConflict: "account_id",
+        }
+      )
     )
     .select();
 }
@@ -40,27 +85,16 @@ type CreateBankConnectionPayload = {
   name: string;
   logo_url: string;
   provider: "gocardless" | "plaid" | "teller";
+  access_token?: string;
+  enrollment_id?: string;
 };
-
-export async function createBankConnection(
-  supabase: Client,
-  data: CreateBankConnectionPayload
-) {
-  return await supabase
-    .from("bank_connections")
-    .insert({
-      ...data,
-      expires_at: addDays(new Date(), 180).toDateString(),
-    })
-    .select()
-    .single();
-}
 
 type UpdateBankConnectionData = {
   id: string;
   teamId: string;
 };
 
+// NOTE: Only GoCardLess needs to be updated
 export async function updateBankConnection(
   supabase: Client,
   data: UpdateBankConnectionData

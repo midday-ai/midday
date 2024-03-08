@@ -23,7 +23,7 @@ export function InboxStatus({ item }) {
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[26px]">
+            <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
               <span>Pending</span>
             </div>
           </TooltipTrigger>

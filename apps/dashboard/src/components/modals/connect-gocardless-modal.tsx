@@ -1,10 +1,7 @@
 "use client";
 
-import {
-  buildLink,
-  createEndUserAgreement,
-  getBanks,
-} from "@midday/gocardless";
+import { createEndUserAgreementAction } from "@/actions/banks/create-end-user-agreement-action";
+import { getBanks } from "@/actions/banks/get-banks";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -19,7 +16,8 @@ import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useAction } from "next-safe-action/hooks";
+import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
 function RowsSkeleton() {
@@ -93,17 +91,21 @@ function Row({ id, name, logo, onSelect }) {
 }
 
 export function ConnectGoCardLessModal({ countryCode }) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
-  const isOpen = searchParams.get("step") === "gocardless";
+
+  const createEndUserAgreement = useAction(createEndUserAgreementAction);
+
+  const [step, setStep] = useQueryState("step", {
+    shallow: true,
+  });
+
+  const isOpen = step === "gocardless";
 
   useEffect(() => {
     async function fetchData() {
-      const banks = await getBanks(countryCode);
+      const banks = await getBanks({ countryCode });
       setLoading(false);
 
       if (banks.length > 0) {
@@ -116,20 +118,6 @@ export function ConnectGoCardLessModal({ countryCode }) {
       fetchData();
     }
   }, [isOpen]);
-
-  const handleCreateEndUserAgreement = async (institutionId: string) => {
-    const data = await createEndUserAgreement(institutionId);
-
-    const redirectBase = isDesktopApp() ? "midday://" : location.origin;
-
-    const { link } = await buildLink({
-      redirect: `${redirectBase}/${pathname}?step=select-account-gocardless`,
-      institutionId,
-      agreement: data.id,
-    });
-
-    router.push(link);
-  };
 
   const handleFilterBanks = (value: string) => {
     if (!value) {
@@ -144,7 +132,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => router.push(pathname)}>
+    <Dialog open={isOpen} onOpenChange={() => setStep(null)}>
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
@@ -152,7 +140,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
               <button
                 type="button"
                 className="items-center rounded border bg-accent p-1"
-                onClick={() => router.back()}
+                onClick={() => setStep("connect")}
               >
                 <Icons.ArrowBack />
               </button>
@@ -183,21 +171,31 @@ export function ConnectGoCardLessModal({ countryCode }) {
                       id={bank.id}
                       name={bank.name}
                       logo={bank.logo}
-                      onSelect={() => handleCreateEndUserAgreement(bank.id)}
+                      onSelect={() =>
+                        createEndUserAgreement.execute({
+                          institutionId: bank.id,
+                          isDesktop: isDesktopApp(),
+                        })
+                      }
                     />
                   );
                 })}
+
                 {!loading && filteredResults.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[300px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">
                       We could not find any banks matching your
                       <br /> criteria let us know which bank you are looking for
-                      <br />
-                      <a href="mailto:support@midday.ai" className="underline">
-                        support@midday.ai
-                      </a>
                     </p>
+
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => setStep("connect")}
+                    >
+                      Try another provider
+                    </Button>
                   </div>
                 )}
               </div>

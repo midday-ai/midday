@@ -60,7 +60,14 @@ export const columns: ColumnDef<Payment>[] = [
                   row.original.category === "income" && "text-[#00C969]"
                 )}
               >
-                {row.original.name}
+                <div className="flex space-x-2 items-center">
+                  <span>{row.original.name}</span>
+                  {row.original.status === "pending" && (
+                    <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
+                      <span>Pending</span>
+                    </div>
+                  )}
+                </div>
               </span>
             </TooltipTrigger>
             {row.original?.description && (

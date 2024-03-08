@@ -1,14 +1,29 @@
 import { client } from "@midday/kv";
+import axios from "axios";
+import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import { formatISO, subMonths } from "date-fns";
 import {
-  GoCardLessBank,
-  GoCardLessBuildLinkOptions,
-  GoCardLessGetAccountsOptions,
-  GoCardLessGetTransactionsParams,
-  GoCardLessTransaction,
+  DeleteRequistionResponse,
+  GetAccessTokenResponse,
+  GetAccountDetailsResponse,
+  GetAccountResponse,
+  GetAccountsRequest,
+  GetAccountsResponse,
+  GetBanksResponse,
+  GetRefreshTokenResponse,
+  GetRequisitionResponse,
+  GetRequisitionsResponse,
+  GetTransactionsRequest,
+  GetTransactionsResponse,
+  PostCreateAgreementResponse,
+  PostRequisitionsRequest,
+  PostRequisitionsResponse,
 } from "./types";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
+
+  #api: AxiosInstance | null = null;
 
   #accessValidForDays = 180;
   #maxHistoricalDays = 730;
@@ -20,34 +35,29 @@ export class GoCardLessApi {
 
   #oneHour = 3600;
 
-  async #getRefreshToken(refresh: string) {
-    const res = await fetch(`${this.#baseUrl}/api/v2/token/refresh/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+  async #getRefreshToken(refresh: string): Promise<string> {
+    const response = await this.#post<GetRefreshTokenResponse>(
+      "/api/v2/token/refresh/",
+      {
         refresh,
-      }),
-    });
+      }
+    );
 
-    const result = await res.json();
-
-    await client.set(this.#accessTokenCacheKey, result.access, {
-      ex: result.access_expires - this.#oneHour,
+    await client.set(this.#accessTokenCacheKey, response.access, {
+      ex: response.access_expires - this.#oneHour,
       nx: true,
     });
 
-    return result.access;
+    return response.refresh;
   }
 
-  async #getAccessToken() {
+  async #getAccessToken(): Promise<string> {
     const [accessToken, refreshToken] = await Promise.all([
       client.get(this.#accessTokenCacheKey),
       client.get(this.#refreshTokenCacheKey),
     ]);
 
-    if (accessToken) {
+    if (typeof accessToken === "string") {
       return accessToken;
     }
 
@@ -55,228 +65,194 @@ export class GoCardLessApi {
       return this.#getRefreshToken(refreshToken);
     }
 
-    const res = await fetch(`${this.#baseUrl}/api/v2/token/new/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const response = await this.#post<GetAccessTokenResponse>(
+      "/api/v2/token/new/",
+      {
         secret_id: process.env.GOCARDLESS_SECRET_ID,
         secret_key: process.env.GOCARDLESS_SECRET_KEY,
-      }),
-    });
-
-    const result = await res.json();
+      }
+    );
 
     await Promise.all([
-      client.set(this.#accessTokenCacheKey, result.access, {
-        ex: result.access_expires - this.#oneHour,
+      client.set(this.#accessTokenCacheKey, response.access, {
+        ex: response.access_expires - this.#oneHour,
         nx: true,
       }),
-      client.set(this.#refreshTokenCacheKey, result.refresh, {
-        ex: result.refresh_expires - this.#oneHour,
+      client.set(this.#refreshTokenCacheKey, response.refresh, {
+        ex: response.refresh_expires - this.#oneHour,
         nx: true,
       }),
     ]);
 
-    return result.access;
+    return response.access;
   }
 
-  public async getBanks(countryCode?: string): Promise<GoCardLessBank[]> {
-    const banks: GoCardLessBank[] | null = await client.get(
-      this.#banksCacheKey
-    );
+  async getBanks(countryCode?: string): Promise<GetBanksResponse> {
+    const cacheKey = `${this.#banksCacheKey}_${countryCode}`;
+
+    const banks: GetBanksResponse | null = await client.get(cacheKey);
 
     if (banks) {
       return banks;
     }
 
-    const token = await this.#getAccessToken();
-
-    const res = await fetch(
-      `${
-        this.#baseUrl
-      }/api/v2/institutions/?country=${countryCode?.toLowerCase()}`,
+    const response = await this.#get<GetBanksResponse>(
+      "/api/v2/institutions/",
+      null,
       {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+        params: {
+          country: countryCode,
         },
       }
     );
 
-    const result: GoCardLessBank[] = await res.json();
-
-    client.set(this.#banksCacheKey, result, {
+    client.set(cacheKey, response, {
       ex: this.#oneHour,
       nx: true,
     });
 
-    return result;
+    return response;
   }
 
-  public async buildLink({
+  async buildLink({
     institutionId,
     agreement,
     redirect,
-  }: GoCardLessBuildLinkOptions) {
-    const token = await this.#getAccessToken();
-
-    const res = await fetch(`${this.#baseUrl}/api/v2/requisitions/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        redirect,
-        institution_id: institutionId,
-        agreement,
-      }),
+  }: PostRequisitionsRequest): Promise<PostRequisitionsResponse> {
+    return this.#post<PostRequisitionsResponse>("/api/v2/requisitions/", {
+      redirect,
+      institution_id: institutionId,
+      agreement,
     });
-
-    return res.json();
   }
 
-  public async createEndUserAgreement(institutionId: string) {
-    const token = await this.#getAccessToken();
-
-    const res = await fetch(`${this.#baseUrl}/api/v2/agreements/enduser/`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
+  async createEndUserAgreement(
+    institutionId: string
+  ): Promise<PostCreateAgreementResponse> {
+    return this.#post<PostCreateAgreementResponse>(
+      "/api/v2/agreements/enduser/",
+      {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
         access_valid_for_days: this.#accessValidForDays,
         max_historical_days: this.#maxHistoricalDays,
-      }),
-    });
-
-    return res.json();
+      }
+    );
   }
 
-  public async getAccountDetails(id: string) {
-    const token = await this.#getAccessToken();
-
+  async getAccountDetails(id: string): Promise<GetAccountDetailsResponse> {
     const [account, details] = await Promise.all([
-      fetch(`${this.#baseUrl}/api/v2/accounts/${id}/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }),
-      fetch(`${this.#baseUrl}/api/v2/accounts/${id}/details/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }),
+      this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`),
+      this.#get<GetAccountDetailsResponse>(`/api/v2/accounts/${id}/details/`),
     ]);
 
-    const accountData = await account.json();
-    const detailsData = await details.json();
-
     return {
-      ...accountData,
-      ...detailsData?.account,
+      ...account,
+      ...details,
     };
   }
 
-  public async getAccounts({
-    accountId,
+  async getAccounts({
+    id,
     countryCode,
-  }: GoCardLessGetAccountsOptions) {
-    const [token, banks] = await Promise.all([
-      this.#getAccessToken,
+  }: GetAccountsRequest): Promise<GetAccountsResponse> {
+    const [banks, response] = await Promise.all([
       this.getBanks(countryCode),
+      this.getRequestion(id),
     ]);
 
-    const result = await fetch(
-      `${this.#baseUrl}/api/v2/requisitions/${accountId}/`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const data = await result.json();
-
     return Promise.all(
-      data.accounts?.map(async (id: string) => {
-        const accountData = await this.getAccountDetails(id);
+      response.accounts?.map(async (acountId: string) => {
+        const accountDetails = await this.getAccountDetails(acountId);
 
         return {
-          ...accountData,
-          bank: banks.find((bank) => bank.id === accountData.institution_id),
+          ...accountDetails,
+          bank: banks.find((bank) => bank.id === accountDetails.institution_id),
         };
       })
     );
   }
 
-  public async getTransactions(
-    params: GoCardLessGetTransactionsParams
-  ): Promise<GoCardLessTransaction[]> {
-    const token = await this.#getAccessToken();
-
-    const url = new URL(
-      `${this.#baseUrl}/api/v2/accounts/${params.accountId}/transactions/`
+  async getTransactions({
+    accountId,
+    latest,
+  }: GetTransactionsRequest): Promise<
+    GetTransactionsResponse["transactions"]["booked"]
+  > {
+    const response = await this.#get<GetTransactionsResponse>(
+      `/api/v2/accounts/${accountId}/transactions/`,
+      latest && {
+        date_to: formatISO(subMonths(new Date(), 1), {
+          representation: "date",
+        }),
+      }
     );
-
-    if (params.dateFrom) {
-      url.searchParams.append("date_from", params.dateFrom);
-    }
-
-    if (params.dateTo) {
-      url.searchParams.append("date_from", params.dateTo);
-    }
-
-    const result = await fetch(url.toString(), {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    const response = await result.json();
 
     return response?.transactions?.booked;
   }
 
-  public async getRequisitions() {
-    const token = await this.#getAccessToken();
-
-    const result = await fetch(`${this.#baseUrl}/api/v2/requisitions/`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    return result.json();
+  async getRequisitions(): Promise<GetRequisitionsResponse> {
+    return this.#get<GetRequisitionsResponse>("/api/v2/requisitions/");
   }
 
-  public async deleteRequisition(id: string) {
+  async getRequestion(id: string): Promise<GetRequisitionResponse> {
+    return this.#get<GetRequisitionResponse>(`/api/v2/requisitions/${id}/`);
+  }
+
+  async deleteRequisition(id: string): Promise<DeleteRequistionResponse> {
+    return this.#_delete<DeleteRequistionResponse>(
+      `/api/v2/requisitions/${id}/`
+    );
+  }
+
+  async #getApi(accessToken?: string): Promise<AxiosInstance> {
+    if (!this.#api) {
+      this.#api = axios.create({
+        baseURL: this.#baseUrl,
+        timeout: 30_000,
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+    }
+
+    return this.#api;
+  }
+
+  async #get<TResponse>(
+    path: string,
+    params?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<TResponse> {
     const token = await this.#getAccessToken();
+    const api = await this.#getApi(token);
 
-    const result = await fetch(`${this.#baseUrl}/api/v2/requisitions/${id}/`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    return api
+      .get<TResponse>(path, { params, ...config })
+      .then(({ data }) => data);
+  }
 
-    return result.json();
+  async #post<TResponse>(
+    path: string,
+    body?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<TResponse> {
+    const token = await this.#getAccessToken();
+    const api = await this.#getApi(token);
+    return api.post<TResponse>(path, body, config).then(({ data }) => data);
+  }
+
+  async #_delete<TResponse>(
+    path: string,
+    params?: unknown,
+    config?: AxiosRequestConfig
+  ): Promise<TResponse> {
+    const token = await this.#getAccessToken();
+    const api = await this.#getApi(token);
+
+    return api
+      .delete<TResponse>(path, { params, ...config })
+      .then(({ data }) => data);
   }
 }

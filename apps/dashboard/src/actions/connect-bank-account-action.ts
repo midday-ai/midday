@@ -6,48 +6,62 @@ import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
+import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
 import { connectBankAccountSchema } from "./schema";
 
 export const connectBankAccountAction = action(
   connectBankAccountSchema,
-  async ({ provider, accounts }) => {
+  async ({ provider, accounts, accessToken, enrollmentId }) => {
     const user = await getUser();
+    const teamId = user.data.team_id;
     const supabase = createClient();
 
     try {
-      const { data } = await createBankAccounts(
-        supabase,
-        accounts.map((account) => ({
-          ...account,
-          provider,
-        }))
-      );
+      await createBankAccounts(supabase, {
+        accessToken,
+        enrollmentId,
+        teamId,
+        userId: user.data.id,
+        accounts,
+        provider,
+      });
+    } catch (error) {
+      console.log(error);
 
-      const event = await client.sendEvent({
-        name: Events.TRANSACTIONS_SETUP,
-        payload: {
-          teamId: user.data.team_id,
+      logsnag.track({
+        event: LogEvents.ConnectBankFailed.name,
+        icon: LogEvents.ConnectBankFailed.icon,
+        user_id: user.data.email,
+        channel: LogEvents.ConnectBankFailed.channel,
+        tags: {
           provider,
-          accounts: data.map((account) => ({
-            id: account.id,
-            account_id: account.account_id,
-          })),
         },
       });
 
-      logsnag.track({
-        event: LogEvents.ConnectBankCompleted.name,
-        icon: LogEvents.ConnectBankCompleted.icon,
-        user_id: user.data.email,
-        channel: LogEvents.ConnectBankCompleted.channel,
-      });
-
-      return event;
-    } catch (err) {
-      console.log(err);
-
       throw new Error("Something went wrong");
     }
+
+    const event = await client.sendEvent({
+      name: Events.TRANSACTIONS_INITIAL_SYNC,
+      payload: {
+        teamId,
+      },
+    });
+
+    logsnag.track({
+      event: LogEvents.ConnectBankCompleted.name,
+      icon: LogEvents.ConnectBankCompleted.icon,
+      user_id: user.data.email,
+      channel: LogEvents.ConnectBankCompleted.channel,
+      tags: {
+        provider,
+      },
+    });
+
+    revalidateTag(`bank_accounts_${teamId}`);
+    revalidateTag(`bank_connections_${teamId}`);
+
+    return event;
   }
 );

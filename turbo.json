@@ -12,6 +12,9 @@
 		"start": {
 			"cache": false
 		},
+		"test": {
+			"cache": false
+		},
 		"dev": {
 			"persistent": true,
 			"cache": false

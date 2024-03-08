@@ -23,6 +23,10 @@ export default {
     card_atm: "Kort bankomat",
     transfer: "Överföring",
     other: "Annan",
+    ach: "Ach",
+    deposit: "Deposition",
+    wire: "Wire",
+    fee: "Avgift",
   },
   language: {
     title: "Språk",

@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { useQueryState } from "nuqs";
+import TransactionsScreenOneLight from "public/assets/transactions-1-light.png";
+import TransactionsScreenOne from "public/assets/transactions-1.png";
+import TransactionsScreenTwoLight from "public/assets/transactions-2-light.png";
+import TransactionsScreenTwo from "public/assets/transactions-2.png";
 import { Fragment, useState } from "react";
-import TransactionsScreenOneLight from "./transactions-1-light.png";
-import TransactionsScreenOne from "./transactions-1.png";
-import TransactionsScreenTwoLight from "./transactions-2-light.png";
-import TransactionsScreenTwo from "./transactions-2.png";
 
 const images = [
   { id: 1, src: TransactionsScreenOne, src2: TransactionsScreenOneLight },
@@ -17,6 +17,15 @@ const images = [
 
 export function TransactionsModal() {
   const [activeId, setActive] = useState(1);
+
+  // When connect transactions is open
+  const [step] = useQueryState("step", {
+    shallow: false,
+  });
+
+  if (step) {
+    return null;
+  }
 
   return (
     <div
@@ -84,15 +93,8 @@ export function TransactionsModal() {
                 />
               ))}
             </div>
-            <Link href="?step=connect">
-              <Button
-                data-event="Connect Bank"
-                data-icon="🏦"
-                data-channel="bank"
-              >
-                Connect bank
-              </Button>
-            </Link>
+
+            <ConnectBankButton />
           </div>
         </div>
       </div>

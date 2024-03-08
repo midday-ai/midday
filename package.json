@@ -12,7 +12,8 @@
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "dev": "turbo dev --parallel",
-    "start:dashboard": "turbo dev --filter=@midday/dashboard",
+    "test": "turbo test --parallel",
+    "start:dashboard": "turbo start --filter=@midday/dashboard",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "dev:website": "turbo dev --filter=@midday/website",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
@@ -24,8 +25,8 @@
   "dependencies": {
     "@biomejs/biome": "1.5.3",
     "@manypkg/cli": "^0.21.2",
-    "turbo": "^1.12.4",
-    "typescript": "^5.3.3"
+    "turbo": "^1.12.5",
+    "typescript": "^5.4.2"
   },
   "resolutions": {
     "jackspeak": "2.1.1"

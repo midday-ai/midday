@@ -9,9 +9,11 @@ export function TransactionBankAccount({
 }) {
   return (
     <div className="flex space-x-2 mt-1 items-center">
-      <div className="rounded-full overflow-hidden">
-        <Image src={logoUrl} alt={name} width={size} height={size} />
-      </div>
+      {logoUrl && (
+        <div className="rounded-full overflow-hidden border border-1">
+          <Image src={logoUrl} alt={name} width={size} height={size} />
+        </div>
+      )}
       <span className={cn("text-sm", className)}>{name}</span>
     </div>
   );

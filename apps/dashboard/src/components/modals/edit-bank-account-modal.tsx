@@ -1,3 +1,4 @@
+import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
@@ -11,10 +12,8 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
@@ -35,6 +34,10 @@ export function EditBankAccountModal({
   isOpen,
   defaultValue,
 }) {
+  const deleteAccount = useAction(deleteBankAccountAction, {
+    onSuccess: () => onOpenChange(false),
+  });
+
   const updateAccount = useAction(updateBankAccountAction, {
     onSuccess: () => onOpenChange(false),
   });
@@ -82,10 +85,24 @@ export function EditBankAccountModal({
                 )}
               />
 
-              <DialogFooter className="mt-6">
-                <div className="space-x-4">
-                  <Button variant="outline">Cancel</Button>
-                  <Button disabled={updateAccount.status === "executing"}>
+              <DialogFooter className="mt-12 w-full">
+                <div className="space-y-4 w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full border-destructive text-destructive hover:text-destructive hover:bg-transparent hover:border-destructive"
+                    disabled={deleteAccount.status === "executing"}
+                    onClick={() => deleteAccount.execute({ id })}
+                  >
+                    {deleteAccount.status === "executing" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      "Delete"
+                    )}
+                  </Button>
+                  <Button
+                    disabled={updateAccount.status === "executing"}
+                    className="w-full"
+                  >
                     {updateAccount.status === "executing" ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (

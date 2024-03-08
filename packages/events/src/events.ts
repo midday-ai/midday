@@ -54,6 +54,26 @@ export const LogEvents = {
     icon: "🏦",
     channel: "bank",
   },
+  ConnectBankProvider: {
+    name: "Connect Bank Provider",
+    icon: "🏦",
+    channel: "bank",
+  },
+  ConnectBankCanceled: {
+    name: "Connect Bank Canceled",
+    icon: "🏦",
+    channel: "bank",
+  },
+  ConnectBankAuthorized: {
+    name: "Connect Bank Authorized",
+    icon: "🏦",
+    channel: "bank",
+  },
+  ConnectBankFailed: {
+    name: "Connect Bank Failed",
+    icon: "🏦",
+    channel: "bank",
+  },
   DeleteBank: {
     name: "Delete Bank",
     icon: "🏦",
@@ -132,6 +152,11 @@ export const LogEvents = {
   DeleteAttachment: {
     name: "Delete Attachment",
     icon: "🖼️",
+    channel: "transaction",
+  },
+  TransactionsManualSync: {
+    name: "Manual Sync",
+    icon: "🔁",
     channel: "transaction",
   },
   CreateFolder: {

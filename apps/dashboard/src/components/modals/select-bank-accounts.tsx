@@ -1,11 +1,10 @@
 "use client";
 
+import { getAccounts } from "@/actions/banks/get-accounts";
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
+import { connectBankAccountSchema } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getAccounts } from "@midday/gocardless";
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -21,34 +20,22 @@ import {
   FormLabel,
 } from "@midday/ui/form";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Switch } from "@midday/ui/switch";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { useToast } from "@midday/ui/use-toast";
-import { capitalCase } from "change-case";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryStates,
+} from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
-
-const formSchema = z.object({
-  accounts: z.array(z.string()).refine((value) => value.some((item) => item)),
-});
-
-const getAccountName = (account) => {
-  if (account?.name) {
-    return capitalCase(account.name);
-  }
-
-  if (account?.product) {
-    return account.product;
-  }
-
-  if (account?.bank?.name) {
-    return account.bank.name;
-  }
-};
 
 function RowsSkeleton() {
   return (
@@ -71,18 +58,36 @@ function RowsSkeleton() {
   );
 }
 
-export function SelectAccountGoCardLessModal({ countryCode }) {
+export function SelectBankAccountsModal({ countryCode }) {
   const { toast } = useToast();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
 
-  const isOpen =
-    searchParams.get("step") === "select-account-gocardless" &&
-    !searchParams.has("error");
+  const [params, setParams] = useQueryStates({
+    step: parseAsStringEnum(["connect", "account", "gocardless"]),
+    error: parseAsBoolean,
+    ref: parseAsString,
+    token: parseAsString,
+    enrollment_id: parseAsString,
+    institution_id: parseAsString,
+    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
+  });
+
+  const { provider, step, error, token, ref, enrollment_id, institution_id } =
+    params;
+
+  const isOpen = step === "account" && !error;
+
+  const onClose = () => {
+    setParams(
+      { step: null },
+      {
+        // NOTE: Rerender so the overview modal is visible
+        shallow: false,
+      }
+    );
+  };
 
   const connectBankAction = useAction(connectBankAccountAction, {
     onError: () => {
@@ -99,53 +104,53 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
     },
   });
 
-  const onClose = () => router.push(pathname);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof connectBankAccountSchema>>({
+    resolver: zodResolver(connectBankAccountSchema),
     defaultValues: {
       accounts: [],
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const accountsWithDetails = values.accounts
-      .map((id) => accounts?.find((account) => account.id === id))
-      .map((account) => ({
-        account_id: account.id,
-        name: getAccountName(account),
-        currency: account.currency,
-        institution_id: account.institution_id,
-        bank_name: account?.bank?.name,
-        logo_url: account?.bank?.logo,
-      }));
-
-    connectBankAction.execute({
-      provider: "gocardless",
-      accounts: accountsWithDetails,
-    });
+  async function onSubmit(values: z.infer<typeof connectBankAccountSchema>) {
+    connectBankAction.execute(values);
   }
 
   useEffect(() => {
     async function fetchData() {
       const data = await getAccounts({
-        accountId: searchParams.get("ref"),
+        provider,
+        id: ref,
         countryCode,
+        accessToken: token,
+        institutionId: institution_id,
       });
 
       setAccounts(data);
       setLoading(false);
 
-      // Set first accounts to checked
+      // Set all accounts to checked
       if (!form.formState.isValid) {
-        form.reset({ accounts: [data.at(0).id] });
+        form.reset({
+          provider,
+          accessToken: token,
+          enrollmentId: enrollment_id,
+          accounts: data.map((account) => ({
+            account_id: account.id,
+            bank_name: account.institution.name,
+            currency: account.currency,
+            name: account.name,
+            institution_id: account.institution.id,
+            logo_url: account.institution?.logo,
+            enabled: false,
+          })),
+        });
       }
     }
 
     if (isOpen && !accounts.length) {
       fetchData();
     }
-  }, [isOpen]);
+  }, [isOpen, provider]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -163,14 +168,16 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
                 <DialogHeader className="mb-8">
                   <DialogTitle>Select Accounts</DialogTitle>
                   <DialogDescription>
-                    Select accounts you want to link with Midday.
+                    Choose the accounts from which you wish to receive
+                    transactions. You can enable or disable accounts in team
+                    settings later if needed.
                   </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6"
+                    className="space-y-6 max-h-[320px] overflow-auto pb-[60px] relative scrollbar-hide"
                   >
                     {loading && <RowsSkeleton />}
 
@@ -185,38 +192,49 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
                               key={account.id}
                               className="flex justify-between"
                             >
-                              <FormLabel className="flex items-between">
-                                <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-                                  <AvatarImage
-                                    src={account.bank.logo}
-                                    alt={account?.bank?.name}
+                              <FormLabel className="flex items-between space-x-4">
+                                {account?.institution?.logo && (
+                                  <Image
+                                    src={account.institution.logo}
+                                    alt={account?.institution?.name}
+                                    width={34}
+                                    height={34}
+                                    className="rounded-full overflow-hidden border"
                                   />
-                                </Avatar>
-                                <div className="ml-4 space-y-1">
+                                )}
+                                <div className="space-y-1">
                                   <p className="text-sm font-medium leading-none mb-1">
-                                    {getAccountName(account)}
+                                    {account.name}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
-                                    {account.bank.name} ({account?.currency})
+                                    {account?.institution?.name} (
+                                    {account?.currency})
                                   </p>
                                 </div>
                               </FormLabel>
 
                               <div>
                                 <FormControl>
-                                  <Checkbox
-                                    checked={field.value?.includes(account.id)}
+                                  <Switch
+                                    checked={
+                                      field.value.find(
+                                        (value) =>
+                                          value.account_id === account.id
+                                      )?.enabled
+                                    }
                                     onCheckedChange={(checked) => {
-                                      return checked
-                                        ? field.onChange([
-                                            ...field.value,
-                                            account.id,
-                                          ])
-                                        : field.onChange(
-                                            field.value?.filter(
-                                              (value) => value !== account.id
-                                            )
-                                          );
+                                      return field.onChange(
+                                        field.value.map((value) => {
+                                          if (value.account_id === account.id) {
+                                            return {
+                                              ...value,
+                                              enabled: checked,
+                                            };
+                                          }
+
+                                          return value;
+                                        })
+                                      );
                                     }}
                                   />
                                 </FormControl>
@@ -227,11 +245,16 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
                       />
                     ))}
 
-                    <div className="pt-4">
+                    <div className="fixed bottom-6 left-6 right-6 z-10 bg-background pt-4">
                       <Button
                         className="w-full"
                         type="submit"
-                        disabled={connectBankAction.status === "executing"}
+                        disabled={
+                          connectBankAction.status === "executing" ||
+                          !form
+                            .getValues("accounts")
+                            .find((account) => account.enabled)
+                        }
                       >
                         {connectBankAction.status === "executing" ? (
                           <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
@@ -246,13 +269,6 @@ export function SelectAccountGoCardLessModal({ countryCode }) {
             </TabsContent>
 
             <TabsContent value="loading">
-              <DialogHeader className="mb-8">
-                <DialogTitle>Loading transactions</DialogTitle>
-                <DialogDescription>
-                  We are now loading transactions from you bank account.
-                </DialogDescription>
-              </DialogHeader>
-
               {eventId && (
                 <LoadingTransactionsEvent
                   eventId={eventId}

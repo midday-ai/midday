@@ -34,11 +34,12 @@ export async function BankAccountList() {
         <BankAccount
           key={account.id}
           id={account.id}
-          last_accessed={account.last_accessed}
+          last_accessed={account?.last_accessed}
           bank_name={account.bank.name}
           name={account.name}
           logo={account.bank.logo_url}
           currency={account.currency}
+          enabled={account.enabled}
         />
       ))}
     </div>

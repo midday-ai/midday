@@ -1,12 +1,30 @@
 import { capitalCase } from "change-case";
 import {
-  GoCardLessTranformTransactionDescriptionParams,
-  GoCardLessTransaction,
-  GoCardLessTransformTransactionParams,
+  Account as BaseAccount,
+  Transaction as BaseTransaction,
+} from "../types";
+import {
+  Transaction,
+  TransactionDescription,
+  TransformAccount,
+  TransformAccountName,
+  TransformTransaction,
 } from "./types";
 
-export const mapTransactionMethod = (method?: string) => {
-  switch (method) {
+export const mapTransactionCategory = (transaction: Transaction) => {
+  if (+transaction.transactionAmount.amount > 0) {
+    return "income";
+  }
+
+  if (transaction?.proprietaryBankTransactionCode === "Transfer") {
+    return "transfer";
+  }
+
+  return "uncategorized";
+};
+
+export const mapTransactionMethod = (type?: string) => {
+  switch (type) {
     case "Payment":
     case "Bankgiro payment":
     case "Incoming foreign payment":
@@ -23,9 +41,7 @@ export const mapTransactionMethod = (method?: string) => {
   }
 };
 
-export const transformTransactionName = (
-  transaction: GoCardLessTransaction
-) => {
+export const transformTransactionName = (transaction: Transaction) => {
   if (transaction?.additionalInformation) {
     return capitalCase(transaction.additionalInformation);
   }
@@ -61,7 +77,7 @@ export const transformTransactionName = (
 const transformDescription = ({
   transaction,
   name,
-}: GoCardLessTranformTransactionDescriptionParams) => {
+}: TransactionDescription) => {
   if (transaction?.remittanceInformationUnstructuredArray?.length) {
     const text = transaction?.remittanceInformationUnstructuredArray.join(" ");
     const description = capitalCase(text);
@@ -72,13 +88,15 @@ const transformDescription = ({
       return description;
     }
   }
+
+  return null;
 };
 
 export const transformTransaction = ({
   transaction,
   teamId,
-  accountId,
-}: GoCardLessTransformTransactionParams) => {
+  bankAccountId,
+}: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode
   );
@@ -109,15 +127,54 @@ export const transformTransaction = ({
     name,
     method,
     internal_id: `${teamId}_${transaction.internalTransactionId}`,
-    amount: transaction.transactionAmount.amount,
+    amount: +transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
-    bank_account_id: accountId,
-    category: +transaction.transactionAmount.amount > 0 ? "income" : null,
+    bank_account_id: bankAccountId,
+    category: mapTransactionCategory(transaction),
     team_id: teamId,
-    currency_rate: currencyExchange?.rate,
-    currency_source: currencyExchange?.currency,
-    balance: transaction?.balanceAfterTransaction?.balanceAmount?.amount,
+    currency_rate: currencyExchange?.rate || null,
+    currency_source: currencyExchange?.currency || null,
+    balance:
+      transaction?.balanceAfterTransaction?.balanceAmount?.amount || null,
     description: transformDescription({ transaction, name }),
     status: "posted",
+  };
+};
+
+const transformAccountName = (account: TransformAccountName) => {
+  if (account?.name) {
+    return capitalCase(account.name);
+  }
+
+  if (account?.product) {
+    return account.product;
+  }
+
+  if (account?.bank?.name) {
+    return account.bank.name;
+  }
+
+  return "No name";
+};
+
+export const transformAccount = ({
+  id,
+  account,
+  bank,
+}: TransformAccount): BaseAccount => {
+  return {
+    id,
+    name: transformAccountName({
+      name: account.name,
+      bank,
+      product: account.product,
+    }),
+    currency: account.currency,
+    institution: bank && {
+      id: bank?.id,
+      logo: bank?.logo,
+      name: bank?.name,
+    },
+    provider: "gocardless",
   };
 };

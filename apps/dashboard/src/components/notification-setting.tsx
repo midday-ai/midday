@@ -1,7 +1,6 @@
 "use client";
 
 import { useI18n } from "@/locales/client";
-import { Checkbox } from "@midday/ui/checkbox";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import { useOptimisticAction } from "next-safe-action/hooks";

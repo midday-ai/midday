@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import { cn } from "@midday/ui/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { useQueryState } from "nuqs";
+import OverViewScreenOneLight from "public/assets/overview-1-light.png";
+import OverViewScreenOne from "public/assets/overview-1.png";
+import OverViewScreenTwoLight from "public/assets/overview-2-light.png";
+import OverViewScreenTwo from "public/assets/overview-2.png";
 import { Fragment, useState } from "react";
-import OverViewScreenOneLight from "./overview-1-light.png";
-import OverViewScreenOne from "./overview-1.png";
-import OverViewScreenTwoLight from "./overview-2-light.png";
-import OverViewScreenTwo from "./overview-2.png";
 
 const images = [
   { id: 1, src: OverViewScreenOne, src2: OverViewScreenOneLight },
@@ -17,6 +17,15 @@ const images = [
 
 export function OverviewModal() {
   const [activeId, setActive] = useState(1);
+
+  // When connect transactions is open
+  const [step] = useQueryState("step", {
+    shallow: false,
+  });
+
+  if (step) {
+    return null;
+  }
 
   return (
     <div
@@ -84,15 +93,8 @@ export function OverviewModal() {
                 />
               ))}
             </div>
-            <Link href="?step=connect">
-              <Button
-                data-event="Connect Bank"
-                data-icon="🏦"
-                data-channel="bank"
-              >
-                Connect bank
-              </Button>
-            </Link>
+
+            <ConnectBankButton />
           </div>
         </div>
       </div>

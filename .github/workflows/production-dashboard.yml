@@ -18,13 +18,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: "1.0.29"
+          bun-version: "1.0.28"
       - name: Install dependencies
         run: bun install --frozen-lockfile
       # - name: 🔦 Run linter
       #   run: bun run lint --filter=@midday/dashboard
       # - name: 🪐 Check TypeScript
       #   run: bun run typecheck --filter=@midday/dashboard
+      - name: 🧪 Run unit tests
+        run: bun run test
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information

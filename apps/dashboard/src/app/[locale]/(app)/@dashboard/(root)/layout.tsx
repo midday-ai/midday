@@ -4,7 +4,7 @@ import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
 import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
-import { SelectAccountGoCardLessModal } from "@/components/modals/select-account-gocardless-modal";
+import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
 import { getCountryCode } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -31,9 +31,9 @@ export default async function Layout({
         {children}
       </div>
 
-      <ConnectTransactionsModal countryCode={countryCode} />
+      <ConnectTransactionsModal />
       <ConnectGoCardLessModal countryCode={countryCode} />
-      <SelectAccountGoCardLessModal countryCode={countryCode} />
+      <SelectBankAccountsModal countryCode={countryCode} />
       <ExportStatus />
       <CommandMenu />
       <HotKeys />
