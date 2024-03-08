@@ -117,7 +117,7 @@ export function ConnectTransactionsModal() {
 
   const { open: openPlaid, ready: plaidReady } = usePlaidLink({
     token,
-    publicKey: process.env.NEXT_PUBLIC_PLAID_PUBLIC_KEY!,
+    publicKey: "",
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
     clientName: "Midday",
     product: ["transactions"],
