@@ -22,14 +22,16 @@ client.defineJob({
       .eq("team_id", teamId)
       .eq("enabled", true);
 
+    if (!accountsData?.length) {
+      // NOTE: Remove all old schedulers
+      const event = await scheduler.unregister(ctx.source.id);
+      await io.logger.debug("Unregister", event);
+    }
+
     await io.logger.debug("Accounts", JSON.stringify(accountsData, null, 2));
 
     if (error) {
       await io.logger.error("Accounts Error", error);
-      // TODO: Remove
-      const event = await scheduler.unregister(ctx.source.id);
-
-      await io.logger.debug("Unregister", event);
     }
 
     const promises = accountsData?.map(async (account) => {
