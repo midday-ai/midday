@@ -31,24 +31,31 @@ client.defineJob({
         return;
       }
 
-      const transactions = await provider.getTransactions({
+      return provider.getTransactions({
         teamId: account.team_id,
         accountId: account.account_id,
         accessToken: account.bank_connection?.access_token,
         bankAccountId: account.id,
       });
-
-      await io.logger.debug("transactions", transactions);
-
-      // NOTE: We will get all the transactions at once for each account so
-      // we need to guard against massive payloads
-      // const { error, data: transactionsData } = await supabase
-      //   .from("decrypted_transactions")
-      //   .upsert(transactions, {
-      //     onConflict: "internal_id",
-      //     ignoreDuplicates: true,
-      //   })
-      //   .select("*, name:decrypted_name");
     });
+
+    try {
+      if (promises) {
+        const transactions = await Promise.all(promises);
+        await io.logger.debug("Transactions", transactions);
+      }
+    } catch (error) {
+      await io.logger.error(JSON.stringify(error, null, 2));
+    }
+
+    // NOTE: We will get all the transactions at once for each account so
+    // we need to guard against massive payloads
+    // const { error, data: transactionsData } = await supabase
+    //   .from("decrypted_transactions")
+    //   .upsert(transactions, {
+    //     onConflict: "internal_id",
+    //     ignoreDuplicates: true,
+    //   })
+    //   .select("*, name:decrypted_name");
   },
 });
