@@ -284,5 +284,5 @@ export const manualSyncTransactionsSchema = z.object({
 
 export const createEndUserAgreementSchema = z.object({
   institutionId: z.string(),
-  redirect: z.string(),
+  isDesktop: z.boolean().optional(),
 });

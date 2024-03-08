@@ -20,7 +20,6 @@ export function ReconnectButton({ id, institutionId }) {
       onClick={() =>
         createEndUserAgreement.execute({
           institutionId,
-          redirect,
         })
       }
     >

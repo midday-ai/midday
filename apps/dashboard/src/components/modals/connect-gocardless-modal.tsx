@@ -17,7 +17,6 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
@@ -92,13 +91,9 @@ function Row({ id, name, logo, onSelect }) {
 }
 
 export function ConnectGoCardLessModal({ countryCode }) {
-  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
-
-  const redirectBase = isDesktopApp() ? "midday://" : location.origin;
-  const redirect = `${redirectBase}/${pathname}?step=account&provider=gocardless`;
 
   const createEndUserAgreement = useAction(createEndUserAgreementAction);
 
@@ -179,7 +174,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
                       onSelect={() =>
                         createEndUserAgreement.execute({
                           institutionId: bank.id,
-                          redirect,
+                          isDesktop: isDesktopApp(),
                         })
                       }
                     />

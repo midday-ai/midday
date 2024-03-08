@@ -27,29 +27,26 @@ client.defineJob({
         provider: account.bank_connection.provider,
       });
 
-      //   const transactions = await provider.getTransactions({
-      //     teamId: account.team_id,
-      //     accountId: account.account_id,
-      //     accessToken: account.bank_connection?.access_token,
-      //   });
+      if (!account) {
+        return;
+      }
+
+      const transactions = await provider.getTransactions({
+        teamId: account.team_id,
+        accountId: account.account_id,
+        accessToken: account.bank_connection?.access_token,
+        bankAccountId: account.id,
+      });
 
       // NOTE: We will get all the transactions at once for each account so
       // we need to guard against massive payloads
-      // await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
-      //   // await supabase.from("transactions").upsert(batch, {
-      //   //   onConflict: "internal_id",
-      //   //   ignoreDuplicates: true,
-      //   // });
-      // });
+      const { error, data: transactionsData } = await supabase
+        .from("decrypted_transactions")
+        .upsert(transactions, {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        })
+        .select("*, name:decrypted_name");
     });
-
-    try {
-      if (promises) {
-        await Promise.all(promises);
-      }
-    } catch (error) {
-      await io.logger.error(error);
-      throw Error("Something went wrong");
-    }
   },
 });
