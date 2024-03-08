@@ -20,7 +20,7 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "transfer";
   }
 
-  return "uncategorized";
+  return null;
 };
 
 export const mapTransactionMethod = (type?: string) => {

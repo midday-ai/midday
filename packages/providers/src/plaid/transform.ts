@@ -106,7 +106,7 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "activity";
   }
 
-  return "uncategorized";
+  return null;
 };
 
 const transformToSignedAmount = (amount: number) => {
