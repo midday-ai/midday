@@ -27,7 +27,9 @@ client.defineJob({
     if (error) {
       await io.logger.error("Accounts Error", error);
       // TODO: Remove
-      await scheduler.unregister(ctx.source.id);
+      const event = await scheduler.unregister(ctx.source.id);
+
+      await io.logger.debug("Unregister", event);
     }
 
     const promises = accountsData?.map(async (account) => {
