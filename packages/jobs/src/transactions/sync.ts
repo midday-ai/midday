@@ -78,7 +78,13 @@ client.defineJob({
             name: Events.TRANSACTIONS_NOTIFICATION,
             payload: {
               teamId,
-              transactions: transactionsData,
+              transactions: transactionsData.map((transaction) => ({
+                id: transaction.id,
+                date: transaction.date,
+                amount: transaction.amount,
+                name: transaction.name,
+                currency: transaction.currency,
+              })),
             },
           });
 

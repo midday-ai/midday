@@ -66,16 +66,16 @@ client.defineJob({
       }));
     });
 
-    if (notificationPromises) {
-      const notificationEvents = await Promise.all(notificationPromises);
+    const notificationEvents = await Promise.all(notificationPromises);
 
-      if (notificationEvents?.length) {
-        triggerBulk(notificationEvents.flat());
-        await io.logger.log(
-          `Sending notifications: ${notificationEvents.length}`
-        );
-      }
+    if (notificationEvents?.length) {
+      triggerBulk(notificationEvents.flat());
+      await io.logger.log(
+        `Sending notifications: ${notificationEvents.length}`
+      );
     }
+
+    await io.logger.debug("notificationEvents", notificationEvents);
 
     const emailPromises = usersData?.map(async ({ user, team_id }) => {
       const { t } = getI18n({ locale: user.locale });
@@ -104,15 +104,15 @@ client.defineJob({
       };
     });
 
-    if (emailPromises) {
-      const emailEvents = await Promise.all(emailPromises);
+    const emailEvents = await Promise.all(emailPromises);
 
-      if (emailEvents?.length) {
-        try {
-          triggerBulk(emailEvents.flat());
-        } catch (error) {
-          await io.logger.debug(error);
-        }
+    await io.logger.debug("emailEvents", emailEvents);
+
+    if (emailEvents?.length) {
+      try {
+        triggerBulk(emailEvents.flat());
+      } catch (error) {
+        await io.logger.debug(error);
       }
     }
   },
