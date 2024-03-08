@@ -38,6 +38,8 @@ client.defineJob({
         bankAccountId: account.id,
       });
 
+      await io.logger.debug("transactions", transactions);
+
       // NOTE: We will get all the transactions at once for each account so
       // we need to guard against massive payloads
       // const { error, data: transactionsData } = await supabase

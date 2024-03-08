@@ -75,11 +75,10 @@ export function ConnectTransactionsModal() {
     }
   }, [isOpen]);
 
-  console.log(process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT);
-
   const { open: openTeller, ready: tellerReady } = useTellerConnect({
     applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
-    environment: "production",
+    environment: process.env
+      .NEXT_PUBLIC_TELLER_ENVIRONMENT as TellerConnectOptions["environment"],
     appearance: "system",
     onSuccess: (authorization) => {
       setParams({
