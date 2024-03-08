@@ -18,16 +18,10 @@ client.defineJob({
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token, enrollment_id)"
+        "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token)"
       )
       .eq("team_id", teamId)
       .eq("enabled", true);
-
-    if (!accountsData?.length) {
-      // NOTE: Remove all old schedulers
-      const event = await scheduler.unregister(ctx.source.id);
-      await io.logger.debug("Unregister", event);
-    }
 
     if (accountsError) {
       await io.logger.error("Accounts Error", accountsError);

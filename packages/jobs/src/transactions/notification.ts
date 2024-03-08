@@ -69,12 +69,12 @@ client.defineJob({
     if (notificationPromises) {
       const notificationEvents = await Promise.all(notificationPromises);
 
-      // if (notificationEvents?.length) {
-      //   triggerBulk(notificationEvents.flat());
-      //   await io.logger.log(
-      //     `Sending notifications: ${notificationEvents.length}`
-      //   );
-      // }
+      if (notificationEvents?.length) {
+        triggerBulk(notificationEvents.flat());
+        await io.logger.log(
+          `Sending notifications: ${notificationEvents.length}`
+        );
+      }
     }
 
     const emailPromises = usersData?.map(async ({ user, team_id }) => {
@@ -107,13 +107,13 @@ client.defineJob({
     if (emailPromises) {
       const emailEvents = await Promise.all(emailPromises);
 
-      // if (emailEvents?.length) {
-      //   try {
-      //     triggerBulk(emailEvents.flat());
-      //   } catch (error) {
-      //     await io.logger.debug(error);
-      //   }
-      // }
+      if (emailEvents?.length) {
+        try {
+          triggerBulk(emailEvents.flat());
+        } catch (error) {
+          await io.logger.debug(error);
+        }
+      }
     }
   },
 });
