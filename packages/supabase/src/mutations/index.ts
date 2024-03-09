@@ -45,16 +45,21 @@ export async function createBankAccounts(
 
   const bankConnection = await supabase
     .from("bank_connections")
-    .insert({
-      institution_id: account.institution_id,
-      name: account.bank_name,
-      logo_url: account.logo_url,
-      team_id: teamId,
-      provider,
-      access_token: accessToken,
-      enrollment_id: enrollmentId,
-      expires_at: expiresAt,
-    })
+    .upsert(
+      {
+        institution_id: account.institution_id,
+        name: account.bank_name,
+        logo_url: account.logo_url,
+        team_id: teamId,
+        provider,
+        access_token: accessToken,
+        enrollment_id: enrollmentId,
+        expires_at: expiresAt,
+      },
+      {
+        onConflict: "institution_id, team_id",
+      }
+    )
     .select()
     .single();
 
