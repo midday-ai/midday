@@ -79,16 +79,6 @@ export async function createBankAccounts(
     .select();
 }
 
-type CreateBankConnectionPayload = {
-  institution_id: string;
-  team_id: string;
-  name: string;
-  logo_url: string;
-  provider: "gocardless" | "plaid" | "teller";
-  access_token?: string;
-  enrollment_id?: string;
-};
-
 type UpdateBankConnectionData = {
   id: string;
   teamId: string;
