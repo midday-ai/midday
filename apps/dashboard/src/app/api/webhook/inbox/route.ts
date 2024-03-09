@@ -56,6 +56,28 @@ export async function POST(req: Request) {
     const subject = res.Subject.length > 0 ? res.Subject.length : "No subject";
     const contentType = "application/pdf";
 
+    if (teamData?.inbox_email) {
+      try {
+        // NOTE: Send original email to company email
+        await resend.emails.send({
+          from: `${res.FromFull.Name} <inbox@midday.ai>`,
+          to: [teamData.inbox_email],
+          subject,
+          text: res.TextBody,
+          html: res.HtmlBody,
+          attachments: attachments?.map((a) => ({
+            filename: a.Name,
+            content: a.Content,
+          })),
+          headers: {
+            "X-Entity-Ref-ID": nanoid(),
+          },
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
     const records = attachments?.map(async (attachment) => {
       const fileName = attachment.Name ?? `${nanoid()}.pdf`;
 
@@ -155,28 +177,6 @@ export async function POST(req: Request) {
             forwarded_to: teamData.inbox_email,
           }))
         );
-      } catch (error) {
-        console.log(error);
-      }
-    }
-
-    if (teamData?.inbox_email) {
-      try {
-        // NOTE: Send original email to company email
-        await resend.emails.send({
-          from: `${res.FromFull.Name} <inbox@midday.ai>`,
-          to: [teamData.inbox_email],
-          subject,
-          text: res.TextBody,
-          html: res.HtmlBody,
-          attachments: attachments?.map((a) => ({
-            filename: a.Name,
-            content: a.Content,
-          })),
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-        });
       } catch (error) {
         console.log(error);
       }

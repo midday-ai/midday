@@ -12,7 +12,6 @@ export async function GET(req) {
   return fetch(
     `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${filePath}`,
     {
-      cache: "no-cache",
       headers: {
         authorization: `Bearer ${session.access_token}`,
       },

@@ -1,10 +1,12 @@
 import { Novu } from "@novu/node";
 
 const novu = new Novu(process.env.NOVU_API_KEY!);
+
 const API_ENDPOINT = "https://api.novu.co/v1";
 
 export enum TriggerEvents {
   TransactionNewInApp = "transaction_new_in_app",
+  TransactionsNewInApp = "transactions_new_in_app",
   TransactionNewEmail = "transaction_new_email",
   InboxNewInApp = "inbox_new_in_app",
   MatchNewInApp = "match_in_app",
@@ -12,6 +14,7 @@ export enum TriggerEvents {
 
 export enum NotificationTypes {
   Transaction = "transaction",
+  Transactions = "transactions",
   Inbox = "inbox",
   Match = "match",
 }
@@ -79,7 +82,6 @@ export async function getSubscriberPreferences({
     `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences`,
     {
       method: "GET",
-      cache: "no-cache",
       headers: {
         Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
       },
@@ -108,7 +110,6 @@ export async function updateSubscriberPreference({
     `${API_ENDPOINT}/subscribers/${teamId}_${subscriberId}/preferences/${templateId}`,
     {
       method: "PATCH",
-      cache: "no-cache",
       headers: {
         Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
         "Content-Type": "application/json",

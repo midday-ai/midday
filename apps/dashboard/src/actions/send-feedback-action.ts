@@ -19,7 +19,6 @@ export const sendFeebackAction = action(
 
     const res = await fetch(`${baseUrl}/email`, {
       method: "POST",
-      cache: "no-cache",
       headers: {
         Authorization: `Bearer ${env.RESEND_API_KEY}`,
         "Content-Type": "application/json",

@@ -27,15 +27,57 @@ function NotificationItem({
   description,
   createdAt,
   recordId,
+  from,
+  to,
   markMessageAsRead,
   type,
 }) {
   switch (type) {
+    case "transactions":
+      return (
+        <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
+          <Link
+            className="flex items-between justify-between space-x-4 "
+            onClick={() => setOpen(false)}
+            href={`/transactions?filter=${JSON.stringify({
+              date: {
+                from,
+                to,
+              },
+            })}`}
+          >
+            <div>
+              <div className="h-9 w-9 flex items-center justify-center space-y-0 border rounded-full">
+                <Icons.Transactions />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm">{description}</p>
+              <span className="text-xs text-[#606060]">
+                {formatDistanceToNow(new Date(createdAt))} ago
+              </span>
+            </div>
+          </Link>
+          {markMessageAsRead && (
+            <div>
+              <Button
+                size="icon"
+                variant="secondary"
+                className="rounded-full bg-transparent hover:bg-[#1A1A1A]"
+                onClick={() => markMessageAsRead(id)}
+              >
+                <Icons.Inventory2 />
+              </Button>
+            </div>
+          )}
+        </div>
+      );
+
     case "transaction":
       return (
         <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
           <Link
-            className="flex flex items-between justify-between space-x-4 "
+            className="flex items-between justify-between space-x-4 "
             onClick={() => setOpen(false)}
             href={`/transactions?id=${recordId}`}
           >
@@ -70,7 +112,7 @@ function NotificationItem({
       return (
         <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
           <Link
-            className="flex flex items-between justify-between space-x-4 "
+            className="flex items-between justify-between space-x-4 "
             onClick={() => setOpen(false)}
             href={`/inbox?id=${recordId}`}
           >
@@ -105,7 +147,7 @@ function NotificationItem({
       return (
         <div className="flex items-between justify-between space-x-4 px-3 py-3 hover:bg-secondary">
           <Link
-            className="flex flex items-between justify-between space-x-4 "
+            className="flex items-between justify-between space-x-4 "
             onClick={() => setOpen(false)}
             href={`/transactions?id=${recordId}`}
           >
@@ -226,6 +268,8 @@ export function NotificationCenter() {
                         createdAt={notification.createdAt}
                         recordId={notification.payload.recordId}
                         type={notification.payload.type}
+                        from={notification.payload?.from}
+                        to={notification.payload?.to}
                       />
                     );
                   })}

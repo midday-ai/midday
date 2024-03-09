@@ -34,33 +34,54 @@ client.defineJob({
   run: async (payload, io) => {
     const { transactions, teamId } = payload;
 
-    const { data: usersData, error: usersError } = await io.supabase.client
+    const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
         "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
       )
       .eq("team_id", teamId);
 
-    if (usersError) {
-      await io.logger.error("Users Error", usersError);
-    }
-
-    await io.logger.debug("users", usersData);
-
-    const notificationPromises = usersData?.map(async ({ user, team_id }) => {
+    const notificationEvents = usersData?.map(({ user, team_id }) => {
       const { t } = getI18n({ locale: user.locale });
 
-      return transactions?.map((transaction) => ({
-        name: TriggerEvents.TransactionNewInApp,
+      // If single transaction
+      if (transactions.length === 0) {
+        const transaction = transactions?.at(0);
+
+        if (transaction) {
+          return {
+            name: TriggerEvents.TransactionNewInApp,
+            payload: {
+              recordId: transaction.id,
+              type: NotificationTypes.Transaction,
+              description: t("notifications.transaction", {
+                amount: Intl.NumberFormat(user.locale, {
+                  style: "currency",
+                  currency: transaction.currency,
+                }).format(transaction.amount),
+                from: transaction.name,
+              }),
+            },
+            user: {
+              subscriberId: user.id,
+              teamId: team_id,
+              email: user.email,
+              fullName: user.full_name,
+              avatarUrl: user.avatar_url,
+            },
+          };
+        }
+      }
+
+      // If multiple transactions
+      return {
+        name: TriggerEvents.TransactionsNewInApp,
         payload: {
-          recordId: transaction.id,
-          type: NotificationTypes.Transaction,
-          description: t("notifications.transaction", {
-            amount: Intl.NumberFormat(user.locale, {
-              style: "currency",
-              currency: transaction.currency,
-            }).format(transaction.amount),
-            from: transaction.name,
+          type: NotificationTypes.Transactions,
+          from: transactions.at(0)?.date,
+          to: transactions[transactions.length - 1]?.date,
+          description: t("notifications.transactions", {
+            numberOfTransactions: transactions.length,
           }),
         },
         user: {
@@ -70,19 +91,16 @@ client.defineJob({
           fullName: user.full_name,
           avatarUrl: user.avatar_url,
         },
-      }));
+      };
     });
 
-    const notificationEvents = await Promise.all(notificationPromises);
-
     if (notificationEvents?.length) {
-      triggerBulk(notificationEvents.flat());
-      await io.logger.log(
-        `Sending notifications: ${notificationEvents.length}`
-      );
+      try {
+        await triggerBulk(notificationEvents.flat());
+      } catch (error) {
+        await io.logger.error("notification events", error);
+      }
     }
-
-    await io.logger.debug("notificationEvents", notificationEvents);
 
     const emailPromises = usersData?.map(async ({ user, team_id }) => {
       const { t } = getI18n({ locale: user.locale });
@@ -113,13 +131,11 @@ client.defineJob({
 
     const emailEvents = await Promise.all(emailPromises);
 
-    await io.logger.debug("emailEvents", emailEvents);
-
     if (emailEvents?.length) {
       try {
-        triggerBulk(emailEvents.flat());
+        await triggerBulk(emailEvents.flat());
       } catch (error) {
-        await io.logger.debug(error);
+        await io.logger.error("email events", error);
       }
     }
   },
