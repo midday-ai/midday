@@ -114,7 +114,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
       }
     }
 
-    if (isOpen) {
+    if (isOpen && !results?.length) {
       fetchData();
     }
   }, [isOpen]);

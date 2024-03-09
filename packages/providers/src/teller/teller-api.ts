@@ -1,7 +1,7 @@
 import * as https from "https";
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
-import {
+import type {
   AuthenticatedRequest,
   GetAccountsResponse,
   GetTransactionsRequest,

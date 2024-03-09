@@ -1,14 +1,14 @@
 import {
   Configuration,
   CountryCode,
-  ItemPublicTokenExchangeResponse,
-  LinkTokenCreateResponse,
+  type ItemPublicTokenExchangeResponse,
+  type LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
   PlaidEnvironments,
   Products,
-  Transaction,
+  type Transaction,
 } from "plaid";
-import {
+import type {
   GetAccountsRequest,
   GetAccountsResponse,
   GetTransactionsRequest,

@@ -10,6 +10,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@upstash/redis": "^1.28.4"
+    "@upstash/redis": "^1.28.4",
+    "server-only": "^0.0.1"
   }
 }

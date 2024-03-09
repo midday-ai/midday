@@ -18,6 +18,11 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // logging: {
+  //   fetches: {
+  //     fullUrl: true,
+  //   },
+  // },
   webpack: (config) => {
     /**
      * Critical: prevents " ⨯ ./node_modules/canvas/build/Release/canvas.node

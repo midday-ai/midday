@@ -2,7 +2,7 @@ import { client } from "@midday/kv";
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import { formatISO, subMonths } from "date-fns";
-import {
+import type {
   DeleteRequistionResponse,
   GetAccessTokenResponse,
   GetAccountDetailsResponse,
@@ -36,8 +36,11 @@ export class GoCardLessApi {
   #oneHour = 3600;
 
   async #getRefreshToken(refresh: string): Promise<string> {
+    const token = await this.#getAccessToken();
+
     const response = await this.#post<GetRefreshTokenResponse>(
       "/api/v2/token/refresh/",
+      token,
       {
         refresh,
       }
@@ -67,6 +70,7 @@ export class GoCardLessApi {
 
     const response = await this.#post<GetAccessTokenResponse>(
       "/api/v2/token/new/",
+      undefined,
       {
         secret_id: process.env.GOCARDLESS_SECRET_ID,
         secret_key: process.env.GOCARDLESS_SECRET_KEY,
@@ -96,8 +100,11 @@ export class GoCardLessApi {
       return banks;
     }
 
+    const token = await this.#getAccessToken();
+
     const response = await this.#get<GetBanksResponse>(
       "/api/v2/institutions/",
+      token,
       null,
       {
         params: {
@@ -119,18 +126,27 @@ export class GoCardLessApi {
     agreement,
     redirect,
   }: PostRequisitionsRequest): Promise<PostRequisitionsResponse> {
-    return this.#post<PostRequisitionsResponse>("/api/v2/requisitions/", {
-      redirect,
-      institution_id: institutionId,
-      agreement,
-    });
+    const token = await this.#getAccessToken();
+
+    return this.#post<PostRequisitionsResponse>(
+      "/api/v2/requisitions/",
+      token,
+      {
+        redirect,
+        institution_id: institutionId,
+        agreement,
+      }
+    );
   }
 
   async createEndUserAgreement(
     institutionId: string
   ): Promise<PostCreateAgreementResponse> {
+    const token = await this.#getAccessToken();
+
     return this.#post<PostCreateAgreementResponse>(
       "/api/v2/agreements/enduser/",
+      token,
       {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
@@ -141,9 +157,14 @@ export class GoCardLessApi {
   }
 
   async getAccountDetails(id: string): Promise<GetAccountDetailsResponse> {
+    const token = await this.#getAccessToken();
+
     const [account, details] = await Promise.all([
-      this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`),
-      this.#get<GetAccountDetailsResponse>(`/api/v2/accounts/${id}/details/`),
+      this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`, token),
+      this.#get<GetAccountDetailsResponse>(
+        `/api/v2/accounts/${id}/details/`,
+        token
+      ),
     ]);
 
     return {
@@ -179,8 +200,11 @@ export class GoCardLessApi {
   }: GetTransactionsRequest): Promise<
     GetTransactionsResponse["transactions"]["booked"]
   > {
+    const token = await this.#getAccessToken();
+
     const response = await this.#get<GetTransactionsResponse>(
       `/api/v2/accounts/${accountId}/transactions/`,
+      token,
       latest && {
         date_from: formatISO(subMonths(new Date(), 1), {
           representation: "date",
@@ -192,16 +216,26 @@ export class GoCardLessApi {
   }
 
   async getRequisitions(): Promise<GetRequisitionsResponse> {
-    return this.#get<GetRequisitionsResponse>("/api/v2/requisitions/");
+    const token = await this.#getAccessToken();
+
+    return this.#get<GetRequisitionsResponse>("/api/v2/requisitions/", token);
   }
 
   async getRequestion(id: string): Promise<GetRequisitionResponse> {
-    return this.#get<GetRequisitionResponse>(`/api/v2/requisitions/${id}/`);
+    const token = await this.#getAccessToken();
+
+    return this.#get<GetRequisitionResponse>(
+      `/api/v2/requisitions/${id}/`,
+      token
+    );
   }
 
   async deleteRequisition(id: string): Promise<DeleteRequistionResponse> {
+    const token = await this.#getAccessToken();
+
     return this.#_delete<DeleteRequistionResponse>(
-      `/api/v2/requisitions/${id}/`
+      `/api/v2/requisitions/${id}/`,
+      token
     );
   }
 
@@ -222,10 +256,10 @@ export class GoCardLessApi {
 
   async #get<TResponse>(
     path: string,
+    token?: string,
     params?: unknown,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
-    const token = await this.#getAccessToken();
     const api = await this.#getApi(token);
 
     return api
@@ -235,20 +269,20 @@ export class GoCardLessApi {
 
   async #post<TResponse>(
     path: string,
+    token?: string,
     body?: unknown,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
-    const token = await this.#getAccessToken();
     const api = await this.#getApi(token);
     return api.post<TResponse>(path, body, config).then(({ data }) => data);
   }
 
   async #_delete<TResponse>(
     path: string,
+    token: string,
     params?: unknown,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
-    const token = await this.#getAccessToken();
     const api = await this.#getApi(token);
 
     return api
