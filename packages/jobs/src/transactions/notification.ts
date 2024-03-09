@@ -45,7 +45,7 @@ client.defineJob({
       const { t } = getI18n({ locale: user.locale });
 
       // If single transaction
-      if (transactions.length === 0) {
+      if (transactions.length === 1) {
         const transaction = transactions?.at(0);
 
         if (transaction) {
