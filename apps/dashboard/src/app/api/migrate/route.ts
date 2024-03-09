@@ -9,7 +9,7 @@ export async function GET(req) {
     const event = await scheduler.register(teamId, {
       type: "interval",
       options: {
-        seconds: 3600, // every 1h
+        seconds: 3600 * 6, // every 6h
       },
     });
 
