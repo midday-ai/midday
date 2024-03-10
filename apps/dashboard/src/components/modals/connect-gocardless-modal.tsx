@@ -2,7 +2,6 @@
 
 import { createEndUserAgreementAction } from "@/actions/banks/create-end-user-agreement-action";
 import { getBanks } from "@/actions/banks/get-banks";
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -17,6 +16,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import Image from "next/image";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
 
@@ -70,9 +70,14 @@ function Row({ id, name, logo, onSelect }) {
   return (
     <div className="flex justify-between">
       <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarImage src={logo} alt={name} />
-        </Avatar>
+        <Image
+          src={logo}
+          alt={name}
+          className="border rounded-full aspect-square"
+          width={36}
+          height={36}
+        />
+
         <div className="ml-4 space-y-1">
           <p className="text-sm font-medium leading-none">{name}</p>
         </div>
