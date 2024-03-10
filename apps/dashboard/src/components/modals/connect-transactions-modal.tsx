@@ -11,8 +11,10 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
+import CsvLogoDark from "public/assets/csv-dark.png";
 import CsvLogo from "public/assets/csv.png";
 import GoCardLessLogo from "public/assets/gocardless.png";
 import PlaidLogo from "public/assets/plaid.png";
@@ -37,6 +39,7 @@ const imports = [
     description:
       "Import transactions using a CSV file, you can also use this for backfilling.",
     logo: CsvLogo,
+    logoDark: CsvLogoDark,
     disabled: true,
   },
 ];
@@ -316,13 +319,27 @@ export function ConnectTransactionsModal({ isEU }) {
                   >
                     <div className="flex space-x-2 items-center ml-4">
                       <Image
-                        className="mt-4 self-start"
+                        className={cn(
+                          "mt-4 self-start",
+                          provider.logoDark && "hidden dark:block"
+                        )}
                         src={provider.logo}
                         width={40}
                         height={40}
                         alt={provider.name}
                         quality={100}
                       />
+
+                      {provider.logoDark && (
+                        <Image
+                          className="mt-4 self-start dark:hidden"
+                          src={provider.logoDark}
+                          width={40}
+                          height={40}
+                          alt={provider.name}
+                          quality={100}
+                        />
+                      )}
 
                       <CardHeader className="p-4 pl-2">
                         <div className="flex space-x-2">
