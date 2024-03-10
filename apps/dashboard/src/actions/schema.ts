@@ -133,6 +133,11 @@ export const updateTransactionSchema = z.object({
   note: z.string().optional(),
   category: z.string().optional(),
   assigned_id: z.string().optional(),
+  status: z.enum(["deleted", "excluded", "posted"]).optional(),
+});
+
+export const deleteTransactionSchema = z.object({
+  id: z.string(),
 });
 
 export const bulkUpdateTransactionsSchema = z.array(updateTransactionSchema);

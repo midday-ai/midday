@@ -1,12 +1,15 @@
 "use client";
 
+import { deleteTransactionAction } from "@/actions/delete-transaction-action";
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
+import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { useToast } from "@midday/ui/use-toast";
 import {
   ColumnDef,
   VisibilityState,
@@ -14,6 +17,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
+import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";
@@ -22,10 +26,6 @@ import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
 import { DataTableHeader } from "./data-table-header";
 import { ExportBar } from "./export-bar";
-
-type Item = {
-  id: string;
-};
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -46,6 +46,7 @@ export function DataTable<TData, TValue>({
   page,
 }: DataTableProps<TData, TValue>) {
   const supabase = createClient();
+  const { toast } = useToast();
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState(initialData);
@@ -57,6 +58,58 @@ export function DataTable<TData, TValue>({
     initialColumnVisibility ?? {}
   );
 
+  const updateTransaction = useAction(updateTransactionAction, {
+    onSuccess: ({ status }) => {
+      if (status === "excluded") {
+        toast({
+          duration: 3500,
+          title: "Transaction excluded",
+          description:
+            "You can view excluded transactions by adding the filter excluded.",
+        });
+      }
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const deleteTransaction = useAction(deleteTransactionAction, {
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const setOpen = (id: string | boolean) => {
+    if (id) {
+      setTransactionId(id);
+    } else {
+      setTransactionId(null);
+    }
+  };
+
+  const handleCopyUrl = async (id: string) => {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/transactions?id=${id}`
+      );
+
+      toast({
+        duration: 4000,
+        title: "Copied URL to clipboard.",
+        variant: "success",
+      });
+    } catch {}
+  };
+
   const table = useReactTable({
     getRowId: (row) => row.id,
     data,
@@ -64,6 +117,12 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
+    meta: {
+      setOpen,
+      copyUrl: handleCopyUrl,
+      updateTransaction,
+      deleteTransaction,
+    },
     state: {
       rowSelection,
       columnVisibility,
@@ -96,14 +155,6 @@ export function DataTable<TData, TValue>({
   const selectedTransaction = data.find(
     (transaction) => transaction?.id === transactionId
   );
-
-  const setOpen = (id: string | boolean) => {
-    if (id) {
-      setTransactionId(id);
-    } else {
-      setTransactionId(null);
-    }
-  };
 
   useEffect(() => {
     setColumns(table.getAllLeafColumns());
@@ -204,7 +255,10 @@ export function DataTable<TData, TValue>({
                   <TableCell
                     key={cell.id}
                     onClick={() => {
-                      if (cell.column.id !== "select") {
+                      if (
+                        cell.column.id !== "select" &&
+                        cell.column.id !== "actions"
+                      ) {
                         setOpen(row.id);
                       }
                     }}

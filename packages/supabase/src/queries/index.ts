@@ -165,6 +165,7 @@ export async function getSpendingQuery(
     .order("name", { ascending: false })
     .eq("team_id", params.teamId)
     .lt("amount", 0)
+    .or("status.eq.pending,status.eq.posted")
     .throwOnError();
 
   if (params.from && params.to) {
@@ -222,7 +223,7 @@ type GetTransactionsParams = {
     fuzzy?: boolean;
   };
   filter: {
-    status?: "fullfilled" | "unfullfilled";
+    status?: "fullfilled" | "unfullfilled" | "excluded";
     attachments?: "include" | "exclude";
     categories?: string[];
     type?: "income" | "expense";
@@ -313,6 +314,12 @@ export async function getTransactionsQuery(
       attachments:transaction_attachments!inner(id,size,name),
       bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `);
+  }
+
+  if (status?.includes("excluded")) {
+    query.eq("status", "excluded");
+  } else {
+    query.or("status.eq.pending,status.eq.posted");
   }
 
   if (categories) {
@@ -450,6 +457,7 @@ export async function getMetricsQuery(
     `
     )
     .eq("team_id", teamId)
+    .or("status.eq.pending,status.eq.posted")
     .order("date", { ascending: false })
     .order("name", { ascending: false })
     .limit(1000000)

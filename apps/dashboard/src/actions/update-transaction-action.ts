@@ -29,5 +29,7 @@ export const updateTransactionAction = action(
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
     revalidateTag(`metrics_${teamId}`);
+
+    return data;
   }
 );

@@ -134,7 +134,7 @@ export async function updateTransaction(
     .from("decrypted_transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, team_id, name:decrypted_name")
+    .select("id, category, team_id, name:decrypted_name, status")
     .single();
 }
 

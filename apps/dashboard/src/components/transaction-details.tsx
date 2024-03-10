@@ -86,7 +86,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
           `categories.${category}`
         )} too?`,
         footer: (
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 mt-4">
             <ToastAction altText="Cancel" className="pl-5 pr-5">
               Cancel
             </ToastAction>

@@ -89,6 +89,11 @@ export const sections = [
         label: "Unfulfilled",
         description: "Transactions with the status Unfulfilled",
       },
+      {
+        id: "excluded",
+        label: "Excluded",
+        description: "Transactions with the status Excluded",
+      },
     ],
   },
   {

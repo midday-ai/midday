@@ -7,7 +7,7 @@ import { useState } from "react";
 
 export function Note({ id, defaultValue }) {
   const [value, setValue] = useState(defaultValue);
-  const action = useAction(updateTransactionAction);
+  const updateTransaction = useAction(updateTransactionAction);
 
   return (
     <Textarea
@@ -18,7 +18,7 @@ export function Note({ id, defaultValue }) {
       placeholder="Note"
       className="min-h-[100px] resize-none"
       onBlur={() =>
-        action.execute({
+        updateTransaction.execute({
           id,
           note: value,
         })

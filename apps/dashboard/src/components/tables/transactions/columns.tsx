@@ -5,7 +5,26 @@ import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
+import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -16,12 +35,13 @@ import {
 import { cn } from "@midday/ui/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { format, isSameYear } from "date-fns";
+import { Loader2 } from "lucide-react";
 
 export type Payment = {
   id: string;
   amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
+  status: "posted" | "excluded" | "included" | "pending";
+  manual?: boolean;
 };
 
 export const columns: ColumnDef<Payment>[] = [
@@ -157,6 +177,98 @@ export const columns: ColumnDef<Payment>[] = [
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      );
+    },
+  },
+  {
+    id: "actions",
+    enableSorting: false,
+    enableHiding: false,
+    cell: ({ row, table }) => {
+      return (
+        <AlertDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <Icons.MoreHoriz />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => table.options.meta?.setOpen(row.original.id)}
+              >
+                View details
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => table.options.meta?.copyUrl(row.original.id)}
+              >
+                Share URL
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              {!row.original?.manual && row.original.status === "excluded" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    table.options.meta?.updateTransaction.execute({
+                      id: row.original.id,
+                      status: "posted",
+                    });
+                  }}
+                >
+                  Include
+                </DropdownMenuItem>
+              )}
+
+              {!row.original?.manual && row.original.status !== "excluded" && (
+                <DropdownMenuItem
+                  onClick={() => {
+                    table.options.meta?.updateTransaction.execute({
+                      id: row.original.id,
+                      status: "excluded",
+                    });
+                  }}
+                >
+                  Exclude
+                </DropdownMenuItem>
+              )}
+
+              {row.original?.manual && (
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem className="text-destructive">
+                    Delete
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your
+                transaction.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  table.options.meta?.deleteTransaction.execute({
+                    id: row.original.id,
+                  });
+                }}
+              >
+                {table.options.meta?.deleteTransaction?.status ===
+                "executing" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Confirm"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       );
     },
   },

@@ -99,7 +99,7 @@ export function DataTableHeader({ table }) {
         )}
 
         {isVisible("category") && (
-          <TableHead className="w-[200px]">
+          <TableHead className="w-[240px]">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"
