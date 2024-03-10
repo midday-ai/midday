@@ -41,7 +41,7 @@ const imports = [
   },
 ];
 
-export function ConnectTransactionsModal() {
+export function ConnectTransactionsModal({ isEU }) {
   const { track } = useLogSnag();
   const [token, setToken] = useState();
 
@@ -162,25 +162,6 @@ export function ConnectTransactionsModal() {
 
   const banks = [
     {
-      id: "gocardless",
-      name: "GoCardless (EU, UK)",
-      description:
-        "More than 2,500 connected banks in 31 countries across the UK and Europe.",
-      logo: GoCardLessLogo,
-      onClick: () => {
-        track({
-          event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
-          channel: LogEvents.ConnectBankProvider.channel,
-          tags: {
-            provider: "gocardless",
-          },
-        });
-
-        setParams({ step: "gocardless" });
-      },
-    },
-    {
       id: "teller",
       name: "Teller (US)",
       description:
@@ -221,7 +202,36 @@ export function ConnectTransactionsModal() {
       },
       disabled: !plaidReady || !token,
     },
-  ];
+    {
+      id: "gocardless",
+      name: "GoCardless (EU, UK)",
+      description:
+        "More than 2,500 connected banks in 31 countries across the UK and Europe.",
+      logo: GoCardLessLogo,
+      onClick: () => {
+        track({
+          event: LogEvents.ConnectBankProvider.name,
+          icon: LogEvents.ConnectBankProvider.icon,
+          channel: LogEvents.ConnectBankProvider.channel,
+          tags: {
+            provider: "gocardless",
+          },
+        });
+
+        setParams({ step: "gocardless" });
+      },
+    },
+  ].sort((a, b) => {
+    if (isEU && a.id === "gocardless") {
+      return -1;
+    }
+
+    if (isEU && a.id === "plaid") {
+      return -1;
+    }
+
+    return 0;
+  });
 
   return (
     <Dialog

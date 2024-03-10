@@ -6,7 +6,7 @@ import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-m
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
-import { getCountryCode } from "@midday/location";
+import { getCountryCode, isEUCountry } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";
 import { redirect } from "next/navigation";
 
@@ -17,6 +17,7 @@ export default async function Layout({
 }) {
   const user = await getUser();
   const countryCode = getCountryCode();
+  const isEU = isEUCountry(countryCode);
 
   if (!user?.data?.team) {
     redirect("/teams");
@@ -31,7 +32,7 @@ export default async function Layout({
         {children}
       </div>
 
-      <ConnectTransactionsModal />
+      <ConnectTransactionsModal isEU={isEU} />
       <ConnectGoCardLessModal countryCode={countryCode} />
       <SelectBankAccountsModal countryCode={countryCode} />
       <ExportStatus />

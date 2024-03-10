@@ -24,3 +24,11 @@ export function getCountryInfo() {
     languages,
   };
 }
+
+export function isEUCountry(countryCode: string) {
+  if (countries.find((country) => country.cca2 === countryCode)) {
+    return true;
+  }
+
+  return false;
+}
