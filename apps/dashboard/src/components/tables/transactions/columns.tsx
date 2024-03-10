@@ -254,12 +254,12 @@ export const columns: ColumnDef<Payment>[] = [
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
-                  table.options.meta?.deleteTransaction.execute({
-                    id: row.original.id,
+                  table.options.meta?.deleteTransactions.execute({
+                    ids: [row.original.id],
                   });
                 }}
               >
-                {table.options.meta?.deleteTransaction?.status ===
+                {table.options.meta?.deleteTransactions?.status ===
                 "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (

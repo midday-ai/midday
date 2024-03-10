@@ -6,9 +6,9 @@ import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
 import { deleteTransactionSchema } from "./schema";
 
-export const deleteTransactionAction = action(
+export const deleteTransactionsAction = action(
   deleteTransactionSchema,
-  async ({ id }) => {
+  async ({ ids }) => {
     const supabase = createClient();
     const user = await getUser();
     const teamId = user.data.team_id;
@@ -16,7 +16,7 @@ export const deleteTransactionAction = action(
     await supabase
       .from("transactions")
       .delete()
-      .eq("id", id)
+      .in("id", ids)
       .is("manual", true);
 
     revalidateTag(`transactions_${teamId}`);

@@ -13,20 +13,21 @@ export const bulkUpdateTransactionsAction = action(
     const user = await getUser();
     const teamId = user.data.team_id;
 
-    const updatePromises = payload.map(async (transaction) => {
+    const updatePromises = payload.data.map(async ({ id, ...params }) => {
       return supabase
         .from("transactions")
-        .update({
-          category: transaction.category,
-        })
-        .eq("id", transaction.id)
-        .eq("team_id", teamId);
+        .update(params)
+        .eq("id", id)
+        .eq("team_id", teamId)
+        .select();
     });
 
-    await Promise.all(updatePromises);
+    const data = await Promise.all(updatePromises);
 
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
     revalidateTag(`metrics_${teamId}`);
+
+    return data;
   }
 );

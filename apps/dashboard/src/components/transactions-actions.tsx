@@ -1,37 +1,94 @@
 "use client";
 
-import { bulkUpdateTransactionsAction } from "@/actions/bulk-update-transactions-action";
+import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
 import { ColumnVisibility } from "@/components/column-visibility";
 import { Filter } from "@/components/filter";
-import { SelectCategory } from "@/components/select-category";
 import { sections } from "@/components/tables/transactions/filters";
 import { useTransactionsStore } from "@/store/transactions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import { useToast } from "@midday/ui/use-toast";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { BulkActions } from "./bulk-actions";
 
 export function TransactionsActions() {
-  const { transactionIds } = useTransactionsStore();
-  const bulkUpdateTransactions = useAction(bulkUpdateTransactionsAction);
+  const { toast } = useToast();
+  const { transactionIds, canDelete } = useTransactionsStore();
+
+  const deleteTransactions = useAction(deleteTransactionsAction, {
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
 
   if (transactionIds?.length) {
     return (
-      <div className="ml-auto">
-        <div className="flex items-center">
-          <span className="text-sm text-[#606060] w-full">Bulk edit</span>
-          <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
+      <AlertDialog>
+        <div className="ml-auto">
+          <div className="flex items-center">
+            <span className="text-sm text-[#606060] w-full">Bulk edit</span>
+            <div className="h-8 w-[1px] bg-border ml-4 mr-4" />
 
-          <SelectCategory
-            placeholder="Category"
-            onChange={(category) => {
-              const payload = transactionIds.map((transaction) => ({
-                id: transaction,
-                category,
-              }));
+            <div className="flex space-x-2">
+              <BulkActions ids={transactionIds} />
 
-              bulkUpdateTransactions.execute(payload);
-            }}
-          />
+              <div>
+                {canDelete && (
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="bg-transparent border border-destructive"
+                    >
+                      <Icons.Delete className="text-destructive" size={18} />
+                    </Button>
+                  </AlertDialogTrigger>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your
+              transactions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                deleteTransactions.execute({ ids: transactionIds });
+              }}
+            >
+              {deleteTransactions.status === "executing" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Confirm"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     );
   }
 

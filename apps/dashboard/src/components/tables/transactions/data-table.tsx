@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTransactionAction } from "@/actions/delete-transaction-action";
+import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
 import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
@@ -53,7 +53,8 @@ export function DataTable<TData, TValue>({
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
-  const { setColumns, setTransactionIds } = useTransactionsStore();
+  const { setColumns, setTransactionIds, setCanDelete } =
+    useTransactionsStore();
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {}
   );
@@ -78,7 +79,7 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const deleteTransaction = useAction(deleteTransactionAction, {
+  const deleteTransactions = useAction(deleteTransactionsAction, {
     onError: () => {
       toast({
         duration: 3500,
@@ -121,7 +122,7 @@ export function DataTable<TData, TValue>({
       setOpen,
       copyUrl: handleCopyUrl,
       updateTransaction,
-      deleteTransaction,
+      deleteTransactions,
     },
     state: {
       rowSelection,
@@ -161,6 +162,21 @@ export function DataTable<TData, TValue>({
   }, [columnVisibility]);
 
   useEffect(() => {
+    const transactions = data.filter((transaction) => {
+      const found = rowSelection[transaction.id];
+      if (found) {
+        return !transaction?.manual;
+      }
+    });
+
+    if (Object.keys(rowSelection)?.length > 0) {
+      if (transactions.length === 0) {
+        setCanDelete(true);
+      } else {
+        setCanDelete(false);
+      }
+    }
+
     setTransactionIds(Object.keys(rowSelection));
   }, [rowSelection]);
 

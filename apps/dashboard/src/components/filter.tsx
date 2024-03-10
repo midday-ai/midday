@@ -440,7 +440,7 @@ export function Filter({ sections }: Props) {
                     className="p-4 w-[480px] space-y-4"
                     key={section.id}
                   >
-                    <div className="max-h-[268px] overflow-auto flex flex-col space-y-2">
+                    <div className="max-h-[268px] overflow-auto flex flex-col space-y-4">
                       {sections
                         ?.filter(
                           (section) => section.type === SectionType.checkbox

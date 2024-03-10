@@ -137,10 +137,13 @@ export const updateTransactionSchema = z.object({
 });
 
 export const deleteTransactionSchema = z.object({
-  id: z.string(),
+  ids: z.array(z.string()),
 });
 
-export const bulkUpdateTransactionsSchema = z.array(updateTransactionSchema);
+export const bulkUpdateTransactionsSchema = z.object({
+  type: z.enum(["category", "note", "assigned", "status"]),
+  data: z.array(updateTransactionSchema),
+});
 
 export const updateSimilarTransactionsSchema = z.object({
   id: z.string(),
