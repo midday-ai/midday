@@ -36,11 +36,9 @@ export class GoCardLessApi {
   #oneHour = 3600;
 
   async #getRefreshToken(refresh: string): Promise<string> {
-    const token = await this.#getAccessToken();
-
     const response = await this.#post<GetRefreshTokenResponse>(
       "/api/v2/token/refresh/",
-      token,
+      undefined,
       {
         refresh,
       }
@@ -246,7 +244,7 @@ export class GoCardLessApi {
         timeout: 30_000,
         headers: {
           Accept: "application/json",
-          Authorization: `Bearer ${accessToken}`,
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         },
       });
     }
