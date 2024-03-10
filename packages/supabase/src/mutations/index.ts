@@ -1,6 +1,6 @@
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
-import { Client, Database } from "../types";
+import type { Client, Database } from "../types";
 
 type CreateBankAccountsPayload = {
   accounts: {

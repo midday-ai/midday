@@ -1,9 +1,9 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import PinField from "react-pin-field";
 
 export function EnrollMFA() {
   const supabase = createClient();
@@ -11,8 +11,11 @@ export function EnrollMFA() {
   const [isValidating, setValidating] = useState(false);
   const [factorId, setFactorId] = useState("");
   const [qr, setQR] = useState("");
+  const [error, setError] = useState(false);
 
   const onComplete = async (code: string) => {
+    setError(false);
+
     if (!isValidating) {
       setValidating(true);
 
@@ -34,7 +37,6 @@ export function EnrollMFA() {
     async function enroll() {
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: "totp",
-        friendlyName: "Midday",
         issuer: "app.midday.ai",
       });
 
@@ -75,14 +77,19 @@ export function EnrollMFA() {
       </div>
 
       <div className="flex w-full">
-        <PinField
-          className="pin-field"
+        <InputOTP
+          className={error && "invalid"}
+          maxLength={6}
           onComplete={onComplete}
-          format={(k) => k.toUpperCase()}
-          length={6}
-          autoFocus
+          numeric="numeric"
           disabled={isValidating}
-          autoComplete="one-time-password"
+          render={({ slots }) => (
+            <InputOTPGroup>
+              {slots.map((slot, index) => (
+                <InputOTPSlot key={index.toString()} {...slot} />
+              ))}
+            </InputOTPGroup>
+          )}
         />
       </div>
 

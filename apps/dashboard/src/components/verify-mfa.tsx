@@ -1,8 +1,7 @@
 import { createClient } from "@midday/supabase/client";
-import { cn } from "@midday/ui/utils";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import PinField from "react-pin-field";
 
 export function VerifyMfa() {
   const [isValidating, setValidating] = useState(false);
@@ -72,14 +71,19 @@ export function VerifyMfa() {
       </div>
 
       <div className="flex w-full mb-6">
-        <PinField
-          className={cn("pin-field", error && "invalid")}
+        <InputOTP
           onComplete={onComplete}
-          format={(k) => k.toUpperCase()}
-          length={6}
-          autoFocus
+          maxLength={6}
+          numeric="numeric"
+          className={error && "invalid"}
           disabled={isValidating}
-          autoComplete="one-time-password"
+          render={({ slots }) => (
+            <InputOTPGroup>
+              {slots.map((slot, index) => (
+                <InputOTPSlot key={index.toString()} {...slot} />
+              ))}
+            </InputOTPGroup>
+          )}
         />
       </div>
 

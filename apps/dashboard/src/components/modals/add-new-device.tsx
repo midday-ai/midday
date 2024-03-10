@@ -4,12 +4,11 @@ import { mfaVerifyAction } from "@/actions/mfa-verify-action";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
-import { cn } from "@midday/ui/utils";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import PinField from "react-pin-field";
 
 export function AddNewDeviceModal() {
   const supabase = createClient();
@@ -102,14 +101,19 @@ export function AddNewDeviceModal() {
           </div>
 
           <div className="flex w-full justify-center">
-            <PinField
-              className={cn("pin-field", error && "invalid")}
+            <InputOTP
+              maxLength={6}
               onComplete={onComplete}
-              format={(k) => k.toUpperCase()}
-              length={6}
-              autoFocus
+              numeric="numeric"
               disabled={isValidating}
-              autoComplete="one-time-password"
+              className={error && "invalid"}
+              render={({ slots }) => (
+                <InputOTPGroup>
+                  {slots.map((slot, index) => (
+                    <InputOTPSlot key={index.toString()} {...slot} />
+                  ))}
+                </InputOTPGroup>
+              )}
             />
           </div>
 
