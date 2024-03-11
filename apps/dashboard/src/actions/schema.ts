@@ -294,3 +294,7 @@ export const createEndUserAgreementSchema = z.object({
   institutionId: z.string(),
   isDesktop: z.boolean().optional(),
 });
+
+export const importTransactionsSchema = z.object({
+  filePath: z.array(z.string()),
+});

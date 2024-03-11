@@ -1,21 +1,30 @@
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
 import { eventTrigger } from "@trigger.dev/sdk";
+import { capitalCase } from "change-case";
+import * as d3 from "d3-dsv";
+import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { TokenTextSplitter } from "langchain/text_splitter";
+import { nanoid } from "nanoid";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
+const transformTransaction = (transaction) => {
+  return {
+    internal_id: nanoid(),
+    team_id: "123",
+    status: "posted",
+    date: transaction.date,
+    amount: transaction.amount,
+    name: capitalCase(transaction.description),
+  };
+};
+
 const transactionSchema = z.object({
-  date: z.coerce
-    .date()
-    .describe("The year when there was an important historic development."),
-  description: z
-    .string()
-    .describe("What happened in this year? What was the development?"),
-  amount: z
-    .number()
-    .describe("What happened in this year? What was the development?"),
+  date: z.string().describe("The date of the transaction"),
+  description: z.string().describe("The description of the transaction"),
+  amount: z.number().describe("The amount of the transaction"),
 });
 
 const extractionDataSchema = z.object({
@@ -40,27 +49,98 @@ client.defineJob({
   run: async (payload, io) => {
     const supabase = await io.supabase.client;
 
-    // const { filePath } = payload;
+    const { filePath } = payload;
 
-    // const { data } = await supabase.storage
-    //   .from("vault")
-    //   .download(filePath.join("/"));
+    const { data } = await supabase.storage
+      .from("vault")
+      .download(filePath.join("/"));
+
+    const transactionsImport = await io.createStatus(
+      "transactions-import-analyzing",
+      {
+        label: "Transactions import",
+        data: {
+          step: "analyzing",
+        },
+      }
+    );
+
+    if (!data) {
+      return null;
+    }
+
+    const loader = new CSVLoader(data);
+    const docs = await loader.load();
+
+    const rawText = await data.text();
+
+    const textSplitter = new TokenTextSplitter({
+      chunkSize: 1000,
+      chunkOverlap: 0,
+    });
+
+    const splitDocs = await textSplitter.splitDocuments(docs);
+    const firstFewRows = splitDocs.splice(0, 5).map((doc) => doc.pageContent);
+
+    const extractionChainParams = firstFewRows.map((text) => {
+      return { text };
+    });
+
+    const llm = new ChatOpenAI({
+      modelName: "gpt-4-turbo-preview",
+      temperature: 0,
+    });
 
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", SYSTEM_PROMPT_TEMPLATE],
-      // Please see the how-to about improving performance with
-      // reference examples.
-      // new MessagesPlaceholder("examples"),
       ["human", "{text}"],
     ]);
-
-    const llm = new ChatOpenAI({
-      modelName: "gpt-4-0125-preview",
-      temperature: 0,
-    });
 
     const extractionChain = prompt.pipe(
       llm.withStructuredOutput(extractionDataSchema)
     );
+
+    await transactionsImport.update("transactions-import-transforming", {
+      data: {
+        step: "transforming",
+      },
+    });
+
+    const results = await extractionChain.batch(extractionChainParams, {
+      maxConcurrency: 5,
+    });
+
+    const transactions = results.flatMap((result) => result.transactions);
+    const originalCsv = d3.csvParse(rawText);
+
+    const firstTransaction = transactions.at(0);
+    const firstRow = Object.values(originalCsv.at(0));
+
+    const dateIndex = firstRow?.findIndex((row) =>
+      row.includes(firstTransaction?.date)
+    );
+    const amountIndex = firstRow?.findIndex((row) =>
+      row.includes(firstTransaction?.amount)
+    );
+    const descriptionIndex = firstRow?.findIndex((row) =>
+      row.includes(firstTransaction?.description)
+    );
+
+    const mappedTransactions = originalCsv.map((row) => {
+      const values = Object.values(row);
+
+      return {
+        date: values.at(dateIndex),
+        amount: values.at(amountIndex),
+        description: values.at(descriptionIndex),
+      };
+    });
+
+    await transactionsImport.update("transactions-import-completed", {
+      data: {
+        step: "completed",
+        transactions: mappedTransactions.map(transformTransaction),
+      },
+    });
   },
 });
