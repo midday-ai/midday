@@ -24,13 +24,16 @@ export class TellerApi {
     accessToken,
     latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
-    return this.#get<GetTransactionsResponse>(
+    const result = await this.#get<GetTransactionsResponse>(
       `/accounts/${accountId}/transactions`,
       accessToken,
       latest && {
         count: 500,
       }
     );
+
+    // NOTE: Remove pending transactions until upsert issue is fixed
+    return result.filter((transaction) => transaction.status !== "pending");
   }
 
   async #getApi(accessToken: string): Promise<AxiosInstance> {

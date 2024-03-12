@@ -51,7 +51,7 @@ export type Transaction = {
     account: string;
   };
   amount: string;
-  status: string;
+  status: "posted" | "pending";
   type: string;
 };
 

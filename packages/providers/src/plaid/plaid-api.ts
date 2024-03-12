@@ -84,7 +84,12 @@ export class PlaidApi {
     }
     // NOTE: Plaid transactions for all accounts, we need to filter based on the
     // Provided accountId
-    return added.filter((transaction) => transaction.account_id === accountId);
+    return (
+      added
+        .filter((transaction) => transaction.account_id === accountId)
+        // NOTE: Remove pending transactions until upsert issue is fixed
+        .filter((transaction) => !transaction.pending)
+    );
   }
 
   async linkTokenCreate({
