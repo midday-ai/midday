@@ -81,11 +81,15 @@ export async function POST(req: Request) {
       // NOTE: Invoices can have the same name so we need to
       // ensure with a unique name
       const name = attachment.Name;
+
+      // Just take the first part
+      const [fileName] = name.split(".");
+
       const parts = name.split(".");
       const fileType = parts.pop();
 
       const uniqueFileName = stripSpecialCharacters(
-        `${name}-${nanoid(5)}.${fileType}`
+        `${fileName}-${nanoid(3)}.${fileType}`
       );
 
       try {
@@ -107,7 +111,7 @@ export async function POST(req: Request) {
           subject,
           team_id: teamData.id,
           file_path: data.path.split("/"),
-          file_name: fileName,
+          file_name: uniqueFileName,
           content_type: contentType,
           size: attachment.ContentLength,
           html: res.HtmlBody,
