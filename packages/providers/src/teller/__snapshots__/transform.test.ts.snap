@@ -5,7 +5,7 @@ exports[`Transform pending transaction 1`] = `
   "amount": 83.62,
   "balance": null,
   "bank_account_id": "123",
-  "category": null,
+  "category": "income",
   "currency": "USD",
   "date": "2024-03-05",
   "description": null,

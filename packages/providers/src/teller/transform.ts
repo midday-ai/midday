@@ -41,6 +41,10 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "fees";
   }
 
+  if (+transaction.amount > 0) {
+    return "income";
+  }
+
   switch (transaction?.details.category) {
     case "bar":
     case "dining":
