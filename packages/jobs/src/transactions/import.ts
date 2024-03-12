@@ -148,8 +148,6 @@ client.defineJob({
       };
     });
 
-    console.log(mappedTransactions);
-
     await transactionsImport.update("transactions-import-completed", {
       data: {
         step: "completed",
