@@ -26,21 +26,8 @@ export const mapTransactionMethod = (type?: TransactionCode | null) => {
 };
 
 export const mapTransactionCategory = (transaction: Transaction) => {
-  // Positive values when money moves out of the account; negative values when money moves in.
-  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
-  if (transaction?.amount < 0) {
-    return "income";
-  }
-
   if (transaction.personal_finance_category?.primary === "INCOME") {
     return "income";
-  }
-
-  if (
-    transaction.transaction_code === "bank charge" ||
-    transaction.personal_finance_category?.primary === "BANK_FEES"
-  ) {
-    return "fees";
   }
 
   if (
@@ -49,6 +36,19 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     transaction.personal_finance_category?.primary === "TRANSFER_OUT"
   ) {
     return "transfer";
+  }
+
+  // Positive values when money moves out of the account; negative values when money moves in.
+  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
+  if (transaction?.amount < 0) {
+    return "income";
+  }
+
+  if (
+    transaction.transaction_code === "bank charge" ||
+    transaction.personal_finance_category?.primary === "BANK_FEES"
+  ) {
+    return "fees";
   }
 
   if (transaction.personal_finance_category?.primary === "FOOD_AND_DRINK") {

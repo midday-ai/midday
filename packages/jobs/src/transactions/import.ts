@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
 import { eventTrigger } from "@trigger.dev/sdk";
@@ -5,19 +6,28 @@ import { capitalCase } from "change-case";
 import * as d3 from "d3-dsv";
 import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { TokenTextSplitter } from "langchain/text_splitter";
-import { nanoid } from "nanoid";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
-const transformTransaction = (transaction) => {
+function generateId(value: string) {
+  const hash = crypto.createHash("sha256");
+  hash.update(value);
+
+  return hash.digest("hex");
+}
+
+const transformTransaction = ({ transaction, teamId }) => {
   return {
-    internal_id: nanoid(),
-    team_id: "123",
+    internal_id: generateId(
+      `${transaction.date}-${transaction.name}-${transaction.amount}`
+    ),
+    team_id: teamId,
     status: "posted",
     date: transaction.date,
     amount: transaction.amount,
     name: capitalCase(transaction.description),
+    manual: true,
   };
 };
 
@@ -43,13 +53,14 @@ client.defineJob({
     name: Events.TRANSACTIONS_IMPORT,
     schema: z.object({
       filePath: z.array(z.string()),
+      teamId: z.string(),
     }),
   }),
   integrations: { supabase },
   run: async (payload, io) => {
     const supabase = await io.supabase.client;
 
-    const { filePath } = payload;
+    const { filePath, teamId } = payload;
 
     const { data } = await supabase.storage
       .from("vault")
@@ -70,6 +81,7 @@ client.defineJob({
     }
 
     const loader = new CSVLoader(data);
+
     const docs = await loader.load();
 
     const rawText = await data.text();
@@ -136,10 +148,14 @@ client.defineJob({
       };
     });
 
+    console.log(mappedTransactions);
+
     await transactionsImport.update("transactions-import-completed", {
       data: {
         step: "completed",
-        transactions: mappedTransactions.map(transformTransaction),
+        transactions: mappedTransactions.map((transaction) =>
+          transformTransaction({ transaction, teamId })
+        ),
       },
     });
   },

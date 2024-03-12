@@ -27,6 +27,7 @@ export default {
     deposit: "Deposition",
     wire: "Wire",
     fee: "Avgift",
+    interest: "Ränta",
   },
   language: {
     title: "Språk",

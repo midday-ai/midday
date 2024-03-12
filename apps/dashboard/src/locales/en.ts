@@ -27,6 +27,7 @@ export default {
     deposit: "Deposit",
     wire: "Wire",
     fee: "Fee",
+    interest: "Interest",
   },
   language: {
     title: "Languages",

@@ -44,7 +44,7 @@ export async function createBankAccounts(
       : undefined;
 
   const bankConnection = await supabase
-    .from("bank_connections")
+    .from("decrypted_bank_connections")
     .upsert(
       {
         institution_id: account.institution_id,
@@ -60,11 +60,11 @@ export async function createBankAccounts(
         onConflict: "institution_id, team_id",
       }
     )
-    .select()
+    .select("*, name:decrypted_name")
     .single();
 
   return supabase
-    .from("bank_accounts")
+    .from("decrypted_bank_accounts")
     .upsert(
       accounts.map(
         (account) => ({

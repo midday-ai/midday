@@ -194,4 +194,9 @@ export const LogEvents = {
     icon: "📥",
     channel: "inbox",
   },
+  ImportTransactions: {
+    name: "Import Transactions",
+    icon: "🗄️",
+    channel: "import",
+  },
 };

@@ -26,7 +26,6 @@ import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { cn } from "@midday/ui/utils";
 import { stripSpecialCharacters } from "@midday/utils";
 import { format, isSameYear } from "date-fns";
-import { AnimatePresence, motion } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
@@ -52,6 +51,7 @@ export function ImportCSVModal() {
 
   const importTransactions = useAction(importTransactionsAction, {
     onSuccess: (data) => {
+      setIsLoading(false);
       setActiveId("loading");
 
       if (data) {
@@ -171,6 +171,7 @@ export function ImportCSVModal() {
                     Import transactions
                   </DialogTitle>
                 </div>
+
                 <DialogDescription>
                   We found {transactions?.length} transactions from from your
                   import.
