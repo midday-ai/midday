@@ -12,7 +12,6 @@ import { createClient } from "@midday/supabase/server";
 import { stripSpecialCharacters } from "@midday/utils";
 import { decode } from "base64-arraybuffer";
 import { nanoid } from "nanoid";
-import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";
 import { Resend } from "resend";
 

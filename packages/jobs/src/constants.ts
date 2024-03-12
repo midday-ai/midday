@@ -9,6 +9,7 @@ export const Jobs = {
   ONBOARDING_EMAILS: "onboarding-emails",
   TRANSACTIONS_INITIAL_SYNC: "transactions-initial-sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions-manual-sync",
+  TRANSACTIONS_IMPORT: "transactions-import",
 };
 
 export const Events = {
@@ -20,4 +21,5 @@ export const Events = {
   ONBOARDING_EMAILS: "onboarding-emails",
   TRANSACTIONS_INITIAL_SYNC: "transactions.initial.sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
+  TRANSACTIONS_IMPORT: "transactions.import",
 };

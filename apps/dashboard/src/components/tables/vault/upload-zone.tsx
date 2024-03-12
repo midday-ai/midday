@@ -154,7 +154,7 @@ export function UploadZone({ children }) {
 
               <p className="text-xs">
                 Drop your files here, to
-                <br /> upload to this folder.{" "}
+                <br /> upload to this folder.
               </p>
             </div>
           </div>

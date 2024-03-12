@@ -13,7 +13,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@baselime/node-opentelemetry": "^0.4.3",
+    "@baselime/node-opentelemetry": "^0.4.6",
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/jobs": "workspace:*",
@@ -35,7 +35,7 @@
     "@vercel/edge-config": "^1.1.0",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.40",
-    "ai": "^3.0.8",
+    "ai": "^3.0.9",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.3",
     "dub": "^0.9.0",

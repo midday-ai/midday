@@ -22,27 +22,10 @@ import TellerLogo from "public/assets/teller.png";
 import ZapierLogo from "public/assets/zapier.png";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
-import { TellerConnectOptions, useTellerConnect } from "teller-connect-react";
-
-const imports = [
-  {
-    id: "zapier",
-    name: "Zapier",
-    description:
-      "With 6,000+ apps you can automate your process of importing transactions from your bank. For example using a SpreadSheet.",
-    logo: ZapierLogo,
-    disabled: true,
-  },
-  {
-    id: "csc",
-    name: "CSV",
-    description:
-      "Import transactions using a CSV file, you can also use this for backfilling.",
-    logo: CsvLogo,
-    logoDark: CsvLogoDark,
-    disabled: true,
-  },
-];
+import {
+  type TellerConnectOptions,
+  useTellerConnect,
+} from "teller-connect-react";
 
 export function ConnectTransactionsModal({ isEU }) {
   const { track } = useLogSnag();
@@ -50,7 +33,12 @@ export function ConnectTransactionsModal({ isEU }) {
 
   const [params, setParams] = useQueryStates(
     {
-      step: parseAsStringEnum(["connect", "account", "gocardless"]),
+      step: parseAsStringEnum([
+        "connect",
+        "account",
+        "gocardless",
+        "import-csv",
+      ]),
       ref: parseAsString,
       token: parseAsString,
       enrollment_id: parseAsString,
@@ -235,6 +223,28 @@ export function ConnectTransactionsModal({ isEU }) {
 
     return 0;
   });
+
+  const imports = [
+    {
+      id: "csc",
+      name: "CSV",
+      description:
+        "Import transactions using a CSV file, you can also use this for backfilling.",
+      logo: CsvLogo,
+      logoDark: CsvLogoDark,
+      onClick: () => {
+        setParams({ step: "import-csv" });
+      },
+    },
+    {
+      id: "zapier",
+      name: "Zapier",
+      description:
+        "With 6,000+ apps you can automate your process of importing transactions from your bank. For example using a SpreadSheet.",
+      logo: ZapierLogo,
+      disabled: true,
+    },
+  ];
 
   return (
     <Dialog

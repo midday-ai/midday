@@ -4,6 +4,7 @@ import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
 import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
+import { ImportCSVModal } from "@/components/modals/import-csv-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
 import { getCountryCode, isEUCountry } from "@midday/location";
@@ -35,6 +36,7 @@ export default async function Layout({
       <ConnectTransactionsModal isEU={isEU} />
       <ConnectGoCardLessModal countryCode={countryCode} />
       <SelectBankAccountsModal countryCode={countryCode} />
+      <ImportCSVModal />
       <ExportStatus />
       <CommandMenu />
       <HotKeys />

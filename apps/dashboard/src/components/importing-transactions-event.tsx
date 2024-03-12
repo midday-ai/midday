@@ -6,10 +6,9 @@ import Lottie from "lottie-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-export function LoadingTransactionsEvent({
+export function ImportingTransactionsEvent({
   eventId,
-  setEventId,
-  onClose,
+  setTransactions,
 }: {
   eventId: string;
 }) {
@@ -20,19 +19,16 @@ export function LoadingTransactionsEvent({
 
   useEffect(() => {
     if (status?.data.step) {
-      if (status.data.step === "getting_transactions") {
+      if (status.data.step === "transforming") {
         setStep(2);
       }
 
       if (status.data.step === "completed") {
         setStep(3);
-        setTimeout(() => {
-          onClose();
-        }, 500);
 
         setTimeout(() => {
-          setEventId(undefined);
-        }, 1000);
+          setTransactions(status.data.transactions);
+        }, 500);
       }
     }
   }, [status]);
@@ -53,7 +49,7 @@ export function LoadingTransactionsEvent({
         }}
       />
       <h2 className="text-lg font-semibold leading-none tracking-tight mb-8">
-        Setting up account
+        Importing transactions
       </h2>
 
       <ul className="text-md text-[#878787] space-y-4 transition-all">
@@ -63,7 +59,7 @@ export function LoadingTransactionsEvent({
             step > 0 && "!opacity-100"
           )}
         >
-          Connecting bank
+          Analyzing transactions
           {step === 1 && <span className="loading-ellipsis" />}
         </li>
         <li
@@ -72,7 +68,7 @@ export function LoadingTransactionsEvent({
             step > 1 && "!opacity-100"
           )}
         >
-          Getting transactions
+          Transforming transactions
           {step === 2 && <span className="loading-ellipsis" />}
         </li>
         <li
