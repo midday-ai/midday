@@ -41,12 +41,6 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "fees";
   }
 
-  // Positive values when money moves out of the account; negative values when money moves in.
-  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
-  if (+transaction?.amount < 0) {
-    return "income";
-  }
-
   switch (transaction?.details.category) {
     case "bar":
     case "dining":
@@ -74,16 +68,6 @@ export const mapTransactionCategory = (transaction: Transaction) => {
   }
 };
 
-const transformToSignedAmount = (amount: number) => {
-  // Positive values when money moves out of the account; negative values when money moves in.
-  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
-  if (amount > 0) {
-    return -amount;
-  }
-
-  return amount * -1;
-};
-
 export const transformTransaction = ({
   transaction,
   teamId,
@@ -97,7 +81,7 @@ export const transformTransaction = ({
     description: null,
     method,
     internal_id: `${teamId}_${transaction.id}`,
-    amount: transformToSignedAmount(+transaction.amount),
+    amount: +transaction.amount,
     currency: "USD",
     bank_account_id: bankAccountId,
     category: mapTransactionCategory(transaction),
