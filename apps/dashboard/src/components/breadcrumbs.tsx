@@ -1,7 +1,14 @@
 "use client";
 
 import { useI18n } from "@/locales/client";
-import { Icons } from "@midday/ui/icons";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@midday/ui/breadcrumb";
 import Link from "next/link";
 import { translatedFolderName } from "./tables/vault/data-table-row";
 
@@ -12,20 +19,33 @@ export function Breadcrumbs({ folders = [] }) {
 
   const links = allFolders?.map((folder, index) => {
     const isLast = folders.length === index;
-    const href = folder === "all" ? "/vault" : `/vault/${folder}`;
+    const parts = folders.slice(0, index);
+    const href =
+      folder === "all" ? "/vault" : `/${["vault", ...parts].join("/")}`;
+
+    if (isLast) {
+      return (
+        <BreadcrumbItem key={folder}>
+          <BreadcrumbPage>{translatedFolderName(t, folder)}</BreadcrumbPage>
+        </BreadcrumbItem>
+      );
+    }
 
     return (
-      <div className="flex items-center" key={folder}>
-        <Link href={href} className="max-w-[100px] truncate">
-          <span key={folder}>{translatedFolderName(t, folder)}</span>
-        </Link>
-
-        {folders.length > 0 && !isLast && (
-          <Icons.ArrowRight className="text-[#878787] mx-1" size={16} />
-        )}
-      </div>
+      <>
+        <BreadcrumbItem key={folder}>
+          <BreadcrumbLink asChild>
+            <Link href={href}>{translatedFolderName(t, folder)}</Link>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbSeparator />
+      </>
     );
   });
 
-  return <div className="flex">{links}</div>;
+  return (
+    <Breadcrumb>
+      <BreadcrumbList>{links}</BreadcrumbList>
+    </Breadcrumb>
+  );
 }

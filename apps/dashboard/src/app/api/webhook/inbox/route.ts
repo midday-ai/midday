@@ -78,21 +78,24 @@ export async function POST(req: Request) {
     }
 
     const records = attachments?.map(async (attachment) => {
-      const fileName = attachment.Name ?? `${nanoid()}.pdf`;
+      // NOTE: Invoices can have the same name so we need to
+      // ensure with a unique name
+      const name = attachment.Name;
+      const parts = name.split(".");
+      const fileType = parts.pop();
+
+      const uniqueFileName = stripSpecialCharacters(
+        `${name}-${nanoid(5)}.${fileType}`
+      );
 
       try {
-        const { data, error } = await supabase.storage.from("vault").upload(
-          // NOTE: Invoices can have the same name so we need to
-          // ensure with a unique folder
-          `${teamData.id}/inbox/${nanoid()}/${stripSpecialCharacters(
-            fileName
-          )}`,
-          decode(attachment.Content),
-          {
-            contentType,
-            upsert: true,
-          }
-        );
+        const { data, error } = await supabase.storage
+          .from("vault")
+          .upload(
+            `${teamData.id}/inbox/${uniqueFileName}`,
+            decode(attachment.Content),
+            { contentType }
+          );
 
         if (error) {
           console.log("Upload error", error);

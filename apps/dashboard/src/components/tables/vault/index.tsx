@@ -9,6 +9,7 @@ import { UploadZone } from "./upload-zone";
 
 export async function Table({ folders, disableActions }) {
   const path = folders?.join("/");
+
   const { data } = await getVault({
     path: path && decodeURIComponent(path),
   });

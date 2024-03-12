@@ -232,6 +232,7 @@ export function ConnectTransactionsModal({ isEU }) {
         "Import transactions using a CSV file, you can also use this for backfilling.",
       logo: CsvLogo,
       logoDark: CsvLogoDark,
+      disabled: true,
       onClick: () => {
         setParams({ step: "import-csv" });
       },

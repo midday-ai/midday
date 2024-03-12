@@ -14,7 +14,7 @@ export function CreateFolderButton({ disableActions }) {
   return (
     <Button
       variant="outline"
-      className="w-[32px] h-[32px]"
+      className="w-[36px] h-[36px]"
       size="icon"
       disabled={disableActions}
       onClick={handleCreateFolder}

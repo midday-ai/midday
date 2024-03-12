@@ -32,9 +32,11 @@ const transformTransaction = ({ transaction, teamId }) => {
 };
 
 const transactionSchema = z.object({
-  date: z.string().describe("The date of the transaction"),
-  description: z.string().describe("The description of the transaction"),
-  amount: z.number().describe("The amount of the transaction"),
+  date: z.string().describe("The datetime of the transaction"),
+  description: z
+    .string()
+    .describe("The description or name of the transaction"),
+  amount: z.number().describe("The amount or value of the transaction"),
 });
 
 const extractionDataSchema = z.object({

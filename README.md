@@ -4,7 +4,7 @@
   </p>
 	<h1 align="center"><b>Midday</b></h1>
 <p align="center">
-    The financial OS for your business
+    Run your business smarter
     <br />
     <br />
     <a href="https://discord.gg/ZmqcvWKH">Discord</a>

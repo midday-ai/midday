@@ -30,6 +30,7 @@
   "exports": {
     "./accordion": "./src/components/accordion.tsx",
     "./alert-dialog": "./src/components/alert-dialog.tsx",
+    "./breadcrumb": "./src/components/breadcrumb.tsx",
     "./alert": "./src/components/alert.tsx",
     "./avatar": "./src/components/avatar.tsx",
     "./button": "./src/components/button.tsx",
