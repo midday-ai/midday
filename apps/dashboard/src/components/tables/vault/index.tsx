@@ -31,7 +31,7 @@ export async function Table({ folders, disableActions }) {
           </div>
         </div>
 
-        <div className="mt-6 h-[calc(100vh-380px)] border overflow-scroll relative">
+        <div className="mt-6 h-[calc(100vh-400px)] border overflow-scroll relative">
           <UploadZone>
             <DataTable teamId={userData.team_id} />
             {data.length === 0 && <EmptyTable type={path} />}
