@@ -8,6 +8,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
+import { Icons } from "@midday/ui/icons";
 import { isSupportedFilePreview } from "@midday/utils";
 import Link from "next/link";
 import { FileIcon } from "./file-icon";
@@ -101,7 +102,7 @@ export async function VaultActivity() {
                 mimetype={file.mimetype}
                 name={file.name}
                 size={65}
-                className="text-[#2C2C2C] mb-0"
+                className="dark:text-[#2C2C2C] mb-0"
               />
               <span className="text-sm truncate w-[70px]">{filename}</span>
               <span className="text-sm mt-1 text-[#878787]">
@@ -115,10 +116,9 @@ export async function VaultActivity() {
           return (
             <Link key={folder.name} href={`/vault/${folder.id}`}>
               <div className="text-center flex flex-col items-center">
-                <FileIcon
+                <Icons.Folder
                   size={65}
-                  className="text-[#2C2C2C] mb-0"
-                  name={folder.id}
+                  className="text-[#878787] dark:text-[#2C2C2C] mb-0"
                 />
                 <span className="text-sm truncate w-[70px]">{folder.name}</span>
               </div>
