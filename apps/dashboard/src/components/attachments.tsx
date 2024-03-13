@@ -15,11 +15,11 @@ import {
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
-import { stripSpecialCharacters } from "@midday/utils";
+import { isSupportedFilePreview, stripSpecialCharacters } from "@midday/utils";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { FilePreview, isSupportedFilePreview } from "./file-preview";
+import { FilePreview } from "./file-preview";
 
 const Item = ({ file, onDelete, id }) => {
   const filePreviewSupported = isSupportedFilePreview(file.type);

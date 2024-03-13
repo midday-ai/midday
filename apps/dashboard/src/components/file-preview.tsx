@@ -1,10 +1,15 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@midday/ui/dialog";
+import {
+  Dialog,
+  DialogContentFrameless,
+  DialogTrigger,
+} from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cn } from "@midday/ui/utils";
+import { FileType } from "@midday/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -12,11 +17,6 @@ import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
-
-export enum FileType {
-  Pdf = "application/pdf",
-  Heic = "image/heic",
-}
 
 type Props = {
   type: FileType;
@@ -29,27 +29,6 @@ type Props = {
   height: number;
   disableFullscreen?: boolean;
   onLoaded?: () => void;
-};
-
-export const isSupportedFilePreview = (type: FileType) => {
-  if (!type) {
-    return false;
-  }
-
-  if (type === FileType.Heic) {
-    return false;
-  }
-
-  if (type?.startsWith("image")) {
-    return true;
-  }
-
-  switch (type) {
-    case FileType.Pdf:
-      return true;
-    default:
-      return false;
-  }
 };
 
 const RenderComponent = ({
@@ -133,7 +112,7 @@ export function FilePreview({
 
   return (
     <Dialog>
-      <div className={cn(className, "relative")}>
+      <div className={cn(className, "relative h-full")}>
         {!preview && isLoaded && (
           <AnimatePresence>
             <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
@@ -146,7 +125,7 @@ export function FilePreview({
                   <DialogTrigger asChild>
                     <Button
                       variant="secondary"
-                      className="w-[32px] h-[32px] bg-black/60 hover:bg-black"
+                      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
                       size="icon"
                     >
                       <Icons.OpenInFull />
@@ -164,7 +143,7 @@ export function FilePreview({
                   <a href={downloadUrl} download>
                     <Button
                       variant="secondary"
-                      className="w-[32px] h-[32px] bg-black/60 hover:bg-black"
+                      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
                       size="icon"
                     >
                       <Icons.FileDownload />
@@ -185,7 +164,7 @@ export function FilePreview({
         />
         <div
           className={cn(
-            "bg-primary/10 w-full h-full items-center flex justify-center",
+            "w-full h-full items-center flex justify-center bg-[#F2F1EF] dark:bg-secondary",
             !isLoaded && "opacity-0",
             error && "opacity-1 bg-transparent"
           )}
@@ -209,7 +188,7 @@ export function FilePreview({
         </div>
       </div>
 
-      <DialogContent className="p-0 max-w-[680px]">
+      <DialogContentFrameless className="max-w-[680px] max-h-[800px] overflow-auto p-0 m-0">
         <FilePreview
           src={src}
           name={name}
@@ -219,7 +198,7 @@ export function FilePreview({
           height={780}
           disableFullscreen
         />
-      </DialogContent>
+      </DialogContentFrameless>
     </Dialog>
   );
 }

@@ -60,6 +60,9 @@ export default {
   folders: {
     all: "All",
     exports: "Exports",
+    inbox: "Inbox",
+    imports: "Imports",
+    transactions: "Transactions",
   },
   mfa_status: {
     verified: "Verified",

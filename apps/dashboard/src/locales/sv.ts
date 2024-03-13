@@ -60,6 +60,9 @@ export default {
   folders: {
     all: "Alla",
     exports: "Exporteringar",
+    inbox: "Inkorg",
+    imports: "Importer",
+    transactions: "Transaktioner",
   },
   mfa_status: {
     verified: "Verifierad",

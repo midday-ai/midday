@@ -28,7 +28,12 @@ export function UploadZone({ children }) {
   const { toast, dismiss, update } = useToast();
   const { createFolder } = useVaultContext((s) => s);
 
-  const isDefaultFolder = ["exports"].includes(folders.at(0));
+  const isDefaultFolder = [
+    "exports",
+    "inbox",
+    "import",
+    "transactions",
+  ].includes(folders.at(0));
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -133,6 +138,7 @@ export function UploadZone({ children }) {
       "image/png": [".png"],
       "image/jpeg": [".jpg", ".jpeg"],
       "application/pdf": [".pdf"],
+      "application/zip": [".zip"],
     },
   });
 

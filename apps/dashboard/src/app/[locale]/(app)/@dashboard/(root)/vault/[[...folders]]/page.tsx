@@ -6,7 +6,12 @@ export const metadata: Metadata = {
 };
 
 export default function Vault({ params }) {
-  const disableActions = ["exports"].includes(params?.folders?.at(0));
+  const disableActions = [
+    "exports",
+    "inbox",
+    "imports",
+    "transactions",
+  ].includes(params?.folders?.at(0));
 
   return <Table folders={params.folders} disableActions={disableActions} />;
 }

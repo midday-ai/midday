@@ -5,7 +5,7 @@ import { deleteFileAction } from "@/actions/delete-file-action";
 import { deleteFolderAction } from "@/actions/delete-folder-action";
 import { shareFileAction } from "@/actions/share-file-action";
 import { FileIcon } from "@/components/file-icon";
-import { FilePreview, isSupportedFilePreview } from "@/components/file-preview";
+import { FilePreview } from "@/components/file-preview";
 import { useI18n } from "@/locales/client";
 import { useVaultContext } from "@/store/vault/hook";
 import { formatSize } from "@/utils/format";
@@ -48,6 +48,7 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
+import { isSupportedFilePreview } from "@midday/utils";
 import { format } from "date-fns";
 import ms from "ms";
 import { useAction } from "next-safe-action/hooks";
@@ -61,6 +62,12 @@ export const translatedFolderName = (t: any, folder: string) => {
       return t("folders.all");
     case "exports":
       return t("folders.exports");
+    case "inbox":
+      return t("folders.inbox");
+    case "imports":
+      return t("folders.imports");
+    case "transactions":
+      return t("folders.transactions");
     default:
       return decodeURIComponent(folder);
   }
@@ -120,7 +127,12 @@ export function DataTableRow({ data, teamId }) {
   const { deleteItem, createFolder } = useVaultContext((s) => s);
 
   const folders = params?.folders ?? [];
-  const isDefaultFolder = ["exports"].includes(data.name);
+  const isDefaultFolder = [
+    "exports",
+    "transactions",
+    "inbox",
+    "import",
+  ].includes(data.name);
 
   const disableActions = ["transactions"].includes(folders?.at(0));
   const folderPath = folders.join("/");
@@ -359,9 +371,6 @@ export function DataTableRow({ data, teamId }) {
               Create folder
             </ContextMenuItem>
           )}
-          {/* {!disableActions && !isDefaultFolder && (
-            <ContextMenuItem>Rename</ContextMenuItem>
-          )} */}
           <ContextMenuItem>
             {data.isFolder ? (
               <a

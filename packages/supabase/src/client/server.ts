@@ -1,13 +1,16 @@
 import { type CookieOptions, createServerClient } from "@supabase/ssr";
 import { cookies, headers } from "next/headers";
-import { Database } from "../types";
+import type { Database } from "../types";
 
 type CreateClientOptions = {
   admin?: boolean;
+  schema?: string;
 };
 
 export const createClient = (options: CreateClientOptions) => {
   const cookieStore = cookies();
+
+  const schema = options?.schema ?? "public";
 
   const key = options?.admin
     ? process.env.SUPABASE_SERVICE_KEY!
@@ -17,6 +20,9 @@ export const createClient = (options: CreateClientOptions) => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key,
     {
+      db: {
+        schema,
+      },
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value;

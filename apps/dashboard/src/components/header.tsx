@@ -17,13 +17,14 @@ export function Header() {
       {isDesktopApp() && <BrowserNavigation />}
       <CommandMenuButton />
 
-      <div className="flex space-x-2 no-drag">
+      <div className="flex space-x-2 no-drag ml-auto">
         {isDesktopApp() && <DesktopCommandMenuButton />}
         <TrackerControl />
         <Suspense>
           <ReconnectBank />
         </Suspense>
         <NotificationCenter />
+
         <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
           <UserMenu />
         </Suspense>

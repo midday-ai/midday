@@ -575,7 +575,14 @@ type GetVaultParams = {
 export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { teamId, path } = params;
 
-  const defaultFolders = path ? [] : [{ name: "exports", isFolder: true }];
+  const defaultFolders = path
+    ? []
+    : [
+        { name: "exports", isFolder: true },
+        { name: "inbox", isFolder: true },
+        { name: "imports", isFolder: true },
+        { name: "transactions", isFolder: true },
+      ];
 
   let basePath = teamId;
 
@@ -590,8 +597,6 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const filteredData =
     data
       ?.filter((file) => file.name !== EMPTY_FOLDER_PLACEHOLDER_FILE_NAME)
-      // NOTE: Exclude transactions and inbox folder
-      .filter((file) => !["transactions", "inbox"].includes(file.name))
       .map((item) => ({ ...item, isFolder: !item.id })) ?? [];
 
   const mergedMap = new Map(
@@ -603,6 +608,15 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   return {
     data: mergedArray,
   };
+}
+
+export async function getVaultActivityQuery(supabase: Client, userId: string) {
+  return supabase
+    .from("objects")
+    .select("*")
+    .eq("owner_id", userId)
+    .limit(20)
+    .order("created_at", { ascending: false });
 }
 
 type GetVaultRecursiveParams = {

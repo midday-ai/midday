@@ -39,6 +39,7 @@ import {
   MdOutlineCancel,
   MdOutlineCategory,
   MdOutlineContentCopy,
+  MdOutlineCreateNewFolder,
   MdOutlineDashboardCustomize,
   MdOutlineDelete,
   MdOutlineDescription,
@@ -77,6 +78,7 @@ import {
   MdPlayCircle,
   MdRefresh,
   MdRemove,
+  MdRuleFolder,
   MdSave,
   MdSearch,
   MdSecurity,
@@ -532,4 +534,6 @@ export const Icons = {
   ArrowForward: MdOutlineArrowForward,
   Forwarded: MdOutlineForwardToInbox,
   Delete: MdOutlineDelete,
+  FolderImports: MdRuleFolder,
+  FolderTransactions: MdTopic,
 };

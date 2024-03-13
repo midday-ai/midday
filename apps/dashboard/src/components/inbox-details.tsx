@@ -13,11 +13,12 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { cn } from "@midday/ui/utils";
+import { FileType } from "@midday/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { FilePreview, FileType } from "./file-preview";
+import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
 

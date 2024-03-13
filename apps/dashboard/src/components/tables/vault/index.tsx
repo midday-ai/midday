@@ -1,4 +1,5 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { VaultActivity } from "@/components/vault-activity";
 import { VaultProvider } from "@/store/vault/provider";
 import { getUser, getVault } from "@midday/supabase/cached-queries";
 import { CreateFolderButton } from "./create-folder-button";
@@ -19,6 +20,8 @@ export async function Table({ folders, disableActions }) {
   return (
     <div>
       <VaultProvider data={data}>
+        <VaultActivity />
+
         <div className="flex justify-between items-center h-[32px] mt-6">
           <Breadcrumbs folders={folders} />
 
@@ -28,7 +31,7 @@ export async function Table({ folders, disableActions }) {
           </div>
         </div>
 
-        <div className="mt-6 h-[calc(100vh-200px)] border overflow-scroll relative">
+        <div className="mt-6 h-[calc(100vh-380px)] border overflow-scroll relative">
           <UploadZone>
             <DataTable teamId={userData.team_id} />
             {data.length === 0 && <EmptyTable type={path} />}
