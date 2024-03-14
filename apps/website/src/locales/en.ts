@@ -5,7 +5,7 @@ export default {
     story: "Story",
     updates: "Updates",
     signIn: "Sign in",
-    getStarted: "Start for free",
+    getStarted: "Get Started",
   },
 
   // startpage: {

@@ -55,9 +55,13 @@ export function Dock() {
       onMouseLeave={() => mouseX.set(Infinity)}
       className="mx-auto flex h-[58px] items-end gap-2 rounded-2xl px-2 pb-2 border dark:border-[#707070]"
     >
-      {apps.map((app) => (
-        <AppIcon mouseX={mouseX} key={app.id} src={app.icon} />
-      ))}
+      {apps.map((app) => {
+        return (
+          <button key={app.id} type="button">
+            <AppIcon mouseX={mouseX} src={app.icon} />
+          </button>
+        );
+      })}
     </motion.div>
   );
 }
