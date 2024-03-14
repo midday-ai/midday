@@ -3,7 +3,7 @@ import { Dock } from "./dock";
 
 export function Screens() {
   return (
-    <div className="flex items-center justify-center mt-24 flex-col">
+    <div className="flex items-center justify-center mt-14 flex-col">
       <CardStack
         items={[
           {

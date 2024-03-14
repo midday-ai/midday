@@ -53,7 +53,7 @@ export function Dock() {
     <motion.div
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
-      className="mx-auto flex h-16 items-end gap-4 rounded-2xl bg-background px-4 pb-3 border border-[#707070]"
+      className="mx-auto flex h-[58px] items-end gap-2 rounded-2xl px-2 pb-2 border dark:border-[#707070]"
     >
       {apps.map((app) => (
         <AppIcon mouseX={mouseX} key={app.id} src={app.icon} />
@@ -81,8 +81,8 @@ function AppIcon({ mouseX, src }: { mouseX: MotionValue }) {
   return (
     <MotionComponent
       src={src}
-      width={50}
-      height={50}
+      width={60}
+      height={60}
       alt=""
       quality={100}
       ref={ref}
