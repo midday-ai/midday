@@ -293,16 +293,17 @@ export function ConnectTransactionsModal({ isEU }) {
                     disabled={bank.disabled}
                   >
                     <div className="flex space-x-2 items-center ml-4">
-                      <Image
-                        className="mt-4 self-start"
-                        src={bank.logo}
-                        width={40}
-                        height={40}
-                        alt={bank.name}
-                        quality={100}
-                      />
+                      <div className="w-[40px] h-[40px] mt-[22px] self-start">
+                        <Image
+                          src={bank.logo}
+                          width={40}
+                          height={40}
+                          alt={bank.name}
+                          quality={100}
+                        />
+                      </div>
 
-                      <CardHeader className="p-4 pl-2">
+                      <CardHeader className="p-4 pl-2 flex-1">
                         <CardTitle className="text-md mb-0">
                           {bank.name}
                         </CardTitle>
@@ -329,30 +330,34 @@ export function ConnectTransactionsModal({ isEU }) {
                     disabled={provider.disabled}
                   >
                     <div className="flex space-x-2 items-center ml-4">
-                      <Image
+                      <div
                         className={cn(
-                          "mt-4 self-start",
+                          "w-[40px] h-[40px] mt-[22px] self-start",
                           provider.logoDark && "hidden dark:block"
                         )}
-                        src={provider.logo}
-                        width={40}
-                        height={40}
-                        alt={provider.name}
-                        quality={100}
-                      />
-
-                      {provider.logoDark && (
+                      >
                         <Image
-                          className="mt-4 self-start dark:hidden"
-                          src={provider.logoDark}
+                          src={provider.logo}
                           width={40}
                           height={40}
                           alt={provider.name}
                           quality={100}
                         />
+                      </div>
+
+                      {provider.logoDark && (
+                        <div className="mt-4 dark:hidden">
+                          <Image
+                            src={provider.logoDark}
+                            width={40}
+                            height={40}
+                            alt={provider.name}
+                            quality={100}
+                          />
+                        </div>
                       )}
 
-                      <CardHeader className="p-4 pl-2">
+                      <CardHeader className="p-4 pl-2 flex-1">
                         <div className="flex space-x-2">
                           <CardTitle className="text-md mb-0">
                             {provider.name}
