@@ -65,7 +65,7 @@ export function Footer() {
               <h6>Solutions</h6>
               <ul>
                 <li className="text-[#878787]">
-                  <Link href="/engine">Midday Engine™</Link>
+                  <Link href="/engine">Midday Engine</Link>
                 </li>
                 <li className="text-[#878787]">
                   <Link href="/docs/self-hosted">Self hosted</Link>
