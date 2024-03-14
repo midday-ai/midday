@@ -10,11 +10,11 @@ export function Hero() {
 
       <h1 className="text-6xl font-medium mt-6">Run your business smarter.</h1>
 
-      <h3 className="mt-8 text-[#707070]">
+      <p className="mt-8 text-[#707070]">
         Integer quis vestibulum lorem. Curabitur consectetur nulla nec justo
         <br />
         congue mattis. Nulla tincidunt ante eros, nec interdum dui varius quis.
-      </h3>
+      </p>
 
       <div className="flex items-center space-x-4 mt-8">
         <Link href="/talk-to-us">

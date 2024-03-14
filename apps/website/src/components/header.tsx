@@ -32,7 +32,7 @@ export function Header() {
   const lastPath = `/${pathname.split("/").pop()}`;
 
   return (
-    <header className="h-12 sticky flex items-center justify-center mt-4 top-4">
+    <header className="h-12 sticky flex items-center justify-center mt-4 top-4 z-50">
       <nav className="border p-3 rounded-2xl bg-background backdrop-blur-md flex items-center">
         <Link className="mr-10" href="/">
           <LogoIcon />
