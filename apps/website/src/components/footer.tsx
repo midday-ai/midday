@@ -1,6 +1,8 @@
 import { LogoLarge } from "@/components/logo-large";
 import Link from "next/link";
 import { Suspense } from "react";
+import { GithubStars } from "./github-stars";
+import { SocialLinks } from "./social-links";
 import { StatusWidget } from "./status-widget";
 
 export function Footer() {
@@ -63,7 +65,7 @@ export function Footer() {
               <h6>Solutions</h6>
               <ul>
                 <li className="text-[#878787]">
-                  <Link href="/engine">Midday Engine</Link>
+                  <Link href="/engine">Midday Engine™</Link>
                 </li>
                 <li className="text-[#878787]">
                   <Link href="/docs/self-hosted">Self hosted</Link>
@@ -82,8 +84,14 @@ export function Footer() {
           </div>
 
           <div className="w-6/12 flex justify-end">
-            <div className="flex justify-between flex-col">
-              <div>Social</div>
+            <div className="flex justify-between items-end flex-col">
+              <div className="flex items-center">
+                <Suspense>
+                  <GithubStars />
+                </Suspense>
+
+                <SocialLinks />
+              </div>
               <div>
                 <Suspense>
                   <StatusWidget />
