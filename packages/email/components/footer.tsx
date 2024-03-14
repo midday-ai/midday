@@ -95,7 +95,7 @@ export function Footer({ baseUrl }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/UmCgADb"
+                href="https://git.new/midday"
               >
                 Github
               </Link>
@@ -206,7 +206,7 @@ export function Footer({ baseUrl }: Props) {
         </Column>
 
         <Column className="align-middle">
-          <Link href="https://go.midday.ai/UmCgADb">
+          <Link href="https://git.new/midday">
             <Img
               src={`${baseUrl}/github.png`}
               width="22"
