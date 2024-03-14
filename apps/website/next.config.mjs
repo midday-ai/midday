@@ -8,6 +8,9 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  experimental: {
+    ppr: true,
+  },
 };
 
 export default config;
