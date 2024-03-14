@@ -2,7 +2,7 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 type ProviderProps = {
   locale: string;

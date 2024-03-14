@@ -1,4 +1,5 @@
-import { ReactNode } from "react";
+import { Header } from "@/components/header";
+import type { ReactNode } from "react";
 import { Provider } from "./provider";
 
 export default function Layout({
@@ -8,5 +9,11 @@ export default function Layout({
   params: { locale: string };
   children: ReactNode;
 }) {
-  return <Provider locale={locale}>{children}</Provider>;
+  return (
+    <Provider locale={locale}>
+      <Header />
+
+      <main className="container mx-auto">{children}</main>
+    </Provider>
+  );
 }

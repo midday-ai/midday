@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@logsnag/next": "^1.0.3",
-    "@midday/location": "workspace:*",
     "@midday/ui": "workspace:*",
     "@vercel/analytics": "^1.2.2",
     "geist": "^1.2.2",

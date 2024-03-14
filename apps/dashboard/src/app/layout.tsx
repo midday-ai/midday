@@ -7,11 +7,11 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { type ReactElement } from "react";
+import type { ReactElement } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | The financial OS for your business",
+  title: "Midday | Run your business smarter",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
 };

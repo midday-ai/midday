@@ -10,14 +10,14 @@ import type { ReactElement } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://midday.ai"),
-  title: "Midday | The financial OS for your business",
+  title: "Midday | Run your business smarter",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
 };
 
 export const viewport = {
   themeColor: [
-    // { media: "(prefers-color-scheme: light)" },
+    { media: "(prefers-color-scheme: light)" },
     { media: "(prefers-color-scheme: dark)" },
   ],
 };

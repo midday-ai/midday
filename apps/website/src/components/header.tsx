@@ -1,32 +1,72 @@
 "use client";
 
-import { useScopedI18n } from "@/locales/client";
-import { Icons } from "@midday/ui/icons";
+import { useI18n } from "@/locales/client";
+import { cn } from "@midday/ui/utils";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { LogoIcon } from "./logo-icon";
+
+const links = [
+  {
+    path: "/",
+    name: "features",
+  },
+  {
+    path: "/pricing",
+    name: "pricing",
+  },
+  {
+    path: "/story",
+    name: "story",
+  },
+  {
+    path: "/updates",
+    name: "updates",
+  },
+  {
+    path: "https://app.midday.ai",
+    name: "signIn",
+  },
+];
 
 export function Header() {
-  const t = useScopedI18n("header");
+  const t = useI18n();
+  const pathname = usePathname();
+
+  const lastPath = `/${pathname.split("/").pop()}`;
 
   return (
-    <header className="pt-4 pb-4 md:pt-10 md:pb-5 flex justify-between px-5 lg:px-10">
-      <Link href="/" title="Midday">
-        <Icons.Logo />
-      </Link>
+    <header className="h-12 sticky flex items-center justify-center mt-4 top-4">
+      <nav className="border p-3 rounded-2xl bg-background backdrop-blur-md flex items-center">
+        <Link className="mr-10" href="/">
+          <LogoIcon />
+        </Link>
 
-      <Link href="https://app.midday.ai">
-        <button
-          type="button"
-          className="relative rounded-lg overflow-hidden dark:p-[1px] border border-primary dark:border-0 font-semibold text-[14px] h-[40px]"
-          style={{
-            background:
-              "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
-          }}
+        <ul className="flex space-x-2 font-medium text-sm mr-8">
+          {links.map(({ path, name }) => {
+            return (
+              <li key={path}>
+                <Link
+                  href={path}
+                  className={cn(
+                    "h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary/80",
+                    path === lastPath && "bg-secondary"
+                  )}
+                >
+                  {t(`header.${name}`)}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <a
+          href="https://app.midday.ai"
+          className="h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 inline-flex bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          <span className="flex items-center gap-4 py-1 px-2 rounded-[7px] bg-background text-primary px-8 h-[39px] h-full">
-            {t("signIn")}
-          </span>
-        </button>
-      </Link>
+          {t("header.getStarted")}
+        </a>
+      </nav>
     </header>
   );
 }
