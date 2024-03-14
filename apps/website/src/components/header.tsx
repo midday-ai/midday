@@ -8,10 +8,6 @@ import { LogoIcon } from "./logo-icon";
 
 const links = [
   {
-    path: "/",
-    name: "features",
-  },
-  {
     path: "/pricing",
     name: "pricing",
   },
@@ -49,8 +45,8 @@ export function Header() {
                 <Link
                   href={path}
                   className={cn(
-                    "h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary/80",
-                    path === lastPath && "bg-secondary"
+                    "h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
+                    path === lastPath && "bg-secondary hover:bg-secondary"
                   )}
                 >
                   {t(`header.${name}`)}
