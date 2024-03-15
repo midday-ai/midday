@@ -1,3 +1,4 @@
+import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
 import { fetchPageBlocks, fetchPages, notion } from "@/lib/notion";
 import { getStaticParams } from "@/locales/server";
@@ -33,7 +34,7 @@ export default async function Page({
       const html = await renderer.render(...blocks);
 
       return (
-        <div key={post.id} className="mb-12">
+        <div key={post.id} className="mb-20">
           <PostStatus status={post.properties.Tag.select.name} />
 
           <h2 className="font-medium text-2xl mb-6">
@@ -43,6 +44,8 @@ export default async function Page({
             className="notion-render"
             dangerouslySetInnerHTML={{ __html: html }}
           />
+
+          <PostMeta author={post.properties.Author.people.at(0)} />
         </div>
       );
     });

@@ -8,9 +8,14 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // experimental: {
-  //   ppr: true,
-  // },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
 };
 
 export default config;
