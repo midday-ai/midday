@@ -40,13 +40,18 @@ export function Header() {
 
         <ul className="flex space-x-2 font-medium text-sm mr-8">
           {links.map(({ path, name }) => {
+            const isActive =
+              path === "/updates"
+                ? pathname.includes("updates")
+                : path === lastPath;
+
             return (
               <li key={path}>
                 <Link
                   href={path}
                   className={cn(
                     "h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
-                    path === lastPath && "bg-secondary hover:bg-secondary"
+                    isActive && "bg-secondary hover:bg-secondary"
                   )}
                 >
                   {t(`header.${name}`)}
