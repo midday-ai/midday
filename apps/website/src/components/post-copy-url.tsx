@@ -4,9 +4,9 @@ import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export function PostCopyURL() {
+export function PostCopyURL({ slug }) {
   const [isCopied, setCopied] = useState(false);
-  const url = "";
+  const url = `${window.origin}/${slug}`;
 
   const handleClipboard = async () => {
     try {
