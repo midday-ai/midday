@@ -14,20 +14,24 @@
   "dependencies": {
     "@logsnag/next": "^1.0.3",
     "@midday/ui": "workspace:*",
+    "@notion-render/client": "^0.0.2",
+    "@notionhq/client": "^2.2.14",
     "@openstatus/react": "^0.0.3",
     "@vercel/analytics": "^1.2.2",
+    "date-fns": "^3.5.0",
     "geist": "^1.2.2",
     "next": "canary",
     "next-international": "1.2.4",
     "next-themes": "^0.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "server-only": "^0.0.1",
     "sharp": "^0.33.2"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^20.11.27",
-    "@types/react": "^18.2.65",
+    "@types/node": "^20.11.28",
+    "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22"
   }
 }

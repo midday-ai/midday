@@ -12,16 +12,16 @@ const links = [
     name: "pricing",
   },
   {
-    path: "/story",
-    name: "story",
-  },
-  {
     path: "/updates",
     name: "updates",
   },
   {
-    path: "https://app.midday.ai",
-    name: "signIn",
+    path: "/story",
+    name: "story",
+  },
+  {
+    path: "/download",
+    name: "download",
   },
 ];
 

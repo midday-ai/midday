@@ -9,7 +9,10 @@ export function CTAButtons() {
           Talk to us
         </Button>
       </Link>
-      <Button className="h-11 px-5">Get Started</Button>
+
+      <a href="https://app.midday.ai">
+        <Button className="h-11 px-5">Get Started</Button>
+      </a>
     </div>
   );
 }
