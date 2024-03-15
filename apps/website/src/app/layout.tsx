@@ -41,7 +41,7 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "whitespace-pre-line bg-[#0C0C0C]"
+          "bg-[#0C0C0C]"
         )}
       >
         {children}
