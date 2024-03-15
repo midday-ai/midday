@@ -13,6 +13,12 @@ export const notion = new Client({
 export const fetchPages = () => {
   return notion.databases.query({
     database_id: process.env.NOTION_DATABASE_ID!,
+    sorts: [
+      {
+        timestamp: "created_time",
+        direction: "ascending",
+      },
+    ],
     filter: {
       property: "Status",
       select: {

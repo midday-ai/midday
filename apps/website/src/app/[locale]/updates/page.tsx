@@ -23,17 +23,18 @@ export default async function Page({
 
   const data = await fetchPages();
 
-  const links = data.results.map((post) => ({
-    id: post.id,
-    lable: format(new Date(post.properties.Date.date.start), "MMMM d, y"),
-  }));
+  const links = data.results
+    // .sort((a, b) => a.created_time - b.created_time)
+    .map((post) => ({
+      id: post.id,
+      lable: format(new Date(post.created_time), "MMMM d, y"),
+    }));
 
   const posts = data.results
-    .sort((a, b) => a.properties.Date.date.start - b.properties.Date.date.start)
+    // .sort((a, b) => a.created_time - b.created_time)
     .map(async (post) => {
       const blocks = await fetchPageBlocks(post.id);
       const html = await renderer.render(...blocks);
-
       const slug = `/updates/${post.properties.Slug.url}`;
 
       return (
