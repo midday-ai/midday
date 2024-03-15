@@ -6,7 +6,7 @@ import { useState } from "react";
 
 export function PostCopyURL({ slug }) {
   const [isCopied, setCopied] = useState(false);
-  const url = `https://midday.ai/${slug}`;
+  const url = `https://midday.ai${slug}`;
 
   const handleClipboard = async () => {
     try {
