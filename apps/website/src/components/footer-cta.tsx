@@ -1,5 +1,4 @@
-import { Button } from "@midday/ui/button";
-import Link from "next/link";
+import { CTAButtons } from "@/components/cta-buttons";
 
 export function FooterCTA() {
   return (
@@ -12,13 +11,8 @@ export function FooterCTA() {
         mattis. Nulla tincidunt ante eros, nec interdum dui varius quis.
       </p>
 
-      <div className="flex items-center space-x-4 mt-10 mb-8">
-        <Link href="/talk-to-us">
-          <Button variant="outline" className="border border-white h-12 px-6">
-            Talk to us
-          </Button>
-        </Link>
-        <Button className="h-11 px-5">Get Started</Button>
+      <div className="mt-10 mb-8">
+        <CTAButtons />
       </div>
     </div>
   );
