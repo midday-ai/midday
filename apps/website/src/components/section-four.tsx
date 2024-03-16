@@ -13,7 +13,11 @@ export function SectionFour() {
           feature web based invoices, live collaboration and project sync.
         </p>
 
-        <Image src={invoicing} quality={100} className="mt-auto" />
+        <Image
+          src={invoicing}
+          quality={100}
+          className="mt-auto object-contain"
+        />
       </div>
 
       <div className="border basis-2/3 rounded-2xl bg-[#121212] p-10 flex justify-between space-x-8">
@@ -46,7 +50,11 @@ export function SectionFour() {
           />
         </div>
 
-        <Image src={inbox} quality={100} className="-mb-10 basis-1/2" />
+        <Image
+          src={inbox}
+          quality={100}
+          className="-mb-10 basis-1/2 object-contain"
+        />
       </div>
     </section>
   );

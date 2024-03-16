@@ -3,6 +3,12 @@
 // Credit: https://buildui.com/recipes/magnified-dock
 
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
+import {
   type MotionValue,
   motion,
   useMotionValue,
@@ -17,6 +23,7 @@ const apps = [
   {
     id: "finder",
     icon: require("public/dock/finder.png"),
+    name: "Finder",
   },
   // {
   //   id: "contacts",
@@ -25,22 +32,27 @@ const apps = [
   {
     id: "midday",
     icon: require("public/dock/midday.png"),
+    name: "Midday",
   },
   {
     id: "cal",
     icon: require("public/dock/cal.png"),
+    name: "Talk to us",
   },
   {
     id: "notion",
     icon: require("public/dock/notion.png"),
+    name: "Roadmap",
   },
   {
     id: "discord",
     icon: require("public/dock/discord.png"),
+    name: "Join the comunity",
   },
   {
     id: "github",
     icon: require("public/dock/github.png"),
+    name: "Repository",
   },
 ];
 
@@ -54,19 +66,26 @@ export function Dock() {
   const mouseX = useMotionValue(Infinity);
 
   return (
-    <motion.div
-      onMouseMove={(e) => mouseX.set(e.pageX)}
-      onMouseLeave={() => mouseX.set(Infinity)}
-      className="mx-auto flex h-[58px] items-end gap-2 rounded-2xl px-2 pb-2 border dark:border-[#707070]"
-    >
-      {apps.map((app) => {
-        return (
-          <button key={app.id} type="button">
-            <AppIcon mouseX={mouseX} src={app.icon} />
-          </button>
-        );
-      })}
-    </motion.div>
+    <TooltipProvider delayDuration={0}>
+      <motion.div
+        onMouseMove={(e) => mouseX.set(e.pageX)}
+        onMouseLeave={() => mouseX.set(Infinity)}
+        className="mx-auto flex h-[58px] items-end gap-2 rounded-2xl px-2 pb-2 border dark:border-[#707070]"
+      >
+        {apps.map((app) => {
+          return (
+            <Tooltip key={app.id}>
+              <TooltipTrigger>
+                <AppIcon mouseX={mouseX} src={app.icon} />
+              </TooltipTrigger>
+              <TooltipContent className="py-1 px-3 rounded-sm" sideOffset={8}>
+                <p className="text-xs">{app.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          );
+        })}
+      </motion.div>
+    </TooltipProvider>
   );
 }
 
