@@ -9,7 +9,7 @@ export function SectionSix() {
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Your Virtual CFO</h3>
 
-          <p className="text-[#B6B6B5]">
+          <p className="text-[#878787]">
             Ask Midday anything and get insights of your financial situation you{" "}
             <br />
             didnt know. Understand your biggest spendings and your biggest

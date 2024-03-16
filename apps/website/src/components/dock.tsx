@@ -18,10 +18,10 @@ const apps = [
     id: "finder",
     icon: require("public/dock/finder.png"),
   },
-  {
-    id: "contacts",
-    icon: require("public/dock/contacts.png"),
-  },
+  // {
+  //   id: "contacts",
+  //   icon: require("public/dock/contacts.png"),
+  // },
   {
     id: "midday",
     icon: require("public/dock/midday.png"),
@@ -37,6 +37,10 @@ const apps = [
   {
     id: "discord",
     icon: require("public/dock/discord.png"),
+  },
+  {
+    id: "github",
+    icon: require("public/dock/github.png"),
   },
 ];
 

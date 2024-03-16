@@ -8,7 +8,7 @@ export function SectionFive() {
 
       <div className="border basis-1/3 rounded-2xl bg-[#121212] p-10 text-center flex flex-col">
         <h4 className="font-medium text-2xl mb-4">Seamless export</h4>
-        <p className="text-[#B6B6B5]">
+        <p className="text-[#878787]">
           Export your transaction with their attachments/basis and hand over to
           you accountant. You can select whatever timeperiod or seperate
           transaction you want.

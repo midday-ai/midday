@@ -14,12 +14,12 @@ export function SectionTwo() {
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Financial overview</h3>
 
-          <p className="text-[#B6B6B5] mb-4">
+          <p className="text-[#878787] mb-4">
             Bring your own bank, we connect to over 4000 banks <br /> world
             wide.
           </p>
 
-          <p className="text-[#B6B6B5]">
+          <p className="text-[#878787]">
             Keep track of your expenses and income. Get a better <br />
             overview of your bussiness financial track record and
             <br /> situation. Share profit/loss reports
@@ -37,7 +37,7 @@ export function SectionTwo() {
                 d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
               />
             </svg>
-            <span className="text-[#B6B6B5]">Share profit/loss reports</span>
+            <span className="text-[#878787]">Share profit/loss reports</span>
           </div>
         </div>
       </div>
