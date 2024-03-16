@@ -7,6 +7,7 @@ import { SectionFour } from "./section-four";
 import { SectionSeven } from "./section-seven";
 import { SectionSix } from "./section-six";
 import { SectionThree } from "./section-three";
+import { Testimonials } from "./testimonials";
 
 export function StartPage() {
   return (
@@ -21,6 +22,7 @@ export function StartPage() {
         <SectionFive />
         <SectionSix />
         <SectionSeven />
+        <Testimonials />
       </div>
     </>
   );
