@@ -111,6 +111,7 @@ export function ConnectGoCardLessModal({ countryCode }) {
   useEffect(() => {
     async function fetchData() {
       const banks = await getBanks({ countryCode });
+      console.log(banks);
       setLoading(false);
 
       if (banks.length > 0) {
