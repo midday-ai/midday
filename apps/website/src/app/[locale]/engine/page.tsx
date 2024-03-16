@@ -58,6 +58,7 @@ export default function Page({
           width={419}
           height={421}
           className="mt-12"
+          quality={100}
         />
 
         <WaitlistInput />
