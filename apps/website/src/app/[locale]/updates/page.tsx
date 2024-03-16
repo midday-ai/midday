@@ -9,6 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const revalidate = 0;
+export const dynamic = "force-static";
 
 export function generateStaticParams() {
   return getStaticParams();
