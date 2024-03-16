@@ -56,7 +56,7 @@ export function Footer() {
                   <Link href="/privacy">Privacy policy</Link>
                 </li>
                 <li className="text-[#878787]">
-                  <Link href="/terms">Terms of service</Link>
+                  <Link href="/terms">Terms and Conditions</Link>
                 </li>
               </ul>
             </div>
