@@ -8,7 +8,7 @@ import { createEndUserAgreementSchema } from "../schema";
 
 export const createEndUserAgreementAction = action(
   createEndUserAgreementSchema,
-  async ({ institutionId, isDesktop }) => {
+  async ({ institutionId, transactionTotalDays, isDesktop }) => {
     const api = new GoCardLessApi();
     const headersList = headers();
 
@@ -16,7 +16,10 @@ export const createEndUserAgreementAction = action(
     const protocol = headersList.get("x-forwarded-proto") || "";
     const pathname = headersList.get("x-invoke-path") || "";
 
-    const data = await api.createEndUserAgreement(institutionId);
+    const data = await api.createEndUserAgreement({
+      institutionId,
+      transactionTotalDays,
+    });
 
     const url = `${protocol}://${domain}`;
     const redirectBase = isDesktop ? "midday://" : url;

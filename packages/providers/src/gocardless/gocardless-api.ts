@@ -16,6 +16,7 @@ import type {
   GetTransactionsRequest,
   GetTransactionsResponse,
   PostCreateAgreementResponse,
+  PostEndUserAgreementRequest,
   PostRequisitionsRequest,
   PostRequisitionsResponse,
 } from "./types";
@@ -26,7 +27,6 @@ export class GoCardLessApi {
   #api: AxiosInstance | null = null;
 
   #accessValidForDays = 180;
-  #maxHistoricalDays = 730;
 
   // Cache keys
   #accessTokenCacheKey = "gocardless_access_token";
@@ -137,9 +137,10 @@ export class GoCardLessApi {
     );
   }
 
-  async createEndUserAgreement(
-    institutionId: string
-  ): Promise<PostCreateAgreementResponse> {
+  async createEndUserAgreement({
+    institutionId,
+    transactionTotalDays,
+  }: PostEndUserAgreementRequest): Promise<PostCreateAgreementResponse> {
     const token = await this.#getAccessToken();
 
     return this.#post<PostCreateAgreementResponse>(
@@ -149,7 +150,7 @@ export class GoCardLessApi {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
         access_valid_for_days: this.#accessValidForDays,
-        max_historical_days: this.#maxHistoricalDays,
+        max_historical_days: transactionTotalDays,
       }
     );
   }

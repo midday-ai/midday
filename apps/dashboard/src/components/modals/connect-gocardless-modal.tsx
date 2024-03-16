@@ -176,12 +176,13 @@ export function ConnectGoCardLessModal({ countryCode }) {
                       id={bank.id}
                       name={bank.name}
                       logo={bank.logo}
-                      onSelect={() =>
+                      onSelect={() => {
                         createEndUserAgreement.execute({
                           institutionId: bank.id,
                           isDesktop: isDesktopApp(),
-                        })
-                      }
+                          transactionTotalDays: +bank.transaction_total_days,
+                        });
+                      }}
                     />
                   );
                 })}

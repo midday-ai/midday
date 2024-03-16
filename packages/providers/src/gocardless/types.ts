@@ -58,6 +58,11 @@ export type PostRequisitionsRequest = {
   redirect: string;
 };
 
+export type PostEndUserAgreementRequest = {
+  institutionId: string;
+  transactionTotalDays: number;
+};
+
 export type PostRequisitionsResponse = {
   id: string;
   created: string;

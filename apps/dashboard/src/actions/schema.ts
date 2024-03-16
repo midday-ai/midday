@@ -292,6 +292,7 @@ export const manualSyncTransactionsSchema = z.object({
 
 export const createEndUserAgreementSchema = z.object({
   institutionId: z.string(),
+  transactionTotalDays: z.number(),
   isDesktop: z.boolean().optional(),
 });
 
