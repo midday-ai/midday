@@ -14,6 +14,7 @@
     "dev": "turbo dev --parallel",
     "test": "turbo test --parallel",
     "start:dashboard": "turbo start --filter=@midday/dashboard",
+    "start:website": "turbo start --filter=@midday/website",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "dev:website": "turbo dev --filter=@midday/website",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
