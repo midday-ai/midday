@@ -34,6 +34,7 @@ export default function Page({
 
         <div className="flex items-center flex-col text-center">
           <h3 className="text-[344px] font-medium leading-[344px]">30</h3>
+
           <p className="font-medium text-xl">
             Claim $30/mo early adopter plan, <br />
             <span className="underline">free while in beta</span>
