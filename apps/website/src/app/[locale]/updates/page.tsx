@@ -1,3 +1,4 @@
+import { PostLinks } from "@/components/post-links";
 import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
 import { fetchPageBlocks, fetchPages } from "@/lib/notion";
@@ -77,20 +78,8 @@ export default async function Page({
   });
 
   return (
-    <div className="container max-w-[1140px] flex">
-      <aside className="sticky h-screen min-w-[260px] pt-[150px] space-y-4 flex flex-col top-[48px]">
-        {links.map((link) => {
-          return (
-            <Link
-              key={link.id}
-              className="text-[14px]"
-              href={`/updates#${link.slug}`}
-            >
-              {link.lable}
-            </Link>
-          );
-        })}
-      </aside>
+    <div className="container max-w-[1140px] flex scroll-smooth">
+      <PostLinks links={links} />
       <div className="max-w-[680px] pt-[150px] w-full">{posts}</div>
     </div>
   );
