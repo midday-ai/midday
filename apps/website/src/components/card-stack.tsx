@@ -60,6 +60,7 @@ export const CardStack = ({
           >
             <Image
               quality={100}
+              priority={index === 0}
               alt="Dashboard - Overview"
               src={require("public/screen-1.png")}
               width={1031}

@@ -2,6 +2,8 @@ import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
+import signature from "public/email/signature-dark.png";
+import founders from "public/founders.png";
 
 export const metadata: Metadata = {
   title: "Story | Midday",
@@ -56,17 +58,12 @@ export default function Page({
         mus. In eu mollis ipsum. Suspendisse luctus lobortis libero malesuada.
       </p>
 
-      <Image
-        src={require("public/founders.png")}
-        width={800}
-        height={514}
-        alt="Pontus & Viktor"
-      />
+      <Image src={founders} width={800} height={514} alt="Pontus & Viktor" />
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, founders</p>
         <Image
-          src={require("public/email/signature-dark.png")}
+          src={signature}
           alt="Signature"
           className="block w-[143px] h-[20px]"
         />
