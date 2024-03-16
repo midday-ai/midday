@@ -29,7 +29,7 @@ export default async function Page({
     slug: post.properties.Slug.url,
   }));
 
-  const posts = data.results.map(async (post) => {
+  const posts = data.results.map(async (post, index) => {
     const blocks = await fetchPageBlocks(post.id);
     const slug = `/updates/${post.properties.Slug.url}`;
 
@@ -52,11 +52,13 @@ export default async function Page({
             case "image":
               return (
                 <Image
+                  priority={index === 0}
                   className="mb-6"
                   key={block.id}
                   width={800}
                   height={520}
                   src={block.image.file.url}
+                  alt={block.image?.caption.at(0)?.plain_text ?? "Image"}
                 />
               );
 
