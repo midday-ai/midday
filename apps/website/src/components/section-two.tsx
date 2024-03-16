@@ -3,9 +3,14 @@ import profitLoss from "public/profit-loss.png";
 
 export function SectionTwo() {
   return (
-    <section className="border rounded-2xl container bg-[#121212] p-10 pb-0 mb-12">
+    <section className="border rounded-2xl container bg-[#121212] p-10 pb-0">
       <div className="flex space-x-12">
-        <Image src={profitLoss} height={400} className="-mb-[1px]" />
+        <Image
+          src={profitLoss}
+          height={400}
+          className="-mb-[1px]"
+          quality={100}
+        />
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Financial overview</h3>
 

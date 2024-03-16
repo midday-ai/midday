@@ -11,11 +11,13 @@ export function StartPage() {
     <>
       <Hero />
       <Screens />
-      <SectionOne />
-      <SectionTwo />
-      <SectionThree />
-      <SectionFour />
-      <SectionFive />
+      <div className="space-y-12">
+        <SectionOne />
+        <SectionTwo />
+        <SectionThree />
+        <SectionFour />
+        <SectionFive />
+      </div>
     </>
   );
 }

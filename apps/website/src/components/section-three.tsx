@@ -47,7 +47,12 @@ export function SectionThree() {
             <span className="text-[#B6B6B5]">Share with your clients</span>
           </div>
         </div>
-        <Image src={timetracker} height={400} className="-mb-[1px] !ml-auto" />
+        <Image
+          src={timetracker}
+          height={400}
+          className="-mb-[1px] !ml-auto"
+          quality={100}
+        />
       </div>
     </section>
   );
