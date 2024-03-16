@@ -18,7 +18,8 @@ export function Provider({ locale, children }: ProviderProps) {
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
-        forcedTheme={pathname.includes("engine") ? "dark" : undefined}
+        // forcedTheme={pathname.includes("engine") ? "dark" : undefined}
+        forcedTheme="dark"
         enableSystem
         disableTransitionOnChange
       >
