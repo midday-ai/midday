@@ -85,7 +85,7 @@ export function WaitlistInput() {
                 autoComplete="email"
                 aria-label="Email address"
                 required
-                className="bg-background font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11 border border-[#DCDAD2] dark:border-none dark:bg-[#1D1D1D]/80"
+                className="bg-transparent font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11 border border-border"
               />
               <SubmitButton />
             </fieldset>
