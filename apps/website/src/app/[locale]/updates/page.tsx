@@ -4,12 +4,17 @@ import { PostStatus } from "@/components/post-status";
 import { fetchPageBlocks, fetchPages } from "@/lib/notion";
 import { getStaticParams } from "@/locales/server";
 import format from "date-fns/format";
+import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import Link from "next/link";
 
 export const revalidate = 0;
 export const dynamic = "force-static";
+
+export const metadata: Metadata = {
+  title: "Updates | Midday",
+};
 
 export function generateStaticParams() {
   return getStaticParams();

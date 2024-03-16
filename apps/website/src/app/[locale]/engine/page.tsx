@@ -1,9 +1,13 @@
 import { SparklesCore } from "@/components/sparkles";
 import { WaitlistInput } from "@/components/waitlist-input";
-import { WavyBackground } from "@/components/wavy-background";
 import { getStaticParams } from "@/locales/server";
+import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "Engine | Midday",
+};
 
 export function generateStaticParams() {
   return getStaticParams();

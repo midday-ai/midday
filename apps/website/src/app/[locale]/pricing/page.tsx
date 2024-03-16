@@ -6,8 +6,13 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Pricing | Midday",
+};
 
 export function generateStaticParams() {
   return getStaticParams();
