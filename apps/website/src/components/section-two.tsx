@@ -8,7 +8,7 @@ export function SectionTwo() {
         <Image
           src={profitLoss}
           height={400}
-          className="-mb-[1px]"
+          className="-mb-[1px] object-contain"
           quality={100}
         />
         <div className="mt-6">

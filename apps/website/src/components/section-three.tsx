@@ -50,7 +50,7 @@ export function SectionThree() {
         <Image
           src={timetracker}
           height={400}
-          className="-mb-[1px] !ml-auto"
+          className="-mb-[1px] !ml-auto object-contain"
           quality={100}
         />
       </div>

@@ -2,7 +2,9 @@ export async function GithubStars() {
   const response = await fetch(
     "https://api.github.com/repos/pontusab/reactnative.se"
   );
+
   const data = await response.json();
+
   return (
     <a
       href="https://github.com/pontusab/reactnative.se"

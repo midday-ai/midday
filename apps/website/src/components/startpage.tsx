@@ -4,6 +4,7 @@ import { SectionOne } from "@/components/section-one";
 import { SectionTwo } from "@/components/section-two";
 import { SectionFive } from "./section-five";
 import { SectionFour } from "./section-four";
+import { SectionSeven } from "./section-seven";
 import { SectionSix } from "./section-six";
 import { SectionThree } from "./section-three";
 
@@ -19,6 +20,7 @@ export function StartPage() {
         <SectionFour />
         <SectionFive />
         <SectionSix />
+        <SectionSeven />
       </div>
     </>
   );

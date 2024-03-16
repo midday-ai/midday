@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const getAuthorTagline = (id: string) =>
   ({
-    "5c2176bb-e4f0-4026-a77a-3feaf95fc758": "Engineering",
+    "5c2176bb-e4f0-4026-a77a-3feaf95fc758": "Engineering", // Pontus
   }[id]);
 
 export function PostAuthor({ name, src, id }) {

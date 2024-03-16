@@ -5,7 +5,12 @@ export function SectionSix() {
   return (
     <section className="border rounded-2xl container bg-[#121212] p-10">
       <div className="flex space-x-12">
-        <Image src={ai} height={405} className="-mb-[1px]" quality={100} />
+        <Image
+          src={ai}
+          height={405}
+          className="-mb-[1px] object-contain"
+          quality={100}
+        />
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Your Virtual CFO</h3>
 
