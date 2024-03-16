@@ -33,7 +33,7 @@ export function Header() {
 
   return (
     <header className="h-12 sticky flex items-center justify-center mt-4 top-4 z-50">
-      <nav className="border p-3 rounded-2xl backdrop-filter backdrop-blur-xl flex items-center bg-[#121212] bg-opacity-80">
+      <nav className="border border-border p-3 rounded-2xl backdrop-filter backdrop-blur-xl flex items-center bg-[#121212] bg-opacity-80">
         <Link className="mr-10" href="/">
           <LogoIcon />
         </Link>
