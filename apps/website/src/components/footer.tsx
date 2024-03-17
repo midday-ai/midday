@@ -101,7 +101,7 @@ export function Footer() {
           </div>
         </div>
 
-        <p className="text-xs text-[#3E3E3E] mb-12">
+        <p className="text-xs text-[#B3B3B2] dark:text-[#3E3E3E] mb-12">
           Cal.com® is a registered trademark by Cal.com, Inc. All rights
           reserved. Cal.com® is a registered trademark by Cal.com, Inc. All
           rights reserved. Cal.com® is a registered trademark by Cal.com, Inc.

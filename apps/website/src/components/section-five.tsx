@@ -1,13 +1,16 @@
-import Image from "next/image";
+import { AdaptiveImage } from "@/components/adaptive-image";
+import exportingLight from "public/exporting-light.png";
 import exporting from "public/exporting.png";
+import vaultLight from "public/vault-light.png";
 import vault from "public/vault.png";
 
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row">
       <div className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col-reverse items-center md:items-start">
-        <Image
-          src={vault}
+        <AdaptiveImage
+          darkSrc={vault}
+          lightSrc={vaultLight}
           quality={100}
           className="mt-8 md:mt-0 basis-1/2 object-contain md:max-w-[367px]"
         />
@@ -35,7 +38,12 @@ export function SectionFive() {
           transaction you want.
         </p>
 
-        <Image src={exporting} quality={100} className="mt-8 md:mt-auto" />
+        <AdaptiveImage
+          darkSrc={exporting}
+          lightSrc={exportingLight}
+          quality={100}
+          className="mt-8 md:mt-auto"
+        />
       </div>
     </section>
   );

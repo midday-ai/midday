@@ -1,5 +1,7 @@
-import Image from "next/image";
+import { AdaptiveImage } from "@/components/adaptive-image";
+import inboxLight from "public/inbox-light.png";
 import inbox from "public/inbox.png";
+import invoicingLight from "public/invoicing-light.png";
 import invoicing from "public/invoicing.png";
 import { CopyInput } from "./copy-input";
 
@@ -13,8 +15,9 @@ export function SectionFour() {
           feature web based invoices, live collaboration and project sync.
         </p>
 
-        <Image
-          src={invoicing}
+        <AdaptiveImage
+          darkSrc={invoicing}
+          lightSrc={invoicingLight}
           quality={100}
           className="mt-auto object-contain"
         />
@@ -50,8 +53,9 @@ export function SectionFour() {
           />
         </div>
 
-        <Image
-          src={inbox}
+        <AdaptiveImage
+          darkSrc={inbox}
+          lightSrc={inboxLight}
           quality={100}
           className="-mb-10 md:basis-1/2 object-contain mt-8 md:mt-0"
         />

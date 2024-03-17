@@ -50,9 +50,9 @@ export default function Page({
               <CTAButtons />
             </div>
 
-            <BlurryCircle className="absolute -top-[50px] right-[0px] bg-[#3633D0]/5" />
-            <BlurryCircle className="absolute bottom-[160px] left-6 bg-[#A1F5CD]/5" />
-            <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB]/5" />
+            <BlurryCircle className="absolute -top-[50px] right-[0px] bg-[#3633D0] bg-opacity-10 dark:bg-opacity-5" />
+            <BlurryCircle className="absolute bottom-[160px] left-6 bg-[#A1F5CD] bg-opacity-15 dark:bg-opacity-5" />
+            <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB] bg-opacity-15 dark:bg-opacity-5" />
           </div>
         </div>
 

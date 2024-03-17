@@ -1,7 +1,7 @@
 "use client";
 
+import { AdaptiveImage } from "@/components/adaptive-image";
 import { motion } from "framer-motion";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 
 let interval: any;
@@ -59,24 +59,13 @@ export const CardStack = ({
               zIndex: cards.length - index, //  decrease z-index for the cards that are behind
             }}
           >
-            <Image
-              quality={100}
+            <AdaptiveImage
               priority={index === 0}
               alt="Dashboard - Overview"
-              src={require("public/screen-1.png")}
+              darkSrc={require("public/screen-1.png")}
+              lightSrc={require("public/screen-1-light.png")}
               width={1031}
               height={670}
-              className="hidden dark:block"
-            />
-
-            <Image
-              quality={100}
-              priority={index === 0}
-              alt="Dashboard - Overview"
-              src={require("public/screen-1-light.png")}
-              width={1031}
-              height={670}
-              className="dark:hidden"
             />
           </motion.div>
         );

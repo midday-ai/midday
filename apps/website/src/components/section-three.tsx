@@ -1,5 +1,7 @@
+import { AdaptiveImage } from "@/components/adaptive-image";
 import { BlurryCircle } from "@/components/blurry-circle";
 import Image from "next/image";
+import timetrackerLight from "public/time-tracker-light.png";
 import timetracker from "public/time-tracker.png";
 
 export function SectionThree() {
@@ -53,8 +55,10 @@ export function SectionThree() {
               <span className="text-[#878787]">Share with your clients</span>
             </div>
           </div>
-          <Image
-            src={timetracker}
+
+          <AdaptiveImage
+            darkSrc={timetracker}
+            lightSrc={timetrackerLight}
             height={400}
             className="-mb-[24px] md:-mb-[1px] !ml-auto object-contain mt-8 md:mt-0"
             quality={100}

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { AdaptiveImage } from "@/components/adaptive-image";
 import profitLossLight from "public/profit-loss-light.png";
 import profitLoss from "public/profit-loss.png";
 
@@ -6,19 +6,13 @@ export function SectionTwo() {
   return (
     <section className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10 md:pb-0">
       <div className="flex flex-col md:space-x-12 md:flex-row">
-        <Image
-          src={profitLoss}
+        <AdaptiveImage
+          lightSrc={profitLossLight}
+          darkSrc={profitLoss}
           height={400}
-          className="-mb-[1px] object-contain hidden dark:block"
-          quality={100}
+          className="-mb-[1px] object-contain "
         />
 
-        <Image
-          src={profitLossLight}
-          height={400}
-          className="-mb-[1px] object-contain block dark:hidden"
-          quality={100}
-        />
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Financial overview</h3>
 
