@@ -1,13 +1,19 @@
+"use client";
+
 import { AdaptiveImage } from "@/components/adaptive-image";
+import { motion } from "framer-motion";
 import inboxLight from "public/inbox-light.png";
 import inbox from "public/inbox.png";
 import invoicingLight from "public/invoicing-light.png";
 import invoicing from "public/invoicing.png";
+import { useState } from "react";
 import { CopyInput } from "./copy-input";
 
 export function SectionFour() {
+  const [isActive, setActive] = useState(false);
+
   return (
-    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row">
+    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row overflow-hidden">
       <div className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 text-center flex flex-col">
         <h4 className="font-medium text-2xl mb-4">Invoicing</h4>
         <p className="text-[#878787]">
@@ -23,7 +29,11 @@ export function SectionFour() {
         />
       </div>
 
-      <div className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
+      <div
+        className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col"
+        onMouseEnter={() => setActive(true)}
+        onMouseLeave={() => setActive(false)}
+      >
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-2xl mb-4">Magic inbox</h4>
 
@@ -53,12 +63,20 @@ export function SectionFour() {
           />
         </div>
 
-        <AdaptiveImage
-          darkSrc={inbox}
-          lightSrc={inboxLight}
-          quality={100}
-          className="-mb-10 md:basis-1/2 object-contain mt-8 md:mt-0"
-        />
+        <div className="md:basis-1/2 mt-8 md:mt-0 -bottom-[8px] relative">
+          <motion.div
+            animate={isActive ? { y: -10 } : { y: 0 }}
+            initial={{ y: -10 }}
+            transition={{ type: "spring", stiffness: 100 }}
+          >
+            <AdaptiveImage
+              darkSrc={inbox}
+              lightSrc={inboxLight}
+              quality={100}
+              className="object-contain border-b-[1px]"
+            />
+          </motion.div>
+        </div>
       </div>
     </section>
   );

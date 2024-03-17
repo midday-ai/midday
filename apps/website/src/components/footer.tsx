@@ -11,11 +11,11 @@ export function Footer() {
     <footer className="border-t-[1px] border-border px-4 md:px-0 pt-10 md:pt-16">
       <div className="container">
         <div className="flex justify-between items-center border-border border-b-[1px] pb-10 md:pb-16 mb-12">
-          <Link href="/" className="scale-50 -ml-[52px] md:ml-0">
+          <Link href="/" className="scale-50 -ml-[52px] md:ml-0 md:scale-100">
             <LogoLarge />
           </Link>
 
-          <h3 className="font-normal ml:text-2xl">
+          <h3 className="font-normal md:text-2xl">
             Run your bussiness smarter.
           </h3>
         </div>

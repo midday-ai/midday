@@ -62,8 +62,7 @@ const testimonials = [
       "https://pbs.twimg.com/profile_images/1145166093029265408/9gJSVrQ7_400x400.jpg",
     handle: "@zenorocha",
     verified: true,
-    quote:
-      "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair.",
+    quote: "this is absolutely amazing",
   },
   {
     name: "Timur Ercan",
@@ -75,6 +74,81 @@ const testimonials = [
       "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity, it was the season of Light, it was the season of Darkness, it was the spring of hope, it was the winter of despair.",
   },
 ];
+
+// const testimonials = [
+//   {
+//     name: "Lucas Grey",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1744288035314008064/kAQycMrk_400x400.png",
+//     handle: "@ImLucasGrey",
+//     verified: true,
+//     quote: "This is so ingenious and good!",
+//   },
+//   {
+//     name: "CodeHagen",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1706595242009387008/_mNR89Xa_400x400.jpg",
+//     handle: "@CodeHagen",
+//     verified: true,
+//     quote: "Well… This is to good 🔥",
+//   },
+//   {
+//     name: "Steven Tey",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1506792347840888834/dS-r50Je_400x400.jpg",
+//     handle: "@steventey",
+//     verified: true,
+//     quote: "That report page is absolutely gorgeous 😍",
+//   },
+//   {
+//     name: "Patrick Tobler",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1643364165627551744/Z92S8fqD_400x400.jpg",
+//     handle: "@Padierfind",
+//     verified: true,
+//     quote: "I love this",
+//   },
+//   {
+//     name: "Christian Alares",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1194368464946974728/1D2biimN_400x400.jpg",
+//     handle: "@c_alares",
+//     verified: true,
+//     quote: "Omg, this is so cool!",
+//   },
+//   {
+//     name: "Zeno Rocha",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1145166093029265408/9gJSVrQ7_400x400.jpg",
+//     handle: "@zenorocha",
+//     verified: true,
+//     quote: "this is absolutely amazing",
+//   },
+//   {
+//     name: "Bailey Simrell",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1488962358609330178/tdTC7o6M_400x400.jpg",
+//     handle: "@baileysimrell",
+//     verified: true,
+//     quote: "Awesome man, looks amazing 🔥",
+//   },
+//   {
+//     name: "Kyle @ KyTech",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1586538348964978689/nkpJWZxG_400x400.png",
+//     handle: "@KyTechInc",
+//     verified: true,
+//     quote: "so ready! 🙌",
+//   },
+//   {
+//     name: "Gokul",
+//     avatarUrl:
+//       "https://pbs.twimg.com/profile_images/1687344852600516608/gVS34j7h_400x400.jpg",
+//     handle: "@KyTechInc",
+//     verified: true,
+//     quote: "🖤 Awesome work. just love it.",
+//   },
+// ];
 
 export function Testimonials() {
   return (

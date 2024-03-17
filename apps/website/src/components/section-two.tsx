@@ -1,17 +1,33 @@
+"use client";
+
 import { AdaptiveImage } from "@/components/adaptive-image";
+import { motion } from "framer-motion";
 import profitLossLight from "public/profit-loss-light.png";
 import profitLoss from "public/profit-loss.png";
+import { useState } from "react";
 
 export function SectionTwo() {
+  const [isActive, setActive] = useState(false);
+
   return (
-    <section className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10 md:pb-0">
+    <section
+      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10 md:pb-0 overflow-hidden"
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+    >
       <div className="flex flex-col md:space-x-12 md:flex-row">
-        <AdaptiveImage
-          lightSrc={profitLossLight}
-          darkSrc={profitLoss}
-          height={400}
-          className="-mb-[1px] object-contain "
-        />
+        <motion.div
+          animate={isActive ? { y: -10 } : { y: 0 }}
+          initial={{ y: -10 }}
+          transition={{ type: "spring", stiffness: 100 }}
+        >
+          <AdaptiveImage
+            lightSrc={profitLossLight}
+            darkSrc={profitLoss}
+            height={400}
+            className="-mb-[1px] object-contain "
+          />
+        </motion.div>
 
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Financial overview</h3>

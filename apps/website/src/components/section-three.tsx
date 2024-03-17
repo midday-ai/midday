@@ -1,12 +1,22 @@
+"use client";
+
 import { AdaptiveImage } from "@/components/adaptive-image";
 import { BlurryCircle } from "@/components/blurry-circle";
+import { motion } from "framer-motion";
 import timetrackerLight from "public/time-tracker-light.png";
 import timetracker from "public/time-tracker.png";
+import { useState } from "react";
 
 export function SectionThree() {
+  const [isActive, setActive] = useState(false);
+
   return (
-    <section className="relative">
-      <div className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10 md:pb-0">
+    <section
+      className="relative"
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+    >
+      <div className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
           <div className="md:mt-6">
             <h3 className="font-medium text-2xl	mb-4">
@@ -55,13 +65,19 @@ export function SectionThree() {
             </div>
           </div>
 
-          <AdaptiveImage
-            darkSrc={timetracker}
-            lightSrc={timetrackerLight}
-            height={400}
-            className="-mb-[24px] md:-mb-[1px] !ml-auto object-contain mt-8 md:mt-0"
-            quality={100}
-          />
+          <motion.div
+            animate={isActive ? { y: -10 } : { y: 0 }}
+            initial={{ y: -10 }}
+            transition={{ type: "spring", stiffness: 100 }}
+          >
+            <AdaptiveImage
+              darkSrc={timetracker}
+              lightSrc={timetrackerLight}
+              height={400}
+              className="-mb-[24px] md:-mb-[1px] !ml-auto object-contain mt-8 md:mt-0 border-b-[1px]"
+              quality={100}
+            />
+          </motion.div>
         </div>
       </div>
       <BlurryCircle className="absolute -top-[50px] -left-[100px] bg-[#F59F95]/5 -z-10" />
