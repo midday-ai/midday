@@ -56,7 +56,7 @@ export default function Page({
           </div>
         </div>
 
-        <div className="-mt-[150px]">
+        <div className="-mt-[200px]">
           <div className="text-center">
             <h4 className="text-4xl">Frequently asked questions</h4>
             <p className="text-[#878787] text-sm mt-4">

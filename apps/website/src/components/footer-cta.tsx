@@ -14,7 +14,7 @@ export function FooterCTA() {
       </p>
 
       <div className="mt-10 mb-8">
-        <CTAButtons />
+        <CTAButtons dark />
       </div>
     </div>
   );

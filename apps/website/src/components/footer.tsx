@@ -1,4 +1,5 @@
 import { LogoLarge } from "@/components/logo-large";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
 import { Suspense } from "react";
 import { GithubStars } from "./github-stars";
@@ -7,34 +8,36 @@ import { StatusWidget } from "./status-widget";
 
 export function Footer() {
   return (
-    <footer className="border-t-[1px] border-border px-4 md:px-0 pt-16">
+    <footer className="border-t-[1px] border-border px-4 md:px-0 pt-10 md:pt-16">
       <div className="container">
-        {/* <div className="flex justify-between items-center border-border border-b-[1px] pb-16 mb-12">
-          <Link href="/">
+        <div className="flex justify-between items-center border-border border-b-[1px] pb-10 md:pb-16 mb-12">
+          <Link href="/" className="scale-50 -ml-[52px] md:ml-0">
             <LogoLarge />
           </Link>
 
-          <h3 className="font-normal text-2xl">Run your bussiness smarter.</h3>
-        </div> */}
+          <h3 className="font-normal ml:text-2xl">
+            Run your bussiness smarter.
+          </h3>
+        </div>
 
-        <div className="flex flex-col md:flex-row w-full mb-20">
+        <div className="flex flex-col md:flex-row w-full mb-10 md:mb-20">
           <div className="flex flex-col space-y-8 md:space-y-0 md:flex-row md:w-6/12 justify-between leading-8">
             <div>
               <h6 className="font-medium">Product</h6>
               <ul>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/">Features</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/pricing">Pricing</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/story">Story</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/updates">Updates</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/download">Download</Link>
                 </li>
               </ul>
@@ -43,19 +46,19 @@ export function Footer() {
             <div>
               <h6>Resources</h6>
               <ul>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="https://git.new/midday">Github</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/support">Support</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/updates">Updates</Link>
                 </li>
-                <li className="text-[#878787]">
-                  <Link href="/privacy">Privacy policy</Link>
+                <li className="text-[#707070] dark:text-[#878787]">
+                  <Link href="/policy">Privacy policy</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
               </ul>
@@ -64,19 +67,21 @@ export function Footer() {
             <div>
               <h6>Solutions</h6>
               <ul>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/engine">Midday Engine</Link>
                 </li>
-                <li className="text-[#878787]">
-                  <Link href="/docs/self-hosted">Self hosted</Link>
+                <li className="text-[#707070] dark:text-[#878787]">
+                  <Link href="https://docs.midday.ai/self-hosted">
+                    Self hosted
+                  </Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/pricing">SaaS hosting</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>
                 </li>
-                <li className="text-[#878787]">
+                <li className="text-[#707070] dark:text-[#878787]">
                   <Link href="/oss-friends">OSS friends</Link>
                 </li>
               </ul>
@@ -93,9 +98,11 @@ export function Footer() {
                 <SocialLinks />
               </div>
               <div className="md:mr-0 mr-auto">
-                <Suspense>
-                  <StatusWidget />
-                </Suspense>
+                <ErrorBoundary>
+                  <Suspense>
+                    <StatusWidget />
+                  </Suspense>
+                </ErrorBoundary>
               </div>
             </div>
           </div>

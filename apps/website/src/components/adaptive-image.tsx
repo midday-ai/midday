@@ -2,7 +2,11 @@ import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import type ImageProps from "next/image";
 
-type Props = ImageProps;
+type Props = {
+  lightSrc: string;
+  darkSrc: string;
+  className: string;
+} & typeof ImageProps;
 
 export function AdaptiveImage({
   lightSrc,

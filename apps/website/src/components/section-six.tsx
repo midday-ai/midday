@@ -1,5 +1,4 @@
 import { AdaptiveImage } from "@/components/adaptive-image";
-import Image from "next/image";
 import aiLight from "public/ai-light.png";
 import ai from "public/ai.png";
 

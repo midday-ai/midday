@@ -146,7 +146,7 @@ export function Header() {
             <motion.ul
               initial="hidden"
               animate="show"
-              className="px-3 pt-8 text-xl text-[#878787] space-y-8 mb-8"
+              className="px-3 pt-8 text-xl text-[#707070] dark:text-[#878787] space-y-8 mb-8"
               variants={listVariant}
             >
               {links.map(({ path, name }) => {

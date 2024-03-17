@@ -1,6 +1,5 @@
 import { AdaptiveImage } from "@/components/adaptive-image";
 import { BlurryCircle } from "@/components/blurry-circle";
-import Image from "next/image";
 import timetrackerLight from "public/time-tracker-light.png";
 import timetracker from "public/time-tracker.png";
 

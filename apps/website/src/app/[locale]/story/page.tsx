@@ -1,8 +1,10 @@
+import { AdaptiveImage } from "@/components/adaptive-image";
 import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import signature from "public/email/signature-dark.png";
+import signatureLight from "public/email/signature.png";
 import founders from "public/founders.png";
 
 export const metadata: Metadata = {
@@ -62,8 +64,9 @@ export default function Page({
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, founders</p>
-        <Image
-          src={signature}
+        <AdaptiveImage
+          darkSrc={signature}
+          lightSrc={signatureLight}
           alt="Signature"
           className="block w-[143px] h-[20px]"
         />

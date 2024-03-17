@@ -5,7 +5,7 @@ export default {
     story: "Story",
     updates: "Updates",
     signIn: "Sign in",
-    getStarted: "Get Started",
+    getStarted: "Sign in",
   },
   waitlist: {
     email: "Enter your email",
