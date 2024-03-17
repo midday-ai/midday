@@ -5,7 +5,7 @@ import { CopyInput } from "./copy-input";
 
 export function SectionFour() {
   return (
-    <section className="flex justify-between space-x-8 h-[450px]">
+    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row">
       <div className="border border-border basis-1/3 rounded-2xl bg-[#121212] p-10 text-center flex flex-col">
         <h4 className="font-medium text-2xl mb-4">Invoicing</h4>
         <p className="text-[#878787]">
@@ -20,8 +20,8 @@ export function SectionFour() {
         />
       </div>
 
-      <div className="border border-border basis-2/3 rounded-2xl bg-[#121212] p-10 flex justify-between space-x-8">
-        <div className="flex flex-col basis-1/2">
+      <div className="border border-border md:basis-2/3 rounded-2xl bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
+        <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-2xl mb-4">Magic inbox</h4>
 
           <p className="text-[#878787] mb-4">
@@ -46,14 +46,14 @@ export function SectionFour() {
 
           <CopyInput
             value="inbox.fw12ed@midday.ai"
-            className="max-w-[240px] mt-auto"
+            className="max-w-[240px] mt-auto hidden md:flex"
           />
         </div>
 
         <Image
           src={inbox}
           quality={100}
-          className="-mb-10 basis-1/2 object-contain"
+          className="-mb-10 md:basis-1/2 object-contain mt-8 md:mt-0"
         />
       </div>
     </section>

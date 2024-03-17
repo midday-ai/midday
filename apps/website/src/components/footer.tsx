@@ -7,18 +7,18 @@ import { StatusWidget } from "./status-widget";
 
 export function Footer() {
   return (
-    <footer className="border-t-[1px] border-border pt-16">
+    <footer className="border-t-[1px] border-border px-4 md:px-0 pt-16">
       <div className="container">
-        <div className="flex justify-between items-center border-border border-b-[1px] pb-16 mb-12">
+        {/* <div className="flex justify-between items-center border-border border-b-[1px] pb-16 mb-12">
           <Link href="/">
             <LogoLarge />
           </Link>
 
           <h3 className="font-normal text-2xl">Run your bussiness smarter.</h3>
-        </div>
+        </div> */}
 
-        <div className="flex w-full mb-20">
-          <div className="flex w-6/12 justify-between leading-8">
+        <div className="flex flex-col md:flex-row w-full mb-20">
+          <div className="flex flex-col space-y-8 md:space-y-0 md:flex-row md:w-6/12 justify-between leading-8">
             <div>
               <h6 className="font-medium">Product</h6>
               <ul>
@@ -83,8 +83,8 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="w-6/12 flex justify-end">
-            <div className="flex justify-between items-end flex-col">
+          <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
+            <div className="flex justify-between md:items-end flex-col space-y-14">
               <div className="flex items-center">
                 <Suspense>
                   <GithubStars />
@@ -92,7 +92,7 @@ export function Footer() {
 
                 <SocialLinks />
               </div>
-              <div>
+              <div className="md:mr-0 mr-auto">
                 <Suspense>
                   <StatusWidget />
                 </Suspense>

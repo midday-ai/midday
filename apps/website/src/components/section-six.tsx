@@ -3,8 +3,8 @@ import ai from "public/ai.png";
 
 export function SectionSix() {
   return (
-    <section className="border border-border rounded-2xl container bg-[#121212] p-10">
-      <div className="flex space-x-12">
+    <section className="border border-border rounded-2xl container bg-[#121212] p-6 md:p-10">
+      <div className="flex flex-col md:flex-row md:space-x-12">
         <Image
           src={ai}
           height={405}

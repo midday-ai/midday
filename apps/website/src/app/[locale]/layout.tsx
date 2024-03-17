@@ -14,7 +14,9 @@ export default function Layout({
   return (
     <Provider locale={locale}>
       <Header />
-      <main className="container mx-auto">{children}</main>
+      <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
+        {children}
+      </main>
       <FooterCTA />
       <Footer />
     </Provider>

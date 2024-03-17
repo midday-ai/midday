@@ -5,9 +5,9 @@ import timetracker from "public/time-tracker.png";
 export function SectionThree() {
   return (
     <section className="relative">
-      <div className="border border-border rounded-2xl container bg-[#121212] p-10 pb-0 z-10">
-        <div className="flex space-x-12">
-          <div className="mt-6">
+      <div className="border border-border rounded-2xl container bg-[#121212] p-6 md:p-10 md:pb-0">
+        <div className="flex flex-col md:space-x-12 md:flex-row">
+          <div className="md:mt-6">
             <h3 className="font-medium text-2xl	mb-4">
               Time track your projects
             </h3>
@@ -56,7 +56,7 @@ export function SectionThree() {
           <Image
             src={timetracker}
             height={400}
-            className="-mb-[1px] !ml-auto object-contain"
+            className="-mb-[24px] md:-mb-[1px] !ml-auto object-contain mt-8 md:mt-0"
             quality={100}
           />
         </div>

@@ -42,13 +42,14 @@ export const CardStack = ({
     }, 5000);
   };
 
+  // TODO: Get screen width
   return (
-    <div className="relative h-[670px] w-[1031px] z-10 bg-background">
+    <div className="relative h-[220px] md:h-[670px] w-[331px] md:w-[1031px] z-10">
       {cards.map((card, index) => {
         return (
           <motion.div
             key={card.id}
-            className="absolute h-[670px] w-[1031px] flex flex-col justify-between"
+            className="absolute h-[220px] md:h-[670px] w-[331px] md:w-[1031px] flex flex-col justify-between"
             style={{
               transformOrigin: "top center",
             }}

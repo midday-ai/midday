@@ -1,6 +1,11 @@
 export async function GithubStars() {
   const response = await fetch(
-    "https://api.github.com/repos/pontusab/reactnative.se"
+    "https://api.github.com/repos/pontusab/reactnative.se",
+    {
+      next: {
+        revalidate: 3600,
+      },
+    }
   );
 
   const data = await response.json();

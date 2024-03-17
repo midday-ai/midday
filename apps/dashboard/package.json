@@ -58,7 +58,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
-    "react-hook-form": "^7.51.0",
+    "react-hook-form": "^7.51.1",
     "react-hotkeys-hook": "^4.5.0",
     "react-intersection-observer": "^9.8.1",
     "react-pdf": "^7.7.1",

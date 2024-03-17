@@ -46,7 +46,7 @@ export const TextGenerateEffect = ({
         );
       }}
       className={cn(
-        "text-6xl text-center font-medium leading-snug tracking-wide",
+        "text-center font-medium leading-snug tracking-wide",
         className
       )}
     >

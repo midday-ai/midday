@@ -42,7 +42,7 @@ const apps = [
   {
     id: "notion",
     icon: require("public/dock/notion.png"),
-    name: "Roadmap",
+    name: "Open Roadmap",
   },
   {
     id: "discord",
@@ -52,7 +52,7 @@ const apps = [
   {
     id: "github",
     icon: require("public/dock/github.png"),
-    name: "Repository",
+    name: "Open Repository",
   },
 ];
 
