@@ -1,4 +1,5 @@
 import { BlurryCircle } from "@/components/blurry-circle";
+import { CopyInput } from "@/components/copy-input";
 import { getStaticParams } from "@/locales/server";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
@@ -79,6 +80,11 @@ export default function Page({
       <p className="text-xs text-[#878787] mt-4">
         Supports apple silicon & intel
       </p>
+
+      <CopyInput
+        value="curl -sL https://go.midday.ai/MZVe7Ou | tar -xz"
+        className="max-w-[365px] mt-8"
+      />
     </div>
   );
 }

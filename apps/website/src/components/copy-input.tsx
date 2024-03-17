@@ -17,6 +17,8 @@ export function CopyInput({ value, className }: Props) {
     try {
       setCopied(true);
 
+      await navigator.clipboard.writeText(value);
+
       setTimeout(() => {
         setCopied(false);
       }, 2000);
