@@ -1,3 +1,4 @@
+import { BlurryCircle } from "@/components/blurry-circle";
 import { getStaticParams } from "@/locales/server";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
@@ -27,8 +28,18 @@ export default function Page({
         Always at your fingertips.
       </h1>
 
-      <Image src={panel} alt="Download Midday" width={1223} height={462} />
-
+      <div className="relative">
+        <Image
+          src={panel}
+          alt="Download Midday"
+          width={1223}
+          height={462}
+          className="z-10 relative"
+        />
+        <BlurryCircle className="absolute -top-[50px] right-[0px] bg-[#3633D0]/5" />
+        <BlurryCircle className="absolute bottom-[50px] -left-6 bg-[#A1F5CD]/5" />
+        <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB]/5" />
+      </div>
       <Image
         src={appIcon}
         alt="Midday App"
