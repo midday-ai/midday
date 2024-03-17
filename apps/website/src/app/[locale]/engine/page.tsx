@@ -4,6 +4,8 @@ import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
+import engineSDK from "public/engine-sdk.png";
+import engine from "public/engine-ui.png";
 
 export const metadata: Metadata = {
   title: "Engine | Midday",
@@ -62,6 +64,44 @@ export default function Page({
         />
 
         <WaitlistInput />
+      </div>
+
+      <div className="text-center flex flex-col items-center mt-24">
+        <h3 className="mb-4 text-2xl font-medium">Unlimted bank connections</h3>
+        <p className="text-[#878787] font-sm max-w-[600px]">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean porta
+          ipsum dui, lacinia ullamcorper purus cursus vel. Vivamus scelerisque
+          felis a efficitur porttitor. Donec scelerisque erat purus, sit amet
+          pretium felis hendrerit a.
+        </p>
+
+        <Image
+          src={engine}
+          alt="Engine UI"
+          width={1026}
+          height={552}
+          className="mt-16"
+        />
+      </div>
+
+      <div className="text-center flex flex-col items-center mt-24">
+        <h3 className="mb-4 text-2xl font-medium">
+          One SDK, implement in minutes
+        </h3>
+        <p className="text-[#878787] font-sm max-w-[600px]">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean porta
+          ipsum dui, lacinia ullamcorper purus cursus vel. Vivamus scelerisque
+          felis a efficitur porttitor. Donec scelerisque erat purus, sit amet
+          pretium felis hendrerit a.
+        </p>
+
+        <Image
+          src={engineSDK}
+          alt="Engine SDK"
+          width={740}
+          height={420}
+          className="mt-16"
+        />
       </div>
     </div>
   );
