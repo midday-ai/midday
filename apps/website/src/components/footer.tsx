@@ -44,7 +44,7 @@ export function Footer() {
               <h6>Resources</h6>
               <ul>
                 <li className="text-[#878787]">
-                  <Link href="/pricing">Github</Link>
+                  <Link href="https://git.new/midday">Github</Link>
                 </li>
                 <li className="text-[#878787]">
                   <Link href="/support">Support</Link>
@@ -77,7 +77,7 @@ export function Footer() {
                   <Link href="/open-startup">Open startup</Link>
                 </li>
                 <li className="text-[#878787]">
-                  <Link href="/friends">OSS friends</Link>
+                  <Link href="/oss-friends">OSS friends</Link>
                 </li>
               </ul>
             </div>
