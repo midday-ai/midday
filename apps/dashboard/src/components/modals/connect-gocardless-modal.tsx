@@ -19,6 +19,7 @@ import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
+import { CountrySelector } from "../country-selector";
 
 function RowsSkeleton() {
   return (
@@ -95,7 +96,8 @@ function Row({ id, name, logo, onSelect }) {
   );
 }
 
-export function ConnectGoCardLessModal({ countryCode }) {
+export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
+  const [countryCode, setCountryCode] = useState(initialCountryCode);
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
@@ -110,19 +112,26 @@ export function ConnectGoCardLessModal({ countryCode }) {
 
   useEffect(() => {
     async function fetchData() {
-      const banks = await getBanks({ countryCode });
-      setLoading(false);
+      try {
+        const banks = await getBanks({ countryCode });
+        setLoading(false);
 
-      if (banks.length > 0) {
         setResults(banks);
         setFilteredResults(banks);
+      } catch {
+        setLoading(false);
+        setResults([]);
+        setFilteredResults([]);
       }
     }
 
-    if (isOpen && !results?.length) {
+    if (
+      (isOpen && !results?.length > 0) ||
+      countryCode !== initialCountryCode
+    ) {
       fetchData();
     }
-  }, [isOpen]);
+  }, [isOpen, countryCode]);
 
   const handleFilterBanks = (value: string) => {
     if (!value) {
@@ -157,16 +166,23 @@ export function ConnectGoCardLessModal({ countryCode }) {
             </DialogDescription>
 
             <div>
-              <Input
-                placeholder="Search bank"
-                type="search"
-                className="my-2"
-                onChange={(evt) => handleFilterBanks(evt.target.value)}
-                autoComplete="off"
-                autoCapitalize="none"
-                autoCorrect="off"
-                spellCheck="false"
-              />
+              <div className="flex space-x-2 my-3">
+                <Input
+                  placeholder="Search bank..."
+                  type="search"
+                  onChange={(evt) => handleFilterBanks(evt.target.value)}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                />
+
+                <CountrySelector
+                  defaultValue={countryCode}
+                  onSelect={setCountryCode}
+                />
+              </div>
+
               <div className="space-y-4 pt-4 h-[400px] overflow-auto scrollbar-hide">
                 {loading && <RowsSkeleton />}
                 {filteredResults?.map((bank) => {

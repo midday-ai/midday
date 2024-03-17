@@ -1,0 +1,78 @@
+"use client";
+
+import countries from "@midday/location/src/country-flag";
+import { Button } from "@midday/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@midday/ui/command";
+import {
+  Popover,
+  PopoverContentWithoutPortal,
+  PopoverTrigger,
+} from "@midday/ui/popover";
+import { cn } from "@midday/ui/utils";
+import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
+import * as React from "react";
+
+export function CountrySelector({ defaultValue, onSelect }) {
+  const [open, setOpen] = React.useState(false);
+  const [value, setValue] = React.useState(defaultValue);
+
+  const selected = Object.values(countries).find(
+    (country) => country.code === value
+  );
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-[400px] justify-between font-normal truncate"
+        >
+          {value ? (
+            <div className="flex space-x-2">
+              <span>{selected?.emoji}</span>
+              <span>{selected?.name}</span>
+            </div>
+          ) : (
+            "Select country"
+          )}
+          <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContentWithoutPortal className="w-[225px] p-0">
+        <Command>
+          <CommandInput placeholder="Search country..." className="h-9" />
+          <CommandEmpty>No country found.</CommandEmpty>
+          <CommandGroup className="overflow-y-auto max-h-[230px] pt-2">
+            {Object.values(countries).map((country) => (
+              <CommandItem
+                key={country.code}
+                value={country.name}
+                onSelect={() => {
+                  setValue(country.code);
+                  onSelect?.(country.code);
+                  setOpen(false);
+                }}
+              >
+                {country.name}
+                <CheckIcon
+                  className={cn(
+                    "ml-auto h-4 w-4",
+                    value === country.code ? "opacity-100" : "opacity-0"
+                  )}
+                />
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        </Command>
+      </PopoverContentWithoutPortal>
+    </Popover>
+  );
+}
