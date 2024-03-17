@@ -8,6 +8,13 @@ import type {
 
 export const notion = new Client({
   auth: process.env.NOTION_TOKEN,
+  fetch: (url, init) =>
+    fetch(url, {
+      ...init,
+      next: {
+        revalidate: 3600,
+      },
+    }),
 });
 
 export const fetchPages = () => {
