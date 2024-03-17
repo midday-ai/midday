@@ -39,7 +39,7 @@ export default async function Page({
         passionate about open source and the future as we are.
       </p>
 
-      <div class="grid grid-cols-3 gap-6 mt-12">
+      <div class="grid md:grid-cols-3 gap-6 mt-12">
         {ossFriends.map((friend) => {
           return (
             <div
