@@ -1,4 +1,5 @@
 import Image from "next/image";
+import profitLossLight from "public/profit-loss-light.png";
 import profitLoss from "public/profit-loss.png";
 
 export function SectionTwo() {
@@ -8,7 +9,14 @@ export function SectionTwo() {
         <Image
           src={profitLoss}
           height={400}
-          className="-mb-[1px] object-contain"
+          className="-mb-[1px] object-contain hidden dark:block"
+          quality={100}
+        />
+
+        <Image
+          src={profitLossLight}
+          height={400}
+          className="-mb-[1px] object-contain block dark:hidden"
           quality={100}
         />
         <div className="mt-6">
