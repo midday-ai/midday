@@ -88,7 +88,9 @@ export default async function Page({
   return (
     <div className="container max-w-[1140px] flex scroll-smooth">
       <PostLinks links={links} />
-      <div className="max-w-[680px] pt-[150px] w-full">{posts}</div>
+      <div className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
+        {posts}
+      </div>
     </div>
   );
 }

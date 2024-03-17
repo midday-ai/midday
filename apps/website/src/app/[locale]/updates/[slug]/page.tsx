@@ -42,8 +42,8 @@ export default async function Page({
   const slugWithPrefix = `/updates/${slug}`;
 
   return (
-    <div className="container max-w-[1140px] flex updates">
-      <aside className="sticky h-screen min-w-[260px] pt-[150px] flex flex-col space-y-4">
+    <div className="container max-w-[1140px] flex">
+      <aside className="sticky h-screen min-w-[260px] pt-[150px] flex-col space-y-4 hidden md:flex">
         <Link href="/updates" className="text-sm font-normal text-[#878787]">
           View all posts
         </Link>
@@ -51,7 +51,7 @@ export default async function Page({
           {format(new Date(post.created_time), "MMMM d, y")}
         </span>
       </aside>
-      <div className="max-w-[680px] pt-[150px] w-full">
+      <div className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
         <PostStatus status={post.properties.Tag.select.name} />
 
         <h2 className="font-medium text-2xl mb-6">

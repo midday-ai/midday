@@ -36,7 +36,9 @@ export default function Page({
           </h1>
 
           <div className="flex items-center flex-col text-center relative">
-            <h3 className="text-[344px] font-medium leading-[344px]">30</h3>
+            <h3 className="md:text-[344px] text-[244px] leading-[244px] font-medium md:leading-[344px]">
+              30
+            </h3>
 
             <p className="font-medium text-xl">
               Claim $30/mo early adopter plan
@@ -68,7 +70,9 @@ export default function Page({
 
           <Accordion type="single" collapsible className="w-full mt-10 mb-48">
             <AccordionItem value="item-1">
-              <AccordionTrigger>Can I self-host Midday.ai?</AccordionTrigger>
+              <AccordionTrigger>
+                <span className="truncate">Can I self-host Midday.ai?</span>
+              </AccordionTrigger>
               <AccordionContent>
                 Absolutely. Please refer to our docs for the latest guides and
                 information on self-hosting the platform.
@@ -90,7 +94,9 @@ export default function Page({
             </AccordionItem>
             <AccordionItem value="item-4">
               <AccordionTrigger>
-                What are your data privacy & security policies?
+                <span className="truncate max-w-[300px] md:max-w-full">
+                  What are your data privacy & security policies?
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 We take data privacy very seriously and implement
@@ -101,7 +107,9 @@ export default function Page({
               </AccordionContent>
               <AccordionItem value="item-5">
                 <AccordionTrigger>
-                  Can I cancel my subscription at any time?
+                  <span className="truncate max-w-[300px] md:max-w-full">
+                    Can I cancel my subscription at any time?
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent>
                   Yes, you can cancel your subscription at any time. If you
@@ -113,7 +121,9 @@ export default function Page({
             </AccordionItem>
             <AccordionItem value="item-6">
               <AccordionTrigger>
-                I have more questions about Midday.ai. How can I get in touch?
+                <span className="truncate max-w-[300px] md:max-w-full">
+                  I have more questions about Midday.ai. How can I get in touch?
+                </span>
               </AccordionTrigger>
               <AccordionContent>
                 Sure, we're happy to answer any questions you might have. Just
