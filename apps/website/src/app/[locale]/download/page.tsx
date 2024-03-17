@@ -1,11 +1,10 @@
-import { Dock } from "@/components/dock";
 import { getStaticParams } from "@/locales/server";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import appIcon from "public/app-icon.png";
-import signature from "public/email/signature-dark.png";
+import panel from "public/panel.png";
 
 export const metadata: Metadata = {
   title: "Download | Midday",
@@ -23,19 +22,24 @@ export default function Page({
   setStaticParamsLocale(locale);
 
   return (
-    <div className="container max-w-[800px] flex flex-col items-center mb-48">
+    <div className="container flex flex-col items-center mb-48 text-center">
       <h1 className="mt-24 font-medium text-center text-5xl mb-24">
-        Be even more efficient with
-        <br /> Midday for mac
+        Always at your fingertips.
       </h1>
 
-      <Dock />
-      {/* <Image src={appIcon} alt="Download Midday" width={150} height={150} /> */}
+      <Image src={panel} alt="Download Midday" width={1223} height={462} />
 
+      <Image
+        src={appIcon}
+        alt="Midday App"
+        width={120}
+        height={120}
+        className="w-[80px] h-[80px] mt-12 md:mt-0 md:h-auto md:w-auto"
+      />
       <p className="mb-4 text-2xl	font-medium mt-8">Midday for mac</p>
-      <p className="text-[#878787] font-sm">
-        Donec risus mi, elementum eu mi vel, ultricies porttitor augue.
-        <br /> Interdum et malesuada fames ac ante ipsum primis in faucibus.
+      <p className="text-[#878787] font-sm max-w-[500px]">
+        Donec risus mi, elementum eu mi vel, ultricies porttitor augue. Interdum
+        et malesuada fames ac ante ipsum primis in faucibus.
       </p>
 
       <a href="https://go.midday.ai/MZVe7Ou" download>
