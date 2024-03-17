@@ -5,7 +5,7 @@ import vault from "public/vault.png";
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row">
-      <div className="border border-border md:basis-2/3 rounded-2xl bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col-reverse items-center md:items-start">
+      <div className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col-reverse items-center md:items-start">
         <Image
           src={vault}
           quality={100}
@@ -27,7 +27,7 @@ export function SectionFive() {
         </div>
       </div>
 
-      <div className="border border-border basis-1/3 rounded-2xl bg-[#121212] p-10 md:text-center flex flex-col">
+      <div className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col">
         <h4 className="font-medium text-2xl mb-4">Seamless export</h4>
         <p className="text-[#878787]">
           Export your transaction with their attachments/basis and hand over to

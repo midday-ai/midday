@@ -41,7 +41,7 @@ export const TextGenerateEffect = ({
           },
           {
             duration: 2,
-            delay: stagger(0.2),
+            delay: stagger(0.13),
           }
         );
       }}

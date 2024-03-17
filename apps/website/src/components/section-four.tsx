@@ -6,7 +6,7 @@ import { CopyInput } from "./copy-input";
 export function SectionFour() {
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row">
-      <div className="border border-border basis-1/3 rounded-2xl bg-[#121212] p-10 text-center flex flex-col">
+      <div className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 text-center flex flex-col">
         <h4 className="font-medium text-2xl mb-4">Invoicing</h4>
         <p className="text-[#878787]">
           We’re working hard to give you the best invoice solution. It will
@@ -20,7 +20,7 @@ export function SectionFour() {
         />
       </div>
 
-      <div className="border border-border md:basis-2/3 rounded-2xl bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
+      <div className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-2xl mb-4">Magic inbox</h4>
 

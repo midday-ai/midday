@@ -41,7 +41,7 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "bg-[#0C0C0C] overflow-x-hidden"
+          "bg-[#F6F6F3] dark:bg-[#0C0C0C] overflow-x-hidden"
         )}
       >
         {children}

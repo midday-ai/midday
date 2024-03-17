@@ -66,6 +66,17 @@ export const CardStack = ({
               src={require("public/screen-1.png")}
               width={1031}
               height={670}
+              className="hidden dark:block"
+            />
+
+            <Image
+              quality={100}
+              priority={index === 0}
+              alt="Dashboard - Overview"
+              src={require("public/screen-1-light.png")}
+              width={1031}
+              height={670}
+              className="dark:hidden"
             />
           </motion.div>
         );
