@@ -26,17 +26,17 @@ export default function Page({
         One API to rule them all.
       </h1>
 
-      <p className="text-[#707070] mt-4 mb-8">
-        Midday Engine streamlines banking integrations with a single API, <br />
+      <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px]">
+        Midday Engine streamlines banking integrations with a single API,
         effortlessly connecting to multiple providers and get one unified
         format.
       </p>
       <div className="max-w-[800px] w-full h-40 relative">
         {/* Gradients */}
-        <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-[2px] w-3/4 blur-sm" />
-        <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-px w-3/4" />
-        <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-[5px] w-1/4 blur-sm" />
-        <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-px w-1/4" />
+        <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-[2px] md:w-3/4 blur-sm" />
+        <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-px md:w-3/4" />
+        <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-[5px] md:w-1/4 blur-sm" />
+        <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-px md:w-1/4" />
 
         {/* Core component */}
         <SparklesCore

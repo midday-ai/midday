@@ -120,26 +120,24 @@ export function Header() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="mt-4 flex justify-between p-3">
+          <div className="mt-4 flex justify-between p-3 relative">
             <button type="button" onClick={handleToggleMenu}>
               <LogoIcon />
             </button>
 
             <button
               type="button"
-              className="ml-auto md:hidden p-2"
-              onClick={() => handleToggleMenu()}
+              className="ml-auto md:hidden p-2 absolute right-[10px] top-2"
+              onClick={handleToggleMenu}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={18}
-                height={13}
-                fill="none"
+                width={24}
+                height={24}
+                className="fill-primary"
               >
-                <path
-                  fill="currentColor"
-                  d="M0 12.195v-2.007h18v2.007H0Zm0-5.017V5.172h18v2.006H0Zm0-5.016V.155h18v2.007H0Z"
-                />
+                <path fill="none" d="M0 0h24v24H0V0z" />
+                <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
               </svg>
             </button>
           </div>
@@ -169,6 +167,10 @@ export function Header() {
                   </motion.li>
                 );
               })}
+
+              <motion.li variants={itemVariant} onClick={handleToggleMenu}>
+                <Link href="/engine">Engine</Link>
+              </motion.li>
 
               <motion.li variants={itemVariant}>
                 <Link href="https://app.midday.ai">Get started</Link>
