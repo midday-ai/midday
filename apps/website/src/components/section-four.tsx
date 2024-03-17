@@ -11,22 +11,33 @@ import { CopyInput } from "./copy-input";
 
 export function SectionFour() {
   const [isActive, setActive] = useState(false);
+  const [isActive2, setActive2] = useState(false);
 
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row overflow-hidden">
-      <div className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 text-center flex flex-col">
+      <div
+        className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 text-center flex flex-col"
+        onMouseEnter={() => setActive2(true)}
+        onMouseLeave={() => setActive2(false)}
+      >
         <h4 className="font-medium text-2xl mb-4">Invoicing</h4>
         <p className="text-[#878787]">
           We’re working hard to give you the best invoice solution. It will
           feature web based invoices, live collaboration and project sync.
         </p>
-
-        <AdaptiveImage
-          darkSrc={invoicing}
-          lightSrc={invoicingLight}
-          quality={100}
-          className="mt-auto object-contain"
-        />
+        <motion.div
+          animate={isActive2 ? { y: -5 } : { y: 0 }}
+          initial={{ y: -5 }}
+          transition={{ type: "spring", stiffness: 100 }}
+          className="mt-auto"
+        >
+          <AdaptiveImage
+            darkSrc={invoicing}
+            lightSrc={invoicingLight}
+            quality={100}
+            className="object-contain"
+          />
+        </motion.div>
       </div>
 
       <div
@@ -65,8 +76,8 @@ export function SectionFour() {
 
         <div className="md:basis-1/2 mt-8 md:mt-0 -bottom-[8px] relative">
           <motion.div
-            animate={isActive ? { y: -10 } : { y: 0 }}
-            initial={{ y: -10 }}
+            animate={isActive ? { y: -5 } : { y: 0 }}
+            initial={{ y: -5 }}
             transition={{ type: "spring", stiffness: 100 }}
           >
             <AdaptiveImage

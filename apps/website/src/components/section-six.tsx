@@ -1,18 +1,34 @@
+"use client";
+
 import { AdaptiveImage } from "@/components/adaptive-image";
+import { motion } from "framer-motion";
 import aiLight from "public/ai-light.png";
 import ai from "public/ai.png";
+import { useState } from "react";
 
 export function SectionSix() {
+  const [isActive, setActive] = useState(false);
+
   return (
-    <section className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10">
+    <section
+      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10"
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+    >
       <div className="flex flex-col md:flex-row md:space-x-12">
-        <AdaptiveImage
-          darkSrc={ai}
-          lightSrc={aiLight}
-          height={405}
-          className="-mb-[1px] object-contain"
-          quality={100}
-        />
+        <motion.div
+          animate={isActive ? { y: -5, x: -5 } : { y: 0, x: 0 }}
+          initial={{ y: 0 }}
+          transition={{ type: "spring", stiffness: 100 }}
+        >
+          <AdaptiveImage
+            darkSrc={ai}
+            lightSrc={aiLight}
+            height={405}
+            className="-mb-[1px] object-contain"
+            quality={100}
+          />
+        </motion.div>
         <div className="mt-6">
           <h3 className="font-medium text-2xl	mb-4">Your Virtual CFO</h3>
 

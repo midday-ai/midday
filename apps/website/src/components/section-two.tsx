@@ -17,8 +17,8 @@ export function SectionTwo() {
     >
       <div className="flex flex-col md:space-x-12 md:flex-row">
         <motion.div
-          animate={isActive ? { y: -10 } : { y: 0 }}
-          initial={{ y: -10 }}
+          animate={isActive ? { y: -5, x: 5 } : { y: 0, x: 0 }}
+          initial={{ y: 0, x: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
         >
           <AdaptiveImage

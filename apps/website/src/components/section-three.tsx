@@ -66,15 +66,16 @@ export function SectionThree() {
           </div>
 
           <motion.div
-            animate={isActive ? { y: -10 } : { y: 0 }}
-            initial={{ y: -10 }}
+            animate={isActive ? { y: -5, x: -5 } : { y: 0, x: 0 }}
+            initial={{ y: 0 }}
             transition={{ type: "spring", stiffness: 100 }}
+            className="!ml-auto"
           >
             <AdaptiveImage
               darkSrc={timetracker}
               lightSrc={timetrackerLight}
               height={400}
-              className="-mb-[24px] md:-mb-[1px] !ml-auto object-contain mt-8 md:mt-0 border-b-[1px]"
+              className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0 border-b-[1px]"
               quality={100}
             />
           </motion.div>
