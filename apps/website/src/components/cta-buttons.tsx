@@ -5,7 +5,7 @@ export function CTAButtons() {
   return (
     <div className="flex items-center space-x-4">
       <Link href="/talk-to-us">
-        <Button variant="outline" className="border border-white h-12 px-6">
+        <Button variant="outline" className="border border-primary h-12 px-6">
           Talk to us
         </Button>
       </Link>

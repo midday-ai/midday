@@ -8,7 +8,7 @@ export async function GithubStars() {
   return (
     <a
       href="https://github.com/pontusab/reactnative.se"
-      className="border flex justify-center h-8 leading-[30px] text-[#878787]"
+      className="border border-border flex justify-center h-8 leading-[30px] text-[#878787]"
     >
       <div className="bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2">
         <svg

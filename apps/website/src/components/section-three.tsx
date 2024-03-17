@@ -5,7 +5,7 @@ import timetracker from "public/time-tracker.png";
 export function SectionThree() {
   return (
     <section className="relative">
-      <div className="border rounded-2xl container bg-[#121212] p-10 pb-0 z-10">
+      <div className="border border-border rounded-2xl container bg-[#121212] p-10 pb-0 z-10">
         <div className="flex space-x-12">
           <div className="mt-6">
             <h3 className="font-medium text-2xl	mb-4">

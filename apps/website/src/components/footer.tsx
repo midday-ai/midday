@@ -7,9 +7,9 @@ import { StatusWidget } from "./status-widget";
 
 export function Footer() {
   return (
-    <footer className="border-t-[1px] pt-16">
+    <footer className="border-t-[1px] border-border pt-16">
       <div className="container">
-        <div className="flex justify-between items-center border-b-[1px] pb-16 mb-12">
+        <div className="flex justify-between items-center border-border border-b-[1px] pb-16 mb-12">
           <Link href="/">
             <LogoLarge />
           </Link>

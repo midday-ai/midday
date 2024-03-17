@@ -50,7 +50,7 @@ export async function StatusWidget() {
 
   return (
     <a
-      className="flex justify-between space-x-2 items-center w-full border rounded-md px-3 py-1"
+      className="flex justify-between space-x-2 items-center w-full border border-border rounded-md px-3 py-1"
       href="https://midday.openstatus.dev"
       target="_blank"
       rel="noreferrer"

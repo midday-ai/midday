@@ -3,7 +3,7 @@ import profitLoss from "public/profit-loss.png";
 
 export function SectionTwo() {
   return (
-    <section className="border rounded-2xl container bg-[#121212] p-10 pb-0">
+    <section className="border border-border rounded-2xl container bg-[#121212] p-10 pb-0">
       <div className="flex space-x-12">
         <Image
           src={profitLoss}
