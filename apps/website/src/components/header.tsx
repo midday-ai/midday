@@ -62,7 +62,7 @@ export function Header() {
   return (
     <header className="h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
       <nav className="border border-border p-3 rounded-2xl backdrop-filter backdrop-blur-xl flex items-center bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
-        <Link className="mr-10" href="/">
+        <Link className="mr-6" href="/">
           <LogoIcon />
         </Link>
 

@@ -1,4 +1,5 @@
 import { AdaptiveImage } from "@/components/adaptive-image";
+import { BlurryCircle } from "@/components/blurry-circle";
 import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
@@ -24,6 +25,9 @@ export default function Page({
 
   return (
     <div className="container max-w-[800px]">
+      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="fixed top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+
       <h1 className="mt-24 font-medium text-center text-5xl mb-8">Why?</h1>
 
       <p className="text-2xl font-normal mb-4">

@@ -56,14 +56,14 @@ const testimonials = [
     quote:
       "Nothing more personally gratifying for me than seeing a beautifully designed app using @teller. Get yourselves on the @middayai waiting list now!",
   },
-  {
-    name: "Zeno Rocha",
-    avatarUrl:
-      "https://pbs.twimg.com/profile_images/1145166093029265408/9gJSVrQ7_400x400.jpg",
-    handle: "@zenorocha",
-    verified: true,
-    quote: "this is absolutely amazing",
-  },
+  // {
+  //   name: "Zeno Rocha",
+  //   avatarUrl:
+  //     "https://pbs.twimg.com/profile_images/1145166093029265408/9gJSVrQ7_400x400.jpg",
+  //   handle: "@zenorocha",
+  //   verified: true,
+  //   quote: "this is absolutely amazing",
+  // },
   {
     name: "Timur Ercan",
     avatarUrl:
