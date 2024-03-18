@@ -105,6 +105,7 @@ export const InfiniteMovingCards = ({
                   src={item.avatarUrl}
                   width={48}
                   height={48}
+                  alt="Tweet"
                   className="rounded-full overflow-hidden"
                 />
                 <div className="flex flex-col">

@@ -20,7 +20,7 @@ import React from "react";
 import { useRef } from "react";
 
 const Component = React.forwardRef((props, ref) => (
-  <Image {...props} ref={ref} />
+  <Image {...props} ref={ref} alt="App" />
 ));
 
 const MotionComponent = motion(Component);
