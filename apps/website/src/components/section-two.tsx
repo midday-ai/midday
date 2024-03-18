@@ -25,7 +25,8 @@ export function SectionTwo() {
             lightSrc={profitLossLight}
             darkSrc={profitLoss}
             height={400}
-            className="-mb-[1px] object-contain "
+            className="-mb-[1px] object-contain"
+            alt="Overview"
           />
         </motion.div>
 

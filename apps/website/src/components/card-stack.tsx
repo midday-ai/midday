@@ -1,6 +1,5 @@
 "use client";
 
-import { AdaptiveImage } from "@/components/adaptive-image";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
@@ -8,8 +7,6 @@ let interval: any;
 
 type Card = {
   id: number;
-  name: string;
-  designation: string;
   content: React.ReactNode;
 };
 
@@ -24,10 +21,11 @@ export const CardStack = ({
 }) => {
   const CARD_OFFSET = offset || 10;
   const SCALE_FACTOR = scaleFactor || 0.06;
-  const [cards, setCards] = useState<Card[]>(items);
+  const [cards, setCards] = useState<Card[]>([items.at(0)]);
 
   useEffect(() => {
-    // startFlipping();
+    startFlipping();
+    setCards(items);
 
     return () => clearInterval(interval);
   }, []);
@@ -59,14 +57,9 @@ export const CardStack = ({
               zIndex: cards.length - index, //  decrease z-index for the cards that are behind
             }}
           >
-            <AdaptiveImage
-              priority={index === 0}
-              alt="Dashboard - Overview"
-              darkSrc={require("public/screen-1.png")}
-              lightSrc={require("public/screen-1-light.png")}
-              width={1031}
-              height={670}
-            />
+            <div className="rounded-2xl border border-border overflow-hidden">
+              {card.content}
+            </div>
           </motion.div>
         );
       })}

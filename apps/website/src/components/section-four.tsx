@@ -36,6 +36,7 @@ export function SectionFour() {
             lightSrc={invoicingLight}
             quality={100}
             className="object-contain"
+            alt="Invoice"
           />
         </motion.div>
       </div>
@@ -85,6 +86,7 @@ export function SectionFour() {
               lightSrc={inboxLight}
               quality={100}
               className="object-contain border-b-[1px] border-border"
+              alt="Inbox"
             />
           </motion.div>
         </div>

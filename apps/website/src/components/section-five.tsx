@@ -28,6 +28,7 @@ export function SectionFive() {
             darkSrc={vault}
             lightSrc={vaultLight}
             quality={100}
+            alt="Vault"
             className="mt-8 md:mt-0 basis-1/2 object-contain md:max-w-[367px]"
           />
         </motion.div>
@@ -69,6 +70,7 @@ export function SectionFive() {
             darkSrc={exporting}
             lightSrc={exportingLight}
             quality={100}
+            alt="Export"
           />
         </motion.div>
       </div>

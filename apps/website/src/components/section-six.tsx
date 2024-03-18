@@ -26,6 +26,7 @@ export function SectionSix() {
             lightSrc={aiLight}
             height={405}
             className="-mb-[1px] object-contain"
+            alt="AI"
             quality={100}
           />
         </motion.div>

@@ -61,6 +61,7 @@ export default function Page({
           height={421}
           className="mt-12"
           quality={100}
+          alt="Midday Engine"
         />
 
         <WaitlistInput />
