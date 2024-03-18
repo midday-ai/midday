@@ -16,7 +16,7 @@ export function SectionFour() {
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row overflow-hidden">
       <div
-        className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 text-center flex flex-col"
+        className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col"
         onMouseEnter={() => setActive2(true)}
         onMouseLeave={() => setActive2(false)}
       >
@@ -29,7 +29,7 @@ export function SectionFour() {
           animate={isActive2 ? { y: -5 } : { y: 0 }}
           initial={{ y: -5 }}
           transition={{ type: "spring", stiffness: 100 }}
-          className="mt-auto"
+          className="mt-8 md:mt-auto"
         >
           <AdaptiveImage
             darkSrc={invoicing}

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="text-center mt-20 items-center flex flex-col">
+    <section className="text-center mt-16 md:mt-20 items-center flex flex-col">
       <Button
         variant="outline"
         className="rounded-full border-border flex space-x-2 items-center"
@@ -24,7 +24,7 @@ export function Hero() {
 
       <h1 className="text-6xl font-medium mt-6">Run your business smarter.</h1>
 
-      <p className="mt-8 text-[#707070]">
+      <p className="mt-4 md:mt-8 text-[#707070]">
         Integer quis vestibulum lorem. Curabitur consectetur nulla nec justo
         <br />
         congue mattis. Nulla tincidunt ante eros, nec interdum dui varius quis.

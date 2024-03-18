@@ -1,5 +1,6 @@
 "use client";
 
+import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Tooltip,
   TooltipContent,
@@ -26,7 +27,8 @@ export const CardStack = ({
   offset?: number;
   scaleFactor?: number;
 }) => {
-  const CARD_OFFSET = offset || 10;
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const CARD_OFFSET = isDesktop ? 10 : 5;
   const SCALE_FACTOR = scaleFactor || 0.06;
   const [cards, setCards] = useState<Card[]>([items.at(0)]);
 

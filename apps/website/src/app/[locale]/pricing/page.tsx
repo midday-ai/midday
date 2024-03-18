@@ -44,7 +44,7 @@ export default function Page({
               Claim $30/mo early adopter plan
             </p>
 
-            <span className="underline">free while in beta</span>
+            <span className="mt-2">Free while in beta</span>
 
             <div className="mt-6">
               <div className="flex items-center space-x-4">
@@ -118,20 +118,22 @@ export default function Page({
                 learn more about our data privacy policies at{" "}
                 <Link href="/privacy">midday.co/privacy</Link>.
               </AccordionContent>
-              <AccordionItem value="item-5">
-                <AccordionTrigger>
-                  <span className="truncate max-w-[300px] md:max-w-full">
-                    Can I cancel my subscription at any time?
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent>
-                  Yes, you can cancel your subscription at any time. If you
-                  cancel your subscription, you will still be able to use Midday
-                  until the end of your billing period. After that, you will be
-                  downgraded to the free plan.
-                </AccordionContent>
-              </AccordionItem>
             </AccordionItem>
+
+            <AccordionItem value="item-5">
+              <AccordionTrigger>
+                <span className="truncate max-w-[300px] md:max-w-full">
+                  Can I cancel my subscription at any time?
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                Yes, you can cancel your subscription at any time. If you cancel
+                your subscription, you will still be able to use Midday until
+                the end of your billing period. After that, you will be
+                downgraded to the free plan.
+              </AccordionContent>
+            </AccordionItem>
+
             <AccordionItem value="item-6">
               <AccordionTrigger>
                 <span className="truncate max-w-[300px] md:max-w-full">

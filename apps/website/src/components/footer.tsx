@@ -15,7 +15,7 @@ export function Footer() {
             <LogoLarge />
           </Link>
 
-          <h3 className="font-normal md:text-2xl">
+          <h3 className="font-normal md:text-2xl text-right">
             Run your bussiness smarter.
           </h3>
         </div>

@@ -1,5 +1,6 @@
 export default {
   header: {
+    features: "Features",
     download: "Download",
     pricing: "Pricing",
     story: "Story",

@@ -10,6 +10,10 @@ import { LogoIcon } from "./logo-icon";
 
 const links = [
   {
+    path: "/",
+    name: "features",
+  },
+  {
     path: "/pricing",
     name: "pricing",
   },

@@ -11,7 +11,7 @@ export function SectionTwo() {
 
   return (
     <section
-      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-6 md:p-10 md:pb-0 overflow-hidden"
+      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden"
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
     >
