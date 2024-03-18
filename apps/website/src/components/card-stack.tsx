@@ -83,7 +83,7 @@ export const CardStack = ({
             }}
             onMouseEnter={() => clearInterval(interval)}
           >
-            <div className="rounded-2xl border border-border overflow-hidden">
+            <div className="rounded-md md:rounded-2xl border border-border overflow-hidden">
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>

@@ -42,7 +42,7 @@ export function Hero() {
           </Link>
 
           <a href="https://app.midday.ai">
-            <Button className="h-11 px-5">Get Early Access</Button>
+            <Button className="h-12 px-5">Get Early Access</Button>
           </a>
         </div>
       </div>

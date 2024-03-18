@@ -26,7 +26,7 @@ export function FooterCTA() {
           </Link>
 
           <a href="https://app.midday.ai">
-            <Button className="h-11 px-5 bg-white text-black hover:bg-white/80">
+            <Button className="h-12 px-5 bg-white text-black hover:bg-white/80">
               Get Early Access
             </Button>
           </a>
