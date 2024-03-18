@@ -1,3 +1,4 @@
+import { DevMessage } from "@/components/dev-message";
 import "@/styles/globals.css";
 import { LogSnagProvider } from "@midday/events/client";
 import "@midday/ui/globals.css";
@@ -46,6 +47,7 @@ export default function Layout({
       >
         {children}
         <Analytics />
+        <DevMessage />
       </body>
     </html>
   );

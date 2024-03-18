@@ -95,6 +95,7 @@ export function Screens() {
                       lightSrc={screen2Light}
                       width={1031}
                       height={670}
+                      priority
                     />
                   ),
                 },
@@ -109,6 +110,7 @@ export function Screens() {
                       lightSrc={screen3Light}
                       width={1031}
                       height={670}
+                      priority
                     />
                   ),
                 },
@@ -118,12 +120,12 @@ export function Screens() {
                   content: (
                     <AdaptiveImage
                       quality={100}
-                      priority
                       alt="Dashboard - Overview"
                       darkSrc={screen4}
                       lightSrc={screen4Light}
                       width={1031}
                       height={670}
+                      priority
                     />
                   ),
                 },
