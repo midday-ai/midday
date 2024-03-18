@@ -19,50 +19,13 @@ import Image from "next/image";
 import React from "react";
 import { useRef } from "react";
 
-const apps = [
-  {
-    id: "finder",
-    icon: require("public/dock/finder.png"),
-    name: "Finder",
-  },
-  // {
-  //   id: "contacts",
-  //   icon: require("public/dock/contacts.png"),
-  // },
-  {
-    id: "midday",
-    icon: require("public/dock/midday.png"),
-    name: "Midday",
-  },
-  {
-    id: "cal",
-    icon: require("public/dock/cal.png"),
-    name: "Talk to us",
-  },
-  {
-    id: "notion",
-    icon: require("public/dock/notion.png"),
-    name: "Open Roadmap",
-  },
-  {
-    id: "discord",
-    icon: require("public/dock/discord.png"),
-    name: "Join the comunity",
-  },
-  {
-    id: "github",
-    icon: require("public/dock/github.png"),
-    name: "Open Repository",
-  },
-];
-
 const Component = React.forwardRef((props, ref) => (
   <Image {...props} ref={ref} />
 ));
 
 const MotionComponent = motion(Component);
 
-export function Dock() {
+export function Dock({ apps }) {
   const mouseX = useMotionValue(Infinity);
 
   return (
@@ -75,7 +38,7 @@ export function Dock() {
         {apps.map((app) => {
           return (
             <Tooltip key={app.id}>
-              <TooltipTrigger>
+              <TooltipTrigger onClick={app.onClick}>
                 <AppIcon mouseX={mouseX} src={app.icon} />
               </TooltipTrigger>
               <TooltipContent className="py-1 px-3 rounded-sm" sideOffset={8}>
