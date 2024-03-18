@@ -1,3 +1,4 @@
+import { BlurryCircle } from "@/components/blurry-circle";
 import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
 import { fetchPageBlocks, fetchPageBySlug, fetchPages } from "@/lib/notion";
@@ -43,6 +44,9 @@ export default async function Page({
 
   return (
     <div className="container max-w-[1140px] flex">
+      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="fixed top-[70%] right-[30%] bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+
       <aside className="sticky h-screen min-w-[260px] pt-[150px] flex-col space-y-4 hidden md:flex">
         <Link href="/updates" className="text-sm font-normal text-[#878787]">
           View all posts

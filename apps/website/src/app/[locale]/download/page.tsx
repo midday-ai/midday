@@ -26,6 +26,9 @@ export default function Page({
 
   return (
     <div className="container flex flex-col items-center mb-48 text-center">
+      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="fixed top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+
       <h1 className="mt-24 font-medium text-center text-5xl mb-24">
         Always at your fingertips.
       </h1>

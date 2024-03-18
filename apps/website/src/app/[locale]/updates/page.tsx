@@ -1,3 +1,4 @@
+import { BlurryCircle } from "@/components/blurry-circle";
 import { PostLinks } from "@/components/post-links";
 import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
@@ -87,6 +88,9 @@ export default async function Page({
 
   return (
     <div className="container max-w-[1140px] flex scroll-smooth">
+      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="fixed top-[70%] right-[30%] bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+
       <PostLinks links={links} />
       <div className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
         {posts}
