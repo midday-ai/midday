@@ -22,6 +22,7 @@ export function Screens() {
           items={[
             {
               id: 1,
+              name: "Overview",
               content: (
                 <AdaptiveImage
                   quality={100}
@@ -36,6 +37,7 @@ export function Screens() {
             },
             {
               id: 2,
+              name: "Tracker",
               content: (
                 <AdaptiveImage
                   quality={100}
@@ -49,7 +51,7 @@ export function Screens() {
             },
             {
               id: 3,
-
+              name: "Inbox",
               content: (
                 <AdaptiveImage
                   quality={100}
@@ -63,6 +65,7 @@ export function Screens() {
             },
             {
               id: 4,
+              name: "Vault",
               content: (
                 <AdaptiveImage
                   quality={100}
