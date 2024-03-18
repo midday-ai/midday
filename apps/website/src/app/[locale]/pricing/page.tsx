@@ -1,5 +1,4 @@
 import { BlurryCircle } from "@/components/blurry-circle";
-import { CTAButtons } from "@/components/cta-buttons";
 import { Testimonials } from "@/components/testimonials";
 import { getStaticParams } from "@/locales/server";
 import {
@@ -8,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Link from "next/link";
@@ -47,7 +47,20 @@ export default function Page({
             <span className="underline">free while in beta</span>
 
             <div className="mt-6">
-              <CTAButtons />
+              <div className="flex items-center space-x-4">
+                <Link href="/talk-to-us">
+                  <Button
+                    variant="outline"
+                    className="border border-primary h-12 px-6"
+                  >
+                    Talk to us
+                  </Button>
+                </Link>
+
+                <a href="https://app.midday.ai">
+                  <Button className="h-11 px-5">Get Early Access</Button>
+                </a>
+              </div>
             </div>
 
             <BlurryCircle className="absolute -top-[50px] right-[0px] bg-[#3633D0] bg-opacity-10 dark:bg-opacity-5" />

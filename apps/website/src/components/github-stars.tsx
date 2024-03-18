@@ -15,7 +15,7 @@ export async function GithubStars() {
       href="https://github.com/pontusab/reactnative.se"
       className="border border-border flex justify-center h-8 leading-[30px] text-[#707070] dark:text-[#878787]"
     >
-      <div className="bg-[#F2F1EF] dark:bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2 border-r-[1px]">
+      <div className="bg-[#F2F1EF] dark:bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2 border-r-[1px] border-border">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width={18}

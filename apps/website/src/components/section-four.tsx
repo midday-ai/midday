@@ -84,7 +84,7 @@ export function SectionFour() {
               darkSrc={inbox}
               lightSrc={inboxLight}
               quality={100}
-              className="object-contain border-b-[1px]"
+              className="object-contain border-b-[1px] border-border"
             />
           </motion.div>
         </div>

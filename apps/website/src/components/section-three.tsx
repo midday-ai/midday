@@ -75,7 +75,7 @@ export function SectionThree() {
               darkSrc={timetracker}
               lightSrc={timetrackerLight}
               height={400}
-              className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0 border-b-[1px]"
+              className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0 border-b-[1px] bordere-border"
               quality={100}
             />
           </motion.div>

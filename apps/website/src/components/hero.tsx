@@ -1,5 +1,5 @@
-import { CTAButtons } from "@/components/cta-buttons";
 import { Button } from "@midday/ui/button";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -31,7 +31,20 @@ export function Hero() {
       </p>
 
       <div className="mt-8">
-        <CTAButtons />
+        <div className="flex items-center space-x-4">
+          <Link href="/talk-to-us">
+            <Button
+              variant="outline"
+              className="border border-primary h-12 px-6"
+            >
+              Talk to us
+            </Button>
+          </Link>
+
+          <a href="https://app.midday.ai">
+            <Button className="h-11 px-5">Get Early Access</Button>
+          </a>
+        </div>
       </div>
 
       <p className="text-xs text-[#707070] mt-6">No credit card required.</p>
