@@ -55,7 +55,6 @@ export const CardStack = ({
   };
 
   const onChangeCard = (item) => {
-    console.log(item);
     const index = cards.findIndex((card) => card.id === item.id);
     setCards([item, ...cards.slice(0, index), ...cards.slice(index + 1)]);
   };
@@ -95,7 +94,9 @@ export const CardStack = ({
                       onClick={() =>
                         onChangeCard(cards.find((c) => c.id === 1))
                       }
-                    />
+                    >
+                      <span className="sr-only">Overview</span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
@@ -114,7 +115,9 @@ export const CardStack = ({
                       onClick={() =>
                         onChangeCard(cards.find((c) => c.id === 3))
                       }
-                    />
+                    >
+                      <span className="sr-only">Inbox</span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
@@ -133,7 +136,9 @@ export const CardStack = ({
                       onClick={() =>
                         onChangeCard(cards.find((c) => c.id === 2))
                       }
-                    />
+                    >
+                      <span className="sr-only">Tracker</span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"
@@ -152,7 +157,9 @@ export const CardStack = ({
                       onClick={() =>
                         onChangeCard(cards.find((c) => c.id === 4))
                       }
-                    />
+                    >
+                      <span className="sr-only">Vault</span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent
                     side="right"

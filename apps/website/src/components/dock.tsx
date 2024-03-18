@@ -39,6 +39,7 @@ export function Dock({ apps }) {
           return (
             <Tooltip key={app.id}>
               <TooltipTrigger onClick={app.onClick}>
+                <span className="sr-only">{app.name}</span>
                 <AppIcon mouseX={mouseX} src={app.icon} />
               </TooltipTrigger>
               <TooltipContent className="py-1 px-3 rounded-sm" sideOffset={8}>

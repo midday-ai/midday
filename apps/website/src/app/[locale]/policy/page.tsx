@@ -461,14 +461,14 @@ export default function Page({
                 following the instructions provided by Google in their Privacy
                 Policy:{" "}
                 <a href="https://policies.google.com/privacy?hl=en">
-                  https:// policies.google.com/privacy?hl=en
+                  https://policies.google.com/privacy?hl=en
                 </a>
               </p>
               <p className="leading-7 mt-8">
                 We also encourage you to review the Google's policy for
                 safeguarding your data:{" "}
                 <a href="https://support.google.com/analytics/answer/6004245">
-                  https:// support.google.com/analytics/answer/6004245
+                  https://support.google.com/analytics/answer/6004245
                 </a>
                 .
               </p>
@@ -476,7 +476,7 @@ export default function Page({
                 For more information on what type of information Firebase
                 collects, please visit the Google Privacy & Terms web page:{" "}
                 <a href="https://policies.google.com/privacy?hl=en">
-                  https:// policies.google.com/privacy?hl=en
+                  https://policies.google.com/privacy?hl=en
                 </a>
               </p>
             </li>

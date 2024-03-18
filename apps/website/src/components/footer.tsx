@@ -13,6 +13,7 @@ export function Footer() {
         <div className="flex justify-between items-center border-border border-b-[1px] pb-10 md:pb-16 mb-12">
           <Link href="/" className="scale-50 -ml-[52px] md:ml-0 md:scale-100">
             <LogoLarge />
+            <span className="sr-only">Midday</span>
           </Link>
 
           <h3 className="font-normal md:text-2xl text-right">
@@ -25,19 +26,19 @@ export function Footer() {
             <div>
               <h6 className="font-medium">Product</h6>
               <ul>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/">Features</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/pricing">Pricing</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/story">Story</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/updates">Updates</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/download">Download</Link>
                 </li>
               </ul>
@@ -46,19 +47,19 @@ export function Footer() {
             <div>
               <h6>Resources</h6>
               <ul>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="https://git.new/midday">Github</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/support">Support</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/updates">Updates</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/policy">Privacy policy</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
               </ul>
@@ -67,21 +68,21 @@ export function Footer() {
             <div>
               <h6>Solutions</h6>
               <ul>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/engine">Midday Engine</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="https://docs.midday.ai/self-hosted">
                     Self hosted
                   </Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/pricing">SaaS hosting</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>
                 </li>
-                <li className="text-[#707070] dark:text-[#878787]">
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/oss-friends">OSS friends</Link>
                 </li>
               </ul>

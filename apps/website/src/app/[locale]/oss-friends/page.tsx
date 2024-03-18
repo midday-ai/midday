@@ -51,6 +51,7 @@ export default async function Page({
                   <h3 className="font-medium text-md">{friend.name}</h3>
                 </a>
                 <a href={friend.href}>
+                  <span className="sr-only">Open link</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width={24}

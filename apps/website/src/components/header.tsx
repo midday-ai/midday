@@ -64,6 +64,7 @@ export function Header() {
       <nav className="border border-border p-3 rounded-2xl backdrop-filter backdrop-blur-xl flex items-center bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
         <Link className="mr-6" href="/">
           <LogoIcon />
+          <span className="sr-only">Midday</span>
         </Link>
 
         <ul className="space-x-2 font-medium text-sm mr-8 hidden md:flex">
@@ -105,6 +106,7 @@ export function Header() {
               d="M0 12.195v-2.007h18v2.007H0Zm0-5.017V5.172h18v2.006H0Zm0-5.016V.155h18v2.007H0Z"
             />
           </svg>
+          <span className="sr-only">Menu</span>
         </button>
 
         <a
