@@ -83,10 +83,10 @@ const ListItem = React.forwardRef<
 });
 
 const links = [
-  {
-    path: "/",
-    name: "features",
-  },
+  // {
+  //   path: "/",
+  //   name: "features",
+  // },
   {
     path: "/pricing",
     name: "pricing",
@@ -159,7 +159,7 @@ export function Header() {
                         <NavigationMenuTrigger>Features</NavigationMenuTrigger>
                         <NavigationMenuContent>
                           <div className="flex">
-                            <Link href="/engine">
+                            {/* <Link href="/engine">
                               <div className="w-[250px]">
                                 <NavigationMenuLink asChild>
                                   <GlowingStarsBackgroundCard>
@@ -175,7 +175,7 @@ export function Header() {
                                   </GlowingStarsBackgroundCard>
                                 </NavigationMenuLink>
                               </div>
-                            </Link>
+                            </Link> */}
                             <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] top-8">
                               {components.map((component) => (
                                 <ListItem
