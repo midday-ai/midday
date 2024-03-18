@@ -63,8 +63,9 @@ export function Screens() {
       case "midday":
         return (
           <div className="relative">
-            <BlurryCircle className="absolute -top-2 right-[320px] bg-[#FFECBB]/20" />
-            <BlurryCircle className="absolute -bottom-6 left-6 bg-[#FFECBB]/5" />
+            <BlurryCircle className="absolute -top-2 right-[320px]  hidden md:block bg-[#FFECBB] dark:bg-[#FFECBB]/40" />
+            <BlurryCircle className="absolute -bottom-6 left-6 hidden md:block bg-[#FFECBB]/50 dark:bg-[#FFECBB]/20" />
+            <BlurryCircle className="absolute -bottom-[60px] right-0 bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
 
             <CardStack
               items={[
