@@ -68,7 +68,7 @@ export default function Page({
         et malesuada fames ac ante ipsum primis in faucibus.
       </p>
 
-      <a href="https://go.midday.ai/MZVe7Ou" download>
+      <a href="https://go.midday.ai/d" download>
         <Button
           variant="outline"
           className="border border-primary h-12 px-6 mt-8"
@@ -82,8 +82,8 @@ export default function Page({
       </p>
 
       <CopyInput
-        value="curl -sL https://go.midday.ai/MZVe7Ou | tar -xz"
-        className="max-w-[365px] mt-8"
+        value="curl -sL https://go.midday.ai/d | tar -xz"
+        className="max-w-[410px] mt-8 font-mono font-normal"
       />
     </div>
   );
