@@ -13,9 +13,9 @@ export function SectionFive() {
   const [isActive2, setActive2] = useState(false);
 
   return (
-    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 md:h-[450px] flex-col md:flex-row overflow-hidden">
+    <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden">
       <div
-        className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col-reverse items-center md:items-start"
+        className="border border-border lg:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start"
         onMouseEnter={() => setActive(true)}
         onMouseLeave={() => setActive(false)}
       >
@@ -29,7 +29,7 @@ export function SectionFive() {
             lightSrc={vaultLight}
             quality={100}
             alt="Vault"
-            className="mt-8 md:mt-0 basis-1/2 object-contain md:max-w-[367px]"
+            className="mt-8 lg:mt-0 basis-1/2 object-contain md:max-w-[367px]"
           />
         </motion.div>
 
@@ -67,7 +67,7 @@ export function SectionFive() {
           animate={isActive2 ? { y: -5, x: -5 } : { y: 0, x: 0 }}
           initial={{ y: -5, x: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
-          className="mt-8 md:mt-auto"
+          className="mt-8 lg:mt-auto"
         >
           <AdaptiveImage
             darkSrc={exporting}
