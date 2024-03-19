@@ -58,7 +58,7 @@ export function TwitterShare() {
     setLoading(true);
 
     const popup = popupCenter({
-      url: "https://twitter.com/intent/tweet?text=I just signed up for @middayai, excited to try this out!",
+      url: "https://twitter.com/intent/tweet?text=I just signed up for @middayai, excited to try this out! https://midday.ai",
       title: "Share",
       w: 800,
       h: 400,
