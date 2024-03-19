@@ -76,9 +76,10 @@ export function Footer() {
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/pricing">SaaS hosting</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                {/* Nothing here yet */}
+                {/* <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>
-                </li>
+                </li> */}
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/oss-friends">OSS friends</Link>
                 </li>
