@@ -2,7 +2,8 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
-import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 
 type ProviderProps = {
   locale: string;
@@ -10,12 +11,14 @@ type ProviderProps = {
 };
 
 export function Provider({ locale, children }: ProviderProps) {
+  const pathname = usePathname();
+
   return (
     <I18nProviderClient locale={locale}>
       <ThemeProvider
         attribute="class"
         defaultTheme="system"
-        forcedTheme="dark"
+        forcedTheme={pathname.includes("engine") ? "dark" : undefined}
         enableSystem
         disableTransitionOnChange
       >

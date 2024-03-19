@@ -1,5 +1,3 @@
-import path from "path";
-
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
@@ -9,6 +7,17 @@ const config = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
+  experimental: {
+    ppr: true,
   },
 };
 

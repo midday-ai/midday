@@ -1,7 +1,7 @@
 // import { ActivityList } from "@/components/activity-list";
 import { MfaSettingsList } from "@/components/mfa-settings-list";
 import { AddNewDeviceModal } from "@/components/modals/add-new-device";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Security | Midday",

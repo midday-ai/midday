@@ -1,7 +1,7 @@
+import { client } from "@midday/kv";
 import { createClient } from "@midday/supabase/middleware";
-import { get } from "@vercel/edge-config";
 import { createI18nMiddleware } from "next-international/middleware";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const I18nMiddleware = createI18nMiddleware({
   locales: ["en"],
@@ -42,11 +42,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Check if in beta list by email
+  // Check if in approved user list by email
   if (
     data?.user &&
-    !(await get("beta"))?.includes(data?.user.email) &&
-    newUrl.pathname !== "/closed"
+    newUrl.pathname === "/" &&
+    !(await client.get("approved"))?.includes(data?.user.email)
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
   }

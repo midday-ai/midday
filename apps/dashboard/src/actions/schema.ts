@@ -22,6 +22,11 @@ export const deleteBankAccountSchema = z.object({
   id: z.string().uuid(),
 });
 
+export const approveUserSchema = z.object({
+  email: z.string().email(),
+  fullName: z.string(),
+});
+
 export const updateBankAccountSchema = z.object({
   id: z.string().uuid(),
   name: z.string().optional(),

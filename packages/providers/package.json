@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@midday/kv": "workspace:*",
-    "axios": "^1.6.7",
+    "axios": "^1.6.8",
     "change-case": "^5.4.3",
     "plaid": "^21.0.0"
   },

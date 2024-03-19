@@ -1,9 +1,24 @@
-import { Header } from "@/components/header";
+import { getStaticParams } from "@/locales/server";
+import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 
-export default function Terms() {
+export const metadata: Metadata = {
+  title: "Terms and Conditions | Midday",
+};
+
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: {
+  params: { locale: string };
+}) {
+  setStaticParamsLocale(locale);
+
   return (
     <>
-      <Header />
       <div className="max-w-[600px] m-auto my-20">
         <h1 className="scroll-m-20 text-2xl tracking-tight lg:text-3xl">
           Terms and Conditions

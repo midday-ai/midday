@@ -14,6 +14,7 @@
     "dev": "turbo dev --parallel",
     "test": "turbo test --parallel",
     "start:dashboard": "turbo start --filter=@midday/dashboard",
+    "start:website": "turbo start --filter=@midday/website",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "dev:website": "turbo dev --filter=@midday/website",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
@@ -24,7 +25,8 @@
   },
   "dependencies": {
     "@biomejs/biome": "1.6.1",
-    "@manypkg/cli": "^0.21.2",
+    "@calcom/embed-react": "^1.3.2",
+    "@manypkg/cli": "^0.21.3",
     "turbo": "^1.12.5",
     "typescript": "^5.4.2"
   },

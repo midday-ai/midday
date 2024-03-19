@@ -1,3 +1,4 @@
+import { DevMessage } from "@/components/dev-message";
 import "@/styles/globals.css";
 import { LogSnagProvider } from "@midday/events/client";
 import "@midday/ui/globals.css";
@@ -10,14 +11,14 @@ import type { ReactElement } from "react";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://midday.ai"),
-  title: "Midday | The financial OS for your business",
+  title: "Midday | Run your business smarter",
   description:
-    "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
 };
 
 export const viewport = {
   themeColor: [
-    // { media: "(prefers-color-scheme: light)" },
+    { media: "(prefers-color-scheme: light)" },
     { media: "(prefers-color-scheme: dark)" },
   ],
 };
@@ -41,11 +42,12 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "whitespace-pre-line"
+          "bg-[#F6F6F3] dark:bg-[#0C0C0C] overflow-x-hidden"
         )}
       >
         {children}
         <Analytics />
+        <DevMessage />
       </body>
     </html>
   );
