@@ -1,6 +1,6 @@
 <p align="center">
    <p align="center">
-      <img src="https://beta.midday.ai/en/opengraph-image.png" alt="Logo">
+      <img src="/github.png" alt="Logo">
   </p>
 	<h1 align="center"><b>Midday</b></h1>
 <p align="center">
