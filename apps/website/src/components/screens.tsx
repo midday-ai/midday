@@ -52,12 +52,12 @@ export function Screens() {
       name: "Join the comunity",
       onClick: () => router.push("https://go.midday.ai/anPiuRx"),
     },
-    {
-      id: "github",
-      icon: require("public/dock/github.png"),
-      name: "Open Repository",
-      onClick: () => router.push("https://git.new/midday"),
-    },
+    // {
+    //   id: "github",
+    //   icon: require("public/dock/github.png"),
+    //   name: "Open Repository",
+    //   onClick: () => router.push("https://git.new/midday"),
+    // },
   ];
 
   const renderActiveApp = () => {

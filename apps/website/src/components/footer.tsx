@@ -54,9 +54,6 @@ export function Footer() {
                   <Link href="/support">Support</Link>
                 </li>
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
-                  <Link href="/updates">Updates</Link>
-                </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/policy">Privacy policy</Link>
                 </li>
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
