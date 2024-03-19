@@ -3,7 +3,7 @@ export async function GithubStars() {
     "https://api.github.com/repos/midday-ai/midday",
     {
       next: {
-        revalidate: 3600,
+        revalidate: 300,
       },
     }
   );
