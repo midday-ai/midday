@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://midday.ai"),
   title: "Midday | Run your business smarter",
   description:
-    "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
 };
 
 export const viewport = {
