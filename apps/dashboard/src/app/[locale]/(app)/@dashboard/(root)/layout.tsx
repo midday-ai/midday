@@ -34,7 +34,7 @@ export default async function Layout({
       </div>
 
       <ConnectTransactionsModal isEU={isEU} />
-      <ConnectGoCardLessModal countryCode={"RO"} />
+      <ConnectGoCardLessModal countryCode={countryCode} />
       <SelectBankAccountsModal countryCode={countryCode} />
       <ImportCSVModal />
       <ExportStatus />
