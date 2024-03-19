@@ -4,10 +4,11 @@ import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
 import { fetchPageBlocks, fetchPages } from "@/lib/notion";
 import { getStaticParams } from "@/locales/server";
+import { NotionRenderer } from "@notion-render/client";
+import "@notion-render/client/dist/theme.css";
 import format from "date-fns/format";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
-import Image from "next/image";
 import Link from "next/link";
 
 export const revalidate = 0;
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
 export function generateStaticParams() {
   return getStaticParams();
 }
+
+const renderer = new NotionRenderer();
 
 export default async function Page({
   params: { locale },
@@ -38,6 +41,7 @@ export default async function Page({
 
   const posts = data.results.map(async (post, index) => {
     const blocks = await fetchPageBlocks(post.id);
+    const html = await renderer.render(...blocks);
     const slug = `/updates/${post.properties.Slug.url}`;
 
     return (
@@ -54,32 +58,10 @@ export default async function Page({
           </h2>
         </Link>
 
-        {blocks.map((block) => {
-          switch (block.type) {
-            case "image":
-              return (
-                <Image
-                  priority={index === 0}
-                  className="mb-6"
-                  key={block.id}
-                  width={800}
-                  height={520}
-                  src={block.image.file.url}
-                  alt={block.image?.caption.at(0)?.plain_text ?? "Image"}
-                />
-              );
-
-            case "paragraph":
-              return (
-                <p className="mb-6 text-[#878787]" key={block.id}>
-                  {block.paragraph.rich_text.at(0)?.plain_text}
-                </p>
-              );
-
-            default:
-              return null;
-          }
-        })}
+        <div
+          className="notion-render"
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
 
         <PostMeta author={post.properties.Author.people.at(0)} slug={slug} />
       </div>
@@ -88,8 +70,8 @@ export default async function Page({
 
   return (
     <div className="container max-w-[1140px] flex scroll-smooth">
-      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
-      <BlurryCircle className="fixed top-[70%] right-[30%] bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="absolute top-[70%] right-[30%] bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
 
       <PostLinks links={links} />
       <div className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">

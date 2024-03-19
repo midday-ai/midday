@@ -20,11 +20,13 @@ export function SectionTwo() {
           animate={isActive ? { y: -5, x: 5 } : { y: 0, x: 0 }}
           initial={{ y: 0, x: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
+          className="w-full"
         >
           <AdaptiveImage
             lightSrc={profitLossLight}
             darkSrc={profitLoss}
             height={400}
+            width={789}
             className="-mb-[1px] object-contain"
             alt="Overview"
           />
@@ -34,14 +36,10 @@ export function SectionTwo() {
           <h3 className="font-medium text-2xl	mb-4">Financial overview</h3>
 
           <p className="text-[#878787] mb-4">
-            Bring your own bank, we connect to over 4000 banks <br /> world
-            wide.
-          </p>
-
-          <p className="text-[#878787]">
-            Keep track of your expenses and income. Get a better <br />
-            overview of your bussiness financial track record and
-            <br /> situation. Share profit/loss reports
+            Bring your own bank. We connect to over 20 000+ banks in 33
+            countries across US, Canada, UK and Europe. Keep tabs on your
+            expenses and income, and gain a clearer picture of your business's
+            financial track record and current situation.
           </p>
 
           <div className="flex space-x-2 items-center mt-8">
@@ -56,7 +54,7 @@ export function SectionTwo() {
                 d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
               />
             </svg>
-            <span className="text-[#878787]">Share profit/loss reports</span>
+            <span className="text-[#878787]">Share financial reports</span>
           </div>
         </div>
       </div>

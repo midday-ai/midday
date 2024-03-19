@@ -8,10 +8,10 @@ export function FooterCTA() {
         Stress free by midday.
       </h3>
       <p className="text-[#878787] mt-6">
-        Integer quis vestibulum lorem. Curabitur consectetur nulla nec justo
-        congue
+        Midday provides you with greater insight into your business and
         <br />
-        mattis. Nulla tincidunt ante eros, nec interdum dui varius quis.
+        automates the boring tasks, allowing you to focus on what you love to do
+        instead.
       </p>
 
       <div className="mt-10 mb-8">

@@ -72,9 +72,10 @@ export const CardStack = ({
             className="absolute h-[220px] md:h-[670px] w-[331px] md:w-[1031px] flex flex-col justify-between"
             style={{
               transformOrigin: "top center",
+              display: index > 2 ? "none" : "block",
             }}
             whileHover={{
-              top: index > 0 && index * -CARD_OFFSET - 30,
+              top: index > 0 && index > 0 && index * -CARD_OFFSET - 30,
               transition: { duration: 0.3 },
             }}
             animate={{
@@ -104,6 +105,27 @@ export const CardStack = ({
                     sideOffset={8}
                   >
                     <p className="text-xs">Overview</p>
+                  </TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="w-[35px] h-[20px] z-20 absolute top-[95px] left-[8px]"
+                      onClick={() =>
+                        onChangeCard(cards.find((c) => c.id === 5))
+                      }
+                    >
+                      <span className="sr-only">Transactions</span>
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="right"
+                    className="py-1 px-3 rounded-sm"
+                    sideOffset={8}
+                  >
+                    <p className="text-xs">Transactions</p>
                   </TooltipContent>
                 </Tooltip>
 

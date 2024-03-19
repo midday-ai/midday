@@ -4,7 +4,7 @@ export function SectionSeven() {
   return (
     <TextGenerateEffect
       className="pt-28 pb-40 text-4xl	md:text-6xl"
-      words="Get an overview of your business financial situation. Time track you projects. Streamline your month-end procedures, reduce hours of manual work and effortlessly equip your accountant with expense reports."
+      words="Put the boring parts of running a business on autopilot. Midday helps you to streamline your month-end procedures, reduce manual work and easily package everything up for your accountant."
     />
   );
 }

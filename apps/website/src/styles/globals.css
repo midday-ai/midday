@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.notion-render b,
+.notion-render h3 {
+    font-weight: 500 !important;
+}
+
+.notion-render ul li,
+.notion-render p {
+    color: #707070;
+}

@@ -12,7 +12,7 @@ export const notion = new Client({
     fetch(url, {
       ...init,
       next: {
-        revalidate: 3600,
+        revalidate: 900,
       },
     }),
 });

@@ -59,7 +59,7 @@ export default function Page({
           src={require("public/engine.png")}
           width={419}
           height={421}
-          className="mt-12"
+          className="mt-16"
           quality={100}
           alt="Midday Engine"
         />
@@ -70,10 +70,8 @@ export default function Page({
       <div className="text-center flex flex-col items-center mt-24">
         <h3 className="mb-4 text-2xl font-medium">Unlimted bank connections</h3>
         <p className="text-[#878787] font-sm max-w-[600px]">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean porta
-          ipsum dui, lacinia ullamcorper purus cursus vel. Vivamus scelerisque
-          felis a efficitur porttitor. Donec scelerisque erat purus, sit amet
-          pretium felis hendrerit a.
+          Expand your market reach by enabling multiple banking providers with
+          just one click. We add even more providers in the future.
         </p>
 
         <Image
@@ -90,10 +88,8 @@ export default function Page({
           One SDK, implement in minutes
         </h3>
         <p className="text-[#878787] font-sm max-w-[600px]">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean porta
-          ipsum dui, lacinia ullamcorper purus cursus vel. Vivamus scelerisque
-          felis a efficitur porttitor. Donec scelerisque erat purus, sit amet
-          pretium felis hendrerit a.
+          With Midday Engine SDK you can implement banking providers in matter
+          of minutes.
         </p>
 
         <Image
@@ -101,7 +97,7 @@ export default function Page({
           alt="Engine SDK"
           width={740}
           height={420}
-          className="mt-16"
+          className="mt-8"
         />
       </div>
     </div>

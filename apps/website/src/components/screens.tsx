@@ -10,6 +10,8 @@ import screen3Light from "public/screen-3-light.png";
 import screen3 from "public/screen-3.png";
 import screen4Light from "public/screen-4-light.png";
 import screen4 from "public/screen-4.png";
+import screen5Light from "public/screen-5-light.png";
+import screen5 from "public/screen-5.png";
 import { useState } from "react";
 import { BlurryCircle } from "./blurry-circle";
 import { CalEmbed } from "./cal-embed";
@@ -42,7 +44,7 @@ export function Screens() {
       id: "notion",
       icon: require("public/dock/notion.png"),
       name: "Open Roadmap",
-      onClick: () => router.push("https://go.midday.ai/aTNyqQH"),
+      onClick: () => router.push("https://go.midday.ai/4bHhyra"),
     },
     {
       id: "discord",
@@ -90,7 +92,7 @@ export function Screens() {
                   content: (
                     <AdaptiveImage
                       quality={100}
-                      alt="Dashboard - Overview"
+                      alt="Dashboard - Tracker"
                       darkSrc={screen2}
                       lightSrc={screen2Light}
                       width={1031}
@@ -105,7 +107,7 @@ export function Screens() {
                   content: (
                     <AdaptiveImage
                       quality={100}
-                      alt="Dashboard - Overview"
+                      alt="Dashboard - Inbox"
                       darkSrc={screen3}
                       lightSrc={screen3Light}
                       width={1031}
@@ -120,9 +122,24 @@ export function Screens() {
                   content: (
                     <AdaptiveImage
                       quality={100}
-                      alt="Dashboard - Overview"
+                      alt="Dashboard - Vault"
                       darkSrc={screen4}
                       lightSrc={screen4Light}
+                      width={1031}
+                      height={670}
+                      priority
+                    />
+                  ),
+                },
+                {
+                  id: 5,
+                  name: "Dashboard - Transactions",
+                  content: (
+                    <AdaptiveImage
+                      quality={100}
+                      alt="Dashboard - Transactions"
+                      darkSrc={screen5}
+                      lightSrc={screen5Light}
                       width={1031}
                       height={670}
                       priority
@@ -135,7 +152,7 @@ export function Screens() {
         );
       case "cal":
         return (
-          <div className="w-full md:h-[670px]">
+          <div className="w-full max-h-[760px] overflow-auto md:h-[600px] md:mt-[70px]">
             <CalEmbed />
           </div>
         );

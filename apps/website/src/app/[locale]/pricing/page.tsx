@@ -30,8 +30,8 @@ export default function Page({
   return (
     <>
       <div className="container max-w-[800px]">
-        <div className="h-screen">
-          <h1 className="mt-24 font-medium text-center text-5xl mb-8">
+        <div className="h-screen min-h-[850px]">
+          <h1 className="mt-24 font-medium text-center text-5xl mb-2">
             What it cost.
           </h1>
 
@@ -40,13 +40,13 @@ export default function Page({
               30
             </h3>
 
-            <p className="font-medium text-xl">
+            <p className="font-medium text-xl mt-4">
               Claim $30/mo early adopter plan
             </p>
 
-            <span className="mt-2">Free while in beta</span>
+            <span className="mt-2 text-[#878787]">Free while in beta</span>
 
-            <div className="mt-6">
+            <div className="mt-8">
               <div className="flex items-center space-x-4">
                 <Link href="/talk-to-us">
                   <Button
@@ -72,13 +72,6 @@ export default function Page({
         <div className="-mt-[200px]">
           <div className="text-center">
             <h4 className="text-4xl">Frequently asked questions</h4>
-            <p className="text-[#878787] text-sm mt-4">
-              Integer quis vestibulum lorem. Curabitur consectetur nulla nec
-              justo
-              <br />
-              congue mattis. Nulla tincidunt ante eros, nec interdum dui varius
-              quis.
-            </p>
           </div>
 
           <Accordion type="single" collapsible className="w-full mt-10 mb-48">

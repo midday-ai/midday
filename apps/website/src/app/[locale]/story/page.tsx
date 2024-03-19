@@ -24,44 +24,43 @@ export default function Page({
   setStaticParamsLocale(locale);
 
   return (
-    <div className="container max-w-[800px]">
-      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
-      <BlurryCircle className="fixed top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+    <div className="container max-w-[750px]">
+      <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="absolute top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
 
-      <h1 className="mt-24 font-medium text-center text-5xl mb-8">Why?</h1>
+      <h1 className="mt-24 font-medium text-center text-5xl mb-16 leading-snug">
+        This is why we’re building <br />
+        Midday.
+      </h1>
 
-      <p className="text-2xl font-normal mb-4">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tincidunt,
-        nunc non efficitur interdum, mauris tellus maximus dolor.
-      </p>
-
+      <h3 className="font-medium text-xl mb-2">Problem</h3>
       <p className="text-[#878787] mb-8">
-        Suspendisse mattis libero vitae eros tincidunt porttitor in eget nulla.
-        Nulla at justo blandit, facilisis dui at, porttitor sapien. Sed vitae
-        nulla ac sapien ornare iaculis. Nunc in accumsan lorem. Curabitur et
-        ligula metus.
+        After years of running our own businesses, we've always felt something
+        was broken, especially when it came to the mundane tasks. Your monthly
+        routine typically involves tracking time, sending invoices, collecting
+        receipts, and organizing documents. All which are scattered across
+        various platforms. We've observed that these tools are often provided by
+        large industry giants that struggle to adapt and innovate quickly.
       </p>
 
-      <p className="text-[#878787] mb-4">
-        Donec risus mi, elementum eu mi vel, ultricies porttitor augue. Interdum
-        et malesuada fames ac ante ipsum primis in faucibus. Aenean vel cursus
-        metus, non convallis mauris. Integer a sodales leo.
+      <h3 className="font-medium text-xl mb-2">Solution</h3>
+      <p className="text-[#878787] mb-8">
+        So, we asked ourselves, why not create one comprehensive tool for all
+        these tasks? Inspired by companies like Notion that revolutionized
+        all-in-one tools, we embarked on developing an all-in-one business OS.
+        Our goal is to help entrepreneurs gain deeper business insights,
+        streamline tedious tasks, and serve as a bridge between you and your
+        accountant, allowing you to focus on the enjoyable aspects of your
+        work."
       </p>
 
-      <p className="text-[#878787] mb-4">
-        Nullam ut risus quis elit suscipit efficitur. Nam rhoncus posuere
-        mauris, vel porttitor elit mattis at. In sodales odio non erat bibendum
-        eleifend. Pellentesque ornare fermentum elit at facilisis. Orci varius
-        natoque penatibus et magnis dis parturient montes, nascetur ridiculus
-        mus. In eu mollis ipsum. Suspendisse luctus lobortis libero malesuada.
-      </p>
-
+      <h3 className="font-medium text-xl mb-2">Open source</h3>
       <p className="text-[#878787] mb-12">
-        Nullam ut risus quis elit suscipit efficitur. Nam rhoncus posuere
-        mauris, vel porttitor elit mattis at. In sodales odio non erat bibendum
-        eleifend. Pellentesque ornare fermentum elit at facilisis. Orci varius
-        natoque penatibus et magnis dis parturient montes, nascetur ridiculus
-        mus. In eu mollis ipsum. Suspendisse luctus lobortis libero malesuada.
+        We've always admired companies that prioritize transparency and
+        collaboration with users to build the best possible product. Whether
+        it's through 15-minute user calls, building in public, or open-sourcing
+        our system, these are values we hold dear and will continue to uphold,
+        regardless of how far or big we go."
       </p>
 
       <Image src={founders} width={800} height={514} alt="Pontus & Viktor" />

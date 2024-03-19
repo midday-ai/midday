@@ -2,7 +2,7 @@ import { LogoLarge } from "@/components/logo-large";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
 import { Suspense } from "react";
-import { GithubStars } from "./github-stars";
+// import { GithubStars } from "./github-stars";
 import { SocialLinks } from "./social-links";
 import { StatusWidget } from "./status-widget";
 
@@ -92,9 +92,9 @@ export function Footer() {
           <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
             <div className="flex justify-between md:items-end flex-col space-y-14">
               <div className="flex items-center">
-                <Suspense>
+                {/* <Suspense>
                   <GithubStars />
-                </Suspense>
+                </Suspense> */}
 
                 <SocialLinks />
               </div>
@@ -111,14 +111,11 @@ export function Footer() {
 
         <p className="text-xs text-[#B3B3B2] dark:text-[#3E3E3E] mb-12">
           Cal.com® is a registered trademark by Cal.com, Inc. All rights
-          reserved. Cal.com® is a registered trademark by Cal.com, Inc. All
-          rights reserved. Cal.com® is a registered trademark by Cal.com, Inc.
-          All rights reserved. Cal.com® is a registered trademark by Cal.com,
-          Inc. All rights reserved. Cal.com® is a registered trademark by
-          Cal.com, Inc. All rights reserved. Cal.com® is a registered trademark
-          by Cal.com, Inc. All rights reserved. Cal.com® is a registered
-          trademark by Cal.com, Inc. All rights reserved. Cal.com® is a
-          registered trademark by Cal.com, Inc. All rights reserved.
+          reserved. Apple.com® is a registered trademark by Apple.com, Inc. All
+          rights reserved. Discord.com® is a registered trademark by
+          Discord.com, Inc. All rights reserved. Github.com® is a registered
+          trademark by Github.com, Inc. All rights reserved. Notion.com® is a
+          registered trademark by Notion.com, Inc. All rights reserved.
         </p>
       </div>
     </footer>

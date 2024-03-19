@@ -18,5 +18,9 @@ export default function Page({
 }) {
   setStaticParamsLocale(locale);
 
-  return <CalEmbed />;
+  return (
+    <div className="mt-24">
+      <CalEmbed />
+    </div>
+  );
 }

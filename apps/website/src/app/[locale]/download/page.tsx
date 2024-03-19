@@ -25,9 +25,9 @@ export default function Page({
   setStaticParamsLocale(locale);
 
   return (
-    <div className="container flex flex-col items-center mb-48 text-center">
-      <BlurryCircle className="fixed top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
-      <BlurryCircle className="fixed top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
+    <div className="container flex flex-col items-center mb-12 md:mb-48 text-center">
+      <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
+      <BlurryCircle className="absolute top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
 
       <h1 className="mt-24 font-medium text-center text-5xl mb-24">
         Always at your fingertips.
@@ -65,10 +65,10 @@ export default function Page({
         quality={100}
         className="w-[80px] h-[80px] mt-12 md:mt-0 md:h-auto md:w-auto"
       />
-      <p className="mb-4 text-2xl	font-medium mt-8">Midday for mac</p>
+      <p className="mb-4 text-2xl	font-medium mt-8">Midday for Mac</p>
       <p className="text-[#878787] font-sm max-w-[500px]">
-        Donec risus mi, elementum eu mi vel, ultricies porttitor augue. Interdum
-        et malesuada fames ac ante ipsum primis in faucibus.
+        With Midday on Mac you have everything <br />
+        accessible just one click away.
       </p>
 
       <a href="https://go.midday.ai/d" download>

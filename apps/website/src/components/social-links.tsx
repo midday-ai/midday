@@ -1,5 +1,5 @@
 import { FaGithub } from "react-icons/fa";
-import { FaProductHunt } from "react-icons/fa";
+// import { FaProductHunt } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaDiscord } from "react-icons/fa6";
 
@@ -15,7 +15,7 @@ export function SocialLinks() {
           />
         </a>
       </li>
-      <li>
+      {/* <li>
         <a href="https://go.midday.ai/7rhA3rz">
           <span className="sr-only">Producthunt</span>
           <FaProductHunt
@@ -23,7 +23,7 @@ export function SocialLinks() {
             className="fill-[#707070] dark:fill-[#878787]"
           />
         </a>
-      </li>
+      </li> */}
       <li>
         <a href="https://go.midday.ai/anPiuRx">
           <span className="sr-only">Discord</span>
