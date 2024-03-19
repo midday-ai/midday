@@ -53,8 +53,4 @@
 
 ## Repo Activity
 
-<!-- ![Repo Activity](https://repobeats.axiom.co/api/embed/ "Repobeats analytics image") -->
-
-```
-
-```
+![Alt](https://repobeats.axiom.co/api/embed/96aae855e5dd87c30d53c1d154b37cf7aa5a89b3.svg "Repobeats analytics image")
