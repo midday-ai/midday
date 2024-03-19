@@ -32,8 +32,10 @@ export function SectionTwo() {
           />
         </motion.div>
 
-        <div className="mt-6">
-          <h3 className="font-medium text-2xl	mb-4">Financial overview</h3>
+        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8">
+          <h3 className="font-medium text-xl md:text-2xl mb-4">
+            Financial overview
+          </h3>
 
           <p className="text-[#878787] mb-4">
             Bring your own bank. We connect to over 20 000+ banks in 33

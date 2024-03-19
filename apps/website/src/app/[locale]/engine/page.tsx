@@ -28,7 +28,7 @@ export default function Page({
         One API to rule them all.
       </h1>
 
-      <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px]">
+      <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px] font-mono">
         Midday Engine streamlines banking integrations with a single API,
         effortlessly connecting to multiple providers and get one unified
         format.

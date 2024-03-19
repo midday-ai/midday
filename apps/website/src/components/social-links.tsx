@@ -5,7 +5,7 @@ import { FaDiscord } from "react-icons/fa6";
 
 export function SocialLinks() {
   return (
-    <ul className="flex space-x-4 items-center ml-5">
+    <ul className="flex space-x-4 items-center md:ml-5">
       <li>
         <a href="https://go.midday.ai/lS72Toq">
           <span className="sr-only">Twitter</span>

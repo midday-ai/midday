@@ -25,13 +25,16 @@ export function SectionSix() {
             darkSrc={ai}
             lightSrc={aiLight}
             height={405}
+            width={793}
             className="-mb-[1px] object-contain"
             alt="AI"
             quality={100}
           />
         </motion.div>
-        <div className="mt-6">
-          <h3 className="font-medium text-2xl	mb-4">Your Virtual CFO</h3>
+        <div className="mt-6 md:max-w-[40%] md:ml-8">
+          <h3 className="font-medium text-xl md:text-2xl	mb-4">
+            Your Virtual CFO
+          </h3>
 
           <p className="text-[#878787]">
             With Midday AI, you can ask anything and gain insights into your

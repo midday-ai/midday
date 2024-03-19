@@ -34,7 +34,7 @@ export function SectionFive() {
         </motion.div>
 
         <div className="flex flex-col basis-1/2">
-          <h4 className="font-medium text-2xl mb-4">Vault</h4>
+          <h4 className="font-medium text-xl md:text-2xl mb-4">Vault</h4>
 
           <p className="text-[#878787] mb-4">
             Store your files securely in Midday.
@@ -53,7 +53,9 @@ export function SectionFive() {
         onMouseEnter={() => setActive2(true)}
         onMouseLeave={() => setActive2(false)}
       >
-        <h4 className="font-medium text-2xl mb-4">Seamless export</h4>
+        <h4 className="font-medium text-xl md:text-2xl mb-4">
+          Seamless export
+        </h4>
         <p className="text-[#878787]">
           Take the hassle out of preparing exports for your accountant. Just
           select any time period or transaction you want and hit export. We

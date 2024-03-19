@@ -20,7 +20,10 @@ export function SectionFour() {
         onMouseEnter={() => setActive2(true)}
         onMouseLeave={() => setActive2(false)}
       >
-        <h4 className="font-medium text-2xl mb-4">Invoicing</h4>
+        <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
+          Coming soon
+        </span>
+        <h4 className="font-medium text-xl md:text-2xl mb-4">Invoicing</h4>
         <p className="text-[#878787]">
           We’re working hard to give you the best invoice solution. It will
           feature web based invoices, live collaboration and project sync.
@@ -47,7 +50,7 @@ export function SectionFour() {
         onMouseLeave={() => setActive(false)}
       >
         <div className="flex flex-col md:basis-1/2">
-          <h4 className="font-medium text-2xl mb-4">Magic inbox</h4>
+          <h4 className="font-medium text-xl md:text-2xl mb-4">Magic inbox</h4>
 
           <p className="text-[#878787] mb-4">
             Automatic matching of incoming invoices or receipts to the right

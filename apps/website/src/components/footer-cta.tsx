@@ -14,7 +14,7 @@ export function FooterCTA() {
         instead.
       </p>
 
-      <div className="mt-10 mb-8">
+      <div className="mt-10 md:mb-8">
         <div className="flex items-center space-x-4">
           <Link href="/talk-to-us">
             <Button

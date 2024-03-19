@@ -18,8 +18,8 @@ export function SectionThree() {
     >
       <div className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
-          <div className="md:mt-6">
-            <h3 className="font-medium text-2xl	mb-4">
+          <div className="mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
+            <h3 className="font-medium text-xl md:text-2xl	mb-4">
               Time track your projects
             </h3>
 

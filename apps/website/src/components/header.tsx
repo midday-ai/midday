@@ -180,7 +180,7 @@ export function Header() {
               </motion.li>
 
               <motion.li
-                className="mt-auto border-t-[1px] pt-8"
+                className="mt-auto border-t-[1px] border-border pt-8"
                 variants={itemVariant}
               >
                 <Link

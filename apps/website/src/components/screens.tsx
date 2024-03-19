@@ -162,7 +162,7 @@ export function Screens() {
   };
 
   return (
-    <div className="flex items-center justify-center mt-14 flex-col">
+    <div className="flex items-center justify-center mt-12 md:mt-14 flex-col">
       {renderActiveApp()}
 
       <div className="mt-8">
