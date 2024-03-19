@@ -109,7 +109,7 @@
     "cmdk": "0.2.1",
     "date-fns": "^3.5.0",
     "embla-carousel-react": "^8.0.0",
-    "input-otp": "^1.2.0",
+    "input-otp": "^1.2.2",
     "jsonfile": "^6.1.0",
     "lucide-react": "^0.358.0",
     "postcss": "^8.4.35",

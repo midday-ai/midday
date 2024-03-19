@@ -13,7 +13,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@baselime/node-opentelemetry": "^0.4.6",
+    "@baselime/node-opentelemetry": "^0.4.8",
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/jobs": "workspace:*",
@@ -38,12 +38,12 @@
     "@vercel/edge-config": "^1.1.0",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.40",
-    "ai": "^3.0.12",
+    "ai": "^3.0.13",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.3",
     "dub": "^0.10.0",
     "fast-csv": "^5.0.1",
-    "framer-motion": "^11.0.14",
+    "framer-motion": "^11.0.15",
     "geist": "^1.2.2",
     "headless-currency-input": "^1.1.0",
     "loops": "0.3.0",
@@ -67,7 +67,7 @@
     "resend": "^3.2.0",
     "sharp": "^0.33.2",
     "teller-connect-react": "^0.1.0",
-    "tus-js-client": "^4.0.1",
+    "tus-js-client": "^4.1.0",
     "use-long-press": "^3.2.0",
     "zod": "^3.22.4",
     "zustand": "^4.5.2"
@@ -76,8 +76,8 @@
     "@midday/tsconfig": "workspace:*",
     "@t3-oss/env-nextjs": "^0.9.2",
     "@todesktop/tailwind-variants": "^1.0.1",
-    "@types/node": "^20.11.28",
-    "@types/react": "^18.2.66",
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",
     "typescript": "^5.4.2"
   }
