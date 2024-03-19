@@ -11,3 +11,7 @@
 .notion-render p {
     color: #707070;
 }
+
+.notion-render a {
+    text-decoration: underline;
+}
