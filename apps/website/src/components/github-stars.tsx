@@ -1,6 +1,6 @@
 export async function GithubStars() {
   const response = await fetch(
-    "https://api.github.com/repos/pontusab/reactnative.se",
+    "https://api.github.com/repos/midday-ai/midday",
     {
       next: {
         revalidate: 3600,
@@ -12,7 +12,7 @@ export async function GithubStars() {
 
   return (
     <a
-      href="https://github.com/pontusab/reactnative.se"
+      href="https://git.new/midday"
       className="border border-border flex justify-center h-8 leading-[30px] text-[#707070] dark:text-[#878787]"
     >
       <div className="bg-[#F2F1EF] dark:bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2 border-r-[1px] border-border">

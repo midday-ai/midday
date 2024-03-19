@@ -30,7 +30,7 @@ export default function Page({
   return (
     <>
       <div className="container max-w-[800px]">
-        <div className="h-screen min-h-[850px]">
+        <div className="min-h-[950px]">
           <h1 className="mt-24 font-medium text-center text-5xl mb-2">
             What it cost.
           </h1>
@@ -64,8 +64,8 @@ export default function Page({
             </div>
 
             <BlurryCircle className="absolute -top-[50px] right-[0px] bg-[#3633D0] bg-opacity-10 dark:bg-opacity-5" />
-            <BlurryCircle className="absolute bottom-[160px] left-6 bg-[#A1F5CD] bg-opacity-15 dark:bg-opacity-5" />
-            <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB] bg-opacity-15 dark:bg-opacity-5" />
+            <BlurryCircle className="absolute bottom-[160px] left-6 bg-[#A1F5CD] bg-opacity-10 dark:bg-opacity-5" />
+            <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB] bg-opacity-10 dark:bg-opacity-5" />
           </div>
         </div>
 
@@ -80,22 +80,33 @@ export default function Page({
                 <span className="truncate">Can I self-host Midday.ai?</span>
               </AccordionTrigger>
               <AccordionContent>
-                Absolutely. Please refer to our docs for the latest guides and
-                information on self-hosting the platform.
+                Absolutely. We are currently writing the documentation for this.
+                You can find the repository{" "}
+                <a href="https://git.new/midday" className="underline">
+                  here
+                </a>
+                .
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-2">
               <AccordionTrigger>Can I run Midday.ai locally?</AccordionTrigger>
               <AccordionContent>
-                Yes. It comes with default styles that matches the other
-                components&apos; aesthetic.
+                Yes. We are currently writing documentation for this. You can
+                find the repository{" "}
+                <a href="https://git.new/midday" className="underline">
+                  here
+                </a>
+                .
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-3">
               <AccordionTrigger>Is Midday.ai open source?</AccordionTrigger>
               <AccordionContent>
-                Yes. It's animated by default, but you can disable it if you
-                prefer.
+                Yes. You can find the repository{" "}
+                <a href="https://git.new/midday" className="underline">
+                  here
+                </a>
+                .
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="item-4">
@@ -107,8 +118,9 @@ export default function Page({
               <AccordionContent>
                 We take data privacy very seriously and implement
                 state-of-the-art security measures to protect your data. We are
-                also actively working towards SOC 2 Type II compliance. You can
-                learn more about our data privacy policies at{" "}
+                also actively working towards SOC 2 Type II compliance. We
+                encrypt data at rest, and sensitive data on row level. We also
+                support 2FA authentication.
                 <Link href="/privacy">midday.co/privacy</Link>.
               </AccordionContent>
             </AccordionItem>
@@ -122,8 +134,7 @@ export default function Page({
               <AccordionContent>
                 Yes, you can cancel your subscription at any time. If you cancel
                 your subscription, you will still be able to use Midday until
-                the end of your billing period. After that, you will be
-                downgraded to the free plan.
+                the end of your billing period.
               </AccordionContent>
             </AccordionItem>
 

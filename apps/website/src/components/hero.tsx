@@ -26,9 +26,8 @@ export function Hero() {
 
       <h1 className="text-6xl font-medium mt-6">Run your business smarter.</h1>
 
-      <p className="mt-4 md:mt-6 text-[#707070]">
+      <p className="mt-4 md:mt-6 text-[#707070] max-w-[600px]">
         Midday provides you with greater insight into your business and
-        <br />
         automates the boring tasks, allowing you to focus on what you love to do
         instead.
       </p>

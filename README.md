@@ -1,6 +1,6 @@
 <p align="center">
    <p align="center">
-      <img width="150" height="150" src="/app-icon.png" alt="Logo">
+      <img src="https://beta.midday.ai/en/opengraph-image.png" alt="Logo">
   </p>
 	<h1 align="center"><b>Midday</b></h1>
 <p align="center">
@@ -15,9 +15,9 @@
   </p>
 </p>
 
-# Roadmap
+# Under active development
 
-View what's currently in progress, and what's planned for the future: [Midday Roadmap](https://midday-ai.notion.site/86823a9c0e2d4da6976d499df27cdfe3)
+> We have been working with Midday for the past 4 months and our philosophy has been "make it work, make it right". Currently, we're actively improving Midday's code quality and best practices. In the meantime, fasten your seatbelts and enjoy the ride!
 
 # App Architecture
 
@@ -54,3 +54,7 @@ View what's currently in progress, and what's planned for the future: [Midday Ro
 ## Repo Activity
 
 <!-- ![Repo Activity](https://repobeats.axiom.co/api/embed/ "Repobeats analytics image") -->
+
+```
+
+```
