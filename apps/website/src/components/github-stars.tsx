@@ -13,7 +13,7 @@ export async function GithubStars() {
   return (
     <a
       href="https://git.new/midday"
-      className="border border-border flex justify-center h-8 leading-[30px] text-[#707070] dark:text-[#878787]"
+      className="border border-border flex justify-center h-8 leading-[30px] text-[#707070] dark:text-[#878787] mr-6 md:mr-0"
     >
       <div className="bg-[#F2F1EF] dark:bg-[#1D1D1D] pl-2 pr-3 text-[14px] flex items-center space-x-2 border-r-[1px] border-border">
         <svg
