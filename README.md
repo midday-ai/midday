@@ -7,7 +7,7 @@
     Run your business smarter
     <br />
     <br />
-    <a href="https://discord.gg/ZmqcvWKH">Discord</a>
+    <a href="https://go.midday.ai/anPiuRx">Discord</a>
     ·
     <a href="https://midday.ai">Website</a>
     ·
