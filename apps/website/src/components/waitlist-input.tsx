@@ -4,6 +4,7 @@ import { subscribeAction } from "@/actions/subscribe-action";
 import { useScopedI18n } from "@/locales/client";
 import { useLogSnag } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 

@@ -10,6 +10,7 @@ export default {
   },
   waitlist: {
     email: "Enter your email",
-    join: "Get early access",
+    join: "Join",
+    subscribed: "Subscribed",
   },
 } as const;
