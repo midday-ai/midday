@@ -68,7 +68,7 @@ export default function Page({
       </div>
 
       <div className="text-center flex flex-col items-center mt-24">
-        <h3 className="mb-4 text-2xl font-medium">Unlimted bank connections</h3>
+        <h3 className="mb-4 text-2xl font-medium">Unlimited bank connections</h3>
         <p className="text-[#878787] font-sm max-w-[600px]">
           Expand your market reach by enabling multiple banking providers with
           just one click. We add even more providers in the future.
