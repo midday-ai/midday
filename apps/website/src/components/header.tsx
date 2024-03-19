@@ -9,7 +9,6 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@midday/ui/navigation-menu";
 import { cn } from "@midday/ui/utils";
 import { motion } from "framer-motion";
@@ -81,10 +80,6 @@ const links = [
     name: "story",
   },
   {
-    path: "/",
-    name: "developers",
-  },
-  {
     path: "/download",
     name: "download",
   },
@@ -123,8 +118,8 @@ export function Header() {
 
   return (
     <header className="h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
-      <NavigationMenu>
-        <nav className="border border-border p-3 rounded-2xl flex items-center backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
+      <nav className="border border-border p-3 rounded-2xl flex items-center backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
+        <NavigationMenu>
           <Link className="mr-10" href="/">
             <LogoIcon />
           </Link>
@@ -135,52 +130,6 @@ export function Header() {
                 path === "/updates"
                   ? pathname.includes("updates")
                   : path === lastPath;
-
-              if (path === "/") {
-                return (
-                  <li>
-                    <NavigationMenuList>
-                      <NavigationMenuItem>
-                        <NavigationMenuTrigger>
-                          Developers
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent className="backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
-                          <div className="flex">
-                            <Link href="/engine">
-                              <div className="w-[250px] mb-6">
-                                <NavigationMenuLink asChild>
-                                  <GlowingStarsBackgroundCard>
-                                    <span className="text-lg font-medium">
-                                      Midday Engine
-                                    </span>
-                                    <div className="flex justify-between items-end">
-                                      <p className="line-clamp-2 text-sm leading-snug text-[#707070]">
-                                        One API to rule them all. Unlimited
-                                        connections.
-                                      </p>
-                                    </div>
-                                  </GlowingStarsBackgroundCard>
-                                </NavigationMenuLink>
-                              </div>
-                            </Link>
-                            <ul className="w-[400px] flex flex-col p-4">
-                              {components.map((component) => (
-                                <ListItem
-                                  key={component.title}
-                                  title={component.title}
-                                  href={component.href}
-                                >
-                                  {component.description}
-                                </ListItem>
-                              ))}
-                            </ul>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-                    </NavigationMenuList>
-                  </li>
-                );
-              }
 
               return (
                 <li key={path}>
@@ -196,6 +145,46 @@ export function Header() {
                 </li>
               );
             })}
+
+            <li>
+              <NavigationMenuList>
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger>Developers</NavigationMenuTrigger>
+                  <NavigationMenuContent className="backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
+                    <div className="flex">
+                      <Link href="/engine">
+                        <div className="w-[250px] mb-6">
+                          <NavigationMenuLink asChild>
+                            <GlowingStarsBackgroundCard>
+                              <span className="text-lg font-medium">
+                                Midday Engine
+                              </span>
+                              <div className="flex justify-between items-end">
+                                <p className="line-clamp-2 text-sm leading-snug text-[#707070]">
+                                  One API to rule them all. Unlimited
+                                  connections.
+                                </p>
+                              </div>
+                            </GlowingStarsBackgroundCard>
+                          </NavigationMenuLink>
+                        </div>
+                      </Link>
+                      <ul className="w-[400px] flex flex-col p-4">
+                        {components.map((component) => (
+                          <ListItem
+                            key={component.title}
+                            title={component.title}
+                            href={component.href}
+                          >
+                            {component.description}
+                          </ListItem>
+                        ))}
+                      </ul>
+                    </div>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </li>
           </ul>
 
           <button
@@ -222,86 +211,86 @@ export function Header() {
           >
             {t("header.getStarted")}
           </a>
-        </nav>
+        </NavigationMenu>
+      </nav>
 
-        {isOpen && (
-          <motion.div
-            className="fixed bg-background top-0 right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <div className="mt-4 flex justify-between p-3 relative">
-              <button type="button" onClick={handleToggleMenu}>
-                <LogoIcon />
-              </button>
+      {isOpen && (
+        <motion.div
+          className="fixed bg-background top-0 right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <div className="mt-4 flex justify-between p-3 relative">
+            <button type="button" onClick={handleToggleMenu}>
+              <LogoIcon />
+            </button>
 
-              <button
-                type="button"
-                className="ml-auto md:hidden p-2 absolute right-[10px] top-2"
-                onClick={handleToggleMenu}
+            <button
+              type="button"
+              className="ml-auto md:hidden p-2 absolute right-[10px] top-2"
+              onClick={handleToggleMenu}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={24}
+                height={24}
+                className="fill-primary"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={24}
-                  height={24}
-                  className="fill-primary"
-                >
-                  <path fill="none" d="M0 0h24v24H0V0z" />
-                  <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                </svg>
-              </button>
-            </div>
+                <path fill="none" d="M0 0h24v24H0V0z" />
+                <path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+              </svg>
+            </button>
+          </div>
 
-            <div className="h-full overflow-auto">
-              <motion.ul
-                initial="hidden"
-                animate="show"
-                className="px-3 pt-8 text-xl text-[#707070] dark:text-[#878787] space-y-8 mb-8"
-                variants={listVariant}
+          <div className="h-full overflow-auto">
+            <motion.ul
+              initial="hidden"
+              animate="show"
+              className="px-3 pt-8 text-xl text-[#707070] dark:text-[#878787] space-y-8 mb-8"
+              variants={listVariant}
+            >
+              {links.map(({ path, name }) => {
+                const isActive =
+                  path === "/updates"
+                    ? pathname.includes("updates")
+                    : path === lastPath;
+
+                return (
+                  <motion.li variants={itemVariant} key={path}>
+                    <Link
+                      href={path}
+                      className={cn(isActive && "text-primary")}
+                      onClick={handleToggleMenu}
+                    >
+                      {t(`header.${name}`)}
+                    </Link>
+                  </motion.li>
+                );
+              })}
+
+              <motion.li variants={itemVariant} onClick={handleToggleMenu}>
+                <Link href="/engine">Engine</Link>
+              </motion.li>
+
+              <motion.li variants={itemVariant}>
+                <Link href="https://app.midday.ai">Get started</Link>
+              </motion.li>
+
+              <motion.li
+                className="mt-auto border-t-[1px] pt-8"
+                variants={itemVariant}
               >
-                {links.map(({ path, name }) => {
-                  const isActive =
-                    path === "/updates"
-                      ? pathname.includes("updates")
-                      : path === lastPath;
-
-                  return (
-                    <motion.li variants={itemVariant} key={path}>
-                      <Link
-                        href={path}
-                        className={cn(isActive && "text-primary")}
-                        onClick={handleToggleMenu}
-                      >
-                        {t(`header.${name}`)}
-                      </Link>
-                    </motion.li>
-                  );
-                })}
-
-                <motion.li variants={itemVariant} onClick={handleToggleMenu}>
-                  <Link href="/engine">Engine</Link>
-                </motion.li>
-
-                <motion.li variants={itemVariant}>
-                  <Link href="https://app.midday.ai">Get started</Link>
-                </motion.li>
-
-                <motion.li
-                  className="mt-auto border-t-[1px] pt-8"
-                  variants={itemVariant}
+                <Link
+                  className="text-xl text-primary"
+                  href="https://app.midday.ai"
                 >
-                  <Link
-                    className="text-xl text-primary"
-                    href="https://app.midday.ai"
-                  >
-                    Sign in
-                  </Link>
-                </motion.li>
-              </motion.ul>
-            </div>
-          </motion.div>
-        )}
-      </NavigationMenu>
+                  Sign in
+                </Link>
+              </motion.li>
+            </motion.ul>
+          </div>
+        </motion.div>
+      )}
     </header>
   );
 }
