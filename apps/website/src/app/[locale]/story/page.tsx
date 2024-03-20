@@ -31,7 +31,7 @@ export default function Page({
       <h3 className="font-medium text-xl mb-2">Problem</h3>
       <p className="text-[#878787] mb-8">
         After years of running our own businesses, we've always felt something
-        was broken, especially when it came to the mundane tasks. Your monthly
+        was missing, especially when it came to the mundane tasks. Your monthly
         routine typically involves tracking time, sending invoices, collecting
         receipts, and organizing documents. All which are scattered across
         various platforms. We've observed that these tools are often provided by
