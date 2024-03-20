@@ -16,35 +16,45 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import React from "react";
+import { FaDiscord, FaGithub } from "react-icons/fa";
+import {
+  MdOutlineDescription,
+  MdOutlineIntegrationInstructions,
+  MdOutlineMemory,
+} from "react-icons/md";
 import { LogoIcon } from "./logo-icon";
-
 const components: { title: string; href: string }[] = [
   {
     title: "Documentation",
     href: "https://docs.midday.ai",
+    icon: () => <MdOutlineDescription />,
   },
   {
     title: "Open Source",
     href: "https://git.new/midday",
+    icon: () => <FaGithub />,
   },
   {
     title: "Join the community",
     href: "https://go.midday.ai/anPiuRx",
+    icon: () => <FaDiscord />,
   },
   {
     title: "Apps & Integrations",
     href: "https://docs.midday.ai",
+    icon: () => <MdOutlineIntegrationInstructions />,
   },
   {
     title: "Engine",
     href: "/engine",
+    icon: () => <MdOutlineMemory />,
   },
 ];
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+>(({ className, title, icon: Icon, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -56,10 +66,10 @@ const ListItem = React.forwardRef<
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-[#707070]">
-            {children}
-          </p>
+          <div className="flex items-center space-x-2">
+            <Icon />
+            <div className="text-sm font-medium leading-none">{title}</div>
+          </div>
         </a>
       </NavigationMenuLink>
     </li>
@@ -175,6 +185,7 @@ export function Header() {
                             key={component.title}
                             title={component.title}
                             href={component.href}
+                            icon={component.icon}
                           >
                             {component.description}
                           </ListItem>
@@ -274,6 +285,14 @@ export function Header() {
 
               <motion.li variants={itemVariant}>
                 <Link href="https://app.midday.ai">Get started</Link>
+              </motion.li>
+
+              <motion.li
+                variants={itemVariant}
+                className="flex items-center space-x-2"
+              >
+                <FaGithub />
+                <Link href="https://git.new/midday">Open Source</Link>
               </motion.li>
 
               <motion.li
