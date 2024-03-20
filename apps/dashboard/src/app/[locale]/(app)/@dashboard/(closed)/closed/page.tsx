@@ -37,8 +37,9 @@ export default function Closed() {
             </div>
 
             <p className="font-medium pb-1 text-2xl text-[#606060]">
-              We send out new invites daily, but you can get instant access by
-              sharing a post on X.
+              We are currently in private beta, but we send out new invites
+              daily. However, you can gain instant access by sharing a post on
+              X.
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-4 space-y-4">
