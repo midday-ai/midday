@@ -15,7 +15,6 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import React from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   MdOutlineDescription,
@@ -23,58 +22,76 @@ import {
   MdOutlineMemory,
 } from "react-icons/md";
 import { LogoIcon } from "./logo-icon";
-const components: { title: string; href: string }[] = [
+
+type ListItemProps = {
+  title: string;
+  href: string;
+  external?: boolean;
+  icon: () => React.JSX.Element;
+  className?: string;
+};
+
+const components: ListItemProps[] = [
   {
     title: "Documentation",
     href: "https://docs.midday.ai",
-    icon: () => <MdOutlineDescription />,
+    icon: () => <MdOutlineDescription size={20} />,
+    external: true,
   },
   {
     title: "Open Source",
     href: "https://git.new/midday",
-    icon: () => <FaGithub />,
+    icon: () => <FaGithub size={19} />,
+    external: true,
   },
   {
     title: "Join the community",
     href: "https://go.midday.ai/anPiuRx",
-    icon: () => <FaDiscord />,
+    icon: () => <FaDiscord size={20} />,
+    external: true,
   },
   {
     title: "Apps & Integrations",
     href: "https://docs.midday.ai",
-    icon: () => <MdOutlineIntegrationInstructions />,
+    icon: () => <MdOutlineIntegrationInstructions size={20} />,
+    external: true,
   },
   {
     title: "Engine",
     href: "/engine",
-    icon: () => <MdOutlineMemory />,
+    icon: () => <MdOutlineMemory size={20} />,
   },
 ];
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a">
->(({ className, title, icon: Icon, ...props }, ref) => {
+const ListItem = ({
+  className,
+  title,
+  icon: Icon,
+  external,
+  ...props
+}: ListItemProps) => {
   return (
     <li>
       <NavigationMenuLink asChild>
-        <a
-          ref={ref}
+        <Link
+          target={external ? "_blank" : undefined}
           className={cn(
             "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary focus:bg-accent focus:text-accent-foreground",
             className
           )}
           {...props}
         >
-          <div className="flex items-center space-x-2">
-            <Icon />
+          <div className="flex items-center">
+            <div className="w-8">
+              <Icon />
+            </div>
             <div className="text-sm font-medium leading-none">{title}</div>
           </div>
-        </a>
+        </Link>
       </NavigationMenuLink>
     </li>
   );
-});
+};
 
 const links = [
   {
@@ -162,7 +179,10 @@ export function Header() {
                   <NavigationMenuTrigger>Developers</NavigationMenuTrigger>
                   <NavigationMenuContent className="backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
                     <div className="flex">
-                      <Link href="/engine">
+                      <Link
+                        href="/engine"
+                        className="border-r-[1px] border-border"
+                      >
                         <div className="w-[250px] mb-6">
                           <NavigationMenuLink asChild>
                             <GlowingStarsBackgroundCard>
@@ -186,9 +206,8 @@ export function Header() {
                             title={component.title}
                             href={component.href}
                             icon={component.icon}
-                          >
-                            {component.description}
-                          </ListItem>
+                            external={component.external}
+                          />
                         ))}
                       </ul>
                     </div>

@@ -57,6 +57,7 @@ export default function Page({
           className="mt-16"
           quality={100}
           alt="Midday Engine"
+          priority
         />
 
         <WaitlistInput />

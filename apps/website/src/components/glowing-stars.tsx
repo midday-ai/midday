@@ -4,14 +4,14 @@
 
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 export const GlowingStarsBackgroundCard = ({
   className,
   children,
 }: {
   className?: string;
-  children?: React.ReactNode;
+  children?: ReactNode;
 }) => {
   const [mouseEnter, setMouseEnter] = useState(false);
 
@@ -23,7 +23,7 @@ export const GlowingStarsBackgroundCard = ({
       onMouseLeave={() => {
         setMouseEnter(false);
       }}
-      className={cn("border-r-[1px] border-border", className)}
+      className={className}
     >
       <div className="flex justify-center items-center">
         <Illustration mouseEnter={mouseEnter} />
@@ -67,7 +67,7 @@ export const Illustration = ({ mouseEnter }: { mouseEnter: boolean }) => {
         const staticDelay = starIdx * 0.01;
         return (
           <div
-            key={`matrix-col-${starIdx}}`}
+            key={`matrix-col-${starIdx.toString()}}`}
             className="relative flex items-center justify-center"
           >
             <Star
@@ -94,7 +94,7 @@ const Star = ({ isGlowing, delay }: { isGlowing: boolean; delay: number }) => {
       }}
       animate={{
         scale: isGlowing ? [1, 1.2, 2.5, 2.2, 1.5] : 1,
-        background: isGlowing ? "#fff" : "#666",
+        background: isGlowing ? "hsl(var(--primary))" : "#666",
       }}
       transition={{
         duration: 2,
@@ -123,7 +123,7 @@ const Glow = ({ delay }: { delay: number }) => {
       exit={{
         opacity: 0,
       }}
-      className="absolute  left-1/2 -translate-x-1/2 z-10 h-[4px] w-[4px] rounded-full bg-blue-500 blur-[1px] shadow-2xl shadow-blue-400"
+      className="absolute left-1/2 -translate-x-1/2 z-10 h-[4px] w-[4px] rounded-full bg-background blur-[1px] shadow-2xl shadow-primary/10"
     />
   );
 };

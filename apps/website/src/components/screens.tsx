@@ -44,19 +44,25 @@ export function Screens() {
       id: "notion",
       icon: require("public/dock/notion.png"),
       name: "Open Roadmap",
-      onClick: () => router.push("https://go.midday.ai/4bHhyra"),
+      onClick: () => router.push("https://go.midday.ai/4bHhyra", {}),
     },
     {
       id: "discord",
       icon: require("public/dock/discord.png"),
       name: "Join the comunity",
-      onClick: () => router.push("https://go.midday.ai/anPiuRx"),
+      onClick: () =>
+        window.open(
+          "https://go.midday.ai/anPiuRx",
+          "_blank",
+          "noopener,noreferrer"
+        ),
     },
     {
       id: "github",
       icon: require("public/dock/github.png"),
       name: "Open Repository",
-      onClick: () => router.push("https://git.new/midday"),
+      onClick: () =>
+        window.open("https://git.new/midday", "_blank", "noopener,noreferrer"),
     },
   ];
 
