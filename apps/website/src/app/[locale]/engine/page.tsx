@@ -1,6 +1,5 @@
 import { SparklesCore } from "@/components/sparkles";
 import { WaitlistInput } from "@/components/waitlist-input";
-import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
@@ -10,10 +9,6 @@ import engine from "public/engine-ui.png";
 export const metadata: Metadata = {
   title: "Engine | Midday",
 };
-
-export function generateStaticParams() {
-  return getStaticParams();
-}
 
 export default function Page({
   params: { locale },
@@ -68,7 +63,9 @@ export default function Page({
       </div>
 
       <div className="text-center flex flex-col items-center mt-24">
-        <h3 className="mb-4 text-2xl font-medium">Unlimited bank connections</h3>
+        <h3 className="mb-4 text-2xl font-medium">
+          Unlimited bank connections
+        </h3>
         <p className="text-[#878787] font-sm max-w-[600px]">
           Expand your market reach by enabling multiple banking providers with
           just one click. We add even more providers in the future.
