@@ -1,6 +1,5 @@
 import { BlurryCircle } from "@/components/blurry-circle";
 import { Testimonials } from "@/components/testimonials";
-import { getStaticParams } from "@/locales/server";
 import {
   Accordion,
   AccordionContent,
@@ -15,10 +14,6 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Pricing | Midday",
 };
-
-export function generateStaticParams() {
-  return getStaticParams();
-}
 
 export default function Page({
   params: { locale },

@@ -1,6 +1,5 @@
 import { BlurryCircle } from "@/components/blurry-circle";
 import { CopyInput } from "@/components/copy-input";
-import { getStaticParams } from "@/locales/server";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
@@ -12,10 +11,6 @@ import panel from "public/panel.png";
 export const metadata: Metadata = {
   title: "Download | Midday",
 };
-
-export function generateStaticParams() {
-  return getStaticParams();
-}
 
 export default function Page({
   params: { locale },

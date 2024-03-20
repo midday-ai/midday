@@ -3,7 +3,6 @@ import { PostLinks } from "@/components/post-links";
 import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
 import { fetchPageBlocks, fetchPages } from "@/lib/notion";
-import { getStaticParams } from "@/locales/server";
 import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
 import format from "date-fns/format";
@@ -17,10 +16,6 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "Updates | Midday",
 };
-
-export function generateStaticParams() {
-  return getStaticParams();
-}
 
 const renderer = new NotionRenderer();
 

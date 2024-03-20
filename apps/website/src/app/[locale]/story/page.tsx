@@ -1,6 +1,5 @@
 import { AdaptiveImage } from "@/components/adaptive-image";
 import { BlurryCircle } from "@/components/blurry-circle";
-import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
 import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
@@ -11,10 +10,6 @@ import founders from "public/founders.png";
 export const metadata: Metadata = {
   title: "Story | Midday",
 };
-
-export function generateStaticParams() {
-  return getStaticParams();
-}
 
 export default function Page({
   params: { locale },
