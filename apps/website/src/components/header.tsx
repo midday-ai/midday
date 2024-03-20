@@ -59,7 +59,7 @@ const components: ListItemProps[] = [
   {
     title: "Engine",
     href: "/engine",
-    icon: () => <MdOutlineMemory size={20} />,
+    icon: () => <MdOutlineMemory size={21} />,
   },
 ];
 
@@ -177,13 +177,13 @@ export function Header() {
               <NavigationMenuList>
                 <NavigationMenuItem>
                   <NavigationMenuTrigger>Developers</NavigationMenuTrigger>
-                  <NavigationMenuContent className="backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
+                  <NavigationMenuContent className="bg-[#FDFDFC] dark:bg-[#121212]">
                     <div className="flex">
                       <Link
                         href="/engine"
                         className="border-r-[1px] border-border"
                       >
-                        <div className="w-[250px] mb-6">
+                        <div className="w-[215px] mb-6">
                           <NavigationMenuLink asChild>
                             <GlowingStarsBackgroundCard>
                               <span className="text-lg font-medium">
@@ -216,32 +216,32 @@ export function Header() {
               </NavigationMenuList>
             </li>
           </ul>
-
-          <button
-            type="button"
-            className="ml-auto md:hidden p-2"
-            onClick={() => handleToggleMenu()}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={18}
-              height={13}
-              fill="none"
-            >
-              <path
-                fill="currentColor"
-                d="M0 12.195v-2.007h18v2.007H0Zm0-5.017V5.172h18v2.006H0Zm0-5.016V.155h18v2.007H0Z"
-              />
-            </svg>
-          </button>
-
-          <a
-            href="https://app.midday.ai"
-            className="hidden md:inline-flex h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            {t("header.getStarted")}
-          </a>
         </NavigationMenu>
+
+        <button
+          type="button"
+          className="ml-auto md:hidden p-2"
+          onClick={() => handleToggleMenu()}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={18}
+            height={13}
+            fill="none"
+          >
+            <path
+              fill="currentColor"
+              d="M0 12.195v-2.007h18v2.007H0Zm0-5.017V5.172h18v2.006H0Zm0-5.016V.155h18v2.007H0Z"
+            />
+          </svg>
+        </button>
+
+        <a
+          href="https://app.midday.ai"
+          className="hidden md:inline-flex h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          {t("header.getStarted")}
+        </a>
       </nav>
 
       {isOpen && (
