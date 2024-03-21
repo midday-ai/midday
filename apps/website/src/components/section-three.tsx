@@ -12,7 +12,7 @@ export function SectionThree() {
 
   return (
     <section
-      className="relative"
+      className="relative mb-12"
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
     >

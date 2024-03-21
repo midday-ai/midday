@@ -13,7 +13,7 @@ export function SectionFive() {
   const [isActive2, setActive2] = useState(false);
 
   return (
-    <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden">
+    <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
       <div
         className="border border-border lg:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start"
         onMouseEnter={() => setActive(true)}

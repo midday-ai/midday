@@ -11,7 +11,7 @@ export function SectionSix() {
 
   return (
     <section
-      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10"
+      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12"
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
     >

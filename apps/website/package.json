@@ -18,6 +18,7 @@
     "@notionhq/client": "^2.2.14",
     "@openstatus/react": "^0.0.3",
     "@vercel/analytics": "^1.2.2",
+    "d3": "^7.9.0",
     "date-fns": "^3.6.0",
     "geist": "^1.2.2",
     "next": "14.1.4",
