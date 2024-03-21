@@ -14,7 +14,7 @@ export function SectionFour() {
   const [isActive2, setActive2] = useState(false);
 
   return (
-    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden">
+    <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden mb-12">
       <div
         className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col"
         onMouseEnter={() => setActive2(true)}
