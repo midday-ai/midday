@@ -1,0 +1,73 @@
+{
+    "$schema": "https://mintlify.com/schema.json",
+    "name": "Midday.ai Docs",
+    "logo": {
+      "dark": "/logos/logotype-dark.svg",
+      "light": "/logos/logotype.svg",
+      "href": "https://midday.ai"
+    },
+    "favicon": "/logos/favicon.png",
+    "colors": {
+      "primary": "#1D1D1D",
+      "light": "#F2F1EF",
+      "dark": "#1D1D1D",
+      "background": {
+        "dark": "#121212",
+        "light": "#FFFFFF"
+      },
+      "anchors": {
+        "from": "#FF7F57",
+        "to": "#9563FF"
+      }
+    },
+    "topbarLinks": [
+      {
+        "name": "Support",
+        "url": "mailto:support@midday.ai"
+      }
+    ],
+    "topbarCtaButton": {
+      "name": "Dashboard",
+      "url": "https://app.midday.ai"
+    },
+    "openapi": "https://api.midday.ai",
+    "tabs": [
+      {
+        "name": "API Reference",
+        "url": "api-reference"
+      }
+    ],
+    "anchors": [
+      {
+        "name": "Help Center",
+        "icon": "question",
+        "url": "https://midday.ai/help"
+      },
+      {
+        "name": "GitHub",
+        "icon": "github",
+        "url": "https://git.new/midday"
+      }
+    ],
+    "navigation": [
+      {
+        "group": "Getting Started",
+        "pages": ["introduction", "local-development", "self-hosting"]
+      },
+      {
+        "group": "Resources",
+        "pages": ["integrations", "sdks", "examples"]
+      }
+    ],
+    "api": {
+      "maintainOrder": true
+    },
+    "feedback": {
+      "thumbsRating": true
+    },
+    "footerSocials": {
+      "twitter": "https://twitter.com/middayi",
+      "github": "https://git.new/midday",
+      "website": "https://midday.ai"
+    }
+  }
