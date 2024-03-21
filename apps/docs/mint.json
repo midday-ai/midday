@@ -56,26 +56,6 @@
       {
         "group": "Resources",
         "pages": ["integrations", "sdks", "examples"]
-      },
-      {
-        "group": "API Reference",
-        "pages": [
-          "api-reference/introduction",
-          "api-reference/rate-limits",
-          "api-reference/errors"
-        ]
-      },
-      {
-        "group": "Links",
-        "pages": [
-          "api-reference/endpoint/create-a-new-link",
-          "api-reference/endpoint/retrieve-a-link",
-          "api-reference/endpoint/edit-a-link",
-          "api-reference/endpoint/delete-a-link",
-          "api-reference/endpoint/retrieve-a-list-of-links",
-          "api-reference/endpoint/retrieve-number-of-links",
-          "api-reference/endpoint/bulk-create-links"
-        ]
       }
     ],
     "api": {
