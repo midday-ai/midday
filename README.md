@@ -1,7 +1,6 @@
+![](github.gif)
+
 <p align="center">
-   <p align="center">
-      <img src="/github.png" alt="Logo">
-  </p>
 	<h1 align="center"><b>Midday</b></h1>
 <p align="center">
     Run your business smarter
