@@ -5,6 +5,12 @@ export const metadata: Metadata = {
   title: "OSS Friends | Midday",
 };
 
+type Friend = {
+  name: string;
+  href: string;
+  description: string;
+};
+
 export default async function Page({
   params: { locale },
 }: {
@@ -12,11 +18,14 @@ export default async function Page({
 }) {
   setStaticParamsLocale(locale);
 
-  const ossFriends = await fetch("https://formbricks.com/api/oss-friends", {
-    next: {
-      revalidate: 3600,
-    },
-  })
+  const ossFriends: Friend[] = await fetch(
+    "https://formbricks.com/api/oss-friends",
+    {
+      next: {
+        revalidate: 3600,
+      },
+    }
+  )
     .then(async (res) => res.json())
     .then(({ data }) => data)
     .catch(() => []);
@@ -34,7 +43,7 @@ export default async function Page({
         passionate about open source and the future as we are.
       </p>
 
-      <div class="grid md:grid-cols-3 gap-6 mt-12">
+      <div className="grid md:grid-cols-3 gap-6 mt-12">
         {ossFriends.map((friend) => {
           return (
             <div
@@ -42,10 +51,10 @@ export default async function Page({
               className="border border-border rounded-2xl dark:bg-[#121212] p-4"
             >
               <div className="flex justify-between items-center mb-2">
-                <a href={friend.href}>
+                <a href={friend.href} target="_blank">
                   <h3 className="font-medium text-md">{friend.name}</h3>
                 </a>
-                <a href={friend.href}>
+                <a href={friend.href} target="_blank">
                   <span className="sr-only">Open link</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
