@@ -33,7 +33,7 @@ const defaultExamples = [
   },
   {
     id: 7,
-    label: "What are our biggest expeend categories?",
+    label: "What are our biggest expenses categories?",
   },
 ];
 
