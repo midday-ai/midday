@@ -43,7 +43,7 @@
     "change-case": "^5.4.3",
     "dub": "^0.10.0",
     "fast-csv": "^5.0.1",
-    "framer-motion": "^11.0.15",
+    "framer-motion": "^11.0.18",
     "geist": "^1.2.2",
     "headless-currency-input": "^1.1.0",
     "loops": "0.3.0",
@@ -79,6 +79,6 @@
     "@types/node": "^20.11.30",
     "@types/react": "^18.2.67",
     "@types/react-dom": "^18.2.22",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.3"
   }
 }

@@ -17,6 +17,6 @@
     "plaid": "^21.0.0"
   },
   "devDependencies": {
-    "@types/bun": "^1.0.8"
+    "@types/bun": "^1.0.10"
   }
 }
