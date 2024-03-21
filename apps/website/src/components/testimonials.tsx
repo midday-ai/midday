@@ -19,6 +19,15 @@ const testimonials = [
     quote: "I love this",
   },
   {
+    name: "Ben Tossell",
+    avatarUrl:
+      "https://pbs.twimg.com/profile_images/1595060668897677314/pHMUc1Zb_400x400.jpg",
+    handle: "@bentossell",
+    verified: true,
+    quote:
+      "well, an actually enjoyable way to organise my whole in and out of my business, plus highlighted a bunch of things I need to cancel",
+  },
+  {
     name: "Christian Alares",
     avatarUrl:
       "https://pbs.twimg.com/profile_images/1194368464946974728/1D2biimN_400x400.jpg",
