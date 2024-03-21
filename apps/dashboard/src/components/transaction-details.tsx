@@ -82,7 +82,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
         title: "Midday AI",
         description: `Do you want to mark ${
           transactions?.data?.length
-        } similar transactions form ${data?.name} as ${t(
+        } similar transactions from ${data?.name} as ${t(
           `categories.${category}`
         )} too?`,
         footer: (
