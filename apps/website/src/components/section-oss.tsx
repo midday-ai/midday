@@ -39,23 +39,25 @@ export function SectionOSS() {
                   <span className="w-full text-left text-lg">Open source</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
-                  <p>
-                    All of our code is fully open soruce, clone, fork and
-                    contribute to Midday.
-                  </p>
+                  <div className="flex-col">
+                    <p>
+                      All of our code is fully open soruce, clone, fork and
+                      contribute to Midday.
+                    </p>
 
-                  <a
-                    href="https://git.new/midday"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Button
-                      variant="outline"
-                      className="mt-8 mb-2 border-primary text-primary"
+                    <a
+                      href="https://git.new/midday"
+                      target="_blank"
+                      rel="noreferrer"
                     >
-                      View repository
-                    </Button>
-                  </a>
+                      <Button
+                        variant="outline"
+                        className="mt-8 mb-2 border-primary text-primary"
+                      >
+                        View repository
+                      </Button>
+                    </a>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-2">
@@ -64,20 +66,24 @@ export function SectionOSS() {
                   <span className="w-full text-left text-lg">Community</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
-                  A welcoming community of hundreds of developers that shares
-                  expertise and offers support.
-                  <a
-                    href="https://go.midday.ai/anPiuRx"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Button
-                      variant="outline"
-                      className="mt-8 mb-2 border-primary text-primary"
+                  <div className="flex-col">
+                    <p>
+                      A welcoming community of hundreds of developers that
+                      shares expertise and offers support.
+                    </p>
+                    <a
+                      href="https://go.midday.ai/anPiuRx"
+                      target="_blank"
+                      rel="noreferrer"
                     >
-                      Join the community
-                    </Button>
-                  </a>
+                      <Button
+                        variant="outline"
+                        className="mt-8 mb-2 border-primary text-primary"
+                      >
+                        Join the community
+                      </Button>
+                    </a>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3">
@@ -86,20 +92,24 @@ export function SectionOSS() {
                   <span className="w-full text-left text-lg">Open roadmap</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
-                  Missing a feature? Start a discussion, report an issue,
-                  contribute the code, or even fork the repository.
-                  <a
-                    href="https://go.midday.ai/aTNyqQH"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Button
-                      variant="outline"
-                      className="mt-8 mb-2 border-primary text-primary"
+                  <div className="flex-col">
+                    <p>
+                      Missing a feature? Start a discussion, report an issue,
+                      contribute the code, or even fork the repository.
+                    </p>
+                    <a
+                      href="https://go.midday.ai/aTNyqQH"
+                      target="_blank"
+                      rel="noreferrer"
                     >
-                      Open roadmap
-                    </Button>
-                  </a>
+                      <Button
+                        variant="outline"
+                        className="mt-8 mb-2 border-primary text-primary"
+                      >
+                        Open roadmap
+                      </Button>
+                    </a>
+                  </div>
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-4">
