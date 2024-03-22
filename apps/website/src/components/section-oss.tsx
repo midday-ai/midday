@@ -35,7 +35,7 @@ export function SectionOSS() {
             >
               <AccordionItem value="item-1">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
-                  <MdDataArray size={32} />
+                  <MdDataArray size={32} className="!rotate-0" />
                   <span className="w-full text-left text-lg">Open source</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
@@ -62,7 +62,7 @@ export function SectionOSS() {
               </AccordionItem>
               <AccordionItem value="item-2">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
-                  <MdOutlineDiversity2 size={32} />
+                  <MdOutlineDiversity2 size={32} className="!rotate-0" />
                   <span className="w-full text-left text-lg">Community</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
@@ -88,7 +88,7 @@ export function SectionOSS() {
               </AccordionItem>
               <AccordionItem value="item-3">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
-                  <MdEditRoad size={32} />
+                  <MdEditRoad size={32} className="!rotate-0" />
                   <span className="w-full text-left text-lg">Open roadmap</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
@@ -114,7 +114,7 @@ export function SectionOSS() {
               </AccordionItem>
               <AccordionItem value="item-4">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
-                  <MdOutlineAssuredWorkload size={32} />
+                  <MdOutlineAssuredWorkload size={32} className="!rotate-0" />
                   <span className="w-full text-left text-lg">Security</span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">

@@ -32,7 +32,11 @@ export function SectionSix() {
           />
         </motion.div>
         <div className="mt-6 md:max-w-[40%] md:ml-8">
-          <h3 className="font-medium text-xl md:text-2xl	mb-4">
+          <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
+            Coming soon
+          </span>
+
+          <h3 className="font-medium text-xl md:text-2xl mt-4 mb-4">
             Your Virtual CFO
           </h3>
 
