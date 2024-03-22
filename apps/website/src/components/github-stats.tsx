@@ -133,21 +133,27 @@ export async function GithubStats() {
         <div className="flex items-center space-x-1">
           <MdOutlineStarBorder />
           <span className="text-xs shrink-0">
-            {repository.stargazers.totalCount}
+            {Intl.NumberFormat("en", { notation: "compact" }).format(
+              repository.stargazers.totalCount ?? 0
+            )}
           </span>
         </div>
 
         <div className="flex items-center space-x-1">
           <LuGitFork />
           <span className="text-xs shrink-0">
-            {repository.forks.totalCount}
+            {Intl.NumberFormat("en", { notation: "compact" }).format(
+              repository.forks.totalCount ?? 0
+            )}
           </span>
         </div>
 
         <div className="flex items-center space-x-1">
           <MdOutlineAdjust />
           <span className="text-xs shrink-0">
-            {repository.commits.history.totalCount}
+            {Intl.NumberFormat("en", { notation: "compact" }).format(
+              repository.commits.history.totalCount ?? 0
+            )}
           </span>
         </div>
       </div>

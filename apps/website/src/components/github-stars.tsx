@@ -31,7 +31,11 @@ export async function GithubStars() {
         </svg>
         <span className="font-medium">Star</span>
       </div>
-      <div className="px-4 text-[14px]">{data.stargazers_count ?? 0}</div>
+      <div className="px-4 text-[14px]">
+        {Intl.NumberFormat("en", { notation: "compact" }).format(
+          data.stargazers_count ?? 0
+        )}
+      </div>
     </a>
   );
 }
