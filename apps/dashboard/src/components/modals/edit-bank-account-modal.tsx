@@ -10,6 +10,12 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@midday/ui/dropdown-menu";
+import {
   Form,
   FormControl,
   FormField,
@@ -18,6 +24,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -58,7 +65,22 @@ export function EditBankAccountModal({
       <DialogContent className="max-w-[455px]">
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle>Edit Bank Account</DialogTitle>
+            <DialogTitle className="flex justify-between">
+              <span>Edit Bank Account</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="mr-8 -mt-[5px]">
+                  <MoreHorizontal size={20} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    className="text-[#F84E4E]"
+                    onClick={() => deleteAccount.execute({ id })}
+                  >
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
@@ -88,20 +110,9 @@ export function EditBankAccountModal({
               <DialogFooter className="mt-12 w-full">
                 <div className="space-y-4 w-full">
                   <Button
-                    variant="outline"
-                    className="w-full border-destructive text-destructive hover:text-destructive hover:bg-transparent hover:border-destructive"
-                    disabled={deleteAccount.status === "executing"}
-                    onClick={() => deleteAccount.execute({ id })}
-                  >
-                    {deleteAccount.status === "executing" ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      "Delete"
-                    )}
-                  </Button>
-                  <Button
                     disabled={updateAccount.status === "executing"}
                     className="w-full"
+                    type="submit"
                   >
                     {updateAccount.status === "executing" ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
