@@ -41,7 +41,7 @@ export function SectionOSS() {
                 <AccordionContent className="text-[#707070]">
                   <div className="flex-col">
                     <p>
-                      All of our code is fully open soruce, clone, fork and
+                      All of our code is fully open source, clone, fork and
                       contribute to Midday.
                     </p>
 
