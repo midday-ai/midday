@@ -27,7 +27,7 @@ export default function Page({
       <div className="container max-w-[800px]">
         <div className="min-h-[950px]">
           <h1 className="mt-24 font-medium text-center text-5xl mb-2">
-            What it cost.
+            What it costs.
           </h1>
 
           <div className="flex items-center flex-col text-center relative">
