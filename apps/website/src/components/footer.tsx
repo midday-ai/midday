@@ -90,18 +90,18 @@ export function Footer() {
           <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
             <div className="flex justify-between md:items-end flex-col space-y-14">
               <div className="flex items-center">
-                <Suspense>
+                {/* <Suspense>
                   <GithubStars />
-                </Suspense>
+                </Suspense> */}
 
                 <SocialLinks />
               </div>
               <div className="md:mr-0 mr-auto">
-                <ErrorBoundary>
+                {/* <ErrorBoundary>
                   <Suspense>
                     <StatusWidget />
                   </Suspense>
-                </ErrorBoundary>
+                </ErrorBoundary> */}
               </div>
             </div>
           </div>

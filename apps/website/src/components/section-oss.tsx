@@ -155,9 +155,9 @@ export function SectionOSS() {
                   </div>
                 </div>
 
-                <Suspense>
+                {/* <Suspense>
                   <GithubStats />
-                </Suspense>
+                </Suspense> */}
               </div>
             </a>
           </div>
