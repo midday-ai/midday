@@ -27,12 +27,12 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "server-only": "^0.0.1",
-    "sharp": "^0.33.2"
+    "sharp": "^0.33.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/node": "^20.11.30",
-    "@types/react": "^18.2.67",
+    "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22"
   }
 }
