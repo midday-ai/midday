@@ -1,7 +1,16 @@
 "use client";
 
-import { ChevronsUpDownIcon, Monitor, Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 
 type Theme = "dark" | "system" | "light";
 
@@ -25,24 +34,23 @@ export const ThemeSwitch = () => {
 
   return (
     <div className="flex items-center relative">
-      <select
-        className="text-xs border rounded appearance-none pl-6 pr-6 py-1.5 bg-transparent outline-none capitalize w-full"
-        defaultValue={theme}
-        onChange={(event) => setTheme(event.target.value)}
-      >
-        {themes.map((theme) => (
-          <option key={theme} value={theme}>
-            {theme}
-          </option>
-        ))}
-      </select>
+      <Select defaultValue={theme} onValueChange={(value) => setTheme(value)}>
+        <SelectTrigger className="w-full pl-6 pr-3 py-1.5 bg-transparent outline-none capitalize h-[32px] text-xs rounded-sm">
+          <SelectValue placeholder="Select theme" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {themes.map((theme) => (
+              <SelectItem key={theme} value={theme} className="capitalize">
+                {theme}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
 
       <div className="absolute left-2 pointer-events-none">
         <ThemeIcon currentTheme={theme as Theme} />
-      </div>
-
-      <div className="absolute right-2">
-        <ChevronsUpDownIcon size={12} />
       </div>
     </div>
   );
