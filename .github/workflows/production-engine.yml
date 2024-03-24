@@ -28,3 +28,4 @@ jobs:
           packageManager: bun
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "apps/engine"
+          command: deploy --minify src/index.ts
