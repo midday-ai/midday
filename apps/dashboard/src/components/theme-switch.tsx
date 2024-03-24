@@ -34,7 +34,10 @@ export const ThemeSwitch = () => {
 
   return (
     <div className="flex items-center relative">
-      <Select defaultValue={theme} onValueChange={(value) => setTheme(value)}>
+    <Select
+          defaultValue={theme}
+          onValueChange={(value: Theme) => setTheme(value)}
+        >   
         <SelectTrigger className="w-full pl-6 pr-3 py-1.5 bg-transparent outline-none capitalize h-[32px] text-xs rounded-sm">
           <SelectValue placeholder="Select theme" />
         </SelectTrigger>
