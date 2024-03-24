@@ -1,7 +1,6 @@
 "use client";
 
 import { GlowingStarsBackgroundCard } from "@/components/glowing-stars";
-import { useI18n } from "@/locales/client";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -95,18 +94,22 @@ const ListItem = ({
 
 const links = [
   {
+    title: "Pricing",
     path: "/pricing",
     name: "pricing",
   },
   {
+    title: "Updates",
     path: "/updates",
     name: "updates",
   },
   {
+    title: "Story",
     path: "/story",
     name: "story",
   },
   {
+    title: "Download",
     path: "/download",
     name: "download",
   },
@@ -130,7 +133,6 @@ const itemVariant = {
 };
 
 export function Header() {
-  const t = useI18n();
   const pathname = usePathname();
   const [isOpen, setOpen] = useState(false);
 
@@ -152,7 +154,7 @@ export function Header() {
           </Link>
 
           <ul className="space-x-2 font-medium text-sm mr-8 hidden md:flex">
-            {links.map(({ path, name }) => {
+            {links.map(({ path, name, title }) => {
               const isActive =
                 path === "/updates"
                   ? pathname.includes("updates")
@@ -167,7 +169,7 @@ export function Header() {
                       isActive && "bg-secondary hover:bg-secondary"
                     )}
                   >
-                    {t(`header.${name}`)}
+                    {title}
                   </Link>
                 </li>
               );
@@ -240,7 +242,7 @@ export function Header() {
           href="https://app.midday.ai"
           className="hidden md:inline-flex h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
-          {t("header.getStarted")}
+          Sign in
         </a>
       </nav>
 
@@ -279,7 +281,7 @@ export function Header() {
               className="px-3 pt-8 text-xl text-[#707070] dark:text-[#878787] space-y-8 mb-8"
               variants={listVariant}
             >
-              {links.map(({ path, name }) => {
+              {links.map(({ path, name, title }) => {
                 const isActive =
                   path === "/updates"
                     ? pathname.includes("updates")
@@ -292,7 +294,7 @@ export function Header() {
                       className={cn(isActive && "text-primary")}
                       onClick={handleToggleMenu}
                     >
-                      {t(`header.${name}`)}
+                      {title}
                     </Link>
                   </motion.li>
                 );

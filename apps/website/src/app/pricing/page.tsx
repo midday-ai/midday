@@ -8,20 +8,13 @@ import {
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pricing | Midday",
 };
 
-export default function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default function Page() {
   return (
     <>
       <div className="container max-w-[800px]">

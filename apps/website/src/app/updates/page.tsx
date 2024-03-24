@@ -7,7 +7,6 @@ import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
 import format from "date-fns/format";
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 import Link from "next/link";
 
 export const revalidate = 0;
@@ -19,13 +18,7 @@ export const metadata: Metadata = {
 
 const renderer = new NotionRenderer();
 
-export default async function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default async function Page() {
   const data = await fetchPages();
 
   const links = data.results.map((post) => ({

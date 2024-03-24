@@ -2,7 +2,6 @@ import { BlurryCircle } from "@/components/blurry-circle";
 import { CopyInput } from "@/components/copy-input";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import appIcon from "public/app-icon.png";
 import panelLight from "public/panel-light.png";
@@ -12,13 +11,7 @@ export const metadata: Metadata = {
   title: "Download | Midday",
 };
 
-export default function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default function Page() {
   return (
     <div className="container flex flex-col items-center mb-12 md:mb-48 text-center">
       <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />

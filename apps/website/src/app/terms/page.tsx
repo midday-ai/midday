@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 
 export const metadata: Metadata = {
   title: "Terms and Conditions | Midday",
 };
 
-export default function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default function Page() {
   return (
     <>
       <div className="max-w-[600px] m-auto my-20">

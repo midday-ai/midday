@@ -21,18 +21,17 @@
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",
     "geist": "^1.2.2",
-    "next": "14.1.4",
-    "next-international": "1.2.4",
+    "next": "14.2.0-canary.39",
     "next-themes": "^0.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "server-only": "^0.0.1",
-    "sharp": "^0.33.2"
+    "sharp": "^0.33.3"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/node": "^20.11.30",
-    "@types/react": "^18.2.67",
+    "@types/react": "^18.2.69",
     "@types/react-dom": "^18.2.22"
   }
 }

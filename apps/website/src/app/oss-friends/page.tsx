@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 
 export const metadata: Metadata = {
   title: "OSS Friends | Midday",
@@ -11,13 +10,7 @@ type Friend = {
   description: string;
 };
 
-export default async function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default async function Page() {
   const ossFriends: Friend[] = await fetch(
     "https://formbricks.com/api/oss-friends",
     {

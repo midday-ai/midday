@@ -1,7 +1,6 @@
 "use client";
 
 import { subscribeAction } from "@/actions/subscribe-action";
-import { useScopedI18n } from "@/locales/client";
 import { useLogSnag } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Loader2 } from "lucide-react";
@@ -9,7 +8,6 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 function SubmitButton() {
-  const t = useScopedI18n("waitlist");
   const { pending } = useFormStatus();
 
   if (pending) {
@@ -25,13 +23,12 @@ function SubmitButton() {
       type="submit"
       className="absolute right-2 h-7 bg-primary top-2 px-4 rounded-md font-medium text-sm z-10 text-primary-foreground"
     >
-      {t("join")}
+      Join
     </button>
   );
 }
 
 export function WaitlistInput() {
-  const t = useScopedI18n("waitlist");
   const [isSubmitted, setSubmitted] = useState(false);
   const { track } = useLogSnag();
 
@@ -79,7 +76,7 @@ export function WaitlistInput() {
           >
             <fieldset className="relative z-50">
               <input
-                placeholder={t("email")}
+                placeholder="Enter your email"
                 type="email"
                 name="email"
                 id="email"
