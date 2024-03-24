@@ -1,7 +1,6 @@
 import { SparklesCore } from "@/components/sparkles";
 import { WaitlistInput } from "@/components/waitlist-input";
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import engineSDK from "public/engine-sdk.png";
 import engine from "public/engine-ui.png";
@@ -10,13 +9,7 @@ export const metadata: Metadata = {
   title: "Engine | Midday",
 };
 
-export default function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default function Page() {
   return (
     <div className="w-full bg-[#0C0C0C] flex flex-col items-center justify-center mt-24">
       <h1 className="text-6xl font-medium text-center text-white relative z-20">

@@ -2,7 +2,6 @@ import { DevMessage } from "@/components/dev-message";
 import { Footer } from "@/components/footer";
 import { FooterCTA } from "@/components/footer-cta";
 import { Header } from "@/components/header";
-import { getStaticParams } from "@/locales/server";
 import "@/styles/globals.css";
 import { LogSnagProvider } from "@midday/events/client";
 import "@midday/ui/globals.css";
@@ -28,19 +27,9 @@ export const viewport = {
   ],
 };
 
-export function generateStaticParams() {
-  return getStaticParams();
-}
-
-export default function Layout({
-  children,
-  params: { locale = "en" },
-}: {
-  children: ReactElement;
-  params: { locale: string };
-}) {
+export default function Layout({ children }: { children: ReactElement }) {
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <LogSnagProvider
           token={process.env.NEXT_PUBLIC_LOGSNAG_TOKEN!}
@@ -54,7 +43,7 @@ export default function Layout({
           "bg-[#F6F6F3] dark:bg-[#0C0C0C] overflow-x-hidden"
         )}
       >
-        <Provider locale={locale}>
+        <Provider>
           <Header />
           <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
             {children}

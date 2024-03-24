@@ -7,11 +7,9 @@ import {
   fetchPages,
   notion,
 } from "@/lib/notion";
-import { getStaticParams } from "@/locales/server";
 import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
 import { format } from "date-fns";
-import { setStaticParamsLocale } from "next-international/server";
 import Link from "next/link";
 
 export const revalidate = 0;
@@ -25,11 +23,7 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({
-  params: { slug },
-}: {
-  params: { slug: string };
-}) {
+export async function generateMetadata() {
   const post = await fetchPageBySlug(slug);
 
   return {
@@ -40,12 +34,10 @@ export async function generateMetadata({
 const renderer = new NotionRenderer();
 
 export default async function Page({
-  params: { locale, slug },
+  params: { slug },
 }: {
-  params: { locale: string; slug: string };
+  params: { slug: string };
 }) {
-  setStaticParamsLocale(locale);
-
   const post = await fetchPageBySlug(slug);
   const blocks = await fetchPageBlocks(post.id);
   const slugWithPrefix = `/updates/${slug}`;

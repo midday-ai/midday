@@ -1,7 +1,6 @@
 import { AdaptiveImage } from "@/components/adaptive-image";
 import { BlurryCircle } from "@/components/blurry-circle";
 import type { Metadata } from "next";
-import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import signature from "public/email/signature-dark.png";
 import signatureLight from "public/email/signature.png";
@@ -11,13 +10,7 @@ export const metadata: Metadata = {
   title: "Story | Midday",
 };
 
-export default function Page({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  setStaticParamsLocale(locale);
-
+export default function Page() {
   return (
     <div className="container max-w-[750px]">
       <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
