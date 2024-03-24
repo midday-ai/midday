@@ -1,6 +1,6 @@
-import { GoCardLessProvider } from "./gocardless/gocardless-provider";
-import { PlaidProvider } from "./plaid/plaid-provider";
+// import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
+// import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import type {
   GetAccountsRequest,
   GetTransactionsRequest,
@@ -12,15 +12,15 @@ export class Provider {
 
   constructor({ provider }: ProviderParams) {
     switch (provider) {
-      case "gocardless":
-        this.#provider = new GoCardLessProvider();
-        break;
+      // case "gocardless":
+      //   this.#provider = new GoCardLessProvider();
+      //   break;
       case "teller":
         this.#provider = new TellerProvider();
         break;
-      case "plaid":
-        this.#provider = new PlaidProvider();
-        break;
+      // case "plaid":
+      //   this.#provider = new PlaidProvider();
+      // break;
       default:
         throw Error("No provider selected");
     }

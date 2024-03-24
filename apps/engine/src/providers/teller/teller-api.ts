@@ -1,6 +1,6 @@
-import * as https from "node:https";
-import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
+// import * as https from "node:https";
+import axios from "xior";
 import type {
   AuthenticatedRequest,
   GetAccountsResponse,
@@ -47,14 +47,14 @@ export class TellerApi {
       "base64"
     ).toString("ascii");
 
-    const agent = new https.Agent({
-      cert,
-      key,
-    });
+    // const agent = new https.Agent({
+    //   cert,
+    //   key,
+    // });
 
     if (!this.#api) {
       this.#api = axios.create({
-        httpsAgent: agent,
+        // httpsAgent: agent,
         baseURL: this.#baseUrl,
         timeout: 30_000,
         headers: {

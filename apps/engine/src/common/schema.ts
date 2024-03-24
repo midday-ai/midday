@@ -8,3 +8,5 @@ export const ErrorSchema = z.object({
     example: "Bad Request",
   }),
 });
+
+export const Providers = z.enum(["teller", "plaid", "gocardless"]);

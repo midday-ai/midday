@@ -1,6 +1,10 @@
+import { Providers } from "@/common/schema";
 import { z } from "@hono/zod-openapi";
 
 export const TransactionsParamsSchema = z.object({
+  provider: Providers.openapi({
+    example: "teller",
+  }),
   latest: z
     .string()
     .optional()

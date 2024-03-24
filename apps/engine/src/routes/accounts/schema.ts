@@ -1,3 +1,4 @@
+import { Providers } from "@/common/schema";
 import { z } from "@hono/zod-openapi";
 import { InstitutionSchema } from "../institutions/schema";
 
@@ -13,6 +14,9 @@ export const AccountsParamsSchema = z.object({
       },
       example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     }),
+  provider: Providers.openapi({
+    example: "teller",
+  }),
   countryCode: z
     .string()
     .optional()
@@ -48,8 +52,6 @@ export const AccountsParamsSchema = z.object({
     }),
 });
 
-export const AccountProvider = z.enum(["teller", "plaid", "gocardless"]);
-
 export const AccountSchema = z
   .object({
     id: z.string().openapi({
@@ -61,7 +63,7 @@ export const AccountSchema = z
     currency: z.string().openapi({
       example: "USD",
     }),
-    provider: AccountProvider.openapi({
+    provider: Providers.openapi({
       example: "teller",
     }),
     institution: InstitutionSchema,
