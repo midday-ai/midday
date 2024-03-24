@@ -6,6 +6,7 @@ import {
   eachWeekOfInterval,
   endOfMonth,
   endOfWeek,
+  format,
   formatISO,
   isAfter,
   isBefore,
@@ -34,6 +35,11 @@ export function TrackerMonthGraph({
     },
     { weekStartsOn }
   );
+
+  const days = eachDayOfInterval({
+    start: startOfWeek(currentDate, { weekStartsOn }),
+    end: endOfWeek(currentDate, { weekStartsOn }),
+  });
 
   const firstDay = startOfMonth(new Date(date));
   const lastDay = endOfMonth(new Date(date));
@@ -75,5 +81,16 @@ export function TrackerMonthGraph({
     });
   });
 
-  return <div className="grid gap-9 rid grid-cols-7">{rows}</div>;
+  const daysRows = days.map((day) => {
+    return <span>{format(day, "iii")}</span>;
+  });
+
+  return (
+    <div>
+      <div className="grid gap-9 grid-cols-7">{rows}</div>
+      <div className="grid gap-9 grid-cols-7 text-[#878787] text-sm mt-8">
+        {daysRows}
+      </div>
+    </div>
+  );
 }
