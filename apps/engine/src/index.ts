@@ -25,7 +25,6 @@ const app = new OpenAPIHono({
 
 app.use(
   (c, next) => {
-    // NOTE: Use https://unkey.dev when we accept customers
     const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
     const bearer = bearerAuth({ token: API_SECRET_KEY });
     return bearer(c, next);
