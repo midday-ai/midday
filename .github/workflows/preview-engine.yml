@@ -23,7 +23,7 @@ jobs:
       # - name: 🪐 Check TypeScript
       #   run: bun run typecheck --filter=@midday/engine
       - name: Deploy Project Artifacts to Cloudflare
-      uses: cloudflare/wrangler-action@v3
-      with:
-        packageManager: bun
-        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

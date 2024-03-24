@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { InstitutionSchema } from "../institutions/schema";
 
 export const AccountsParamsSchema = z.object({
   id: z
@@ -47,17 +48,29 @@ export const AccountsParamsSchema = z.object({
     }),
 });
 
+export const AccountProvider = z.enum(["teller", "plaid", "gocardless"]);
+
 export const AccountSchema = z
   .object({
     id: z.string().openapi({
-      example: "123",
+      example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
     }),
     name: z.string().openapi({
-      example: "John Doe",
+      example: "Savings account",
     }),
-    age: z.number().openapi({
-      example: 42,
+    currency: z.string().openapi({
+      example: "USD",
     }),
+    provider: AccountProvider.openapi({
+      example: "teller",
+    }),
+    institution: InstitutionSchema,
+    enrollment_id: z
+      .string()
+      .openapi({
+        example: "add29d44-1b36-4bcc-b317-b2cbc73ab8e7",
+      })
+      .nullable(),
   })
   .openapi("Account");
 
