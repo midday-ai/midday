@@ -19,16 +19,6 @@ const config = {
   experimental: {
     ppr: true,
   },
-  // // NOTE: We only support en language for now so we don't need the middleware for rewrites
-  // // Remove this once we have more languages, this also enable cached pages
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: "/:path*",
-  //       destination: "/en/:path*",
-  //     },
-  //   ];
-  // },
 };
 
 export default config;
