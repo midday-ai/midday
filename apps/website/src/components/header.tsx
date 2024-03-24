@@ -281,7 +281,7 @@ export function Header() {
               className="px-3 pt-8 text-xl text-[#707070] dark:text-[#878787] space-y-8 mb-8"
               variants={listVariant}
             >
-              {links.map(({ path, name }) => {
+              {links.map(({ path, name, title }) => {
                 const isActive =
                   path === "/updates"
                     ? pathname.includes("updates")
@@ -294,7 +294,7 @@ export function Header() {
                       className={cn(isActive && "text-primary")}
                       onClick={handleToggleMenu}
                     >
-                      {t(`header.${name}`)}
+                      {title}
                     </Link>
                   </motion.li>
                 );
