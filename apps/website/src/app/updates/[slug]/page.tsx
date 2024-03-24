@@ -19,11 +19,14 @@ export async function generateStaticParams() {
 
   return data.results.map((post) => ({
     slug: post.properties.Slug.url,
-    ...getStaticParams(),
   }));
 }
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  params: { slug },
+}: {
+  params: { slug: string };
+}) {
   const post = await fetchPageBySlug(slug);
 
   return {
