@@ -1,9 +1,14 @@
 {
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy --minify src/index.ts"
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@midday/providers": "workspace:*",
     "@hono/zod-openapi": "^0.9.9",
     "@hono/zod-validator": "^0.2.0",
     "hono": "^4.1.3",
