@@ -1,12 +1,7 @@
 import { BlurryCircle } from "@/components/blurry-circle";
 import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
-import {
-  fetchPageBlocks,
-  fetchPageBySlug,
-  fetchPages,
-  notion,
-} from "@/lib/notion";
+import { fetchPageBlocks, fetchPageBySlug, fetchPages } from "@/lib/notion";
 import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
 import { format } from "date-fns";

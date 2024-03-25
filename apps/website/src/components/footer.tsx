@@ -16,15 +16,15 @@ export function Footer() {
             <span className="sr-only">Midday</span>
           </Link>
 
-          <h3 className="font-normal md:text-2xl text-right">
+          <h6 className="font-normal md:text-2xl text-right">
             Run your business smarter.
-          </h3>
+          </h6>
         </div>
 
         <div className="flex flex-col md:flex-row w-full mb-10 md:mb-20">
           <div className="flex flex-col space-y-8 md:space-y-0 md:flex-row md:w-6/12 justify-between leading-8">
             <div>
-              <h6 className="font-medium">Product</h6>
+              <span className="font-medium">Product</span>
               <ul>
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/">Features</Link>
@@ -45,7 +45,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h6>Resources</h6>
+              <span>Resources</span>
               <ul>
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="https://git.new/midday">Github</Link>
@@ -63,7 +63,7 @@ export function Footer() {
             </div>
 
             <div>
-              <h6>Solutions</h6>
+              <span>Solutions</span>
               <ul>
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/engine">Midday Engine</Link>
