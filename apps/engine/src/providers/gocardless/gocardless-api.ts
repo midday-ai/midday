@@ -1,7 +1,8 @@
-import { client } from "@midday/kv";
-import axios from "axios";
-import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import { Redis } from "@upstash/redis/cloudflare";
 import { formatISO, subMonths } from "date-fns";
+import xior from "xior";
+import type { XiorInstance, XiorRequestConfig } from "xior";
+import type { ProviderParams } from "../types";
 import type {
   DeleteRequistionResponse,
   GetAccessTokenResponse,
@@ -24,7 +25,9 @@ import type {
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
 
-  #api: AxiosInstance | null = null;
+  #api: XiorInstance | null = null;
+
+  #redis: Redis;
 
   #accessValidForDays = 180;
 
@@ -35,6 +38,19 @@ export class GoCardLessApi {
 
   #oneHour = 3600;
 
+  #secretKey;
+  #secretId;
+
+  constructor({ envs }: ProviderParams) {
+    this.#secretId = envs.GOCARDLESS_SECRET_ID;
+    this.#secretKey = envs.GOCARDLESS_SECRET_KEY;
+
+    this.#redis = Redis.fromEnv({
+      UPSTASH_REDIS_REST_TOKEN: envs.UPSTASH_REDIS_REST_TOKEN,
+      UPSTASH_REDIS_REST_URL: envs.UPSTASH_REDIS_REST_URL,
+    });
+  }
+
   async #getRefreshToken(refresh: string): Promise<string> {
     const response = await this.#post<GetRefreshTokenResponse>(
       "/api/v2/token/refresh/",
@@ -44,7 +60,7 @@ export class GoCardLessApi {
       }
     );
 
-    await client.set(this.#accessTokenCacheKey, response.access, {
+    await this.#redis.set(this.#accessTokenCacheKey, response.access, {
       ex: response.access_expires - this.#oneHour,
       nx: true,
     });
@@ -54,8 +70,8 @@ export class GoCardLessApi {
 
   async #getAccessToken(): Promise<string> {
     const [accessToken, refreshToken] = await Promise.all([
-      client.get(this.#accessTokenCacheKey),
-      client.get(this.#refreshTokenCacheKey),
+      this.#redis.get(this.#accessTokenCacheKey),
+      this.#redis.get(this.#refreshTokenCacheKey),
     ]);
 
     if (typeof accessToken === "string") {
@@ -70,17 +86,17 @@ export class GoCardLessApi {
       "/api/v2/token/new/",
       undefined,
       {
-        secret_id: process.env.GOCARDLESS_SECRET_ID,
-        secret_key: process.env.GOCARDLESS_SECRET_KEY,
+        secret_id: this.#secretId,
+        secret_key: this.#secretKey,
       }
     );
 
     await Promise.all([
-      client.set(this.#accessTokenCacheKey, response.access, {
+      this.#redis.set(this.#accessTokenCacheKey, response.access, {
         ex: response.access_expires - this.#oneHour,
         nx: true,
       }),
-      client.set(this.#refreshTokenCacheKey, response.refresh, {
+      this.#redis.set(this.#refreshTokenCacheKey, response.refresh, {
         ex: response.refresh_expires - this.#oneHour,
         nx: true,
       }),
@@ -92,7 +108,7 @@ export class GoCardLessApi {
   async getBanks(countryCode?: string): Promise<GetBanksResponse> {
     const cacheKey = `${this.#banksCacheKey}_${countryCode}`;
 
-    const banks: GetBanksResponse | null = await client.get(cacheKey);
+    const banks: GetBanksResponse | null = await this.#redis.get(cacheKey);
 
     if (banks) {
       return banks;
@@ -103,7 +119,7 @@ export class GoCardLessApi {
     const response = await this.#get<GetBanksResponse>(
       "/api/v2/institutions/",
       token,
-      null,
+      undefined,
       {
         params: {
           country: countryCode,
@@ -111,7 +127,7 @@ export class GoCardLessApi {
       }
     );
 
-    client.set(cacheKey, response, {
+    this.#redis.set(cacheKey, response, {
       ex: this.#oneHour,
       nx: true,
     });
@@ -238,9 +254,9 @@ export class GoCardLessApi {
     );
   }
 
-  async #getApi(accessToken?: string): Promise<AxiosInstance> {
+  async #getApi(accessToken?: string): Promise<XiorInstance> {
     if (!this.#api) {
-      this.#api = axios.create({
+      this.#api = xior.create({
         baseURL: this.#baseUrl,
         timeout: 30_000,
         headers: {
@@ -256,8 +272,8 @@ export class GoCardLessApi {
   async #get<TResponse>(
     path: string,
     token?: string,
-    params?: unknown,
-    config?: AxiosRequestConfig
+    params?: Record<string, string>,
+    config?: XiorRequestConfig
   ): Promise<TResponse> {
     const api = await this.#getApi(token);
 
@@ -270,7 +286,7 @@ export class GoCardLessApi {
     path: string,
     token?: string,
     body?: unknown,
-    config?: AxiosRequestConfig
+    config?: XiorRequestConfig
   ): Promise<TResponse> {
     const api = await this.#getApi(token);
     return api.post<TResponse>(path, body, config).then(({ data }) => data);
@@ -279,8 +295,8 @@ export class GoCardLessApi {
   async #_delete<TResponse>(
     path: string,
     token: string,
-    params?: unknown,
-    config?: AxiosRequestConfig
+    params?: Record<string, string>,
+    config?: XiorRequestConfig
   ): Promise<TResponse> {
     const api = await this.#getApi(token);
 

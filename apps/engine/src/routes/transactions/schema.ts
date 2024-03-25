@@ -5,6 +5,17 @@ export const TransactionsParamsSchema = z.object({
   provider: Providers.openapi({
     example: "teller",
   }),
+  accountId: z
+    .string()
+    .optional()
+    .openapi({
+      description: "Get transactions by accountId",
+      param: {
+        name: "accountId",
+        in: "query",
+      },
+      example: "5341343-4234-4c65-815c-t234213442",
+    }),
   latest: z
     .string()
     .optional()

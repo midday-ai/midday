@@ -1,13 +1,17 @@
 import type { Provider } from "../interface";
-import type { GetAccountsRequest, GetTransactionsRequest } from "../types";
+import type {
+  GetAccountsRequest,
+  GetTransactionsRequest,
+  ProviderParams,
+} from "../types";
 import { GoCardLessApi } from "./gocardless-api";
 import { transformAccount, transformTransaction } from "./transform";
 
 export class GoCardLessProvider implements Provider {
   #api: GoCardLessApi;
 
-  constructor() {
-    this.#api = new GoCardLessApi();
+  constructor(params: ProviderParams) {
+    this.#api = new GoCardLessApi(params);
   }
 
   async getTransactions({

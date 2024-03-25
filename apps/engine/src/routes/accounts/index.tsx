@@ -2,6 +2,7 @@ import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { createRoute } from "@hono/zod-openapi";
+import { env } from "hono/adapter";
 import { AccountsParamsSchema, AccountsSchema } from "./schema";
 
 const app = new OpenAPIHono();
@@ -33,11 +34,13 @@ const indexRoute = createRoute({
 });
 
 app.openapi(indexRoute, async (c) => {
+  const envs = env(c);
   const { provider, ...rest } = c.req.query();
 
-  console.log(rest);
-
-  const api = new Provider({ provider });
+  const api = new Provider({
+    provider,
+    envs,
+  });
 
   const data = await api.getAccounts(rest);
 

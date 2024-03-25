@@ -3,6 +3,12 @@ export type Providers = "teller" | "plaid" | "gocardless";
 export type ProviderParams = {
   provider: Providers;
   environment?: "development" | "staging" | "production";
+  envs: {
+    UPSTASH_REDIS_REST_URL: string;
+    UPSTASH_REDIS_REST_TOKEN: string;
+    GOCARDLESS_SECRET_KEY: string;
+    GOCARDLESS_SECRET_ID: string;
+  };
 };
 
 export type Transaction = {
