@@ -23,16 +23,16 @@ export default async function Login(params) {
   }
 
   const cookieStore = cookies();
-  const preffered = cookieStore.get(Cookies.PrefferedSignInProvider);
+  const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
   const { device } = userAgent({ headers: headers() });
 
   let moreSignInOptions = null;
-  let prefferedSignInOption =
+  let preferredSignInOption =
     device?.vendor === "Apple" ? <AppleSignIn /> : <GoogleSignIn />;
 
-  switch (preffered?.value) {
+  switch (preferred?.value) {
     case "apple":
-      prefferedSignInOption = <AppleSignIn />;
+      preferredSignInOption = <AppleSignIn />;
       moreSignInOptions = (
         <>
           <GoogleSignIn />
@@ -45,7 +45,7 @@ export default async function Login(params) {
       break;
 
     case "slack":
-      prefferedSignInOption = <SlackSignIn />;
+      preferredSignInOption = <SlackSignIn />;
       moreSignInOptions = (
         <>
           <GoogleSignIn />
@@ -58,7 +58,7 @@ export default async function Login(params) {
       break;
 
     case "github":
-      prefferedSignInOption = <GithubSignIn />;
+      preferredSignInOption = <GithubSignIn />;
       moreSignInOptions = (
         <>
           <GoogleSignIn />
@@ -71,7 +71,7 @@ export default async function Login(params) {
       break;
 
     case "figma":
-      prefferedSignInOption = <FigmaSignIn />;
+      preferredSignInOption = <FigmaSignIn />;
       moreSignInOptions = (
         <>
           <GoogleSignIn />
@@ -84,7 +84,7 @@ export default async function Login(params) {
       break;
 
     case "google":
-      prefferedSignInOption = <GoogleSignIn />;
+      preferredSignInOption = <GoogleSignIn />;
       moreSignInOptions = (
         <>
           <AppleSignIn />
@@ -97,7 +97,7 @@ export default async function Login(params) {
       break;
 
     case "notion":
-      prefferedSignInOption = <NotionSignIn />;
+      preferredSignInOption = <NotionSignIn />;
       moreSignInOptions = (
         <>
           <GoogleSignIn />
@@ -158,7 +158,7 @@ export default async function Login(params) {
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-6">
-              {prefferedSignInOption}
+              {preferredSignInOption}
 
               <Accordion
                 type="single"
