@@ -2,6 +2,7 @@ import { CommandMenu } from "@/components/command-menu";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
+import { MobileOverview } from "@/components/mobile-overlay";
 import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-modal";
 import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
 import { ImportCSVModal } from "@/components/modals/import-csv-modal";
@@ -26,6 +27,7 @@ export default async function Layout({
 
   return (
     <div className="flex">
+      <MobileOverview />
       <Sidebar />
 
       <div className="flex-1 ml-8 mr-10 mb-8">
