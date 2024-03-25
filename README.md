@@ -1,4 +1,4 @@
-![](github.gif)
+![hero](github.png)
 
 <p align="center">
 	<h1 align="center"><b>Midday</b></h1>
