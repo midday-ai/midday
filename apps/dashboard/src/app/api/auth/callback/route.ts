@@ -6,8 +6,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export const runtime = "edge";
-export const preferredRegion = "fra1,sfo1";
+export const preferredRegion = ["fra1", "sfo1"];
 
 export async function GET(req: NextRequest) {
   const cookieStore = cookies();
