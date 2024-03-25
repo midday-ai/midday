@@ -42,11 +42,13 @@ export let isFsReadStream: Shims['isFsReadStream'] | undefined = undefined;
 export function setShims(shims: Shims, options: { auto: boolean } = { auto: false }) {
   if (auto) {
     throw new Error(
-      `you must \`import 'midday/shims/${shims.kind}'\` before importing anything else from midday`,
+      `you must \`import '@midday/engine-sdk/shims/${shims.kind}'\` before importing anything else from @midday/engine-sdk`,
     );
   }
   if (kind) {
-    throw new Error(`can't \`import 'midday/shims/${shims.kind}'\` after \`import 'midday/shims/${kind}'\``);
+    throw new Error(
+      `can't \`import '@midday/engine-sdk/shims/${shims.kind}'\` after \`import '@midday/engine-sdk/shims/${kind}'\``,
+    );
   }
   auto = options.auto;
   kind = shims.kind;

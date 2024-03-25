@@ -9,9 +9,9 @@
     "esModuleInterop": true,
     "baseUrl": "./",
     "paths": {
-      "midday/_shims/auto/*": ["src/_shims/auto/*-node"],
-      "midday/*": ["src/*"],
-      "midday": ["src/index.ts"],
+      "@midday/engine-sdk/_shims/auto/*": ["src/_shims/auto/*-node"],
+      "@midday/engine-sdk/*": ["src/*"],
+      "@midday/engine-sdk": ["src/index.ts"],
       "digest-fetch": ["./typings/digest-fetch"]
     },
     "noEmit": true,

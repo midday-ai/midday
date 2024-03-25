@@ -1,12 +1,12 @@
 {
-  "name": "midday",
+  "name": "@midday/engine-sdk",
   "version": "0.0.1-alpha.0",
   "description": "The official TypeScript library for the Midday API",
   "author": "Midday <dev-feedback@midday.com>",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "type": "commonjs",
-  "repository": "github:stainless-sdks/midday-node",
+  "repository": "github:midday-ai/midday",
   "license": "Apache-2.0",
   "packageManager": "yarn@1.22.21",
   "files": [
@@ -60,8 +60,8 @@
     "./shims/web.mjs"
   ],
   "imports": {
-    "midday": ".",
-    "midday/*": "./src/*"
+    "@midday/engine-sdk": ".",
+    "@midday/engine-sdk/*": "./src/*"
   },
   "exports": {
     "./_shims/auto/*": {

@@ -1,9 +1,9 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as Core from 'midday/core';
-import { APIResource } from 'midday/resource';
-import { isRequestOptions } from 'midday/core';
-import * as AccountsAPI from 'midday/resources/accounts';
+import * as Core from '@midday/engine-sdk/core';
+import { APIResource } from '@midday/engine-sdk/resource';
+import { isRequestOptions } from '@midday/engine-sdk/core';
+import * as AccountsAPI from '@midday/engine-sdk/resources/accounts';
 
 export class Accounts extends APIResource {
   list(query?: AccountListParams, options?: Core.RequestOptions): Core.APIPromise<Account>;

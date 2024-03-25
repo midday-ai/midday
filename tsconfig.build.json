@@ -5,8 +5,8 @@
   "compilerOptions": {
     "rootDir": "./dist/src",
     "paths": {
-      "midday/*": ["dist/src/*"],
-      "midday": ["dist/src/index.ts"],
+      "@midday/engine-sdk/*": ["dist/src/*"],
+      "@midday/engine-sdk": ["dist/src/index.ts"],
       "digest-fetch": ["./typings/digest-fetch"]
     },
     "noEmit": false,

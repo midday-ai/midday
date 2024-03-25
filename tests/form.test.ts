@@ -1,6 +1,6 @@
-import { multipartFormRequestOptions, createForm } from 'midday/core';
-import { Blob } from 'midday/_shims/index';
-import { toFile } from 'midday';
+import { multipartFormRequestOptions, createForm } from '@midday/engine-sdk/core';
+import { Blob } from '@midday/engine-sdk/_shims/index';
+import { toFile } from '@midday/engine-sdk';
 
 describe('form data validation', () => {
   test('valid values do not error', async () => {

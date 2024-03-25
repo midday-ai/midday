@@ -1,9 +1,9 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import * as Core from 'midday/core';
-import { APIResource } from 'midday/resource';
-import { isRequestOptions } from 'midday/core';
-import * as TransactionsAPI from 'midday/resources/transactions';
+import * as Core from '@midday/engine-sdk/core';
+import { APIResource } from '@midday/engine-sdk/resource';
+import { isRequestOptions } from '@midday/engine-sdk/core';
+import * as TransactionsAPI from '@midday/engine-sdk/resources/transactions';
 
 export class Transactions extends APIResource {
   list(query?: TransactionListParams, options?: Core.RequestOptions): Core.APIPromise<Transaction>;

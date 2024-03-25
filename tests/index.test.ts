@@ -1,8 +1,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import Midday from 'midday';
-import { APIUserAbortError } from 'midday';
-import { Headers } from 'midday/core';
+import Midday from '@midday/engine-sdk';
+import { APIUserAbortError } from '@midday/engine-sdk';
+import { Headers } from '@midday/engine-sdk/core';
 import defaultFetch, { Response, type RequestInit, type RequestInfo } from 'node-fetch';
 
 describe('instantiate client', () => {
