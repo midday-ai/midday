@@ -16,9 +16,9 @@ export function Footer() {
             <span className="sr-only">Midday</span>
           </Link>
 
-          <h6 className="font-normal md:text-2xl text-right">
+          <span className="font-normal md:text-2xl text-right">
             Run your business smarter.
-          </h6>
+          </span>
         </div>
 
         <div className="flex flex-col md:flex-row w-full mb-10 md:mb-20">
