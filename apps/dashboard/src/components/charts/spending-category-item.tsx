@@ -1,0 +1,33 @@
+"use client";
+
+import { useCurrentLocale } from "@/locales/client";
+import { formatAmount } from "@/utils/format";
+import { CategoryIcon } from "../category";
+
+export function SpendingCategoryItem({
+  category,
+  amount,
+  currency,
+  precentage,
+}) {
+  const locale = useCurrentLocale();
+
+  return (
+    <div className="px-3 py-1 flex justify-between items-center space-x-12">
+      <div className="text-sm font-medium flex items-center space-x-2">
+        {category && <CategoryIcon name={category} />}
+        <p>
+          {amount &&
+            formatAmount({
+              amount: amount,
+              currency,
+              locale,
+              maximumFractionDigits: 0,
+              minimumFractionDigits: 0,
+            })}
+        </p>
+      </div>
+      <p className="text-sm text-[#606060] truncate">{precentage}%</p>
+    </div>
+  );
+}

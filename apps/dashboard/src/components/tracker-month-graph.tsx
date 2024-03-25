@@ -88,7 +88,7 @@ export function TrackerMonthGraph({
   return (
     <div>
       <div className="grid gap-9 grid-cols-7">{rows}</div>
-      <div className="grid gap-9 grid-cols-7 text-[#878787] text-sm mt-8">
+      <div className="grid gap-9 grid-cols-7 text-[#878787] text-sm mt-8 text-center">
         {daysRows}
       </div>
     </div>
