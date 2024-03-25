@@ -23,7 +23,7 @@ export const viewport = {
   ],
 };
 
-export const preferredRegion = "fra1";
+export const preferredRegion = "fra1,sfo1";
 
 export default function Layout({
   children,
