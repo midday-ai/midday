@@ -18,8 +18,10 @@ export function MobileOverview() {
   const isMobile = useMediaQuery("(max-width: 768px)");
 
   useEffect(() => {
-    if (!isMobile) {
+    if (isMobile) {
       document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
   }, [isMobile]);
 
