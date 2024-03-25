@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["dist/src"],
+  "exclude": ["dist/src/_shims/*-deno.ts"],
+  "compilerOptions": {
+    "rootDir": "./dist/src",
+    "paths": {
+      "midday/*": ["dist/src/*"],
+      "midday": ["dist/src/index.ts"],
+      "digest-fetch": ["./typings/digest-fetch"]
+    },
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    "outDir": "dist",
+    "pretty": true,
+    "sourceMap": true
+  }
+}

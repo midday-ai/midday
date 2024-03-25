@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eux
+
+npm config set //registry.npmjs.org/:_authToken $NPM_TOKEN
+
+yarn build
+cd dist
+yarn publish --access public

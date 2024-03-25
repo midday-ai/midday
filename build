@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -exuo pipefail
+
+node scripts/check-version.cjs
+
+# Build into dist and will publish the package from there,
+# so that src/resources/foo.ts becomes <package root>/resources/foo.js
+# This way importing from `"midday/resources/foo"` works
+# even with `"moduleResolution": "node"`
+
+rm -rf dist; mkdir dist
+# Copy src to dist/src and build from dist/src into dist, so that
+# the source map for index.js.map will refer to ./src/index.ts etc
+cp -rp src README.md dist
+rm dist/src/_shims/*-deno.ts dist/src/_shims/auto/*-deno.ts
+for file in LICENSE CHANGELOG.md; do
+  if [ -e "${file}" ]; then cp "${file}" dist; fi
+done
+if [ -e "bin/cli" ]; then
+  mkdir dist/bin
+  cp -p "bin/cli" dist/bin/;
+fi
+# this converts the export map paths for the dist directory
+# and does a few other minor things
+node scripts/make-dist-package-json.cjs > dist/package.json
+
+# build to .js/.mjs/.d.ts files
+npm exec tsc-multi
+# copy over handwritten .js/.mjs/.d.ts files
+cp src/_shims/*.{d.ts,js,mjs,md} dist/_shims
+cp src/_shims/auto/*.{d.ts,js,mjs} dist/_shims/auto
+# we need to add exports = module.exports = Midday Node to index.js;
+# No way to get that from index.ts because it would cause compile errors
+# when building .mjs
+node scripts/fix-index-exports.cjs
+# with "moduleResolution": "nodenext", if ESM resolves to index.d.ts,
+# it'll have TS errors on the default import.  But if it resolves to
+# index.d.mts the default import will work (even though both files have
+# the same export default statement)
+cp dist/index.d.ts dist/index.d.mts
+cp tsconfig.dist-src.json dist/src/tsconfig.json
+
+node scripts/postprocess-files.cjs
+
+# make sure that nothing crashes when we require the output CJS or
+# import the output ESM
+(cd dist && node -e 'require("midday")')
+(cd dist && node -e 'import("midday")' --input-type=module)
+
+if command -v deno &> /dev/null && [ -e ./build-deno ]
+then
+  ./build-deno
+fi

@@ -1,0 +1,7 @@
+node_modules
+yarn-error.log
+codegen.log
+dist
+/deno
+/*.tgz
+.idea/

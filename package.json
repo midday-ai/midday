@@ -1,0 +1,124 @@
+{
+  "name": "midday",
+  "version": "0.0.1-alpha.0",
+  "description": "The official TypeScript library for the Midday API",
+  "author": "Midday <dev-feedback@midday.com>",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "type": "commonjs",
+  "repository": "github:stainless-sdks/midday-node",
+  "license": "Apache-2.0",
+  "packageManager": "yarn@1.22.21",
+  "files": [
+    "*"
+  ],
+  "private": false,
+  "scripts": {
+    "test": "bin/check-test-server && yarn jest",
+    "build": "bash ./build",
+    "prepack": "echo 'to pack, run yarn build && (cd dist; yarn pack)' && exit 1",
+    "prepublishOnly": "echo 'to publish, run yarn build && (cd dist; yarn publish)' && exit 1",
+    "format": "prettier --write --cache --cache-strategy metadata . !dist",
+    "prepare": "if ./scripts/check-is-in-git-install.sh; then npm run build; fi",
+    "tsn": "ts-node -r tsconfig-paths/register",
+    "lint": "eslint --ext ts,js .",
+    "fix": "eslint --fix --ext ts,js ."
+  },
+  "dependencies": {
+    "@types/node": "^18.11.18",
+    "@types/node-fetch": "^2.6.4",
+    "abort-controller": "^3.0.0",
+    "agentkeepalive": "^4.2.1",
+    "digest-fetch": "^1.3.0",
+    "form-data-encoder": "1.7.2",
+    "formdata-node": "^4.3.2",
+    "node-fetch": "^2.6.7",
+    "web-streams-polyfill": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.4.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.49.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "eslint-plugin-unused-imports": "^3.0.0",
+    "jest": "^29.4.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-morph": "^19.0.0",
+    "ts-node": "^10.5.0",
+    "tsc-multi": "^1.1.0",
+    "tsconfig-paths": "^4.0.0",
+    "typescript": "^4.8.2"
+  },
+  "sideEffects": [
+    "./_shims/index.js",
+    "./_shims/index.mjs",
+    "./shims/node.js",
+    "./shims/node.mjs",
+    "./shims/web.js",
+    "./shims/web.mjs"
+  ],
+  "imports": {
+    "midday": ".",
+    "midday/*": "./src/*"
+  },
+  "exports": {
+    "./_shims/auto/*": {
+      "deno": {
+        "types": "./dist/_shims/auto/*.d.ts",
+        "require": "./dist/_shims/auto/*.js",
+        "default": "./dist/_shims/auto/*.mjs"
+      },
+      "bun": {
+        "types": "./dist/_shims/auto/*.d.ts",
+        "require": "./dist/_shims/auto/*-bun.js",
+        "default": "./dist/_shims/auto/*-bun.mjs"
+      },
+      "browser": {
+        "types": "./dist/_shims/auto/*.d.ts",
+        "require": "./dist/_shims/auto/*.js",
+        "default": "./dist/_shims/auto/*.mjs"
+      },
+      "worker": {
+        "types": "./dist/_shims/auto/*.d.ts",
+        "require": "./dist/_shims/auto/*.js",
+        "default": "./dist/_shims/auto/*.mjs"
+      },
+      "workerd": {
+        "types": "./dist/_shims/auto/*.d.ts",
+        "require": "./dist/_shims/auto/*.js",
+        "default": "./dist/_shims/auto/*.mjs"
+      },
+      "node": {
+        "types": "./dist/_shims/auto/*-node.d.ts",
+        "require": "./dist/_shims/auto/*-node.js",
+        "default": "./dist/_shims/auto/*-node.mjs"
+      },
+      "types": "./dist/_shims/auto/*.d.ts",
+      "require": "./dist/_shims/auto/*.js",
+      "default": "./dist/_shims/auto/*.mjs"
+    },
+    ".": {
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./*.mjs": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.mjs"
+    },
+    "./*.js": {
+      "types": "./dist/*.d.ts",
+      "default": "./dist/*.js"
+    },
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "require": "./dist/*.js",
+      "default": "./dist/*.mjs"
+    }
+  }
+}
