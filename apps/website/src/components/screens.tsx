@@ -103,7 +103,6 @@ export function Screens() {
                       lightSrc={screen2Light}
                       width={1031}
                       height={670}
-                      priority
                     />
                   ),
                 },
@@ -118,7 +117,6 @@ export function Screens() {
                       lightSrc={screen3Light}
                       width={1031}
                       height={670}
-                      priority
                     />
                   ),
                 },
@@ -133,7 +131,6 @@ export function Screens() {
                       lightSrc={screen4Light}
                       width={1031}
                       height={670}
-                      priority
                     />
                   ),
                 },
@@ -148,7 +145,6 @@ export function Screens() {
                       lightSrc={screen5Light}
                       width={1031}
                       height={670}
-                      priority
                     />
                   ),
                 },

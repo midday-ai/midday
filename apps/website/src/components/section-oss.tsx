@@ -18,7 +18,7 @@ export function SectionOSS() {
   return (
     <section className="container mb-32">
       <div className="mb-12">
-        <h3 className="text-4xl mb-4">Open startup</h3>
+        <h6 className="text-4xl mb-4">Open startup</h6>
         <p className="text-[#707070]">
           We believe in being as transparent as possible, from code to metrics.
         </p>

@@ -254,6 +254,7 @@ export function Header() {
         >
           <div className="mt-4 flex justify-between p-3 relative">
             <button type="button" onClick={handleToggleMenu}>
+              <span className="sr-only">Midday Logo</span>
               <LogoIcon />
             </button>
 

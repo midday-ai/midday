@@ -1,6 +1,7 @@
 "use client";
 
 // Thank you: https://ui.aceternity.com/components/following-pointer
+
 import React, { useEffect, useState } from "react";
 
 import { cn } from "@midday/ui/utils";

@@ -44,10 +44,10 @@ export default async function Page() {
               className="border border-border rounded-2xl dark:bg-[#121212] p-4"
             >
               <div className="flex justify-between items-center mb-2">
-                <a href={friend.href} target="_blank">
+                <a href={friend.href} target="_blank" rel="noreferrer">
                   <h3 className="font-medium text-md">{friend.name}</h3>
                 </a>
-                <a href={friend.href} target="_blank">
+                <a href={friend.href} target="_blank" rel="noreferrer">
                   <span className="sr-only">Open link</span>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
