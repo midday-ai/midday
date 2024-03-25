@@ -40,7 +40,7 @@ export const mapCategoryColor = (name: string) => {
     [categories.fees]: "#40B9FE",
     [categories.uncategorized]: "#606060",
     [categories.taxes]: "#B39CD0",
-    [categories.other]: "#F5F5F3",
+    [categories.other]: "hsl(var(--primary))",
   }[name];
 };
 
