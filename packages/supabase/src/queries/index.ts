@@ -204,9 +204,10 @@ export async function getSpendingQuery(
           category: category || "uncategorized",
           currency,
           amount: +Math.abs(amount).toFixed(2),
+          precentage: Math.round((amount / totalAmount) * 100),
         };
       })
-      .sort((a, b) => a.category.length - b.category.length),
+      .sort((a, b) => b.amount - a.amount),
   };
 }
 
