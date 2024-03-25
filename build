@@ -5,7 +5,7 @@ node scripts/check-version.cjs
 
 # Build into dist and will publish the package from there,
 # so that src/resources/foo.ts becomes <package root>/resources/foo.js
-# This way importing from `"midday/resources/foo"` works
+# This way importing from `"@midday/engine-sdk/resources/foo"` works
 # even with `"moduleResolution": "node"`
 
 rm -rf dist; mkdir dist
@@ -44,8 +44,8 @@ node scripts/postprocess-files.cjs
 
 # make sure that nothing crashes when we require the output CJS or
 # import the output ESM
-(cd dist && node -e 'require("midday")')
-(cd dist && node -e 'import("midday")' --input-type=module)
+(cd dist && node -e 'require("@midday/engine-sdk")')
+(cd dist && node -e 'import("@midday/engine-sdk")' --input-type=module)
 
 if command -v deno &> /dev/null && [ -e ./build-deno ]
 then

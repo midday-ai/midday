@@ -6,9 +6,9 @@
     "rootDir": "./deno",
     "lib": ["es2020", "DOM"],
     "paths": {
-      "midday/_shims/auto/*": ["deno/_shims/auto/*-deno"],
-      "midday/*": ["deno/*"],
-      "midday": ["deno/index.ts"],
+      "@midday/engine-sdk/_shims/auto/*": ["deno/_shims/auto/*-deno"],
+      "@midday/engine-sdk/*": ["deno/*"],
+      "@midday/engine-sdk": ["deno/index.ts"],
       "digest-fetch": ["./typings/digest-fetch"]
     },
     "noEmit": true,

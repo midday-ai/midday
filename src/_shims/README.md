@@ -1,9 +1,9 @@
 # 👋 Wondering what everything in here does?
 
-`midday` supports a wide variety of runtime environments like Node.js, Deno, Bun, browsers, and various
+`@midday/engine-sdk` supports a wide variety of runtime environments like Node.js, Deno, Bun, browsers, and various
 edge runtimes, as well as both CommonJS (CJS) and EcmaScript Modules (ESM).
 
-To do this, `midday` provides shims for either using `node-fetch` when in Node (because `fetch` is still experimental there) or the global `fetch` API built into the environment when not in Node.
+To do this, `@midday/engine-sdk` provides shims for either using `node-fetch` when in Node (because `fetch` is still experimental there) or the global `fetch` API built into the environment when not in Node.
 
 It uses [conditional exports](https://nodejs.org/api/packages.html#conditional-exports) to
 automatically select the correct shims for each environment. However, conditional exports are a fairly new
@@ -15,32 +15,32 @@ getting the wrong raw `Response` type from `.asResponse()`, for example.
 
 The user can work around these issues by manually importing one of:
 
-- `import 'midday/shims/node'`
-- `import 'midday/shims/web'`
+- `import '@midday/engine-sdk/shims/node'`
+- `import '@midday/engine-sdk/shims/web'`
 
 All of the code here in `_shims` handles selecting the automatic default shims or manual overrides.
 
 ### How it works - Runtime
 
-Runtime shims get installed by calling `setShims` exported by `midday/_shims/registry`.
+Runtime shims get installed by calling `setShims` exported by `@midday/engine-sdk/_shims/registry`.
 
-Manually importing `midday/shims/node` or `midday/shims/web`, calls `setShims` with the respective runtime shims.
+Manually importing `@midday/engine-sdk/shims/node` or `@midday/engine-sdk/shims/web`, calls `setShims` with the respective runtime shims.
 
-All client code imports shims from `midday/_shims/index`, which:
+All client code imports shims from `@midday/engine-sdk/_shims/index`, which:
 
 - checks if shims have been set manually
-- if not, calls `setShims` with the shims from `midday/_shims/auto/runtime`
-- re-exports the installed shims from `midday/_shims/registry`.
+- if not, calls `setShims` with the shims from `@midday/engine-sdk/_shims/auto/runtime`
+- re-exports the installed shims from `@midday/engine-sdk/_shims/registry`.
 
-`midday/_shims/auto/runtime` exports web runtime shims.
-If the `node` export condition is set, the export map replaces it with `midday/_shims/auto/runtime-node`.
+`@midday/engine-sdk/_shims/auto/runtime` exports web runtime shims.
+If the `node` export condition is set, the export map replaces it with `@midday/engine-sdk/_shims/auto/runtime-node`.
 
 ### How it works - Type time
 
-All client code imports shim types from `midday/_shims/index`, which selects the manual types from `midday/_shims/manual-types` if they have been declared, otherwise it exports the auto types from `midday/_shims/auto/types`.
+All client code imports shim types from `@midday/engine-sdk/_shims/index`, which selects the manual types from `@midday/engine-sdk/_shims/manual-types` if they have been declared, otherwise it exports the auto types from `@midday/engine-sdk/_shims/auto/types`.
 
-`midday/_shims/manual-types` exports an empty namespace.
-Manually importing `midday/shims/node` or `midday/shims/web` merges declarations into this empty namespace, so they get picked up by `midday/_shims/index`.
+`@midday/engine-sdk/_shims/manual-types` exports an empty namespace.
+Manually importing `@midday/engine-sdk/shims/node` or `@midday/engine-sdk/shims/web` merges declarations into this empty namespace, so they get picked up by `@midday/engine-sdk/_shims/index`.
 
-`midday/_shims/auto/types` exports web type definitions.
-If the `node` export condition is set, the export map replaces it with `midday/_shims/auto/types-node`, though TS only picks this up if `"moduleResolution": "nodenext"` or `"moduleResolution": "bundler"`.
+`@midday/engine-sdk/_shims/auto/types` exports web type definitions.
+If the `node` export condition is set, the export map replaces it with `@midday/engine-sdk/_shims/auto/types-node`, though TS only picks this up if `"moduleResolution": "nodenext"` or `"moduleResolution": "bundler"`.
