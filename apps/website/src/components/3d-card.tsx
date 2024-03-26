@@ -4,7 +4,6 @@
 
 import { cn } from "@midday/ui/utils";
 
-import Image from "next/image";
 import React, {
   createContext,
   useState,
