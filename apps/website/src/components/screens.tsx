@@ -155,7 +155,7 @@ export function Screens() {
       case "cal":
         return (
           <div className="w-full max-h-[760px] overflow-auto md:h-[600px] md:mt-[70px]">
-            <CalEmbed />
+            <CalEmbed calLink="pontus-midday/15min" />
           </div>
         );
       default:

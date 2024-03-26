@@ -145,6 +145,10 @@ export function Header() {
     });
   };
 
+  if (pathname.includes("pitch")) {
+    return null;
+  }
+
   return (
     <header className="h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
       <nav className="border border-border p-3 rounded-2xl flex items-center backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">

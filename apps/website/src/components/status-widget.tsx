@@ -1,10 +1,20 @@
+"use client";
+
+import { fetchStatus } from "@/actions/fetch-status";
 import { cn } from "@midday/ui/utils";
-import { getStatus } from "@openstatus/react";
+import { useEffect, useState } from "react";
 
-export async function StatusWidget() {
-  const res = await getStatus("midday");
+export function StatusWidget() {
+  const [status, setStatus] = useState("operational");
 
-  const { status } = res;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetchStatus();
+      setStatus(response);
+    }
+
+    fetchData();
+  }, []);
 
   const getStatusLevel = (level) => {
     return {

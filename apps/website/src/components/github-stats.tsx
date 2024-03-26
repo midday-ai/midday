@@ -1,4 +1,8 @@
+"use client";
+
+import { getGithubStats } from "@/actions/fetch-github-stats";
 import { ChartSSR } from "@/components/chart-ssr";
+import { useEffect, useState } from "react";
 import { LuGitFork } from "react-icons/lu";
 import {
   MdBalance,
@@ -7,117 +11,17 @@ import {
   MdOutlineStarBorder,
 } from "react-icons/md";
 
-async function getAllStargazers({ owner, name }) {
-  let endCursor = undefined;
-  let hasNextPage = true;
-  let added = [];
+export function GithubStats() {
+  const [data, setData] = useState();
 
-  while (hasNextPage) {
-    const request = await fetch("https://api.github.com/graphql", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
-      },
-      next: {
-        revalidate: 3600,
-      },
-      body: JSON.stringify({
-        variables: { after: endCursor, owner, name },
-        query: `query Repository($owner: String!, $name: String!, $after: String) {
-          repository(owner: $owner, name: $name) {
-            stargazers (first: 100, after: $after) {
-              pageInfo {
-                endCursor
-                hasNextPage
-              }
-              edges {
-               starredAt
-              }
-            }
-          }
-        }`,
-      }),
-    });
-
-    const { data } = await request.json();
-
-    added = added.concat(data.repository.stargazers.edges);
-    hasNextPage = data.repository.stargazers.pageInfo.hasNextPage;
-    endCursor = data.repository.stargazers.pageInfo.endCursor;
-  }
-
-  return added;
-}
-
-async function githubRequest({ owner, name }) {
-  const request = await fetch("https://api.github.com/graphql", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
-    },
-    next: {
-      revalidate: 3600,
-    },
-    body: JSON.stringify({
-      variables: { owner, name },
-      query: `query Repository($owner: String!, $name: String!) {
-          repository(owner: $owner, name: $name) {
-            forks {
-              totalCount
-            }
-            watchers {
-              totalCount
-            }
-            stargazers {
-              totalCount
-            }
-             commits:object(expression: "main") {
-              ... on Commit {
-                history {
-                  totalCount
-                }
-              }
-            }
-          }
-        }`,
-    }),
-  });
-
-  return request.json();
-}
-
-export async function GithubStats() {
-  const stargazers = await getAllStargazers({
-    owner: "midday-ai",
-    name: "midday",
-  });
-
-  const {
-    data: { repository },
-  } = await githubRequest({
-    owner: "midday-ai",
-    name: "midday",
-  });
-
-  const starsPerDate = stargazers.reduce((acc, curr) => {
-    const date = curr.starredAt.substring(0, 10);
-
-    if (acc[date]) {
-      acc[date]++;
-    } else {
-      acc[date] = 1;
+  useEffect(() => {
+    async function fetchData() {
+      const response = await getGithubStats();
+      setData(response);
     }
-    return acc;
-  }, {});
 
-  const data = Object.keys(starsPerDate).map((key) => {
-    return {
-      date: new Date(key),
-      value: starsPerDate[key],
-    };
-  });
+    fetchData();
+  }, []);
 
   return (
     <>
@@ -133,33 +37,36 @@ export async function GithubStats() {
         <div className="flex items-center space-x-1">
           <MdOutlineStarBorder />
           <span className="text-xs shrink-0">
-            {Intl.NumberFormat("en", { notation: "compact" }).format(
-              repository.stargazers.totalCount ?? 0
-            )}
+            {data?.repository &&
+              Intl.NumberFormat("en", { notation: "compact" }).format(
+                data.repository.stargazers.totalCount ?? 0
+              )}
           </span>
         </div>
 
         <div className="flex items-center space-x-1">
           <LuGitFork />
           <span className="text-xs shrink-0">
-            {Intl.NumberFormat("en", { notation: "compact" }).format(
-              repository.forks.totalCount ?? 0
-            )}
+            {data?.repository &&
+              Intl.NumberFormat("en", { notation: "compact" }).format(
+                data.repository.forks.totalCount ?? 0
+              )}
           </span>
         </div>
 
         <div className="flex items-center space-x-1">
           <MdOutlineAdjust />
           <span className="text-xs shrink-0">
-            {Intl.NumberFormat("en", { notation: "compact" }).format(
-              repository.commits.history.totalCount ?? 0
-            )}
+            {data?.repository &&
+              Intl.NumberFormat("en", { notation: "compact" }).format(
+                data.repository.commits.history.totalCount ?? 0
+              )}
           </span>
         </div>
       </div>
 
       <div className="pb-10 mt-10 h-[130px]">
-        <ChartSSR data={data} />
+        {data?.stats && <ChartSSR data={data?.stats} />}
         <p className="text-[#878787] text-sm mt-4">Updated one hour ago</p>
       </div>
     </>

@@ -11,7 +11,7 @@ import {
 } from "@midday/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 
-export function BottomBar({ count, show, totalAmount, hasNextPage, currency }) {
+export function BottomBar({ count, show, totalAmount, currency }) {
   const locale = useCurrentLocale();
 
   return (
@@ -21,7 +21,7 @@ export function BottomBar({ count, show, totalAmount, hasNextPage, currency }) {
         animate={{ y: show ? 0 : 100 }}
         initial={{ y: 100 }}
       >
-        <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 flex h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
+        <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
           <div className="flex items-center space-x-2">
             <span className="text-sm">Total</span>
             <TooltipProvider delayDuration={0}>

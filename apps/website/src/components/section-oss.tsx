@@ -5,7 +5,6 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
-import { Suspense } from "react";
 import {
   MdDataArray,
   MdEditRoad,
@@ -155,9 +154,7 @@ export function SectionOSS() {
                   </div>
                 </div>
 
-                <Suspense>
-                  <GithubStats />
-                </Suspense>
+                <GithubStats />
               </div>
             </a>
           </div>
