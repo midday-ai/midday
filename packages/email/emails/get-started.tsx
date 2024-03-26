@@ -18,6 +18,7 @@ import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
+  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -27,6 +28,7 @@ const baseUrl =
 
 export const GetStartedEmail = ({
   fullName = "Viktor Hofte",
+  unsubscribeLink = "https://midday.ai",
 }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Lets get started! Follow the steps below and you’ll be up to speed in no time.`;
@@ -120,7 +122,7 @@ export const GetStartedEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
           </Container>
         </Body>
       </Tailwind>

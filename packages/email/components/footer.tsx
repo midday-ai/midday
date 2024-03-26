@@ -7,14 +7,16 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+
 import React from "react";
 import { TripleColumn } from "responsive-react-email";
 
 type Props = {
   baseUrl?: string;
+  unsubscribeLink?: string;
 };
 
-export function Footer({ baseUrl }: Props) {
+export function Footer({ baseUrl, unsubscribeLink }: Props) {
   return (
     <Section className="w-full">
       <Hr />
@@ -226,6 +228,19 @@ export function Footer({ baseUrl }: Props) {
         </Text>
       </Row>
 
+      {unsubscribeLink && (
+        <Row>
+          <Link
+            className="text-[#707070] text-[14px]"
+            href={unsubscribeLink}
+            title="Unsubscribe"
+          >
+            Unsubscribe
+          </Link>
+        </Row>
+      )}
+
+      <br />
       <br />
 
       <Row>

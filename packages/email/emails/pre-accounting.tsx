@@ -19,6 +19,7 @@ import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
+  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -28,6 +29,7 @@ const baseUrl =
 
 export const PreAccountingEmail = ({
   fullName = "Viktor Hofte",
+  unsubscribeLink = "https://midday.ai",
 }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Always have to dig up old receipts and invoices when your accountant asks for it? No more, with Midday everything is gathered, neatly structured and connected to transactions.`;
@@ -117,7 +119,7 @@ export const PreAccountingEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
           </Container>
         </Body>
       </Tailwind>
