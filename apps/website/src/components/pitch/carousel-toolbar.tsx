@@ -22,7 +22,7 @@ export function CarouselToolbar() {
             <div className="flex backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 h-12 px-4 py-2 border border-[#2C2C2C] items-center rounded-full space-x-4">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button">
+                  <button type="button" onClick={() => api.scrollTo(100)}>
                     <Icons.Calendar size={20} />
                   </button>
                 </TooltipTrigger>

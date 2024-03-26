@@ -1,14 +1,19 @@
-export async function GithubStars() {
-  const response = await fetch(
-    "https://api.github.com/repos/midday-ai/midday",
-    {
-      next: {
-        revalidate: 300,
-      },
-    }
-  );
+"use client";
 
-  const data = await response.json();
+import { fetchGithubStars } from "@/actions/fetch-github-stars";
+import { useEffect, useState } from "react";
+
+export function GithubStars() {
+  const [data, setData] = useState();
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetchGithubStars();
+      setData(response);
+    }
+
+    fetchData();
+  }, []);
 
   return (
     <a
@@ -32,9 +37,10 @@ export async function GithubStars() {
         <span className="font-medium">Star</span>
       </div>
       <div className="px-4 text-[14px]">
-        {Intl.NumberFormat("en", { notation: "compact" }).format(
-          data.stargazers_count ?? 0
-        )}
+        {data &&
+          Intl.NumberFormat("en", { notation: "compact" }).format(
+            data.stargazers_count ?? 0
+          )}
       </div>
     </a>
   );

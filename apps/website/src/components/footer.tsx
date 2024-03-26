@@ -1,9 +1,8 @@
 "use client";
+
 import { LogoLarge } from "@/components/logo-large";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense } from "react";
 import { GithubStars } from "./github-stars";
 import { SocialLinks } from "./social-links";
 import { StatusWidget } from "./status-widget";
@@ -98,18 +97,11 @@ export function Footer() {
           <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
             <div className="flex justify-between md:items-end flex-col space-y-14">
               <div className="flex items-center">
-                <Suspense>
-                  <GithubStars />
-                </Suspense>
-
+                <GithubStars />
                 <SocialLinks />
               </div>
               <div className="md:mr-0 mr-auto">
-                <ErrorBoundary>
-                  <Suspense>
-                    <StatusWidget />
-                  </Suspense>
-                </ErrorBoundary>
+                <StatusWidget />
               </div>
             </div>
           </div>

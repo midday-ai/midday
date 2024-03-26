@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useRef } from "react";
 
 const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
@@ -25,7 +26,9 @@ export function SectionFour() {
     <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">
         <span>Demo - Version 0.5 (Private beta)</span>
-        <span className="text-[#878787]">Midday</span>
+        <span className="text-[#878787]">
+          <Link href="/">Midday</Link>
+        </span>
       </div>
 
       <div className="flex flex-col h-screen min-h-full justify-center">

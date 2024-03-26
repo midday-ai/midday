@@ -1,5 +1,6 @@
 "use client";
 
+import { SectionBook } from "@/components/pitch/section-book";
 import { SectionFive } from "@/components/pitch/section-five";
 import { SectionFour } from "@/components/pitch/section-four";
 import { SecitonOne } from "@/components/pitch/section-one";
@@ -26,6 +27,9 @@ export function PitchCarusel() {
         </CarouselItem>
         <CarouselItem>
           <SectionFive />
+        </CarouselItem>
+        <CarouselItem>
+          <SectionBook />
         </CarouselItem>
       </CarouselContent>
 
