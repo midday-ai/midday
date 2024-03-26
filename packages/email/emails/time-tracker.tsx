@@ -19,6 +19,7 @@ import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
+  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -28,6 +29,7 @@ const baseUrl =
 
 export const TimeTrackerEmail = ({
   fullName = "Viktor Hofte",
+  unsubscribeLink = "https://midday.ai",
 }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Boost your productivity with our advanced time-tracking tool. With insightful project overviews and seamless collaboration amongst your team, you’re set up for optimal efficiency.`;
@@ -116,7 +118,7 @@ export const TimeTrackerEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
           </Container>
         </Body>
       </Tailwind>

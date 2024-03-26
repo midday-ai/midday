@@ -1,3 +1,4 @@
+import { generateUnsubscribeLink } from "@midday/email";
 import FinancialOverViewEmail from "@midday/email/emails/financial-overview";
 import GetStartedEmail from "@midday/email/emails/get-started";
 import InboxEmail from "@midday/email/emails/inbox";
@@ -33,6 +34,13 @@ client.defineJob({
     resend,
   },
   run: async (payload, io, ctx) => {
+    const id = ctx.event?.id as string;
+
+    const unsubscribeLink = await generateUnsubscribeLink({
+      id,
+      type: "onboarding",
+    });
+
     const isTestOrDev =
       ctx.run.isTest || ctx.environment.type === "DEVELOPMENT";
 
@@ -40,7 +48,12 @@ client.defineJob({
       to: payload.email,
       subject: "Welcome to Midday",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: await renderAsync(WelcomeEmail({ fullName: payload.fullName })),
+      html: await renderAsync(
+        WelcomeEmail({
+          fullName: payload.fullName,
+          unsubscribeLink,
+        })
+      ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
@@ -52,7 +65,9 @@ client.defineJob({
       to: payload.email,
       subject: "Get Started",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: await renderAsync(GetStartedEmail({ fullName: payload.fullName })),
+      html: await renderAsync(
+        GetStartedEmail({ fullName: payload.fullName, unsubscribeLink })
+      ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
@@ -67,7 +82,10 @@ client.defineJob({
         subject: "Financial Overview",
         from: "Pontus from Midday <pontus@midday.ai>",
         html: await renderAsync(
-          FinancialOverViewEmail({ fullName: payload.fullName })
+          FinancialOverViewEmail({
+            fullName: payload.fullName,
+            unsubscribeLink,
+          })
         ),
         headers: {
           "X-Entity-Ref-ID": nanoid(),
@@ -81,7 +99,9 @@ client.defineJob({
       to: payload.email,
       subject: "Magic Inbox",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: await renderAsync(InboxEmail({ fullName: payload.fullName })),
+      html: await renderAsync(
+        InboxEmail({ fullName: payload.fullName, unsubscribeLink })
+      ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
@@ -94,7 +114,7 @@ client.defineJob({
       subject: "Pre-Accounting",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
-        PreAccountingEmail({ fullName: payload.fullName })
+        PreAccountingEmail({ fullName: payload.fullName, unsubscribeLink })
       ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
@@ -107,7 +127,9 @@ client.defineJob({
       to: payload.email,
       subject: "Store your files securely",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: await renderAsync(VaultEmail({ fullName: payload.fullName })),
+      html: await renderAsync(
+        VaultEmail({ fullName: payload.fullName, unsubscribeLink })
+      ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },
@@ -119,7 +141,9 @@ client.defineJob({
       to: payload.email,
       subject: "Time track your projects",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: await renderAsync(TimeTrackEmail({ fullName: payload.fullName })),
+      html: await renderAsync(
+        TimeTrackEmail({ fullName: payload.fullName, unsubscribeLink })
+      ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
       },

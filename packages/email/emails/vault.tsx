@@ -18,6 +18,7 @@ import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
+  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -25,7 +26,10 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const VaultEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const VaultEmail = ({
+  fullName = "Viktor Hofte",
+  unsubscribeLink = "https://midday.ai",
+}: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, There’s no need to scramble for things across devices or different drives. Keep all of your files, such as contracts and agreements safe in one place.`;
 
@@ -113,7 +117,7 @@ export const VaultEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
           </Container>
         </Body>
       </Tailwind>

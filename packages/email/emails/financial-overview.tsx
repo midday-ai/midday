@@ -18,6 +18,7 @@ import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
+  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -27,6 +28,7 @@ const baseUrl =
 
 export const FinancialOverviewEmail = ({
   fullName = "Pontus Abrahamsson",
+  unsubscribeLink = "https://midday.ai",
 }: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We connect to the majority of banks worldwide, making it easier for you to keep track of all your expenses and income in one place. Filter and compare different time periods to better track your business.`;
@@ -123,7 +125,7 @@ export const FinancialOverviewEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
           </Container>
         </Body>
       </Tailwind>

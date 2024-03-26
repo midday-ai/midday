@@ -3,7 +3,7 @@ import { Counter } from "@/components/counter";
 import { getMetricsQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { format } from "date-fns";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;

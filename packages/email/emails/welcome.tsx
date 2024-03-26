@@ -17,6 +17,7 @@ import { Logo } from "../components/logo";
 
 interface OverviewProps {
   fullName: string;
+  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -24,7 +25,10 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
+export const WelcomeEmail = ({
+  fullName = "Viktor Hofte",
+  unsubscribeLink = "https://midday.ai",
+}: OverviewProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
 
@@ -123,7 +127,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: OverviewProps) => {
 
             <br />
 
-            <Footer baseUrl={baseUrl} />
+            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
           </Container>
         </Body>
       </Tailwind>

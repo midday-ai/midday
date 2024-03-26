@@ -6,7 +6,7 @@ import { Cookies } from "@/utils/constants";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
