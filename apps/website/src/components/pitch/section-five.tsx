@@ -61,7 +61,9 @@ export function SectionFive() {
             </Card>
           </div>
 
-          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl"></div>
+          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl">
+            <h2>What users are saying</h2>
+          </div>
         </div>
       </div>
     </div>
