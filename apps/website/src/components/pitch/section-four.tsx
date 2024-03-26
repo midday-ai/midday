@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import ReactHlsPlayer from "react-hls-player";
+import dynamic from "next/dynamic";
+import { useRef } from "react";
+
+const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
+  ssr: false,
+  loading: () => <p>Loading...</p>,
+});
 
 export function SectionFour() {
   const playerRef = useRef();

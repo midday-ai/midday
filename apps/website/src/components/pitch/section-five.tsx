@@ -1,5 +1,3 @@
-import Image from "next/image";
-import overview from "./overview.png";
 import { Card } from "./ui";
 
 export function SectionFive() {
