@@ -10,12 +10,14 @@ type ProviderProps = {
 
 export function Provider({ children }: ProviderProps) {
   const pathname = usePathname();
+  const isDarkPath = pathname.includes("engine") || pathname.includes("pitch");
+  const theme = isDarkPath ? "dark" : undefined;
 
   return (
     <ThemeProvider
       attribute="class"
       defaultTheme="system"
-      forcedTheme={pathname.includes("engine") ? "dark" : undefined}
+      forcedTheme={theme}
       enableSystem
       disableTransitionOnChange
     >
