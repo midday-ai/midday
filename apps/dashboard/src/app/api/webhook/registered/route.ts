@@ -22,6 +22,7 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   const email = body.record.email;
+  const userId = body.record.id;
   const fullName = body.record.raw_user_meta_data.full_name;
 
   // NOTE: Start onboarding email for enabled beta users
@@ -29,6 +30,7 @@ export async function POST(req: Request) {
 
   if (isBeta) {
     client.sendEvent({
+      id: userId,
       name: Events.ONBOARDING_EMAILS,
       payload: {
         fullName,

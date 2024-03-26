@@ -82,7 +82,7 @@ export function TrackerMonthGraph({
   });
 
   const daysRows = days.map((day) => {
-    return <span>{format(day, "iii")}</span>;
+    return <span key={day.toDateString()}>{format(day, "iii")}</span>;
   });
 
   return (

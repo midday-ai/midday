@@ -4,7 +4,6 @@ import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { TrackerMonthGraph } from "@/components/tracker-month-graph";
 import { formatISO } from "date-fns";
-import { useRouter, useSearchParams } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { TrackerHeader } from "./tracker-header";
 
@@ -15,9 +14,6 @@ export function TrackerWrapper({
   user,
   currencyCode,
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
   const [params, setParams] = useQueryStates({
     date: parseAsString.withDefault(initialDate),
     create: parseAsString,
