@@ -4,7 +4,7 @@ import { Card } from "./ui";
 
 export function SecitonTwo() {
   return (
-    <div className="h-screen relative">
+    <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">
         <span>Problem</span>
         <span className="text-[#878787]">Midday</span>
@@ -41,7 +41,13 @@ export function SecitonTwo() {
             </div>
           </div>
           <div>
-            <Image src={reciept} alt="Reciept" width={650} height={875} />
+            <Image
+              src={reciept}
+              alt="Reciept"
+              width={650}
+              height={875}
+              quality={100}
+            />
           </div>
           <div className="ml-auto w-full space-y-8">
             <Card>

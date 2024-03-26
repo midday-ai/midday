@@ -1,6 +1,6 @@
 export function SecitonOne() {
   return (
-    <div className="h-screen relative">
+    <div className="h-screen relative container">
       <span className="absolute right-8 top-4">Pitch/2024</span>
       <div className="absolute bottom-[650px]">
         <svg

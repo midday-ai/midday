@@ -1,8 +1,4 @@
-import { SectionFive } from "@/components/pitch/section-five";
-import { SectionFour } from "@/components/pitch/section-four";
-import { SecitonOne } from "@/components/pitch/section-one";
-import { SecitonThree } from "@/components/pitch/section-three";
-import { SecitonTwo } from "@/components/pitch/section-two";
+import { PitchCarusel } from "@/components/pitch/pitch-carousel";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,12 +7,8 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="w-full bg-[#0C0C0C] flex flex-col">
-      <SecitonOne />
-      <SecitonTwo />
-      <SecitonThree />
-      <SectionFour />
-      <SectionFive />
+    <div className="fixed top-0 bottom-0 right-0 left-0 h-screen">
+      <PitchCarusel />
     </div>
   );
 }

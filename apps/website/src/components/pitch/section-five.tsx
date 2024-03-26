@@ -1,8 +1,10 @@
+import Image from "next/image";
+import customers from "./customers.png";
 import { Card } from "./ui";
 
 export function SectionFive() {
   return (
-    <div className="h-screen relative">
+    <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">
         <span>Traction</span>
         <span className="text-[#878787]">Midday</span>
@@ -59,8 +61,10 @@ export function SectionFive() {
             </Card>
           </div>
 
-          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl">
-            <h2>What users are saying</h2>
+          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6">
+            <h2 className="mb-24 block text-[38px]">What users are saying</h2>
+
+            <Image src={customers} width={698} alt="Customers" quality={100} />
           </div>
         </div>
       </div>

@@ -22,7 +22,7 @@ export function SectionFour() {
   };
 
   return (
-    <div className="h-screen relative">
+    <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">
         <span>Demo - Version 0.5 (Private beta)</span>
         <span className="text-[#878787]">Midday</span>
