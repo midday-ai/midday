@@ -27,8 +27,10 @@ export function PitchCarusel() {
 
   useEffect(() => {
     async function fetchViewsCount() {
-      const data = await setViewCount("pitch");
-      setViews(data);
+      try {
+        const data = await setViewCount("pitch");
+        setViews(data);
+      } catch {}
     }
 
     if (!called.current) {

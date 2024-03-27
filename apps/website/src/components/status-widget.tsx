@@ -11,7 +11,10 @@ export function StatusWidget() {
     async function fetchData() {
       try {
         const response = await fetchStatus();
-        setStatus(response);
+
+        if (response) {
+          setStatus(response);
+        }
       } catch {}
     }
 
@@ -59,6 +62,10 @@ export function StatusWidget() {
   };
 
   const level = getStatusLevel(status);
+
+  if (!level) {
+    return null;
+  }
 
   return (
     <a
