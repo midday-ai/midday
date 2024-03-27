@@ -128,10 +128,16 @@ export function SectionTraction() {
             <h2 className="mb-24 block text-[38px]">What people say</h2>
 
             <div className=" absolute w-[220px] top-[50%] left-[50%] -mt-5 -ml-[110px] flex justify-center">
-              <Button className="w-full flex items-center space-x-2 h-10">
-                <span>More posts on</span>
-                <FaXTwitter />
-              </Button>
+              <a
+                href="https://twitter.com/search?q=midday.ai&src=typed_query&f=top"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Button className="w-full flex items-center space-x-2 h-10">
+                  <span>More posts on</span>
+                  <FaXTwitter />
+                </Button>
+              </a>
             </div>
 
             <Image src={customers} width={698} alt="Customers" quality={100} />
