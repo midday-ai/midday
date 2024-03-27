@@ -13,7 +13,7 @@ export function SectionSubscription() {
       <div className="flex flex-col min-h-screen justify-center container">
         <div className="px-4 md:px-0 md:pt-0 h-[580px] md:h-auto overflow-auto pb-[100px] md:pb-0">
           <div className="mb-4">
-            <h2 className="text-xl">Tiers</h2>
+            <h2 className="text-2xl">Tiers</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0 md:mb-[80px] mb-12">
@@ -22,7 +22,7 @@ export function SectionSubscription() {
                 Base
               </span>
 
-              <h2 className="text-xl">Free</h2>
+              <h2 className="text-2xl">Free</h2>
               <p className="text-[#878787] text-sm text-center">
                 We will offer a free limited plan for customers to get to know
                 the system.
@@ -34,7 +34,7 @@ export function SectionSubscription() {
                 Pro
               </span>
 
-              <h2 className="text-xl">TBD/ mo</h2>
+              <h2 className="text-2xl">TBD/ mo</h2>
               <p className="text-[#878787] text-sm text-center">
                 This is the price new users will pay when we launch. The price
                 is yet to be determined.
@@ -46,7 +46,7 @@ export function SectionSubscription() {
                 Enterprise
               </span>
 
-              <h2 className="text-xl">TBD</h2>
+              <h2 className="text-2xl">TBD</h2>
               <p className="text-[#878787] text-sm text-center">
                 This plan will be offered to bigger companies with lots of
                 seats. This will be licensed based and the price is yet to be
@@ -56,7 +56,7 @@ export function SectionSubscription() {
           </div>
 
           <div className="mb-4">
-            <h2 className="text-xl">Add ons</h2>
+            <h2 className="text-2xl">Add ons</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0">
