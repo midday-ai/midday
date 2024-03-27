@@ -66,6 +66,9 @@ export function Footer() {
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                  <Link href="/pitch">Investors</Link>
+                </li>
               </ul>
             </div>
 
