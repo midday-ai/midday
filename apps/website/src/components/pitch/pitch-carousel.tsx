@@ -24,17 +24,15 @@ export function PitchCarusel() {
   const called = useRef(false);
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
 
   useEffect(() => {
-    async function setCount() {
+    async function fetchViewsCount() {
       const data = await setViewCount("pitch");
-
       setViews(data);
     }
 
     if (!called.current) {
-      setCount();
+      fetchViewsCount();
       called.current = true;
     }
   }, [called.current]);
@@ -44,7 +42,6 @@ export function PitchCarusel() {
       return;
     }
 
-    setCount(api.scrollSnapList().length);
     setCurrent(api.selectedScrollSnap() + 1);
 
     api.on("select", () => {
