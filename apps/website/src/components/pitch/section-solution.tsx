@@ -29,7 +29,7 @@ export function SectionSolution() {
               </svg>
               <h2 className="text-2xl">One OS</h2>
 
-              <p className="text-[#878787] text-sm">
+              <p className="text-[#878787] text-sm text-center">
                 We set out on a journey to develop an all-encompassing business
                 operating system. Our overarching aim is to empower
                 entrepreneurs by providing them with a comprehensive suite of
@@ -69,15 +69,15 @@ export function SectionSolution() {
 
               <h2 className="text-2xl">Intermediary</h2>
 
-              <p className="text-[#878787] text-sm">
+              <p className="text-[#878787] text-sm text-center">
                 Midday serves as the bridge between you and your accountant,
                 streamlining your month-end procedures, reducing manual work,
                 and easily packaging everything up for financial review. By
-                prioritizing user experience over building a revision system, we
-                ensure our platform remains user-friendly and entirely focused
-                on what entrepreneurs need. This approach enables us to scale
-                quickly and globally without the need to navigate domestic tax
-                laws and change accountants current software choices.
+                prioritizing user experience over building a accountant system,
+                we ensure our platform remains user-friendly and entirely
+                focused on what entrepreneurs need. This approach enables us to
+                scale quickly and globally without the need to navigate domestic
+                tax laws and change accountants current workflows.
               </p>
             </Card>
           </div>
@@ -119,7 +119,7 @@ export function SectionSolution() {
 
               <h2 className="text-2xl">User friendly & AI</h2>
 
-              <p className="text-[#878787] text-sm">
+              <p className="text-[#878787] text-sm text-center">
                 We're focusing on building the platform with our community to
                 ensure it's as user-friendly as possible and covers all the
                 features needed to assist as many business owners as possible.

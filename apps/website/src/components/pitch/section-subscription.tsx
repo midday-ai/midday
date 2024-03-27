@@ -25,7 +25,7 @@ export function SectionSubscription() {
               <h2 className="text-xl">Free</h2>
               <p className="text-[#878787] text-sm text-center">
                 We will offer a free limited plan for customers to get to know
-                the platform and value.
+                the system.
               </p>
             </Card>
 
@@ -63,8 +63,8 @@ export function SectionSubscription() {
             <Card className="pb-8">
               <h2>Team seats</h2>
               <p className="text-[#878787] text-sm text-center">
-                Additional team members will be priced around $9. The team will
-                have the ability to invite however many users they want.
+                Additional team members will be per seat pricing. The team will
+                have the ability to invite how many users they want.
               </p>
             </Card>
 
@@ -81,7 +81,7 @@ export function SectionSubscription() {
               <h2>Custom domain</h2>
               <p className="text-[#878787] text-sm text-center">
                 If the user want a custom inbox email, for example
-                Receipts@acme.com, we can provide this for an additional fee.
+                acme.inbox@midday.ai, we can provide this for an additional fee.
               </p>
             </Card>
           </div>

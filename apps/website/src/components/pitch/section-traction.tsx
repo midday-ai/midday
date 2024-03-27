@@ -58,8 +58,8 @@ export function SectionTraction() {
 
               <p className="text-[#878787] text-sm text-center">
                 Since going open source on the 20th of March 2024 we’ve gained
-                834 stars on Github. Full documentation and how to contribute
-                will follow soon.
+                834 stars on Github. Our goal is to build a great comunity
+                around Midday.
               </p>
 
               <div className="flex items-center space-x-4">
@@ -101,8 +101,8 @@ export function SectionTraction() {
 
               <p className="text-[#878787] text-sm text-center">
                 Since building everything in public we’ve gained lots of
-                engagement on our posts. We see this as great way to talk to our
-                users.
+                engagement on our posts. We see this as one way to talk to our
+                users and get quick feedback.
               </p>
 
               <span className="mt-auto font-mono text-[122px]">839</span>

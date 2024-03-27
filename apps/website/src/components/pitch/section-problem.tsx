@@ -29,7 +29,7 @@ export function SectionProblem() {
               </svg>
               <h2 className="text-2xl">Disorganization</h2>
 
-              <p className="text-[#878787] text-sm">
+              <p className="text-[#878787] text-sm text-center">
                 Running a business is tough, and one of the biggest challenges
                 is disorganization. From scattered files to misplaced documents,
                 this lack of structure hampers productivity and wastes time.
@@ -83,13 +83,13 @@ export function SectionProblem() {
 
               <h2 className="text-2xl">Scattered workflow</h2>
 
-              <p className="text-[#878787] text-sm">
+              <p className="text-[#878787] text-sm text-center">
                 Existing services often compound the problem by residing on
                 various platforms, resulting in a fragmented workflow. From
                 tracking time to managing finances and storing documents,
                 entrepreneurs navigate multiple interfaces and systems. This
-                scattered approach wastes time, increases the risk of errors,
-                and disrupts productivity.
+                scattered approach wastes time and money, increases the risk of
+                errors, and disrupts productivity.
               </p>
             </Card>
             <Card className="min-h-[315px]">
@@ -122,7 +122,7 @@ export function SectionProblem() {
 
               <h2 className="text-2xl">Old tech</h2>
 
-              <p className="text-[#878787] text-sm">
+              <p className="text-[#878787] text-sm text-center">
                 Services are outdated and prioritize features tailored to
                 accountants rather than offering a user-friendly interface for
                 business owners. This approach often results in cumbersome
