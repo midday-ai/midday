@@ -4,8 +4,8 @@ import { Card } from "./ui";
 export function SectionVision() {
   return (
     <div className="min-h-screen relative w-screen">
-      <div className="absolute left-8 right-8 top-4 flex justify-between">
-        <span>Vision</span>
+      <div className="absolute left-8 right-8 top-4 flex justify-between text-lg">
+        <span>Our vision</span>
         <span className="text-[#878787]">
           <Link href="/">Midday</Link>
         </span>

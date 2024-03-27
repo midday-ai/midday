@@ -6,8 +6,8 @@ import { Card } from "./ui";
 export function SectionSolution() {
   return (
     <div className="min-h-screen relative w-screen">
-      <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between">
-        <span>Solution</span>
+      <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between text-lg">
+        <span>Our solution</span>
         <span className="text-[#878787]">
           <Link href="/">Midday</Link>
         </span>

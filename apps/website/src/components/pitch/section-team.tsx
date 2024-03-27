@@ -8,8 +8,8 @@ import viktor from "./viktor.png";
 export function SectionTeam() {
   return (
     <div className="min-h-screen relative w-screen">
-      <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between">
-        <span>Team</span>
+      <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between text-lg">
+        <span>Who we are</span>
         <span className="text-[#878787]">
           <Link href="/">Midday</Link>
         </span>
@@ -71,7 +71,7 @@ export function SectionTeam() {
             />
           </div>
           <div className="ml-auto w-full space-y-8 items-center flex">
-            <h2 className="text-[64px] font-medium text-center">
+            <h2 className="text-[64px] font-medium text-center leading-tight">
               “The speed and velocity we have together is unmatched.”
             </h2>
           </div>
