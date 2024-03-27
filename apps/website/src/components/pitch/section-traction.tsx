@@ -23,7 +23,7 @@ export function SectionTraction() {
                 signups ready to start using Midday.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">1300</span>
+              <span className="mt-auto font-mono text-[122px]">3500</span>
             </Card>
 
             <Card>
@@ -48,7 +48,7 @@ export function SectionTraction() {
                 us.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">3500</span>
+              <span className="mt-auto font-mono text-[122px]">1300</span>
             </Card>
 
             <Card>
