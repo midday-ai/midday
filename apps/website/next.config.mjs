@@ -19,7 +19,7 @@ const config = {
   async redirects() {
     return [
       {
-        source: "/en(.*)",
+        source: "/en/(.*)",
         destination: "/",
         permanent: true,
       },
