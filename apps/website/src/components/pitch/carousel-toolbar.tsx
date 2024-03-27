@@ -192,7 +192,7 @@ export function CarouselToolbar({ views }: Props) {
             <DialogTitle>Share</DialogTitle>
           </DialogHeader>
           <DialogDescription>
-            Thanks for sharing out pitch deck.
+            Thanks for sharing our pitch deck.
           </DialogDescription>
 
           <div className="grid gap-6 py-4">
