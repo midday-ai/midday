@@ -7,7 +7,8 @@ export async function fetchStats() {
 
   const { count } = await supabase
     .from("users")
-    .select("id", { count: "exact" });
+    .select("id", { count: "exact" })
+    .limit(1);
 
   return count;
 }

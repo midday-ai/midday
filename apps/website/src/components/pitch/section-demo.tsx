@@ -98,7 +98,7 @@ export function SectionDemo({ playVideo }: Props) {
             autoPlay={false}
             controls={!isDesktop}
             playerRef={playerRef}
-            className="w-full max-h-[90%] lg:max-h-full mt-8 bg-[#121212]"
+            className="w-full max-h-[90%] lg:max-h-full mt-8 bg-[#121212] max-w-[1400px] m-auto"
             loop
           />
         </div>

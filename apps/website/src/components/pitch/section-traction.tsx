@@ -42,7 +42,7 @@ export function SectionTraction() {
       <div className="flex flex-col min-h-screen justify-center container">
         <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0 h-[580px] md:h-auto overflow-auto pb-[100px] md:pb-0">
           <div className="space-y-8">
-            <Card>
+            <Card className="min-h-[360px]">
               <h2 className="text-2xl">Waitlist sign ups</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -53,7 +53,7 @@ export function SectionTraction() {
               <span className="mt-auto font-mono text-[122px]">3453</span>
             </Card>
 
-            <Card>
+            <Card className="min-h-[360px]">
               <h2 className="text-2xl">Github stars</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -77,7 +77,7 @@ export function SectionTraction() {
             </Card>
           </div>
           <div className="space-y-8">
-            <Card>
+            <Card className="min-h-[360px]">
               <h2 className="text-2xl">Private beta users</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -96,7 +96,7 @@ export function SectionTraction() {
               </div>
             </Card>
 
-            <Card>
+            <Card className="min-h-[360px]">
               <h2 className="text-2xl">X Followers</h2>
 
               <p className="text-[#878787] text-sm text-center">

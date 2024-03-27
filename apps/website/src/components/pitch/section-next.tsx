@@ -19,7 +19,7 @@ export function SectionNext() {
       <div className="flex flex-col min-h-screen justify-center container">
         <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0 h-[580px] md:h-auto overflow-auto pb-[100px] md:pb-0">
           <div className="space-y-8">
-            <Card>
+            <Card className="min-h-[370px]">
               <h2 className="text-xl">Invoice</h2>
               <span />
               <Image src={invoice} width={362} alt="Invoice" quality={100} />
@@ -31,7 +31,7 @@ export function SectionNext() {
               rel="noreferrer"
               className="block"
             >
-              <Card>
+              <Card className="min-h-[370px]">
                 <h2 className="text-xl">Engine</h2>
                 <span className="underline">Read more</span>
                 <Image src={engine} width={362} alt="Engine" quality={100} />
@@ -39,13 +39,13 @@ export function SectionNext() {
             </a>
           </div>
           <div className="space-y-8">
-            <Card>
+            <Card className="min-h-[370px]">
               <h2 className="text-xl">Midday AI</h2>
               <span />
               <Image src={ai} width={362} alt="Midday AI" quality={100} />
             </Card>
 
-            <Card>
+            <Card className="min-h-[370px]">
               <h2 className="text-xl">Apps & integrations</h2>
               <span />
               <Image

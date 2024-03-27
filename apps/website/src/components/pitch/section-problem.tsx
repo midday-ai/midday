@@ -53,7 +53,7 @@ export function SectionProblem() {
             />
           </div>
           <div className="ml-auto w-full space-y-8">
-            <Card>
+            <Card className="min-h-[315px]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={80}
@@ -92,7 +92,7 @@ export function SectionProblem() {
                 and disrupts productivity.
               </p>
             </Card>
-            <Card>
+            <Card className="min-h-[315px]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={80}
