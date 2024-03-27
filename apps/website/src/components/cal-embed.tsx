@@ -3,7 +3,12 @@
 import Cal, { getCalApi } from "@calcom/embed-react";
 import { useEffect } from "react";
 
-export function CalEmbed({ calLink }) {
+type Props = {
+  theme?: "light" | "dark";
+  calLink: string;
+};
+
+export function CalEmbed({ calLink, theme }) {
   useEffect(() => {
     (async function () {
       const cal = await getCalApi();
@@ -19,7 +24,7 @@ export function CalEmbed({ calLink }) {
     <Cal
       calLink={calLink}
       style={{ width: "100%", height: "100%", overflow: "scroll" }}
-      config={{ layout: "month_view" }}
+      config={{ layout: "month_view", theme }}
     />
   );
 }

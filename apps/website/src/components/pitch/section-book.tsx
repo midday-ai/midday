@@ -13,7 +13,7 @@ export function SectionBook() {
       </div>
       <div className="flex flex-col min-h-screen justify-center container">
         <div className="h-[400px] md:h-[600px] px-4 md:px-0">
-          <CalEmbed calLink="pontus-midday/midday-x-vc" />
+          <CalEmbed calLink="pontus-midday/midday-x-vc" theme="dark" />
         </div>
       </div>
     </div>
