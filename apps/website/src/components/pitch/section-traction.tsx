@@ -2,9 +2,11 @@
 
 import { fetchGithubStars } from "@/actions/fetch-github-stars";
 import { fetchStats } from "@/actions/fetch-stats";
+import { Button } from "@midday/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FaXTwitter } from "react-icons/fa6";
 import customers from "./customers.png";
 import { Card } from "./ui";
 
@@ -44,7 +46,7 @@ export function SectionTraction() {
       <div className="flex flex-col min-h-screen justify-center container">
         <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0 h-[580px] md:h-auto overflow-auto pb-[100px] md:pb-0">
           <div className="space-y-8">
-            <Card className="min-h-[360px]">
+            <Card className="min-h-[365px]">
               <h2 className="text-2xl">Waitlist sign ups</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -55,7 +57,7 @@ export function SectionTraction() {
               <span className="mt-auto font-mono text-[122px]">3453</span>
             </Card>
 
-            <Card className="min-h-[360px]">
+            <Card className="min-h-[365px]">
               <h2 className="text-2xl">Github stars</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -79,7 +81,7 @@ export function SectionTraction() {
             </Card>
           </div>
           <div className="space-y-8">
-            <Card className="min-h-[360px]">
+            <Card className="min-h-[365px]">
               <h2 className="text-2xl">Private beta users</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -98,7 +100,7 @@ export function SectionTraction() {
               </div>
             </Card>
 
-            <Card className="min-h-[360px]">
+            <Card className="min-h-[365px]">
               <h2 className="text-2xl">Transactions</h2>
 
               <p className="text-[#878787] text-sm text-center">
@@ -122,8 +124,15 @@ export function SectionTraction() {
             </Card>
           </div>
 
-          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6 bg-[#0C0C0C]">
-            <h2 className="mb-24 block text-[38px]">What users are saying</h2>
+          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6 bg-[#0C0C0C] relative">
+            <h2 className="mb-24 block text-[38px]">What people say</h2>
+
+            <div className=" absolute w-[220px] top-[50%] left-[50%] -mt-5 -ml-[110px] flex justify-center">
+              <Button className="w-full flex items-center space-x-2 h-10">
+                <span>More posts on</span>
+                <FaXTwitter />
+              </Button>
+            </div>
 
             <Image src={customers} width={698} alt="Customers" quality={100} />
           </div>
