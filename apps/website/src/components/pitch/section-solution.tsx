@@ -84,7 +84,7 @@ export function SectionSolution() {
           <div className="space-y-8">
             <div className="px-8">
               <h2 className="text-[42px] text-center leading-[58px]">
-                We offers business insights and automates tedious tasks, freeing
+                We offer business insights and automates tedious tasks, freeing
                 users to focus on what they love.
               </h2>
             </div>
