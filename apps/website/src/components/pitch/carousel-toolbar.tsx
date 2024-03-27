@@ -45,7 +45,7 @@ export function CarouselToolbar({ views }: Props) {
                   className="py-1 px-3 rounded-sm"
                   sideOffset={25}
                 >
-                  <span className="text-xs">Viewers</span>
+                  <span className="text-xs">Views</span>
                 </TooltipContent>
               </Tooltip>
 

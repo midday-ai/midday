@@ -23,6 +23,13 @@ export function Grid() {
         <div className="border-r-[1px] border-[#161616]" />
         <div className="border-r-[1px] border-[#161616]" />
       </div>
+      <div className="h-full w-full absolute flex justify-between flex-col">
+        <div className="border-t-[1px] border-[#161616]" />
+        <div className="border-t-[1px] border-[#161616]" />
+        <div className="border-t-[1px] border-[#161616]" />
+        <div className="border-t-[1px] border-[#161616]" />
+        <div className="border-t-[1px] border-[#161616]" />
+      </div>
     </div>
   );
 }
