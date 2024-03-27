@@ -3,11 +3,11 @@ import Link from "next/link";
 import overview from "./overview.png";
 import { Card } from "./ui";
 
-export function SecitonThree() {
+export function SectionSolution() {
   return (
     <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">
-        <span>Problem</span>
+        <span>Solution</span>
         <span className="text-[#878787]">
           <Link href="/">Midday</Link>
         </span>

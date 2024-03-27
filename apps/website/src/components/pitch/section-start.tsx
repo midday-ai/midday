@@ -1,4 +1,4 @@
-export function SecitonOne() {
+export function SectionStart() {
   return (
     <div className="h-screen relative container">
       <span className="absolute right-8 top-4">Pitch/2024</span>

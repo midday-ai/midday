@@ -2,22 +2,51 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
   ssr: false,
   loading: () => <p>Loading...</p>,
 });
 
-export function SectionFour() {
+type Props = {
+  playVideo: boolean;
+};
+
+export function SectionDemo({ playVideo }: Props) {
   const playerRef = useRef();
   const isPlaying = useRef<HTMLVideoElement>(null);
 
-  const handleOnPlay = () => {
-    if (isPlaying.current) {
-      playerRef.current.pause();
+  useHotkeys(
+    "space",
+    () => {
+      togglePlay();
+    },
+    []
+  );
+
+  useHotkeys(
+    "backspace",
+    () => {
+      playerRef.current.currentTime = 0;
+    },
+    [playerRef]
+  );
+
+  useEffect(() => {
+    if (playVideo) {
+      togglePlay();
     } else {
-      playerRef.current.play();
+      togglePlay();
+    }
+  }, [playVideo]);
+
+  const togglePlay = () => {
+    if (isPlaying.current) {
+      playerRef.current?.pause();
+    } else {
+      playerRef.current?.play();
     }
     isPlaying.current = !isPlaying.current;
   };
@@ -35,7 +64,7 @@ export function SectionFour() {
         <div className="flex justify-between space-x-8">
           <div>
             <ReactHlsPlayer
-              onClick={handleOnPlay}
+              onClick={togglePlay}
               src="https://customer-oh6t55xltlgrfayh.cloudflarestream.com/3c8ebd39be71d2451dee78d497b89a23/manifest/video.m3u8"
               autoPlay={false}
               controls={false}

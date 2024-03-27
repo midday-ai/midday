@@ -10,7 +10,6 @@ import {
   MdArrowRight,
   MdAutoAwesome,
   MdBarChart,
-  MdCalendarToday,
   MdCelebration,
   MdChevronLeft,
   MdChevronRight,
@@ -21,6 +20,7 @@ import {
   MdDevices,
   MdDriveFileMove,
   MdDynamicForm,
+  MdEditCalendar,
   MdErrorOutline,
   MdExpandMore,
   MdFastfood,
@@ -537,5 +537,5 @@ export const Icons = {
   Delete: MdOutlineDelete,
   FolderImports: MdRuleFolder,
   FolderTransactions: MdTopic,
-  Calendar: MdCalendarToday,
+  Calendar: MdEditCalendar,
 };

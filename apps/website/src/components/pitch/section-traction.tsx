@@ -3,7 +3,7 @@ import Link from "next/link";
 import customers from "./customers.png";
 import { Card } from "./ui";
 
-export function SectionFive() {
+export function SectionTraction() {
   return (
     <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">
