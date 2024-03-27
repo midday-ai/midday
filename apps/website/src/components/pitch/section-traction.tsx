@@ -1,9 +1,36 @@
+"use client";
+
+import { fetchGithubStars } from "@/actions/fetch-github-stars";
+import { fetchStats } from "@/actions/fetch-stats";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import customers from "./customers.png";
 import { Card } from "./ui";
 
 export function SectionTraction() {
+  const [stars, setStars] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    async function fetchStars() {
+      try {
+        const response = await fetchGithubStars();
+        setStars(response);
+      } catch {}
+    }
+
+    async function fetchCount() {
+      try {
+        const response = await fetchStats();
+        setCount(response);
+      } catch {}
+    }
+
+    fetchStars();
+    fetchCount();
+  }, []);
+
   return (
     <div className="min-h-screen relative w-screen">
       <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between">
@@ -23,7 +50,7 @@ export function SectionTraction() {
                 signups ready to start using Midday.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">3500</span>
+              <span className="mt-auto font-mono text-[122px]">3453</span>
             </Card>
 
             <Card>
@@ -35,7 +62,18 @@ export function SectionTraction() {
                 will follow soon.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">840</span>
+              <div className="flex items-center space-x-4">
+                <span className="relative ml-auto flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </span>
+                <span className="mt-auto font-mono text-[122px]">
+                  {stars &&
+                    Intl.NumberFormat("en", { notation: "compact" }).format(
+                      stars.stargazers_count ?? 0
+                    )}
+                </span>
+              </div>
             </Card>
           </div>
           <div className="space-y-8">
@@ -48,7 +86,14 @@ export function SectionTraction() {
                 us.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">1300</span>
+              <div className="flex items-center space-x-4">
+                <span className="relative ml-auto flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </span>
+
+                <span className="mt-auto font-mono text-[122px]">{count}</span>
+              </div>
             </Card>
 
             <Card>
@@ -64,7 +109,7 @@ export function SectionTraction() {
             </Card>
           </div>
 
-          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6">
+          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6 bg-[#0C0C0C]">
             <h2 className="mb-24 block text-[38px]">What users are saying</h2>
 
             <Image src={customers} width={698} alt="Customers" quality={100} />
