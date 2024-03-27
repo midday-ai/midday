@@ -201,7 +201,7 @@ export function CarouselToolbar({ views }: Props) {
               className="w-full flex items-center space-x-2 h-10"
               onClick={handleOnShare}
             >
-              <span>Share a post on</span>
+              <span>Share on</span>
               <FaXTwitter />
             </Button>
           </div>
