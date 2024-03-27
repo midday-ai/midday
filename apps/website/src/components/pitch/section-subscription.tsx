@@ -3,15 +3,14 @@ import { Card } from "./ui";
 
 export function SectionSubscription() {
   return (
-    <div className="h-screen relative w-screen container">
-      <div className="absolute left-0 right-0 top-4 flex justify-between">
+    <div className="min-h-screen relative w-screen">
+      <div className="absolute left-8 right-8 top-4 flex justify-between">
         <span>How we will make money</span>
         <span className="text-[#878787]">
           <Link href="/">Midday</Link>
         </span>
       </div>
-
-      <div className="flex flex-col h-screen min-h-full justify-center">
+      <div className="flex flex-col min-h-screen justify-center container">
         <div className="mb-4">
           <h2 className="text-xl">Tiers</h2>
         </div>
@@ -31,7 +30,7 @@ export function SectionSubscription() {
 
           <Card className="pb-8">
             <span className="py-1 px-4 border border-border rounded-lg text-sm font-medium mb-4">
-              Launch price
+              Pro
             </span>
 
             <h2 className="text-xl">TBD/ mo</h2>

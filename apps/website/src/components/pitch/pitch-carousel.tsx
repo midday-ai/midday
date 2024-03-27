@@ -3,6 +3,7 @@
 import { setViewCount } from "@/actions/set-view-count";
 import { SectionBook } from "@/components/pitch/section-book";
 import { SectionDemo } from "@/components/pitch/section-demo";
+import { SectionNext } from "@/components/pitch/section-next";
 import { SectionProblem } from "@/components/pitch/section-problem";
 import { SectionSolution } from "@/components/pitch/section-solution";
 import { SectionStart } from "@/components/pitch/section-start";
@@ -77,6 +78,9 @@ export function PitchCarusel() {
         </CarouselItem>
         <CarouselItem>
           <SectionVision />
+        </CarouselItem>
+        <CarouselItem>
+          <SectionNext />
         </CarouselItem>
         <CarouselItem>
           <SectionBook />

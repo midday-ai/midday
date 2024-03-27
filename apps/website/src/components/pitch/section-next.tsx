@@ -1,0 +1,69 @@
+import Image from "next/image";
+import Link from "next/link";
+import app from "./app.png";
+import apps from "./apps.png";
+import engine from "./engine.png";
+import invoice from "./invoice.png";
+import ai from "./midday-ai.png";
+import { Card } from "./ui";
+
+export function SectionNext() {
+  return (
+    <div className="min-h-screen relative w-screen">
+      <div className="absolute left-8 right-8 top-4 flex justify-between">
+        <span>Whats coming next</span>
+        <span className="text-[#878787]">
+          <Link href="/">Midday</Link>
+        </span>
+      </div>
+      <div className="flex flex-col min-h-screen justify-center container">
+        <div className="grid grid-cols-3 gap-8">
+          <div className="space-y-8">
+            <Card>
+              <h2 className="text-xl">Invoice</h2>
+
+              <Image src={invoice} width={362} alt="Invoice" quality={100} />
+            </Card>
+
+            <a
+              href="https://midday.ai/engine"
+              target="_blank"
+              rel="noreferrer"
+              className="block"
+            >
+              <Card>
+                <h2 className="text-xl">Engine</h2>
+
+                <Image src={engine} width={362} alt="Engine" quality={100} />
+              </Card>
+            </a>
+          </div>
+          <div className="space-y-8">
+            <Card>
+              <h2 className="text-xl">Midday AI</h2>
+
+              <Image src={ai} width={362} alt="Midday AI" quality={100} />
+            </Card>
+
+            <Card>
+              <h2 className="text-xl">Apps & integrations</h2>
+
+              <Image
+                src={apps}
+                width={362}
+                alt="Apps & integrations"
+                quality={100}
+              />
+            </Card>
+          </div>
+
+          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6">
+            <h2 className="mb-24 block text-xl">Native app</h2>
+
+            <Image src={app} width={698} alt="App" quality={100} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
