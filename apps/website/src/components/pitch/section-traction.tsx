@@ -127,7 +127,7 @@ export function SectionTraction() {
           <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6 bg-[#0C0C0C] relative">
             <h2 className="mb-24 block text-[38px]">What people say</h2>
 
-            <div className=" absolute w-[220px] top-[50%] left-[50%] -mt-5 -ml-[110px] flex justify-center">
+            <div className="absolute w-[220px] bottom-6 left-[50%] -mt-5 -ml-[110px] flex justify-center">
               <a
                 href="https://twitter.com/search?q=midday.ai&src=typed_query&f=top"
                 target="_blank"
