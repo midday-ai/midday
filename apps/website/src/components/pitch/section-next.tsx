@@ -21,7 +21,7 @@ export function SectionNext() {
           <div className="space-y-8">
             <Card>
               <h2 className="text-xl">Invoice</h2>
-
+              <span />
               <Image src={invoice} width={362} alt="Invoice" quality={100} />
             </Card>
 
@@ -33,7 +33,7 @@ export function SectionNext() {
             >
               <Card>
                 <h2 className="text-xl">Engine</h2>
-
+                <span className="underline">Read more</span>
                 <Image src={engine} width={362} alt="Engine" quality={100} />
               </Card>
             </a>
@@ -41,13 +41,13 @@ export function SectionNext() {
           <div className="space-y-8">
             <Card>
               <h2 className="text-xl">Midday AI</h2>
-
+              <span />
               <Image src={ai} width={362} alt="Midday AI" quality={100} />
             </Card>
 
             <Card>
               <h2 className="text-xl">Apps & integrations</h2>
-
+              <span />
               <Image
                 src={apps}
                 width={362}
@@ -59,7 +59,7 @@ export function SectionNext() {
 
           <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6">
             <h2 className="mb-24 block text-xl">Native app</h2>
-
+            <span />
             <Image src={app} width={698} alt="App" quality={100} />
           </div>
         </div>
