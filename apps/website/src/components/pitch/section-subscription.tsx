@@ -4,8 +4,8 @@ import { Card } from "./ui";
 export function SectionSubscription() {
   return (
     <div className="min-h-screen relative w-screen">
-      <div className="absolute left-8 right-8 top-4 flex justify-between">
-        <span>How we will make money</span>
+      <div className="absolute left-4 right-4 md:left-8 md:right-8 top-4 flex justify-between">
+        <span>Team</span>
         <span className="text-[#878787]">
           <Link href="/">Midday</Link>
         </span>
@@ -15,7 +15,7 @@ export function SectionSubscription() {
           <h2 className="text-xl">Tiers</h2>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0">
           <Card className="pb-8">
             <span className="py-1 px-4 bg-white text-black rounded-lg text-sm font-medium mb-4">
               Base
@@ -57,7 +57,7 @@ export function SectionSubscription() {
           <h2 className="text-xl">Add ons</h2>
         </div>
 
-        <div className="grid grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 px-4 md:px-0 md:pt-0">
           <Card className="pb-8">
             <h2>Team seats</h2>
             <p className="text-[#878787] text-sm text-center">

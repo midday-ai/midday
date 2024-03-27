@@ -53,7 +53,7 @@ export function PitchCarusel() {
   }, [api]);
 
   return (
-    <Carousel className="w-full h-full relative" setApi={setApi}>
+    <Carousel className="w-full min-h-full relative" setApi={setApi}>
       <CarouselContent>
         <CarouselItem>
           <SectionStart />

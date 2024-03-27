@@ -59,7 +59,7 @@ export function SectionDemo({ playVideo }: Props) {
           <Link href="/">Midday</Link>
         </span>
       </div>
-      <div className="flex flex-col min-h-screen min-h-full justify-center container">
+      <div className="flex flex-col min-h-screen justify-center container">
         <div className="flex justify-between space-x-8">
           <div>
             <ReactHlsPlayer
@@ -68,7 +68,7 @@ export function SectionDemo({ playVideo }: Props) {
               autoPlay={false}
               controls={false}
               playerRef={playerRef}
-              className="w-full"
+              className="w-full max-h-[90%] lg:max-h-full mt-8"
             />
           </div>
         </div>

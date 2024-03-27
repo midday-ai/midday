@@ -11,8 +11,8 @@ export function SectionBook() {
           <Button variant="outline">Create account</Button>
         </Link>
       </div>
-      <div className="flex flex-col min-h-screen min-h-full justify-center container">
-        <div className="h-[600px]">
+      <div className="flex flex-col min-h-screen justify-center container">
+        <div className="h-[400px] md:h-[600px]">
           <CalEmbed calLink="pontus-midday/midday-x-vc" />
         </div>
       </div>
