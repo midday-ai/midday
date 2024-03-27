@@ -17,7 +17,7 @@ export function CalEmbed({ calLink }) {
 
   return (
     <Cal
-      calLink={calLink}
+      calLink="pontus-midday/15min"
       style={{ width: "100%", height: "100%", overflow: "scroll" }}
       config={{ layout: "month_view" }}
     />

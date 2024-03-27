@@ -9,8 +9,10 @@ export function StatusWidget() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetchStatus();
-      setStatus(response);
+      try {
+        const response = await fetchStatus();
+        setStatus(response);
+      } catch {}
     }
 
     fetchData();

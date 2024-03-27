@@ -8,8 +8,10 @@ export function GithubStars() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await fetchGithubStars();
-      setData(response);
+      try {
+        const response = await fetchGithubStars();
+        setData(response);
+      } catch {}
     }
 
     fetchData();

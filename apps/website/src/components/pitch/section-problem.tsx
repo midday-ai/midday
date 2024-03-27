@@ -3,7 +3,7 @@ import Link from "next/link";
 import reciept from "./reciept.png";
 import { Card } from "./ui";
 
-export function SecitonTwo() {
+export function SectionProblem() {
   return (
     <div className="h-screen relative w-screen container">
       <div className="absolute left-0 right-0 top-4 flex justify-between">

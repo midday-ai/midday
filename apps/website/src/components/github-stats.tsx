@@ -16,8 +16,10 @@ export function GithubStats() {
 
   useEffect(() => {
     async function fetchData() {
-      const response = await getGithubStats();
-      setData(response);
+      try {
+        const response = await getGithubStats();
+        setData(response);
+      } catch {}
     }
 
     fetchData();

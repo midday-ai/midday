@@ -1,39 +1,90 @@
 "use client";
 
+import { setViewCount } from "@/actions/set-view-count";
 import { SectionBook } from "@/components/pitch/section-book";
-import { SectionFive } from "@/components/pitch/section-five";
-import { SectionFour } from "@/components/pitch/section-four";
-import { SecitonOne } from "@/components/pitch/section-one";
-import { SecitonThree } from "@/components/pitch/section-three";
-import { SecitonTwo } from "@/components/pitch/section-two";
-import { Carousel, CarouselContent, CarouselItem } from "@midday/ui/carousel";
+import { SectionDemo } from "@/components/pitch/section-demo";
+import { SectionProblem } from "@/components/pitch/section-problem";
+import { SectionSolution } from "@/components/pitch/section-solution";
+import { SectionStart } from "@/components/pitch/section-start";
+import { SectionSubscription } from "@/components/pitch/section-subscription";
+import { SectionTeam } from "@/components/pitch/section-team";
+import { SectionTraction } from "@/components/pitch/section-traction";
+import { SectionVision } from "@/components/pitch/section-vision";
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from "@midday/ui/carousel";
+import { useEffect, useRef, useState } from "react";
 import { CarouselToolbar } from "./carousel-toolbar";
 
 export function PitchCarusel() {
+  const [views, setViews] = useState(0);
+  const called = useRef(false);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    async function setCount() {
+      const data = await setViewCount("pitch");
+
+      setViews(data);
+    }
+
+    if (!called.current) {
+      setCount();
+      called.current = true;
+    }
+  }, [called.current]);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
   return (
-    <Carousel className="w-full h-full relative">
+    <Carousel className="w-full h-full relative" setApi={setApi}>
       <CarouselContent>
         <CarouselItem>
-          <SecitonOne />
+          <SectionStart />
         </CarouselItem>
         <CarouselItem>
-          <SecitonTwo />
+          <SectionProblem />
         </CarouselItem>
         <CarouselItem>
-          <SecitonThree />
+          <SectionSolution />
         </CarouselItem>
         <CarouselItem>
-          <SectionFour />
+          <SectionDemo playVideo={current === 4} />
         </CarouselItem>
         <CarouselItem>
-          <SectionFive />
+          <SectionTraction />
+        </CarouselItem>
+        <CarouselItem>
+          <SectionTeam />
+        </CarouselItem>
+        <CarouselItem>
+          <SectionSubscription />
+        </CarouselItem>
+        <CarouselItem>
+          <SectionVision />
         </CarouselItem>
         <CarouselItem>
           <SectionBook />
         </CarouselItem>
       </CarouselContent>
 
-      <CarouselToolbar />
+      <CarouselToolbar views={views} />
     </Carousel>
   );
 }
