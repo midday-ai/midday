@@ -72,66 +72,6 @@ export function SectionDemo({ playVideo }: Props) {
               className="w-full"
             />
           </div>
-
-          <div className="w-[575px]">
-            <h2 className="mb-8">Features in this demo</h2>
-
-            <div>
-              <ul className="h-full overflow-auto space-y-4 max-h-[580px]">
-                <li className="border border-border rounded-xl p-4">
-                  <span className="mb-2 block">Overview</span>
-                  <p className="text-xs text-[#878787]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Suspendisse cursus venenatis neque, sit amet maximus ex. Sed
-                    nisl augue, bibendum eu vehicula nec, eleifend ac risus.
-                    Vivamus porta arcu nec magna mollis vestibulum a nec augue.
-                    Aliquam imperdiet hendrerit mi non blandit.
-                  </p>
-                </li>
-
-                <li className="border border-border rounded-xl p-4">
-                  <span className="mb-2 block">Overview</span>
-                  <p className="text-xs text-[#878787]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Suspendisse cursus venenatis neque, sit amet maximus ex. Sed
-                    nisl augue, bibendum eu vehicula nec, eleifend ac risus.
-                    Vivamus porta arcu nec magna mollis vestibulum a nec augue.
-                    Aliquam imperdiet hendrerit mi non blandit.
-                  </p>
-                </li>
-                <li className="border border-border rounded-xl p-4">
-                  <span className="mb-2 block">Overview</span>
-                  <p className="text-xs text-[#878787]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Suspendisse cursus venenatis neque, sit amet maximus ex. Sed
-                    nisl augue, bibendum eu vehicula nec, eleifend ac risus.
-                    Vivamus porta arcu nec magna mollis vestibulum a nec augue.
-                    Aliquam imperdiet hendrerit mi non blandit.
-                  </p>
-                </li>
-                <li className="border border-border rounded-xl p-4">
-                  <span className="mb-2 block">Overview</span>
-                  <p className="text-xs text-[#878787]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Suspendisse cursus venenatis neque, sit amet maximus ex. Sed
-                    nisl augue, bibendum eu vehicula nec, eleifend ac risus.
-                    Vivamus porta arcu nec magna mollis vestibulum a nec augue.
-                    Aliquam imperdiet hendrerit mi non blandit.
-                  </p>
-                </li>
-                <li className="border border-border rounded-xl p-4">
-                  <span className="mb-2 block">Overview</span>
-                  <p className="text-xs text-[#878787]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Suspendisse cursus venenatis neque, sit amet maximus ex. Sed
-                    nisl augue, bibendum eu vehicula nec, eleifend ac risus.
-                    Vivamus porta arcu nec magna mollis vestibulum a nec augue.
-                    Aliquam imperdiet hendrerit mi non blandit.
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </div>
         </div>
       </div>
     </div>
