@@ -10,7 +10,8 @@ import { Card } from "./ui";
 
 export function SectionTraction() {
   const [stars, setStars] = useState(0);
-  const [count, setCount] = useState(0);
+  const [users, setUsers] = useState(0);
+  const [transactions, setTransactions] = useState(0);
 
   useEffect(() => {
     async function fetchStars() {
@@ -22,8 +23,9 @@ export function SectionTraction() {
 
     async function fetchCount() {
       try {
-        const response = await fetchStats();
-        setCount(response);
+        const { users, transactions } = await fetchStats();
+        setUsers(users);
+        setTransactions(transactions);
       } catch {}
     }
 
@@ -92,20 +94,31 @@ export function SectionTraction() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                 </span>
 
-                <span className="mt-auto font-mono text-[122px]">{count}</span>
+                <span className="mt-auto font-mono text-[122px]">{users}</span>
               </div>
             </Card>
 
             <Card className="min-h-[360px]">
-              <h2 className="text-2xl">X Followers</h2>
+              <h2 className="text-2xl">Transactions</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                Since building everything in public we’ve gained lots of
-                engagement on our posts. We see this as one way to talk to our
-                users and get quick feedback.
+                We are already handling a significant amount of transaction
+                data.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">839</span>
+              <div className="flex items-center space-x-4">
+                <span className="relative ml-auto flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+                </span>
+
+                <span className="mt-auto font-mono text-[122px]">
+                  {transactions &&
+                    Intl.NumberFormat("en", { notation: "compact" }).format(
+                      transactions
+                    )}
+                </span>
+              </div>
             </Card>
           </div>
 
