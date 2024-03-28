@@ -7,7 +7,7 @@ export function SectionVision() {
       <div className="absolute left-8 right-8 top-4 flex justify-between text-lg">
         <span>Our vision</span>
         <span className="text-[#878787]">
-          <Link href="/">Midday</Link>
+          <Link href="/">midday.ai</Link>
         </span>
       </div>
       <div className="flex flex-col min-h-screen justify-center container">
