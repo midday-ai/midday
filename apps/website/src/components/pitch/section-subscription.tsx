@@ -97,8 +97,8 @@ export function SectionSubscription() {
                 <h2>Engine</h2>
                 <p className="text-[#878787] text-sm text-center max-w-[800px]">
                   Midday Engine streamlines banking integrations with a single
-                  API from, effortlessly connecting to multiple providers and
-                  get one unified format and UI. We currently utilize our Engine
+                  API, effortlessly connecting to multiple providers and get one
+                  unified format and UI. We currently utilize our Engine
                   internally, but we will soon offer it as a paid service.
                 </p>
               </div>
