@@ -1,3 +1,14 @@
+import { BankAccountsChart } from "@/components/charts/bank-accounts-chart";
+import { BankConnectionsChart } from "@/components/charts/bank-connections-chart";
+import { InboxChart } from "@/components/charts/inbox-chart";
+import { ReportsChart } from "@/components/charts/reports-chart";
+import { TrackerEntriesChart } from "@/components/charts/tracker-entries-chart";
+import { TrackerProjectsChart } from "@/components/charts/tracker-projects-chart";
+import { TransactionEnrichmentsChart } from "@/components/charts/transaction-enrichments-chart";
+import { TransactionsChart } from "@/components/charts/transactions-chart";
+import { UsersChart } from "@/components/charts/users-chart";
+import { VaultChart } from "@/components/charts/vault-chart";
+
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,13 +23,22 @@ export default async function Page() {
       </h1>
 
       <p className="text-[#878787] font-sm text-center">
-        We believe in a better and more sustainable future powered by Open
-        Source software.
-        <br /> Below you can find a list of our friends who are just as
-        passionate about open source and the future as we are.
+        We value transparency and aim to keep you informed about our journey
+        every step of the way.
       </p>
 
-      <div className="grid md:grid-cols-3 gap-6 mt-12">hello</div>
+      <div className="grid md:grid-cols-2 gap-6 mt-12">
+        <UsersChart />
+        <TransactionsChart />
+        <TransactionEnrichmentsChart />
+        <BankAccountsChart />
+        <BankConnectionsChart />
+        <VaultChart />
+        <TrackerEntriesChart />
+        <TrackerProjectsChart />
+        <InboxChart />
+        <ReportsChart />
+      </div>
     </div>
   );
 }
