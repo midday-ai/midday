@@ -62,7 +62,7 @@ export function SectionTraction() {
 
               <p className="text-[#878787] text-sm text-center">
                 Since going open source on the 20th of March 2024 we’ve gained
-                834 stars on Github. Our goal is to build a great comunity
+                834 stars on Github. Our goal is to build a great community
                 around Midday.
               </p>
 

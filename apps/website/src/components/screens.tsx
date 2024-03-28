@@ -49,7 +49,7 @@ export function Screens() {
     {
       id: "discord",
       icon: require("public/dock/discord.png"),
-      name: "Join the comunity",
+      name: "Join the community",
       onClick: () =>
         window.open(
           "https://go.midday.ai/anPiuRx",
