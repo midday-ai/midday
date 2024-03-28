@@ -17,7 +17,7 @@ export async function generateUnsubscribeLink({
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("1 day")
+    .setExpirationTime("1 week")
     .sign(secretKey);
 
   const url = new URL(`/unsubscribe/${token}`, "https://app.midday.ai");
