@@ -5,6 +5,7 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
+import Link from "next/link";
 import {
   MdDataArray,
   MdEditRoad,
@@ -19,7 +20,20 @@ export function SectionOSS() {
       <div className="mb-12">
         <h2 className="text-4xl mb-4">Open startup</h2>
         <p className="text-[#707070]">
-          We believe in being as transparent as possible, from code to metrics.
+          We believe in being as transparent as possible, from{" "}
+          <a
+            href="https://git.new/midday"
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          >
+            code
+          </a>{" "}
+          to{" "}
+          <Link href="/open-startup" className="underline">
+            metrics
+          </Link>
+          .
         </p>
       </div>
 

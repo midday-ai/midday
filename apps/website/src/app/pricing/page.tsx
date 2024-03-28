@@ -45,7 +45,11 @@ export default function Page() {
                   </Button>
                 </Link>
 
-                <a href="https://app.midday.ai">
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href="https://app.midday.ai"
+                >
                   <Button className="h-12 px-5">Get Early Access</Button>
                 </a>
               </div>
@@ -70,7 +74,12 @@ export default function Page() {
               <AccordionContent>
                 Absolutely. We are currently writing the documentation for this.
                 You can find the repository{" "}
-                <a href="https://git.new/midday" className="underline">
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href="https://git.new/midday"
+                  className="underline"
+                >
                   here
                 </a>
                 .
@@ -81,7 +90,12 @@ export default function Page() {
               <AccordionContent>
                 Yes. We are currently writing documentation for this. You can
                 find the repository{" "}
-                <a href="https://git.new/midday" className="underline">
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href="https://git.new/midday"
+                  className="underline"
+                >
                   here
                 </a>
                 .
@@ -91,7 +105,12 @@ export default function Page() {
               <AccordionTrigger>Is Midday.ai open source?</AccordionTrigger>
               <AccordionContent>
                 Yes. You can find the repository{" "}
-                <a href="https://git.new/midday" className="underline">
+                <a
+                  target="_blank"
+                  rel="noreferrer"
+                  href="https://git.new/midday"
+                  className="underline"
+                >
                   here
                 </a>
                 .
