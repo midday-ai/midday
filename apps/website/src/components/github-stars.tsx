@@ -4,7 +4,7 @@ import { fetchGithubStars } from "@/actions/fetch-github-stars";
 import { useEffect, useState } from "react";
 
 export function GithubStars() {
-  const [data, setData] = useState();
+  const [data, setData] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
