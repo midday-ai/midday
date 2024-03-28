@@ -27,7 +27,7 @@
 - Nextjs
 - Supabase
 - Shadcn
-- Tauri
+- ToDesktop
 - Expo
 - TailwindCSS
 
