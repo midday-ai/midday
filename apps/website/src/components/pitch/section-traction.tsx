@@ -60,11 +60,11 @@ export function SectionTraction() {
             </Card>
 
             <Card className="min-h-[365px]">
-              <h2 className="text-2xl">Github stars</h2>
+              <h2 className="text-2xl">GitHub stars</h2>
 
               <p className="text-[#878787] text-sm text-center">
                 Since going open source on the 20th of March 2024 we’ve gained
-                834 stars on Github. Our goal is to build a great community
+                834 stars on GitHub. Our goal is to build a great community
                 around Midday.
               </p>
 
