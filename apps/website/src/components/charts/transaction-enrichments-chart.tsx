@@ -20,9 +20,9 @@ export function TransactionEnrichmentsChart() {
 
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background rounded-xl px-6 pt-8 pb-6 space-y-4">
-      <h2 className="text-2xl">Enriched Transactions</h2>
+      <h2 className="text-2xl">Enriched Categories</h2>
       <p className="text-[#878787] text-sm text-center">
-        Number of enriched transactions using{" "}
+        Number of enriched categories using{" "}
         <Link href="/engine" className="underline">
           Midday Engine
         </Link>
