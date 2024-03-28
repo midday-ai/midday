@@ -31,7 +31,8 @@ export async function middleware(request: NextRequest) {
   if (
     !data?.user &&
     newUrl.pathname !== "/" &&
-    !newUrl.pathname.includes("/report")
+    !newUrl.pathname.includes("/report") &&
+    !newUrl.pathname.includes("/unsubscribe")
   ) {
     const encodedSearchParams = `${newUrl.pathname.substring(1)}${
       newUrl.search
