@@ -29,9 +29,7 @@ export async function generateUnsubscribeLink({
 
 export async function verifyUnsubscribeLink(token: string) {
   try {
-    const { payload } = await jwtVerify(token, secretKey, {
-      issuer: process.env.UNSUBSCRIBE_JWT_ISSUER,
-    });
+    const { payload } = await jwtVerify(token, secretKey);
 
     return payload;
   } catch (e) {
