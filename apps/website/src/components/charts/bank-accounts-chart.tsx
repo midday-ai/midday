@@ -30,7 +30,7 @@ export function BankAccountsChart() {
           <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
         </span>
 
-        <span className="mt-auto font-mono text-[122px]">
+        <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {data &&
             Intl.NumberFormat("en", { notation: "compact" }).format(data)}
         </span>

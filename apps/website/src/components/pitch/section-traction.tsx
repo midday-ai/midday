@@ -54,7 +54,9 @@ export function SectionTraction() {
                 signups ready to start using Midday.
               </p>
 
-              <span className="mt-auto font-mono text-[122px]">3453</span>
+              <span className="mt-auto font-mono text-[80px] md:text-[122px]">
+                3453
+              </span>
             </Card>
 
             <Card className="min-h-[365px]">
@@ -71,7 +73,7 @@ export function SectionTraction() {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                 </span>
-                <span className="mt-auto font-mono text-[122px]">
+                <span className="mt-auto font-mono text-[80px] md:text-[122px]">
                   {stars &&
                     Intl.NumberFormat("en", { notation: "compact" }).format(
                       stars.stargazers_count ?? 0
@@ -96,7 +98,9 @@ export function SectionTraction() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                 </span>
 
-                <span className="mt-auto font-mono text-[122px]">{users}</span>
+                <span className="mt-auto font-mono text-[80px] md:text-[122px]">
+                  {users}
+                </span>
               </div>
             </Card>
 
@@ -114,7 +118,7 @@ export function SectionTraction() {
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
                 </span>
 
-                <span className="mt-auto font-mono text-[122px]">
+                <span className="mt-auto font-mono text-[80px] md:text-[122px]">
                   {transactions &&
                     Intl.NumberFormat("en", { notation: "compact" }).format(
                       transactions
