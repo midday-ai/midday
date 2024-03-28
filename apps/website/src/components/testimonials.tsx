@@ -52,6 +52,14 @@ const testimonials = [
     quote: "Awesome man, looks amazing 🔥",
   },
   {
+    name: "Cal.com",
+    avatarUrl:
+      "https://pbs.twimg.com/profile_images/1729977047999524864/suW5VpQZ_400x400.jpg",
+    handle: "@calcom",
+    verified: true,
+    quote: "We love @middayai 🖤",
+  },
+  {
     name: "Kyle @ KyTech",
     avatarUrl:
       "https://pbs.twimg.com/profile_images/1586538348964978689/nkpJWZxG_400x400.png",
@@ -82,6 +90,15 @@ const testimonials = [
     handle: "@KyTechInc",
     verified: true,
     quote: "🖤 Awesome work. just love it.",
+  },
+  {
+    name: "Peer Richelsen — oss/acc",
+    avatarUrl:
+      "https://pbs.twimg.com/profile_images/1623291991709700097/aBL_VpMC_400x400.jpg",
+    handle: "@peer_rich",
+    verified: true,
+    quote:
+      "the best thing i couldve done as a founder is build something that helps other founders. so proud 🖤 @middayai",
   },
 ];
 
