@@ -99,7 +99,7 @@ export const InboxEmail = ({
 
               <Column
                 title="Automatic mapping to an existing transaction"
-                description="When the receipt or invoice is recieved, Midday automatically scans the invoice and finds the transaction. Voila, your transaction now has a the right attachment. "
+                description="When the receipt or invoice is received, Midday automatically scans the invoice and finds the transaction. Voila, your transaction now has a the right attachment. "
                 imgSrc={`${baseUrl}/inbox-mapping.png`}
               />
 
