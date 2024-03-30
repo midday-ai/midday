@@ -5,12 +5,12 @@ import appIcon from "public/appicon.png";
 import { useEffect, useRef } from "react";
 
 export function DesktopSignInVerifyCode({ code }) {
-  const isRunned = useRef(false);
+  const hasRunned = useRef(false);
 
   useEffect(() => {
-    if (code && !isRunned.current) {
+    if (code && !hasRunned.current) {
       window.location.replace(`midday://api/auth/callback?code=${code}`);
-      isRunned.current = true;
+      hasRunned.current = true;
     }
   }, [code]);
 
