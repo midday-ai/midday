@@ -2,8 +2,10 @@ import { BarChart } from "@/components/charts/bar-chart";
 import { Counter } from "@/components/counter";
 import { getMetricsQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
+import { Button } from "@midday/ui/button";
 import { format } from "date-fns";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
@@ -67,6 +69,10 @@ export default async function Report({ params }) {
             {data.type === "profit" ? "Profit" : "Revenue"}
           </span>
         </div>
+
+        <Link href="/" className="absolute right-4">
+          <Button variant="outline">Sign up</Button>
+        </Link>
       </div>
 
       <div className="justify-center items-center w-full flex mt-[60px] md:mt-[180px]">

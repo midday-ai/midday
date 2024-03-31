@@ -1,8 +1,10 @@
 import { TrackerGraph } from "@/components/tracker-graph/tracker-graph";
 import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
+import { Button } from "@midday/ui/button";
 import { endOfMonth, formatISO, startOfMonth, subMonths } from "date-fns";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;
@@ -65,6 +67,10 @@ export default async function ProjectReport({ params, searchParams }) {
           <div>{reportData.project.name}</div>
           <span className="text-[#878787]">Time Report</span>
         </div>
+
+        <Link href="/" className="absolute right-4">
+          <Button variant="outline">Sign up</Button>
+        </Link>
       </div>
 
       <div className="justify-center w-full flex px-8 h-full mt-6">

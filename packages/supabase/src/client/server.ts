@@ -16,6 +16,14 @@ export const createClient = (options: CreateClientOptions) => {
     ? process.env.SUPABASE_SERVICE_KEY!
     : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+  const auth = options?.admin
+    ? {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false,
+      }
+    : {};
+
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key,
@@ -46,6 +54,7 @@ export const createClient = (options: CreateClientOptions) => {
           }
         },
       },
+      auth,
       global: {
         headers: {
           // Pass user agent from browser

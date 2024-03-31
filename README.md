@@ -18,6 +18,10 @@
 
 > We have been working with Midday for the past 4 months and our philosophy has been "make it work, make it right". Currently, we're actively improving Midday's code quality and best practices. In the meantime, fasten your seatbelts and enjoy the ride!
 
+# Get started
+
+We are working on the documentation to get started with Midday for local development: https://docs.midday.ai/local-development
+
 # App Architecture
 
 - Monorepo
