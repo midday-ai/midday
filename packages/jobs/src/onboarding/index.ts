@@ -63,7 +63,7 @@ client.defineJob({
 
     const getStarted = await io.resend.emails.send("get-started", {
       to: payload.email,
-      subject: "Get Started",
+      subject: "Get Started 1/6",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
         GetStartedEmail({ fullName: payload.fullName, unsubscribeLink })
@@ -79,7 +79,7 @@ client.defineJob({
       "financial-overview",
       {
         to: payload.email,
-        subject: "Financial Overview",
+        subject: "Financial Overview 2/6",
         from: "Pontus from Midday <pontus@midday.ai>",
         html: await renderAsync(
           FinancialOverViewEmail({
@@ -97,7 +97,7 @@ client.defineJob({
 
     const magicInbox = await io.resend.emails.send("magic-inbox", {
       to: payload.email,
-      subject: "Magic Inbox",
+      subject: "Magic Inbox 3/6",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
         InboxEmail({ fullName: payload.fullName, unsubscribeLink })
@@ -111,7 +111,7 @@ client.defineJob({
 
     const preAccounting = await io.resend.emails.send("pre-accounting", {
       to: payload.email,
-      subject: "Pre-Accounting",
+      subject: "Pre-Accounting 4/6",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
         PreAccountingEmail({ fullName: payload.fullName, unsubscribeLink })
@@ -125,7 +125,7 @@ client.defineJob({
 
     const vault = await io.resend.emails.send("vault", {
       to: payload.email,
-      subject: "Store your files securely",
+      subject: "Store your files securely 5/6",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
         VaultEmail({ fullName: payload.fullName, unsubscribeLink })
@@ -139,7 +139,7 @@ client.defineJob({
 
     const timeTracker = await io.resend.emails.send("time-tracker", {
       to: payload.email,
-      subject: "Time track your projects",
+      subject: "Time track your projects 6/6",
       from: "Pontus from Midday <pontus@midday.ai>",
       html: await renderAsync(
         TimeTrackEmail({ fullName: payload.fullName, unsubscribeLink })
