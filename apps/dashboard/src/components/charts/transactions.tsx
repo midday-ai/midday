@@ -13,7 +13,7 @@ export async function Transactions({ disabled }) {
   const type = cookies().get("transactions-period")?.value ?? "all";
 
   return (
-    <div className="flex-1 border p-8 relative h-full">
+    <div className="border p-8 relative">
       <TransactionsPeriod type={type} disabled={disabled} />
 
       <div className="mt-8">

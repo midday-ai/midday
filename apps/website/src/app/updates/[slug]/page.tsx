@@ -37,7 +37,6 @@ export default async function Page({
   params: { slug: string };
 }) {
   const post = await fetchPageBySlug(slug);
-  const blocks = await fetchPageBlocks(post.id);
   const slugWithPrefix = `/updates/${slug}`;
 
   const content = async () => {

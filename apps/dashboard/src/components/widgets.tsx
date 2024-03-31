@@ -26,20 +26,29 @@ export function Widgets({ disabled, initialPeriod, searchParams }) {
       </div>
 
       <CarouselContent className="-ml-[40px]">
-        <CarouselItem className="basis-1/3 pl-[40px]">
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
           <Insights />
         </CarouselItem>
-        <CarouselItem className="basis-1/3 pl-[40px]">
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
           <Spending disabled={disabled} initialPeriod={initialPeriod} />
         </CarouselItem>
-        <CarouselItem className="basis-1/3 pl-[40px]">
-          <Tracker date={searchParams?.date} />
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
+          <Insights />
         </CarouselItem>
-        <CarouselItem className="basis-1/3 pl-[40px]">
-          <Transactions disabled={disabled} />
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
+          <Insights />
         </CarouselItem>
-        <CarouselItem className="basis-1/3 pl-[40px]">
-          <Inbox disabled={disabled} />
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
+          <Insights />
+        </CarouselItem>
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
+          <div className="border aspect-square" />
+        </CarouselItem>
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
+          <div className="border aspect-square" />
+        </CarouselItem>
+        <CarouselItem className="lg:basis-1/2 xl:basis-1/3 pl-[40px]">
+          <div className="border aspect-square" />
         </CarouselItem>
       </CarouselContent>
     </Carousel>

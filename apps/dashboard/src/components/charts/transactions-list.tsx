@@ -1,12 +1,11 @@
-import { TransactionListItem } from "@/components/charts/transaction-list-item";
-import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { transactionList } from "./data";
+import { TransactionsItemList } from "./transactions-item-list";
 
 export function TransactionsListHeader() {
   return (
-    <div className="flex  p-3 border-b-[1px]">
+    <div className="flex p-3 border-b-[1px]">
       <span className="font-medium text-sm w-[50%]">Description</span>
       <span className="font-medium text-sm w-[35%]">Amount</span>
       <span className="font-medium text-sm ml-auto">Status</span>
@@ -38,7 +37,7 @@ export async function TransactionsList({ type, disabled }) {
   const transactions = disabled
     ? transactionList
     : await getTransactions({
-        to: 5,
+        to: 15,
         from: 0,
         filter: {
           type,
@@ -47,24 +46,16 @@ export async function TransactionsList({ type, disabled }) {
 
   if (!transactions?.data?.length) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center">
         <p className="text-sm text-[#606060]">No transactions found</p>
       </div>
     );
   }
 
   return (
-    <ul className="bullet-none divide-y cursor-pointer">
-      {transactions?.data?.map((transaction) => {
-        return (
-          <li key={transaction.id}>
-            <TransactionListItem
-              transaction={transaction}
-              disabled={disabled}
-            />
-          </li>
-        );
-      })}
-    </ul>
+    <TransactionsItemList
+      transactions={transactions?.data}
+      disabled={disabled}
+    />
   );
 }

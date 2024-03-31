@@ -6,7 +6,7 @@ import { SpendingPeriod } from "./spending-period";
 
 export async function Spending({ disabled, initialPeriod }) {
   return (
-    <div className="flex-1 border p-8 h-[490px]">
+    <div className="border p-8 relative">
       <SpendingPeriod initialPeriod={initialPeriod} />
 
       <ErrorBoundary errorComponent={ErrorFallback}>

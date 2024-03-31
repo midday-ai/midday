@@ -15,7 +15,7 @@ export async function InboxWidget({ filter, disabled }) {
   const { data } = disabled
     ? inboxData
     : await getInboxQuery(supabase, {
-        to: 2,
+        to: 15,
         from: 0,
         status: filter,
         teamId: user.data.team_id,
@@ -36,6 +36,8 @@ export async function InboxWidget({ filter, disabled }) {
       </div>
     );
   }
+
+  return null;
 
   return (
     <div className="flex flex-col gap-4 pt-8">

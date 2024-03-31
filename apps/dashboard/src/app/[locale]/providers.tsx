@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProviderClient } from "@/locales/client";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { TriggerProvider } from "@trigger.dev/react";
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 // We need to import it here because this is the first
 // client component
