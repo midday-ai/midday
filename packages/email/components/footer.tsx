@@ -208,12 +208,12 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
         </Column>
 
         <Column className="align-middle">
-          <Link href="https://git.new/midday">
+          <Link href="https://go.midday.ai/Ct3xybK">
             <Img
-              src={`${baseUrl}/github.png`}
+              src={`${baseUrl}/linkedin.png`}
               width="22"
               height="22"
-              alt="Midday on Github"
+              alt="Midday on LinkedIn"
             />
           </Link>
         </Column>
