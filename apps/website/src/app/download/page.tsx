@@ -1,9 +1,9 @@
+import { AppIcon } from "@/components/app-icon";
 import { BlurryCircle } from "@/components/blurry-circle";
 import { CopyInput } from "@/components/copy-input";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
-import appIcon from "public/app-icon.png";
 import panelLight from "public/panel-light.png";
 import panel from "public/panel.png";
 
@@ -45,14 +45,17 @@ export default function Page() {
         <BlurryCircle className="absolute bottom-[50px] -left-6 bg-[#A1F5CD]/5" />
         <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB]/5" />
       </div>
-      <Image
+      {/* <Image
         src={appIcon}
         alt="Midday App"
         width={120}
         height={120}
         quality={100}
         className="w-[80px] h-[80px] mt-12 md:mt-0 md:h-auto md:w-auto"
-      />
+      /> */}
+
+      <AppIcon />
+
       <p className="mb-4 text-2xl	font-medium mt-8">Midday for Mac</p>
       <p className="text-[#878787] font-sm max-w-[500px]">
         With Midday on Mac you have everything <br />
