@@ -11,7 +11,7 @@ export async function Inbox({ disabled }) {
   const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
 
   return (
-    <div className="border p-8 relative aspect-square">
+    <div className="border relative aspect-square overflow-hidden p-8">
       <InboxHeader filter={filter} disabled={disabled} />
 
       <ErrorBoundary errorComponent={ErrorFallback}>

@@ -11,7 +11,7 @@ export function TransactionsItemList({ transactions, disabled }) {
   return (
     <div ref={ref}>
       <ul
-        className="bullet-none divide-y cursor-pointer overflow-auto scrollbar-hide max-h-[450px]"
+        className="bullet-none divide-y cursor-pointer overflow-auto scrollbar-hide"
         style={{ maxHeight: width - PADDING }}
       >
         {transactions?.map((transaction) => {

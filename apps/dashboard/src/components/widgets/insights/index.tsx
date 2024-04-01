@@ -36,7 +36,7 @@ const items = shuffle(defaultExamples).slice(0, 5);
 
 export function Insights() {
   return (
-    <div className="border aspect-square p-8 relative flex flex-col">
+    <div className="border aspect-square overflow-hidden relative flex flex-col p-8">
       <h2 className="text-lg">Insights</h2>
 
       <div className="flex flex-1 flex-col justify-center items-center">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrackerStore } from "@/store/tracker";
+import { cn } from "@midday/ui/utils";
 import {
   eachDayOfInterval,
   eachWeekOfInterval,
@@ -23,6 +24,7 @@ export function TrackerMonthGraph({
   showCurrentDate,
   projectId,
   disableHover,
+  hideDaysIndicators,
 }) {
   const weekStartsOn = 1; // TODO: Monday - should be user setting
   const { isTracking } = useTrackerStore();
@@ -87,8 +89,21 @@ export function TrackerMonthGraph({
 
   return (
     <div>
-      <div className="grid gap-9 grid-cols-7">{rows}</div>
-      <div className="grid gap-9 grid-cols-7 text-[#878787] text-sm mt-8 text-center">
+      <div
+        className={cn(
+          "grid gap-9 grid-cols-7",
+          hideDaysIndicators && "gap-7 2xl:gap-9"
+        )}
+      >
+        {rows}
+      </div>
+
+      <div
+        className={cn(
+          "gap-9 grid-cols-7 text-[#878787] text-sm mt-8 text-center grid",
+          hideDaysIndicators && "hidden 2xl:grid"
+        )}
+      >
         {daysRows}
       </div>
     </div>

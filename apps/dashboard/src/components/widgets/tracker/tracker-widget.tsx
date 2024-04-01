@@ -4,7 +4,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import { TrackerWrapper } from "./tracker-wrapper";
 
-export async function TrackerWidget({ date }) {
+export async function TrackerWidget({ date, hideDaysIndicators }) {
   const currentDate = date ?? new Date();
   const userData = await getUser();
   const { currencyCode } = getCountryInfo();
@@ -20,6 +20,7 @@ export async function TrackerWidget({ date }) {
 
   return (
     <TrackerWrapper
+      hideDaysIndicators={hideDaysIndicators}
       data={data}
       meta={meta}
       date={currentDate}
