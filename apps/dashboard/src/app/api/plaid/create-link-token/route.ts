@@ -8,11 +8,11 @@ export async function POST() {
     const api = new PlaidApi();
 
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+      data: { user },
+    } = await supabase.auth.getUser();
 
     const response = await api.linkTokenCreate({
-      userId: session.user.id,
+      userId: user.id,
     });
 
     return NextResponse.json(response.data);

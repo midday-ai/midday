@@ -6,14 +6,16 @@ import { SpendingPeriod } from "./spending-period";
 
 export async function Spending({ disabled, initialPeriod }) {
   return (
-    <div className="flex-1 border p-8 h-[490px]">
-      <SpendingPeriod initialPeriod={initialPeriod} />
+    <div className="border aspect-square relative overflow-hidden">
+      <div className="p-8 flex-col">
+        <SpendingPeriod initialPeriod={initialPeriod} />
 
-      <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense>
-          <SpendingList initialPeriod={initialPeriod} disabled={disabled} />
-        </Suspense>
-      </ErrorBoundary>
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense>
+            <SpendingList initialPeriod={initialPeriod} disabled={disabled} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
     </div>
   );
 }

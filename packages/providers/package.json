@@ -14,9 +14,9 @@
     "@midday/kv": "workspace:*",
     "axios": "^1.6.8",
     "change-case": "^5.4.3",
-    "plaid": "^21.0.0"
+    "plaid": "^22.0.1"
   },
   "devDependencies": {
-    "@types/bun": "^1.0.10"
+    "@types/bun": "^1.0.12"
   }
 }

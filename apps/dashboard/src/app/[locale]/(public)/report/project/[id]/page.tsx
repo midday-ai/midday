@@ -5,6 +5,7 @@ import { Button } from "@midday/ui/button";
 import { endOfMonth, formatISO, startOfMonth, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";
+
 import { notFound } from "next/navigation";
 
 export const revalidate = 3600;

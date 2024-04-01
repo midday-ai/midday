@@ -2,7 +2,6 @@
 
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,

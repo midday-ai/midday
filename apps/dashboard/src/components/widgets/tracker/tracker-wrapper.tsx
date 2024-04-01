@@ -13,6 +13,7 @@ export function TrackerWrapper({
   meta,
   user,
   currencyCode,
+  hideDaysIndicators,
 }) {
   const [params, setParams] = useQueryStates({
     date: parseAsString.withDefault(initialDate),
@@ -37,6 +38,7 @@ export function TrackerWrapper({
           date={params.date}
           data={data}
           onSelect={setParams}
+          hideDaysIndicators={hideDaysIndicators}
         />
       </div>
 
