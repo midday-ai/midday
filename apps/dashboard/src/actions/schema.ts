@@ -57,6 +57,10 @@ export const changeSpendingPeriodSchema = z.object({
   to: z.string().datetime(),
 });
 
+export const closeMobileOverlaySchema = z.object({
+  value: z.boolean(),
+});
+
 export const changeChartTypeSchema = z.enum(["profit", "revenue"]);
 export const changeChartPeriodSchema = z.object({
   from: z.string().optional(),

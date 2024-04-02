@@ -8,8 +8,10 @@ import { ConnectTransactionsModal } from "@/components/modals/connect-transactio
 import { ImportCSVModal } from "@/components/modals/import-csv-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
+import { Cookies } from "@/utils/constants";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export default async function Layout({
@@ -20,6 +22,7 @@ export default async function Layout({
   const user = await getUser();
   const countryCode = getCountryCode();
   const isEU = isEUCountry(countryCode);
+  const mobileOverlay = cookies().has(Cookies.MobileOverlay);
 
   if (!user?.data?.team) {
     redirect("/teams");
@@ -27,7 +30,7 @@ export default async function Layout({
 
   return (
     <div className="flex">
-      <MobileOverview />
+      {!mobileOverlay && <MobileOverview />}
       <Sidebar />
 
       <div className="flex-1 ml-8 mr-10 mb-8">

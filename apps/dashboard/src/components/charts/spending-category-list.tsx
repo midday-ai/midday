@@ -37,7 +37,7 @@ export function SpendingCategoryList({ categories, period }) {
                     <Category
                       key={category}
                       name={category}
-                      className="text-sm text-primary space-x-3 w-[78%]"
+                      className="text-sm text-primary space-x-3 w-[90%]"
                     />
 
                     <Progress
