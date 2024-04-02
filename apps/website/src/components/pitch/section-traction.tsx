@@ -63,9 +63,7 @@ export function SectionTraction() {
               <h2 className="text-2xl">GitHub stars</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                Since going open source on the 20th of March 2024 we’ve gained
-                834 stars on GitHub. Our goal is to build a great community
-                around Midday.
+                Our goal is to build a great community around Midday.
               </p>
 
               <div className="flex items-center space-x-4">
