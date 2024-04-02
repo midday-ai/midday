@@ -23,9 +23,15 @@ export async function generateMetadata({
   params: { slug: string };
 }) {
   const post = await fetchPageBySlug(slug);
+  const blocks = await fetchPageBlocks(post.id);
+
+  const firstImage = blocks.find((block) => block.type === "image");
 
   return {
     title: `Midday | ${post.properties.Title.title.at(0)?.plain_text}`,
+    openGraph: {
+      images: [firstImage?.image?.file?.url],
+    },
   };
 }
 

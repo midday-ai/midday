@@ -7,7 +7,7 @@ import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
 import format from "date-fns/format";
 import type { Metadata } from "next";
-// import Link from "next/link";
+import Link from "next/link";
 
 export const revalidate = 0;
 export const dynamic = "force-static";
@@ -40,11 +40,11 @@ export default async function Page() {
       >
         <PostStatus status={post.properties.Tag.select.name} />
 
-        {/* <Link href={slug}> */}
-        <h2 className="font-medium text-2xl mb-6">
-          {post.properties.Title.title.at(0)?.plain_text}
-        </h2>
-        {/* </Link> */}
+        <Link href={slug}>
+          <h2 className="font-medium text-2xl mb-6">
+            {post.properties.Title.title.at(0)?.plain_text}
+          </h2>
+        </Link>
 
         <div
           className="notion-render"
