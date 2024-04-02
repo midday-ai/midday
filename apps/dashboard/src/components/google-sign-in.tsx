@@ -34,6 +34,10 @@ export function GoogleSignIn() {
         },
       });
     } else {
+      console.log(getURL());
+
+      return;
+
       const redirectTo = new URL("/api/auth/callback", getURL());
 
       if (returnTo) {
