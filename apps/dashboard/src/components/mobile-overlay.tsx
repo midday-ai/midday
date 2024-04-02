@@ -1,5 +1,6 @@
 "use client";
 
+import { closeMobileOverlayAction } from "@/actions/close-mobile-overlay-action";
 import { subscribeAction } from "@/actions/subscribe-action";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { createClient } from "@midday/supabase/client";
@@ -16,14 +17,16 @@ export function MobileOverview() {
   const supabase = createClient();
   const [email, setEmail] = useState<string>();
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const closeOverlay = useAction(closeMobileOverlayAction);
+  const isVisible = isMobile && closeOverlay.status === "idle";
 
   useEffect(() => {
-    if (isMobile) {
+    if (isVisible) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
-  }, [isMobile]);
+  }, [isVisible]);
 
   useEffect(() => {
     async function fetchData() {
@@ -34,17 +37,17 @@ export function MobileOverview() {
       }
     }
 
-    if (isMobile) {
+    if (isVisible) {
       fetchData();
     }
-  }, [isMobile]);
+  }, [isVisible]);
 
-  if (!isMobile) {
+  if (!isVisible) {
     return null;
   }
 
   return (
-    <div className="fixed w-screen h-screen bg-background z-50 flex flex-col items-center justify-center">
+    <div className="fixed w-screen h-screen bg-background z-50 flex flex-col items-center justify-center p-2">
       <div className="overflow-auto h-full scrollbar-hide">
         <Image src={mobile} quality={100} alt="Mobile" width={393} />
 
@@ -108,7 +111,12 @@ export function MobileOverview() {
           </div>
 
           <span className="text-[#878787] text-center text-sm">
-            <a href="https://midday.ai">Go to homepage</a>
+            <button
+              type="button"
+              onClick={() => closeOverlay.execute({ value: true })}
+            >
+              Continue anyway
+            </button>
           </span>
         </div>
       </div>

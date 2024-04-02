@@ -7,4 +7,5 @@ export const Cookies = {
   MfaSetupVisited: "mfa-setup-visited",
   MenuConfig: "menu-config",
   InboxFilter: "inbox-filter",
+  MobileOverlay: "mobile-overlay",
 };

@@ -3,8 +3,8 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
+import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
-import { useTheme } from "next-themes";
 import {
   Bar,
   BarChart as BaseBarChart,
@@ -107,7 +107,6 @@ const ToolTipContent = ({ payload = {} }) => {
 export function BarChart({ data, disabled }) {
   const locale = useCurrentLocale();
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { resolvedTheme } = useTheme();
 
   const formattedData = data.result.map((item) => ({
     ...item,
@@ -181,7 +180,7 @@ export function BarChart({ data, disabled }) {
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
-            stroke={resolvedTheme === "dark" ? "#2C2C2C" : "#DCDAD2"}
+            className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
           />
           <Tooltip content={ToolTipContent} cursor={false} />
 
@@ -189,13 +188,11 @@ export function BarChart({ data, disabled }) {
             {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={
-                  +entry.previous.value > 0
-                    ? resolvedTheme === "dark"
-                      ? "#323232"
-                      : "#C6C6C6"
-                    : "#41191A"
-                }
+                className={cn(
+                  "fill-[#41191A]",
+                  +entry.previous.value > 0 &&
+                    "dark:fill-[#323232] fill-[#C6C6C6]"
+                )}
               />
             ))}
           </Bar>
@@ -204,13 +201,11 @@ export function BarChart({ data, disabled }) {
             {data.result.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={
-                  +entry.current.value > 0
-                    ? resolvedTheme === "dark"
-                      ? "#F5F5F3"
-                      : "#121212"
-                    : "#FF3638"
-                }
+                className={cn(
+                  "fill-[#FF3638]",
+                  +entry.current.value > 0 &&
+                    "dark:fill-[#F5F5F3] fill-[#121212]"
+                )}
               />
             ))}
           </Bar>
