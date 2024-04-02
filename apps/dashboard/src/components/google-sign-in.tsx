@@ -34,6 +34,7 @@ export function GoogleSignIn() {
         },
       });
     } else {
+      console.log("url");
       console.log(getURL());
 
       return;
