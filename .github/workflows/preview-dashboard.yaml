@@ -33,6 +33,8 @@ jobs:
         run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
         run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NEXT_PUBLIC_DASHBOARD_URL: ${{ env.GITHUB_REF_SLUG }}.app.midday.ai
       - name: Deploy Project Artifacts to Vercel
         run: |
           bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt

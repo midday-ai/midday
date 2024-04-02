@@ -3,7 +3,7 @@ import { LogEvents } from "@midday/events/events";
 import { logsnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { get } from "@vercel/edge-config";
-import LoopsClient from "loops";
+import { LoopsClient } from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 

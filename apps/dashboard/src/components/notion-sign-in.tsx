@@ -3,6 +3,7 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
+import { getURL } from "@midday/utils";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -15,7 +16,7 @@ export function NotionSignIn() {
     setLoading(true);
 
     if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", location.origin);
+      const redirectTo = new URL("/api/auth/callback", getURL());
 
       redirectTo.searchParams.append("provider", "notion");
       redirectTo.searchParams.append("client", "desktop");
@@ -33,7 +34,7 @@ export function NotionSignIn() {
       await supabase.auth.signInWithOAuth({
         provider: "notion",
         options: {
-          redirectTo: `${location.origin}/api/auth/callback?provider=notion`,
+          redirectTo: `${getURL()}/api/auth/callback?provider=notion`,
         },
       });
     }
