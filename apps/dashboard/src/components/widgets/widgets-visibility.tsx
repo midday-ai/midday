@@ -28,28 +28,30 @@ export function WidgetsVisibility({ widgets }) {
         </div>
 
         <div className="flex flex-col p-4 space-y-2 max-h-[352px] overflow-auto">
-          {Object.keys(widgets).map((widget) => {
-            return (
-              <div key={widget} className="flex items-center space-x-2">
-                <Checkbox
-                  id={widget}
-                  checked={widgets[widget]}
-                  onCheckedChange={(checked) => {
-                    toggleVisibility.execute({
-                      ...widgets,
-                      [widget]: checked,
-                    });
-                  }}
-                />
-                <label
-                  htmlFor={widget}
-                  className="text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {t(`widgets.${widget}`)}
-                </label>
-              </div>
-            );
-          })}
+          {Object.keys(widgets)
+            .sort()
+            .map((widget) => {
+              return (
+                <div key={widget} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={widget}
+                    checked={widgets[widget]}
+                    onCheckedChange={(checked) => {
+                      toggleVisibility.execute({
+                        ...widgets,
+                        [widget]: checked,
+                      });
+                    }}
+                  />
+                  <label
+                    htmlFor={widget}
+                    className="text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {t(`widgets.${widget}`)}
+                  </label>
+                </div>
+              );
+            })}
         </div>
       </PopoverContent>
     </Popover>
