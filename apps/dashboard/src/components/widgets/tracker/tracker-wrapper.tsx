@@ -27,11 +27,7 @@ export function TrackerWrapper({
 
   return (
     <div>
-      <TrackerHeader
-        date={params.date}
-        setDate={(date: string) => setParams({ date })}
-        totalDuration={meta?.totalDuration}
-      />
+      <TrackerHeader totalDuration={meta?.totalDuration} date={initialDate} />
 
       <div className="mt-10">
         <TrackerMonthGraph

@@ -2,7 +2,6 @@ import { CopyInput } from "@/components/copy-input";
 import { getUser } from "@midday/supabase/cached-queries";
 import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
-
 import { inboxData } from "./data";
 import { InboxList } from "./inbox-list";
 

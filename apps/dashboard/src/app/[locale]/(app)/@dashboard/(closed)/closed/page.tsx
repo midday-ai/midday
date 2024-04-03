@@ -1,10 +1,10 @@
-import { TwitterShare } from "@/components/twitter-share";
 import { UserMenu } from "@/components/user-menu";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+import { FaXTwitter } from "react-icons/fa6";
 
 export const metadata: Metadata = {
   title: "Early access | Midday",
@@ -38,12 +38,18 @@ export default function Closed() {
 
             <p className="font-medium pb-1 text-2xl text-[#606060]">
               We are currently in private beta, but we send out new invites
-              daily. However, you can gain instant access by sharing a post on
-              X.
+              daily. You can follow us on X for the latest updates.
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-4 space-y-4">
-              <TwitterShare />
+              <a href="https://twitter.com/middayai">
+                <Button className="w-full flex items-center space-x-2 h-10">
+                  <>
+                    <span>Follow us on</span>
+                    <FaXTwitter />
+                  </>
+                </Button>
+              </a>
 
               <Link href="https://midday.ai" className="w-full">
                 <Button className="w-full h-10" variant="outline">

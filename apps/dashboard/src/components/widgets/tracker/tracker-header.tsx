@@ -2,8 +2,20 @@
 
 import { TrackerSelect } from "@/components/tracker-select";
 import { secondsToHoursAndMinutes } from "@/utils/format";
+import { formatISO } from "date-fns";
+import { parseAsString, useQueryStates } from "nuqs";
 
-export function TrackerHeader({ date, setDate, totalDuration }) {
+export function TrackerHeader({ date: initialDate, totalDuration }) {
+  const [params, setParams] = useQueryStates({
+    date: parseAsString.withDefault(initialDate),
+    create: parseAsString,
+    projectId: parseAsString,
+    update: parseAsString,
+    day: parseAsString.withDefault(
+      formatISO(new Date(), { representation: "date" })
+    ),
+  });
+
   return (
     <div className="flex justify-between">
       <div>
@@ -13,7 +25,11 @@ export function TrackerHeader({ date, setDate, totalDuration }) {
         </span>
       </div>
 
-      <TrackerSelect date={date} onSelect={setDate} disableKeyboard />
+      <TrackerSelect
+        date={params?.date}
+        onSelect={(date: string) => setParams({ date })}
+        disableKeyboard
+      />
     </div>
   );
 }

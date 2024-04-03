@@ -14,11 +14,6 @@ export const LogEvents = {
     icon: "🌝",
     channel: "login",
   },
-  VerifiedEarlyAccess: {
-    name: "Verified Early Access",
-    icon: "🕶️",
-    channel: "login",
-  },
   Registered: {
     name: "User Registered",
     icon: "🎓",
