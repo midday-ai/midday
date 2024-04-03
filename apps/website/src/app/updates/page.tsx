@@ -23,7 +23,7 @@ export default async function Page() {
 
   const links = data.results.map((post) => ({
     id: post.id,
-    lable: format(new Date(post.created_time), "MMMM d, y"),
+    lable: format(new Date(post.properties.Date.date.start), "MMMM d, y"),
     slug: post.properties.Slug.url,
   }));
 
