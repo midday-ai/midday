@@ -8,6 +8,14 @@ export const updateUserSchema = z.object({
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
+export const widgetsVisibilitySchema = z.object({
+  inbox: z.boolean(),
+  tracker: z.boolean(),
+  transactions: z.boolean(),
+  spending: z.boolean(),
+  insights: z.boolean(),
+});
+
 export const updateTeamSchema = z.object({
   name: z.string().min(2).max(32).optional(),
   email: z.string().email().optional(),
