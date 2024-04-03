@@ -29,7 +29,7 @@ export const fetchPages = () => {
     filter: {
       property: "Status",
       select: {
-        equals: "Published",
+        equals: process.env.NODE_ENV === "development" ? "Draft" : "Published",
       },
     },
   });

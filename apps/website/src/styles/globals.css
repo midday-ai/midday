@@ -15,3 +15,14 @@
 .notion-render a {
     text-decoration: underline;
 }
+
+.notion-render code {
+    font-family: var(--font-geist-mono);
+    line-height: normal;
+    background: rgba(135, 131, 120, .15);
+    color: #EB5757;
+    border-radius: 4px;
+    font-size: 85%;
+    padding: 0.2em 0.4em;
+    font-weight: 600;
+}
