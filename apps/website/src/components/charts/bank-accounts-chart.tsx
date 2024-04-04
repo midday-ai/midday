@@ -1,21 +1,8 @@
-"use client";
-
 import { fetchStats } from "@/actions/fetch-stats";
-import { useEffect, useState } from "react";
 
-export function BankAccountsChart() {
-  const [data, setData] = useState(0);
+export async function BankAccountsChart() {
+  const { bankAccounts } = await fetchStats();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { bankAcounts } = await fetchStats();
-        setData(bankAcounts);
-      } catch {}
-    }
-
-    fetchData();
-  }, []);
 
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background rounded-xl px-6 pt-8 pb-6 space-y-4">
@@ -31,8 +18,8 @@ export function BankAccountsChart() {
         </span>
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
-          {data &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(data)}
+          {bankAccounts &&
+            Intl.NumberFormat("en", { notation: "compact" }).format(bankAccounts)}
         </span>
       </div>
     </div>
