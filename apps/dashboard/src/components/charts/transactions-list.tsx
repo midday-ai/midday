@@ -46,8 +46,8 @@ export async function TransactionsList({ type, disabled }) {
 
   if (!transactions?.data?.length) {
     return (
-      <div className="flex items-center justify-center">
-        <p className="text-sm text-[#606060]">No transactions found</p>
+      <div className="flex items-center justify-center aspect-square">
+        <p className="text-sm text-[#606060] -mt-12">No transactions found</p>
       </div>
     );
   }

@@ -2,7 +2,12 @@ import { getCountryInfo } from "@midday/location";
 import { getTrackerRecordsByRange } from "@midday/supabase/cached-queries";
 import { getUser } from "@midday/supabase/cached-queries";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { TrackerHeader } from "./tracker-header";
 import { TrackerWrapper } from "./tracker-wrapper";
+
+export function TrackerWidgetSkeleton() {
+  return <TrackerHeader />;
+}
 
 export async function TrackerWidget({ date, hideDaysIndicators }) {
   const currentDate = date ?? new Date();

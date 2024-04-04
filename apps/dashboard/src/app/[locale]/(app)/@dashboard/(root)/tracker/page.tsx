@@ -4,7 +4,7 @@ import { Table } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerChangeStatus } from "@/components/tracker-change-status";
 import { TrackerGraph } from "@/components/tracker-graph";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {

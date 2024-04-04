@@ -8,7 +8,6 @@ import { cn } from "@midday/ui/utils";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Suspense } from "react";
 
 // NOTE: GoCardLess serverAction needs this currently
 // (Fetch accounts takes up to 20s and default limit is 15s)
@@ -58,19 +57,14 @@ export default async function Overview({ searchParams }) {
       <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
         <div className="h-[450px]">
           <ChartSelectors defaultValue={defaultValue} />
-
-          <Suspense>
-            <Chart value={value} defaultValue={defaultValue} disabled={empty} />
-          </Suspense>
+          <Chart value={value} defaultValue={defaultValue} disabled={empty} />
         </div>
 
-        <div className="mt-14">
-          <Widgets
-            initialPeriod={initialPeriod}
-            disabled={empty}
-            searchParams={searchParams}
-          />
-        </div>
+        <Widgets
+          initialPeriod={initialPeriod}
+          disabled={empty}
+          searchParams={searchParams}
+        />
       </div>
       {!isOpen && empty && <OverviewModal />}
     </>

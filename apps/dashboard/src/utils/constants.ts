@@ -8,4 +8,5 @@ export const Cookies = {
   MenuConfig: "menu-config",
   InboxFilter: "inbox-filter",
   MobileOverlay: "mobile-overlay",
+  Widgets: "overview-widgets",
 };

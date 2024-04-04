@@ -81,4 +81,11 @@ export default {
     match: "Receive notifications about matches.",
     transactions: "Receive notifications about new transactions.",
   },
+  widgets: {
+    insights: "Insights",
+    inbox: "Inbox",
+    spending: "Spending",
+    transactions: "Transactions",
+    tracker: "Tracker",
+  },
 } as const;
