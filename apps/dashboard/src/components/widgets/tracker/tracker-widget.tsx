@@ -6,11 +6,7 @@ import { TrackerHeader } from "./tracker-header";
 import { TrackerWrapper } from "./tracker-wrapper";
 
 export function TrackerWidgetSkeleton() {
-  return (
-    <div>
-      <TrackerHeader />
-    </div>
-  );
+  return <TrackerHeader />;
 }
 
 export async function TrackerWidget({ date, hideDaysIndicators }) {
