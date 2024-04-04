@@ -10,7 +10,7 @@ export async function fetchStats() {
   const [
     { count: users },
     { count: transactions },
-    { count: bankAcounts },
+    { count: bankAccounts },
     { count: trackerEntries },
     { count: inboxItems },
     { count: bankConnections },
@@ -73,7 +73,7 @@ export async function fetchStats() {
   return {
     users,
     transactions,
-    bankAcounts,
+    bankAccounts,
     trackerEntries,
     inboxItems,
     bankConnections,
