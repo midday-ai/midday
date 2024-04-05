@@ -71,6 +71,8 @@ export const InboxEmail = ({
               Magic Inbox
             </Heading>
 
+            <br />
+
             <Img
               src={`${baseUrl}/magic-inbox-header.png`}
               alt="Overview"
