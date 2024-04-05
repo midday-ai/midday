@@ -3,7 +3,6 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { getURL } from "@midday/utils";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -19,7 +18,7 @@ export function GoogleSignIn() {
     setLoading(true);
 
     if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", getURL());
+      const redirectTo = new URL("/api/auth/callback", window.location.origin);
 
       redirectTo.searchParams.append("provider", "google");
       redirectTo.searchParams.append("client", "desktop");
@@ -34,7 +33,7 @@ export function GoogleSignIn() {
         },
       });
     } else {
-      const redirectTo = new URL("/api/auth/callback", getURL());
+      const redirectTo = new URL("/api/auth/callback", window.location.origin);
 
       if (returnTo) {
         redirectTo.searchParams.append("return_to", returnTo);
