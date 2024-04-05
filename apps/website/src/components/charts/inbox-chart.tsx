@@ -1,21 +1,10 @@
-"use client";
 
 import { fetchStats } from "@/actions/fetch-stats";
-import { useEffect, useState } from "react";
 
-export function InboxChart() {
-  const [data, setData] = useState(0);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { inboxItems } = await fetchStats();
-        setData(inboxItems);
-      } catch {}
-    }
+export async function InboxChart() {
+  const { inboxItems } = await fetchStats();
 
-    fetchData();
-  }, []);
 
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background rounded-xl px-6 pt-8 pb-6 space-y-4">
@@ -31,8 +20,8 @@ export function InboxChart() {
         </span>
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
-          {data &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(data)}
+          {inboxItems &&
+            Intl.NumberFormat("en", { notation: "compact" }).format(inboxItems)}
         </span>
       </div>
     </div>

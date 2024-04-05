@@ -1,21 +1,7 @@
-"use client";
-
 import { fetchStats } from "@/actions/fetch-stats";
-import { useEffect, useState } from "react";
 
-export function ReportsChart() {
-  const [data, setData] = useState(0);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { reports } = await fetchStats();
-        setData(reports);
-      } catch {}
-    }
-
-    fetchData();
-  }, []);
+export async function ReportsChart() {
+  const { reports } = await fetchStats();
 
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background rounded-xl px-6 pt-8 pb-6 space-y-4">
@@ -31,8 +17,8 @@ export function ReportsChart() {
         </span>
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
-          {data &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(data)}
+          {reports &&
+            Intl.NumberFormat("en", { notation: "compact" }).format(reports)}
         </span>
       </div>
     </div>
