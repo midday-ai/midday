@@ -18,6 +18,9 @@ const config = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  env: {
+    NEXT_PUBLIC_VERCEL_URL: process.env.VERCEL_URL,
+  },
   // logging: {
   //   fetches: {
   //     fullUrl: true,
