@@ -40,8 +40,8 @@ export async function POST(req: Request) {
     channel: LogEvents.InboxInbound.channel,
   });
 
-  if (res?.To && ipRange.includes(clientIP)) {
-    const email = res?.To;
+  if (res?.OriginalRecipient && ipRange.includes(clientIP)) {
+    const email = res?.OriginalRecipient;
     const [inboxId] = email.split("@");
 
     const { data: teamData } = await supabase
