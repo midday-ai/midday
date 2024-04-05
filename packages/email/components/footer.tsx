@@ -240,6 +240,18 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
         </Row>
       )}
 
+      {!unsubscribeLink && (
+        <Row>
+          <Link
+            className="text-[#707070] text-[14px]"
+            href="https://app.midday.ai/settings/notifications"
+            title="Unsubscribe"
+          >
+            Notification preferences
+          </Link>
+        </Row>
+      )}
+
       <br />
       <br />
 
