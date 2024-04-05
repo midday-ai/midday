@@ -1,12 +1,7 @@
 import { BlurryCircle } from "@/components/blurry-circle";
 import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
-import {
-  fetchPageBlocks,
-  fetchPageBySlug,
-  fetchPages,
-  imageRenderer,
-} from "@/lib/notion";
+import { fetchPageBlocks, fetchPageBySlug, fetchPages } from "@/lib/notion";
 import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
 import { format } from "date-fns";
@@ -40,9 +35,7 @@ export async function generateMetadata({
   };
 }
 
-const renderer = new NotionRenderer({
-  renderers: [imageRenderer],
-});
+const renderer = new NotionRenderer();
 
 export default async function Page({
   params: { slug },

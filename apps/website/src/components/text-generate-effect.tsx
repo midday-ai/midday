@@ -2,7 +2,6 @@
 
 import { cn } from "@midday/ui/utils";
 import { motion, stagger, useAnimate } from "framer-motion";
-import { useEffect } from "react";
 
 export const TextGenerateEffect = ({
   words,

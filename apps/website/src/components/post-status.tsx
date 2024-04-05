@@ -1,13 +1,15 @@
-export function PostStatus({ status }) {
-  switch (status) {
-    case "Update":
-      return (
-        <div className="border border-[#DFB31D] rounded-md px-2 py-1 inline-block text-[#DFB31D] text-[10px] font-medium mb-4">
-          Updates
-        </div>
-      );
+import { cn } from "@midday/ui/utils";
 
-    default:
-      return null;
-  }
+export function PostStatus({ status }) {
+  return (
+    <div
+      className={cn(
+        "border rounded-md px-2 py-1 inline-block text-[10px] font-medium mb-4",
+        status === "Update" && "border-[#DFB31D] text-[#DFB31D]",
+        status === "Engineering" && "border-[#34b285] text-[#34b285]"
+      )}
+    >
+      {status}
+    </div>
+  );
 }
