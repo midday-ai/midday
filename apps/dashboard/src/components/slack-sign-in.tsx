@@ -3,7 +3,6 @@
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { getURL } from "@midday/utils";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -16,7 +15,7 @@ export function SlackSignIn() {
     setLoading(true);
 
     if (isDesktopApp()) {
-      const redirectTo = new URL("/api/auth/callback", getURL());
+      const redirectTo = new URL("/api/auth/callback", window.location.origin);
 
       redirectTo.searchParams.append("provider", "slack");
       redirectTo.searchParams.append("client", "desktop");
@@ -34,7 +33,7 @@ export function SlackSignIn() {
       await supabase.auth.signInWithOAuth({
         provider: "slack",
         options: {
-          redirectTo: `${getURL()}/api/auth/callback?provider=slack`,
+          redirectTo: `${window.location.origin}/api/auth/callback?provider=slack`,
         },
       });
     }

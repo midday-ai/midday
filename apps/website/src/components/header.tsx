@@ -153,12 +153,12 @@ export function Header() {
     <header className="h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
       <nav className="border border-border p-3 rounded-2xl flex items-center backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
         <NavigationMenu>
-          <Link className="mr-10" href="/">
+          <Link href="/">
             <span className="sr-only">Midday Logo</span>
             <LogoIcon />
           </Link>
 
-          <ul className="space-x-2 font-medium text-sm mr-8 hidden md:flex">
+          <ul className="space-x-2 font-medium text-sm hidden md:flex mx-3">
             {links.map(({ path, name, title }) => {
               const isActive =
                 path === "/updates"
