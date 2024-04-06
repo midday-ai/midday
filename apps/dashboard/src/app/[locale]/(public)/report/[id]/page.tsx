@@ -1,5 +1,5 @@
 import { BarChart } from "@/components/charts/bar-chart";
-import { Counter } from "@/components/counter";
+import { FormatAmount } from "@/components/format-amount";
 import { getMetricsQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
@@ -80,8 +80,8 @@ export default async function Report({ params }) {
           <div>
             <div className="flex flex-col space-y-2 items-start mb-16">
               <div>
-                <h1 className="text-3xl">
-                  <Counter
+                <h1 className="text-4xl font-mono">
+                  <FormatAmount
                     value={metricsData.summary.currentTotal}
                     currency={metricsData.summary.currency}
                   />

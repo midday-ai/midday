@@ -1,4 +1,3 @@
-import { Counter } from "@/components/counter";
 import { getMetrics } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/utils";
 import { cookies } from "next/headers";
@@ -15,9 +14,9 @@ export async function Chart({ value, defaultValue, disabled }) {
   return (
     <div className="relative mt-32">
       <div className="absolute -top-[120px] space-y-2">
-        <h1 className={cn("text-3xl", disabled && "skeleton-box")}>
-          <Counter
-            value={data.summary.currentTotal}
+        <h1 className={cn("text-4xl font-mono", disabled && "skeleton-box")}>
+          <FormatAmount
+            amount={data.summary.currentTotal}
             currency={data.summary.currency}
           />
         </h1>
