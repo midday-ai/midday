@@ -3,7 +3,7 @@
 import { action } from "@/actions/safe-action";
 import { createReportSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import Dub from "dub";
@@ -41,6 +41,8 @@ export const createReportAction = action(createReportSchema, async (params) => {
     .eq("id", data.id)
     .select("*")
     .single();
+
+  const logsnag = setupLogSnag();
 
   logsnag.track({
     event: LogEvents.OverviewReport.name,

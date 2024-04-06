@@ -9,4 +9,5 @@ export const Cookies = {
   InboxFilter: "inbox-filter",
   MobileOverlay: "mobile-overlay",
   Widgets: "overview-widgets",
+  TrackingConsent: "tracking-consent",
 };

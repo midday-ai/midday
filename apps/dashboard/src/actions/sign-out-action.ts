@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 
@@ -14,6 +14,8 @@ export async function signOutAction() {
   await supabase.auth.signOut({
     scope: "local",
   });
+
+  const logsnag = setupLogSnag();
 
   logsnag.track({
     event: LogEvents.SignOut.name,

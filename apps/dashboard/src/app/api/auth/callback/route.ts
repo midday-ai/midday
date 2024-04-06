@@ -1,7 +1,8 @@
 import { Cookies } from "@/utils/constants";
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
+import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -22,7 +23,9 @@ export async function GET(req: NextRequest) {
   }
 
   if (provider) {
-    cookieStore.set(Cookies.PreferredSignInProvider, provider);
+    cookieStore.set(Cookies.PreferredSignInProvider, provider, {
+      expires: addYears(new Date(), 1),
+    });
   }
 
   if (code) {
@@ -35,6 +38,8 @@ export async function GET(req: NextRequest) {
 
     if (user) {
       const userId = user.id;
+
+      const logsnag = setupLogSnag();
 
       await logsnag.track({
         event: LogEvents.SignedIn.name,
@@ -54,7 +59,10 @@ export async function GET(req: NextRequest) {
   }
 
   if (!mfaSetupVisited) {
-    cookieStore.set(Cookies.MfaSetupVisited, "true");
+    cookieStore.set(Cookies.MfaSetupVisited, "true", {
+      expires: addYears(new Date(), 1),
+    });
+
     return NextResponse.redirect(`${requestUrl.origin}/mfa/setup`);
   }
 

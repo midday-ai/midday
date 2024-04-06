@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { createTeam, updateUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
@@ -18,6 +18,8 @@ export const createTeamAction = action(
 
     revalidateTag(`user_${user.data.id}`);
     revalidateTag(`teams_${user.data.id}`);
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.CreateTeam.name,

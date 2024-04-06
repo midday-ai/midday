@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
@@ -28,6 +28,8 @@ export const connectBankAccountAction = action(
       });
     } catch (error) {
       console.log(error);
+
+      const logsnag = setupLogSnag();
 
       logsnag.track({
         event: LogEvents.ConnectBankFailed.name,

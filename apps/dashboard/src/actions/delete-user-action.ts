@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { deleteUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { redirect } from "next/navigation";
@@ -13,6 +13,8 @@ export const deleteUserAction = async () => {
   });
 
   const userId = await deleteUser(supabase);
+
+  const logsnag = setupLogSnag();
 
   logsnag.track({
     event: LogEvents.DeleteUser.name,

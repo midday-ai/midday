@@ -8,6 +8,8 @@ export const updateUserSchema = z.object({
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
+export const trackingConsentSchema = z.boolean();
+
 export const widgetsVisibilitySchema = z.object({
   inbox: z.boolean(),
   tracker: z.boolean(),

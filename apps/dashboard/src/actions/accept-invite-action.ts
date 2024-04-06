@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import {
@@ -36,6 +36,8 @@ export const acceptInviteAction = action(
     }
 
     revalidateTag(`teams_${user.data.id}`);
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.AcceptInvite.name,

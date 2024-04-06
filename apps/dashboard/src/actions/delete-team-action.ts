@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { deleteTeam } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -17,6 +17,8 @@ export const deleteTeamAction = action(deleteTeamSchema, async ({ teamId }) => {
 
   revalidateTag(`user_${user.data.id}`);
   revalidateTag(`teams_${user.data.id}`);
+
+  const logsnag = setupLogSnag();
 
   logsnag.track({
     event: LogEvents.DeleteTeam.name,

@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -21,6 +21,8 @@ export const mfaVerifyAction = action(
     });
 
     revalidatePath("/account/security");
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.MfaVerify.name,

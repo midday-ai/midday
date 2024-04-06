@@ -1,6 +1,6 @@
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { Events } from "@midday/jobs";
 import { client } from "@midday/jobs/src/client";
 import {
@@ -33,6 +33,8 @@ export async function POST(req: Request) {
   const supabase = createClient({ admin: true });
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for");
+
+  const logsnag = setupLogSnag();
 
   logsnag.track({
     event: LogEvents.InboxInbound.name,

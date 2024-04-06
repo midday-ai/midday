@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { deleteTeamMember } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -19,6 +19,8 @@ export const deleteTeamMemberAction = action(
     if (revalidatePath) {
       revalidatePathFunc(revalidatePath);
     }
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.DeleteTeamMember.name,

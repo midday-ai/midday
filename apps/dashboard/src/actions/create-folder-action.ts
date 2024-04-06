@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { createFolder } from "@midday/supabase/storage";
@@ -20,6 +20,8 @@ export const createFolderAction = action(createFolderSchema, async (value) => {
   });
 
   await revalidateTag(`vault_${user.data.team_id}`);
+
+  const logsnag = setupLogSnag();
 
   logsnag.track({
     event: LogEvents.CreateFolder.name,
