@@ -7,6 +7,7 @@ import { GoogleSignIn } from "@/components/google-sign-in";
 import { NotionSignIn } from "@/components/notion-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
+import { getCountryCode, isEUCountry } from "@midday/location";
 import {
   Accordion,
   AccordionContent,
@@ -23,9 +24,11 @@ export default async function Login(params) {
     return <DesktopCommandMenuSignIn />;
   }
 
+  const countryCode = getCountryCode();
+  const isEU = isEUCountry(countryCode);
   const cookieStore = cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
-  const showTrackingConsent = !cookieStore.has(Cookies.TrackingConsent);
+  const showTrackingConsent = isEU && !cookieStore.has(Cookies.TrackingConsent);
   const { device } = userAgent({ headers: headers() });
 
   let moreSignInOptions = null;

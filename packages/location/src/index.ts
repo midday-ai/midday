@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { EU_COUNTRY_CODES } from "./countries";
 import countries from "./countries.json";
 
 export function getCountryCode() {
@@ -26,7 +27,7 @@ export function getCountryInfo() {
 }
 
 export function isEUCountry(countryCode: string) {
-  if (countries.find((country) => country.cca2 === countryCode)) {
+  if (EU_COUNTRY_CODES.includes(countryCode)) {
     return true;
   }
 
