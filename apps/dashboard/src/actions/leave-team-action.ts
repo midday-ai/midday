@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getTeamMembers, getUser } from "@midday/supabase/cached-queries";
 import { leaveTeam } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -43,6 +43,8 @@ export const leaveTeamAction = action(
     if (redirectTo) {
       redirect(redirectTo);
     }
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.LeaveTeam.name,

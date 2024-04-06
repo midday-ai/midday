@@ -2,7 +2,7 @@
 
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
 import { action } from "./safe-action";
 import { sendFeedbackSchema } from "./schema";
@@ -32,6 +32,8 @@ export const sendFeebackAction = action(
     });
 
     const json = await res.json();
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.SendFeedback.name,

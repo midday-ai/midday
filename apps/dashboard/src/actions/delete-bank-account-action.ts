@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { deleteBankAccount } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
@@ -20,6 +20,8 @@ export const deleteBankAccountAction = action(
     revalidateTag(`metrics_${data.team_id}`);
     revalidateTag(`spending_${data.team_id}`);
     revalidateTag(`insights_${data.team_id}`);
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.DeleteBank.name,

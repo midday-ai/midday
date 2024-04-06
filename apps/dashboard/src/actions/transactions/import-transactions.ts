@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { action } from "../safe-action";
@@ -19,6 +19,8 @@ export const importTransactionsAction = action(
         teamId: user.data.team_id,
       },
     });
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.ImportTransactions.name,

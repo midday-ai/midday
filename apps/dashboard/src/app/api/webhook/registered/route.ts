@@ -1,6 +1,6 @@
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { get } from "@vercel/edge-config";
 import { LoopsClient } from "loops";
@@ -64,7 +64,9 @@ export async function POST(req: Request) {
     });
   }
 
-  await logsnag.track({
+  const logsnag = setupLogSnag();
+
+  logsnag.track({
     event: LogEvents.Registered.name,
     icon: LogEvents.Registered.icon,
     user_id: email,

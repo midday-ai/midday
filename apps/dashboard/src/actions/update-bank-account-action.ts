@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { updateBankAccount } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -23,6 +23,8 @@ export const updateBankAccountAction = action(
     revalidateTag(`bank_accounts_${data.team_id}`);
     revalidateTag(`bank_connections_${data.team_id}`);
     revalidateTag(`transactions_${data.team_id}`);
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.DeleteBank.name,

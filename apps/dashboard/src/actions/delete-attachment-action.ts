@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { deleteAttachment } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -25,6 +25,8 @@ export const deleteAttachmentAction = action(
         transaction_id: null,
       })
       .eq("transaction_id", data.transaction_id);
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.DeleteAttachment.name,

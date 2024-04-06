@@ -4,7 +4,7 @@ import { env } from "@/env.mjs";
 import InviteEmail from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { LogEvents } from "@midday/events/events";
-import { logsnag } from "@midday/events/server";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { renderAsync } from "@react-email/components";
@@ -80,6 +80,8 @@ export const inviteTeamMembersAction = action(
     if (redirectTo) {
       redirect(redirectTo);
     }
+
+    const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.InviteTeamMembers.name,

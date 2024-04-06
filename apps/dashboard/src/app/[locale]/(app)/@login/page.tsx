@@ -1,4 +1,5 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
+import { ConsentBanner } from "@/components/consent-banner";
 import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
 import { FigmaSignIn } from "@/components/figma-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
@@ -24,6 +25,7 @@ export default async function Login(params) {
 
   const cookieStore = cookies();
   const preferred = cookieStore.get(Cookies.PreferredSignInProvider);
+  const showTrackingConsent = !cookieStore.has(Cookies.TrackingConsent);
   const { device } = userAgent({ headers: headers() });
 
   let moreSignInOptions = null;
@@ -193,6 +195,8 @@ export default async function Login(params) {
           </div>
         </div>
       </div>
+
+      {showTrackingConsent && <ConsentBanner />}
     </div>
   );
 }
