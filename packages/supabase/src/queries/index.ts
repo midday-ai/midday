@@ -8,7 +8,7 @@ import {
   isWithinInterval,
   subYears,
 } from "date-fns";
-import { Client } from "../types";
+import type { Client } from "../types";
 import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
 export function getPagination(page: number, size: number) {
