@@ -9,7 +9,7 @@ import { useState } from "react";
 export function ConsentBanner() {
   const [isOpen, setOpen] = useState(true);
   const trackingAction = useAction(trackingConsentAction, {
-    onSuccess: () => setOpen(false),
+    onExecute: () => setOpen(false),
   });
 
   if (!isOpen) {
