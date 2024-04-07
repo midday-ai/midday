@@ -5,11 +5,14 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 export function GithubSignIn() {
   const [isLoading, setLoading] = useState(false);
   const supabase = createClient();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("return_to");
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -30,10 +33,18 @@ export function GithubSignIn() {
         },
       });
     } else {
+      const redirectTo = new URL("/api/auth/callback", window.location.origin);
+
+      if (returnTo) {
+        redirectTo.searchParams.append("return_to", returnTo);
+      }
+
+      redirectTo.searchParams.append("provider", "github");
+
       await supabase.auth.signInWithOAuth({
         provider: "github",
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?provider=github`,
+          redirectTo: redirectTo.toString(),
         },
       });
     }
