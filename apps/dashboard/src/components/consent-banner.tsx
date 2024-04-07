@@ -19,7 +19,7 @@ export function ConsentBanner() {
   return (
     <div
       className={cn(
-        "fixed z-50 bottom-4 left-4 flex flex-col space-y-4 w-full max-w-[420px] rounded-xl border border-border p-4 transition-all",
+        "fixed z-50 bottom-2 md:bottom-4 left-2 md:left-4 flex flex-col space-y-4 w-[calc(100vw-16px)] max-w-[420px] rounded-xl border border-border p-4 transition-all bg-background",
         isOpen &&
           "animate-in sm:slide-in-from-bottom-full slide-in-from-bottom-full"
       )}
