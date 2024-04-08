@@ -1,4 +1,5 @@
 import { BlurryCircle } from "@/components/blurry-circle";
+import { FlipCounter } from "@/components/flip-counter";
 import { Testimonials } from "@/components/testimonials";
 import {
   Accordion,
@@ -20,19 +21,16 @@ export default function Page() {
       <div className="container max-w-[800px]">
         <div className="min-h-[950px]">
           <h1 className="mt-24 font-medium text-center text-5xl mb-2">
-            What it costs.
+            Early adopter price.
           </h1>
 
           <div className="flex items-center flex-col text-center relative">
-            <h3 className="md:text-[344px] text-[244px] leading-[244px] font-medium md:leading-[344px]">
-              30
-            </h3>
-
+            <div className="mt-12 mb-12">
+              <FlipCounter />
+            </div>
             <p className="font-medium text-xl mt-4">
-              Claim $30/mo early adopter plan
+              Claim $30/mo - Free while in beta
             </p>
-
-            <span className="mt-2 text-[#878787]">Free while in beta</span>
 
             <div className="mt-8">
               <div className="flex items-center space-x-4">

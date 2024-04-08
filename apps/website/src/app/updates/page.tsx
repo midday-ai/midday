@@ -1,11 +1,9 @@
 import { BlurryCircle } from "@/components/blurry-circle";
-import { PostLinks } from "@/components/post-links";
-import { PostMeta } from "@/components/post-meta";
 import { PostStatus } from "@/components/post-status";
+import { UpdatesToolbar } from "@/components/updates-toolbar";
 import { fetchPageBlocks, fetchPages } from "@/lib/notion";
 import { NotionRenderer } from "@notion-render/client";
 import "@notion-render/client/dist/theme.css";
-import format from "date-fns/format";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -20,12 +18,6 @@ const renderer = new NotionRenderer();
 
 export default async function Page() {
   const data = await fetchPages();
-
-  const links = data.results.map((post) => ({
-    id: post.id,
-    lable: format(new Date(post.properties.Date.date.start), "MMMM d, y"),
-    slug: post.properties.Slug.url,
-  }));
 
   const posts = data.results.map(async (post, index) => {
     const blocks = await fetchPageBlocks(post.id);
@@ -50,21 +42,26 @@ export default async function Page() {
           className="notion-render"
           dangerouslySetInnerHTML={{ __html: html }}
         />
-
-        <PostMeta author={post.properties.Author.people.at(0)} slug={slug} />
       </div>
     );
   });
 
   return (
-    <div className="container max-w-[1140px] flex scroll-smooth">
+    <div className="container flex justify-center scroll-smooth">
       <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
       <BlurryCircle className="absolute top-[70%] right-[30%] bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
 
-      <PostLinks links={links} />
       <div className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
         {posts}
       </div>
+
+      <UpdatesToolbar
+        posts={data.results.map((post) => ({
+          id: post.id,
+          slug: post.properties.Slug.url,
+          title: post?.properties?.Title?.title?.at(0)?.text?.content,
+        }))}
+      />
     </div>
   );
 }
