@@ -27,6 +27,7 @@
     "@novu/headless": "^0.24.1",
     "@openstatus/react": "^0.0.3",
     "@tanstack/react-table": "^8.15.3",
+    "@team-plain/typescript-sdk": "^3.9.0",
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.2.5",
     "@todesktop/runtime": "^1.6.1",

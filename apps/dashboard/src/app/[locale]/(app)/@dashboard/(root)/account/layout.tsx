@@ -9,6 +9,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           { path: "/account/language", label: "Language & region" },
           { path: "/account/security", label: "Security" },
           { path: "/account/teams", label: "Teams" },
+          { path: "/account/support", label: "Support" },
         ]}
       />
 
