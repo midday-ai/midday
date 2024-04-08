@@ -67,8 +67,8 @@ export function FlipCounter() {
           3
         </span>
         <div className="absolute top-[50%] -mt-2 h-[3px] w-full bg-background" />
-        <div className="absolute h-[30px] w-[4px] bg-white left-0 top-[50%] -mt-[15px] z-10" />
-        <div className="absolute h-[30px] w-[4px] bg-white right-0 top-[50%] -mt-[15px] z-10" />
+        <div className="absolute h-[30px] w-[4px] bg-[#878787] left-0 top-[50%] -mt-[15px] z-10" />
+        <div className="absolute h-[30px] w-[4px] bg-[#878787] right-0 top-[50%] -mt-[15px] z-10" />
       </div>
 
       <div className="relative">
@@ -76,8 +76,8 @@ export function FlipCounter() {
           0
         </span>
         <div className="absolute top-[50%] -mt-2 h-[3px] w-full bg-background" />
-        <div className="absolute h-[30px] w-[4px] bg-white left-0 top-[50%] -mt-[15px] z-10" />
-        <div className="absolute h-[30px] w-[4px] bg-white right-0 top-[50%] -mt-[15px] z-10" />
+        <div className="absolute h-[30px] w-[4px] bg-[#878787] left-0 top-[50%] -mt-[15px] z-10" />
+        <div className="absolute h-[30px] w-[4px] bg-[#878787] right-0 top-[50%] -mt-[15px] z-10" />
       </div>
     </div>
   );
