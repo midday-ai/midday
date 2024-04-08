@@ -94,6 +94,8 @@ export function CarouselToolbar({ views }: Props) {
                       <span className="text-sm">
                         {Intl.NumberFormat("en", {
                           notation: "compact",
+                          minimumFractionDigits: 0,
+                          maximumFractionDigits: 1,
                         }).format(views ?? 0)}
                       </span>
                     </div>

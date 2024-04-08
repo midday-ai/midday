@@ -40,9 +40,11 @@ export function GithubStars() {
       </div>
       <div className="px-4 text-[14px]">
         {data &&
-          Intl.NumberFormat("en", { notation: "compact" }).format(
-            data.stargazers_count ?? 0
-          )}
+          Intl.NumberFormat("en", {
+            notation: "compact",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 1,
+          }).format(data.stargazers_count ?? 0)}
       </div>
     </a>
   );

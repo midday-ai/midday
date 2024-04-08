@@ -25,8 +25,8 @@ export function TrackerMonthGraph({
   projectId,
   disableHover,
   hideDaysIndicators,
+  weekStartsOn,
 }) {
-  const weekStartsOn = 1; // TODO: Monday - should be user setting
   const { isTracking } = useTrackerStore();
   const currentDate = new Date(date);
 

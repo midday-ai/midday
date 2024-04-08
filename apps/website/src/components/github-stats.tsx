@@ -40,9 +40,11 @@ export function GithubStats() {
           <MdOutlineStarBorder />
           <span className="text-xs shrink-0">
             {data?.repository &&
-              Intl.NumberFormat("en", { notation: "compact" }).format(
-                data.repository.stargazers.totalCount ?? 0
-              )}
+              Intl.NumberFormat("en", {
+                notation: "compact",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 1,
+              }).format(data.repository.stargazers.totalCount ?? 0)}
           </span>
         </div>
 
@@ -50,9 +52,11 @@ export function GithubStats() {
           <LuGitFork />
           <span className="text-xs shrink-0">
             {data?.repository &&
-              Intl.NumberFormat("en", { notation: "compact" }).format(
-                data.repository.forks.totalCount ?? 0
-              )}
+              Intl.NumberFormat("en", {
+                notation: "compact",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 1,
+              }).format(data.repository.forks.totalCount ?? 0)}
           </span>
         </div>
 
@@ -60,9 +64,11 @@ export function GithubStats() {
           <MdOutlineAdjust />
           <span className="text-xs shrink-0">
             {data?.repository &&
-              Intl.NumberFormat("en", { notation: "compact" }).format(
-                data.repository.commits.history.totalCount ?? 0
-              )}
+              Intl.NumberFormat("en", {
+                notation: "compact",
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 1,
+              }).format(data.repository.commits.history.totalCount ?? 0)}
           </span>
         </div>
       </div>

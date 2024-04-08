@@ -18,7 +18,9 @@ export async function TransactionsChart() {
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {transactions &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(transactions)}
+            Intl.NumberFormat("en", { notation: "compact" }).format(
+              transactions
+            )}
         </span>
       </div>
     </div>

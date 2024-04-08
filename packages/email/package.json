@@ -17,7 +17,7 @@
     "@react-email/components": "0.0.16",
     "@react-email/tailwind": "0.0.15",
     "date-fns": "^3.6.0",
-    "jose": "^5.2.3",
+    "jose": "^5.2.4",
     "react-email": "canary",
     "responsive-react-email": "^0.0.5"
   },
