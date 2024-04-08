@@ -27,9 +27,8 @@ export function TrackerGraph({
   numberOfMonths,
   isTracking,
   projectId,
+  weekStartsOn,
 }) {
-  const weekStartsOn = 1; // TODO: Monday - should be user setting
-
   const [params, setParams] = useQueryStates(
     {
       date: parseAsString.withDefault(date),

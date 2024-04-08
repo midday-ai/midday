@@ -175,6 +175,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
               onSelect={setParams}
               data={records}
               projectId={projectId}
+              weekStartsOn={user.week_starts_on_monday && 1}
             />
 
             <TrackerEntriesList
@@ -224,6 +225,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
           onSelect={setParams}
           data={records}
           projectId={projectId}
+          weekStartsOn={user.week_starts_on_monday && 1}
         />
 
         <TrackerEntriesList

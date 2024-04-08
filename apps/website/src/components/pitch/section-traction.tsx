@@ -73,9 +73,11 @@ export function SectionTraction() {
                 </span>
                 <span className="mt-auto font-mono text-[80px] md:text-[122px]">
                   {stars &&
-                    Intl.NumberFormat("en", { notation: "compact" }).format(
-                      stars.stargazers_count ?? 0
-                    )}
+                    Intl.NumberFormat("en", {
+                      notation: "compact",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 1,
+                    }).format(stars.stargazers_count ?? 0)}
                 </span>
               </div>
             </Card>

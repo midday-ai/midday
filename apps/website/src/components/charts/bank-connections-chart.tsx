@@ -23,7 +23,9 @@ export async function BankConnectionsChart() {
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {bankConnections &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(bankConnections)}
+            Intl.NumberFormat("en", { notation: "compact" }).format(
+              bankConnections
+            )}
         </span>
       </div>
     </div>

@@ -18,7 +18,9 @@ export async function TrackerEntriesChart() {
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {trackerEntries &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(trackerEntries)}
+            Intl.NumberFormat("en", { notation: "compact" }).format(
+              trackerEntries
+            )}
         </span>
       </div>
     </div>

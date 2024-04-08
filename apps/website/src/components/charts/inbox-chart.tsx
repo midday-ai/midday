@@ -1,10 +1,7 @@
-
 import { fetchStats } from "@/actions/fetch-stats";
-
 
 export async function InboxChart() {
   const { inboxItems } = await fetchStats();
-
 
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background rounded-xl px-6 pt-8 pb-6 space-y-4">

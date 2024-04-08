@@ -1,4 +1,3 @@
-import { Header } from "@/components/header";
 import { SecondaryMenu } from "@/components/secondary-menu";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -7,6 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <SecondaryMenu
         items={[
           { path: "/account", label: "General" },
+          { path: "/account/language", label: "Language & region" },
           { path: "/account/security", label: "Security" },
           { path: "/account/teams", label: "Teams" },
         ]}

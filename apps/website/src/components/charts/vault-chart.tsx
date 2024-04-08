@@ -18,7 +18,9 @@ export async function VaultChart() {
 
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {vaultObjects &&
-            Intl.NumberFormat("en", { notation: "compact" }).format(vaultObjects)}
+            Intl.NumberFormat("en", { notation: "compact" }).format(
+              vaultObjects
+            )}
         </span>
       </div>
     </div>

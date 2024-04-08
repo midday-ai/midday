@@ -65,7 +65,7 @@ export async function fetchStats() {
     },
     ["stats"],
     {
-      revalidate: 1,
+      revalidate: 300,
       tags: ["stats"],
     }
   )();
