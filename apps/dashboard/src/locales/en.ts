@@ -87,5 +87,6 @@ export default {
     spending: "Spending",
     transactions: "Transactions",
     tracker: "Tracker",
+    accounts: "Accounts",
   },
 } as const;

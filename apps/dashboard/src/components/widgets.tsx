@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import * as React from "react";
 import { Spending } from "./charts/spending";
 import { Transactions } from "./charts/transactions";
+import { Accounts } from "./widgets/accounts";
 import { Inbox } from "./widgets/inbox";
 import { Insights } from "./widgets/insights";
 import { Tracker } from "./widgets/tracker";
@@ -20,6 +21,7 @@ export const initialWidgetsVisibility = {
   tracker: true,
   inbox: false,
   transactions: false,
+  accounts: false,
 };
 
 export async function Widgets({
@@ -28,7 +30,10 @@ export async function Widgets({
   searchParams,
 }: Props) {
   const widgets = cookies().has(Cookies.Widgets)
-    ? JSON.parse(cookies().get(Cookies.Widgets)?.value)
+    ? {
+        ...initialWidgetsVisibility,
+        ...JSON.parse(cookies().get(Cookies.Widgets)?.value),
+      }
     : initialWidgetsVisibility;
 
   return (
@@ -47,6 +52,7 @@ export async function Widgets({
         )}
         {widgets.transactions && <Transactions disabled={disabled} />}
         {widgets.inbox && <Inbox disabled={disabled} />}
+        {widgets.accounts && <Accounts disabled={disabled} />}
       </div>
     </div>
   );

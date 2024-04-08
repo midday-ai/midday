@@ -17,6 +17,7 @@ export const widgetsVisibilitySchema = z.object({
   transactions: z.boolean(),
   spending: z.boolean(),
   insights: z.boolean(),
+  accounts: z.boolean(),
 });
 
 export const updateTeamSchema = z.object({
