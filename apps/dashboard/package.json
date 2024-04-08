@@ -42,7 +42,6 @@
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.4",
     "dub": "^0.10.0",
-    "fast-csv": "^5.0.1",
     "framer-motion": "^11.0.25",
     "geist": "^1.3.0",
     "headless-currency-input": "^1.1.0",
