@@ -24,7 +24,7 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
       <br />
 
       <Text className="text-[21px] font-regular">
-        Run your bussiness smarter.
+        Run your business smarter.
       </Text>
 
       <br />
