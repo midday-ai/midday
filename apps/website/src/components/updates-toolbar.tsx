@@ -17,7 +17,8 @@ import {
 } from "@midday/ui/tooltip";
 import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useHotkeys } from "react-hotkeys-hook";
 import { FaXTwitter } from "react-icons/fa6";
 import { CopyInput } from "./copy-input";
 
@@ -57,33 +58,37 @@ const popupCenter = ({ url, title, w, h }) => {
 };
 
 export function UpdatesToolbar({ posts }) {
-  const [currentIndex, setIndex] = useState(0);
+  const pathname = usePathname();
+  const currentIndex = posts.findIndex((a) => pathname.endsWith(a.slug)) ?? 0;
   const views = 100;
 
-  // TODO: Change with observable when scrolling over new post
   const currentPost = posts[currentIndex];
 
   const handlePrev = () => {
-    const nextPost = posts[currentIndex];
+    if (currentIndex > 0) {
+      const nextPost = posts[currentIndex - 1];
 
-    const element = document.getElementById(nextPost?.slug);
-    element?.scrollIntoView({
-      behavior: "smooth",
-    });
-
-    setIndex((prev) => prev - 1);
+      const element = document.getElementById(nextPost?.slug);
+      element?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
   };
 
   const handleNext = () => {
-    const nextPost = posts[currentIndex + 1];
+    if (currentIndex !== posts.length - 1) {
+      const nextPost = posts[currentIndex + 1];
 
-    const element = document.getElementById(nextPost?.slug);
-    element?.scrollIntoView({
-      behavior: "smooth",
-    });
+      const element = document.getElementById(nextPost?.slug);
 
-    setIndex((prev) => prev + 1);
+      element?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
   };
+
+  useHotkeys("arrowRight", () => handleNext(), [handleNext]);
+  useHotkeys("arrowLeft", () => handlePrev(), [handlePrev]);
 
   const handleOnShare = () => {
     const popup = popupCenter({
@@ -125,7 +130,6 @@ export function UpdatesToolbar({ posts }) {
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        disabled={currentIndex === 0}
                         className={cn(currentIndex === 0 && "opacity-50")}
                         onClick={handlePrev}
                       >
@@ -143,9 +147,8 @@ export function UpdatesToolbar({ posts }) {
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        disabled={posts.length < currentIndex}
                         className={cn(
-                          posts.length < currentIndex && "opacity-50"
+                          currentIndex === posts.length - 1 && "opacity-50"
                         )}
                         onClick={handleNext}
                       >
@@ -173,9 +176,7 @@ export function UpdatesToolbar({ posts }) {
           </DialogHeader>
 
           <div className="grid gap-6 py-4">
-            <CopyInput
-              value={`https://midday.ai/updates/${currentPost.slug}`}
-            />
+            <CopyInput value={`https://midday.ai${pathname}`} />
             <Button
               className="w-full flex items-center space-x-2 h-10"
               onClick={handleOnShare}

@@ -2,7 +2,7 @@ import { CalEmbed } from "@/components/cal-embed";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Talk to us | Midday",
+  title: "Talk to us",
 };
 
 export default function Page() {

@@ -23,7 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Open Startup | Midday",
+  title: "Open Startup",
 };
 
 export default async function Page() {

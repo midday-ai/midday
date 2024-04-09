@@ -2,27 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-.notion-render b,
-.notion-render h3 {
-    font-weight: 500 !important;
+:root {
+    --sh-class: #FFFFFF;
+    --sh-identifier: #FFFFFF;
+    --sh-sign: #8996a3;
+    --sh-string: #A7A7A7;
+    --sh-keyword: #A7A7A7;
+    --sh-comment: #a19595;
+    --sh-jsxliterals: #FFFFFF;
+    --sh-property: #A7A7A7;
+    --sh-entity: #A7A7A7;
 }
 
-.notion-render ul li,
-.notion-render p {
+.updates p {
+    min-height: 1.87em;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding: 3px 2px;
+}
+
+.updates h3 {
+    font-size: 1.25em;
+    margin-top: .8em;
+    margin-bottom: 1px;
+    font-weight: 500;
+}
+
+.updates p,
+.updates li {
     color: #707070;
 }
 
-.notion-render a {
+.updates ul li {
+    margin-top: 1px;
+    margin-bottom: 1px;
+    padding-left: 12px;
+    padding-top: 3px;
+    padding-bottom: 2px;
+}
+
+.updates ul {
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+.updates p code span {
+    font-family: var(--font-geist-mono);
+    color: #eb5757 !important;
+    font-size: 85%;
+    font-weight: 600;
+}
+
+.updates p code {
+    border-radius: 4px;
+    background: hsla(44, 6%, 50%, .15);
+    padding: 0 .4em 3px .4em;
+    line-height: normal;
+
+}
+
+.updates a {
     text-decoration: underline;
 }
 
-.notion-render code {
-    font-family: var(--font-geist-mono);
-    line-height: normal;
-    background: rgba(135, 131, 120, .15);
-    color: #EB5757;
-    border-radius: 4px;
-    font-size: 85%;
-    padding: 0.2em 0.4em;
-    font-weight: 600;
+.updates blockquote p {
+    margin: 7px 2px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-left: 3px solid;
+    color: hsl(var(--foreground));
+}
+
+.updates b,
+.updates strong {
+    font-weight: 500;
+}
+
+pre::-webkit-scrollbar {
+    display: none;
+}
+
+pre {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+    padding: 20px;
+    border: 1px solid;
+    border-color: hsl(var(--border));
+    border-radius: 10px;
+    margin: 20px 0 !important;
+    background-color: #0C0C0C;
+}
+
+pre code {
+    font-size: 14px;
+    font-weight: 500 !important;
 }

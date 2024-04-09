@@ -8,7 +8,7 @@ import panelLight from "public/panel-light.png";
 import panel from "public/panel.png";
 
 export const metadata: Metadata = {
-  title: "Download | Midday",
+  title: "Download",
 };
 
 export default function Page() {

@@ -1,50 +1,24 @@
+import { Article } from "@/components/article";
 import { BlurryCircle } from "@/components/blurry-circle";
-import { PostStatus } from "@/components/post-status";
 import { UpdatesToolbar } from "@/components/updates-toolbar";
-import { fetchPageBlocks, fetchPages } from "@/lib/notion";
-import { NotionRenderer } from "@notion-render/client";
-import "@notion-render/client/dist/theme.css";
+import { getBlogPosts } from "@/lib/blog";
 import type { Metadata } from "next";
-import Link from "next/link";
-
-export const revalidate = 0;
-export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Updates | Midday",
+  title: "Updates",
 };
 
-const renderer = new NotionRenderer();
-
 export default async function Page() {
-  const data = await fetchPages();
+  const data = getBlogPosts();
 
-  const posts = data.results.map(async (post, index) => {
-    const blocks = await fetchPageBlocks(post.id);
-    const html = await renderer.render(...blocks);
-    const slug = `/updates/${post.properties.Slug.url}`;
-
-    return (
-      <div
-        key={post.id}
-        className="pt-28 mb-20 -mt-28"
-        id={post.properties.Slug.url}
-      >
-        <PostStatus status={post.properties.Tag.select.name} />
-
-        <Link href={slug}>
-          <h2 className="font-medium text-2xl mb-6">
-            {post.properties.Title.title.at(0)?.plain_text}
-          </h2>
-        </Link>
-
-        <div
-          className="notion-render"
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      </div>
-    );
-  });
+  const posts = data
+    .sort((a, b) => {
+      if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
+        return -1;
+      }
+      return 1;
+    })
+    .map((post, index) => <Article data={post} firstPost={index === 0} />);
 
   return (
     <div className="container flex justify-center scroll-smooth">
@@ -56,10 +30,9 @@ export default async function Page() {
       </div>
 
       <UpdatesToolbar
-        posts={data.results.map((post) => ({
-          id: post.id,
-          slug: post.properties.Slug.url,
-          title: post?.properties?.Title?.title?.at(0)?.text?.content,
+        posts={data.map((post) => ({
+          slug: post.slug,
+          title: post.metadata.title,
         }))}
       />
     </div>
