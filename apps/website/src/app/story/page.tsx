@@ -7,7 +7,7 @@ import signatureLight from "public/email/signature.png";
 import founders from "public/founders.png";
 
 export const metadata: Metadata = {
-  title: "Story | Midday",
+  title: "Story",
 };
 
 export default function Page() {

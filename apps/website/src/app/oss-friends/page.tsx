@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "OSS Friends | Midday",
+  title: "OSS Friends",
 };
 
 type Friend = {

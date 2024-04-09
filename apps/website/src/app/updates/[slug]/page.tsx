@@ -1,72 +1,110 @@
+import { baseUrl } from "@/app/sitemap";
 import { BlurryCircle } from "@/components/blurry-circle";
+import { CustomMDX } from "@/components/mdx";
 import { PostStatus } from "@/components/post-status";
-import { fetchPageBlocks, fetchPageBySlug, fetchPages } from "@/lib/notion";
-import { NotionRenderer } from "@notion-render/client";
-import "@notion-render/client/dist/theme.css";
-
-export const revalidate = 0;
+import { getBlogPosts } from "@/lib/blog";
+import type { Metadata } from "next";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 
 export async function generateStaticParams() {
-  const data = await fetchPages();
+  const posts = getBlogPosts();
 
-  return data.results.map((post) => ({
-    slug: post.properties.Slug.url,
+  return posts.map((post) => ({
+    slug: post.slug,
   }));
 }
 
 export async function generateMetadata({
-  params: { slug },
-}: {
-  params: { slug: string };
-}) {
-  const post = await fetchPageBySlug(slug);
-  const blocks = await fetchPageBlocks(post.id);
+  params,
+}): Promise<Metadata | undefined> {
+  const post = getBlogPosts().find((post) => post.slug === params.slug);
+  if (!post) {
+    return;
+  }
 
-  const firstImage = blocks.find((block) => block.type === "image");
+  const {
+    title,
+    publishedAt: publishedTime,
+    summary: description,
+    image,
+  } = post.metadata;
 
   return {
-    title: `Midday | ${post.properties.Title.title.at(0)?.plain_text}`,
+    title,
+    description,
     openGraph: {
-      images: [firstImage?.image?.file?.url],
+      title,
+      description,
+      type: "article",
+      publishedTime,
+      url: `${baseUrl}/blog/${post.slug}`,
+      images: [
+        {
+          url: image,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
     },
   };
 }
-
-const renderer = new NotionRenderer();
 
 export default async function Page({
   params: { slug },
 }: {
   params: { slug: string };
 }) {
-  const post = await fetchPageBySlug(slug);
+  const post = getBlogPosts().find((post) => post.slug === slug);
 
-  const content = async () => {
-    const blocks = await fetchPageBlocks(post.id);
-    const html = await renderer.render(...blocks);
-
-    return (
-      <div
-        className="notion-render"
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-    );
-  };
+  if (!post) {
+    notFound();
+  }
 
   return (
     <div className="container max-w-[1140px] flex justify-center">
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            headline: post.metadata.title,
+            datePublished: post.metadata.publishedAt,
+            dateModified: post.metadata.publishedAt,
+            description: post.metadata.summary,
+            image: `${baseUrl}${post.metadata.image}`,
+            url: `${baseUrl}/updates/${post.slug}`,
+          }),
+        }}
+      />
+
       <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
       <BlurryCircle className="absolute top-[70%] right-[30%] bg-[#3633D0]/5 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
 
-      <div className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
-        <PostStatus status={post.properties.Tag.select.name} />
+      <article className="max-w-[680px] pt-[80px] md:pt-[150px] w-full">
+        <PostStatus status={post.metadata.tag} />
 
-        <h2 className="font-medium text-2xl mb-6">
-          {post.properties.Title.title.at(0)?.plain_text}
-        </h2>
+        <h2 className="font-medium text-2xl mb-6">{post.metadata.title}</h2>
 
-        {content()}
-      </div>
+        <div className="updates">
+          {post.metadata.image && (
+            <Image
+              src={post.metadata.image}
+              alt={post.metadata.title}
+              width={680}
+              height={442}
+              className="mb-12"
+            />
+          )}
+          <CustomMDX source={post.content} />
+        </div>
+      </article>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Policy | Midday",
+  title: "Policy",
 };
 
 export default function Page() {

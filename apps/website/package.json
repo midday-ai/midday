@@ -15,8 +15,6 @@
     "@logsnag/next": "^1.0.3",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
-    "@notion-render/client": "^0.0.2",
-    "@notionhq/client": "^2.2.14",
     "@openstatus/react": "^0.0.3",
     "@pqina/flip": "^1.8.3",
     "@uidotdev/usehooks": "^2.4.1",
@@ -26,17 +24,19 @@
     "framer-motion": "^11.0.25",
     "geist": "^1.3.0",
     "next": "14.2.0-canary.39",
+    "next-mdx-remote": "^4.4.1",
     "next-themes": "^0.3.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-hls-player": "^3.0.7",
     "server-only": "^0.0.1",
-    "sharp": "^0.33.3"
+    "sharp": "^0.33.3",
+    "sugar-high": "^0.6.0"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^20.12.5",
-    "@types/react": "^18.2.74",
+    "@types/node": "^20.12.6",
+    "@types/react": "^18.2.75",
     "@types/react-dom": "^18.2.24"
   }
 }

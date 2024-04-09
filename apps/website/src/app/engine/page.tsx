@@ -6,7 +6,7 @@ import engineSDK from "public/engine-sdk.png";
 import engine from "public/engine-ui.png";
 
 export const metadata: Metadata = {
-  title: "Engine | Midday",
+  title: "Engine",
 };
 
 export default function Page() {

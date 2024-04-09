@@ -12,12 +12,36 @@ import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { Provider } from "./provider";
+import { baseUrl } from "./sitemap";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://midday.ai"),
-  title: "Midday | Run your business smarter",
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: "Midday | Run your business smarter",
+    template: "%s | Midday",
+  },
   description:
     "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+  openGraph: {
+    title: "Midday | Run your business smarter",
+    description: "This is my portfolio.",
+    url: baseUrl,
+    siteName:
+      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+    locale: "en_US",
+    type: "website",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export const viewport = {

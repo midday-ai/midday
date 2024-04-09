@@ -63,7 +63,7 @@ export function FlipCounter() {
   return (
     <div className="space-x-4 md:space-x-8 flex">
       <div className="relative">
-        <span className="md:text-[260px] text-[180px] leading-[230px] md:leading-[340px] font-mono font-semibold bg-background rounded-3xl border border-border px-6">
+        <span className="md:text-[260px] text-[180px] leading-[230px] md:leading-[340px] font-mono font-medium bg-background rounded-3xl border border-border px-6">
           3
         </span>
         <div className="absolute top-[50%] -mt-2 h-[3px] w-full bg-background" />
@@ -72,7 +72,7 @@ export function FlipCounter() {
       </div>
 
       <div className="relative">
-        <span className="md:text-[260px] text-[180px] leading-[230px] md:leading-[340px] font-mono font-semibold bg-background rounded-3xl border border-border px-6">
+        <span className="md:text-[260px] text-[180px] leading-[230px] md:leading-[340px] font-mono font-medium bg-background rounded-3xl border border-border px-6">
           0
         </span>
         <div className="absolute top-[50%] -mt-2 h-[3px] w-full bg-background" />

@@ -1,11 +1,13 @@
-import type { MetadataRoute } from "next";
+import { baseUrl } from "./sitemap";
 
-export default function robots(): MetadataRoute.Robots {
+export default function robots() {
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
-    sitemap: "https://midday.ai/sitemap.xml",
+    rules: [
+      {
+        userAgent: "*",
+      },
+    ],
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: `${baseUrl}`,
   };
 }
