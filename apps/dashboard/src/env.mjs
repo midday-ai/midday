@@ -19,6 +19,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
     API_ROUTE_SECRET: z.string(),
+    PLAIN_API_KEY: z.string(),
   },
   /**
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
@@ -72,6 +73,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
+    PLAIN_API_KEY: process.env.PLAIN_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
