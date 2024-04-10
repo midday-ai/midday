@@ -19,6 +19,13 @@ export const widgetsVisibilitySchema = z.object({
   insights: z.boolean(),
 });
 
+export const sendSupportSchema = z.object({
+  subject: z.string(),
+  priority: z.string(),
+  type: z.string(),
+  message: z.string(),
+});
+
 export const updateTeamSchema = z.object({
   name: z.string().min(2).max(32).optional(),
   email: z.string().email().optional(),

@@ -199,4 +199,9 @@ export const LogEvents = {
     icon: "🗄️",
     channel: "import",
   },
+  SupportTicket: {
+    name: "Support Ticket",
+    icon: "🛟",
+    channel: "support",
+  },
 };

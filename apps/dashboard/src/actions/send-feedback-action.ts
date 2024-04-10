@@ -1,47 +1,59 @@
 "use server";
 
-import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
-import { createClient } from "@midday/supabase/server";
+import { getUser } from "@midday/supabase/cached-queries";
+import { PlainClient } from "@team-plain/typescript-sdk";
 import { action } from "./safe-action";
 import { sendFeedbackSchema } from "./schema";
 
-const baseUrl = "https://api.resend.com";
+const client = new PlainClient({
+  apiKey: process.env.PLAIN_API_KEY!,
+});
 
 export const sendFeebackAction = action(
   sendFeedbackSchema,
   async ({ feedback }) => {
-    const supabase = createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const user = await getUser();
 
-    const res = await fetch(`${baseUrl}/email`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.RESEND_API_KEY}`,
-        "Content-Type": "application/json",
+    const customer = await client.upsertCustomer({
+      identifier: {
+        emailAddress: user.data.email,
       },
-      body: JSON.stringify({
-        from: "feedback@midday.ai",
-        to: "pontus@midday.ai",
-        subject: "Feedback",
-        text: `${feedback} \nName: ${user?.user_metadata?.name} \nEmail: ${user?.email}`,
-      }),
+      onCreate: {
+        fullName: user.data.full_name,
+        externalId: user.data.id,
+        email: {
+          email: user.data.email,
+          isVerified: true,
+        },
+      },
+      onUpdate: {},
     });
 
-    const json = await res.json();
+    const response = await client.createThread({
+      title: "Feedback",
+      customerIdentifier: {
+        customerId: customer.data?.customer.id,
+      },
+      components: [
+        {
+          componentText: {
+            text: feedback,
+          },
+        },
+      ],
+    });
 
     const logsnag = setupLogSnag();
 
     logsnag.track({
       event: LogEvents.SendFeedback.name,
       icon: LogEvents.SendFeedback.icon,
-      user_id: user.id,
+      user_id: user.data.id,
       channel: LogEvents.SendFeedback.channel,
     });
 
-    return json;
+    return response;
   }
 );
