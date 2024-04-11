@@ -21,12 +21,13 @@ export const deleteBankAccountAction = action(
     revalidateTag(`spending_${data.team_id}`);
     revalidateTag(`insights_${data.team_id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = setupLogSnag({
+      userId: data.created_by,
+    });
 
     logsnag.track({
       event: LogEvents.DeleteBank.name,
       icon: LogEvents.DeleteBank.icon,
-      user_id: data.created_by,
       channel: LogEvents.DeleteBank.channel,
     });
   }

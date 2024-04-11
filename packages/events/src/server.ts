@@ -1,14 +1,28 @@
 import { LogSnag } from "@logsnag/next/server";
 import { cookies } from "next/headers";
 
-export const setupLogSnag = () => {
-  const disableTracking =
-    cookies().get("tracking-consent")?.value === "0" ||
-    Boolean(process.env.NEXT_PUBLIC_LOGSNAG_DISABLED!);
+type Props = {
+  userId: string;
+  fullName: string;
+};
 
-  return new LogSnag({
+export const setupLogSnag = async ({ userId, fullName }: Props) => {
+  const trackingConsent = cookies().get("tracking-consent")?.value === "0";
+
+  const logsnag = new LogSnag({
     token: process.env.LOGSNAG_PRIVATE_TOKEN!,
     project: process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!,
-    disableTracking,
+    disableTracking: Boolean(process.env.NEXT_PUBLIC_LOGSNAG_DISABLED!),
   });
+
+  if (trackingConsent) {
+    await logsnag.identify({
+      user_id: userId,
+      properties: {
+        name: fullName,
+      },
+    });
+  }
+
+  return logsnag;
 };

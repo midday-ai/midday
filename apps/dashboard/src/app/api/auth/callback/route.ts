@@ -39,21 +39,16 @@ export async function GET(req: NextRequest) {
     if (user) {
       const userId = user.id;
 
-      const logsnag = setupLogSnag();
+      const logsnag = setupLogSnag({
+        userId,
+        fullName: user.full_name,
+      });
 
       await logsnag.track({
         event: LogEvents.SignedIn.name,
         icon: LogEvents.SignedIn.icon,
-        user_id: userId,
         notify: true,
         channel: LogEvents.SignedIn.channel,
-      });
-
-      await logsnag.identify({
-        user_id: userId,
-        properties: {
-          name: user.user_metadata?.full_name,
-        },
       });
     }
   }

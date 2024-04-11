@@ -42,12 +42,14 @@ export const createReportAction = action(createReportSchema, async (params) => {
     .select("*")
     .single();
 
-  const logsnag = setupLogSnag();
+  const logsnag = setupLogSnag({
+    userId: user.data.id,
+    fullName: user.data.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.OverviewReport.name,
     icon: LogEvents.OverviewReport.icon,
-    user_id: user.data.email,
     channel: LogEvents.OverviewReport.channel,
   });
 

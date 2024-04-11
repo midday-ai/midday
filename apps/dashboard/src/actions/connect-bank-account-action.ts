@@ -17,6 +17,11 @@ export const connectBankAccountAction = action(
     const teamId = user.data.team_id;
     const supabase = createClient();
 
+    const logsnag = setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
+
     try {
       await createBankAccounts(supabase, {
         accessToken,
@@ -29,12 +34,9 @@ export const connectBankAccountAction = action(
     } catch (error) {
       console.log(error);
 
-      const logsnag = setupLogSnag();
-
       logsnag.track({
         event: LogEvents.ConnectBankFailed.name,
         icon: LogEvents.ConnectBankFailed.icon,
-        user_id: user.data.email,
         channel: LogEvents.ConnectBankFailed.channel,
         tags: {
           provider,
@@ -54,7 +56,6 @@ export const connectBankAccountAction = action(
     logsnag.track({
       event: LogEvents.ConnectBankCompleted.name,
       icon: LogEvents.ConnectBankCompleted.icon,
-      user_id: user.data.email,
       channel: LogEvents.ConnectBankCompleted.channel,
       tags: {
         provider,

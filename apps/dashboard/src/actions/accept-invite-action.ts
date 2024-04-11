@@ -37,12 +37,14 @@ export const acceptInviteAction = action(
 
     revalidateTag(`teams_${user.data.id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.AcceptInvite.name,
       icon: LogEvents.AcceptInvite.icon,
-      user_id: user.data.email,
       channel: LogEvents.AcceptInvite.channel,
     });
 

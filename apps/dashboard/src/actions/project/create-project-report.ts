@@ -40,12 +40,14 @@ export const createProjectReport = action(
       .select("*")
       .single();
 
-    const logsnag = setupLogSnag();
+    const logsnag = setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.ProjectReport.name,
       icon: LogEvents.ProjectReport.icon,
-      user_id: user.data.email,
       channel: LogEvents.ProjectReport.channel,
     });
 

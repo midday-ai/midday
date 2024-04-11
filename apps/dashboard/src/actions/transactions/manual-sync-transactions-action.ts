@@ -12,12 +12,14 @@ export const manualSyncTransactionsAction = action(
   async ({ accountId }) => {
     const user = await getUser();
 
-    const logsnag = setupLogSnag();
+    const logsnag = setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.TransactionsManualSync.name,
       icon: LogEvents.TransactionsManualSync.icon,
-      user_id: user.data.email,
       channel: LogEvents.TransactionsManualSync.channel,
     });
 

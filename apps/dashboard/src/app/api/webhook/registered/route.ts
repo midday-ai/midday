@@ -64,16 +64,15 @@ export async function POST(req: Request) {
     });
   }
 
-  const logsnag = setupLogSnag();
+  const logsnag = setupLogSnag({
+    userId,
+    fullName,
+  });
 
   logsnag.track({
     event: LogEvents.Registered.name,
     icon: LogEvents.Registered.icon,
-    user_id: email,
     channel: LogEvents.Registered.channel,
-    tags: {
-      email,
-    },
   });
 
   return NextResponse.json({ success: true });

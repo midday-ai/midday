@@ -21,12 +21,14 @@ export const createFolderAction = action(createFolderSchema, async (value) => {
 
   await revalidateTag(`vault_${user.data.team_id}`);
 
-  const logsnag = setupLogSnag();
+  const logsnag = setupLogSnag({
+    userId: user.data.id,
+    fullName: user.data.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.CreateFolder.name,
     icon: LogEvents.CreateFolder.icon,
-    user_id: user.data.email,
     channel: LogEvents.CreateFolder.channel,
   });
 });

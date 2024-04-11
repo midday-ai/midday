@@ -24,12 +24,14 @@ export const shareFileAction = action(shareFileSchema, async (value) => {
     },
   });
 
-  const logsnag = setupLogSnag();
+  const logsnag = setupLogSnag({
+    userId: user.data.id,
+    fullName: user.data.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.ShareFile.name,
     icon: LogEvents.ShareFile.icon,
-    user_id: user.data.id,
     channel: LogEvents.ShareFile.channel,
   });
 

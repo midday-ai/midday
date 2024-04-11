@@ -26,12 +26,14 @@ export const deleteAttachmentAction = action(
       })
       .eq("transaction_id", data.transaction_id);
 
-    const logsnag = setupLogSnag();
+    const logsnag = setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.DeleteAttachment.name,
       icon: LogEvents.DeleteAttachment.icon,
-      user_id: user.data.email,
       channel: LogEvents.DeleteAttachment.channel,
     });
 

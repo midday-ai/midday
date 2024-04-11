@@ -59,12 +59,14 @@ export const sendSupportAction = action(sendSupportSchema, async (data) => {
     ],
   });
 
-  const logsnag = setupLogSnag();
+  const logsnag = setupLogSnag({
+    userId: user.data.id,
+    fullName: user.data.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.SupportTicket.name,
     icon: LogEvents.SupportTicket.icon,
-    user_id: user.data.email,
     channel: LogEvents.SupportTicket.channel,
   });
 

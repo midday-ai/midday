@@ -20,12 +20,14 @@ export const deleteFolderAction = action(deleteFolderSchema, async (value) => {
 
   await revalidateTag(`vault_${user.data.team_id}`);
 
-  const logsnag = setupLogSnag();
+  const logsnag = setupLogSnag({
+    userId: user.data.id,
+    fullName: user.data.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.DeleteFolder.name,
     icon: LogEvents.DeleteFolder.icon,
-    user_id: user.data.id,
     channel: LogEvents.DeleteFolder.channel,
   });
 
