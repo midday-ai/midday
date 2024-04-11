@@ -18,12 +18,14 @@ export const createAttachmentsAction = action(
 
     revalidateTag(`transactions_${user.data.team_id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.CreateAttachment.name,
       icon: LogEvents.CreateAttachment.icon,
-      user_id: user.data.email,
       channel: LogEvents.CreateAttachment.channel,
     });
 

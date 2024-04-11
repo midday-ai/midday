@@ -17,12 +17,14 @@ export const changeTeamAction = action(
 
     revalidateTag(`user_${user.data.id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.ChangeTeam.name,
       icon: LogEvents.ChangeTeam.icon,
-      user_id: user.data.email,
       channel: LogEvents.ChangeTeam.channel,
     });
 

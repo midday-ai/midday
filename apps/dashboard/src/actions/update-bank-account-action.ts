@@ -24,12 +24,14 @@ export const updateBankAccountAction = action(
     revalidateTag(`bank_connections_${data.team_id}`);
     revalidateTag(`transactions_${data.team_id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.DeleteBank.name,
       icon: LogEvents.DeleteBank.icon,
-      user_id: data.created_by,
       channel: LogEvents.DeleteBank.channel,
     });
   }

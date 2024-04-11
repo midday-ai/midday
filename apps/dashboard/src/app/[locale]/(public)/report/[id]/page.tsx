@@ -82,7 +82,7 @@ export default async function Report({ params }) {
               <div>
                 <h1 className="text-4xl font-mono">
                   <FormatAmount
-                    value={metricsData.summary.currentTotal}
+                    amount={metricsData.summary.currentTotal}
                     currency={metricsData.summary.currency}
                   />
                 </h1>

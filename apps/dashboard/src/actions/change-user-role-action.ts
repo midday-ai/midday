@@ -23,12 +23,13 @@ export const changeUserRoleAction = action(
       revalidatePathFunc(revalidatePath);
     }
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId,
+    });
 
     logsnag.track({
       event: LogEvents.UserRoleChange.name,
       icon: LogEvents.UserRoleChange.icon,
-      user_id: userId,
       channel: LogEvents.UserRoleChange.channel,
     });
 

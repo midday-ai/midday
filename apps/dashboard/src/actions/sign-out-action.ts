@@ -15,12 +15,14 @@ export async function signOutAction() {
     scope: "local",
   });
 
-  const logsnag = setupLogSnag();
+  const logsnag = await setupLogSnag({
+    userId: user.id,
+    fullName: user.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.SignOut.name,
     icon: LogEvents.SignOut.icon,
-    user_id: user.id,
     channel: LogEvents.SignOut.channel,
   });
 

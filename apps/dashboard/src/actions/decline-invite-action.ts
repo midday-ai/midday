@@ -20,12 +20,14 @@ export const declineInviteAction = action(
       revalidatePathFunc(revalidatePath);
     }
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.DeclineInvite.name,
       icon: LogEvents.DeclineInvite.icon,
-      user_id: user.data.email,
       channel: LogEvents.DeclineInvite.channel,
     });
 

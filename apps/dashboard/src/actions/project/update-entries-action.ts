@@ -43,12 +43,14 @@ export const updateEntriesAction = action(
     revalidateTag(`tracker_projects_${user.data.team_id}`);
     revalidateTag(`tracker_entries_${user.data.team_id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.TrackerCreateEntry.name,
       icon: LogEvents.TrackerCreateEntry.icon,
-      user_id: user.data.email,
       channel: LogEvents.TrackerCreateEntry.channel,
     });
 

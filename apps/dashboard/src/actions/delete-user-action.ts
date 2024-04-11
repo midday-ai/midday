@@ -14,7 +14,9 @@ export const deleteUserAction = async () => {
 
   const userId = await deleteUser(supabase);
 
-  const logsnag = setupLogSnag();
+  const logsnag = await setupLogSnag({
+    userId,
+  });
 
   logsnag.track({
     event: LogEvents.DeleteUser.name,

@@ -113,12 +113,11 @@ export const createReportAction = action(schema, async (params) => {
     .select("*")
     .single();
 
-  const logsnag = setupLogSnag();
+  const logsnag = await setupLogSnag();
 
   logsnag.track({
     event: LogEvents.OverviewReport.name,
     icon: LogEvents.OverviewReport.icon,
-    user_id: user.data.email,
     channel: LogEvents.OverviewReport.channel,
   });
 

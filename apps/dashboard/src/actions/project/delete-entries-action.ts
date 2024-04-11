@@ -19,12 +19,14 @@ export const deleteEntriesAction = action(
     revalidateTag(`tracker_projects_${user.data.team_id}`);
     revalidateTag(`tracker_entries_${user.data.team_id}`);
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.TrackerDeleteEntry.name,
       icon: LogEvents.TrackerDeleteEntry.icon,
-      user_id: user.data.email,
       channel: LogEvents.TrackerDeleteEntry.channel,
     });
   }

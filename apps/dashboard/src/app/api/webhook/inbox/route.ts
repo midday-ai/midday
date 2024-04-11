@@ -34,7 +34,7 @@ export async function POST(req: Request) {
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for");
 
-  const logsnag = setupLogSnag();
+  const logsnag = await setupLogSnag();
 
   logsnag.track({
     event: LogEvents.InboxInbound.name,

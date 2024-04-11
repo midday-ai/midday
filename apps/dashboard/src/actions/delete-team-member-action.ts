@@ -20,12 +20,14 @@ export const deleteTeamMemberAction = action(
       revalidatePathFunc(revalidatePath);
     }
 
-    const logsnag = setupLogSnag();
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
     logsnag.track({
       event: LogEvents.DeleteTeamMember.name,
       icon: LogEvents.DeleteTeamMember.icon,
-      user_id: user.data.id,
       channel: LogEvents.DeleteTeamMember.channel,
     });
 

@@ -20,12 +20,14 @@ export const deleteFileAction = action(deleteFileSchema, async (value) => {
 
   await revalidateTag(`vault_${user.data.team_id}`);
 
-  const logsnag = setupLogSnag();
+  const logsnag = await setupLogSnag({
+    userId: user.data.id,
+    fullName: user.data.full_name,
+  });
 
   logsnag.track({
     event: LogEvents.DeleteFile.name,
     icon: LogEvents.DeleteFile.icon,
-    user_id: user.data.id,
     channel: LogEvents.DeleteFile.channel,
   });
 
