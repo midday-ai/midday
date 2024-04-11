@@ -17,16 +17,16 @@ export async function POST(req: Request) {
     if (email && fullName) {
       await redis.append("approved", email);
 
-      trigger.sendEvent({
+      await trigger.sendEvent({
         name: Events.ONBOARDING_EMAILS,
         payload: {
           fullName,
           email,
         },
       });
-    }
 
-    return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true });
+    }
   } catch (error) {
     console.log(error);
   }
