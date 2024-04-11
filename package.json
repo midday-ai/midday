@@ -28,7 +28,7 @@
     "@calcom/embed-react": "^1.3.2",
     "@manypkg/cli": "^0.21.3",
     "turbo": "^1.13.2",
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   },
   "resolutions": {
     "jackspeak": "2.1.1"

@@ -14,7 +14,7 @@
         "@logsnag/next": "^1.0.3"
     },
     "devDependencies": {
-        "typescript": "^5.4.4"
+        "typescript": "^5.4.5"
     },
     "exports": {
         "./server": "./src/server.ts",

@@ -2,7 +2,8 @@ import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
-import { get } from "@vercel/edge-config";
+import { client as redisClient } from "@midday/kv";
+
 import { LoopsClient } from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
   const fullName = body.record.raw_user_meta_data.full_name;
 
   // NOTE: Start onboarding email for enabled beta users
-  const isBeta = (await get("beta"))?.includes(email);
+  const isBeta = (await redisClient.get("approved"))?.includes(email);
 
   if (isBeta) {
     client.sendEvent({
@@ -39,29 +40,33 @@ export async function POST(req: Request) {
     });
   }
 
-  const found = await loops.findContact(email);
-  const [firstName, lastName] = fullName.split(" ");
+  try {
+    const found = await loops.findContact(email);
+    const [firstName, lastName] = fullName.split(" ");
 
-  if (found.length > 0) {
-    const userId = found?.at(0)?.id;
+    if (found.length > 0) {
+      const userId = found?.at(0)?.id;
 
-    if (!userId) {
-      return null;
+      if (!userId) {
+        return null;
+      }
+
+      await loops.updateContact(email, {
+        userId,
+        userGroup: "registered",
+        firstName,
+        lastName,
+      });
+    } else {
+      await loops.createContact(email, {
+        userId: body.record.id,
+        userGroup: "registered",
+        firstName,
+        lastName,
+      });
     }
-
-    await loops.updateContact(email, {
-      userId,
-      userGroup: "registered",
-      firstName,
-      lastName,
-    });
-  } else {
-    await loops.createContact(email, {
-      userId: body.record.id,
-      userGroup: "registered",
-      firstName,
-      lastName,
-    });
+  } catch (err) {
+    console.log(err);
   }
 
   const logsnag = await setupLogSnag({
