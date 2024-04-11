@@ -25,6 +25,8 @@ export async function POST(req: Request) {
   const userId = body.record.id;
   const fullName = body.record.raw_user_meta_data.full_name;
 
+  console.log("register_1");
+
   // NOTE: Start onboarding email for enabled beta users
   const isBeta = (await get("beta"))?.includes(email);
 
@@ -38,6 +40,21 @@ export async function POST(req: Request) {
       },
     });
   }
+
+  console.log("register_2");
+
+  const logsnag = await setupLogSnag({
+    userId,
+    fullName,
+  });
+
+  logsnag.track({
+    event: LogEvents.Registered.name,
+    icon: LogEvents.Registered.icon,
+    channel: LogEvents.Registered.channel,
+  });
+
+  console.log("register_3");
 
   try {
     const found = await loops.findContact(email);
@@ -68,21 +85,7 @@ export async function POST(req: Request) {
     console.log(err);
   }
 
-  const logsnag = await setupLogSnag({
-    userId,
-    fullName,
-  });
-
-  console.log("register_event", {
-    userId,
-    fullName,
-  });
-
-  logsnag.track({
-    event: LogEvents.Registered.name,
-    icon: LogEvents.Registered.icon,
-    channel: LogEvents.Registered.channel,
-  });
+  console.log("register_4");
 
   return NextResponse.json({ success: true });
 }
