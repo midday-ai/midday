@@ -6,6 +6,14 @@ type Props = {
   fullName: string;
 };
 
+interface TrackOptions {
+  channel: string;
+  event: string;
+  description?: string;
+  user_id?: string;
+  icon?: string;
+}
+
 export const setupLogSnag = async ({ userId, fullName }: Props) => {
   const trackingConsent = cookies().get("tracking-consent")?.value === "0";
 
@@ -24,5 +32,12 @@ export const setupLogSnag = async ({ userId, fullName }: Props) => {
     });
   }
 
-  return logsnag;
+  return {
+    ...logsnag,
+    track: (options: TrackOptions) =>
+      logsnag.track({
+        ...options,
+        user_id: trackingConsent ? userId : undefined,
+      }),
+  };
 };
