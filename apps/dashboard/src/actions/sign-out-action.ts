@@ -16,8 +16,8 @@ export async function signOutAction() {
   });
 
   const logsnag = setupLogSnag({
-    userId: user.data.id,
-    fullName: user.data.full_name,
+    userId: user.id,
+    fullName: user.full_name,
   });
 
   logsnag.track({

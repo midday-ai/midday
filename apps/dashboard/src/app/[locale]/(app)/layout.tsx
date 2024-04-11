@@ -1,4 +1,3 @@
-import { SetUserIdServerComponent } from "@logsnag/next";
 import { createClient } from "@midday/supabase/server";
 
 export default async function Layout({
@@ -15,14 +14,7 @@ export default async function Layout({
   } = await supabase.auth.getUser();
 
   if (user) {
-    return (
-      <>
-        {dashboard}
-        {!process.env.NEXT_PUBLIC_LOGSNAG_DISABLED && (
-          <SetUserIdServerComponent userId={user.id} />
-        )}
-      </>
-    );
+    return dashboard;
   }
 
   return login;
