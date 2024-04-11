@@ -11,15 +11,15 @@
   },
   "dependencies": {
     "@google-cloud/documentai": "^8.2.0",
-    "@langchain/core": "^0.1.54",
-    "@langchain/openai": "^0.0.26",
+    "@langchain/core": "^0.1.57",
+    "@langchain/openai": "^0.0.28",
     "@trigger.dev/react": "^2.3.18",
     "@trigger.dev/resend": "^2.3.18",
     "@trigger.dev/sdk": "^2.3.18",
     "@trigger.dev/supabase": "^2.3.18",
     "fast-csv": "^5.0.1",
     "d3-dsv": "3",
-    "langchain": "^0.1.31",
+    "langchain": "^0.1.33",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {

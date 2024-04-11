@@ -21,7 +21,7 @@
     "@vercel/analytics": "^1.2.2",
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",
-    "framer-motion": "^11.0.25",
+    "framer-motion": "^11.0.28",
     "geist": "^1.3.0",
     "next": "14.2.0-canary.39",
     "next-mdx-remote": "^4.4.1",

@@ -39,32 +39,41 @@ export async function POST(req: Request) {
     });
   }
 
-  const found = await loops.findContact(email);
-  const [firstName, lastName] = fullName.split(" ");
+  try {
+    const found = await loops.findContact(email);
+    const [firstName, lastName] = fullName.split(" ");
 
-  if (found.length > 0) {
-    const userId = found?.at(0)?.id;
+    if (found.length > 0) {
+      const userId = found?.at(0)?.id;
 
-    if (!userId) {
-      return null;
+      if (!userId) {
+        return null;
+      }
+
+      await loops.updateContact(email, {
+        userId,
+        userGroup: "registered",
+        firstName,
+        lastName,
+      });
+    } else {
+      await loops.createContact(email, {
+        userId: body.record.id,
+        userGroup: "registered",
+        firstName,
+        lastName,
+      });
     }
-
-    await loops.updateContact(email, {
-      userId,
-      userGroup: "registered",
-      firstName,
-      lastName,
-    });
-  } else {
-    await loops.createContact(email, {
-      userId: body.record.id,
-      userGroup: "registered",
-      firstName,
-      lastName,
-    });
+  } catch (err) {
+    console.log(err);
   }
 
   const logsnag = await setupLogSnag({
+    userId,
+    fullName,
+  });
+
+  console.log("register_event", {
     userId,
     fullName,
   });

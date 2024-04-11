@@ -13,6 +13,6 @@
     "@novu/node": "^0.24.1"
   },
   "devDependencies": {
-    "typescript": "^5.4.4"
+    "typescript": "^5.4.5"
   }
 }
