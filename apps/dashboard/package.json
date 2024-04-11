@@ -36,7 +36,6 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.3.0",
     "@uidotdev/usehooks": "^2.4.1",
-    "@vercel/edge-config": "^1.1.0",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.41",
     "ai": "^3.0.21",

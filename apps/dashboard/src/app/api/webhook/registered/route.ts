@@ -2,7 +2,8 @@ import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
-import { get } from "@vercel/edge-config";
+import { client as redisClient } from "@midday/kv";
+
 import { LoopsClient } from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -25,10 +26,8 @@ export async function POST(req: Request) {
   const userId = body.record.id;
   const fullName = body.record.raw_user_meta_data.full_name;
 
-  console.log("register_1");
-
   // NOTE: Start onboarding email for enabled beta users
-  const isBeta = (await get("beta"))?.includes(email);
+  const isBeta = (await redisClient.get("approved"))?.includes(email);
 
   if (isBeta) {
     client.sendEvent({
@@ -40,21 +39,6 @@ export async function POST(req: Request) {
       },
     });
   }
-
-  console.log("register_2");
-
-  const logsnag = await setupLogSnag({
-    userId,
-    fullName,
-  });
-
-  logsnag.track({
-    event: LogEvents.Registered.name,
-    icon: LogEvents.Registered.icon,
-    channel: LogEvents.Registered.channel,
-  });
-
-  console.log("register_3");
 
   try {
     const found = await loops.findContact(email);
@@ -85,7 +69,16 @@ export async function POST(req: Request) {
     console.log(err);
   }
 
-  console.log("register_4");
+  const logsnag = await setupLogSnag({
+    userId,
+    fullName,
+  });
+
+  logsnag.track({
+    event: LogEvents.Registered.name,
+    icon: LogEvents.Registered.icon,
+    channel: LogEvents.Registered.channel,
+  });
 
   return NextResponse.json({ success: true });
 }
