@@ -21,7 +21,7 @@ export const deleteBankAccountAction = action(
     revalidateTag(`spending_${data.team_id}`);
     revalidateTag(`insights_${data.team_id}`);
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: data.created_by,
     });
 

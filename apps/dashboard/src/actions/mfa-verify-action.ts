@@ -22,7 +22,7 @@ export const mfaVerifyAction = action(
 
     revalidatePath("/account/security");
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

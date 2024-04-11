@@ -18,7 +18,7 @@ export const deleteProjectAction = action(
 
     revalidateTag(`tracker_projects_${user.data.team_id}`);
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

@@ -26,7 +26,7 @@ export const deleteAttachmentAction = action(
       })
       .eq("transaction_id", data.transaction_id);
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

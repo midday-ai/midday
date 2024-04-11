@@ -12,7 +12,7 @@ export const manualSyncTransactionsAction = action(
   async ({ accountId }) => {
     const user = await getUser();
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

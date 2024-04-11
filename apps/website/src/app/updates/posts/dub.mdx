@@ -113,7 +113,7 @@ export const createReportAction = action(schema, async (params) => {
     .select("*")
     .single();
 
-  const logsnag = setupLogSnag();
+  const logsnag = await setupLogSnag();
 
   logsnag.track({
     event: LogEvents.OverviewReport.name,

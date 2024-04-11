@@ -23,7 +23,7 @@ export const changeUserRoleAction = action(
       revalidatePathFunc(revalidatePath);
     }
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId,
     });
 

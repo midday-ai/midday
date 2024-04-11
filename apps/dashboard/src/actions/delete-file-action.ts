@@ -20,7 +20,7 @@ export const deleteFileAction = action(deleteFileSchema, async (value) => {
 
   await revalidateTag(`vault_${user.data.team_id}`);
 
-  const logsnag = setupLogSnag({
+  const logsnag = await setupLogSnag({
     userId: user.data.id,
     fullName: user.data.full_name,
   });

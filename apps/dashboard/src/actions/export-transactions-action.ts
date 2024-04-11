@@ -21,7 +21,7 @@ export const exportTransactionsAction = action(
       },
     });
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

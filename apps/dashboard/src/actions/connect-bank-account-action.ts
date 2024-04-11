@@ -17,7 +17,7 @@ export const connectBankAccountAction = action(
     const teamId = user.data.team_id;
     const supabase = createClient();
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

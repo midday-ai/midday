@@ -18,7 +18,7 @@ export const createAttachmentsAction = action(
 
     revalidateTag(`transactions_${user.data.team_id}`);
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

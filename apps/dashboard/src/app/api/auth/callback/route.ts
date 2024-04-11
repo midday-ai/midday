@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     if (user) {
       const userId = user.id;
 
-      const logsnag = setupLogSnag({
+      const logsnag = await setupLogSnag({
         userId,
         fullName: user.full_name,
       });

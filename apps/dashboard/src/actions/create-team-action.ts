@@ -19,7 +19,7 @@ export const createTeamAction = action(
     revalidateTag(`user_${user.data.id}`);
     revalidateTag(`teams_${user.data.id}`);
 
-    const logsnag = setupLogSnag({
+    const logsnag = await setupLogSnag({
       userId: user.data.id,
       fullName: user.data.full_name,
     });

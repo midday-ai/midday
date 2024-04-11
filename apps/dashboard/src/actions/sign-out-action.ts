@@ -15,7 +15,7 @@ export async function signOutAction() {
     scope: "local",
   });
 
-  const logsnag = setupLogSnag({
+  const logsnag = await setupLogSnag({
     userId: user.id,
     fullName: user.full_name,
   });

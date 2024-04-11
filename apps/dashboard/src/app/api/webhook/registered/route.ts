@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     });
   }
 
-  const logsnag = setupLogSnag({
+  const logsnag = await setupLogSnag({
     userId,
     fullName,
   });
