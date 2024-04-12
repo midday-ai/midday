@@ -8,7 +8,7 @@ export function AppDetails({ id, name, description, logo, active }) {
       key={id}
       className="flex md:space-x-12 md:flex-row md:items-center mt-10 pt-10 first:pt-0 flex-col"
     >
-      <div className="w-[300px] h-[200px] flex items-center justify-center bg-gradient-to-b from-[#E7E5E1] to-[#DCDAD6]  dark:from-[#1A1A1A] dark:to-[#171717] rounded-xl">
+      <div className="md:w-[300px] w-full md:h-[200px] h-[230px] flex items-center justify-center bg-gradient-to-b from-[#E7E5E1] to-[#DCDAD6]  dark:from-[#1A1A1A] dark:to-[#171717] rounded-xl">
         {logo}
       </div>
       <div className="md:flex-1 my-6 md:my-0">
