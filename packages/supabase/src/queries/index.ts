@@ -267,6 +267,8 @@ export async function getTransactionsQuery(
       // });
     } else if (column === "assigned") {
       query.order("assigned_id", { ascending: value === "asc" });
+    } else if (column === "bank_account") {
+      query.order("bank_account_id", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }
