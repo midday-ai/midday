@@ -1,15 +1,82 @@
-import { AppDetails } from "@/components/app-details";
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Apps | Midday",
-};
-
-const apps = [
+export const features = [
+  {
+    id: "xero",
+    name: "Xero",
+    description:
+      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+    logo: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={60}
+        height={60}
+        fill="none"
+      >
+        <g clipPath="url(#a)">
+          <mask
+            id="b"
+            width={88}
+            height={88}
+            x={-14}
+            y={-14}
+            maskUnits="userSpaceOnUse"
+            style={{
+              maskType: "luminance",
+            }}
+          >
+            <path
+              fill="#fff"
+              d="M-13.205-13.275h86.464V73.19h-86.464v-86.464Z"
+            />
+          </mask>
+          <g mask="url(#b)">
+            <path
+              fill="white"
+              d="M30 59.885c16.505 0 29.886-13.38 29.886-29.885C59.886 13.494 46.505.114 30 .114S.114 13.494.114 30c0 16.505 13.38 29.885 29.886 29.885Z"
+            />
+            <path
+              fill="#121212"
+              d="m14.42 29.913 5.1-5.112a.914.914 0 0 0-1.3-1.285l-5.096 5.094-5.118-5.101a.914.914 0 1 0-1.285 1.299l5.1 5.098-5.097 5.107a.914.914 0 1 0 1.282 1.3l5.11-5.103 5.091 5.085a.911.911 0 0 0 1.576-.628.907.907 0 0 0-.266-.644l-5.097-5.11ZM44.74 29.912c0 .915.745 1.66 1.662 1.66.914 0 1.66-.745 1.66-1.66 0-.916-.746-1.66-1.66-1.66-.917 0-1.662.744-1.662 1.66Z"
+            />
+            <path
+              fill="#121212"
+              d="M41.59 29.912a4.814 4.814 0 0 1 4.81-4.809 4.815 4.815 0 0 1 4.808 4.81A4.814 4.814 0 0 1 46.4 34.72a4.814 4.814 0 0 1-4.81-4.808Zm-1.891 0c0 3.695 3.006 6.7 6.7 6.7 3.695 0 6.703-3.005 6.703-6.7 0-3.694-3.008-6.7-6.702-6.7a6.709 6.709 0 0 0-6.701 6.7ZM39.223 23.326h-.28a3.8 3.8 0 0 0-2.339.79.916.916 0 0 0-.892-.72.904.904 0 0 0-.906.907l.003 11.286a.915.915 0 0 0 1.827-.002v-6.939c0-2.313.212-3.247 2.193-3.494.184-.023.383-.02.383-.02.543-.018.928-.39.928-.894a.916.916 0 0 0-.917-.914ZM21.677 28.81l.003-.077a4.842 4.842 0 0 1 9.402.076h-9.405Zm11.276-.173c-.394-1.864-1.415-3.396-2.969-4.38-2.272-1.442-5.272-1.362-7.467.198a6.777 6.777 0 0 0-2.823 5.503c0 .538.065 1.081.2 1.616a6.754 6.754 0 0 0 5.687 5.006 6.379 6.379 0 0 0 2.41-.16c.701-.171 1.38-.455 2.004-.855.648-.417 1.19-.966 1.714-1.624l.032-.036c.364-.451.296-1.093-.104-1.4-.337-.258-.904-.363-1.35.208a6.233 6.233 0 0 1-.32.417c-.354.392-.794.771-1.32 1.065a4.81 4.81 0 0 1-2.247.568c-2.658-.03-4.08-1.885-4.586-3.21a4.806 4.806 0 0 1-.204-.768 1.715 1.715 0 0 1-.012-.14l9.538-.002c1.308-.028 2.011-.95 1.817-2.006Z"
+            />
+          </g>
+        </g>
+        <defs>
+          <clipPath id="a">
+            <path fill="#fff" d="M0 0h60v60H0z" />
+          </clipPath>
+        </defs>
+      </svg>
+    ),
+  },
+  {
+    id: "quickbooks",
+    name: "Quickbooks",
+    description:
+      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+    logo: (
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width={60}
+        height={60}
+        fill="none"
+      >
+        <path
+          fill="white"
+          d="M30 60c16.568 0 30-13.432 30-30C60 13.432 46.568 0 30 0 13.432 0 0 13.432 0 30c0 16.568 13.432 30 30 30Z"
+        />
+        <path
+          fill="black"
+          d="M8.333 30A11.667 11.667 0 0 0 20 41.667h1.667v-4.334H20a7.332 7.332 0 0 1-6.828-10.153A7.336 7.336 0 0 1 20 22.666h4v22.667a4.335 4.335 0 0 0 4.333 4.334V18.333H20A11.666 11.666 0 0 0 8.333 30ZM40 18.333h-1.666v4.334H40a7.333 7.333 0 0 1 0 14.666h-4V14.667a4.331 4.331 0 0 0-4.333-4.333v31.333H40a11.667 11.667 0 0 0 0-23.334Z"
+        />
+      </svg>
+    ),
+  },
   {
     id: "fortnox",
     name: "Fortnox",
-    active: true,
     description:
       "Integration with Fortnox is a powerful solution that allows seamless connectivity between Midday and Fortnox, a popular cloud-based accounting and financial management software. This integration streamlines financial processes by enabling data exchange, synchronization, and automation between Midday and Fortnox.",
     logo: (
@@ -33,7 +100,6 @@ const apps = [
   {
     id: "visma",
     name: "Visma",
-    active: true,
     description:
       "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
     logo: (
@@ -142,81 +208,6 @@ const apps = [
     ),
   },
   {
-    id: "quickbooks",
-    name: "Quickbooks",
-    description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
-    logo: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={60}
-        height={60}
-        fill="none"
-      >
-        <path
-          fill="white"
-          d="M30 60c16.568 0 30-13.432 30-30C60 13.432 46.568 0 30 0 13.432 0 0 13.432 0 30c0 16.568 13.432 30 30 30Z"
-        />
-        <path
-          fill="black"
-          d="M8.333 30A11.667 11.667 0 0 0 20 41.667h1.667v-4.334H20a7.332 7.332 0 0 1-6.828-10.153A7.336 7.336 0 0 1 20 22.666h4v22.667a4.335 4.335 0 0 0 4.333 4.334V18.333H20A11.666 11.666 0 0 0 8.333 30ZM40 18.333h-1.666v4.334H40a7.333 7.333 0 0 1 0 14.666h-4V14.667a4.331 4.331 0 0 0-4.333-4.333v31.333H40a11.667 11.667 0 0 0 0-23.334Z"
-        />
-      </svg>
-    ),
-  },
-  {
-    id: "xero",
-    name: "Xero",
-    description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
-    logo: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={60}
-        height={60}
-        fill="none"
-      >
-        <g clipPath="url(#a)">
-          <mask
-            id="b"
-            width={88}
-            height={88}
-            x={-14}
-            y={-14}
-            maskUnits="userSpaceOnUse"
-            style={{
-              maskType: "luminance",
-            }}
-          >
-            <path
-              fill="#fff"
-              d="M-13.205-13.275h86.464V73.19h-86.464v-86.464Z"
-            />
-          </mask>
-          <g mask="url(#b)">
-            <path
-              fill="white"
-              d="M30 59.885c16.505 0 29.886-13.38 29.886-29.885C59.886 13.494 46.505.114 30 .114S.114 13.494.114 30c0 16.505 13.38 29.885 29.886 29.885Z"
-            />
-            <path
-              fill="#121212"
-              d="m14.42 29.913 5.1-5.112a.914.914 0 0 0-1.3-1.285l-5.096 5.094-5.118-5.101a.914.914 0 1 0-1.285 1.299l5.1 5.098-5.097 5.107a.914.914 0 1 0 1.282 1.3l5.11-5.103 5.091 5.085a.911.911 0 0 0 1.576-.628.907.907 0 0 0-.266-.644l-5.097-5.11ZM44.74 29.912c0 .915.745 1.66 1.662 1.66.914 0 1.66-.745 1.66-1.66 0-.916-.746-1.66-1.66-1.66-.917 0-1.662.744-1.662 1.66Z"
-            />
-            <path
-              fill="#121212"
-              d="M41.59 29.912a4.814 4.814 0 0 1 4.81-4.809 4.815 4.815 0 0 1 4.808 4.81A4.814 4.814 0 0 1 46.4 34.72a4.814 4.814 0 0 1-4.81-4.808Zm-1.891 0c0 3.695 3.006 6.7 6.7 6.7 3.695 0 6.703-3.005 6.703-6.7 0-3.694-3.008-6.7-6.702-6.7a6.709 6.709 0 0 0-6.701 6.7ZM39.223 23.326h-.28a3.8 3.8 0 0 0-2.339.79.916.916 0 0 0-.892-.72.904.904 0 0 0-.906.907l.003 11.286a.915.915 0 0 0 1.827-.002v-6.939c0-2.313.212-3.247 2.193-3.494.184-.023.383-.02.383-.02.543-.018.928-.39.928-.894a.916.916 0 0 0-.917-.914ZM21.677 28.81l.003-.077a4.842 4.842 0 0 1 9.402.076h-9.405Zm11.276-.173c-.394-1.864-1.415-3.396-2.969-4.38-2.272-1.442-5.272-1.362-7.467.198a6.777 6.777 0 0 0-2.823 5.503c0 .538.065 1.081.2 1.616a6.754 6.754 0 0 0 5.687 5.006 6.379 6.379 0 0 0 2.41-.16c.701-.171 1.38-.455 2.004-.855.648-.417 1.19-.966 1.714-1.624l.032-.036c.364-.451.296-1.093-.104-1.4-.337-.258-.904-.363-1.35.208a6.233 6.233 0 0 1-.32.417c-.354.392-.794.771-1.32 1.065a4.81 4.81 0 0 1-2.247.568c-2.658-.03-4.08-1.885-4.586-3.21a4.806 4.806 0 0 1-.204-.768 1.715 1.715 0 0 1-.012-.14l9.538-.002c1.308-.028 2.011-.95 1.817-2.006Z"
-            />
-          </g>
-        </g>
-        <defs>
-          <clipPath id="a">
-            <path fill="#fff" d="M0 0h60v60H0z" />
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-  },
-  {
     id: "stripe",
     name: "Stripe",
     description:
@@ -236,15 +227,3 @@ const apps = [
     ),
   },
 ];
-
-export default function Apps() {
-  return (
-    <div className="max-w-[1200px]">
-      <div className="divide-y">
-        {apps.map((app) => {
-          return <AppDetails key={app.id} {...app} />;
-        })}
-      </div>
-    </div>
-  );
-}

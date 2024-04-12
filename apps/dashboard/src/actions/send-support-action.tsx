@@ -46,6 +46,7 @@ export const sendSupportAction = action(sendSupportSchema, async (data) => {
 
   const response = await client.createThread({
     title: data.subject,
+    description: data.message,
     priority: mapToPriorityNumber(data.priority),
     customerIdentifier: {
       customerId: customer.data?.customer.id,

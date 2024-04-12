@@ -5,7 +5,12 @@ import { Button } from "@midday/ui/button";
 import { ChevronUp } from "lucide-react";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-export function VoteButton({ count, id }) {
+type Props = {
+  id: string;
+  count: number;
+};
+
+export function VoteButton({ count, id }: Props) {
   const { execute, optimisticData } = useOptimisticAction(
     voteAction,
     count,
@@ -18,7 +23,7 @@ export function VoteButton({ count, id }) {
     <Button
       variant="outline"
       className="p-6 flex-col w-14 h-16"
-      onClick={() => execute({ revalidatePath: "/apps", id })}
+      onClick={() => execute({ id })}
     >
       <div className="flex space-x-2 items-center flex-col">
         <ChevronUp size={16} />
