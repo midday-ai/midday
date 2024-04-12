@@ -1,14 +1,7 @@
 import { AppDetails } from "@/components/app-details";
+import { FeatureRequestModal } from "@/components/feature-request-modal";
 import { Button } from "@midday/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@midday/ui/dialog";
+import { Dialog, DialogTrigger } from "@midday/ui/dialog";
 import type { Metadata } from "next";
 import { features } from "./features";
 
@@ -46,25 +39,7 @@ export default async function Page() {
         </div>
       </div>
 
-      <DialogContent className="sm:max-w-[500px]">
-        <div className="p-4">
-          <DialogHeader>
-            <DialogTitle>Request</DialogTitle>
-            <DialogDescription>
-              Make changes to your profile here. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter className="flex space-x-4 mt-8">
-            <DialogTrigger asChild>
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
-            </DialogTrigger>
-            <Button type="submit">Submit</Button>
-          </DialogFooter>
-        </div>
-      </DialogContent>
+      <FeatureRequestModal />
     </Dialog>
   );
 }

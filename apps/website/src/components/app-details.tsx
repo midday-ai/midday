@@ -6,13 +6,13 @@ export function AppDetails({ id, name, description, logo, active }) {
   return (
     <section
       key={id}
-      className="flex space-x-12 items-center mt-10 pt-10 first:pt-0"
+      className="flex md:space-x-12 md:flex-row md:items-center mt-10 pt-10 first:pt-0 flex-col"
     >
       <div className="w-[300px] h-[200px] flex items-center justify-center bg-gradient-to-b from-[#E7E5E1] to-[#DCDAD6]  dark:from-[#1A1A1A] dark:to-[#171717] rounded-xl">
         {logo}
       </div>
-      <div className="flex-1">
-        <div className="flex items-center mb-4 space-x-2">
+      <div className="md:flex-1 my-6 md:my-0">
+        <div className="flex md:items-center mb-4 space-x-2">
           <h2 className="font-medium">{name}</h2>
           {active && (
             <button
@@ -33,7 +33,7 @@ export function AppDetails({ id, name, description, logo, active }) {
         <p className="text-sm text-[#606060]">{description}</p>
       </div>
 
-      <Suspense fallback={<Skeleton className="p-6 flex-col w-14 h-16" />}>
+      <Suspense fallback={<Skeleton className="p-6 flex-col w-14 h-16 " />}>
         <Vote id={id} />
       </Suspense>
     </section>

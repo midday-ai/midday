@@ -36,6 +36,8 @@ export const sendFeebackAction = action(
       customerIdentifier: {
         customerId: customer.data?.customer.id,
       },
+      // Feedback
+      labelTypeIds: ["lt_01HV93GFTZAKESXMVY8X371ADG"],
       components: [
         {
           componentText: {

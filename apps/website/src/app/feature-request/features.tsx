@@ -3,7 +3,7 @@ export const features = [
     id: "xero",
     name: "Xero",
     description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+      "Integrating with Xero allows you to synchronize transactions and attachments neatly organized in your bookkeeping software, making it easier for you or your accountant to close your books faster.",
     logo: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -55,7 +55,7 @@ export const features = [
     id: "quickbooks",
     name: "Quickbooks",
     description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+      "Integrating with QuickBooks enables you to synchronize transactions and attachments, neatly organizing them in your bookkeeping software. This streamlines the process for you or your accountant to close your books faster.",
     logo: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -78,7 +78,7 @@ export const features = [
     id: "fortnox",
     name: "Fortnox",
     description:
-      "Integration with Fortnox is a powerful solution that allows seamless connectivity between Midday and Fortnox, a popular cloud-based accounting and financial management software. This integration streamlines financial processes by enabling data exchange, synchronization, and automation between Midday and Fortnox.",
+      "By seamlessly integrating with Fortnox, you gain the ability to effortlessly synchronize every transaction and attachment, ensuring meticulous organization within your bookkeeping software. This comprehensive synchronization not only enhances accuracy but also significantly expedites the process, enabling you or your accountant to efficiently close your books with greater speed and precision.",
     logo: (
       <svg
         width="100"
@@ -101,7 +101,7 @@ export const features = [
     id: "visma",
     name: "Visma",
     description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+      "Integrating with Visma allows you to synchronize transactions and attachments, neatly organizing them within your bookkeeping software. This streamlines the process for you or your accountant to close your books faster.",
     logo: (
       <svg
         width="119"
@@ -130,69 +130,69 @@ export const features = [
       </svg>
     ),
   },
-  {
-    id: "linear",
-    name: "Linear",
-    description:
-      "Midday and Linear enhancing collaboration and streamline workflows. Seamlessly link files managed in Midday to relevant tasks or projects in Linear, providing a more cohesive experience for teams managing financial data alongside project development.",
-    logo: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={60}
-        height={60}
-        fill="none"
-      >
-        <g clipPath="url(#a)">
-          <path
-            fill="currentColor"
-            d="M.735 36.914c-.133-.57.545-.928.958-.514l21.908 21.907c.413.413.054 1.091-.515.958C12.031 56.67 3.33 47.969.736 36.914Zm-.734-8.78c-.01.17.053.335.174.456L31.41 59.825c.12.12.287.185.456.174a30.042 30.042 0 0 0 4.178-.556.583.583 0 0 0 .287-.989L1.546 23.67a.583.583 0 0 0-.99.287 30.04 30.04 0 0 0-.555 4.177Zm2.526-10.31a.593.593 0 0 0 .124.66l38.866 38.865a.593.593 0 0 0 .66.124 29.941 29.941 0 0 0 3.111-1.61.589.589 0 0 0 .11-.924L5.061 14.602a.589.589 0 0 0-.924.11 29.949 29.949 0 0 0-1.61 3.111Zm5.068-6.98a.591.591 0 0 1-.026-.812C13.068 3.876 21.067 0 29.97 0 46.556 0 60 13.444 60 30.029c0 8.904-3.876 16.903-10.032 22.402a.592.592 0 0 1-.813-.026l-41.56-41.56Z"
-          />
-        </g>
-        <defs>
-          <clipPath id="a">
-            <path fill="currentColor" d="M0 0h60v60H0z" />
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-  },
-  {
-    id: "notion",
-    name: "Notion",
-    description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
-    logo: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={60}
-        height={60}
-        fill="none"
-      >
-        <g clipPath="url(#a)">
-          <path
-            fill="transparent"
-            d="M3.61 2.588 36.81.136c4.078-.35 5.126-.114 7.69 1.75l10.598 7.466c1.748 1.284 2.33 1.633 2.33 3.031V53.33c0 2.566-.932 4.084-4.194 4.316L14.68 59.98c-2.448.116-3.614-.234-4.896-1.868L1.98 47.964C.58 46.096 0 44.698 0 43.064V6.668C0 4.57.932 2.82 3.61 2.588Z"
-          />
-          <path
-            fill="currentColor"
-            fillRule="evenodd"
-            d="M36.81.136 3.61 2.588C.932 2.82 0 4.57 0 6.668v36.396c0 1.634.58 3.032 1.98 4.9l7.804 10.148c1.282 1.634 2.448 1.984 4.896 1.868l38.554-2.334c3.26-.233 4.194-1.75 4.194-4.316V12.384c0-1.326-.523-1.708-2.065-2.84L44.5 1.886c-2.564-1.864-3.612-2.1-7.69-1.75ZM15.552 11.714c-3.148.212-3.862.26-5.65-1.194L5.356 6.904c-.462-.468-.23-1.052.934-1.168l31.916-2.332c2.68-.234 4.076.7 5.124 1.516l5.474 3.966c.234.118.816.816.116.816l-32.96 1.984-.408.028Zm-3.67 41.266V18.22c0-1.518.466-2.218 1.862-2.336L51.6 13.668c1.284-.116 1.864.7 1.864 2.216v34.528c0 1.518-.234 2.802-2.33 2.918l-36.226 2.1c-2.096.116-3.026-.582-3.026-2.45Zm35.76-32.896c.232 1.05 0 2.1-1.05 2.22l-1.746.346v25.664c-1.516.816-2.912 1.282-4.078 1.282-1.865 0-2.33-.584-3.726-2.332L25.624 29.3v17.38l3.612.818s0 2.1-2.915 2.1l-8.034.466c-.234-.468 0-1.634.815-1.866l2.098-.582v-22.98l-2.912-.236c-.234-1.05.348-2.566 1.98-2.684l8.62-.58 11.88 18.196V23.234l-3.028-.348c-.234-1.285.698-2.22 1.862-2.334l8.04-.468Z"
-            clipRule="evenodd"
-          />
-        </g>
-        <defs>
-          <clipPath id="a">
-            <path fill="currentColor" d="M0 0h60v60H0z" />
-          </clipPath>
-        </defs>
-      </svg>
-    ),
-  },
+  // {
+  //   id: "linear",
+  //   name: "Linear",
+  //   description:
+  //     "Midday and Linear enhancing collaboration and streamline workflows. Seamlessly link files managed in Midday to relevant tasks or projects in Linear, providing a more cohesive experience for teams managing financial data alongside project development.",
+  //   logo: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       width={60}
+  //       height={60}
+  //       fill="none"
+  //     >
+  //       <g clipPath="url(#a)">
+  //         <path
+  //           fill="currentColor"
+  //           d="M.735 36.914c-.133-.57.545-.928.958-.514l21.908 21.907c.413.413.054 1.091-.515.958C12.031 56.67 3.33 47.969.736 36.914Zm-.734-8.78c-.01.17.053.335.174.456L31.41 59.825c.12.12.287.185.456.174a30.042 30.042 0 0 0 4.178-.556.583.583 0 0 0 .287-.989L1.546 23.67a.583.583 0 0 0-.99.287 30.04 30.04 0 0 0-.555 4.177Zm2.526-10.31a.593.593 0 0 0 .124.66l38.866 38.865a.593.593 0 0 0 .66.124 29.941 29.941 0 0 0 3.111-1.61.589.589 0 0 0 .11-.924L5.061 14.602a.589.589 0 0 0-.924.11 29.949 29.949 0 0 0-1.61 3.111Zm5.068-6.98a.591.591 0 0 1-.026-.812C13.068 3.876 21.067 0 29.97 0 46.556 0 60 13.444 60 30.029c0 8.904-3.876 16.903-10.032 22.402a.592.592 0 0 1-.813-.026l-41.56-41.56Z"
+  //         />
+  //       </g>
+  //       <defs>
+  //         <clipPath id="a">
+  //           <path fill="currentColor" d="M0 0h60v60H0z" />
+  //         </clipPath>
+  //       </defs>
+  //     </svg>
+  //   ),
+  // },
+  // {
+  //   id: "notion",
+  //   name: "Notion",
+  //   description:
+  //     "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+  //   logo: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       width={60}
+  //       height={60}
+  //       fill="none"
+  //     >
+  //       <g clipPath="url(#a)">
+  //         <path
+  //           fill="transparent"
+  //           d="M3.61 2.588 36.81.136c4.078-.35 5.126-.114 7.69 1.75l10.598 7.466c1.748 1.284 2.33 1.633 2.33 3.031V53.33c0 2.566-.932 4.084-4.194 4.316L14.68 59.98c-2.448.116-3.614-.234-4.896-1.868L1.98 47.964C.58 46.096 0 44.698 0 43.064V6.668C0 4.57.932 2.82 3.61 2.588Z"
+  //         />
+  //         <path
+  //           fill="currentColor"
+  //           fillRule="evenodd"
+  //           d="M36.81.136 3.61 2.588C.932 2.82 0 4.57 0 6.668v36.396c0 1.634.58 3.032 1.98 4.9l7.804 10.148c1.282 1.634 2.448 1.984 4.896 1.868l38.554-2.334c3.26-.233 4.194-1.75 4.194-4.316V12.384c0-1.326-.523-1.708-2.065-2.84L44.5 1.886c-2.564-1.864-3.612-2.1-7.69-1.75ZM15.552 11.714c-3.148.212-3.862.26-5.65-1.194L5.356 6.904c-.462-.468-.23-1.052.934-1.168l31.916-2.332c2.68-.234 4.076.7 5.124 1.516l5.474 3.966c.234.118.816.816.116.816l-32.96 1.984-.408.028Zm-3.67 41.266V18.22c0-1.518.466-2.218 1.862-2.336L51.6 13.668c1.284-.116 1.864.7 1.864 2.216v34.528c0 1.518-.234 2.802-2.33 2.918l-36.226 2.1c-2.096.116-3.026-.582-3.026-2.45Zm35.76-32.896c.232 1.05 0 2.1-1.05 2.22l-1.746.346v25.664c-1.516.816-2.912 1.282-4.078 1.282-1.865 0-2.33-.584-3.726-2.332L25.624 29.3v17.38l3.612.818s0 2.1-2.915 2.1l-8.034.466c-.234-.468 0-1.634.815-1.866l2.098-.582v-22.98l-2.912-.236c-.234-1.05.348-2.566 1.98-2.684l8.62-.58 11.88 18.196V23.234l-3.028-.348c-.234-1.285.698-2.22 1.862-2.334l8.04-.468Z"
+  //           clipRule="evenodd"
+  //         />
+  //       </g>
+  //       <defs>
+  //         <clipPath id="a">
+  //           <path fill="currentColor" d="M0 0h60v60H0z" />
+  //         </clipPath>
+  //       </defs>
+  //     </svg>
+  //   ),
+  // },
   {
     id: "calcom",
     name: "Cal.com",
     description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+      "Integrating with Cal.com automatically synchronizes your tracked hours with your calendar, allowing you to easily monitor your progress on your projects.",
     logo: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -207,23 +207,23 @@ export const features = [
       </svg>
     ),
   },
-  {
-    id: "stripe",
-    name: "Stripe",
-    description:
-      "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
-    logo: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={72}
-        height={30}
-        fill="none"
-      >
-        <path
-          fill="currentColor"
-          d="M5.058 11.735c0-.78.64-1.08 1.699-1.08 1.52 0 3.438.46 4.958 1.28V7.236c-1.66-.66-3.299-.92-4.958-.92C2.699 6.317 0 8.437 0 11.975c0 5.517 7.597 4.637 7.597 7.016 0 .92-.8 1.22-1.92 1.22-1.659 0-3.778-.68-5.457-1.6v4.758c1.859.8 3.738 1.14 5.457 1.14 4.159 0 7.017-2.06 7.017-5.638-.02-5.957-7.636-4.897-7.636-7.136Zm13.514-9.416-4.878 1.04-.02 16.012c0 2.959 2.219 5.138 5.177 5.138 1.64 0 2.84-.3 3.499-.66v-4.058c-.64.26-3.799 1.18-3.799-1.78v-7.096h3.799V6.657H18.55l.02-4.338Zm9.995 5.817-.32-1.479H23.93v17.492h4.998V12.294c1.18-1.539 3.178-1.259 3.798-1.04V6.658c-.64-.24-2.979-.68-4.158 1.48Zm5.377-1.479h5.018v17.492h-5.018V6.657Zm0-1.52 5.018-1.079V0l-5.018 1.06v4.078Zm15.453 1.18c-1.959 0-3.218.92-3.918 1.56l-.26-1.24h-4.398v23.31l4.998-1.06.02-5.658c.72.52 1.78 1.26 3.538 1.26 3.579 0 6.837-2.879 6.837-9.216-.02-5.797-3.318-8.956-6.817-8.956Zm-1.199 13.774c-1.18 0-1.88-.42-2.359-.94l-.02-7.416c.52-.58 1.24-.98 2.379-.98 1.82 0 3.079 2.04 3.079 4.658 0 2.679-1.24 4.678-3.079 4.678Zm23.77-4.618c0-5.118-2.48-9.156-7.218-9.156-4.757 0-7.636 4.038-7.636 9.116 0 6.017 3.398 9.056 8.276 9.056 2.379 0 4.178-.54 5.538-1.3v-3.998c-1.36.68-2.92 1.1-4.898 1.1-1.94 0-3.659-.68-3.878-3.039h9.775c0-.26.04-1.3.04-1.78Zm-9.876-1.9c0-2.258 1.379-3.198 2.638-3.198 1.22 0 2.52.94 2.52 3.199h-5.158Z"
-        />
-      </svg>
-    ),
-  },
+  // {
+  //   id: "stripe",
+  //   name: "Stripe",
+  //   description:
+  //     "Integration with Visma offers a comprehensive solution for connecting Midday with Visma's suite of financial and administrative software. This integration facilitates the exchange of data and automates key financial processes, enhancing the efficiency of your operations and ensuring accurate financial management.",
+  //   logo: (
+  //     <svg
+  //       xmlns="http://www.w3.org/2000/svg"
+  //       width={72}
+  //       height={30}
+  //       fill="none"
+  //     >
+  //       <path
+  //         fill="currentColor"
+  //         d="M5.058 11.735c0-.78.64-1.08 1.699-1.08 1.52 0 3.438.46 4.958 1.28V7.236c-1.66-.66-3.299-.92-4.958-.92C2.699 6.317 0 8.437 0 11.975c0 5.517 7.597 4.637 7.597 7.016 0 .92-.8 1.22-1.92 1.22-1.659 0-3.778-.68-5.457-1.6v4.758c1.859.8 3.738 1.14 5.457 1.14 4.159 0 7.017-2.06 7.017-5.638-.02-5.957-7.636-4.897-7.636-7.136Zm13.514-9.416-4.878 1.04-.02 16.012c0 2.959 2.219 5.138 5.177 5.138 1.64 0 2.84-.3 3.499-.66v-4.058c-.64.26-3.799 1.18-3.799-1.78v-7.096h3.799V6.657H18.55l.02-4.338Zm9.995 5.817-.32-1.479H23.93v17.492h4.998V12.294c1.18-1.539 3.178-1.259 3.798-1.04V6.658c-.64-.24-2.979-.68-4.158 1.48Zm5.377-1.479h5.018v17.492h-5.018V6.657Zm0-1.52 5.018-1.079V0l-5.018 1.06v4.078Zm15.453 1.18c-1.959 0-3.218.92-3.918 1.56l-.26-1.24h-4.398v23.31l4.998-1.06.02-5.658c.72.52 1.78 1.26 3.538 1.26 3.579 0 6.837-2.879 6.837-9.216-.02-5.797-3.318-8.956-6.817-8.956Zm-1.199 13.774c-1.18 0-1.88-.42-2.359-.94l-.02-7.416c.52-.58 1.24-.98 2.379-.98 1.82 0 3.079 2.04 3.079 4.658 0 2.679-1.24 4.678-3.079 4.678Zm23.77-4.618c0-5.118-2.48-9.156-7.218-9.156-4.757 0-7.636 4.038-7.636 9.116 0 6.017 3.398 9.056 8.276 9.056 2.379 0 4.178-.54 5.538-1.3v-3.998c-1.36.68-2.92 1.1-4.898 1.1-1.94 0-3.659-.68-3.878-3.039h9.775c0-.26.04-1.3.04-1.78Zm-9.876-1.9c0-2.258 1.379-3.198 2.638-3.198 1.22 0 2.52.94 2.52 3.199h-5.158Z"
+  //       />
+  //     </svg>
+  //   ),
+  // },
 ];
