@@ -66,6 +66,10 @@ export async function UserMenu({ onlySignOut }) {
                 </DropdownMenuItem>
               </Link>
 
+              <Link href="/account/support">
+                <DropdownMenuItem>Support</DropdownMenuItem>
+              </Link>
+
               <Link href="/account/teams">
                 <DropdownMenuItem>
                   Teams

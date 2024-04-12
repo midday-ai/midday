@@ -48,6 +48,9 @@ export function Footer() {
                 <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
                   <Link href="/download">Download</Link>
                 </li>
+                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                  <Link href="/feature-request">Feature Request</Link>
+                </li>
               </ul>
             </div>
 

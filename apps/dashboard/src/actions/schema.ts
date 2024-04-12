@@ -129,11 +129,6 @@ export const shareFileSchema = z.object({
   expireIn: z.number(),
 });
 
-export const voteSchema = z.object({
-  revalidatePath: z.string(),
-  id: z.string(),
-});
-
 export const connectBankAccountSchema = z.object({
   accessToken: z.string().nullable().optional(), // Teller
   enrollmentId: z.string().nullable().optional(), // Teller

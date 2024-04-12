@@ -46,10 +46,13 @@ export const sendSupportAction = action(sendSupportSchema, async (data) => {
 
   const response = await client.createThread({
     title: data.subject,
+    description: data.message,
     priority: mapToPriorityNumber(data.priority),
     customerIdentifier: {
       customerId: customer.data?.customer.id,
     },
+    // Support
+    labelTypeIds: ["lt_01HV93FQT6NSC1EN2HHA6BG9WK"],
     components: [
       {
         componentText: {

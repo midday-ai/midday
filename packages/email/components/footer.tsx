@@ -78,6 +78,15 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
                 Download
               </Link>
             </Row>
+
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] text-[14px]"
+                href="https://midday.ai/feature-request"
+              >
+                Feature Request
+              </Link>
+            </Row>
           </Section>
         }
         columnOneStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
@@ -124,6 +133,14 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
                 href="https://go.midday.ai/TJIL5mQ"
               >
                 Privacy policy
+              </Link>
+            </Row>
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] text-[14px]"
+                href="https://app.midday.ai/account/support"
+              >
+                Support
               </Link>
             </Row>
           </Section>

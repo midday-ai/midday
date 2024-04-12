@@ -11,9 +11,7 @@ import { VaultChart } from "@/components/charts/vault-chart";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,

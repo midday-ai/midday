@@ -1,9 +1,8 @@
 import { verifyUnsubscribeLink } from "@midday/email";
-import { client } from "@midday/jobs";
+import { client } from "@midday/jobs/src/client";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 export default async function Unsubscribe({
   params,
@@ -12,15 +11,9 @@ export default async function Unsubscribe({
 }) {
   const decodedToken = await verifyUnsubscribeLink(params.code);
 
-  if (!decodedToken?.id) {
-    return notFound();
-  }
-
   try {
     await client.cancelRunsForEvent(decodedToken.id as string);
-  } catch {
-    return notFound();
-  }
+  } catch {}
 
   return (
     <div>

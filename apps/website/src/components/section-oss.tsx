@@ -33,7 +33,12 @@ export function SectionOSS() {
           <Link href="/open-startup" className="underline">
             metrics
           </Link>
-          .
+          . <br />
+          and you can also{" "}
+          <Link href="/feature-request" className="underline">
+            request a feature
+          </Link>{" "}
+          and vote on which ones we should prioritize.
         </p>
       </div>
 
