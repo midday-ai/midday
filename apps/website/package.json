@@ -23,7 +23,7 @@
     "date-fns": "^3.6.0",
     "framer-motion": "^11.0.28",
     "geist": "^1.3.0",
-    "next": "14.2.0-canary.39",
+    "next": "14.2.0",
     "next-mdx-remote": "^4.4.1",
     "next-themes": "^0.3.0",
     "react": "18.2.0",
@@ -36,7 +36,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@types/node": "^20.12.7",
-    "@types/react": "^18.2.75",
-    "@types/react-dom": "^18.2.24"
+    "@types/react": "^18.2.77",
+    "@types/react-dom": "^18.2.25"
   }
 }

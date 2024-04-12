@@ -31,9 +31,12 @@ export function ChartPeriod({ defaultValue, disabled }) {
   }
 
   if (state?.to) {
-    placeholder = `${placeholder} -${format(new Date(state.to), "LLL dd, y")} `;
+    placeholder = `${placeholder} - ${format(
+      new Date(state.to),
+      "LLL dd, y"
+    )} `;
   } else {
-    placeholder = `${placeholder} -${format(
+    placeholder = `${placeholder} - ${format(
       new Date(defaultValue.to),
       "LLL dd, y"
     )} `;
