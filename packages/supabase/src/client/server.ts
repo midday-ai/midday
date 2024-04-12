@@ -7,38 +7,6 @@ type CreateClientOptions = {
   schema?: string;
 };
 
-// https://github.com/supabase/supabase-js/issues/1010
-// https://github.com/supabase/auth-js/issues/873
-const conWarn = console.warn;
-const conLog = console.log;
-
-const IGNORE_WARNINGS = [
-  "Using supabase.auth.getSession() is potentially insecure",
-  "Using the user object as returned from supabase.auth.getSession()",
-];
-
-console.warn = (...args) => {
-  const match = args.find((arg) =>
-    typeof arg === "string"
-      ? IGNORE_WARNINGS.find((warning) => arg.includes(warning))
-      : false
-  );
-  if (!match) {
-    conWarn(...args);
-  }
-};
-
-console.log = (...args) => {
-  const match = args.find((arg) =>
-    typeof arg === "string"
-      ? IGNORE_WARNINGS.find((warning) => arg.includes(warning))
-      : false
-  );
-  if (!match) {
-    conLog(...args);
-  }
-};
-
 export const createClient = (options: CreateClientOptions) => {
   const cookieStore = cookies();
 
