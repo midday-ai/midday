@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 
 export function PostStatus({ status }) {
   return (

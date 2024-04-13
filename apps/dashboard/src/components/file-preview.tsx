@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   Dialog,
   DialogContentFrameless,
@@ -8,7 +9,6 @@ import {
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
-import { cn } from "@midday/ui/utils";
 import { FileType } from "@midday/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";

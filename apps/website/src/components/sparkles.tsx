@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import type { Container, SingleOrMultiple } from "@tsparticles/engine";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";

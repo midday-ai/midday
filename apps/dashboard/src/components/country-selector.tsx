@@ -2,6 +2,7 @@
 
 import countries from "@midday/location/src/country-flag";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   Command,
   CommandEmpty,
@@ -14,7 +15,6 @@ import {
   PopoverContentWithoutPortal,
   PopoverTrigger,
 } from "@midday/ui/popover";
-import { cn } from "@midday/ui/utils";
 import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons";
 import * as React from "react";
 

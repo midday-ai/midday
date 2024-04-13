@@ -1,7 +1,7 @@
 "use client";
 
 import { ConnectBankButton } from "@/components/connect-bank-button";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import { useQueryState } from "nuqs";
 import TransactionsScreenOneLight from "public/assets/transactions-1-light.png";

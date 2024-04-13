@@ -1,11 +1,11 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { cn } from "@midday/ui/cn";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
-import { cn } from "@midday/ui/utils";
 import { format, isSameDay } from "date-fns";
 
 export function TrackerDayCard({

@@ -2,6 +2,7 @@
 
 import { Button } from "@midday/ui/button";
 import { useCarousel } from "@midday/ui/carousel";
+import { cn } from "@midday/ui/cn";
 import {
   Dialog,
   DialogContent,
@@ -17,7 +18,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { cn } from "@midday/ui/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FaXTwitter } from "react-icons/fa6";

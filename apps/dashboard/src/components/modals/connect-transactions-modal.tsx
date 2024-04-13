@@ -3,6 +3,7 @@
 import { useLogSnag } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
+import { cn } from "@midday/ui/cn";
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,6 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { cn } from "@midday/ui/utils";
 import Image from "next/image";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import CsvLogoDark from "public/assets/csv-dark.png";

@@ -1,13 +1,21 @@
 "use client";
 
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
-import { cn } from "@midday/ui/utils";
-import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { formatDistanceToNow } from "date-fns";
 import { InboxStatus } from "./inbox-status";
 
-export function InboxSkeleton({ numberOfItems, className }) {
+type InboxSkeletonProps = {
+  numberOfItems: number;
+  className?: string;
+};
+
+export function InboxSkeleton({
+  numberOfItems,
+  className,
+}: InboxSkeletonProps) {
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       {[...Array(numberOfItems)].map((_, index) => (
@@ -41,7 +49,26 @@ export function InboxSkeleton({ numberOfItems, className }) {
   );
 }
 
-export function InboxList({ items, selectedId, updateInbox, setSelectedId }) {
+type InboxListProps = {
+  items: {
+    id: string;
+    read: boolean;
+    status: string;
+    name: string;
+    created_at: string;
+    file_name?: string;
+  }[];
+  selectedId: string;
+  updateInbox: (item: { id: string; read: boolean }) => void;
+  setSelectedId: (id: string) => void;
+};
+
+export function InboxList({
+  items,
+  selectedId,
+  updateInbox,
+  setSelectedId,
+}: InboxListProps) {
   if (!items.length) {
     return (
       <div className="h-full w-full flex items-center justify-center">

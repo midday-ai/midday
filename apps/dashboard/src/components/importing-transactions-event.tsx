@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import Lottie from "lottie-react";
 import { useTheme } from "next-themes";

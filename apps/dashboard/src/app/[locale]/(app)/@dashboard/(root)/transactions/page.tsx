@@ -5,7 +5,7 @@ import { Table } from "@/components/tables/transactions";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";

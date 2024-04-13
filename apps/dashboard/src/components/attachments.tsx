@@ -7,6 +7,7 @@ import { formatSize } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   HoverCard,
   HoverCardContent,
@@ -14,7 +15,6 @@ import {
 } from "@midday/ui/hover-card";
 import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
 import { isSupportedFilePreview, stripSpecialCharacters } from "@midday/utils";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";

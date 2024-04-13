@@ -1,5 +1,5 @@
 import { getMetrics } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { cookies } from "next/headers";
 import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";

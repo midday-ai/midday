@@ -401,7 +401,11 @@ html.todesktop a {
 }
 
 /* Desktop Command menu */
-html.todesktop-panel {
+html.light.todesktop-panel {
+  background-color: rgba(255,255,255,.5);
+}
+
+html.dark.todesktop-panel {
   background-color: rgba(000,000,000,.3);
 }
 

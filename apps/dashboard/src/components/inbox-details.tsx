@@ -2,6 +2,7 @@
 
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -12,7 +13,6 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
 import { FileType } from "@midday/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";

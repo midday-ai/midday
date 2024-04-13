@@ -3,7 +3,7 @@
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 import {
   Bar,

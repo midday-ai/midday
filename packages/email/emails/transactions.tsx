@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import {
   Body,
   Button,
@@ -13,7 +13,6 @@ import {
   Text,
 } from "@react-email/components";
 import { format } from "date-fns";
-import * as React from "react";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
@@ -191,7 +190,7 @@ export const TransactionsEmail = ({
                             "!text-[#00C969]"
                         )}
                       >
-                        <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
+                        <Text className="text-[14px] m-0 p-0 mt-1 pb-1 line-clamp-1">
                           {transaction.name}
                         </Text>
                       </Link>

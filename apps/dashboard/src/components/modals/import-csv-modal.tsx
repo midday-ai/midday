@@ -5,6 +5,7 @@ import { useUpload } from "@/hooks/use-upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,6 @@ import {
   TableRow,
 } from "@midday/ui/table";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
-import { cn } from "@midday/ui/utils";
 import { stripSpecialCharacters } from "@midday/utils";
 import { format, isSameYear } from "date-fns";
 import { useAction } from "next-safe-action/hooks";

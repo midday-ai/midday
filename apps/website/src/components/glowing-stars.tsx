@@ -2,7 +2,7 @@
 
 "use client";
 
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { AnimatePresence, motion } from "framer-motion";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 

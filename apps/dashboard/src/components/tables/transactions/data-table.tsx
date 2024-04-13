@@ -5,7 +5,6 @@ import { updateColumnVisibilityAction } from "@/actions/update-column-visibility
 import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
-import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
@@ -18,7 +17,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 import { useState } from "react";
@@ -35,7 +33,6 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data: initialData,
-  teamId,
   initialTransactionId,
   pageSize,
   loadMore,
@@ -45,9 +42,7 @@ export function DataTable<TData, TValue>({
   initialColumnVisibility,
   page,
 }: DataTableProps<TData, TValue>) {
-  const supabase = createClient();
   const { toast } = useToast();
-  const router = useRouter();
   const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
@@ -150,7 +145,6 @@ export function DataTable<TData, TValue>({
 
   const [transactionId, setTransactionId] = useQueryState("id", {
     defaultValue: initialTransactionId,
-    shallow: false,
   });
 
   const selectedTransaction = data.find(
@@ -231,28 +225,6 @@ export function DataTable<TData, TValue>({
       document.removeEventListener("keydown", keyDownHandler);
     };
   }, [transactionId, data, setTransactionId]);
-
-  useEffect(() => {
-    const channel = supabase
-      .channel("realtime_transactions")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "transactions",
-          filter: `team_id=eq.${teamId}`,
-        },
-        () => {
-          router.refresh();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [supabase, router, teamId]);
 
   return (
     <div className="rounded-md mb-8 relative">

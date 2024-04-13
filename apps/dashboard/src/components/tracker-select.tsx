@@ -1,6 +1,6 @@
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { cn } from "@midday/ui/utils";
 import {
   addDays,
   addMonths,

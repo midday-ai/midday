@@ -1,7 +1,7 @@
 "use client";
 
 import { useTrackerStore } from "@/store/tracker";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import {
   eachDayOfInterval,
   eachWeekOfInterval,

@@ -25,7 +25,7 @@ export const CommandComponent = ({ selected = MenuOption.Root }) => {
 
   return (
     <motion.div
-      className="h-full bg-background backdrop-filter backdrop-blur-lg"
+      className="h-full backdrop-filter backdrop-blur-lg"
       key={selected}
       initial={{ scale: 0.98, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}

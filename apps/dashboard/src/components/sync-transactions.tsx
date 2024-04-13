@@ -1,4 +1,5 @@
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -6,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { cn } from "@midday/ui/utils";
 import { useEventDetails } from "@trigger.dev/react";
 
 export function SyncTransactions({

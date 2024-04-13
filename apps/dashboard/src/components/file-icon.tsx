@@ -1,5 +1,5 @@
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { cn } from "@midday/ui/utils";
 
 export function FileIcon({ mimetype, name, isFolder, size = 16, className }) {
   if (name === "exports") {
