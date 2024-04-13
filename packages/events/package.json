@@ -8,7 +8,7 @@
         "clean": "rm -rf .turbo node_modules",
         "lint": "biome check .",
         "format": "biome --write .",
-        "check:types": "tsc --noEmit"
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@logsnag/next": "^1.0.3"

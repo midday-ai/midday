@@ -12,6 +12,7 @@ interface TrackOptions {
   description?: string;
   user_id?: string;
   icon?: string;
+  tags?: Record<string, string | number | boolean>;
 }
 
 export const setupLogSnag = async (options: Props) => {

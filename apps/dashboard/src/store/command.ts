@@ -12,7 +12,7 @@ interface CommandState {
   isOpen: boolean;
   setOpen: (menu?: MenuOption) => void;
   setMenu: (menu: MenuOption) => void;
-  selected: MenuOption;
+  selected?: MenuOption;
 }
 
 export const useCommandStore = create<CommandState>()((set) => ({

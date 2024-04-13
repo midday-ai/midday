@@ -4,7 +4,6 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "tooling/*",
     "packages/email/*"
   ],
   "scripts": {
@@ -21,7 +20,7 @@
     "jobs:dashboard": "turbo jobs --filter=@midday/dashboard",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
-    "check:types": "turbo typecheck"
+    "typecheck": "turbo typecheck"
   },
   "dependencies": {
     "@biomejs/biome": "1.6.4",

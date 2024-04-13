@@ -11,7 +11,7 @@ export const bulkUpdateTransactionsAction = action(
   async (payload) => {
     const supabase = createClient();
     const user = await getUser();
-    const teamId = user.data.team_id;
+    const teamId = user?.data?.team_id;
 
     const updatePromises = payload.data.map(async ({ id, ...params }) => {
       return supabase

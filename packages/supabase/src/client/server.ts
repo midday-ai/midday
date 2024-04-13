@@ -7,7 +7,7 @@ type CreateClientOptions = {
   schema?: string;
 };
 
-export const createClient = (options: CreateClientOptions) => {
+export const createClient = (options?: CreateClientOptions) => {
   const cookieStore = cookies();
 
   const schema = options?.schema ?? "public";

@@ -12,7 +12,7 @@ export const updateSimilarTransactionsAction = action(
   async ({ id }) => {
     const supabase = createClient();
     const user = await getUser();
-    const teamId = user.data.team_id;
+    const teamId = user?.data?.team_id;
 
     await updateSimilarTransactions(supabase, id);
 
