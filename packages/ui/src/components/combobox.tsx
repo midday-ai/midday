@@ -2,9 +2,8 @@
 
 import { Command as CommandPrimitive } from "cmdk";
 import { Loader2 } from "lucide-react";
-import * as React from "react";
 import { useCallback, useRef, useState } from "react";
-import { cn } from "../utils/cn";
+import { cn } from "../utils";
 import {
   CommandGroup,
   CommandInput,
