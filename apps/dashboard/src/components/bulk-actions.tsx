@@ -3,12 +3,12 @@
 import { bulkUpdateTransactionsAction } from "@/actions/bulk-update-transactions-action";
 import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Label } from "@midday/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { RadioGroup, RadioGroupItem } from "@midday/ui/radio-group";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
 import * as Tabs from "@radix-ui/react-tabs";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";

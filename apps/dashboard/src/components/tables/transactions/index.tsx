@@ -1,5 +1,5 @@
 import { DataTable } from "@/components/tables/transactions/data-table";
-import { getTransactions, getUser } from "@midday/supabase/cached-queries";
+import { getTransactions } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { columns } from "./columns";
 import { NoResults } from "./empty-states";
@@ -17,7 +17,6 @@ export async function Table({
   query,
 }) {
   const hasFilters = Object.keys(filter).length > 0;
-  const { data: userData } = await getUser();
   const initialColumnVisibility = JSON.parse(
     cookies().get("transactions-columns")?.value || "[]"
   );
@@ -66,7 +65,6 @@ export async function Table({
 
   return (
     <DataTable
-      teamId={userData.team_id}
       initialColumnVisibility={initialColumnVisibility}
       initialTransactionId={initialTransactionId}
       columns={columns}

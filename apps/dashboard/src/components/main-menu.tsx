@@ -3,6 +3,7 @@
 import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -10,7 +11,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { cn } from "@midday/ui/utils";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   AnimatePresence,

@@ -15,11 +15,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import { cn } from "@midday/ui/cn";
 import { Label } from "@midday/ui/label";
 import { Skeleton } from "@midday/ui/skeleton";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";

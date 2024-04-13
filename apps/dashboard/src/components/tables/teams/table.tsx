@@ -19,6 +19,7 @@ import {
 } from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Dialog, DialogTrigger } from "@midday/ui/dialog";
 import {
   DropdownMenu,
@@ -30,7 +31,6 @@ import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
 import {
   ColumnDef,
   flexRender,

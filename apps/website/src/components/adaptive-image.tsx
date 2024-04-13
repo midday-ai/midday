@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import type ImageProps from "next/image";
 

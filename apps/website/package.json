@@ -16,7 +16,6 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@openstatus/react": "^0.0.3",
-    "@pqina/flip": "^1.8.3",
     "@team-plain/typescript-sdk": "^3.9.0",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/analytics": "^1.2.2",

@@ -4,7 +4,7 @@ import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";

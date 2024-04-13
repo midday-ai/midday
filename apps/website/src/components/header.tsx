@@ -1,6 +1,7 @@
 "use client";
 
 import { GlowingStarsBackgroundCard } from "@/components/glowing-stars";
+import { cn } from "@midday/ui/cn";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,7 +10,6 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@midday/ui/navigation-menu";
-import { cn } from "@midday/ui/utils";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

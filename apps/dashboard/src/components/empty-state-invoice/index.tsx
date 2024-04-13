@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import Invoice1Light from "public/assets/invoice-1-light.png";
 import Invoice1 from "public/assets/invoice-1.png";

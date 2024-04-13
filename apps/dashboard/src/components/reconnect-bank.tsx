@@ -1,9 +1,9 @@
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { cn } from "@midday/ui/utils";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { ReconnectButton } from "./reconnect-button";
 

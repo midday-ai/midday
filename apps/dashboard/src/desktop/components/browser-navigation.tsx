@@ -1,7 +1,7 @@
 "use client";
 
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { cn } from "@midday/ui/utils";
 import { webContents } from "@todesktop/client-core";
 import { useEffect, useState } from "react";
 

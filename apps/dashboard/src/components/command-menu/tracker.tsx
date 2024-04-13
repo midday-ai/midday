@@ -2,10 +2,10 @@ import { BackButton } from "@/components/command-menu/back-button";
 import { useCommandStore } from "@/store/command";
 import { useTrackerStore } from "@/store/tracker";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { CommandGroup, CommandItem, CommandList } from "@midday/ui/command";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
-import { cn } from "@midday/ui/utils";
 
 const projects = [
   {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/locales/client";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 
 export function TrackerStatus({ status }) {
   const t = useI18n();

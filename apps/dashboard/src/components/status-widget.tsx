@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { getStatus } from "@openstatus/react";
 
 export async function StatusWidget() {

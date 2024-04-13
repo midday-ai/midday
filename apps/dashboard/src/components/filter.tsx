@@ -3,6 +3,7 @@
 import { useI18n } from "@/locales/client";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
+import { cn } from "@midday/ui/cn";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import { MonthRangePicker } from "@midday/ui/month-range-picker";
@@ -15,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { cn } from "@midday/ui/utils";
 import * as Tabs from "@radix-ui/react-tabs";
 import { format } from "date-fns";
 import { ChevronDown, ChevronRight, Trash2, X } from "lucide-react";

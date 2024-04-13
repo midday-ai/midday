@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchStatus } from "@/actions/fetch-status";
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import { useEffect, useState } from "react";
 
 export function StatusWidget() {

@@ -69,7 +69,7 @@
     "./toaster": "./src/components/toaster.tsx",
     "./tooltip": "./src/components/tooltip.tsx",
     "./use-toast": "./src/components/use-toast.tsx",
-    "./utils": "./src/utils"
+    "./cn": "./src/utils/cn.ts"
   },
   "dependencies": {
     "@mui/icons-material": "^5.15.15",

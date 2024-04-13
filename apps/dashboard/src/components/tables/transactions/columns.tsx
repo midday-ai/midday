@@ -18,6 +18,7 @@ import {
 } from "@midday/ui/alert-dialog";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,8 +33,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { cn } from "@midday/ui/utils";
-import { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format, isSameYear } from "date-fns";
 import { Loader2 } from "lucide-react";
 
@@ -81,7 +81,7 @@ export const columns: ColumnDef<Payment>[] = [
                 )}
               >
                 <div className="flex space-x-2 items-center">
-                  <span>{row.original.name}</span>
+                  <span className="line-clamp-1">{row.original.name}</span>
                   {row.original.status === "pending" && (
                     <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
                       <span>Pending</span>

@@ -191,7 +191,7 @@ export const TransactionsEmail = ({
                             "!text-[#00C969]"
                         )}
                       >
-                        <Text className="text-[14px] m-0 p-0 mt-1 pb-1">
+                        <Text className="text-[14px] m-0 p-0 mt-1 pb-1 line-clamp-1">
                           {transaction.name}
                         </Text>
                       </Link>

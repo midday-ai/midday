@@ -5,6 +5,7 @@ import { useVaultContext } from "@/store/vault/hook";
 import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
+import { cn } from "@midday/ui/cn";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -12,7 +13,6 @@ import {
   ContextMenuTrigger,
 } from "@midday/ui/context-menu";
 import { useToast } from "@midday/ui/use-toast";
-import { cn } from "@midday/ui/utils";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
