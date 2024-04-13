@@ -8,7 +8,7 @@
         "clean": "rm -rf .turbo node_modules",
         "lint": "biome check .",
         "format": "biome --write .",
-        "check:types": "tsc --noEmit"
+        "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
         "typescript": "^5.4.4"

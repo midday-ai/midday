@@ -1,6 +1,6 @@
 "use server";
 
-import { VisibilityState } from "@tanstack/react-table";
+import type { VisibilityState } from "@tanstack/react-table";
 import { cookies } from "next/headers";
 
 type Props = {

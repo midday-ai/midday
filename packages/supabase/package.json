@@ -6,7 +6,7 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "check:types": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "login": "supabase login",
     "db:generate": "supabase gen types typescript --project-id pytddvqiozwrhfbwqazp --schema public > src/types/db.ts"
   },
