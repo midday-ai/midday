@@ -159,9 +159,13 @@ export function FeatureRequestModal() {
                 )}
               />
 
-              <DialogFooter className="flex space-x-4 pt-4">
+              <DialogFooter className="md:flex md:space-x-4 pt-4">
                 <DialogTrigger asChild>
-                  <Button type="button" variant="outline">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-2 md:mt-0"
+                  >
                     Cancel
                   </Button>
                 </DialogTrigger>
