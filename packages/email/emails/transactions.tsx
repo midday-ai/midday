@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/utils";
+import { cn } from "@midday/ui/cn";
 import {
   Body,
   Button,
@@ -13,7 +13,6 @@ import {
   Text,
 } from "@react-email/components";
 import { format } from "date-fns";
-import * as React from "react";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
 import { getI18n } from "../locales";
