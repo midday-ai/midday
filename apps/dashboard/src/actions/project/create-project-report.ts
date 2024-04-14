@@ -19,14 +19,14 @@ export const createProjectReport = action(
     const { data } = await supabase
       .from("tracker_reports")
       .insert({
-        team_id: user.data.team_id,
+        team_id: user?.data?.team_id,
         project_id: params.projectId,
       })
       .select("*")
       .single();
 
     const link = await dub.links.create({
-      url: `${params.baseUrl}/report/project/${data.id}`,
+      url: `${params.baseUrl}/report/project/${data?.id}`,
       rewrite: true,
     });
 
@@ -41,8 +41,8 @@ export const createProjectReport = action(
       .single();
 
     const logsnag = await setupLogSnag({
-      userId: user.data.id,
-      fullName: user.data.full_name,
+      userId: user?.data?.id,
+      fullName: user?.data?.full_name,
     });
 
     logsnag.track({

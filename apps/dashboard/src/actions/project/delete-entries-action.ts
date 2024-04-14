@@ -16,12 +16,12 @@ export const deleteEntriesAction = action(
 
     await supabase.from("tracker_entries").delete().eq("id", params.id);
 
-    revalidateTag(`tracker_projects_${user.data.team_id}`);
-    revalidateTag(`tracker_entries_${user.data.team_id}`);
+    revalidateTag(`tracker_projects_${user?.data?.team_id}`);
+    revalidateTag(`tracker_entries_${user?.data?.team_id}`);
 
     const logsnag = await setupLogSnag({
-      userId: user.data.id,
-      fullName: user.data.full_name,
+      userId: user?.data?.id,
+      fullName: user?.data?.full_name,
     });
 
     logsnag.track({

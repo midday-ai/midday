@@ -1,6 +1,12 @@
 import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
+  type GetMetricsParams,
+  type GetSpendingParams,
+  type GetTrackerProjectsQueryParams,
+  type GetTrackerRecordsByRangeParams,
+  type GetTransactionsParams,
+  type GetVaultParams,
   getBankConnectionsByTeamIdQuery,
   getMetricsQuery,
   getSpendingQuery,
@@ -17,7 +23,7 @@ import {
   getVaultQuery,
 } from "../queries";
 
-export const getTransactions = async (params) => {
+export const getTransactions = async (params: GetTransactionsParams) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -146,7 +152,7 @@ export const getTeamMembers = async () => {
   )(teamId);
 };
 
-export const getSpending = async (params) => {
+export const getSpending = async (params: GetSpendingParams) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -167,7 +173,7 @@ export const getSpending = async (params) => {
   )(params);
 };
 
-export const getMetrics = async (params) => {
+export const getMetrics = async (params: GetMetricsParams) => {
   const supabase = createClient();
 
   const user = await getUser();
@@ -189,7 +195,7 @@ export const getMetrics = async (params) => {
   )(params);
 };
 
-export const getVault = async (params) => {
+export const getVault = async (params: GetVaultParams) => {
   const supabase = createClient();
 
   const user = await getUser();
@@ -273,7 +279,9 @@ export const getUserInvites = async () => {
   )();
 };
 
-export const getTrackerProjects = async (params) => {
+export const getTrackerProjects = async (
+  params: GetTrackerProjectsQueryParams
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -290,7 +298,9 @@ export const getTrackerProjects = async (params) => {
   )(params);
 };
 
-export const getTrackerRecordsByRange = async (params) => {
+export const getTrackerRecordsByRange = async (
+  params: GetTrackerRecordsByRangeParams
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;

@@ -17,14 +17,14 @@ export const createProjectAction = action(
 
     const { data } = await createProject(supabase, {
       ...params,
-      team_id: user.data.team_id,
+      team_id: user?.data?.team_id,
     });
 
-    revalidateTag(`tracker_projects_${user.data.team_id}`);
+    revalidateTag(`tracker_projects_${user?.data?.team_id}`);
 
     const logsnag = await setupLogSnag({
-      userId: user.data.id,
-      fullName: user.data.full_name,
+      userId: user?.data?.id,
+      fullName: user?.data?.full_name,
     });
 
     logsnag.track({

@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 
 type Props = {
   userId?: string;
-  fullName: string;
+  fullName?: string | null;
 };
 
 interface TrackOptions {
@@ -25,7 +25,7 @@ export const setupLogSnag = async (options: Props) => {
     disableTracking: Boolean(process.env.NEXT_PUBLIC_LOGSNAG_DISABLED!),
   });
 
-  if (trackingConsent && userId) {
+  if (trackingConsent && userId && fullName) {
     await logsnag.identify({
       user_id: userId,
       properties: {

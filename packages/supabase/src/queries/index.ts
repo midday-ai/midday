@@ -142,7 +142,7 @@ export async function getTeamUserQuery(
   };
 }
 
-type GetSpendingParams = {
+export type GetSpendingParams = {
   from: string;
   to: string;
   teamId: string;
@@ -211,7 +211,7 @@ export async function getSpendingQuery(
   };
 }
 
-type GetTransactionsParams = {
+export type GetTransactionsParams = {
   teamId: string;
   to: number;
   from: number;
@@ -433,7 +433,7 @@ export async function getSimilarTransactions(
     .throwOnError();
 }
 
-type GetMetricsParams = {
+export type GetMetricsParams = {
   teamId: string;
   from: string;
   to: string;
@@ -570,7 +570,7 @@ export async function getMetricsQuery(
   };
 }
 
-type GetVaultParams = {
+export type GetVaultParams = {
   teamId: string;
   path?: string;
 };
@@ -775,7 +775,7 @@ export async function getInboxQuery(
   };
 }
 
-type GetTrackerProjectsQueryParams = {
+export type GetTrackerProjectsQueryParams = {
   teamId: string;
   to: number;
   from?: number;
@@ -833,7 +833,7 @@ export async function getTrackerProjectsQuery(
   };
 }
 
-type GetTrackerRecordsByRangeParams = {
+export type GetTrackerRecordsByRangeParams = {
   teamId: string;
   from: string;
   to: string;

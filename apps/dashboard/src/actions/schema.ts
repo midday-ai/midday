@@ -252,8 +252,6 @@ export const updateInboxSchema = z.object({
   transaction_id: z.string().nullable().optional(),
 });
 
-export const changeInboxFilterSchema = inboxFilter.optional();
-
 export const createProjectSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),

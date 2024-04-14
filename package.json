@@ -25,7 +25,7 @@
   "dependencies": {
     "@biomejs/biome": "1.6.4",
     "@calcom/embed-react": "^1.4.0",
-    "@manypkg/cli": "^0.21.3",
+    "@manypkg/cli": "^0.21.4",
     "turbo": "^1.13.2",
     "typescript": "^5.4.5"
   },
