@@ -4,7 +4,7 @@ import type { Database } from "../types";
 
 type CreateClientOptions = {
   admin?: boolean;
-  schema?: string;
+  schema?: "public" | "storage";
 };
 
 export const createClient = (options?: CreateClientOptions) => {
