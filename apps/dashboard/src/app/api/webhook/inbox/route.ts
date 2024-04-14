@@ -32,7 +32,7 @@ const ipRange = [
 export async function POST(req: Request) {
   const supabase = createClient({ admin: true });
   const res = await req.json();
-  const clientIP = headers().get("x-forwarded-for");
+  const clientIP = headers().get("x-forwarded-for") ?? "";
 
   const logsnag = await setupLogSnag();
 
@@ -116,7 +116,6 @@ export async function POST(req: Request) {
           file_name: uniqueFileName,
           content_type: contentType,
           size: attachment.ContentLength,
-          html: res.HtmlBody,
         };
       } catch (error) {
         console.log(error);

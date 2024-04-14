@@ -69,7 +69,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "bank_accounts_team_id_fkey"
+            foreignKeyName: "public_bank_accounts_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -203,7 +203,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inbox_team_id_fkey"
+            foreignKeyName: "public_inbox_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -494,6 +494,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "public_transaction_attachments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "public_transaction_attachments_transaction_id_fkey"
             columns: ["transaction_id"]
             isOneToOne: false
@@ -505,13 +512,6 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "transaction_attachments_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -676,17 +676,17 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "public_user_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "user_invites_invited_by_fkey"
             columns: ["invited_by"]
             isOneToOne: false
             referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_invites_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -843,7 +843,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "bank_accounts_team_id_fkey"
+            foreignKeyName: "public_bank_accounts_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -992,7 +992,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "inbox_team_id_fkey"
+            foreignKeyName: "public_inbox_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"

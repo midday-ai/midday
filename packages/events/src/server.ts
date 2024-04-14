@@ -15,7 +15,7 @@ interface TrackOptions {
   tags?: Record<string, string | number | boolean>;
 }
 
-export const setupLogSnag = async (options: Props) => {
+export const setupLogSnag = async (options?: Props) => {
   const { userId, fullName } = options ?? {};
   const trackingConsent = cookies().get("tracking-consent")?.value === "0";
 
