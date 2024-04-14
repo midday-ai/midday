@@ -6,15 +6,18 @@ import { formatISO } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
 
 export function TrackerHeader({ date: initialDate, totalDuration }) {
-  const [params, setParams] = useQueryStates({
-    date: parseAsString.withDefault(initialDate),
-    create: parseAsString,
-    projectId: parseAsString,
-    update: parseAsString,
-    day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
-    ),
-  });
+  const [params, setParams] = useQueryStates(
+    {
+      date: parseAsString.withDefault(initialDate),
+      create: parseAsString,
+      projectId: parseAsString,
+      update: parseAsString,
+      day: parseAsString.withDefault(
+        formatISO(new Date(), { representation: "date" })
+      ),
+    },
+    { shallow: false }
+  );
 
   return (
     <div className="flex justify-between">
