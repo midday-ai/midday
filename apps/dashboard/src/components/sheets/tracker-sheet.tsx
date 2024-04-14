@@ -84,6 +84,10 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   };
 
   async function fetchData({ day, projectId }) {
+    if (!user) {
+      return null;
+    }
+
     try {
       const { data, meta } = await getTrackerRecordsByRangeQuery(supabase, {
         projectId,
