@@ -844,6 +844,10 @@ export async function getTrackerRecordsByRangeQuery(
   supabase: Client,
   params: GetTrackerRecordsByRangeParams
 ) {
+  if (!params.teamId) {
+    return null;
+  }
+
   const query = supabase
     .from("tracker_entries")
     .select(

@@ -84,7 +84,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
   };
 
   async function fetchData({ day, projectId }) {
-    if (!user) {
+    if (!user?.team_id) {
       return null;
     }
 
