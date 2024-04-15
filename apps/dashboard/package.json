@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@baselime/node-opentelemetry": "^0.5.8",
+    "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.3.4",
     "@midday/events": "workspace:*",
     "@midday/jobs": "workspace:*",
@@ -36,6 +37,7 @@
     "@tsparticles/react": "^3.0.0",
     "@tsparticles/slim": "^3.3.0",
     "@uidotdev/usehooks": "^2.4.1",
+    "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.41",
     "ai": "^3.0.22",

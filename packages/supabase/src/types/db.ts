@@ -137,7 +137,6 @@ export type Database = {
           file_name: string | null
           file_path: string[] | null
           forwarded_to: string | null
-          html: string | null
           id: string
           issuer_name: string | null
           name: string | null
@@ -160,7 +159,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string
           issuer_name?: string | null
           name?: string | null
@@ -183,7 +181,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string
           issuer_name?: string | null
           name?: string | null
@@ -909,7 +906,6 @@ export type Database = {
           content_type: string | null
           created_at: string | null
           currency: string | null
-          decrypted_html: string | null
           decrypted_issuer_name: string | null
           decrypted_name: string | null
           decrypted_subject: string | null
@@ -918,7 +914,6 @@ export type Database = {
           file_name: string | null
           file_path: string[] | null
           forwarded_to: string | null
-          html: string | null
           id: string | null
           issuer_name: string | null
           name: string | null
@@ -936,7 +931,6 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           currency?: string | null
-          decrypted_html?: never
           decrypted_issuer_name?: never
           decrypted_name?: never
           decrypted_subject?: never
@@ -945,7 +939,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string | null
           issuer_name?: string | null
           name?: string | null
@@ -963,7 +956,6 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           currency?: string | null
-          decrypted_html?: never
           decrypted_issuer_name?: never
           decrypted_name?: never
           decrypted_subject?: never
@@ -972,7 +964,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string | null
           issuer_name?: string | null
           name?: string | null
@@ -1173,6 +1164,30 @@ export type Database = {
         }
         Returns: string
       }
+      get_profit: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
+      get_revenue: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
       gtrgm_compress: {
         Args: {
           "": unknown
@@ -1327,7 +1342,10 @@ export type Database = {
       transactionStatus: "posted" | "pending" | "excluded"
     }
     CompositeTypes: {
-      [_ in never]: never
+      metrics_record: {
+        date: string | null
+        value: number | null
+      }
     }
   }
 }

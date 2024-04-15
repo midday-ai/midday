@@ -82,8 +82,8 @@ export const inviteTeamMembersAction = action(
     }
 
     const logsnag = await setupLogSnag({
-      userId: user.data.id,
-      fullName: user.data.full_name,
+      userId: user?.data?.id,
+      fullName: user?.data?.full_name,
     });
 
     logsnag.track({

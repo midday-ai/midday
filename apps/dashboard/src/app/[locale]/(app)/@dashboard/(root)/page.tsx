@@ -26,9 +26,6 @@ const defaultValue = {
 export default async function Overview({ searchParams }) {
   // TODO: Check if there are transactions instead
   const bankConnections = await getBankConnectionsByTeamId();
-  const chartPeriod = cookies().has(Cookies.ChartPeriod)
-    ? JSON.parse(cookies().get(Cookies.ChartPeriod)?.value)
-    : {};
 
   const initialPeriod = cookies().has("spending-period")
     ? JSON.parse(cookies().get("spending-period")?.value)
@@ -39,7 +36,6 @@ export default async function Overview({ searchParams }) {
       };
 
   const value = {
-    ...chartPeriod,
     ...(searchParams.from && { from: searchParams.from }),
     ...(searchParams.to && { to: searchParams.to }),
     period: searchParams.period,

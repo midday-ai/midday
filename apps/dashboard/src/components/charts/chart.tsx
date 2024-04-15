@@ -9,7 +9,7 @@ export async function Chart({ value, defaultValue, disabled }) {
   const type = cookies().get("chart-type")?.value ?? "profit";
   const data = disabled
     ? chartData
-    : await getMetrics({ ...defaultValue, ...value, type });
+    : await getMetrics({ ...defaultValue, ...value, type, currency: "SEK" });
 
   return (
     <div className="relative mt-32">

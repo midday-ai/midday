@@ -3,6 +3,7 @@ import { LogSnagProvider } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { Toaster } from "@midday/ui/toaster";
+import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -49,6 +50,7 @@ export default function Layout({
         {children}
         <SpeedInsights />
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
