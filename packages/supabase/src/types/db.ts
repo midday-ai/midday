@@ -1164,6 +1164,14 @@ export type Database = {
         }
         Returns: string
       }
+      get_bank_account_currencies: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          currency: string
+        }[]
+      }
       get_profit: {
         Args: {
           team_id: string

@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@google-cloud/documentai": "^8.2.0",
-    "@langchain/core": "^0.1.57",
+    "@google-cloud/documentai": "^8.3.0",
+    "@langchain/core": "^0.1.58",
     "@langchain/openai": "^0.0.28",
     "@trigger.dev/react": "^2.3.18",
     "@trigger.dev/resend": "^2.3.18",

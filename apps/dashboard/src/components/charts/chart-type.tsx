@@ -13,7 +13,12 @@ import { useOptimisticAction } from "next-safe-action/hooks";
 
 const options = ["profit", "revenue"];
 
-export function ChartType({ initialValue, disabled }) {
+type Props = {
+  initialValue: string;
+  disabled?: boolean;
+};
+
+export function ChartType({ initialValue, disabled }: Props) {
   const t = useI18n();
   const { execute, optimisticData } = useOptimisticAction(
     changeChartTypeAction,

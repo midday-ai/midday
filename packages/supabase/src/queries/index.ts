@@ -401,6 +401,19 @@ export async function getSimilarTransactions(
     .throwOnError();
 }
 
+type GetBankAccountsCurrenciesParams = {
+  teamId: string;
+};
+
+export async function getBankAccountsCurrenciesQuery(
+  supabase: Client,
+  params: GetBankAccountsCurrenciesParams
+) {
+  return supabase.rpc("get_bank_account_currencies", {
+    team_id: params.teamId,
+  });
+}
+
 export type GetMetricsParams = {
   teamId: string;
   from: string;

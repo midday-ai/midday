@@ -63,6 +63,7 @@ export const connectBankAccountAction = action(
     });
 
     revalidateTag(`bank_accounts_${teamId}`);
+    revalidateTag(`bank_accounts_currencies_${teamId}`);
     revalidateTag(`bank_connections_${teamId}`);
 
     return event;

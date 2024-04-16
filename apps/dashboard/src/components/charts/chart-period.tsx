@@ -9,8 +9,16 @@ import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 
-export function ChartPeriod({ defaultValue, disabled }) {
-  let placeholder;
+type Props = {
+  defaultValue: {
+    to: string;
+    from: string;
+  };
+  disabled?: string;
+};
+
+export function ChartPeriod({ defaultValue, disabled }: Props) {
+  let placeholder: string;
 
   const { execute } = useAction(changeChartPeriodAction);
 

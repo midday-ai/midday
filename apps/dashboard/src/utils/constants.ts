@@ -9,4 +9,5 @@ export const Cookies = {
   MobileOverlay: "mobile-overlay",
   Widgets: "overview-widgets",
   TrackingConsent: "tracking-consent",
+  ChartCurrency: "chart-currency",
 };
