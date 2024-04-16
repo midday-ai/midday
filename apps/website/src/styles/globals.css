@@ -91,9 +91,10 @@ pre {
     border-radius: 10px;
     margin: 20px 0 !important;
     background-color: #0C0C0C;
+    overflow: auto;
 }
 
 pre code {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500 !important;
 }
