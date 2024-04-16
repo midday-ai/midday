@@ -5,7 +5,7 @@ import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { share } from "@midday/supabase/storage";
-import Dub from "dub";
+import { Dub } from "dub";
 import { action } from "./safe-action";
 import { shareFileSchema } from "./schema";
 

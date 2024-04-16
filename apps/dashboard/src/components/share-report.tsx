@@ -34,11 +34,20 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CopyInput } from "./copy-input";
 
-const FormSchema = z.object({
+const formSchema = z.object({
   expireAt: z.date().optional(),
 });
 
-export function ShareReport({ defaultValue, type }) {
+type Props = {
+  defaultValue: {
+    from: string;
+    to: string;
+  };
+  type: "profit" | "revenue";
+  currency: string;
+};
+
+export function ShareReport({ defaultValue, type, currency }: Props) {
   const [isOpen, setOpen] = useState(false);
   const { toast, dismiss } = useToast();
 
@@ -46,17 +55,18 @@ export function ShareReport({ defaultValue, type }) {
   const from = searchParams?.get("from") ?? defaultValue.from;
   const to = searchParams?.get("to") ?? defaultValue.to;
 
-  const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
   });
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
+  function onSubmit(data: z.infer<typeof formSchema>) {
     createReport.execute({
       baseUrl: window.location.origin,
       from,
       to,
       type,
       expiresAt: data.expireAt && new Date(data.expireAt).toISOString(),
+      currency,
     });
   }
 

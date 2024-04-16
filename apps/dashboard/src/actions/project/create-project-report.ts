@@ -6,7 +6,7 @@ import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
-import Dub from "dub";
+import { Dub } from "dub";
 
 const dub = new Dub({ projectSlug: "midday" });
 

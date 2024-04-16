@@ -1,19 +1,13 @@
 import { Cookies } from "@/utils/constants";
-import {
-  getBankAccountsCurrencies,
-  getMetrics,
-} from "@midday/supabase/cached-queries";
+import { getMetrics } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { cookies } from "next/headers";
 import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";
 import { chartData } from "./data";
 
-export async function Chart({ value, defaultValue, disabled }) {
+export async function Chart({ value, defaultValue, disabled, currency }) {
   const type = cookies().get(Cookies.ChartType)?.value ?? "profit";
-  const currency = cookies().has(Cookies.ChartCurrency)
-    ? cookies().get(Cookies.ChartCurrency)?.value
-    : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
 
   const data = disabled
     ? chartData

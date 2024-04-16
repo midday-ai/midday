@@ -58,7 +58,7 @@ export default async function Report({ params }) {
     from: data.from,
     to: data.to,
     type: data.type,
-    currency: "SEK",
+    currency: data.currency,
   });
 
   return (

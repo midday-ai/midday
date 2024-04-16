@@ -3,7 +3,10 @@ import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
+import {
+  getBankAccountsCurrencies,
+  getBankConnectionsByTeamId,
+} from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
@@ -27,8 +30,12 @@ export default async function Overview({ searchParams }) {
   // TODO: Check if there are transactions instead
   const bankConnections = await getBankConnectionsByTeamId();
 
-  const initialPeriod = cookies().has("spending-period")
-    ? JSON.parse(cookies().get("spending-period")?.value)
+  const currency = cookies().has(Cookies.ChartCurrency)
+    ? cookies().get(Cookies.ChartCurrency)?.value
+    : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
+
+  const initialPeriod = cookies().has(Cookies.SpendingPeriod)
+    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
     : {
         id: "this_month",
         from: startOfYear(new Date()).toISOString(),
@@ -52,8 +59,13 @@ export default async function Overview({ searchParams }) {
     <>
       <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
         <div className="h-[450px]">
-          <ChartSelectors defaultValue={defaultValue} />
-          <Chart value={value} defaultValue={defaultValue} disabled={empty} />
+          <ChartSelectors defaultValue={defaultValue} currency={currency} />
+          <Chart
+            value={value}
+            defaultValue={defaultValue}
+            disabled={empty}
+            currency={currency}
+          />
         </div>
 
         <Widgets
