@@ -6,7 +6,7 @@ image: "/images/logsnag.png"
 tag: "Engineering"
 ---
 
-It's important for every new product to take the right decisions as often you can, and thanks for our public roadmap, votes on feature request and building in public we have a deep conection with our users, but on top of that we also want data to back our decisions.
+It's important for every new product to take the right decisions as often you can, and thanks for our public roadmap, votes on feature request and building in public we have a deep connection with our users, but on top of that we also want data to back our decisions.
 And thats why we have implemented LogSnag to track a lot of events so we can take data-driven decisions too.
 
 <br />
@@ -21,16 +21,18 @@ where we install `@logsnag/next`.
 The package includes all the events we want to track in Midday for example:
 
 ```typescript
-SignedIn: {
-    name: "User Signed In",
-    icon: "🌝",
-    channel: "login",
-},
-    SignOut: {
-    name: "User Signed Out",
-    icon: "🌝",
-    channel: "login",
-},
+{
+    SignedIn: {
+        name: "User Signed In",
+        icon: "🌝",
+        channel: "login",
+    },
+        SignOut: {
+        name: "User Signed Out",
+        icon: "🌝",
+        channel: "login",
+    },
+}
 ```
 
 <br />
