@@ -23,6 +23,7 @@ export const createReportAction = action(createReportSchema, async (params) => {
       type: params.type,
       expire_at: params.expiresAt,
       currency: params.currency,
+      created_by: user.data.id,
     })
     .select("*")
     .single();

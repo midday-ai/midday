@@ -21,6 +21,7 @@ export const createProjectReport = action(
       .insert({
         team_id: user?.data?.team_id,
         project_id: params.projectId,
+        created_by: user?.data?.id,
       })
       .select("*")
       .single();
