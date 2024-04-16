@@ -1,45 +1,13 @@
+import { UTCDate } from "@date-fns/utc";
 import {
   addDays,
-  addMonths,
-  addWeeks,
-  differenceInMonths,
-  differenceInWeeks,
-  format,
+  endOfMonth,
   isWithinInterval,
+  startOfMonth,
   subYears,
 } from "date-fns";
 import type { Client } from "../types";
 import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
-
-export function getPagination(page: number, size: number) {
-  const limit = size ? +size : 3;
-  const from = page ? page * limit : 0;
-  const to = page ? from + size - 1 : size - 1;
-
-  return { from, to };
-}
-
-export function getMonthRange(current: Date, previous: Date) {
-  const range = [];
-  const months = Math.abs(differenceInMonths(current, previous)) + 1;
-
-  for (let i = 0; i < months; i++) {
-    range.push(addMonths(new Date(current), i));
-  }
-
-  return range;
-}
-
-export function getWeekRange(current: Date, previous: Date) {
-  const range = [];
-  const weeks = Math.abs(differenceInWeeks(current, previous)) + 1;
-
-  for (let i = 0; i < weeks; i++) {
-    range.push(addWeeks(new Date(current), i));
-  }
-
-  return range;
-}
 
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
@@ -284,7 +252,7 @@ export async function getTransactionsQuery(
   }
 
   if (search?.query && search?.fuzzy) {
-    if (!Number.isNaN(parseInt(search.query))) {
+    if (!Number.isNaN(Number.parseInt(search.query))) {
       // NOTE: amount_text is a pg_function that casts amount to text
       query.like("amount_text", `%${search.query}%`);
     } else {
@@ -293,7 +261,7 @@ export async function getTransactionsQuery(
   }
 
   if (search?.query && !search?.fuzzy) {
-    if (!Number.isNaN(parseInt(search.query))) {
+    if (!Number.isNaN(Number.parseInt(search.query))) {
       // NOTE: amount_text is a pg_function that casts amount to text
       query.like("amount_text", `%${search.query}%`);
     } else {
@@ -433,137 +401,89 @@ export async function getSimilarTransactions(
     .throwOnError();
 }
 
+type GetBankAccountsCurrenciesParams = {
+  teamId: string;
+};
+
+export async function getBankAccountsCurrenciesQuery(
+  supabase: Client,
+  params: GetBankAccountsCurrenciesParams
+) {
+  return supabase.rpc("get_bank_account_currencies", {
+    team_id: params.teamId,
+  });
+}
+
 export type GetMetricsParams = {
   teamId: string;
   from: string;
   to: string;
+  currency: string;
   type?: "revenue" | "profit";
-  period?: "weekly" | "monthly";
 };
 
 export async function getMetricsQuery(
   supabase: Client,
   params: GetMetricsParams
 ) {
-  const { teamId, from, to, type, period = "monthly" } = params;
+  const { teamId, from, to, type = "profit", currency } = params;
 
-  const previousFromDate = subYears(new Date(from), 1);
-  const dateFormat = period === "monthly" ? "y-M" : "y-ww";
+  const rpc = type === "profit" ? "get_profit" : "get_revenue";
 
-  const query = supabase
-    .from("transactions")
-    .select(
-      `
-      amount,
-      date,
-      currency
-    `
-    )
-    .eq("team_id", teamId)
-    .or("status.eq.pending,status.eq.posted")
-    .order("date", { ascending: false })
-    .order("name", { ascending: false })
-    .limit(1000000)
-    .gte("date", previousFromDate.toDateString())
-    .lte("date", to);
+  const fromDate = new UTCDate(from);
+  const toDate = new UTCDate(to);
 
-  if (type === "profit") {
-    query.or("category.neq.transfer,category.is.null");
-  }
-
-  if (type === "revenue") {
-    query.eq("category", "income");
-  }
-
-  const { data } = await query.throwOnError();
-
-  const sum = [
-    ...data
-      .reduce((map, item) => {
-        const key = format(new Date(item.date), dateFormat);
-        const prev = map.get(key);
-
-        if (prev) {
-          prev.value += item.amount;
-        } else {
-          map.set(key, {
-            key,
-            date: item.date,
-            value: item.amount,
-            currency: item.currency,
-          });
-        }
-
-        return map;
-      }, new Map())
-      .values(),
-  ];
-
-  const result = sum?.reduce((acc, item) => {
-    const key = format(new Date(item.date), "y");
-
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(item);
-    return acc;
-  }, {});
-
-  const [prevData = [], currentData = [], nextData = []] =
-    Object.values(result);
-
-  // NOTE: If dates spans over years
-  const combinedData = [...currentData, ...nextData];
+  const [{ data: prevData }, { data: currentData }] = await Promise.all([
+    supabase.rpc(rpc, {
+      team_id: teamId,
+      date_from: subYears(startOfMonth(fromDate), 1).toDateString(),
+      date_to: subYears(endOfMonth(toDate), 1).toDateString(),
+      currency,
+    }),
+    supabase.rpc(rpc, {
+      team_id: teamId,
+      date_from: startOfMonth(fromDate).toDateString(),
+      date_to: endOfMonth(toDate).toDateString(),
+      currency,
+    }),
+  ]);
 
   const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
-  const currentTotal = combinedData?.reduce(
+  const currentTotal = currentData?.reduce(
     (value, item) => item.value + value,
     0
   );
-
-  const current = new Date(from);
-  const previous = new Date(to);
-  const range =
-    period === "weekly"
-      ? getWeekRange(current, previous)
-      : getMonthRange(current, previous);
 
   return {
     summary: {
       currentTotal,
       prevTotal,
-      currency: data?.at(0)?.currency,
+      currency,
     },
     meta: {
       type,
-      period,
     },
-    result: range.map((date) => {
-      const currentKey = format(date, dateFormat);
-      const previousKey = format(subYears(date, 1), dateFormat);
-      const current = combinedData?.find((p) => p.key === currentKey);
-      const currentValue = current?.value ?? 0;
-      const previous = prevData?.find((p) => p.key === previousKey);
-      const previousValue = previous?.value ?? 0;
+    result: currentData?.map((record, index) => {
+      const prev = prevData?.at(index);
 
       return {
-        date: date.toISOString(),
-        previous: {
-          date: subYears(date, 1).toISOString(),
-          value: previousValue ?? 0,
-          currency: previous?.currency || data?.at(0)?.currency,
-        },
-        current: {
-          date: date.toISOString(),
-          value: currentValue ?? 0,
-          currency: current?.currency || data?.at(0)?.currency,
-        },
+        date: record.date,
         precentage: {
           value: getPercentageIncrease(
-            Math.abs(previousValue),
-            Math.abs(currentValue)
+            Math.abs(prev?.value),
+            Math.abs(record.value)
           ),
-          status: currentValue > previousValue ? "positive" : "negative",
+          status: record.value > prev?.value ? "positive" : "negative",
+        },
+        current: {
+          date: record.date,
+          value: record.value,
+          currency,
+        },
+        previous: {
+          date: prev?.date,
+          value: prev?.value,
+          currency,
         },
       };
     }),

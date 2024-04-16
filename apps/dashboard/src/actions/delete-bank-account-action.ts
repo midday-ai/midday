@@ -15,6 +15,7 @@ export const deleteBankAccountAction = action(
     const { data } = await deleteBankAccount(supabase, id);
 
     revalidateTag(`bank_accounts_${data.team_id}`);
+    revalidateTag(`bank_accounts_currencies_${data.team_id}`);
     revalidateTag(`bank_connections_${data.team_id}`);
     revalidateTag(`transactions_${data.team_id}`);
     revalidateTag(`metrics_${data.team_id}`);

@@ -137,7 +137,6 @@ export type Database = {
           file_name: string | null
           file_path: string[] | null
           forwarded_to: string | null
-          html: string | null
           id: string
           issuer_name: string | null
           name: string | null
@@ -160,7 +159,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string
           issuer_name?: string | null
           name?: string | null
@@ -183,7 +181,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string
           issuer_name?: string | null
           name?: string | null
@@ -228,6 +225,8 @@ export type Database = {
       reports: {
         Row: {
           created_at: string
+          created_by: string | null
+          currency: string | null
           expire_at: string | null
           from: string | null
           id: string
@@ -239,6 +238,8 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
+          currency?: string | null
           expire_at?: string | null
           from?: string | null
           id?: string
@@ -250,6 +251,8 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
+          currency?: string | null
           expire_at?: string | null
           from?: string | null
           id?: string
@@ -260,6 +263,13 @@ export type Database = {
           type?: Database["public"]["Enums"]["reportTypes"] | null
         }
         Relationships: [
+          {
+            foreignKeyName: "public_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reports_team_id_fkey"
             columns: ["team_id"]
@@ -374,6 +384,7 @@ export type Database = {
         Row: {
           billable: boolean | null
           created_at: string
+          created_by: string | null
           currency: string | null
           description: string | null
           estimate: number | null
@@ -388,6 +399,7 @@ export type Database = {
         Insert: {
           billable?: boolean | null
           created_at?: string
+          created_by?: string | null
           currency?: string | null
           description?: string | null
           estimate?: number | null
@@ -400,6 +412,7 @@ export type Database = {
         Update: {
           billable?: boolean | null
           created_at?: string
+          created_by?: string | null
           currency?: string | null
           description?: string | null
           estimate?: number | null
@@ -410,6 +423,13 @@ export type Database = {
           team_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "public_tracker_projects_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tracker_projects_team_id_fkey"
             columns: ["team_id"]
@@ -909,7 +929,6 @@ export type Database = {
           content_type: string | null
           created_at: string | null
           currency: string | null
-          decrypted_html: string | null
           decrypted_issuer_name: string | null
           decrypted_name: string | null
           decrypted_subject: string | null
@@ -918,7 +937,6 @@ export type Database = {
           file_name: string | null
           file_path: string[] | null
           forwarded_to: string | null
-          html: string | null
           id: string | null
           issuer_name: string | null
           name: string | null
@@ -936,7 +954,6 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           currency?: string | null
-          decrypted_html?: never
           decrypted_issuer_name?: never
           decrypted_name?: never
           decrypted_subject?: never
@@ -945,7 +962,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string | null
           issuer_name?: string | null
           name?: string | null
@@ -963,7 +979,6 @@ export type Database = {
           content_type?: string | null
           created_at?: string | null
           currency?: string | null
-          decrypted_html?: never
           decrypted_issuer_name?: never
           decrypted_name?: never
           decrypted_subject?: never
@@ -972,7 +987,6 @@ export type Database = {
           file_name?: string | null
           file_path?: string[] | null
           forwarded_to?: string | null
-          html?: string | null
           id?: string | null
           issuer_name?: string | null
           name?: string | null
@@ -1173,6 +1187,38 @@ export type Database = {
         }
         Returns: string
       }
+      get_bank_account_currencies: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          currency: string
+        }[]
+      }
+      get_profit: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
+      get_revenue: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
       gtrgm_compress: {
         Args: {
           "": unknown
@@ -1327,7 +1373,10 @@ export type Database = {
       transactionStatus: "posted" | "pending" | "excluded"
     }
     CompositeTypes: {
-      [_ in never]: never
+      metrics_record: {
+        date: string | null
+        value: number | null
+      }
     }
   }
 }

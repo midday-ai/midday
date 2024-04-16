@@ -7,6 +7,7 @@ import {
   type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
   type GetVaultParams,
+  getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getMetricsQuery,
   getSpendingQuery,
@@ -171,6 +172,30 @@ export const getSpending = async (params: GetSpendingParams) => {
       revalidate: 180,
     }
   )(params);
+};
+
+export const getBankAccountsCurrencies = async () => {
+  const supabase = createClient();
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getBankAccountsCurrenciesQuery(supabase, {
+        teamId,
+      });
+    },
+    ["bank_accounts_currencies", teamId],
+    {
+      tags: [`bank_accounts_currencies_${teamId}`],
+      revalidate: 180,
+    }
+  )();
 };
 
 export const getMetrics = async (params: GetMetricsParams) => {

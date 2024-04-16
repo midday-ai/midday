@@ -58,6 +58,7 @@ export default async function Report({ params }) {
     from: data.from,
     to: data.to,
     type: data.type,
+    currency: data.currency,
   });
 
   return (
