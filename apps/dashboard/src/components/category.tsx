@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/locales/client";
 import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 
 export const categories = {
   travel: "travel",
@@ -44,38 +43,28 @@ export const mapCategoryColor = (name: string) => {
   }[name];
 };
 
-export function CategoryIcon({ name, size = 18 }) {
+type CategoryIconProps = {
+  name: string;
+  size?: number;
+};
+
+export function CategoryIcon({ name, size = 12 }: CategoryIconProps) {
   const color = mapCategoryColor(name);
 
-  return {
-    [categories.travel]: <Icons.FlightTakeoff style={{ color }} size={size} />,
-    [categories.office_supplies]: <Icons.Desk style={{ color }} size={size} />,
-    [categories.meals]: <Icons.FastFood style={{ color }} size={size} />,
-    [categories.software]: <Icons.Save style={{ color }} size={size} />,
-    [categories.fees]: <Icons.Fees style={{ color }} size={size} />,
-    [categories.rent]: <Icons.HomeWork style={{ color }} size={size} />,
-    [categories.income]: <Icons.Payments style={{ color }} size={size} />,
-    [categories.equipment]: <Icons.Devices style={{ color }} size={size} />,
-    [categories.salary]: <Icons.Salary style={{ color }} size={size} />,
-    [categories.transfer]: (
-      <Icons.AccountBalance style={{ color }} size={size} />
-    ),
-    [categories.other]: <Icons.Category style={{ color }} size={size} />,
-    [categories.activity]: <Icons.Celebration style={{ color }} size={size} />,
-    [categories.uncategorized]: (
-      <Icons.Difference style={{ color }} size={size} />
-    ),
-    [categories.taxes]: <Icons.Apartment style={{ color }} size={size} />,
-    [categories.internet_and_telephone]: (
-      <Icons.Sensors style={{ color }} size={size} />
-    ),
-    [categories.facilities_expenses]: (
-      <Icons.DynamicForm style={{ color }} size={size} />
-    ),
-  }[name];
+  return (
+    <div
+      className="rounded-[2px]"
+      style={{ backgroundColor: color, width: size, height: size }}
+    />
+  );
 }
 
-export function Category({ name, className }) {
+type Props = {
+  name: string;
+  className?: string;
+};
+
+export function Category({ name, className }: Props) {
   const t = useI18n();
 
   return (

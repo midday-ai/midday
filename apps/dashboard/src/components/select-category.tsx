@@ -53,7 +53,7 @@ export function SelectCategory({
           <SelectContent className="overflow-y-auto max-h-[350px]">
             {sortedCategories.map((category) => (
               <SelectItem key={category} value={category}>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 items-center">
                   <CategoryIcon name={category} />
                   <span>{t(`categories.${category}`)}</span>
                 </div>
