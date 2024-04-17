@@ -1,7 +1,7 @@
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
-import {
+import type {
   GetAccountsRequest,
   GetTransactionsRequest,
   ProviderParams,

@@ -12,6 +12,7 @@ interface TrackOptions {
   description?: string;
   user_id?: string;
   icon?: string;
+  notify?: boolean;
   tags?: Record<string, string | number | boolean>;
 }
 

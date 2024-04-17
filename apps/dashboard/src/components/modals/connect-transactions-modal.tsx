@@ -27,7 +27,11 @@ import {
   useTellerConnect,
 } from "teller-connect-react";
 
-export function ConnectTransactionsModal({ isEU }) {
+type Props = {
+  isEU: boolean;
+};
+
+export function ConnectTransactionsModal({ isEU }: Props) {
   const { track } = useLogSnag();
   const [token, setToken] = useState();
 

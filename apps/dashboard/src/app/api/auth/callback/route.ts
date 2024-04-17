@@ -45,10 +45,10 @@ export async function GET(req: NextRequest) {
       });
 
       await logsnag.track({
-        event: LogEvents.SignedIn.name,
-        icon: LogEvents.SignedIn.icon,
+        event: LogEvents.SignIn.name,
+        icon: LogEvents.SignIn.icon,
         notify: true,
-        channel: LogEvents.SignedIn.channel,
+        channel: LogEvents.SignIn.channel,
       });
     }
   }

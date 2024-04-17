@@ -4,7 +4,7 @@ export const LogEvents = {
     icon: "⭐",
     channel: "waitlist",
   },
-  SignedIn: {
+  SignIn: {
     name: "User Signed In",
     icon: "🌝",
     channel: "login",
