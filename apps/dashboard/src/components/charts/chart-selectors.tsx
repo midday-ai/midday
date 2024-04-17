@@ -10,11 +10,13 @@ export async function ChartSelectors({ defaultValue, currency }) {
 
   return (
     <div className="flex justify-between mt-6">
-      <ChartType initialValue={chartType} />
+      <div className="flex space-x-2">
+        <ChartType initialValue={chartType} />
+        <ChartCurrency defaultValue={currency} />
+      </div>
 
       <div className="flex space-x-2">
         <ChartPeriod defaultValue={defaultValue} />
-        <ChartCurrency defaultValue={currency} />
         <ShareReport
           defaultValue={defaultValue}
           type={chartType}

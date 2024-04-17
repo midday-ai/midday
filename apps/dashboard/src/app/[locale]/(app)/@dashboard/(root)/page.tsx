@@ -30,6 +30,8 @@ export default async function Overview({ searchParams }) {
   // TODO: Check if there are transactions instead
   const bankConnections = await getBankConnectionsByTeamId();
 
+  const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+
   const currency = cookies().has(Cookies.ChartCurrency)
     ? cookies().get(Cookies.ChartCurrency)?.value
     : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
@@ -65,6 +67,7 @@ export default async function Overview({ searchParams }) {
             defaultValue={defaultValue}
             disabled={empty}
             currency={currency}
+            type={chartType}
           />
         </div>
 

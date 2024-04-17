@@ -1,20 +1,16 @@
-import { Cookies } from "@/utils/constants";
 import { getMetrics } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
-import { cookies } from "next/headers";
 import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";
 import { chartData } from "./data";
 
-export async function Chart({ value, defaultValue, disabled, currency }) {
-  const type = cookies().get(Cookies.ChartType)?.value ?? "profit";
-
+export async function Chart({ value, defaultValue, disabled, currency, type }) {
   const data = disabled
     ? chartData
     : await getMetrics({ ...defaultValue, ...value, type, currency });
 
   return (
-    <div className="relative mt-32">
+    <div className="relative mt-36">
       <div className="absolute -top-[120px] space-y-2">
         <h1 className={cn("text-4xl font-mono", disabled && "skeleton-box")}>
           <FormatAmount

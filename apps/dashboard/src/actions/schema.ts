@@ -75,7 +75,7 @@ export const closeMobileOverlaySchema = z.object({
 });
 
 export const changeChartCurrencySchema = z.string();
-export const changeChartTypeSchema = z.enum(["profit", "revenue"]);
+export const changeChartTypeSchema = z.enum(["profit", "revenue", "burn-rate"]);
 export const changeChartPeriodSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
