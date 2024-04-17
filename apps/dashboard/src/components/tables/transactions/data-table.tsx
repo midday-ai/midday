@@ -145,6 +145,7 @@ export function DataTable<TData, TValue>({
 
   const [transactionId, setTransactionId] = useQueryState("id", {
     defaultValue: initialTransactionId,
+    shallow: false,
   });
 
   const selectedTransaction = data.find(
