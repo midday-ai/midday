@@ -18,6 +18,8 @@ export const changeChartCurrencyAction = action(
     });
 
     revalidateTag(`metrics_${user.data.team_id}`);
+    revalidateTag(`current_burn_rate_${user.data.team_id}`);
+    revalidateTag(`burn_rate_${user.data.team_id}`);
 
     return value;
   }

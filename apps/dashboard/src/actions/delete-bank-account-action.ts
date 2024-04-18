@@ -19,6 +19,8 @@ export const deleteBankAccountAction = action(
     revalidateTag(`bank_connections_${data.team_id}`);
     revalidateTag(`transactions_${data.team_id}`);
     revalidateTag(`metrics_${data.team_id}`);
+    revalidateTag(`current_burn_rate_${data.team_id}`);
+    revalidateTag(`burn_rate_${data.team_id}`);
     revalidateTag(`spending_${data.team_id}`);
     revalidateTag(`insights_${data.team_id}`);
 

@@ -27,6 +27,8 @@ export const bulkUpdateTransactionsAction = action(
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
     revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`current_burn_rate_${teamId}`);
+    revalidateTag(`burn_rate_${teamId}`);
 
     return data;
   }

@@ -1213,6 +1213,13 @@ export type Database = {
           value: number
         }[]
       }
+      get_current_burn_rate: {
+        Args: {
+          team_id: string
+          currency: string
+        }
+        Returns: number
+      }
       get_profit: {
         Args: {
           team_id: string

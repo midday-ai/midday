@@ -15,6 +15,33 @@ import {
 } from "recharts";
 import { findLargestValue, getYAxisWidth } from "./utils";
 
+const ToolTipContent = ({ payload, currency }) => {
+  const { value = 0, date } = payload.at(0)?.payload ?? {};
+
+  const locale = useCurrentLocale();
+
+  return (
+    <div className="w-[240px] rounded-lg border shadow-sm bg-background">
+      <div className="py-2 px-3">
+        <div className="flex items-center justify-between">
+          <p className="font-medium text-[13px]">
+            {formatAmount({
+              maximumFractionDigits: 0,
+              minimumFractionDigits: 0,
+              currency,
+              amount: value,
+              locale,
+            })}
+          </p>
+          <p className="text-xs text-[#606060] text-right">
+            {date && format(new Date(date), "MMM, y")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export function AreaChart({ currency, data }) {
   const locale = useCurrentLocale();
   const maxValue = findLargestValue(data);
@@ -47,6 +74,14 @@ export function AreaChart({ currency, data }) {
           vertical={false}
           className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
         />
+
+        <Tooltip
+          content={(content) => (
+            <ToolTipContent {...content} currency={currency} />
+          )}
+          cursor={false}
+        />
+
         <XAxis
           dataKey="date"
           stroke="#888888"
