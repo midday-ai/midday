@@ -114,7 +114,7 @@ export function AreaChart({ currency, data }) {
         />
         <Tooltip />
         <Area
-          strokeWidth={3}
+          strokeWidth={2.5}
           type="monotone"
           dataKey="value"
           stroke="hsl(var(--primary))"
