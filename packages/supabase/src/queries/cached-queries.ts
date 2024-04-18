@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
+  GetBurnRateQueryParams,
   type GetMetricsParams,
   type GetSpendingParams,
   type GetTrackerProjectsQueryParams,
@@ -9,6 +10,7 @@ import {
   type GetVaultParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
+  getBurnRateQuery,
   getMetricsQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
@@ -337,6 +339,23 @@ export const getTrackerRecordsByRange = async (
     ["tracker_entries", teamId],
     {
       tags: [`tracker_entries_${teamId}`],
+      revalidate: 180,
+    }
+  )(params);
+};
+
+export const getBurnRate = async (params: GetBurnRateQueryParams) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getBurnRateQuery(supabase, { ...params, teamId });
+    },
+    ["burn_rate", teamId],
+    {
+      tags: [`burn_rate_${teamId}`],
       revalidate: 180,
     }
   )(params);

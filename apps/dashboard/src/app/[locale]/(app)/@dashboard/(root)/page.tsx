@@ -1,5 +1,5 @@
-import { Chart } from "@/components/charts/chart";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
+import { Charts } from "@/components/charts/charts";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
@@ -62,7 +62,7 @@ export default async function Overview({ searchParams }) {
       <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
         <div className="h-[450px]">
           <ChartSelectors defaultValue={defaultValue} currency={currency} />
-          <Chart
+          <Charts
             value={value}
             defaultValue={defaultValue}
             disabled={empty}

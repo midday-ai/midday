@@ -1,0 +1,91 @@
+"use client";
+
+import { useCurrentLocale } from "@/locales/client";
+import { formatAmount } from "@/utils/format";
+import { format } from "date-fns";
+import React from "react";
+import {
+  Area,
+  AreaChart as BaseAreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { findLargestValue, getYAxisWidth } from "./utils";
+
+export function AreaChart({ currency, data }) {
+  const locale = useCurrentLocale();
+  const maxValue = findLargestValue(data);
+
+  const getLabel = (value: number) => {
+    return formatAmount({
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+      currency,
+      amount: value,
+      locale,
+    });
+  };
+
+  return (
+    <ResponsiveContainer width="100%" height={290}>
+      <BaseAreaChart data={data}>
+        <defs>
+          <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
+            <stop
+              offset="5%"
+              stopColor="hsl(var(--primary))"
+              stopOpacity={0.4}
+            />
+            <stop offset="95%" stopColor="transparent" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid
+          strokeDasharray="3 3"
+          vertical={false}
+          className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
+        />
+        <XAxis
+          dataKey="date"
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickMargin={20}
+          tickFormatter={(value) => {
+            return format(new Date(value), "MMM");
+          }}
+          tick={{
+            fill: "#606060",
+            fontSize: 12,
+            fontFamily: "var(--font-sans)",
+          }}
+        />
+        <YAxis
+          stroke="#888888"
+          fontSize={12}
+          tickLine={false}
+          axisLine={false}
+          tickMargin={10}
+          tickFormatter={getLabel}
+          width={getYAxisWidth(getLabel(maxValue))}
+          tick={{
+            fill: "#606060",
+            fontSize: 12,
+            fontFamily: "var(--font-sans)",
+          }}
+        />
+        <Tooltip />
+        <Area
+          strokeWidth={3}
+          type="monotone"
+          dataKey="value"
+          stroke="hsl(var(--primary))"
+          fill="url(#colorPv)"
+        />
+      </BaseAreaChart>
+    </ResponsiveContainer>
+  );
+}

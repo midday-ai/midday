@@ -4,14 +4,20 @@ import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";
 import { chartData } from "./data";
 
-export async function Chart({ value, defaultValue, disabled, currency, type }) {
+export async function ProfitRevenueChart({
+  value,
+  defaultValue,
+  disabled,
+  currency,
+  type,
+}) {
   const data = disabled
     ? chartData
     : await getMetrics({ ...defaultValue, ...value, type, currency });
 
   return (
-    <div className="relative mt-36">
-      <div className="absolute -top-[120px] space-y-2">
+    <div className="mt-5">
+      <div className="space-y-2 mb-14">
         <h1 className={cn("text-4xl font-mono", disabled && "skeleton-box")}>
           <FormatAmount
             amount={data.summary.currentTotal}
@@ -29,7 +35,7 @@ export async function Chart({ value, defaultValue, disabled, currency, type }) {
           last period
         </p>
       </div>
-      <BarChart data={data} disabled={disabled} />
+      <BarChart data={data} disabled={disabled} currency={currency} />
     </div>
   );
 }
