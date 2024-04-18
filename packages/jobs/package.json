@@ -19,7 +19,7 @@
     "@trigger.dev/supabase": "^2.3.18",
     "fast-csv": "^5.0.1",
     "d3-dsv": "3",
-    "langchain": "^0.1.33",
+    "langchain": "^0.1.34",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {

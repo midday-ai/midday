@@ -1363,7 +1363,7 @@ export type Database = {
     Enums: {
       bank_providers: "gocardless" | "plaid" | "teller"
       bankProviders: "gocardless" | "plaid" | "teller"
-      reportTypes: "profit" | "revenue"
+      reportTypes: "profit" | "revenue" | "burn_rate"
       teamRoles: "owner" | "member"
       trackerStatus: "in_progress" | "completed"
       transactionCategories:
