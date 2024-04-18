@@ -23,6 +23,7 @@ client.defineJob({
   id: "onboarding-emails",
   name: "Onboarding Emails",
   version: "1.0.0",
+  enabled: false,
   trigger: eventTrigger({
     name: Events.ONBOARDING_EMAILS,
     schema: z.object({
