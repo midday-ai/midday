@@ -144,10 +144,7 @@ export default async function Report({ params }) {
                   />
                 </h1>
               </div>
-              <div className="text-[#878787]">
-                {format(new Date(data.from), "LLL dd, y")} -{" "}
-                {format(new Date(data.to), "LLL dd, y")}
-              </div>
+              <div className="text-[#878787]">This month</div>
             </div>
             <AreaChart currency={data.currency} data={burnRateData} />
           </>
