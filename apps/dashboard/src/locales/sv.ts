@@ -56,7 +56,7 @@ export default {
   chart_type: {
     profit: "Vinst",
     revenue: "Omsättning",
-    "burn-rate": "Brännhastighet",
+    burn_rate: "Brännhastighet",
   },
   folders: {
     all: "Alla",

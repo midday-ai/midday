@@ -56,7 +56,7 @@ export default {
   chart_type: {
     profit: "Profit",
     revenue: "Revenue",
-    "burn-rate": "Burn rate",
+    burn_rate: "Burn rate",
   },
   folders: {
     all: "All",

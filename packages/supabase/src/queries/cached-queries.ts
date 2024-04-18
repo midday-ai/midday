@@ -346,7 +346,9 @@ export const getTrackerRecordsByRange = async (
   )(params);
 };
 
-export const getBurnRate = async (params: GetBurnRateQueryParams) => {
+export const getBurnRate = async (
+  params: Omit<GetBurnRateQueryParams, "teamId">
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -364,7 +366,7 @@ export const getBurnRate = async (params: GetBurnRateQueryParams) => {
 };
 
 export const getCurrentBurnRate = async (
-  params: GetCurrentBurnRateQueryParams
+  params: Omit<GetCurrentBurnRateQueryParams, "teamId">
 ) => {
   const supabase = createClient();
   const user = await getUser();

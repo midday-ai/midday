@@ -6,7 +6,7 @@ export function Charts(props) {
     case "revenue":
     case "profit":
       return <ProfitRevenueChart {...props} />;
-    case "burn-rate":
+    case "burn_rate":
       return <BurnRateChart {...props} />;
     default:
       return null;
