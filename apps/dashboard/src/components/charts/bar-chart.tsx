@@ -1,6 +1,5 @@
 "use client";
 
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
@@ -16,6 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { Status } from "./status";
+import { findLargestValue, getYAxisWidth } from "./utils";
 
 // Override console.error
 // This is a hack to suppress the warning about missing defaultProps in recharts library as of version 2.12
@@ -32,7 +32,7 @@ const ToolTipContent = ({ payload = {} }) => {
   const [current, previous] = payload;
 
   return (
-    <div className="w-[240px] rounded-xl border shadow-sm bg-background">
+    <div className="w-[240px] rounded-lg border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
         <p className="text-sm">
           {t(`chart_type.${current?.payload?.meta?.type}`)}
@@ -104,9 +104,8 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function BarChart({ data, disabled }) {
+export function BarChart({ data, disabled, currency }) {
   const locale = useCurrentLocale();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const formattedData = data.result.map((item) => ({
     ...item,
@@ -116,6 +115,22 @@ export function BarChart({ data, disabled }) {
       data.meta.period === "weekly" ? "w" : "MMM"
     ),
   }));
+
+  const maxValue = Math.max(
+    ...data.result.map((item) =>
+      Math.max(item.current.value, item.previous.value)
+    )
+  );
+
+  const getLabel = (value: number) => {
+    return formatAmount({
+      maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+      currency,
+      amount: value,
+      locale,
+    });
+  };
 
   return (
     <div className="relative">
@@ -131,57 +146,41 @@ export function BarChart({ data, disabled }) {
       </div>
 
       <ResponsiveContainer width="100%" height={290}>
-        <BaseBarChart
-          data={formattedData}
-          margin={{ top: 0, left: isDesktop ? 40 : 0, right: 0, bottom: 0 }}
-          barGap={15}
-          {...{
-            overflow: "visible",
-          }}
-        >
+        <BaseBarChart data={formattedData} barGap={15}>
           <XAxis
             dataKey="date"
             stroke="#888888"
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickMargin={10}
+            tickMargin={20}
             tick={{
               fill: "#606060",
-              fontSize: 14,
+              fontSize: 12,
               fontFamily: "var(--font-sans)",
             }}
           />
-          {isDesktop && (
-            <YAxis
-              stroke="#888888"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              tickFormatter={(value) => {
-                if (data.summary.currency) {
-                  return formatAmount({
-                    maximumFractionDigits: 0,
-                    minimumFractionDigits: 0,
-                    currency: data.summary.currency,
-                    amount: disabled ? 0 : value,
-                    locale,
-                  });
-                }
-                return 0;
-              }}
-              tick={{
-                fill: "#606060",
-                fontSize: 12,
-                fontFamily: "var(--font-sans)",
-              }}
-            />
-          )}
+
+          <YAxis
+            stroke="#888888"
+            fontSize={12}
+            tickLine={false}
+            axisLine={false}
+            tickFormatter={(value) => getLabel(disabled ? 0 : value)}
+            width={getYAxisWidth(maxValue)}
+            tick={{
+              fill: "#606060",
+              fontSize: 12,
+              fontFamily: "var(--font-sans)",
+            }}
+          />
+
           <CartesianGrid
             strokeDasharray="3 3"
             vertical={false}
             className="stoke-[#DCDAD2] dark:stroke-[#2C2C2C]"
           />
+
           <Tooltip content={ToolTipContent} cursor={false} />
 
           <Bar dataKey="previous.value" barSize={16}>

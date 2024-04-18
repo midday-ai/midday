@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@midday/ui/form";
+import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
@@ -103,8 +104,8 @@ export function ShareReport({ defaultValue, type, currency }: Props) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
-      <Button variant="outline" onClick={() => setOpen(true)}>
-        Share
+      <Button variant="outline" onClick={() => setOpen(true)} size="icon">
+        <Icons.Share size={16} />
       </Button>
 
       <DialogContent className="sm:max-w-[425px]">

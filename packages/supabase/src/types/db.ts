@@ -12,6 +12,7 @@ export type Database = {
       bank_accounts: {
         Row: {
           account_id: string
+          balance: number | null
           bank_connection_id: string | null
           created_at: string
           created_by: string
@@ -24,6 +25,7 @@ export type Database = {
         }
         Insert: {
           account_id: string
+          balance?: number | null
           bank_connection_id?: string | null
           created_at?: string
           created_by: string
@@ -36,6 +38,7 @@ export type Database = {
         }
         Update: {
           account_id?: string
+          balance?: number | null
           bank_connection_id?: string | null
           created_at?: string
           created_by?: string
@@ -384,7 +387,6 @@ export type Database = {
         Row: {
           billable: boolean | null
           created_at: string
-          created_by: string | null
           currency: string | null
           description: string | null
           estimate: number | null
@@ -399,7 +401,6 @@ export type Database = {
         Insert: {
           billable?: boolean | null
           created_at?: string
-          created_by?: string | null
           currency?: string | null
           description?: string | null
           estimate?: number | null
@@ -412,7 +413,6 @@ export type Database = {
         Update: {
           billable?: boolean | null
           created_at?: string
-          created_by?: string | null
           currency?: string | null
           description?: string | null
           estimate?: number | null
@@ -423,13 +423,6 @@ export type Database = {
           team_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "public_tracker_projects_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "tracker_projects_team_id_fkey"
             columns: ["team_id"]
@@ -442,6 +435,7 @@ export type Database = {
       tracker_reports: {
         Row: {
           created_at: string
+          created_by: string | null
           id: string
           link_id: string | null
           project_id: string | null
@@ -450,6 +444,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          created_by?: string | null
           id?: string
           link_id?: string | null
           project_id?: string | null
@@ -458,6 +453,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          created_by?: string | null
           id?: string
           link_id?: string | null
           project_id?: string | null
@@ -465,6 +461,13 @@ export type Database = {
           team_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "public_tracker_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "public_tracker_reports_project_id_fkey"
             columns: ["project_id"]
@@ -803,6 +806,7 @@ export type Database = {
       decrypted_bank_accounts: {
         Row: {
           account_id: string | null
+          balance: number | null
           bank_connection_id: string | null
           created_at: string | null
           created_by: string | null
@@ -816,6 +820,7 @@ export type Database = {
         }
         Insert: {
           account_id?: string | null
+          balance?: number | null
           bank_connection_id?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -829,6 +834,7 @@ export type Database = {
         }
         Update: {
           account_id?: string | null
+          balance?: number | null
           bank_connection_id?: string | null
           created_at?: string | null
           created_by?: string | null
@@ -1195,6 +1201,25 @@ export type Database = {
           currency: string
         }[]
       }
+      get_burn_rate: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
+      get_current_burn_rate: {
+        Args: {
+          team_id: string
+          currency: string
+        }
+        Returns: number
+      }
       get_profit: {
         Args: {
           team_id: string
@@ -1338,7 +1363,7 @@ export type Database = {
     Enums: {
       bank_providers: "gocardless" | "plaid" | "teller"
       bankProviders: "gocardless" | "plaid" | "teller"
-      reportTypes: "profit" | "revenue"
+      reportTypes: "profit" | "revenue" | "burn_rate"
       teamRoles: "owner" | "member"
       trackerStatus: "in_progress" | "completed"
       transactionCategories:

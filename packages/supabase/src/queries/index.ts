@@ -414,6 +414,48 @@ export async function getBankAccountsCurrenciesQuery(
   });
 }
 
+export type GetBurnRateQueryParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency: string;
+};
+
+export async function getBurnRateQuery(
+  supabase: Client,
+  params: GetBurnRateQueryParams
+) {
+  const { teamId, from, to, currency } = params;
+
+  const fromDate = new UTCDate(from);
+  const toDate = new UTCDate(to);
+
+  return supabase.rpc("get_burn_rate", {
+    team_id: teamId,
+    date_from: startOfMonth(fromDate).toDateString(),
+    date_to: endOfMonth(toDate).toDateString(),
+    currency,
+  });
+}
+
+export type GetCurrentBurnRateQueryParams = {
+  teamId: string;
+
+  currency: string;
+};
+
+export async function getCurrentBurnRateQuery(
+  supabase: Client,
+  params: GetCurrentBurnRateQueryParams
+) {
+  const { teamId, currency } = params;
+
+  return supabase.rpc("get_current_burn_rate", {
+    team_id: teamId,
+    currency,
+  });
+}
+
 export type GetMetricsParams = {
   teamId: string;
   from: string;

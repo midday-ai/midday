@@ -7,7 +7,6 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@midday/ui/select";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
@@ -33,8 +32,8 @@ export function SelectCurrency({ currencies, defaultValue }: Props) {
       defaultValue={optimisticData || currencies.at(0)?.id}
       onValueChange={execute}
     >
-      <SelectTrigger className="w-[90px]">
-        <SelectValue defaultValue={optimisticData} />
+      <SelectTrigger className="w-[90px] font-medium">
+        <span>{optimisticData}</span>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

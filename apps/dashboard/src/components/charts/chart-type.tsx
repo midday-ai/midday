@@ -2,16 +2,17 @@
 
 import { changeChartTypeAction } from "@/actions/change-chart-type-action";
 import { useI18n } from "@/locales/client";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+} from "@midday/ui/select";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["profit", "revenue"];
+const options = ["profit", "revenue", "burn_rate"];
 
 type Props = {
   initialValue: string;
@@ -29,26 +30,24 @@ export function ChartType({ initialValue, disabled }: Props) {
   );
 
   return (
-    <div className="flex space-x-2 items-center mb-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger disabled={disabled}>
-          <div className="flex items-center space-x-2">
-            <h2 className="text-md">{t(`chart_type.${optimisticData}`)}</h2>
-            <Icons.ChevronDown />
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-46">
-          {options.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option}
-              onCheckedChange={() => execute(option)}
-              checked={option === optimisticData}
-            >
-              {t(`chart_type.${option}`)}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <Select defaultValue={optimisticData} onValueChange={execute}>
+      <SelectTrigger
+        className="flex-1 space-x-1 font-medium"
+        disabled={disabled}
+      >
+        <span>{t(`chart_type.${optimisticData}`)}</span>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {options.map((option) => {
+            return (
+              <SelectItem key={option} value={option}>
+                {t(`chart_type.${option}`)}
+              </SelectItem>
+            );
+          })}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }
