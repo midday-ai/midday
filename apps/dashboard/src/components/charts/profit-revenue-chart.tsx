@@ -17,7 +17,7 @@ export async function ProfitRevenueChart({
 
   return (
     <div className="mt-5">
-      <div className="space-y-2 mb-14">
+      <div className="space-y-2 mb-14 inline-block">
         <h1 className={cn("text-4xl font-mono", disabled && "skeleton-box")}>
           <FormatAmount
             amount={data.summary.currentTotal}
