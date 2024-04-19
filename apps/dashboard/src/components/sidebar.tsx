@@ -12,7 +12,7 @@ export function Sidebar() {
     : null;
 
   return (
-    <aside className="h-screen flex-shrink-0 flex-col justify-between flex sticky top-0 ml-4 pb-4 items-center">
+    <aside className="h-screen flex-shrink-0 flex-col justify-between flex fixed top-0 ml-4 pb-4 items-center">
       <div className="flex flex-col items-center justify-center">
         <div className="mt-6 todesktop:mt-[35px]">
           <Link href="/">
