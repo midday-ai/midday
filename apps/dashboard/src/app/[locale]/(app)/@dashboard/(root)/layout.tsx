@@ -29,11 +29,12 @@ export default async function Layout({
   }
 
   return (
-    <div className="flex">
+    <div className="relative">
       {!mobileOverlay && <MobileOverview />}
+
       <Sidebar />
 
-      <div className="flex-1 ml-8 mr-10 mb-8">
+      <div className="ml-[95px] mr-10 pb-8">
         <Header />
         {children}
       </div>

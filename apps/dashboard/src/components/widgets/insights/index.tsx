@@ -15,10 +15,6 @@ const defaultExamples = [
     label: "How much did I spend on software last year?",
   },
   {
-    id: 4,
-    label: "Show me all transactions without receipts last month",
-  },
-  {
     id: 5,
     label: "Show me all recurring costs this year",
   },
@@ -32,7 +28,7 @@ const defaultExamples = [
   },
 ];
 
-const items = shuffle(defaultExamples).slice(0, 5);
+const items = shuffle(defaultExamples).slice(0, 4);
 
 export function Insights() {
   return (

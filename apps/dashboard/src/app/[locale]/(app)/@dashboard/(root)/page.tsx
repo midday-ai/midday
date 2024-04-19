@@ -60,7 +60,7 @@ export default async function Overview({ searchParams }) {
   return (
     <>
       <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
-        <div className="h-[450px]">
+        <div className="h-[520px]">
           <ChartSelectors defaultValue={defaultValue} currency={currency} />
           <Charts
             value={value}

@@ -11,14 +11,6 @@ export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;
 
 export const trackingConsentSchema = z.boolean();
 
-export const widgetsVisibilitySchema = z.object({
-  inbox: z.boolean(),
-  tracker: z.boolean(),
-  transactions: z.boolean(),
-  spending: z.boolean(),
-  insights: z.boolean(),
-});
-
 export const sendSupportSchema = z.object({
   subject: z.string(),
   priority: z.string(),

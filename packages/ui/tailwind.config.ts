@@ -122,6 +122,9 @@ export default {
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },
+      screens: {
+        "3xl": "1800px",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
