@@ -15,7 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { Status } from "./status";
-import { findLargestValue, getYAxisWidth } from "./utils";
+import { getYAxisWidth } from "./utils";
 
 // Override console.error
 // This is a hack to suppress the warning about missing defaultProps in recharts library as of version 2.12
