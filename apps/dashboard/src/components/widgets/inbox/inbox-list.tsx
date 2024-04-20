@@ -13,7 +13,7 @@ export function InboxList({ data }) {
   return (
     <div ref={ref}>
       <div
-        className="flex flex-col gap-4 pt-8 overflow-auto"
+        className="flex flex-col gap-4 pt-8 overflow-auto scrollbar-hide"
         style={{ maxHeight: width - PADDING }}
       >
         {data.map((item) => (

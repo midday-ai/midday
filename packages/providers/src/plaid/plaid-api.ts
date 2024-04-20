@@ -9,6 +9,8 @@ import {
   type Transaction,
 } from "plaid";
 import type {
+  GetAccountBalanceRequest,
+  GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
   GetTransactionsRequest,
@@ -32,6 +34,19 @@ export class PlaidApi {
     });
 
     this.#client = new PlaidBaseApi(configuration);
+  }
+
+  async getAccountBalance({
+    accessToken,
+    accountId,
+  }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse | undefined> {
+    const accounts = await this.#client.accountsGet({
+      access_token: accessToken,
+    });
+
+    return accounts.data.accounts.find(
+      (account) => account?.account_id === accountId
+    );
   }
 
   async getAccounts({

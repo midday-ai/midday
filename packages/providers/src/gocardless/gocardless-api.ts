@@ -5,6 +5,7 @@ import { formatISO, subMonths } from "date-fns";
 import type {
   DeleteRequistionResponse,
   GetAccessTokenResponse,
+  GetAccountBalanceResponse,
   GetAccountDetailsResponse,
   GetAccountResponse,
   GetAccountsRequest,
@@ -87,6 +88,25 @@ export class GoCardLessApi {
     ]);
 
     return response.access;
+  }
+
+  async getAccountBalance(
+    accountId: string
+  ): Promise<
+    GetAccountBalanceResponse["balances"][0]["balanceAmount"] | undefined
+  > {
+    const token = await this.#getAccessToken();
+
+    const { balances } = await this.#get<GetAccountBalanceResponse>(
+      `/api/v2/accounts/${accountId}/balances/`,
+      token
+    );
+
+    const foundAccount = balances?.find(
+      (account) => account.balanceType === "interimAvailable"
+    );
+
+    return foundAccount?.balanceAmount;
   }
 
   async getBanks(countryCode?: string): Promise<GetBanksResponse> {

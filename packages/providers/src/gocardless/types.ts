@@ -192,3 +192,18 @@ export type TransformAccountName = {
   bank?: Bank;
   product: string;
 };
+
+export type AccountBalance = {
+  balanceAmount: {
+    amount: string;
+    currency: string;
+  };
+  balanceType: "interimAvailable" | "interimBooked";
+  creditLimitIncluded: boolean;
+};
+
+export type GetAccountBalanceResponse = {
+  balances: AccountBalance[];
+};
+
+export type TransformAccountBalance = AccountBalance["balanceAmount"];

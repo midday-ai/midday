@@ -1,4 +1,4 @@
-import {
+import type {
   AccountsGetResponse,
   Transaction,
   TransactionsSyncResponse,
@@ -37,6 +37,8 @@ export type GetAccountsResponse = AccountWithintitution[];
 
 export type TransformAccount = AccountWithintitution;
 
+export type TransformAccountBalance = AccountsGetResponse["accounts"][0];
+
 export type TransformTransaction = {
   teamId: string;
   bankAccountId: string;
@@ -44,3 +46,10 @@ export type TransformTransaction = {
 };
 
 export type GetTransactionsResponse = TransactionsSyncResponse["added"];
+
+export type GetAccountBalanceResponse = AccountsGetResponse["accounts"][0];
+
+export interface GetAccountBalanceRequest {
+  accessToken: string;
+  accountId: string;
+}

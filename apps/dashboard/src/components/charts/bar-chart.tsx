@@ -153,7 +153,7 @@ export function BarChart({ data, disabled, currency }) {
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickMargin={20}
+            tickMargin={15}
             tick={{
               fill: "#606060",
               fontSize: 12,

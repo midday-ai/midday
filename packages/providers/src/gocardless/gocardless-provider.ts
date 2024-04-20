@@ -1,7 +1,15 @@
-import { Provider } from "../interface";
-import { GetAccountsRequest, GetTransactionsRequest } from "../types";
+import type { Provider } from "../interface";
+import type {
+  GetAccountBalanceRequest,
+  GetAccountsRequest,
+  GetTransactionsRequest,
+} from "../types";
 import { GoCardLessApi } from "./gocardless-api";
-import { transformAccount, transformTransaction } from "./transform";
+import {
+  transformAccount,
+  transformAccountBalance,
+  transformTransaction,
+} from "./transform";
 
 export class GoCardLessProvider implements Provider {
   #api: GoCardLessApi;
@@ -41,5 +49,17 @@ export class GoCardLessProvider implements Provider {
     });
 
     return response.map(transformAccount);
+  }
+
+  async getAccountBalance({ accountId }: GetAccountBalanceRequest) {
+    if (!accountId) {
+      throw Error("Missing params");
+    }
+
+    const response = await this.#api.getAccountBalance(accountId);
+
+    if (response) {
+      return transformAccountBalance(response);
+    }
   }
 }

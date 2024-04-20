@@ -32,3 +32,10 @@ exports[`Transform accounts 1`] = `
   "provider": "gocardless",
 }
 `;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 1942682.86,
+  "currency": "SEK",
+}
+`;

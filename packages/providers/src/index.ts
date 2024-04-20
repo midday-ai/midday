@@ -2,6 +2,7 @@ import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
+  GetAccountBalanceRequest,
   GetAccountsRequest,
   GetTransactionsRequest,
   ProviderParams,
@@ -32,5 +33,9 @@ export class Provider {
 
   async getAccounts(params: GetAccountsRequest) {
     return this.#provider?.getAccounts(params);
+  }
+
+  async getAccountBalance(params: GetAccountBalanceRequest) {
+    return this.#provider?.getAccountBalance(params);
   }
 }

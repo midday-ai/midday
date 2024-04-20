@@ -82,3 +82,10 @@ exports[`Transform accounts 1`] = `
   "provider": "teller",
 }
 `;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 99.41,
+  "currency": "USD",
+}
+`;

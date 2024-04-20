@@ -1,10 +1,15 @@
 import { capitalCase } from "change-case";
-import { Transaction, TransactionCode } from "plaid";
-import {
+import type { Transaction, TransactionCode } from "plaid";
+import type {
   Account as BaseAccount,
+  Balance as BaseBalance,
   Transaction as BaseTransaction,
 } from "../types";
-import { TransformAccount, TransformTransaction } from "./types";
+import type {
+  TransformAccount,
+  TransformAccountBalance,
+  TransformTransaction,
+} from "./types";
 
 export const mapTransactionMethod = (type?: TransactionCode | null) => {
   switch (type) {
@@ -162,3 +167,13 @@ export const transformAccount = ({
     provider: "plaid",
   };
 };
+
+export const transformAccountBalance = (
+  account: TransformAccountBalance
+): BaseBalance => ({
+  currency:
+    account?.balances.iso_currency_code ||
+    account?.balances.unofficial_currency_code ||
+    "USD",
+  amount: account?.balances?.available ?? 0,
+});

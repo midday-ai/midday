@@ -8,6 +8,7 @@ import {
 import * as React from "react";
 import { Spending } from "./charts/spending";
 import { Transactions } from "./charts/transactions";
+import { AccountBalance } from "./widgets/account-balance";
 import { Inbox } from "./widgets/inbox";
 import { Insights } from "./widgets/insights";
 import { Tracker } from "./widgets/tracker";
@@ -37,6 +38,7 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
     <Tracker key="tracker" date={searchParams?.date} hideDaysIndicators />,
     <Transactions key="transactions" disabled={disabled} />,
     <Inbox key="inbox" disabled={disabled} />,
+    <AccountBalance key="account-balance" />,
   ];
 
   return (

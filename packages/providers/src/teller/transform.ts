@@ -1,9 +1,15 @@
 import { capitalCase } from "change-case";
-import {
+import type {
   Account as BaseAccount,
+  Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
 } from "../types";
-import { Transaction, TransformAccount, TransformTransaction } from "./types";
+import type {
+  Transaction,
+  TransformAccount,
+  TransformAccountBalance,
+  TransformTransaction,
+} from "./types";
 
 export const mapTransactionMethod = (type?: string) => {
   switch (type) {
@@ -114,3 +120,10 @@ export const transformAccount = ({
     provider: "teller",
   };
 };
+
+export const transformAccountBalance = (
+  account: TransformAccountBalance
+): BaseAccountBalance => ({
+  currency: "USD",
+  amount: +account.available,
+});

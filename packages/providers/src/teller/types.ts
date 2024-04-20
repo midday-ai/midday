@@ -124,3 +124,19 @@ export type TransformTransaction = {
 };
 
 export type TransformAccount = Account;
+
+export interface GetAccountBalanceRequest extends AuthenticatedRequest {
+  accountId: string;
+}
+
+export type GetAccountBalanceResponse = {
+  ledger: string;
+  links: {
+    account: string;
+    self: string;
+  };
+  account_id: string;
+  available: string;
+};
+
+export type TransformAccountBalance = GetAccountBalanceResponse;
