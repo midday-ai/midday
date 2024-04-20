@@ -1,12 +1,15 @@
 import { capitalCase } from "change-case";
-import {
+import type {
   Account as BaseAccount,
+  Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
 } from "../types";
-import {
+import type {
+  AccountBalance,
   Transaction,
   TransactionDescription,
   TransformAccount,
+  TransformAccountBalance,
   TransformAccountName,
   TransformTransaction,
 } from "./types";
@@ -178,3 +181,10 @@ export const transformAccount = ({
     provider: "gocardless",
   };
 };
+
+export const transformAccountBalance = (
+  account: TransformAccountBalance
+): BaseAccountBalance => ({
+  currency: account.currency,
+  amount: +account.amount,
+});

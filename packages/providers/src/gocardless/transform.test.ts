@@ -1,5 +1,9 @@
 import { expect, test } from "bun:test";
-import { transformAccount, transformTransaction } from "./transform";
+import {
+  transformAccount,
+  transformAccountBalance,
+  transformTransaction,
+} from "./transform";
 
 test("Transform income transaction", () => {
   expect(
@@ -50,6 +54,15 @@ test("Transform accounts", () => {
         countries: ["DK", "GB", "DE", "SE", "ES", "IE", "DK"],
         logo: "https://cdn-logos.gocardless.com/ais/PLEO_PLEODK00.png",
       },
+    })
+  ).toMatchSnapshot();
+});
+
+test("Transform account balance", () => {
+  expect(
+    transformAccountBalance({
+      currency: "SEK",
+      amount: "1942682.86",
     })
   ).toMatchSnapshot();
 });

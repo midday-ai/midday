@@ -46,11 +46,18 @@ export async function getBankConnectionsByTeamIdQuery(
     .throwOnError();
 }
 
+export type GetTeamBankAccountsParams = {
+  teamId: string;
+  enabled?: boolean;
+};
+
 export async function getTeamBankAccountsQuery(
   supabase: Client,
-  teamId: string
+  params: GetTeamBankAccountsParams
 ) {
-  return supabase
+  const { teamId, enabled } = params;
+
+  const query = supabase
     .from("decrypted_bank_accounts")
     .select(
       "*, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
@@ -59,6 +66,12 @@ export async function getTeamBankAccountsQuery(
     .order("created_at", { ascending: true })
     .order("name", { ascending: false })
     .throwOnError();
+
+  if (enabled) {
+    query.eq("enabled", enabled);
+  }
+
+  return query;
 }
 
 export async function getTeamMembersQuery(supabase: Client, teamId: string) {

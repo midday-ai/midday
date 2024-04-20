@@ -37,6 +37,11 @@ export type Account = {
   enrollment_id?: string; // Teller
 };
 
+export type Balance = {
+  amount: number;
+  currency: string;
+};
+
 export type GetTransactionsRequest = {
   teamId: string;
   bankAccountId: string;
@@ -50,6 +55,11 @@ export type GetAccountsRequest = {
   countryCode?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
+};
+
+export type GetAccountBalanceRequest = {
+  accountId: string;
+  accessToken?: string; // Teller & Plaid
 };
 
 export type GetTransactionsResponse = Transaction[];

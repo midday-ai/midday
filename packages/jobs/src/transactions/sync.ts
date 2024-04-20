@@ -32,13 +32,23 @@ client.defineJob({
         provider: account.bank_connection.provider,
       });
 
-      // Update bank account last_accessed
-      await io.supabase.client
-        .from("bank_accounts")
-        .update({
-          last_accessed: new Date().toISOString(),
-        })
-        .eq("id", account.id);
+      try {
+        const balance = await provider.getAccountBalance({
+          accountId: account.account_id,
+          accessToken: account.bank_connection?.access_token,
+        });
+
+        // Update bank account
+        await io.supabase.client
+          .from("bank_accounts")
+          .update({
+            balance: balance?.amount,
+            last_accessed: new Date().toISOString(),
+          })
+          .eq("id", account.id);
+      } catch (error) {
+        await io.logger.error("Update Account Balance Error", error);
+      }
 
       return provider.getTransactions({
         teamId: account.team_id,

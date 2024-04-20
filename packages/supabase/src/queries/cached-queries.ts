@@ -1,10 +1,11 @@
 import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
-  GetBurnRateQueryParams,
-  GetCurrentBurnRateQueryParams,
+  type GetBurnRateQueryParams,
+  type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
   type GetSpendingParams,
+  type GetTeamBankAccountsParams,
   type GetTrackerProjectsQueryParams,
   type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
@@ -113,7 +114,9 @@ export const getBankConnectionsByTeamId = async () => {
   )(teamId);
 };
 
-export const getTeamBankAccounts = async () => {
+export const getTeamBankAccounts = async (
+  params: Omit<GetTeamBankAccountsParams, "teamId">
+) => {
   const supabase = createClient();
 
   const user = await getUser();
@@ -125,14 +128,14 @@ export const getTeamBankAccounts = async () => {
 
   return unstable_cache(
     async () => {
-      return getTeamBankAccountsQuery(supabase, teamId);
+      return getTeamBankAccountsQuery(supabase, { ...params, teamId });
     },
     ["bank_accounts", teamId],
     {
       tags: [`bank_accounts_${teamId}`],
       revalidate: 180,
     }
-  )(teamId);
+  )(params);
 };
 
 export const getTeamMembers = async () => {

@@ -64,3 +64,10 @@ exports[`Transform accounts 1`] = `
   "provider": "plaid",
 }
 `;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 2000,
+  "currency": "USD",
+}
+`;

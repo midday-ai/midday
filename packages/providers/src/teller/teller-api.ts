@@ -1,8 +1,10 @@
-import * as https from "https";
+import * as https from "node:https";
 import axios from "axios";
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 import type {
   AuthenticatedRequest,
+  GetAccountBalanceRequest,
+  GetAccountBalanceResponse,
   GetAccountsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
@@ -34,6 +36,18 @@ export class TellerApi {
 
     // NOTE: Remove pending transactions until upsert issue is fixed
     return result.filter((transaction) => transaction.status !== "pending");
+  }
+
+  async getAccountBalance({
+    accountId,
+    accessToken,
+  }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse> {
+    const result = await this.#get<GetAccountBalanceResponse>(
+      `/accounts/${accountId}/balances`,
+      accessToken
+    );
+
+    return result;
   }
 
   async #getApi(accessToken: string): Promise<AxiosInstance> {

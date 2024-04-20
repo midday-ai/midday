@@ -88,7 +88,7 @@ export function AreaChart({ currency, data }) {
           fontSize={12}
           tickLine={false}
           axisLine={false}
-          tickMargin={20}
+          tickMargin={15}
           tickFormatter={(value) => {
             return format(new Date(value), "MMM");
           }}
