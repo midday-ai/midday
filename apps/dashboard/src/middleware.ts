@@ -43,11 +43,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  const checkPath = data?.user && newUrl.pathname === "/";
+
   // Check if in approved user list by email
   if (
-    data?.user &&
-    newUrl.pathname === "/" &&
-    !(await client.get("approved"))?.includes(data?.user.email)
+    checkPath &&
+    !(await client.get("approved"))?.includes(data?.user.email) &&
+    checkPath &&
+    !(await client.get("users")).includes(data?.user.email)
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
   }
