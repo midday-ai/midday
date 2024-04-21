@@ -1,6 +1,6 @@
 "use client";
 
-import { UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
+import { type UpdateUserFormValues, updateUserSchema } from "@/actions/schema";
 import { updateUserAction } from "@/actions/update-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
