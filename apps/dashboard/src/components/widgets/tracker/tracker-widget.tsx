@@ -14,7 +14,7 @@ export async function TrackerWidget({ date, hideDaysIndicators }) {
   const userData = await getUser();
   const { currencyCode } = getCountryInfo();
 
-  const { data, meta } = await getTrackerRecordsByRange({
+  const trackerData = await getTrackerRecordsByRange({
     from: formatISO(startOfMonth(new Date(currentDate)), {
       representation: "date",
     }),
@@ -26,8 +26,8 @@ export async function TrackerWidget({ date, hideDaysIndicators }) {
   return (
     <TrackerWrapper
       hideDaysIndicators={hideDaysIndicators}
-      data={data}
-      meta={meta}
+      data={trackerData?.data}
+      meta={trackerData?.meta}
       date={currentDate}
       user={userData?.data}
       currencyCode={currencyCode}

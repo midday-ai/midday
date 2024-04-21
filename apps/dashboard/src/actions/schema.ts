@@ -322,3 +322,10 @@ export const setupUserSchema = z.object({
     message: "Name must be at least 2 characters.",
   }),
 });
+
+export const verifyOtpSchema = z.object({
+  type: z.enum(["phone", "email"]),
+  token: z.string(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+});
