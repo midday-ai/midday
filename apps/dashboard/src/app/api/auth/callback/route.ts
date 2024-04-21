@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
       const logsnag = await setupLogSnag({
         userId,
-        fullName: user.full_name,
+        fullName: user?.user_metadata?.full_name,
       });
 
       await logsnag.track({

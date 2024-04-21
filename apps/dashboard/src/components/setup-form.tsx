@@ -14,13 +14,23 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { useToast } from "@midday/ui/use-toast";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
 export function SetupForm() {
+  const { toast } = useToast();
+
   const setupUser = useAction(setupUserAction, {
-    onError: () => alert("error"),
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
   });
 
   const form = useForm<z.infer<typeof setupUserSchema>>({
@@ -30,6 +40,9 @@ export function SetupForm() {
       team_name: "",
     },
   });
+
+  const isSubmitting =
+    setupUser.status !== "idle" && setupUser.status !== "hasErrored";
 
   return (
     <Form {...form}>
@@ -69,12 +82,12 @@ export function SetupForm() {
           )}
         />
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={setupUser.status === "executing"}
-        >
-          Submit
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <span>Submit</span>
+          )}
         </Button>
       </form>
     </Form>
