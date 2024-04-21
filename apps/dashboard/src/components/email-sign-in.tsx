@@ -84,7 +84,7 @@ export function EmailSignIn({ className }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className={cn("flex flex-col space-y-2", className)}>
+        <div className={cn("flex flex-col space-y-4", className)}>
           <FormField
             control={form.control}
             name="email"
