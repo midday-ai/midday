@@ -313,3 +313,12 @@ export const createEndUserAgreementSchema = z.object({
 export const importTransactionsSchema = z.object({
   filePath: z.array(z.string()),
 });
+
+export const setupUserSchema = z.object({
+  full_name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  team_name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+});

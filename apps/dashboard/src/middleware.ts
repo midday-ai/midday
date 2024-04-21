@@ -32,7 +32,8 @@ export async function middleware(request: NextRequest) {
     !data?.user &&
     newUrl.pathname !== "/" &&
     !newUrl.pathname.includes("/report") &&
-    !newUrl.pathname.includes("/unsubscribe")
+    !newUrl.pathname.includes("/unsubscribe") &&
+    !newUrl.pathname.includes("/setup")
   ) {
     const encodedSearchParams = `${newUrl.pathname.substring(1)}${
       newUrl.search
@@ -53,6 +54,15 @@ export async function middleware(request: NextRequest) {
     !(await client.get("users")).includes(data?.user.email)
   ) {
     return NextResponse.redirect(new URL("/closed", request.url));
+  }
+
+  // If authenticated but no full_name redirect to user setup page
+  if (
+    newUrl.pathname !== "/setup" &&
+    data?.user &&
+    !data?.user?.user_metadata?.full_name
+  ) {
+    return NextResponse.redirect(`${url.origin}/setup`);
   }
 
   const { data: mfaData } =

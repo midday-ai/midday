@@ -1,6 +1,7 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
 import { ConsentBanner } from "@/components/consent-banner";
 import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
+import { EmailSignIn } from "@/components/email-sign-in";
 import { FigmaSignIn } from "@/components/figma-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
@@ -40,6 +41,7 @@ export default async function Login(params) {
       preferredSignInOption = <AppleSignIn />;
       moreSignInOptions = (
         <>
+          <EmailSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <SlackSignIn />
           <GithubSignIn />
@@ -53,6 +55,7 @@ export default async function Login(params) {
       preferredSignInOption = <SlackSignIn />;
       moreSignInOptions = (
         <>
+          <EmailSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
@@ -66,6 +69,7 @@ export default async function Login(params) {
       preferredSignInOption = <GithubSignIn />;
       moreSignInOptions = (
         <>
+          <EmailSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <SlackSignIn />
@@ -79,6 +83,7 @@ export default async function Login(params) {
       preferredSignInOption = <FigmaSignIn />;
       moreSignInOptions = (
         <>
+          <EmailSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
@@ -92,6 +97,7 @@ export default async function Login(params) {
       preferredSignInOption = <GoogleSignIn />;
       moreSignInOptions = (
         <>
+          <EmailSignIn className="border-b-[1px] border-border pb-8" />
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
@@ -105,6 +111,7 @@ export default async function Login(params) {
       preferredSignInOption = <NotionSignIn />;
       moreSignInOptions = (
         <>
+          <EmailSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
@@ -114,10 +121,25 @@ export default async function Login(params) {
       );
       break;
 
+    case "email":
+      preferredSignInOption = <EmailSignIn />;
+      moreSignInOptions = (
+        <>
+          <GoogleSignIn />
+          <AppleSignIn />
+          <GithubSignIn />
+          <SlackSignIn />
+          <FigmaSignIn />
+          <NotionSignIn />
+        </>
+      );
+      break;
+
     default:
       if (device?.vendor === "Apple") {
         moreSignInOptions = (
           <>
+            <EmailSignIn className="border-b-[1px] border-border pb-8" />
             <GoogleSignIn />
             <SlackSignIn />
             <GithubSignIn />
@@ -128,6 +150,7 @@ export default async function Login(params) {
       } else {
         moreSignInOptions = (
           <>
+            <EmailSignIn className="border-b-[1px] border-border pb-8" />
             <AppleSignIn />
             <SlackSignIn />
             <GithubSignIn />
@@ -140,7 +163,7 @@ export default async function Login(params) {
 
   return (
     <div>
-      <header className="w-full absolute left-0 right-0">
+      <header className="w-full fixed left-0 right-0">
         <div className="ml-5 mt-4 md:ml-10 md:mt-10">
           <Link href="https://midday.ai">
             <Icons.Logo />
@@ -149,7 +172,7 @@ export default async function Login(params) {
       </header>
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
-        <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
+        <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col py-8">
           <div className="flex w-full flex-col relative">
             <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
               <h1 className="font-medium pb-1 text-3xl">Login to midday.</h1>

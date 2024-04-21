@@ -170,7 +170,8 @@ export async function updateTeam(supabase: Client, data: any) {
     .from("teams")
     .update(data)
     .eq("id", userData?.team_id)
-    .select();
+    .select()
+    .single();
 }
 
 type UpdateUserTeamRoleParams = {
