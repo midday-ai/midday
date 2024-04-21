@@ -4,18 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@midday/ui/form";
+import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -32,8 +25,6 @@ export function EmailSignIn({ className }: Props) {
   const [isLoading, setLoading] = useState(false);
   const [isSent, setSent] = useState(false);
   const supabase = createClient();
-  const searchParams = useSearchParams();
-  const returnTo = searchParams.get("return_to");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -69,14 +60,14 @@ export function EmailSignIn({ className }: Props) {
 
   if (isSent) {
     return (
-      <div className="space-y-4">
-        <h2 className="font-medium text-center">Check your inbox</h2>
-        <Button
-          className="active:scale-[0.98] rounded-xl bg-primary px-6 py-4 text-secondary font-medium flex space-x-2 h-[40px] w-full"
-          onClick={() => setSent(false)}
-        >
-          Send again
-        </Button>
+      <div className={cn("flex flex-col space-y-4", className)}>
+        <div className="text-center bg-[#F2F1EF] dark:bg-secondary h-[36px] border border-border rounded-lg flex items-center justify-center space-x-2">
+          <Icons.Check />
+          <p>Check your inbox and click the magic link.</p>
+        </div>
+        <button onClick={() => setSent(false)} type="button">
+          Try again
+        </button>
       </div>
     );
   }
@@ -84,7 +75,7 @@ export function EmailSignIn({ className }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        <div className={cn("flex flex-col space-y-2", className)}>
+        <div className={cn("flex flex-col space-y-4", className)}>
           <FormField
             control={form.control}
             name="email"
