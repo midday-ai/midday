@@ -1,6 +1,11 @@
 import { SetupForm } from "@/components/setup-form";
 import { Icons } from "@midday/ui/icons";
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Setup account | Midday",
+};
 
 export default function Page() {
   return (
