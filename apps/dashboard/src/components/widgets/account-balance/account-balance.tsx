@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import { FormatAmount } from "@/components/format-amount";
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
@@ -10,6 +11,14 @@ export function AccountBalance({ data }) {
   const sortedAccounts = data.sort((a, b) => b.balance - a.balance);
 
   const activeAccount = sortedAccounts.at(activeIndex);
+
+  if (!activeAccount) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <ConnectBankButton />
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-between mt-12 items-center flex-col space-y-6">

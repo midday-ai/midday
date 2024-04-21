@@ -9,7 +9,7 @@ export async function AccountBalanceWidget() {
   const { data: accountsData } = await getTeamBankAccounts({ enabled: true });
 
   return (
-    <div>
+    <div className="h-full">
       <div className="flex justify-between">
         <div>
           <h2 className="text-lg">Account balance</h2>
