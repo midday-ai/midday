@@ -1,9 +1,9 @@
 import { AppleSignIn } from "@/components/apple-sign-in";
 import { ConsentBanner } from "@/components/consent-banner";
 import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
-import { EmailSignIn } from "@/components/email-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
+import { OTPSignIn } from "@/components/otp-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
 import { getCountryCode, isEUCountry } from "@midday/location";
@@ -39,7 +39,7 @@ export default async function Login(params) {
       preferredSignInOption = <AppleSignIn />;
       moreSignInOptions = (
         <>
-          <EmailSignIn className="border-b-[1px] border-border pb-8" />
+          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <SlackSignIn />
           <GithubSignIn />
@@ -51,7 +51,7 @@ export default async function Login(params) {
       preferredSignInOption = <SlackSignIn />;
       moreSignInOptions = (
         <>
-          <EmailSignIn className="border-b-[1px] border-border pb-8" />
+          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
@@ -63,7 +63,7 @@ export default async function Login(params) {
       preferredSignInOption = <GithubSignIn />;
       moreSignInOptions = (
         <>
-          <EmailSignIn className="border-b-[1px] border-border pb-8" />
+          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <SlackSignIn />
@@ -75,7 +75,7 @@ export default async function Login(params) {
       preferredSignInOption = <GoogleSignIn />;
       moreSignInOptions = (
         <>
-          <EmailSignIn className="border-b-[1px] border-border pb-8" />
+          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
@@ -83,8 +83,8 @@ export default async function Login(params) {
       );
       break;
 
-    case "email":
-      preferredSignInOption = <EmailSignIn />;
+    case "otp":
+      preferredSignInOption = <OTPSignIn />;
       moreSignInOptions = (
         <>
           <GoogleSignIn />
@@ -99,7 +99,7 @@ export default async function Login(params) {
       if (device?.vendor === "Apple") {
         moreSignInOptions = (
           <>
-            <EmailSignIn className="border-b-[1px] border-border pb-8" />
+            <OTPSignIn className="border-b-[1px] border-border pb-8" />
             <GoogleSignIn />
             <SlackSignIn />
             <GithubSignIn />
@@ -108,7 +108,7 @@ export default async function Login(params) {
       } else {
         moreSignInOptions = (
           <>
-            <EmailSignIn className="border-b-[1px] border-border pb-8" />
+            <OTPSignIn className="border-b-[1px] border-border pb-8" />
             <AppleSignIn />
             <SlackSignIn />
             <GithubSignIn />

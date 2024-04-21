@@ -6,7 +6,7 @@ export function AccountBalanceSkeleton() {
 }
 
 export async function AccountBalanceWidget() {
-  const { data: accountsData } = await getTeamBankAccounts({ enabled: true });
+  const accountsData = await getTeamBankAccounts({ enabled: true });
 
   return (
     <div className="h-full">
@@ -16,7 +16,7 @@ export async function AccountBalanceWidget() {
         </div>
       </div>
 
-      <AccountBalance data={accountsData} />
+      <AccountBalance data={accountsData?.data} />
     </div>
   );
 }
