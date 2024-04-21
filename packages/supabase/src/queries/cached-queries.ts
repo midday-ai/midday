@@ -4,6 +4,7 @@ import {
   type GetBurnRateQueryParams,
   type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
+  GetRunwayQueryParams,
   type GetSpendingParams,
   type GetTeamBankAccountsParams,
   type GetTrackerProjectsQueryParams,
@@ -15,6 +16,7 @@ import {
   getBurnRateQuery,
   getCurrentBurnRateQuery,
   getMetricsQuery,
+  getRunwayQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
@@ -382,6 +384,25 @@ export const getCurrentBurnRate = async (
     ["current_burn_rate", teamId],
     {
       tags: [`current_burn_rate_${teamId}`],
+      revalidate: 180,
+    }
+  )(params);
+};
+
+export const getRunway = async (
+  params: Omit<GetRunwayQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getRunwayQuery(supabase, { ...params, teamId });
+    },
+    ["runway", teamId],
+    {
+      tags: [`runway_${teamId}`],
       revalidate: 180,
     }
   )(params);

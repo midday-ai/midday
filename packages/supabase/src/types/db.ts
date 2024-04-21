@@ -1244,6 +1244,22 @@ export type Database = {
           value: number
         }[]
       }
+      get_runway: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: number
+      }
+      get_total_balance: {
+        Args: {
+          team_id: string
+          currency: string
+        }
+        Returns: number
+      }
       gtrgm_compress: {
         Args: {
           "": unknown

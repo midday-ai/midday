@@ -451,6 +451,30 @@ export async function getBurnRateQuery(
   });
 }
 
+export type GetRunwayQueryParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency: string;
+};
+
+export async function getRunwayQuery(
+  supabase: Client,
+  params: GetRunwayQueryParams
+) {
+  const { teamId, from, to, currency } = params;
+
+  const fromDate = new UTCDate(from);
+  const toDate = new UTCDate(to);
+
+  return supabase.rpc("get_runway", {
+    team_id: teamId,
+    date_from: startOfMonth(fromDate).toDateString(),
+    date_to: endOfMonth(toDate).toDateString(),
+    currency,
+  });
+}
+
 export type GetCurrentBurnRateQueryParams = {
   teamId: string;
 

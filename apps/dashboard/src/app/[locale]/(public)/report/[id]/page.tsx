@@ -5,6 +5,7 @@ import {
   getBurnRateQuery,
   getCurrentBurnRateQuery,
   getMetricsQuery,
+  getRunwayQuery,
 } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
@@ -115,23 +116,33 @@ export default async function Report({ params }) {
         );
       }
       case "burn_rate": {
-        const [{ data: burnRateData }, { data: currentBurnRateData, error }] =
-          await Promise.all([
-            getBurnRateQuery(supabase, {
-              teamId: data.team_id,
-              from: data.from,
-              to: data.to,
-              type: data.type,
-              currency: data.currency,
-            }),
-            getCurrentBurnRateQuery(supabase, {
-              teamId: data.team_id,
-              from: data.from,
-              to: data.to,
-              type: data.type,
-              currency: data.currency,
-            }),
-          ]);
+        const [
+          { data: burnRateData },
+          { data: currentBurnRateData },
+          { data: runway },
+        ] = await Promise.all([
+          getBurnRateQuery(supabase, {
+            teamId: data.team_id,
+            from: data.from,
+            to: data.to,
+            type: data.type,
+            currency: data.currency,
+          }),
+          getCurrentBurnRateQuery(supabase, {
+            teamId: data.team_id,
+            from: data.from,
+            to: data.to,
+            type: data.type,
+            currency: data.currency,
+          }),
+          getRunwayQuery(supabase, {
+            teamId: data.team_id,
+            from: data.from,
+            to: data.to,
+            type: data.type,
+            currency: data.currency,
+          }),
+        ]);
 
         return (
           <>
@@ -144,7 +155,11 @@ export default async function Report({ params }) {
                   />
                 </h1>
               </div>
-              <div className="text-[#878787]">This month</div>
+              <div className="text-[#878787]">
+                {runway && runway > 0
+                  ? `${runway} months runway`
+                  : "This month"}
+              </div>
             </div>
             <AreaChart currency={data.currency} data={burnRateData} />
           </>
