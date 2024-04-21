@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectBankButton } from "@/components/connect-bank-button";
 import { FormatAmount } from "@/components/format-amount";
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
@@ -7,8 +8,17 @@ import { useState } from "react";
 
 export function AccountBalance({ data }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const sortedAccounts = data.sort((a, b) => b.balance - a.balance);
 
-  const activeAccount = data.at(activeIndex);
+  const activeAccount = sortedAccounts.at(activeIndex);
+
+  if (!activeAccount) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <ConnectBankButton />
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-between mt-12 items-center flex-col space-y-6">
@@ -38,9 +48,9 @@ export function AccountBalance({ data }) {
         </div>
       </div>
 
-      {data.length > 1 && (
+      {sortedAccounts.length > 1 && (
         <div className="flex space-x-2">
-          {data.map((account, idx) => (
+          {sortedAccounts.map((account, idx) => (
             <button
               type="button"
               onMouseEnter={() => setActiveIndex(idx)}
@@ -48,7 +58,7 @@ export function AccountBalance({ data }) {
               key={account.id}
               className={cn(
                 "w-[8px] h-[8px] rounded-full bg-[#1D1D1D] dark:bg-[#D9D9D9] opacity-30 transition-all cursor-pointer",
-                account.id === activeIndex && "opacity-1"
+                idx === activeIndex && "opacity-1"
               )}
             />
           ))}

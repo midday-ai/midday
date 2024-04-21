@@ -53,3 +53,16 @@ export function secondsToHoursAndMinutes(seconds: number) {
 
   return "0h";
 }
+
+type BurnRateData = {
+  value: number;
+  date: string;
+};
+
+export function calculateAvgBurnRate(data: BurnRateData[] | null) {
+  if (!data) {
+    return 0;
+  }
+
+  return data?.reduce((acc, curr) => acc + curr.value, 0) / data?.length;
+}

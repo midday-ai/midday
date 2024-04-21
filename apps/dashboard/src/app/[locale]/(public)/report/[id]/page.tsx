@@ -1,13 +1,21 @@
 import { AreaChart } from "@/components/charts/area-chart";
 import { BarChart } from "@/components/charts/bar-chart";
 import { FormatAmount } from "@/components/format-amount";
+import { calculateAvgBurnRate } from "@/utils/format";
 import {
   getBurnRateQuery,
-  getCurrentBurnRateQuery,
   getMetricsQuery,
+  getRunwayQuery,
 } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { format } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -115,23 +123,22 @@ export default async function Report({ params }) {
         );
       }
       case "burn_rate": {
-        const [{ data: burnRateData }, { data: currentBurnRateData, error }] =
-          await Promise.all([
-            getBurnRateQuery(supabase, {
-              teamId: data.team_id,
-              from: data.from,
-              to: data.to,
-              type: data.type,
-              currency: data.currency,
-            }),
-            getCurrentBurnRateQuery(supabase, {
-              teamId: data.team_id,
-              from: data.from,
-              to: data.to,
-              type: data.type,
-              currency: data.currency,
-            }),
-          ]);
+        const [{ data: burnRateData }, { data: runway }] = await Promise.all([
+          getBurnRateQuery(supabase, {
+            teamId: data.team_id,
+            from: data.from,
+            to: data.to,
+            type: data.type,
+            currency: data.currency,
+          }),
+          getRunwayQuery(supabase, {
+            teamId: data.team_id,
+            from: data.from,
+            to: data.to,
+            type: data.type,
+            currency: data.currency,
+          }),
+        ]);
 
         return (
           <>
@@ -139,12 +146,30 @@ export default async function Report({ params }) {
               <div>
                 <h1 className="text-4xl font-mono">
                   <FormatAmount
-                    amount={currentBurnRateData ?? 0}
+                    amount={calculateAvgBurnRate(burnRateData)}
                     currency={data.currency}
                   />
                 </h1>
               </div>
-              <div className="text-[#878787]">This month</div>
+              <div className="text-sm text-[#606060] flex items-center space-x-2">
+                <span>
+                  {runway && runway > 0
+                    ? `${runway} months runway`
+                    : "Average burn rate"}
+                </span>
+                {runway && runway > 0 && (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Icons.Info className="h-4 w-4 mt-1" />
+                      </TooltipTrigger>
+                      <TooltipContent className="px-3 py-1.5 text-xs">
+                        Average burn rate / Total balance
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
             </div>
             <AreaChart currency={data.currency} data={burnRateData} />
           </>
