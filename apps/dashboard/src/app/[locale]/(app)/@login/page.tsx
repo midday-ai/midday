@@ -2,10 +2,8 @@ import { AppleSignIn } from "@/components/apple-sign-in";
 import { ConsentBanner } from "@/components/consent-banner";
 import { DesktopCommandMenuSignIn } from "@/components/desktop-command-menu-sign-in";
 import { EmailSignIn } from "@/components/email-sign-in";
-import { FigmaSignIn } from "@/components/figma-sign-in";
 import { GithubSignIn } from "@/components/github-sign-in";
 import { GoogleSignIn } from "@/components/google-sign-in";
-import { NotionSignIn } from "@/components/notion-sign-in";
 import { SlackSignIn } from "@/components/slack-sign-in";
 import { Cookies } from "@/utils/constants";
 import { getCountryCode, isEUCountry } from "@midday/location";
@@ -45,8 +43,6 @@ export default async function Login(params) {
           <GoogleSignIn />
           <SlackSignIn />
           <GithubSignIn />
-          <FigmaSignIn />
-          <NotionSignIn />
         </>
       );
       break;
@@ -59,8 +55,6 @@ export default async function Login(params) {
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
-          <FigmaSignIn />
-          <NotionSignIn />
         </>
       );
       break;
@@ -73,22 +67,6 @@ export default async function Login(params) {
           <GoogleSignIn />
           <AppleSignIn />
           <SlackSignIn />
-          <FigmaSignIn />
-          <NotionSignIn />
-        </>
-      );
-      break;
-
-    case "figma":
-      preferredSignInOption = <FigmaSignIn />;
-      moreSignInOptions = (
-        <>
-          <EmailSignIn className="border-b-[1px] border-border pb-8" />
-          <GoogleSignIn />
-          <AppleSignIn />
-          <GithubSignIn />
-          <SlackSignIn />
-          <NotionSignIn />
         </>
       );
       break;
@@ -101,22 +79,6 @@ export default async function Login(params) {
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
-          <FigmaSignIn />
-          <NotionSignIn />
-        </>
-      );
-      break;
-
-    case "notion":
-      preferredSignInOption = <NotionSignIn />;
-      moreSignInOptions = (
-        <>
-          <EmailSignIn className="border-b-[1px] border-border pb-8" />
-          <GoogleSignIn />
-          <AppleSignIn />
-          <GithubSignIn />
-          <SlackSignIn />
-          <FigmaSignIn />
         </>
       );
       break;
@@ -129,8 +91,6 @@ export default async function Login(params) {
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
-          <FigmaSignIn />
-          <NotionSignIn />
         </>
       );
       break;
@@ -143,8 +103,6 @@ export default async function Login(params) {
             <GoogleSignIn />
             <SlackSignIn />
             <GithubSignIn />
-            <FigmaSignIn />
-            <NotionSignIn />
           </>
         );
       } else {
@@ -154,8 +112,6 @@ export default async function Login(params) {
             <AppleSignIn />
             <SlackSignIn />
             <GithubSignIn />
-            <FigmaSignIn />
-            <NotionSignIn />
           </>
         );
       }
