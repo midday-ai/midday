@@ -35,7 +35,7 @@ function extractRootDomainFromEmail(email) {
 
 export function InboxDetailsSkeleton() {
   return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[660px]">
+    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
       <div className="flex items-center py-2 h-[52px]">
         <div className="flex items-center gap-2" />
       </div>
@@ -83,7 +83,7 @@ export function InboxDetails({ item, updateInbox, teamId }) {
   };
 
   return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[660px]">
+    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>
@@ -215,7 +215,7 @@ export function InboxDetails({ item, updateInbox, teamId }) {
               <FilePreview
                 src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
                 name={item.name}
-                type={FileType.Pdf}
+                type={item.content_type}
                 width={680}
                 height={900}
                 disableFullscreen

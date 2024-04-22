@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";

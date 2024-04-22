@@ -14,6 +14,7 @@ import { decode } from "base64-arraybuffer";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { Resend } from "resend";
+import sharp from "sharp";
 
 export const runtime = "nodejs";
 export const maxDuration = 300; // 5min
@@ -28,6 +29,54 @@ const ipRange = [
   "50.31.156.77",
   "18.217.206.57",
 ];
+
+type Attachment = {
+  Content: string;
+  Name: string;
+  ContentType: string;
+  ContentLength: number;
+};
+
+type GenereateFileNameParams = {
+  fileName: string;
+  type: "pdf" | "jpg";
+};
+
+function generateFileName({ fileName, type }: GenereateFileNameParams) {
+  return stripSpecialCharacters(`${fileName}-${nanoid(3)}.${type}`);
+}
+
+async function transformContent(attachment: Attachment) {
+  const attachmentBuffer = decode(attachment.Content);
+
+  const [fileName = "attachment"] = attachment.Name.split(".");
+
+  if (attachment.ContentType === "application/pdf") {
+    return {
+      content: attachmentBuffer,
+      contentType: attachment.ContentType,
+      size: attachment.ContentLength,
+      // NOTE: Attachments can have the same name so we need to
+      // ensure with a unique name
+      fileName: generateFileName({ fileName, type: "pdf" }),
+    };
+  }
+
+  const image = await sharp(attachmentBuffer)
+    .rotate()
+    .resize({ width: 1500 })
+    .toFormat("jpeg")
+    .toBuffer();
+
+  return {
+    content: image,
+    contentType: "image/jpeg",
+    size: image.byteLength,
+    // NOTE: Attachments can have the same name so we need to
+    // ensure with a unique name
+    fileName: generateFileName({ fileName, type: "jpg" }),
+  };
+}
 
 export async function POST(req: Request) {
   const supabase = createClient({ admin: true });
@@ -55,7 +104,6 @@ export async function POST(req: Request) {
 
     const attachments = res?.Attachments;
     const subject = res.Subject.length > 0 ? res.Subject : "No subject";
-    const contentType = "application/pdf";
 
     if (teamData?.inbox_email) {
       try {
@@ -80,28 +128,16 @@ export async function POST(req: Request) {
     }
 
     const records = attachments?.map(async (attachment) => {
-      // NOTE: Invoices can have the same name so we need to
-      // ensure with a unique name
-      const name = attachment.Name;
-
-      // Just take the first part
-      const [fileName] = name.split(".");
-
-      const parts = name.split(".");
-      const fileType = parts.pop();
-
-      const uniqueFileName = stripSpecialCharacters(
-        `${fileName}-${nanoid(3)}.${fileType}`
-      );
-
       try {
+        const { content, contentType, size, fileName } = await transformContent(
+          attachment
+        );
+
         const { data, error } = await supabase.storage
           .from("vault")
-          .upload(
-            `${teamData.id}/inbox/${uniqueFileName}`,
-            decode(attachment.Content),
-            { contentType }
-          );
+          .upload(`${teamData.id}/inbox/${fileName}`, content, {
+            contentType,
+          });
 
         if (error) {
           console.log("Upload error", error);
@@ -113,9 +149,9 @@ export async function POST(req: Request) {
           subject,
           team_id: teamData.id,
           file_path: data.path.split("/"),
-          file_name: uniqueFileName,
+          file_name: fileName,
           content_type: contentType,
-          size: attachment.ContentLength,
+          size,
         };
       } catch (error) {
         console.log(error);

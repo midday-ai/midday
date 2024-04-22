@@ -56,6 +56,9 @@ const RenderComponent = ({
   };
 
   if (type?.startsWith("image")) {
+    // NOTE: Can't get initial onLoad event to fire
+    onLoaded(true);
+
     return (
       <div className={cn("flex items-center justify-center", className)}>
         <img
