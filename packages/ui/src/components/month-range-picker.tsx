@@ -1,8 +1,16 @@
 "use client";
 
-import { endOfMonth, formatISO, isSameDay, startOfMonth } from "date-fns";
+import {
+  endOfMonth,
+  formatISO,
+  isBefore,
+  isSameDay,
+  startOfMonth,
+  subMonths,
+} from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { cn } from "../utils";
 import { Button } from "./button";
 
@@ -106,16 +114,19 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
 
     const isSelectedDate = isStart || isEnd;
     const isRange = isSelected && !isSelectedDate;
+    const isDisabled = isBefore(today, subMonths(endOfMonth(monthStart), 1));
 
     return (
       <button
         type="button"
         key={month}
+        disabled={isDisabled}
         className={cn(
           "!w-[40px] !h-[40px] m-0 pr-[60px] rounded-none mb-1.5 bg-transparent",
           isStart && toDate && "bg-secondary rounded-l-full",
           isEnd && "bg-secondary rounded-r-full pr-0",
-          isRange && "bg-secondary"
+          isRange && "bg-secondary",
+          isDisabled && "opacity-40"
         )}
         onClick={() => handleMonthClick(monthStart)}
       >
@@ -125,7 +136,7 @@ export const MonthRangePicker = ({ date, setDate }: Props) => {
             isSelectedDate && "bg-primary text-primary-foreground",
             isSelectedDate &&
               "rounded-full hover:bg-primary hover:text-primary-foreground",
-
+            isDisabled && "hover:border-transparent",
             isStart && "",
             isEnd && ""
           )}
