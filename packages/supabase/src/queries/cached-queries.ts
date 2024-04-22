@@ -4,7 +4,7 @@ import {
   type GetBurnRateQueryParams,
   type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
-  GetRunwayQueryParams,
+  type GetRunwayQueryParams,
   type GetSpendingParams,
   type GetTeamBankAccountsParams,
   type GetTrackerProjectsQueryParams,
