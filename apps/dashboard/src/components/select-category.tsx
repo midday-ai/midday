@@ -50,7 +50,7 @@ export function SelectCategory({
           >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent className="overflow-y-auto max-h-[350px]">
+          <SelectContent className="overflow-y-auto max-h-[265px]">
             {sortedCategories.map((category) => (
               <SelectItem key={category} value={category}>
                 <div className="flex space-x-2 items-center">

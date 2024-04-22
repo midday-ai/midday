@@ -64,13 +64,13 @@
     "react-intersection-observer": "^9.8.2",
     "react-pdf": "^7.7.1",
     "react-plaid-link": "^3.5.1",
-    "recharts": "^2.12.5",
+    "recharts": "^2.12.6",
     "resend": "^3.2.0",
     "sharp": "^0.33.3",
     "teller-connect-react": "^0.1.0",
     "tus-js-client": "^4.1.0",
     "use-long-press": "^3.2.0",
-    "zod": "^3.22.5",
+    "zod": "^3.23.0",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
