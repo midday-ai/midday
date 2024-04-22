@@ -54,7 +54,7 @@ export async function POST(req: Request) {
       .throwOnError();
 
     const attachments = res?.Attachments;
-    const subject = res.Subject.length > 0 ? res.Subject.length : "No subject";
+    const subject = res.Subject.length > 0 ? res.Subject : "No subject";
     const contentType = "application/pdf";
 
     if (teamData?.inbox_email) {
