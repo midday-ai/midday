@@ -11,6 +11,7 @@ import {
 import { createClient } from "@midday/supabase/server";
 import { stripSpecialCharacters } from "@midday/utils";
 import { decode } from "base64-arraybuffer";
+import convert from "heic-convert";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { Resend } from "resend";
@@ -43,6 +44,8 @@ type GenereateFileNameParams = {
 };
 
 function generateFileName({ fileName, type }: GenereateFileNameParams) {
+  // NOTE: Attachments can have the same name so we need to
+  // ensure with a unique name
   return stripSpecialCharacters(`${fileName}-${nanoid(3)}.${type}`);
 }
 
@@ -56,9 +59,30 @@ async function transformContent(attachment: Attachment) {
       content: attachmentBuffer,
       contentType: attachment.ContentType,
       size: attachment.ContentLength,
-      // NOTE: Attachments can have the same name so we need to
-      // ensure with a unique name
       fileName: generateFileName({ fileName, type: "pdf" }),
+    };
+  }
+
+  if (attachment.ContentType === "image/heic") {
+    const decodedImage = await convert({
+      buffer: attachmentBuffer,
+      format: "JPEG",
+      quality: 1,
+    });
+
+    console.log(decodedImage);
+
+    const image = await sharp(decodedImage)
+      .rotate()
+      .resize({ width: 1500 })
+      .toFormat("jpeg")
+      .toBuffer();
+
+    return {
+      content: image,
+      contentType: "image/jpeg",
+      size: image.byteLength,
+      fileName: generateFileName({ fileName, type: "jpg" }),
     };
   }
 
@@ -72,8 +96,6 @@ async function transformContent(attachment: Attachment) {
     content: image,
     contentType: "image/jpeg",
     size: image.byteLength,
-    // NOTE: Attachments can have the same name so we need to
-    // ensure with a unique name
     fileName: generateFileName({ fileName, type: "jpg" }),
   };
 }
@@ -83,15 +105,15 @@ export async function POST(req: Request) {
   const res = await req.json();
   const clientIP = headers().get("x-forwarded-for") ?? "";
 
-  const logsnag = await setupLogSnag();
-
-  logsnag.track({
-    event: LogEvents.InboxInbound.name,
-    icon: LogEvents.InboxInbound.icon,
-    channel: LogEvents.InboxInbound.channel,
-  });
-
   if (res?.OriginalRecipient && ipRange.includes(clientIP)) {
+    const logsnag = await setupLogSnag();
+
+    logsnag.track({
+      event: LogEvents.InboxInbound.name,
+      icon: LogEvents.InboxInbound.icon,
+      channel: LogEvents.InboxInbound.channel,
+    });
+
     const email = res?.OriginalRecipient;
     const [inboxId] = email.split("@");
 

@@ -47,6 +47,7 @@
     "framer-motion": "^11.1.7",
     "geist": "^1.3.0",
     "headless-currency-input": "^1.1.0",
+    "heic-convert": "1.2.4",
     "loops": "1.0.1",
     "lottie-react": "^2.4.0",
     "ms": "^2.1.3",
