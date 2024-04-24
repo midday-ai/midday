@@ -14,5 +14,17 @@ export type DocumentResponse = {
 };
 
 export type DocumentClientParams = {
-  mimeType: MimeType;
+  contentType: string;
+};
+
+export type GetDocumentRequest = {
+  content: string;
+};
+
+export type GetDocumentResponse = {
+  name?: string;
+  date?: string;
+  amount?: number;
+  currency?: string;
+  meta: unknown;
 };

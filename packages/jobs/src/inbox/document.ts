@@ -52,8 +52,8 @@ client.defineJob({
     }
 
     const result = new DocumentClient({
-      mimeType: contentType,
-    }).processDocument({
+      contentType,
+    }).getDocument({
       content: Buffer.from(buffer).toString("base64"),
     });
 

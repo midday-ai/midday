@@ -1,22 +1,27 @@
-import type { DocumentClientParams } from "./types";
+import { ExpenseProcessor } from "./processors/expense/expense-processor";
+import { InvoiceProcessor } from "./processors/invoice/invoice-processor";
+import type {
+  DocumentClientParams,
+  GetDocumentRequest,
+  GetDocumentResponse,
+} from "./types";
 
 export class DocumentClient {
-  #provider;
+  #processor;
 
-  constructor({ mimeType }: DocumentClientParams) {
-    switch (mimeType) {
+  constructor({ contentType }: DocumentClientParams) {
+    switch (contentType) {
       case "application/pdf":
-        this.#provider = null;
-        break;
-      case "image/jpeg":
-        this.#provider = null;
+        this.#processor = new InvoiceProcessor();
         break;
       default:
-        throw Error("Mime type not supported");
+        this.#processor = new ExpenseProcessor();
     }
   }
 
-  public async processDocument({ content }) {
-    this.#provider.processDocument({ content });
+  public async getDocument(
+    params: GetDocumentRequest
+  ): Promise<GetDocumentResponse> {
+    return this.#processor.getDocument(params);
   }
 }
