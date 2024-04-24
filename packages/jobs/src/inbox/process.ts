@@ -78,6 +78,7 @@ client.defineJob({
           name: Events.INBOX_DOCUMENT,
           payload: {
             inboxId: inbox.id,
+            teamId,
           },
         })
       )

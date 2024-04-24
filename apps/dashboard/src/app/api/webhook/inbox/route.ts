@@ -1,3 +1,5 @@
+import { LogEvents } from "@midday/events/events";
+import { setupLogSnag } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
 import { client as BackgroundClient, Events } from "@midday/jobs";
 import { createClient } from "@midday/supabase/server";
@@ -44,6 +46,14 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+
+  const logsnag = await setupLogSnag();
+
+  logsnag.track({
+    event: LogEvents.InboxInbound.name,
+    icon: LogEvents.InboxInbound.icon,
+    channel: LogEvents.InboxInbound.channel,
+  });
 
   const supabase = createClient({ admin: true });
 

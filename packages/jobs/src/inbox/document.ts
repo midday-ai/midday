@@ -1,4 +1,9 @@
 import { findDocumentValue } from "@midday/inbox";
+import {
+  NotificationTypes,
+  TriggerEvents,
+  triggerBulk,
+} from "@midday/notification";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { client, supabase } from "../client";
@@ -26,13 +31,14 @@ client.defineJob({
     name: Events.INBOX_DOCUMENT,
     schema: z.object({
       recordId: z.string(),
+      teamId: z.string(),
     }),
   }),
   integrations: {
     supabase,
   },
   run: async (payload, io) => {
-    const { recordId } = payload;
+    const { recordId, teamId } = payload;
 
     const { data: inboxData } = await io.supabase.client
       .from("inbox")
@@ -40,6 +46,12 @@ client.defineJob({
       .eq("id", recordId)
       .single()
       .throwOnError();
+
+    // Get all users on team
+    const { data: usersData } = await io.supabase.client
+      .from("users_on_team")
+      .select("team_id, user:users(id, full_name, avatar_url, email, locale)")
+      .eq("team_id", teamId);
 
     const contentType = inboxData?.content_type;
     const { data } = await io.supabase.client.storage
@@ -117,6 +129,35 @@ client.defineJob({
         .from("inbox")
         .update({ status: "pending" })
         .eq("id", recordId);
+
+      if (!inboxData || !usersData?.length) {
+        return;
+      }
+
+      // And send a notification about the new inbox record
+      const notificationEvents = await Promise.all(
+        usersData?.map(async ({ user, team_id }) => {
+          return inboxData?.map((inbox) => ({
+            name: TriggerEvents.InboxNewInApp,
+            payload: {
+              recordId: inbox.id,
+              description: `${inbox.name} - ${inbox.subject}`,
+              type: NotificationTypes.Inbox,
+            },
+            user: {
+              subscriberId: user.id,
+              teamId: team_id,
+              email: user.email,
+              fullName: user.full_name,
+              avatarUrl: user.avatar_url,
+            },
+          }));
+        })
+      );
+
+      if (notificationEvents.length) {
+        triggerBulk(notificationEvents?.flat());
+      }
     }
   },
 });

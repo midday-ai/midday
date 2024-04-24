@@ -15,51 +15,55 @@ type GenereateFileNameParams = {
   type: "pdf" | "jpg";
 };
 
+const MAX_SIZE = 1500;
+
 export async function generateAttachment(attachment: Attachment) {
   const attachmentBuffer = decode(attachment.content);
 
-  if (attachment.contentType === "application/pdf") {
-    return {
-      content: attachmentBuffer,
-      contentType: attachment.contentType,
-      size: attachment.size,
-      fileName: `${nanoid(10)}.pdf`,
-    };
+  switch (attachment.contentType) {
+    case "application/pdf": {
+      return {
+        content: attachmentBuffer,
+        contentType: attachment.contentType,
+        size: attachment.size,
+        fileName: `${nanoid(10)}.pdf`,
+      };
+    }
+    case "image/heic": {
+      const buffer = new Uint8Array(attachmentBuffer);
+
+      const decodedImage = await convert({
+        buffer,
+        format: "JPEG",
+        quality: 1,
+      });
+
+      const image = await sharp(decodedImage)
+        .rotate()
+        .resize({ width: MAX_SIZE })
+        .toFormat("jpeg")
+        .toBuffer();
+
+      return {
+        content: image,
+        contentType: "image/jpeg",
+        size: image.byteLength,
+        fileName: `${nanoid(10)}.jpg`,
+      };
+    }
+    default: {
+      const image = await sharp(attachmentBuffer)
+        .rotate()
+        .resize({ width: MAX_SIZE })
+        .toFormat("jpeg")
+        .toBuffer();
+
+      return {
+        content: image,
+        contentType: "image/jpeg",
+        size: image.byteLength,
+        fileName: generateFileName({ fileName, type: "jpg" }),
+      };
+    }
   }
-
-  if (attachment.contentType === "image/heic") {
-    const buffer = new Uint8Array(attachmentBuffer);
-
-    const decodedImage = await convert({
-      buffer,
-      format: "JPEG",
-      quality: 1,
-    });
-
-    const image = await sharp(decodedImage)
-      .rotate()
-      .resize({ width: 1500 })
-      .toFormat("jpeg")
-      .toBuffer();
-
-    return {
-      content: image,
-      contentType: "image/jpeg",
-      size: image.byteLength,
-      fileName: `${nanoid(10)}.jpg`,
-    };
-  }
-
-  const image = await sharp(attachmentBuffer)
-    .rotate()
-    .resize({ width: 1500 })
-    .toFormat("jpeg")
-    .toBuffer();
-
-  return {
-    content: image,
-    contentType: "image/jpeg",
-    size: image.byteLength,
-    fileName: generateFileName({ fileName, type: "jpg" }),
-  };
 }

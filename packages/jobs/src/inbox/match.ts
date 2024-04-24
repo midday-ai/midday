@@ -56,7 +56,7 @@ client.defineJob({
         .insert({
           type: inboxData.content_type,
           path: inboxData.file_path,
-          transaction_id: transaction.id,
+          transaction_id: transaction?.id,
           team_id: inboxData.team_id,
           size: inboxData.size,
           name: inboxData.file_name,
@@ -69,10 +69,14 @@ client.defineJob({
         {
           id: inboxData.id,
           attachment_id: attachmentData.id,
-          transaction_id: transaction.id,
+          transaction_id: transaction?.id,
           read: true,
         }
       );
+
+      if (!updatedInboxData) {
+        throw Error("Nothing updated");
+      }
 
       revalidateTag(`transactions_${inboxData.team_id}`);
 
@@ -84,14 +88,14 @@ client.defineJob({
         .eq("team_id", inboxData.team_id);
 
       const notificationEvents = usersData?.map(({ user }) => {
-        const { t } = getI18n({ locale: user.locale });
+        const { t } = getI18n({ locale: user?.locale });
 
         return {
           name: TriggerEvents.MatchNewInApp,
           payload: {
             recordId: updatedInboxData.transaction_id,
             description: t("notifications.match", {
-              transactionName: transaction.name,
+              transactionName: transaction?.name,
               fileName: updatedInboxData.file_name,
             }),
             type: NotificationTypes.Match,
@@ -106,7 +110,9 @@ client.defineJob({
         };
       });
 
-      triggerBulk(notificationEvents?.flat());
+      if (notificationEvents?.length) {
+        triggerBulk(notificationEvents?.flat());
+      }
     }
   },
 });
