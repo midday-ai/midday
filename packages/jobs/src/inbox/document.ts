@@ -39,7 +39,6 @@ client.defineJob({
       .select("team_id, user:users(id, full_name, avatar_url, email, locale)")
       .eq("team_id", teamId);
 
-    const contentType = inboxData?.content_type;
     const { data } = await io.supabase.client.storage
       .from("vault")
       .download(inboxData.file_path.join("/"));
@@ -51,50 +50,38 @@ client.defineJob({
       throw Error("No file data");
     }
 
-    const result = new DocumentClient({
-      contentType,
-    }).getDocument({
-      content: Buffer.from(buffer).toString("base64"),
-    });
-
     try {
-      // switch (contentType) {
-      //   case "application/pdf":
-      //     {
-      //       const { data: updatedInboxData } = await io.supabase.client
-      //         .from("inbox")
-      //         .update({
-      //           amount,
-      //           currency,
-      //           name: issuerName,
-      //           due_date: dueDate && new Date(dueDate),
-      //           status: "pending",
-      //           meta: JSON.stringify(entities),
-      //         })
-      //         .eq("id", recordId)
-      //         .select()
-      //         .single();
-      //       if (updatedInboxData?.amount) {
-      //         await io.sendEvent("Match Inbox", {
-      //           name: Events.INBOX_MATCH,
-      //           payload: {
-      //             teamId: updatedInboxData.team_id,
-      //             inboxId: updatedInboxData.id,
-      //             amount: updatedInboxData.amount,
-      //           },
-      //         });
-      //         await io.logger.log("updated inbox", updatedInboxData);
-      //       }
-      //     }
-      //     break;
-      //   case "image/jpeg":
-      //     // TODO: Process expense
-      //     return;
-      //   default:
-      //     return io.logger.debug(
-      //       `Not a supported content type: ${contentType}`
-      //     );
-      // }
+      const document = new DocumentClient({
+        contentType: inboxData?.content_type,
+      });
+
+      const result = await document.getDocument({
+        content: Buffer.from(buffer).toString("base64"),
+      });
+
+      const { data: updatedInbox } = await io.supabase.client
+        .from("inbox")
+        .update({
+          amount: result.amount,
+          currency: result.currency,
+          name: result.name,
+          due_date: result.date && new Date(result.date),
+          status: "pending",
+          meta: result?.meta && JSON.stringify(result.meta),
+        })
+        .eq("id", recordId)
+        .select()
+        .single();
+      if (updatedInbox?.amount) {
+        await io.sendEvent("Match Inbox", {
+          name: Events.INBOX_MATCH,
+          payload: {
+            teamId: updatedInbox.team_id,
+            inboxId: updatedInbox.id,
+            amount: updatedInbox.amount,
+          },
+        });
+      }
     } catch {
       // If we end up here we could not parse the document
       // But we want to update the status so we show the record with fallback name (Subject/From name)

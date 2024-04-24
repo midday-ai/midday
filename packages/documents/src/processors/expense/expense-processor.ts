@@ -4,7 +4,7 @@ import type { GetDocumentRequest } from "../../types";
 import { findValue } from "../../utils";
 
 export class ExpenseProcessor implements Processor {
-  async #processDocument(content: string) {
+  async #processDocumentWithMain(content: string) {
     const [result] = await GoogleDocumentClient.processDocument({
       name: `projects/${credentials.project_id}/locations/eu/processors/${process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID}`,
       rawDocument: {
@@ -29,7 +29,28 @@ export class ExpenseProcessor implements Processor {
     };
   }
 
+  async #processDocumentSecondary(content: string) {
+    return {
+      name: null,
+      date: null,
+      currency: null,
+      amount: null,
+      meta: null,
+    };
+  }
+
   public async getDocument(params: GetDocumentRequest) {
-    return this.#processDocument(params.content);
+    const main = await this.#processDocumentWithMain(params.content);
+
+    if (!main.amount) {
+      const secondary = await this.#processDocumentSecondary(params.content);
+
+      return {
+        ...main,
+        ...secondary,
+      };
+    }
+
+    return main;
   }
 }

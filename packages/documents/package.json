@@ -11,6 +11,7 @@
     "test": "bun test src"
   },
   "dependencies": {
+    "@azure/ai-form-recognizer": "^5.0.0",
     "@google-cloud/documentai": "^8.5.0",
     "base64-arraybuffer": "^1.0.2",
     "heic-convert": "1.2.4",
