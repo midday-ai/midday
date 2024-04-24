@@ -19,6 +19,7 @@
     "@midday/events": "workspace:*",
     "@midday/jobs": "workspace:*",
     "@midday/kv": "workspace:*",
+    "@midday/inbox": "workspace:*",
     "@midday/location": "workspace:*",
     "@midday/notification": "workspace:*",
     "@midday/providers": "workspace:*",

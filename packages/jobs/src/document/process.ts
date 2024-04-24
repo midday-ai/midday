@@ -90,7 +90,7 @@ client.defineJob({
 
           if (updatedInboxData?.amount) {
             await io.sendEvent("Match Inbox", {
-              name: Events.MATCH_INBOX,
+              name: Events.INBOX_MATCH,
               payload: {
                 teamId: updatedInboxData.team_id,
                 inboxId: updatedInboxData.id,

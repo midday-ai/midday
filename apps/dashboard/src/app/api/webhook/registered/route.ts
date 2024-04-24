@@ -3,7 +3,6 @@ import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { client as redisClient } from "@midday/kv";
-
 import { LoopsClient } from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";

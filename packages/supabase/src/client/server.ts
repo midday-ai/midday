@@ -8,15 +8,15 @@ type CreateClientOptions = {
 };
 
 export const createClient = (options?: CreateClientOptions) => {
+  const { admin = false, ...rest } = options ?? {};
+
   const cookieStore = cookies();
 
-  const schema = options?.schema ?? "public";
-
-  const key = options?.admin
+  const key = admin
     ? process.env.SUPABASE_SERVICE_KEY!
     : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-  const auth = options?.admin
+  const auth = admin
     ? {
         persistSession: false,
         autoRefreshToken: false,
@@ -28,9 +28,7 @@ export const createClient = (options?: CreateClientOptions) => {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     key,
     {
-      db: {
-        schema,
-      },
+      ...rest,
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value;

@@ -13,11 +13,11 @@ import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
 client.defineJob({
-  id: Jobs.MATCH_INBOX,
+  id: Jobs.INBOX_MATCH,
   name: "Inbox - Match",
   version: "0.0.1",
   trigger: eventTrigger({
-    name: Events.MATCH_INBOX,
+    name: Events.INBOX_MATCH,
     schema: z.object({
       inboxId: z.string(),
       amount: z.number(),

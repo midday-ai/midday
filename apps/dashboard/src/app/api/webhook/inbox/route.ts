@@ -1,27 +1,8 @@
-import { env } from "@/env.mjs";
-import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
-import { Events } from "@midday/jobs";
-import { client } from "@midday/jobs/src/client";
-import {
-  NotificationTypes,
-  TriggerEvents,
-  triggerBulk,
-} from "@midday/notification";
+import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
+import { client as BackgroundClient, Events } from "@midday/jobs";
 import { createClient } from "@midday/supabase/server";
-import { stripSpecialCharacters } from "@midday/utils";
-import { decode } from "base64-arraybuffer";
-import convert from "heic-convert";
-import { nanoid } from "nanoid";
 import { headers } from "next/headers";
-import { Resend } from "resend";
-import sharp from "sharp";
-
-export const runtime = "nodejs";
-export const maxDuration = 300; // 5min
-export const dynamic = "force-dynamic";
-
-const resend = new Resend(env.RESEND_API_KEY);
+import { NextResponse } from "next/server";
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
@@ -31,92 +12,42 @@ const ipRange = [
   "18.217.206.57",
 ];
 
-type Attachment = {
-  Content: string;
-  Name: string;
-  ContentType: string;
-  ContentLength: number;
-};
-
-type GenereateFileNameParams = {
-  fileName: string;
-  type: "pdf" | "jpg";
-};
-
-function generateFileName({ fileName, type }: GenereateFileNameParams) {
-  // NOTE: Attachments can have the same name so we need to
-  // ensure with a unique name
-  return stripSpecialCharacters(`${fileName}-${nanoid(3)}.${type}`);
-}
-
-async function transformContent(attachment: Attachment) {
-  const attachmentBuffer = decode(attachment.Content);
-
-  const [fileName = "attachment"] = attachment.Name.split(".");
-
-  if (attachment.ContentType === "application/pdf") {
-    return {
-      content: attachmentBuffer,
-      contentType: attachment.ContentType,
-      size: attachment.ContentLength,
-      fileName: generateFileName({ fileName, type: "pdf" }),
-    };
-  }
-
-  if (attachment.ContentType === "image/heic") {
-    const decodedImage = await convert({
-      buffer: attachmentBuffer,
-      format: "JPEG",
-      quality: 1,
-    });
-
-    console.log(decodedImage);
-
-    const image = await sharp(decodedImage)
-      .rotate()
-      .resize({ width: 1500 })
-      .toFormat("jpeg")
-      .toBuffer();
-
-    return {
-      content: image,
-      contentType: "image/jpeg",
-      size: image.byteLength,
-      fileName: generateFileName({ fileName, type: "jpg" }),
-    };
-  }
-
-  const image = await sharp(attachmentBuffer)
-    .rotate()
-    .resize({ width: 1500 })
-    .toFormat("jpeg")
-    .toBuffer();
-
-  return {
-    content: image,
-    contentType: "image/jpeg",
-    size: image.byteLength,
-    fileName: generateFileName({ fileName, type: "jpg" }),
-  };
-}
-
 export async function POST(req: Request) {
+  const clientIp = headers().get("x-forwarded-for") ?? "";
+
+  if (
+    process.env.NODE_ENV !== "development" &&
+    (!clientIp || !ipRange.includes(clientIp))
+  ) {
+    return NextResponse.json({ error: "Invalid IP address" }, { status: 403 });
+  }
+
+  const parsedBody = inboxWebhookPostSchema.safeParse(await req.json());
+
+  if (!parsedBody.success) {
+    const errors = parsedBody.error.errors.map((error) => ({
+      path: error.path.join("."),
+      message: error.message,
+    }));
+
+    return NextResponse.json(
+      { error: "Invalid request body", errors },
+      { status: 400 }
+    );
+  }
+
+  const inboxId = getInboxIdFromEmail(parsedBody.data.OriginalRecipient);
+
+  if (!inboxId) {
+    return NextResponse.json(
+      { error: "Invalid OriginalRecipient email" },
+      { status: 400 }
+    );
+  }
+
   const supabase = createClient({ admin: true });
-  const res = await req.json();
-  const clientIP = headers().get("x-forwarded-for") ?? "";
 
-  if (res?.OriginalRecipient && ipRange.includes(clientIP)) {
-    const logsnag = await setupLogSnag();
-
-    logsnag.track({
-      event: LogEvents.InboxInbound.name,
-      icon: LogEvents.InboxInbound.icon,
-      channel: LogEvents.InboxInbound.channel,
-    });
-
-    const email = res?.OriginalRecipient;
-    const [inboxId] = email.split("@");
-
+  try {
     const { data: teamData } = await supabase
       .from("teams")
       .select("id, inbox_email")
@@ -124,129 +55,54 @@ export async function POST(req: Request) {
       .single()
       .throwOnError();
 
-    const attachments = res?.Attachments;
-    const subject = res.Subject.length > 0 ? res.Subject : "No subject";
+    const {
+      MessageID,
+      OriginalRecipient,
+      FromFull,
+      Subject,
+      Attachments,
+      TextBody,
+      HtmlBody,
+    } = parsedBody.data;
+
+    const name = Subject.length > 0 ? Subject : FromFull?.Name;
+
+    const attachments = Attachments?.map((a) => ({
+      filename: a.Name,
+      content: a.Content,
+    }));
 
     if (teamData?.inbox_email) {
-      try {
-        // NOTE: Send original email to company email
-        await resend.emails.send({
-          from: `${res.FromFull.Name} <inbox@midday.ai>`,
-          to: [teamData.inbox_email],
+      BackgroundClient.sendEvent({
+        name: Events.INBOX_FORWARD,
+        id: MessageID,
+        payload: {
+          from: `${parsedBody.FromFull.Name} <inbox@midday.ai>`,
+          to: teamData.inbox_email,
           subject,
-          text: res.TextBody,
-          html: res.HtmlBody,
-          attachments: attachments?.map((a) => ({
-            filename: a.Name,
-            content: a.Content,
-          })),
-          headers: {
-            "X-Entity-Ref-ID": nanoid(),
-          },
-        });
-      } catch (error) {
-        console.log(error);
-      }
+          text: TextBody,
+          html: HtmlBody,
+          attachments,
+        },
+      });
     }
 
-    const records = attachments?.map(async (attachment) => {
-      try {
-        const { content, contentType, size, fileName } = await transformContent(
-          attachment
-        );
-
-        const { data, error } = await supabase.storage
-          .from("vault")
-          .upload(`${teamData.id}/inbox/${fileName}`, content, {
-            contentType,
-          });
-
-        if (error) {
-          console.log("Upload error", error);
-        }
-
-        return {
-          email: res.FromFull.Email,
-          name: res.FromFull.Name,
-          subject,
-          team_id: teamData.id,
-          file_path: data.path.split("/"),
-          file_name: fileName,
-          content_type: contentType,
-          size,
-        };
-      } catch (error) {
-        console.log(error);
-      }
+    BackgroundClient.sendEvent({
+      name: Events.INBOX_PROCESS,
+      payload: {
+        teamId: teamData?.id,
+        name,
+        attachments,
+      },
     });
-
-    if (records.length > 0) {
-      const insertData = await Promise.all(records);
-
-      const { data: inboxData, error } = await supabase
-        .from("decrypted_inbox")
-        .insert(insertData)
-        .select("*, name:decrypted_name, subject:decrypted_subject");
-
-      if (error) {
-        console.log("inbox error", error);
-      }
-
-      await Promise.all(
-        inboxData?.map((inbox) =>
-          client.sendEvent({
-            name: Events.PROCESS_DOCUMENT,
-            payload: {
-              inboxId: inbox.id,
-            },
-          })
-        )
-      );
-
-      const { data: usersData } = await supabase
-        .from("users_on_team")
-        .select("team_id, user:users(id, full_name, avatar_url, email, locale)")
-        .eq("team_id", teamData.id);
-
-      try {
-        const notificationEvents = await Promise.all(
-          usersData?.map(async ({ user, team_id }) => {
-            return inboxData?.map((inbox) => ({
-              name: TriggerEvents.InboxNewInApp,
-              payload: {
-                recordId: inbox.id,
-                description: `${inbox.name} - ${inbox.subject}`,
-                type: NotificationTypes.Inbox,
-              },
-              user: {
-                subscriberId: user.id,
-                teamId: team_id,
-                email: user.email,
-                fullName: user.full_name,
-                avatarUrl: user.avatar_url,
-              },
-            }));
-          })
-        );
-
-        triggerBulk(notificationEvents?.flat());
-      } catch (error) {
-        console.log(error);
-      }
-
-      // NOTE: If we end up here the email was forwarded
-      try {
-        await supabase.from("inbox").upsert(
-          inboxData?.map((inbox) => ({
-            id: inbox.id,
-            forwarded_to: teamData.inbox_email,
-          }))
-        );
-      } catch (error) {
-        console.log(error);
-      }
-    }
+  } catch (err) {
+    return NextResponse.json(
+      { error: `Failed to create record for ${inboxId}` },
+      { status: 500 }
+    );
   }
 
-  return Response.json({ success: true });
+  return NextResponse.json({
+    success: true,
+  });
 }
