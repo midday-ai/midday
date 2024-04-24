@@ -65,12 +65,8 @@ export async function POST(req: Request) {
       HtmlBody,
     } = parsedBody.data;
 
-    const name = Subject.length > 0 ? Subject : FromFull?.Name;
-
-    const attachments = Attachments?.map((a) => ({
-      filename: a.Name,
-      content: a.Content,
-    }));
+    const fallbackName = Subject.length > 0 ? Subject : FromFull?.Name;
+    const forwardTo = teamData.inbox_email;
 
     if (teamData?.inbox_email) {
       BackgroundClient.sendEvent({
@@ -78,11 +74,14 @@ export async function POST(req: Request) {
         id: MessageID,
         payload: {
           from: `${parsedBody.FromFull.Name} <inbox@midday.ai>`,
-          to: teamData.inbox_email,
+          to: forwardTo,
           subject,
           text: TextBody,
           html: HtmlBody,
-          attachments,
+          attachments: Attachments?.map((a) => ({
+            filename: a.Name,
+            content: a.Content,
+          })),
         },
       });
     }
@@ -91,8 +90,13 @@ export async function POST(req: Request) {
       name: Events.INBOX_PROCESS,
       payload: {
         teamId: teamData?.id,
-        name,
-        attachments,
+        forwardTo,
+        fallbackName,
+        attachments: Attachments?.map((a) => ({
+          filename: a.Name,
+          content: a.Content,
+          size: a.ContentLength,
+        })),
       },
     });
   } catch (err) {

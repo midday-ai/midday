@@ -19,8 +19,8 @@ client.defineJob({
       attachments: z
         .array(
           z.object({
-            Name: z.string(),
-            Content: z.string(),
+            name: z.string(),
+            content: z.string(),
           })
         )
         .optional(),
@@ -39,8 +39,8 @@ client.defineJob({
       text,
       html,
       attachments: attachments?.map((a) => ({
-        filename: a.Name,
-        content: a.Content,
+        filename: a.name,
+        content: a.content,
       })),
       react: null,
       headers: {
