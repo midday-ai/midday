@@ -1,0 +1,23 @@
+{
+  "name": "@midday/documents",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test src"
+  },
+  "dependencies": {
+    "@google-cloud/documentai": "^8.5.0",
+    "base64-arraybuffer": "^1.0.2",
+    "heic-convert": "1.2.4",
+    "nanoid": "5.0.7"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.0",
+    "@types/heic-convert": "^1.2.3"
+  }
+}
