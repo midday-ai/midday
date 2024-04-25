@@ -50,14 +50,13 @@ export function InboxSkeleton({
 type InboxListProps = {
   items: {
     id: string;
-    read: boolean;
     status: string;
     name: string;
     created_at: string;
     file_name?: string;
   }[];
   selectedId: string;
-  updateInbox: (item: { id: string; read: boolean }) => void;
+  updateInbox: (item: { id: string }) => void;
   setSelectedId: (id: string) => void;
 };
 
@@ -83,10 +82,6 @@ export function InboxList({
             type="button"
             onClick={() => {
               setSelectedId(item.id);
-
-              if (!item.read) {
-                updateInbox({ id: item.id, read: true });
-              }
             }}
             key={item.id}
             className={cn(
@@ -102,9 +97,6 @@ export function InboxList({
                     <div className="font-semibold">{item.name}</div>
                     {item.status === "handled" && <Icons.Check />}
                   </div>
-                  {!item.read && (
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />
-                  )}
                 </div>
                 <div
                   className={cn(

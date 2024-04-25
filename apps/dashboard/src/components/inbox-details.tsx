@@ -22,16 +22,16 @@ import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
 
-function extractRootDomainFromEmail(email) {
-  const url = email?.split("@")?.at(1);
+// function extractRootDomainFromEmail(email) {
+//   const url = email?.split("@")?.at(1);
 
-  const domain = url.match(
-    /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/im
-  )[1];
-  const parts = domain.split(".").reverse();
-  const rootDomain = `${parts[1]}.${parts[0]}`;
-  return rootDomain;
-}
+//   const domain = url.match(
+//     /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/im
+//   )[1];
+//   const parts = domain.split(".").reverse();
+//   const rootDomain = `${parts[1]}.${parts[0]}`;
+//   return rootDomain;
+// }
 
 export function InboxDetailsSkeleton() {
   return (
@@ -162,9 +162,7 @@ export function InboxDetails({ item, updateInbox, teamId }) {
                     // NOTE: Can't be hidden because onLoad is not fired
                     isLoading && "absolute -left-[100px]"
                   )}
-                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${extractRootDomainFromEmail(
-                    item.email
-                  )}&size=128`}
+                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.website}&size=128`}
                   alt={item.name}
                   placeholder={undefined}
                   onLoad={() => setLoading(false)}

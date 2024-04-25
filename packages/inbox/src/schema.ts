@@ -20,7 +20,7 @@ export const inboxWebhookPostSchema = z.object({
         message: "Invalid email domain",
       }),
   ]),
-  Attachments: inboxAttachment.optional(),
+  Attachments: z.array(inboxAttachment).optional(),
   Subject: z.string().optional(),
   TextBody: z.string().optional(),
   HtmlBody: z.string().optional(),

@@ -741,7 +741,7 @@ export async function getInboxQuery(
   const query = supabase
     .from("decrypted_inbox")
     .select(
-      "*, subject:decrypted_subject, issuer_name:decrypted_issuer_name, name:decrypted_name, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
+      "*, subject:decrypted_subject, website, issuer_name:decrypted_issuer_name, name:decrypted_name, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
       {
         count: "exact",
       }

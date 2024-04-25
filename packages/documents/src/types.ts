@@ -1,7 +1,8 @@
 export type Document = {
-  content: string;
-  mimeType: string;
-  size: number;
+  Content: string;
+  ContentType: string;
+  ContentLength: number;
+  Name: string;
 };
 
 export type MimeType = "application/pdf" | "image/jpeg";
@@ -22,9 +23,19 @@ export type GetDocumentRequest = {
 };
 
 export type GetDocumentResponse = {
-  name?: string;
-  date?: string;
-  amount?: number;
-  currency?: string;
-  meta: unknown;
+  name?: string | null;
+  date?: string | null;
+  amount?: string | null;
+  currency?: string | null;
+  meta?: {
+    [key: string]: unknown;
+  };
 };
+
+export type Entries = {
+  normalizedValue?: {
+    text: string;
+  };
+  mentionText?: string;
+  type: string;
+}[];

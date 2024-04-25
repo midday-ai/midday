@@ -1,6 +1,6 @@
+import { stripSpecialCharacters } from "@midday/utils";
 import { decode } from "base64-arraybuffer";
 import convert from "heic-convert";
-import { nanoid } from "nanoid";
 import sharp from "sharp";
 import type { Document, DocumentResponse } from "./types";
 
@@ -9,19 +9,22 @@ const MAX_SIZE = 1500;
 export async function prepareDocument(
   document: Document
 ): Promise<DocumentResponse> {
-  const buffer = decode(document.content);
+  const buffer = decode(document.Content);
+  const fileName = document.Name.split(".")?.at(0);
+  const sanitizedName = stripSpecialCharacters(fileName);
 
-  switch (document.mimeType) {
+  switch (document.ContentType) {
     case "application/pdf": {
       return {
         content: buffer,
         mimeType: "application/pdf",
-        size: document.size,
-        fileName: `${nanoid(10)}.pdf`,
+        size: document.ContentLength,
+        fileName: `${sanitizedName}.pdf`,
       };
     }
     case "image/heic": {
       const decodedImage = await convert({
+        // @ts-ignore
         buffer: new Uint8Array(buffer),
         format: "JPEG",
         quality: 1,
@@ -37,7 +40,7 @@ export async function prepareDocument(
         content: image,
         mimeType: "image/jpeg",
         size: image.byteLength,
-        fileName: `${nanoid(10)}.jpg`,
+        fileName: `${sanitizedName}.jpg`,
       };
     }
     default: {
@@ -51,7 +54,7 @@ export async function prepareDocument(
         content: image,
         mimeType: "image/jpeg",
         size: image.byteLength,
-        fileName: `${nanoid(10)}.jpg`,
+        fileName: `${sanitizedName}.jpg`,
       };
     }
   }

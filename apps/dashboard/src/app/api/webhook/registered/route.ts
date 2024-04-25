@@ -25,6 +25,17 @@ export async function POST(req: Request) {
   const userId = body.record.id;
   const fullName = body.record.raw_user_meta_data.full_name;
 
+  const logsnag = await setupLogSnag({
+    userId,
+    fullName,
+  });
+
+  logsnag.track({
+    event: LogEvents.Registered.name,
+    icon: LogEvents.Registered.icon,
+    channel: LogEvents.Registered.channel,
+  });
+
   // NOTE: Start onboarding email for enabled beta users
   const isBeta = (await redisClient.get("approved"))?.includes(email);
 
@@ -67,17 +78,6 @@ export async function POST(req: Request) {
   } catch (err) {
     console.log(err);
   }
-
-  const logsnag = await setupLogSnag({
-    userId,
-    fullName,
-  });
-
-  logsnag.track({
-    event: LogEvents.Registered.name,
-    icon: LogEvents.Registered.icon,
-    channel: LogEvents.Registered.channel,
-  });
 
   return NextResponse.json({ success: true });
 }

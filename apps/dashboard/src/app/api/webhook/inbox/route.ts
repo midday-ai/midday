@@ -1,10 +1,18 @@
+import { env } from "@/env.mjs";
+import { prepareDocument } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
 import { client as BackgroundClient, Events } from "@midday/jobs";
+import { client as RedisClient } from "@midday/kv";
 import { createClient } from "@midday/supabase/server";
+import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+export const runtime = "nodejs";
+export const maxDuration = 300; // 5min
 
 // https://postmarkapp.com/support/article/800-ips-for-firewalls#webhooks
 const ipRange = [
@@ -13,6 +21,8 @@ const ipRange = [
   "50.31.156.77",
   "18.217.206.57",
 ];
+
+const resend = new Resend(env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   const clientIp = headers().get("x-forwarded-for") ?? "";
@@ -65,51 +75,96 @@ export async function POST(req: Request) {
       .single()
       .throwOnError();
 
-    const {
-      MessageID,
-      OriginalRecipient,
-      FromFull,
-      Subject,
-      Attachments,
-      TextBody,
-      HtmlBody,
-    } = parsedBody.data;
+    const teamId = teamData?.id;
 
-    const fallbackName = Subject.length > 0 ? Subject : FromFull?.Name;
-    const forwardTo = teamData.inbox_email;
+    const { MessageID, FromFull, Subject, Attachments, TextBody, HtmlBody } =
+      parsedBody.data;
 
-    if (teamData?.inbox_email) {
-      BackgroundClient.sendEvent({
-        name: Events.INBOX_FORWARD,
-        id: MessageID,
-        payload: {
-          from: `${parsedBody.FromFull.Name} <inbox@midday.ai>`,
-          to: forwardTo,
-          subject,
+    const fallbackName = Subject ?? FromFull?.Name;
+    const forwardTo = teamData?.inbox_email;
+
+    if (forwardTo) {
+      const messageKey = `message-id:${MessageID}`;
+      const isForwarded = await RedisClient.exists(messageKey);
+
+      if (!isForwarded) {
+        const { error } = await resend.emails.send({
+          from: `${FromFull?.Name} <inbox@midday.ai>`,
+          to: [forwardTo],
+          subject: fallbackName,
           text: TextBody,
           html: HtmlBody,
           attachments: Attachments?.map((a) => ({
             filename: a.Name,
             content: a.Content,
           })),
-        },
-      });
+          react: null,
+          headers: {
+            "X-Entity-Ref-ID": nanoid(),
+          },
+        });
+
+        if (!error) {
+          await RedisClient.set(messageKey, true, { ex: 9600 });
+        }
+      }
     }
 
-    BackgroundClient.sendEvent({
-      name: Events.INBOX_PROCESS,
-      payload: {
-        teamId: teamData?.id,
-        forwardTo,
-        fallbackName,
-        attachments: Attachments?.map((a) => ({
-          filename: a.Name,
-          content: a.Content,
-          size: a.ContentLength,
-        })),
-      },
+    // Transform and upload files
+    const uploadedAttachments = Attachments?.map(async (attachment) => {
+      const { content, mimeType, size, fileName } = await prepareDocument(
+        attachment
+      );
+
+      const { data } = await supabase.storage
+        .from("vault")
+        .upload(`${teamId}/inbox/${MessageID}/${fileName}`, content, {
+          contentType: mimeType,
+          upsert: true,
+        });
+
+      return {
+        name: fallbackName,
+        status: "processing",
+        team_id: teamId,
+        file_path: data?.path.split("/"),
+        file_name: fileName,
+        content_type: mimeType,
+        forwarded_to: forwardTo,
+        reference_id: `${fileName}_${MessageID}`,
+        size,
+      };
     });
-  } catch (err) {
+
+    if (!uploadedAttachments) {
+      throw Error("No attachments");
+    }
+
+    const insertData = await Promise.all(uploadedAttachments);
+
+    // Insert records
+    const { data: inboxData } = await supabase
+      .from("inbox")
+      .upsert(insertData, { onConflict: "reference_id" })
+      .select("id")
+      .throwOnError();
+
+    if (!inboxData?.length) {
+      throw Error("No records");
+    }
+
+    await Promise.all(
+      inboxData?.map((inbox) =>
+        BackgroundClient.sendEvent({
+          name: Events.INBOX_DOCUMENT,
+          payload: {
+            recordId: inbox.id,
+            teamId,
+          },
+        })
+      )
+    );
+  } catch {
     return NextResponse.json(
       { error: `Failed to create record for ${inboxId}` },
       { status: 500 }

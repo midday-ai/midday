@@ -11,14 +11,15 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@azure/ai-form-recognizer": "^5.0.0",
+    "@midday/utils": "workspace:*",
     "@google-cloud/documentai": "^8.5.0",
     "base64-arraybuffer": "^1.0.2",
-    "heic-convert": "1.2.4",
-    "nanoid": "5.0.7"
+    "heic-convert": "1.2.4"
   },
   "devDependencies": {
     "@types/bun": "^1.1.0",
-    "@types/heic-convert": "^1.2.3"
+    "@types/heic-convert": "^1.2.3",
+    "request": "^2.88.2"
   }
 }
+
