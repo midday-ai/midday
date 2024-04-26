@@ -23,8 +23,10 @@ Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
   const { meta, id, status } = payload.record;
 
-  // Check if content has changed.
-  if (status !== "pending") {
+  // Check if meta data is saved, meta is saved with a async background job
+  // That parses the document using Google Document AI
+  // packages/jobs/src/inbox/document.ts
+  if (status !== "pending" && meta) {
     return new Response("Not ready to be embedded");
   }
 
