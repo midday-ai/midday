@@ -11,7 +11,7 @@ const supabase = createClient<Database>(
 const model = new Supabase.ai.Session("gte-small");
 
 Deno.serve(async (req) => {
-  const { search } = await req.json();
+  const { search, limit = 10 } = await req.json();
 
   if (!search) {
     return new Response("Please provide a search param!");
@@ -22,13 +22,15 @@ Deno.serve(async (req) => {
     normalize: true,
   });
 
+  // TODO: Support different multiple table searches
+  // so we can have one search for all embeddings (inbox, transactions, documents)
   const { data: result, error } = await supabase
     .rpc("query_inbox_embeddings", {
       embedding: JSON.stringify(embedding),
       match_threshold: 0.8,
     })
     .select("*")
-    .limit(3);
+    .limit(limit);
 
   if (error) {
     return Response.json(error);
