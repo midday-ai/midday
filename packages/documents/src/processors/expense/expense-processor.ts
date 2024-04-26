@@ -15,10 +15,6 @@ export class ExpenseProcessor implements Processor {
 
     const entities = result.document.entities;
 
-    console.log(JSON.stringify(entities, null, 2));
-
-    console.log(JSON.stringify(getExpenseMetaData(entities), null, 2));
-
     const currency = findValue(entities, "currency") ?? null;
     const date = findValue(entities, "receipt_date") ?? null;
     const name = findValue(entities, "supplier_name") ?? null;

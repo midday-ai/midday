@@ -38,7 +38,6 @@ export function getInvoiceMetaData(entities: Entries) {
 }
 
 export function getExpenseMetaData(entities: Entries) {
-  console.log(entities);
   return {
     "Supplier name": findValue(entities, "supplier_name"),
     "Receipt date": findValue(entities, "receipt_date"),
