@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@midday/documents": "workspace:*",
-    "@langchain/core": "^0.1.59",
+    "@langchain/core": "^0.1.60",
     "@langchain/openai": "^0.0.28",
     "@trigger.dev/react": "^2.3.18",
     "@trigger.dev/resend": "^2.3.18",
@@ -19,7 +19,7 @@
     "@trigger.dev/supabase": "^2.3.18",
     "fast-csv": "^5.0.1",
     "d3-dsv": "3",
-    "langchain": "^0.1.35",
+    "langchain": "^0.1.36",
     "nanoid": "^5.0.7"
   }
 }

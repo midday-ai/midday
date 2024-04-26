@@ -12,7 +12,6 @@ import { useOptimisticAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
-import { CopyInput } from "./copy-input";
 import { InboxEmpty } from "./inbox-empty";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
@@ -156,7 +155,6 @@ export function InboxView({
           </TabsList>
 
           <div className="flex space-x-2">
-            <CopyInput value={`${inboxId}@inbox.midday.ai`} />
             <InboxSettingsModal email={team?.inbox_email} />
           </div>
         </div>

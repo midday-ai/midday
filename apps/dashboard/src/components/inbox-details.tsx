@@ -22,17 +22,6 @@ import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
 
-// function extractRootDomainFromEmail(email) {
-//   const url = email?.split("@")?.at(1);
-
-//   const domain = url.match(
-//     /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/im
-//   )[1];
-//   const parts = domain.split(".").reverse();
-//   const rootDomain = `${parts[1]}.${parts[0]}`;
-//   return rootDomain;
-// }
-
 export function InboxDetailsSkeleton() {
   return (
     <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
