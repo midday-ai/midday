@@ -13,7 +13,6 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { FileType } from "@midday/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
@@ -72,7 +71,7 @@ export function InboxDetails({ item, updateInbox, teamId }) {
   };
 
   return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
+    <div className="flex h-[calc(100vh-120px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>

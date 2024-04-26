@@ -56,14 +56,12 @@ type InboxListProps = {
     file_name?: string;
   }[];
   selectedId: string;
-  updateInbox: (item: { id: string }) => void;
   setSelectedId: (id: string) => void;
 };
 
 export function InboxList({
   items,
   selectedId,
-  updateInbox,
   setSelectedId,
 }: InboxListProps) {
   if (!items.length) {

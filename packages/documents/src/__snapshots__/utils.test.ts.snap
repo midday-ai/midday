@@ -1,7 +1,0 @@
-// Bun Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`Generate comma separated string 1`] = `
-"Supplier name: Savoj, Receipt date: 2024-04-19, Purchase time: 19:25:46, Supplier address: Roslagsgatan 43
-113 54 Stockholm
-Sverige, Supplier city: Stockholm, Supplier phone: null, Supplier email: null, Items: 1 marinara 119,00, 1 165,00, 1 filetti 169,00, 1 pepperoni, Margherita 298,00, Nduja, Pesto Burrata, Net amount: 1149.99, Total amount: 189, Currency: SEK"
-`;

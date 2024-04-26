@@ -73,6 +73,7 @@ import {
   MdSearch,
   MdSecurity,
   MdSignalCellularAlt,
+  MdSort,
   MdTopic,
   MdTrendingDown,
   MdTrendingUp,
@@ -487,4 +488,5 @@ export const Icons = {
   FolderTransactions: MdTopic,
   Calendar: MdEditCalendar,
   Reply: MdReplay,
+  Sort: MdSort,
 };

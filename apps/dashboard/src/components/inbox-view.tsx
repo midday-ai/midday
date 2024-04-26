@@ -3,8 +3,11 @@
 import { updateInboxAction } from "@/actions/inbox/update";
 import { InboxDetails, InboxDetailsSkeleton } from "@/components/inbox-details";
 import { InboxList, InboxSkeleton } from "@/components/inbox-list";
+import { InboxSearch } from "@/components/inbox-search";
 import { InboxUpdates } from "@/components/inbox-updates";
 import { createClient } from "@midday/supabase/client";
+import { Button } from "@midday/ui/button";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
@@ -140,27 +143,26 @@ export function InboxView({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <Tabs defaultValue="all">
-        <div className="flex items-center justify-between py-2 mb-4 mt-2">
-          <TabsList className="p-0 h-auto space-x-4 bg-transparent">
-            <TabsTrigger className="p-0" value="all">
-              All
-            </TabsTrigger>
-            <TabsTrigger className="p-0" value="pending">
-              Pending
-            </TabsTrigger>
-            <TabsTrigger className="p-0" value="completed">
-              Completed
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="flex space-x-2">
-            <InboxSettingsModal email={team?.inbox_email} />
-          </div>
-        </div>
-
-        <div className="flex flex-row space-x-8">
+      <Tabs defaultValue="todo">
+        <div className="flex flex-row space-x-8 mt-4">
           <div className="w-full h-full relative overflow-hidden">
+            <div className="flex justify-center items-center space-x-4 mb-4">
+              <TabsList>
+                <TabsTrigger value="todo">Todo</TabsTrigger>
+                <TabsTrigger value="pending">Pending</TabsTrigger>
+                <TabsTrigger value="completed">Completed</TabsTrigger>
+              </TabsList>
+
+              <InboxSearch />
+
+              <div className="flex space-x-2">
+                <Button variant="outline" size="icon">
+                  <Icons.Sort size={16} />
+                </Button>
+                <InboxSettingsModal email={team?.inbox_email} />
+              </div>
+            </div>
+
             <InboxUpdates
               show={Boolean(updates)}
               onRefresh={() => {
@@ -168,7 +170,7 @@ export function InboxView({
               }}
             />
 
-            <TabsContent value="all" className="m-0 h-full">
+            <TabsContent value="todo" className="m-0 h-full">
               <InboxList
                 items={optimisticData}
                 selectedId={selectedId}
