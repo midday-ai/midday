@@ -151,7 +151,7 @@ export function InboxDetails({ item, updateInbox, teamId }) {
                     // NOTE: Can't be hidden because onLoad is not fired
                     isLoading && "absolute -left-[100px]"
                   )}
-                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=${item.website}&size=128`}
+                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
                   alt={item.name}
                   placeholder={undefined}
                   onLoad={() => setLoading(false)}

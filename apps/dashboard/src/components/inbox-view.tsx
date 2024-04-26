@@ -99,38 +99,38 @@ export function InboxView({
     }
   );
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("realtime_inbox")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "inbox",
-          filter: `team_id=eq.${team.id}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setUpdates(true);
+  // useEffect(() => {
+  //   const channel = supabase
+  //     .channel("realtime_inbox")
+  //     .on(
+  //       "postgres_changes",
+  //       {
+  //         event: "*",
+  //         schema: "public",
+  //         table: "inbox",
+  //         filter: `team_id=eq.${team.id}`,
+  //       },
+  //       (payload) => {
+  //         if (payload.eventType === "INSERT") {
+  //           setUpdates(true);
 
-            // If nothing in inbox yet
-            if (!optimisticData?.length) {
-              router.refresh();
-            }
-          }
+  //           // If nothing in inbox yet
+  //           if (!optimisticData?.length) {
+  //             router.refresh();
+  //           }
+  //         }
 
-          if (payload.eventType === "UPDATE") {
-            router.refresh();
-          }
-        }
-      )
-      .subscribe();
+  //         if (payload.eventType === "UPDATE") {
+  //           router.refresh();
+  //         }
+  //       }
+  //     )
+  //     .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [team, supabase]);
+  //   return () => {
+  //     supabase.removeChannel(channel);
+  //   };
+  // }, [team, supabase]);
 
   const selectedItems = optimisticData?.find((item) => item.id === selectedId);
 

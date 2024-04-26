@@ -16,7 +16,7 @@ export class InvoiceProcessor implements Processor {
     const entities = result.document.entities;
 
     const currency = findValue(entities, "currency") ?? null;
-    const date = findValue(entities, "receipt_date") ?? null;
+    const date = findValue(entities, "due_date") ?? null;
     const name = findValue(entities, "supplier_name") ?? null;
     const amount = findValue(entities, "total_amount") ?? null;
     const email = findValue(entities, "supplier_email") ?? null;

@@ -27,6 +27,7 @@ export type GetDocumentResponse = {
   date?: string | null;
   amount?: string | null;
   currency?: string | null;
+  website?: string | null;
   meta?: {
     [key: string]: unknown;
   };

@@ -65,13 +65,15 @@ client.defineJob({
           amount: result.amount,
           currency: result.currency,
           name: result.name,
+          website: result.website,
           due_date: result.date && new Date(result.date),
           status: "pending",
-          meta: result?.meta && JSON.stringify(result.meta),
+          meta: result.meta,
         })
         .eq("id", recordId)
         .select()
         .single();
+
       if (updatedInbox?.amount) {
         await io.sendEvent("Match Inbox", {
           name: Events.INBOX_MATCH,

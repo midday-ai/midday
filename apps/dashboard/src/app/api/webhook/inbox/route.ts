@@ -125,13 +125,12 @@ export async function POST(req: Request) {
 
       return {
         name: fallbackName,
-        status: "processing",
         team_id: teamId,
         file_path: data?.path.split("/"),
         file_name: fileName,
         content_type: mimeType,
         forwarded_to: forwardTo,
-        reference_id: `${fileName}_${MessageID}`,
+        reference_id: `${MessageID}_${fileName}`,
         size,
       };
     });
@@ -145,7 +144,8 @@ export async function POST(req: Request) {
     // Insert records
     const { data: inboxData } = await supabase
       .from("inbox")
-      .upsert(insertData, { onConflict: "reference_id" })
+      // TODO: Create custom upsert for encrypted values
+      .insert(insertData)
       .select("id")
       .throwOnError();
 
@@ -164,7 +164,9 @@ export async function POST(req: Request) {
         })
       )
     );
-  } catch {
+  } catch (error) {
+    console.log(error);
+
     return NextResponse.json(
       { error: `Failed to create record for ${inboxId}` },
       { status: 500 }
