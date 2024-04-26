@@ -1358,6 +1358,42 @@ export type Database = {
               full_name: string
             }[]
           }
+      query_inbox_embeddings: {
+        Args: {
+          embedding: string
+          match_threshold: number
+        }
+        Returns: {
+          amount: number | null
+          archived: boolean | null
+          attachment_id: string | null
+          content_type: string | null
+          created_at: string | null
+          currency: string | null
+          decrypted_issuer_name: string | null
+          decrypted_name: string | null
+          decrypted_subject: string | null
+          due_date: string | null
+          email: string | null
+          embedding: string | null
+          file_name: string | null
+          file_path: string[] | null
+          forwarded_to: string | null
+          id: string | null
+          issuer_name: string | null
+          meta: Json | null
+          name: string | null
+          read: boolean | null
+          reference_id: string | null
+          size: number | null
+          status: Database["public"]["Enums"]["inbox_status"] | null
+          subject: string | null
+          team_id: string | null
+          transaction_id: string | null
+          trash: boolean | null
+          website: string | null
+        }[]
+      }
       set_limit: {
         Args: {
           "": number

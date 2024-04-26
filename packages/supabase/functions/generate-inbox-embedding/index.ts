@@ -19,6 +19,15 @@ const supabase = createClient<Database>(
 
 const model = new Supabase.ai.Session("gte-small");
 
+function getCommaSeparatedList(data) {
+  return Object.entries(data)
+    .map(
+      ([key, value]) =>
+        `${key}: ${Array.isArray(value) ? value.join(", ") : value}`
+    )
+    .join(", ");
+}
+
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
   const { meta, id, status } = payload.record;
@@ -30,7 +39,8 @@ Deno.serve(async (req) => {
     return new Response("Not ready to be embedded");
   }
 
-  const embedding = await model.run(meta, {
+  const content = getCommaSeparatedList(meta);
+  const embedding = await model.run(content, {
     mean_pool: true,
     normalize: true,
   });

@@ -329,3 +329,9 @@ export const verifyOtpSchema = z.object({
   phone: z.string().optional(),
   email: z.string().optional(),
 });
+
+export const searchEmbeddingsSchema = z.object({
+  query: z.string().min(1),
+  type: z.enum(["inbox"]),
+  limit: z.number().optional(),
+});
