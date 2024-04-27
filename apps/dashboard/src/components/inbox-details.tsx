@@ -1,6 +1,6 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
+import Image from "next/image";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { SelectTransaction } from "./select-transaction";
@@ -118,17 +119,23 @@ export function InboxDetails({ item, updateInbox, teamId }) {
             <div className="flex items-start gap-4 text-sm relative">
               <Avatar>
                 {item.website && (
-                  <AvatarImage
+                  <Image
+                    alt={item.website}
+                    width={40}
+                    height={40}
+                    className="rounded-full overflow-hidden"
                     src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
                   />
                 )}
-                <AvatarFallback>
-                  {item?.name
-                    .split(" ")
-                    .slice(0, 2)
-                    .map((chunk) => chunk[0])
-                    .join("")}
-                </AvatarFallback>
+                {!item.website && (
+                  <AvatarFallback>
+                    {item?.name
+                      .split(" ")
+                      .slice(0, 2)
+                      .map((chunk) => chunk[0])
+                      .join("")}
+                  </AvatarFallback>
+                )}
               </Avatar>
 
               <div className="grid gap-1">
@@ -190,6 +197,7 @@ export function InboxDetails({ item, updateInbox, teamId }) {
               inboxId={item.id}
               selectedTransaction={item?.transaction}
               onSelect={updateInbox}
+              key={item.id}
             />
           </div>
         </div>

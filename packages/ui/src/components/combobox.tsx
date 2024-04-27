@@ -27,6 +27,7 @@ type AutoCompleteProps = {
   placeholder?: string;
   className?: string;
   classNameList?: string;
+  autoFocus?: boolean;
 };
 
 export const Combobox = ({
@@ -40,6 +41,7 @@ export const Combobox = ({
   className,
   classNameList,
   isLoading = false,
+  autoFocus,
   onValueChange,
 }: AutoCompleteProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -105,6 +107,7 @@ export const Combobox = ({
           placeholder={placeholder}
           disabled={disabled}
           className={className}
+          autoFocus={autoFocus}
         />
 
         {isLoading && (

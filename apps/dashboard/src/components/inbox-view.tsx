@@ -1,6 +1,7 @@
 "use client";
 
 import { updateInboxAction } from "@/actions/inbox/update";
+import { searchEmbeddingsAction } from "@/actions/search/search-embeddings-action";
 import { InboxDetails, InboxDetailsSkeleton } from "@/components/inbox-details";
 import { InboxList, InboxSkeleton } from "@/components/inbox-list";
 import { InboxSearch } from "@/components/inbox-search";
@@ -10,9 +11,11 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
+import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { InboxToolbar } from "./inbox-toolbar";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
@@ -53,8 +56,8 @@ export function InboxViewSkeleton() {
 }
 
 export function InboxView({ items, team }) {
+  const [isLoading, setLoading] = useState(false);
   const [updates, setUpdates] = useState(false);
-
   const [params, setParams] = useQueryStates(
     {
       id: parseAsString.withDefault(items?.at(0)?.id),
@@ -66,9 +69,39 @@ export function InboxView({ items, team }) {
     }
   );
 
+  const debouncedSearchTerm = useDebounce(params.query, 300);
+
+  const searchAction = useAction(searchEmbeddingsAction, {
+    onSuccess: (data) => {
+      setLoading(false);
+      if (data.length) {
+        setParams({ id: data?.at(0)?.id });
+      }
+    },
+    onError: () => setLoading(false),
+  });
+
+  useEffect(() => {
+    if (params.query) {
+      setLoading(true);
+    }
+  }, [params.query]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      searchAction.execute({
+        query: debouncedSearchTerm,
+        type: "inbox",
+        threshold: 0.78,
+      });
+    }
+  }, [debouncedSearchTerm]);
+
+  const data = (params.query && searchAction.result?.data) || items;
+
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
-    items,
+    data,
     (state, payload) => {
       if (payload.trash) {
         return state.filter((item) => item.id !== payload.id);
@@ -106,6 +139,18 @@ export function InboxView({ items, team }) {
     (item) => item.id === params.id
   );
 
+  const handleOnPaginate = (direction) => {
+    if (direction === "prev") {
+      const index = currentIndex - 1;
+      setParams({ id: optimisticData.at(index)?.id });
+    }
+
+    if (direction === "next") {
+      const index = currentIndex + 1;
+      setParams({ id: optimisticData.at(index)?.id });
+    }
+  };
+
   return (
     <TooltipProvider delayDuration={0}>
       <Tabs
@@ -121,8 +166,12 @@ export function InboxView({ items, team }) {
               </TabsList>
 
               <InboxSearch
+                onClear={() => setParams({ query: null, id: null })}
+                onArrowDown={() => handleOnPaginate("down")}
                 value={params.query}
-                onChange={(value: string) => setParams({ query: value })}
+                onChange={(value: string) => {
+                  setParams({ query: value, id: null });
+                }}
               />
 
               <div className="flex space-x-2">
@@ -140,10 +189,16 @@ export function InboxView({ items, team }) {
               }}
             />
 
+            {isLoading && (
+              <div className="flex flex-col gap-4 pt-0">
+                <InboxSkeleton numberOfItems={12} />
+              </div>
+            )}
+
             <TabsContent value="todo" className="m-0 h-full">
               <InboxList
                 items={optimisticData.filter(
-                  (item) => item.pending && !item.transaction_id
+                  (item) => item.status === "pending" && !item.transaction_id
                 )}
                 selectedId={params.id}
                 setSelectedId={(value: string) => setParams({ id: value })}
@@ -161,14 +216,19 @@ export function InboxView({ items, team }) {
             <InboxToolbar
               isFirst={currentIndex === 0}
               isLast={currentIndex === optimisticData.length - 1}
+              onPaginate={handleOnPaginate}
             />
           </div>
 
-          <InboxDetails
-            item={selectedItems}
-            updateInbox={updateInbox}
-            teamId={team.id}
-          />
+          {isLoading ? (
+            <InboxDetailsSkeleton />
+          ) : (
+            <InboxDetails
+              item={selectedItems}
+              updateInbox={updateInbox}
+              teamId={team.id}
+            />
+          )}
         </div>
       </Tabs>
     </TooltipProvider>

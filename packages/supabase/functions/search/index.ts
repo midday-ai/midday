@@ -11,7 +11,7 @@ const supabase = createClient<Database>(
 const model = new Supabase.ai.Session("gte-small");
 
 Deno.serve(async (req) => {
-  const { search, type, limit = 10 } = await req.json();
+  const { search, type, limit = 10, threshold = 0.75 } = await req.json();
 
   if (!search) {
     return new Response("Please provide a search param!");
@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
         const { data: result } = await supabase
           .rpc("query_inbox_embeddings", {
             embedding: JSON.stringify(embedding),
-            match_threshold: 0.8,
+            match_threshold: threshold,
           })
           .select("*")
           .limit(limit);

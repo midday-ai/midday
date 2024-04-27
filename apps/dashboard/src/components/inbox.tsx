@@ -7,7 +7,6 @@ export async function Inbox() {
   const user = await getUser();
   const supabase = createClient();
 
-  // TODO: Fix Infinite Scroll
   const inbox = await getInboxQuery(supabase, {
     to: 10000,
     teamId: user.data.team_id,

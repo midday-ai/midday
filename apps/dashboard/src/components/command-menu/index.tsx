@@ -21,7 +21,7 @@ export const CommandComponent = ({ selected = MenuOption.Root }) => {
     [MenuOption.Feedback]: <CommandFeedback />,
   }[selected];
 
-  useHotkeys("ctrl+backspace", () => setMenu(MenuOption.Root));
+  useHotkeys("mod+backspace", () => setMenu(MenuOption.Root));
 
   return (
     <motion.div

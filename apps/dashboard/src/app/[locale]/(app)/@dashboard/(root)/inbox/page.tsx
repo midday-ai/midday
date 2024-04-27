@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Inbox | Midday",
 };
 
-export default function InboxPage() {
+export default async function InboxPage() {
   return (
     <div className="flex-col flex">
       <Suspense fallback={<InboxViewSkeleton />}>
