@@ -13,11 +13,9 @@ export async function Inbox() {
     teamId: user.data.team_id,
   });
 
-  return (
-    <InboxView
-      items={inbox?.data}
-      inboxId={user?.data?.team?.inbox_id}
-      team={user?.data?.team}
-    />
-  );
+  // if (!optimisticData?.length) {
+  //   return <InboxEmpty inboxId={inboxId} />;
+  // }
+
+  return <InboxView items={inbox?.data} team={user?.data?.team} />;
 }

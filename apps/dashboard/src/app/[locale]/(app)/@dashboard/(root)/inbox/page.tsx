@@ -7,11 +7,11 @@ export const metadata: Metadata = {
   title: "Inbox | Midday",
 };
 
-export default function InboxPage({ searchParams }) {
+export default function InboxPage() {
   return (
     <div className="flex-col flex">
       <Suspense fallback={<InboxViewSkeleton />}>
-        <Inbox selectedId={searchParams?.id} />
+        <Inbox />
       </Suspense>
     </div>
   );

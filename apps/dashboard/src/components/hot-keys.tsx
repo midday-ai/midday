@@ -1,11 +1,16 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { signOutAction } from "@/actions/sign-out-action";
+import { useRouter } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 
 export function HotKeys() {
   const router = useRouter();
-  const pathname = usePathname();
+
+  const handleSignOut = async () => {
+    signOutAction();
+    router.refresh();
+  };
 
   useHotkeys("meta+s", (evt) => {
     evt.preventDefault();
@@ -22,7 +27,7 @@ export function HotKeys() {
     router.push("/settings/members");
   });
 
-  useHotkeys("ctrl+t", (evt) => {
+  useHotkeys("ctrl+e", (evt) => {
     evt.preventDefault();
     router.push("/account/teams");
   });

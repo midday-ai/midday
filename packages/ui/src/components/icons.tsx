@@ -5,6 +5,8 @@ import { FiGithub } from "react-icons/fi";
 import {
   MdAdd,
   MdArrowBack,
+  MdArrowDropDown,
+  MdArrowDropUp,
   MdArrowLeft,
   MdArrowRight,
   MdAutoAwesome,
@@ -28,6 +30,7 @@ import {
   MdMoreHoriz,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
+  MdOutlineBackspace,
   MdOutlineBrokenImage,
   MdOutlineCancel,
   MdOutlineCategory,
@@ -444,6 +447,8 @@ export const Icons = {
   Description: MdDescription,
   FolderZip: MdFolderZip,
   ArrowRight: MdArrowRight,
+  ArrowDropUp: MdArrowDropUp,
+  ArrowDropDown: MdArrowDropDown,
   ChevronRight: MdChevronRight,
   ChevronLeft: MdChevronLeft,
   ArrowLeft: MdArrowLeft,
@@ -489,4 +494,5 @@ export const Icons = {
   Calendar: MdEditCalendar,
   Reply: MdReplay,
   Sort: MdSort,
+  Backspace: MdOutlineBackspace,
 };

@@ -2,7 +2,8 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Skeleton } from "@midday/ui/skeleton";
-import { formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
+import { FormatAmount } from "./format-amount";
 import { InboxStatus } from "./inbox-status";
 
 type InboxSkeletonProps = {
@@ -54,6 +55,9 @@ type InboxListProps = {
     name: string;
     created_at: string;
     file_name?: string;
+    due_date?: string;
+    currency?: string;
+    amount?: number;
   }[];
   selectedId: string;
   setSelectedId: (id: string) => void;
@@ -73,7 +77,7 @@ export function InboxList({
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-180px)]">
+    <ScrollArea className="h-full">
       <div className="flex flex-col gap-4 pt-0">
         {items.map((item) => (
           <button
@@ -104,13 +108,18 @@ export function InboxList({
                       : "text-muted-foreground"
                   )}
                 >
-                  {formatDistanceToNow(new Date(item.created_at), {
-                    addSuffix: true,
-                  })}
+                  {item?.due_date && format(new Date(item.due_date), "PP")}
                 </div>
               </div>
               <div className="flex">
-                <div className="text-xs font-medium">{item?.file_name}</div>
+                <div className="text-xs font-medium">
+                  {item?.currency && item?.amount && (
+                    <FormatAmount
+                      amount={item.amount}
+                      currency={item.currency}
+                    />
+                  )}
+                </div>
                 <div className="ml-auto">
                   <InboxStatus item={item} />
                 </div>

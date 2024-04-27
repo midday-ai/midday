@@ -108,7 +108,7 @@ export const Combobox = ({
         />
 
         {isLoading && (
-          <Loader2 className="w-[20px] h-[20px] absolute right-4 animate-spin text-dark-gray" />
+          <Loader2 className="w-[18px] h-[18px] absolute right-4 animate-spin text-dark-gray" />
         )}
 
         {!isLoading && selected && (

@@ -16,7 +16,7 @@ import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
-import { InboxToolbar } from "./inbox-toolbar";
+import { SelectTransaction } from "./select-transaction";
 
 export function InboxDetailsSkeleton() {
   return (
@@ -133,24 +133,24 @@ export function InboxDetails({ item, updateInbox, teamId }) {
 
               <div className="grid gap-1">
                 <div className="font-semibold">{item.name}</div>
-                <div className="line-clamp-1 text-xs">{item.file_name}</div>
+                <div className="line-clamp-1 text-xs">
+                  {item.currency && (
+                    <div className="line-clamp-1 text-xs">
+                      <FormatAmount
+                        amount={item.amount}
+                        currency={item.currency}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             <div className="grid gap-1 ml-auto text-right">
               <div className="text-xs text-muted-foreground">
-                {format(new Date(item.created_at), "PPpp")}
+                {item.due_date && format(new Date(item.due_date), "PP")}
               </div>
 
               <div className="flex space-x-2 items-center ml-auto mt-1">
-                {item.currency && (
-                  <div className="line-clamp-1 text-xs">
-                    <FormatAmount
-                      amount={item.amount}
-                      currency={item.currency}
-                    />
-                  </div>
-                )}
-
                 {item.forwarded_to && (
                   <Tooltip>
                     <TooltipTrigger>
@@ -183,15 +183,19 @@ export function InboxDetails({ item, updateInbox, teamId }) {
             )}
           </div>
 
-          <InboxToolbar
-            selectedItem={item}
-            teamId={teamId}
-            onSelect={updateInbox}
-          />
+          <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg fixed bottom-14 right-[160px] z-50 w-[400px]">
+            <SelectTransaction
+              placeholder="Select transaction"
+              teamId={teamId}
+              inboxId={item.id}
+              selectedTransaction={item?.transaction}
+              onSelect={updateInbox}
+            />
+          </div>
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">
-          No message selected
+          No attachment selected
         </div>
       )}
     </div>

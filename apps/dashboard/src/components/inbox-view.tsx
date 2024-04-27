@@ -11,9 +11,9 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
-import { InboxEmpty } from "./inbox-empty";
+import { InboxToolbar } from "./inbox-toolbar";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
 export function InboxViewSkeleton() {
@@ -52,23 +52,19 @@ export function InboxViewSkeleton() {
   );
 }
 
-export function InboxView({ items, inboxId, team }) {
+export function InboxView({ items, team }) {
   const [updates, setUpdates] = useState(false);
 
-  const [selectedId, setSelectedId] = useQueryState("id", {
-    defaultValue: items?.at(0)?.id,
-    shallow: true,
-  });
-
-  const [tab, setTab] = useQueryState("tab", {
-    defaultValue: "todo",
-    shallow: true,
-  });
-
-  const [search, setSearch] = useQueryState("search", {
-    defaultValue: "",
-    shallow: true,
-  });
+  const [params, setParams] = useQueryStates(
+    {
+      id: parseAsString.withDefault(items?.at(0)?.id),
+      tab: parseAsString.withDefault("todo"),
+      query: parseAsString.withDefault(""),
+    },
+    {
+      shallow: true,
+    }
+  );
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
@@ -97,30 +93,37 @@ export function InboxView({ items, inboxId, team }) {
           );
 
           const selectIndex = deleteIndex > 0 ? deleteIndex - 1 : 0;
-          setSelectedId(optimisticData?.at(selectIndex)?.id);
+          setParams({
+            id: optimisticData?.at(selectIndex)?.id,
+          });
         }
       },
     }
   );
 
-  const selectedItems = optimisticData?.find((item) => item.id === selectedId);
-
-  if (!optimisticData?.length) {
-    return <InboxEmpty inboxId={inboxId} />;
-  }
+  const selectedItems = optimisticData?.find((item) => item.id === params.id);
+  const currentIndex = optimisticData.findIndex(
+    (item) => item.id === params.id
+  );
 
   return (
     <TooltipProvider delayDuration={0}>
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs
+        value={params.tab}
+        onValueChange={(value) => setParams({ tab: value })}
+      >
         <div className="flex flex-row space-x-8 mt-4">
-          <div className="w-full h-full relative overflow-hidden">
+          <div className="w-full h-[calc(100vh-120px)] relative overflow-hidden">
             <div className="flex justify-center items-center space-x-4 mb-4">
               <TabsList>
                 <TabsTrigger value="todo">Todo</TabsTrigger>
                 <TabsTrigger value="completed">Completed</TabsTrigger>
               </TabsList>
 
-              <InboxSearch value={search} onChange={setSearch} />
+              <InboxSearch
+                value={params.query}
+                onChange={(value: string) => setParams({ query: value })}
+              />
 
               <div className="flex space-x-2">
                 <Button variant="outline" size="icon">
@@ -142,18 +145,23 @@ export function InboxView({ items, inboxId, team }) {
                 items={optimisticData.filter(
                   (item) => item.pending && !item.transaction_id
                 )}
-                selectedId={selectedId}
-                setSelectedId={setSelectedId}
+                selectedId={params.id}
+                setSelectedId={(value: string) => setParams({ id: value })}
               />
             </TabsContent>
 
             <TabsContent value="completed" className="m-0 h-full">
               <InboxList
                 items={optimisticData.filter((item) => item.transaction_id)}
-                selectedId={selectedId}
-                setSelectedId={setSelectedId}
+                selectedId={params.id}
+                setSelectedId={(value: string) => setParams({ id: value })}
               />
             </TabsContent>
+
+            <InboxToolbar
+              isFirst={currentIndex === 0}
+              isLast={currentIndex === optimisticData.length - 1}
+            />
           </div>
 
           <InboxDetails
