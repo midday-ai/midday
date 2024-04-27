@@ -1,8 +1,7 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -15,8 +14,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { InboxToolbar } from "./inbox-toolbar";
@@ -52,9 +49,6 @@ export function InboxDetailsSkeleton() {
 
 export function InboxDetails({ item, updateInbox, teamId }) {
   const { toast } = useToast();
-  const [hasError, setError] = useState(false);
-  const [isLoading, setLoading] = useState(true);
-  const [isLoaded, setLoaded] = useState(false);
 
   const handleCopyUrl = async () => {
     try {
@@ -117,45 +111,25 @@ export function InboxDetails({ item, updateInbox, teamId }) {
         </div>
       </div>
       <Separator />
+
       {item ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
-              {isLoading && (
-                <Skeleton className="w-[40px] h-[40px] rounded-full" />
-              )}
-
-              {!isLoading && hasError && (
-                <Avatar>
-                  <AvatarFallback>
-                    {item?.name
-                      .split(" ")
-                      .slice(0, 2)
-                      .map((chunk) => chunk[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-
-              {!hasError && (
-                <Image
-                  width={40}
-                  height={40}
-                  onError={() => {
-                    setLoading(false);
-                    setError(true);
-                  }}
-                  className={cn(
-                    "rounded-full overflow-hidden",
-                    // NOTE: Can't be hidden because onLoad is not fired
-                    isLoading && "absolute -left-[100px]"
-                  )}
-                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
-                  alt={item.name}
-                  placeholder={undefined}
-                  onLoad={() => setLoading(false)}
-                />
-              )}
+              <Avatar>
+                {item.website && (
+                  <AvatarImage
+                    src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
+                  />
+                )}
+                <AvatarFallback>
+                  {item?.name
+                    .split(" ")
+                    .slice(0, 2)
+                    .map((chunk) => chunk[0])
+                    .join("")}
+                </AvatarFallback>
+              </Avatar>
 
               <div className="grid gap-1">
                 <div className="font-semibold">{item.name}</div>
@@ -205,7 +179,6 @@ export function InboxDetails({ item, updateInbox, teamId }) {
                 width={680}
                 height={900}
                 disableFullscreen
-                onLoaded={() => setLoaded(true)}
               />
             )}
           </div>
@@ -214,7 +187,6 @@ export function InboxDetails({ item, updateInbox, teamId }) {
             selectedItem={item}
             teamId={teamId}
             onSelect={updateInbox}
-            isLoaded={isLoaded}
           />
         </div>
       ) : (

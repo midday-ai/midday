@@ -3,7 +3,7 @@ import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { InboxView } from "./inbox-view";
 
-export async function Inbox({ selectedId: initialSelectedId }) {
+export async function Inbox() {
   const user = await getUser();
   const supabase = createClient();
 
@@ -13,15 +13,11 @@ export async function Inbox({ selectedId: initialSelectedId }) {
     teamId: user.data.team_id,
   });
 
-  const selectedId = initialSelectedId || inbox?.data?.at(0)?.id;
-
   return (
     <InboxView
-      key={selectedId}
       items={inbox?.data}
       inboxId={user?.data?.team?.inbox_id}
       team={user?.data?.team}
-      selectedId={selectedId}
     />
   );
 }

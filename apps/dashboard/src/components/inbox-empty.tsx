@@ -1,7 +1,11 @@
 import { Icons } from "@midday/ui/icons";
 import { CopyInput } from "./copy-input";
 
-export function InboxEmpty({ inboxId }) {
+type Props = {
+  inboxId: string;
+};
+
+export function InboxEmpty({ inboxId }: Props) {
   return (
     <div className="h-[calc(100vh-150px)] flex items-center justify-center">
       <div className="flex flex-col items-center w-[330px]">
