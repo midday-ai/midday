@@ -8,20 +8,16 @@ import { createClient } from "@midday/supabase/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 
 export const updateInboxAction = action(updateInboxSchema, async (params) => {
-  try {
-    const user = await getUser();
-    const teamId = user?.data?.team_id;
-    const supabase = createClient();
-    const { data: inboxData } = await updateInboxById(supabase, {
-      ...params,
-      teamId,
-    });
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+  const supabase = createClient();
+  const { data: inboxData } = await updateInboxById(supabase, {
+    ...params,
+    teamId,
+  });
 
-    revalidatePath("/inbox");
-    revalidateTag(`transactions_${teamId}`);
+  revalidatePath("/inbox");
+  revalidateTag(`transactions_${teamId}`);
 
-    return inboxData;
-  } catch (error) {
-    console.log(error);
-  }
+  return inboxData;
 });

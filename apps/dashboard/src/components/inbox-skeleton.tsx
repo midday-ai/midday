@@ -1,28 +1,25 @@
 "use client";
 
-import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { InboxHeader } from "./inbox-header";
-import { InboxListSkeleton } from "./inbox-list-skeleton";
 import { InboxStructure } from "./inbox-structure";
 
 type Props = {
   forwardEmail?: string;
   inboxId?: string;
+  ascending: boolean;
 };
 
-export function InboxViewSkeleton({ forwardEmail, inboxId }: Props) {
+export function InboxViewSkeleton({ forwardEmail, inboxId, ascending }: Props) {
   return (
     <InboxStructure
-      leftColumn={
-        <>
-          <InboxHeader
-            forwardEmail={forwardEmail ?? ""}
-            inboxId={inboxId ?? ""}
-          />
-          <InboxListSkeleton numberOfItems={12} />
-        </>
+      isLoading
+      headerComponent={
+        <InboxHeader
+          ascending={ascending}
+          forwardEmail={forwardEmail ?? ""}
+          inboxId={inboxId ?? ""}
+        />
       }
-      rightColumn={<InboxDetailsSkeleton />}
     />
   );
 }

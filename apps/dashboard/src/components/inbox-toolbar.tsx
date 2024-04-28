@@ -5,11 +5,18 @@ import { useHotkeys } from "react-hotkeys-hook";
 type Props = {
   isFirst: boolean;
   isLast: boolean;
+  tab: "todo" | "done" | "archived";
   onDelete: () => void;
   onKeyPress: (direction: "down" | "up" | "left" | "right") => void;
 };
 
-export function InboxToolbar({ isFirst, isLast, onKeyPress, onDelete }: Props) {
+export function InboxToolbar({
+  isFirst,
+  isLast,
+  onKeyPress,
+  onDelete,
+  tab,
+}: Props) {
   useHotkeys(
     "arrowUp",
     () => {
@@ -45,20 +52,32 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onDelete }: Props) {
   return (
     <div className="left-0 right-0 absolute bottom-0 flex items-center justify-center">
       <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 justify-between items-center flex px-2 rounded-lg space-x-4 text-[#878787]">
-        <button type="button" className="flex items-center space-x-2">
+        <button
+          type="button"
+          className="flex items-center space-x-2"
+          onClick={() => onDelete()}
+        >
           <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
             <span className="text-[16px]">⌘</span>
             <Icons.Backspace />
           </kbd>
-          <span className="text-xs">Delete</span>
+          <span className="text-xs">
+            {tab !== "archived" ? "Archive" : "Delete"}
+          </span>
         </button>
-        <button type="button" className="flex items-center space-x-2">
-          <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
-            <Icons.KeyboardArrowLeft size={16} />
-            <Icons.KeyboardArrowRight size={16} />
-          </kbd>
-          <span className="text-xs">Change tab</span>
-        </button>
+        <div className="flex items-center space-x-2">
+          <button type="button" onClick={() => onKeyPress("left")}>
+            <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+              <Icons.KeyboardArrowLeft size={16} />
+            </kbd>
+          </button>
+          <button type="button" onClick={() => onKeyPress("right")}>
+            <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+              <Icons.KeyboardArrowRight size={16} />
+            </kbd>
+          </button>
+          <span className="text-xs">Switch tab</span>
+        </div>
         <button
           type="button"
           disabled={isFirst}

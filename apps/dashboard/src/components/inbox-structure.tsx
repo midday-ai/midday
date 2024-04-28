@@ -1,17 +1,23 @@
 import { Tabs } from "@midday/ui/tabs";
 import { TooltipProvider } from "@midday/ui/tooltip";
 import { useQueryState } from "nuqs";
+import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
+import { InboxListSkeleton } from "./inbox-list-skeleton";
 
 type Props = {
-  leftColumn: React.ReactNode;
-  rightColumn: React.ReactNode;
+  isLoading?: boolean;
+  headerComponent: React.ReactNode;
+  leftComponent?: React.ReactNode;
+  rightComponent?: React.ReactNode;
   onChangeTab?: (tab: "done" | "todo") => void;
 };
 
 export function InboxStructure({
-  leftColumn,
-  rightColumn,
+  headerComponent,
+  leftComponent,
+  rightComponent,
   onChangeTab,
+  isLoading,
 }: Props) {
   const [tab, setTab] = useQueryState("tab", {
     shallow: true,
@@ -29,10 +35,15 @@ export function InboxStructure({
               onChangeTab?.(value);
             }}
           >
-            {leftColumn}
+            {headerComponent}
+            {isLoading ? (
+              <InboxListSkeleton numberOfItems={12} />
+            ) : (
+              leftComponent
+            )}
           </Tabs>
         </div>
-        {rightColumn}
+        {isLoading ? <InboxDetailsSkeleton /> : rightComponent}
       </div>
     </TooltipProvider>
   );

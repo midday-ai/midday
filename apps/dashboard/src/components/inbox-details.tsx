@@ -7,6 +7,7 @@ import {
 import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Separator } from "@midday/ui/separator";
+import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
@@ -20,10 +21,13 @@ type Props = {
   item: any[];
   updateInbox: () => void;
   teamId: string;
+  isEmpty?: boolean;
 };
 
-export function InboxDetails({ item, updateInbox, teamId }: Props) {
+export function InboxDetails({ item, updateInbox, teamId, isEmpty }: Props) {
   const { toast } = useToast();
+
+  const isProcessing = item?.status === "processing" || item?.status === "new";
 
   const handleCopyUrl = async () => {
     try {
@@ -38,6 +42,10 @@ export function InboxDetails({ item, updateInbox, teamId }: Props) {
       });
     } catch {}
   };
+
+  if (isEmpty) {
+    return <div className="w-[1160px]" />;
+  }
 
   return (
     <div className="flex h-[calc(100vh-120px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
@@ -91,43 +99,57 @@ export function InboxDetails({ item, updateInbox, teamId }: Props) {
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
-              <Avatar>
-                {item.website && (
-                  <Image
-                    alt={item.website}
-                    width={40}
-                    height={40}
-                    className="rounded-full overflow-hidden"
-                    src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
-                  />
-                )}
-                {!item.website && (
-                  <AvatarFallback>
-                    {item?.name
-                      .split(" ")
-                      .slice(0, 2)
-                      .map((chunk) => chunk[0])
-                      .join("")}
-                  </AvatarFallback>
-                )}
-              </Avatar>
+              {isProcessing ? (
+                <Skeleton className="h-[40px] w-[40px] rounded-full" />
+              ) : (
+                <Avatar>
+                  {item.website && (
+                    <Image
+                      alt={item.website}
+                      width={40}
+                      height={40}
+                      className="rounded-full overflow-hidden"
+                      src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
+                    />
+                  )}
+                  {!item.website && item?.display_name && (
+                    <AvatarFallback>
+                      {item.display_name
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((chunk) => chunk[0])
+                        .join("")}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              )}
 
               <div className="grid gap-1">
-                <div className="font-semibold">{item.name}</div>
+                <div className="font-semibold">
+                  {isProcessing ? (
+                    <Skeleton className="h-3 w-[120px] rounded-sm mb-1" />
+                  ) : (
+                    item.display_name
+                  )}
+                </div>
                 <div className="line-clamp-1 text-xs">
+                  {isProcessing && !item.currency && (
+                    <Skeleton className="h-3 w-[50px] rounded-sm" />
+                  )}
                   {item.currency && (
-                    <div className="line-clamp-1 text-xs">
-                      <FormatAmount
-                        amount={item.amount}
-                        currency={item.currency}
-                      />
-                    </div>
+                    <FormatAmount
+                      amount={item.amount}
+                      currency={item.currency}
+                    />
                   )}
                 </div>
               </div>
             </div>
             <div className="grid gap-1 ml-auto text-right">
               <div className="text-xs text-muted-foreground">
+                {isProcessing && !item.due_date && (
+                  <Skeleton className="h-3 w-[50px] rounded-sm" />
+                )}
                 {item.due_date && format(new Date(item.due_date), "PP")}
               </div>
 

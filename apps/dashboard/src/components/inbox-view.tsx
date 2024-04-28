@@ -4,15 +4,14 @@ import { updateInboxAction } from "@/actions/inbox/update";
 import { searchEmbeddingsAction } from "@/actions/search/search-embeddings-action";
 import { InboxDetails } from "@/components/inbox-details";
 import { InboxList } from "@/components/inbox-list";
+import { createClient } from "@midday/supabase/client";
 import { TabsContent } from "@midday/ui/tabs";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
-import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
 import { InboxHeader } from "./inbox-header";
-import { InboxListSkeleton } from "./inbox-list-skeleton";
 import { InboxStructure } from "./inbox-structure";
 import { InboxToolbar } from "./inbox-toolbar";
 
@@ -24,25 +23,30 @@ type Props = {
   ascending: boolean;
 };
 
-export const TAB_ITEMS = ["todo", "done", "trash"];
+export const TAB_ITEMS = ["todo", "done", "archived"];
 
 const todoFilter = (item) =>
   !item.transaction_id && !item.trash && !item.archived;
 const doneFilter = (item) =>
   item.transaction_id && !item.trash && !item.archived;
-const trashFilter = (item) => item.trash;
+const archivedFilter = (item) => item.archived;
 
 export function InboxView({
-  items,
+  items: initialItems,
   forwardEmail,
   teamId,
   inboxId,
   ascending,
 }: Props) {
+  const supabase = createClient();
   const [isLoading, setLoading] = useState(false);
+  const [items, setItems] = useState(initialItems);
+
   const [params, setParams] = useQueryStates(
     {
-      id: parseAsString.withDefault(items.filter(todoFilter)?.at(0)?.id),
+      id: parseAsString.withDefault(
+        items.filter(todoFilter)?.at(0)?.id ?? null
+      ),
       q: parseAsString.withDefault(""),
       tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
     },
@@ -65,6 +69,57 @@ export function InboxView({
   });
 
   useEffect(() => {
+    setItems(initialItems);
+  }, [ascending]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime_inbox")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "inbox",
+          filter: `team_id=eq.${teamId}`,
+        },
+        (payload) => {
+          switch (payload.eventType) {
+            case "INSERT":
+              {
+                setItems((prev) => [payload.new, ...prev]);
+
+                if (params.id) {
+                  setParams({ id: payload.new.id });
+                }
+              }
+              break;
+            case "UPDATE":
+              {
+                setItems((prev) => {
+                  return prev.map((item) => {
+                    if (item.id === payload.new.id) {
+                      return { ...item, ...payload.new };
+                    }
+
+                    return item;
+                  });
+                });
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [teamId]);
+
+  useEffect(() => {
     if (params.q) {
       setLoading(true);
     }
@@ -75,7 +130,7 @@ export function InboxView({
       searchAction.execute({
         query: debouncedSearchTerm,
         type: "inbox",
-        threshold: 0.78,
+        threshold: 0.75,
       });
     }
   }, [debouncedSearchTerm]);
@@ -129,7 +184,7 @@ export function InboxView({
       case "done":
         return optimisticData.filter(doneFilter);
       case "trash":
-        return optimisticData.filter(trashFilter);
+        return optimisticData.filter(archivedFilter);
       default:
         return optimisticData;
     }
@@ -138,6 +193,7 @@ export function InboxView({
   const currentItems = getCurrentItems(params.tab);
   const selectedItems = currentItems?.find((item) => item.id === params.id);
   const currentIndex = currentItems.findIndex((item) => item.id === params.id);
+  const currentTabEmpty = Boolean(currentItems.length === 0);
 
   const handleOnDelete = () => {
     const currentId = params.id;
@@ -167,7 +223,10 @@ export function InboxView({
       const nextTab = TAB_ITEMS[nextTabIndex];
 
       if (nextTabIndex >= 0) {
-        setParams({ tab: nextTab, id: getCurrentItems(nextTab)?.at(0)?.id });
+        setParams({
+          tab: nextTab,
+          id: getCurrentItems(nextTab)?.at(0)?.id ?? null,
+        });
       }
     }
 
@@ -179,69 +238,58 @@ export function InboxView({
       const nextTab = TAB_ITEMS[nextTabIndex];
 
       if (nextTabIndex < TAB_ITEMS.length)
-        setParams({ tab: nextTab, id: getCurrentItems(nextTab)?.at(0)?.id });
+        setParams({
+          tab: nextTab,
+          id: getCurrentItems(nextTab)?.at(0)?.id ?? null,
+        });
     }
   };
 
   return (
     <InboxStructure
+      isLoading={isLoading}
       onChangeTab={(tab) => {
         const items = getCurrentItems(tab);
         setParams({ id: items?.at(0)?.id });
       }}
-      leftColumn={
+      headerComponent={
+        <InboxHeader
+          forwardEmail={forwardEmail}
+          inboxId={inboxId}
+          handleOnPaginate={handleOnPaginate}
+          ascending={ascending}
+        />
+      }
+      leftComponent={
         <>
-          <InboxHeader
-            forwardEmail={forwardEmail}
-            inboxId={inboxId}
-            handleOnPaginate={handleOnPaginate}
-            ascending={ascending}
-          />
-
-          {isLoading && <InboxListSkeleton numberOfItems={12} />}
-
-          <TabsContent value="todo" className="m-0 h-full">
-            <InboxList
-              items={currentItems}
-              selectedId={params.id}
-              setSelectedId={(value: string) => setParams({ id: value })}
-            />
-          </TabsContent>
-
-          <TabsContent value="done" className="m-0 h-full">
-            <InboxList
-              items={currentItems}
-              selectedId={params.id}
-              setSelectedId={(value: string) => setParams({ id: value })}
-            />
-          </TabsContent>
-
-          <TabsContent value="trash" className="m-0 h-full">
-            <InboxList
-              items={currentItems}
-              selectedId={params.id}
-              setSelectedId={(value: string) => setParams({ id: value })}
-            />
-          </TabsContent>
+          {TAB_ITEMS.map((value) => (
+            <TabsContent key={value} value={value} className="m-0 h-full">
+              <InboxList
+                items={currentItems}
+                hasQuery={Boolean(params.q)}
+                onClear={() =>
+                  setParams({ q: null, id: currentItems?.id ?? null })
+                }
+              />
+            </TabsContent>
+          ))}
 
           <InboxToolbar
             onDelete={handleOnDelete}
             isFirst={currentIndex === 0}
             isLast={currentIndex === currentItems.length - 1}
             onKeyPress={handleOnPaginate}
+            tab={params.tab}
           />
         </>
       }
-      rightColumn={
-        isLoading ? (
-          <InboxDetailsSkeleton />
-        ) : (
-          <InboxDetails
-            item={selectedItems}
-            updateInbox={updateInbox}
-            teamId={teamId}
-          />
-        )
+      rightComponent={
+        <InboxDetails
+          item={selectedItems}
+          updateInbox={updateInbox}
+          teamId={teamId}
+          isEmpty={currentTabEmpty}
+        />
       }
     />
   );

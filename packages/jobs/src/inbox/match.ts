@@ -70,7 +70,7 @@ client.defineJob({
           id: inboxData.id,
           attachment_id: attachmentData.id,
           transaction_id: transaction?.id,
-          read: true,
+          teamId: payload.teamId,
         }
       );
 

@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { Label } from "@midday/ui/label";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -41,7 +42,10 @@ export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
 
   return (
     <div className="flex flex-col space-y-4">
-      <CopyInput value={`${inboxId}.inbox@midday.ai`} />
+      <div className="flex flex-col space-y-3">
+        <Label>Inbox email</Label>
+        <CopyInput value={`${inboxId}.inbox@midday.ai`} />
+      </div>
       <Form {...form}>
         <form onSubmit={onSubmit} className="flex flex-col">
           <FormField
@@ -49,7 +53,7 @@ export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
             name="inbox_email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Forward email</FormLabel>
+                <FormLabel>Forward to</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
@@ -69,7 +73,7 @@ export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
                   />
                 </FormControl>
                 <FormDescription>
-                  We will send a copy of the emails to this address.
+                  We will send copies of the attachments to this address.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

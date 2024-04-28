@@ -64,10 +64,10 @@ client.defineJob({
         .update({
           amount: result.amount,
           currency: result.currency,
-          name: result.name,
+          display_name: result.name,
           website: result.website,
           due_date: result.date && new Date(result.date),
-          status: "pending",
+          status: "processing",
           meta: result.meta,
         })
         .eq("id", recordId)
@@ -103,7 +103,7 @@ client.defineJob({
             name: TriggerEvents.InboxNewInApp,
             payload: {
               recordId: inbox.id,
-              description: `${inbox.name} - ${inbox.subject}`,
+              description: inbox.display_name,
               type: NotificationTypes.Inbox,
             },
             user: {

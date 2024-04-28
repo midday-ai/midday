@@ -750,9 +750,9 @@ export async function getInboxQuery(
   } = params;
 
   const query = supabase
-    .from("decrypted_inbox")
+    .from("inbox")
     .select(
-      "id, file_name, file_path, transaction_id, amount, currency, trash, content_type, due_date, trash, status, forwarded_to, name:decrypted_name, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
+      "id, file_name, file_path, display_name, transaction_id, amount, currency, trash, content_type, due_date, trash, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
       {
         count: "exact",
       }

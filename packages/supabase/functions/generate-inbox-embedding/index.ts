@@ -35,8 +35,8 @@ Deno.serve(async (req) => {
   // Check if meta data is saved, meta is saved with a async background job
   // That parses the document using Google Document AI
   // packages/jobs/src/inbox/document.ts
-  if (status !== "pending" && meta) {
-    return new Response("Not ready to be embedded");
+  if (status !== "processing" && meta) {
+    return new Response("Not ready to generate embeddings");
   }
 
   const content = getCommaSeparatedList(meta);
@@ -49,6 +49,7 @@ Deno.serve(async (req) => {
     .from("decrypted_inbox")
     .update({
       embedding: JSON.stringify(embedding),
+      status: "pending",
     })
     .eq("id", id);
 

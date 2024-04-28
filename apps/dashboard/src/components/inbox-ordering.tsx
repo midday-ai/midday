@@ -27,15 +27,15 @@ export function InboxOrdering({ ascending }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={ascending}
-          onCheckedChange={() => inboxOrder.execute(true)}
+          checked={!ascending}
+          onCheckedChange={() => inboxOrder.execute(false)}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={!ascending}
-          onCheckedChange={() => inboxOrder.execute(false)}
+          checked={ascending}
+          onCheckedChange={() => inboxOrder.execute(true)}
         >
           Oldest first
         </DropdownMenuCheckboxItem>

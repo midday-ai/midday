@@ -124,7 +124,7 @@ export async function POST(req: Request) {
         });
 
       return {
-        name: fallbackName,
+        display_name: fallbackName,
         team_id: teamId,
         file_path: data?.path.split("/"),
         file_name: fileName,
