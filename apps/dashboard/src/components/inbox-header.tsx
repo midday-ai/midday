@@ -34,7 +34,6 @@ export function InboxHeader({
       <TabsList>
         <TabsTrigger value="todo">Todo</TabsTrigger>
         <TabsTrigger value="done">Done</TabsTrigger>
-        <TabsTrigger value="archived">Archived</TabsTrigger>
       </TabsList>
 
       <InboxSearch

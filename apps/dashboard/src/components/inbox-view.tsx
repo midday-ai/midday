@@ -23,13 +23,12 @@ type Props = {
   ascending: boolean;
 };
 
-export const TAB_ITEMS = ["todo", "done", "archived"];
+export const TAB_ITEMS = ["todo", "done"];
 
 const todoFilter = (item) =>
   !item.transaction_id && !item.trash && !item.archived;
 const doneFilter = (item) =>
   item.transaction_id && !item.trash && !item.archived;
-const archivedFilter = (item) => item.archived;
 
 export function InboxView({
   items: initialItems,
@@ -155,21 +154,6 @@ export function InboxView({
 
         return item;
       });
-    },
-    {
-      onExecute: (input) => {
-        if (input.trash) {
-          const deleteIndex = optimisticData.findIndex(
-            (item) => item.id === input.id
-          );
-
-          const selectIndex = deleteIndex > 0 ? deleteIndex - 1 : 0;
-
-          setParams({
-            id: optimisticData?.at(selectIndex)?.id,
-          });
-        }
-      },
     }
   );
 
@@ -183,10 +167,8 @@ export function InboxView({
         return optimisticData.filter(todoFilter);
       case "done":
         return optimisticData.filter(doneFilter);
-      case "trash":
-        return optimisticData.filter(archivedFilter);
       default:
-        return optimisticData;
+        return optimisticData.filter(todoFilter);
     }
   };
 
@@ -194,13 +176,6 @@ export function InboxView({
   const selectedItems = currentItems?.find((item) => item.id === params.id);
   const currentIndex = currentItems.findIndex((item) => item.id === params.id);
   const currentTabEmpty = Boolean(currentItems.length === 0);
-
-  const handleOnDelete = () => {
-    const currentId = params.id;
-
-    setParams({ id: null });
-    updateInbox({ id: currentId, trash: true });
-  };
 
   const handleOnPaginate = (direction) => {
     if (direction === "up") {
@@ -245,12 +220,25 @@ export function InboxView({
     }
   };
 
+  const handleOnDelete = () => {
+    const selectIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+
+    setParams({
+      id: currentItems?.at(selectIndex)?.id ?? null,
+    });
+
+    updateInbox({
+      id: params.id,
+      trash: true,
+    });
+  };
+
   return (
     <InboxStructure
       isLoading={isLoading}
       onChangeTab={(tab) => {
         const items = getCurrentItems(tab);
-        setParams({ id: items?.at(0)?.id });
+        setParams({ id: items?.at(0)?.id ?? null, q: null });
       }}
       headerComponent={
         <InboxHeader
@@ -275,11 +263,10 @@ export function InboxView({
           ))}
 
           <InboxToolbar
-            onDelete={handleOnDelete}
+            onAction={handleOnDelete}
             isFirst={currentIndex === 0}
             isLast={currentIndex === currentItems.length - 1}
             onKeyPress={handleOnPaginate}
-            tab={params.tab}
           />
         </>
       }
@@ -287,6 +274,7 @@ export function InboxView({
         <InboxDetails
           item={selectedItems}
           updateInbox={updateInbox}
+          onDelete={handleOnDelete}
           teamId={teamId}
           isEmpty={currentTabEmpty}
         />

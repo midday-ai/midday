@@ -11,6 +11,7 @@ export const updateInboxAction = action(updateInboxSchema, async (params) => {
   const user = await getUser();
   const teamId = user?.data?.team_id;
   const supabase = createClient();
+
   const { data: inboxData } = await updateInboxById(supabase, {
     ...params,
     teamId,

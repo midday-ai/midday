@@ -235,13 +235,11 @@ export const declineInviteSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export const inboxFilter = z.enum(["all", "done", "archived", "deleted"]);
+export const inboxFilter = z.enum(["done", "todo"]);
 
 export const updateInboxSchema = z.object({
   id: z.string(),
-  read: z.boolean().optional(),
   trash: z.boolean().optional(),
-  archived: z.boolean().optional(),
   transaction_id: z.string().nullable().optional(),
 });
 

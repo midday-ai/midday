@@ -19,12 +19,19 @@ import { SelectTransaction } from "./select-transaction";
 
 type Props = {
   item: any[];
+  onDelete: () => void;
   updateInbox: () => void;
   teamId: string;
   isEmpty?: boolean;
 };
 
-export function InboxDetails({ item, updateInbox, teamId, isEmpty }: Props) {
+export function InboxDetails({
+  item,
+  onDelete,
+  updateInbox,
+  teamId,
+  isEmpty,
+}: Props) {
   const { toast } = useToast();
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
@@ -57,14 +64,13 @@ export function InboxDetails({ item, updateInbox, teamId, isEmpty }: Props) {
                 variant="ghost"
                 size="icon"
                 disabled={!item}
-                onClick={() => updateInbox({ id: item.id, trash: true })}
+                onClick={onDelete}
               >
                 <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Move to trash</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent className="px-3 py-1.5 text-xs">
-              Move to trash
+              Delete
             </TooltipContent>
           </Tooltip>
         </div>

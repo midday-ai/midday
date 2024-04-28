@@ -5,18 +5,11 @@ import { useHotkeys } from "react-hotkeys-hook";
 type Props = {
   isFirst: boolean;
   isLast: boolean;
-  tab: "todo" | "done" | "archived";
-  onDelete: () => void;
+  onAction: () => void;
   onKeyPress: (direction: "down" | "up" | "left" | "right") => void;
 };
 
-export function InboxToolbar({
-  isFirst,
-  isLast,
-  onKeyPress,
-  onDelete,
-  tab,
-}: Props) {
+export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
   useHotkeys(
     "arrowUp",
     () => {
@@ -46,7 +39,7 @@ export function InboxToolbar({
   });
 
   useHotkeys("mod+backspace", () => {
-    onDelete();
+    onAction();
   });
 
   return (
@@ -55,15 +48,13 @@ export function InboxToolbar({
         <button
           type="button"
           className="flex items-center space-x-2"
-          onClick={() => onDelete()}
+          onClick={() => onAction()}
         >
           <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
             <span className="text-[16px]">⌘</span>
             <Icons.Backspace />
           </kbd>
-          <span className="text-xs">
-            {tab !== "archived" ? "Archive" : "Delete"}
-          </span>
+          <span className="text-xs">Delete</span>
         </button>
         <div className="flex items-center space-x-2">
           <button type="button" onClick={() => onKeyPress("left")}>
@@ -76,7 +67,7 @@ export function InboxToolbar({
               <Icons.KeyboardArrowRight size={16} />
             </kbd>
           </button>
-          <span className="text-xs">Switch tab</span>
+          <span className="text-xs">Change tab</span>
         </div>
         <button
           type="button"
