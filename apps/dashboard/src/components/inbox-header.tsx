@@ -1,8 +1,7 @@
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useQueryState } from "nuqs";
 import { InboxSearch } from "./inbox-search";
+import { InboxSorting } from "./inbox-sorting";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
 type Props = {
@@ -43,10 +42,7 @@ export function InboxHeader({
       />
 
       <div className="flex space-x-2">
-        <Button variant="outline" size="icon">
-          <Icons.Sort size={16} />
-        </Button>
-
+        <InboxSorting />
         <InboxSettingsModal forwardEmail={forwardEmail} inboxId={inboxId} />
       </div>
     </div>
