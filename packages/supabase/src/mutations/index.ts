@@ -426,8 +426,7 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
 
 type UpdateInboxByIdParams = {
   id: string;
-  read?: boolean;
-  status?: "completed" | "archived";
+  status?: "deleted";
   attachment_id?: string;
   transaction_id?: string;
   teamId: string;

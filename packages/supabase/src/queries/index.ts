@@ -745,34 +745,26 @@ export async function getInboxQuery(
     teamId,
     done,
     archived,
-    trash,
     ascending = false,
   } = params;
 
   const query = supabase
     .from("inbox")
     .select(
-      "id, file_name, file_path, display_name, transaction_id, amount, currency, trash, content_type, due_date, trash, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
-      {
-        count: "exact",
-      }
+      "id, file_name, file_path, display_name, transaction_id, amount, currency, content_type, due_date, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)"
     )
     .eq("team_id", teamId)
     .order("created_at", { ascending });
 
   if (archived) {
-    query.eq("archived", false);
-  }
-
-  if (trash) {
-    query.eq("trash", false);
+    query.eq("status", "archived");
   }
 
   if (done) {
     query.not("transaction_id", "is", null);
   }
 
-  const { data, count } = await query.range(from, to);
+  const { data } = await query.range(from, to);
 
   return {
     data: data?.map((item) => {
@@ -787,7 +779,6 @@ export async function getInboxQuery(
         review: !pending && !item.transaction_id,
       };
     }),
-    count,
   };
 }
 

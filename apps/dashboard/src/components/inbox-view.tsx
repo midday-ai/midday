@@ -26,9 +26,13 @@ type Props = {
 export const TAB_ITEMS = ["todo", "done"];
 
 const todoFilter = (item) =>
-  !item.transaction_id && !item.trash && !item.archived;
+  !item.transaction_id &&
+  item.status !== "deleted" &&
+  item.status !== "archived";
 const doneFilter = (item) =>
-  item.transaction_id && !item.trash && !item.archived;
+  item.transaction_id &&
+  item.status !== "deleted" &&
+  item.status !== "archived";
 
 export function InboxView({
   items: initialItems,
@@ -140,7 +144,7 @@ export function InboxView({
     updateInboxAction,
     data,
     (state, payload) => {
-      if (payload.trash) {
+      if (payload.status === "deleted") {
         return state.filter((item) => item.id !== payload.id);
       }
 
@@ -229,7 +233,7 @@ export function InboxView({
 
     updateInbox({
       id: params.id,
-      trash: true,
+      status: "deleted",
     });
   };
 

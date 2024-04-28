@@ -9,14 +9,20 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
-import { useAction } from "next-safe-action/hooks";
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {
   ascending: boolean;
 };
 
 export function InboxOrdering({ ascending }: Props) {
-  const inboxOrder = useAction(inboxOrderAction);
+  const { execute: inboxOrder, optimisticData } = useOptimisticAction(
+    inboxOrderAction,
+    ascending,
+    (state) => {
+      return !state;
+    }
+  );
 
   return (
     <DropdownMenu>
@@ -27,15 +33,15 @@ export function InboxOrdering({ ascending }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={!ascending}
-          onCheckedChange={() => inboxOrder.execute(false)}
+          checked={!optimisticData}
+          onCheckedChange={() => inboxOrder(false)}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={ascending}
-          onCheckedChange={() => inboxOrder.execute(true)}
+          checked={optimisticData}
+          onCheckedChange={() => inboxOrder(true)}
         >
           Oldest first
         </DropdownMenuCheckboxItem>
