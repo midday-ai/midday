@@ -21,6 +21,7 @@ type Props = {
   forwardEmail: string;
   inboxId: string;
   teamId: string;
+  ascending: boolean;
 };
 
 export const TAB_ITEMS = ["todo", "done", "trash"];
@@ -31,7 +32,13 @@ const doneFilter = (item) =>
   item.transaction_id && !item.trash && !item.archived;
 const trashFilter = (item) => item.trash;
 
-export function InboxView({ items, forwardEmail, teamId, inboxId }: Props) {
+export function InboxView({
+  items,
+  forwardEmail,
+  teamId,
+  inboxId,
+  ascending,
+}: Props) {
   const [isLoading, setLoading] = useState(false);
   const [params, setParams] = useQueryStates(
     {
@@ -188,6 +195,7 @@ export function InboxView({ items, forwardEmail, teamId, inboxId }: Props) {
             forwardEmail={forwardEmail}
             inboxId={inboxId}
             handleOnPaginate={handleOnPaginate}
+            ascending={ascending}
           />
 
           {isLoading && <InboxListSkeleton numberOfItems={12} />}

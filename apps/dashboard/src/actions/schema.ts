@@ -235,7 +235,7 @@ export const declineInviteSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export const inboxFilter = z.enum(["all", "completed", "archived", "deleted"]);
+export const inboxFilter = z.enum(["all", "done", "archived", "deleted"]);
 
 export const updateInboxSchema = z.object({
   id: z.string(),
@@ -336,3 +336,5 @@ export const searchEmbeddingsSchema = z.object({
   limit: z.number().optional(),
   threshold: z.number().optional(),
 });
+
+export const inboxOrder = z.boolean();

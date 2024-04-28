@@ -1,5 +1,6 @@
 "use client";
 
+import { inboxOrderAction } from "@/actions/inbox/order";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -8,8 +9,15 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
+import { useAction } from "next-safe-action/hooks";
 
-export function InboxSorting() {
+type Props = {
+  ascending: boolean;
+};
+
+export function InboxOrdering({ ascending }: Props) {
+  const inboxOrder = useAction(inboxOrderAction);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -19,15 +27,15 @@ export function InboxSorting() {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked
-          // onCheckedChange={setShowStatusBar}
+          checked={ascending}
+          onCheckedChange={() => inboxOrder.execute(true)}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-
-        // onCheckedChange={setShowStatusBar}
+          checked={!ascending}
+          onCheckedChange={() => inboxOrder.execute(false)}
         >
           Oldest first
         </DropdownMenuCheckboxItem>

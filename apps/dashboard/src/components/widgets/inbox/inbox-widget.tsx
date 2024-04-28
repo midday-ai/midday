@@ -14,8 +14,10 @@ export async function InboxWidget({ filter, disabled }) {
     : await getInboxQuery(supabase, {
         to: 15,
         from: 0,
-        status: filter,
         teamId: user.data.team_id,
+        archived: false,
+        trash: false,
+        done: filter === "done",
       });
 
   if (!data?.length) {

@@ -1,7 +1,7 @@
 import { TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { parseAsString, useQueryStates } from "nuqs";
+import { InboxOrdering } from "./inbox-ordering";
 import { InboxSearch } from "./inbox-search";
-import { InboxSorting } from "./inbox-sorting";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
 type Props = {
@@ -9,6 +9,7 @@ type Props = {
   inboxId: string;
   handleOnPaginate?: (direction: "down" | "up") => void;
   onChange?: (value: string | null) => void;
+  ascending: boolean;
 };
 
 export function InboxHeader({
@@ -16,6 +17,7 @@ export function InboxHeader({
   inboxId,
   handleOnPaginate,
   onChange,
+  ascending,
 }: Props) {
   const [params, setParams] = useQueryStates(
     {
@@ -46,7 +48,7 @@ export function InboxHeader({
       />
 
       <div className="flex space-x-2">
-        <InboxSorting />
+        <InboxOrdering ascending={ascending} />
         <InboxSettingsModal forwardEmail={forwardEmail} inboxId={inboxId} />
       </div>
     </div>

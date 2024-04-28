@@ -51,7 +51,7 @@ export default {
   },
   inbox_filter: {
     all: "All",
-    completed: "Completed",
+    done: "Done",
   },
   chart_type: {
     profit: "Profit",

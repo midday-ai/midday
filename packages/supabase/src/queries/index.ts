@@ -727,16 +727,27 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  status: "completed" | "archived";
   from?: number;
   to?: number;
+  archived?: boolean;
+  trash?: boolean;
+  done?: boolean;
+  ascending?: boolean;
 };
 
 export async function getInboxQuery(
   supabase: Client,
   params: GetInboxQueryParams
 ) {
-  const { from = 0, to = 10, teamId, status } = params;
+  const {
+    from = 0,
+    to = 10,
+    teamId,
+    done,
+    archived,
+    trash,
+    ascending = false,
+  } = params;
 
   const query = supabase
     .from("decrypted_inbox")
@@ -747,9 +758,17 @@ export async function getInboxQuery(
       }
     )
     .eq("team_id", teamId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending });
 
-  if (status === "completed") {
+  if (archived) {
+    query.eq("archived", false);
+  }
+
+  if (trash) {
+    query.eq("trash", false);
+  }
+
+  if (done) {
     query.not("transaction_id", "is", null);
   }
 
