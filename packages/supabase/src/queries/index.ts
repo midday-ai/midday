@@ -741,14 +741,12 @@ export async function getInboxQuery(
   const query = supabase
     .from("decrypted_inbox")
     .select(
-      "*, name:decrypted_name, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
+      "id, file_name, file_path, transaction_id, amount, currency, trash, content_type, due_date, trash, status, forwarded_to, name:decrypted_name, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
       {
         count: "exact",
       }
     )
     .eq("team_id", teamId)
-    .eq("archived", false)
-    .eq("trash", false)
     .order("created_at", { ascending: false });
 
   if (status === "completed") {

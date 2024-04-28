@@ -5,10 +5,11 @@ import { useHotkeys } from "react-hotkeys-hook";
 type Props = {
   isFirst: boolean;
   isLast: boolean;
+  onDelete: () => void;
   onKeyPress: (direction: "down" | "up" | "left" | "right") => void;
 };
 
-export function InboxToolbar({ isFirst, isLast, onKeyPress }: Props) {
+export function InboxToolbar({ isFirst, isLast, onKeyPress, onDelete }: Props) {
   useHotkeys(
     "arrowUp",
     () => {
@@ -38,7 +39,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress }: Props) {
   });
 
   useHotkeys("mod+backspace", () => {
-    alert("Delete");
+    onDelete();
   });
 
   return (

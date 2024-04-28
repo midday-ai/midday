@@ -1,5 +1,5 @@
 import { TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 import { InboxSearch } from "./inbox-search";
 import { InboxSorting } from "./inbox-sorting";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
@@ -9,7 +9,6 @@ type Props = {
   inboxId: string;
   handleOnPaginate?: (direction: "down" | "up") => void;
   onChange?: (value: string | null) => void;
-  onClear?: () => void;
 };
 
 export function InboxHeader({
@@ -17,26 +16,31 @@ export function InboxHeader({
   inboxId,
   handleOnPaginate,
   onChange,
-  onClear,
 }: Props) {
-  const [query, setQuery] = useQueryState("q", {
-    shallow: true,
-    defaultValue: "",
-  });
+  const [params, setParams] = useQueryStates(
+    {
+      id: parseAsString,
+      q: parseAsString.withDefault(""),
+    },
+    {
+      shallow: true,
+    }
+  );
 
   return (
     <div className="flex justify-center items-center space-x-4 mb-4">
       <TabsList>
         <TabsTrigger value="todo">Todo</TabsTrigger>
         <TabsTrigger value="done">Done</TabsTrigger>
+        <TabsTrigger value="trash">Trash</TabsTrigger>
       </TabsList>
 
       <InboxSearch
-        onClear={onClear}
+        onClear={() => setParams({ id: null, q: null })}
         onArrowDown={() => handleOnPaginate?.("down")}
-        value={query}
+        value={params.q}
         onChange={(value) => {
-          setQuery(value);
+          setParams({ id: null, q: value });
           onChange?.(value);
         }}
       />

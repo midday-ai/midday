@@ -5,20 +5,12 @@ import { InboxHeader } from "./inbox-header";
 import { InboxListSkeleton } from "./inbox-list-skeleton";
 import { InboxStructure } from "./inbox-structure";
 
-type Props = {
-  forwardEmail?: string;
-  inboxId?: string;
-};
-
-export function InboxViewSkeleton({ forwardEmail, inboxId }: Props) {
+export function InboxViewSkeleton() {
   return (
     <InboxStructure
       leftColumn={
         <>
-          <InboxHeader
-            forwardEmail={forwardEmail ?? ""}
-            inboxId={inboxId ?? ""}
-          />
+          <InboxHeader forwardEmail="" inboxId="" />
           <InboxListSkeleton numberOfItems={12} />
         </>
       }

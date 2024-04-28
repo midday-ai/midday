@@ -1,8 +1,10 @@
 "use client";
+
+import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox-status";
 import { Icons } from "@midday/ui/icons";
 import { useMeasure } from "@uidotdev/usehooks";
-import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { format } from "date-fns";
 import Link from "next/link";
 
 const PADDING = 35;
@@ -29,18 +31,20 @@ export function InboxList({ data }) {
                     <div className="font-semibold">{item.name}</div>
                     {item.status === "handled" && <Icons.Check />}
                   </div>
-                  {!item.read && (
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />
-                  )}
                 </div>
                 <div className="ml-auto text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(item.created_at), {
-                    addSuffix: true,
-                  })}
+                  {item.due_date && format(new Date(item.due_date), "PP")}
                 </div>
               </div>
               <div className="flex">
-                <div className="text-xs font-medium">{item?.file_name}</div>
+                {item?.currency && item?.amount && (
+                  <div className="text-xs font-medium">
+                    <FormatAmount
+                      amount={item.amount}
+                      currency={item.currency}
+                    />
+                  </div>
+                )}
                 <div className="ml-auto">
                   <InboxStatus item={item} />
                 </div>

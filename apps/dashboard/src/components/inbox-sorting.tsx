@@ -24,6 +24,13 @@ export function InboxSorting() {
         >
           Most recent
         </DropdownMenuCheckboxItem>
+
+        <DropdownMenuCheckboxItem
+
+        // onCheckedChange={setShowStatusBar}
+        >
+          Oldest first
+        </DropdownMenuCheckboxItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
