@@ -1,11 +1,14 @@
 "use server";
 
+import { getUser } from "@midday/supabase/cached-queries";
 import { action } from "../safe-action";
 import { searchEmbeddingsSchema } from "../schema";
 
 export const searchEmbeddingsAction = action(
   searchEmbeddingsSchema,
   async (params) => {
+    const user = await getUser();
+
     const { query, type, limit = 10, threshold } = params;
 
     const res = await fetch(
@@ -21,12 +24,13 @@ export const searchEmbeddingsAction = action(
           limit,
           threshold,
           search: query,
+          team_id: user?.data?.team_id,
         }),
       }
     );
 
-    const data = await res.json();
+    const { data } = await res.json();
 
-    return data?.result;
+    return data;
   }
 );

@@ -11,14 +11,17 @@ const supabase = createClient<Database>(
 const model = new Supabase.ai.Session("gte-small");
 
 Deno.serve(async (req) => {
-  const { search, type, limit = 10, threshold = 0.75 } = await req.json();
+  // Use zod
+  const {
+    search,
+    type,
+    team_id,
+    limit = 10,
+    threshold = 0.75,
+  } = await req.json();
 
-  if (!search) {
-    return new Response("Please provide a search param!");
-  }
-
-  if (!type) {
-    return new Response("Please provide a search type!");
+  if (!search || !team_id || !type) {
+    return new Response("Please provide missing param");
   }
 
   const embedding = await model.run(search, {
@@ -33,11 +36,25 @@ Deno.serve(async (req) => {
           .rpc("query_inbox_embeddings", {
             embedding: JSON.stringify(embedding),
             match_threshold: threshold,
+            team_id,
           })
           .select("*")
           .limit(limit);
 
-        return Response.json({ result });
+        const data = result.map(({ transaction_id, ...rest }) => ({
+          ...rest,
+          transaction: transaction_id
+            ? {
+                id: transaction_id,
+                date: rest.transaction_date,
+                name: rest.transaction_name,
+                amount: rest.transaction_amount,
+                currency: rest.transaction_currency,
+              }
+            : null,
+        }));
+
+        return Response.json({ data });
       }
       default:
         break;

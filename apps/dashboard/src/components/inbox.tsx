@@ -16,5 +16,12 @@ export async function Inbox() {
   //   return <InboxEmpty inboxId={inboxId} />;
   // }
 
-  return <InboxView items={inbox?.data} team={user?.data?.team} />;
+  return (
+    <InboxView
+      items={inbox?.data}
+      teamId={user?.data?.team?.id}
+      inboxId={user?.data?.team?.inbox_id}
+      forwardEmail={user?.data?.team?.inbox_email}
+    />
+  );
 }

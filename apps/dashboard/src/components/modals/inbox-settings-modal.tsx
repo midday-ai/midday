@@ -12,7 +12,12 @@ import { Icons } from "@midday/ui/icons";
 import { useState } from "react";
 import { InboxSettings } from "../inbox-settings";
 
-export function InboxSettingsModal({ email }) {
+type Props = {
+  forwardEmail: string;
+  inboxId: string;
+};
+
+export function InboxSettingsModal({ forwardEmail, inboxId }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -29,13 +34,17 @@ export function InboxSettingsModal({ email }) {
       >
         <div className="p-4">
           <DialogHeader className="mb-8">
-            <DialogTitle>Inbox settings</DialogTitle>
+            <DialogTitle>Settings</DialogTitle>
             <DialogDescription>
               Make changes to your inbox here. Click save when you're done.
             </DialogDescription>
           </DialogHeader>
 
-          <InboxSettings email={email} onSuccess={() => setOpen(false)} />
+          <InboxSettings
+            forwardEmail={forwardEmail}
+            inboxId={inboxId}
+            onSuccess={() => setOpen(false)}
+          />
         </div>
       </DialogContent>
     </Dialog>

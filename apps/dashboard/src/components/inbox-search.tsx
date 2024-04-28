@@ -1,11 +1,16 @@
-"use client";
-
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useHotkeys } from "react-hotkeys-hook";
 
-export function InboxSearch({ value, onChange, onClear, onArrowDown }) {
-  useHotkeys("esc", () => onClear(), {
+type Props = {
+  value: string;
+  onChange: (value: string | null) => void;
+  onClear?: () => void;
+  onArrowDown?: () => void;
+};
+
+export function InboxSearch({ value, onChange, onClear, onArrowDown }: Props) {
+  useHotkeys("esc", () => onClear?.(), {
     enableOnFormTags: true,
     enabled: Boolean(value),
   });
@@ -17,6 +22,7 @@ export function InboxSearch({ value, onChange, onClear, onArrowDown }) {
         placeholder="Search inbox"
         onKeyDown={(evt) => {
           if (evt.key === "ArrowDown") {
+            // @ts-ignore
             evt.target?.blur();
             evt.preventDefault();
             onArrowDown?.();

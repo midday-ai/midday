@@ -2,78 +2,45 @@
 
 import { updateInboxAction } from "@/actions/inbox/update";
 import { searchEmbeddingsAction } from "@/actions/search/search-embeddings-action";
-import { InboxDetails, InboxDetailsSkeleton } from "@/components/inbox-details";
+import { InboxDetails } from "@/components/inbox-details";
 import { InboxList, InboxSkeleton } from "@/components/inbox-list";
-import { InboxSearch } from "@/components/inbox-search";
-import { InboxUpdates } from "@/components/inbox-updates";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { TooltipProvider } from "@midday/ui/tooltip";
+import { TabsContent } from "@midday/ui/tabs";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
 import { useAction } from "next-safe-action/hooks";
-import { parseAsString, useQueryStates } from "nuqs";
+import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+import { InboxDetailsSkeleton } from "./inbox-details-skeleton";
+import { InboxHeader } from "./inbox-header";
+import { InboxStructure } from "./inbox-structure";
 import { InboxToolbar } from "./inbox-toolbar";
-import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 
-export function InboxViewSkeleton() {
-  return (
-    <div>
-      <div className="flex items-center justify-between py-2 mb-6 mt-2">
-        <div className="space-x-4 flex mt-3">
-          <div>
-            <Skeleton className="h-3 w-[80px]" />
-          </div>
-          <div>
-            <Skeleton className="h-3 w-[100px]" />
-          </div>
-          <div>
-            <Skeleton className="h-3 w-[100px]" />
-          </div>
-        </div>
+type Props = {
+  items: any[];
+  forwardEmail: string;
+  inboxId: string;
+  teamId: string;
+};
 
-        <div>
-          <Skeleton className="w-[245px] rounded-sm h-[30px]" />
-        </div>
-      </div>
-
-      <div className="flex flex-row space-x-8">
-        <div className="w-full h-full relative overflow-hidden">
-          <div className="h-[calc(100vh-180px)]">
-            <div className="flex flex-col gap-4 pt-0">
-              <InboxSkeleton numberOfItems={12} />
-            </div>
-          </div>
-        </div>
-
-        <InboxDetailsSkeleton />
-      </div>
-    </div>
-  );
-}
-
-export function InboxView({ items, team }) {
+export function InboxView({ items, forwardEmail, teamId, inboxId }: Props) {
   const [isLoading, setLoading] = useState(false);
-  const [updates, setUpdates] = useState(false);
   const [params, setParams] = useQueryStates(
     {
       id: parseAsString.withDefault(items?.at(0)?.id),
-      tab: parseAsString.withDefault("todo"),
-      query: parseAsString.withDefault(""),
+      q: parseAsString.withDefault(""),
+      tab: parseAsStringEnum(["todo", "done"]).withDefault("todo"),
     },
     {
       shallow: true,
     }
   );
 
-  const debouncedSearchTerm = useDebounce(params.query, 300);
+  const debouncedSearchTerm = useDebounce(params.q, 300);
 
   const searchAction = useAction(searchEmbeddingsAction, {
     onSuccess: (data) => {
       setLoading(false);
+
       if (data.length) {
         setParams({ id: data?.at(0)?.id });
       }
@@ -82,10 +49,10 @@ export function InboxView({ items, team }) {
   });
 
   useEffect(() => {
-    if (params.query) {
+    if (params.q) {
       setLoading(true);
     }
-  }, [params.query]);
+  }, [params.q]);
 
   useEffect(() => {
     if (debouncedSearchTerm) {
@@ -97,7 +64,7 @@ export function InboxView({ items, team }) {
     }
   }, [debouncedSearchTerm]);
 
-  const data = (params.query && searchAction.result?.data) || items;
+  const data = ((params.q && searchAction.result?.data) || items) ?? [];
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
@@ -126,6 +93,7 @@ export function InboxView({ items, team }) {
           );
 
           const selectIndex = deleteIndex > 0 ? deleteIndex - 1 : 0;
+
           setParams({
             id: optimisticData?.at(selectIndex)?.id,
           });
@@ -134,103 +102,92 @@ export function InboxView({ items, team }) {
     }
   );
 
-  const selectedItems = optimisticData?.find((item) => item.id === params.id);
-  const currentIndex = optimisticData.findIndex(
-    (item) => item.id === params.id
-  );
-
-  const handleOnPaginate = (direction) => {
-    if (direction === "prev") {
-      const index = currentIndex - 1;
-      setParams({ id: optimisticData.at(index)?.id });
+  const getCurrentItems = (tab: "todo" | "done") => {
+    if (tab === "todo") {
+      return optimisticData.filter((item) => !item.transaction_id);
     }
 
-    if (direction === "next") {
+    return optimisticData.filter((item) => item.transaction_id);
+  };
+
+  const currentItems = getCurrentItems(params.tab);
+
+  const selectedItems = currentItems?.find((item) => item.id === params.id);
+  const currentIndex = currentItems.findIndex((item) => item.id === params.id);
+
+  const handleOnPaginate = (direction) => {
+    if (direction === "up") {
+      const index = currentIndex - 1;
+      setParams({ id: currentItems.at(index)?.id });
+    }
+
+    if (direction === "down") {
       const index = currentIndex + 1;
-      setParams({ id: optimisticData.at(index)?.id });
+      setParams({ id: currentItems.at(index)?.id });
+    }
+
+    if (direction === "left") {
+      setParams({ tab: "todo", id: getCurrentItems("todo")?.at(0)?.id });
+    }
+
+    if (direction === "right") {
+      setParams({ tab: "done", id: getCurrentItems("done")?.at(0)?.id });
     }
   };
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tabs
-        value={params.tab}
-        onValueChange={(value) => setParams({ tab: value })}
-      >
-        <div className="flex flex-row space-x-8 mt-4">
-          <div className="w-full h-[calc(100vh-120px)] relative overflow-hidden">
-            <div className="flex justify-center items-center space-x-4 mb-4">
-              <TabsList>
-                <TabsTrigger value="todo">Todo</TabsTrigger>
-                <TabsTrigger value="completed">Completed</TabsTrigger>
-              </TabsList>
+    <InboxStructure
+      onChangeTab={(tab) => {
+        const items = getCurrentItems(tab);
+        setParams({ id: items?.at(0)?.id });
+      }}
+      leftColumn={
+        <>
+          <InboxHeader
+            forwardEmail={forwardEmail}
+            inboxId={inboxId}
+            handleOnPaginate={handleOnPaginate}
+            onClear={() => {
+              setParams({ q: null, id: null });
+            }}
+          />
 
-              <InboxSearch
-                onClear={() => setParams({ query: null, id: null })}
-                onArrowDown={() => handleOnPaginate("down")}
-                value={params.query}
-                onChange={(value: string) => {
-                  setParams({ query: value, id: null });
-                }}
-              />
+          {isLoading && <InboxSkeleton numberOfItems={12} />}
 
-              <div className="flex space-x-2">
-                <Button variant="outline" size="icon">
-                  <Icons.Sort size={16} />
-                </Button>
-                <InboxSettingsModal email={team?.inbox_email} />
-              </div>
-            </div>
-
-            <InboxUpdates
-              show={Boolean(updates)}
-              onRefresh={() => {
-                setUpdates(false);
-              }}
+          <TabsContent value="todo" className="m-0 h-full">
+            <InboxList
+              items={currentItems}
+              selectedId={params.id}
+              setSelectedId={(value: string) => setParams({ id: value })}
             />
+          </TabsContent>
 
-            {isLoading && (
-              <div className="flex flex-col gap-4 pt-0">
-                <InboxSkeleton numberOfItems={12} />
-              </div>
-            )}
-
-            <TabsContent value="todo" className="m-0 h-full">
-              <InboxList
-                items={optimisticData.filter(
-                  (item) => item.status === "pending" && !item.transaction_id
-                )}
-                selectedId={params.id}
-                setSelectedId={(value: string) => setParams({ id: value })}
-              />
-            </TabsContent>
-
-            <TabsContent value="completed" className="m-0 h-full">
-              <InboxList
-                items={optimisticData.filter((item) => item.transaction_id)}
-                selectedId={params.id}
-                setSelectedId={(value: string) => setParams({ id: value })}
-              />
-            </TabsContent>
-
-            <InboxToolbar
-              isFirst={currentIndex === 0}
-              isLast={currentIndex === optimisticData.length - 1}
-              onPaginate={handleOnPaginate}
+          <TabsContent value="done" className="m-0 h-full">
+            <InboxList
+              items={currentItems}
+              selectedId={params.id}
+              setSelectedId={(value: string) => setParams({ id: value })}
             />
-          </div>
+          </TabsContent>
 
-          {isLoading ? (
-            <InboxDetailsSkeleton />
-          ) : (
-            <InboxDetails
-              item={selectedItems}
-              updateInbox={updateInbox}
-              teamId={team.id}
-            />
-          )}
-        </div>
-      </Tabs>
-    </TooltipProvider>
+          <InboxToolbar
+            isFirst={currentIndex === 0}
+            isLast={currentIndex === currentItems.length - 1}
+            onKeyPress={handleOnPaginate}
+          />
+        </>
+      }
+      rightColumn={
+        isLoading ? (
+          <InboxDetailsSkeleton />
+        ) : (
+          <InboxDetails
+            item={selectedItems}
+            updateInbox={updateInbox}
+            teamId={teamId}
+          />
+        )
+      }
+    />
   );
 }

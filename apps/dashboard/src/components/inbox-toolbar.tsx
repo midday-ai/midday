@@ -5,14 +5,14 @@ import { useHotkeys } from "react-hotkeys-hook";
 type Props = {
   isFirst: boolean;
   isLast: boolean;
-  onPaginate: (direction: "prev" | "next") => void;
+  onKeyPress: (direction: "down" | "up" | "left" | "right") => void;
 };
 
-export function InboxToolbar({ isFirst, isLast, onPaginate }: Props) {
+export function InboxToolbar({ isFirst, isLast, onKeyPress }: Props) {
   useHotkeys(
     "arrowUp",
     () => {
-      onPaginate("prev");
+      onKeyPress("up");
     },
     {
       enabled: !isFirst,
@@ -22,12 +22,20 @@ export function InboxToolbar({ isFirst, isLast, onPaginate }: Props) {
   useHotkeys(
     "arrowDown",
     () => {
-      onPaginate("next");
+      onKeyPress("down");
     },
     {
       enabled: !isLast,
     }
   );
+
+  useHotkeys("arrowRight", () => {
+    onKeyPress("right");
+  });
+
+  useHotkeys("arrowLeft", () => {
+    onKeyPress("left");
+  });
 
   useHotkeys("mod+backspace", () => {
     alert("Delete");
@@ -43,25 +51,32 @@ export function InboxToolbar({ isFirst, isLast, onPaginate }: Props) {
           </kbd>
           <span className="text-xs">Delete</span>
         </button>
+        <button type="button" className="flex items-center space-x-2">
+          <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+            <Icons.KeyboardArrowLeft size={16} />
+            <Icons.KeyboardArrowRight size={16} />
+          </kbd>
+          <span className="text-xs">Change tab</span>
+        </button>
         <button
           type="button"
           disabled={isFirst}
-          onClick={() => onPaginate("prev")}
+          onClick={() => onKeyPress("up")}
           className={cn("flex items-center space-x-2", isFirst && "opacity-50")}
         >
           <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
-            <Icons.ArrowDropUp size={16} />
+            <Icons.KeyboardArrowUp size={16} />
           </kbd>
           <span className="text-xs">Previous</span>
         </button>
         <button
           type="button"
           disabled={isLast}
-          onClick={() => onPaginate("next")}
+          onClick={() => onKeyPress("down")}
           className={cn("flex items-center space-x-2", isLast && "opacity-50")}
         >
           <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
-            <Icons.ArrowDropDown size={16} />
+            <Icons.KeyboardArrowDown size={16} />
           </kbd>
           <span className="text-xs">Next</span>
         </button>

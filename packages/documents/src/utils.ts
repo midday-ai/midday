@@ -1,10 +1,12 @@
 import type { Entries } from "./types";
 
+export function cleanText(text?: string) {
+  return text?.trim().replace(/\n/g, "");
+}
+
 export function findValue(entities: Entries, type: string) {
   const found = entities.find((entry) => entry.type === type);
-  return (
-    found?.normalizedValue?.text.trim() || found?.mentionText?.trim() || null
-  );
+  return cleanText(found?.normalizedValue?.text || found?.mentionText);
 }
 
 export function getDomainFromEmail(email: string | null) {
@@ -14,8 +16,8 @@ export function getDomainFromEmail(email: string | null) {
 export function getLineItems(entities: Entries) {
   const items = entities.filter((entry) => entry.type === "line_item");
 
-  return items.map(
-    (item) => item?.normalizedValue?.text.trim() || item?.mentionText?.trim()
+  return items.map((item) =>
+    cleanText(item?.normalizedValue?.text || item?.mentionText)
   );
 }
 
