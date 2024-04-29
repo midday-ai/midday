@@ -139,7 +139,7 @@ export function InboxView({
       search.execute({
         query: debouncedSearchTerm,
         type: "inbox",
-        threshold: 0.75,
+        threshold: 0.8,
       });
     }
   }, [debouncedSearchTerm]);
