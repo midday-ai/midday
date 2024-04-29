@@ -29,6 +29,7 @@ const todoFilter = (item) =>
   !item.transaction_id &&
   item.status !== "deleted" &&
   item.status !== "archived";
+
 const doneFilter = (item) =>
   item.transaction_id &&
   item.status !== "deleted" &&
@@ -62,6 +63,7 @@ export function InboxView({
 
   const searchAction = useAction(searchEmbeddingsAction, {
     onSuccess: (data) => {
+      console.log(data);
       setLoading(false);
 
       if (data.length) {
@@ -138,7 +140,7 @@ export function InboxView({
     }
   }, [debouncedSearchTerm]);
 
-  const data = ((params.q && searchAction.result?.data) || items) ?? [];
+  const data = (params.q && searchAction.result?.data) || items;
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
