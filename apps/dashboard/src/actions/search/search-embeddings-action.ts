@@ -1,16 +1,16 @@
 "use server";
 
-import { getUser } from "@midday/supabase/cached-queries";
+// import { getUser } from "@midday/supabase/cached-queries";
 import { action } from "../safe-action";
 import { searchEmbeddingsSchema } from "../schema";
 
 export const searchEmbeddingsAction = action(
   searchEmbeddingsSchema,
   async (params) => {
-    const user = await getUser();
+    // const user = await getUser();
 
-    const { query, type, limit = 10, threshold } = params;
-    console.log({ query, type, limit });
+    // const { query, type, limit = 10, threshold } = params;
+    console.log(params);
     // const res = await fetch(
     //   `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/search`,
     //   {
@@ -31,6 +31,6 @@ export const searchEmbeddingsAction = action(
 
     // const { data } = await res.json();
 
-    return [];
+    return Promise.resolve([]);
   }
 );
