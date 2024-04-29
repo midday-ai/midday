@@ -1,7 +1,7 @@
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
-import { AnimatePresence, motion } from "framer-motion";
+// import { AnimatePresence, motion } from "framer-motion";
 import { InboxItem } from "./inbox-item";
 
 type InboxListProps = {
@@ -53,23 +53,23 @@ export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
   return (
     <ScrollArea className="h-screen">
       <div className="flex flex-col gap-4 pb-[250px]">
-        <AnimatePresence initial={false}>
-          {items.map((item) => (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{
-                opacity: { duration: 0.2 },
-                height: { type: "spring", bounce: 0.3, duration: 0.5 },
-              }}
-              key={item.id}
-              className="w-full"
-            >
-              <InboxItem item={item} />
-            </motion.div>
-          ))}
-        </AnimatePresence>
+        {/* <AnimatePresence initial={false}> */}
+        {items.map((item) => (
+          // <motion.div
+          //   initial={{ opacity: 0, height: 0 }}
+          //   animate={{ opacity: 1, height: "auto" }}
+          //   exit={{ opacity: 0, height: 0 }}
+          //   transition={{
+          //     opacity: { duration: 0.2 },
+          //     height: { type: "spring", bounce: 0.3, duration: 0.5 },
+          //   }}
+          //   key={item.id}
+          //   className="w-full"
+          // >
+          <InboxItem key={item.id} item={item} />
+          // </motion.div>
+        ))}
+        {/* </AnimatePresence> */}
       </div>
     </ScrollArea>
   );

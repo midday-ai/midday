@@ -6,6 +6,8 @@ import { InboxDetails } from "@/components/inbox-details";
 import { InboxList } from "@/components/inbox-list";
 import { createClient } from "@midday/supabase/client";
 import { TabsContent } from "@midday/ui/tabs";
+import { ToastAction } from "@midday/ui/toast";
+import { useToast } from "@midday/ui/use-toast";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
 import { useAction } from "next-safe-action/hooks";
@@ -43,6 +45,7 @@ export function InboxView({
   ascending,
 }: Props) {
   const supabase = createClient();
+  const { toast } = useToast();
   const [isLoading, setLoading] = useState(false);
   const [items, setItems] = useState(initialItems);
 
@@ -226,6 +229,20 @@ export function InboxView({
   };
 
   const handleOnDelete = () => {
+    toast({
+      duration: 6000,
+      title: "Attachment deleted",
+      variant: "success",
+      action: (
+        <ToastAction
+          altText="Undo"
+          onClick={() => updateInbox({ id: params.id, status: "pending" })}
+        >
+          Undo
+        </ToastAction>
+      ),
+    });
+
     const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
 
     setParams({
@@ -254,7 +271,7 @@ export function InboxView({
         />
       }
       leftComponent={
-        <>
+        <div>
           {TAB_ITEMS.map((value) => (
             <TabsContent key={value} value={value} className="m-0 h-full">
               <InboxList
@@ -273,7 +290,7 @@ export function InboxView({
             isLast={currentIndex === currentItems.length - 1}
             onKeyPress={handleOnPaginate}
           />
-        </>
+        </div>
       }
       rightComponent={
         <InboxDetails

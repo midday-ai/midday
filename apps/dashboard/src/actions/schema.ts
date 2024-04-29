@@ -239,7 +239,7 @@ export const inboxFilter = z.enum(["done", "todo", "all"]);
 
 export const updateInboxSchema = z.object({
   id: z.string(),
-  status: z.enum(["deleted"]).optional(),
+  status: z.enum(["deleted", "pending"]).optional(),
   transaction_id: z.string().nullable().optional(),
 });
 
