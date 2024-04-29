@@ -1,5 +1,5 @@
 type Options = {
-  locale: string;
+  locale?: string;
 };
 
 function translations(locale: string, params?: any) {
@@ -107,7 +107,7 @@ function translations(locale: string, params?: any) {
   }
 }
 
-export function getI18n({ locale }: Options) {
+export function getI18n({ locale = "en" }: Options) {
   return {
     t: (key: string, params?: any) => translations(locale, params)[key],
   };

@@ -727,38 +727,37 @@ export async function getUserInviteQuery(
 
 type GetInboxQueryParams = {
   teamId: string;
-  status: "completed" | "archived";
   from?: number;
   to?: number;
+  done?: boolean;
+  ascending?: boolean;
 };
 
 export async function getInboxQuery(
   supabase: Client,
   params: GetInboxQueryParams
 ) {
-  const { from = 0, to = 10, teamId, status } = params;
+  const { from = 0, to = 10, teamId, done, ascending = false } = params;
 
   const query = supabase
-    .from("decrypted_inbox")
+    .from("inbox")
     .select(
-      "*, subject:decrypted_subject, issuer_name:decrypted_issuer_name, name:decrypted_name, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
-      {
-        count: "exact",
-      }
+      "id, file_name, file_path, display_name, transaction_id, amount, currency, content_type, due_date, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)"
     )
     .eq("team_id", teamId)
-    .eq("archived", false)
-    .eq("trash", false)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending });
 
-  if (status === "completed") {
+  if (done) {
     query.not("transaction_id", "is", null);
   }
 
-  const { data, count } = await query.range(from, to);
+  const { data } = await query.range(from, to);
+
+  // TODO: Fix neq in query
+  const filteredData = data?.filter((item) => item.status !== "deleted");
 
   return {
-    data: data?.map((item) => {
+    data: filteredData?.map((item) => {
       const pending = isWithinInterval(new Date(), {
         start: new Date(item.created_at),
         end: addDays(new Date(item.created_at), 45),
@@ -770,7 +769,6 @@ export async function getInboxQuery(
         review: !pending && !item.transaction_id,
       };
     }),
-    count,
   };
 }
 

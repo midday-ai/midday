@@ -1,8 +1,10 @@
 "use client";
+
+import { FormatAmount } from "@/components/format-amount";
 import { InboxStatus } from "@/components/inbox-status";
 import { Icons } from "@midday/ui/icons";
 import { useMeasure } from "@uidotdev/usehooks";
-import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import { format } from "date-fns";
 import Link from "next/link";
 
 const PADDING = 35;
@@ -16,38 +18,44 @@ export function InboxList({ data }) {
         className="flex flex-col gap-4 pt-8 overflow-auto scrollbar-hide"
         style={{ maxHeight: width - PADDING }}
       >
-        {data.map((item) => (
-          <Link
-            key={item.id}
-            href={`/inbox?id=${item.id}`}
-            className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all"
-          >
-            <div className="flex w-full flex-col gap-1">
-              <div className="flex items-center mb-1">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="font-semibold">{item.name}</div>
-                    {item.status === "handled" && <Icons.Check />}
+        {data.map((item) => {
+          const tab = item.transaction_id ? "done" : "todo";
+
+          return (
+            <Link
+              key={item.id}
+              href={`/inbox?id=${item.id}&tab=${tab}`}
+              className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all"
+            >
+              <div className="flex w-full flex-col gap-1">
+                <div className="flex items-center mb-1">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="font-semibold">{item?.display_name}</div>
+                      {item.status === "handled" && <Icons.Check />}
+                    </div>
                   </div>
-                  {!item.read && (
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-[#FFD02B]" />
+                  <div className="ml-auto text-xs text-muted-foreground">
+                    {item.due_date && format(new Date(item.due_date), "PP")}
+                  </div>
+                </div>
+                <div className="flex">
+                  {item?.currency && item?.amount && (
+                    <div className="text-xs font-medium">
+                      <FormatAmount
+                        amount={item.amount}
+                        currency={item.currency}
+                      />
+                    </div>
                   )}
-                </div>
-                <div className="ml-auto text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(item.created_at), {
-                    addSuffix: true,
-                  })}
+                  <div className="ml-auto">
+                    <InboxStatus item={item} />
+                  </div>
                 </div>
               </div>
-              <div className="flex">
-                <div className="text-xs font-medium">{item?.file_name}</div>
-                <div className="ml-auto">
-                  <InboxStatus item={item} />
-                </div>
-              </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

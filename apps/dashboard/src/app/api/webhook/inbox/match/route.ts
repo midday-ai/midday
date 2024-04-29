@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     .is("transaction_id", null);
 
   // NOTE: If we match more than one inbox record we can't be sure of a match
-  if (inboxData.length === 1) {
+  if (inboxData && inboxData.length === 1) {
     const inbox = inboxData.at(0);
 
     const { data: attachmentData } = await supabase

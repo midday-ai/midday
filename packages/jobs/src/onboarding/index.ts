@@ -7,17 +7,11 @@ import { generateUnsubscribeLink } from "@midday/email";
 // import VaultEmail from "@midday/email/emails/vault";
 import WelcomeEmail from "@midday/email/emails/welcome";
 import { renderAsync } from "@react-email/components";
-import { Resend } from "@trigger.dev/resend";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 import { z } from "zod";
-import { client } from "../client";
+import { client, resend } from "../client";
 import { Events } from "../constants";
-
-const resend = new Resend({
-  id: "resend",
-  apiKey: process.env.RESEND_API_KEY!,
-});
 
 client.defineJob({
   id: "onboarding-emails",

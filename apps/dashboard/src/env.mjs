@@ -25,7 +25,22 @@ export const env = createEnv({
    * Specify your server-side environment variables schema here. This way you can ensure the app isn't
    * built with invalid env vars.
    */
-  server: {},
+  server: {
+    GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: z.string(),
+    GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID: z.string(),
+    PLAIN_API_KEY: z.string(),
+    API_ROUTE_SECRET: z.string(),
+    OPENAI_API_KEY: z.string(),
+    SUPABASE_SERVICE_KEY: z.string(),
+    UPSTASH_REDIS_REST_TOKEN: z.string(),
+    UPSTASH_REDIS_REST_URL: z.string(),
+    LOOPS_ENDPOINT: z.string(),
+    LOOPS_API_KEY: z.string(),
+    GOCARDLESS_SECRET_ID: z.string(),
+    GOCARDLESS_SECRET_KEY: z.string(),
+    NOVU_API_KEY: z.string(),
+    RESEND_API_KEY: z.string(),
+  },
   /**
    * Specify your client-side environment variables schema here.
    * For them to be exposed to the client, prefix them with `NEXT_PUBLIC_`.
@@ -74,6 +89,9 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
     PLAIN_API_KEY: process.env.PLAIN_API_KEY,
+    GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
+    GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
+      process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

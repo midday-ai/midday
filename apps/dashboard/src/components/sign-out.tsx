@@ -1,10 +1,7 @@
 "use client";
 
 import { signOutAction } from "@/actions/sign-out-action";
-import {
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-} from "@midday/ui/dropdown-menu";
+import { DropdownMenuItem } from "@midday/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -21,7 +18,6 @@ export function SignOut() {
   return (
     <DropdownMenuItem onClick={handleSignOut}>
       {isLoading ? "Loading..." : "Sign out"}
-      <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
     </DropdownMenuItem>
   );
 }

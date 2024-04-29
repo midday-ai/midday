@@ -1,18 +1,23 @@
 import { Inbox } from "@/components/inbox";
-import { InboxViewSkeleton } from "@/components/inbox-view";
-import { Metadata } from "next";
+import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { Cookies } from "@/utils/constants";
+import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Inbox | Midday",
 };
 
-export default function InboxPage({ searchParams }) {
+export default async function InboxPage({ searchParams }) {
+  const ascending =
+    cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
+
   return (
-    <div className="flex-col flex">
-      <Suspense fallback={<InboxViewSkeleton />}>
-        <Inbox selectedId={searchParams?.id} />
-      </Suspense>
-    </div>
+    <Suspense
+      fallback={<InboxViewSkeleton key={ascending.toString()} ascending />}
+    >
+      <Inbox ascending={ascending} query={searchParams?.q} />
+    </Suspense>
   );
 }

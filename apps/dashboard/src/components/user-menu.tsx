@@ -71,7 +71,7 @@ export async function UserMenu({ onlySignOut }) {
               <Link href="/account/teams">
                 <DropdownMenuItem>
                   Teams
-                  <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>

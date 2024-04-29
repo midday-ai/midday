@@ -21,7 +21,7 @@ export const sendSupportSchema = z.object({
 export const updateTeamSchema = z.object({
   name: z.string().min(2).max(32).optional(),
   email: z.string().email().optional(),
-  inbox_email: z.string().email().optional(),
+  inbox_email: z.string().email().optional().nullable(),
   logo_url: z.string().url().optional(),
   revalidatePath: z.string().optional(),
 });
@@ -235,13 +235,11 @@ export const declineInviteSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export const inboxFilter = z.enum(["all", "completed", "archived", "deleted"]);
+export const inboxFilter = z.enum(["done", "todo", "all"]);
 
 export const updateInboxSchema = z.object({
   id: z.string(),
-  read: z.boolean().optional(),
-  trash: z.boolean().optional(),
-  archived: z.boolean().optional(),
+  status: z.enum(["deleted", "pending"]).optional(),
   transaction_id: z.string().nullable().optional(),
 });
 
@@ -329,3 +327,12 @@ export const verifyOtpSchema = z.object({
   phone: z.string().optional(),
   email: z.string().optional(),
 });
+
+export const searchSchema = z.object({
+  query: z.string().min(1),
+  type: z.enum(["inbox"]),
+  limit: z.number().optional(),
+  threshold: z.number().optional(),
+});
+
+export const inboxOrder = z.boolean();

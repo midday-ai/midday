@@ -1,36 +1,97 @@
-"use client";
+import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
+import { useHotkeys } from "react-hotkeys-hook";
 
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { SelectTransaction } from "./select-transaction";
+type Props = {
+  isFirst: boolean;
+  isLast: boolean;
+  onAction: () => void;
+  onKeyPress: (direction: "down" | "up" | "left" | "right") => void;
+};
 
-export function InboxToolbar({ selectedItem, teamId, onSelect, isLoaded }) {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    if (isLoaded) {
-      setShow(true);
+export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
+  useHotkeys(
+    "arrowUp",
+    () => {
+      onKeyPress("up");
+    },
+    {
+      enabled: !isFirst,
     }
-  }, [isLoaded]);
+  );
+
+  useHotkeys(
+    "arrowDown",
+    () => {
+      onKeyPress("down");
+    },
+    {
+      enabled: !isLast,
+    }
+  );
+
+  useHotkeys("arrowRight", () => {
+    onKeyPress("right");
+  });
+
+  useHotkeys("arrowLeft", () => {
+    onKeyPress("left");
+  });
+
+  useHotkeys("mod+backspace", () => {
+    onAction();
+  });
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="h-12 fixed bottom-14 right-[160px] z-50 w-[400px]"
-        animate={{ y: show ? 0 : 150 }}
-        initial={{ y: 150 }}
-      >
-        <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
-          <SelectTransaction
-            key={selectedItem.id}
-            placeholder="Select transaction"
-            teamId={teamId}
-            inboxId={selectedItem.id}
-            selectedTransaction={selectedItem?.transaction}
-            onSelect={onSelect}
-          />
+    <div className="left-0 right-0 absolute bottom-0 flex items-center justify-center">
+      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 justify-between items-center flex px-2 rounded-lg space-x-4 text-[#878787]">
+        <button
+          type="button"
+          className="flex items-center space-x-2"
+          onClick={() => onAction()}
+        >
+          <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+            <span className="text-[16px]">⌘</span>
+            <Icons.Backspace />
+          </kbd>
+          <span className="text-xs">Delete</span>
+        </button>
+        <div className="flex items-center space-x-2">
+          <button type="button" onClick={() => onKeyPress("left")}>
+            <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+              <Icons.KeyboardArrowLeft size={16} />
+            </kbd>
+          </button>
+          <button type="button" onClick={() => onKeyPress("right")}>
+            <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+              <Icons.KeyboardArrowRight size={16} />
+            </kbd>
+          </button>
+          <span className="text-xs">Change tab</span>
         </div>
-      </motion.div>
-    </AnimatePresence>
+        <button
+          type="button"
+          disabled={isFirst}
+          onClick={() => onKeyPress("up")}
+          className={cn("flex items-center space-x-2", isFirst && "opacity-50")}
+        >
+          <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+            <Icons.KeyboardArrowUp size={16} />
+          </kbd>
+          <span className="text-xs">Previous</span>
+        </button>
+        <button
+          type="button"
+          disabled={isLast}
+          onClick={() => onKeyPress("down")}
+          className={cn("flex items-center space-x-2", isLast && "opacity-50")}
+        >
+          <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+            <Icons.KeyboardArrowDown size={16} />
+          </kbd>
+          <span className="text-xs">Next</span>
+        </button>
+      </div>
+    </div>
   );
 }

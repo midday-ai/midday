@@ -1,8 +1,5 @@
-"use client";
-
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,60 +10,31 @@ import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
 import { useToast } from "@midday/ui/use-toast";
-import { FileType } from "@midday/utils";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
-import { InboxToolbar } from "./inbox-toolbar";
+import { SelectTransaction } from "./select-transaction";
 
-function extractRootDomainFromEmail(email) {
-  const url = email?.split("@")?.at(1);
+type Props = {
+  item: any[];
+  onDelete: () => void;
+  onSelectTransaction: () => void;
+  teamId: string;
+  isEmpty?: boolean;
+};
 
-  const domain = url.match(
-    /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/im
-  )[1];
-  const parts = domain.split(".").reverse();
-  const rootDomain = `${parts[1]}.${parts[0]}`;
-  return rootDomain;
-}
-
-export function InboxDetailsSkeleton() {
-  return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[660px]">
-      <div className="flex items-center py-2 h-[52px]">
-        <div className="flex items-center gap-2" />
-      </div>
-
-      <Separator />
-      <div className="flex flex-1 flex-col">
-        <div className="flex items-start p-4">
-          <div className="flex items-start gap-4 text-sm">
-            <Skeleton className="h-[40px] w-[40px] rounded-full" />
-            <div className="grid gap-1 space-y-1">
-              <Skeleton className="h-3 w-[100px]" />
-              <Skeleton className="h-2 w-[120px]" />
-            </div>
-          </div>
-          <div className="grid gap-1 ml-auto text-right">
-            <Skeleton className="h-2 w-[100px] ml-auto" />
-            <Skeleton className="h-2 w-[50px] ml-auto" />
-          </div>
-        </div>
-
-        <Separator />
-      </div>
-    </div>
-  );
-}
-
-export function InboxDetails({ item, updateInbox, teamId }) {
+export function InboxDetails({
+  item,
+  onDelete,
+  onSelectTransaction,
+  teamId,
+  isEmpty,
+}: Props) {
   const { toast } = useToast();
-  const [hasError, setError] = useState(false);
-  const [isLoading, setLoading] = useState(true);
-  const [isLoaded, setLoaded] = useState(false);
+
+  const isProcessing = item?.status === "processing" || item?.status === "new";
 
   const handleCopyUrl = async () => {
     try {
@@ -82,8 +50,12 @@ export function InboxDetails({ item, updateInbox, teamId }) {
     } catch {}
   };
 
+  if (isEmpty) {
+    return <div className="w-[1160px]" />;
+  }
+
   return (
-    <div className="flex h-[calc(100vh-180px)] overflow-hidden flex-col border rounded-xl min-w-[660px]">
+    <div className="flex h-[calc(100vh-120px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>
@@ -92,14 +64,13 @@ export function InboxDetails({ item, updateInbox, teamId }) {
                 variant="ghost"
                 size="icon"
                 disabled={!item}
-                onClick={() => updateInbox({ id: item.id, trash: true })}
+                onClick={onDelete}
               >
                 <Trash2 className="h-4 w-4" />
-                <span className="sr-only">Move to trash</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent className="px-3 py-1.5 text-xs">
-              Move to trash
+              Delete
             </TooltipContent>
           </Tooltip>
         </div>
@@ -129,68 +100,66 @@ export function InboxDetails({ item, updateInbox, teamId }) {
         </div>
       </div>
       <Separator />
+
       {item ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
-              {isLoading && (
-                <Skeleton className="w-[40px] h-[40px] rounded-full" />
-              )}
-
-              {!isLoading && hasError && (
+              {isProcessing ? (
+                <Skeleton className="h-[40px] w-[40px] rounded-full" />
+              ) : (
                 <Avatar>
-                  <AvatarFallback>
-                    {item?.name
-                      .split(" ")
-                      .slice(0, 2)
-                      .map((chunk) => chunk[0])
-                      .join("")}
-                  </AvatarFallback>
+                  {item.website && (
+                    <Image
+                      alt={item.website}
+                      width={40}
+                      height={40}
+                      className="rounded-full overflow-hidden"
+                      src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
+                    />
+                  )}
+                  {!item.website && item?.display_name && (
+                    <AvatarFallback>
+                      {item.display_name
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((chunk) => chunk[0])
+                        .join("")}
+                    </AvatarFallback>
+                  )}
                 </Avatar>
               )}
 
-              {!hasError && (
-                <Image
-                  width={40}
-                  height={40}
-                  onError={() => {
-                    setLoading(false);
-                    setError(true);
-                  }}
-                  className={cn(
-                    "rounded-full overflow-hidden",
-                    // NOTE: Can't be hidden because onLoad is not fired
-                    isLoading && "absolute -left-[100px]"
-                  )}
-                  src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${extractRootDomainFromEmail(
-                    item.email
-                  )}&size=128`}
-                  alt={item.name}
-                  placeholder={undefined}
-                  onLoad={() => setLoading(false)}
-                />
-              )}
-
               <div className="grid gap-1">
-                <div className="font-semibold">{item.name}</div>
-                <div className="line-clamp-1 text-xs">{item.file_name}</div>
-              </div>
-            </div>
-            <div className="grid gap-1 ml-auto text-right">
-              <div className="text-xs text-muted-foreground">
-                {format(new Date(item.created_at), "PPpp")}
-              </div>
-
-              <div className="flex space-x-2 items-center ml-auto mt-1">
-                {item.currency && (
-                  <div className="line-clamp-1 text-xs">
+                <div className="font-semibold">
+                  {isProcessing ? (
+                    <Skeleton className="h-3 w-[120px] rounded-sm mb-1" />
+                  ) : (
+                    item.display_name
+                  )}
+                </div>
+                <div className="line-clamp-1 text-xs">
+                  {isProcessing && !item.currency && (
+                    <Skeleton className="h-3 w-[50px] rounded-sm" />
+                  )}
+                  {item.currency && (
                     <FormatAmount
                       amount={item.amount}
                       currency={item.currency}
                     />
-                  </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="grid gap-1 ml-auto text-right">
+              <div className="text-xs text-muted-foreground">
+                {isProcessing && !item.due_date && (
+                  <Skeleton className="h-3 w-[50px] rounded-sm" />
                 )}
+                {item.due_date && format(new Date(item.due_date), "PP")}
+              </div>
 
+              <div className="flex space-x-2 items-center ml-auto mt-1">
                 {item.forwarded_to && (
                   <Tooltip>
                     <TooltipTrigger>
@@ -215,25 +184,28 @@ export function InboxDetails({ item, updateInbox, teamId }) {
               <FilePreview
                 src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
                 name={item.name}
-                type={FileType.Pdf}
+                type={item.content_type}
                 width={680}
                 height={900}
                 disableFullscreen
-                onLoaded={() => setLoaded(true)}
               />
             )}
           </div>
 
-          <InboxToolbar
-            selectedItem={item}
-            teamId={teamId}
-            onSelect={updateInbox}
-            isLoaded={isLoaded}
-          />
+          <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg fixed bottom-14 right-[160px] z-50 w-[400px]">
+            <SelectTransaction
+              placeholder="Select transaction"
+              teamId={teamId}
+              inboxId={item.id}
+              selectedTransaction={item?.transaction}
+              onSelect={onSelectTransaction}
+              key={item.id}
+            />
+          </div>
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">
-          No message selected
+          No attachment selected
         </div>
       )}
     </div>

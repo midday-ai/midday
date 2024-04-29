@@ -8,14 +8,14 @@
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
     "login": "supabase login",
-    "db:generate": "supabase gen types typescript --project-id pytddvqiozwrhfbwqazp --schema public > src/types/db.ts"
+    "db:generate": "supabase gen types typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.3.0",
-    "@supabase/supabase-js": "2.42.5",
-    "supabase": "^1.162.4"
+    "supabase": "^1.163.6"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.42.7",
     "typescript": "^5.4.5"
   },
   "exports": {

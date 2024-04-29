@@ -1,77 +1,156 @@
 "use client";
 
 import { updateInboxAction } from "@/actions/inbox/update";
-import { InboxDetails, InboxDetailsSkeleton } from "@/components/inbox-details";
-import { InboxList, InboxSkeleton } from "@/components/inbox-list";
-import { InboxUpdates } from "@/components/inbox-updates";
+import { searchAction } from "@/actions/search-action";
+import { InboxDetails } from "@/components/inbox-details";
+import { InboxList } from "@/components/inbox-list";
 import { createClient } from "@midday/supabase/client";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { TooltipProvider } from "@midday/ui/tooltip";
+import { TabsContent } from "@midday/ui/tabs";
+import { ToastAction } from "@midday/ui/toast";
+import { useToast } from "@midday/ui/use-toast";
+import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
-import { useQueryState } from "nuqs";
+import { useAction } from "next-safe-action/hooks";
+import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
-import { CopyInput } from "./copy-input";
-import { InboxEmpty } from "./inbox-empty";
-import { InboxSettingsModal } from "./modals/inbox-settings-modal";
+import { InboxHeader } from "./inbox-header";
+import { InboxStructure } from "./inbox-structure";
+import { InboxToolbar } from "./inbox-toolbar";
 
-export function InboxViewSkeleton() {
-  return (
-    <div>
-      <div className="flex items-center justify-between py-2 mb-6 mt-2">
-        <div className="space-x-4 flex mt-3">
-          <div>
-            <Skeleton className="h-3 w-[80px]" />
-          </div>
-          <div>
-            <Skeleton className="h-3 w-[100px]" />
-          </div>
-          <div>
-            <Skeleton className="h-3 w-[100px]" />
-          </div>
-        </div>
+type Props = {
+  items: any[];
+  forwardEmail: string;
+  inboxId: string;
+  teamId: string;
+  ascending: boolean;
+  query?: string;
+};
 
-        <div>
-          <Skeleton className="w-[245px] rounded-sm h-[30px]" />
-        </div>
-      </div>
+export const TAB_ITEMS = ["todo", "done"];
 
-      <div className="flex flex-row space-x-8">
-        <div className="w-full h-full relative overflow-hidden">
-          <div className="h-[calc(100vh-180px)]">
-            <div className="flex flex-col gap-4 pt-0">
-              <InboxSkeleton numberOfItems={12} />
-            </div>
-          </div>
-        </div>
+const todoFilter = (item) =>
+  !item.transaction_id &&
+  item.status !== "deleted" &&
+  item.status !== "archived";
 
-        <InboxDetailsSkeleton />
-      </div>
-    </div>
-  );
-}
+const doneFilter = (item) =>
+  item.transaction_id &&
+  item.status !== "deleted" &&
+  item.status !== "archived";
 
 export function InboxView({
-  items,
+  items: initialItems,
+  forwardEmail,
+  teamId,
   inboxId,
-  team,
-  selectedId: initialSelectedId,
-}) {
-  const [updates, setUpdates] = useState(false);
+  ascending,
+  query,
+}: Props) {
   const supabase = createClient();
-  const router = useRouter();
+  const { toast } = useToast();
+  const [isLoading, setLoading] = useState(Boolean(query));
+  const [items, setItems] = useState(initialItems);
 
-  const [selectedId, setSelectedId] = useQueryState("id", {
-    defaultValue: initialSelectedId,
-    shallow: true,
+  const [params, setParams] = useQueryStates(
+    {
+      id: parseAsString.withDefault(
+        items.filter(todoFilter)?.at(0)?.id ?? null
+      ),
+      q: parseAsString.withDefault(""),
+      tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
+    },
+    {
+      shallow: true,
+    }
+  );
+
+  const debouncedSearchTerm = useDebounce(params.q, 300);
+
+  const search = useAction(searchAction, {
+    onSuccess: (data) => {
+      setLoading(false);
+
+      if (data.length) {
+        setParams({ id: data?.at(0)?.id });
+      }
+    },
+    onError: () => setLoading(false),
   });
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [ascending]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime_inbox")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "inbox",
+          filter: `team_id=eq.${teamId}`,
+        },
+        (payload) => {
+          switch (payload.eventType) {
+            case "INSERT":
+              {
+                setItems((prev) => [payload.new, ...prev]);
+
+                if (params.id) {
+                  setParams({ id: payload.new.id });
+                }
+              }
+              break;
+            case "UPDATE":
+              {
+                setItems((prev) => {
+                  return prev.map((item) => {
+                    if (item.id === payload.new.id) {
+                      return { ...item, ...payload.new };
+                    }
+
+                    return item;
+                  });
+                });
+              }
+              break;
+            default:
+              break;
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [teamId]);
+
+  useEffect(() => {
+    if (params.q) {
+      setLoading(true);
+    }
+  }, [params.q]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      search.execute({
+        query: debouncedSearchTerm,
+        type: "inbox",
+        threshold: 0.75,
+      });
+    }
+  }, [debouncedSearchTerm]);
+
+  const data = (params.q && search.result?.data) || items;
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
-    items,
+    data,
     (state, payload) => {
-      if (payload.trash) {
+      if (payload.status === "deleted") {
         return state.filter((item) => item.id !== payload.id);
       }
 
@@ -85,128 +164,156 @@ export function InboxView({
 
         return item;
       });
-    },
-    {
-      onExecute: (input) => {
-        if (input.trash) {
-          const deleteIndex = optimisticData.findIndex(
-            (item) => item.id === input.id
-          );
-
-          const selectIndex = deleteIndex > 0 ? deleteIndex - 1 : 0;
-          setSelectedId(optimisticData?.at(selectIndex)?.id);
-        }
-      },
     }
   );
 
-  useEffect(() => {
-    const channel = supabase
-      .channel("realtime_inbox")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "inbox",
-          filter: `team_id=eq.${team.id}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setUpdates(true);
+  const getCurrentItems = (tab: (typeof TAB_ITEMS)[0]) => {
+    if (params.q) {
+      return optimisticData;
+    }
 
-            // If nothing in inbox yet
-            if (!optimisticData?.length) {
-              router.refresh();
-            }
-          }
+    switch (tab) {
+      case "todo":
+        return optimisticData.filter(todoFilter);
+      case "done":
+        return optimisticData.filter(doneFilter);
+      default:
+        return optimisticData.filter(todoFilter);
+    }
+  };
 
-          if (payload.eventType === "UPDATE") {
-            router.refresh();
-          }
-        }
-      )
-      .subscribe();
+  const currentItems = getCurrentItems(params.tab);
+  const selectedItems = currentItems?.find((item) => item.id === params.id);
+  const currentIndex = currentItems.findIndex((item) => item.id === params.id);
+  const currentTabEmpty = Boolean(currentItems.length === 0);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [team, supabase]);
+  const selectNextItem = () => {
+    const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
 
-  const selectedItems = optimisticData?.find((item) => item.id === selectedId);
+    setParams({
+      id: currentItems?.at(selectIndex)?.id ?? null,
+    });
+  };
 
-  if (!optimisticData?.length) {
-    return <InboxEmpty inboxId={inboxId} />;
-  }
+  const handleOnPaginate = (direction) => {
+    if (direction === "up") {
+      const index = currentIndex - 1;
+      setParams({ id: currentItems.at(index)?.id });
+    }
+
+    if (direction === "down") {
+      const index = currentIndex + 1;
+      setParams({ id: currentItems.at(index)?.id });
+    }
+
+    const currentTabIndex = TAB_ITEMS.indexOf(params.tab);
+
+    if (direction === "left") {
+      const nextTabIndex =
+        currentTabIndex < TAB_ITEMS.length
+          ? currentTabIndex - 1
+          : currentTabIndex;
+      const nextTab = TAB_ITEMS[nextTabIndex];
+
+      if (nextTabIndex >= 0) {
+        setParams({
+          tab: nextTab,
+          id: getCurrentItems(nextTab)?.at(0)?.id ?? null,
+        });
+      }
+    }
+
+    if (direction === "right") {
+      const nextTabIndex =
+        currentTabIndex < TAB_ITEMS.length
+          ? currentTabIndex + 1
+          : currentTabIndex;
+      const nextTab = TAB_ITEMS[nextTabIndex];
+
+      if (nextTabIndex < TAB_ITEMS.length)
+        setParams({
+          tab: nextTab,
+          id: getCurrentItems(nextTab)?.at(0)?.id ?? null,
+        });
+    }
+  };
+
+  const handleOnDelete = () => {
+    selectNextItem();
+
+    toast({
+      duration: 6000,
+      title: "Attachment deleted",
+      variant: "success",
+      action: (
+        <ToastAction
+          altText="Undo"
+          onClick={() => updateInbox({ id: params.id, status: "pending" })}
+        >
+          Undo
+        </ToastAction>
+      ),
+    });
+
+    updateInbox({
+      id: params.id,
+      status: "deleted",
+    });
+  };
+
+  const handleOnSelectTransaction = (item) => {
+    if (params.tab === "done") {
+      selectNextItem();
+    }
+    updateInbox(item);
+  };
 
   return (
-    <TooltipProvider delayDuration={0}>
-      <Tabs defaultValue="all">
-        <div className="flex items-center justify-between py-2 mb-4 mt-2">
-          <TabsList className="p-0 h-auto space-x-4 bg-transparent">
-            <TabsTrigger className="p-0" value="all">
-              All
-            </TabsTrigger>
-            <TabsTrigger className="p-0" value="pending">
-              Pending
-            </TabsTrigger>
-            <TabsTrigger className="p-0" value="completed">
-              Completed
-            </TabsTrigger>
-          </TabsList>
-
-          <div className="flex space-x-2">
-            <CopyInput value={`${inboxId}@inbox.midday.ai`} />
-            <InboxSettingsModal email={team?.inbox_email} />
-          </div>
-        </div>
-
-        <div className="flex flex-row space-x-8">
-          <div className="w-full h-full relative overflow-hidden">
-            <InboxUpdates
-              show={Boolean(updates)}
-              onRefresh={() => {
-                setUpdates(false);
-              }}
-            />
-
-            <TabsContent value="all" className="m-0 h-full">
+    <InboxStructure
+      isLoading={isLoading}
+      onChangeTab={(tab) => {
+        const items = getCurrentItems(tab);
+        setParams({ id: items?.at(0)?.id ?? null, q: null });
+      }}
+      headerComponent={
+        <InboxHeader
+          forwardEmail={forwardEmail}
+          inboxId={inboxId}
+          handleOnPaginate={handleOnPaginate}
+          ascending={ascending}
+        />
+      }
+      leftComponent={
+        <>
+          {TAB_ITEMS.map((value) => (
+            <TabsContent key={value} value={value} className="m-0 h-full">
               <InboxList
-                items={optimisticData}
-                selectedId={selectedId}
-                updateInbox={updateInbox}
-                setSelectedId={setSelectedId}
+                items={currentItems}
+                hasQuery={Boolean(params.q)}
+                onClear={() =>
+                  setParams({ q: null, id: currentItems?.id ?? null })
+                }
               />
             </TabsContent>
+          ))}
 
-            <TabsContent value="pending" className="m-0 h-full">
-              <InboxList
-                items={optimisticData.filter(
-                  (item) => item.pending && !item.transaction_id
-                )}
-                selectedId={selectedId}
-                updateInbox={updateInbox}
-                setSelectedId={setSelectedId}
-              />
-            </TabsContent>
-
-            <TabsContent value="completed" className="m-0 h-full">
-              <InboxList
-                items={optimisticData.filter((item) => item.transaction_id)}
-                selectedId={selectedId}
-                updateInbox={updateInbox}
-                setSelectedId={setSelectedId}
-              />
-            </TabsContent>
-          </div>
-
-          <InboxDetails
-            item={selectedItems}
-            updateInbox={updateInbox}
-            teamId={team.id}
+          <InboxToolbar
+            onAction={handleOnDelete}
+            isFirst={currentIndex === 0}
+            isLast={currentIndex === currentItems.length - 1}
+            onKeyPress={handleOnPaginate}
           />
-        </div>
-      </Tabs>
-    </TooltipProvider>
+        </>
+      }
+      rightComponent={
+        <InboxDetails
+          item={selectedItems}
+          onSelectTransaction={handleOnSelectTransaction}
+          onDelete={handleOnDelete}
+          teamId={teamId}
+          isEmpty={currentTabEmpty}
+        />
+      }
+    />
   );
 }

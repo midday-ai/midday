@@ -40,7 +40,7 @@ export default {
   },
   inbox_filter: {
     all: "Alla",
-    completed: "Slutförda",
+    done: "Slutförda",
   },
   spending_period: {
     this_month: "Den här månaden",

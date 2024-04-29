@@ -1,27 +1,36 @@
 import { getUser } from "@midday/supabase/cached-queries";
 import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
+import { InboxEmpty } from "./inbox-empty";
 import { InboxView } from "./inbox-view";
 
-export async function Inbox({ selectedId: initialSelectedId }) {
+type Props = {
+  ascending: boolean;
+  query?: string;
+};
+
+export async function Inbox({ ascending, query }: Props) {
   const user = await getUser();
   const supabase = createClient();
 
-  // TODO: Fix Infinite Scroll
   const inbox = await getInboxQuery(supabase, {
     to: 10000,
     teamId: user.data.team_id,
+    ascending,
   });
 
-  const selectedId = initialSelectedId || inbox?.data?.at(0)?.id;
+  if (!inbox?.data?.length) {
+    return <InboxEmpty inboxId={user?.data?.team?.inbox_id} />;
+  }
 
   return (
     <InboxView
-      key={selectedId}
       items={inbox?.data}
+      teamId={user?.data?.team?.id}
       inboxId={user?.data?.team?.inbox_id}
-      team={user?.data?.team}
-      selectedId={selectedId}
+      forwardEmail={user?.data?.team?.inbox_email}
+      ascending={ascending}
+      query={query}
     />
   );
 }
