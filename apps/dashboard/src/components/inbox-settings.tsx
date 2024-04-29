@@ -44,7 +44,7 @@ export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
     <div className="flex flex-col space-y-4">
       <div className="flex flex-col space-y-3">
         <Label>Inbox email</Label>
-        <CopyInput value={`${inboxId}.inbox@midday.ai`} />
+        <CopyInput value={`${inboxId}@inbox.midday.ai`} />
       </div>
       <Form {...form}>
         <form onSubmit={onSubmit} className="flex flex-col">
