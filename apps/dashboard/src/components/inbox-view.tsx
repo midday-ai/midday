@@ -271,7 +271,7 @@ export function InboxView({
         />
       }
       leftComponent={
-        <div>
+        <>
           {TAB_ITEMS.map((value) => (
             <TabsContent key={value} value={value} className="m-0 h-full">
               <InboxList
@@ -290,7 +290,7 @@ export function InboxView({
             isLast={currentIndex === currentItems.length - 1}
             onKeyPress={handleOnPaginate}
           />
-        </div>
+        </>
       }
       rightComponent={
         <InboxDetails
