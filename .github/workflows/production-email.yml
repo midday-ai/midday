@@ -25,12 +25,12 @@ jobs:
       # - name: 🪐 Check TypeScript
       #   run: bun run typecheck --filter=@midday/email
       - name: 📤 Pull Vercel Environment Information
-        run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@33.7.1 env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information
-        run: bunx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@33.7.1 pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
-        run: bunx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@33.7.1 build --prod --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: |
-          bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` email.midday.ai
+          bunx vercel@33.7.1 deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
+          bunx vercel@33.7.1 alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` email.midday.ai
