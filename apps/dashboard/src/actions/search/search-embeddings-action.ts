@@ -11,8 +11,6 @@ export const searchEmbeddingsAction = action(
 
     const { query, type, limit = 10, threshold } = params;
 
-    console.log({ query, type });
-
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/search`,
       {
@@ -32,8 +30,6 @@ export const searchEmbeddingsAction = action(
     );
 
     const { data } = await res.json();
-
-    console.log(data);
 
     return data;
   }

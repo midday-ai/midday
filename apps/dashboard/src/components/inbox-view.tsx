@@ -63,14 +63,13 @@ export function InboxView({
 
   const searchAction = useAction(searchEmbeddingsAction, {
     onSuccess: (data) => {
-      console.log(data);
-      setLoading(false);
+      // setLoading(false);
 
       if (data.length) {
         setParams({ id: data?.at(0)?.id });
       }
     },
-    onError: () => setLoading(false),
+    // onError: () => setLoading(false),
   });
 
   useEffect(() => {
@@ -124,11 +123,11 @@ export function InboxView({
     };
   }, [teamId]);
 
-  useEffect(() => {
-    if (params.q) {
-      setLoading(true);
-    }
-  }, [params.q]);
+  // useEffect(() => {
+  //   if (params.q) {
+  //     setLoading(true);
+  //   }
+  // }, [params.q]);
 
   useEffect(() => {
     if (debouncedSearchTerm) {
@@ -140,7 +139,9 @@ export function InboxView({
     }
   }, [debouncedSearchTerm]);
 
-  const data = (params.q && searchAction.result?.data) || items;
+  console.log(searchAction.result?.data);
+
+  const data = items;
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
