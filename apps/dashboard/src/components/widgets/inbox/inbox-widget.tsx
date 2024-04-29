@@ -15,8 +15,6 @@ export async function InboxWidget({ filter, disabled }) {
         to: 15,
         from: 0,
         teamId: user.data.team_id,
-        archived: false,
-        trash: false,
         done: filter === "done",
       });
 
