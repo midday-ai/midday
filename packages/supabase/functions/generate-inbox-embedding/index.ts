@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
   });
 
   const { error } = await supabase
-    .from("decrypted_inbox")
+    .from("inbox")
     .update({
       embedding: JSON.stringify(embedding),
       status: "pending",

@@ -243,7 +243,8 @@ export function InboxView({
 
     toast({
       duration: 6000,
-      title: "Attachment deleted",
+      title: "Item deleted",
+      description: "You can still find the attachment in your Vault.",
       variant: "success",
       action: (
         <ToastAction
