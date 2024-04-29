@@ -4,7 +4,6 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEBSITE }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_CLI_VERSION: vercel@33.7.1
 on:
   push:
     branches-ignore:
@@ -27,8 +26,8 @@ jobs:
       # - name: 🪐 Check TypeScript
       #   run: bun run typecheck --filter=@midday/website
       - name: 📤 Pull Vercel Environment Information
-        run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@33.7.1 pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
-        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@33.7.1 build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
-        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel@33.7.1 deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
