@@ -85,10 +85,7 @@ export async function ReconnectBank() {
                 </div>
 
                 <div className="flex space-x-2">
-                  <ReconnectButton
-                    id={bank.id}
-                    institutionId={bank.institution_id}
-                  />
+                  <ReconnectButton institutionId={bank.institution_id} />
                 </div>
               </div>
             );
