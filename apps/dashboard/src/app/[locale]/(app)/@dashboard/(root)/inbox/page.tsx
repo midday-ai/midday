@@ -9,13 +9,16 @@ export const metadata: Metadata = {
   title: "Inbox | Midday",
 };
 
-export default async function InboxPage() {
+export default async function InboxPage({ searchParams }) {
   const ascending =
     cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
 
+  console.log(searchParams?.q);
   return (
-    <Suspense fallback={<InboxViewSkeleton key={ascending.toString()} />}>
-      <Inbox ascending={ascending} />
+    <Suspense
+      fallback={<InboxViewSkeleton key={ascending.toString()} ascending />}
+    >
+      <Inbox ascending={ascending} query={searchParams?.q} />
     </Suspense>
   );
 }

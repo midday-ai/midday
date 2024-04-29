@@ -23,6 +23,7 @@ type Props = {
   inboxId: string;
   teamId: string;
   ascending: boolean;
+  query?: string;
 };
 
 export const TAB_ITEMS = ["todo", "done"];
@@ -43,10 +44,11 @@ export function InboxView({
   teamId,
   inboxId,
   ascending,
+  query,
 }: Props) {
   const supabase = createClient();
   const { toast } = useToast();
-  const [isLoading, setLoading] = useState(false);
+  const [isLoading, setLoading] = useState(Boolean(query));
   const [items, setItems] = useState(initialItems);
 
   const [params, setParams] = useQueryStates(

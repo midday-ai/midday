@@ -3,7 +3,12 @@ import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { InboxView } from "./inbox-view";
 
-export async function Inbox({ ascending }) {
+type Props = {
+  ascending: boolean;
+  query?: string;
+};
+
+export async function Inbox({ ascending, query }: Props) {
   const user = await getUser();
   const supabase = createClient();
 
@@ -24,6 +29,7 @@ export async function Inbox({ ascending }) {
       inboxId={user?.data?.team?.inbox_id}
       forwardEmail={user?.data?.team?.inbox_email}
       ascending={ascending}
+      query={query}
     />
   );
 }

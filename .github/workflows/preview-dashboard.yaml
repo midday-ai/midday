@@ -28,8 +28,8 @@ jobs:
       - name: 🧪 Run unit tests
         run: bun run test
       - name: 📤 Pull Vercel Environment Information
-        run: bunx vercel@33.7.1 pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
-        run: bunx vercel@33.7.1 build --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
-        run: bunx vercel@33.7.1 deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
+        run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
