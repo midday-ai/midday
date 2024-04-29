@@ -5,7 +5,10 @@ import { unstable_cache } from "next/cache";
 
 export async function fetchStats() {
   const supabase = createClient({ admin: true });
-  const supabaseStorage = createClient({ admin: true, schema: "storage" });
+  const supabaseStorage = createClient({
+    admin: true,
+    db: { schema: "storage" },
+  });
 
   const [
     { count: users },
