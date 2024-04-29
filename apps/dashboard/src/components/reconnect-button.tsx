@@ -6,11 +6,11 @@ import { Icons } from "@midday/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useAction } from "next-safe-action/hooks";
 
-export function ReconnectButton({ id, institutionId }) {
-  const redirect = `${
-    location.origin
-  }/api/gocardless?id=${id}&desktop=${isDesktopApp()}`;
+type Props = {
+  institutionId: string;
+};
 
+export function ReconnectButton({ institutionId }: Props) {
   const createEndUserAgreement = useAction(createEndUserAgreementAction);
 
   return (
@@ -19,7 +19,9 @@ export function ReconnectButton({ id, institutionId }) {
       size="icon"
       onClick={() =>
         createEndUserAgreement.execute({
+          isDesktop: isDesktopApp(),
           institutionId,
+          transactionTotalDays: 30,
         })
       }
     >

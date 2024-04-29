@@ -17,9 +17,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v1
         with:
-          bun-version: latest
+          bun-version: 1.1.6
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install --frozen-lockfile --production
       # - name: 🔦 Run linter
       #   run: bun run lint --filter=@midday/ui
       # - name: 🪐 Check TypeScript

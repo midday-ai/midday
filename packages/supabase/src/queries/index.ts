@@ -633,7 +633,7 @@ export async function getVaultRecursiveQuery(
   supabase: Client,
   params: GetVaultRecursiveParams
 ) {
-  const { teamId, path, folder, limit = 10000, offset = 0 } = params;
+  const { teamId, path, folder, limit = 10000 } = params;
 
   let basePath = teamId;
 

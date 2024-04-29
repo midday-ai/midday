@@ -15,7 +15,7 @@ const defaultFolders = [
 ];
 
 export async function VaultActivity() {
-  const supabase = createClient({ schema: "storage" });
+  const supabase = createClient({ db: { schema: "storage" } });
   const { data: userData } = await getUser();
 
   const { data: storageData } = await getVaultActivityQuery(
@@ -39,7 +39,7 @@ export async function VaultActivity() {
       <span className="text-sm font-medium">Recent activity</span>
 
       <div className="flex space-x-20 mt-6 overflow-auto w-[calc(100vw-130px)] scrollbar-hide">
-        {files.map((file) => {
+        {files?.map((file) => {
           return <VaultPreview file={file} />;
         })}
 
