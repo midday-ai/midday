@@ -1,6 +1,7 @@
 import { getUser } from "@midday/supabase/cached-queries";
 import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
+import { InboxEmpty } from "./inbox-empty";
 import { InboxView } from "./inbox-view";
 
 type Props = {
@@ -18,9 +19,9 @@ export async function Inbox({ ascending, query }: Props) {
     ascending,
   });
 
-  // if (!optimisticData?.length) {
-  //   return <InboxEmpty inboxId={inboxId} />;
-  // }
+  if (!inbox?.data?.length) {
+    return <InboxEmpty inboxId={user?.data?.team?.inbox_id} />;
+  }
 
   return (
     <InboxView

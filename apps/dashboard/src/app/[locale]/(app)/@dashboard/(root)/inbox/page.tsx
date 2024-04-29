@@ -13,7 +13,6 @@ export default async function InboxPage({ searchParams }) {
   const ascending =
     cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
 
-  console.log(searchParams?.q);
   return (
     <Suspense
       fallback={<InboxViewSkeleton key={ascending.toString()} ascending />}
