@@ -20,7 +20,7 @@ import { SelectTransaction } from "./select-transaction";
 type Props = {
   item: any[];
   onDelete: () => void;
-  updateInbox: () => void;
+  onSelectTransaction: () => void;
   teamId: string;
   isEmpty?: boolean;
 };
@@ -28,7 +28,7 @@ type Props = {
 export function InboxDetails({
   item,
   onDelete,
-  updateInbox,
+  onSelectTransaction,
   teamId,
   isEmpty,
 }: Props) {
@@ -198,7 +198,7 @@ export function InboxDetails({
               teamId={teamId}
               inboxId={item.id}
               selectedTransaction={item?.transaction}
-              onSelect={updateInbox}
+              onSelect={onSelectTransaction}
               key={item.id}
             />
           </div>

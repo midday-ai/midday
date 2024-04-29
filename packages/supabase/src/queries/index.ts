@@ -754,10 +754,13 @@ export async function getInboxQuery(
       "id, file_name, file_path, display_name, transaction_id, amount, currency, content_type, due_date, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)"
     )
     .eq("team_id", teamId)
-    .order("created_at", { ascending });
+    .order("created_at", { ascending })
+    .neq("status", "deleted");
 
   if (archived) {
     query.eq("status", "archived");
+  } else {
+    query.neq("status", "archived");
   }
 
   if (done) {

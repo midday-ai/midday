@@ -187,6 +187,14 @@ export function InboxView({
   const currentIndex = currentItems.findIndex((item) => item.id === params.id);
   const currentTabEmpty = Boolean(currentItems.length === 0);
 
+  const selectNextItem = () => {
+    const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
+
+    setParams({
+      id: currentItems?.at(selectIndex)?.id ?? null,
+    });
+  };
+
   const handleOnPaginate = (direction) => {
     if (direction === "up") {
       const index = currentIndex - 1;
@@ -231,6 +239,8 @@ export function InboxView({
   };
 
   const handleOnDelete = () => {
+    selectNextItem();
+
     toast({
       duration: 6000,
       title: "Attachment deleted",
@@ -245,16 +255,17 @@ export function InboxView({
       ),
     });
 
-    const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
-
-    setParams({
-      id: currentItems?.at(selectIndex)?.id ?? null,
-    });
-
     updateInbox({
       id: params.id,
       status: "deleted",
     });
+  };
+
+  const handleOnSelectTransaction = (item) => {
+    if (params.tab === "done") {
+      selectNextItem();
+    }
+    updateInbox(item);
   };
 
   return (
@@ -297,7 +308,7 @@ export function InboxView({
       rightComponent={
         <InboxDetails
           item={selectedItems}
-          updateInbox={updateInbox}
+          onSelectTransaction={handleOnSelectTransaction}
           onDelete={handleOnDelete}
           teamId={teamId}
           isEmpty={currentTabEmpty}
