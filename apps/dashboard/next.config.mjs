@@ -3,6 +3,11 @@ import "./src/env.mjs";
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
+  experimental: {
+    serverActions: {
+      allowedOrigins: ["dashboard-7jmdjvrab-midday.vercel.app"],
+    },
+  },
   images: {
     remotePatterns: [
       {

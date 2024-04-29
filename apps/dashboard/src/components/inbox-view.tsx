@@ -1,7 +1,7 @@
 "use client";
 
 import { updateInboxAction } from "@/actions/inbox/update";
-import { searchEmbeddingsAction } from "@/actions/search/search-embeddings-action";
+import { searchAction } from "@/actions/search-action";
 import { InboxDetails } from "@/components/inbox-details";
 import { InboxList } from "@/components/inbox-list";
 import { createClient } from "@midday/supabase/client";
@@ -61,15 +61,15 @@ export function InboxView({
 
   const debouncedSearchTerm = useDebounce(params.q, 300);
 
-  const searchAction = useAction(searchEmbeddingsAction, {
+  const search = useAction(searchAction, {
     onSuccess: (data) => {
-      // setLoading(false);
+      setLoading(false);
 
       if (data.length) {
         setParams({ id: data?.at(0)?.id });
       }
     },
-    // onError: () => setLoading(false),
+    onError: () => setLoading(false),
   });
 
   useEffect(() => {
@@ -123,15 +123,15 @@ export function InboxView({
     };
   }, [teamId]);
 
-  // useEffect(() => {
-  //   if (params.q) {
-  //     setLoading(true);
-  //   }
-  // }, [params.q]);
+  useEffect(() => {
+    if (params.q) {
+      setLoading(true);
+    }
+  }, [params.q]);
 
   useEffect(() => {
     if (debouncedSearchTerm) {
-      searchAction.execute({
+      search.execute({
         query: debouncedSearchTerm,
         type: "inbox",
         threshold: 0.75,
@@ -139,9 +139,7 @@ export function InboxView({
     }
   }, [debouncedSearchTerm]);
 
-  console.log(searchAction.result?.data);
-
-  const data = items;
+  const data = (params.q && search.result?.data) || items;
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
