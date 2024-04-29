@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@midday/utils": "workspace:*",
-    "@google-cloud/documentai": "^8.5.0",
+    "@google-cloud/documentai": "^8.6.0",
     "base64-arraybuffer": "^1.0.2",
     "heic-convert": "1.2.4"
   },

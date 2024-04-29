@@ -225,7 +225,7 @@ export function InboxView({
   };
 
   const handleOnDelete = () => {
-    const selectIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+    const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
 
     setParams({
       id: currentItems?.at(selectIndex)?.id ?? null,
