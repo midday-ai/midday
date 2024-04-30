@@ -30,13 +30,10 @@ function getCommaSeparatedList(data) {
 
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
-  const { meta, id, status } = payload.record;
+  const { meta, id } = payload.record;
 
-  // Check if meta data is saved, meta is saved with a async background job
-  // That parses the document using Google Document AI
-  // packages/jobs/src/inbox/document.ts
-  if (status !== "processing" && meta) {
-    return new Response("Not ready to generate embeddings");
+  if (!meta) {
+    return new Response("No data to generate embeddings from");
   }
 
   const content = getCommaSeparatedList(meta);
