@@ -9,7 +9,13 @@ export const metadata: Metadata = {
   title: "Inbox | Midday",
 };
 
-export default async function InboxPage({ searchParams }) {
+type Props = {
+  searchParams: {
+    id?: string;
+  };
+};
+
+export default async function InboxPage({ searchParams }: Props) {
   const ascending =
     cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
 
