@@ -1,7 +1,12 @@
-import type { Entries } from "./types";
+import { capitalCase } from "change-case";
+import type { Attachments, Entries } from "./types";
 
 export function cleanText(text?: string) {
-  return text?.trim().replace(/\n/g, "");
+  const value = text?.trim().replace(/\n/g, "");
+
+  if (value) {
+    return capitalCase(value);
+  }
 }
 
 export function findValue(entities: Entries, type: string) {
@@ -18,6 +23,19 @@ export function getLineItems(entities: Entries) {
 
   return items.map((item) =>
     cleanText(item?.normalizedValue?.text || item?.mentionText)
+  );
+}
+
+export const allowedMimeTypes = [
+  "image/heic",
+  "image/png",
+  "image/jpeg",
+  "application/pdf",
+];
+
+export function getAllowedAttachments(attachments?: Attachments) {
+  return attachments?.filter((attachment) =>
+    allowedMimeTypes.includes(attachment.ContentType)
   );
 }
 

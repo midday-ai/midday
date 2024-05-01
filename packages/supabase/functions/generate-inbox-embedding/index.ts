@@ -21,7 +21,7 @@ const model = new Supabase.ai.Session("gte-small");
 
 function getCommaSeparatedList(data) {
   return Object.entries(data)
-    .map(
+    ?.map(
       ([key, value]) =>
         `${key}: ${Array.isArray(value) ? value.join(", ") : value}`
     )
