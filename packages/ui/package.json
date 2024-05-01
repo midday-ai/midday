@@ -51,7 +51,7 @@
     "./month-range-picker": "./src/components/month-range-picker.tsx",
     "./navigation-menu": "./src/components/navigation-menu.tsx",
     "./popover": "./src/components/popover.tsx",
-    "./postcss": "./postcss.js",
+    "./postcss": "./postcss.config.js",
     "./progress": "./src/components/progress.tsx",
     "./radio-group": "./src/components/radio-group.tsx",
     "./scroll-area": "./src/components/scroll-area.tsx",
