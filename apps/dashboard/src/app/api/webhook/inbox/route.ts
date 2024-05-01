@@ -1,5 +1,5 @@
 import { env } from "@/env.mjs";
-import { prepareDocument } from "@midday/documents";
+import { getAllowedAttachments, prepareDocument } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
@@ -110,8 +110,10 @@ export async function POST(req: Request) {
       }
     }
 
+    const allowedAttachments = getAllowedAttachments(Attachments);
+
     // Transform and upload files
-    const uploadedAttachments = Attachments?.map(async (attachment) => {
+    const uploadedAttachments = allowedAttachments?.map(async (attachment) => {
       const { content, mimeType, size, fileName } = await prepareDocument(
         attachment
       );

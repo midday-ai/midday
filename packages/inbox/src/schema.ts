@@ -4,6 +4,7 @@ export const inboxAttachment = z.object({
   Name: z.string(),
   Content: z.string(),
   ContentType: z.string(),
+  ContentID: z.string(),
   ContentLength: z.number(),
 });
 

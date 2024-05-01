@@ -40,3 +40,13 @@ export type Entries = {
   mentionText?: string;
   type: string;
 }[];
+
+export interface Attachment {
+  ContentLength: number;
+  Content: string;
+  Name: string;
+  ContentType: string;
+  ContentID: string;
+}
+
+export type Attachments = Attachment[];
