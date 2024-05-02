@@ -110,8 +110,10 @@ export async function POST(req: Request) {
       }
     }
 
+    const allowedAttachments = getAllowedAttachments(Attachments);
+
     // If no attachments we just want to forward the email
-    if (!Attachments?.length && forwardTo) {
+    if (!allowedAttachments?.length && forwardTo) {
       const messageKey = `message-id:${MessageID}`;
       const isForwarded = await RedisClient.exists(messageKey);
 
@@ -137,8 +139,6 @@ export async function POST(req: Request) {
         success: true,
       });
     }
-
-    const allowedAttachments = getAllowedAttachments(Attachments);
 
     // Transform and upload files
     const uploadedAttachments = allowedAttachments?.map(async (attachment) => {
