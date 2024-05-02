@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 type Props = {
   searchParams: {
     id?: string;
+    q?: string;
   };
 };
 

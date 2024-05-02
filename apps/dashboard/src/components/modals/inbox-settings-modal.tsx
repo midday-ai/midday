@@ -14,10 +14,15 @@ import { InboxSettings } from "../inbox-settings";
 
 type Props = {
   forwardEmail: string;
+  inboxForwarding: boolean;
   inboxId: string;
 };
 
-export function InboxSettingsModal({ forwardEmail, inboxId }: Props) {
+export function InboxSettingsModal({
+  forwardEmail,
+  inboxForwarding,
+  inboxId,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -42,6 +47,7 @@ export function InboxSettingsModal({ forwardEmail, inboxId }: Props) {
 
           <InboxSettings
             forwardEmail={forwardEmail}
+            inboxForwarding={inboxForwarding}
             inboxId={inboxId}
             onSuccess={() => setOpen(false)}
           />

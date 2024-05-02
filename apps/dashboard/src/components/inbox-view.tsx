@@ -20,6 +20,7 @@ import { InboxToolbar } from "./inbox-toolbar";
 type Props = {
   items: any[];
   forwardEmail: string;
+  inboxForwarding: boolean;
   inboxId: string;
   teamId: string;
   ascending: boolean;
@@ -41,6 +42,7 @@ const doneFilter = (item) =>
 export function InboxView({
   items: initialItems,
   forwardEmail,
+  inboxForwarding,
   teamId,
   inboxId,
   ascending,
@@ -279,6 +281,7 @@ export function InboxView({
       }}
       headerComponent={
         <InboxHeader
+          inboxForwarding={inboxForwarding}
           forwardEmail={forwardEmail}
           inboxId={inboxId}
           handleOnPaginate={handleOnPaginate}

@@ -7,6 +7,7 @@ import { InboxSettingsModal } from "./modals/inbox-settings-modal";
 type Props = {
   forwardEmail: string;
   inboxId: string;
+  inboxForwarding: boolean;
   handleOnPaginate?: (direction: "down" | "up") => void;
   onChange?: (value: string | null) => void;
   ascending: boolean;
@@ -14,6 +15,7 @@ type Props = {
 
 export function InboxHeader({
   forwardEmail,
+  inboxForwarding,
   inboxId,
   handleOnPaginate,
   onChange,
@@ -48,7 +50,11 @@ export function InboxHeader({
 
       <div className="flex space-x-2">
         <InboxOrdering ascending={ascending} />
-        <InboxSettingsModal forwardEmail={forwardEmail} inboxId={inboxId} />
+        <InboxSettingsModal
+          forwardEmail={forwardEmail}
+          inboxId={inboxId}
+          inboxForwarding={inboxForwarding}
+        />
       </div>
     </div>
   );

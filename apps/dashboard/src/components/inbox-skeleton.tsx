@@ -15,6 +15,7 @@ export function InboxViewSkeleton({ forwardEmail, inboxId, ascending }: Props) {
       isLoading
       headerComponent={
         <InboxHeader
+          inboxForwarding
           ascending={ascending}
           forwardEmail={forwardEmail ?? ""}
           inboxId={inboxId ?? ""}

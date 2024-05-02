@@ -29,6 +29,7 @@ export async function Inbox({ ascending, query }: Props) {
       teamId={user?.data?.team?.id}
       inboxId={user?.data?.team?.inbox_id}
       forwardEmail={user?.data?.team?.inbox_email}
+      inboxForwarding={user?.data?.team?.inbox_forwarding}
       ascending={ascending}
       query={query}
     />

@@ -7,7 +7,9 @@ export function InboxViewSkeleton() {
   return (
     <InboxStructure
       isLoading
-      headerComponent={<InboxHeader forwardEmail="" inboxId="" ascending />}
+      headerComponent={
+        <InboxHeader forwardEmail="" inboxId="" ascending inboxForwarding />
+      }
     />
   );
 }

@@ -2,6 +2,7 @@ import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
+import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -13,6 +14,7 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
+import { Switch } from "@midday/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -21,10 +23,16 @@ import { CopyInput } from "./copy-input";
 type Props = {
   forwardEmail: string;
   inboxId: string;
+  inboxForwarding: boolean;
   onSuccess: () => void;
 };
 
-export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
+export function InboxSettings({
+  forwardEmail,
+  inboxForwarding,
+  inboxId,
+  onSuccess,
+}: Props) {
   const action = useAction(updateTeamAction, {
     onSuccess,
   });
@@ -33,6 +41,7 @@ export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
     resolver: zodResolver(updateTeamSchema),
     defaultValues: {
       inbox_email: forwardEmail,
+      inbox_forwarding: inboxForwarding,
     },
   });
 
@@ -46,39 +55,61 @@ export function InboxSettings({ forwardEmail, inboxId, onSuccess }: Props) {
         <Label>Inbox email</Label>
         <CopyInput value={`${inboxId}@inbox.midday.ai`} />
       </div>
+
       <Form {...form}>
         <form onSubmit={onSubmit} className="flex flex-col">
-          <FormField
-            control={form.control}
-            name="inbox_email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Forward to</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={field.value ?? ""}
-                    onChange={(evt) =>
-                      field.onChange(
-                        evt.target.value.length > 0 ? evt.target.value : null
-                      )
-                    }
-                    className="w-full"
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    type="email"
-                    placeholder="hello@example.com"
-                  />
-                </FormControl>
-                <FormDescription>
-                  We will send copies of the attachments to this address.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <Collapsible open={form.watch("inbox_forwarding")}>
+            <FormField
+              control={form.control}
+              name="inbox_forwarding"
+              render={({ field }) => (
+                <FormItem className="flex justify-between items-center w-full mb-4">
+                  <FormLabel>Forward email</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            <CollapsibleContent>
+              <FormField
+                control={form.control}
+                name="inbox_email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(evt) =>
+                          field.onChange(
+                            evt.target.value.length > 0
+                              ? evt.target.value
+                              : null
+                          )
+                        }
+                        className="w-full"
+                        autoComplete="off"
+                        autoCapitalize="none"
+                        autoCorrect="off"
+                        spellCheck="false"
+                        type="email"
+                        placeholder="hello@example.com"
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      We will send a copy of the email to this address.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CollapsibleContent>
+          </Collapsible>
 
           <div className="w-full mt-8">
             <Button

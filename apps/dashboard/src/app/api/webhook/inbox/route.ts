@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   try {
     const { data: teamData } = await supabase
       .from("teams")
-      .select("id, inbox_email")
+      .select("id, inbox_email, inbox_forwarding")
       .eq("inbox_id", inboxId)
       .single()
       .throwOnError();
@@ -81,16 +81,17 @@ export async function POST(req: Request) {
       parsedBody.data;
 
     const fallbackName = Subject ?? FromFull?.Name;
-    const forwardTo = teamData?.inbox_email;
+    const forwardEmail = teamData?.inbox_email;
+    const forwardingEnabled = teamData?.inbox_forwarding && forwardEmail;
 
-    if (forwardTo) {
+    if (forwardingEnabled) {
       const messageKey = `message-id:${MessageID}`;
       const isForwarded = await RedisClient.exists(messageKey);
 
       if (!isForwarded) {
         const { error } = await resend.emails.send({
           from: `${FromFull?.Name} <inbox@midday.ai>`,
-          to: [forwardTo],
+          to: [forwardEmail],
           subject: fallbackName,
           text: TextBody,
           html: HtmlBody,
@@ -113,17 +114,21 @@ export async function POST(req: Request) {
     const allowedAttachments = getAllowedAttachments(Attachments);
 
     // If no attachments we just want to forward the email
-    if (!allowedAttachments?.length && forwardTo) {
+    if (!allowedAttachments?.length && forwardEmail) {
       const messageKey = `message-id:${MessageID}`;
       const isForwarded = await RedisClient.exists(messageKey);
 
       if (!isForwarded) {
         const { error } = await resend.emails.send({
           from: `${FromFull?.Name} <inbox@midday.ai>`,
-          to: [forwardTo],
+          to: [forwardEmail],
           subject: fallbackName,
           text: TextBody,
           html: HtmlBody,
+          attachments: Attachments?.map((a) => ({
+            filename: a.Name,
+            content: a.Content,
+          })),
           react: null,
           headers: {
             "X-Entity-Ref-ID": nanoid(),
@@ -170,7 +175,6 @@ export async function POST(req: Request) {
     // Insert records
     const { data: inboxData } = await supabase
       .from("inbox")
-      // TODO: Create custom upsert for encrypted values
       .insert(insertData)
       .select("id")
       .throwOnError();
