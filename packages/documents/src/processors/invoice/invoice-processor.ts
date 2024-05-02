@@ -1,3 +1,4 @@
+import { capitalCase } from "change-case";
 import type { Processor } from "../../interface";
 import { GoogleDocumentClient, credentials } from "../../providers/google";
 import type { GetDocumentRequest } from "../../types";
@@ -14,10 +15,13 @@ export class InvoiceProcessor implements Processor {
     });
 
     const entities = result.document.entities;
-
     const currency = findValue(entities, "currency") ?? null;
-    const date = findValue(entities, "due_date") ?? null;
-    const name = findValue(entities, "supplier_name") ?? null;
+    const date =
+      findValue(entities, "due_date") ||
+      findValue(entities, "invoice_date") ||
+      null;
+    const foundName = findValue(entities, "supplier_name");
+    const name = (foundName && capitalCase(foundName)) || null;
     const amount = findValue(entities, "total_amount") ?? null;
     const email = findValue(entities, "supplier_email") ?? null;
     const website = getDomainFromEmail(email) ?? null;

@@ -1,3 +1,4 @@
+import { capitalCase } from "change-case";
 import type { Processor } from "../../interface";
 import { GoogleDocumentClient, credentials } from "../../providers/google";
 import type { GetDocumentRequest } from "../../types";
@@ -17,7 +18,8 @@ export class ExpenseProcessor implements Processor {
 
     const currency = findValue(entities, "currency") ?? null;
     const date = findValue(entities, "receipt_date") ?? null;
-    const name = findValue(entities, "supplier_name") ?? null;
+    const foundName = findValue(entities, "supplier_name");
+    const name = (foundName && capitalCase(foundName)) || null;
     const amount = findValue(entities, "total_amount") ?? null;
     const email = findValue(entities, "supplier_email") ?? null;
     const website = getDomainFromEmail(email) ?? null;

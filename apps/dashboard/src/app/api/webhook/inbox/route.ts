@@ -57,14 +57,6 @@ export async function POST(req: Request) {
     );
   }
 
-  const logsnag = await setupLogSnag();
-
-  logsnag.track({
-    event: LogEvents.InboxInbound.name,
-    icon: LogEvents.InboxInbound.icon,
-    channel: LogEvents.InboxInbound.channel,
-  });
-
   const supabase = createClient({ admin: true });
 
   try {
@@ -74,6 +66,14 @@ export async function POST(req: Request) {
       .eq("inbox_id", inboxId)
       .single()
       .throwOnError();
+
+    const logsnag = await setupLogSnag();
+
+    logsnag.track({
+      event: LogEvents.InboxInbound.name,
+      icon: LogEvents.InboxInbound.icon,
+      channel: LogEvents.InboxInbound.channel,
+    });
 
     const teamId = teamData?.id;
 

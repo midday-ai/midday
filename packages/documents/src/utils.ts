@@ -1,12 +1,7 @@
-import { capitalCase } from "change-case";
 import type { Attachments, Entries } from "./types";
 
 export function cleanText(text?: string) {
-  const value = text?.trim().replace(/\n/g, "");
-
-  if (value) {
-    return capitalCase(value);
-  }
+  return text?.trim().replace(/\n/g, "");
 }
 
 export function findValue(entities: Entries, type: string) {
@@ -26,6 +21,18 @@ export function getLineItems(entities: Entries) {
   );
 }
 
+export function cleanMetaData(data: any) {
+  for (const [key, value] of Object.entries(data)) {
+    if (value === undefined) {
+      delete data[key];
+    } else if (typeof value === "object" && value !== null) {
+      cleanMetaData(value);
+    }
+  }
+
+  return data;
+}
+
 export const allowedMimeTypes = [
   "image/heic",
   "image/png",
@@ -39,8 +46,9 @@ export function getAllowedAttachments(attachments?: Attachments) {
   );
 }
 
+// TODO: Exclude undefined values
 export function getInvoiceMetaData(entities: Entries) {
-  return {
+  return cleanMetaData({
     "Invoice id": findValue(entities, "invoice_id"),
     "Invoice date": findValue(entities, "invoice_date"),
     "Due date": findValue(entities, "due_date"),
@@ -58,11 +66,12 @@ export function getInvoiceMetaData(entities: Entries) {
       entities,
       "currency"
     )}`,
-  };
+  });
 }
 
+// TODO: Exclude undefined values
 export function getExpenseMetaData(entities: Entries) {
-  return {
+  return cleanMetaData({
     Supplier: findValue(entities, "supplier_name"),
     Date: findValue(entities, "receipt_date"),
     Address: findValue(entities, "supplier_address"),
@@ -78,5 +87,5 @@ export function getExpenseMetaData(entities: Entries) {
       entities,
       "currency"
     )}`,
-  };
+  });
 }
