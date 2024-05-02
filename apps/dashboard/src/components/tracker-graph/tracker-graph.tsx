@@ -29,16 +29,11 @@ export function TrackerGraph({
   projectId,
   weekStartsOn,
 }) {
-  const [params, setParams] = useQueryStates(
-    {
-      date: parseAsString.withDefault(date),
-      day: parseAsString,
-      projectId: parseAsString,
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    date: parseAsString.withDefault(date),
+    day: parseAsString,
+    projectId: parseAsString,
+  });
 
   const onSelect = (params) => {
     setParams(params);

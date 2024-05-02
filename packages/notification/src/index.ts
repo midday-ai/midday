@@ -1,4 +1,5 @@
 import { Novu } from "@novu/node";
+import { nanoid } from "nanoid";
 
 const novu = new Novu(process.env.NOVU_API_KEY!);
 
@@ -31,6 +32,7 @@ type TriggerPayload = {
   name: TriggerEvents;
   payload: any;
   user: TriggerUser;
+  replyTo?: string;
   tenant?: string; // NOTE: Currently no way to listen for messages with tenant, we use team_id + user_id for unique
 };
 
@@ -44,6 +46,15 @@ export async function trigger(data: TriggerPayload) {
       },
       payload: data.payload,
       tenant: data.tenant,
+      overrides: {
+        email: {
+          replyTo: data.replyTo,
+          // @ts-ignore
+          headers: {
+            "X-Entity-Ref-ID": nanoid(),
+          },
+        },
+      },
     });
   } catch (error) {
     console.log(error);
@@ -62,6 +73,14 @@ export async function triggerBulk(events: TriggerPayload[]) {
         },
         payload: data.payload,
         tenant: data.tenant,
+        overrides: {
+          email: {
+            replyTo: data.replyTo,
+            headers: {
+              "X-Entity-Ref-ID": nanoid(),
+            },
+          },
+        },
       }))
     );
   } catch (error) {

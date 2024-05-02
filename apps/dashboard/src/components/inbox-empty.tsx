@@ -1,3 +1,4 @@
+import { getInboxEmail } from "@midday/inbox";
 import { Icons } from "@midday/ui/icons";
 import { CopyInput } from "./copy-input";
 
@@ -20,7 +21,7 @@ export function InboxEmpty({ inboxId }: Props) {
           </p>
         </div>
 
-        <CopyInput value={`${inboxId}@inbox.midday.ai`} />
+        <CopyInput value={getInboxEmail(inboxId)} />
       </div>
     </div>
   );

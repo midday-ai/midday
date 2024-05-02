@@ -10,8 +10,8 @@ import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import {
-  ColumnDef,
-  VisibilityState,
+  type ColumnDef,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -145,7 +145,6 @@ export function DataTable<TData, TValue>({
 
   const [transactionId, setTransactionId] = useQueryState("id", {
     defaultValue: initialTransactionId,
-    shallow: false,
   });
 
   const selectedTransaction = data.find(

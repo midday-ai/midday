@@ -104,9 +104,7 @@ export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
 
   const createEndUserAgreement = useAction(createEndUserAgreementAction);
 
-  const [step, setStep] = useQueryState("step", {
-    shallow: true,
-  });
+  const [step, setStep] = useQueryState("step");
 
   const isOpen = step === "gocardless";
 

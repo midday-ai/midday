@@ -6,9 +6,7 @@ import { FormatAmount } from "./format-amount";
 import { InboxStatus } from "./inbox-status";
 
 export function InboxItem({ item }) {
-  const [selectedId, setSelectedId] = useQueryState("id", {
-    shallow: true,
-  });
+  const [selectedId, setSelectedId] = useQueryState("inboxId");
 
   const isSelected = selectedId === item.id;
   const isProcessing = item.status === "processing" || item.status === "new";

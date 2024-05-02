@@ -8,19 +8,14 @@ import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 
 export function EmptyState({ currencyCode, user }) {
-  const [params, setParams] = useQueryStates(
-    {
-      create: parseAsString,
-      projectId: parseAsString,
-      update: parseAsString,
-      day: parseAsString.withDefault(
-        formatISO(new Date(), { representation: "date" })
-      ),
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    create: parseAsString,
+    projectId: parseAsString,
+    update: parseAsString,
+    day: parseAsString.withDefault(
+      formatISO(new Date(), { representation: "date" })
+    ),
+  });
 
   return (
     <div className="flex items-center justify-center ">
@@ -57,19 +52,14 @@ export function EmptyState({ currencyCode, user }) {
 export function NoResults({ currencyCode, user }) {
   const router = useRouter();
 
-  const [params, setParams] = useQueryStates(
-    {
-      create: parseAsString,
-      projectId: parseAsString,
-      update: parseAsString,
-      day: parseAsString.withDefault(
-        formatISO(new Date(), { representation: "date" })
-      ),
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    create: parseAsString,
+    projectId: parseAsString,
+    update: parseAsString,
+    day: parseAsString.withDefault(
+      formatISO(new Date(), { representation: "date" })
+    ),
+  });
 
   return (
     <div className="flex items-center justify-center ">

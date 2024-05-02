@@ -47,19 +47,14 @@ export function DataTable({
     setData(initialData);
   }, [initialData]);
 
-  const [params, setParams] = useQueryStates(
-    {
-      day: parseAsString.withDefault(
-        formatISO(new Date(), { representation: "date" })
-      ),
-      projectId: parseAsString,
-      create: parseAsString,
-      update: parseAsString,
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    day: parseAsString.withDefault(
+      formatISO(new Date(), { representation: "date" })
+    ),
+    projectId: parseAsString,
+    create: parseAsString,
+    update: parseAsString,
+  });
 
   const selectedProject = data.find(
     (project) => project.id === params?.projectId

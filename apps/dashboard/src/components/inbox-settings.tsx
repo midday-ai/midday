@@ -1,6 +1,7 @@
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getInboxEmail } from "@midday/inbox";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import {
@@ -53,7 +54,7 @@ export function InboxSettings({
     <div className="flex flex-col space-y-4">
       <div className="flex flex-col space-y-3">
         <Label>Inbox email</Label>
-        <CopyInput value={`${inboxId}@inbox.midday.ai`} />
+        <CopyInput value={getInboxEmail(inboxId)} />
       </div>
 
       <Form {...form}>

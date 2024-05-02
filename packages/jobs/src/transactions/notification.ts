@@ -1,5 +1,6 @@
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
+import { getInboxEmail } from "@midday/inbox";
 import {
   NotificationTypes,
   TriggerEvents,
@@ -37,7 +38,7 @@ client.defineJob({
     const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
-        "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
+        "id, team_id, team:teams(inbox_id), user:users(id, full_name, avatar_url, email, locale)"
       )
       .eq("team_id", teamId);
 
@@ -62,6 +63,7 @@ client.defineJob({
                 from: transaction.name,
               }),
             },
+            replyTo: getInboxEmail(user.team.inbox_id),
             user: {
               subscriberId: user.id,
               teamId: team_id,
@@ -119,6 +121,7 @@ client.defineJob({
           subject: t("transactions.subject"),
           html,
         },
+        replyTo: getInboxEmail(user.team.inbox_id),
         user: {
           subscriberId: user.id,
           teamId: team_id,
