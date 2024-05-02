@@ -442,7 +442,9 @@ export async function updateInboxById(
     .from("inbox")
     .update(data)
     .eq("id", id)
-    .select()
+    .select(
+      "id, file_name, file_path, display_name, transaction_id, amount, currency, content_type, due_date, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)"
+    )
     .single();
 
   const { data: inboxData } = inbox;
@@ -466,7 +468,9 @@ export async function updateInboxById(
         .from("inbox")
         .update({ attachment_id: attachmentData.id })
         .eq("id", params.id)
-        .select()
+        .select(
+          "id, file_name, file_path, display_name, transaction_id, amount, currency, content_type, due_date, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)"
+        )
         .single();
     }
   } else {

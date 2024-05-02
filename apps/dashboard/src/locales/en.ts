@@ -51,6 +51,7 @@ export default {
   },
   inbox_filter: {
     all: "All",
+    todo: "Todo",
     done: "Done",
   },
   chart_type: {

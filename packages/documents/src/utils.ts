@@ -44,31 +44,39 @@ export function getInvoiceMetaData(entities: Entries) {
     "Invoice id": findValue(entities, "invoice_id"),
     "Invoice date": findValue(entities, "invoice_date"),
     "Due date": findValue(entities, "due_date"),
-    "Supplier name": findValue(entities, "supplier_name"),
+    Supplier: findValue(entities, "supplier_name"),
     "Supplier address": findValue(entities, "supplier_address"),
     "Receiver address": findValue(entities, "receiver_address"),
-    "Supplier phone": findValue(entities, "supplier_phone"),
-    "Supplier email": findValue(entities, "supplier_email"),
-    "Supplier city": findValue(entities, "supplier_city"),
-    Items: getLineItems(entities),
-    "Net amount": findValue(entities, "net_amount"),
-    "Total amount": findValue(entities, "total_amount"),
-    Currency: findValue(entities, "currency"),
+    Phone: findValue(entities, "supplier_phone"),
+    Email: findValue(entities, "supplier_email"),
+    Products: getLineItems(entities),
+    "Net amount": `${findValue(entities, "net_amount")} ${findValue(
+      entities,
+      "currency"
+    )}`,
+    "Total amount": `${findValue(entities, "total_amount")} ${findValue(
+      entities,
+      "currency"
+    )}`,
   };
 }
 
 export function getExpenseMetaData(entities: Entries) {
   return {
-    "Supplier name": findValue(entities, "supplier_name"),
-    "Receipt date": findValue(entities, "receipt_date"),
-    "Purchase time": findValue(entities, "purchase_time"),
-    "Supplier address": findValue(entities, "supplier_address"),
-    "Supplier city": findValue(entities, "supplier_city"),
-    "Supplier phone": findValue(entities, "supplier_phone"),
-    "Supplier email": findValue(entities, "supplier_email"),
-    Items: getLineItems(entities),
-    "Net amount": findValue(entities, "net_amount"),
-    "Total amount": findValue(entities, "total_amount"),
-    Currency: findValue(entities, "currency"),
+    Supplier: findValue(entities, "supplier_name"),
+    Date: findValue(entities, "receipt_date"),
+    Address: findValue(entities, "supplier_address"),
+    City: findValue(entities, "supplier_city"),
+    Phone: findValue(entities, "supplier_phone"),
+    Email: findValue(entities, "supplier_email"),
+    Products: getLineItems(entities),
+    "Net amount": `${findValue(entities, "net_amount")} ${findValue(
+      entities,
+      "currency"
+    )}`,
+    "Total amount": `${findValue(entities, "total_amount")} ${findValue(
+      entities,
+      "currency"
+    )}`,
   };
 }

@@ -139,12 +139,12 @@ export function InboxView({
       search.execute({
         query: debouncedSearchTerm,
         type: "inbox",
-        threshold: 0.75,
+        threshold: 0.8,
       });
     }
   }, [debouncedSearchTerm]);
 
-  const data = (params.q && search.result?.data) || items;
+  const data = params.q ? search.result?.data || [] : items;
 
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
@@ -155,6 +155,9 @@ export function InboxView({
       }
 
       return items.map((item) => {
+        // const removeTransaction =
+        //   item?.transaction_id && payload.transaction_id;
+
         if (item.id === payload.id) {
           return {
             ...item,
@@ -263,9 +266,7 @@ export function InboxView({
   };
 
   const handleOnSelectTransaction = (item) => {
-    if (params.tab === "done") {
-      selectNextItem();
-    }
+    selectNextItem();
     updateInbox(item);
   };
 

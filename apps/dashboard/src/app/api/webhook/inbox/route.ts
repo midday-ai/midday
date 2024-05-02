@@ -138,7 +138,32 @@ export async function POST(req: Request) {
     });
 
     if (!uploadedAttachments) {
-      throw Error("No attachments");
+      // If no attachments we just want to forward the email
+      if (forwardTo) {
+        const messageKey = `message-id:${MessageID}`;
+        const isForwarded = await RedisClient.exists(messageKey);
+  
+        if (!isForwarded) {
+          const { error } = await resend.emails.send({
+            from: `${FromFull?.Name} <inbox@midday.ai>`,
+            to: [forwardTo],
+            subject: fallbackName,
+            text: TextBody,
+            html: HtmlBody,
+            react: null,
+            headers: {
+              "X-Entity-Ref-ID": nanoid(),
+            },
+          });
+  
+          if (!error) {
+            await RedisClient.set(messageKey, true, { ex: 9600 });
+          }
+        }
+
+      return NextResponse.json({
+        success: true,
+      });
     }
 
     const insertData = await Promise.all(uploadedAttachments);

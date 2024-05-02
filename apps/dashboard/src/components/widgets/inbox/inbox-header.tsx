@@ -11,7 +11,7 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["all", "done"];
+const options = ["all", "todo", "done"];
 
 type Props = {
   filter: string;

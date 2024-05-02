@@ -40,6 +40,7 @@ export default {
   },
   inbox_filter: {
     all: "Alla",
+    todo: "Att göra",
     done: "Slutförda",
   },
   spending_period: {

@@ -730,6 +730,7 @@ type GetInboxQueryParams = {
   from?: number;
   to?: number;
   done?: boolean;
+  todo?: boolean;
   ascending?: boolean;
 };
 
@@ -737,7 +738,7 @@ export async function getInboxQuery(
   supabase: Client,
   params: GetInboxQueryParams
 ) {
-  const { from = 0, to = 10, teamId, done, ascending = false } = params;
+  const { from = 0, to = 10, teamId, done, todo, ascending = false } = params;
 
   const query = supabase
     .from("inbox")
@@ -749,6 +750,10 @@ export async function getInboxQuery(
 
   if (done) {
     query.not("transaction_id", "is", null);
+  }
+
+  if (todo) {
+    query.is("transaction_id", null);
   }
 
   const { data } = await query.range(from, to);

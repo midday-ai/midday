@@ -34,7 +34,7 @@ import {
 } from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
+import type z from "zod";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
 function RowsSkeleton() {

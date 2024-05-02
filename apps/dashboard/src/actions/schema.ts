@@ -235,7 +235,7 @@ export const declineInviteSchema = z.object({
   revalidatePath: z.string().optional(),
 });
 
-export const inboxFilter = z.enum(["done", "todo", "all"]);
+export const inboxFilterSchema = z.enum(["done", "todo", "all"]);
 
 export const updateInboxSchema = z.object({
   id: z.string(),
