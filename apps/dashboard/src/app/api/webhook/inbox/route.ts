@@ -164,7 +164,7 @@ export async function POST(req: Request) {
         file_path: data?.path.split("/"),
         file_name: fileName,
         content_type: mimeType,
-        forwarded_to: forwardTo,
+        forwarded_to: forwardEmail,
         reference_id: `${MessageID}_${fileName}`,
         size,
       };
