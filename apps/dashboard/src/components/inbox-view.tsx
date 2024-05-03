@@ -53,18 +53,13 @@ export function InboxView({
   const [isLoading, setLoading] = useState(Boolean(query));
   const [items, setItems] = useState(initialItems);
 
-  const [params, setParams] = useQueryStates(
-    {
-      id: parseAsString.withDefault(
-        items.filter(todoFilter)?.at(0)?.id ?? null
-      ),
-      q: parseAsString.withDefault(""),
-      tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    inboxId: parseAsString.withDefault(
+      items.filter(todoFilter)?.at(0)?.id ?? null
+    ),
+    q: parseAsString.withDefault(""),
+    tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
+  });
 
   const debouncedSearchTerm = useDebounce(params.q, 300);
 
@@ -100,8 +95,8 @@ export function InboxView({
               {
                 setItems((prev) => [payload.new, ...prev]);
 
-                if (params.id) {
-                  setParams({ id: payload.new.id });
+                if (params.inboxId) {
+                  setParams({ inboxId: payload.new.id });
                 }
               }
               break;
@@ -157,8 +152,8 @@ export function InboxView({
       }
 
       return items.map((item) => {
-        // const removeTransaction =
-        //   item?.transaction_id && payload.transaction_id;
+        const removeTransaction =
+          item?.transaction_id && payload.transaction_id;
 
         if (item.id === payload.id) {
           return {
@@ -188,27 +183,31 @@ export function InboxView({
   };
 
   const currentItems = getCurrentItems(params.tab);
-  const selectedItems = currentItems?.find((item) => item.id === params.id);
-  const currentIndex = currentItems.findIndex((item) => item.id === params.id);
+  const selectedItems = currentItems?.find(
+    (item) => item.id === params.inboxId
+  );
+  const currentIndex = currentItems.findIndex(
+    (item) => item.id === params.inboxId
+  );
   const currentTabEmpty = Boolean(currentItems.length === 0);
 
   const selectNextItem = () => {
     const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
 
     setParams({
-      id: currentItems?.at(selectIndex)?.id ?? null,
+      inboxId: currentItems?.at(selectIndex)?.id ?? null,
     });
   };
 
   const handleOnPaginate = (direction) => {
     if (direction === "up") {
       const index = currentIndex - 1;
-      setParams({ id: currentItems.at(index)?.id });
+      setParams({ inboxId: currentItems.at(index)?.id });
     }
 
     if (direction === "down") {
       const index = currentIndex + 1;
-      setParams({ id: currentItems.at(index)?.id });
+      setParams({ inboxId: currentItems.at(index)?.id });
     }
 
     const currentTabIndex = TAB_ITEMS.indexOf(params.tab);
@@ -223,7 +222,7 @@ export function InboxView({
       if (nextTabIndex >= 0) {
         setParams({
           tab: nextTab,
-          id: getCurrentItems(nextTab)?.at(0)?.id ?? null,
+          inboxId: getCurrentItems(nextTab)?.at(0)?.id ?? null,
         });
       }
     }
@@ -238,7 +237,7 @@ export function InboxView({
       if (nextTabIndex < TAB_ITEMS.length)
         setParams({
           tab: nextTab,
-          id: getCurrentItems(nextTab)?.at(0)?.id ?? null,
+          inboxId: getCurrentItems(nextTab)?.at(0)?.id ?? null,
         });
     }
   };
@@ -254,7 +253,7 @@ export function InboxView({
       action: (
         <ToastAction
           altText="Undo"
-          onClick={() => updateInbox({ id: params.id, status: "pending" })}
+          onClick={() => updateInbox({ id: params.inboxId, status: "pending" })}
         >
           Undo
         </ToastAction>
@@ -262,7 +261,7 @@ export function InboxView({
     });
 
     updateInbox({
-      id: params.id,
+      id: params.inboxId,
       status: "deleted",
     });
   };
@@ -277,7 +276,7 @@ export function InboxView({
       isLoading={isLoading}
       onChangeTab={(tab) => {
         const items = getCurrentItems(tab);
-        setParams({ id: items?.at(0)?.id ?? null, q: null });
+        setParams({ inboxId: items?.at(0)?.id ?? null, q: null });
       }}
       headerComponent={
         <InboxHeader
@@ -296,7 +295,7 @@ export function InboxView({
                 items={currentItems}
                 hasQuery={Boolean(params.q)}
                 onClear={() =>
-                  setParams({ q: null, id: currentItems?.id ?? null })
+                  setParams({ q: null, inboxId: currentItems?.id ?? null })
                 }
               />
             </TabsContent>

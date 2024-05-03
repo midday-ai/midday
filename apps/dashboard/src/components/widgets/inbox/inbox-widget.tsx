@@ -1,4 +1,5 @@
 import { CopyInput } from "@/components/copy-input";
+import { getInboxEmail } from "@midday/inbox";
 import { getUser } from "@midday/supabase/cached-queries";
 import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
@@ -23,7 +24,7 @@ export async function InboxWidget({ filter, disabled }) {
     return (
       <div className="flex flex-col space-y-4 items-center justify-center h-full text-center">
         <div>
-          <CopyInput value={`${user?.data?.team?.inbox_id}@inbox.midday.ai`} />
+          <CopyInput value={getInboxEmail(user?.data?.team?.inbox_id)} />
         </div>
 
         <p className="text-sm text-[#606060]">

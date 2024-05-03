@@ -103,6 +103,12 @@ export function TransactionDetails({ transactionId, data: initialData }) {
     }
   };
 
+  const defaultValue = ["attachment"];
+
+  if (data?.note) {
+    defaultValue.push("note");
+  }
+
   return (
     <>
       <div className="flex justify-between mb-8">
@@ -194,7 +200,7 @@ export function TransactionDetails({ transactionId, data: initialData }) {
         </div>
       </div>
 
-      <Accordion type="multiple" defaultValue={["attachment"]}>
+      <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
           <AccordionContent>

@@ -40,7 +40,7 @@ import { Loader2 } from "lucide-react";
 export type Payment = {
   id: string;
   amount: number;
-  status: "posted" | "excluded" | "included" | "pending";
+  status: "posted" | "excluded" | "included" | "pending" | "completed";
   manual?: boolean;
 };
 
@@ -160,7 +160,9 @@ export const columns: ColumnDef<Payment>[] = [
     accessorKey: "status",
     header: "Status",
     cell: ({ row }) => {
-      const fullfilled = row?.original?.attachments?.length > 0;
+      const fullfilled =
+        row.original?.status === "completed" ||
+        row?.original?.attachments?.length > 0;
 
       if (fullfilled) {
         return <Icons.Check />;
@@ -218,6 +220,34 @@ export const columns: ColumnDef<Payment>[] = [
                   Include
                 </DropdownMenuItem>
               )}
+
+              {row?.original?.attachments?.length === 0 &&
+                row.original.status !== "completed" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      table.options.meta?.updateTransaction.execute({
+                        id: row.original.id,
+                        status: "completed",
+                      });
+                    }}
+                  >
+                    Mark as completed
+                  </DropdownMenuItem>
+                )}
+
+              {row?.original?.attachments?.length === 0 &&
+                row.original.status === "completed" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      table.options.meta?.updateTransaction.execute({
+                        id: row.original.id,
+                        status: "posted",
+                      });
+                    }}
+                  >
+                    Mark as uncompleted
+                  </DropdownMenuItem>
+                )}
 
               {!row.original?.manual && row.original.status !== "excluded" && (
                 <DropdownMenuItem

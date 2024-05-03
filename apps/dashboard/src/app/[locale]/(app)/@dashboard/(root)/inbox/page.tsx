@@ -10,10 +10,7 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  searchParams: {
-    id?: string;
-    q?: string;
-  };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export default async function InboxPage({ searchParams }: Props) {

@@ -20,7 +20,6 @@ export function InboxStructure({
   isLoading,
 }: Props) {
   const [tab, setTab] = useQueryState("tab", {
-    shallow: true,
     defaultValue: "todo",
   });
 

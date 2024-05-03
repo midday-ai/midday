@@ -584,13 +584,13 @@ export type Database = {
           currency_source: string | null
           date: string
           description: string | null
+          embedding: string | null
           id: string
           internal_id: string
           manual: boolean | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note: string | null
-          order: number
           status: Database["public"]["Enums"]["transactionStatus"] | null
           team_id: string
         }
@@ -606,13 +606,13 @@ export type Database = {
           currency_source?: string | null
           date: string
           description?: string | null
+          embedding?: string | null
           id?: string
           internal_id: string
           manual?: boolean | null
           method: Database["public"]["Enums"]["transactionMethods"]
           name: string
           note?: string | null
-          order?: number
           status?: Database["public"]["Enums"]["transactionStatus"] | null
           team_id: string
         }
@@ -628,13 +628,13 @@ export type Database = {
           currency_source?: string | null
           date?: string
           description?: string | null
+          embedding?: string | null
           id?: string
           internal_id?: string
           manual?: boolean | null
           method?: Database["public"]["Enums"]["transactionMethods"]
           name?: string
           note?: string | null
-          order?: number
           status?: Database["public"]["Enums"]["transactionStatus"] | null
           team_id?: string
         }
@@ -977,13 +977,13 @@ export type Database = {
           decrypted_description: string | null
           decrypted_name: string | null
           description: string | null
+          embedding: string | null
           id: string | null
           internal_id: string | null
           manual: boolean | null
           method: Database["public"]["Enums"]["transactionMethods"] | null
           name: string | null
           note: string | null
-          order: number | null
           status: Database["public"]["Enums"]["transactionStatus"] | null
           team_id: string | null
         }
@@ -1001,13 +1001,13 @@ export type Database = {
           decrypted_description?: never
           decrypted_name?: never
           description?: string | null
+          embedding?: string | null
           id?: string | null
           internal_id?: string | null
           manual?: boolean | null
           method?: Database["public"]["Enums"]["transactionMethods"] | null
           name?: string | null
           note?: string | null
-          order?: number | null
           status?: Database["public"]["Enums"]["transactionStatus"] | null
           team_id?: string | null
         }
@@ -1025,13 +1025,13 @@ export type Database = {
           decrypted_description?: never
           decrypted_name?: never
           description?: string | null
+          embedding?: string | null
           id?: string | null
           internal_id?: string | null
           manual?: boolean | null
           method?: Database["public"]["Enums"]["transactionMethods"] | null
           name?: string | null
           note?: string | null
-          order?: number | null
           status?: Database["public"]["Enums"]["transactionStatus"] | null
           team_id?: string | null
         }
@@ -1068,12 +1068,6 @@ export type Database = {
       }
     }
     Functions: {
-      amount_text: {
-        Args: {
-          "": unknown
-        }
-        Returns: string
-      }
       generate_id: {
         Args: {
           size: number
@@ -1387,7 +1381,7 @@ export type Database = {
         | "deposit"
         | "wire"
         | "fee"
-      transactionStatus: "posted" | "pending" | "excluded"
+      transactionStatus: "posted" | "pending" | "excluded" | "completed"
     }
     CompositeTypes: {
       metrics_record: {

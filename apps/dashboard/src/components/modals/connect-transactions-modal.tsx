@@ -35,24 +35,14 @@ export function ConnectTransactionsModal({ isEU }: Props) {
   const { track } = useLogSnag();
   const [token, setToken] = useState();
 
-  const [params, setParams] = useQueryStates(
-    {
-      step: parseAsStringEnum([
-        "connect",
-        "account",
-        "gocardless",
-        "import-csv",
-      ]),
-      ref: parseAsString,
-      token: parseAsString,
-      enrollment_id: parseAsString,
-      institution_id: parseAsString,
-      provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    step: parseAsStringEnum(["connect", "account", "gocardless", "import-csv"]),
+    ref: parseAsString,
+    token: parseAsString,
+    enrollment_id: parseAsString,
+    institution_id: parseAsString,
+    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
+  });
 
   const isOpen = params.step === "connect";
 

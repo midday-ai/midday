@@ -21,15 +21,10 @@ export function InboxHeader({
   onChange,
   ascending,
 }: Props) {
-  const [params, setParams] = useQueryStates(
-    {
-      id: parseAsString,
-      q: parseAsString.withDefault(""),
-    },
-    {
-      shallow: true,
-    }
-  );
+  const [params, setParams] = useQueryStates({
+    id: parseAsString,
+    q: parseAsString.withDefault(""),
+  });
 
   return (
     <div className="flex justify-center items-center space-x-4 mb-4">

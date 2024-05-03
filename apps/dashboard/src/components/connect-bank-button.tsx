@@ -4,9 +4,7 @@ import { Button } from "@midday/ui/button";
 import { useQueryState } from "nuqs";
 
 export function ConnectBankButton() {
-  const [_, setStep] = useQueryState("step", {
-    shallow: true,
-  });
+  const [_, setStep] = useQueryState("step");
 
   return (
     <Button

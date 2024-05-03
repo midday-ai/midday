@@ -22,7 +22,6 @@ export default async function Transactions({
   // TODO: Check if there are transactions instead
   const bankConnections = await getBankConnectionsByTeamId();
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
-  const transactionId = searchParams?.id;
   const filter =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
   const sort = searchParams?.sort?.split(":");
@@ -41,14 +40,13 @@ export default async function Transactions({
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense
             fallback={<Loading />}
-            key={JSON.stringify({ page, filter, sort })}
+            key={JSON.stringify({ page, filter, sort, query: searchParams?.q })}
           >
             <Table
               filter={filter}
               page={page}
               sort={sort}
               noAccounts={empty}
-              initialTransactionId={transactionId}
               query={searchParams?.q}
             />
           </Suspense>

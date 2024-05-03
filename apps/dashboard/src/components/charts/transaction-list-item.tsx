@@ -34,7 +34,8 @@ function TransactionStatus({ fullfilled }) {
 export function TransactionListItem({ transaction, disabled }) {
   const [isOpen, setOpen] = useState();
 
-  const fullfilled = transaction?.attachments?.length > 0;
+  const fullfilled =
+    transaction?.status === "completed" || transaction?.attachments?.length > 0;
 
   return (
     <>
