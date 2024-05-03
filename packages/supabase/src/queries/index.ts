@@ -146,7 +146,7 @@ export async function getSpendingQuery(
     .order("name", { ascending: false })
     .eq("team_id", params.teamId)
     .lt("amount", 0)
-    .or("status.eq.pending,status.eq.posted")
+    .or("status.eq.pending,status.eq.posted,status.eq.completed")
     .throwOnError();
 
   if (params.from && params.to) {
@@ -256,7 +256,7 @@ export async function getTransactionsQuery(
   } else {
     query
       .order("date", { ascending: false })
-      .order("name", { ascending: false });
+      .order("created_at", { ascending: false });
   }
 
   if (date?.from && date?.to) {
@@ -303,7 +303,7 @@ export async function getTransactionsQuery(
   if (status?.includes("excluded")) {
     query.eq("status", "excluded");
   } else {
-    query.or("status.eq.pending,status.eq.posted");
+    query.or("status.eq.pending,status.eq.posted,status.eq.completed");
   }
 
   if (categories) {

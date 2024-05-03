@@ -1,5 +1,6 @@
 import { client } from "@midday/kv";
-import { createClient } from "@midday/supabase/middleware";
+import { updateSession } from "@midday/supabase/middleware";
+import { createClient } from "@midday/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -10,8 +11,8 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
-  const response = I18nMiddleware(request);
-  const { supabase } = createClient(request, response);
+  const response = await updateSession(request, I18nMiddleware(request));
+  const supabase = createClient();
   const url = new URL("/", request.url);
   const nextUrl = request.nextUrl;
 

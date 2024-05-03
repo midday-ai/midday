@@ -16,7 +16,7 @@ import { Tracker } from "./widgets/tracker";
 type Props = {
   disabled: boolean;
   initialPeriod: any;
-  searchParams: any;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export const initialWidgetsVisibility = {

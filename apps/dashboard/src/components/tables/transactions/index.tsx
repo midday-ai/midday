@@ -8,14 +8,7 @@ import { Loading } from "./loading";
 const pageSize = 50;
 const maxItems = 100000;
 
-export async function Table({
-  filter,
-  page,
-  sort,
-  noAccounts,
-  initialTransactionId,
-  query,
-}) {
+export async function Table({ filter, page, sort, noAccounts, query }) {
   const hasFilters = Object.keys(filter).length > 0;
   const initialColumnVisibility = JSON.parse(
     cookies().get("transactions-columns")?.value || "[]"
@@ -66,7 +59,6 @@ export async function Table({
   return (
     <DataTable
       initialColumnVisibility={initialColumnVisibility}
-      initialTransactionId={initialTransactionId}
       columns={columns}
       data={data}
       pageSize={pageSize}

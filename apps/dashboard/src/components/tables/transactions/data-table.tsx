@@ -33,7 +33,6 @@ interface DataTableProps<TData, TValue> {
 export function DataTable<TData, TValue>({
   columns,
   data: initialData,
-  initialTransactionId,
   pageSize,
   loadMore,
   meta,
@@ -143,9 +142,7 @@ export function DataTable<TData, TValue>({
     }
   };
 
-  const [transactionId, setTransactionId] = useQueryState("id", {
-    defaultValue: initialTransactionId,
-  });
+  const [transactionId, setTransactionId] = useQueryState("id");
 
   const selectedTransaction = data.find(
     (transaction) => transaction?.id === transactionId

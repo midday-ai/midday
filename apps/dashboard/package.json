@@ -40,7 +40,7 @@
     "@vercel/analytics": "^1.2.2",
     "@vercel/speed-insights": "^1.0.10",
     "@zip.js/zip.js": "2.7.43",
-    "ai": "^3.1.0",
+    "ai": "^3.1.1",
     "change-case": "^5.4.4",
     "currency-symbol-map": "^5.1.0",
     "dub": "^0.25.2",
@@ -55,7 +55,7 @@
     "next-safe-action": "6.2.0",
     "next-themes": "^0.3.0",
     "nuqs": "^1.17.1",
-    "openai": "^4.40.0",
+    "openai": "^4.40.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-dropzone": "^14.2.3",
@@ -70,7 +70,7 @@
     "teller-connect-react": "^0.1.0",
     "tus-js-client": "^4.1.0",
     "use-long-press": "^3.2.0",
-    "zod": "^3.23.5",
+    "zod": "^3.23.6",
     "zustand": "^4.5.2"
   },
   "devDependencies": {

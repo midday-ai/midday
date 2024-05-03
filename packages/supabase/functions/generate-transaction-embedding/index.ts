@@ -3,9 +3,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2.42.7";
 import type { Database, Tables } from "../../src/types";
 
-type TransactionRecord = Tables<"transaction">;
+type TransactionRecord = Tables<"transactions">;
 interface WebhookPayload {
-  type: "UPDATE";
+  type: "INSERT" | "UPDATE";
   table: string;
   record: TransactionRecord;
   schema: "public";
@@ -21,16 +21,20 @@ const model = new Supabase.ai.Session("gte-small");
 
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
-  const { id } = payload.record;
+  const { id, amount, category } = payload.record;
+
+  // Check if content has changed.
+  if (
+    amount === payload?.old_record?.amount &&
+    category === payload?.old_record?.category
+  ) {
+    return new Response("ok - no change");
+  }
 
   const { data } = await supabase
     .from("decrypted_transactions")
     .select("name:decrypted_name, amount, date, currency, category")
     .eq("id", id);
-
-  if (!data) {
-    return new Response("No data to generate embeddings from");
-  }
 
   const content = `Name: ${data.name}, Amount: ${data.amount}${data.currency}, Date: ${data.date}, Category: ${data.category}`;
   const embedding = await model.run(content, {
