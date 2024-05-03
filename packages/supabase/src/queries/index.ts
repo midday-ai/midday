@@ -135,13 +135,7 @@ export async function getSpendingQuery(
 ) {
   const query = supabase
     .from("transactions")
-    .select(
-      `
-      currency,
-      category,
-      amount
-    `
-    )
+    .select("currency, category, amount")
     .order("date", { ascending: false })
     .order("name", { ascending: false })
     .eq("team_id", params.teamId)
