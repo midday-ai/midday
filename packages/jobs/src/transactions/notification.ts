@@ -42,7 +42,7 @@ client.defineJob({
       )
       .eq("team_id", teamId);
 
-    const notificationEvents = usersData?.map(({ user, team_id }) => {
+    const notificationEvents = usersData?.map(({ user, team_id, team }) => {
       const { t } = getI18n({ locale: user.locale });
 
       // If single transaction
@@ -63,7 +63,7 @@ client.defineJob({
                 from: transaction.name,
               }),
             },
-            replyTo: getInboxEmail(user.team.inbox_id),
+            replyTo: getInboxEmail(team?.inbox_id),
             user: {
               subscriberId: user.id,
               teamId: team_id,
@@ -104,7 +104,7 @@ client.defineJob({
       }
     }
 
-    const emailPromises = usersData?.map(async ({ user, team_id }) => {
+    const emailPromises = usersData?.map(async ({ user, team_id, team }) => {
       const { t } = getI18n({ locale: user.locale });
 
       const html = await renderAsync(
@@ -121,7 +121,7 @@ client.defineJob({
           subject: t("transactions.subject"),
           html,
         },
-        replyTo: getInboxEmail(user.team.inbox_id),
+        replyTo: getInboxEmail(team?.inbox_id),
         user: {
           subscriberId: user.id,
           teamId: team_id,
