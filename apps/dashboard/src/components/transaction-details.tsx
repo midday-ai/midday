@@ -22,7 +22,9 @@ import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
+import { useQueryState } from "nuqs";
 import { useEffect, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
@@ -30,14 +32,51 @@ import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
-export function TransactionDetails({ transactionId, data: initialData }) {
+type Props = {
+  data: any;
+  ids?: string[];
+};
+
+export function TransactionDetails({ data: initialData, ids }: Props) {
   const [data, setData] = useState(initialData);
+  const [transactionId, setTransactionId] = useQueryState("id");
+
   const { toast } = useToast();
   const t = useI18n();
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const updateTransaction = useAction(updateTransactionAction);
   const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
+
+  useHotkeys("esc", () => setTransactionId(null));
+
+  const enabled = Boolean(ids?.length);
+
+  useHotkeys(
+    "ArrowUp",
+    () => {
+      const currentIndex = ids?.indexOf(transactionId) ?? 0;
+      const prevId = ids[currentIndex - 1];
+
+      if (prevId) {
+        setTransactionId(prevId);
+      }
+    },
+    { enabled }
+  );
+
+  useHotkeys(
+    "ArrowDown",
+    () => {
+      const currentIndex = ids?.indexOf(transactionId) ?? 0;
+      const nextId = ids[currentIndex + 1];
+
+      if (nextId) {
+        setTransactionId(nextId);
+      }
+    },
+    { enabled }
+  );
 
   useEffect(() => {
     if (initialData) {
@@ -57,10 +96,10 @@ export function TransactionDetails({ transactionId, data: initialData }) {
       }
     }
 
-    if (!data) {
+    if (!data && transactionId) {
       fetchData();
     }
-  }, [data]);
+  }, [data, transactionId]);
 
   const handleOnAssign = (assigned_id: string) => {
     updateTransaction.execute({ assigned_id, id: data.id });

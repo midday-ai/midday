@@ -49,6 +49,9 @@ export function DataTable<TData, TValue>({
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
   const { setColumns, setTransactionIds, setCanDelete } =
     useTransactionsStore();
+
+  const [transactionId, setTransactionId] = useQueryState("id");
+
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {}
   );
@@ -142,8 +145,6 @@ export function DataTable<TData, TValue>({
     }
   };
 
-  const [transactionId, setTransactionId] = useQueryState("id");
-
   const selectedTransaction = data.find(
     (transaction) => transaction?.id === transactionId
   );
@@ -187,41 +188,6 @@ export function DataTable<TData, TValue>({
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
-
-  useEffect(() => {
-    const currentIndex = data.findIndex((row) => row.id === transactionId);
-
-    const keyDownHandler = (evt: KeyboardEvent) => {
-      if (transactionId && evt.key === "ArrowDown") {
-        evt.preventDefault();
-        const nextItem = data.at(currentIndex + 1);
-
-        if (nextItem) {
-          setTransactionId(nextItem.id);
-        }
-      }
-
-      if (transactionId && evt.key === "Escape") {
-        setTransactionId(null);
-      }
-
-      if (transactionId && evt.key === "ArrowUp") {
-        evt.preventDefault();
-
-        const prevItem = data.at(currentIndex - 1);
-
-        if (currentIndex > 0 && prevItem) {
-          setTransactionId(prevItem.id);
-        }
-      }
-    };
-
-    document.addEventListener("keydown", keyDownHandler);
-
-    return () => {
-      document.removeEventListener("keydown", keyDownHandler);
-    };
-  }, [transactionId, data, setTransactionId]);
 
   return (
     <div className="rounded-md mb-8 relative">
@@ -276,7 +242,7 @@ export function DataTable<TData, TValue>({
         isOpen={Boolean(transactionId)}
         setOpen={setOpen}
         data={selectedTransaction}
-        transactionId={transactionId}
+        ids={data?.map(({ id }) => id)}
       />
 
       {meta.count > 0 && (
