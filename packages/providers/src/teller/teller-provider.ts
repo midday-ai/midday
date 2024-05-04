@@ -62,13 +62,18 @@ export class TellerProvider implements Provider {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccountBalance({
-      accessToken,
-      accountId,
-    });
+    // const response = await this.#api.getAccountBalance({
+    //   accessToken,
+    //   accountId,
+    // });
 
-    if (response) {
-      return transformAccountBalance(response);
-    }
+    // if (response) {
+    //   return transformAccountBalance(response);
+    // }
+
+    return {
+      currency: "USD",
+      amount: null,
+    };
   }
 }
