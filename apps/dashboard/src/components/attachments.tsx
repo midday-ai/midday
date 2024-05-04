@@ -3,84 +3,16 @@
 import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
-import { formatSize } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { Skeleton } from "@midday/ui/skeleton";
 import { useToast } from "@midday/ui/use-toast";
-import { isSupportedFilePreview, stripSpecialCharacters } from "@midday/utils";
-import { X } from "lucide-react";
+import { stripSpecialCharacters } from "@midday/utils";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { FilePreview } from "./file-preview";
-
-const Item = ({ file, onDelete, id }) => {
-  const filePreviewSupported = isSupportedFilePreview(file.type);
-
-  return (
-    <div className="flex items-center justify-between">
-      <div className="flex space-x-4 items-center">
-        <HoverCard openDelay={200}>
-          <HoverCardTrigger>
-            <div className="rounded-md border w-[40px] h-[40px] overflow-hidden cursor-pointer">
-              {file.isUploading ? (
-                <Skeleton className="w-full h-full" />
-              ) : (
-                <FilePreview
-                  src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-                  name={file.name}
-                  type={file.type}
-                  preview
-                  width={45}
-                  height={100}
-                />
-              )}
-            </div>
-          </HoverCardTrigger>
-          {filePreviewSupported && (
-            <HoverCardContent
-              className="w-[273px] h-[358px] p-0 overflow-hidden"
-              side="left"
-              sideOffset={55}
-            >
-              <FilePreview
-                src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-                downloadUrl={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
-                name={file.name}
-                type={file.type}
-                width={280}
-                height={365}
-              />
-            </HoverCardContent>
-          )}
-        </HoverCard>
-
-        <div className="flex flex-col space-y-0.5 w-80">
-          <span className="truncate">{file.name}</span>
-          <span className="text-xs text-[#606060]">
-            {file.size && formatSize(file.size)}
-          </span>
-        </div>
-      </div>
-
-      <Button
-        variant="ghost"
-        size="icon"
-        className="w-auto hover:bg-transparent flex"
-        onClick={onDelete}
-      >
-        <X size={14} />
-      </Button>
-    </div>
-  );
-};
+import { AttachmentItem } from "./attachment-item";
+import { SelectAttachment } from "./select-attachment";
 
 type Attachment = {
   type: string;
@@ -93,6 +25,13 @@ export function Attachments({ id, data }) {
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
+
+  const createAttachments = useAction(createAttachmentsAction, {
+    onSuccess: (newFiles) => {
+      const uniqueFiles = new Set([...files, ...newFiles]);
+      setFiles([...uniqueFiles]);
+    },
+  });
 
   const handleOnDelete = async (id: string) => {
     setFiles((files) => files.filter((file) => file?.id !== id));
@@ -111,6 +50,7 @@ export function Attachments({ id, data }) {
     ]);
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
+
     const uploadedFiles = await Promise.all(
       acceptedFiles.map(async (acceptedFile) => {
         const filename = stripSpecialCharacters(acceptedFile.name);
@@ -131,10 +71,20 @@ export function Attachments({ id, data }) {
       })
     );
 
-    const { data: newFiles } = await createAttachmentsAction(uploadedFiles);
+    createAttachments.execute(uploadedFiles);
+  };
 
-    const uniqueFiles = new Set([...files, ...newFiles]);
-    setFiles([...uniqueFiles]);
+  const handleOnSelectFile = (file) => {
+    const item = {
+      transaction_id: id,
+      name: file.name,
+      size: file.data.size,
+      type: file.data.content_type,
+      path: file.data.file_path,
+    };
+
+    setFiles((prev) => [item, ...prev]);
+    createAttachments.execute([item]);
   };
 
   useEffect(() => {
@@ -172,9 +122,13 @@ export function Attachments({ id, data }) {
 
   return (
     <div>
+      <SelectAttachment
+        placeholder="Search attachment"
+        onSelect={handleOnSelectFile}
+      />
       <div
         className={cn(
-          "w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1 transition-colors text-[#606060]",
+          "mt-4 w-full h-[120px] border-dotted border-2 border-border rounded-xl text-center flex flex-col justify-center space-y-1 transition-colors text-[#606060]",
           isDragActive && "bg-secondary text-primary"
         )}
         {...getRootProps()}
@@ -199,7 +153,7 @@ export function Attachments({ id, data }) {
 
       <ul className="mt-4 space-y-4">
         {files.map((file) => (
-          <Item
+          <AttachmentItem
             key={file.name}
             id={id}
             file={file}

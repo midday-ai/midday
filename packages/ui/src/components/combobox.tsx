@@ -14,7 +14,7 @@ import { Icons } from "./icons";
 
 export type Option = Record<"id" | "name", string> & Record<string, string>;
 
-type AutoCompleteProps = {
+type ComboboxProps = {
   options: Option[];
   emptyMessage: string;
   value?: Option;
@@ -43,7 +43,7 @@ export const Combobox = ({
   isLoading = false,
   autoFocus,
   onValueChange,
-}: AutoCompleteProps) => {
+}: ComboboxProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setOpen] = useState(false);
   const [selected, setSelected] = useState<Option | undefined>(value as Option);
@@ -130,7 +130,7 @@ export const Combobox = ({
           {inputValue?.length > 0 && (
             <CommandGroup
               className={cn(
-                "bg-background absolute z-10 w-full max-h-[250px] overflow-auto py-2 border rounded-xl",
+                "bg-background absolute z-10 w-full max-h-[250px] overflow-auto py-2 border rounded-md px-2",
                 classNameList
               )}
             >
@@ -144,7 +144,7 @@ export const Combobox = ({
                       event.stopPropagation();
                     }}
                     onSelect={() => handleSelectOption(option)}
-                    className="flex items-center gap-2 w-full"
+                    className="flex items-center gap-2 w-full rounded-md px-2"
                   >
                     {Component ? <Component /> : option.name}
                   </CommandItem>

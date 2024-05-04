@@ -7,7 +7,7 @@ import type {
 import { TellerApi } from "./teller-api";
 import {
   transformAccount,
-  transformAccountBalance,
+  // transformAccountBalance,
   transformTransaction,
 } from "./transform";
 
