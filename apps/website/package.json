@@ -32,7 +32,7 @@
     "react-hls-player": "^3.0.7",
     "server-only": "^0.0.1",
     "sharp": "^0.33.3",
-    "sugar-high": "^0.6.0"
+    "sugar-high": "^0.6.1"
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",

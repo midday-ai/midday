@@ -15,7 +15,7 @@
     "supabase": "^1.165.0"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.43.0",
+    "@supabase/supabase-js": "^2.43.1",
     "typescript": "^5.4.5"
   },
   "exports": {
