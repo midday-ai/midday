@@ -146,12 +146,12 @@ export type GetTransactionsParams = {
   teamId: string;
   to: number;
   from: number;
-  sort: {
+  sort?: {
     column: string;
     value: "asc" | "desc";
   };
   searchQuery?: string;
-  filter: {
+  filter?: {
     status?: "fullfilled" | "unfullfilled" | "excluded";
     attachments?: "include" | "exclude";
     categories?: string[];
