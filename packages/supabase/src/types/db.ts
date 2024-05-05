@@ -1157,7 +1157,7 @@ export type Database = {
           category: string
           amount: number
           currency: string
-          percentage: string
+          percentage: number
         }[]
       }
       get_total_amount: {
@@ -1205,6 +1205,12 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      is_fulfilled: {
+        Args: {
+          "": unknown
+        }
+        Returns: boolean
       }
       nanoid: {
         Args: {
