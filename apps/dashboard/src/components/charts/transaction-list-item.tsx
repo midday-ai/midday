@@ -19,7 +19,7 @@ export function TransactionListItem({ transaction, disabled }: Props) {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="w-full">
+      <div onClick={() => setOpen(true)} className="w-full">
         <div className="flex items-center p-3">
           <div className="w-[50%] flex space-x-2">
             <span
@@ -51,7 +51,7 @@ export function TransactionListItem({ transaction, disabled }: Props) {
             <TransactionStatus fullfilled={fullfilled} />
           </div>
         </div>
-      </button>
+      </div>
 
       <TransactionSheet isOpen={isOpen} setOpen={setOpen} data={transaction} />
     </>
