@@ -46,7 +46,6 @@ export function SelectTransaction({
           },
           search: {
             query: value,
-            fuzzy: true,
           },
         });
 

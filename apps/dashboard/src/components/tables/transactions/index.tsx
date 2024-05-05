@@ -4,14 +4,23 @@ import { cookies } from "next/headers";
 import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
+import { Cookies } from "@/utils/constants";
 
 const pageSize = 50;
 const maxItems = 100000;
 
-export async function Table({ filter, page, sort, noAccounts, query }) {
+type Props = {
+  filter: any;
+  page: number;
+  sort: any;
+  noAccounts: boolean;
+  query?: string;
+};
+
+export async function Table({ filter, page, sort, noAccounts, query }: Props) {
   const hasFilters = Object.keys(filter).length > 0;
   const initialColumnVisibility = JSON.parse(
-    cookies().get("transactions-columns")?.value || "[]"
+    cookies().get(Cookies.TransactionsColumns)?.value || "[]"
   );
 
   // NOTE: When we have a filter we want to show all results so users can select
@@ -21,10 +30,7 @@ export async function Table({ filter, page, sort, noAccounts, query }) {
     from: 0,
     filter,
     sort,
-    search: {
-      query,
-      fuzzy: true,
-    },
+    searchQuery: query,
   });
 
   async function loadMore({ from, to }) {
@@ -35,10 +41,7 @@ export async function Table({ filter, page, sort, noAccounts, query }) {
       from: from + 1,
       filter,
       sort,
-      search: {
-        query,
-        fuzzy: true,
-      },
+      searchQuery: query,
     });
   }
 
@@ -67,6 +70,7 @@ export async function Table({ filter, page, sort, noAccounts, query }) {
       meta={meta}
       hasFilters={hasFilters}
       page={page}
+      query={query}
     />
   );
 }

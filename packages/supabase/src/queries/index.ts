@@ -127,63 +127,19 @@ export type GetSpendingParams = {
   from: string;
   to: string;
   teamId: string;
+  currency: string;
 };
 
 export async function getSpendingQuery(
   supabase: Client,
   params: GetSpendingParams
 ) {
-  const query = supabase
-    .from("transactions")
-    .select("currency, category, amount")
-    .order("date", { ascending: false })
-    .order("name", { ascending: false })
-    .eq("team_id", params.teamId)
-    .lt("amount", 0)
-    .or("status.eq.pending,status.eq.posted,status.eq.completed")
-    .throwOnError();
-
-  if (params.from && params.to) {
-    query.gte("date", params.from);
-    query.lte("date", params.to);
-  }
-
-  const { data, count } = await query.range(0, 1000000);
-  const totalAmount = data
-    ?.filter((item) => item.category !== "transfer")
-    ?.reduce((amount, item) => item.amount + amount, 0);
-
-  const combinedValues = {};
-
-  for (const item of data) {
-    const { category, amount, currency } = item;
-
-    const key = category || "uncategorized";
-
-    if (combinedValues[key]) {
-      combinedValues[key].amount += amount;
-    } else {
-      combinedValues[key] = { amount, currency };
-    }
-  }
-
-  return {
-    meta: {
-      count,
-      totalAmount: +Math.abs(totalAmount).toFixed(2),
-      currency: data?.at(0)?.currency,
-    },
-    data: Object.entries(combinedValues)
-      .map(([category, { amount, currency }]) => {
-        return {
-          category: category || "uncategorized",
-          currency,
-          amount: +Math.abs(amount).toFixed(2),
-          precentage: Math.round((amount / totalAmount) * 100),
-        };
-      })
-      .sort((a, b) => b.amount - a.amount),
-  };
+  return supabase.rpc("get_spending", {
+    team_id: params.teamId,
+    date_from: params.from,
+    date_to: params.to,
+    currency_target: params.currency,
+  });
 }
 
 export type GetTransactionsParams = {
@@ -194,10 +150,7 @@ export type GetTransactionsParams = {
     column: string;
     value: "asc" | "desc";
   };
-  search?: {
-    query?: string;
-    fuzzy?: boolean;
-  };
+  searchQuery?: string;
   filter: {
     status?: "fullfilled" | "unfullfilled" | "excluded";
     attachments?: "include" | "exclude";
@@ -214,38 +167,41 @@ export async function getTransactionsQuery(
   supabase: Client,
   params: GetTransactionsParams
 ) {
-  const { from = 0, to, filter, sort, teamId, search } = params;
+  const { from = 0, to, filter, sort, teamId, searchQuery } = params;
   const { date = {}, status, attachments, categories, type } = filter || {};
+
+  const columns = [
+    "id",
+    "date",
+    "amount",
+    "currency",
+    "category",
+    "method",
+    "status",
+    "name:decrypted_name",
+    "description:decrypted_description",
+    "assigned:assigned_id(*)",
+    "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
+    "attachments:transaction_attachments(id, name, size, path, type)",
+  ];
 
   const query = supabase
     .from("decrypted_transactions")
-    .select(
-      `
-      *,
-      name:decrypted_name,
-      description:decrypted_description,
-      assigned:assigned_id(*),
-      attachments:transaction_attachments(*),
-      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
-      `,
-      { count: "exact" }
-    )
+    .select(columns.join(","), { count: "exact" })
     .eq("team_id", teamId);
 
   if (sort) {
     const [column, value] = sort;
+    const ascending = value === "asc";
 
     if (column === "attachment") {
-      // TODO: Order by attachment i.e status
-      // query.order("transaction_attachments", {
-      //   ascending: value === "asc",
-      // });
+      query.order("is_fulfilled", { ascending });
     } else if (column === "assigned") {
-      query.order("assigned_id", { ascending: value === "asc" });
+      query.order("assigned_id", { ascending });
     } else if (column === "bank_account") {
-      query.order("bank_account_id", { ascending: value === "asc" });
+      query.order("bank_account_id", { ascending });
     } else {
-      query.order(column, { ascending: value === "asc" });
+      query.order(column, { ascending });
     }
   } else {
     query
@@ -258,40 +214,20 @@ export async function getTransactionsQuery(
     query.lte("date", date.to);
   }
 
-  if (search?.query && search?.fuzzy) {
-    if (!Number.isNaN(Number.parseInt(search.query))) {
-      // NOTE: amount_text is a pg_function that casts amount to text
-      query.like("amount_text", `%${search.query}%`);
+  if (searchQuery) {
+    if (!Number.isNaN(Number.parseInt(searchQuery))) {
+      query.like("amount_text", `%${searchQuery}%`);
     } else {
-      query.ilike("decrypted_name", `%${search.query}%`);
+      query.ilike("decrypted_name", `%${searchQuery}%`);
     }
-  }
-
-  if (search?.query && !search?.fuzzy) {
-    if (!Number.isNaN(Number.parseInt(search.query))) {
-      // NOTE: amount_text is a pg_function that casts amount to text
-      query.like("amount_text", `%${search.query}%`);
-    } else {
-      query.textSearch("decrypted_name", search.query, {
-        type: "websearch",
-        config: "english",
-      });
-    }
-  }
-
-  if (attachments === "exclude" || status?.includes("unfullfilled")) {
-    query.filter("transaction_attachments.id", "is", null);
   }
 
   if (status?.includes("fullfilled") || attachments === "include") {
-    query.select(`
-      *,
-      name:decrypted_name,
-      description:decrypted_description,
-      assigned:assigned_id(*),
-      attachments:transaction_attachments!inner(id,size,name),
-      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
-    `);
+    query.eq("is_fulfilled", true);
+  }
+
+  if (status?.includes("unfulfilled") || attachments === "exclude") {
+    query.eq("is_fulfilled", false);
   }
 
   if (status?.includes("excluded")) {
@@ -301,17 +237,6 @@ export async function getTransactionsQuery(
   }
 
   if (categories) {
-    query.select(
-      `
-      *,
-      name:decrypted_name,
-      description:decrypted_description,
-      assigned:assigned_id(*),
-      attachments:transaction_attachments(*),
-      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
-    `
-    );
-
     const matchCategory = categories
       .map((category) => {
         if (category === "uncategorized") {
@@ -333,34 +258,26 @@ export async function getTransactionsQuery(
     query.eq("category", "income");
   }
 
-  const { data, count } = await query.range(from, to).throwOnError();
+  const { data, count } = await query.range(from, to);
 
-  // Only calculate total amount when a filters are applied
-  // Investigate pg functions
-  const totalAmount =
-    Object.keys(filter).length > 0
-      ? (await query.limit(1000000).neq("category", "transfer"))?.data?.reduce(
-          (amount, item) => item.amount + amount,
-          0
-        )
-      : 0;
+  const totalAmount = data
+    ?.filter((transaction) => transaction.category !== "transfer")
+    ?.reduce((acc, { amount, currency }) => {
+      const existingCurrency = acc.find((item) => item.currency === currency);
 
-  const totalMissingAttachments = data?.reduce((acc, currentItem) => {
-    if (
-      currentItem.attachments?.length === 0 ||
-      currentItem?.status !== "completed"
-    ) {
-      return acc + 1;
-    }
-    return acc;
-  }, 0);
+      if (existingCurrency) {
+        existingCurrency.amount += amount;
+      } else {
+        acc.push({ amount, currency });
+      }
+      return acc;
+    }, [])
+    .sort((a, b) => a?.amount - b?.amount);
 
   return {
     meta: {
-      count,
       totalAmount,
-      totalMissingAttachments,
-      currency: data?.at(0)?.currency,
+      count,
     },
     data: data?.map((transaction) => ({
       ...transaction,

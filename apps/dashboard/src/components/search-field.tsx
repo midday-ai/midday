@@ -3,13 +3,22 @@
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { useQueryState } from "nuqs";
+import { useHotkeys } from "react-hotkeys-hook";
 
-export function SearchField({ placeholder }) {
+type Props = {
+  placeholder: string;
+};
+
+export function SearchField({ placeholder }: Props) {
   const [search, setSearch] = useQueryState("q", {
     shallow: false,
   });
 
-  const handleSearch = (evt) => {
+  useHotkeys("esc", () => setSearch(null), {
+    enableOnFormTags: true,
+  });
+
+  const handleSearch = (evt: React.ChangeEvent<HTMLInputElement>) => {
     const value = evt.target.value;
 
     if (value) {
@@ -21,11 +30,11 @@ export function SearchField({ placeholder }) {
 
   return (
     <div className="max-w-[350px] relative w-full">
-      <Icons.Search className="absolute pointer-events-none left-3 top-[10px]" />
+      <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
       <Input
         placeholder={placeholder}
         className="pl-9 w-full"
-        defaultValue={search}
+        value={search ?? ""}
         onChange={handleSearch}
         autoComplete="off"
         autoCapitalize="none"

@@ -24,6 +24,7 @@ import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
 import { DataTableHeader } from "./data-table-header";
 import { ExportBar } from "./export-bar";
+import { Cookies } from "@/utils/constants";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -32,6 +33,7 @@ interface DataTableProps<TData, TValue> {
 
 export function DataTable<TData, TValue>({
   columns,
+  query,
   data: initialData,
   pageSize,
   loadMore,
@@ -51,6 +53,10 @@ export function DataTable<TData, TValue>({
     useTransactionsStore();
 
   const [transactionId, setTransactionId] = useQueryState("id");
+
+  const selectedRows = Object.keys(rowSelection).length;
+  const showBottomBar =
+    (hasFilters && !selectedRows) || (query && !selectedRows);
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     initialColumnVisibility ?? {}
@@ -174,7 +180,7 @@ export function DataTable<TData, TValue>({
 
   useEffect(() => {
     updateColumnVisibilityAction({
-      key: "transactions-columns",
+      key: Cookies.TransactionsColumns,
       data: columnVisibility,
     });
   }, [columnVisibility]);
@@ -245,19 +251,14 @@ export function DataTable<TData, TValue>({
         ids={data?.map(({ id }) => id)}
       />
 
-      {meta.count > 0 && (
-        <BottomBar
-          show={hasFilters && !Object.keys(rowSelection).length}
-          page={page}
-          count={meta.count}
-          hasNextPage={hasNextPage}
-          totalAmount={meta.totalAmount}
-          currency={meta.currency}
-        />
-      )}
+      <BottomBar
+        show={showBottomBar}
+        count={meta.count}
+        totalAmount={meta.totalAmount}
+      />
 
       <ExportBar
-        selected={Object.keys(rowSelection).length}
+        selected={selectedRows}
         deselectAll={() => table.toggleAllPageRowsSelected(false)}
         transactionIds={Object.keys(rowSelection)}
       />
