@@ -14,16 +14,16 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 
-type Props = {
-  selectedId: string;
-  isLoading: boolean;
-  onSelect: (selectedId: string) => void;
-};
-
 type User = {
   id: string;
   avatar_url?: string | null;
   full_name: string | null;
+};
+
+type Props = {
+  selectedId: string;
+  isLoading: boolean;
+  onSelect: (user?: User) => void;
 };
 
 export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
@@ -59,7 +59,10 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
           <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
         </div>
       ) : (
-        <Select value={value} onValueChange={onSelect}>
+        <Select
+          value={value}
+          onValueChange={(id) => onSelect(users.find((user) => user.id === id))}
+        >
           <SelectTrigger
             id="assign"
             className="line-clamp-1 truncate"

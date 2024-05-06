@@ -1,7 +1,4 @@
-"use client";
-
 import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
-import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
@@ -31,21 +28,28 @@ import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { TransactionBankAccount } from "./transaction-bank-account";
+import { UpdateTransactionValues } from "@/actions/schema";
 
 type Props = {
   data: any;
   ids?: string[];
+  updateTransaction: (
+    values: UpdateTransactionValues,
+    optimisticData: any
+  ) => void;
 };
 
-export function TransactionDetails({ data: initialData, ids }: Props) {
+export function TransactionDetails({
+  data: initialData,
+  ids,
+  updateTransaction,
+}: Props) {
   const [data, setData] = useState(initialData);
   const [transactionId, setTransactionId] = useQueryState("id");
-
   const { toast } = useToast();
   const t = useI18n();
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
-  const updateTransaction = useAction(updateTransactionAction);
   const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
 
   useHotkeys("esc", () => setTransactionId(null));
@@ -55,7 +59,7 @@ export function TransactionDetails({ data: initialData, ids }: Props) {
   useHotkeys(
     "ArrowUp",
     () => {
-      const currentIndex = ids?.indexOf(transactionId) ?? 0;
+      const currentIndex = ids?.indexOf(data.id) ?? 0;
       const prevId = ids[currentIndex - 1];
 
       if (prevId) {
@@ -68,7 +72,7 @@ export function TransactionDetails({ data: initialData, ids }: Props) {
   useHotkeys(
     "ArrowDown",
     () => {
-      const currentIndex = ids?.indexOf(transactionId) ?? 0;
+      const currentIndex = ids?.indexOf(data.id) ?? 0;
       const nextId = ids[currentIndex + 1];
 
       if (nextId) {
@@ -88,7 +92,7 @@ export function TransactionDetails({ data: initialData, ids }: Props) {
   useEffect(() => {
     async function fetchData() {
       try {
-        const transaction = await getTransactionQuery(supabase, transactionId);
+        const transaction = await getTransactionQuery(supabase, data.id);
         setData(transaction);
         setLoading(false);
       } catch {
@@ -96,17 +100,13 @@ export function TransactionDetails({ data: initialData, ids }: Props) {
       }
     }
 
-    if (!data && transactionId) {
+    if (!data) {
       fetchData();
     }
-  }, [data, transactionId]);
-
-  const handleOnAssign = (assigned_id: string) => {
-    updateTransaction.execute({ assigned_id, id: data.id });
-  };
+  }, [data]);
 
   const handleOnChangeCategory = async (category: string) => {
-    updateTransaction.execute({ id: data.id, category });
+    updateTransaction({ id: data.id, category });
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
@@ -234,7 +234,12 @@ export function TransactionDetails({ data: initialData, ids }: Props) {
           <AssignUser
             isLoading={isLoading}
             selectedId={data?.assigned?.id ?? undefined}
-            onSelect={handleOnAssign}
+            onSelect={(user) => {
+              updateTransaction(
+                { assigned_id: user?.id, id: data.id },
+                { assigned: user }
+              );
+            }}
           />
         </div>
       </div>
@@ -243,14 +248,18 @@ export function TransactionDetails({ data: initialData, ids }: Props) {
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
           <AccordionContent>
-            <Attachments id={data?.id} data={data?.attachments} />
+            <Attachments id={data.id} data={data?.attachments} />
           </AccordionContent>
         </AccordionItem>
 
         <AccordionItem value="note">
           <AccordionTrigger>Note</AccordionTrigger>
           <AccordionContent>
-            <Note id={transactionId} defaultValue={data?.note} />
+            <Note
+              id={data.id}
+              defaultValue={data?.note}
+              updateTransaction={updateTransaction}
+            />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

@@ -25,6 +25,7 @@ import { BottomBar } from "./bottom-bar";
 import { DataTableHeader } from "./data-table-header";
 import { ExportBar } from "./export-bar";
 import { Cookies } from "@/utils/constants";
+import { UpdateTransactionValues } from "@/actions/schema";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -88,6 +89,27 @@ export function DataTable<TData, TValue>({
     },
   });
 
+  const handleUpdateTransaction = (
+    values: UpdateTransactionValues,
+    optimisticData?: any
+  ) => {
+    setData((prev) => {
+      return prev.map((item) => {
+        if (item.id === values.id) {
+          return {
+            ...item,
+            ...values,
+            ...(optimisticData ?? {}),
+          };
+        }
+
+        return item;
+      });
+    });
+
+    updateTransaction.execute(values);
+  };
+
   const deleteTransactions = useAction(deleteTransactionsAction, {
     onError: () => {
       toast({
@@ -97,6 +119,14 @@ export function DataTable<TData, TValue>({
       });
     },
   });
+
+  const handleDeleteTransactions = (ids: string[]) => {
+    setData((prev) => {
+      return prev.filter((item) => !ids.includes(item.id));
+    });
+
+    deleteTransactions.execute({ ids });
+  };
 
   const setOpen = (id: string | boolean) => {
     if (id) {
@@ -130,8 +160,8 @@ export function DataTable<TData, TValue>({
     meta: {
       setOpen,
       copyUrl: handleCopyUrl,
-      updateTransaction,
-      deleteTransactions,
+      updateTransaction: handleUpdateTransaction,
+      deleteTransactions: handleDeleteTransactions,
     },
     state: {
       rowSelection,
@@ -255,6 +285,7 @@ export function DataTable<TData, TValue>({
         setOpen={setOpen}
         data={selectedTransaction}
         ids={data?.map(({ id }) => id)}
+        updateTransaction={handleUpdateTransaction}
       />
 
       <BottomBar

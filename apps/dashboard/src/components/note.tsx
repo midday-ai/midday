@@ -1,13 +1,15 @@
-"use client";
-
-import { updateTransactionAction } from "@/actions/update-transaction-action";
+import { UpdateTransactionValues } from "@/actions/schema";
 import { Textarea } from "@midday/ui/textarea";
-import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
-export function Note({ id, defaultValue }) {
+type Props = {
+  id: string;
+  defaultValue: string;
+  updateTransaction: (values: UpdateTransactionValues) => void;
+};
+
+export function Note({ id, defaultValue, updateTransaction }: Props) {
   const [value, setValue] = useState(defaultValue);
-  const updateTransaction = useAction(updateTransactionAction);
 
   return (
     <Textarea
@@ -18,7 +20,7 @@ export function Note({ id, defaultValue }) {
       placeholder="Note"
       className="min-h-[100px] resize-none"
       onBlur={() =>
-        updateTransaction.execute({
+        updateTransaction({
           id,
           note: value,
         })
