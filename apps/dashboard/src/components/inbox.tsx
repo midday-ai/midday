@@ -17,9 +17,10 @@ export async function Inbox({ ascending, query }: Props) {
     to: 10000,
     teamId: user.data.team_id,
     ascending,
+    searchQuery: query,
   });
 
-  if (!inbox?.data?.length) {
+  if (!inbox?.data?.length && !query) {
     return <InboxEmpty inboxId={user?.data?.team?.inbox_id} />;
   }
 
@@ -31,7 +32,6 @@ export async function Inbox({ ascending, query }: Props) {
       forwardEmail={user?.data?.team?.inbox_email}
       inboxForwarding={user?.data?.team?.inbox_forwarding}
       ascending={ascending}
-      query={query}
     />
   );
 }

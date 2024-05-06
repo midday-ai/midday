@@ -335,7 +335,6 @@ export const searchSchema = z.object({
   query: z.string().min(1),
   type: z.enum(["inbox"]),
   limit: z.number().optional(),
-  threshold: z.number().optional(),
 });
 
 export const inboxOrder = z.boolean();

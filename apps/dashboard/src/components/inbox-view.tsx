@@ -1,16 +1,13 @@
 "use client";
 
 import { updateInboxAction } from "@/actions/inbox/update";
-import { searchAction } from "@/actions/search-action";
 import { InboxDetails } from "@/components/inbox-details";
 import { InboxList } from "@/components/inbox-list";
 import { createClient } from "@midday/supabase/client";
 import { TabsContent } from "@midday/ui/tabs";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
-import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
-import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { InboxHeader } from "./inbox-header";
@@ -24,7 +21,6 @@ type Props = {
   inboxId: string;
   teamId: string;
   ascending: boolean;
-  query?: string;
 };
 
 export const TAB_ITEMS = ["todo", "done"];
@@ -46,32 +42,17 @@ export function InboxView({
   teamId,
   inboxId,
   ascending,
-  query,
 }: Props) {
   const supabase = createClient();
   const { toast } = useToast();
-  const [isLoading, setLoading] = useState(Boolean(query));
   const [items, setItems] = useState(initialItems);
 
   const [params, setParams] = useQueryStates({
     inboxId: parseAsString.withDefault(
-      items.filter(todoFilter)?.at(0)?.id ?? null
+      items?.filter(todoFilter)?.at(0)?.id ?? null
     ),
     q: parseAsString.withDefault(""),
     tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
-  });
-
-  const debouncedSearchTerm = useDebounce(params.q, 300);
-
-  const search = useAction(searchAction, {
-    onSuccess: (data) => {
-      setLoading(false);
-
-      if (data.length) {
-        setParams({ id: data?.at(0)?.id });
-      }
-    },
-    onError: () => setLoading(false),
   });
 
   useEffect(() => {
@@ -125,27 +106,9 @@ export function InboxView({
     };
   }, [teamId]);
 
-  useEffect(() => {
-    if (params.q) {
-      setLoading(true);
-    }
-  }, [params.q]);
-
-  useEffect(() => {
-    if (debouncedSearchTerm) {
-      search.execute({
-        query: debouncedSearchTerm,
-        type: "inbox",
-        threshold: 0.8,
-      });
-    }
-  }, [debouncedSearchTerm]);
-
-  const data = params.q ? search.result?.data || [] : items;
-
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
-    data,
+    items,
     (state, payload) => {
       if (payload.status === "deleted") {
         return state.filter((item) => item.id !== payload.id);
@@ -171,11 +134,11 @@ export function InboxView({
 
     switch (tab) {
       case "todo":
-        return optimisticData.filter(todoFilter);
+        return optimisticData?.filter(todoFilter);
       case "done":
-        return optimisticData.filter(doneFilter);
+        return optimisticData?.filter(doneFilter);
       default:
-        return optimisticData.filter(todoFilter);
+        return optimisticData?.filter(todoFilter);
     }
   };
 
@@ -183,10 +146,10 @@ export function InboxView({
   const selectedItems = currentItems?.find(
     (item) => item.id === params.inboxId
   );
-  const currentIndex = currentItems.findIndex(
+  const currentIndex = currentItems?.findIndex(
     (item) => item.id === params.inboxId
   );
-  const currentTabEmpty = Boolean(currentItems.length === 0);
+  const currentTabEmpty = Boolean(currentItems?.length === 0);
 
   const selectNextItem = () => {
     const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
@@ -270,7 +233,6 @@ export function InboxView({
 
   return (
     <InboxStructure
-      isLoading={isLoading}
       onChangeTab={(tab) => {
         const items = getCurrentItems(tab);
         setParams({ inboxId: items?.at(0)?.id ?? null, q: null });
@@ -292,7 +254,10 @@ export function InboxView({
                 items={currentItems}
                 hasQuery={Boolean(params.q)}
                 onClear={() =>
-                  setParams({ q: null, inboxId: currentItems?.id ?? null })
+                  setParams(
+                    { q: null, inboxId: currentItems?.id ?? null },
+                    { shallow: false }
+                  )
                 }
               />
             </TabsContent>
@@ -301,7 +266,7 @@ export function InboxView({
           <InboxToolbar
             onAction={handleOnDelete}
             isFirst={currentIndex === 0}
-            isLast={currentIndex === currentItems.length - 1}
+            isLast={currentIndex === currentItems?.length - 1}
             onKeyPress={handleOnPaginate}
           />
         </>

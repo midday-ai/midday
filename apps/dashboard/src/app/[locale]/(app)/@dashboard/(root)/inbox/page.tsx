@@ -17,10 +17,10 @@ export default async function InboxPage({ searchParams }: Props) {
   const ascending =
     cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
 
+  const loaderKey = `${ascending.toString()}${searchParams?.q}`;
+
   return (
-    <Suspense
-      fallback={<InboxViewSkeleton key={ascending.toString()} ascending />}
-    >
+    <Suspense key={loaderKey} fallback={<InboxViewSkeleton ascending />}>
       <Inbox ascending={ascending} query={searchParams?.q} />
     </Suspense>
   );

@@ -647,19 +647,44 @@ type GetInboxQueryParams = {
   done?: boolean;
   todo?: boolean;
   ascending?: boolean;
+  searchQuery?: string;
 };
 
 export async function getInboxQuery(
   supabase: Client,
   params: GetInboxQueryParams
 ) {
-  const { from = 0, to = 10, teamId, done, todo, ascending = false } = params;
+  const {
+    from = 0,
+    to = 10,
+    teamId,
+    done,
+    todo,
+    searchQuery,
+    ascending = false,
+  } = params;
+
+  const columns = [
+    "id",
+    "file_name",
+    "file_path",
+    "display_name",
+    "transaction_id",
+    "amount",
+    "currency",
+    "content_type",
+    "due_date",
+    "status",
+    "forwarded_to",
+    "created_at",
+    "website",
+    "due_date",
+    "transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
+  ];
 
   const query = supabase
     .from("inbox")
-    .select(
-      "id, file_name, file_path, display_name, transaction_id, amount, currency, content_type, due_date, status, forwarded_to, created_at, website, due_date, transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)"
-    )
+    .select(columns.join(","))
     .eq("team_id", teamId)
     .order("created_at", { ascending });
 
@@ -671,8 +696,15 @@ export async function getInboxQuery(
     query.is("transaction_id", null);
   }
 
-  const { data } = await query.range(from, to);
+  if (searchQuery) {
+    if (!Number.isNaN(Number.parseInt(searchQuery))) {
+      query.like("inbox_amount_text", `%${searchQuery}%`);
+    } else {
+      query.textSearch("fts", `${searchQuery}:*`);
+    }
+  }
 
+  const { data } = await query.range(from, to);
   // TODO: Fix neq in query
   const filteredData = data?.filter((item) => item.status !== "deleted");
 

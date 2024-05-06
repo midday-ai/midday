@@ -34,11 +34,16 @@ export function InboxHeader({
       </TabsList>
 
       <InboxSearch
-        onClear={() => setParams({ id: null, q: null })}
+        onClear={() => setParams({ id: null, q: null }, { shallow: false })}
         onArrowDown={() => handleOnPaginate?.("down")}
         value={params.q}
         onChange={(value) => {
-          setParams({ id: null, q: value });
+          setParams(
+            { id: null, q: value },
+            {
+              shallow: false,
+            }
+          );
           onChange?.(value);
         }}
       />

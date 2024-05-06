@@ -20,7 +20,7 @@ type InboxListProps = {
 };
 
 export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
-  if (hasQuery && !items.length) {
+  if (hasQuery && !items?.length) {
     return (
       <div className="h-screen -mt-[140px] w-full flex items-center justify-center flex-col">
         <div className="flex flex-col items-center">
@@ -38,7 +38,7 @@ export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
     );
   }
 
-  if (!items.length) {
+  if (!items?.length) {
     return (
       <div className="h-screen -mt-[140px] w-full flex items-center justify-center flex-col">
         <Icons.InboxEmpty size={32} />
