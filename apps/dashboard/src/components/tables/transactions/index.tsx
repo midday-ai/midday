@@ -25,7 +25,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
 
   // NOTE: When we have a filter we want to show all results so users can select
   // And handle all in once (export etc)
-  const { data, meta } = await getTransactions({
+  const transactions = await getTransactions({
     to: hasFilters ? maxItems : pageSize,
     from: 0,
     filter,
@@ -33,7 +33,9 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
     searchQuery: query,
   });
 
-  async function loadMore({ from, to }) {
+  const { data, meta } = transactions ?? {};
+
+  async function loadMore({ from, to }: { from: number; to: number }) {
     "use server";
 
     return getTransactions({
@@ -57,7 +59,9 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
     return <NoResults hasFilters={hasFilters} />;
   }
 
-  const hasNextPage = meta.count / (page + 1) > pageSize;
+  const hasNextPage = Boolean(
+    meta?.count && meta.count / (page + 1) > pageSize
+  );
 
   return (
     <DataTable

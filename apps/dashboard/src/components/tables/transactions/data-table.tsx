@@ -29,6 +29,13 @@ import { Cookies } from "@/utils/constants";
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  hasNextPage?: boolean;
+  hasFilters?: boolean;
+  loadMore: () => void;
+  query?: string;
+  pageSize: number;
+  meta: Record<string, string>;
+  initialColumnVisibility: VisibilityState;
 }
 
 export function DataTable<TData, TValue>({
@@ -37,11 +44,10 @@ export function DataTable<TData, TValue>({
   data: initialData,
   pageSize,
   loadMore,
-  meta,
+  meta: pageMeta,
   hasFilters,
   hasNextPage: initialHasNextPage,
   initialColumnVisibility,
-  page,
 }: DataTableProps<TData, TValue>) {
   const { toast } = useToast();
   const [rowSelection, setRowSelection] = useState({});
@@ -253,8 +259,8 @@ export function DataTable<TData, TValue>({
 
       <BottomBar
         show={showBottomBar}
-        count={meta.count}
-        totalAmount={meta.totalAmount}
+        count={pageMeta?.count}
+        totalAmount={pageMeta?.totalAmount}
       />
 
       <ExportBar

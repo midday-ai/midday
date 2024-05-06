@@ -1,14 +1,19 @@
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 
-export function AssignedUser({ user }) {
+type Props = {
+  avatarUrl?: string | null;
+  fullName?: string | null;
+};
+
+export function AssignedUser({ avatarUrl, fullName }: Props) {
   return (
     <div className="flex space-x-2 mt-1">
-      {user?.avatar_url && (
+      {avatarUrl && (
         <Avatar className="h-5 w-5">
-          <AvatarImage src={user.avatar_url} alt={user?.full_name} />
+          <AvatarImage src={avatarUrl} alt={fullName ?? ""} />
         </Avatar>
       )}
-      <span className="truncate">{user?.full_name.split(" ").at(0)}</span>
+      <span className="truncate">{fullName?.split(" ").at(0)}</span>
     </div>
   );
 }

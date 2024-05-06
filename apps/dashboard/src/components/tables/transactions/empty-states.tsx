@@ -4,7 +4,11 @@ import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useRouter } from "next/navigation";
 
-export function NoResults({ hasFilters }) {
+type Props = {
+  hasFilters?: boolean;
+};
+
+export function NoResults({ hasFilters }: Props) {
   const router = useRouter();
 
   return (

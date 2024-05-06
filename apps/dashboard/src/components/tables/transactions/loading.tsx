@@ -8,7 +8,7 @@ const data = [...Array(40)].map((_, i) => ({ id: i.toString() }));
 export function Loading() {
   return (
     <Table>
-      <DataTableHeader />
+      <DataTableHeader loading />
 
       <TableBody>
         {data?.map((row) => (
@@ -39,9 +39,10 @@ export function Loading() {
                 <Skeleton className="h-3.5 w-[70%]" />
               </div>
             </TableCell>
-            <TableCell className="100px">
+            <TableCell className="w-50px">
               <Skeleton className="h-[20px] w-[20px] rounded-full" />
             </TableCell>
+            <TableCell className="w-60px"></TableCell>
           </TableRow>
         ))}
       </TableBody>

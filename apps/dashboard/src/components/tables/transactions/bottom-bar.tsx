@@ -14,7 +14,7 @@ import { AnimatePresence, motion } from "framer-motion";
 type Props = {
   count: number;
   show: boolean;
-  totalAmount: {
+  totalAmount?: {
     amount: number;
     currency: string;
   }[];
@@ -22,19 +22,21 @@ type Props = {
 
 export function BottomBar({ count, show, totalAmount }: Props) {
   const locale = useCurrentLocale();
-  const multiCurrency = totalAmount.length > 1;
+  const multiCurrency = totalAmount && totalAmount.length > 1;
   const t = useI18n();
-  const first = totalAmount.at(0);
+  const first = totalAmount && totalAmount.at(0);
 
-  const amountPerCurrency = totalAmount
-    .map((total) =>
-      formatAmount({
-        amount: total?.amount,
-        currency: total.currency,
-        locale,
-      })
-    )
-    .join(", ");
+  const amountPerCurrency =
+    totalAmount &&
+    totalAmount
+      .map((total) =>
+        formatAmount({
+          amount: total?.amount,
+          currency: total.currency,
+          locale,
+        })
+      )
+      .join(", ");
 
   return (
     <AnimatePresence>

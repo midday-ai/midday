@@ -7,7 +7,12 @@ import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
-export function DataTableHeader({ table }) {
+type Props = {
+  table?: any;
+  loading?: boolean;
+};
+
+export function DataTableHeader({ table, loading }: Props) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -34,6 +39,7 @@ export function DataTableHeader({ table }) {
   );
 
   const isVisible = (id) =>
+    loading ||
     table
       ?.getAllLeafColumns()
       .find((col) => col.id === id)
@@ -41,7 +47,7 @@ export function DataTableHeader({ table }) {
 
   return (
     <TableHeader>
-      <TableRow className="h-[45px]">
+      <TableRow className="h-[45px] hover:bg-transparent">
         <TableHead className="w-[50px]">
           <Checkbox
             checked={
