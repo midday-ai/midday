@@ -1,16 +1,19 @@
-"use client";
-
 import { exportTransactionsAction } from "@/actions/export-transactions-action";
 import { useExportStore } from "@/store/export";
 import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
-export function ExportBar({ selected, deselectAll, transactionIds }) {
+type Props = {
+  selected: boolean;
+  deselectAll: () => void;
+  transactionIds: string[];
+};
+
+export function ExportBar({ selected, deselectAll, transactionIds }: Props) {
   const { toast } = useToast();
   const { setExportId } = useExportStore();
   const [isOpen, setOpen] = useState(false);
@@ -44,7 +47,7 @@ export function ExportBar({ selected, deselectAll, transactionIds }) {
         animate={{ y: isOpen ? 0 : 100 }}
         initial={{ y: 100 }}
       >
-        <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 flex h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
+        <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
           <span className="text-sm">{selected} selected</span>
 
           <div className="flex items-center space-x-4">

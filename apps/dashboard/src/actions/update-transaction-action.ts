@@ -16,6 +16,7 @@ export const updateTransactionAction = action(
     const supabase = createClient();
     const user = await getUser();
     const teamId = user.data.team_id;
+
     const { data } = await updateTransaction(supabase, id, payload);
 
     // Add category to global transaction_enrichments

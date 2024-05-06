@@ -243,7 +243,7 @@ export const columns: ColumnDef<Transaction>[] = [
               {!row.original?.manual && row.original.status === "excluded" && (
                 <DropdownMenuItem
                   onClick={() => {
-                    table.options.meta?.updateTransaction.execute({
+                    table.options.meta?.updateTransaction({
                       id: row.original.id,
                       status: "posted",
                     });
@@ -257,7 +257,7 @@ export const columns: ColumnDef<Transaction>[] = [
                 row.original.status !== "completed" && (
                   <DropdownMenuItem
                     onClick={() => {
-                      table.options.meta?.updateTransaction.execute({
+                      table.options.meta?.updateTransaction({
                         id: row.original.id,
                         status: "completed",
                       });
@@ -271,7 +271,7 @@ export const columns: ColumnDef<Transaction>[] = [
                 row.original.status === "completed" && (
                   <DropdownMenuItem
                     onClick={() => {
-                      table.options.meta?.updateTransaction.execute({
+                      table.options.meta?.updateTransaction({
                         id: row.original.id,
                         status: "posted",
                       });
@@ -284,7 +284,7 @@ export const columns: ColumnDef<Transaction>[] = [
               {!row.original?.manual && row.original.status !== "excluded" && (
                 <DropdownMenuItem
                   onClick={() => {
-                    table.options.meta?.updateTransaction.execute({
+                    table.options.meta?.updateTransaction({
                       id: row.original.id,
                       status: "excluded",
                     });
@@ -316,7 +316,7 @@ export const columns: ColumnDef<Transaction>[] = [
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={() => {
-                  table.options.meta?.deleteTransactions.execute({
+                  table.options.meta?.deleteTransactions({
                     ids: [row.original.id],
                   });
                 }}

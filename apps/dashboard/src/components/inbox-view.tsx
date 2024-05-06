@@ -152,9 +152,6 @@ export function InboxView({
       }
 
       return items.map((item) => {
-        const removeTransaction =
-          item?.transaction_id && payload.transaction_id;
-
         if (item.id === payload.id) {
           return {
             ...item,

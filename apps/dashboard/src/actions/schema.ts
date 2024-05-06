@@ -152,6 +152,8 @@ export const updateTransactionSchema = z.object({
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
 });
 
+export type UpdateTransactionValues = z.infer<typeof updateTransactionSchema>;
+
 export const deleteTransactionSchema = z.object({
   ids: z.array(z.string()),
 });
