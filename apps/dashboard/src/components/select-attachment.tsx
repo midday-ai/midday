@@ -23,7 +23,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
   const [isLoading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
 
-  const debouncedSearchTerm = useDebounce(query, 100);
+  const debouncedSearchTerm = useDebounce(query, 300);
 
   const search = useAction(searchAction, {
     onSuccess: (data) => {
