@@ -1,6 +1,7 @@
 "use client";
 
 import { updateInboxAction } from "@/actions/inbox/update";
+import { searchAction } from "@/actions/search-action";
 import { InboxDetails } from "@/components/inbox-details";
 import { InboxList } from "@/components/inbox-list";
 import { createClient } from "@midday/supabase/client";
@@ -8,11 +9,13 @@ import { TabsContent } from "@midday/ui/tabs";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { InboxHeader } from "./inbox-header";
 import { InboxStructure } from "./inbox-structure";
 import { InboxToolbar } from "./inbox-toolbar";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   items: any[];
@@ -21,6 +24,7 @@ type Props = {
   inboxId: string;
   teamId: string;
   ascending: boolean;
+  query?: string;
 };
 
 export const TAB_ITEMS = ["todo", "done"];
@@ -42,17 +46,30 @@ export function InboxView({
   teamId,
   inboxId,
   ascending,
+  query,
 }: Props) {
   const supabase = createClient();
   const { toast } = useToast();
+  const [isLoading, setLoading] = useState(Boolean(query));
   const [items, setItems] = useState(initialItems);
 
   const [params, setParams] = useQueryStates({
     inboxId: parseAsString.withDefault(
-      items?.filter(todoFilter)?.at(0)?.id ?? null
+      items.filter(todoFilter)?.at(0)?.id ?? null
     ),
     q: parseAsString.withDefault(""),
     tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
+  });
+
+  const debouncedSearchTerm = useDebounce(params.q, 300);
+
+  const search = useAction(searchAction, {
+    onSuccess: (data) => {
+      setLoading(false);
+
+      setParams({ id: data?.at(0)?.id });
+    },
+    onError: () => setLoading(false),
   });
 
   useEffect(() => {
@@ -106,9 +123,26 @@ export function InboxView({
     };
   }, [teamId]);
 
+  useEffect(() => {
+    if (params.q) {
+      setLoading(true);
+    }
+  }, [params.q]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm) {
+      search.execute({
+        query: debouncedSearchTerm,
+        type: "inbox",
+      });
+    }
+  }, [debouncedSearchTerm]);
+
+  const data = params.q ? search.result?.data || [] : items;
+
   const { execute: updateInbox, optimisticData } = useOptimisticAction(
     updateInboxAction,
-    items,
+    data,
     (state, payload) => {
       if (payload.status === "deleted") {
         return state.filter((item) => item.id !== payload.id);
@@ -162,12 +196,12 @@ export function InboxView({
   const handleOnPaginate = (direction) => {
     if (direction === "up") {
       const index = currentIndex - 1;
-      setParams({ inboxId: currentItems.at(index)?.id });
+      setParams({ inboxId: currentItems?.at(index)?.id });
     }
 
     if (direction === "down") {
       const index = currentIndex + 1;
-      setParams({ inboxId: currentItems.at(index)?.id });
+      setParams({ inboxId: currentItems?.at(index)?.id });
     }
 
     const currentTabIndex = TAB_ITEMS.indexOf(params.tab);
@@ -233,6 +267,7 @@ export function InboxView({
 
   return (
     <InboxStructure
+      isLoading={isLoading}
       onChangeTab={(tab) => {
         const items = getCurrentItems(tab);
         setParams({ inboxId: items?.at(0)?.id ?? null, q: null });
@@ -254,10 +289,7 @@ export function InboxView({
                 items={currentItems}
                 hasQuery={Boolean(params.q)}
                 onClear={() =>
-                  setParams(
-                    { q: null, inboxId: currentItems?.id ?? null },
-                    { shallow: false }
-                  )
+                  setParams({ q: null, inboxId: currentItems?.id ?? null })
                 }
               />
             </TabsContent>

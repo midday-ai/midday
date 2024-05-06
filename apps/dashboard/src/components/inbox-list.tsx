@@ -51,7 +51,7 @@ export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
   }
 
   // Only run when first item has status=new or deleted
-  const initialAnimation = items.at(0)?.status === "new" && {
+  const initialAnimation = items?.at(0)?.status === "new" && {
     opacity: 0,
     height: 0,
   };
@@ -65,7 +65,7 @@ export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
     <ScrollArea className="h-screen">
       <div className="flex flex-col gap-4 pb-[250px]">
         <AnimatePresence initial={false}>
-          {items.map((item) => {
+          {items?.map((item) => {
             return (
               <motion.div
                 key={item.id}

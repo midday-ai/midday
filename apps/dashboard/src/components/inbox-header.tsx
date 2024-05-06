@@ -3,6 +3,7 @@ import { parseAsString, useQueryStates } from "nuqs";
 import { InboxOrdering } from "./inbox-ordering";
 import { InboxSearch } from "./inbox-search";
 import { InboxSettingsModal } from "./modals/inbox-settings-modal";
+import { startTransition } from "react";
 
 type Props = {
   forwardEmail: string;
@@ -21,10 +22,15 @@ export function InboxHeader({
   onChange,
   ascending,
 }: Props) {
-  const [params, setParams] = useQueryStates({
-    id: parseAsString,
-    q: parseAsString.withDefault(""),
-  });
+  const [params, setParams] = useQueryStates(
+    {
+      id: parseAsString,
+      q: parseAsString.withDefault(""),
+    },
+    {
+      startTransition,
+    }
+  );
 
   return (
     <div className="flex justify-center items-center space-x-4 mb-4">
@@ -34,16 +40,11 @@ export function InboxHeader({
       </TabsList>
 
       <InboxSearch
-        onClear={() => setParams({ id: null, q: null }, { shallow: false })}
+        onClear={() => setParams({ id: null, q: null })}
         onArrowDown={() => handleOnPaginate?.("down")}
         value={params.q}
         onChange={(value) => {
-          setParams(
-            { id: null, q: value },
-            {
-              shallow: false,
-            }
-          );
+          setParams({ id: null, q: value });
           onChange?.(value);
         }}
       />

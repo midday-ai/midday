@@ -134,7 +134,7 @@ export const Combobox = ({
                 classNameList
               )}
             >
-              {options.map(({ component: Component, ...option }) => {
+              {options?.map(({ component: Component, ...option }) => {
                 return (
                   <CommandItem
                     key={option.id}

@@ -20,6 +20,7 @@ export const searchAction = action(searchSchema, async (params) => {
           "id, file_name, amount, currency, file_path, content_type, due_date, display_name"
         )
         .eq("team_id", teamId)
+        .neq("status", "deleted")
         .order("created_at", { ascending: true });
 
       if (!Number.isNaN(Number.parseInt(searchQuery))) {
