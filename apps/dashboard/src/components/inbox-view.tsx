@@ -67,7 +67,9 @@ export function InboxView({
     onSuccess: (data) => {
       setLoading(false);
 
-      setParams({ id: data?.at(0)?.id });
+      if (data?.length) {
+        setParams({ id: data?.at(0)?.id });
+      }
     },
     onError: () => setLoading(false),
   });
@@ -134,6 +136,7 @@ export function InboxView({
       search.execute({
         query: debouncedSearchTerm,
         type: "inbox",
+        limit: 100,
       });
     }
   }, [debouncedSearchTerm]);
