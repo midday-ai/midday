@@ -56,27 +56,25 @@ export function TransactionDetails({
 
   const enabled = Boolean(ids?.length);
 
-  useHotkeys(
-    "ArrowUp",
-    () => {
-      const currentIndex = ids?.indexOf(data?.id) ?? 0;
-      const prevId = ids[currentIndex - 1];
+  const ref = useHotkeys(
+    "ArrowUp, ArrowDown",
+    ({ key }) => {
+      if (key === "ArrowUp") {
+        const currentIndex = ids?.indexOf(data?.id) ?? 0;
+        const prevId = ids[currentIndex - 1];
 
-      if (prevId) {
-        setTransactionId(prevId);
+        if (prevId) {
+          setTransactionId(prevId);
+        }
       }
-    },
-    { enabled }
-  );
 
-  useHotkeys(
-    "ArrowDown",
-    () => {
-      const currentIndex = ids?.indexOf(data?.id) ?? 0;
-      const nextId = ids[currentIndex + 1];
+      if (key === "ArrowDown") {
+        const currentIndex = ids?.indexOf(data?.id) ?? 0;
+        const nextId = ids[currentIndex + 1];
 
-      if (nextId) {
-        setTransactionId(nextId);
+        if (nextId) {
+          setTransactionId(nextId);
+        }
       }
     },
     { enabled }
@@ -106,7 +104,7 @@ export function TransactionDetails({
   }, [data]);
 
   const handleOnChangeCategory = async (category: string) => {
-    updateTransaction({ id: data?.id, category });
+    updateTransaction({ id: data?.id, category }, { category });
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
@@ -151,7 +149,7 @@ export function TransactionDetails({
   }
 
   return (
-    <>
+    <div ref={ref}>
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
@@ -265,6 +263,6 @@ export function TransactionDetails({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </>
+    </div>
   );
 }
