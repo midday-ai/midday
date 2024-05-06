@@ -19,7 +19,7 @@ export async function Inbox({ ascending, query }: Props) {
     ascending,
   });
 
-  if (!inbox?.data?.length) {
+  if (!inbox?.data?.length && !query) {
     return <InboxEmpty inboxId={user?.data?.team?.inbox_id} />;
   }
 

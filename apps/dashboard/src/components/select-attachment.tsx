@@ -41,7 +41,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
     }
   }, [debouncedSearchTerm]);
 
-  const options = items.map((item) => ({
+  const options = items?.map((item) => ({
     id: item.id,
     name: item.display_name,
     data: item,

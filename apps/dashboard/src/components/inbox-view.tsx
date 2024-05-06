@@ -8,7 +8,6 @@ import { createClient } from "@midday/supabase/client";
 import { TabsContent } from "@midday/ui/tabs";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
-import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
@@ -16,6 +15,7 @@ import { useEffect, useState } from "react";
 import { InboxHeader } from "./inbox-header";
 import { InboxStructure } from "./inbox-structure";
 import { InboxToolbar } from "./inbox-toolbar";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   items: any[];
@@ -67,7 +67,7 @@ export function InboxView({
     onSuccess: (data) => {
       setLoading(false);
 
-      if (data.length) {
+      if (data?.length) {
         setParams({ id: data?.at(0)?.id });
       }
     },
@@ -136,7 +136,7 @@ export function InboxView({
       search.execute({
         query: debouncedSearchTerm,
         type: "inbox",
-        threshold: 0.8,
+        limit: 100,
       });
     }
   }, [debouncedSearchTerm]);
@@ -171,11 +171,11 @@ export function InboxView({
 
     switch (tab) {
       case "todo":
-        return optimisticData.filter(todoFilter);
+        return optimisticData?.filter(todoFilter);
       case "done":
-        return optimisticData.filter(doneFilter);
+        return optimisticData?.filter(doneFilter);
       default:
-        return optimisticData.filter(todoFilter);
+        return optimisticData?.filter(todoFilter);
     }
   };
 
@@ -183,10 +183,10 @@ export function InboxView({
   const selectedItems = currentItems?.find(
     (item) => item.id === params.inboxId
   );
-  const currentIndex = currentItems.findIndex(
+  const currentIndex = currentItems?.findIndex(
     (item) => item.id === params.inboxId
   );
-  const currentTabEmpty = Boolean(currentItems.length === 0);
+  const currentTabEmpty = Boolean(currentItems?.length === 0);
 
   const selectNextItem = () => {
     const selectIndex = currentIndex > 0 ? currentIndex - 1 : 1;
@@ -199,12 +199,12 @@ export function InboxView({
   const handleOnPaginate = (direction) => {
     if (direction === "up") {
       const index = currentIndex - 1;
-      setParams({ inboxId: currentItems.at(index)?.id });
+      setParams({ inboxId: currentItems?.at(index)?.id });
     }
 
     if (direction === "down") {
       const index = currentIndex + 1;
-      setParams({ inboxId: currentItems.at(index)?.id });
+      setParams({ inboxId: currentItems?.at(index)?.id });
     }
 
     const currentTabIndex = TAB_ITEMS.indexOf(params.tab);
@@ -301,7 +301,7 @@ export function InboxView({
           <InboxToolbar
             onAction={handleOnDelete}
             isFirst={currentIndex === 0}
-            isLast={currentIndex === currentItems.length - 1}
+            isLast={currentIndex === currentItems?.length - 1}
             onKeyPress={handleOnPaginate}
           />
         </>

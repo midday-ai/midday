@@ -59,7 +59,7 @@ export function TransactionDetails({
   useHotkeys(
     "ArrowUp",
     () => {
-      const currentIndex = ids?.indexOf(data.id) ?? 0;
+      const currentIndex = ids?.indexOf(data?.id) ?? 0;
       const prevId = ids[currentIndex - 1];
 
       if (prevId) {
@@ -72,7 +72,7 @@ export function TransactionDetails({
   useHotkeys(
     "ArrowDown",
     () => {
-      const currentIndex = ids?.indexOf(data.id) ?? 0;
+      const currentIndex = ids?.indexOf(data?.id) ?? 0;
       const nextId = ids[currentIndex + 1];
 
       if (nextId) {
@@ -92,7 +92,7 @@ export function TransactionDetails({
   useEffect(() => {
     async function fetchData() {
       try {
-        const transaction = await getTransactionQuery(supabase, data.id);
+        const transaction = await getTransactionQuery(supabase, data?.id);
         setData(transaction);
         setLoading(false);
       } catch {
@@ -106,7 +106,7 @@ export function TransactionDetails({
   }, [data]);
 
   const handleOnChangeCategory = async (category: string) => {
-    updateTransaction({ id: data.id, category });
+    updateTransaction({ id: data?.id, category });
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
@@ -131,7 +131,9 @@ export function TransactionDetails({
             </ToastAction>
             <ToastAction
               altText="Yes"
-              onClick={() => updateSimilarTransactions.execute({ id: data.id })}
+              onClick={() =>
+                updateSimilarTransactions.execute({ id: data?.id })
+              }
               className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Yes
@@ -236,7 +238,7 @@ export function TransactionDetails({
             selectedId={data?.assigned?.id ?? undefined}
             onSelect={(user) => {
               updateTransaction(
-                { assigned_id: user?.id, id: data.id },
+                { assigned_id: user?.id, id: data?.id },
                 { assigned: user }
               );
             }}
@@ -248,7 +250,7 @@ export function TransactionDetails({
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
           <AccordionContent>
-            <Attachments id={data.id} data={data?.attachments} />
+            <Attachments id={data?.id} data={data?.attachments} />
           </AccordionContent>
         </AccordionItem>
 
@@ -256,7 +258,7 @@ export function TransactionDetails({
           <AccordionTrigger>Note</AccordionTrigger>
           <AccordionContent>
             <Note
-              id={data.id}
+              id={data?.id}
               defaultValue={data?.note}
               updateTransaction={updateTransaction}
             />

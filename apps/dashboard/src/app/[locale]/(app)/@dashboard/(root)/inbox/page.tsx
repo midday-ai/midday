@@ -19,7 +19,8 @@ export default async function InboxPage({ searchParams }: Props) {
 
   return (
     <Suspense
-      fallback={<InboxViewSkeleton key={ascending.toString()} ascending />}
+      key={ascending.toString()}
+      fallback={<InboxViewSkeleton ascending />}
     >
       <Inbox ascending={ascending} query={searchParams?.q} />
     </Suspense>
