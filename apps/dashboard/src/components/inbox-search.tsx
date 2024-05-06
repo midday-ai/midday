@@ -17,7 +17,7 @@ export function InboxSearch({ value, onChange, onClear, onArrowDown }: Props) {
 
   return (
     <div className="relative w-full">
-      <Icons.Search className="w-[20px] h-[20px] absolute left-2 top-2 pointer-events-none" />
+      <Icons.Search className="w-[18px] h-[18px] absolute left-2 top-[10px] pointer-events-none" />
       <Input
         placeholder="Search inbox"
         onKeyDown={(evt) => {

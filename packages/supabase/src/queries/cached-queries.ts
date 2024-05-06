@@ -31,7 +31,9 @@ import {
   getVaultQuery,
 } from "../queries";
 
-export const getTransactions = async (params: GetTransactionsParams) => {
+export const getTransactions = async (
+  params: Omit<GetTransactionsParams, "teamId">
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;

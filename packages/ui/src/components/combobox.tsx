@@ -96,7 +96,7 @@ export const Combobox = ({
   return (
     <CommandPrimitive className="w-full">
       <div className="flex items-center w-full relative">
-        <Icons.Search className="w-[22px] h-[22px] absolute left-4 pointer-events-none" />
+        <Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />
 
         <CommandInput
           ref={inputRef}
@@ -111,7 +111,7 @@ export const Combobox = ({
         />
 
         {isLoading && (
-          <Loader2 className="w-[18px] h-[18px] absolute right-4 animate-spin text-dark-gray" />
+          <Loader2 className="w-[16px] h-[16px] absolute right-4 animate-spin text-dark-gray" />
         )}
 
         {!isLoading && selected && (

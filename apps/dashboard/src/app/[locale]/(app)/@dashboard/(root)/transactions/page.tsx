@@ -27,7 +27,13 @@ export default async function Transactions({
   const sort = searchParams?.sort?.split(":");
 
   const isOpen = Boolean(searchParams.step);
-  const empty = !bankConnections?.data?.length && !isOpen;
+  const isEmpty = !bankConnections?.data?.length && !isOpen;
+  const loadingKey = JSON.stringify({
+    page,
+    filter,
+    sort,
+    query: searchParams?.q,
+  });
 
   return (
     <>
@@ -36,24 +42,21 @@ export default async function Transactions({
         <TransactionsActions />
       </div>
 
-      <div className={cn(empty && "opacity-20 pointer-events-none")}>
+      <div className={cn(isEmpty && "opacity-20 pointer-events-none")}>
         <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense
-            fallback={<Loading />}
-            key={JSON.stringify({ page, filter, sort, query: searchParams?.q })}
-          >
+          <Suspense fallback={<Loading />} key={loadingKey}>
             <Table
               filter={filter}
               page={page}
               sort={sort}
-              noAccounts={empty}
+              noAccounts={isEmpty}
               query={searchParams?.q}
             />
           </Suspense>
         </ErrorBoundary>
       </div>
 
-      {!isOpen && empty && <TransactionsModal />}
+      {!isOpen && isEmpty && <TransactionsModal />}
     </>
   );
 }

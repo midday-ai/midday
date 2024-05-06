@@ -37,14 +37,37 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { format, isSameYear } from "date-fns";
 import { Loader2 } from "lucide-react";
 
-export type Payment = {
+export type Transaction = {
   id: string;
   amount: number;
   status: "posted" | "excluded" | "included" | "pending" | "completed";
   manual?: boolean;
+  date: string;
+  category: string;
+  name: string;
+  description?: string;
+  currency: string;
+  method: string;
+  attachments?: {
+    id: string;
+    path: string;
+    name: string;
+    type: string;
+    size: number;
+  }[];
+  assigned?: {
+    avatar_url: string;
+    full_name: string;
+  };
+  bank_account?: {
+    name: string;
+    bank_connection: {
+      logo_url: string;
+    };
+  };
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
     cell: ({ row }) => (
@@ -153,7 +176,16 @@ export const columns: ColumnDef<Payment>[] = [
     accessorKey: "assigned",
     header: "Assigned",
     cell: ({ row }) => {
-      return <AssignedUser user={row.original.assigned} />;
+      if (!row.original.assigned) {
+        return null;
+      }
+
+      return (
+        <AssignedUser
+          fullName={row.original.assigned?.full_name}
+          avatarUrl={row.original.assigned?.avatar_url}
+        />
+      );
     },
   },
   {

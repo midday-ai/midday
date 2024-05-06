@@ -4,12 +4,19 @@ import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
 import { CategoryIcon } from "../category";
 
+type Props = {
+  category: string;
+  amount: number;
+  currency: string;
+  percentage: number;
+};
+
 export function SpendingCategoryItem({
   category,
   amount,
   currency,
-  precentage,
-}) {
+  percentage,
+}: Props) {
   const locale = useCurrentLocale();
 
   return (
@@ -27,7 +34,7 @@ export function SpendingCategoryItem({
             })}
         </p>
       </div>
-      <p className="text-sm text-[#606060] truncate">{precentage}%</p>
+      <p className="text-sm text-[#606060] truncate">{percentage}%</p>
     </div>
   );
 }

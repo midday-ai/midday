@@ -1068,6 +1068,12 @@ export type Database = {
       }
     }
     Functions: {
+      amount_text: {
+        Args: {
+          "": unknown
+        }
+        Returns: string
+      }
       generate_id: {
         Args: {
           size: number
@@ -1140,6 +1146,29 @@ export type Database = {
         }
         Returns: number
       }
+      get_spending: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency_target: string
+        }
+        Returns: {
+          category: string
+          amount: number
+          currency: string
+          percentage: number
+        }[]
+      }
+      get_total_amount: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          currency: string
+          total_amount: number
+        }[]
+      }
       get_total_balance: {
         Args: {
           team_id: string
@@ -1176,6 +1205,12 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      is_fulfilled: {
+        Args: {
+          "": unknown
+        }
+        Returns: boolean
       }
       nanoid: {
         Args: {

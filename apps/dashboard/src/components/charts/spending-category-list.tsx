@@ -22,7 +22,7 @@ export function SpendingCategoryList({ categories, period }) {
         className="mt-8 space-y-5 overflow-auto scrollbar-hide"
         style={{ maxHeight: width - PADDING }}
       >
-        {categories.map(({ category, precentage, amount, currency }) => {
+        {categories.map(({ category, percentage, amount, currency }) => {
           return (
             <li key={category}>
               <HoverCard openDelay={10} closeDelay={10}>
@@ -42,7 +42,7 @@ export function SpendingCategoryList({ categories, period }) {
 
                     <Progress
                       className="w-full rounded-none h-[6px]"
-                      value={precentage}
+                      value={percentage}
                     />
                   </Link>
                 </HoverCardTrigger>
@@ -52,7 +52,7 @@ export function SpendingCategoryList({ categories, period }) {
                     category={category}
                     amount={amount}
                     currency={currency}
-                    precentage={precentage}
+                    percentage={percentage}
                   />
                 </HoverCardContent>
               </HoverCard>

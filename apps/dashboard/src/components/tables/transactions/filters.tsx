@@ -12,7 +12,7 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import { Archive, Calendar, Paperclip, Search, Tag } from "lucide-react";
+import { Archive, Calendar, Paperclip, Tag } from "lucide-react";
 
 export const sections = [
   {

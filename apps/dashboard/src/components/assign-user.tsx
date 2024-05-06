@@ -1,5 +1,3 @@
-"use client";
-
 import { createClient } from "@midday/supabase/client";
 import {
   getCurrentUserTeamQuery,
@@ -22,10 +20,16 @@ type Props = {
   onSelect: (selectedId: string) => void;
 };
 
+type User = {
+  id: string;
+  avatar_url?: string | null;
+  full_name: string | null;
+};
+
 export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
   const [value, setValue] = useState<string>();
   const supabase = createClient();
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     setValue(selectedId);
@@ -34,12 +38,15 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
   useEffect(() => {
     async function getUsers() {
       const { data: userData } = await getCurrentUserTeamQuery(supabase);
-      const { data: membersData } = await getTeamMembersQuery(
-        supabase,
-        userData?.team_id
-      );
 
-      setUsers(membersData);
+      if (userData?.team_id) {
+        const { data: membersData } = await getTeamMembersQuery(
+          supabase,
+          userData.team_id
+        );
+
+        setUsers(membersData?.map(({ user }) => user));
+      }
     }
 
     getUsers();
@@ -62,11 +69,16 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
           </SelectTrigger>
 
           <SelectContent className="overflow-y-auto max-h-[200px]">
-            {users?.map(({ user }) => (
-              <SelectItem key={user?.id} value={user?.id}>
-                <AssignedUser user={user} />
-              </SelectItem>
-            ))}
+            {users?.map((user) => {
+              return (
+                <SelectItem key={user?.id} value={user?.id}>
+                  <AssignedUser
+                    fullName={user.full_name}
+                    avatarUrl={user.avatar_url}
+                  />
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
       )}
