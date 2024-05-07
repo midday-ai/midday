@@ -223,6 +223,17 @@ export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
 
+export const createCategoriesSchema = z.object({
+  revalidatePath: z.string(),
+  categories: z.array(
+    z.object({
+      name: z.string().optional(),
+    })
+  ),
+});
+
+export type CreateCategoriesFormValues = z.infer<typeof createCategoriesSchema>;
+
 export const deleteInviteSchema = z.object({
   id: z.string(),
   revalidatePath: z.string().optional(),

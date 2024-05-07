@@ -35,12 +35,19 @@ const formSchema = z.object({
   }),
 });
 
+type Props = {
+  id: string;
+  onOpenChange: (isOpen: boolean) => void;
+  isOpen: boolean;
+  defaultValue: string;
+};
+
 export function EditBankAccountModal({
   id,
   onOpenChange,
   isOpen,
   defaultValue,
-}) {
+}: Props) {
   const deleteAccount = useAction(deleteBankAccountAction, {
     onSuccess: () => onOpenChange(false),
   });

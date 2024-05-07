@@ -12,7 +12,11 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
-export function CreateTeamModal({ onOpenChange }) {
+type Props = {
+  onOpenChange: (isOpen: boolean) => void;
+};
+
+export function CreateTeamModal({ onOpenChange }: Props) {
   const [name, setName] = useState("");
   const createTeam = useAction(createTeamAction, {
     onSuccess: () => onOpenChange(false),
