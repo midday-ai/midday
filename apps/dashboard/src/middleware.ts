@@ -1,6 +1,6 @@
-import { client } from "@midday/kv";
 import { updateSession } from "@midday/supabase/middleware";
 import { createClient } from "@midday/supabase/server";
+import { addYears, isAfter } from "date-fns";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -45,15 +45,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  const invited = request.cookies.get("invite");
+  const inviteCode = nextUrl.searchParams.get("invite");
+
+  if (!invited && inviteCode) {
+    response.cookies.set("invite", inviteCode, {
+      expires: addYears(new Date(), 1),
+    });
+  }
+
   const checkPath = data?.user && newUrl.pathname === "/";
 
-  // Check if in approved user list by email
-  if (
-    checkPath &&
-    !(await client.get("approved"))?.includes(data?.user.email) &&
-    checkPath &&
-    !(await client.get("users")).includes(data?.user.email)
-  ) {
+  // Check if user is registred before date or have invite code
+  if (checkPath && isAfter(data.user.created_at, new Date() || !invited)) {
     return NextResponse.redirect(new URL("/closed", request.url));
   }
 
