@@ -58,7 +58,11 @@ function RowsSkeleton() {
   );
 }
 
-export function SelectBankAccountsModal({ countryCode }) {
+type Props = {
+  countryCode: string;
+};
+
+export function SelectBankAccountsModal({ countryCode }: Props) {
   const { toast } = useToast();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
