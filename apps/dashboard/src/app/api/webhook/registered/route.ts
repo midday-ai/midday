@@ -2,7 +2,6 @@ import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { setupLogSnag } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
-import { client as redisClient } from "@midday/kv";
 import { LoopsClient } from "loops";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
@@ -37,18 +36,14 @@ export async function POST(req: Request) {
   });
 
   // NOTE: Start onboarding email for enabled beta users
-  const isBeta = (await redisClient.get("approved"))?.includes(email);
-
-  if (isBeta) {
-    client.sendEvent({
-      id: userId,
-      name: Events.ONBOARDING_EMAILS,
-      payload: {
-        fullName,
-        email,
-      },
-    });
-  }
+  // client.sendEvent({
+  //   id: userId,
+  //   name: Events.ONBOARDING_EMAILS,
+  //   payload: {
+  //     fullName,
+  //     email,
+  //   },
+  // });
 
   try {
     const found = await loops.findContact(email);
