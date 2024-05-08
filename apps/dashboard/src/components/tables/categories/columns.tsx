@@ -1,8 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-import type { ColumnDef } from "@tanstack/react-table";
+import { EditCategoryModal } from "@/components/modals/edit-category-modal";
 import { Button } from "@midday/ui/button";
 import { Checkbox } from "@midday/ui/checkbox";
 import {
@@ -11,10 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import type { ColumnDef } from "@tanstack/react-table";
+import * as React from "react";
 
 export type Category = {
   id: string;
   name: string;
+  color: string;
 };
 
 export const columns: ColumnDef<Category>[] = [
@@ -30,11 +32,21 @@ export const columns: ColumnDef<Category>[] = [
   },
   {
     accessorKey: "name",
-    cell: ({ row }) => <div>{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="flex space-x-2 items-center">
+        <div
+          className="size-3 transition-colors rounded-[2px]"
+          style={{ backgroundColor: row.original.color }}
+        />
+        <span>{row.getValue("name")}</span>
+      </div>
+    ),
   },
   {
     id: "actions",
-    cell: () => {
+    cell: ({ row, table }) => {
+      const [isOpen, setOpen] = React.useState(false);
+
       return (
         <div className="text-right">
           <DropdownMenu>
@@ -45,10 +57,28 @@ export const columns: ColumnDef<Category>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
-              <DropdownMenuItem>Remove</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  table.options.meta?.deleteCategories.execute({
+                    ids: [row.original.id],
+                    revalidatePath: "/settings/categories",
+                  })
+                }
+              >
+                Remove
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+
+          <EditCategoryModal
+            id={row.id}
+            defaultValue={row.original}
+            isOpen={isOpen}
+            onOpenChange={setOpen}
+          />
         </div>
       );
     },

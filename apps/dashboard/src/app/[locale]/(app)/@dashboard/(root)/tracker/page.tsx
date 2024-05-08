@@ -28,7 +28,7 @@ export default async function Tracker({ searchParams }) {
         </div>
       </div>
 
-      <Suspense key={`${status}-${status}`} fallback={<Loading />}>
+      <Suspense key={status} fallback={<Loading />}>
         <Table status={status} sort={sort} query={searchParams?.q} />
       </Suspense>
     </div>

@@ -2,9 +2,9 @@
 
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
+import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { action } from "./safe-action";
 import { createCategoriesSchema } from "./schema";
-import { revalidatePath as revalidatePathFunc } from "next/cache";
 
 export const createCategoriesAction = action(
   createCategoriesSchema,
@@ -18,8 +18,6 @@ export const createCategoriesAction = action(
         team_id: user?.data?.team_id,
       }))
     );
-
-    console.log(response);
 
     revalidatePathFunc(revalidatePath);
 

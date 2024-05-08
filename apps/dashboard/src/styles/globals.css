@@ -412,3 +412,28 @@ html.dark.todesktop-panel {
 html.todesktop-panel body {
   background-color: transparent !important;
 }
+
+.color-picker .react-colorful {
+  height: 240px;
+}
+.color-picker .react-colorful__saturation {
+  border-radius: 4px 4px 0 0;
+}
+.color-picker .react-colorful__hue {
+  height: 40px;
+  border-radius: 0 0 4px 4px;
+}
+
+.color-picker .react-colorful__hue-pointer {
+  width: 8px;
+  height: inherit;
+}
+
+.color-picker .react-colorful__pointer {
+  width: 15px;
+  height: 15px;
+}
+
+.color-picker .react-colorful__hue {
+  height: 20px;
+}
