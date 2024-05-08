@@ -545,18 +545,21 @@ export type Database = {
       }
       transaction_categories: {
         Row: {
+          color: string | null
           created_at: string
           id: string
           name: string | null
           team_id: string | null
         }
         Insert: {
+          color?: string | null
           created_at?: string
           id?: string
           name?: string | null
           team_id?: string | null
         }
         Update: {
+          color?: string | null
           created_at?: string
           id?: string
           name?: string | null

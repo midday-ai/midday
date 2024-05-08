@@ -42,7 +42,7 @@ function translations(locale: string, params?: any) {
         "invite.title1": "Join",
         "invite.title2": "on",
         "invite.link1": "has invited you to the",
-        "invite.link2": "on",
+        "invite.link2": "team on",
         "invite.join": "Join the team",
         "invite.link3": "or copy and paste this URL into your browser",
         "invite.footer1": "This invitation was intended for",

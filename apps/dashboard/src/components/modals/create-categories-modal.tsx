@@ -1,6 +1,6 @@
 import { createCategoriesAction } from "@/actions/create-categories-action";
 import {
-  CreateCategoriesFormValues,
+  type CreateCategoriesFormValues,
   createCategoriesSchema,
 } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,17 +14,18 @@ import {
 } from "@midday/ui/dialog";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { InputColor } from "../input-color";
 
 type Props = {
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
 };
+
 export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
   const { toast } = useToast();
 
@@ -53,14 +54,23 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
       revalidatePath: "/settings/categories",
       categories: [
         {
-          name: "",
+          name: undefined,
+          color: undefined,
         },
       ],
     },
   });
 
   useEffect(() => {
-    form.reset();
+    form.reset({
+      revalidatePath: "/settings/categories",
+      categories: [
+        {
+          name: undefined,
+          color: undefined,
+        },
+      ],
+    });
   }, [isOpen]);
 
   const onSubmit = form.handleSubmit((data) => {
@@ -98,13 +108,15 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormControl>
-                        <Input
+                        <InputColor
+                          autoFocus
                           placeholder="Category"
-                          autoComplete="off"
-                          autoCapitalize="none"
-                          autoCorrect="off"
-                          spellCheck="false"
-                          {...field}
+                          onChange={({ name, color }) => {
+                            field.onChange(name);
+                            form.setValue(`categories.${index}.color`, color);
+                          }}
+                          defaultValue={field.value}
+                          defaultColor={form.watch(`categories.${index}.color`)}
                         />
                       </FormControl>
                     </FormItem>
@@ -117,7 +129,12 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
               variant="outline"
               type="button"
               className="mt-4 space-x-1"
-              onClick={() => append({ name: undefined })}
+              onClick={() => {
+                append({
+                  name: undefined,
+                  color: undefined,
+                });
+              }}
             >
               <Icons.Add />
               <span>Add more</span>
