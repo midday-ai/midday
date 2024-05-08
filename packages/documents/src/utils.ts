@@ -37,6 +37,7 @@ export const allowedMimeTypes = [
   "image/heic",
   "image/png",
   "image/jpeg",
+  "image/jpg",
   "application/pdf",
 ];
 
