@@ -28,6 +28,7 @@ type ComboboxProps = {
   className?: string;
   classNameList?: string;
   autoFocus?: boolean;
+  showIcon?: boolean;
 };
 
 export const Combobox = ({
@@ -41,6 +42,7 @@ export const Combobox = ({
   className,
   classNameList,
   isLoading = false,
+  showIcon = true,
   autoFocus,
   onValueChange,
 }: ComboboxProps) => {
@@ -96,7 +98,9 @@ export const Combobox = ({
   return (
     <CommandPrimitive className="w-full">
       <div className="flex items-center w-full relative">
-        <Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />
+        {showIcon && (
+          <Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />
+        )}
 
         <CommandInput
           ref={inputRef}

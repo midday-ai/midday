@@ -1,3 +1,4 @@
+import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
 import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
@@ -28,7 +29,6 @@ import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { TransactionBankAccount } from "./transaction-bank-account";
-import { UpdateTransactionValues } from "@/actions/schema";
 
 type Props = {
   data: any;
@@ -217,7 +217,7 @@ export function TransactionDetails({
           </Label>
 
           <SelectCategory
-            placeholder="Select"
+            placeholder="Category"
             isLoading={isLoading}
             name={data?.name}
             id={transactionId}
