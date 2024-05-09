@@ -49,10 +49,15 @@ client.defineJob({
       bankAccountId: account.id,
     });
 
+    const formatted = transactions.map((transaction) => ({
+      ...transaction,
+      category_slug: transaction.category,
+    }));
+
     // NOTE: We will get all the transactions at once for each account so
     // we need to guard against massive payloads
     const promises = await processPromisesBatch(
-      transactions,
+      formatted,
       BATCH_LIMIT,
       async (batch) => {
         return supabase

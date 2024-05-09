@@ -10,8 +10,7 @@ export async function CategoriesTable() {
     .from("transaction_categories")
     .select("id, name, color, system, vat")
     .eq("team_id", user.data?.team_id)
-    .order("created_at", { ascending: true })
-    .order("system", { ascending: true });
+    .order("created_at", { ascending: false });
 
   return <DataTable data={data} />;
 }

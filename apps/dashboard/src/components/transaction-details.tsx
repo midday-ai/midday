@@ -54,11 +54,12 @@ export function TransactionDetails({
 
   useHotkeys("esc", () => setTransactionId(null));
 
-  const enabled = Boolean(ids?.length);
+  const enabled = true; //Boolean(ids?.length);
 
   const ref = useHotkeys(
     "ArrowUp, ArrowDown",
     ({ key }) => {
+      alert(key);
       if (key === "ArrowUp") {
         const currentIndex = ids?.indexOf(data?.id) ?? 0;
         const prevId = ids[currentIndex - 1];

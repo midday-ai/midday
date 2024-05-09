@@ -35,15 +35,14 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  // NOTE: Start onboarding email for enabled beta users
-  // client.sendEvent({
-  //   id: userId,
-  //   name: Events.ONBOARDING_EMAILS,
-  //   payload: {
-  //     fullName,
-  //     email,
-  //   },
-  // });
+  client.sendEvent({
+    id: userId,
+    name: Events.ONBOARDING_EMAILS,
+    payload: {
+      fullName,
+      email,
+    },
+  });
 
   try {
     const found = await loops.findContact(email);
