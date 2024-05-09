@@ -221,7 +221,7 @@ export function TransactionDetails({
             isLoading={isLoading}
             name={data?.name}
             id={transactionId}
-            selectedId={data?.category ?? undefined}
+            selected={data?.category}
             onChange={handleOnChangeCategory}
           />
         </div>

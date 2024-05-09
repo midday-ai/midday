@@ -43,7 +43,11 @@ export function CommandMenu() {
   useHotkeys("meta+k", () => setOpen());
 
   return (
-    <CommandDialog open={isOpen} onOpenChange={setOpen}>
+    <CommandDialog
+      open={isOpen}
+      onOpenChange={setOpen}
+      className="max-w-[740px]"
+    >
       <CommandComponent selected={selected} />
     </CommandDialog>
   );

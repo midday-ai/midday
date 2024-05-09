@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
   type GetBurnRateQueryParams,
+  GetCategoriesParams,
   type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
@@ -14,6 +15,7 @@ import {
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
+  getCategoriesQuery,
   getCurrentBurnRateQuery,
   getMetricsQuery,
   getRunwayQuery,

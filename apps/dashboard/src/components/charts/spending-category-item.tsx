@@ -2,7 +2,7 @@
 
 import { useCurrentLocale } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
-import { CategoryIcon } from "../category";
+import { CategoryColor } from "../category";
 
 type Props = {
   category: string;
@@ -22,7 +22,7 @@ export function SpendingCategoryItem({
   return (
     <div className="px-3 py-1 flex justify-between items-center space-x-12">
       <div className="text-sm font-medium flex items-center space-x-2">
-        {category && <CategoryIcon name={category} />}
+        {category && <CategoryColor name={category} system />}
         <p>
           {amount &&
             formatAmount({

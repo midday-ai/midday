@@ -9,6 +9,39 @@ import {
 import type { Client } from "../types";
 import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
+type TransformCategoryParams = {
+  category?: string | null;
+  transaction_category?: {
+    id: string;
+    name: string;
+    system: boolean;
+    color: string;
+    vat: number;
+  } | null;
+};
+
+function transformCategory({
+  category,
+  transaction_category,
+}: TransformCategoryParams) {
+  if (transaction_category) {
+    return transaction_category;
+  }
+
+  // Enum
+  return category
+    ? {
+        id: category,
+        name: category,
+        system: true,
+      }
+    : {
+        id: "uncategorized",
+        name: "uncategorized",
+        system: true,
+      };
+}
+
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
@@ -282,7 +315,7 @@ export async function getTransactionsQuery(
     },
     data: data?.map((transaction) => ({
       ...transaction,
-      category: transaction?.category || "uncategorized",
+      category: transformCategory(transaction),
     })),
   };
 }
@@ -306,7 +339,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
 
   return {
     ...data,
-    category: data?.category || "uncategorized",
+    category: transformCategory(data),
   };
 }
 

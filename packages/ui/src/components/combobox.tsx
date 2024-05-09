@@ -29,6 +29,7 @@ type ComboboxProps = {
   classNameList?: string;
   autoFocus?: boolean;
   showIcon?: boolean;
+  CreateComponent?: React.ReactElement<{ value: string }>;
 };
 
 export const Combobox = ({
@@ -45,6 +46,7 @@ export const Combobox = ({
   showIcon = true,
   autoFocus,
   onValueChange,
+  CreateComponent,
 }: ComboboxProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setOpen] = useState(false);
@@ -115,12 +117,12 @@ export const Combobox = ({
         />
 
         {isLoading && (
-          <Loader2 className="w-[16px] h-[16px] absolute right-4 animate-spin text-dark-gray" />
+          <Loader2 className="w-[16px] h-[16px] absolute right-2 animate-spin text-dark-gray" />
         )}
 
         {!isLoading && selected && (
           <Icons.Close
-            className="w-[20px] h-[20px] absolute right-4"
+            className="w-[20px] h-[20px] absolute right-2"
             onClick={handleOnRemove}
           />
         )}
@@ -155,19 +157,26 @@ export const Combobox = ({
                 );
               })}
 
-              {onCreate && (
-                <CommandItem
-                  key={inputValue}
-                  value={inputValue}
-                  onSelect={() => onCreate(inputValue)}
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                >
-                  {`Create "${inputValue}"`}
-                </CommandItem>
-              )}
+              {onCreate &&
+                !options?.find(
+                  (o) => o.name.toLowerCase() === inputValue.toLowerCase()
+                ) && (
+                  <CommandItem
+                    key={inputValue}
+                    value={inputValue}
+                    onSelect={() => onCreate(inputValue)}
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                  >
+                    {CreateComponent ? (
+                      <CreateComponent value={inputValue} />
+                    ) : (
+                      `Create "${inputValue}"`
+                    )}
+                  </CommandItem>
+                )}
             </CommandGroup>
           )}
         </CommandList>

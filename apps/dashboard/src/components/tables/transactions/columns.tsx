@@ -150,7 +150,13 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "category",
     header: "Category",
     cell: ({ row }) => {
-      return <Category name={row.original.category} />;
+      return (
+        <Category
+          name={row.original.category.name}
+          system={row.original?.category?.system}
+          color={row.original?.category?.color}
+        />
+      );
     },
   },
   {

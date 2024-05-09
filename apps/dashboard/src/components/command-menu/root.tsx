@@ -54,7 +54,11 @@ export function CommandRoot() {
 
   return (
     <div>
-      <CommandInput placeholder="Type a command or search..." autoFocus />
+      <CommandInput
+        placeholder="Type a command or search..."
+        autoFocus
+        className="px-3 border-b-[1px] rounded-none"
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 

@@ -11,11 +11,12 @@ export const createCategoriesAction = action(
   async ({ categories, revalidatePath }) => {
     const supabase = createClient();
     const user = await getUser();
+    const teamId = user?.data?.team_id;
 
     const response = await supabase.from("transaction_categories").insert(
       categories.map((category) => ({
         ...category,
-        team_id: user?.data?.team_id,
+        team_id: teamId,
       }))
     );
 
