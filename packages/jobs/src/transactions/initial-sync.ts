@@ -69,7 +69,12 @@ client.defineJob({
       // NOTE: We will get all the transactions at once for each account so
       // we need to guard against massive payloads
       await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
-        await supabase.from("transactions").upsert(batch, {
+        const formatted = batch.map((transaction) => ({
+          ...transaction,
+          category_slug: transaction.category,
+        }));
+
+        await supabase.from("transactions").upsert(formatted, {
           onConflict: "internal_id",
           ignoreDuplicates: true,
         });

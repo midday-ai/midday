@@ -182,7 +182,7 @@ export async function getTransactionsQuery(
     "name:decrypted_name",
     "description:decrypted_description",
     "assigned:assigned_id(*)",
-    "category:category_id(id, name, vat)",
+    "category:transaction_categories(id, name, color, vat)",
     "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
   ];
@@ -242,9 +242,9 @@ export async function getTransactionsQuery(
     const matchCategory = categories
       .map((category) => {
         if (category === "uncategorized") {
-          return "category.is.null";
+          return "category_slug.is.null";
         }
-        return `category.eq.${category}`;
+        return `category_slug.eq.${category}`;
       })
       .join(",");
 
@@ -253,11 +253,11 @@ export async function getTransactionsQuery(
 
   if (type === "expense") {
     query.lt("amount", 0);
-    // query.neq("category", "transfer");
+    query.neq("category_slug", "transfer");
   }
 
   if (type === "income") {
-    // query.eq("category", "income");
+    query.eq("category_slug", "income");
   }
 
   const { data, count } = await query.range(from, to);
