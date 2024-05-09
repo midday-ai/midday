@@ -1,6 +1,5 @@
 import { updateSession } from "@midday/supabase/middleware";
 import { createClient } from "@midday/supabase/server";
-import { addYears, isAfter, isBefore } from "date-fns";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -43,29 +42,6 @@ export async function middleware(request: NextRequest) {
     url.searchParams.append("return_to", encodedSearchParams);
 
     return NextResponse.redirect(url);
-  }
-
-  const invited = request.cookies.has("invite");
-  const inviteCode = nextUrl.searchParams.get("invite");
-
-  if (!invited && inviteCode) {
-    response.cookies.set("invite", inviteCode, {
-      expires: addYears(new Date(), 1),
-    });
-  }
-
-  const checkPath = data?.user && newUrl.pathname === "/";
-
-  if (
-    // If user is registred before date
-    (checkPath &&
-      !isBefore(new Date(data.user.created_at), new Date("2024-05-08")) &&
-      !invited) ||
-    (checkPath &&
-      isAfter(new Date(data.user.created_at), new Date("2024-05-08")) &&
-      !invited)
-  ) {
-    return NextResponse.redirect(new URL("/closed", request.url));
   }
 
   // If authenticated but no full_name redirect to user setup page
