@@ -13,15 +13,21 @@ export const createCategoriesAction = action(
     const user = await getUser();
     const teamId = user?.data?.team_id;
 
-    const response = await supabase.from("transaction_categories").insert(
-      categories.map((category) => ({
-        ...category,
-        team_id: teamId,
-      }))
-    );
+    const { data, error } = await supabase
+      .from("transaction_categories")
+      .insert(
+        categories.map((category) => ({
+          ...category,
+          team_id: teamId,
+        }))
+      );
+
+    if (error) {
+      throw Error(error.message);
+    }
 
     revalidatePathFunc(revalidatePath);
 
-    return response;
+    return data;
   }
 );

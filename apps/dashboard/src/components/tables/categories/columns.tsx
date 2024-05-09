@@ -16,21 +16,14 @@ import * as React from "react";
 export type Category = {
   id: string;
   name: string;
+  system: boolean;
+  vat?: string;
   color: string;
 };
 
 export const columns: ColumnDef<Category>[] = [
   {
-    id: "select",
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-  },
-  {
+    header: "Name",
     accessorKey: "name",
     cell: ({ row }) => (
       <div className="flex space-x-2 items-center">
@@ -39,8 +32,20 @@ export const columns: ColumnDef<Category>[] = [
           style={{ backgroundColor: row.original.color }}
         />
         <span>{row.getValue("name")}</span>
+        {row.original.system && (
+          <div className="pl-2">
+            <span className="border border-border rounded-full py-1.5 px-3 text-xs text-[#878787] font-mono">
+              System
+            </span>
+          </div>
+        )}
       </div>
     ),
+  },
+  {
+    header: "VAT",
+    accessorKey: "vat",
+    cell: ({ row }) => row.getValue("vat") ?? "-",
   },
   {
     id: "actions",
@@ -52,7 +57,6 @@ export const columns: ColumnDef<Category>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
                 <DotsHorizontalIcon className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -60,16 +64,18 @@ export const columns: ColumnDef<Category>[] = [
               <DropdownMenuItem onClick={() => setOpen(true)}>
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() =>
-                  table.options.meta?.deleteCategories.execute({
-                    ids: [row.original.id],
-                    revalidatePath: "/settings/categories",
-                  })
-                }
-              >
-                Remove
-              </DropdownMenuItem>
+              {!row.original.system && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    table.options.meta?.deleteCategories.execute({
+                      ids: [row.original.id],
+                      revalidatePath: "/settings/categories",
+                    })
+                  }
+                >
+                  Remove
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
 

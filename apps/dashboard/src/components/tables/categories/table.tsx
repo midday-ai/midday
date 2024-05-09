@@ -11,11 +11,17 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
 import { cn } from "@midday/ui/cn";
 import { Dialog } from "@midday/ui/dialog";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import {
   flexRender,
@@ -26,14 +32,14 @@ import {
 import { useAction } from "next-safe-action/hooks";
 import React from "react";
 import { type Category, columns } from "./columns";
-import { TableHeader } from "./table-header";
+import { Header } from "./header";
+// import { TableHeader } from "./table-header";
 
 type Props = {
   data: Category[];
 };
 
 export function DataTable({ data }: Props) {
-  const [rowSelection, setRowSelection] = React.useState({});
   const [isOpen, onOpenChange] = React.useState(false);
   const { toast } = useToast();
 
@@ -54,29 +60,35 @@ export function DataTable({ data }: Props) {
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
     meta: {
       deleteCategories,
     },
-    state: {
-      rowSelection,
-    },
   });
-
-  const selectedIds = table
-    ?.getFilteredSelectedRowModel()
-    .rows.map(({ id }) => id);
 
   return (
     <AlertDialog>
       <div className="w-full">
-        <TableHeader
-          table={table}
-          selectedIds={selectedIds}
-          onOpenChange={onOpenChange}
-        />
+        <Header table={table} onOpenChange={onOpenChange} />
 
         <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
@@ -88,7 +100,7 @@ export function DataTable({ data }: Props) {
                   {row.getVisibleCells().map((cell, index) => (
                     <TableCell
                       key={cell.id}
-                      className={cn((index === 0 || index === 2) && "w-[50px]")}
+                      className={cn(index === 2 && "w-[50px]")}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,

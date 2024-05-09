@@ -9,39 +9,6 @@ import {
 import type { Client } from "../types";
 import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
-type TransformCategoryParams = {
-  category?: string | null;
-  transaction_category?: {
-    id: string;
-    name: string;
-    system: boolean;
-    color: string;
-    vat: number;
-  } | null;
-};
-
-function transformCategory({
-  category,
-  transaction_category,
-}: TransformCategoryParams) {
-  if (transaction_category) {
-    return transaction_category;
-  }
-
-  // Enum
-  return category
-    ? {
-        id: category,
-        name: category,
-        system: true,
-      }
-    : {
-        id: "uncategorized",
-        name: "uncategorized",
-        system: true,
-      };
-}
-
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
@@ -215,6 +182,7 @@ export async function getTransactionsQuery(
     "name:decrypted_name",
     "description:decrypted_description",
     "assigned:assigned_id(*)",
+    "category:category_id(id, name, vat)",
     "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
   ];
@@ -285,17 +253,17 @@ export async function getTransactionsQuery(
 
   if (type === "expense") {
     query.lt("amount", 0);
-    query.neq("category", "transfer");
+    // query.neq("category", "transfer");
   }
 
   if (type === "income") {
-    query.eq("category", "income");
+    // query.eq("category", "income");
   }
 
   const { data, count } = await query.range(from, to);
 
   const totalAmount = data
-    ?.filter((transaction) => transaction.category !== "transfer")
+    // ?.filter((transaction) => transaction.category !== "transfer")
     ?.reduce((acc, { amount, currency }) => {
       const existingCurrency = acc.find((item) => item.currency === currency);
 
@@ -313,10 +281,7 @@ export async function getTransactionsQuery(
       totalAmount,
       count,
     },
-    data: data?.map((transaction) => ({
-      ...transaction,
-      category: transformCategory(transaction),
-    })),
+    data,
   };
 }
 
@@ -329,6 +294,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       name:decrypted_name,
       description:decrypted_description,
       assigned:assigned_id(*),
+      category:category_id(id, name, vat),
       attachments:transaction_attachments(*),
       bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `
@@ -337,10 +303,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
     .single()
     .throwOnError();
 
-  return {
-    ...data,
-    category: transformCategory(data),
-  };
+  return data;
 }
 
 type GetSimilarTransactionsParams = {

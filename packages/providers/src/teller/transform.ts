@@ -62,9 +62,9 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     case "tax":
       return "taxes";
     case "office":
-      return "office_supplies";
+      return "office-supplies";
     case "phone":
-      return "internet_and_telephone";
+      return "internet-and-telephone";
     case "software":
       return "software";
     case "entertainment":
