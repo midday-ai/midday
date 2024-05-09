@@ -14,6 +14,7 @@ export async function prepareDocument(
   const sanitizedName = stripSpecialCharacters(fileName);
 
   switch (document.ContentType) {
+    case "application/octet-stream":
     case "application/pdf": {
       return {
         content: buffer,
