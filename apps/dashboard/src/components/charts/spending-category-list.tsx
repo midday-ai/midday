@@ -37,6 +37,7 @@ export function SpendingCategoryList({ categories, period }) {
                     <Category
                       key={category}
                       name={category}
+                      system
                       className="text-sm text-primary space-x-3 w-[90%]"
                     />
 

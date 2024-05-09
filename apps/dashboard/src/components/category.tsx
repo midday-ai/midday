@@ -45,16 +45,27 @@ export const mapCategoryColor = (name: string) => {
 
 type CategoryIconProps = {
   name: string;
+  system: boolean;
+  color?: string;
   size?: number;
+  className?: string;
 };
 
-export function CategoryIcon({ name, size = 12 }: CategoryIconProps) {
-  const color = mapCategoryColor(name);
-
+export function CategoryColor({
+  name,
+  system,
+  color,
+  className,
+  size = 12,
+}: CategoryIconProps) {
   return (
     <div
-      className="rounded-[2px]"
-      style={{ backgroundColor: color, width: size, height: size }}
+      className={cn("rounded-[2px]", className)}
+      style={{
+        backgroundColor: system ? mapCategoryColor(name) : color,
+        width: size,
+        height: size,
+      }}
     />
   );
 }
@@ -62,15 +73,17 @@ export function CategoryIcon({ name, size = 12 }: CategoryIconProps) {
 type Props = {
   name: string;
   className?: string;
+  system: boolean;
+  color?: string;
 };
 
-export function Category({ name, className }: Props) {
+export function Category({ name, system, color, className }: Props) {
   const t = useI18n();
 
   return (
     <div className={cn("flex space-x-2 items-center", className)}>
-      <CategoryIcon name={name} />
-      {name && <p>{t(`categories.${name}`)}</p>}
+      <CategoryColor name={name} system={system} color={color} />
+      {name && <span>{system ? t(`categories.${name}`) : name}</span>}
     </div>
   );
 }

@@ -1,9 +1,9 @@
 "use server";
 
 import { getUser } from "@midday/supabase/cached-queries";
+import { createClient } from "@midday/supabase/server";
 import { action } from "./safe-action";
 import { searchSchema } from "./schema";
-import { createClient } from "@midday/supabase/server";
 
 export const searchAction = action(searchSchema, async (params) => {
   const user = await getUser();
@@ -28,6 +28,19 @@ export const searchAction = action(searchSchema, async (params) => {
       } else {
         query.textSearch("fts", `${searchQuery}:*`);
       }
+
+      const { data } = await query.range(0, limit);
+
+      return data;
+    }
+
+    case "categories": {
+      const query = supabase
+        .from("transaction_categories")
+        .select("id, name, color")
+        .eq("team_id", teamId)
+        .ilike("name", `%${searchQuery}%`)
+        .order("created_at", { ascending: true });
 
       const { data } = await query.range(0, limit);
 
