@@ -39,6 +39,7 @@ export const allowedMimeTypes = [
   "image/jpeg",
   "image/jpg",
   "application/pdf",
+  "application/octet-stream",
 ];
 
 export function getAllowedAttachments(attachments?: Attachments) {
