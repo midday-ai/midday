@@ -546,24 +546,33 @@ export type Database = {
       transaction_categories: {
         Row: {
           color: string | null
-          created_at: string
+          created_at: string | null
           id: string
           name: string | null
+          slug: string | null
+          system: boolean | null
           team_id: string | null
+          vat: number | null
         }
         Insert: {
           color?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           name?: string | null
+          slug?: string | null
+          system?: boolean | null
           team_id?: string | null
+          vat?: number | null
         }
         Update: {
           color?: string | null
-          created_at?: string
+          created_at?: string | null
           id?: string
           name?: string | null
+          slug?: string | null
+          system?: boolean | null
           team_id?: string | null
+          vat?: number | null
         }
         Relationships: [
           {
@@ -614,6 +623,7 @@ export type Database = {
           balance: number | null
           bank_account_id: string | null
           category: Database["public"]["Enums"]["transactionCategories"] | null
+          category_id: string | null
           created_at: string
           currency: string
           currency_rate: number | null
@@ -635,6 +645,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_id?: string | null
           created_at?: string
           currency: string
           currency_rate?: number | null
@@ -656,6 +667,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_id?: string | null
           created_at?: string
           currency?: string
           currency_rate?: number | null
@@ -698,6 +710,13 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1002,6 +1021,7 @@ export type Database = {
           balance: number | null
           bank_account_id: string | null
           category: Database["public"]["Enums"]["transactionCategories"] | null
+          category_id: string | null
           created_at: string | null
           currency: string | null
           currency_rate: number | null
@@ -1025,6 +1045,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           currency_rate?: number | null
@@ -1048,6 +1069,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_id?: string | null
           created_at?: string | null
           currency?: string | null
           currency_rate?: number | null
@@ -1092,6 +1114,13 @@ export type Database = {
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
             referencedColumns: ["id"]
           },
         ]
@@ -1414,11 +1443,29 @@ export type Database = {
         }
         Returns: string[]
       }
+      slugify: {
+        Args: {
+          value: string
+        }
+        Returns: string
+      }
       total_duration: {
         Args: {
           "": unknown
         }
         Returns: number
+      }
+      unaccent: {
+        Args: {
+          "": string
+        }
+        Returns: string
+      }
+      unaccent_init: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
       }
       upsert_bank_connection: {
         Args: {

@@ -1,13 +1,27 @@
 import { Skeleton } from "@midday/ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { TableHeader } from "./table-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@midday/ui/table";
+import { Header } from "./header";
 
 export function CategoriesSkeleton() {
   return (
     <div className="w-full">
-      <TableHeader />
+      <Header />
 
       <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>VAT</TableHead>
+          </TableRow>
+        </TableHeader>
+
         <TableBody>
           {[...Array(6)].map((_, index) => (
             <TableRow

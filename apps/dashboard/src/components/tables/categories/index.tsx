@@ -8,9 +8,10 @@ export async function CategoriesTable() {
 
   const { data } = await supabase
     .from("transaction_categories")
-    .select("id, name, color")
+    .select("id, name, color, system, vat")
     .eq("team_id", user.data?.team_id)
-    .order("created_at", { ascending: true });
+    .order("created_at", { ascending: true })
+    .order("system", { ascending: true });
 
   return <DataTable data={data} />;
 }

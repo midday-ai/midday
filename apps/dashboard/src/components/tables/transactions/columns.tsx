@@ -152,8 +152,7 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       return (
         <Category
-          name={row.original.category.name}
-          system={row.original?.category?.system}
+          name={row.original.category?.name}
           color={row.original?.category?.color}
         />
       );

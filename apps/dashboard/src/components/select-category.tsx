@@ -5,13 +5,12 @@ import { Combobox } from "@midday/ui/combobox";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { CategoryColor, categories, mapCategoryColor } from "./category";
+import { CategoryColor } from "./category";
 
 type Selected = {
   id: string;
   name: string;
   color?: string;
-  system: boolean;
 };
 
 type Props = {
@@ -27,8 +26,6 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
   const [data, setData] = useState([]);
   const [isLoading, setLoading] = useState(false);
   const t = useI18n();
-
-  console.log(selected);
 
   const debouncedSearchTerm = useDebounce(query, 50);
 
@@ -54,13 +51,7 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
     }
   }, [debouncedSearchTerm]);
 
-  const defaultCategories = Object.keys(categories).map((category) => ({
-    id: category,
-    name: t(`categories.${category}`),
-    color: mapCategoryColor(category),
-  }));
-
-  const options = [...defaultCategories, ...data]?.map((d) => ({
+  const options = data?.map((d) => ({
     id: d.id,
     name: d.name,
     component: () => {
@@ -83,7 +74,7 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
   const selectedValue = selected
     ? {
         id: selected.id,
-        name: selected.system ? t(`categories.${selected.id}`) : selected.name,
+        name: selected.name,
       }
     : undefined;
 
@@ -92,9 +83,7 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
       {selected && (
         <CategoryColor
           className="absolute top-[12px] left-2"
-          system={selected.system}
           color={selected.color}
-          name={selected.name}
         />
       )}
 

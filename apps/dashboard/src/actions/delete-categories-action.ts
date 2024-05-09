@@ -21,6 +21,7 @@ export const deleteCategoriesAction = action(
       .from("transaction_categories")
       .delete()
       .in("id", ids)
+      .eq("system", false)
       .select();
 
     revalidatePathFunc(revalidatePath);

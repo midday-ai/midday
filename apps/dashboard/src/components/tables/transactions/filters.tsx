@@ -1,6 +1,5 @@
 "use client";
 
-import { categories } from "@/components/category";
 import { SectionType } from "@/components/filter";
 import {
   endOfDay,
@@ -12,7 +11,7 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import { Archive, Calendar, Paperclip, Tag } from "lucide-react";
+import { Calendar, Paperclip, Tag } from "lucide-react";
 
 export const sections = [
   {
@@ -117,14 +116,14 @@ export const sections = [
       },
     ],
   },
-  {
-    id: "categories",
-    label: "Categories",
-    icon: Archive,
-    type: SectionType.checkbox,
-    options: Object.keys(categories).map((category) => ({
-      id: category,
-      translationKey: `categories.${category}`,
-    })),
-  },
+  // {
+  //   id: "categories",
+  //   label: "Categories",
+  //   icon: Archive,
+  //   type: SectionType.checkbox,
+  //   options: Object.keys(categories).map((category) => ({
+  //     id: category,
+  //     translationKey: `categories.${category}`,
+  //   })),
+  // },
 ];
