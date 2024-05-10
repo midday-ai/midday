@@ -122,7 +122,7 @@ export const Combobox = ({
 
         {!isLoading && selected && (
           <Icons.Close
-            className="w-[20px] h-[20px] absolute right-2"
+            className="w-[18px] h-[18px] absolute right-2"
             onClick={handleOnRemove}
           />
         )}

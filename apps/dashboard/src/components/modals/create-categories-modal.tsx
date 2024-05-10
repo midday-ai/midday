@@ -3,6 +3,8 @@ import {
   type CreateCategoriesFormValues,
   createCategoriesSchema,
 } from "@/actions/schema";
+import { InputColor } from "@/components/input-color";
+import { VatAssistant } from "@/components/vat-assistant";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -14,16 +16,22 @@ import {
 } from "@midday/ui/dialog";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import { InputColor } from "../input-color";
 
 type Props = {
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
+};
+
+const newItem = {
+  name: undefined,
+  vat: undefined,
+  color: undefined,
 };
 
 export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
@@ -52,24 +60,14 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
     resolver: zodResolver(createCategoriesSchema),
     defaultValues: {
       revalidatePath: "/settings/categories",
-      categories: [
-        {
-          name: undefined,
-          color: undefined,
-        },
-      ],
+      categories: [newItem],
     },
   });
 
   useEffect(() => {
     form.reset({
       revalidatePath: "/settings/categories",
-      categories: [
-        {
-          name: undefined,
-          color: undefined,
-        },
-      ],
+      categories: [newItem],
     });
   }, [isOpen]);
 
@@ -101,27 +99,59 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
 
             <div className="flex flex-col space-y-2">
               {fields.map((field, index) => (
-                <FormField
-                  control={form.control}
-                  key={field.id}
-                  name={`categories.${index}.name`}
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormControl>
-                        <InputColor
-                          autoFocus
-                          placeholder="Category"
-                          onChange={({ name, color }) => {
-                            field.onChange(name);
-                            form.setValue(`categories.${index}.color`, color);
-                          }}
-                          defaultValue={field.value}
-                          defaultColor={form.watch(`categories.${index}.color`)}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div key={field.id} className="flex space-x-2">
+                  <FormField
+                    control={form.control}
+                    name={`categories.${index}.name`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <InputColor
+                            autoFocus
+                            placeholder="Name"
+                            onChange={({ name, color }) => {
+                              field.onChange(name);
+                              form.setValue(`categories.${index}.color`, color);
+                            }}
+                            defaultValue={field.value}
+                            defaultColor={form.watch(
+                              `categories.${index}.color`
+                            )}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex-1 relative">
+                    <FormField
+                      control={form.control}
+                      name={`categories.${index}.vat`}
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              autoFocus={false}
+                              placeholder="VAT"
+                              className="remove-arrow"
+                              type="number"
+                              min={0}
+                              max={100}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    <VatAssistant
+                      name={form.watch(`categories.${index}.name`)}
+                      onSelect={(vat) => {
+                        form.setValue(`categories.${index}.vat`, vat);
+                      }}
+                    />
+                  </div>
+                </div>
               ))}
             </div>
 
@@ -130,10 +160,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
               type="button"
               className="mt-4 space-x-1"
               onClick={() => {
-                append({
-                  name: undefined,
-                  color: undefined,
-                });
+                append(newItem, { shouldFocus: false });
               }}
             >
               <Icons.Add />

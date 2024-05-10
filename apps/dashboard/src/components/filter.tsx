@@ -232,6 +232,12 @@ export function Filter({ sections }: Props) {
 
         if (filter.length) {
           const option = section?.options?.find((o) => o.id === filter.at(0));
+
+          // Category
+          if (filter.at(0)?.name) {
+            return filter.at(0)?.name;
+          }
+
           return option?.translationKey
             ? t(option?.translationKey)
             : option?.label;

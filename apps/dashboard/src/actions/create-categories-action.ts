@@ -20,13 +20,16 @@ export const createCategoriesAction = action(
           ...category,
           team_id: teamId,
         }))
-      );
+      )
+      .select("id, name, color, vat, slug");
 
     if (error) {
       throw Error(error.message);
     }
 
-    revalidatePathFunc(revalidatePath);
+    if (revalidatePath) {
+      revalidatePathFunc(revalidatePath);
+    }
 
     return data;
   }

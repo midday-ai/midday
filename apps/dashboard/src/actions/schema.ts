@@ -145,10 +145,10 @@ export const sendFeedbackSchema = z.object({
 });
 
 export const updateTransactionSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   note: z.string().optional(),
-  category: z.string().optional(),
-  assigned_id: z.string().optional(),
+  category_slug: z.string().optional(),
+  assigned_id: z.string().uuid().optional(),
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
 });
 
@@ -229,7 +229,7 @@ export type InviteTeamMembersFormValues = z.infer<
 >;
 
 export const createCategoriesSchema = z.object({
-  revalidatePath: z.string(),
+  revalidatePath: z.string().optional(),
   categories: z.array(
     z.object({
       name: z.string().optional(),
@@ -366,3 +366,7 @@ export const searchSchema = z.object({
 });
 
 export const inboxOrder = z.boolean();
+
+export const getVatRateSchema = z.object({
+  name: z.string().min(2),
+});

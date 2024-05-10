@@ -116,14 +116,14 @@ export const sections = [
       },
     ],
   },
-  // {
-  //   id: "categories",
-  //   label: "Categories",
-  //   icon: Archive,
-  //   type: SectionType.checkbox,
-  //   options: Object.keys(categories).map((category) => ({
-  //     id: category,
-  //     translationKey: `categories.${category}`,
-  //   })),
-  // },
+  {
+    id: "categories",
+    label: "Categories",
+    // icon: Archive,
+    type: SectionType.checkbox,
+    // options: Object.keys(categories).map((category) => ({
+    //   id: category,
+    //   translationKey: `categories.${category}`,
+    // })),
+  },
 ];

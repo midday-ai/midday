@@ -54,12 +54,11 @@ export function TransactionDetails({
 
   useHotkeys("esc", () => setTransactionId(null));
 
-  const enabled = true; //Boolean(ids?.length);
+  const enabled = Boolean(ids?.length);
 
-  const ref = useHotkeys(
+  useHotkeys(
     "ArrowUp, ArrowDown",
     ({ key }) => {
-      alert(key);
       if (key === "ArrowUp") {
         const currentIndex = ids?.indexOf(data?.id) ?? 0;
         const prevId = ids[currentIndex - 1];
@@ -104,8 +103,16 @@ export function TransactionDetails({
     }
   }, [data]);
 
-  const handleOnChangeCategory = async (category: string) => {
-    updateTransaction({ id: data?.id, category }, { category });
+  const handleOnChangeCategory = async (category: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string;
+  }) => {
+    updateTransaction(
+      { id: data?.id, category_slug: category.slug },
+      { category }
+    );
 
     const { data: userData } = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
@@ -150,7 +157,7 @@ export function TransactionDetails({
   }
 
   return (
-    <div ref={ref}>
+    <div>
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (

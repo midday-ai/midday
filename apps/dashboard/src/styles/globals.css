@@ -437,3 +437,13 @@ html.todesktop-panel body {
 .color-picker .react-colorful__hue {
   height: 20px;
 }
+
+.remove-arrow::-webkit-inner-spin-button,
+.remove-arrow::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.remove-arrow {
+    appearance: textfield;
+}

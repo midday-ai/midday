@@ -9,6 +9,16 @@ import {
 import type { Client } from "../types";
 import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
+function transactionCategory(transaction) {
+  return (
+    transaction?.category ?? {
+      id: "uncategorized",
+      name: "Uncategorized",
+      color: "#606060",
+    }
+  );
+}
+
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
@@ -281,7 +291,10 @@ export async function getTransactionsQuery(
       totalAmount,
       count,
     },
-    data,
+    data: data?.map((transaction) => ({
+      ...transaction,
+      category: transactionCategory(transaction),
+    })),
   };
 }
 
@@ -303,7 +316,10 @@ export async function getTransactionQuery(supabase: Client, id: string) {
     .single()
     .throwOnError();
 
-  return data;
+  return {
+    ...data,
+    category: transactionCategory(data),
+  };
 }
 
 type GetSimilarTransactionsParams = {
