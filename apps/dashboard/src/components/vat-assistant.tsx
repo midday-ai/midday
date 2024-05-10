@@ -20,16 +20,18 @@ type Props = {
 };
 
 export function VatAssistant({ name, onSelect }: Props) {
-  const [rate, setRate] = useState();
+  const [result, setResult] = useState<
+    { vat: number; country: string } | undefined
+  >();
   const [isLoading, setLoading] = useState(false);
   const debouncedName = useDebounce(name, 300);
 
   const getVatRate = useAction(getVatRateAction, {
-    onSuccess: (result) => {
+    onSuccess: (data) => {
       setLoading(false);
 
-      if (result.vat) {
-        setRate(result.vat);
+      if (data) {
+        setResult(data);
       }
     },
     onError: () => {
@@ -38,8 +40,8 @@ export function VatAssistant({ name, onSelect }: Props) {
   });
 
   const handleOnSelect = () => {
-    if (rate) {
-      onSelect(rate);
+    if (result?.vat) {
+      onSelect(result.vat);
     }
   };
 
@@ -47,7 +49,7 @@ export function VatAssistant({ name, onSelect }: Props) {
     setLoading(true);
 
     if (!name) {
-      setRate(undefined);
+      setResult(undefined);
     }
   }, [name]);
 
@@ -64,7 +66,7 @@ export function VatAssistant({ name, onSelect }: Props) {
           <div
             className={cn(
               "absolute right-2 top-3 transition-all opacity-0",
-              rate && "opacity-100"
+              result?.vat && "opacity-100"
             )}
           >
             {isLoading ? (
@@ -74,7 +76,7 @@ export function VatAssistant({ name, onSelect }: Props) {
             )}
           </div>
         </TooltipTrigger>
-        {rate && (
+        {result?.vat && (
           <TooltipContent
             sideOffset={20}
             className="flex flex-col max-w-[310px] space-y-2"
@@ -84,7 +86,7 @@ export function VatAssistant({ name, onSelect }: Props) {
               <Experimental className="px-2 py-0 border-border" />
             </div>
             <span className="text-xs text-[#878787]">
-              {`The VAT rate for ${name} in Sweden is generally ${rate}%. Please remember to confirm this with your local Tax office.`}
+              {`The VAT rate for ${name} in ${result.country} is generally ${result.vat}%. Please remember to confirm this with your local Tax office.`}
             </span>
 
             <div className="flex justify-end mt-3 pt-3">
