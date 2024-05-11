@@ -30,10 +30,12 @@ export function MobileOverview() {
 
   useEffect(() => {
     async function fetchData() {
-      const { data } = await supabase.auth.getUser();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      if (data.user.email) {
-        setEmail(data.user.email);
+      if (session?.user.email) {
+        setEmail(session.user.email);
       }
     }
 

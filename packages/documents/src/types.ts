@@ -12,6 +12,7 @@ export type DocumentResponse = {
   mimeType: MimeType;
   size: number;
   fileName: string;
+  name: string;
 };
 
 export type DocumentClientParams = {

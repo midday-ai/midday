@@ -10,7 +10,7 @@ export async function prepareDocument(
   document: Document
 ): Promise<DocumentResponse> {
   const buffer = decode(document.Content);
-  const fileName = document.Name.split(".")?.at(0);
+  const fileName = document.Name.split(".")?.at(0) ?? "File";
   const sanitizedName = stripSpecialCharacters(fileName);
 
   switch (document.ContentType) {
@@ -20,6 +20,7 @@ export async function prepareDocument(
         content: buffer,
         mimeType: "application/pdf",
         size: document.ContentLength,
+        name: fileName,
         fileName: `${sanitizedName}.pdf`,
       };
     }
@@ -41,6 +42,7 @@ export async function prepareDocument(
         content: image,
         mimeType: "image/jpeg",
         size: image.byteLength,
+        name: fileName,
         fileName: `${sanitizedName}.jpg`,
       };
     }
@@ -55,6 +57,7 @@ export async function prepareDocument(
         content: image,
         mimeType: "image/jpeg",
         size: image.byteLength,
+        name: fileName,
         fileName: `${sanitizedName}.jpg`,
       };
     }

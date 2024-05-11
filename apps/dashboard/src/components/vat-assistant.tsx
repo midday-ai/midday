@@ -46,9 +46,12 @@ export function VatAssistant({ name, onSelect }: Props) {
   };
 
   useEffect(() => {
-    setLoading(true);
+    if (name) {
+      setLoading(true);
+    }
 
     if (!name) {
+      setLoading(false);
       setResult(undefined);
     }
   }, [name]);
@@ -63,16 +66,16 @@ export function VatAssistant({ name, onSelect }: Props) {
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div
-            className={cn(
-              "absolute right-2 top-3 transition-all opacity-0",
-              result?.vat && "opacity-100"
-            )}
-          >
+          <div className="absolute right-2 top-3">
             {isLoading ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
             ) : (
-              <Icons.AIOutline className="pointer-events-none" />
+              <Icons.AIOutline
+                className={cn(
+                  "pointer-events-none transition-all opacity-0",
+                  result?.vat && "opacity-100"
+                )}
+              />
             )}
           </div>
         </TooltipTrigger>

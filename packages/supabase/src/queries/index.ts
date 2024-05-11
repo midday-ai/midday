@@ -185,14 +185,13 @@ export async function getTransactionsQuery(
     "date",
     "amount",
     "currency",
-    "category",
     "method",
     "status",
     "note",
     "name:decrypted_name",
     "description:decrypted_description",
     "assigned:assigned_id(*)",
-    "category:transaction_categories(id, name, color, vat)",
+    "category:transaction_categories(id, name, color, slug)",
     "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
   ];
@@ -273,7 +272,7 @@ export async function getTransactionsQuery(
   const { data, count } = await query.range(from, to);
 
   const totalAmount = data
-    // ?.filter((transaction) => transaction.category !== "transfer")
+    ?.filter((transaction) => transaction?.category?.slug !== "transfer")
     ?.reduce((acc, { amount, currency }) => {
       const existingCurrency = acc.find((item) => item.currency === currency);
 
@@ -307,7 +306,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       name:decrypted_name,
       description:decrypted_description,
       assigned:assigned_id(*),
-      category:category_id(id, name, vat),
+      category:category_slug(id, name, vat),
       attachments:transaction_attachments(*),
       bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `

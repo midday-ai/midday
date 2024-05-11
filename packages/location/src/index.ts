@@ -4,7 +4,7 @@ import countries from "./countries.json";
 import flags from "./country-flag";
 
 export function getCountryCode() {
-  const countryCode = headers().get("x-vercel-ip-country") || "US";
+  const countryCode = headers().get("x-vercel-ip-country") || "SE";
 
   return countryCode;
 }
