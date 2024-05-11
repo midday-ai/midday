@@ -3,6 +3,7 @@ import {
   updateCategorySchema,
 } from "@/actions/schema";
 import { updateCategoryAction } from "@/actions/update-category-action";
+import { VatAssistant } from "@/components/vat-assistant";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
   FormItem,
   FormMessage,
 } from "@midday/ui/form";
+import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -28,7 +30,7 @@ type Props = {
   id: string;
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
-  defaultValue: { name: string; color: string };
+  defaultValue: { name: string; color: string; description?: string };
 };
 
 export function EditCategoryModal({
@@ -48,8 +50,19 @@ export function EditCategoryModal({
       id,
       name: defaultValue.name,
       color: defaultValue.color,
+      description: defaultValue.description ?? undefined,
+      vat: defaultValue.vat ?? undefined,
     },
   });
+
+  function onSubmit(values: UpdateCategoriesFormValues) {
+    console.log(values);
+    updateCategory.execute({
+      ...values,
+      description: values.description?.length ? values.description : null,
+      vat: values.vat?.length ? values.vat : null,
+    });
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -60,42 +73,92 @@ export function EditCategoryModal({
           </DialogHeader>
 
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(updateCategory.execute)}
-              className="mt-6 mb-6"
-            >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <div className="relative">
-                        <div
-                          className="size-3 transition-colors rounded-[2px] absolute top-3 left-2"
-                          style={{
-                            backgroundColor: form.watch("color"),
-                          }}
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 mb-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex space-x-2">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <div className="relative">
+                            <div
+                              className="size-3 transition-colors rounded-[2px] absolute top-3 left-2"
+                              style={{
+                                backgroundColor: form.watch("color"),
+                              }}
+                            />
+
+                            <InputColor
+                              placeholder="Category"
+                              onChange={({ name, color }) => {
+                                form.setValue("color", color);
+                                field.onChange(name);
+                              }}
+                              defaultValue={field.value}
+                              defaultColor={form.watch("color")}
+                            />
+
+                            <FormMessage />
+                          </div>
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex-1 relative">
+                    <FormField
+                      control={form.control}
+                      name="vat"
+                      render={({ field }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input
+                              {...field}
+                              autoFocus={false}
+                              placeholder="VAT"
+                              className="remove-arrow"
+                              type="number"
+                              min={0}
+                              max={100}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+
+                    {defaultValue.name !== form.watch("name") && (
+                      <VatAssistant
+                        name={form.watch("name")}
+                        onSelect={(vat) => {
+                          if (vat) {
+                            form.setValue("vat", vat.toString());
+                          }
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormControl>
+                        <Input
+                          {...field}
+                          autoFocus={false}
+                          placeholder="Description"
                         />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-                        <InputColor
-                          placeholder="Category"
-                          onChange={({ name, color }) => {
-                            form.setValue("color", color);
-                            field.onChange(name);
-                          }}
-                          defaultValue={field.value}
-                          defaultColor={form.watch("color")}
-                        />
-
-                        <FormMessage />
-                      </div>
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-
-              <DialogFooter className="mt-12 w-full">
+              <DialogFooter className="mt-8 w-full">
                 <div className="space-y-4 w-full">
                   <Button
                     disabled={updateCategory.status === "executing"}

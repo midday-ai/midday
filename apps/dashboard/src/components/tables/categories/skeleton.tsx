@@ -23,7 +23,7 @@ export function CategoriesSkeleton() {
         </TableHeader>
 
         <TableBody>
-          {[...Array(6)].map((_, index) => (
+          {[...Array(15)].map((_, index) => (
             <TableRow
               key={index.toString()}
               className="hover:bg-transparent h-[49px]"

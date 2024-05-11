@@ -547,31 +547,34 @@ export type Database = {
         Row: {
           color: string | null
           created_at: string | null
+          description: string | null
           id: string
           name: string | null
-          slug: string | null
+          slug: string
           system: boolean | null
-          team_id: string | null
+          team_id: string
           vat: number | null
         }
         Insert: {
           color?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           name?: string | null
-          slug?: string | null
+          slug: string
           system?: boolean | null
-          team_id?: string | null
+          team_id?: string
           vat?: number | null
         }
         Update: {
           color?: string | null
           created_at?: string | null
+          description?: string | null
           id?: string
           name?: string | null
-          slug?: string | null
+          slug?: string
           system?: boolean | null
-          team_id?: string | null
+          team_id?: string
           vat?: number | null
         }
         Relationships: [
@@ -623,7 +626,7 @@ export type Database = {
           balance: number | null
           bank_account_id: string | null
           category: Database["public"]["Enums"]["transactionCategories"] | null
-          category_id: string | null
+          category_slug: string | null
           created_at: string
           currency: string
           currency_rate: number | null
@@ -645,7 +648,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
-          category_id?: string | null
+          category_slug?: string | null
           created_at?: string
           currency: string
           currency_rate?: number | null
@@ -667,7 +670,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
-          category_id?: string | null
+          category_slug?: string | null
           created_at?: string
           currency?: string
           currency_rate?: number | null
@@ -692,20 +695,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_transactions_bank_account_id_fkey"
-            columns: ["bank_account_id"]
-            isOneToOne: false
-            referencedRelation: "bank_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_transactions_bank_account_id_fkey"
-            columns: ["bank_account_id"]
-            isOneToOne: false
-            referencedRelation: "decrypted_bank_accounts"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "public_transactions_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -713,11 +702,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_slug_team_id_fkey"
+            columns: ["category_slug", "team_id"]
             isOneToOne: false
             referencedRelation: "transaction_categories"
-            referencedColumns: ["id"]
+            referencedColumns: ["slug", "team_id"]
           },
         ]
       }
@@ -1021,7 +1024,7 @@ export type Database = {
           balance: number | null
           bank_account_id: string | null
           category: Database["public"]["Enums"]["transactionCategories"] | null
-          category_id: string | null
+          category_slug: string | null
           created_at: string | null
           currency: string | null
           currency_rate: number | null
@@ -1045,7 +1048,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
-          category_id?: string | null
+          category_slug?: string | null
           created_at?: string | null
           currency?: string | null
           currency_rate?: number | null
@@ -1069,7 +1072,7 @@ export type Database = {
           balance?: number | null
           bank_account_id?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
-          category_id?: string | null
+          category_slug?: string | null
           created_at?: string | null
           currency?: string | null
           currency_rate?: number | null
@@ -1096,20 +1099,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_transactions_bank_account_id_fkey"
-            columns: ["bank_account_id"]
-            isOneToOne: false
-            referencedRelation: "bank_accounts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "public_transactions_bank_account_id_fkey"
-            columns: ["bank_account_id"]
-            isOneToOne: false
-            referencedRelation: "decrypted_bank_accounts"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "public_transactions_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
@@ -1117,11 +1106,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "transactions_category_id_fkey"
-            columns: ["category_id"]
+            foreignKeyName: "transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "decrypted_bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_category_slug_team_id_fkey"
+            columns: ["category_slug", "team_id"]
             isOneToOne: false
             referencedRelation: "transaction_categories"
-            referencedColumns: ["id"]
+            referencedColumns: ["slug", "team_id"]
           },
         ]
       }

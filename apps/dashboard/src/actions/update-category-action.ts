@@ -11,14 +11,14 @@ import { updateCategorySchema } from "./schema";
 
 export const updateCategoryAction = action(
   updateCategorySchema,
-  async ({ id, name, color, revalidatePath }) => {
+  async ({ id, name, color, description, vat, revalidatePath }) => {
     const supabase = createClient();
     const user = await getUser();
     const teamId = user?.data.team_id;
 
     await supabase
       .from("transaction_categories")
-      .update({ name, color })
+      .update({ name, color, description, vat })
       .eq("id", id);
 
     revalidatePathFunc(revalidatePath);

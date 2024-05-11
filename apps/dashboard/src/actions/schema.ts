@@ -233,8 +233,9 @@ export const createCategoriesSchema = z.object({
   categories: z.array(
     z.object({
       name: z.string().optional(),
+      description: z.string().optional(),
       color: z.string().optional(),
-      vat: z.number().optional(),
+      vat: z.string().optional(),
     })
   ),
 });
@@ -245,7 +246,8 @@ export const updateCategorySchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
   color: z.string(),
-  vat: z.number().optional(),
+  description: z.string().optional().nullable(),
+  vat: z.string().optional().nullable(),
   revalidatePath: z.string(),
 });
 

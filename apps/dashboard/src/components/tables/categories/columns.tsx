@@ -9,6 +9,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";
@@ -31,7 +37,23 @@ export const columns: ColumnDef<Category>[] = [
           className="size-3 transition-colors rounded-[2px]"
           style={{ backgroundColor: row.original.color }}
         />
-        <span>{row.getValue("name")}</span>
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="cursor-default">{row.getValue("name")}</span>
+            </TooltipTrigger>
+            {row.original?.description && (
+              <TooltipContent
+                className="px-3 py-1.5 text-xs"
+                side="right"
+                sideOffset={10}
+              >
+                {row.original.description}
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
+
         {row.original.system && (
           <div className="pl-2">
             <span className="border border-border rounded-full py-1.5 px-3 text-xs text-[#878787] font-mono">

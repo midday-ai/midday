@@ -30,6 +30,7 @@ type Props = {
 
 const newItem = {
   name: undefined,
+  description: undefined,
   vat: undefined,
   color: undefined,
 };
@@ -97,60 +98,86 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-4 max-h-[400px] overflow-auto">
               {fields.map((field, index) => (
-                <div key={field.id} className="flex space-x-2">
-                  <FormField
-                    control={form.control}
-                    name={`categories.${index}.name`}
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <InputColor
-                            autoFocus
-                            placeholder="Name"
-                            onChange={({ name, color }) => {
-                              field.onChange(name);
-                              form.setValue(`categories.${index}.color`, color);
-                            }}
-                            defaultValue={field.value}
-                            defaultColor={form.watch(
-                              `categories.${index}.color`
-                            )}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="flex-1 relative">
+                <div key={field.id} className="flex flex-col space-y-2">
+                  <div className="flex space-x-2">
                     <FormField
                       control={form.control}
-                      name={`categories.${index}.vat`}
+                      name={`categories.${index}.name`}
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input
-                              {...field}
-                              autoFocus={false}
-                              placeholder="VAT"
-                              className="remove-arrow"
-                              type="number"
-                              min={0}
-                              max={100}
+                            <InputColor
+                              autoFocus
+                              placeholder="Name"
+                              onChange={({ name, color }) => {
+                                field.onChange(name);
+                                form.setValue(
+                                  `categories.${index}.color`,
+                                  color
+                                );
+                              }}
+                              defaultValue={field.value}
+                              defaultColor={form.watch(
+                                `categories.${index}.color`
+                              )}
                             />
                           </FormControl>
                         </FormItem>
                       )}
                     />
 
-                    <VatAssistant
-                      name={form.watch(`categories.${index}.name`)}
-                      onSelect={(vat) => {
-                        form.setValue(`categories.${index}.vat`, vat);
-                      }}
-                    />
+                    <div className="flex-1 relative">
+                      <FormField
+                        control={form.control}
+                        name={`categories.${index}.vat`}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input
+                                {...field}
+                                autoFocus={false}
+                                placeholder="VAT"
+                                className="remove-arrow"
+                                type="number"
+                                min={0}
+                                max={100}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+
+                      <VatAssistant
+                        name={form.watch(`categories.${index}.name`)}
+                        onSelect={(vat) => {
+                          if (vat) {
+                            form.setValue(
+                              `categories.${index}.vat`,
+                              vat.toString()
+                            );
+                          }
+                        }}
+                      />
+                    </div>
                   </div>
+
+                  <FormField
+                    control={form.control}
+                    name={`categories.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormControl>
+                          <Input
+                            {...field}
+                            autoFocus={false}
+                            placeholder="Description"
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
               ))}
             </div>

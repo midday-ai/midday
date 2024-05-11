@@ -8,7 +8,7 @@ export async function CategoriesTable() {
 
   const { data } = await supabase
     .from("transaction_categories")
-    .select("id, name, color, system, vat")
+    .select("id, name, color, description, system, vat")
     .eq("team_id", user.data?.team_id)
     .order("created_at", { ascending: false });
 
