@@ -40,6 +40,7 @@ export const env = createEnv({
     GOCARDLESS_SECRET_KEY: z.string(),
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
+    BASELIME_SERVICE: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -92,6 +93,7 @@ export const env = createEnv({
     GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
       process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
+    BASELIME_SERVICE: process.env.BASELIME_SERVICE,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
