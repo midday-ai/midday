@@ -59,10 +59,10 @@ export const getTransactions = async (
 export const getUser = async () => {
   const supabase = createClient();
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  const userId = user?.id;
+  const userId = session?.user.id;
 
   if (!userId) {
     return null;

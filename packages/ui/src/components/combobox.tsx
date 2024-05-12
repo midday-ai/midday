@@ -120,7 +120,7 @@ export const Combobox = ({
           <Loader2 className="w-[16px] h-[16px] absolute right-2 animate-spin text-dark-gray" />
         )}
 
-        {!isLoading && selected && (
+        {!isLoading && selected && onRemove && (
           <Icons.Close
             className="w-[18px] h-[18px] absolute right-2"
             onClick={handleOnRemove}
