@@ -132,7 +132,7 @@ export function BulkActions({ ids }) {
                         type: "category",
                         data: ids.map((transaction) => ({
                           id: transaction,
-                          category,
+                          category_slug: category.slug,
                         })),
                       });
                     }}
