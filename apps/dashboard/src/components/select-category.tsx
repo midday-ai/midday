@@ -32,6 +32,7 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
       const category = data.at(0);
 
       if (category) {
+        setData((prev) => [category, ...prev]);
         onChange(category);
       }
     },
@@ -111,6 +112,7 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
       )}
 
       <Combobox
+        key={selected?.id}
         showIcon={false}
         className={cn(
           "border border-border rounded-md p-2 h-9",

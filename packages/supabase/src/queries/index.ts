@@ -39,10 +39,13 @@ export async function getUserQuery(supabase: Client, userId: string) {
 
 export async function getCurrentUserTeamQuery(supabase: Client) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  return getUserQuery(supabase, user?.id);
+  if (!session?.user) {
+    return;
+  }
+  return getUserQuery(supabase, session.user?.id);
 }
 
 export async function getBankConnectionsByTeamIdQuery(
@@ -369,7 +372,7 @@ export async function getBurnRateQuery(
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_burn_rate", {
+  return supabase.rpc("get_burn_rate_v2", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
@@ -413,7 +416,7 @@ export async function getCurrentBurnRateQuery(
 ) {
   const { teamId, currency } = params;
 
-  return supabase.rpc("get_current_burn_rate", {
+  return supabase.rpc("get_current_burn_rate_v2", {
     team_id: teamId,
     currency,
   });
@@ -433,7 +436,7 @@ export async function getMetricsQuery(
 ) {
   const { teamId, from, to, type = "profit", currency } = params;
 
-  const rpc = type === "profit" ? "get_profit" : "get_revenue";
+  const rpc = type === "profit" ? "get_profit_v2" : "get_revenue_v2";
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);

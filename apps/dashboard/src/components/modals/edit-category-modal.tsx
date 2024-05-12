@@ -30,7 +30,12 @@ type Props = {
   id: string;
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
-  defaultValue: { name: string; color: string; description?: string };
+  defaultValue: {
+    name: string;
+    color: string;
+    description?: string;
+    vat?: string;
+  };
 };
 
 export function EditCategoryModal({
@@ -51,16 +56,15 @@ export function EditCategoryModal({
       name: defaultValue.name,
       color: defaultValue.color,
       description: defaultValue.description ?? undefined,
-      vat: defaultValue.vat ?? undefined,
+      vat: defaultValue?.vat?.toString() ?? undefined,
     },
   });
 
   function onSubmit(values: UpdateCategoriesFormValues) {
-    console.log(values);
     updateCategory.execute({
       ...values,
       description: values.description?.length ? values.description : null,
-      vat: values.vat?.length ? values.vat : null,
+      vat: values.vat?.length ? values.vat.toString() : null,
     });
   }
 

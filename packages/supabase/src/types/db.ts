@@ -1198,7 +1198,26 @@ export type Database = {
           value: number
         }[]
       }
+      get_burn_rate_v2: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
       get_current_burn_rate: {
+        Args: {
+          team_id: string
+          currency: string
+        }
+        Returns: number
+      }
+      get_current_burn_rate_v2: {
         Args: {
           team_id: string
           currency: string
@@ -1217,7 +1236,31 @@ export type Database = {
           value: number
         }[]
       }
+      get_profit_v2: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
       get_revenue: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency: string
+        }
+        Returns: {
+          date: string
+          value: number
+        }[]
+      }
+      get_revenue_v2: {
         Args: {
           team_id: string
           date_from: string
@@ -1252,7 +1295,30 @@ export type Database = {
           percentage: number
         }[]
       }
+      get_spending_v2: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          currency_target: string
+        }
+        Returns: {
+          category: string
+          amount: number
+          currency: string
+          percentage: number
+        }[]
+      }
       get_total_amount: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          currency: string
+          total_amount: number
+        }[]
+      }
+      get_total_amount_v2: {
         Args: {
           team_id: string
         }

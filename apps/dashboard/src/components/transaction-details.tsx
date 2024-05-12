@@ -114,22 +114,18 @@ export function TransactionDetails({
       { category }
     );
 
-    const { data: userData } = await getCurrentUserTeamQuery(supabase);
+    const user = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
-      teamId: userData?.team_id,
+      teamId: user?.data?.team_id,
     });
 
-    if (transactions?.data?.length > 1) {
+    if (transactions?.data && transactions.data.length > 1) {
       toast({
         duration: 6000,
         variant: "ai",
         title: "Midday AI",
-        description: `Do you want to mark ${
-          transactions?.data?.length
-        } similar transactions from ${data?.name} as ${t(
-          `categories.${category}`
-        )} too?`,
+        description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${category.name} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
             <ToastAction altText="Cancel" className="pl-5 pr-5">
@@ -137,9 +133,9 @@ export function TransactionDetails({
             </ToastAction>
             <ToastAction
               altText="Yes"
-              onClick={() =>
-                updateSimilarTransactions.execute({ id: data?.id })
-              }
+              onClick={() => {
+                updateSimilarTransactions.execute({ id: data?.id });
+              }}
               className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Yes

@@ -37,7 +37,7 @@ export const searchAction = action(searchSchema, async (params) => {
     case "categories": {
       const query = supabase
         .from("transaction_categories")
-        .select("id, name, color")
+        .select("id, name, color, slug")
         .eq("team_id", teamId)
         .ilike("name", `%${searchQuery}%`)
         .order("created_at", { ascending: true });
