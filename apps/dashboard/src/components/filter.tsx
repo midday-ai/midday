@@ -34,9 +34,10 @@ type SelectedOption = {
   value: string;
 };
 
-type Option = {
+type Option<TVal> = {
   id: string;
   label?: string;
+  renderLabel?: (value: TVal) => React.ReactNode;
   translationKey?: string;
   from?: Date;
   to?: Date;
@@ -57,9 +58,10 @@ type Section = {
 
 type Props = {
   sections: Section[];
+  categories: any;
 };
 
-export function Filter({ sections }: Props) {
+export function Filter({ sections, categories }: Props) {
   const t = useI18n();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -233,12 +235,7 @@ export function Filter({ sections }: Props) {
         if (filter.length) {
           const option = section?.options?.find((o) => o.id === filter.at(0));
 
-          // Category
-          if (filter.at(0)?.name) {
-            return filter.at(0)?.name;
-          }
-
-          return option?.translationKey
+          return option.renderLabel?.(option) ?? option?.translationKey
             ? t(option?.translationKey)
             : option?.label;
         }

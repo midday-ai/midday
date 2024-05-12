@@ -23,17 +23,12 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
     cookies().get(Cookies.TransactionsColumns)?.value || "[]"
   );
 
-  const formatedFilters = {
-    ...filter,
-    categories: filter?.categories?.map((category) => category.slug),
-  };
-
   // NOTE: When we have a filter we want to show all results so users can select
   // And handle all in once (export etc)
   const transactions = await getTransactions({
     to: hasFilters ? maxItems : pageSize,
     from: 0,
-    filter: formatedFilters,
+    filter,
     sort,
     searchQuery: query,
   });
@@ -46,7 +41,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
     return getTransactions({
       to,
       from: from + 1,
-      filter: formatedFilters,
+      filter,
       sort,
       searchQuery: query,
     });

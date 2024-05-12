@@ -30,7 +30,7 @@ export function SpendingCategoryList({ categories, period }) {
                   <Link
                     className="flex items-center"
                     href={`/transactions?filter=${JSON.stringify({
-                      categories: [{ slug: category, name: "Cat" }],
+                      categories: [category],
                       date: { from: period?.from, to: period?.to },
                     })}`}
                   >

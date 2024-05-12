@@ -122,6 +122,7 @@ export function transactionSections(categories) {
       label: "Categories",
       icon: Archive,
       type: SectionType.checkbox,
+      renderLabel: (value) => value.name,
       options: categories.map((category) => ({
         id: category.slug,
         label: category.name,

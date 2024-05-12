@@ -23,7 +23,6 @@ export default async function Transactions({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   // TODO: Check if there are transactions instead
-
   const [bankConnections, categories] = await Promise.all([
     getBankConnectionsByTeamId(),
     getCategories(),
