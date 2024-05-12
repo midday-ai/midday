@@ -156,12 +156,17 @@ export async function deleteUser(supabase: Client) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  await supabase.auth.admin.deleteUser(session.id);
-  // TODO: Delete files etc
-  await supabase.from("users").delete().eq("id", session.id);
-  await supabase.auth.signOut();
+  if (!session?.user) {
+    return;
+  }
 
-  return session.id;
+  await Promise.all([
+    supabase.auth.admin.deleteUser(session.user.id),
+    supabase.from("users").delete().eq("id", session.user.id),
+    supabase.auth.signOut(),
+  ]);
+
+  return session.user.id;
 }
 
 export async function updateTeam(supabase: Client, data: any) {
