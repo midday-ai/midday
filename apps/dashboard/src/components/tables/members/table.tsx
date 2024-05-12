@@ -37,7 +37,7 @@ import {
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -61,16 +61,16 @@ export const columns: ColumnDef[] = [
               <AvatarImage src={row.original.user?.avatar_url} />
               <AvatarFallback>
                 <span className="text-xs">
-                  {row.original.user.full_name?.charAt(0)?.toUpperCase()}
+                  {row.original.user?.full_name?.charAt(0)?.toUpperCase()}
                 </span>
               </AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
               <span className="font-medium text-sm">
-                {row.original.user.full_name}
+                {row.original.user?.full_name}
               </span>
               <span className="text-sm text-[#606060]">
-                {row.original.user.email}
+                {row.original.user?.email}
               </span>
             </div>
           </div>
@@ -134,14 +134,14 @@ export const columns: ColumnDef[] = [
           <div className="flex space-x-2 items-center">
             {(table.options.meta.currentUser.role === "owner" &&
               table.options.meta.currentUser.user.id !==
-                row.original.user.id) ||
+                row.original.user?.id) ||
             (table.options.meta.currentUser.role === "owner" &&
               table.options.meta.totalOwners > 1) ? (
               <Select
                 value={row.original.role}
                 onValueChange={(role) => {
                   changeUserRole.execute({
-                    userId: row.original.user.id,
+                    userId: row.original.user?.id,
                     teamId: row.original.team_id,
                     role,
                     revalidatePath: "/settings/members",
@@ -171,7 +171,7 @@ export const columns: ColumnDef[] = [
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   {table.options.meta.currentUser.user.id !==
-                    row.original.user.id && (
+                    row.original.user?.id && (
                     <AlertDialog>
                       <DropdownMenuItem
                         className="text-destructive"
@@ -196,7 +196,7 @@ export const columns: ColumnDef[] = [
                             disabled={deleteTeamMember.status === "executing"}
                             onClick={() =>
                               deleteTeamMember.execute({
-                                userId: row.original.user.id,
+                                userId: row.original.user?.id,
                                 teamId: row.original.team_id,
                                 revalidatePath: "/settings/members",
                               })
@@ -214,7 +214,7 @@ export const columns: ColumnDef[] = [
                   )}
 
                   {table.options.meta.currentUser.user.id ===
-                    row.original.user.id && (
+                    row.original.user?.id && (
                     <AlertDialog>
                       <DropdownMenuItem
                         className="text-destructive"
