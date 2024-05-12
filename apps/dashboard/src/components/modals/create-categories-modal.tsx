@@ -60,21 +60,18 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
   const form = useForm<CreateCategoriesFormValues>({
     resolver: zodResolver(createCategoriesSchema),
     defaultValues: {
-      revalidatePath: "/settings/categories",
       categories: [newItem],
     },
   });
 
   useEffect(() => {
     form.reset({
-      revalidatePath: "/settings/categories",
       categories: [newItem],
     });
   }, [isOpen]);
 
   const onSubmit = form.handleSubmit((data) => {
     createCategories.execute({
-      revalidatePath: "/settings/categories",
       categories: data.categories.filter(
         (category) => category.name !== undefined
       ),
@@ -98,7 +95,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col space-y-4 max-h-[400px] overflow-auto">
+            <div className="flex flex-col space-y-6 max-h-[400px] overflow-auto">
               {fields.map((field, index) => (
                 <div key={field.id} className="flex flex-col space-y-2">
                   <div className="flex space-x-2">

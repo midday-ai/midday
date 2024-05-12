@@ -222,7 +222,6 @@ export function TransactionDetails({
 
           <SelectCategory
             placeholder="Category"
-            isLoading={isLoading}
             name={data?.name}
             id={transactionId}
             selected={data?.category}

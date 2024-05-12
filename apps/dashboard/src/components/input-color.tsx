@@ -22,7 +22,7 @@ export function InputColor({
   const [value, setValue] = useState(defaultValue);
 
   return (
-    <div>
+    <div className="relative">
       <ColorPicker
         value={color}
         onSelect={(newColor) => {

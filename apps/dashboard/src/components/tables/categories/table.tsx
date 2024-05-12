@@ -33,7 +33,6 @@ import { useAction } from "next-safe-action/hooks";
 import React from "react";
 import { type Category, columns } from "./columns";
 import { Header } from "./header";
-// import { TableHeader } from "./table-header";
 
 type Props = {
   data: Category[];

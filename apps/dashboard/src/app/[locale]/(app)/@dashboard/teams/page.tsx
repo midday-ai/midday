@@ -7,7 +7,7 @@ import {
 } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Icons } from "@midday/ui/icons";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";

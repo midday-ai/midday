@@ -1,5 +1,5 @@
-import { colors } from "@/utils/categories";
 import { cn } from "@midday/ui/cn";
+import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useClickAway } from "@uidotdev/usehooks";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";
@@ -10,29 +10,18 @@ type Props = {
 };
 
 export function ColorPicker({ value, onSelect }: Props) {
-  const [isOpen, setOpen] = useState(false);
-
-  const ref = useClickAway(() => {
-    setOpen(false);
-  });
-
   return (
-    <div className="relative" ref={ref}>
-      <button
-        type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="size-3 transition-colors rounded-[2px] absolute top-3 left-2"
-        style={{
-          backgroundColor: value,
-        }}
-      />
-
-      <div
-        className={cn(
-          "position absolute bg-background rounded-sm border border-border p-1 top-10 invisible",
-          isOpen && "visible"
-        )}
-      >
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="size-3 transition-colors rounded-[2px] absolute top-3 left-2"
+          style={{
+            backgroundColor: value,
+          }}
+        />
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-auto" sideOffset={14}>
         <HexColorPicker
           className="color-picker"
           color={value}
@@ -40,7 +29,7 @@ export function ColorPicker({ value, onSelect }: Props) {
             onSelect(c);
           }}
         />
-      </div>
-    </div>
+      </PopoverContent>
+    </Popover>
   );
 }

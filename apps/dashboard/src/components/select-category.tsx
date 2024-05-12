@@ -17,7 +17,6 @@ type Selected = {
 
 type Props = {
   selected?: Selected;
-  isLoading: boolean;
   placeholder: string;
   onChange: (selected: Selected) => void;
 };

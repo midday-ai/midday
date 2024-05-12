@@ -850,3 +850,22 @@ export async function getTrackerRecordsByRangeQuery(
     data: result,
   };
 }
+
+export type GetCategoriesParams = {
+  teamId: string;
+  limit?: number;
+};
+
+export async function getCategoriesQuery(
+  supabase: Client,
+  params: GetCategoriesParams
+) {
+  const { teamId, limit = 1000 } = params;
+
+  return supabase
+    .from("transaction_categories")
+    .select("id, name, color, slug, description, system, vat")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false })
+    .range(0, limit);
+}

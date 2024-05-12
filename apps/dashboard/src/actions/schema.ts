@@ -229,7 +229,6 @@ export type InviteTeamMembersFormValues = z.infer<
 >;
 
 export const createCategoriesSchema = z.object({
-  revalidatePath: z.string().optional(),
   categories: z.array(
     z.object({
       name: z.string().optional(),
@@ -248,7 +247,6 @@ export const updateCategorySchema = z.object({
   color: z.string(),
   description: z.string().optional().nullable(),
   vat: z.string().optional().nullable(),
-  revalidatePath: z.string(),
 });
 
 export type UpdateCategoriesFormValues = z.infer<typeof updateCategorySchema>;

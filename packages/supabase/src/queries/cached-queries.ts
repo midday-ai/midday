@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "../client/server";
 import {
   type GetBurnRateQueryParams,
-  GetCategoriesParams,
+  type GetCategoriesParams,
   type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
@@ -182,7 +182,7 @@ export const getSpending = async (params: GetSpendingParams) => {
     ["spending", teamId],
     {
       tags: [`spending_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
     }
   )(params);
 };
@@ -228,7 +228,7 @@ export const getMetrics = async (params: GetMetricsParams) => {
     ["metrics", teamId],
     {
       tags: [`metrics_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
     }
   )(params);
 };
@@ -369,7 +369,7 @@ export const getBurnRate = async (
     ["burn_rate", teamId],
     {
       tags: [`burn_rate_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
     }
   )(params);
 };
@@ -388,7 +388,7 @@ export const getCurrentBurnRate = async (
     ["current_burn_rate", teamId],
     {
       tags: [`current_burn_rate_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
     }
   )(params);
 };
@@ -407,7 +407,26 @@ export const getRunway = async (
     ["runway", teamId],
     {
       tags: [`runway_${teamId}`],
-      revalidate: 180,
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getCategories = async (
+  params?: Omit<GetCategoriesParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getCategoriesQuery(supabase, { ...params, teamId });
+    },
+    ["transaction_categories", teamId],
+    {
+      tags: [`transaction_categories_${teamId}`],
+      revalidate: 3600,
     }
   )(params);
 };

@@ -51,7 +51,6 @@ export function EditCategoryModal({
   const form = useForm<UpdateCategoriesFormValues>({
     resolver: zodResolver(updateCategorySchema),
     defaultValues: {
-      revalidatePath: "/settings/categories",
       id,
       name: defaultValue.name,
       color: defaultValue.color,
