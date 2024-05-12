@@ -40,23 +40,6 @@ export function ColorPicker({ value, onSelect }: Props) {
             onSelect(c);
           }}
         />
-        {/* {colors.map((c) => {
-          return (
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onSelect(c);
-              }}
-              className={cn(
-                "size-4 rounded-[2px] ring-1 ring-transparent",
-                c === value && "ring-primary"
-              )}
-              style={{ backgroundColor: c }}
-              key={c}
-            />
-          );
-        })} */}
       </div>
     </div>
   );

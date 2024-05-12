@@ -118,6 +118,7 @@ export function SelectCategory({ selected, placeholder, onChange }: Props) {
         )}
         placeholder={placeholder}
         value={selectedValue}
+        // onRemove={}
         CreateComponent={({ value }) => (
           <div className="flex items-center space-x-2">
             <div
