@@ -153,15 +153,15 @@ export async function updateUser(supabase: Client, data: any) {
 
 export async function deleteUser(supabase: Client) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  await supabase.auth.admin.deleteUser(user.id);
+  await supabase.auth.admin.deleteUser(session.id);
   // TODO: Delete files etc
-  await supabase.from("users").delete().eq("id", user.id);
+  await supabase.from("users").delete().eq("id", session.id);
   await supabase.auth.signOut();
 
-  return user.id;
+  return session.id;
 }
 
 export async function updateTeam(supabase: Client, data: any) {

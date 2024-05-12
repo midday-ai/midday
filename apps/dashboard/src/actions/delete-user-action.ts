@@ -7,10 +7,7 @@ import { createClient } from "@midday/supabase/server";
 import { redirect } from "next/navigation";
 
 export const deleteUserAction = async () => {
-  const supabase = createClient({
-    // NOTE: Needed for supabase.auth.admin
-    admin: true,
-  });
+  const supabase = createClient();
 
   const userId = await deleteUser(supabase);
 
