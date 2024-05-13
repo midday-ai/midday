@@ -41,6 +41,7 @@ export const env = createEnv({
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
     BASELIME_SERVICE: z.string(),
+    BASELIME_API_KEY: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -94,6 +95,7 @@ export const env = createEnv({
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
       process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
     BASELIME_SERVICE: process.env.BASELIME_SERVICE,
+    BASELIME_API_KEY: process.env.BASELIME_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });

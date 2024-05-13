@@ -5,7 +5,6 @@ import type {
   Transaction as BaseTransaction,
 } from "../types";
 import type {
-  AccountBalance,
   Transaction,
   TransactionDescription,
   TransformAccount,
