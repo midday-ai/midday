@@ -3,7 +3,6 @@ import {
   updateCategorySchema,
 } from "@/actions/schema";
 import { updateCategoryAction } from "@/actions/update-category-action";
-import { VatAssistant } from "@/components/vat-assistant";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {

@@ -1,4 +1,4 @@
-import { UpdateTransactionValues } from "@/actions/schema";
+import type { UpdateTransactionValues } from "@/actions/schema";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { Sheet, SheetContent } from "@midday/ui/sheet";

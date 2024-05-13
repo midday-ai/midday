@@ -221,8 +221,6 @@ export function TransactionDetails({
           </Label>
 
           <SelectCategory
-            placeholder="Category"
-            name={data?.name}
             id={transactionId}
             selected={data?.category}
             onChange={handleOnChangeCategory}
