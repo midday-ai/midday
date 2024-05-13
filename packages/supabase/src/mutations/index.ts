@@ -134,19 +134,23 @@ export async function updateTransaction(
     .from("decrypted_transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, team_id, name:decrypted_name, status")
+    .select("id, category, category_slug, team_id, name:decrypted_name, status")
     .single();
 }
 
 export async function updateUser(supabase: Client, data: any) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.user) {
+    return;
+  }
 
   return supabase
     .from("users")
     .update(data)
-    .eq("id", user?.id)
+    .eq("id", session.user.id)
     .select()
     .single();
 }
@@ -254,20 +258,32 @@ export async function updateBankAccount(
     .single();
 }
 
-export async function updateSimilarTransactions(supabase: Client, id: string) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
+type UpdateSimilarTransactionsParams = {
+  id: string;
+  team_id: string;
+};
+
+export async function updateSimilarTransactions(
+  supabase: Client,
+  params: UpdateSimilarTransactionsParams
+) {
+  const { id, team_id } = params;
 
   const transaction = await supabase
     .from("decrypted_transactions")
-    .select("name:decrypted_name, category")
+    .select("name:decrypted_name, category_slug")
     .eq("id", id)
     .single();
 
+  if (!transaction?.data?.category_slug) {
+    return null;
+  }
+
   return supabase
     .from("decrypted_transactions")
-    .update({ category: transaction.data.category })
+    .update({ category_slug: transaction.data.category_slug })
     .eq("decrypted_name", transaction.data.name)
-    .eq("team_id", userData?.team_id)
+    .eq("team_id", team_id)
     .select("id, team_id");
 }
 
@@ -298,29 +314,6 @@ export async function createAttachments(
   return data;
 }
 
-type CreateEnrichmentTransactionParams = {
-  name: string;
-  category: Database["public"]["Enums"]["transactionCategories"];
-};
-
-export async function createEnrichmentTransaction(
-  supabase: Client,
-  params: CreateEnrichmentTransactionParams
-) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  const { data } = await supabase
-    .from("transaction_enrichments")
-    .insert({
-      name: params.name,
-      category: params.category,
-      created_by: userData?.id,
-    })
-    .select();
-
-  return data;
-}
-
 export async function deleteAttachment(supabase: Client, id: string) {
   const { data } = await supabase
     .from("transaction_attachments")
@@ -338,10 +331,10 @@ type CreateTeamParams = {
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user) {
+  if (!session?.user) {
     return;
   }
 
@@ -356,7 +349,7 @@ export async function createTeam(supabase: Client, params: CreateTeamParams) {
   const { data: userData } = await supabase
     .from("users_on_team")
     .insert({
-      user_id: user.id,
+      user_id: session.user.id,
       team_id: teamData?.id,
       role: "owner",
     })
@@ -394,18 +387,22 @@ export async function leaveTeam(supabase: Client, params: LeaveTeamParams) {
 
 export async function joinTeamByInviteCode(supabase: Client, code: string) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.user.email) {
+    return;
+  }
 
   const { data: inviteData } = await getUserInviteQuery(supabase, {
     code,
-    email: user?.email,
+    email: session.user.email,
   });
 
   if (inviteData) {
     // Add user team
     await supabase.from("users_on_team").insert({
-      user_id: user.id,
+      user_id: session.user.id,
       team_id: inviteData?.team_id,
       role: inviteData.role,
     });
@@ -416,7 +413,7 @@ export async function joinTeamByInviteCode(supabase: Client, code: string) {
       .update({
         team_id: inviteData?.team_id,
       })
-      .eq("id", user.id)
+      .eq("id", session.user.id)
       .select()
       .single();
 

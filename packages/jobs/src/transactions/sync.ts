@@ -62,7 +62,10 @@ client.defineJob({
     try {
       if (promises) {
         const result = await Promise.all(promises);
-        const transactions = result?.flat();
+        const transactions = result.flat()?.map((transaction) => ({
+          ...transaction,
+          category_slug: transaction.category,
+        }));
 
         await io.logger.debug("Transactions", transactions);
 

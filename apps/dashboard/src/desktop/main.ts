@@ -49,11 +49,12 @@ async function main() {
         window.location.pathname = "/desktop/command";
       } else {
         const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
 
-        if (!user) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
           window.location.pathname = "/";
         }
       }

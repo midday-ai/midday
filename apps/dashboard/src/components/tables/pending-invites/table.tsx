@@ -18,7 +18,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -62,12 +62,13 @@ export const columns: ColumnDef<Payment>[] = [
       const { toast } = useToast();
 
       const deleteInvite = useAction(deleteInviteAction, {
-        onSuccess: () =>
+        onSuccess: () => {
           toast({
             title: "Team invite removed.",
             duration: 3500,
             variant: "success",
-          }),
+          });
+        },
         onError: () => {
           toast({
             duration: 3500,
@@ -125,7 +126,7 @@ export function PendingInvitesSkeleton() {
         <TableBody>
           {[...Array(6)].map((_, index) => (
             <TableRow key={index.toString()} className="hover:bg-transparent">
-              <TableCell className={cn("border-r-[0px] py-4")}>
+              <TableCell className="border-r-[0px] py-4">
                 <div className="flex items-center space-x-4">
                   <Skeleton className="rounded-full w-8 h-8" />
 

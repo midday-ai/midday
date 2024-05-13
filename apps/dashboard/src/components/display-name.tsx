@@ -33,7 +33,7 @@ export function DisplayName({ fullName }) {
     },
   });
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = form.handleSubmit((data) => {
     action.execute({
       full_name: data.full_name,
     });

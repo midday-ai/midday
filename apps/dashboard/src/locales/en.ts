@@ -1,22 +1,4 @@
 export default {
-  categories: {
-    meals: "Meals",
-    travel: "Travel",
-    software: "Software",
-    office_supplies: "Office Supplies",
-    fees: "Fees",
-    internet_and_telephone: "Internet & Telephone",
-    rent: "Rent",
-    equipment: "Equipment",
-    salary: "Salary",
-    income: "Income",
-    transfer: "Transfer",
-    activity: "Activity",
-    other: "Other",
-    uncategorized: "Uncategorized",
-    taxes: "Taxes",
-    facilities_expenses: "Facilities Expenses",
-  },
   transaction_methods: {
     card_purchase: "Card Purchase",
     payment: "Payment",

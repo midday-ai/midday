@@ -1,10 +1,12 @@
 "use client";
 
 import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
+import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateColumnVisibilityAction } from "@/actions/update-column-visibility-action";
 import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
+import { Cookies } from "@/utils/constants";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
@@ -24,8 +26,6 @@ import { useInView } from "react-intersection-observer";
 import { BottomBar } from "./bottom-bar";
 import { DataTableHeader } from "./data-table-header";
 import { ExportBar } from "./export-bar";
-import { Cookies } from "@/utils/constants";
-import { UpdateTransactionValues } from "@/actions/schema";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

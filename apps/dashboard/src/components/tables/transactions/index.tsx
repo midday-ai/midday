@@ -1,10 +1,10 @@
 import { DataTable } from "@/components/tables/transactions/data-table";
+import { Cookies } from "@/utils/constants";
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { columns } from "./columns";
 import { NoResults } from "./empty-states";
 import { Loading } from "./loading";
-import { Cookies } from "@/utils/constants";
 
 const pageSize = 50;
 const maxItems = 100000;

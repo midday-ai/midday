@@ -33,15 +33,15 @@ export async function GET(req: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
 
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
+      data: { session },
+    } = await supabase.auth.getSession();
 
-    if (user) {
-      const userId = user.id;
+    if (session) {
+      const userId = session.user.id;
 
       const logsnag = await setupLogSnag({
         userId,
-        fullName: user?.user_metadata?.full_name,
+        fullName: session?.user?.user_metadata?.full_name,
       });
 
       await logsnag.track({

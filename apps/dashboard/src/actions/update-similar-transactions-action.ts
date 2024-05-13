@@ -14,7 +14,14 @@ export const updateSimilarTransactionsAction = action(
     const user = await getUser();
     const teamId = user?.data?.team_id;
 
-    await updateSimilarTransactions(supabase, id);
+    if (!teamId) {
+      return null;
+    }
+
+    await updateSimilarTransactions(supabase, {
+      team_id: teamId,
+      id,
+    });
 
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);

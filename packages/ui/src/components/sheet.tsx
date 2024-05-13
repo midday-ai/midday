@@ -58,6 +58,7 @@ const SheetContent = React.forwardRef<
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
+      onOpenAutoFocus={(e) => e.preventDefault()}
       ref={ref}
       className={cn(sheetVariants({ side }), className)}
       {...props}

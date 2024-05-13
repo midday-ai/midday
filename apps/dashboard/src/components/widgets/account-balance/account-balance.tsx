@@ -8,7 +8,7 @@ import { useState } from "react";
 
 export function AccountBalance({ data }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const sortedAccounts = data.sort((a, b) => b.balance - a.balance);
+  const sortedAccounts = data?.sort((a, b) => b.balance - a.balance);
 
   const activeAccount = sortedAccounts.at(activeIndex);
 

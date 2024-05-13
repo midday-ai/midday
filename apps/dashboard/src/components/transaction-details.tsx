@@ -1,3 +1,4 @@
+import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
 import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
@@ -28,7 +29,6 @@ import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
 import { TransactionBankAccount } from "./transaction-bank-account";
-import { UpdateTransactionValues } from "@/actions/schema";
 
 type Props = {
   data: any;
@@ -56,7 +56,7 @@ export function TransactionDetails({
 
   const enabled = Boolean(ids?.length);
 
-  const ref = useHotkeys(
+  useHotkeys(
     "ArrowUp, ArrowDown",
     ({ key }) => {
       if (key === "ArrowUp") {
@@ -103,25 +103,29 @@ export function TransactionDetails({
     }
   }, [data]);
 
-  const handleOnChangeCategory = async (category: string) => {
-    updateTransaction({ id: data?.id, category }, { category });
+  const handleOnChangeCategory = async (category: {
+    id: string;
+    name: string;
+    slug: string;
+    color: string;
+  }) => {
+    updateTransaction(
+      { id: data?.id, category_slug: category.slug },
+      { category }
+    );
 
-    const { data: userData } = await getCurrentUserTeamQuery(supabase);
+    const user = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
-      teamId: userData?.team_id,
+      teamId: user?.data?.team_id,
     });
 
-    if (transactions?.data?.length > 1) {
+    if (transactions?.data && transactions.data.length > 1) {
       toast({
         duration: 6000,
         variant: "ai",
         title: "Midday AI",
-        description: `Do you want to mark ${
-          transactions?.data?.length
-        } similar transactions from ${data?.name} as ${t(
-          `categories.${category}`
-        )} too?`,
+        description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${category.name} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
             <ToastAction altText="Cancel" className="pl-5 pr-5">
@@ -129,9 +133,9 @@ export function TransactionDetails({
             </ToastAction>
             <ToastAction
               altText="Yes"
-              onClick={() =>
-                updateSimilarTransactions.execute({ id: data?.id })
-              }
+              onClick={() => {
+                updateSimilarTransactions.execute({ id: data?.id });
+              }}
               className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
               Yes
@@ -149,7 +153,7 @@ export function TransactionDetails({
   }
 
   return (
-    <div ref={ref}>
+    <div>
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
@@ -217,11 +221,8 @@ export function TransactionDetails({
           </Label>
 
           <SelectCategory
-            placeholder="Select"
-            isLoading={isLoading}
-            name={data?.name}
             id={transactionId}
-            selectedId={data?.category ?? undefined}
+            selected={data?.category}
             onChange={handleOnChangeCategory}
           />
         </div>

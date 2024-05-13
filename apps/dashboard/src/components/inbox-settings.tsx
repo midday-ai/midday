@@ -46,7 +46,7 @@ export function InboxSettings({
     },
   });
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = form.handleSubmit((data) => {
     action.execute(data);
   });
 

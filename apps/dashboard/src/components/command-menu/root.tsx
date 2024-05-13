@@ -1,5 +1,6 @@
 "use client";
 
+import { Experimental } from "@/components/experimental";
 import { MenuOption, useCommandStore } from "@/store/command";
 import {
   CommandEmpty,
@@ -54,7 +55,11 @@ export function CommandRoot() {
 
   return (
     <div>
-      <CommandInput placeholder="Type a command or search..." autoFocus />
+      <CommandInput
+        placeholder="Type a command or search..."
+        autoFocus
+        className="px-3 border-b-[1px] rounded-none"
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
 
@@ -63,18 +68,7 @@ export function CommandRoot() {
             <Icons.AI className="mr-2 h-[20px] w-[20px] text-[#0091ff]" />
             <div className="flex items-center justify-between w-full">
               <span>Ask Midday AI...</span>
-
-              <span
-                className="relative rounded-lg overflow-hidden border dark:p-[1px] dark:border-none"
-                style={{
-                  background:
-                    "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #848f9c 50%, rgba(235,248,255,.18) 100%)",
-                }}
-              >
-                <span className="flex items-center py-[3px] px-3 rounded-[7px] bg-background text-[10px] h-full font-normal">
-                  Experimental
-                </span>
-              </span>
+              <Experimental />
             </div>
           </CommandItem>
 

@@ -147,7 +147,7 @@ export async function POST(req: Request) {
 
     // Transform and upload files
     const uploadedAttachments = allowedAttachments?.map(async (attachment) => {
-      const { content, mimeType, size, fileName } = await prepareDocument(
+      const { content, mimeType, size, fileName, name } = await prepareDocument(
         attachment
       );
 
@@ -159,12 +159,13 @@ export async function POST(req: Request) {
         });
 
       return {
-        display_name: fallbackName,
+        // NOTE: If we can't parse the name using OCR this will be the fallback name
+        display_name: Subject || name,
         team_id: teamId,
         file_path: data?.path.split("/"),
         file_name: fileName,
         content_type: mimeType,
-        forwarded_to: forwardEmail,
+        forwarded_to: forwardingEnabled ? forwardEmail : null,
         reference_id: `${MessageID}_${fileName}`,
         size,
       };

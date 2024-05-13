@@ -28,6 +28,8 @@ type ComboboxProps = {
   className?: string;
   classNameList?: string;
   autoFocus?: boolean;
+  showIcon?: boolean;
+  CreateComponent?: React.ReactElement<{ value: string }>;
 };
 
 export const Combobox = ({
@@ -41,8 +43,10 @@ export const Combobox = ({
   className,
   classNameList,
   isLoading = false,
+  showIcon = true,
   autoFocus,
   onValueChange,
+  CreateComponent,
 }: ComboboxProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setOpen] = useState(false);
@@ -96,7 +100,9 @@ export const Combobox = ({
   return (
     <CommandPrimitive className="w-full">
       <div className="flex items-center w-full relative">
-        <Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />
+        {showIcon && (
+          <Icons.Search className="w-[18px] h-[18px] absolute left-4 pointer-events-none" />
+        )}
 
         <CommandInput
           ref={inputRef}
@@ -111,12 +117,12 @@ export const Combobox = ({
         />
 
         {isLoading && (
-          <Loader2 className="w-[16px] h-[16px] absolute right-4 animate-spin text-dark-gray" />
+          <Loader2 className="w-[16px] h-[16px] absolute right-2 animate-spin text-dark-gray" />
         )}
 
-        {!isLoading && selected && (
+        {!isLoading && selected && onRemove && (
           <Icons.Close
-            className="w-[20px] h-[20px] absolute right-4"
+            className="w-[18px] h-[18px] absolute right-2"
             onClick={handleOnRemove}
           />
         )}
@@ -151,19 +157,26 @@ export const Combobox = ({
                 );
               })}
 
-              {onCreate && (
-                <CommandItem
-                  key={inputValue}
-                  value={inputValue}
-                  onSelect={() => onCreate(inputValue)}
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                >
-                  {`Create "${inputValue}"`}
-                </CommandItem>
-              )}
+              {onCreate &&
+                !options?.find(
+                  (o) => o.name.toLowerCase() === inputValue.toLowerCase()
+                ) && (
+                  <CommandItem
+                    key={inputValue}
+                    value={inputValue}
+                    onSelect={() => onCreate(inputValue)}
+                    onMouseDown={(event) => {
+                      event.preventDefault();
+                      event.stopPropagation();
+                    }}
+                  >
+                    {CreateComponent ? (
+                      <CreateComponent value={inputValue} />
+                    ) : (
+                      `Create "${inputValue}"`
+                    )}
+                  </CommandItem>
+                )}
             </CommandGroup>
           )}
         </CommandList>

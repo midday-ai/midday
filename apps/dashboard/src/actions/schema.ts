@@ -145,10 +145,10 @@ export const sendFeedbackSchema = z.object({
 });
 
 export const updateTransactionSchema = z.object({
-  id: z.string(),
+  id: z.string().uuid(),
   note: z.string().optional(),
-  category: z.string().optional(),
-  assigned_id: z.string().optional(),
+  category_slug: z.string().optional(),
+  assigned_id: z.string().uuid().optional(),
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
 });
 
@@ -156,6 +156,11 @@ export type UpdateTransactionValues = z.infer<typeof updateTransactionSchema>;
 
 export const deleteTransactionSchema = z.object({
   ids: z.array(z.string()),
+});
+
+export const deleteCategoriesSchema = z.object({
+  ids: z.array(z.string()),
+  revalidatePath: z.string(),
 });
 
 export const bulkUpdateTransactionsSchema = z.object({
@@ -222,6 +227,29 @@ export const inviteTeamMembersSchema = z.object({
 export type InviteTeamMembersFormValues = z.infer<
   typeof inviteTeamMembersSchema
 >;
+
+export const createCategoriesSchema = z.object({
+  categories: z.array(
+    z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      color: z.string().optional(),
+      vat: z.string().optional(),
+    })
+  ),
+});
+
+export type CreateCategoriesFormValues = z.infer<typeof createCategoriesSchema>;
+
+export const updateCategorySchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1),
+  color: z.string(),
+  description: z.string().optional().nullable(),
+  vat: z.string().optional().nullable(),
+});
+
+export type UpdateCategoriesFormValues = z.infer<typeof updateCategorySchema>;
 
 export const deleteInviteSchema = z.object({
   id: z.string(),
@@ -333,8 +361,12 @@ export const verifyOtpSchema = z.object({
 
 export const searchSchema = z.object({
   query: z.string().min(1),
-  type: z.enum(["inbox"]),
+  type: z.enum(["inbox", "categories"]),
   limit: z.number().optional(),
 });
 
 export const inboxOrder = z.boolean();
+
+export const getVatRateSchema = z.object({
+  name: z.string().min(2),
+});

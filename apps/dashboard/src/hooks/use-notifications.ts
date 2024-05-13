@@ -89,10 +89,13 @@ export function useNotifications() {
   useEffect(() => {
     async function fetchUser() {
       const {
-        data: { user },
-      } = await supabase.auth.getUser();
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      const { data: userData } = await getUserQuery(supabase, user?.id);
+      const { data: userData } = await getUserQuery(
+        supabase,
+        session?.user?.id
+      );
 
       if (userData) {
         setSubscriberId(`${userData.team_id}_${userData.id}`);

@@ -4,7 +4,10 @@ import { SearchField } from "@/components/search-field";
 import { Table } from "@/components/tables/transactions";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
-import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
+import {
+  getBankConnectionsByTeamId,
+  getCategories,
+} from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -20,7 +23,11 @@ export default async function Transactions({
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
   // TODO: Check if there are transactions instead
-  const bankConnections = await getBankConnectionsByTeamId();
+  const [bankConnections, categories] = await Promise.all([
+    getBankConnectionsByTeamId(),
+    getCategories(),
+  ]);
+
   const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
   const filter =
     (searchParams?.filter && JSON.parse(searchParams.filter)) ?? {};
@@ -39,7 +46,7 @@ export default async function Transactions({
     <>
       <div className="flex justify-between py-6">
         <SearchField placeholder="Search transactions" />
-        <TransactionsActions />
+        <TransactionsActions categories={categories?.data} />
       </div>
 
       <div className={cn(isEmpty && "opacity-20 pointer-events-none")}>

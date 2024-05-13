@@ -34,7 +34,7 @@ export function TeamName({ name }) {
     },
   });
 
-  const onSubmit = form.handleSubmit(async (data) => {
+  const onSubmit = form.handleSubmit((data) => {
     action.execute(data);
   });
 

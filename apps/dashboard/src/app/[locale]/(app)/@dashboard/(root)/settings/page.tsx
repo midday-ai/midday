@@ -9,17 +9,18 @@ export const metadata: Metadata = {
 };
 
 export default async function Account() {
-  const { data: userData } = await getUser();
+  const user = await getUser();
 
   return (
     <div className="space-y-12">
       <TeamAvatar
-        teamId={userData?.team?.id}
-        name={userData?.team?.name}
-        logoUrl={userData?.team?.logo_url}
+        teamId={user?.data?.team?.id}
+        name={user?.data?.team?.name}
+        logoUrl={user?.data?.team?.logo_url}
       />
-      <TeamName name={userData?.team?.name} />
-      <DeleteTeam name={userData?.team?.name} teamId={userData?.team.id} />
+
+      <TeamName name={user?.data?.team?.name} />
+      <DeleteTeam name={user?.data?.team?.name} teamId={user?.data?.team?.id} />
     </div>
   );
 }

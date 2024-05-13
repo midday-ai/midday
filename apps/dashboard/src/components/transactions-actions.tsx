@@ -3,7 +3,7 @@
 import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
 import { ColumnVisibility } from "@/components/column-visibility";
 import { Filter } from "@/components/filter";
-import { sections } from "@/components/tables/transactions/filters";
+import { transactionSections } from "@/components/tables/transactions/filters";
 import { useTransactionsStore } from "@/store/transactions";
 import {
   AlertDialog,
@@ -23,9 +23,14 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { BulkActions } from "./bulk-actions";
 
-export function TransactionsActions() {
+type Props = {
+  categories: { id: string; name: string; slug: string }[] | null;
+};
+
+export function TransactionsActions({ categories }: Props) {
   const { toast } = useToast();
   const { transactionIds, canDelete } = useTransactionsStore();
+  const sections = transactionSections(categories);
 
   const deleteTransactions = useAction(deleteTransactionsAction, {
     onError: () => {

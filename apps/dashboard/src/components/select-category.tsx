@@ -1,67 +1,120 @@
-import { useI18n } from "@/locales/client";
+import { createCategoriesAction } from "@/actions/create-categories-action";
+import { getColorFromName } from "@/utils/categories";
+import { createClient } from "@midday/supabase/client";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@midday/ui/select";
-import { Skeleton } from "@midday/ui/skeleton";
+  getCategoriesQuery,
+  getCurrentUserTeamQuery,
+} from "@midday/supabase/queries";
+import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
+import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
-import { CategoryIcon, categories } from "./category";
+import { CategoryColor } from "./category";
 
-export function SelectCategory({
-  selectedId,
-  isLoading,
-  placeholder,
-  onChange,
-}) {
-  const [value, setValue] = useState();
-  const t = useI18n();
+type Selected = {
+  id: string;
+  name: string;
+  color: string;
+  slug: string;
+};
+
+type Props = {
+  selected?: Selected;
+  onChange: (selected: Selected) => void;
+};
+
+function transformCategory(category) {
+  return {
+    id: category.id,
+    label: category.name,
+    color: category.color,
+    slug: category.slug,
+  };
+}
+
+export function SelectCategory({ selected, onChange }: Props) {
+  const [data, setData] = useState([]);
+  const supabase = createClient();
 
   useEffect(() => {
-    setValue(selectedId);
-  }, [selectedId]);
+    async function fetchData() {
+      const { data: userData } = await getCurrentUserTeamQuery(supabase);
+      if (userData?.team_id) {
+        const response = await getCategoriesQuery(supabase, {
+          teamId: userData.team_id,
+          limit: 1000,
+        });
 
-  const sortedCategories = Object.values(categories).sort((a, b) => {
-    if (a === value) {
-      return -1;
+        if (response.data) {
+          setData(response.data.map(transformCategory));
+        }
+      }
     }
 
-    if (b === value) {
-      return 1;
+    if (!data.length) {
+      fetchData();
     }
+  }, [data]);
 
-    return a.localeCompare(b);
+  const createCategories = useAction(createCategoriesAction, {
+    onSuccess: (data) => {
+      const category = data.at(0);
+
+      if (category) {
+        setData((prev) => [transformCategory(category), ...prev]);
+        onChange(category);
+      }
+    },
   });
 
+  const selectedValue = selected ? transformCategory(selected) : undefined;
+
   return (
-    <div className="relative w-full">
-      {isLoading ? (
-        <div className="h-[36px] border rounded-md">
-          <Skeleton className="h-[14px] w-[40%] rounded-sm absolute left-3 top-[39px]" />
+    <ComboboxDropdown
+      disabled={createCategories.status === "executing"}
+      placeholder="Select category"
+      searchPlaceholder="Search category"
+      items={data}
+      selectedItem={selectedValue}
+      onSelect={(item) => {
+        onChange({
+          id: item.id,
+          name: item.label,
+          color: item.color,
+          slug: item.slug,
+        });
+      }}
+      onCreate={(value) => {
+        createCategories.execute({
+          categories: [
+            {
+              name: value,
+              color: getColorFromName(value),
+            },
+          ],
+        });
+      }}
+      renderSelectedItem={(selectedItem) => (
+        <div className="flex items-center space-x-2">
+          <CategoryColor color={selectedItem.color} />
+          <span>{selectedItem.label}</span>
         </div>
-      ) : (
-        <Select value={value} onValueChange={onChange}>
-          <SelectTrigger
-            id="category"
-            className="line-clamp-1 truncate"
-            onKeyDown={(evt) => evt.preventDefault()}
-          >
-            <SelectValue placeholder={placeholder} />
-          </SelectTrigger>
-          <SelectContent className="overflow-y-auto max-h-[350px]">
-            {sortedCategories.map((category) => (
-              <SelectItem key={category} value={category}>
-                <div className="flex space-x-2 items-center">
-                  <CategoryIcon name={category} />
-                  <span>{t(`categories.${category}`)}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       )}
-    </div>
+      renderOnCreate={(value) => {
+        return (
+          <div className="flex items-center space-x-2">
+            <CategoryColor color={getColorFromName(value)} />
+            <span>{`Create "${value}"`}</span>
+          </div>
+        );
+      }}
+      renderListItem={({ item }) => {
+        return (
+          <div className="flex items-center space-x-2">
+            <CategoryColor color={item.color} />
+            <span>{item.label}</span>
+          </div>
+        );
+      }}
+    />
   );
 }

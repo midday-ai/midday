@@ -90,12 +90,12 @@ export function SelectTransaction({
           transaction_id: option?.id,
         })
       }
-      onRemove={() =>
+      onRemove={() => {
         onSelect({
           id: inboxId,
           transaction_id: null,
-        })
-      }
+        });
+      }}
       value={selectedValue}
       options={options}
       isLoading={isLoading}

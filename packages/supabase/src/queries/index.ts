@@ -9,6 +9,16 @@ import {
 import type { Client } from "../types";
 import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
+function transactionCategory(transaction) {
+  return (
+    transaction?.category ?? {
+      id: "uncategorized",
+      name: "Uncategorized",
+      color: "#606060",
+    }
+  );
+}
+
 export function getPercentageIncrease(a: number, b: number) {
   return a > 0 && b > 0 ? Math.abs(((a - b) / b) * 100).toFixed() : 0;
 }
@@ -29,10 +39,13 @@ export async function getUserQuery(supabase: Client, userId: string) {
 
 export async function getCurrentUserTeamQuery(supabase: Client) {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  return getUserQuery(supabase, user?.id);
+  if (!session?.user) {
+    return;
+  }
+  return getUserQuery(supabase, session.user?.id);
 }
 
 export async function getBankConnectionsByTeamIdQuery(
@@ -134,7 +147,7 @@ export async function getSpendingQuery(
   supabase: Client,
   params: GetSpendingParams
 ) {
-  return supabase.rpc("get_spending", {
+  return supabase.rpc("get_spending_v2", {
     team_id: params.teamId,
     date_from: params.from,
     date_to: params.to,
@@ -175,13 +188,13 @@ export async function getTransactionsQuery(
     "date",
     "amount",
     "currency",
-    "category",
     "method",
     "status",
     "note",
     "name:decrypted_name",
     "description:decrypted_description",
     "assigned:assigned_id(*)",
+    "category:transaction_categories(id, name, color, slug)",
     "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
   ];
@@ -241,9 +254,9 @@ export async function getTransactionsQuery(
     const matchCategory = categories
       .map((category) => {
         if (category === "uncategorized") {
-          return "category.is.null";
+          return "category_slug.is.null";
         }
-        return `category.eq.${category}`;
+        return `category_slug.eq.${category}`;
       })
       .join(",");
 
@@ -252,17 +265,17 @@ export async function getTransactionsQuery(
 
   if (type === "expense") {
     query.lt("amount", 0);
-    query.neq("category", "transfer");
+    query.neq("category_slug", "transfer");
   }
 
   if (type === "income") {
-    query.eq("category", "income");
+    query.eq("category_slug", "income");
   }
 
   const { data, count } = await query.range(from, to);
 
   const totalAmount = data
-    ?.filter((transaction) => transaction.category !== "transfer")
+    ?.filter((transaction) => transaction?.category?.slug !== "transfer")
     ?.reduce((acc, { amount, currency }) => {
       const existingCurrency = acc.find((item) => item.currency === currency);
 
@@ -282,7 +295,7 @@ export async function getTransactionsQuery(
     },
     data: data?.map((transaction) => ({
       ...transaction,
-      category: transaction?.category || "uncategorized",
+      category: transactionCategory(transaction),
     })),
   };
 }
@@ -296,6 +309,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       name:decrypted_name,
       description:decrypted_description,
       assigned:assigned_id(*),
+      category:category_slug(id, name, vat),
       attachments:transaction_attachments(*),
       bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
     `
@@ -306,7 +320,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
 
   return {
     ...data,
-    category: data?.category || "uncategorized",
+    category: transactionCategory(data),
   };
 }
 
@@ -358,7 +372,7 @@ export async function getBurnRateQuery(
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_burn_rate", {
+  return supabase.rpc("get_burn_rate_v2", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
@@ -402,7 +416,7 @@ export async function getCurrentBurnRateQuery(
 ) {
   const { teamId, currency } = params;
 
-  return supabase.rpc("get_current_burn_rate", {
+  return supabase.rpc("get_current_burn_rate_v2", {
     team_id: teamId,
     currency,
   });
@@ -422,7 +436,7 @@ export async function getMetricsQuery(
 ) {
   const { teamId, from, to, type = "profit", currency } = params;
 
-  const rpc = type === "profit" ? "get_profit" : "get_revenue";
+  const rpc = type === "profit" ? "get_profit_v2" : "get_revenue_v2";
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
@@ -835,4 +849,23 @@ export async function getTrackerRecordsByRangeQuery(
     },
     data: result,
   };
+}
+
+export type GetCategoriesParams = {
+  teamId: string;
+  limit?: number;
+};
+
+export async function getCategoriesQuery(
+  supabase: Client,
+  params: GetCategoriesParams
+) {
+  const { teamId, limit = 1000 } = params;
+
+  return supabase
+    .from("transaction_categories")
+    .select("id, name, color, slug, description, system, vat")
+    .eq("team_id", teamId)
+    .order("created_at", { ascending: false })
+    .range(0, limit);
 }

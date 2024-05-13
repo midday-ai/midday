@@ -3,7 +3,7 @@ export function getYAxisWidth(value: string) {
 }
 
 export function findLargestValue(data) {
-  return data.reduce((max, obj) => {
+  return data?.reduce((max, obj) => {
     return obj.value > max ? obj.value : max;
   }, data[0].value);
 }

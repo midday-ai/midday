@@ -84,7 +84,7 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     transaction.personal_finance_category?.detailed ===
       "RENT_AND_UTILITIES_OTHER_UTILITIES"
   ) {
-    return "facilities_expenses";
+    return "facilities-expenses";
   }
 
   if (
@@ -100,11 +100,11 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     transaction.personal_finance_category?.detailed ===
       "RENT_AND_UTILITIES_TELEPHONE"
   ) {
-    return "internet_and_telephone";
+    return "internet-and-telephone";
   }
 
   if (transaction.personal_finance_category?.primary === "HOME_IMPROVEMENT") {
-    return "office_supplies";
+    return "office-supplies";
   }
 
   if (transaction.personal_finance_category?.primary === "ENTERTAINMENT") {
