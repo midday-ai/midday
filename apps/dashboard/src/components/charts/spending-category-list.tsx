@@ -25,7 +25,7 @@ export function SpendingCategoryList({ categories, period }) {
         {categories.map(
           ({ slug, name, color, percentage, amount, currency }) => {
             return (
-              <li key={category}>
+              <li key={slug}>
                 <HoverCard openDelay={10} closeDelay={10}>
                   <HoverCardTrigger asChild>
                     <Link
