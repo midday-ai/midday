@@ -28,7 +28,6 @@ export function CategoryColor({
 type Props = {
   name: string;
   className?: string;
-  system: boolean;
   color?: string;
 };
 

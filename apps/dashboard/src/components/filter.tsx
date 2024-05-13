@@ -235,7 +235,7 @@ export function Filter({ sections, categories }: Props) {
         if (filter.length) {
           const option = section?.options?.find((o) => o.id === filter.at(0));
 
-          return option.renderLabel?.(option) ?? option?.translationKey
+          return option?.renderLabel?.(option) ?? option?.translationKey
             ? t(option?.translationKey)
             : option?.label;
         }

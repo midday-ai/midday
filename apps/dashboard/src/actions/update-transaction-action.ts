@@ -1,10 +1,7 @@
 "use server";
 
 import { getUser } from "@midday/supabase/cached-queries";
-import {
-  createEnrichmentTransaction,
-  updateTransaction,
-} from "@midday/supabase/mutations";
+import { updateTransaction } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
@@ -18,14 +15,6 @@ export const updateTransactionAction = action(
     const teamId = user.data.team_id;
 
     const { data } = await updateTransaction(supabase, id, payload);
-
-    // Add category to global transaction_enrichments
-    if (data?.category) {
-      createEnrichmentTransaction(supabase, {
-        name: data.name,
-        category: data.category,
-      });
-    }
 
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);

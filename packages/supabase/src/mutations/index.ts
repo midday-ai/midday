@@ -314,29 +314,6 @@ export async function createAttachments(
   return data;
 }
 
-type CreateEnrichmentTransactionParams = {
-  name: string;
-  category: Database["public"]["Enums"]["transactionCategories"];
-};
-
-export async function createEnrichmentTransaction(
-  supabase: Client,
-  params: CreateEnrichmentTransactionParams
-) {
-  const { data: userData } = await getCurrentUserTeamQuery(supabase);
-
-  const { data } = await supabase
-    .from("transaction_enrichments")
-    .insert({
-      name: params.name,
-      category: params.category,
-      created_by: userData?.id,
-    })
-    .select();
-
-  return data;
-}
-
 export async function deleteAttachment(supabase: Client, id: string) {
   const { data } = await supabase
     .from("transaction_attachments")

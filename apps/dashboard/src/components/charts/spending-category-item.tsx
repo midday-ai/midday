@@ -5,14 +5,16 @@ import { formatAmount } from "@/utils/format";
 import { CategoryColor } from "../category";
 
 type Props = {
-  category: string;
+  name: string;
+  color: string;
   amount: number;
   currency: string;
   percentage: number;
 };
 
 export function SpendingCategoryItem({
-  category,
+  name,
+  color,
   amount,
   currency,
   percentage,
@@ -22,7 +24,7 @@ export function SpendingCategoryItem({
   return (
     <div className="px-3 py-1 flex justify-between items-center space-x-12">
       <div className="text-sm font-medium flex items-center space-x-2">
-        {category && <CategoryColor name={category} system />}
+        <CategoryColor name={name} color={color} />
         <p>
           {amount &&
             formatAmount({

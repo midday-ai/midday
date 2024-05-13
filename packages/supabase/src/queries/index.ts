@@ -147,7 +147,7 @@ export async function getSpendingQuery(
   supabase: Client,
   params: GetSpendingParams
 ) {
-  return supabase.rpc("get_spending", {
+  return supabase.rpc("get_spending_v2", {
     team_id: params.teamId,
     date_from: params.from,
     date_to: params.to,

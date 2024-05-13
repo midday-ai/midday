@@ -1,12 +1,12 @@
+import { Cookies } from "@/utils/constants";
 import {
   getBankAccountsCurrencies,
   getSpending,
 } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
+import { cookies } from "next/headers";
 import { spendingData } from "./data";
 import { SpendingCategoryList } from "./spending-category-list";
-import { cookies } from "next/headers";
-import { Cookies } from "@/utils/constants";
 
 export function SpendingListSkeleton() {
   return (
