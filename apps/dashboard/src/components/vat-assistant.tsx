@@ -9,22 +9,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useDebounce } from "@uidotdev/usehooks";
-import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 
 type Props = {
   name?: string;
+  value?: string | null;
   onSelect: (value: number) => void;
+  isFocused: boolean;
 };
 
-export function VatAssistant({ name, onSelect }: Props) {
+export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
   const [result, setResult] = useState<
     { vat: number; country: string } | undefined
   >();
   const [isLoading, setLoading] = useState(false);
-  const debouncedName = useDebounce(name, 300);
 
   const getVatRate = useAction(getVatRateAction, {
     onSuccess: (data) => {
@@ -46,37 +45,24 @@ export function VatAssistant({ name, onSelect }: Props) {
   };
 
   useEffect(() => {
-    if (name) {
+    if (isFocused && name && name.length > 2 && !value) {
       setLoading(true);
+      getVatRate.execute({ name });
     }
-
-    if (!name) {
-      setLoading(false);
-      setResult(undefined);
-    }
-  }, [name]);
-
-  useEffect(() => {
-    if (debouncedName && debouncedName.length > 2) {
-      getVatRate.execute({ name: debouncedName });
-    }
-  }, [debouncedName]);
+  }, [isFocused, name]);
 
   return (
     <TooltipProvider delayDuration={0}>
       <Tooltip>
         <TooltipTrigger asChild>
           <div className="absolute right-2 top-3">
-            {isLoading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Icons.AIOutline
-                className={cn(
-                  "pointer-events-none transition-all opacity-0",
-                  result?.vat && "opacity-100"
-                )}
-              />
-            )}
+            <Icons.AIOutline
+              className={cn(
+                "pointer-events-none opacity-50 transition-colors",
+                result?.vat && "opacity-100",
+                isLoading && "animate-pulse opacity-100"
+              )}
+            />
           </div>
         </TooltipTrigger>
         {result?.vat && (

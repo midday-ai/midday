@@ -4,7 +4,6 @@ import {
   createCategoriesSchema,
 } from "@/actions/schema";
 import { InputColor } from "@/components/input-color";
-import { VatAssistant } from "@/components/vat-assistant";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -22,6 +21,7 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { VatInput } from "../vat-input";
 
 type Props = {
   onOpenChange: (isOpen: boolean) => void;
@@ -132,30 +132,24 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                         render={({ field }) => (
                           <FormItem className="flex-1">
                             <FormControl>
-                              <Input
-                                {...field}
-                                autoFocus={false}
-                                placeholder="VAT"
-                                className="remove-arrow"
-                                type="number"
-                                min={0}
-                                max={100}
+                              <VatInput
+                                value={field.value}
+                                name={form.watch(`categories.${index}.name`)}
+                                onChange={(evt) => {
+                                  field.onChange(evt.target.value);
+                                }}
+                                onSelect={(vat) => {
+                                  if (vat) {
+                                    form.setValue(
+                                      `categories.${index}.vat`,
+                                      vat.toString()
+                                    );
+                                  }
+                                }}
                               />
                             </FormControl>
                           </FormItem>
                         )}
-                      />
-
-                      <VatAssistant
-                        name={form.watch(`categories.${index}.name`)}
-                        onSelect={(vat) => {
-                          if (vat) {
-                            form.setValue(
-                              `categories.${index}.vat`,
-                              vat.toString()
-                            );
-                          }
-                        }}
                       />
                     </div>
                   </div>

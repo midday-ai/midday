@@ -25,6 +25,7 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { InputColor } from "../input-color";
+import { VatInput } from "../vat-input";
 
 type Props = {
   id: string;
@@ -117,30 +118,22 @@ export function EditCategoryModal({
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input
-                              {...field}
-                              autoFocus={false}
-                              placeholder="VAT"
-                              className="remove-arrow"
-                              type="number"
-                              min={0}
-                              max={100}
+                            <VatInput
+                              value={field.value}
+                              name={form.watch("name")}
+                              onChange={(evt) => {
+                                field.onChange(evt.target.value);
+                              }}
+                              onSelect={(vat) => {
+                                if (vat) {
+                                  form.setValue("vat", vat.toString());
+                                }
+                              }}
                             />
                           </FormControl>
                         </FormItem>
                       )}
                     />
-
-                    {defaultValue.name !== form.watch("name") && (
-                      <VatAssistant
-                        name={form.watch("name")}
-                        onSelect={(vat) => {
-                          if (vat) {
-                            form.setValue("vat", vat.toString());
-                          }
-                        }}
-                      />
-                    )}
                   </div>
                 </div>
 
