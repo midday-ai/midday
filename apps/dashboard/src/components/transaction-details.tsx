@@ -194,7 +194,7 @@ export function TransactionDetails({
                 <span
                   className={cn(
                     "text-4xl font-mono",
-                    data?.category === "income" && "text-[#00C969]"
+                    data?.category?.slug === "income" && "text-[#00C969]"
                   )}
                 >
                   <FormatAmount
