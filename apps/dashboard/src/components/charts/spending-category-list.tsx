@@ -23,7 +23,7 @@ export function SpendingCategoryList({ categories, period }) {
         style={{ maxHeight: width - PADDING }}
       >
         {categories.map(
-          ({ category, name, color, percentage, amount, currency }) => {
+          ({ slug, name, color, percentage, amount, currency }) => {
             return (
               <li key={category}>
                 <HoverCard openDelay={10} closeDelay={10}>
@@ -31,12 +31,12 @@ export function SpendingCategoryList({ categories, period }) {
                     <Link
                       className="flex items-center"
                       href={`/transactions?filter=${JSON.stringify({
-                        categories: [category],
+                        categories: [slug],
                         date: { from: period?.from, to: period?.to },
                       })}`}
                     >
                       <Category
-                        key={category}
+                        key={slug}
                         name={name}
                         color={color}
                         className="text-sm text-primary space-x-3 w-[90%]"
