@@ -58,6 +58,8 @@ export function BottomBar({ count, show, totalAmount }: Props) {
                         amount: first?.amount,
                         currency: first?.currency,
                         locale,
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0,
                       })}
                 </span>
               </TooltipTrigger>

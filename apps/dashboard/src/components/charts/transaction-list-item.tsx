@@ -26,7 +26,7 @@ export function TransactionListItem({ transaction, disabled }: Props) {
               className={cn(
                 "text-sm",
                 disabled && "skeleton-box",
-                row.original?.category?.slug === "income" && "text-[#00C969]"
+                transaction?.category?.slug === "income" && "text-[#00C969]"
               )}
             >
               {transaction.name}
@@ -37,7 +37,7 @@ export function TransactionListItem({ transaction, disabled }: Props) {
               className={cn(
                 "text-sm",
                 disabled && "skeleton-box",
-                row.original?.category?.slug === "income" && "text-[#00C969]"
+                transaction?.category?.slug === "income" && "text-[#00C969]"
               )}
             >
               <FormatAmount
