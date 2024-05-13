@@ -49,9 +49,9 @@ client.defineJob({
       bankAccountId: account.id,
     });
 
-    const formatted = transactions.map((transaction) => ({
-      ...transaction,
-      category_slug: transaction.category,
+    const formatted = transactions.map(({ category, ...rest }) => ({
+      ...rest,
+      category_slug: category,
     }));
 
     // NOTE: We will get all the transactions at once for each account so
