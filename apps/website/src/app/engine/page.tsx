@@ -1,4 +1,3 @@
-import { SparklesCore } from "@/components/sparkles";
 import { WaitlistInput } from "@/components/waitlist-input";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -27,16 +26,6 @@ export default function Page() {
         <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-px md:w-3/4" />
         <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-[5px] md:w-1/4 blur-sm" />
         <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-[#D9D9D9] to-transparent h-px md:w-1/4" />
-
-        {/* Core component */}
-        <SparklesCore
-          background="transparent"
-          minSize={0.4}
-          maxSize={1.2}
-          particleDensity={800}
-          className="w-full h-full"
-          particleColor="#FFFFFF"
-        />
 
         {/* Radial Gradient to prevent sharp edges */}
         <div className="absolute inset-0 w-full h-full bg-[#0C0C0C] [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]" />
