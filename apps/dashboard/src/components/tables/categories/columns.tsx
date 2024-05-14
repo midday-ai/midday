@@ -67,7 +67,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     header: "VAT",
     accessorKey: "vat",
-    cell: ({ row }) => row.getValue("vat") ?? "-",
+    cell: ({ row }) => (row.getValue("vat") ? `${row.getValue("vat")}%` : "-"),
   },
   {
     id: "actions",
