@@ -1,8 +1,7 @@
 "use client";
 
-import { AdaptiveImage } from "@/components/adaptive-image";
 import { motion } from "framer-motion";
-import aiLight from "public/ai-light.png";
+import Image from "next/image";
 import ai from "public/ai.png";
 import { useState } from "react";
 
@@ -11,7 +10,7 @@ export function SectionSix() {
 
   return (
     <section
-      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12"
+      className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12"
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
     >
@@ -21,9 +20,8 @@ export function SectionSix() {
           initial={{ y: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
         >
-          <AdaptiveImage
-            darkSrc={ai}
-            lightSrc={aiLight}
+          <Image
+            src={ai}
             height={405}
             width={793}
             className="-mb-[1px] object-contain"

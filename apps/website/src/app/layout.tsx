@@ -64,7 +64,7 @@ export default function Layout({ children }: { children: ReactElement }) {
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "bg-[#F6F6F3] dark:bg-[#0C0C0C] overflow-x-hidden"
+          "bg-[#0C0C0C] overflow-x-hidden"
         )}
       >
         <Provider>

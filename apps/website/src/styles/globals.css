@@ -98,3 +98,17 @@ pre code {
     font-size: 13px;
     font-weight: 500 !important;
 }
+
+.dotted-bg {
+    --d: 2px; 
+   
+    background : radial-gradient(
+      circle at 
+         var(--d) 
+         var(--d), 
+         
+      #232323 calc(var(--d) - 1px), 
+      #0000 var(--d)
+    ) 
+    0 0 / 12px 12px;
+}

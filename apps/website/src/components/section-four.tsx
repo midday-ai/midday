@@ -1,10 +1,8 @@
 "use client";
 
-import { AdaptiveImage } from "@/components/adaptive-image";
 import { motion } from "framer-motion";
-import inboxLight from "public/inbox-light.png";
+import Image from "next/image";
 import inbox from "public/inbox.png";
-import invoicingLight from "public/invoicing-light.png";
 import invoicing from "public/invoicing.png";
 import { useState } from "react";
 import { CopyInput } from "./copy-input";
@@ -16,7 +14,7 @@ export function SectionFour() {
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden mb-12">
       <div
-        className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col"
+        className="border border-border basis-1/3 bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col"
         onMouseEnter={() => setActive2(true)}
         onMouseLeave={() => setActive2(false)}
       >
@@ -34,9 +32,8 @@ export function SectionFour() {
           transition={{ type: "spring", stiffness: 100 }}
           className="mt-8 md:mt-auto"
         >
-          <AdaptiveImage
-            darkSrc={invoicing}
-            lightSrc={invoicingLight}
+          <Image
+            src={invoicing}
             quality={100}
             className="object-contain"
             alt="Invoice"
@@ -45,7 +42,7 @@ export function SectionFour() {
       </div>
 
       <div
-        className="border border-border md:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col"
+        className="border border-border md:basis-2/3 bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col"
         onMouseEnter={() => setActive(true)}
         onMouseLeave={() => setActive(false)}
       >
@@ -84,9 +81,8 @@ export function SectionFour() {
             initial={{ y: -5 }}
             transition={{ type: "spring", stiffness: 100 }}
           >
-            <AdaptiveImage
-              darkSrc={inbox}
-              lightSrc={inboxLight}
+            <Image
+              src={inbox}
               quality={100}
               className="object-contain"
               alt="Inbox"

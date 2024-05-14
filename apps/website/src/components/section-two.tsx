@@ -1,8 +1,7 @@
 "use client";
 
-import { AdaptiveImage } from "@/components/adaptive-image";
 import { motion } from "framer-motion";
-import profitLossLight from "public/profit-loss-light.png";
+import Image from "next/image";
 import profitLoss from "public/profit-loss.png";
 import { useState } from "react";
 
@@ -11,7 +10,7 @@ export function SectionTwo() {
 
   return (
     <section
-      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden mb-12"
+      className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden mb-12"
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
     >
@@ -22,9 +21,8 @@ export function SectionTwo() {
           transition={{ type: "spring", stiffness: 100 }}
           className="w-full"
         >
-          <AdaptiveImage
-            lightSrc={profitLossLight}
-            darkSrc={profitLoss}
+          <Image
+            src={profitLoss}
             height={400}
             width={789}
             className="-mb-[1px] object-contain"

@@ -69,13 +69,13 @@ export function StatusWidget() {
 
   return (
     <a
-      className="flex justify-between space-x-2 items-center w-full border border-border rounded-md px-3 py-1"
+      className="flex justify-between space-x-2 items-center w-full border border-border rounded-full px-3 py-1.5"
       href="https://midday.openstatus.dev"
       target="_blank"
       rel="noreferrer"
     >
       <div>
-        <p className="text-sm">{level.label}</p>
+        <p className="text-xs font-mono">{level.label}</p>
       </div>
 
       <span className="relative ml-auto flex h-1.5 w-1.5">

@@ -15,7 +15,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="border-t-[1px] border-border px-4 md:px-6 pt-10 md:pt-16 bg-[#F6F6F3] dark:bg-[#0C0C0C]">
+    <footer className="border-t-[1px] border-border px-4 md:px-6 pt-10 md:pt-16 bg-[#0C0C0C]">
       <div className="container">
         <div className="flex justify-between items-center border-border border-b-[1px] pb-10 md:pb-16 mb-12">
           <Link href="/" className="scale-50 -ml-[52px] md:ml-0 md:scale-100">
@@ -33,22 +33,22 @@ export function Footer() {
             <div>
               <span className="font-medium">Product</span>
               <ul>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/">Features</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/pricing">Pricing</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/story">Story</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/updates">Updates</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/download">Download</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/feature-request">Feature Request</Link>
                 </li>
               </ul>
@@ -57,22 +57,22 @@ export function Footer() {
             <div>
               <span>Resources</span>
               <ul>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="https://git.new/midday">Github</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/support">Support</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/policy">Privacy policy</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/open-startup">Open Startup</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/pitch">Investors</Link>
                 </li>
               </ul>
@@ -81,22 +81,22 @@ export function Footer() {
             <div>
               <span>Solutions</span>
               <ul>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/engine">Midday Engine</Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="https://docs.midday.ai/self-hosted">
                     Self hosted
                   </Link>
                 </li>
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/">SaaS hosting</Link>
                 </li>
                 {/* Nothing here yet */}
-                {/* <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                {/* <li className="transition-colors text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>
                 </li> */}
-                <li className="text-[#707070] transition-colors hover:text-primary dark:text-[#878787]">
+                <li className="transition-colors text-[#878787]">
                   <Link href="/oss-friends">OSS friends</Link>
                 </li>
               </ul>
@@ -115,15 +115,6 @@ export function Footer() {
             </div>
           </div>
         </div>
-
-        <p className="text-xs text-[#B3B3B2] dark:text-[#3E3E3E] mb-12">
-          Cal.com® is a registered trademark by Cal.com, Inc. All rights
-          reserved. Apple.com® is a registered trademark by Apple.com, Inc. All
-          rights reserved. Discord.com® is a registered trademark by
-          Discord.com, Inc. All rights reserved. Github.com® is a registered
-          trademark by Github.com, Inc. All rights reserved. Notion.com® is a
-          registered trademark by Notion.com, Inc. All rights reserved.
-        </p>
       </div>
     </footer>
   );

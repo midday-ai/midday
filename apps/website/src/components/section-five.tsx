@@ -1,10 +1,8 @@
 "use client";
 
-import { AdaptiveImage } from "@/components/adaptive-image";
 import { motion } from "framer-motion";
-import exportingLight from "public/exporting-light.png";
+import Image from "next/image";
 import exporting from "public/exporting.png";
-import vaultLight from "public/vault-light.png";
 import vault from "public/vault.png";
 import { useState } from "react";
 
@@ -15,7 +13,7 @@ export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
       <div
-        className="border border-border lg:basis-2/3 rounded-2xl bg-white dark:bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start"
+        className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start"
         onMouseEnter={() => setActive(true)}
         onMouseLeave={() => setActive(false)}
       >
@@ -24,9 +22,8 @@ export function SectionFive() {
           initial={{ y: 0, x: 0 }}
           transition={{ type: "spring", stiffness: 100 }}
         >
-          <AdaptiveImage
-            darkSrc={vault}
-            lightSrc={vaultLight}
+          <Image
+            src={vault}
             quality={100}
             alt="Vault"
             className="mt-8 lg:mt-0 basis-1/2 object-contain md:max-w-[367px]"
@@ -49,7 +46,7 @@ export function SectionFive() {
       </div>
 
       <div
-        className="border border-border basis-1/3 rounded-2xl bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col"
+        className="border border-border basis-1/3 bg-[#121212] p-10 md:text-center flex flex-col"
         onMouseEnter={() => setActive2(true)}
         onMouseLeave={() => setActive2(false)}
       >
@@ -69,12 +66,7 @@ export function SectionFive() {
           transition={{ type: "spring", stiffness: 100 }}
           className="mt-8 lg:mt-auto"
         >
-          <AdaptiveImage
-            darkSrc={exporting}
-            lightSrc={exportingLight}
-            quality={100}
-            alt="Export"
-          />
+          <Image src={exporting} quality={100} alt="Export" />
         </motion.div>
       </div>
     </section>

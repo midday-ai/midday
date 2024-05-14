@@ -107,7 +107,7 @@ export function UpdatesToolbar({ posts }) {
         <AnimatePresence>
           <motion.div animate={{ y: views > 0 ? 0 : 100 }} initial={{ y: 100 }}>
             <TooltipProvider delayDuration={20}>
-              <div className="flex backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 px-4 py-2 border dark:border-[#2C2C2C] border-[#DCDAD2] items-center rounded-2xl space-x-4">
+              <div className="flex backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 px-4 py-2 border dark:border-[#2C2C2C] border-[#DCDAD2] items-center space-x-4">
                 <Tooltip>
                   <TooltipTrigger>
                     <DialogTrigger asChild>

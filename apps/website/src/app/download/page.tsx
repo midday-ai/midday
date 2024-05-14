@@ -1,10 +1,8 @@
-import { BlurryCircle } from "@/components/blurry-circle";
 import { CopyInput } from "@/components/copy-input";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
 import appIcon from "public/app-icon.png";
-import panelLight from "public/panel-light.png";
 import panel from "public/panel.png";
 
 export const metadata: Metadata = {
@@ -14,9 +12,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="container flex flex-col items-center mb-12 md:mb-48 text-center">
-      <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
-      <BlurryCircle className="absolute top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
-
       <h1 className="mt-24 font-medium text-center text-5xl mb-24">
         Always at your fingertips.
       </h1>
@@ -27,23 +22,10 @@ export default function Page() {
           alt="Download Midday"
           width={1223}
           height={462}
-          className="z-10 relative hidden dark:block"
+          className="z-10 relative"
           quality={100}
           priority
         />
-
-        <Image
-          src={panelLight}
-          alt="Download Midday"
-          width={1223}
-          height={462}
-          className="z-10 relative dark:hidden"
-          quality={100}
-          priority
-        />
-
-        <BlurryCircle className="absolute bottom-[50px] -left-6 bg-[#A1F5CD]/5" />
-        <BlurryCircle className="absolute bottom-0 right-[150px] bg-[#FFECBB]/5" />
       </div>
       <Image
         src={appIcon}

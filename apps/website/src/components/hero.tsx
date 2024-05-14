@@ -1,15 +1,20 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
+import Spline from "@splinetool/react-spline";
 import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="text-center mt-16 md:mt-18 items-center flex flex-col">
+    <section className="mt-16 md:mt-[250px] flex flex-col">
       <Link href="/updates/early-adopter">
         <Button
           variant="outline"
           className="rounded-full border-border flex space-x-2 items-center"
         >
-          <span>Announcing Early Adopters Plan</span>
+          <span className="font-mono text-xs">
+            Announcing Early Adopters Plan
+          </span>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={12}
@@ -24,7 +29,10 @@ export function Hero() {
         </Button>
       </Link>
 
-      <h1 className="text-6xl font-medium mt-6">Run your business smarter.</h1>
+      <h1 className="text-6xl font-medium mt-6">
+        Run your
+        <br /> business smarter.
+      </h1>
 
       <p className="mt-4 md:mt-6 text-[#707070] max-w-[600px]">
         Midday provides you with greater insight into your business and
@@ -49,7 +57,15 @@ export function Hero() {
         </div>
       </div>
 
-      <p className="text-xs text-[#707070] mt-6">No credit card required.</p>
+      <p className="text-xs text-[#707070] mt-6 font-mono">
+        Used by over <span className="underline">2800+</span> businesses.
+      </p>
+
+      <Spline
+        scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"
+        className="absolute -right-[100px] w-auto h-auto top-[100px]"
+        style={{ width: "auto", height: "auto", background: "transparent" }}
+      />
     </section>
   );
 }
