@@ -197,6 +197,7 @@ export async function getTransactionsQuery(
     "category:transaction_categories(id, name, color, slug)",
     "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
+    "vat:calculated_vat",
   ];
 
   const query = supabase
@@ -311,7 +312,8 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       assigned:assigned_id(*),
       category:category_slug(id, name, vat),
       attachments:transaction_attachments(*),
-      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))
+      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url)),
+      vat:calculated_vat
     `
     )
     .eq("id", id)

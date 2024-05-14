@@ -187,7 +187,7 @@ export function TransactionDetails({
             )}
           </h2>
           <div className="flex justify-between items-center">
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full space-y-1">
               {isLoading ? (
                 <Skeleton className="w-[50%] h-[30px] rounded-md mb-2" />
               ) : (
@@ -203,6 +203,14 @@ export function TransactionDetails({
                   />
                 </span>
               )}
+              <div className="h-3">
+                {data?.vat > 0 && (
+                  <span className="text-[#606060] text-xs">
+                    VAT{" "}
+                    <FormatAmount amount={data.vat} currency={data.currency} />
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
