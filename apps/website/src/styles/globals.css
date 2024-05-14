@@ -108,7 +108,24 @@ pre code {
          var(--d), 
          
       #232323 calc(var(--d) - 1px), 
-      #0000 var(--d)
+      #0C0C0C var(--d)
     ) 
-    0 0 / 12px 12px;
+    0 0 / 10px 10px;
+}
+
+
+.animate-hero-text-slide-up-fade {
+    animation: hero-text-slide-up-fade 1s ease-in-out
+}
+
+@keyframes hero-text-slide-up-fade {
+    0% {
+        opacity: 0;
+        transform: translateY(16px)
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0)
+    }
 }

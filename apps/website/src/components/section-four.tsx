@@ -1,23 +1,12 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import inbox from "public/inbox.png";
 import invoicing from "public/invoicing.png";
-import { useState } from "react";
 import { CopyInput } from "./copy-input";
 
 export function SectionFour() {
-  const [isActive, setActive] = useState(false);
-  const [isActive2, setActive2] = useState(false);
-
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden mb-12">
-      <div
-        className="border border-border basis-1/3 bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col"
-        onMouseEnter={() => setActive2(true)}
-        onMouseLeave={() => setActive2(false)}
-      >
+      <div className="border border-border basis-1/3 bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col">
         <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
           Coming soon
         </span>
@@ -26,26 +15,16 @@ export function SectionFour() {
           We’re working hard to give you the best invoice solution. It will
           feature web based invoices, live collaboration and project sync.
         </p>
-        <motion.div
-          animate={isActive2 ? { y: -5 } : { y: 0 }}
-          initial={{ y: -5 }}
-          transition={{ type: "spring", stiffness: 100 }}
-          className="mt-8 md:mt-auto"
-        >
-          <Image
-            src={invoicing}
-            quality={100}
-            className="object-contain"
-            alt="Invoice"
-          />
-        </motion.div>
+
+        <Image
+          src={invoicing}
+          quality={100}
+          className="object-contain"
+          alt="Invoice"
+        />
       </div>
 
-      <div
-        className="border border-border md:basis-2/3 bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col"
-        onMouseEnter={() => setActive(true)}
-        onMouseLeave={() => setActive(false)}
-      >
+      <div className="border border-border md:basis-2/3 bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-xl md:text-2xl mb-4">Magic inbox</h4>
 
@@ -76,18 +55,12 @@ export function SectionFour() {
         </div>
 
         <div className="md:basis-1/2 mt-8 md:mt-0 -bottom-[8px] relative">
-          <motion.div
-            animate={isActive ? { y: -5 } : { y: 0 }}
-            initial={{ y: -5 }}
-            transition={{ type: "spring", stiffness: 100 }}
-          >
-            <Image
-              src={inbox}
-              quality={100}
-              className="object-contain"
-              alt="Inbox"
-            />
-          </motion.div>
+          <Image
+            src={inbox}
+            quality={100}
+            className="object-contain"
+            alt="Inbox"
+          />
         </div>
       </div>
     </section>

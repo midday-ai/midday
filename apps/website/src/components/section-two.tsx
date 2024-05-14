@@ -1,34 +1,17 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import profitLoss from "public/profit-loss.png";
-import { useState } from "react";
 
 export function SectionTwo() {
-  const [isActive, setActive] = useState(false);
-
   return (
-    <section
-      className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden mb-12"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-    >
+    <section className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden mb-12">
       <div className="flex flex-col md:space-x-12 md:flex-row">
-        <motion.div
-          animate={isActive ? { y: -5, x: 5 } : { y: 0, x: 0 }}
-          initial={{ y: 0, x: 0 }}
-          transition={{ type: "spring", stiffness: 100 }}
-          className="w-full"
-        >
-          <Image
-            src={profitLoss}
-            height={400}
-            width={789}
-            className="-mb-[1px] object-contain"
-            alt="Overview"
-          />
-        </motion.div>
+        <Image
+          src={profitLoss}
+          height={400}
+          width={789}
+          className="-mb-[1px] object-contain"
+          alt="Overview"
+        />
 
         <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8">
           <h3 className="font-medium text-xl md:text-2xl mb-4">

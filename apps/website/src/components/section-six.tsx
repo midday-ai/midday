@@ -1,34 +1,19 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import ai from "public/ai.png";
-import { useState } from "react";
 
 export function SectionSix() {
-  const [isActive, setActive] = useState(false);
-
   return (
-    <section
-      className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-    >
+    <section className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12">
       <div className="flex flex-col md:flex-row md:space-x-12">
-        <motion.div
-          animate={isActive ? { y: -5, x: -5 } : { y: 0, x: 0 }}
-          initial={{ y: 0 }}
-          transition={{ type: "spring", stiffness: 100 }}
-        >
-          <Image
-            src={ai}
-            height={405}
-            width={793}
-            className="-mb-[1px] object-contain"
-            alt="AI"
-            quality={100}
-          />
-        </motion.div>
+        <Image
+          src={ai}
+          height={405}
+          width={793}
+          className="-mb-[1px] object-contain"
+          alt="AI"
+          quality={100}
+        />
+
         <div className="mt-6 md:max-w-[40%] md:ml-8">
           <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
             Coming soon

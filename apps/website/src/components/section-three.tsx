@@ -1,19 +1,9 @@
-"use client";
-
-import { motion } from "framer-motion";
 import Image from "next/image";
 import timetracker from "public/time-tracker.png";
-import { useState } from "react";
 
 export function SectionThree() {
-  const [isActive, setActive] = useState(false);
-
   return (
-    <section
-      className="relative mb-12"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-    >
+    <section className="relative mb-12">
       <div className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
           <div className="mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
@@ -63,20 +53,13 @@ export function SectionThree() {
             </div>
           </div>
 
-          <motion.div
-            animate={isActive ? { y: -5, x: -5 } : { y: 0, x: 0 }}
-            initial={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="!ml-auto"
-          >
-            <Image
-              src={timetracker}
-              height={400}
-              className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0"
-              quality={100}
-              alt="Tracker"
-            />
-          </motion.div>
+          <Image
+            src={timetracker}
+            height={400}
+            className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0"
+            quality={100}
+            alt="Tracker"
+          />
         </div>
       </div>
     </section>
