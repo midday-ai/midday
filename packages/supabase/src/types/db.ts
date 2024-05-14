@@ -590,31 +590,54 @@ export type Database = {
       transaction_enrichments: {
         Row: {
           category: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug: string | null
           created_at: string
           created_by: string | null
           id: string
           name: string | null
+          system: boolean | null
+          team_id: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           name?: string | null
+          system?: boolean | null
+          team_id?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug?: string | null
           created_at?: string
           created_by?: string | null
           id?: string
           name?: string | null
+          system?: boolean | null
+          team_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transaction_enrichments_category_slug_team_id_fkey"
+            columns: ["category_slug", "team_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["slug", "team_id"]
+          },
           {
             foreignKeyName: "transaction_enrichments_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_enrichments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -985,34 +1008,57 @@ export type Database = {
       decrypted_transaction_enrichments: {
         Row: {
           category: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug: string | null
           created_at: string | null
           created_by: string | null
           decrypted_name: string | null
           id: string | null
           name: string | null
+          system: boolean | null
+          team_id: string | null
         }
         Insert: {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug?: string | null
           created_at?: string | null
           created_by?: string | null
           decrypted_name?: never
           id?: string | null
           name?: string | null
+          system?: boolean | null
+          team_id?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug?: string | null
           created_at?: string | null
           created_by?: string | null
           decrypted_name?: never
           id?: string | null
           name?: string | null
+          system?: boolean | null
+          team_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transaction_enrichments_category_slug_team_id_fkey"
+            columns: ["category_slug", "team_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_categories"
+            referencedColumns: ["slug", "team_id"]
+          },
           {
             foreignKeyName: "transaction_enrichments_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transaction_enrichments_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -1136,6 +1182,12 @@ export type Database = {
         }
         Returns: string
       }
+      calculated_vat: {
+        Args: {
+          "": unknown
+        }
+        Returns: number
+      }
       extract_product_names: {
         Args: {
           products_json: Json
@@ -1198,26 +1250,7 @@ export type Database = {
           value: number
         }[]
       }
-      get_burn_rate_v2: {
-        Args: {
-          team_id: string
-          date_from: string
-          date_to: string
-          currency: string
-        }
-        Returns: {
-          date: string
-          value: number
-        }[]
-      }
       get_current_burn_rate: {
-        Args: {
-          team_id: string
-          currency: string
-        }
-        Returns: number
-      }
-      get_current_burn_rate_v2: {
         Args: {
           team_id: string
           currency: string
@@ -1236,31 +1269,7 @@ export type Database = {
           value: number
         }[]
       }
-      get_profit_v2: {
-        Args: {
-          team_id: string
-          date_from: string
-          date_to: string
-          currency: string
-        }
-        Returns: {
-          date: string
-          value: number
-        }[]
-      }
       get_revenue: {
-        Args: {
-          team_id: string
-          date_from: string
-          date_to: string
-          currency: string
-        }
-        Returns: {
-          date: string
-          value: number
-        }[]
-      }
-      get_revenue_v2: {
         Args: {
           team_id: string
           date_from: string
@@ -1289,44 +1298,12 @@ export type Database = {
           currency_target: string
         }
         Returns: {
-          category: string
-          amount: number
-          currency: string
-          percentage: number
-        }[]
-      }
-      get_spending_v2: {
-        Args: {
-          team_id: string
-          date_from: string
-          date_to: string
-          currency_target: string
-        }
-        Returns: {
           name: string
           slug: string
           amount: number
           currency: string
           color: string
           percentage: number
-        }[]
-      }
-      get_total_amount: {
-        Args: {
-          team_id: string
-        }
-        Returns: {
-          currency: string
-          total_amount: number
-        }[]
-      }
-      get_total_amount_v2: {
-        Args: {
-          team_id: string
-        }
-        Returns: {
-          currency: string
-          total_amount: number
         }[]
       }
       get_total_balance: {
