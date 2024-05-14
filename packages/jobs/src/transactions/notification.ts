@@ -27,6 +27,7 @@ client.defineJob({
           amount: z.number(),
           name: z.string(),
           currency: z.string(),
+          category: z.string().optional().nullable(),
         })
       ),
     }),

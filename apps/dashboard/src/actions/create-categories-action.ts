@@ -1,5 +1,7 @@
 "use server";
 
+import { LogEvents } from "@midday/events/events";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
@@ -28,6 +30,17 @@ export const createCategoriesAction = action(
     }
 
     revalidateTag(`transaction_categories_${teamId}`);
+
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
+
+    logsnag.track({
+      event: LogEvents.CategoryCreate.name,
+      icon: LogEvents.CategoryCreate.icon,
+      channel: LogEvents.CategoryCreate.channel,
+    });
 
     return data;
   }
