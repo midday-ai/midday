@@ -28,12 +28,14 @@ export const setupLogSnag = async (options?: Props) => {
   });
 
   if (trackingConsent && userId && fullName) {
-    await logsnag.identify({
-      user_id: userId,
-      properties: {
-        name: fullName,
-      },
-    });
+    waitUntil(
+      logsnag.identify({
+        user_id: userId,
+        properties: {
+          name: fullName,
+        },
+      })
+    );
   }
 
   return {

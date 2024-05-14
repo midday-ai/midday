@@ -592,7 +592,6 @@ export type Database = {
           category: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug: string | null
           created_at: string
-          created_by: string | null
           id: string
           name: string | null
           system: boolean | null
@@ -602,7 +601,6 @@ export type Database = {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string
-          created_by?: string | null
           id?: string
           name?: string | null
           system?: boolean | null
@@ -612,7 +610,6 @@ export type Database = {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string
-          created_by?: string | null
           id?: string
           name?: string | null
           system?: boolean | null
@@ -625,13 +622,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "transaction_categories"
             referencedColumns: ["slug", "team_id"]
-          },
-          {
-            foreignKeyName: "transaction_enrichments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "transaction_enrichments_team_id_fkey"
@@ -1010,7 +1000,6 @@ export type Database = {
           category: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug: string | null
           created_at: string | null
-          created_by: string | null
           decrypted_name: string | null
           id: string | null
           name: string | null
@@ -1021,7 +1010,6 @@ export type Database = {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string | null
-          created_by?: string | null
           decrypted_name?: never
           id?: string | null
           name?: string | null
@@ -1032,7 +1020,6 @@ export type Database = {
           category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string | null
-          created_by?: string | null
           decrypted_name?: never
           id?: string | null
           name?: string | null
@@ -1046,13 +1033,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "transaction_categories"
             referencedColumns: ["slug", "team_id"]
-          },
-          {
-            foreignKeyName: "transaction_enrichments_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "transaction_enrichments_team_id_fkey"

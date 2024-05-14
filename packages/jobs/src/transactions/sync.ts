@@ -97,6 +97,7 @@ client.defineJob({
                 amount: transaction.amount,
                 name: transaction.name,
                 currency: transaction.currency,
+                category: transaction.category_slug,
               })),
             },
           });

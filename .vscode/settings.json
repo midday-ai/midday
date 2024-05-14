@@ -12,5 +12,8 @@
     "next/router.d.ts",
     "next/dist/client/router.d.ts"
   ],
-  "terminal.integrated.localEchoStyle": "dim"
+  "terminal.integrated.localEchoStyle": "dim",
+  "search.exclude": {
+    "**/node_modules": true
+   }
 }
