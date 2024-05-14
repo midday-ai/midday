@@ -1,4 +1,5 @@
 import { LogSnag } from "@logsnag/next/server";
+import { waitUntil } from "@vercel/functions";
 import { cookies } from "next/headers";
 
 type Props = {
@@ -37,10 +38,19 @@ export const setupLogSnag = async (options?: Props) => {
 
   return {
     ...logsnag,
-    track: (options: TrackOptions) =>
-      logsnag.track({
-        ...options,
-        user_id: trackingConsent ? userId : undefined,
-      }),
+    track: (options: TrackOptions) => {
+      if (process.env.NODE_ENV !== "production") {
+        console.log("Track", options);
+        return;
+      }
+
+      // https://vercel.com/docs/functions/functions-api-reference#waituntil
+      waitUntil(
+        logsnag.track({
+          ...options,
+          user_id: trackingConsent ? userId : undefined,
+        })
+      );
+    },
   };
 };

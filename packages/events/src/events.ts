@@ -204,4 +204,14 @@ export const LogEvents = {
     icon: "🛟",
     channel: "support",
   },
+  CategoryCreate: {
+    name: "Category Create",
+    icon: "🪵",
+    channel: "category",
+  },
+  CategoryDelete: {
+    name: "Category Delete",
+    icon: "🪵",
+    channel: "category",
+  },
 };
