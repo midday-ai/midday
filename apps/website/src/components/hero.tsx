@@ -38,15 +38,15 @@ export function Hero() {
           </Button>
         </Link>
 
-        <h1 className="text-6xl font-medium mt-6">
+        <h1 className="text-[90px] font-medium mt-6 leading-none">
           Run your
           <br /> business smarter.
         </h1>
 
         <p className="mt-4 md:mt-6 text-[#707070] max-w-[600px]">
-          Midday provides you with greater insight into your business and
-          automates the boring tasks, allowing you to focus on what you love to
-          do instead.
+          An all-in-one tool for freelancers, contractors, consultants, and solo
+          entrepreneurs to manage their finances, track projects, store files,
+          and send invoices.
         </p>
 
         <div className="mt-8">
@@ -66,7 +66,7 @@ export function Hero() {
           </div>
         </div>
 
-        <p className="text-xs text-[#707070] mt-6 font-mono">
+        <p className="text-xs text-[#707070] mt-8 font-mono">
           Used by over{" "}
           <Link href="/open-startup">
             <span className="underline">2800+</span>

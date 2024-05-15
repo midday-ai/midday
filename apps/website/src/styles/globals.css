@@ -136,6 +136,7 @@ pre code {
    -webkit-text-fill-color: transparent;  
 }
 
+/* Thanks Resend */
 .animate-webgl-scale-in-fade {
     animation: webgl-scale-in-fade 0.7s ease-in-out;
 }
