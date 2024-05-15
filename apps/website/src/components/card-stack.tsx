@@ -90,7 +90,7 @@ export const CardStack = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="w-[35px] h-[20px] z-20 absolute top-[60px] left-[8px]"
+                    className="w-[35px] h-[20px] z-20 absolute top-[75px] left-[8px]"
                     onClick={() => onChangeCard(cards.find((c) => c.id === 1))}
                   >
                     <span className="sr-only">Overview</span>
@@ -109,7 +109,7 @@ export const CardStack = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="w-[35px] h-[20px] z-20 absolute top-[95px] left-[8px]"
+                    className="w-[35px] h-[20px] z-20 absolute top-[105px] left-[8px]"
                     onClick={() => onChangeCard(cards.find((c) => c.id === 5))}
                   >
                     <span className="sr-only">Transactions</span>
@@ -128,7 +128,7 @@ export const CardStack = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="w-[35px] h-[20px] z-20 absolute top-[125px] left-[8px]"
+                    className="w-[35px] h-[20px] z-20 absolute top-[135px] left-[8px]"
                     onClick={() => onChangeCard(cards.find((c) => c.id === 3))}
                   >
                     <span className="sr-only">Inbox</span>
@@ -147,7 +147,7 @@ export const CardStack = ({
                 <TooltipTrigger asChild>
                   <button
                     type="button"
-                    className="w-[35px] h-[20px] z-20 absolute top-[160px] left-[8px]"
+                    className="w-[35px] h-[20px] z-20 absolute top-[170px] left-[8px]"
                     onClick={() => onChangeCard(cards.find((c) => c.id === 2))}
                   >
                     <span className="sr-only">Tracker</span>

@@ -1,10 +1,18 @@
 "use client";
 
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import Spline from "@splinetool/react-spline";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export function Hero() {
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    setAnimate(true);
+  }, []);
+
   return (
     <section className="mt-16 md:mt-[250px] relative md:min-h-[375px]">
       <div className="hero-slide-up flex flex-col">
@@ -67,11 +75,14 @@ export function Hero() {
         </p>
       </div>
 
-      <Spline
-        scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"
-        className="absolute -right-[200px] xl:-right-[100px] w-auto h-auto -top-[200px] hidden md:block scale-75 xl:scale-100"
-        style={{ width: "auto", height: "auto", background: "transparent" }}
-      />
+      <div className="transform-gpu grayscale hidden md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute -right-[200px] xl:-right-[100px] w-auto h-auto -top-[200px]">
+        <div className={cn(animate && "animate-webgl-scale-in-fade")}>
+          <Spline
+            scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"
+            style={{ width: "auto", height: "auto", background: "transparent" }}
+          />
+        </div>
+      </div>
     </section>
   );
 }

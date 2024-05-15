@@ -109,8 +109,30 @@ export default {
             transform: "translateY(-50%)",
           },
         },
+        "webgl-scale-in-fade": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(.7)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "scale(1)",
+          },
+        },
+        "open-scale-up-fade": {
+          "0%": {
+            opacity: "0",
+            transform: "scale(.98) translateY(5px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "scale(1) translateY(0)",
+          },
+        },
       },
       animation: {
+        "animate-webgl-scale-in-fade": "webgl-scale-in-fade 1s ease-in-out",
+        "open-scale-up-fade": "open-scale-up-fade",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
