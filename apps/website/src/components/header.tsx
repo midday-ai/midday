@@ -68,12 +68,12 @@ export function Header() {
   return (
     <header
       className={cn(
-        "h-[56px] sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center",
+        "sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center",
         pathname === "/" &&
           "transition duration-1s ease-in-out animate-header-slide-down-fade"
       )}
     >
-      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full">
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full h-[56px]">
         <Link href="/">
           <span className="sr-only">Midday Logo</span>
           <LogoIcon />
@@ -121,7 +121,7 @@ export function Header() {
         </button>
 
         <a
-          className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4"
+          className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4 hidden md:block"
           href="https://app.midday.ai"
         >
           Sign in
@@ -134,7 +134,7 @@ export function Header() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="mt-4 flex justify-between p-3 relative">
+          <div className="mt-4 flex justify-between p-3 px-4 relative">
             <button type="button" onClick={handleToggleMenu}>
               <span className="sr-only">Midday Logo</span>
               <LogoIcon />

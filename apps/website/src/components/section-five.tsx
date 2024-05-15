@@ -10,7 +10,7 @@ export function SectionFive() {
           src={vault}
           quality={100}
           alt="Vault"
-          className="mt-8 lg:mt-0 basis-1/2 object-contain md:max-w-[367px]"
+          className="mt-8 lg:mt-0 basis-1/2 object-contain md:max-w-[367px] md:border-none border-l-[1px] border-border"
         />
 
         <div className="flex flex-col basis-1/2">
@@ -39,7 +39,12 @@ export function SectionFive() {
           clearly pointing to the right attachment.
         </p>
 
-        <Image src={exporting} quality={100} alt="Export" className="mt-auto" />
+        <Image
+          src={exporting}
+          quality={100}
+          alt="Export"
+          className="md:mt-auto mt-10"
+        />
       </div>
     </section>
   );

@@ -56,7 +56,7 @@ export function SectionThree() {
           <Image
             src={timetracker}
             height={400}
-            className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0"
+            className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
             quality={100}
             alt="Tracker"
           />

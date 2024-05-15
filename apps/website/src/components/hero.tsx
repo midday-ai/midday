@@ -14,8 +14,8 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="mt-16 md:mt-[250px] relative md:min-h-[375px]">
-      <div className="hero-slide-up flex flex-col">
+    <section className="md:mt-[250px] relative md:min-h-[375px]">
+      <div className="hero-slide-up flex flex-col mt-[240px]">
         <Link href="/updates/early-adopter">
           <Button
             variant="outline"
@@ -38,7 +38,7 @@ export function Hero() {
           </Button>
         </Link>
 
-        <h1 className="text-[90px] font-medium mt-6 leading-none">
+        <h1 className="text-[30px] md:text-[90px] font-medium mt-6 leading-none">
           Run your
           <br /> business smarter.
         </h1>
@@ -75,7 +75,7 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="transform-gpu grayscale hidden md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute -right-[200px] xl:-right-[100px] w-auto h-auto -top-[200px]">
+      <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
         <div className={cn(animate && "animate-webgl-scale-in-fade")}>
           <Spline
             scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"

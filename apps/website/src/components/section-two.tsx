@@ -14,7 +14,7 @@ export function SectionTwo() {
           quality={100}
         />
 
-        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center">
+        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center p-8 md:p-0">
           <h3 className="font-medium text-xl md:text-2xl mb-4">
             Financial overview
           </h3>
