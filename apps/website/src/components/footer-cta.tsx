@@ -17,10 +17,10 @@ export function FooterCTA() {
         Stress free by midday.
       </span>
       <p className="text-[#878787] mt-6">
-        Midday provides you with greater insight into your business and
+        An all-in-one tool for freelancers, contractors, consultants, and solo
         <br />
-        automates the boring tasks, allowing you to focus on what you love to do
-        instead.
+        entrepreneurs to manage their finances, track projects, store files, and
+        send invoices.
       </p>
 
       <div className="mt-10 md:mb-8">

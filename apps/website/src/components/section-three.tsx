@@ -11,7 +11,7 @@ export function SectionThree() {
               Time track your projects
             </h3>
 
-            <p className="text-[#878787] mb-4">
+            <p className="text-[#878787] mb-4 text-sm">
               Effortlessly boost productivity and collaboration with our
               advanced <br />
               time tracking solution: gain insightful project overviews and
@@ -23,7 +23,7 @@ export function SectionThree() {
               success.
             </p>
 
-            <div className="flex space-x-2 items-center mt-8">
+            <div className="flex space-x-2 items-center mt-8 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={18}
@@ -37,7 +37,7 @@ export function SectionThree() {
               </svg>
               <span className="text-[#878787]">Live time tracking</span>
             </div>
-            <div className="flex space-x-2 items-center mt-1">
+            <div className="flex space-x-2 items-center mt-1 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={18}

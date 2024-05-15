@@ -68,12 +68,12 @@ export function Header() {
   return (
     <header
       className={cn(
-        "h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center",
+        "h-[56px] sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center",
         pathname === "/" &&
           "transition duration-1s ease-in-out animate-header-slide-down-fade"
       )}
     >
-      <nav className="border border-border p-3 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full">
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full">
         <Link href="/">
           <span className="sr-only">Midday Logo</span>
           <LogoIcon />

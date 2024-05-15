@@ -11,7 +11,7 @@ export function SectionFour() {
           Coming soon
         </span>
         <h4 className="font-medium text-xl md:text-2xl mb-4">Invoicing</h4>
-        <p className="text-[#878787] mb-[35px]">
+        <p className="text-[#878787] mb-[35px] text-sm">
           We’re working hard to give you the best invoice solution. It will
           feature web based invoices, live collaboration and project sync.
         </p>
@@ -28,21 +28,21 @@ export function SectionFour() {
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-xl md:text-2xl mb-4">Magic inbox</h4>
 
-          <p className="text-[#878787] mb-4">
+          <p className="text-[#878787] mb-4 text-sm">
             Automatic matching of incoming invoices or receipts to the right
             transaction.
           </p>
 
           <ul className="list-decimal pl-4 space-y-3">
-            <li className="text-[#878787]">
+            <li className="text-[#878787] text-sm">
               Use your personalized email address for your invoices and
               receipts.
             </li>
-            <li className="text-[#878787]">
+            <li className="text-[#878787] text-sm">
               The invoice arrives in the inbox, with our AI solution the invoice
               automatically matches with the right transaction.
             </li>
-            <li className="text-[#878787]">
+            <li className="text-[#878787] text-sm">
               Your transaction now have the right basis/attachments for you to
               export.
             </li>

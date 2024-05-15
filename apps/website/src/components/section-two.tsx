@@ -19,7 +19,7 @@ export function SectionTwo() {
             Financial overview
           </h3>
 
-          <p className="text-[#878787] mb-4">
+          <p className="text-[#878787] mb-4 text-sm">
             Bring your own bank. We connect to over 20 000+ banks in 33
             countries across US, Canada, UK and Europe. Keep tabs on your
             expenses and income, and gain a clearer picture of your business's
@@ -38,7 +38,9 @@ export function SectionTwo() {
                 d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
               />
             </svg>
-            <span className="text-[#878787]">Share financial reports</span>
+            <span className="text-[#878787] text-sm">
+              Share financial reports
+            </span>
           </div>
         </div>
       </div>

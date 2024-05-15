@@ -104,7 +104,7 @@ const testimonials = [
 export function Testimonials() {
   return (
     <div className="relative pb-22">
-      <h3 className="text-4xl mb-8">What people say</h3>
+      <h3 className="text-4xl mb-8 font-medium">What people say</h3>
       <InfiniteMovingCards items={testimonials} direction="left" speed="slow" />
     </div>
   );

@@ -168,3 +168,8 @@ pre code {
         transform: translateY(0)
     }
 }
+
+::selection {
+    background: rgba(0, 100, 217, 0.8);
+    color: black;
+  }

@@ -116,7 +116,9 @@ export function Footer() {
         </div>
       </div>
 
-      <h5 className="text-[#161616] text-[500px] leading-none">midday</h5>
+      <h5 className="text-[#161616] text-[500px] leading-none text-center">
+        midday
+      </h5>
     </footer>
   );
 }

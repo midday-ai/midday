@@ -19,7 +19,7 @@ export default function Page() {
         to rule them all
       </h2>
 
-      <div>
+      <div className="mb-2 mt-6">
         <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px]">
           Midday engine streamlines banking integrations with a single API
           effortlessly connecting to multiple providers and get one unified
@@ -29,7 +29,7 @@ export default function Page() {
 
       <WaitlistInput />
 
-      <div className="text-center flex flex-col items-center mt-24">
+      <div className="text-center flex flex-col items-center mt-[140px]">
         <h3 className="mb-4 text-2xl font-medium">
           Unlimited bank connections
         </h3>
@@ -44,6 +44,7 @@ export default function Page() {
           width={1026}
           height={552}
           className="mt-16"
+          quality={100}
         />
       </div>
 

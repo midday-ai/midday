@@ -43,7 +43,7 @@ export function Hero() {
           <br /> business smarter.
         </h1>
 
-        <p className="mt-4 md:mt-6 text-[#707070] max-w-[600px]">
+        <p className="mt-4 md:mt-6 max-w-[600px]">
           An all-in-one tool for freelancers, contractors, consultants, and solo
           entrepreneurs to manage their finances, track projects, store files,
           and send invoices.

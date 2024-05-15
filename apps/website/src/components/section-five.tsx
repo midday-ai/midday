@@ -16,11 +16,11 @@ export function SectionFive() {
         <div className="flex flex-col basis-1/2">
           <h4 className="font-medium text-xl md:text-2xl mb-4">Vault</h4>
 
-          <p className="text-[#878787] mb-4">
+          <p className="text-[#878787] mb-4 text-sm">
             Store your files securely in Midday.
           </p>
 
-          <p className="text-[#878787]">
+          <p className="text-[#878787] text-sm">
             There’s no need to scramble for things across different drives. Keep
             all of your files, such as contracts and agreements safe in one
             place.
@@ -32,7 +32,7 @@ export function SectionFive() {
         <h4 className="font-medium text-xl md:text-2xl mb-4">
           Seamless export
         </h4>
-        <p className="text-[#878787]">
+        <p className="text-[#878787] text-sm">
           Take the hassle out of preparing exports for your accountant. Just
           select any time period or transaction you want and hit export. We
           package everything up neatly in a CSV file (accountants loves these)
