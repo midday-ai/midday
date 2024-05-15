@@ -1,95 +1,12 @@
 "use client";
 
 import { cn } from "@midday/ui/cn";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@midday/ui/navigation-menu";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FaDiscord, FaGithub } from "react-icons/fa";
-import {
-  MdOutlineDescription,
-  MdOutlineIntegrationInstructions,
-  MdOutlineMemory,
-} from "react-icons/md";
+import { FaGithub } from "react-icons/fa";
 import { LogoIcon } from "./logo-icon";
-
-type ListItemProps = {
-  title: string;
-  href: string;
-  external?: boolean;
-  icon: () => React.JSX.Element;
-  className?: string;
-};
-
-const components: ListItemProps[] = [
-  {
-    title: "Documentation",
-    href: "https://docs.midday.ai",
-    icon: () => <MdOutlineDescription size={20} />,
-    external: true,
-  },
-  {
-    title: "Open Source",
-    href: "https://git.new/midday",
-    icon: () => <FaGithub size={19} />,
-    external: true,
-  },
-  {
-    title: "Join the community",
-    href: "https://go.midday.ai/anPiuRx",
-    icon: () => <FaDiscord size={20} />,
-    external: true,
-  },
-  {
-    title: "Apps & Integrations",
-    href: "https://docs.midday.ai",
-    icon: () => <MdOutlineIntegrationInstructions size={20} />,
-    external: true,
-  },
-  {
-    title: "Engine",
-    href: "/engine",
-    icon: () => <MdOutlineMemory size={21} />,
-  },
-];
-
-const ListItem = ({
-  className,
-  title,
-  icon: Icon,
-  external,
-  ...props
-}: ListItemProps) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          target={external ? "_blank" : undefined}
-          className={cn(
-            "block select-none space-y-1 p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="flex items-center">
-            <div className="w-8">
-              <Icon />
-            </div>
-            <div className="text-sm font-medium leading-none">{title}</div>
-          </div>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-};
 
 const links = [
   {
@@ -157,56 +74,33 @@ export function Header() {
       )}
     >
       <nav className="border border-border p-3 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full">
-        <NavigationMenu>
-          <Link href="/">
-            <span className="sr-only">Midday Logo</span>
-            <LogoIcon />
-          </Link>
+        <Link href="/">
+          <span className="sr-only">Midday Logo</span>
+          <LogoIcon />
+        </Link>
 
-          <ul className="space-x-2 font-medium text-sm hidden md:flex mx-3">
-            {links.map(({ path, name, title }) => {
-              const isActive =
-                path === "/updates"
-                  ? pathname.includes("updates")
-                  : path === lastPath;
+        <ul className="space-x-2 font-medium text-sm hidden md:flex mx-3">
+          {links.map(({ path, name, title }) => {
+            const isActive =
+              path === "/updates"
+                ? pathname.includes("updates")
+                : path === lastPath;
 
-              return (
-                <li key={path}>
-                  <Link
-                    href={path}
-                    className={cn(
-                      "h-8 items-center justify-center text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
-                      isActive && "bg-secondary hover:bg-secondary"
-                    )}
-                  >
-                    {title}
-                  </Link>
-                </li>
-              );
-            })}
-
-            <li>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Developers</NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-[#121212]">
-                    <ul className="w-[200px] pb-2">
-                      {components.map((component) => (
-                        <ListItem
-                          key={component.title}
-                          title={component.title}
-                          href={component.href}
-                          icon={component.icon}
-                          external={component.external}
-                        />
-                      ))}
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </li>
-          </ul>
-        </NavigationMenu>
+            return (
+              <li key={path}>
+                <Link
+                  href={path}
+                  className={cn(
+                    "h-8 items-center justify-center text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
+                    isActive && "bg-secondary hover:bg-secondary"
+                  )}
+                >
+                  {title}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
         <button
           type="button"
