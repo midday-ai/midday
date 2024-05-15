@@ -11,11 +11,11 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="w-full bg-[#0C0C0C] flex flex-col items-center justify-center mt-24">
-      <h1 className="text-[175px] font-medium text-center text-white relative z-20 leading-none">
+      <h1 className="text-[100px] md:text-[170px] font-medium text-center text-white relative z-20 leading-none">
         One API
       </h1>
 
-      <h2 className="text-[175px] leading-none text-dotted">
+      <h2 className="text-[100px] md:text-[170px] leading-none text-dotted text-center">
         to rule them all
       </h2>
 
