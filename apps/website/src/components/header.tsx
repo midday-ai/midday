@@ -220,7 +220,10 @@ export function Header() {
           </svg>
         </button>
 
-        <a className="text-sm font-medium" href="https://app.midday.ai">
+        <a
+          className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4"
+          href="https://app.midday.ai"
+        >
           Sign in
         </a>
       </nav>

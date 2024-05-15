@@ -59,7 +59,6 @@ const popupCenter = ({ url, title, w, h }) => {
 export function UpdatesToolbar({ posts }) {
   const pathname = usePathname();
   const currentIndex = posts.findIndex((a) => pathname.endsWith(a.slug)) ?? 0;
-  const views = 100;
 
   const currentPost = posts[currentIndex];
 
@@ -86,8 +85,8 @@ export function UpdatesToolbar({ posts }) {
     }
   };
 
-  useHotkeys("arrowDown", () => handleNext(), [handleNext]);
-  useHotkeys("arrowUp", () => handlePrev(), [handlePrev]);
+  useHotkeys("arrowRight", () => handleNext(), [handleNext]);
+  useHotkeys("arrowLeft", () => handlePrev(), [handlePrev]);
 
   const handleOnShare = () => {
     const popup = popupCenter({

@@ -31,6 +31,7 @@ export function Screens() {
                   width={1031}
                   height={670}
                   priority
+                  className="border border-border"
                 />
               ),
             },
@@ -44,6 +45,7 @@ export function Screens() {
                   src={screen2}
                   width={1031}
                   height={670}
+                  className="border border-border"
                 />
               ),
             },
@@ -57,6 +59,7 @@ export function Screens() {
                   src={screen3}
                   width={1031}
                   height={670}
+                  className="border border-border"
                 />
               ),
             },
@@ -70,6 +73,7 @@ export function Screens() {
                   src={screen4}
                   width={1031}
                   height={670}
+                  className="border border-border"
                 />
               ),
             },
@@ -83,6 +87,7 @@ export function Screens() {
                   src={screen5}
                   width={1031}
                   height={670}
+                  className="border border-border"
                 />
               ),
             },

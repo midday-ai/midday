@@ -15,11 +15,11 @@ export function SectionSix() {
         />
 
         <div className="mt-6 md:max-w-[40%] md:ml-8">
-          <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
+          <span className="text-[#F5F5F3] border border-border rounded-full self-start font-medium font-mono px-3 text-xs py-1.5 mb-4 bg-[#1D1D1D]">
             Coming soon
           </span>
 
-          <h3 className="font-medium text-xl md:text-2xl mt-4 mb-4">
+          <h3 className="font-medium text-xl md:text-2xl mt-8 mb-4">
             Your Virtual CFO
           </h3>
 
