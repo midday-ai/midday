@@ -129,3 +129,15 @@ pre code {
         transform: translateY(0)
     }
 }
+
+.text-stroke {
+    /* color: white;
+    -webkit-text-fill-color: black;
+    -webkit-text-stroke: 1px white; */
+
+    color: black;
+    text-shadow: -1px 1px 0 white,
+    1px 1px 0 white,
+    1px -1px 0 white,
+    -1px -1px 0 white;
+}

@@ -6,7 +6,7 @@ import { CopyInput } from "./copy-input";
 export function SectionFour() {
   return (
     <section className="flex justify-between space-y-12 md:space-y-0 md:space-x-8 flex-col md:flex-row overflow-hidden mb-12">
-      <div className="border border-border basis-1/3 bg-white dark:bg-[#121212] p-10 md:text-center flex flex-col">
+      <div className="border border-border basis-1/3 bg-[#121212] p-10 md:text-center flex flex-col">
         <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
           Coming soon
         </span>
@@ -24,7 +24,7 @@ export function SectionFour() {
         />
       </div>
 
-      <div className="border border-border md:basis-2/3 bg-white dark:bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
+      <div className="border border-border md:basis-2/3 bg-[#121212] p-10 flex justify-between md:space-x-8 md:flex-row flex-col">
         <div className="flex flex-col md:basis-1/2">
           <h4 className="font-medium text-xl md:text-2xl mb-4">Magic inbox</h4>
 

@@ -65,7 +65,7 @@ export function Hero() {
 
       <Spline
         scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"
-        className="absolute -right-[100px] w-auto h-auto -top-[200px]"
+        className="absolute -right-[200px] xl:-right-[100px] w-auto h-auto -top-[200px] hidden md:block scale-75 xl:scale-100"
         style={{ width: "auto", height: "auto", background: "transparent" }}
       />
     </section>

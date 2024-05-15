@@ -13,7 +13,7 @@ export function Screens() {
   const router = useRouter();
 
   return (
-    <div className="mt-12 md:mt-[250px] relative py-10">
+    <div className="mt-12 md:mt-[250px] relative pt-10 pb-14">
       <div className="relative z-10 flex flex-col items-center">
         <div className="text-center pb-14">
           <h3 className="text-4xl md:text-6xl font-medium">The thin layer</h3>

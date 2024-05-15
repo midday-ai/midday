@@ -16,7 +16,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { AnimatePresence, motion } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FaXTwitter } from "react-icons/fa6";
@@ -103,70 +102,60 @@ export function UpdatesToolbar({ posts }) {
 
   return (
     <Dialog>
-      <div className="fixed flex justify-center left-0 bottom-5 w-full">
-        <AnimatePresence>
-          <motion.div animate={{ y: views > 0 ? 0 : 100 }} initial={{ y: 100 }}>
-            <TooltipProvider delayDuration={20}>
-              <div className="flex backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 px-4 py-2 border dark:border-[#2C2C2C] border-[#DCDAD2] items-center space-x-4">
-                <Tooltip>
-                  <TooltipTrigger>
-                    <DialogTrigger asChild>
-                      <Icons.Share
-                        size={18}
-                        className="text-[#606060] -mt-[1px]"
-                      />
-                    </DialogTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    className="py-1 px-3 rounded-sm"
-                    sideOffset={25}
-                  >
-                    <span className="text-xs">Share</span>
-                  </TooltipContent>
-                </Tooltip>
+      <div className="fixed right-0">
+        <TooltipProvider delayDuration={20}>
+          <div className="flex flex-col backdrop-filter backdrop-blur-lg bg-[#1A1A1A]/80 px-4 py-2 border border-[#2C2C2C] space-y-4">
+            <Tooltip>
+              <TooltipTrigger>
+                <DialogTrigger asChild>
+                  <Icons.Share size={18} className="text-[#606060] -mt-[1px]" />
+                </DialogTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="py-1 px-3 rounded-sm" sideOffset={25}>
+                <span className="text-xs">Share</span>
+              </TooltipContent>
+            </Tooltip>
 
-                <div className="flex items-center border-l-[1px] border-border pl-4">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className={cn(currentIndex === 0 && "opacity-50")}
-                        onClick={handlePrev}
-                      >
-                        <Icons.ChevronLeft className="h-6 w-6" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className="py-1 px-3 rounded-sm"
-                      sideOffset={25}
-                    >
-                      <span className="text-xs">Previous post</span>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className={cn(
-                          currentIndex === posts.length - 1 && "opacity-50"
-                        )}
-                        onClick={handleNext}
-                      >
-                        <Icons.ChevronRight className="h-6 w-6" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent
-                      className="py-1 px-3 rounded-sm"
-                      sideOffset={25}
-                    >
-                      <span className="text-xs">Next post</span>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </div>
-            </TooltipProvider>
-          </motion.div>
-        </AnimatePresence>
+            <div className="flex items-center border-l-[1px] border-border pl-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(currentIndex === 0 && "opacity-50")}
+                    onClick={handlePrev}
+                  >
+                    <Icons.ChevronLeft className="h-6 w-6" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={25}
+                >
+                  <span className="text-xs">Previous post</span>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      currentIndex === posts.length - 1 && "opacity-50"
+                    )}
+                    onClick={handleNext}
+                  >
+                    <Icons.ChevronRight className="h-6 w-6" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={25}
+                >
+                  <span className="text-xs">Next post</span>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
+        </TooltipProvider>
       </div>
 
       <DialogContent className="sm:max-w-[425px]">

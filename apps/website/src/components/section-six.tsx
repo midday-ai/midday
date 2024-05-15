@@ -3,7 +3,7 @@ import ai from "public/ai.png";
 
 export function SectionSix() {
   return (
-    <section className="border border-border container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12">
+    <section className="border border-border container bg-[#121212] p-8 md:p-10 mb-12">
       <div className="flex flex-col md:flex-row md:space-x-12">
         <Image
           src={ai}

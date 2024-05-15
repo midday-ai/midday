@@ -42,7 +42,7 @@ export function SectionOSS() {
         </p>
       </div>
 
-      <div className="border border-border bg-white dark:bg-[#121212] p-8 md:p-10">
+      <div className="border border-border bg-[#121212] p-8 md:p-10">
         <div className="flex flex-col md:flex-row md:space-x-16">
           <div className="md:basis-1/2">
             <Accordion
