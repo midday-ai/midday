@@ -1,9 +1,6 @@
-import { AdaptiveImage } from "@/components/adaptive-image";
-import { BlurryCircle } from "@/components/blurry-circle";
 import type { Metadata } from "next";
 import Image from "next/image";
 import signature from "public/email/signature-dark.png";
-import signatureLight from "public/email/signature.png";
 import founders from "public/founders.png";
 
 export const metadata: Metadata = {
@@ -13,9 +10,6 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <div className="container max-w-[750px]">
-      <BlurryCircle className="absolute top-[40%] -right-6 bg-[#F59F95]/30 dark:bg-[#F59F95]/10 -z-10 hidden md:block" />
-      <BlurryCircle className="absolute top-[70%] left-0 bg-[#3633D0]/10 dark:bg-[#3633D0]/10 -z-10 hidden md:block" />
-
       <h1 className="mt-24 font-medium text-center text-5xl mb-16 leading-snug">
         This is why we’re building <br />
         Midday.
@@ -54,9 +48,8 @@ export default function Page() {
 
       <div className="mt-6 mb-8">
         <p className="text-sm text-[#878787] mb-2">Best regards, founders</p>
-        <AdaptiveImage
-          darkSrc={signature}
-          lightSrc={signatureLight}
+        <Image
+          src={signature}
           alt="Signature"
           className="block w-[143px] h-[20px]"
         />

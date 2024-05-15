@@ -1,96 +1,12 @@
 "use client";
 
-import { GlowingStarsBackgroundCard } from "@/components/glowing-stars";
 import { cn } from "@midday/ui/cn";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@midday/ui/navigation-menu";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { FaDiscord, FaGithub } from "react-icons/fa";
-import {
-  MdOutlineDescription,
-  MdOutlineIntegrationInstructions,
-  MdOutlineMemory,
-} from "react-icons/md";
+import { FaGithub } from "react-icons/fa";
 import { LogoIcon } from "./logo-icon";
-
-type ListItemProps = {
-  title: string;
-  href: string;
-  external?: boolean;
-  icon: () => React.JSX.Element;
-  className?: string;
-};
-
-const components: ListItemProps[] = [
-  {
-    title: "Documentation",
-    href: "https://docs.midday.ai",
-    icon: () => <MdOutlineDescription size={20} />,
-    external: true,
-  },
-  {
-    title: "Open Source",
-    href: "https://git.new/midday",
-    icon: () => <FaGithub size={19} />,
-    external: true,
-  },
-  {
-    title: "Join the community",
-    href: "https://go.midday.ai/anPiuRx",
-    icon: () => <FaDiscord size={20} />,
-    external: true,
-  },
-  {
-    title: "Apps & Integrations",
-    href: "https://docs.midday.ai",
-    icon: () => <MdOutlineIntegrationInstructions size={20} />,
-    external: true,
-  },
-  {
-    title: "Engine",
-    href: "/engine",
-    icon: () => <MdOutlineMemory size={21} />,
-  },
-];
-
-const ListItem = ({
-  className,
-  title,
-  icon: Icon,
-  external,
-  ...props
-}: ListItemProps) => {
-  return (
-    <li>
-      <NavigationMenuLink asChild>
-        <Link
-          target={external ? "_blank" : undefined}
-          className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-secondary focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          <div className="flex items-center">
-            <div className="w-8">
-              <Icon />
-            </div>
-            <div className="text-sm font-medium leading-none">{title}</div>
-          </div>
-        </Link>
-      </NavigationMenuLink>
-    </li>
-  );
-};
 
 const links = [
   {
@@ -150,80 +66,41 @@ export function Header() {
   }
 
   return (
-    <header className="h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
-      <nav className="border border-border p-3 rounded-2xl flex items-center backdrop-filter backdrop-blur-xl bg-[#FDFDFC] dark:bg-[#121212] bg-opacity-70">
-        <NavigationMenu>
-          <Link href="/">
-            <span className="sr-only">Midday Logo</span>
-            <LogoIcon />
-          </Link>
+    <header
+      className={cn(
+        "sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center",
+        pathname === "/" &&
+          "transition duration-1s ease-in-out animate-header-slide-down-fade"
+      )}
+    >
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full h-[56px]">
+        <Link href="/">
+          <span className="sr-only">Midday Logo</span>
+          <LogoIcon />
+        </Link>
 
-          <ul className="space-x-2 font-medium text-sm hidden md:flex mx-3">
-            {links.map(({ path, name, title }) => {
-              const isActive =
-                path === "/updates"
-                  ? pathname.includes("updates")
-                  : path === lastPath;
+        <ul className="space-x-2 font-medium text-sm hidden md:flex mx-3">
+          {links.map(({ path, name, title }) => {
+            const isActive =
+              path === "/updates"
+                ? pathname.includes("updates")
+                : path === lastPath;
 
-              return (
-                <li key={path}>
-                  <Link
-                    href={path}
-                    className={cn(
-                      "h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
-                      isActive && "bg-secondary hover:bg-secondary"
-                    )}
-                  >
-                    {title}
-                  </Link>
-                </li>
-              );
-            })}
-
-            <li>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger>Developers</NavigationMenuTrigger>
-                  <NavigationMenuContent className="bg-[#FDFDFC] dark:bg-[#121212]">
-                    <div className="flex">
-                      <Link
-                        href="/engine"
-                        className="border-r-[1px] border-border"
-                      >
-                        <div className="w-[215px] mb-6">
-                          <NavigationMenuLink asChild>
-                            <GlowingStarsBackgroundCard>
-                              <span className="text-lg font-medium">
-                                Midday Engine
-                              </span>
-                              <div className="flex justify-between items-end">
-                                <p className="line-clamp-2 text-sm leading-snug text-[#707070]">
-                                  One API to rule them all. Unlimited
-                                  connections.
-                                </p>
-                              </div>
-                            </GlowingStarsBackgroundCard>
-                          </NavigationMenuLink>
-                        </div>
-                      </Link>
-                      <ul className="w-[400px] flex flex-col p-4">
-                        {components.map((component) => (
-                          <ListItem
-                            key={component.title}
-                            title={component.title}
-                            href={component.href}
-                            icon={component.icon}
-                            external={component.external}
-                          />
-                        ))}
-                      </ul>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </li>
-          </ul>
-        </NavigationMenu>
+            return (
+              <li key={path}>
+                <Link
+                  href={path}
+                  className={cn(
+                    "h-8 items-center justify-center text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
+                    isActive && "bg-secondary hover:bg-secondary"
+                  )}
+                >
+                  {title}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
 
         <button
           type="button"
@@ -244,8 +121,8 @@ export function Header() {
         </button>
 
         <a
+          className="text-sm font-medium pr-2 border-l-[1px] border-border pl-4 hidden md:block"
           href="https://app.midday.ai"
-          className="hidden md:inline-flex h-8 items-center justify-center rounded-md text-sm font-medium transition-colors px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
           Sign in
         </a>
@@ -257,7 +134,7 @@ export function Header() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="mt-4 flex justify-between p-3 relative">
+          <div className="mt-4 flex justify-between p-3 px-4 relative">
             <button type="button" onClick={handleToggleMenu}>
               <span className="sr-only">Midday Logo</span>
               <LogoIcon />
@@ -284,7 +161,7 @@ export function Header() {
             <motion.ul
               initial="hidden"
               animate="show"
-              className="px-3 pt-8 text-xl text-[#707070] dark:text-[#878787] space-y-8 mb-8"
+              className="px-3 pt-8 text-xl text-[#878787] space-y-8 mb-8"
               variants={listVariant}
             >
               {links.map(({ path, name, title }) => {

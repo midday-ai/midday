@@ -1,43 +1,25 @@
-"use client";
-
-import { AdaptiveImage } from "@/components/adaptive-image";
-import { motion } from "framer-motion";
-import profitLossLight from "public/profit-loss-light.png";
-import profitLoss from "public/profit-loss.png";
-import { useState } from "react";
+import Image from "next/image";
+import computer from "public/computer.png";
 
 export function SectionTwo() {
-  const [isActive, setActive] = useState(false);
-
   return (
-    <section
-      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden mb-12"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-    >
+    <section className="border border-border container bg-[#121212] md:pb-0 overflow-hidden mb-12">
       <div className="flex flex-col md:space-x-12 md:flex-row">
-        <motion.div
-          animate={isActive ? { y: -5, x: 5 } : { y: 0, x: 0 }}
-          initial={{ y: 0, x: 0 }}
-          transition={{ type: "spring", stiffness: 100 }}
-          className="w-full"
-        >
-          <AdaptiveImage
-            lightSrc={profitLossLight}
-            darkSrc={profitLoss}
-            height={400}
-            width={789}
-            className="-mb-[1px] object-contain"
-            alt="Overview"
-          />
-        </motion.div>
+        <Image
+          src={computer}
+          height={446}
+          width={836}
+          className="-mb-[1px] object-contain"
+          alt="Overview"
+          quality={100}
+        />
 
-        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8">
+        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center p-8 md:p-0">
           <h3 className="font-medium text-xl md:text-2xl mb-4">
             Financial overview
           </h3>
 
-          <p className="text-[#878787] mb-4">
+          <p className="text-[#878787] mb-4 text-sm">
             Bring your own bank. We connect to over 20 000+ banks in 33
             countries across US, Canada, UK and Europe. Keep tabs on your
             expenses and income, and gain a clearer picture of your business's
@@ -56,7 +38,9 @@ export function SectionTwo() {
                 d="M6.55 13 .85 7.3l1.425-1.425L6.55 10.15 15.725.975 17.15 2.4 6.55 13Z"
               />
             </svg>
-            <span className="text-[#878787]">Share financial reports</span>
+            <span className="text-[#878787] text-sm">
+              Share financial reports
+            </span>
           </div>
         </div>
       </div>

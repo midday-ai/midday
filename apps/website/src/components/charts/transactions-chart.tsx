@@ -4,7 +4,7 @@ export async function TransactionsChart() {
   const { transactions } = await fetchStats();
 
   return (
-    <div className="flex border flex-col items-center justify-center border-border bg-background rounded-xl px-6 pt-8 pb-6 space-y-4">
+    <div className="flex border flex-col items-center justify-center border-border bg-background px-6 pt-8 pb-6 space-y-4">
       <h2 className="text-2xl">Transactions</h2>
       <p className="text-[#878787] text-sm text-center">
         We are already handling a significant amount of transactions.

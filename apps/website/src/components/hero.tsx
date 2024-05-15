@@ -1,55 +1,88 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
+import Spline from "@splinetool/react-spline";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export function Hero() {
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    setAnimate(true);
+  }, []);
+
   return (
-    <section className="text-center mt-16 md:mt-18 items-center flex flex-col">
-      <Link href="/updates/early-adopter">
-        <Button
-          variant="outline"
-          className="rounded-full border-border flex space-x-2 items-center"
-        >
-          <span>Announcing Early Adopters Plan</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={12}
-            height={12}
-            fill="none"
+    <section className="md:mt-[250px] relative md:min-h-[375px]">
+      <div className="hero-slide-up flex flex-col mt-[240px]">
+        <Link href="/updates/early-adopter">
+          <Button
+            variant="outline"
+            className="rounded-full border-border flex space-x-2 items-center"
           >
-            <path
-              fill="currentColor"
-              d="M8.783 6.667H.667V5.333h8.116L5.05 1.6 6 .667 11.333 6 6 11.333l-.95-.933 3.733-3.733Z"
-            />
-          </svg>
-        </Button>
-      </Link>
-
-      <h1 className="text-6xl font-medium mt-6">Run your business smarter.</h1>
-
-      <p className="mt-4 md:mt-6 text-[#707070] max-w-[600px]">
-        Midday provides you with greater insight into your business and
-        automates the boring tasks, allowing you to focus on what you love to do
-        instead.
-      </p>
-
-      <div className="mt-8">
-        <div className="flex items-center space-x-4">
-          <Link href="/talk-to-us">
-            <Button
-              variant="outline"
-              className="border border-primary h-12 px-6"
+            <span className="font-mono text-xs">
+              Announcing Early Adopters Plan
+            </span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={12}
+              height={12}
+              fill="none"
             >
-              Talk to us
-            </Button>
-          </Link>
+              <path
+                fill="currentColor"
+                d="M8.783 6.667H.667V5.333h8.116L5.05 1.6 6 .667 11.333 6 6 11.333l-.95-.933 3.733-3.733Z"
+              />
+            </svg>
+          </Button>
+        </Link>
 
-          <a href="https://app.midday.ai">
-            <Button className="h-12 px-5">Get Early Access</Button>
-          </a>
+        <h1 className="text-[30px] md:text-[90px] font-medium mt-6 leading-none">
+          Run your
+          <br /> business smarter.
+        </h1>
+
+        <p className="mt-4 md:mt-6 max-w-[600px]">
+          An all-in-one tool for freelancers, contractors, consultants, and solo
+          entrepreneurs to manage their finances, track projects, store files,
+          and send invoices.
+        </p>
+
+        <div className="mt-8">
+          <div className="flex items-center space-x-4">
+            <Link href="/talk-to-us">
+              <Button
+                variant="outline"
+                className="border border-primary h-12 px-6"
+              >
+                Talk to us
+              </Button>
+            </Link>
+
+            <a href="https://app.midday.ai">
+              <Button className="h-12 px-5">Get Early Access</Button>
+            </a>
+          </div>
         </div>
+
+        <p className="text-xs text-[#707070] mt-8 font-mono">
+          Used by over{" "}
+          <Link href="/open-startup">
+            <span className="underline">2800+</span>
+          </Link>{" "}
+          businesses.
+        </p>
       </div>
 
-      <p className="text-xs text-[#707070] mt-6">No credit card required.</p>
+      <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
+        <div className={cn(animate && "animate-webgl-scale-in-fade")}>
+          <Spline
+            scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"
+            style={{ width: "auto", height: "auto", background: "transparent" }}
+          />
+        </div>
+      </div>
     </section>
   );
 }

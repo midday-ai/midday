@@ -18,7 +18,7 @@ export function SectionOSS() {
   return (
     <section className="container mb-32">
       <div className="mb-12">
-        <h2 className="text-4xl mb-4">Open startup</h2>
+        <h2 className="text-4xl mb-4 font-medium">Open startup</h2>
         <p className="text-[#707070]">
           We believe in being as transparent as possible, from{" "}
           <a
@@ -42,7 +42,7 @@ export function SectionOSS() {
         </p>
       </div>
 
-      <div className="border border-border rounded-2xl bg-white dark:bg-[#121212] p-8 md:p-10">
+      <div className="border border-border bg-[#121212] p-8 md:p-10">
         <div className="flex flex-col md:flex-row md:space-x-16">
           <div className="md:basis-1/2">
             <Accordion
@@ -146,7 +146,7 @@ export function SectionOSS() {
           </div>
           <div className="md:basis-1/2">
             <a href="https://git.new/midday" target="_blank" rel="noreferrer">
-              <div className="aspect-square md:max-h-[280px] w-full md:border border-border rounded-2xl md:p-10 mt-0 md:mt-0">
+              <div className="aspect-square md:max-h-[280px] w-full md:border border-border md:p-10 mt-0 md:mt-0">
                 <div className="md:border-b-[1px] border-border pb-8 mb-8">
                   <h3 className="font-medium text-xl md:text-2xl hidden md:block">
                     Midday

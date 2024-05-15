@@ -85,118 +85,104 @@ export const CardStack = ({
             }}
             onMouseEnter={() => clearInterval(interval)}
           >
-            <div className="rounded-md md:rounded-2xl border border-border overflow-hidden">
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-[35px] h-[20px] z-20 absolute top-[60px] left-[8px]"
-                      onClick={() =>
-                        onChangeCard(cards.find((c) => c.id === 1))
-                      }
-                    >
-                      <span className="sr-only">Overview</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="py-1 px-3 rounded-sm"
-                    sideOffset={8}
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-[35px] h-[20px] z-20 absolute top-[75px] left-[8px]"
+                    onClick={() => onChangeCard(cards.find((c) => c.id === 1))}
                   >
-                    <p className="text-xs">Overview</p>
-                  </TooltipContent>
-                </Tooltip>
+                    <span className="sr-only">Overview</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={8}
+                >
+                  <p className="text-xs">Overview</p>
+                </TooltipContent>
+              </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-[35px] h-[20px] z-20 absolute top-[95px] left-[8px]"
-                      onClick={() =>
-                        onChangeCard(cards.find((c) => c.id === 5))
-                      }
-                    >
-                      <span className="sr-only">Transactions</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="py-1 px-3 rounded-sm"
-                    sideOffset={8}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-[35px] h-[20px] z-20 absolute top-[105px] left-[8px]"
+                    onClick={() => onChangeCard(cards.find((c) => c.id === 5))}
                   >
-                    <p className="text-xs">Transactions</p>
-                  </TooltipContent>
-                </Tooltip>
+                    <span className="sr-only">Transactions</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={8}
+                >
+                  <p className="text-xs">Transactions</p>
+                </TooltipContent>
+              </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-[35px] h-[20px] z-20 absolute top-[125px] left-[8px]"
-                      onClick={() =>
-                        onChangeCard(cards.find((c) => c.id === 3))
-                      }
-                    >
-                      <span className="sr-only">Inbox</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="py-1 px-3 rounded-sm"
-                    sideOffset={8}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-[35px] h-[20px] z-20 absolute top-[135px] left-[8px]"
+                    onClick={() => onChangeCard(cards.find((c) => c.id === 3))}
                   >
-                    <p className="text-xs">Inbox</p>
-                  </TooltipContent>
-                </Tooltip>
+                    <span className="sr-only">Inbox</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={8}
+                >
+                  <p className="text-xs">Inbox</p>
+                </TooltipContent>
+              </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-[35px] h-[20px] z-20 absolute top-[160px] left-[8px]"
-                      onClick={() =>
-                        onChangeCard(cards.find((c) => c.id === 2))
-                      }
-                    >
-                      <span className="sr-only">Tracker</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="py-1 px-3 rounded-sm"
-                    sideOffset={8}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-[35px] h-[20px] z-20 absolute top-[170px] left-[8px]"
+                    onClick={() => onChangeCard(cards.find((c) => c.id === 2))}
                   >
-                    <p className="text-xs">Tracker</p>
-                  </TooltipContent>
-                </Tooltip>
+                    <span className="sr-only">Tracker</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={8}
+                >
+                  <p className="text-xs">Tracker</p>
+                </TooltipContent>
+              </Tooltip>
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="w-[35px] h-[20px] z-20 absolute top-[230px] left-[8px]"
-                      onClick={() =>
-                        onChangeCard(cards.find((c) => c.id === 4))
-                      }
-                    >
-                      <span className="sr-only">Vault</span>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="right"
-                    className="py-1 px-3 rounded-sm"
-                    sideOffset={8}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="w-[35px] h-[20px] z-20 absolute top-[230px] left-[8px]"
+                    onClick={() => onChangeCard(cards.find((c) => c.id === 4))}
                   >
-                    <p className="text-xs">Vault</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                    <span className="sr-only">Vault</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="right"
+                  className="py-1 px-3 rounded-sm"
+                  sideOffset={8}
+                >
+                  <p className="text-xs">Vault</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
-              <div onClick={() => onChangeCardByIndex(index)}>
-                {card.content}
-              </div>
-            </div>
+            <div onClick={() => onChangeCardByIndex(index)}>{card.content}</div>
           </motion.div>
         );
       })}

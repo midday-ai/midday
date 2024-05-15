@@ -1,29 +1,17 @@
-"use client";
-
-import { AdaptiveImage } from "@/components/adaptive-image";
-import { BlurryCircle } from "@/components/blurry-circle";
-import { motion } from "framer-motion";
-import timetrackerLight from "public/time-tracker-light.png";
+import Image from "next/image";
 import timetracker from "public/time-tracker.png";
-import { useState } from "react";
 
 export function SectionThree() {
-  const [isActive, setActive] = useState(false);
-
   return (
-    <section
-      className="relative mb-12"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-    >
-      <div className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
+    <section className="relative mb-12">
+      <div className="border border-border container bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden">
         <div className="flex flex-col md:space-x-12 md:flex-row">
           <div className="mt-6 md:max-w-[40%] md:mr-8 md:mb-8">
             <h3 className="font-medium text-xl md:text-2xl	mb-4">
               Time track your projects
             </h3>
 
-            <p className="text-[#878787] mb-4">
+            <p className="text-[#878787] mb-4 text-sm">
               Effortlessly boost productivity and collaboration with our
               advanced <br />
               time tracking solution: gain insightful project overviews and
@@ -35,7 +23,7 @@ export function SectionThree() {
               success.
             </p>
 
-            <div className="flex space-x-2 items-center mt-8">
+            <div className="flex space-x-2 items-center mt-8 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={18}
@@ -49,7 +37,7 @@ export function SectionThree() {
               </svg>
               <span className="text-[#878787]">Live time tracking</span>
             </div>
-            <div className="flex space-x-2 items-center mt-1">
+            <div className="flex space-x-2 items-center mt-1 text-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={18}
@@ -65,25 +53,15 @@ export function SectionThree() {
             </div>
           </div>
 
-          <motion.div
-            animate={isActive ? { y: -5, x: -5 } : { y: 0, x: 0 }}
-            initial={{ y: 0 }}
-            transition={{ type: "spring", stiffness: 100 }}
-            className="!ml-auto"
-          >
-            <AdaptiveImage
-              darkSrc={timetracker}
-              lightSrc={timetrackerLight}
-              height={400}
-              className="-mb-[24px] md:-mb-[1px] object-contain mt-8 md:mt-0"
-              quality={100}
-              alt="Tracker"
-            />
-          </motion.div>
+          <Image
+            src={timetracker}
+            height={400}
+            className="-mb-[32px] md:-mb-[1px] object-contain mt-8 md:mt-0"
+            quality={100}
+            alt="Tracker"
+          />
         </div>
       </div>
-      <BlurryCircle className="absolute -top-[50px] -left-[100px] bg-[#F59F95]/5 -z-10" />
-      <BlurryCircle className="absolute -bottom-[50px] -right-[100px] bg-[#A1F5CD]/5 -z-10" />
     </section>
   );
 }

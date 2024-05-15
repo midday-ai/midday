@@ -1,46 +1,29 @@
-"use client";
-
-import { AdaptiveImage } from "@/components/adaptive-image";
-import { motion } from "framer-motion";
-import aiLight from "public/ai-light.png";
+import Image from "next/image";
 import ai from "public/ai.png";
-import { useState } from "react";
 
 export function SectionSix() {
-  const [isActive, setActive] = useState(false);
-
   return (
-    <section
-      className="border border-border rounded-2xl container bg-white dark:bg-[#121212] p-8 md:p-10 mb-12"
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => setActive(false)}
-    >
+    <section className="border border-border container bg-[#121212] p-8 md:p-10 mb-12">
       <div className="flex flex-col md:flex-row md:space-x-12">
-        <motion.div
-          animate={isActive ? { y: -5, x: -5 } : { y: 0, x: 0 }}
-          initial={{ y: 0 }}
-          transition={{ type: "spring", stiffness: 100 }}
-        >
-          <AdaptiveImage
-            darkSrc={ai}
-            lightSrc={aiLight}
-            height={405}
-            width={793}
-            className="-mb-[1px] object-contain"
-            alt="AI"
-            quality={100}
-          />
-        </motion.div>
+        <Image
+          src={ai}
+          height={405}
+          width={793}
+          className="-mb-[1px] object-contain"
+          alt="AI"
+          quality={100}
+        />
+
         <div className="mt-6 md:max-w-[40%] md:ml-8">
-          <span className="text-primary border border-primary rounded-full self-start font-semibold px-3 text-xs py-1.5 mb-4">
+          <span className="text-[#F5F5F3] border border-border rounded-full self-start font-medium font-mono px-3 text-xs py-1.5 mb-4 bg-[#1D1D1D]">
             Coming soon
           </span>
 
-          <h3 className="font-medium text-xl md:text-2xl mt-4 mb-4">
+          <h3 className="font-medium text-xl md:text-2xl mt-8 mb-4">
             Your Virtual CFO
           </h3>
 
-          <p className="text-[#878787]">
+          <p className="text-[#878787] text-sm">
             With Midday AI, you can ask anything and gain insights into your
             financial situation. Understand your major expenses and income
             sources. Inquire about transactions without receipts or explore
