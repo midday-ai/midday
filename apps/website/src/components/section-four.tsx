@@ -11,7 +11,7 @@ export function SectionFour() {
           Coming soon
         </span>
         <h4 className="font-medium text-xl md:text-2xl mb-4">Invoicing</h4>
-        <p className="text-[#878787]">
+        <p className="text-[#878787] mb-[35px]">
           We’re working hard to give you the best invoice solution. It will
           feature web based invoices, live collaboration and project sync.
         </p>
@@ -19,7 +19,7 @@ export function SectionFour() {
         <Image
           src={invoicing}
           quality={100}
-          className="object-contain"
+          className="object-contain mt-auto"
           alt="Invoice"
         />
       </div>
@@ -58,7 +58,7 @@ export function SectionFour() {
           <Image
             src={inbox}
             quality={100}
-            className="object-contain"
+            className="object-contain -bottom-[32px] relative"
             alt="Inbox"
           />
         </div>

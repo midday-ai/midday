@@ -86,8 +86,8 @@ export function UpdatesToolbar({ posts }) {
     }
   };
 
-  useHotkeys("arrowRight", () => handleNext(), [handleNext]);
-  useHotkeys("arrowLeft", () => handlePrev(), [handlePrev]);
+  useHotkeys("arrowDown", () => handleNext(), [handleNext]);
+  useHotkeys("arrowUp", () => handlePrev(), [handlePrev]);
 
   const handleOnShare = () => {
     const popup = popupCenter({
@@ -102,21 +102,25 @@ export function UpdatesToolbar({ posts }) {
 
   return (
     <Dialog>
-      <div className="fixed right-0">
+      <div className="fixed right-6 bottom-0 top-0 flex flex-col items-center justify-center">
         <TooltipProvider delayDuration={20}>
-          <div className="flex flex-col backdrop-filter backdrop-blur-lg bg-[#1A1A1A]/80 px-4 py-2 border border-[#2C2C2C] space-y-4">
+          <div className="flex flex-col items-center backdrop-filter backdrop-blur-lg bg-[#1A1A1A]/80 p-2 border border-[#2C2C2C] space-y-4 rounded-full">
             <Tooltip>
               <TooltipTrigger>
                 <DialogTrigger asChild>
                   <Icons.Share size={18} className="text-[#606060] -mt-[1px]" />
                 </DialogTrigger>
               </TooltipTrigger>
-              <TooltipContent className="py-1 px-3 rounded-sm" sideOffset={25}>
+              <TooltipContent
+                className="py-1 px-3 rounded-sm"
+                sideOffset={25}
+                side="right"
+              >
                 <span className="text-xs">Share</span>
               </TooltipContent>
             </Tooltip>
 
-            <div className="flex items-center border-l-[1px] border-border pl-4">
+            <div className="flex flex-col items-center border-t-[1px] border-border space-y-2 pt-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -124,12 +128,13 @@ export function UpdatesToolbar({ posts }) {
                     className={cn(currentIndex === 0 && "opacity-50")}
                     onClick={handlePrev}
                   >
-                    <Icons.ChevronLeft className="h-6 w-6" />
+                    <Icons.ChevronUp className="h-6 w-6" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
                   className="py-1 px-3 rounded-sm"
                   sideOffset={25}
+                  side="right"
                 >
                   <span className="text-xs">Previous post</span>
                 </TooltipContent>
@@ -143,12 +148,13 @@ export function UpdatesToolbar({ posts }) {
                     )}
                     onClick={handleNext}
                   >
-                    <Icons.ChevronRight className="h-6 w-6" />
+                    <Icons.ChevronDown className="h-6 w-6" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent
                   className="py-1 px-3 rounded-sm"
                   sideOffset={25}
+                  side="right"
                 >
                   <span className="text-xs">Next post</span>
                 </TooltipContent>

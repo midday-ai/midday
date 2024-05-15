@@ -7,7 +7,7 @@ import Link from "next/link";
 export function Hero() {
   return (
     <section className="mt-16 md:mt-[250px] relative md:min-h-[375px]">
-      <div className="animate-hero-text-slide-up-fade flex flex-col">
+      <div className="hero-slide-up flex flex-col">
         <Link href="/updates/early-adopter">
           <Button
             variant="outline"

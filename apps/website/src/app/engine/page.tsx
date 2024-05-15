@@ -15,17 +15,19 @@ export default function Page() {
         One API
       </h1>
 
-      <h2 className="text-[175px] leading-none"> to rule them all</h2>
+      <h2 className="text-[175px] leading-none text-dotted">
+        to rule them all
+      </h2>
 
-      <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px]">
-        Midday engine streamlines banking integrations with a single API
-        effortlessly connecting to multiple providers and get one unified
-        format.
-      </p>
-
-      <div className="w-full flex items-center flex-col z-10">
-        <WaitlistInput />
+      <div>
+        <p className="text-[#707070] mt-4 mb-8 text-center max-w-[550px]">
+          Midday engine streamlines banking integrations with a single API
+          effortlessly connecting to multiple providers and get one unified
+          format.
+        </p>
       </div>
+
+      <WaitlistInput />
 
       <div className="text-center flex flex-col items-center mt-24">
         <h3 className="mb-4 text-2xl font-medium">

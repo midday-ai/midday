@@ -93,7 +93,7 @@ export function SectionSubscription() {
               rel="noreferrer"
               className="block"
             >
-              <div className="ful-w p-4 border border-border bg-[#121212] rounded-xl px-6 mt-8 text-center flex flex-col justify-center items-center space-y-4 pb-8">
+              <div className="ful-w p-4 border border-border bg-[#121212] px-6 mt-8 text-center flex flex-col justify-center items-center space-y-4 pb-8">
                 <h2>Engine</h2>
                 <p className="text-[#878787] text-sm text-center max-w-[800px]">
                   Midday Engine streamlines banking integrations with a single

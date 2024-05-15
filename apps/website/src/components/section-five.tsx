@@ -5,7 +5,7 @@ import vault from "public/vault.png";
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
-      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start">
+      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 md:pl-0 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start">
         <Image
           src={vault}
           quality={100}
@@ -39,7 +39,7 @@ export function SectionFive() {
           clearly pointing to the right attachment.
         </p>
 
-        <Image src={exporting} quality={100} alt="Export" />
+        <Image src={exporting} quality={100} alt="Export" className="mt-auto" />
       </div>
     </section>
   );

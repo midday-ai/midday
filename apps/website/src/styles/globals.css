@@ -100,25 +100,16 @@ pre code {
 }
 
 .dotted-bg {
-    --d: 2px; 
-   
-    background : radial-gradient(
-      circle at 
-         var(--d) 
-         var(--d), 
-         
-      #232323 calc(var(--d) - 1px), 
-      #0C0C0C var(--d)
-    ) 
-    0 0 / 10px 10px;
+    background-image: radial-gradient(circle at 1px 1px, #232323 1px, transparent 0);
+    background-size: 10px 10px;
 }
 
 
-.animate-hero-text-slide-up-fade {
-    animation: hero-text-slide-up-fade 1s ease-in-out
+.hero-slide-up {
+    animation: hero-animation 1s ease-in-out
 }
 
-@keyframes hero-text-slide-up-fade {
+@keyframes hero-animation {
     0% {
         opacity: 0;
         transform: translateY(16px)
@@ -131,13 +122,16 @@ pre code {
 }
 
 .text-stroke {
-    /* color: white;
-    -webkit-text-fill-color: black;
-    -webkit-text-stroke: 1px white; */
-
     color: black;
     text-shadow: -1px 1px 0 white,
     1px 1px 0 white,
     1px -1px 0 white,
     -1px -1px 0 white;
+}
+
+.text-dotted {
+    background-image: radial-gradient(circle at 0.4px 0.2px, #fff 1px, transparent 0);
+    background-size: 5px 5px;
+    background-clip: text;  
+   -webkit-text-fill-color: transparent;  
 }

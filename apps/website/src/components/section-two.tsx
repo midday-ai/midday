@@ -1,19 +1,20 @@
 import Image from "next/image";
-import profitLoss from "public/profit-loss.png";
+import computer from "public/computer.png";
 
 export function SectionTwo() {
   return (
-    <section className="border border-border container bg-[#121212] p-8 md:p-10 md:pb-0 overflow-hidden mb-12">
+    <section className="border border-border container bg-[#121212] md:pb-0 overflow-hidden mb-12">
       <div className="flex flex-col md:space-x-12 md:flex-row">
         <Image
-          src={profitLoss}
-          height={400}
-          width={789}
+          src={computer}
+          height={446}
+          width={836}
           className="-mb-[1px] object-contain"
           alt="Overview"
+          quality={100}
         />
 
-        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8">
+        <div className="mt-6 md:max-w-[40%] md:ml-8 md:mb-8 flex flex-col justify-center">
           <h3 className="font-medium text-xl md:text-2xl mb-4">
             Financial overview
           </h3>

@@ -150,7 +150,7 @@ export function Header() {
 
   return (
     <header className="h-12 sticky mt-4 top-4 z-50 px-2 md:px-4 md:flex justify-center">
-      <nav className="border border-border p-3 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70">
+      <nav className="border border-border p-3 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full">
         <NavigationMenu>
           <Link href="/">
             <span className="sr-only">Midday Logo</span>

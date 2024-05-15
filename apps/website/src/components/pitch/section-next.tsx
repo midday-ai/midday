@@ -57,7 +57,7 @@ export function SectionNext() {
             </Card>
           </div>
 
-          <div className="ml-auto w-full max-w-[820px] h-full border border-border rounded-xl p-6 bg-[#0C0C0C]">
+          <div className="ml-auto w-full max-w-[820px] h-full border border-border p-6 bg-[#0C0C0C]">
             <h2 className="mb-24 block text-xl">Native app</h2>
             <span />
             <Image src={app} width={698} alt="App" quality={100} />
