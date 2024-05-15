@@ -101,7 +101,7 @@ export function UpdatesToolbar({ posts }) {
 
   return (
     <Dialog>
-      <div className="fixed right-6 bottom-0 top-0 flex flex-col items-center justify-center">
+      <div className="fixed right-6 bottom-0 top-0 flex-col items-center justify-center hidden md:flex">
         <TooltipProvider delayDuration={20}>
           <div className="flex flex-col items-center backdrop-filter backdrop-blur-lg bg-[#1A1A1A]/80 p-2 border border-[#2C2C2C] space-y-4 rounded-full">
             <Tooltip>

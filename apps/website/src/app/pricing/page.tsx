@@ -18,11 +18,11 @@ export default function Page() {
     <>
       <div className="container">
         <div className="min-h-[950px]">
-          <h1 className="mt-24 font-medium text-center text-[170px] mb-2 leading-none">
+          <h1 className="mt-24 font-medium text-center text-[100px] md:text-[170px] mb-2 leading-none">
             Free
           </h1>
 
-          <h3 className="font-medium text-center text-[170px] mb-2 text-stroke leading-none">
+          <h3 className="font-medium text-center text-[100px] md:text-[170px] mb-2 text-stroke leading-none">
             while in beta
           </h3>
 
