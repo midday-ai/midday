@@ -480,7 +480,7 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "public_tracker_reports_team_id_fkey"
+            foreignKeyName: "tracker_reports_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -589,7 +589,6 @@ export type Database = {
       }
       transaction_enrichments: {
         Row: {
-          category: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug: string | null
           created_at: string
           id: string
@@ -598,7 +597,6 @@ export type Database = {
           team_id: string | null
         }
         Insert: {
-          category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string
           id?: string
@@ -607,7 +605,6 @@ export type Database = {
           team_id?: string | null
         }
         Update: {
-          category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string
           id?: string
@@ -997,7 +994,6 @@ export type Database = {
       }
       decrypted_transaction_enrichments: {
         Row: {
-          category: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug: string | null
           created_at: string | null
           decrypted_name: string | null
@@ -1007,7 +1003,6 @@ export type Database = {
           team_id: string | null
         }
         Insert: {
-          category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string | null
           decrypted_name?: never
@@ -1017,7 +1012,6 @@ export type Database = {
           team_id?: string | null
         }
         Update: {
-          category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string | null
           decrypted_name?: never
