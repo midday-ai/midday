@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@novu/node": "^0.24.1",
+    "@novu/node": "^0.24.2",
     "nanoid": "^5.0.7"
   },
   "devDependencies": {

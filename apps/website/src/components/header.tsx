@@ -73,7 +73,7 @@ export function Header() {
           "transition duration-1s ease-in-out animate-header-slide-down-fade"
       )}
     >
-      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 rounded-full h-[56px]">
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 h-[56px]">
         <Link href="/">
           <span className="sr-only">Midday Logo</span>
           <LogoIcon />

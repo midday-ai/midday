@@ -17,13 +17,14 @@
     "@midday/ui": "workspace:*",
     "@openstatus/react": "^0.0.3",
     "@splinetool/react-spline": "^2.2.6",
-    "@splinetool/runtime": "^1.3.4",
+    "@splinetool/runtime": "^1.3.5",
     "@team-plain/typescript-sdk": "3.9.0",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/analytics": "^1.2.2",
+    "@calcom/embed-react": "^1.5.0",
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",
-    "framer-motion": "^11.1.9",
+    "framer-motion": "^11.2.2",
     "geist": "^1.3.0",
     "next": "14.2.1",
     "next-mdx-remote": "^4.4.1",
@@ -38,8 +39,8 @@
   },
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
-    "@types/node": "^20.12.11",
-    "@types/react": "^18.3.1",
+    "@types/node": "^20.12.12",
+    "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0"
   }
 }

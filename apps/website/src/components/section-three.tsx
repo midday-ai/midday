@@ -15,12 +15,8 @@ export function SectionThree() {
               Effortlessly boost productivity and collaboration with our
               advanced <br />
               time tracking solution: gain insightful project overviews and
-              foster
-              <br />
-              seamless collaboration amongst your team for optimal efficiency
-              and
-              <br />
-              success.
+              foster seamless collaboration amongst your team for optimal
+              efficiency and success.
             </p>
 
             <div className="flex space-x-2 items-center mt-8 text-sm">

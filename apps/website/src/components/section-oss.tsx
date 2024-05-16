@@ -16,10 +16,10 @@ import { GithubStats } from "./github-stats";
 
 export function SectionOSS() {
   return (
-    <section className="container mb-32">
+    <section className="container mb-16 md:mb-32">
       <div className="mb-12">
         <h2 className="text-4xl mb-4 font-medium">Open startup</h2>
-        <p className="text-[#707070]">
+        <p className="text-[#707070] max-w-[500px]">
           We believe in being as transparent as possible, from{" "}
           <a
             href="https://git.new/midday"
@@ -33,8 +33,7 @@ export function SectionOSS() {
           <Link href="/open-startup" className="underline">
             metrics
           </Link>
-          . <br />
-          and you can also{" "}
+          . You can also{" "}
           <Link href="/feature-request" className="underline">
             request a feature
           </Link>{" "}

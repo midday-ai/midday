@@ -5,12 +5,12 @@ import vault from "public/vault.png";
 export function SectionFive() {
   return (
     <section className="flex justify-between space-y-12 lg:space-y-0 lg:space-x-8 flex-col lg:flex-row overflow-hidden mb-12">
-      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 md:pl-0 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start">
+      <div className="border border-border lg:basis-2/3 bg-[#121212] p-10 flex justify-between lg:space-x-8 lg:flex-row flex-col-reverse items-center lg:items-start">
         <Image
           src={vault}
           quality={100}
           alt="Vault"
-          className="mt-8 lg:mt-0 basis-1/2 object-contain md:max-w-[367px] md:border-none border-l-[1px] border-border"
+          className="mt-8 lg:mt-0 basis-1/2 object-contain md:max-w-[367px] border-l-[1px] border-border"
         />
 
         <div className="flex flex-col basis-1/2">
