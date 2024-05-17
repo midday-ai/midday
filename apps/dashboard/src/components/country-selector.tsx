@@ -48,7 +48,7 @@ export function CountrySelector({ defaultValue, onSelect }) {
       </PopoverTrigger>
       <PopoverContentWithoutPortal className="w-[225px] p-0">
         <Command>
-          <CommandInput placeholder="Search country..." className="h-9" />
+          <CommandInput placeholder="Search country..." className="h-9 px-2" />
           <CommandEmpty>No country found.</CommandEmpty>
           <CommandGroup className="overflow-y-auto max-h-[230px] pt-2">
             {Object.values(countries).map((country) => (
