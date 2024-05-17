@@ -5,7 +5,7 @@ import type { Database, Tables } from "../../src/types";
 
 type TransactionCategoriesRecord = Tables<"transaction_categories">;
 interface WebhookPayload {
-  type: "INSERT" | "UPDATE";
+  type: "INSERT";
   table: string;
   record: TransactionCategoriesRecord;
   schema: "public";
@@ -21,7 +21,7 @@ const model = new Supabase.ai.Session("gte-small");
 
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
-  const { id, name } = payload.record;
+  const { id, name, system } = payload.record;
 
   if (name === payload?.old_record?.name) {
     return new Response("No change");

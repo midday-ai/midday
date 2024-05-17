@@ -2,6 +2,7 @@
 
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
+import { addDays, isWithinInterval } from "date-fns";
 import { action } from "./safe-action";
 import { searchSchema } from "./schema";
 
@@ -17,7 +18,7 @@ export const searchAction = action(searchSchema, async (params) => {
       const query = supabase
         .from("inbox")
         .select(
-          "id, file_name, amount, currency, file_path, content_type, due_date, display_name"
+          "id, created_at, file_name, amount, currency, file_path, content_type, due_date, display_name"
         )
         .eq("team_id", teamId)
         .neq("status", "deleted")
@@ -31,7 +32,18 @@ export const searchAction = action(searchSchema, async (params) => {
 
       const { data } = await query.range(0, limit);
 
-      return data;
+      return data?.map((item) => {
+        const pending = isWithinInterval(new Date(), {
+          start: new Date(item.created_at),
+          end: addDays(new Date(item.created_at), 45),
+        });
+
+        return {
+          ...item,
+          pending,
+          review: !pending && !item.id,
+        };
+      });
     }
 
     case "categories": {
