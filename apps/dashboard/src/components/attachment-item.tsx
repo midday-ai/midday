@@ -47,7 +47,9 @@ export function AttachmentItem({ file, onDelete, id }: Props) {
             >
               <FilePreview
                 src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-                downloadUrl={`/api/download/file?path=transactions/${id}/${file.name}&filename=${file.name}`}
+                downloadUrl={`/api/download/file?path=${file?.path
+                  ?.slice(1)
+                  .join("/")}&filename=${file.name}`}
                 name={file.name}
                 type={file.type}
                 width={280}

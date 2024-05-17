@@ -35,7 +35,7 @@ export function TrackerWrapper({
           data={data}
           onSelect={setParams}
           hideDaysIndicators={hideDaysIndicators}
-          weekStartsOn={user.week_starts_on_monday && 1}
+          weekStartsOn={user?.week_starts_on_monday && 1}
         />
       </div>
 
