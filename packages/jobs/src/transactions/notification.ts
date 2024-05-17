@@ -36,6 +36,10 @@ client.defineJob({
   run: async (payload, io) => {
     const { transactions, teamId } = payload;
 
+    const sortedTransactions = transactions.sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    );
+
     const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
@@ -47,8 +51,8 @@ client.defineJob({
       const { t } = getI18n({ locale: user.locale });
 
       // If single transaction
-      if (transactions.length === 1) {
-        const transaction = transactions?.at(0);
+      if (sortedTransactions.length === 1) {
+        const transaction = sortedTransactions?.at(0);
 
         if (transaction) {
           return {
@@ -81,10 +85,10 @@ client.defineJob({
         name: TriggerEvents.TransactionsNewInApp,
         payload: {
           type: NotificationTypes.Transactions,
-          from: transactions.at(0)?.date,
-          to: transactions[transactions.length - 1]?.date,
+          from: sortedTransactions.at(0)?.date,
+          to: sortedTransactions[sortedTransactions.length - 1]?.date,
           description: t("notifications.transactions", {
-            numberOfTransactions: transactions.length,
+            numberOfTransactions: sortedTransactions.length,
           }),
         },
         user: {
@@ -111,7 +115,7 @@ client.defineJob({
       const html = await renderAsync(
         TransactionsEmail({
           fullName: user.full_name,
-          transactions,
+          transactions: sortedTransactions,
           locale: user.locale,
         })
       );
