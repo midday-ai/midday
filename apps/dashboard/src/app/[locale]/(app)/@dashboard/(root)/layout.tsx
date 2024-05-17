@@ -20,7 +20,10 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
-  const countryCode = getCountryCode();
+  const countryCode = cookies().has(Cookies.CountryCode)
+    ? cookies().get(Cookies.CountryCode)?.value
+    : getCountryCode();
+
   const isEU = isEUCountry(countryCode);
   const mobileOverlay = cookies().has(Cookies.MobileOverlay);
 
