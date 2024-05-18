@@ -136,7 +136,7 @@ export function BrandCanvas() {
                 <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos.zip">
                   Videos
                 </SelectItem>
-                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/founders.png">
+                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/founders.zip">
                   Founders
                 </SelectItem>
                 <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/screens.zip">
