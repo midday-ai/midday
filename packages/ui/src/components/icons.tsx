@@ -5,14 +5,12 @@ import { FiGithub } from "react-icons/fi";
 import {
   MdAdd,
   MdArrowBack,
-  MdArrowDownward,
-  MdArrowDropDown,
-  MdArrowDropUp,
   MdArrowLeft,
   MdArrowRight,
   MdArrowUpward,
   MdAutoAwesome,
   MdBarChart,
+  MdChangeHistory,
   MdChevronLeft,
   MdChevronRight,
   MdClose,
@@ -62,6 +60,7 @@ import {
   MdOutlineMoveToInbox,
   MdOutlineNotificationsNone,
   MdOutlineOpenInFull,
+  MdOutlinePalette,
   MdOutlinePause,
   MdOutlinePlayArrow,
   MdOutlineQuestionAnswer,
@@ -500,7 +499,7 @@ export const Icons = {
   QuestionAnswer: MdOutlineQuestionAnswer,
   Click: MdSignalCellularAlt,
   Tune: MdOutlineTune,
-
+  Change: MdChangeHistory,
   Forwarded: MdOutlineForwardToInbox,
   Delete: MdOutlineDelete,
   FolderImports: MdRuleFolder,
@@ -509,4 +508,5 @@ export const Icons = {
   Reply: MdReplay,
   Sort: MdSort,
   Backspace: MdOutlineBackspace,
+  Palette: MdOutlinePalette,
 };
