@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@calcom/embed-react": "^1.5.0",
     "@logsnag/next": "^1.0.3",
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
@@ -21,7 +22,6 @@
     "@team-plain/typescript-sdk": "3.9.0",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/analytics": "^1.2.2",
-    "@calcom/embed-react": "^1.5.0",
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.2.2",
@@ -33,6 +33,7 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-hls-player": "^3.0.7",
+    "react-use-draggable-scroll": "^0.4.7",
     "server-only": "^0.0.1",
     "sharp": "^0.33.3",
     "sugar-high": "^0.6.1"

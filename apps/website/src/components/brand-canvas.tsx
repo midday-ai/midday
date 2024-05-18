@@ -1,12 +1,18 @@
 "use client";
 
-import dynamic from "next/dynamic";
+import { Button } from "@midday/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 import Image from "next/image";
-
-const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
-  ssr: false,
-  loading: () => <p>Loading...</p>,
-});
+import { useRef, useState } from "react";
+import { useDraggable } from "react-use-draggable-scroll";
 
 const assets = [
   <Image
@@ -89,11 +95,63 @@ const assets = [
   />,
 ];
 
+const repeated = [...assets, ...assets, ...assets, ...assets, ...assets];
+
 export function BrandCanvas() {
+  const [value, setValue] = useState(
+    "https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/all.zip"
+  );
+  const ref = useRef();
+  const { events } = useDraggable(ref);
+
   return (
-    <div className="sm:h-screen sm:w-screen">
-      <div className="sm:absolute top-0 left-0 right-0 grid grid-cols-0 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:overflow-hidden sm:h-screen">
-        {assets.map((asset) => asset)}
+    <div className="sm:h-screen sm:w-screen overflow-hidden">
+      <div
+        className="fixed bg-background z-10 top-0 left-0 right-0 overflow-scroll scrollbar-hide cursor-grabbing"
+        {...events}
+        ref={ref}
+      >
+        <div className="w-[4900px] flex h-screen">
+          <div className="grid grid-cols-8 gap-4 items-center">
+            {repeated.map((asset, index) => (
+              <div className="h-auto max-w-full" key={index.toString()}>
+                {asset}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="fixed bottom-10 z-20 w-full flex justify-center items-center">
+        <div className="h-[48px] w-[200px] rounded-full border border-border backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 text-center flex items-center p-1 pl-2 justify-between space-x-4">
+          <Select onValueChange={setValue} value={value}>
+            <SelectTrigger className="w-[180px] border-0 space-x-2">
+              <SelectValue placeholder="All" className="border-0" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/all.zip">
+                  All
+                </SelectItem>
+                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos.zip">
+                  Videos
+                </SelectItem>
+                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/founders.png">
+                  Founders
+                </SelectItem>
+                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/screens.zip">
+                  Screens
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+
+          <Button className="rounded-full">
+            <a href={value} download title="Download">
+              Download
+            </a>
+          </Button>
+        </div>
       </div>
     </div>
   );
