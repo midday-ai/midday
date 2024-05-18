@@ -2,7 +2,7 @@ import { BrandCanvas } from "@/components/brand-canvas";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Brand",
+  title: "Branding",
 };
 
 export default function Page() {
