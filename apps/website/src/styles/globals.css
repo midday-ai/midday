@@ -170,6 +170,10 @@ pre code {
 }
 
 ::selection {
-    background: rgba(0, 100, 217, 0.8);
-    color: black;
-  }
+    background: #00cc9937;
+    color: #007763fd
+}
+
+img::selection {
+    background: transparent;
+ }

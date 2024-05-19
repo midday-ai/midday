@@ -136,7 +136,7 @@ export const Combobox = ({
           {inputValue?.length > 0 && (
             <CommandGroup
               className={cn(
-                "bg-background absolute z-10 w-full max-h-[250px] overflow-auto py-2 border rounded-md px-2",
+                "bg-background absolute z-10 w-full max-h-[250px] overflow-auto py-2 border px-2",
                 classNameList
               )}
             >
@@ -150,7 +150,7 @@ export const Combobox = ({
                       event.stopPropagation();
                     }}
                     onSelect={() => handleSelectOption(option)}
-                    className="flex items-center gap-2 w-full rounded-md px-2"
+                    className="flex items-center gap-2 w-full px-2"
                   >
                     {Component ? <Component /> : option.name}
                   </CommandItem>

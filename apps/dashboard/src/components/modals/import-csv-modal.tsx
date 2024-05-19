@@ -173,8 +173,9 @@ export function ImportCSVModal() {
                 </div>
 
                 <DialogDescription>
-                  We found {transactions?.length} transactions from from your
-                  import.
+                  We found{" "}
+                  <span className="underline">{transactions?.length}</span>{" "}
+                  transactions from from your import.
                 </DialogDescription>
               </DialogHeader>
 

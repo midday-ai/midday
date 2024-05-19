@@ -1,38 +1,15 @@
-import crypto from "node:crypto";
+import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
+import { csvTransformed } from "@midday/import";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { capitalCase } from "change-case";
-import * as d3 from "d3-dsv";
-import { CSVLoader } from "langchain/document_loaders/fs/csv";
 import { TokenTextSplitter } from "langchain/text_splitter";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
-function generateId(value: string) {
-  const hash = crypto.createHash("sha256");
-  hash.update(value);
-
-  return hash.digest("hex");
-}
-
-const transformTransaction = ({ transaction, teamId }) => {
-  return {
-    internal_id: generateId(
-      `${transaction.date}-${transaction.name}-${transaction.amount}`
-    ),
-    team_id: teamId,
-    status: "posted",
-    date: transaction.date,
-    amount: transaction.amount,
-    name: capitalCase(transaction.description),
-    manual: true,
-  };
-};
-
 const transactionSchema = z.object({
-  date: z.string().describe("The datetime of the transaction"),
+  date: z.string().describe("The date of the transaction"),
   description: z
     .string()
     .describe("The description or name of the transaction"),
@@ -85,7 +62,6 @@ client.defineJob({
     const loader = new CSVLoader(data);
 
     const docs = await loader.load();
-
     const rawText = await data.text();
 
     const textSplitter = new TokenTextSplitter({
@@ -94,14 +70,16 @@ client.defineJob({
     });
 
     const splitDocs = await textSplitter.splitDocuments(docs);
-    const firstFewRows = splitDocs.splice(0, 5).map((doc) => doc.pageContent);
+
+    // Skip first 5 because it can be a header
+    const firstFewRows = splitDocs.splice(5, 15).map((doc) => doc.pageContent);
 
     const extractionChainParams = firstFewRows.map((text) => {
       return { text };
     });
 
     const llm = new ChatOpenAI({
-      modelName: "gpt-4-turbo-preview",
+      modelName: "gpt-4o",
       temperature: 0,
     });
 
@@ -120,42 +98,21 @@ client.defineJob({
       },
     });
 
-    const results = await extractionChain.batch(extractionChainParams, {
-      maxConcurrency: 5,
-    });
-
+    const results = await extractionChain.batch(extractionChainParams);
     const transactions = results.flatMap((result) => result.transactions);
-    const originalCsv = d3.csvParse(rawText);
 
-    const firstTransaction = transactions.at(0);
-    const firstRow = Object.values(originalCsv.at(0));
+    console.log(transactions);
 
-    const dateIndex = firstRow?.findIndex((row) =>
-      row.includes(firstTransaction?.date)
-    );
-    const amountIndex = firstRow?.findIndex((row) =>
-      row.includes(firstTransaction?.amount)
-    );
-    const descriptionIndex = firstRow?.findIndex((row) =>
-      row.includes(firstTransaction?.description)
-    );
-
-    const mappedTransactions = originalCsv.map((row) => {
-      const values = Object.values(row);
-
-      return {
-        date: values.at(dateIndex),
-        amount: values.at(amountIndex),
-        description: values.at(descriptionIndex),
-      };
+    const transformedTransactions = csvTransformed({
+      raw: rawText,
+      extracted: transactions,
+      teamId,
     });
 
     await transactionsImport.update("transactions-import-completed", {
       data: {
         step: "completed",
-        transactions: mappedTransactions.map((transaction) =>
-          transformTransaction({ transaction, teamId })
-        ),
+        transactions: transformedTransactions,
       },
     });
   },

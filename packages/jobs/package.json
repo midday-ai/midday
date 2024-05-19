@@ -10,16 +10,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@langchain/community": "^0.2.0",
+    "@langchain/core": "^0.2.0",
+    "@langchain/openai": "^0.0.32",
     "@midday/documents": "workspace:*",
-    "@langchain/core": "^0.1.63",
-    "@langchain/openai": "^0.0.31",
+    "@midday/import": "workspace:*",
     "@trigger.dev/react": "^2.3.18",
     "@trigger.dev/resend": "^2.3.18",
     "@trigger.dev/sdk": "^2.3.18",
     "@trigger.dev/supabase": "^2.3.18",
-    "fast-csv": "^5.0.1",
-    "d3-dsv": "3",
-    "langchain": "^0.1.37",
+    "change-case": "^5.4.4",
+    "langchain": "^0.2.0",
     "nanoid": "^5.0.7"
   }
 }
