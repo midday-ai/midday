@@ -40,7 +40,7 @@ export function transform(transaction: TransformTransaction) {
 
 export function parseCsv(input: string) {
   return parse(input, {
-    delimiter: [",", ";", "."],
+    delimiter: [",", ";"],
     skip_empty_lines: true,
     skip_records_with_empty_values: true,
     skip_records_with_error: true,

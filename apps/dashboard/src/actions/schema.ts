@@ -370,3 +370,25 @@ export const inboxOrder = z.boolean();
 export const getVatRateSchema = z.object({
   name: z.string().min(2),
 });
+
+export const createBankAccountSchema = z.object({
+  name: z.string(),
+  currency: z.string().optional(),
+});
+
+export const createTransactionsSchema = z.object({
+  accountId: z.string().uuid(),
+  currency: z.string(),
+  transactions: z.array(
+    z.object({
+      id: z.string(),
+      description: z.string(),
+      amount: z.number(),
+      currency: z.string(),
+    })
+  ),
+});
+
+export type CreateTransactionsFormValues = z.infer<
+  typeof createTransactionsSchema
+>;

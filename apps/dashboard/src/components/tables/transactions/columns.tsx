@@ -5,6 +5,7 @@ import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
+import { formatTransactionDate } from "@/utils/format";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,7 +35,6 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import type { ColumnDef } from "@tanstack/react-table";
-import { format, isSameYear } from "date-fns";
 import { Loader2 } from "lucide-react";
 
 export type Transaction = {
@@ -83,11 +83,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => {
-      if (isSameYear(new Date(), new Date(row.original.date))) {
-        return format(new Date(row.original.date), "MMM d");
-      }
-
-      return format(new Date(row.original.date), "P");
+      return formatTransactionDate(row.original.date);
     },
   },
   {

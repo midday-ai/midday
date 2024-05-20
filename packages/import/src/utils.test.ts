@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import { csvTransformed } from ".";
 import { parseCsv } from "./utils";
 
-const csv1 = `Bokförd,Valutadatum,Text,Typ,Insättningar/uttag,Bokfört saldo
+const csvComma = `Bokförd,Valutadatum,Text,Typ,Insättningar/uttag,Bokfört saldo
 2024-03-08,2024-03-08,ELLEVIO AB (PUBL),Betalning (bg/pg),-168.00,1942493.52
 2024-03-08,2024-03-08,ELLEVIO AB (PUBL),Betalning (bg/pg),-165.00,1942661.52
 2024-03-06,2024-03-06,BANKTJÄNSTER,Annan,-136.00,1942826.52
@@ -16,7 +16,7 @@ const csv1 = `Bokförd,Valutadatum,Text,Typ,Insättningar/uttag,Bokfört saldo
 2024-03-04,2024-03-02,GOOGLE CLOUD/24-03-01,Kortköp,-39.85,1715838.05
 2024-03-01,2024-03-01,AMSTERDAM   /24-03-01,Kortköp,-153.10,1715877.90`;
 
-const csv2 = `"Kontonummer";"Kontonamn";"";"Saldo";"Tillgängligt belopp"
+const csvColon = `"Kontonummer";"Kontonamn";"";"Saldo";"Tillgängligt belopp"
 "90248745117";"Rörelsekonto";"";"195 460,31";"195 460,31"
 
 "Bokföringsdatum";"Transaktionsdatum";"Transaktionstyp";"Meddelande";"Belopp"
@@ -34,39 +34,12 @@ const csv2 = `"Kontonummer";"Kontonamn";"";"Saldo";"Tillgängligt belopp"
 "2024-03-02";"2024-03-01";"Kortköp";"GOOGLE*CLOUD 5NHT7Z,CC GOOGLE.COM,IE";"-1,22"
 "2024-03-02";"2024-03-01";"Kortköp";"GSUITE,Dublin,IE";"-100,00"`;
 
-const csv3 = `Bokförd Valutadatum Text Typ Insättningar/uttag "Bokfört saldo"
-2024-05-17 2024-05-17 "SAN FRANCISC/24-05-16" Kortköp -714,26 70001,16
-2024-05-15 2024-05-15 SKATTEVERKET "Betalning (bg/pg)" -67749,00 70715,42
-2024-05-08 2024-05-08 "VOLKSWAGEN FINANS SVERIG" "Betalning (bg/pg)" -6615,00 138464,42
-2024-05-07 2024-05-07 "PREMIE FÖRS." Annan -5000,00 145079,42
-2024-05-06 2024-05-06 "TWITTER PAID/24-05-05" Kortköp -166,00 150079,42
-2024-05-06 2024-05-06 BANKTJÄNSTER Annan -264,25 150245,42`;
-
-const csv4 = `Bokförd.Valutadatum.Text.Typ.Insättningar/uttag.Bokfört saldo
-2024-05-17.2024-05-17.SAN FRANCISC/24-05-16.Kortköp.-714,26.70001,16
-2024-05-15.2024-05-15.SKATTEVERKET.Betalning (bg/pg).-67749,00.70715,42
-2024-05-08.2024-05-08.VOLKSWAGEN FINANS SVERIG.Betalning (bg/pg).-6615,00.138464,42
-2024-05-07.2024-05-07."PREMIE FÖRS.".Annan.-5000,00.145079,42
-2024-05-06.2024-05-06.TWITTER PAID/24-05-05.Kortköp.-166,00.150079,42
-2024-05-06.2024-05-06.BANKTJÄNSTER.Annan.-264,25.150245,42
-2024-05-06.2024-05-06.KOSTNAD.Annan.-31,85.150509,67
-2024-05-06.2024-05-06.H06513143882.Internationell betalning.150000,00.150541,52
-2024-05-03.2024-05-03.DUBLIN      /24-05-02.Kortköp.-99,11.541,52`;
-
 test("Parse from comma delimiter", () => {
-  expect(parseCsv(csv1)).toMatchSnapshot();
+  expect(parseCsv(csvComma)).toMatchSnapshot();
 });
 
 test("Parse from colon delimiter", () => {
-  expect(parseCsv(csv2)).toMatchSnapshot();
-});
-
-test("Parse from space delimiter", () => {
-  expect(parseCsv(csv3)).toMatchSnapshot();
-});
-
-test("Parse from dot delimiter", () => {
-  expect(parseCsv(csv4)).toMatchSnapshot();
+  expect(parseCsv(csvColon)).toMatchSnapshot();
 });
 
 test("Transform transactions", () => {
@@ -125,7 +98,7 @@ test("Transform transactions", () => {
           amount: -1061.65,
         },
       ],
-      raw: csv1,
+      raw: csvComma,
     })
   ).toMatchSnapshot();
 });
@@ -155,7 +128,7 @@ test("Transform transactions", () => {
           amount: -30,
         },
       ],
-      raw: csv2,
+      raw: csvColon,
     })
   ).toMatchSnapshot();
 });

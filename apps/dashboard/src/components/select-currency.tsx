@@ -1,50 +1,37 @@
-"use client";
-
-import { changeChartCurrencyAction } from "@/actions/change-chart-currency";
+import { cn } from "@midday/ui/cn";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
   SelectTrigger,
 } from "@midday/ui/select";
-import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {
-  defaultValue?: string;
-  currencies: {
-    id: string;
-    label: string;
-  }[];
+  value?: string;
+  className?: string;
+  currencies: string[];
+  onChange: (value: string) => void;
 };
 
-export function SelectCurrency({ currencies, defaultValue }: Props) {
-  const { execute, optimisticData } = useOptimisticAction(
-    changeChartCurrencyAction,
-    defaultValue,
-    (_, newState) => {
-      return newState;
-    }
-  );
-
+export function SelectCurrency({
+  currencies,
+  value,
+  onChange,
+  className,
+}: Props) {
   return (
-    <Select
-      defaultValue={optimisticData || currencies.at(0)?.id}
-      onValueChange={execute}
-    >
-      <SelectTrigger className="w-[90px] font-medium">
-        <span>{optimisticData}</span>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className={cn("w-[90px] font-medium", className)}>
+        {value}
       </SelectTrigger>
       <SelectContent>
-        <SelectGroup>
-          {currencies.map((currency) => {
-            return (
-              <SelectItem key={currency.id} value={currency.id}>
-                {currency.label}
-              </SelectItem>
-            );
-          })}
-        </SelectGroup>
+        {currencies.map((currency) => {
+          return (
+            <SelectItem key={currency} value={currency}>
+              {currency}
+            </SelectItem>
+          );
+        })}
       </SelectContent>
     </Select>
   );

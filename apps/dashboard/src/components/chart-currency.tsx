@@ -1,6 +1,5 @@
 import { getBankAccountsCurrencies } from "@midday/supabase/cached-queries";
-import getSymbolFromCurrency from "currency-symbol-map";
-import { SelectCurrency } from "./select-currency";
+import { SelectChartCurrency } from "./select-chart-currency";
 
 type Props = {
   defaultValue?: string;
@@ -15,12 +14,12 @@ export async function ChartCurrency({ defaultValue }: Props) {
   }
 
   return (
-    <SelectCurrency
+    <SelectChartCurrency
       defaultValue={defaultValue}
       currencies={
         currencies?.data?.map(({ currency }) => ({
           id: currency,
-          label: `${currency} ${getSymbolFromCurrency(currency)}`,
+          label: currency,
         })) ?? []
       }
     />

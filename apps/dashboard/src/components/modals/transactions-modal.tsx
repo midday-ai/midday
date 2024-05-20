@@ -29,13 +29,13 @@ export function TransactionsModal() {
 
   return (
     <div
-      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl border dark:border-none dark:p-px text-primary rounded-lg z-50"
+      className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-xl border dark:border-none dark:p-px text-primary z-50"
       style={{
         background:
           "linear-gradient(-45deg, rgba(235,248,255,.18) 0%, #727d8b 50%, rgba(235,248,255,.18) 100%)",
       }}
     >
-      <div className="bg-background p-2 rounded-[7px]">
+      <div className="bg-background p-2">
         <div className="p-4">
           <div className="mb-8 space-y-5">
             <h2 className="font-medium text-xl">
