@@ -101,8 +101,6 @@ client.defineJob({
     const results = await extractionChain.batch(extractionChainParams);
     const transactions = results.flatMap((result) => result.transactions);
 
-    console.log(transactions);
-
     const transformedTransactions = csvTransformed({
       raw: rawText,
       extracted: transactions,

@@ -13,7 +13,7 @@ export function csvTransformed({
   teamId,
 }: CsvTransformedParams) {
   const originalCsv = parseCsv(raw);
-  const firstFewRows = extracted.splice(0, 20);
+  const firstFewRows = extracted.splice(5, 20);
 
   const dateIndex = findIndexesByKey({
     raw: originalCsv,
