@@ -7,7 +7,7 @@ import { revalidateTag } from "next/cache";
 import { action } from "./safe-action";
 import { createTransactionsSchema } from "./schema";
 
-const BATCH_LIMIT = 300;
+const BATCH_LIMIT = 100;
 
 export const createTransactionsAction = action(
   createTransactionsSchema,

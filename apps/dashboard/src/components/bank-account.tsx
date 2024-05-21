@@ -62,7 +62,7 @@ export function BankAccount({
           <div className="flex flex-col">
             <p className="text-sm font-medium leading-none mb-1">{name}</p>
             <span className="text-xs font-medium text-[#606060]">
-              {bank_name} ({currency})
+              {bank_name} {currency && `(${currency})`}
             </span>
 
             {!manual && (

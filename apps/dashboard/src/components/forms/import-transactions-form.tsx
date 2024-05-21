@@ -15,7 +15,6 @@ import { cn } from "@midday/ui/cn";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormMessage,
@@ -31,7 +30,7 @@ import {
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 type Props = {
@@ -44,10 +43,14 @@ export function ImportTransactionsForm({
   transactions,
 }: Props) {
   const [_, setStep] = useQueryState("step");
+  const [showCurrency, setShowCurrency] = useState(false);
 
   const createTransactions = useAction(createTransactionsAction, {
-    onSuccess: () => setStep(null),
+    onSuccess: () => {
+      setStep(null);
+    },
   });
+
   const form = useForm<CreateTransactionsFormValues>({
     resolver: zodResolver(createTransactionsSchema),
     defaultValues: {
@@ -90,20 +93,24 @@ export function ImportTransactionsForm({
                   className="w-full"
                   placeholder="Select account"
                   {...field}
+                  onChange={(account) => {
+                    field.onChange(account.id);
+                    form.setValue("currency", account.currency ?? "");
+                    setShowCurrency(Boolean(!account.currency));
+                  }}
                 />
               </FormControl>
-              <FormDescription>Select or create a new account.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {!selectedCurrency && (
+        {showCurrency && (
           <FormField
             control={form.control}
             name="currency"
             render={({ field }) => (
-              <FormItem className="w-full">
+              <FormItem className="w-full mt-4">
                 <FormControl>
                   <SelectCurrency
                     className="w-full"
@@ -113,16 +120,13 @@ export function ImportTransactionsForm({
                     )}
                   />
                 </FormControl>
-                <FormDescription>
-                  Select the currency for your transactions.
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
         )}
 
-        <div className="h-[480px] overflow-auto mt-8 mb-4">
+        <div className="h-[480px] overflow-auto mt-4 mb-4">
           <Table>
             <TableHeader>
               <TableRow>

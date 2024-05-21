@@ -93,8 +93,7 @@ export function ImportCSVModal({ currencies, defaultCurrency }) {
                     <DialogTitle className="m-0 p-0">Import CSV</DialogTitle>
                   </div>
                   <DialogDescription>
-                    Upload your CSV file with transactions. We support both
-                    comma and colon separated formats.
+                    Upload your CSV file with transactions.
                   </DialogDescription>
                 </DialogHeader>
 

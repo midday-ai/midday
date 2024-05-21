@@ -2,9 +2,9 @@ import type { CsvTransformedParams } from "./types";
 import {
   filterTransactions,
   findIndexesByKey,
+  parseAmount,
   parseCsv,
   transform,
-  transformAmount,
 } from "./utils";
 
 export function csvTransformed({
@@ -27,7 +27,7 @@ export function csvTransformed({
     key: "amount",
     // We need to normalize the amount value
     parse: (value) => {
-      return Math.round(transformAmount(value));
+      return Math.round(parseAmount(value));
     },
   });
 

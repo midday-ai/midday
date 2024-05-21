@@ -4,6 +4,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@midday/ui/select";
 
 type Props = {
@@ -22,7 +23,7 @@ export function SelectCurrency({
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger className={cn("w-[90px] font-medium", className)}>
-        {value}
+        <SelectValue placeholder="Select currency" />
       </SelectTrigger>
       <SelectContent>
         {currencies.map((currency) => {

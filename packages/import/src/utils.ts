@@ -16,19 +16,21 @@ function generateId(value: string) {
 type TransformTransaction = Transaction & { teamId: string };
 
 export function transformAmount(amount: string | number) {
-  if (typeof amount === "string") {
-    return +amount.replace(/\s/g, "").replace(",", ".");
-  }
+  return +amount
+    .toString()
+    .replace(/,/g, ".")
+    .replace(/[^0-9.-]/g, "");
+}
 
-  return amount;
+export function parseAmount(amount: string | number) {
+  return +amount.toString().replace(/\s/g, "").replace(",", ".");
 }
 
 export function transform(transaction: TransformTransaction) {
-  const internalId = generateId(
-    `${transaction.date}-${transaction.name}-${transaction.amount}`
-  );
+  const internalId = generateId(`${transaction.date}-${transaction.name}`);
+
   return {
-    internal_id: internalId,
+    internal_id: `${transaction.teamId}_${internalId}`,
     team_id: transaction.teamId,
     status: "posted",
     method: "other",
@@ -41,7 +43,7 @@ export function transform(transaction: TransformTransaction) {
 }
 
 function detectDelimiter(input: string) {
-  const delimiters = [",", ";", "|", "\t"];
+  const delimiters = [",", ";", "|", ".", "\t"];
   const idx = delimiters
     .map((d) => input.indexOf(d))
     .reduce((prev, cur) =>
@@ -55,8 +57,6 @@ export function parseCsv(input: string) {
   return parse(input, {
     delimiter: detectDelimiter(input),
     skip_empty_lines: true,
-    skip_records_with_empty_values: true,
-    skip_records_with_error: true,
     trim: true,
     relax_column_count: true,
   });

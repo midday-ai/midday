@@ -1,5 +1,3 @@
-"use client";
-
 import { createBankAccountAction } from "@/actions/create-bank-account-action";
 import { createClient } from "@midday/supabase/client";
 import {
@@ -14,6 +12,13 @@ import { TransactionBankAccount } from "./transaction-bank-account";
 type Props = {
   placeholder: string;
   className?: string;
+  value?: string;
+  onChange: (value: {
+    id: string;
+    label: string;
+    logo?: string;
+    currency?: string;
+  }) => void;
 };
 
 export function SelectAccount({ placeholder, onChange, value }: Props) {
@@ -23,7 +28,7 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
   const createBankAccount = useAction(createBankAccountAction, {
     onSuccess: async (result) => {
       if (result) {
-        onChange(result.id);
+        onChange(result);
         setData((prev) => [{ id: result.id, label: result.name }, ...prev]);
       }
     },
@@ -42,6 +47,7 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
             id: account.id,
             label: account.name,
             logo: account?.logo_url,
+            currency: account.currency,
           }))
         );
       }
@@ -58,19 +64,23 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
     <ComboboxDropdown
       disabled={createBankAccount.status === "executing"}
       placeholder={placeholder}
-      searchPlaceholder="Search or create account"
+      searchPlaceholder="Select or create account"
       items={data}
       selectedItem={selectedValue}
       onSelect={(item) => {
-        onChange(item.id);
+        onChange(item);
       }}
       onCreate={(name) => createBankAccount.execute({ name })}
-      renderSelectedItem={(selectedItem) => (
-        <TransactionBankAccount
-          name={selectedItem.label}
-          logoUrl={selectedItem.logo}
-        />
-      )}
+      renderSelectedItem={(selectedItem) => {
+        return (
+          <TransactionBankAccount
+            name={`${selectedItem.label} ${
+              selectedItem.currency ? `(${selectedItem.currency})` : ""
+            }`}
+            logoUrl={selectedItem.logo}
+          />
+        );
+      }}
       renderOnCreate={(value) => {
         return (
           <div className="flex items-center space-x-2">
@@ -79,7 +89,12 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
         );
       }}
       renderListItem={({ item }) => {
-        return <TransactionBankAccount name={item.label} logoUrl={item.logo} />;
+        return (
+          <TransactionBankAccount
+            name={`${item.label} ${item.currency ? `(${item.currency})` : ""}`}
+            logoUrl={item.logo}
+          />
+        );
       }}
     />
   );

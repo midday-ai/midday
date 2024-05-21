@@ -7,7 +7,7 @@ import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { scheduler } from "./scheduler";
 
-const BATCH_LIMIT = 300;
+const BATCH_LIMIT = 100;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,

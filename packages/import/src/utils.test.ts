@@ -59,6 +59,16 @@ const csvColo2 = `Datum;Kategori;Underkategori;Text;Belopp;Saldo;Status;Avst�m
 2024-03-07;�vriga utgifter;Fackf�rening;Unionen;-235,00;13�918,91;Utf�rd;Nej
 2024-03-06;Mat & dryck;Livsmedelsaff�r;Hemkop Linkoping Vas ))));-273,60;14�153,91;Utf�rd;Nej`;
 
+const csvDot = `Bokförd.Valutadatum.Text.Typ.Insättningar/uttag.Bokfört saldo
+2024-05-17.2024-05-17.SAN FRANCISC/24-05-16.Kortköp.-714,26.70001,16
+2024-05-15.2024-05-15.SKATTEVERKET.Betalning (bg/pg).-67749,00.70715,42
+2024-05-08.2024-05-08.VOLKSWAGEN FINANS SVERIG.Betalning (bg/pg).-6615,00.138464,42
+2024-05-07.2024-05-07."PREMIE FÖRS.".Annan.-5000,00.145079,42
+2024-05-06.2024-05-06.TWITTER PAID/24-05-05.Kortköp.-166,00.150079,42
+2024-05-06.2024-05-06.BANKTJÄNSTER.Annan.-264,25.150245,42
+2024-05-06.2024-05-06.KOSTNAD.Annan.-31,85.150509,67
+2024-05-06.2024-05-06.H06513143882.Internationell betalning.150000,00.150541,52`;
+
 test("Parse from comma delimiter", () => {
   expect(parseCsv(csvComma)).toMatchSnapshot();
 });
@@ -208,6 +218,51 @@ test("Transform transactions", () => {
         { date: "2024-03-07", description: "Nöje & fritid; Bio", amount: 0 },
       ],
       raw: csvColo2,
+    })
+  ).toMatchSnapshot();
+});
+
+test("Transform transactions", () => {
+  expect(
+    csvTransformed({
+      teamId: "123",
+      extracted: [
+        { date: "2024-05-06", description: "BANKTJÄNSTER", amount: -264 },
+        { date: "2024-05-06", description: "KOSTNAD Annan", amount: -31 },
+        {
+          date: "2024-05-06",
+          description: "Internationell betalning",
+          amount: 150000,
+        },
+        {
+          date: "2024-05-03",
+          description: "DUBLIN /24-05-02 Kortköp",
+          amount: -99,
+        },
+        {
+          date: "2024-04-30",
+          description: "PORSCHE /IF SKADEFÖRSÄKR.Betalning (bg/pg)",
+          amount: -3750,
+        },
+        {
+          date: "2024-04-30",
+          description: "XENT REDOVISNING AB.Betalning (bg/pg)",
+          amount: -3538,
+        },
+        {
+          date: "2024-04-30",
+          description: "CITADELLSKAJEN VÄSTRA SA.Betalning (bg/pg)",
+          amount: -1875,
+        },
+        { date: "2024-04-25", description: "LÖN 124913330028", amount: 0 },
+        { date: "2024-04-25", description: "Överföring", amount: -38000 },
+        {
+          date: "2024-04-24",
+          description: "SAN FRANCISC/24-04-23 Kortköp",
+          amount: -238,
+        },
+      ],
+      raw: csvDot,
     })
   ).toMatchSnapshot();
 });
