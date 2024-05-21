@@ -279,7 +279,7 @@ export function Filter({ sections, categories }: Props) {
           </Button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[650px] rounded-xl mt-2.5 p-0 overflow-hidden"
+          className="w-[650px] mt-2.5 p-0 overflow-hidden"
           align="end"
         >
           <Tabs.Root
@@ -296,7 +296,7 @@ export function Filter({ sections, categories }: Props) {
                   <Tabs.TabsTrigger value={id} asChild key={id}>
                     <Button
                       className={cn(
-                        "rounded-md w-[190px] items-center justify-start relative mb-1.5 group",
+                        "w-[190px] items-center justify-start relative mb-1.5 group",
                         isActive && "bg-secondary"
                       )}
                       variant="ghost"

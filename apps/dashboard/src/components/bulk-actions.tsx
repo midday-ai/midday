@@ -73,7 +73,7 @@ export function BulkActions({ ids }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[500px] rounded-xl mt-2.5 p-0 overflow-hidden"
+        className="w-[500px] mt-2.5 p-0 overflow-hidden"
         align="end"
       >
         <Tabs.Root
@@ -90,7 +90,7 @@ export function BulkActions({ ids }) {
                 <Tabs.TabsTrigger value={id} asChild key={id}>
                   <Button
                     className={cn(
-                      "rounded-md w-[190px] items-center justify-start relative mb-1.5 group",
+                      "w-[190px] items-center justify-start relative mb-1.5 group",
                       isActive && "bg-secondary"
                     )}
                     variant="ghost"

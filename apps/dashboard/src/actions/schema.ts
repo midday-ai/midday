@@ -381,10 +381,17 @@ export const createTransactionsSchema = z.object({
   currency: z.string(),
   transactions: z.array(
     z.object({
-      id: z.string(),
-      description: z.string(),
+      internal_id: z.string(),
+      bank_account_id: z.string().uuid(),
+      date: z.coerce.date(),
+      name: z.string(),
       amount: z.number(),
       currency: z.string(),
+      team_id: z.string(),
+      status: z.enum(["posted"]),
+      method: z.enum(["other"]),
+      manual: z.boolean(),
+      category_slug: z.enum(["income"]).nullable(),
     })
   ),
 });

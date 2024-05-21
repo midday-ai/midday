@@ -156,7 +156,7 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "bank_account",
-    header: "Bank Account",
+    header: "Account",
     cell: ({ row }) => {
       return (
         <TransactionBankAccount

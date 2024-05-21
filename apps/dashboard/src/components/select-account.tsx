@@ -79,7 +79,6 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
         );
       }}
       renderListItem={({ item }) => {
-        console.log(item);
         return <TransactionBankAccount name={item.label} logoUrl={item.logo} />;
       }}
     />

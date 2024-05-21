@@ -9,11 +9,13 @@ import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
 const transactionSchema = z.object({
-  date: z.string().describe("The date of the transaction"),
-  description: z
-    .string()
-    .describe("The description or name of the transaction"),
-  amount: z.number().describe("The amount or value of the transaction"),
+  date: z.string().describe("The date usually in the format YYYY-MM-DD"),
+  description: z.string().describe("The text describing the transaction"),
+  amount: z
+    .number()
+    .describe(
+      "The amount involved in the transaction, including the minus sign if present"
+    ),
 });
 
 const extractionDataSchema = z.object({
@@ -22,7 +24,7 @@ const extractionDataSchema = z.object({
 
 const SYSTEM_PROMPT_TEMPLATE = `You are an expert extraction algorithm.
 Only extract relevant information from the text.
-If you do not know the value of an attribute asked to extract, you may omit the attribute's value.`;
+You are extracting bank transaction information`;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_IMPORT,

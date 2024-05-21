@@ -129,7 +129,7 @@ export function DataTableHeader({ table, loading }: Props) {
               variant="ghost"
               onClick={() => createSortQuery("bank_account")}
             >
-              <span>Bank Account</span>
+              <span>Account</span>
               {"bank_account" === column && value === "asc" && (
                 <ArrowDown size={16} />
               )}

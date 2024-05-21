@@ -31,16 +31,29 @@ export function transform(transaction: TransformTransaction) {
     internal_id: internalId,
     team_id: transaction.teamId,
     status: "posted",
+    method: "other",
     date: formatISO(transaction.date, { representation: "date" }),
     amount: transformAmount(transaction.amount),
     name: transaction?.description && capitalCase(transaction.description),
     manual: true,
+    category: transformAmount(transaction.amount) > 0 ? "income" : null,
   };
+}
+
+function detectDelimiter(input: string) {
+  const delimiters = [",", ";", "|", "\t"];
+  const idx = delimiters
+    .map((d) => input.indexOf(d))
+    .reduce((prev, cur) =>
+      prev === -1 || (cur !== -1 && cur < prev) ? cur : prev
+    );
+
+  return input[idx] || ",";
 }
 
 export function parseCsv(input: string) {
   return parse(input, {
-    delimiter: [",", ";"],
+    delimiter: detectDelimiter(input),
     skip_empty_lines: true,
     skip_records_with_empty_values: true,
     skip_records_with_error: true,

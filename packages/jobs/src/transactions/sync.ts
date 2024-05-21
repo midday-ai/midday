@@ -21,7 +21,8 @@ client.defineJob({
         "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token)"
       )
       .eq("team_id", teamId)
-      .eq("enabled", true);
+      .eq("enabled", true)
+      .eq("manual", false);
 
     if (accountsError) {
       await io.logger.error("Accounts Error", accountsError);

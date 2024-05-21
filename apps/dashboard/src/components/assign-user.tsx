@@ -55,8 +55,8 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
   return (
     <div className="relative">
       {isLoading ? (
-        <div className="h-[36px] border rounded-md">
-          <Skeleton className="h-[14px] w-[60%] rounded-sm absolute left-3 top-[39px]" />
+        <div className="h-[36px] border">
+          <Skeleton className="h-[14px] w-[60%] absolute left-3 top-[39px]" />
         </div>
       ) : (
         <Select

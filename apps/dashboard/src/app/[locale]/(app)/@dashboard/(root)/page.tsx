@@ -5,7 +5,7 @@ import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
 import {
   getBankAccountsCurrencies,
-  getBankConnectionsByTeamId,
+  getTeamBankAccounts,
 } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
@@ -27,9 +27,7 @@ const defaultValue = {
 };
 
 export default async function Overview({ searchParams }) {
-  // TODO: Check if there are transactions instead
-  const bankConnections = await getBankConnectionsByTeamId();
-
+  const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   const currency = cookies().has(Cookies.ChartCurrency)
@@ -54,7 +52,7 @@ export default async function Overview({ searchParams }) {
   const isOpen = Boolean(searchParams.step) && !searchParams.error;
 
   const empty =
-    !bankConnections?.data?.length ||
+    !accounts?.data?.length ||
     (Boolean(searchParams.error) && Boolean(searchParams.step));
 
   return (

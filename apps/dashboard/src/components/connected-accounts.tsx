@@ -16,7 +16,7 @@ export async function ConnectedAccounts() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Connected Accounts</CardTitle>
+        <CardTitle>Accounts</CardTitle>
         <CardDescription>
           Manage bank accounts, update or connect new ones.
         </CardDescription>

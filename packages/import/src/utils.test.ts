@@ -34,6 +34,31 @@ const csvColon = `"Kontonummer";"Kontonamn";"";"Saldo";"Tillgängligt belopp"
 "2024-03-02";"2024-03-01";"Kortköp";"GOOGLE*CLOUD 5NHT7Z,CC GOOGLE.COM,IE";"-1,22"
 "2024-03-02";"2024-03-01";"Kortköp";"GSUITE,Dublin,IE";"-100,00"`;
 
+const csvColo2 = `Datum;Kategori;Underkategori;Text;Belopp;Saldo;Status;Avst�mt
+2024-03-10;;;Okq8;-93,00;;V�ntar;Nej
+2024-03-10;;;Non Solo Bar P;-220,50;;V�ntar;Nej
+2024-03-10;;;Max Burgers 2010140_ki;-134,00;;V�ntar;Nej
+2024-03-10;;;Cherry 2 21400;-400,00;;V�ntar;Nej
+2024-03-10;;;Cherry 2 21400;-400,00;;V�ntar;Nej
+2024-03-10;;;Cherry 2 21400;-400,00;;V�ntar;Nej
+2024-03-10;;;Ballbreaker;-676,00;;V�ntar;Nej
+2024-03-10;;;Okq8;-74,00;;V�ntar;Nej
+2024-03-10;;;Circle K Linkoping Mal;-81,00;;V�ntar;Nej
+2024-03-10;;;La Kantarell;-145,00;;V�ntar;Nej
+2024-03-10;�vriga inkomster;Konto�verf�ringar;Swish fr�n Gustav Karl Valdemar Alsteryd;1�200,00;12�605,18;Utf�rd;Nej
+2024-03-10;�vriga utgifter;�vriga konto�verf�ringar;Swish till Christoffer Collin;-1�325,00;11�405,18;Utf�rd;Nej
+2024-03-09;�vriga utgifter;�vriga konto�verf�ringar;Swish till CARL OHLSSON;-110,00;12�730,18;Utf�rd;Nej
+2024-03-09;�vriga utgifter;�vriga konto�verf�ringar;Swish till EASYPARK AB;-78,78;12�840,18;Utf�rd;Nej
+2024-03-08;Mat & dryck;Livsmedelsaff�r;Shifudo Sverige Ab   ))));-144,00;12�918,96;Utf�rd;Nej
+2024-03-08;N�je & fritid;Kaf� & restaurang;Q                    ))));-90,00;13�062,96;Utf�rd;Nej
+2024-03-08;Boende;�vrigt;Mimosa Blommor       ))));-345,00;13�152,96;Utf�rd;Nej
+2024-03-07;N�je & fritid;Kaf� & restaurang;Shish Kebab          ))));-100,00;13�497,96;Utf�rd;Nej
+2024-03-07;Mat & dryck;Livsmedelsaff�r;Hemkop Linkoping Vas ))));-92,95;13�597,96;Utf�rd;Nej
+2024-03-07;N�je & fritid;Bio, konsert & teater;Filmstaden Link      ))));-109,00;13�690,91;Utf�rd;Nej
+2024-03-07;�vriga utgifter;Kabel-TV;Disney Plus;-119,00;13�799,91;Utf�rd;Nej
+2024-03-07;�vriga utgifter;Fackf�rening;Unionen;-235,00;13�918,91;Utf�rd;Nej
+2024-03-06;Mat & dryck;Livsmedelsaff�r;Hemkop Linkoping Vas ))));-273,60;14�153,91;Utf�rd;Nej`;
+
 test("Parse from comma delimiter", () => {
   expect(parseCsv(csvComma)).toMatchSnapshot();
 });
@@ -129,6 +154,60 @@ test("Transform transactions", () => {
         },
       ],
       raw: csvColon,
+    })
+  ).toMatchSnapshot();
+});
+
+test("Transform transactions", () => {
+  expect(
+    csvTransformed({
+      teamId: "123",
+      extracted: [
+        { date: "2024-03-10", description: "Cherry 2 21400", amount: -400 },
+        { date: "2024-03-10", description: "Ballbreaker", amount: -676 },
+        { date: "2024-03-10", description: "Okq8", amount: -74 },
+        {
+          date: "2024-03-10",
+          description: "Circle K Linkoping Mal",
+          amount: -81,
+        },
+        { date: "2024-03-10", description: "La Kantarell", amount: -145 },
+        {
+          date: "2024-03-10",
+          description: "Swish från Gustav Karl Valdemar Alsteryd",
+          amount: 1200,
+        },
+        {
+          date: "2024-03-10",
+          description: "Swish till Christoffer Collin",
+          amount: -1325,
+        },
+        {
+          date: "2024-03-09",
+          description: "Swish till CARL OHLSSON",
+          amount: -110,
+        },
+        {
+          date: "2024-03-09",
+          description: "Swish till EASYPARK AB",
+          amount: -78,
+        },
+        {
+          date: "2024-03-08",
+          description: "Shifudo Sverige Ab",
+          amount: -144,
+        },
+        { date: "2024-03-08", description: "Q", amount: -90 },
+        { date: "2024-03-08", description: "Mimosa Blommor", amount: -345 },
+        { date: "2024-03-07", description: "Shish Kebab", amount: -100 },
+        {
+          date: "2024-03-07",
+          description: "Hemkop Linkoping Vas",
+          amount: -92,
+        },
+        { date: "2024-03-07", description: "Nöje & fritid; Bio", amount: 0 },
+      ],
+      raw: csvColo2,
     })
   ).toMatchSnapshot();
 });
