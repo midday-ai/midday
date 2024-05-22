@@ -168,6 +168,7 @@ export type GetTransactionsParams = {
     status?: "fullfilled" | "unfullfilled" | "excluded";
     attachments?: "include" | "exclude";
     categories?: string[];
+    accounts?: string[];
     type?: "income" | "expense";
     date: {
       from?: string;
@@ -181,7 +182,14 @@ export async function getTransactionsQuery(
   params: GetTransactionsParams
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
-  const { date = {}, status, attachments, categories, type } = filter || {};
+  const {
+    date = {},
+    status,
+    attachments,
+    categories,
+    type,
+    accounts,
+  } = filter || {};
 
   const columns = [
     "id",
@@ -272,6 +280,10 @@ export async function getTransactionsQuery(
 
   if (type === "income") {
     query.eq("category_slug", "income");
+  }
+
+  if (accounts?.length) {
+    query.in("bank_account_id", accounts);
   }
 
   const { data, count } = await query.range(from, to);

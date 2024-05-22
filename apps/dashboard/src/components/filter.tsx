@@ -58,10 +58,9 @@ type Section = {
 
 type Props = {
   sections: Section[];
-  categories: any;
 };
 
-export function Filter({ sections, categories }: Props) {
+export function Filter({ sections }: Props) {
   const t = useI18n();
   const searchParams = useSearchParams();
   const pathname = usePathname();
