@@ -28,7 +28,7 @@ export function TransactionBankAccount({
           />
         </div>
       )}
-      <span className={cn("text-sm", className)}>{name}</span>
+      <span className={cn("text-sm line-clamp-1", className)}>{name}</span>
     </div>
   );
 }
