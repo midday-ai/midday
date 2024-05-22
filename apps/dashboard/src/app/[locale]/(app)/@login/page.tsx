@@ -150,7 +150,7 @@ export default async function Login(params) {
                 className="border-t-[1px] pt-2 mt-6"
               >
                 <AccordionItem value="item-1" className="border-0">
-                  <AccordionTrigger className="justify-start space-x-2 justify-center flex text-sm">
+                  <AccordionTrigger className="justify-start space-x-2 flex text-sm">
                     <span>More options</span>
                   </AccordionTrigger>
                   <AccordionContent className="mt-4">

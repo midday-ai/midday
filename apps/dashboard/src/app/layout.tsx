@@ -1,4 +1,4 @@
-import { SystemBanner } from "@/components/system-banner";
+// import { SystemBanner } from "@/components/system-banner";
 import "@/styles/globals.css";
 import { LogSnagProvider } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
@@ -48,7 +48,7 @@ export default function Layout({
           "whitespace-pre-line overscroll-none"
         )}
       >
-        <SystemBanner />
+        {/* <SystemBanner /> */}
         {children}
         <SpeedInsights />
         <Toaster />
