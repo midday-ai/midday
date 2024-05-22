@@ -85,7 +85,7 @@ export function TrackerDayCard({
 
       {hoverEnabled && (
         <HoverCardContent
-          className="w-[220px] rounded-xl border shadow-sm bg-background p-0"
+          className="w-[220px] rounded-xl border bg-background p-0"
           sideOffset={30}
         >
           <div className="flex justify-between border-b-[1px] pl-3 pr-3 py-2.5 items-center">

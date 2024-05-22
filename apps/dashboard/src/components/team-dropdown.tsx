@@ -36,7 +36,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }) {
         {sortedTeams.map(({ team }, index) => (
           <motion.div
             key={team.id}
-            className="w-[32px] h-[32px] left-0 drop-shadow-sm overflow-hidden absolute"
+            className="w-[32px] h-[32px] left-0 overflow-hidden absolute"
             style={{ zIndex: -index }}
             initial={{
               scale: `${100 - index * 16}%`,
