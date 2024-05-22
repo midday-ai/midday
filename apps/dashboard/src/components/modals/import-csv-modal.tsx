@@ -1,10 +1,10 @@
 "use client";
 
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
+import { ImportTransactionsForm } from "@/components/forms/import-transactions-form";
 import { useUpload } from "@/hooks/use-upload";
 import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
   Dialog,
@@ -15,32 +15,15 @@ import {
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
 import { Spinner } from "@midday/ui/spinner";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { stripSpecialCharacters } from "@midday/utils";
-import { format, isSameYear } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ImportingTransactionsEvent } from "../importing-transactions-event";
 
-const formatTransactionDate = (date: string) => {
-  if (isSameYear(new Date(), new Date(date))) {
-    return format(new Date(date), "MMM d");
-  }
-
-  return format(new Date(date), "P");
-};
-
-export function ImportCSVModal() {
+export function ImportCSVModal({ currencies, defaultCurrency }) {
   const supabase = createClient();
   const [step, setStep] = useQueryState("step");
   const [eventId, setEventId] = useState();
@@ -137,10 +120,6 @@ export function ImportCSVModal() {
                     </div>
                   )}
                 </div>
-
-                <div className="flex justify-center mb-6">
-                  <Icons.OpenAI />
-                </div>
               </>
             </TabsContent>
 
@@ -155,7 +134,7 @@ export function ImportCSVModal() {
             </TabsContent>
 
             <TabsContent value="transactions" className="relative">
-              <DialogHeader>
+              <DialogHeader className="mb-4">
                 <div className="flex space-x-4 items-center mb-4">
                   <button
                     type="button"
@@ -173,52 +152,18 @@ export function ImportCSVModal() {
                 </div>
 
                 <DialogDescription>
-                  We found {transactions?.length} transactions from from your
-                  import.
+                  We found{" "}
+                  <span className="underline">{transactions?.length}</span>{" "}
+                  transactions from from your import. Please select the account
+                  and currency to proceed with the import.
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="h-[480px] overflow-auto mt-8 mb-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[80px]">Date</TableHead>
-                      <TableHead>Description</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions?.map((transaction) => (
-                      <TableRow
-                        key={transaction.internal_id}
-                        className="h-[45px]"
-                      >
-                        <TableCell>
-                          {transaction?.date &&
-                            formatTransactionDate(transaction.date)}
-                        </TableCell>
-                        <TableCell
-                          className={transaction.amount > 0 && "text-[#00C969]"}
-                        >
-                          {transaction.name}
-                        </TableCell>
-                        <TableCell
-                          className={cn(
-                            "text-right",
-                            transaction.amount > 0 && "text-[#00C969]"
-                          )}
-                        >
-                          {transaction.amount}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              <div className="w-full absolute bottom-0 left-0 h-[150px] flex flex-col justify-end pointer-events-none bg-gradient-to-b from-transparent via-background to-background">
-                <Button className="w-full">Save</Button>
-              </div>
+              <ImportTransactionsForm
+                currencies={currencies}
+                defaultCurrency={defaultCurrency}
+                transactions={transactions}
+              />
             </TabsContent>
           </Tabs>
         </div>

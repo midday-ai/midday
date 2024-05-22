@@ -18,6 +18,7 @@ export function BankAccount({
   last_accessed,
   currency,
   enabled,
+  manual,
 }) {
   const [isOpen, setOpen] = useState(false);
   const [eventId, setEventId] = useState<string>();
@@ -45,7 +46,7 @@ export function BankAccount({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="flex text-start items-center w-full"
+          className="flex text-start items-center w-full space-x-4"
         >
           {logo && (
             <Image
@@ -58,25 +59,27 @@ export function BankAccount({
             />
           )}
 
-          <div className="ml-4 flex flex-col">
+          <div className="flex flex-col">
             <p className="text-sm font-medium leading-none mb-1">{name}</p>
             <span className="text-xs font-medium text-[#606060]">
-              {bank_name} ({currency})
+              {bank_name} {currency && `(${currency})`}
             </span>
 
-            <span className="text-xs text-[#606060]">
-              {last_accessed
-                ? `Last accessed ${formatDistanceToNow(
-                    new Date(last_accessed)
-                  )} ago`
-                : "Never accessed"}
-            </span>
+            {!manual && (
+              <span className="text-xs text-[#606060]">
+                {last_accessed
+                  ? `Last accessed ${formatDistanceToNow(
+                      new Date(last_accessed)
+                    )} ago`
+                  : "Never accessed"}
+              </span>
+            )}
           </div>
         </button>
       </div>
 
       <div className="flex items-center space-x-4">
-        {enabled && (
+        {!manual && enabled && (
           <SyncTransactions
             eventId={eventId}
             onClick={() => manualSyncTransactions.execute({ accountId: id })}
@@ -84,13 +87,15 @@ export function BankAccount({
           />
         )}
 
-        <Switch
-          checked={enabled}
-          disabled={updateAccount.status === "executing"}
-          onCheckedChange={(enabled: boolean) => {
-            updateAccount.execute({ id, enabled });
-          }}
-        />
+        {!manual && (
+          <Switch
+            checked={enabled}
+            disabled={updateAccount.status === "executing"}
+            onCheckedChange={(enabled: boolean) => {
+              updateAccount.execute({ id, enabled });
+            }}
+          />
+        )}
       </div>
 
       <EditBankAccountModal

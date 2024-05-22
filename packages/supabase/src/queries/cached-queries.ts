@@ -121,7 +121,7 @@ export const getBankConnectionsByTeamId = async () => {
 };
 
 export const getTeamBankAccounts = async (
-  params: Omit<GetTeamBankAccountsParams, "teamId">
+  params?: Omit<GetTeamBankAccountsParams, "teamId">
 ) => {
   const supabase = createClient();
 

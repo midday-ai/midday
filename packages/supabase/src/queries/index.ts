@@ -191,6 +191,7 @@ export async function getTransactionsQuery(
     "method",
     "status",
     "note",
+    "manual",
     "name:decrypted_name",
     "description:decrypted_description",
     "assigned:assigned_id(*)",

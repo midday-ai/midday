@@ -5,8 +5,8 @@ import { Table } from "@/components/tables/transactions";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import {
-  getBankConnectionsByTeamId,
   getCategories,
+  getTeamBankAccounts,
 } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
@@ -22,9 +22,8 @@ export default async function Transactions({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  // TODO: Check if there are transactions instead
-  const [bankConnections, categories] = await Promise.all([
-    getBankConnectionsByTeamId(),
+  const [accounts, categories] = await Promise.all([
+    getTeamBankAccounts(),
     getCategories(),
   ]);
 
@@ -34,7 +33,7 @@ export default async function Transactions({
   const sort = searchParams?.sort?.split(":");
 
   const isOpen = Boolean(searchParams.step);
-  const isEmpty = !bankConnections?.data?.length && !isOpen;
+  const isEmpty = !accounts?.data?.length && !isOpen;
   const loadingKey = JSON.stringify({
     page,
     filter,

@@ -1,16 +1,16 @@
 "use server";
 
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatGroq } from "@langchain/groq";
+import { ChatOpenAI } from "@langchain/openai";
 import { getCountry } from "@midday/location";
 import { z } from "zod";
 import { action } from "../safe-action";
 import { getVatRateSchema } from "../schema";
 
-const model = new ChatGroq({
+const model = new ChatOpenAI({
   temperature: 0,
-  model: "mixtral-8x7b-32768",
-  apiKey: process.env.GROQ_API_KEY,
+  model: "gpt-4o",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const vatSchema = z.object({

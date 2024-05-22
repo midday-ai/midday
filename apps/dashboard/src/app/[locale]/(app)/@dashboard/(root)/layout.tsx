@@ -10,9 +10,15 @@ import { SelectBankAccountsModal } from "@/components/modals/select-bank-account
 import { Sidebar } from "@/components/sidebar";
 import { Cookies } from "@/utils/constants";
 import { getCountryCode, isEUCountry } from "@midday/location";
+import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+const uniqueCurrencies = () => {
+  const uniqueSet = new Set(Object.values(currencies));
+  return [...uniqueSet];
+};
 
 export default async function Layout({
   children,
@@ -45,7 +51,10 @@ export default async function Layout({
       <ConnectTransactionsModal isEU={isEU} />
       <ConnectGoCardLessModal countryCode={countryCode} />
       <SelectBankAccountsModal countryCode={countryCode} />
-      <ImportCSVModal />
+      <ImportCSVModal
+        currencies={uniqueCurrencies()}
+        defaultCurrency={currencies[countryCode]}
+      />
       <ExportStatus />
       <CommandMenu />
       <HotKeys />

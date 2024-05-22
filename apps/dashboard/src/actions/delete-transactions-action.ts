@@ -11,6 +11,7 @@ export const deleteTransactionsAction = action(
   async ({ ids }) => {
     const supabase = createClient();
     const user = await getUser();
+
     const teamId = user.data.team_id;
 
     await supabase
