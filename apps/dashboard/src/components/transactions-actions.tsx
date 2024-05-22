@@ -59,7 +59,7 @@ export function TransactionsActions({ categories }: Props) {
                     <Button
                       size="icon"
                       variant="destructive"
-                      className="bg-transparent border border-destructive"
+                      className="bg-transparent border border-destructive hover:bg-transparent"
                     >
                       <Icons.Delete className="text-destructive" size={18} />
                     </Button>

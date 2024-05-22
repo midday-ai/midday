@@ -120,10 +120,6 @@ export function ImportCSVModal({ currencies, defaultCurrency }) {
                     </div>
                   )}
                 </div>
-
-                <div className="flex justify-center mb-6">
-                  <Icons.OpenAI />
-                </div>
               </>
             </TabsContent>
 
