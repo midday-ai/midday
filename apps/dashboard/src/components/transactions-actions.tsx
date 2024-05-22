@@ -25,12 +25,14 @@ import { BulkActions } from "./bulk-actions";
 
 type Props = {
   categories: { id: string; name: string; slug: string }[] | null;
+  accounts: { id: string; name: string; currency?: string }[] | null;
 };
 
-export function TransactionsActions({ categories }: Props) {
+export function TransactionsActions({ categories, accounts }: Props) {
+  console.log(accounts);
   const { toast } = useToast();
   const { transactionIds, canDelete } = useTransactionsStore();
-  const sections = transactionSections(categories);
+  const sections = transactionSections({ categories, accounts });
 
   const deleteTransactions = useAction(deleteTransactionsAction, {
     onError: () => {

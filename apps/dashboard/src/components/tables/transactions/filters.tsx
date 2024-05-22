@@ -11,9 +11,9 @@ import {
   subDays,
   subMonths,
 } from "date-fns";
-import { Archive, Calendar, Paperclip, Tag } from "lucide-react";
+import { Archive, Calendar, Landmark, Paperclip, Tag } from "lucide-react";
 
-export function transactionSections(categories) {
+export function transactionSections({ categories, accounts }) {
   return [
     {
       id: "date",
@@ -126,6 +126,19 @@ export function transactionSections(categories) {
       options: categories.map((category) => ({
         id: category.slug,
         label: category.name,
+      })),
+    },
+    {
+      id: "accounts",
+      label: "Accounts",
+      icon: Landmark,
+      type: SectionType.checkbox,
+      renderLabel: (value) => value.name,
+      options: accounts.map((account) => ({
+        id: account.id,
+        label: account?.currency
+          ? `${account.name} (${account.currency})`
+          : account.name,
       })),
     },
   ];
