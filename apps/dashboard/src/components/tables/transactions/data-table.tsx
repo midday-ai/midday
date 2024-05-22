@@ -120,9 +120,9 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const handleDeleteTransactions = (ids: string[]) => {
+  const handleDeleteTransactions = ({ ids }) => {
     setData((prev) => {
-      return prev.filter((item) => !ids.includes(item.id));
+      return prev.filter((item) => !ids?.includes(item.id));
     });
 
     deleteTransactions.execute({ ids });

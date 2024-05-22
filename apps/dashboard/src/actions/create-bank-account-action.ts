@@ -1,7 +1,7 @@
 "use server";
 
-// import { LogEvents } from "@midday/events/events";
-// import { setupLogSnag } from "@midday/events/server";
+import { LogEvents } from "@midday/events/events";
+import { setupLogSnag } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { nanoid } from "nanoid";
@@ -37,16 +37,16 @@ export const createBankAccountAction = action(
     revalidateTag(`bank_accounts_${teamId}`);
     revalidateTag(`bank_accounts_currencies_${teamId}`);
 
-    // const logsnag = await setupLogSnag({
-    //   userId: user.data.id,
-    //   fullName: user.data.full_name,
-    // });
+    const logsnag = await setupLogSnag({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
 
-    // logsnag.track({
-    //   event: LogEvents.CategoryCreate.name,
-    //   icon: LogEvents.CategoryCreate.icon,
-    //   channel: LogEvents.CategoryCreate.channel,
-    // });
+    logsnag.track({
+      event: LogEvents.BankAccountCreate.name,
+      icon: LogEvents.BankAccountCreate.icon,
+      channel: LogEvents.BankAccountCreate.channel,
+    });
 
     return data;
   }

@@ -74,6 +74,11 @@ export const LogEvents = {
     icon: "🏦",
     channel: "bank",
   },
+  BankAccountCreate: {
+    name: "Create Bank Account",
+    icon: "🏦",
+    channel: "bank",
+  },
   DeleteBank: {
     name: "Delete Bank",
     icon: "🏦",
