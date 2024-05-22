@@ -39,10 +39,10 @@ export default async function Login(params) {
       preferredSignInOption = <AppleSignIn />;
       moreSignInOptions = (
         <>
-          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <SlackSignIn />
           <GithubSignIn />
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
@@ -51,10 +51,10 @@ export default async function Login(params) {
       preferredSignInOption = <SlackSignIn />;
       moreSignInOptions = (
         <>
-          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <GithubSignIn />
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
@@ -63,10 +63,10 @@ export default async function Login(params) {
       preferredSignInOption = <GithubSignIn />;
       moreSignInOptions = (
         <>
-          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <GoogleSignIn />
           <AppleSignIn />
           <SlackSignIn />
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
@@ -75,10 +75,10 @@ export default async function Login(params) {
       preferredSignInOption = <GoogleSignIn />;
       moreSignInOptions = (
         <>
-          <OTPSignIn className="border-b-[1px] border-border pb-8" />
           <AppleSignIn />
           <GithubSignIn />
           <SlackSignIn />
+          <OTPSignIn className="border-t-[1px] border-border pt-8" />
         </>
       );
       break;
@@ -99,19 +99,19 @@ export default async function Login(params) {
       if (device?.vendor === "Apple") {
         moreSignInOptions = (
           <>
-            <OTPSignIn className="border-b-[1px] border-border pb-8" />
             <GoogleSignIn />
             <SlackSignIn />
             <GithubSignIn />
+            <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
         );
       } else {
         moreSignInOptions = (
           <>
-            <OTPSignIn className="border-b-[1px] border-border pb-8" />
             <AppleSignIn />
             <SlackSignIn />
             <GithubSignIn />
+            <OTPSignIn className="border-t-[1px] border-border pt-8" />
           </>
         );
       }
