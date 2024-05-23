@@ -15,7 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { Status } from "./status";
-import { getYAxisWidth } from "./utils";
+import { getYAxisWidth, roundToNearestFactor } from "./utils";
 
 // Override console.error
 // This is a hack to suppress the warning about missing defaultProps in recharts library as of version 2.12
@@ -116,12 +116,6 @@ export function BarChart({ data, disabled, currency }) {
     ),
   }));
 
-  const maxValue = Math.max(
-    ...data.result.map((item) =>
-      Math.max(item.current.value, item.previous.value)
-    )
-  );
-
   const getLabel = (value: number) => {
     return formatAmount({
       maximumFractionDigits: 0,
@@ -131,6 +125,14 @@ export function BarChart({ data, disabled, currency }) {
       locale,
     });
   };
+
+  const getLabelMaxValue = getLabel(
+    roundToNearestFactor(
+      data.result.map((item) =>
+        Math.max(item.current.value, item.previous.value)
+      )
+    )
+  );
 
   return (
     <div className="relative">
@@ -167,7 +169,7 @@ export function BarChart({ data, disabled, currency }) {
             tickLine={false}
             axisLine={false}
             tickFormatter={(value) => getLabel(disabled ? 0 : value)}
-            width={getYAxisWidth(maxValue)}
+            width={getYAxisWidth(getLabelMaxValue)}
             tick={{
               fill: "#606060",
               fontSize: 12,
