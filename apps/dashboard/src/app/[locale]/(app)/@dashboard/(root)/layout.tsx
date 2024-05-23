@@ -1,3 +1,4 @@
+import { AI } from "@/actions/ai/chat";
 import { CommandMenu } from "@/components/command-menu";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
@@ -56,7 +57,10 @@ export default async function Layout({
         defaultCurrency={currencies[countryCode]}
       />
       <ExportStatus />
-      <CommandMenu />
+
+      <AI>
+        <CommandMenu />
+      </AI>
       <HotKeys />
     </div>
   );

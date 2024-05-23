@@ -21,7 +21,7 @@ const ToolTipContent = ({ payload, currency }) => {
   const locale = useCurrentLocale();
 
   return (
-    <div className="w-[240px] rounded-lg border shadow-sm bg-background">
+    <div className="w-[240px] border shadow-sm bg-background">
       <div className="py-2 px-3">
         <div className="flex items-center justify-between">
           <p className="font-medium text-[13px]">

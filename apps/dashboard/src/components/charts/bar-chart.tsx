@@ -32,7 +32,7 @@ const ToolTipContent = ({ payload = {} }) => {
   const [current, previous] = payload;
 
   return (
-    <div className="w-[240px] rounded-lg border shadow-sm bg-background">
+    <div className="w-[240px] border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
         <p className="text-sm">
           {t(`chart_type.${current?.payload?.meta?.type}`)}

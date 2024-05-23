@@ -13,7 +13,7 @@ export function InsightsWidget({ items }) {
         {items.map((example) => (
           <li
             key={example.id}
-            className="rounded-lg dark:bg-secondary bg-[#F2F1EF] text-xs font-mono text-[#606060] hover:opacity-80 transition-all cursor-default"
+            className="rounded-full dark:bg-secondary bg-[#F2F1EF] text-xs font-mono text-[#606060] hover:opacity-80 transition-all cursor-default"
           >
             <button
               onClick={() => setOpen(MenuOption.AI)}
@@ -29,10 +29,10 @@ export function InsightsWidget({ items }) {
         <div className="relative">
           <Input
             placeholder="Ask Midday AI a question..."
-            className="w-full h-11 rounded-lg cursor-pointer bg-background"
+            className="w-full h-11 cursor-pointer bg-background"
             onFocus={() => setOpen(MenuOption.AI)}
           />
-          <Icons.LogoIcon className="absolute right-3 bottom-3 pointer-events-none" />
+          <Icons.LogoIcon className="absolute right-3 bottom-3.5 pointer-events-none" />
         </div>
       </div>
     </div>
