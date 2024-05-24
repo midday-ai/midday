@@ -67,7 +67,7 @@ export function CommandRoot() {
           <CommandItem onSelect={() => setMenu(MenuOption.AI)}>
             <Icons.AI className="mr-2 h-[20px] w-[20px] text-[#0091ff]" />
             <div className="flex items-center justify-between w-full">
-              <span>Ask Midday AI...</span>
+              <span>Ask Midday...</span>
               <Experimental />
             </div>
           </CommandItem>

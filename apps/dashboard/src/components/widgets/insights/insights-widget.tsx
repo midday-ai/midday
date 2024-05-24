@@ -28,7 +28,7 @@ export function InsightsWidget({ items }) {
       <div className="absolute bottom-8 left-8 right-8">
         <div className="relative">
           <Input
-            placeholder="Ask Midday AI a question..."
+            placeholder="Ask Midday a question..."
             className="w-full h-11 cursor-pointer bg-background"
             onFocus={() => setOpen(MenuOption.AI)}
           />

@@ -17,6 +17,10 @@ export function Chat() {
   const { continueConversation } = useActions();
 
   const onSubmit = async () => {
+    if (input.length === 0) {
+      return null;
+    }
+
     setInput("");
     scrollToBottom();
 

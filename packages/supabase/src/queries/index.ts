@@ -421,7 +421,6 @@ export async function getRunwayQuery(
 
 export type GetCurrentBurnRateQueryParams = {
   teamId: string;
-
   currency: string;
 };
 
