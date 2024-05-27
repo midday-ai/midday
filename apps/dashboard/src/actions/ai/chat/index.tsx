@@ -13,7 +13,7 @@ import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { z } from "zod";
-import { saveChat } from "../storage";
+// import { saveChat } from "../storage";
 import type { AIState, Chat, UIState } from "../types";
 
 export interface ServerMessage {
@@ -72,7 +72,7 @@ export async function continueConversation(
     },
     tools: {
       createBudget: {
-        description: "Create a flower",
+        description: "Create a budget",
         parameters: z.object({
           category: z.string().describe("The category for the budget"),
           amount: z.number().describe("The spending limit for the budget"),
@@ -88,7 +88,7 @@ export async function continueConversation(
           //   },
           // ]);
 
-          return <div>We j {category}</div>;
+          return <div>{category}</div>;
         },
       },
       showSpending: {
@@ -106,7 +106,7 @@ export async function continueConversation(
           //   },
           // ]);
 
-          return <div>You spent 18044 SEK on {category} last month</div>;
+          return <div>{category}</div>;
         },
       },
       showBurnRate: {
