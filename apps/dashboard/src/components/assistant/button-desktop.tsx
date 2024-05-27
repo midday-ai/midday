@@ -1,11 +1,11 @@
 "use client";
 
-import { useCommandStore } from "@/store/command";
+import { useAssistantStore } from "@/store/assistant";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 
-export function DesktopCommandMenuButton() {
-  const { setOpen } = useCommandStore();
+export function DesktopAssistantuButton() {
+  const { setOpen } = useAssistantStore();
 
   return (
     <Button

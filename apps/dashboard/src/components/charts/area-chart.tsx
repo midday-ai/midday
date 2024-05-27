@@ -57,7 +57,7 @@ export function AreaChart({ currency, data }) {
 
   // TODO: Get highest value used in yAxis
   const getLabelMaxValue = getLabel(
-    roundToNearestFactor(data.map(({ value }) => value))
+    roundToNearestFactor(data?.map(({ value }) => value))
   );
 
   return (

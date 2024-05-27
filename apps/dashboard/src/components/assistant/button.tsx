@@ -1,10 +1,10 @@
 "use client";
 
-import { useCommandStore } from "@/store/command";
+import { useAssistantStore } from "@/store/assistant";
 import { Button } from "@midday/ui/button";
 
-export function CommandMenuButton() {
-  const { setOpen } = useCommandStore();
+export function AssistantButton() {
+  const { setOpen } = useAssistantStore();
 
   return (
     <Button

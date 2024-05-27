@@ -3,10 +3,10 @@ export function getYAxisWidth(value: string) {
 }
 
 export function roundToNearestFactor(numbers: number[]) {
-  if (numbers.length < 2) return numbers;
+  if (numbers?.length < 2) return numbers;
 
   // Sort the array
-  numbers.sort((a, b) => a - b);
+  numbers?.sort((a, b) => a - b);
 
   // Calculate gaps
   const gaps = [];

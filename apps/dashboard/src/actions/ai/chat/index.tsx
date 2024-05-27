@@ -1,5 +1,6 @@
 "use server";
 
+import { SpinnerMessage } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { calculateAvgBurnRate } from "@/utils/format";
 import { openai } from "@ai-sdk/openai";
@@ -12,6 +13,8 @@ import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { z } from "zod";
+import { saveChat } from "../storage";
+import type { AIState, Chat, UIState } from "../types";
 
 export interface ServerMessage {
   role: "user" | "assistant";
@@ -49,8 +52,9 @@ export async function continueConversation(
 
   const result = await streamUI({
     model: openai("gpt-4o"),
+    initial: <SpinnerMessage />,
     messages: [
-      ...history.get(),
+      ...history.get().messages,
       {
         role: "user",
         content: input,
@@ -102,7 +106,7 @@ export async function continueConversation(
           //   },
           // ]);
 
-          return <div>You spent 8044 SEK on {category}</div>;
+          return <div>You spent 18044 SEK on {category} last month</div>;
         },
       },
       showBurnRate: {
@@ -178,10 +182,31 @@ export async function continueConversation(
   };
 }
 
-export const AI = createAI<ServerMessage[], ClientMessage[]>({
+export const AI = createAI<AIState, UIState>({
   actions: {
     continueConversation,
   },
-  initialAIState: [],
   initialUIState: [],
+  initialAIState: { chatId: nanoid(), messages: [] },
+  // onSetAIState: async ({ state }) => {
+  //   "use server";
+
+  //   const { chatId, messages } = state;
+
+  //   const createdAt = new Date();
+  //   const userId = "123"; //session.user.id as string
+
+  //   const firstMessageContent = messages?.at(0).content as string;
+  //   const title = firstMessageContent.substring(0, 100);
+
+  //   const chat: Chat = {
+  //     id: chatId,
+  //     title,
+  //     userId,
+  //     createdAt,
+  //     messages,
+  //   };
+
+  //   await saveChat(chat);
+  // },
 });

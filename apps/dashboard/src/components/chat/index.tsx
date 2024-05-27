@@ -13,28 +13,25 @@ import { ChatList } from "./chat-list";
 
 export function Chat() {
   const [input, setInput] = useState<string>("");
-  const [conversation, setConversation] = useUIState();
+  const [messages, submitMessage] = useUIState();
   const { continueConversation } = useActions();
 
-  const onSubmit = async () => {
-    if (input.length === 0) {
+  const onSubmit = async (value: string) => {
+    if (value.length === 0) {
       return null;
     }
 
     setInput("");
     scrollToBottom();
 
-    setConversation((currentConversation: ClientMessage[]) => [
-      ...currentConversation,
-      { id: nanoid(), role: "user", display: input },
+    submitMessage((message: ClientMessage[]) => [
+      ...message,
+      { id: nanoid(), role: "user", display: value },
     ]);
 
-    const message = await continueConversation(input);
+    const message = await continueConversation(value);
 
-    setConversation((currentConversation: ClientMessage[]) => [
-      ...currentConversation,
-      message,
-    ]);
+    submitMessage((messages: ClientMessage[]) => [...messages, message]);
   };
 
   const { messagesRef, scrollRef, visibilityRef, scrollToBottom } =
@@ -42,19 +39,19 @@ export function Chat() {
 
   return (
     <div className="relative">
-      <div className="overflow-auto h-[365px]" ref={scrollRef}>
+      <div className="overflow-auto h-[375px]" ref={scrollRef}>
         <div ref={messagesRef}>
-          {conversation.length ? (
-            <ChatList messages={conversation} />
+          {messages.length ? (
+            <ChatList messages={messages} />
           ) : (
-            <ChatEmpty />
+            <ChatEmpty onSubmit={(value) => onSubmit(value)} />
           )}
 
           <div className="w-full h-px" ref={visibilityRef} />
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 h-[50px] w-full border-border border-t-[1px] bg-background">
+      <div className="fixed bottom-[1px] left-[1px] right-[1px] h-[50px] border-border border-t-[1px] bg-background">
         <Input
           type="text"
           value={input}
@@ -63,7 +60,7 @@ export function Chat() {
           autoFocus
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              onSubmit();
+              onSubmit(input);
             }
           }}
           onChange={(evt) => {

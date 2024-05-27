@@ -3,6 +3,7 @@
 import type { ClientMessage } from "@/actions/ai/chat";
 import { cn } from "@midday/ui/cn";
 import { ChatAvatar } from "./chat-avatar";
+import { spinner } from "./spinner";
 
 type Props = {
   message: ClientMessage;
@@ -10,7 +11,7 @@ type Props = {
 
 export function ChatMessage({ message }: Props) {
   return (
-    <div className="flex space-x-4">
+    <div className="flex space-x-4 items-center">
       <div>
         <ChatAvatar role={message.role} />
       </div>
@@ -22,6 +23,17 @@ export function ChatMessage({ message }: Props) {
       >
         {message.display}
       </div>
+    </div>
+  );
+}
+
+export function SpinnerMessage() {
+  return (
+    <div className="flex space-x-4 items-center">
+      {/* <div>
+        <ChatAvatar role="assistant" />
+      </div> */}
+      <div>{spinner}</div>
     </div>
   );
 }

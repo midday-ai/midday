@@ -128,7 +128,7 @@ export function BarChart({ data, disabled, currency }) {
 
   const getLabelMaxValue = getLabel(
     roundToNearestFactor(
-      data.result.map((item) =>
+      data?.result.map((item) =>
         Math.max(item.current.value, item.previous.value)
       )
     )

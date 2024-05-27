@@ -1,11 +1,11 @@
 "use client";
 
-import { MenuOption, useCommandStore } from "@/store/command";
+import { useAssistantStore } from "@/store/assistant";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 
 export function InsightsWidget({ items }) {
-  const { setOpen } = useCommandStore();
+  const { setOpen } = useAssistantStore();
 
   return (
     <div className="-mt-10">
@@ -16,7 +16,7 @@ export function InsightsWidget({ items }) {
             className="rounded-full dark:bg-secondary bg-[#F2F1EF] text-xs font-mono text-[#606060] hover:opacity-80 transition-all cursor-default"
           >
             <button
-              onClick={() => setOpen(MenuOption.AI)}
+              onClick={() => setOpen()}
               type="button"
               className="inline-block p-3 py-2"
             >
@@ -30,7 +30,7 @@ export function InsightsWidget({ items }) {
           <Input
             placeholder="Ask Midday a question..."
             className="w-full h-11 cursor-pointer bg-background"
-            onFocus={() => setOpen(MenuOption.AI)}
+            onFocus={() => setOpen()}
           />
           <Icons.LogoIcon className="absolute right-3 bottom-3.5 pointer-events-none" />
         </div>

@@ -65,6 +65,7 @@ import {
   MdOutlinePlayArrow,
   MdOutlineQuestionAnswer,
   MdOutlineSettings,
+  MdOutlineSubject,
   MdOutlineTask,
   MdOutlineTimer,
   MdOutlineTune,
@@ -433,10 +434,33 @@ export const Icons = {
       />
     </svg>
   ),
+  Sidebar: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="currentColor"
+      viewBox="0 -960 960 960"
+      {...props}
+    >
+      <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm240-80h400v-480H400v480Zm-80 0v-480H160v480h160Zm-160 0v-480 480Zm160 0h80-80Zm0-480h80-80Z" />
+    </svg>
+  ),
+  SidebarFilled: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={24}
+      height={24}
+      fill="currentColor"
+      viewBox="0 -960 960 960"
+      {...props}
+    >
+      <path d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h160v640H160Zm240 0v-640h400q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H400Z" />
+    </svg>
+  ),
   Fence: MdFence,
   Refresh: MdRefresh,
   Inventory2: MdInventory2,
-  SettingsCog: Settings,
   Person: MdPerson,
   Peolple: MdPeople,
   Notifications: MdOutlineNotificationsNone,
@@ -511,4 +535,5 @@ export const Icons = {
   Sort: MdSort,
   Backspace: MdOutlineBackspace,
   Palette: MdOutlinePalette,
+  Subject: MdOutlineSubject,
 };

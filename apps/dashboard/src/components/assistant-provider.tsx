@@ -1,8 +1,6 @@
 "use client";
 
 import { assistantSettingsAction } from "@/actions/ai/assistant-settings-action";
-import { updateTeamAction } from "@/actions/update-team-action";
-
 import {
   Card,
   CardContent,

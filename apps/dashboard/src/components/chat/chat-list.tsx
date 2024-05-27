@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClientMessage } from "@/actions/ai/chat";
-import { ChatMessage } from "./chat-message";
+import { ChatMessage } from "./messages";
 
 type Props = {
   messages: ClientMessage[];

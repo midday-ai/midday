@@ -1,8 +1,6 @@
 "use client";
 
-import { CommandComponent } from "@/components/command-menu";
-import { MenuOption, useCommandStore } from "@/store/command";
-import { Command } from "@midday/ui/command";
+import { Assistant } from "@/components/assistant";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,11 +12,9 @@ import { platform } from "@todesktop/client-core";
 import { app } from "@todesktop/client-core";
 
 export default function CommandDesktop() {
-  const { selected } = useCommandStore();
-
   return (
-    <Command>
-      <CommandComponent selected={selected ?? MenuOption.Root} />
+    <div>
+      <Assistant />
       <div className="fixed flex px-3 bottom-0 h-[45px] w-full border-t-[1px] items-center bg-background">
         <DropdownMenu>
           <DropdownMenuTrigger>
@@ -69,6 +65,6 @@ export default function CommandDesktop() {
           </div>
         </div>
       </div>
-    </Command>
+    </div>
   );
 }

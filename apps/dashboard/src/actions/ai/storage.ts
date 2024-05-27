@@ -1,11 +1,7 @@
 import { client as RedisClient } from "@midday/kv";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
-
-type SettingsResponse = {
-  provider: "openai" | "mistralai";
-  enabled: boolean;
-};
+import type { Chat, SettingsResponse } from "./types";
 
 export async function getAssistantSettings(): Promise<SettingsResponse> {
   const supabase = createClient();
@@ -53,7 +49,7 @@ export async function setAssistantSettings({
   });
 }
 
-export async function deleteHistory() {
+export async function clearChats() {
   const supabase = createClient();
   const {
     data: { session },
@@ -61,10 +57,53 @@ export async function deleteHistory() {
 
   const userId = session?.user.id;
 
-  return RedisClient.del(`assistant:user:${userId}:history`);
+  const chats: string[] = await RedisClient.zrange(
+    `user:chat:${userId}`,
+    0,
+    -1
+  );
+
+  const pipeline = RedisClient.pipeline();
+
+  for (const chat of chats) {
+    pipeline.del(chat);
+    pipeline.zrem(`user:chat:${userId}`, chat);
+  }
+
+  await pipeline.exec();
 }
 
-export async function getHistory() {
+export async function getChats() {
+  const supabase = createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const userId = session?.user.id;
+  try {
+    const pipeline = RedisClient.pipeline();
+    const chats: string[] = await RedisClient.zrange(
+      `user:chat:${userId}`,
+      0,
+      -1,
+      {
+        rev: true,
+      }
+    );
+
+    for (const chat of chats) {
+      pipeline.hgetall(chat);
+    }
+
+    const results = await pipeline.exec();
+
+    return results as Chat[];
+  } catch (error) {
+    return [];
+  }
+}
+
+export async function getChat(id: string) {
   const supabase = createClient();
   const {
     data: { session },
@@ -72,5 +111,22 @@ export async function getHistory() {
 
   const userId = session?.user.id;
 
-  return RedisClient.get(`assistant:user:${userId}:history`);
+  const chat = await RedisClient.hgetall<Chat>(`chat:${id}`);
+
+  if (!chat || (userId && chat.userId !== userId)) {
+    return null;
+  }
+
+  return chat;
+}
+
+export async function saveChat(chat: Chat) {
+  const pipeline = RedisClient.pipeline();
+  pipeline.hmset(`chat:${chat.id}`, chat);
+  pipeline.zadd(`user:chat:${chat.userId}`, {
+    score: Date.now(),
+    member: `chat:${chat.id}`,
+  });
+
+  await pipeline.exec();
 }

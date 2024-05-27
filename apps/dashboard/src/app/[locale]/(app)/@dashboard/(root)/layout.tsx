@@ -1,5 +1,5 @@
 import { AI } from "@/actions/ai/chat";
-import { CommandMenu } from "@/components/command-menu";
+import { Assistant } from "@/components/assistant";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
@@ -59,7 +59,7 @@ export default async function Layout({
       <ExportStatus />
 
       <AI>
-        <CommandMenu />
+        <Assistant />
       </AI>
       <HotKeys />
     </div>
