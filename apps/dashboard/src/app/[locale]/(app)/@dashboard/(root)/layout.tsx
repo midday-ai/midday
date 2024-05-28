@@ -13,6 +13,7 @@ import { Cookies } from "@/utils/constants";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
+import { nanoid } from "ai";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -42,6 +43,10 @@ export default async function Layout({
     <div className="relative">
       {!mobileOverlay && <MobileOverview />}
 
+      <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
+        <Assistant />
+      </AI>
+
       <Sidebar />
 
       <div className="ml-[95px] mr-10 pb-8">
@@ -57,10 +62,6 @@ export default async function Layout({
         defaultCurrency={currencies[countryCode]}
       />
       <ExportStatus />
-
-      <AI>
-        <Assistant />
-      </AI>
       <HotKeys />
     </div>
   );

@@ -3,15 +3,23 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { SidebarItems } from "./sidebar-items";
+import { Toolbar } from "./toolbar";
 
 type Props = {
   isExpanded: boolean;
   setExpanded: (value: boolean) => void;
   setOpen: (value: boolean) => void;
+  onSelect: (id: string) => void;
 };
 
-export function SidebarList({ isExpanded, setExpanded, setOpen }: Props) {
+export function SidebarList({
+  isExpanded,
+  setExpanded,
+  setOpen,
+  onSelect,
+}: Props) {
   const ref = useClickAway(() => {
     setExpanded(false);
   });
@@ -23,8 +31,9 @@ export function SidebarList({ isExpanded, setExpanded, setOpen }: Props) {
     router.push("/account/assistant");
   };
 
-  const onSelect = () => {
+  const handleOnSelect = (id: string) => {
     setExpanded(false);
+    onSelect(id);
   };
 
   const onNewChat = () => {
@@ -32,7 +41,7 @@ export function SidebarList({ isExpanded, setExpanded, setOpen }: Props) {
   };
 
   return (
-    <div>
+    <div className="relative">
       <div
         ref={ref}
         className={cn(
@@ -49,7 +58,10 @@ export function SidebarList({ isExpanded, setExpanded, setOpen }: Props) {
           <Icons.Settings size={18} />
         </Button>
 
-        <SidebarItems onSelect={onSelect} onNewChat={onNewChat} />
+        <SidebarItems onSelect={handleOnSelect} />
+        <Toolbar onNewChat={onNewChat} />
+
+        <div className="absolute z-10 h-[477px] w-[30px] bg-background/95 right-0 top-0 pointer-events-none" />
       </div>
 
       <div

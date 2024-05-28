@@ -26,6 +26,6 @@
     "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",
-    "./types": "./src/types/db.ts"
+    "./types": "./src/types/index.ts"
   }
 }

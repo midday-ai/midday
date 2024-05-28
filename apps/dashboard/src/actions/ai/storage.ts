@@ -1,3 +1,5 @@
+"use server";
+
 import { client as RedisClient } from "@midday/kv";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { createClient } from "@midday/supabase/server";
@@ -123,10 +125,15 @@ export async function getChat(id: string) {
 export async function saveChat(chat: Chat) {
   const pipeline = RedisClient.pipeline();
   pipeline.hmset(`chat:${chat.id}`, chat);
-  pipeline.zadd(`user:chat:${chat.userId}`, {
-    score: Date.now(),
-    member: `chat:${chat.id}`,
-  });
+
+  const chatKey = `user:chat:${chat.userId}`;
+  pipeline
+    .zadd(chatKey, {
+      score: Date.now(),
+      member: `chat:${chat.id}`,
+    })
+    // Expire in 30 days
+    .expire(chatKey, 2592000);
 
   await pipeline.exec();
 }

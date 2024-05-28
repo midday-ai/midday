@@ -1,177 +1,118 @@
 "use server";
 
-import { SpinnerMessage } from "@/components/chat/messages";
-import { FormatAmount } from "@/components/format-amount";
-import { calculateAvgBurnRate } from "@/utils/format";
+import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
-import { getBurnRate, getRunway } from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
+import { createClient } from "@midday/supabase/server";
 import { Ratelimit } from "@upstash/ratelimit";
-import { createAI, getMutableAIState, streamUI } from "ai/rsc";
-import { format } from "date-fns";
-import { nanoid } from "nanoid";
+import { nanoid } from "ai";
+import {
+  createAI,
+  createStreamableValue,
+  getMutableAIState,
+  streamUI,
+} from "ai/rsc";
 import { headers } from "next/headers";
-import type { ReactNode } from "react";
-import { z } from "zod";
-// import { saveChat } from "../storage";
-import type { AIState, Chat, UIState } from "../types";
-
-export interface ServerMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export interface ClientMessage {
-  id: string;
-  role: "user" | "assistant";
-  display: ReactNode;
-}
+import { getAssistantSettings, saveChat } from "../storage";
+import type { AIState, Chat, ClientMessage, UIState } from "../types";
+import { getBurnRateTool } from "./tools/burn-rate";
+import { createBudgetTool } from "./tools/create-budget";
+import { getLargestIncomeTool } from "./tools/largest-income";
+import { getRunwayTool } from "./tools/runway";
+import { getSpendingTool } from "./tools/spending";
 
 const ratelimit = new Ratelimit({
-  limiter: Ratelimit.fixedWindow(10, "30s"),
+  limiter: Ratelimit.fixedWindow(10, "10s"),
   redis: RedisClient,
 });
 
-export async function continueConversation(
-  input: string
+export async function submitUserMessage(
+  content: string
 ): Promise<ClientMessage> {
   "use server";
-  const history = getMutableAIState();
   const ip = headers().get("x-forwarded-for");
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
 
   const { success } = await ratelimit.limit(ip);
 
+  const aiState = getMutableAIState<typeof AI>();
+
   if (!success) {
-    return {
-      id: nanoid(),
-      role: "assistant",
-      display:
-        "Not so fast, tiger. You've reached your message limit. Please wait a minute and try again.",
-    };
+    aiState.update({
+      ...aiState.get(),
+      messages: [
+        ...aiState.get().messages,
+        {
+          id: nanoid(),
+          role: "assistant",
+          content:
+            "Not so fast, tiger. You've reached your message limit. Please wait a minute and try again.",
+        },
+      ],
+    });
   }
+
+  aiState.update({
+    ...aiState.get(),
+    messages: [
+      ...aiState.get().messages,
+      {
+        id: nanoid(),
+        role: "user",
+        content,
+      },
+    ],
+  });
+
+  let textStream: undefined | ReturnType<typeof createStreamableValue<string>>;
+  let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
     model: openai("gpt-4o"),
     initial: <SpinnerMessage />,
+    system: `\
+    You are a helful asssitant in Midday that can help users ask questions around their transactions`,
     messages: [
-      ...history.get().messages,
+      ...aiState.get().messages,
       {
         role: "user",
-        content: input,
+        content,
       },
     ],
-    text: ({ content, done }) => {
-      if (done) {
-        history.done((messages: ServerMessage[]) => [
-          ...messages,
-          { role: "assistant", content },
-        ]);
+    text: ({ content, done, delta }) => {
+      if (!textStream) {
+        textStream = createStreamableValue("");
+        textNode = <BotMessage content={textStream.value} />;
       }
 
-      return content;
+      if (done) {
+        textStream.done();
+        aiState.done({
+          ...aiState.get(),
+          messages: [
+            ...aiState.get().messages,
+            {
+              id: nanoid(),
+              role: "assistant",
+              content,
+            },
+          ],
+        });
+      } else {
+        textStream.update(delta);
+      }
+
+      return textNode;
     },
     tools: {
-      createBudget: {
-        description: "Create a budget",
-        parameters: z.object({
-          category: z.string().describe("The category for the budget"),
-          amount: z.number().describe("The spending limit for the budget"),
-          period: z.enum(["monthly", "yearly"]),
-          currency: z.string().default("SEK"),
-        }),
-        generate: async ({ category }) => {
-          // history.done((messages: ServerMessage[]) => [
-          //   ...messages,
-          //   {
-          //     role: "assistant",
-          //     content: "Here is your current burn rate",
-          //   },
-          // ]);
-
-          return <div>{category}</div>;
-        },
-      },
-      showSpending: {
-        description: "Get spending from transactions",
-        parameters: z.object({
-          category: z.string().describe("The category for the spending"),
-          currency: z.string().default("SEK"),
-        }),
-        generate: async ({ category }) => {
-          // history.done((messages: ServerMessage[]) => [
-          //   ...messages,
-          //   {
-          //     role: "assistant",
-          //     content: "Here is your current burn rate",
-          //   },
-          // ]);
-
-          return <div>{category}</div>;
-        },
-      },
-      showBurnRate: {
-        description: "Get burn rate",
-        parameters: z.object({
-          startDate: z.coerce
-            .date()
-            .describe("The start date for the burn rate period")
-            .default(new Date("2023-01-01")),
-          endDate: z.coerce
-            .date()
-            .describe("The end date for the burn rate period")
-            .default(new Date("2024-01-01")),
-          currency: z.string().default("SEK"),
-        }),
-        generate: async ({ currency, startDate, endDate }) => {
-          // history.done((messages: ServerMessage[]) => [
-          //   ...messages,
-          //   {
-          //     role: "assistant",
-          //     content: "Here is your current burn rate",
-          //   },
-          // ]);
-
-          const { data } = await getBurnRate({
-            currency,
-            from: startDate.toString(),
-            to: endDate.toString(),
-          });
-
-          const avarageBurnRate = calculateAvgBurnRate(data);
-
-          return (
-            <div>
-              Your avarage burn rate is{" "}
-              <FormatAmount amount={avarageBurnRate} currency={currency} />{" "}
-              between {format(new Date(startDate), "LLL dd, y")} and{" "}
-              {format(new Date(endDate), "LLL dd, y")}
-            </div>
-          );
-        },
-      },
-      showRunway: {
-        description: "Get runway for your business",
-        parameters: z.object({
-          startDate: z.coerce
-            .date()
-            .describe("The start date for the runway period")
-            .default(new Date("2023-01-01")),
-          endDate: z.coerce
-            .date()
-            .describe("The end date for the runway period")
-            .default(new Date("2024-01-01")),
-          currency: z.string().default("SEK"),
-        }),
-        generate: async ({ currency, startDate, endDate }) => {
-          const { data } = await getRunway({
-            currency,
-            from: startDate.toString(),
-            to: endDate.toString(),
-          });
-
-          return `${data?.toString()} months`;
-        },
-      },
+      create_budget: createBudgetTool({ aiState }),
+      get_spending: getSpendingTool({ aiState }),
+      get_burn_rate: getBurnRateTool({ aiState }),
+      get_runway: getRunwayTool({ aiState }),
+      get_largest_income: getLargestIncomeTool({ supabase, teamId, aiState }),
     },
   });
 
@@ -184,29 +125,31 @@ export async function continueConversation(
 
 export const AI = createAI<AIState, UIState>({
   actions: {
-    continueConversation,
+    submitUserMessage,
   },
   initialUIState: [],
-  initialAIState: { chatId: nanoid(), messages: [] },
-  // onSetAIState: async ({ state }) => {
-  //   "use server";
+  onSetAIState: async ({ state, done }) => {
+    "use server";
 
-  //   const { chatId, messages } = state;
+    const settings = await getAssistantSettings();
+    const createdAt = new Date();
+    const userId = state.user.id;
 
-  //   const createdAt = new Date();
-  //   const userId = "123"; //session.user.id as string
+    const { chatId, messages } = state;
 
-  //   const firstMessageContent = messages?.at(0).content as string;
-  //   const title = firstMessageContent.substring(0, 100);
+    const firstMessageContent = messages?.at(0).content as string;
+    const title = firstMessageContent.substring(0, 100);
 
-  //   const chat: Chat = {
-  //     id: chatId,
-  //     title,
-  //     userId,
-  //     createdAt,
-  //     messages,
-  //   };
+    const chat: Chat = {
+      id: chatId,
+      title,
+      userId,
+      createdAt,
+      messages,
+    };
 
-  //   await saveChat(chat);
-  // },
+    if (done && settings?.enabled) {
+      await saveChat(chat);
+    }
+  },
 });

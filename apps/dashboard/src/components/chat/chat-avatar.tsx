@@ -1,41 +1,22 @@
 "use client";
 
-import { createClient } from "@midday/supabase/client";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
-import { useEffect, useState } from "react";
+import { useAIState } from "ai/rsc";
 
 type Props = {
   role: "assistant" | "user";
 };
 export function ChatAvatar({ role }: Props) {
-  const supabase = createClient();
-  const [user, setUser] = useState();
-
-  useEffect(() => {
-    async function fetchData() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const data = {
-        id: session?.user.id,
-        fullName: session?.user?.user_metadata.name,
-        avatarUrl: session?.user?.user_metadata?.avatar_url,
-      };
-
-      if (!user) {
-        setUser(data);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const [aiState] = useAIState();
 
   switch (role) {
     case "user": {
       return (
         <Avatar className="size-6">
-          <AvatarImage src={user?.avatarUrl} alt={user?.fullName ?? ""} />
+          <AvatarImage
+            src={aiState?.user?.avatar_url}
+            alt={aiState?.user?.full_name ?? ""}
+          />
         </Avatar>
       );
     }
