@@ -1,6 +1,7 @@
-import { BotMessage, UserMessage } from "@/components/chat/messages";
+import { BotCard, BotMessage, UserMessage } from "@/components/chat/messages";
 import type { Chat } from "../types";
 import { BurnRateUI } from "./tools/ui/burn-rate-ui";
+import { RunwayUI } from "./tools/ui/runway-ui";
 
 function getUIComponentFromMessage(message) {
   if (message.role === "user") {
@@ -12,12 +13,14 @@ function getUIComponentFromMessage(message) {
   }
 
   if (message.role === "tool") {
-    message.content.map((tool) => {
+    return message.content.map((tool) => {
       switch (tool.toolName) {
-        case "get_spending":
-          return null;
-        case "get_burn_rate":
+        case "runway": {
+          return <RunwayUI {...tool.result} />;
+        }
+        case "burn_rate": {
           return <BurnRateUI {...tool.result} />;
+        }
         default:
           return null;
       }
@@ -29,7 +32,7 @@ export const getUIStateFromAIState = (aiState: Chat) => {
   return aiState?.messages
     .filter((message) => message.role !== "system")
     .map((message, index) => ({
-      id: `${aiState.chatId}-${index}`,
+      id: `${aiState.id}-${index}`,
       display: getUIComponentFromMessage(message),
     }));
 };

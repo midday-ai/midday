@@ -1,5 +1,7 @@
+import type { AI } from "@/actions/ai/chat";
 import { getChatsAction } from "@/actions/ai/chat/get-chats-action";
 import type { Chat } from "@/actions/ai/types";
+import { useAIState } from "ai/rsc";
 import { useEffect, useState } from "react";
 import { SidebarItem } from "./sidebar-item";
 
@@ -25,6 +27,7 @@ const formatRange = (key: string) => {
 export function SidebarItems({ onSelect }: SidebarItemsProps) {
   const [items, setItems] = useState<Chat[]>([]);
   const [isLoading, setLoading] = useState(false);
+  const [aiState] = useAIState<typeof AI>();
 
   useEffect(() => {
     async function fetchData() {
@@ -35,15 +38,29 @@ export function SidebarItems({ onSelect }: SidebarItemsProps) {
       if (result) {
         setItems(result);
       }
+
+      setLoading(false);
     }
 
-    if (!items.length && !isLoading) {
+    if (
+      (!items.length && !isLoading) ||
+      (items.length !== aiState?.messages.length && !isLoading)
+    ) {
       fetchData();
     }
-  }, []);
+  }, [aiState]);
 
   return (
     <div className="overflow-auto relative h-[410px] mt-16 scrollbar-hide p-4 pt-0 pb-[50px] flex flex-col space-y-6">
+      {!Object.keys(items).length && (
+        <div className="flex flex-col justify-center items-center h-full">
+          <div className="flex flex-col items-center -mt-12 text-xs space-y-1">
+            <span className="text-[#878787]">History</span>
+            <span>No results found</span>
+          </div>
+        </div>
+      )}
+
       {Object.keys(items).map((key) => {
         const section = items[key];
 

@@ -6,6 +6,10 @@ import { getChats } from "../storage";
 export async function getChatsAction() {
   const data = await getChats();
 
+  if (!data.length) {
+    return [];
+  }
+
   const base = {
     "1d": [],
     "7d": [],

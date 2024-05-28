@@ -1,5 +1,6 @@
 "use client";
 
+import type { AI } from "@/actions/ai/chat";
 import { Avatar, AvatarImage } from "@midday/ui/avatar";
 import { useAIState } from "ai/rsc";
 
@@ -7,7 +8,7 @@ type Props = {
   role: "assistant" | "user";
 };
 export function ChatAvatar({ role }: Props) {
-  const [aiState] = useAIState();
+  const [aiState] = useAIState<typeof AI>();
 
   switch (role) {
     case "user": {

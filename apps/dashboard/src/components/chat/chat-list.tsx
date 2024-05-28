@@ -7,11 +7,20 @@ type Props = {
 };
 
 export function ChatList({ messages }: Props) {
+  if (!messages.length) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-col space-y-8 p-4 pb-8">
-      {messages.map((message) => (
-        <div key={message.id}>{message.display}</div>
-      ))}
+    <div className="flex flex-col  p-4 pb-8">
+      {messages
+        .filter((tool) => tool.display !== undefined)
+        .map((message, index) => (
+          <div key={message.id}>
+            {message.display}
+            {index < messages.length - 1 && <div className="my-6" />}
+          </div>
+        ))}
     </div>
   );
 }

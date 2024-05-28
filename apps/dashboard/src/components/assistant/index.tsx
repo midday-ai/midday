@@ -6,6 +6,7 @@ import { getChat } from "@/actions/ai/storage";
 import { Chat } from "@/components/chat";
 import { useAssistantStore } from "@/store/assistant";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
+import { nanoid } from "ai";
 import { useAIState, useUIState } from "ai/rsc";
 import { useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -17,17 +18,34 @@ export function Assistant() {
   const [isExpanded, setExpanded] = useState(false);
   const [chatId, setChatId] = useState();
   const [messages, setMessages] = useUIState<typeof AI>();
-  // const [aiState, setAIState] = useAIState<typeof AI>();
+  const [_, setAIState] = useAIState<typeof AI>();
 
   const toggleOpen = () => setExpanded((prev) => !prev);
 
-  useHotkeys("meta+k", () => setOpen());
+  const onNewChat = () => {
+    setExpanded(false);
+    setAIState((prev) => ({ ...prev, messages: [], chatId: nanoid() }));
+    setMessages([]);
+  };
+
+  const handleOnSelect = (id: string) => {
+    setExpanded(false);
+    setChatId(id);
+  };
+
+  useHotkeys("meta+k", () => setOpen(), {
+    enableOnFormTags: true,
+  });
+  useHotkeys("meta+j", () => onNewChat(), {
+    enableOnFormTags: true,
+  });
 
   useEffect(() => {
     async function fetchData() {
       const result = await getChat(chatId);
 
       if (result) {
+        setAIState((prev) => ({ ...prev, messages: result.messages }));
         setMessages(getUIStateFromAIState(result));
       }
     }
@@ -42,10 +60,11 @@ export function Assistant() {
         hideClose
       >
         <SidebarList
+          onNewChat={onNewChat}
           isExpanded={isExpanded}
           setExpanded={setExpanded}
           setOpen={setOpen}
-          onSelect={setChatId}
+          onSelect={handleOnSelect}
         />
         <Header toggleSidebar={toggleOpen} isExpanded={isExpanded} />
         <Chat submitMessage={setMessages} messages={messages} />

@@ -1,6 +1,7 @@
 "use client";
 
 import { assistantSettingsAction } from "@/actions/ai/assistant-settings-action";
+import type { AI } from "@/actions/ai/chat";
 import { clearHistoryAction } from "@/actions/ai/clear-history-action";
 import { Button } from "@midday/ui/button";
 import {
@@ -12,10 +13,12 @@ import {
 } from "@midday/ui/card";
 import { Switch } from "@midday/ui/switch";
 import { useToast } from "@midday/ui/use-toast";
+import { useUIState } from "ai/rsc";
 import { useAction, useOptimisticAction } from "next-safe-action/hooks";
 
 export function AssistantHistory({ enabled }) {
   const { toast } = useToast();
+  const [_, setMessages] = useUIState<typeof AI>();
 
   const { execute, status, optimisticData } = useOptimisticAction(
     assistantSettingsAction,
@@ -60,7 +63,10 @@ export function AssistantHistory({ enabled }) {
           <span className="font-medium text-sm">Clear history</span>
           <Button
             variant="outline"
-            onClick={() => clearHistory.execute(null)}
+            onClick={() => {
+              clearHistory.execute(null);
+              setMessages([]);
+            }}
             disabled={clearHistory.status === "executing"}
           >
             Clear

@@ -2,6 +2,7 @@ import type { MutableAIState } from "@/actions/ai/types";
 import { getRunway } from "@midday/supabase/cached-queries";
 import { nanoid } from "ai";
 import { z } from "zod";
+import { RunwayUI } from "./ui/runway-ui";
 
 type Args = {
   aiState: MutableAIState;
@@ -34,7 +35,9 @@ export function getRunwayTool({ aiState }: Args) {
 
       const toolCallId = nanoid();
 
-      const result = `${data?.toString()} months`;
+      const props = {
+        months: data,
+      };
 
       aiState.done({
         ...aiState.get(),
@@ -60,14 +63,14 @@ export function getRunwayTool({ aiState }: Args) {
                 type: "tool-result",
                 toolName: "runway",
                 toolCallId,
-                result,
+                result: props,
               },
             ],
           },
         ],
       });
 
-      return result;
+      return <RunwayUI {...props} />;
     },
   };
 }

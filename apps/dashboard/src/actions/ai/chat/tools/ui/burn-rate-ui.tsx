@@ -1,3 +1,4 @@
+import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { format } from "date-fns";
 
@@ -15,11 +16,11 @@ export function BurnRateUI({
   endDate,
 }: Props) {
   return (
-    <div>
+    <BotCard>
       Your avarage burn rate is{" "}
       <FormatAmount amount={avarageBurnRate} currency={currency} /> between{" "}
       {startDate && format(new Date(startDate), "LLL dd, y")} and{" "}
       {endDate && format(new Date(endDate), "LLL dd, y")}
-    </div>
+    </BotCard>
   );
 }

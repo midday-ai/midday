@@ -28,6 +28,21 @@ export function getBurnRateTool({ aiState }: Args) {
 
       const { currency, startDate, endDate } = args;
 
+      const { data } = await getBurnRate({
+        currency,
+        from: startDate.toString(),
+        to: endDate.toString(),
+      });
+
+      const avarageBurnRate = calculateAvgBurnRate(data);
+
+      const props = {
+        avarageBurnRate,
+        currency,
+        startDate,
+        endDate,
+      };
+
       aiState.done({
         ...aiState.get(),
         messages: [
@@ -52,29 +67,14 @@ export function getBurnRateTool({ aiState }: Args) {
                 type: "tool-result",
                 toolName: "burn_rate",
                 toolCallId,
-                result: args,
+                result: props,
               },
             ],
           },
         ],
       });
 
-      const { data } = await getBurnRate({
-        currency,
-        from: startDate.toString(),
-        to: endDate.toString(),
-      });
-
-      const avarageBurnRate = calculateAvgBurnRate(data);
-
-      return (
-        <BurnRateUI
-          avarageBurnRate={avarageBurnRate}
-          currency={currency}
-          startDate={startDate}
-          endDate={endDate}
-        />
-      );
+      return <BurnRateUI {...props} />;
     },
   };
 }

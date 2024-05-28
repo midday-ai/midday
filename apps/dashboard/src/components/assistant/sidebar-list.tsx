@@ -3,7 +3,6 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
-import { useQueryState } from "nuqs";
 import { SidebarItems } from "./sidebar-items";
 import { Toolbar } from "./toolbar";
 
@@ -12,6 +11,7 @@ type Props = {
   setExpanded: (value: boolean) => void;
   setOpen: (value: boolean) => void;
   onSelect: (id: string) => void;
+  onNewChat: () => void;
 };
 
 export function SidebarList({
@@ -19,6 +19,7 @@ export function SidebarList({
   setExpanded,
   setOpen,
   onSelect,
+  onNewChat,
 }: Props) {
   const ref = useClickAway(() => {
     setExpanded(false);
@@ -29,15 +30,6 @@ export function SidebarList({
   const navigateToSettings = () => {
     setOpen(false);
     router.push("/account/assistant");
-  };
-
-  const handleOnSelect = (id: string) => {
-    setExpanded(false);
-    onSelect(id);
-  };
-
-  const onNewChat = () => {
-    setExpanded(false);
   };
 
   return (
@@ -58,7 +50,7 @@ export function SidebarList({
           <Icons.Settings size={18} />
         </Button>
 
-        <SidebarItems onSelect={handleOnSelect} />
+        <SidebarItems onSelect={onSelect} />
         <Toolbar onNewChat={onNewChat} />
 
         <div className="absolute z-10 h-[477px] w-[30px] bg-background/95 right-0 top-0 pointer-events-none" />
