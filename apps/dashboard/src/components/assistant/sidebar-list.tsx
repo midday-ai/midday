@@ -8,6 +8,7 @@ import { Toolbar } from "./toolbar";
 
 type Props = {
   isExpanded: boolean;
+  chatId?: string;
   setExpanded: (value: boolean) => void;
   setOpen: (value: boolean) => void;
   onSelect: (id: string) => void;
@@ -16,6 +17,7 @@ type Props = {
 
 export function SidebarList({
   isExpanded,
+  chatId,
   setExpanded,
   setOpen,
   onSelect,
@@ -50,7 +52,7 @@ export function SidebarList({
           <Icons.Settings size={18} />
         </Button>
 
-        <SidebarItems onSelect={onSelect} />
+        <SidebarItems onSelect={onSelect} chatId={chatId} />
         <Toolbar onNewChat={onNewChat} />
 
         <div className="absolute z-10 h-[477px] w-[30px] bg-background/95 right-0 top-0 pointer-events-none" />

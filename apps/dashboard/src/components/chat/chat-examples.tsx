@@ -1,0 +1,75 @@
+"use client";
+
+import { shuffle } from "@midday/utils";
+import {
+  AnimatePresence,
+  Reorder,
+  motion,
+  useMotionValue,
+} from "framer-motion";
+import { useRef } from "react";
+import { useDraggable } from "react-use-draggable-scroll";
+
+const defaultExamples = [
+  `What's my burn rate`,
+  "How much money did I earn last month",
+  "How much do I spend on software",
+  "Show me all recurring costs this year",
+  "Show me recurring services we paying for",
+  "What are our biggest expenses",
+];
+
+const items = shuffle(defaultExamples);
+
+const listVariant = {
+  hidden: { y: 45, opacity: 0 },
+  show: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 0.3,
+      staggerChildren: 0.08,
+    },
+  },
+};
+
+const itemVariant = {
+  hidden: { y: 45, opacity: 0 },
+  show: { y: 0, opacity: 1 },
+};
+
+export function ChatExamples({ onSubmit }) {
+  const ref = useRef();
+  const { events } = useDraggable(ref);
+
+  const totalLength = defaultExamples.reduce((accumulator, currentString) => {
+    return accumulator + currentString.length * 8.3 + 20;
+  }, 0);
+
+  return (
+    <div
+      className="absolute z-10 bottom-[70px] left-0 right-0 overflow-scroll scrollbar-hide cursor-grabbing"
+      {...events}
+      ref={ref}
+    >
+      <motion.ul
+        variants={listVariant}
+        initial="hidden"
+        animate="show"
+        className="flex space-x-6 ml-4 items-center"
+        style={{ width: `${totalLength}px` }}
+      >
+        {items.map((example) => (
+          <button key={example} type="button" onClick={() => onSubmit(example)}>
+            <motion.li
+              variants={itemVariant}
+              className="font-mono text-[#878787] text-xs bg-[#1D1D1D] px-4 py-2.5 rounded-full cursor-default"
+            >
+              {example}
+            </motion.li>
+          </button>
+        ))}
+      </motion.ul>
+    </div>
+  );
+}

@@ -27,29 +27,29 @@ export const useScrollAnchor = () => {
     }
   }, [isAtBottom, isVisible]);
 
-  //   useEffect(() => {
-  //     const { current } = scrollRef;
+  useEffect(() => {
+    const { current } = scrollRef;
 
-  //     if (current) {
-  //       const handleScroll = (event: Event) => {
-  //         const target = event.target as HTMLDivElement;
-  //         const offset = 25;
-  //         const isAtBottom =
-  //           target.scrollTop + target.clientHeight >=
-  //           target.scrollHeight - offset;
+    if (current) {
+      const handleScroll = (event: Event) => {
+        const target = event.target as HTMLDivElement;
+        const offset = 25;
+        const isAtBottom =
+          target.scrollTop + target.clientHeight >=
+          target.scrollHeight - offset;
 
-  //         setIsAtBottom(isAtBottom);
-  //       };
+        setIsAtBottom(isAtBottom);
+      };
 
-  //       current.addEventListener("scroll", handleScroll, {
-  //         passive: true,
-  //       });
+      current.addEventListener("scroll", handleScroll, {
+        passive: true,
+      });
 
-  //       return () => {
-  //         current.removeEventListener("scroll", handleScroll);
-  //       };
-  //     }
-  //   }, []);
+      return () => {
+        current.removeEventListener("scroll", handleScroll);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     if (visibilityRef.current) {

@@ -65,7 +65,9 @@ export function Assistant() {
           setExpanded={setExpanded}
           setOpen={setOpen}
           onSelect={handleOnSelect}
+          chatId={chatId}
         />
+
         <Header toggleSidebar={toggleOpen} isExpanded={isExpanded} />
         <Chat submitMessage={setMessages} messages={messages} />
       </DialogContent>

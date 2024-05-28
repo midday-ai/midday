@@ -6,10 +6,11 @@ import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Textarea } from "@midday/ui/textarea";
-import { useActions, useUIState } from "ai/rsc";
+import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useState } from "react";
 import { ChatEmpty } from "./chat-empty";
+import { ChatExamples } from "./chat-examples";
 import { ChatList } from "./chat-list";
 import { UserMessage } from "./messages";
 
@@ -48,6 +49,8 @@ export function Chat({ messages, submitMessage }) {
   const { messagesRef, scrollRef, visibilityRef, scrollToBottom } =
     useScrollAnchor();
 
+  const showExamples = messages.length === 0 && !input;
+
   return (
     <div className="relative">
       <div className="overflow-auto h-[375px]" ref={scrollRef}>
@@ -63,6 +66,8 @@ export function Chat({ messages, submitMessage }) {
       </div>
 
       <div className="fixed bottom-[1px] left-[1px] right-[1px] h-[50px] border-border border-t-[1px] bg-background">
+        {showExamples && <ChatExamples onSubmit={onSubmit} />}
+
         <form
           ref={formRef}
           onSubmit={(evt) => {

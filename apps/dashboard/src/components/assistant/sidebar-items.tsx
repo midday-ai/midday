@@ -7,6 +7,7 @@ import { SidebarItem } from "./sidebar-item";
 
 interface SidebarItemsProps {
   onSelect: (id: string) => void;
+  chatId?: string;
 }
 
 const formatRange = (key: string) => {
@@ -24,7 +25,7 @@ const formatRange = (key: string) => {
   }
 };
 
-export function SidebarItems({ onSelect }: SidebarItemsProps) {
+export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
   const [items, setItems] = useState<Chat[]>([]);
   const [isLoading, setLoading] = useState(false);
   const [aiState] = useAIState<typeof AI>();
@@ -74,10 +75,15 @@ export function SidebarItems({ onSelect }: SidebarItemsProps) {
               </div>
             )}
 
-            <div className="mt-2 flex flex-col space-y-3">
+            <div className="mt-2 flex flex-col space-y-1">
               {section?.map((chat) => {
                 return (
-                  <SidebarItem key={chat.id} chat={chat} onSelect={onSelect} />
+                  <SidebarItem
+                    key={chat.id}
+                    chat={chat}
+                    onSelect={onSelect}
+                    chatId={chatId}
+                  />
                 );
               })}
             </div>
