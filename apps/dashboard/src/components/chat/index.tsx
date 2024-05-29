@@ -3,21 +3,32 @@
 import type { ClientMessage } from "@/actions/ai/types";
 import { useEnterSubmit } from "@/hooks/use-enter-submit";
 import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
+import { useAssistantStore } from "@/store/assistant";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Textarea } from "@midday/ui/textarea";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatEmpty } from "./chat-empty";
 import { ChatExamples } from "./chat-examples";
 import { ChatList } from "./chat-list";
 import { UserMessage } from "./messages";
 
-export function Chat({ messages, submitMessage }) {
-  const [input, setInput] = useState<string>("");
+export function Chat({
+  messages,
+  submitMessage,
+  user,
+  onNewChat,
+  input,
+  setInput,
+}) {
   const { submitUserMessage } = useActions();
   const { formRef, onKeyDown } = useEnterSubmit();
+  const ref = useRef(false);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const { message } = useAssistantStore();
 
   const onSubmit = async (input: string) => {
     const value = input.trim();
@@ -46,6 +57,20 @@ export function Chat({ messages, submitMessage }) {
     ]);
   };
 
+  useEffect(() => {
+    if (!ref.current && message) {
+      onNewChat();
+      onSubmit(message);
+      ref.current = true;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [messages]);
+
   const { messagesRef, scrollRef, visibilityRef, scrollToBottom } =
     useScrollAnchor();
 
@@ -58,7 +83,7 @@ export function Chat({ messages, submitMessage }) {
           {messages.length ? (
             <ChatList messages={messages} />
           ) : (
-            <ChatEmpty firstName="Pontus" />
+            <ChatEmpty firstName={user.full_name.split(" ").at(0)} />
           )}
 
           <div className="w-full h-px" ref={visibilityRef} />
@@ -76,6 +101,7 @@ export function Chat({ messages, submitMessage }) {
           }}
         >
           <Textarea
+            ref={inputRef}
             tabIndex={0}
             rows={1}
             spellCheck={false}

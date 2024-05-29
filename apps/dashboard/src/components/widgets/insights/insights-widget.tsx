@@ -4,7 +4,11 @@ import { useAssistantStore } from "@/store/assistant";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 
-export function InsightsWidget({ items }) {
+type Props = {
+  items: string[];
+};
+
+export function InsightsWidget({ items }: Props) {
   const { setOpen } = useAssistantStore();
 
   return (
@@ -12,15 +16,15 @@ export function InsightsWidget({ items }) {
       <ul className="flex flex-col justify-center items-center space-y-3 flex-shrink">
         {items.map((example) => (
           <li
-            key={example.id}
+            key={example}
             className="rounded-full dark:bg-secondary bg-[#F2F1EF] text-xs font-mono text-[#606060] hover:opacity-80 transition-all cursor-default"
           >
             <button
-              onClick={() => setOpen()}
+              onClick={() => setOpen(example)}
               type="button"
               className="inline-block p-3 py-2"
             >
-              <span>{example.label}</span>
+              <span>{example}</span>
             </button>
           </li>
         ))}

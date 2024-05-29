@@ -1,6 +1,7 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { nanoid } from "ai";
 import { z } from "zod";
+import { SpendingUI } from "./ui/spending-ui";
 
 type Args = {
   aiState: MutableAIState;
@@ -17,7 +18,11 @@ export function getSpendingTool({ aiState }: Args) {
       const { category } = args;
       const toolCallId = nanoid();
 
-      const result = <div>{category}</div>;
+      const props = {
+        amount: 13113,
+        currency: "SEK",
+        category,
+      };
 
       aiState.done({
         ...aiState.get(),
@@ -43,14 +48,14 @@ export function getSpendingTool({ aiState }: Args) {
                 type: "tool-result",
                 toolName: "get_spending",
                 toolCallId,
-                result,
+                result: props,
               },
             ],
           },
         ],
       });
 
-      return result;
+      return <SpendingUI {...props} />;
     },
   };
 }

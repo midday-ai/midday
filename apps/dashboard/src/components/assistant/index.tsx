@@ -18,11 +18,13 @@ export function Assistant() {
   const [isExpanded, setExpanded] = useState(false);
   const [chatId, setChatId] = useState();
   const [messages, setMessages] = useUIState<typeof AI>();
-  const [_, setAIState] = useAIState<typeof AI>();
+  const [aiState, setAIState] = useAIState<typeof AI>();
+  const [input, setInput] = useState<string>("");
 
   const toggleOpen = () => setExpanded((prev) => !prev);
 
   const onNewChat = () => {
+    setInput("");
     setExpanded(false);
     setAIState((prev) => ({ ...prev, messages: [], chatId: nanoid() }));
     setMessages([]);
@@ -36,6 +38,7 @@ export function Assistant() {
   useHotkeys("meta+k", () => setOpen(), {
     enableOnFormTags: true,
   });
+
   useHotkeys("meta+j", () => onNewChat(), {
     enableOnFormTags: true,
   });
@@ -69,7 +72,15 @@ export function Assistant() {
         />
 
         <Header toggleSidebar={toggleOpen} isExpanded={isExpanded} />
-        <Chat submitMessage={setMessages} messages={messages} />
+
+        <Chat
+          submitMessage={setMessages}
+          messages={messages}
+          user={aiState.user}
+          onNewChat={onNewChat}
+          setInput={setInput}
+          input={input}
+        />
       </DialogContent>
     </Dialog>
   );

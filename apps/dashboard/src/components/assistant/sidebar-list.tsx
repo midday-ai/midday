@@ -39,7 +39,7 @@ export function SidebarList({
       <div
         ref={ref}
         className={cn(
-          "w-[220px] h-[477px] bg-background absolute -left-[220px] top-[1px] bottom-[1px] duration-200 ease-out transition-all border-border border-r-[1px] z-20 invisible",
+          "w-[220px] h-[477px] bg-background dark:bg-[#131313] absolute -left-[220px] top-0 bottom-[1px] duration-200 ease-out transition-all border-border border-r-[1px] z-20 invisible",
           isExpanded && "visible translate-x-full"
         )}
       >

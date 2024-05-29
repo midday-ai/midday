@@ -7,19 +7,9 @@ import {
   motion,
   useMotionValue,
 } from "framer-motion";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { useDraggable } from "react-use-draggable-scroll";
-
-const defaultExamples = [
-  `What's my burn rate`,
-  "How much money did I earn last month",
-  "How much do I spend on software",
-  "Show me all recurring costs this year",
-  "Show me recurring services we paying for",
-  "What are our biggest expenses",
-];
-
-const items = shuffle(defaultExamples);
+import { chatExamples } from "./examples";
 
 const listVariant = {
   hidden: { y: 45, opacity: 0 },
@@ -39,11 +29,12 @@ const itemVariant = {
 };
 
 export function ChatExamples({ onSubmit }) {
+  const items = useMemo(() => shuffle(chatExamples), []);
   const ref = useRef();
   const { events } = useDraggable(ref);
 
-  const totalLength = defaultExamples.reduce((accumulator, currentString) => {
-    return accumulator + currentString.length * 8.3 + 20;
+  const totalLength = chatExamples.reduce((accumulator, currentString) => {
+    return accumulator + currentString.length * 9 + 20;
   }, 0);
 
   return (
