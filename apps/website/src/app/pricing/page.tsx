@@ -123,7 +123,7 @@ export default function Page() {
                   are also actively working towards SOC 2 Type II compliance. We
                   encrypt data at rest, and sensitive data on row level. We also
                   support 2FA authentication.
-                  <Link href="/privacy">midday.co/privacy</Link>.
+                  <Link href="/policy">midday.ai/policy</Link>.
                 </AccordionContent>
               </AccordionItem>
 
