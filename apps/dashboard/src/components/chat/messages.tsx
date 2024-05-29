@@ -1,6 +1,7 @@
 "use client";
 
 import { useStreamableText } from "@/hooks/use-streamable-text";
+import { cn } from "@midday/ui/cn";
 import type { StreamableValue } from "ai/rsc";
 import { MemoizedReactMarkdown } from "../markdown";
 import { ChatAvatar } from "./chat-avatar";
@@ -71,9 +72,11 @@ export function BotMessage({
 export function BotCard({
   children,
   showAvatar = true,
+  className,
 }: {
   children?: React.ReactNode;
   showAvatar?: boolean;
+  className?: string;
 }) {
   return (
     <div className="group relative flex items-start">
@@ -81,7 +84,12 @@ export function BotCard({
         {showAvatar && <ChatAvatar role="assistant" />}
       </div>
 
-      <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed">
+      <div
+        className={cn(
+          "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
+          className
+        )}
+      >
         {children}
       </div>
     </div>

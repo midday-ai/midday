@@ -42,7 +42,7 @@ const ToolTipContent = ({ payload, currency }) => {
   );
 };
 
-export function AreaChart({ currency, data }) {
+export function AreaChart({ currency, data, height = 290 }) {
   const locale = useCurrentLocale();
 
   const getLabel = (value: number) => {
@@ -61,7 +61,7 @@ export function AreaChart({ currency, data }) {
   );
 
   return (
-    <ResponsiveContainer width="100%" height={290}>
+    <ResponsiveContainer width="100%" height={height}>
       <BaseAreaChart data={data}>
         <defs>
           <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
@@ -102,6 +102,7 @@ export function AreaChart({ currency, data }) {
             fontFamily: "var(--font-sans)",
           }}
         />
+
         <YAxis
           stroke="#888888"
           fontSize={12}
@@ -116,7 +117,9 @@ export function AreaChart({ currency, data }) {
             fontFamily: "var(--font-sans)",
           }}
         />
+
         <Tooltip />
+
         <Area
           strokeWidth={2.5}
           type="monotone"
