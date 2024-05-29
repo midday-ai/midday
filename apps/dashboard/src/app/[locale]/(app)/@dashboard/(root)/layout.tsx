@@ -1,5 +1,5 @@
 import { AI } from "@/actions/ai/chat";
-import { Assistant } from "@/components/assistant";
+import { AssistantModal } from "@/components/assistant/assistant-modal";
 import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
 import { HotKeys } from "@/components/hot-keys";
@@ -51,7 +51,7 @@ export default async function Layout({
           {children}
         </div>
 
-        <Assistant />
+        <AssistantModal />
         <ConnectTransactionsModal isEU={isEU} />
         <ConnectGoCardLessModal countryCode={countryCode} />
         <SelectBankAccountsModal countryCode={countryCode} />

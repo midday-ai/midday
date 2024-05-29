@@ -1,6 +1,7 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
+import { mistral } from "@ai-sdk/mistral";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -27,6 +28,19 @@ const ratelimit = new Ratelimit({
   redis: RedisClient,
 });
 
+async function selectModel() {
+  const settings = await getAssistantSettings();
+
+  switch (settings.provider) {
+    case "mistralai": {
+      return mistral("mistral-large-latest");
+    }
+    default: {
+      return openai("gpt-4o");
+    }
+  }
+}
+
 export async function submitUserMessage(
   content: string
 ): Promise<ClientMessage> {
@@ -35,6 +49,8 @@ export async function submitUserMessage(
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
+
+  const model = await selectModel();
 
   const { success } = await ratelimit.limit(ip);
 
@@ -71,7 +87,7 @@ export async function submitUserMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model: openai("gpt-4o"),
+    model,
     initial: <SpinnerMessage />,
     system: `\
     You are a helful asssitant in Midday that can help users ask questions around their transactions`,

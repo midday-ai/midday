@@ -4,14 +4,13 @@ import type { ClientMessage } from "@/actions/ai/types";
 import { useEnterSubmit } from "@/hooks/use-enter-submit";
 import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { useAssistantStore } from "@/store/assistant";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
 import { Textarea } from "@midday/ui/textarea";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
 import { ChatEmpty } from "./chat-empty";
 import { ChatExamples } from "./chat-examples";
+import { ChatFooter } from "./chat-footer";
 import { ChatList } from "./chat-list";
 import { UserMessage } from "./messages";
 
@@ -22,6 +21,7 @@ export function Chat({
   onNewChat,
   input,
   setInput,
+  showFeedback,
 }) {
   const { submitUserMessage } = useActions();
   const { formRef, onKeyDown } = useEnterSubmit();
@@ -78,7 +78,7 @@ export function Chat({
 
   return (
     <div className="relative">
-      <div className="overflow-auto h-[375px]" ref={scrollRef}>
+      <div className="overflow-auto h-[335px]" ref={scrollRef}>
         <div ref={messagesRef}>
           {messages.length ? (
             <ChatList messages={messages} />
@@ -90,7 +90,7 @@ export function Chat({
         </div>
       </div>
 
-      <div className="fixed bottom-[1px] left-[1px] right-[1px] h-[50px] border-border border-t-[1px] bg-background">
+      <div className="fixed bottom-[1px] left-[1px] right-[1px] h-[88px] bg-background border-border border-t-[1px]">
         {showExamples && <ChatExamples onSubmit={onSubmit} />}
 
         <form
@@ -108,7 +108,7 @@ export function Chat({
             autoComplete="off"
             autoCorrect="off"
             value={input}
-            className="border-none h-12 pt-4"
+            className="h-12 min-h-12 pt-3 resize-none border-none"
             placeholder="Ask Midday a question..."
             autoFocus
             onKeyDown={onKeyDown}
@@ -116,16 +116,12 @@ export function Chat({
               setInput(evt.target.value);
             }}
           />
-
-          <Button
-            className="absolute right-3 bottom-3 size-6"
-            size="icon"
-            disabled={input === ""}
-            type="submit"
-          >
-            <Icons.Enter size={18} />
-          </Button>
         </form>
+
+        <ChatFooter
+          onSubmit={() => onSubmit(input)}
+          showFeedback={showFeedback}
+        />
       </div>
     </div>
   );

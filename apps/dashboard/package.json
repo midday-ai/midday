@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/mistral": "^0.0.14",
     "@ai-sdk/openai": "^0.0.17",
     "@baselime/node-opentelemetry": "^0.5.8",
     "@date-fns/utc": "^1.2.0",

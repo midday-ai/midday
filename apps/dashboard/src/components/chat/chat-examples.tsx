@@ -34,12 +34,12 @@ export function ChatExamples({ onSubmit }) {
   const { events } = useDraggable(ref);
 
   const totalLength = chatExamples.reduce((accumulator, currentString) => {
-    return accumulator + currentString.length * 9 + 20;
+    return accumulator + currentString.length * 8.2 + 20;
   }, 0);
 
   return (
     <div
-      className="absolute z-10 bottom-[70px] left-0 right-0 overflow-scroll scrollbar-hide cursor-grabbing"
+      className="absolute z-10 bottom-[100px] left-0 right-0 overflow-scroll scrollbar-hide cursor-grabbing"
       {...events}
       ref={ref}
     >
@@ -47,14 +47,14 @@ export function ChatExamples({ onSubmit }) {
         variants={listVariant}
         initial="hidden"
         animate="show"
-        className="flex space-x-6 ml-4 items-center"
+        className="flex space-x-4 ml-4 items-center"
         style={{ width: `${totalLength}px` }}
       >
         {items.map((example) => (
           <button key={example} type="button" onClick={() => onSubmit(example)}>
             <motion.li
               variants={itemVariant}
-              className="font-mono text-[#878787] text-xs bg-[#1D1D1D] px-4 py-2.5 rounded-full cursor-default"
+              className="font-mono text-[#878787] text-xs bg-[#1D1D1D] px-3 py-2 rounded-full cursor-default"
             >
               {example}
             </motion.li>

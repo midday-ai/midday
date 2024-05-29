@@ -68,14 +68,12 @@ export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
         return (
           <div key={key}>
             {section?.length > 0 && (
-              <div className="sticky">
-                <span className="font-mono text-[#878787] text-xs">
-                  {formatRange(key)}
-                </span>
+              <div className="sticky top-0 z-20 w-full bg-background dark:bg-[#131313] pb-1">
+                <span className="font-mono text-xs">{formatRange(key)}</span>
               </div>
             )}
 
-            <div className="mt-2 flex flex-col space-y-1">
+            <div className="mt-1">
               {section?.map((chat) => {
                 return (
                   <SidebarItem

@@ -40,6 +40,7 @@ import {
   MdOutlineBrokenImage,
   MdOutlineCancel,
   MdOutlineCategory,
+  MdOutlineChatBubbleOutline,
   MdOutlineContentCopy,
   MdOutlineDashboardCustomize,
   MdOutlineDelete,
@@ -536,4 +537,5 @@ export const Icons = {
   Backspace: MdOutlineBackspace,
   Palette: MdOutlinePalette,
   Subject: MdOutlineSubject,
+  ChatBubble: MdOutlineChatBubbleOutline,
 };

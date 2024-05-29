@@ -14,7 +14,7 @@ export function Header({ toggleSidebar, isExpanded }: Props) {
         <Button
           variant="outline"
           size="icon"
-          className="size-8 z-50"
+          className="size-8 z-50 p-0"
           onClick={toggleSidebar}
         >
           {isExpanded ? (

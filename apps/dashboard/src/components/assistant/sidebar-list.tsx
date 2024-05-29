@@ -1,8 +1,5 @@
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
-import { useRouter } from "next/navigation";
 import { SidebarItems } from "./sidebar-items";
 import { Toolbar } from "./toolbar";
 
@@ -10,7 +7,6 @@ type Props = {
   isExpanded: boolean;
   chatId?: string;
   setExpanded: (value: boolean) => void;
-  setOpen: (value: boolean) => void;
   onSelect: (id: string) => void;
   onNewChat: () => void;
 };
@@ -19,20 +15,12 @@ export function SidebarList({
   isExpanded,
   chatId,
   setExpanded,
-  setOpen,
   onSelect,
   onNewChat,
 }: Props) {
   const ref = useClickAway(() => {
     setExpanded(false);
   });
-
-  const router = useRouter();
-
-  const navigateToSettings = () => {
-    setOpen(false);
-    router.push("/account/assistant");
-  };
 
   return (
     <div className="relative">
@@ -43,19 +31,9 @@ export function SidebarList({
           isExpanded && "visible translate-x-full"
         )}
       >
-        <Button
-          variant="outline"
-          size="icon"
-          className="size-8 z-50 absolute right-4 top-3"
-          onClick={navigateToSettings}
-        >
-          <Icons.Settings size={18} />
-        </Button>
-
         <SidebarItems onSelect={onSelect} chatId={chatId} />
         <Toolbar onNewChat={onNewChat} />
-
-        <div className="absolute z-10 h-[477px] w-[30px] bg-background/95 right-0 top-0 pointer-events-none" />
+        <div className="absolute z-10 h-[477px] w-[45px] bg-gradient-to-r from-background/30 dark:from-[#131313]/30 to-background right-0 top-0 pointer-events-none" />
       </div>
 
       <div

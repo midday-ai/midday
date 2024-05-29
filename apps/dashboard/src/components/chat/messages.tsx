@@ -54,6 +54,11 @@ export function BotMessage({
             p({ children }) {
               return children;
             },
+            ol({ children }) {
+              return (
+                <ol className="list-disc ml-3 leading-none">{children}</ol>
+              );
+            },
           }}
         >
           {text}
