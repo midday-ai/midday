@@ -62,7 +62,7 @@ export function InboxList({ items, hasQuery, onClear }: InboxListProps) {
   };
 
   return (
-    <ScrollArea className="h-screen">
+    <ScrollArea className="h-screen" hideScrollbar>
       <div className="flex flex-col gap-4 pb-[250px]">
         <AnimatePresence initial={false}>
           {items?.map((item) => {

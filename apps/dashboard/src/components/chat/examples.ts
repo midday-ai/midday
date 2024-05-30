@@ -3,7 +3,7 @@ export const chatExamples = [
   `What's my runway`,
   "Create a budget",
   "Show largest income",
-  "Show me transactions without attachments",
+  "Show transactions without reciepts",
   "Show my spending",
   "Find a reciept or invoice",
   "Find a transaction",

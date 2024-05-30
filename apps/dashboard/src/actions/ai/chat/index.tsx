@@ -19,6 +19,8 @@ import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
 import { createBudgetTool } from "./tools/create-budget";
+import { getDocumentsTool } from "./tools/get-documents";
+import { getTransactionsTool } from "./tools/get-transactions";
 import { getLargestIncomeTool } from "./tools/largest-income";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
@@ -48,7 +50,7 @@ export async function submitUserMessage(
   const ip = headers().get("x-forwarded-for");
   const supabase = createClient();
   const user = await getUser();
-  const teamId = user?.data?.team_id;
+  const teamId = user?.data?.team_id as string;
 
   const model = await selectModel();
 
@@ -129,6 +131,8 @@ export async function submitUserMessage(
       get_burn_rate: getBurnRateTool({ aiState }),
       get_runway: getRunwayTool({ aiState }),
       get_largest_income: getLargestIncomeTool({ supabase, teamId, aiState }),
+      get_transactions: getTransactionsTool({ aiState }),
+      get_documents: getDocumentsTool({ aiState, teamId }),
     },
   });
 

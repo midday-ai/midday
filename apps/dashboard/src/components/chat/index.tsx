@@ -4,6 +4,7 @@ import type { ClientMessage } from "@/actions/ai/types";
 import { useEnterSubmit } from "@/hooks/use-enter-submit";
 import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { useAssistantStore } from "@/store/assistant";
+import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
@@ -78,7 +79,7 @@ export function Chat({
 
   return (
     <div className="relative">
-      <div className="overflow-auto h-[335px]" ref={scrollRef}>
+      <ScrollArea className="h-[335px]" ref={scrollRef}>
         <div ref={messagesRef}>
           {messages.length ? (
             <ChatList messages={messages} />
@@ -88,7 +89,7 @@ export function Chat({
 
           <div className="w-full h-px" ref={visibilityRef} />
         </div>
-      </div>
+      </ScrollArea>
 
       <div className="fixed bottom-[1px] left-[1px] right-[1px] h-[88px] bg-background border-border border-t-[1px]">
         {showExamples && <ChatExamples onSubmit={onSubmit} />}

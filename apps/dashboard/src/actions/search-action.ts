@@ -1,6 +1,7 @@
 "use server";
 
 import { getUser } from "@midday/supabase/cached-queries";
+import { getInboxSearchQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { addDays, isWithinInterval } from "date-fns";
 import { action } from "./safe-action";
@@ -15,22 +16,10 @@ export const searchAction = action(searchSchema, async (params) => {
 
   switch (type) {
     case "inbox": {
-      const query = supabase
-        .from("inbox")
-        .select(
-          "id, created_at, file_name, amount, currency, file_path, content_type, due_date, display_name"
-        )
-        .eq("team_id", teamId)
-        .neq("status", "deleted")
-        .order("created_at", { ascending: true });
-
-      if (!Number.isNaN(Number.parseInt(searchQuery))) {
-        query.like("inbox_amount_text", `%${searchQuery}%`);
-      } else {
-        query.textSearch("fts", `${searchQuery}:*`);
-      }
-
-      const { data } = await query.range(0, limit);
+      const data = await getInboxSearchQuery(supabase, {
+        teamId,
+        q: searchQuery,
+      });
 
       return data?.map((item) => {
         const pending = isWithinInterval(new Date(), {

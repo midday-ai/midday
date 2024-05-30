@@ -1,8 +1,10 @@
 import { BotCard, BotMessage, UserMessage } from "@/components/chat/messages";
 import type { Chat } from "../types";
 import { BurnRateUI } from "./tools/ui/burn-rate-ui";
+import { DocumentsUI } from "./tools/ui/documents-ui";
 import { RunwayUI } from "./tools/ui/runway-ui";
 import { SpendingUI } from "./tools/ui/spending-ui";
+import { TransactionsUI } from "./tools/ui/transactions-ui";
 
 function getUIComponentFromMessage(message) {
   if (message.role === "user") {
@@ -27,6 +29,15 @@ function getUIComponentFromMessage(message) {
         case "get_spending": {
           return <SpendingUI {...tool.result} />;
         }
+
+        case "get_transactions": {
+          return <TransactionsUI {...tool.result} />;
+        }
+
+        case "get_documents": {
+          return <DocumentsUI {...tool.result} />;
+        }
+
         default:
           return null;
       }

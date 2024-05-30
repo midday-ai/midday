@@ -125,7 +125,7 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
               </DropdownMenu>
             </SheetHeader>
 
-            <ScrollArea className="h-full p-0 pb-28">
+            <ScrollArea className="h-full p-0 pb-280" hideScrollbar>
               <TrackerProjectForm
                 form={form}
                 isSaving={updateAction.status === "executing"}

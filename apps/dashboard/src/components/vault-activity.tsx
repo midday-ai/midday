@@ -25,14 +25,18 @@ export async function VaultActivity() {
 
   const files = storageData
     ?.filter((file) => file.path_tokens.pop() !== ".emptyFolderPlaceholder")
-    .map((file) => ({
-      id: file.id,
-      name: file.name,
-      path: file.path_tokens,
-      size: file.metadata.size,
-      mimetype: file.metadata.mimetype,
-      createdAt: file.created_at,
-    }));
+    .map((file) => {
+      const filename = file.name.split("/").at(-1);
+
+      return {
+        id: file.id,
+        name: file.name,
+        path: [...file.path_tokens, filename],
+        size: file.metadata.size,
+        mimetype: file.metadata.mimetype,
+        createdAt: file.created_at,
+      };
+    });
 
   return (
     <div className="mt-6 mb-10">
@@ -40,7 +44,7 @@ export async function VaultActivity() {
 
       <div className="flex space-x-20 mt-6 overflow-auto w-[calc(100vw-130px)] scrollbar-hide">
         {files?.map((file) => {
-          return <VaultPreview file={file} />;
+          return <VaultPreview key={file.id} file={file} />;
         })}
 
         {defaultFolders.map((folder) => {

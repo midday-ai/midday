@@ -60,6 +60,11 @@ export function BotMessage({
                 <ol className="list-disc ml-3 leading-none">{children}</ol>
               );
             },
+            ul({ children }) {
+              return (
+                <ul className="list-disc ml-3 leading-none">{children}</ul>
+              );
+            },
           }}
         >
           {text}

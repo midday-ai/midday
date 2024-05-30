@@ -18,7 +18,7 @@ export function TransactionStatus({ fullfilled }: Props) {
   return (
     <TooltipProvider delayDuration={50}>
       <Tooltip>
-        <TooltipTrigger>
+        <TooltipTrigger asChild>
           <Icons.AlertCircle />
         </TooltipTrigger>
         <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={5}>

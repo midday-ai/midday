@@ -1,15 +1,15 @@
 import { BotCard } from "@/components/chat/messages";
+import { addMonths, format } from "date-fns";
 
 type Props = {
   months: number;
 };
 
 export function RunwayUI({ months }: Props) {
-  const result = `${months?.toString()} months`;
-
   return (
     <BotCard>
-      <p>{result}</p>
+      Based on your historical data, your expected runway is {months} months,
+      ending in {format(addMonths(new Date(), months), "MMMM Y")}.
     </BotCard>
   );
 }

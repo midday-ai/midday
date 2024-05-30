@@ -29,6 +29,7 @@ type Props = {
   height: number;
   disableFullscreen?: boolean;
   onLoaded?: () => void;
+  download?: boolean;
 };
 
 const RenderComponent = ({
@@ -104,6 +105,7 @@ export function FilePreview({
   width,
   height,
   disableFullscreen,
+  download = true,
   onLoaded,
 }: Props) {
   const [isLoaded, setLoaded] = useState(false);
@@ -116,8 +118,8 @@ export function FilePreview({
   return (
     <Dialog>
       <div className={cn(className, "relative h-full")}>
-        {!preview && isLoaded && (
-          <AnimatePresence>
+        <AnimatePresence>
+          {!preview && isLoaded && (
             <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
               {!disableFullscreen && (
                 <motion.div
@@ -155,8 +157,29 @@ export function FilePreview({
                 </motion.div>
               )}
             </div>
-          </AnimatePresence>
-        )}
+          )}
+
+          {download && downloadUrl && (
+            <div className="absolute bottom-4 left-2 z-10">
+              <motion.div
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -50, opacity: 0 }}
+                transition={{ delay: 0.04 }}
+              >
+                <a href={downloadUrl} download>
+                  <Button
+                    variant="secondary"
+                    className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
+                    size="icon"
+                  >
+                    <Icons.FileDownload />
+                  </Button>
+                </a>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
         <Skeleton
           className={cn(

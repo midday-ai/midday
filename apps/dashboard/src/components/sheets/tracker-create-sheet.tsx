@@ -45,7 +45,7 @@ export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
             <h2 className="text-xl">Create Project</h2>
           </SheetHeader>
 
-          <ScrollArea className="h-full p-0 pb-28">
+          <ScrollArea className="h-full p-0 pb-28" hideScrollbar>
             <TrackerProjectForm
               isSaving={action.status === "executing"}
               onSubmit={action.execute}

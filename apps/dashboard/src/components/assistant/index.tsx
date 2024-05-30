@@ -23,10 +23,12 @@ export function Assistant() {
   const toggleOpen = () => setExpanded((prev) => !prev);
 
   const onNewChat = () => {
+    const newChatId = nanoid();
     setInput("");
     setExpanded(false);
-    setAIState((prev) => ({ ...prev, messages: [], chatId: nanoid() }));
+    setAIState((prev) => ({ ...prev, messages: [], chatId: newChatId }));
     setMessages([]);
+    setChatId(newChatId);
   };
 
   const handleOnSelect = (id: string) => {
