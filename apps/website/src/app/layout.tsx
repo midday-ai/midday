@@ -3,15 +3,13 @@ import { Footer } from "@/components/footer";
 import { FooterCTA } from "@/components/footer-cta";
 import { Header } from "@/components/header";
 import "@/styles/globals.css";
-import { LogSnagProvider } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
+import { OpenpanelProvider } from "@openpanel/nextjs";
 import "@midday/ui/globals.css";
-import { Analytics } from "@vercel/analytics/react";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { Provider } from "./provider";
 import { baseUrl } from "./sitemap";
 
 export const metadata: Metadata = {
@@ -51,13 +49,6 @@ export const viewport = {
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <LogSnagProvider
-          token={process.env.NEXT_PUBLIC_LOGSNAG_TOKEN!}
-          project={process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!}
-          disableTracking={Boolean(process.env.NEXT_PUBLIC_LOGSNAG_DISABLED!)}
-        />
-      </head>
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
@@ -71,7 +62,12 @@ export default function Layout({ children }: { children: ReactElement }) {
         <FooterCTA />
         <Footer />
 
-        <Analytics />
+        <OpenpanelProvider
+          clientId={process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!}
+          trackScreenViews={true}
+          trackAttributes={true}
+          trackOutgoingLinks={true}
+        />
         <DevMessage />
       </body>
     </html>
