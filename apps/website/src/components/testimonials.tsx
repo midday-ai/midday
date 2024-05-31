@@ -59,6 +59,15 @@ const testimonials = [
     quote: "We love @middayai 🖤",
   },
   {
+    name: "Guillermo Rauch",
+    avatarUrl:
+      "https://pbs.twimg.com/profile_images/1783856060249595904/8TfcCN0r_400x400.jpg",
+    handle: "@rauchg",
+    verified: true,
+    quote:
+      "nice to see @middayai generative ui features built on @vercel AI sdk midday is becoming one of the best OSS @nextjs real-world apps",
+  },
+  {
     name: "Kyle @ KyTech",
     avatarUrl:
       "https://pbs.twimg.com/profile_images/1586538348964978689/nkpJWZxG_400x400.png",
