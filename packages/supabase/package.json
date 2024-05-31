@@ -15,7 +15,7 @@
     "supabase": "^1.167.4"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.43.2",
+    "@supabase/supabase-js": "^2.43.4",
     "typescript": "^5.4.5"
   },
   "exports": {
@@ -26,6 +26,6 @@
     "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",
-    "./types": "./src/types/db.ts"
+    "./types": "./src/types/index.ts"
   }
 }

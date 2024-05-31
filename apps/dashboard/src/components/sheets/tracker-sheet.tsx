@@ -165,7 +165,7 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
             </div>
           )}
 
-          <ScrollArea className="h-full p-0">
+          <ScrollArea className="h-full p-0" hideScrollbar>
             <TrackerSelect
               date={day}
               onSelect={(day) => setParams({ day })}

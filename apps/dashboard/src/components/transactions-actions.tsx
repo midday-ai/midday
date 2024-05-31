@@ -29,7 +29,6 @@ type Props = {
 };
 
 export function TransactionsActions({ categories, accounts }: Props) {
-  console.log(accounts);
   const { toast } = useToast();
   const { transactionIds, canDelete } = useTransactionsStore();
   const sections = transactionSections({ categories, accounts });

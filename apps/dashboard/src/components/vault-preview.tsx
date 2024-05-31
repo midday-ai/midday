@@ -7,14 +7,31 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@midday/ui/hover-card";
-import { isSupportedFilePreview } from "@midday/utils";
+import { type FileType, isSupportedFilePreview } from "@midday/utils";
 import { FileIcon } from "./file-icon";
 
-export function VaultPreview({ file }) {
-  const filename = file.name.split("/").pop();
-  // NOTE: Remove teamId from path
+type Props = {
+  preview?: boolean;
+  height?: number;
+  width?: number;
+  file: {
+    id: string;
+    path: string[];
+    mimetype: FileType;
+    size?: number;
+  };
+};
+
+export function VaultPreview({
+  file,
+  preview = true,
+  width = 45,
+  height = 57,
+}: Props) {
+  const filename = file.path?.at(-1);
   const [, ...rest] = file.path;
-  const downloadPath = [rest, filename].join("/");
+  // Without team_id
+  const downloadPath = rest.join("/");
 
   if (isSupportedFilePreview(file.mimetype)) {
     return (
@@ -23,36 +40,42 @@ export function VaultPreview({ file }) {
           className="text-center flex flex-col items-center"
           key={file.id}
         >
-          <div className="w-[65px] h-[75px] bg-[#F2F1EF] dark:bg-secondary flex items-center justify-center p-2 overflow-hidden mb-2">
+          <div
+            className="bg-[#F2F1EF] dark:bg-secondary flex items-center justify-center p-2 overflow-hidden mb-2"
+            style={{ width: width + 20, height: height + 20 }}
+          >
             <FilePreview
-              src={`/api/proxy?filePath=vault/${file.name}`}
-              name={file.name}
+              src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
+              name={filename}
               type={file.mimetype}
               preview
-              width={45}
-              height={57}
+              width={width}
+              height={height}
             />
           </div>
 
           <span className="text-sm truncate w-[70px]">{filename}</span>
-          <span className="text-sm mt-1 text-[#878787]">
-            {formatSize(file.size)}
-          </span>
+          {file.size && (
+            <span className="text-sm mt-1 text-[#878787]">
+              {formatSize(file.size)}
+            </span>
+          )}
         </HoverCardTrigger>
-        <HoverCardContent
-          className="w-[273px] h-[358px] p-0 overflow-hidden"
-          sideOffset={-40}
-        >
-          <FilePreview
-            src={`/api/proxy?filePath=vault/${file.name}`}
-            downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}
-            name={file.name}
-            type={file.mimetype}
-            width={280}
-            height={365}
-            onOpen={() => setOpen(false)}
-          />
-        </HoverCardContent>
+        {preview && (
+          <HoverCardContent
+            className="w-[273px] h-[358px] p-0 overflow-hidden"
+            sideOffset={-40}
+          >
+            <FilePreview
+              src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
+              downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}
+              name={filename}
+              type={file.mimetype}
+              width={280}
+              height={365}
+            />
+          </HoverCardContent>
+        )}
       </HoverCard>
     );
   }

@@ -19,7 +19,7 @@ export function SpendingCategoryList({ categories, period }) {
   return (
     <div ref={ref}>
       <ul
-        className="mt-8 space-y-5 overflow-auto scrollbar-hide"
+        className="mt-8 space-y-4 overflow-auto scrollbar-hide"
         style={{ maxHeight: width - PADDING }}
       >
         {categories.map(
@@ -49,7 +49,7 @@ export function SpendingCategoryList({ categories, period }) {
                     </Link>
                   </HoverCardTrigger>
 
-                  <HoverCardContent className="rounded-xl border shadow-sm bg-background py-2 px-2">
+                  <HoverCardContent className="border shadow-sm bg-background py-2 px-2">
                     <SpendingCategoryItem
                       color={color}
                       name={name}

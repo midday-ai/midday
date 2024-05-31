@@ -32,7 +32,7 @@ const ToolTipContent = ({ payload = {} }) => {
   const [current, previous] = payload;
 
   return (
-    <div className="w-[240px] rounded-lg border shadow-sm bg-background">
+    <div className="w-[240px] border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
         <p className="text-sm">
           {t(`chart_type.${current?.payload?.meta?.type}`)}
@@ -104,7 +104,7 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function BarChart({ data, disabled, currency }) {
+export function BarChart({ data, disabled, currency, height = 290 }) {
   const locale = useCurrentLocale();
 
   const formattedData = data.result.map((item) => ({
@@ -128,7 +128,7 @@ export function BarChart({ data, disabled, currency }) {
 
   const getLabelMaxValue = getLabel(
     roundToNearestFactor(
-      data.result.map((item) =>
+      data?.result.map((item) =>
         Math.max(item.current.value, item.previous.value)
       )
     )
@@ -147,7 +147,7 @@ export function BarChart({ data, disabled, currency }) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={290}>
+      <ResponsiveContainer width="100%" height={height}>
         <BaseBarChart data={formattedData} barGap={15}>
           <XAxis
             dataKey="date"

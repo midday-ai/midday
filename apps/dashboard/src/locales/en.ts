@@ -66,7 +66,7 @@ export default {
     transactions: "Receive notifications about new transactions.",
   },
   widgets: {
-    insights: "Insights",
+    insights: "Assistant",
     inbox: "Inbox",
     spending: "Spending",
     transactions: "Transactions",

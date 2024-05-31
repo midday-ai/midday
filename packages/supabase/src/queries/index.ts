@@ -170,7 +170,7 @@ export type GetTransactionsParams = {
     categories?: string[];
     accounts?: string[];
     type?: "income" | "expense";
-    date: {
+    date?: {
       from?: string;
       to?: string;
     };
@@ -421,7 +421,6 @@ export async function getRunwayQuery(
 
 export type GetCurrentBurnRateQueryParams = {
   teamId: string;
-
   currency: string;
 };
 
@@ -883,4 +882,36 @@ export async function getCategoriesQuery(
     .eq("team_id", teamId)
     .order("created_at", { ascending: false })
     .range(0, limit);
+}
+
+type GetInboxSearchParams = {
+  teamId: string;
+  limit?: number;
+  q: string;
+};
+
+export async function getInboxSearchQuery(
+  supabase: Client,
+  params: GetInboxSearchParams
+) {
+  const { teamId, q, limit = 10 } = params;
+
+  const query = supabase
+    .from("inbox")
+    .select(
+      "id, created_at, file_name, amount, currency, file_path, content_type, due_date, display_name, size"
+    )
+    .eq("team_id", teamId)
+    .neq("status", "deleted")
+    .order("created_at", { ascending: true });
+
+  if (!Number.isNaN(Number.parseInt(q))) {
+    query.like("inbox_amount_text", `%${q}%`);
+  } else {
+    query.textSearch("fts", `${q}:*`);
+  }
+
+  const { data } = await query.range(0, limit);
+
+  return data;
 }

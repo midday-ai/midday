@@ -3,10 +3,10 @@ export function getYAxisWidth(value: string) {
 }
 
 export function roundToNearestFactor(numbers: number[]) {
-  if (numbers.length < 2) return numbers;
+  if (numbers?.length < 2) return numbers;
 
   // Sort the array
-  numbers.sort((a, b) => a - b);
+  numbers?.sort((a, b) => a - b);
 
   // Calculate gaps
   const gaps = [];
@@ -16,9 +16,6 @@ export function roundToNearestFactor(numbers: number[]) {
 
   // Determine the rounding factor: using the maximum gap
   const maxGap = Math.max(...gaps);
-
-  // Alternatively, you can define a fixed interval, e.g., 250000
-  // let roundingFactor = 250000;
 
   // Rounding factor based on maxGap, rounded to the nearest significant figure
   let roundingFactor = Math.pow(10, Math.floor(Math.log10(maxGap)));

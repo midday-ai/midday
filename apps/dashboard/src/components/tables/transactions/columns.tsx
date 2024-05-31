@@ -5,6 +5,7 @@ import { Category } from "@/components/category";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
+import { TransactionStatus } from "@/components/transaction-status";
 import { formatTransactionDate } from "@/utils/format";
 import {
   AlertDialog,
@@ -197,22 +198,7 @@ export const columns: ColumnDef<Transaction>[] = [
         row.original?.status === "completed" ||
         row?.original?.attachments?.length > 0;
 
-      if (fullfilled) {
-        return <Icons.Check />;
-      }
-
-      return (
-        <TooltipProvider delayDuration={50}>
-          <Tooltip>
-            <TooltipTrigger>
-              <Icons.AlertCircle />
-            </TooltipTrigger>
-            <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={5}>
-              Missing attachment
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      );
+      return <TransactionStatus fullfilled={fullfilled} />;
     },
   },
   {

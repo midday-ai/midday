@@ -21,7 +21,11 @@ export function TransactionStatus({ fullfilled }: Props) {
         <TooltipTrigger>
           <Icons.AlertCircle />
         </TooltipTrigger>
-        <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={5}>
+        <TooltipContent
+          className="px-3 py-1.5 text-xs"
+          side="left"
+          sideOffset={10}
+        >
           Missing attachment
         </TooltipContent>
       </Tooltip>

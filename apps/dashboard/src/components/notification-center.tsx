@@ -245,7 +245,7 @@ export function NotificationCenter() {
               className="rounded-full bg-ransparent hover:bg-accent"
               onClick={() => setOpen(false)}
             >
-              <Icons.SettingsCog className="text-[#606060]" size={16} />
+              <Icons.Settings className="text-[#606060]" size={16} />
             </Button>
           </Link>
 
