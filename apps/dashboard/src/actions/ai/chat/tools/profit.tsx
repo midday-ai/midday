@@ -1,9 +1,8 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { calculateAvgBurnRate } from "@/utils/format";
-import { getBurnRate, getRunway } from "@midday/supabase/cached-queries";
+import { getMetrics } from "@midday/supabase/cached-queries";
 import { nanoid } from "ai";
 import { z } from "zod";
-import { BurnRateUI } from "./ui/burn-rate-ui";
+import { ProfitUI } from "./ui/profit-ui";
 
 type Args = {
   aiState: MutableAIState;
@@ -12,47 +11,39 @@ type Args = {
   dateTo: string;
 };
 
-export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
   return {
-    description: "Get burn rate",
+    description: "Get profit",
     parameters: z.object({
       startDate: z.coerce
         .date()
-        .describe("The start date for the burn rate period")
+        .describe("The start date for the profit period")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date for the burn rate period")
+        .describe("The end date for the profit period")
         .default(new Date(dateTo)),
       currency: z.string().default(currency),
     }),
-    generate: async (args) => {
-      const toolCallId = nanoid();
+    generate: async function* (args) {
+      yield <div />;
 
       const { currency, startDate, endDate } = args;
 
-      const [{ data: months }, { data: burnRateData }] = await Promise.all([
-        getRunway({
-          currency,
-          from: startDate.toString(),
-          to: endDate.toString(),
-        }),
-        getBurnRate({
-          currency,
-          from: startDate.toString(),
-          to: endDate.toString(),
-        }),
-      ]);
+      const data = await getMetrics({
+        from: startDate,
+        to: endDate,
+        type: "profit",
+        currency,
+      });
 
-      const avarageBurnRate = calculateAvgBurnRate(burnRateData);
+      const toolCallId = nanoid();
 
       const props = {
-        avarageBurnRate,
-        currency,
+        data,
         startDate,
         endDate,
-        months,
-        data: burnRateData,
+        currency,
       };
 
       aiState.done({
@@ -65,7 +56,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "burn_rate",
+                toolName: "profit",
                 toolCallId,
                 args,
               },
@@ -77,7 +68,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "burn_rate",
+                toolName: "profit",
                 toolCallId,
                 result: props,
               },
@@ -86,7 +77,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
         ],
       });
 
-      return <BurnRateUI {...props} />;
+      return <ProfitUI {...props} />;
     },
   };
 }

@@ -1,11 +1,11 @@
 export const chatExamples = [
   `What's my burn rate`,
   `What's my runway`,
-  "Create a budget",
-  "Show largest income",
-  "Show transactions without reciepts",
+  "Show transactions without receipts",
   "Show my spending",
-  "Find a reciept or invoice",
+  "Find a receipt or invoice",
   "Find a transaction",
-  "Show spending for a category",
+  // "Show my revenue",
+  `What's my profit`,
+  `What's my revenue`,
 ];

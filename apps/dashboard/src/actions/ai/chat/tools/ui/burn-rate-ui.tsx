@@ -11,13 +11,20 @@ type Props = {
 };
 
 export function BurnRateUI({ avarageBurnRate, currency, months, data }: Props) {
+  if (!data?.length) {
+    return (
+      <BotCard>
+        We couldn't find any historical data to provide you with a burn rate.
+      </BotCard>
+    );
+  }
   return (
     <BotCard className="font-sans space-y-4">
       <p className="font-mono">
         Based on your historical data, your avarage burn rate is{" "}
         <FormatAmount amount={avarageBurnRate} currency={currency} /> per month.
         Your expected runway is {months} months, ending in{" "}
-        {format(addMonths(new Date(), months), "MMMM Y")}.
+        {format(addMonths(new Date(), months), "PP")}.
       </p>
 
       <AreaChart currency={currency} data={data} height={200} />

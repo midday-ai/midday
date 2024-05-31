@@ -1,27 +1,52 @@
 import type { MutableAIState } from "@/actions/ai/types";
+import { getSpending } from "@midday/supabase/cached-queries";
 import { nanoid } from "ai";
 import { z } from "zod";
 import { SpendingUI } from "./ui/spending-ui";
 
 type Args = {
   aiState: MutableAIState;
+  currency: string;
+  dateFrom: string;
+  dateTo: string;
 };
 
-export function getSpendingTool({ aiState }: Args) {
+export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
   return {
     description: "Get spending from transactions",
     parameters: z.object({
-      category: z.string().describe("The category for the spending"),
-      currency: z.string().default("SEK"),
+      currency: z.string().default(currency),
+      category: z.string(),
+      startDate: z.coerce
+        .date()
+        .describe("The start date for spending")
+        .default(new Date(dateFrom)),
+      endDate: z.coerce
+        .date()
+        .describe("The end date for spending")
+        .default(new Date(dateTo)),
     }),
     generate: async (args) => {
-      const { category } = args;
+      const { startDate, endDate, currency, category } = args;
       const toolCallId = nanoid();
 
+      const { data } = await getSpending({
+        from: startDate,
+        to: endDate,
+        currency,
+      });
+
+      const found = data.find(
+        (c) => category.toLowerCase() === c?.name?.toLowerCase()
+      );
+
       const props = {
-        amount: 13113,
-        currency: "SEK",
+        currency,
         category,
+        amount: found?.amount,
+        name: found?.name,
+        startDate,
+        endDate,
       };
 
       aiState.done({

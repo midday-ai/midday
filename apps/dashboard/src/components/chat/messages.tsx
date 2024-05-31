@@ -3,6 +3,8 @@
 import { useStreamableText } from "@/hooks/use-streamable-text";
 import { cn } from "@midday/ui/cn";
 import type { StreamableValue } from "ai/rsc";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { ErrorFallback } from "../error-fallback";
 import { MemoizedReactMarkdown } from "../markdown";
 import { ChatAvatar } from "./chat-avatar";
 import { spinner } from "./spinner";
@@ -43,34 +45,36 @@ export function BotMessage({
   const text = useStreamableText(content);
 
   return (
-    <div className="group relative flex items-start">
-      <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
-        <ChatAvatar role="assistant" />
-      </div>
+    <ErrorBoundary errorComponent={ErrorFallback}>
+      <div className="group relative flex items-start">
+        <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
+          <ChatAvatar role="assistant" />
+        </div>
 
-      <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono">
-        <MemoizedReactMarkdown
-          className="prose break-words dark:prose-invert leading-relaxed prose-pre:p-0 mb-2 last:mb-0 text-xs font-mono"
-          components={{
-            p({ children }) {
-              return children;
-            },
-            ol({ children }) {
-              return (
-                <ol className="list-disc ml-3 leading-none">{children}</ol>
-              );
-            },
-            ul({ children }) {
-              return (
-                <ul className="list-disc ml-3 leading-none">{children}</ul>
-              );
-            },
-          }}
-        >
-          {text}
-        </MemoizedReactMarkdown>
+        <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono">
+          <MemoizedReactMarkdown
+            className="prose break-words dark:prose-invert leading-relaxed prose-pre:p-0 mb-2 last:mb-0 text-xs font-mono"
+            components={{
+              p({ children }) {
+                return children;
+              },
+              ol({ children }) {
+                return (
+                  <ol className="list-disc ml-3 leading-none">{children}</ol>
+                );
+              },
+              ul({ children }) {
+                return (
+                  <ul className="list-disc ml-3 leading-none">{children}</ul>
+                );
+              },
+            }}
+          >
+            {text}
+          </MemoizedReactMarkdown>
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }
 
@@ -84,19 +88,21 @@ export function BotCard({
   className?: string;
 }) {
   return (
-    <div className="group relative flex items-start">
-      <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
-        {showAvatar && <ChatAvatar role="assistant" />}
-      </div>
+    <ErrorBoundary errorComponent={ErrorFallback}>
+      <div className="group relative flex items-start">
+        <div className="flex size-[25px] shrink-0 select-none items-center justify-center">
+          {showAvatar && <ChatAvatar role="assistant" />}
+        </div>
 
-      <div
-        className={cn(
-          "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
-          className
-        )}
-      >
-        {children}
+        <div
+          className={cn(
+            "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
+            className
+          )}
+        >
+          {children}
+        </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 }

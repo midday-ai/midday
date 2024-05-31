@@ -17,8 +17,21 @@ type Props = {
 };
 
 export function DocumentsUI({ data }: Props) {
+  if (!data?.length) {
+    return (
+      <BotCard>
+        No documents were found for your request. Please try a different
+        message.
+      </BotCard>
+    );
+  }
+
   return (
     <BotCard className="font-sans space-y-4">
+      <p className="font-mono">
+        We found {data.length} documents based on your query
+      </p>
+
       <div className="w-full overflow-auto space-x-4 flex">
         {data?.map((item) => {
           const filename = item.file_path?.at(-1);
@@ -32,6 +45,7 @@ export function DocumentsUI({ data }: Props) {
               height={198}
               key={item.id}
               preview
+              name={item.display_name}
               type={item.content_type}
               download
               downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}

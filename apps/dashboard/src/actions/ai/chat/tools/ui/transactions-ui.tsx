@@ -41,6 +41,10 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
         </p>
       )}
 
+      {meta.totalAmount.length > 1 && (
+        <p>We found {meta.count} transactions </p>
+      )}
+
       {meta.count > 0 && (
         <Table className="text-xs font-sans">
           <TableHeader>

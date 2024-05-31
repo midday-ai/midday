@@ -6,21 +6,24 @@ import { RunwayUI } from "./ui/runway-ui";
 
 type Args = {
   aiState: MutableAIState;
+  currency: string;
+  dateFrom: string;
+  dateTo: string;
 };
 
-export function getRunwayTool({ aiState }: Args) {
+export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
   return {
-    description: "Get runway for your business",
+    description: "Get runway",
     parameters: z.object({
       startDate: z.coerce
         .date()
         .describe("The start date for the runway period")
-        .default(new Date("2023-01-01")),
+        .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
         .describe("The end date for the runway period")
-        .default(new Date("2024-01-01")),
-      currency: z.string().default("SEK"),
+        .default(new Date(dateTo)),
+      currency: z.string().default(currency),
     }),
     generate: async function* (args) {
       yield <div />;

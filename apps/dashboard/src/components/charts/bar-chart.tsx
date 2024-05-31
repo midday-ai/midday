@@ -104,7 +104,7 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function BarChart({ data, disabled, currency }) {
+export function BarChart({ data, disabled, currency, height = 290 }) {
   const locale = useCurrentLocale();
 
   const formattedData = data.result.map((item) => ({
@@ -147,7 +147,7 @@ export function BarChart({ data, disabled, currency }) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={290}>
+      <ResponsiveContainer width="100%" height={height}>
         <BaseBarChart data={formattedData} barGap={15}>
           <XAxis
             dataKey="date"

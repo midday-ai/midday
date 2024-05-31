@@ -1,11 +1,13 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
-import { mistral } from "@ai-sdk/mistral";
+// import { mistral } from "@ai-sdk/mistral";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
-import { getUser } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
+import {
+  getBankAccountsCurrencies,
+  getUser,
+} from "@midday/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
 import { nanoid } from "ai";
 import {
@@ -14,14 +16,14 @@ import {
   getMutableAIState,
   streamUI,
 } from "ai/rsc";
+import { startOfMonth, subMonths } from "date-fns";
 import { headers } from "next/headers";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
-import { createBudgetTool } from "./tools/create-budget";
 import { getDocumentsTool } from "./tools/get-documents";
 import { getTransactionsTool } from "./tools/get-transactions";
-import { getLargestIncomeTool } from "./tools/largest-income";
+import { getProfitTool } from "./tools/profit";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
 
@@ -34,9 +36,9 @@ async function selectModel() {
   const settings = await getAssistantSettings();
 
   switch (settings.provider) {
-    case "mistralai": {
-      return mistral("mistral-large-latest");
-    }
+    // case "mistralai": {
+    //   return mistral("mistral-large-latest");
+    // }
     default: {
       return openai("gpt-4o");
     }
@@ -48,9 +50,15 @@ export async function submitUserMessage(
 ): Promise<ClientMessage> {
   "use server";
   const ip = headers().get("x-forwarded-for");
-  const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id as string;
+
+  const defaultValues = {
+    from: subMonths(startOfMonth(new Date()), 12).toISOString(),
+    to: new Date().toISOString(),
+    currency:
+      (await getBankAccountsCurrencies())?.data?.at(0)?.currency ?? "USD",
+  };
 
   const model = await selectModel();
 
@@ -92,7 +100,7 @@ export async function submitUserMessage(
     model,
     initial: <SpinnerMessage />,
     system: `\
-    You are a helful asssitant in Midday that can help users ask questions around their transactions`,
+    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.`,
     messages: [
       ...aiState.get().messages,
       {
@@ -126,11 +134,30 @@ export async function submitUserMessage(
       return textNode;
     },
     tools: {
-      create_budget: createBudgetTool({ aiState }),
-      get_spending: getSpendingTool({ aiState }),
-      get_burn_rate: getBurnRateTool({ aiState }),
-      get_runway: getRunwayTool({ aiState }),
-      get_largest_income: getLargestIncomeTool({ supabase, teamId, aiState }),
+      get_spending: getSpendingTool({
+        aiState,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
+      get_burn_rate: getBurnRateTool({
+        aiState,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
+      get_runway: getRunwayTool({
+        aiState,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
+      get_profit: getProfitTool({
+        aiState,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
       get_transactions: getTransactionsTool({ aiState }),
       get_documents: getDocumentsTool({ aiState, teamId }),
     },

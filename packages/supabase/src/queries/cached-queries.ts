@@ -166,7 +166,9 @@ export const getTeamMembers = async () => {
   )(teamId);
 };
 
-export const getSpending = async (params: GetSpendingParams) => {
+export const getSpending = async (
+  params: Omit<GetSpendingParams, "teamId">
+) => {
   const supabase = createClient();
   const user = await getUser();
   const teamId = user?.data?.team_id;
@@ -211,7 +213,7 @@ export const getBankAccountsCurrencies = async () => {
   )();
 };
 
-export const getMetrics = async (params: GetMetricsParams) => {
+export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
   const supabase = createClient();
 
   const user = await getUser();
