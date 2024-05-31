@@ -23,7 +23,10 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .date()
         .describe("The end date for the profit period")
         .default(new Date(dateTo)),
-      currency: z.string().default(currency),
+      currency: z
+        .string()
+        .default(currency)
+        .describe("The currency for profit"),
     }),
     generate: async function* (args) {
       yield <div />;

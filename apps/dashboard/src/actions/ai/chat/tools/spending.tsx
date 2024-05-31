@@ -15,8 +15,11 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
   return {
     description: "Get spending from transactions",
     parameters: z.object({
-      currency: z.string().default(currency),
-      category: z.string(),
+      currency: z
+        .string()
+        .default(currency)
+        .describe("The currency for spending"),
+      category: z.string().describe("The category for spending"),
       startDate: z.coerce
         .date()
         .describe("The start date for spending")

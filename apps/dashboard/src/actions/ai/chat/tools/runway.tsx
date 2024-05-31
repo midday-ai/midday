@@ -23,7 +23,10 @@ export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .date()
         .describe("The end date for the runway period")
         .default(new Date(dateTo)),
-      currency: z.string().default(currency),
+      currency: z
+        .string()
+        .default(currency)
+        .describe("The currency for the runway"),
     }),
     generate: async function* (args) {
       yield <div />;
