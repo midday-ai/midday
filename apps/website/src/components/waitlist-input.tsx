@@ -1,7 +1,6 @@
 "use client";
 
 import { subscribeAction } from "@/actions/subscribe-action";
-import { useLogSnag } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
@@ -30,7 +29,6 @@ function SubmitButton() {
 
 export function WaitlistInput() {
   const [isSubmitted, setSubmitted] = useState(false);
-  const { track } = useLogSnag();
 
   return (
     <div>
@@ -58,16 +56,6 @@ export function WaitlistInput() {
               setSubmitted(true);
               await subscribeAction(formData, "engine");
               const email = formData.get("email") as string;
-
-              track({
-                event: LogEvents.Engine.name,
-                notify: true,
-                icon: LogEvents.Engine.icon,
-                channel: LogEvents.Engine.channel,
-                tags: {
-                  email,
-                },
-              });
 
               setTimeout(() => {
                 setSubmitted(false);
