@@ -29,13 +29,13 @@ export function Hero() {
       }}
     >
       <div className="hero-slide-up flex flex-col mt-[240px]">
-        <Link href="/updates/early-adopter">
+        <Link href="/updates/assistant">
           <Button
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
             <span className="font-mono text-xs">
-              Announcing Early Adopters Plan
+              Introducing Midday Assistant v1
             </span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
