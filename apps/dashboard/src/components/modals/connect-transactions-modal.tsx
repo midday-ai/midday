@@ -75,9 +75,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       track({
         event: LogEvents.ConnectBankAuthorized.name,
         channel: LogEvents.ConnectBankAuthorized.channel,
-        tags: {
-          provider: "teller",
-        },
+        provider: "teller",
       });
     },
     onExit: () => {
@@ -86,9 +84,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       track({
         event: LogEvents.ConnectBankCanceled.name,
         channel: LogEvents.ConnectBankCanceled.channel,
-        tags: {
-          provider: "teller",
-        },
+        provider: "teller",
       });
 
       setParams({ step: "connect" });
@@ -122,9 +118,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       track({
         event: LogEvents.ConnectBankAuthorized.name,
         channel: LogEvents.ConnectBankAuthorized.channel,
-        tags: {
-          provider: "plaid",
-        },
+        provider: "plaid",
       });
     },
     onExit: () => {
@@ -133,9 +127,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       track({
         event: LogEvents.ConnectBankCanceled.name,
         channel: LogEvents.ConnectBankCanceled.channel,
-        tags: {
-          provider: "plaid",
-        },
+        provider: "plaid",
       });
     },
   });
@@ -151,9 +143,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         track({
           event: LogEvents.ConnectBankProvider.name,
           channel: LogEvents.ConnectBankProvider.channel,
-          tags: {
-            provider: "teller",
-          },
+          provider: "teller",
         });
 
         openTeller();
@@ -170,9 +160,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         track({
           event: LogEvents.ConnectBankProvider.name,
           channel: LogEvents.ConnectBankProvider.channel,
-          tags: {
-            provider: "plaid",
-          },
+          provider: "plaid",
         });
 
         openPlaid();
@@ -190,9 +178,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         track({
           event: LogEvents.ConnectBankProvider.name,
           channel: LogEvents.ConnectBankProvider.channel,
-          tags: {
-            provider: "gocardless",
-          },
+          provider: "gocardless",
         });
 
         setParams({ step: "gocardless" });

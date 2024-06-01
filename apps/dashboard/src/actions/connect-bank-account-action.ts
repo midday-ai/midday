@@ -37,9 +37,7 @@ export const connectBankAccountAction = action(
       analytics.track({
         event: LogEvents.ConnectBankFailed.name,
         channel: LogEvents.ConnectBankFailed.channel,
-        tags: {
-          provider,
-        },
+        provider,
       });
 
       throw new Error("Something went wrong");
@@ -55,9 +53,7 @@ export const connectBankAccountAction = action(
     analytics.track({
       event: LogEvents.ConnectBankCompleted.name,
       channel: LogEvents.ConnectBankCompleted.channel,
-      tags: {
-        provider,
-      },
+      provider,
     });
 
     revalidateTag(`bank_accounts_${teamId}`);
