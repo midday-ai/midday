@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
   // Not authenticated
   if (
     !data?.user &&
-    newUrl.pathname !== "/" &&
+    newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/report") &&
     !newUrl.pathname.includes("/unsubscribe") &&
     !newUrl.pathname.includes("/setup")
@@ -39,7 +39,11 @@ export async function middleware(request: NextRequest) {
       newUrl.search
     }`;
 
-    url.searchParams.append("return_to", encodedSearchParams);
+    const url = new URL("/login", request.url);
+
+    if (encodedSearchParams) {
+      url.searchParams.append("return_to", encodedSearchParams);
+    }
 
     return NextResponse.redirect(url);
   }

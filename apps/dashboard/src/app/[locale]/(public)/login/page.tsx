@@ -14,11 +14,16 @@ import {
   AccordionTrigger,
 } from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
+import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import Link from "next/link";
 import { userAgent } from "next/server";
 
-export default async function Login(params) {
+export const metadata: Metadata = {
+  title: "Login | Midday",
+};
+
+export default async function Page(params) {
   if (params?.searchParams?.return_to === "desktop/command") {
     return <DesktopCommandMenuSignIn />;
   }
