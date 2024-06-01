@@ -10,6 +10,7 @@ import { ImportCSVModal } from "@/components/modals/import-csv-modal";
 import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
 import { Cookies } from "@/utils/constants";
+import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -37,6 +38,10 @@ export default async function Layout({
 
   if (!user?.data?.team) {
     redirect("/teams");
+  }
+
+  if (user) {
+    await setupAnalytics({ userId: user.data.id });
   }
 
   return (
