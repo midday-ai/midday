@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { deleteTeam } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -18,14 +18,13 @@ export const deleteTeamAction = action(deleteTeamSchema, async ({ teamId }) => {
   revalidateTag(`user_${user.data.id}`);
   revalidateTag(`teams_${user.data.id}`);
 
-  const logsnag = await setupLogSnag({
+  const analytics = await setupAnalytics({
     userId: user.data.id,
     fullName: user.data.full_name,
   });
 
-  logsnag.track({
+  analytics.track({
     event: LogEvents.DeleteTeam.name,
-    icon: LogEvents.DeleteTeam.icon,
     channel: LogEvents.DeleteTeam.channel,
   });
 

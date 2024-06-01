@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { deleteBankAccount } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
@@ -24,13 +24,12 @@ export const deleteBankAccountAction = action(
     revalidateTag(`spending_${data.team_id}`);
     revalidateTag(`insights_${data.team_id}`);
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: data.created_by,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.DeleteBank.name,
-      icon: LogEvents.DeleteBank.icon,
       channel: LogEvents.DeleteBank.channel,
     });
   }

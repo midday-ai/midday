@@ -4,8 +4,8 @@ import { FooterCTA } from "@/components/footer-cta";
 import { Header } from "@/components/header";
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
-import { OpenpanelProvider } from "@openpanel/nextjs";
 import "@midday/ui/globals.css";
+import { Provider as Analytics } from "@midday/events/client";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -61,13 +61,7 @@ export default function Layout({ children }: { children: ReactElement }) {
         </main>
         <FooterCTA />
         <Footer />
-
-        <OpenpanelProvider
-          clientId={process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!}
-          trackScreenViews={true}
-          trackAttributes={true}
-          trackOutgoingLinks={true}
-        />
+        <Analytics />
         <DevMessage />
       </body>
     </html>

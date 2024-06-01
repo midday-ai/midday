@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { remove } from "@midday/supabase/storage";
@@ -20,14 +20,13 @@ export const deleteFileAction = action(deleteFileSchema, async (value) => {
 
   await revalidateTag(`vault_${user.data.team_id}`);
 
-  const logsnag = await setupLogSnag({
+  const analytics = await setupAnalytics({
     userId: user.data.id,
     fullName: user.data.full_name,
   });
 
-  logsnag.track({
+  analytics.track({
     event: LogEvents.DeleteFile.name,
-    icon: LogEvents.DeleteFile.icon,
     channel: LogEvents.DeleteFile.channel,
   });
 

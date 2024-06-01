@@ -38,7 +38,7 @@ We are working on the documentation to get started with Midday for local develop
 ### Hosting
 
 - Supabase (database, storage, realtime, auth)
-- Vercel (Website, edge-config, analytics and metrics)
+- Vercel (Website, edge-config, and metrics)
 - Upstash (redis)
 
 ### Services
@@ -51,7 +51,7 @@ We are working on the documentation to get started with Midday for local develop
 - Plaid (Bank connection in Canada and US)
 - Teller (Bank connection in the US)
 - Loops (Marketing email)
-- LogSnag (Events)
+- OpenPanel (Events and Analytics)
 - Dub (Short URLs)
 
 ## Repo Activity

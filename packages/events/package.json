@@ -11,15 +11,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@logsnag/next": "^1.0.3",
-    "@vercel/functions": "^1.0.2"
+    "@vercel/functions": "^1.0.2",
+    "@openpanel/nextjs": "^0.0.10-beta"
   },
   "devDependencies": {
     "typescript": "^5.4.5"
   },
   "exports": {
     "./server": "./src/server.ts",
-    "./client": "./src/client.ts",
+    "./client": "./src/client.tsx",
     "./events": "./src/events.ts"
   }
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { deleteUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { redirect } from "next/navigation";
@@ -11,13 +11,12 @@ export const deleteUserAction = async () => {
 
   const userId = await deleteUser(supabase);
 
-  const logsnag = await setupLogSnag({
+  const analytics = await setupAnalytics({
     userId,
   });
 
-  logsnag.track({
+  analytics.track({
     event: LogEvents.DeleteUser.name,
-    icon: LogEvents.DeleteUser.icon,
     user_id: userId,
     channel: LogEvents.DeleteUser.channel,
   });

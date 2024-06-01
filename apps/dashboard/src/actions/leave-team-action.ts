@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getTeamMembers, getUser } from "@midday/supabase/cached-queries";
 import { leaveTeam } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -44,14 +44,13 @@ export const leaveTeamAction = action(
       redirect(redirectTo);
     }
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: user.data.id,
       fullName: user.data.full_name,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.LeaveTeam.name,
-      icon: LogEvents.LeaveTeam.icon,
       channel: LogEvents.LeaveTeam.channel,
     });
 

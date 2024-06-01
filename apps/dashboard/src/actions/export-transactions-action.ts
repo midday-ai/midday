@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { action } from "./safe-action";
@@ -21,14 +21,13 @@ export const exportTransactionsAction = action(
       },
     });
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: user.data.id,
       fullName: user.data.full_name,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.ExportTransactions.name,
-      icon: LogEvents.ExportTransactions.icon,
       channel: LogEvents.ExportTransactions.channel,
     });
 

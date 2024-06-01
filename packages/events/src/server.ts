@@ -1,4 +1,4 @@
-import { LogSnag } from "@logsnag/next/server";
+import { OpenpanelSdk, type PostEventPayload } from "@openpanel/nextjs";
 import { waitUntil } from "@vercel/functions";
 import { cookies } from "next/headers";
 
@@ -7,52 +7,37 @@ type Props = {
   fullName?: string | null;
 };
 
-interface TrackOptions {
-  channel: string;
-  event: string;
-  description?: string;
-  user_id?: string;
-  icon?: string;
-  notify?: boolean;
-  tags?: Record<string, string | number | boolean>;
-}
-
-export const setupLogSnag = async (options?: Props) => {
+export const setupAnalytics = async (options?: Props) => {
   const { userId, fullName } = options ?? {};
   const trackingConsent = cookies().get("tracking-consent")?.value === "0";
 
-  const logsnag = new LogSnag({
-    token: process.env.LOGSNAG_PRIVATE_TOKEN!,
-    project: process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!,
-    disableTracking: Boolean(process.env.NEXT_PUBLIC_LOGSNAG_DISABLED!),
+  const client = new OpenpanelSdk({
+    clientId: process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!,
+    clientSecret: process.env.OPENPANEL_SECRET_KEY!,
   });
 
   if (trackingConsent && userId && fullName) {
+    const [firstName, lastName] = fullName.split(" ");
+
     waitUntil(
-      logsnag.identify({
-        user_id: userId,
-        properties: {
-          name: fullName,
-        },
+      client.setProfile({
+        profileId: userId,
+        firstName,
+        lastName,
       })
     );
   }
 
   return {
-    ...logsnag,
-    track: (options: TrackOptions) => {
+    track: (options: { event: string } & PostEventPayload["properties"]) => {
       if (process.env.NODE_ENV !== "production") {
         console.log("Track", options);
         return;
       }
 
-      // https://vercel.com/docs/functions/functions-api-reference#waituntil
-      waitUntil(
-        logsnag.track({
-          ...options,
-          user_id: trackingConsent ? userId : undefined,
-        })
-      );
+      const { event, ...rest } = options;
+
+      waitUntil(client.event(event, rest));
     },
   };
 };

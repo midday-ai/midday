@@ -1,6 +1,6 @@
 "use client";
 
-import { useLogSnag } from "@midday/events/client";
+import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
@@ -32,7 +32,6 @@ type Props = {
 };
 
 export function ConnectTransactionsModal({ isEU }: Props) {
-  const { track } = useLogSnag();
   const [token, setToken] = useState();
 
   const [params, setParams] = useQueryStates({
@@ -75,7 +74,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
 
       track({
         event: LogEvents.ConnectBankAuthorized.name,
-        icon: LogEvents.ConnectBankAuthorized.icon,
         channel: LogEvents.ConnectBankAuthorized.channel,
         tags: {
           provider: "teller",
@@ -87,7 +85,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
 
       track({
         event: LogEvents.ConnectBankCanceled.name,
-        icon: LogEvents.ConnectBankCanceled.icon,
         channel: LogEvents.ConnectBankCanceled.channel,
         tags: {
           provider: "teller",
@@ -124,7 +121,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
 
       track({
         event: LogEvents.ConnectBankAuthorized.name,
-        icon: LogEvents.ConnectBankAuthorized.icon,
         channel: LogEvents.ConnectBankAuthorized.channel,
         tags: {
           provider: "plaid",
@@ -136,7 +132,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
 
       track({
         event: LogEvents.ConnectBankCanceled.name,
-        icon: LogEvents.ConnectBankCanceled.icon,
         channel: LogEvents.ConnectBankCanceled.channel,
         tags: {
           provider: "plaid",
@@ -155,7 +150,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       onClick: () => {
         track({
           event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
             provider: "teller",
@@ -175,7 +169,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       onClick: () => {
         track({
           event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
             provider: "plaid",
@@ -196,7 +189,6 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       onClick: () => {
         track({
           event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
             provider: "gocardless",

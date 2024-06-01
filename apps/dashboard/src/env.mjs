@@ -31,6 +31,7 @@ export const env = createEnv({
     RESEND_API_KEY: z.string(),
     BASELIME_SERVICE: z.string(),
     BASELIME_API_KEY: z.string(),
+    OPENPANEL_SECRET_KEY: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -42,12 +43,10 @@ export const env = createEnv({
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: z.string(),
     NEXT_PUBLIC_SUPABASE_ID: z.string(),
     NEXT_PUBLIC_TRIGGER_API_KEY: z.string(),
-    NEXT_PUBLIC_LOGSNAG_TOKEN: z.string(),
-    NEXT_PUBLIC_LOGSNAG_PROJECT: z.string(),
     NEXT_PUBLIC_TELLER_APPLICATION_ID: z.string(),
     NEXT_PUBLIC_TELLER_ENVIRONMENT: z.string(),
     NEXT_PUBLIC_PLAID_ENVIRONMENT: z.string(),
-    NEXT_PUBLIC_LOGSNAG_DISABLED: z.boolean().optional(),
+    NEXT_PUBLIC_OPENPANEL_CLIENT_ID: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -61,7 +60,6 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID,
     NEXT_PUBLIC_TELLER_ENVIRONMENT: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
     NEXT_PUBLIC_PLAID_ENVIRONMENT: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT,
-    NEXT_PUBLIC_LOGSNAG_DISABLED: process.env.NEXT_PUBLIC_LOGSNAG_DISABLED,
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     PORT: process.env.PORT,
     LOOPS_ENDPOINT: process.env.LOOPS_ENDPOINT,
@@ -74,8 +72,6 @@ export const env = createEnv({
     NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
       process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
-    NEXT_PUBLIC_LOGSNAG_TOKEN: process.env.NEXT_PUBLIC_LOGSNAG_TOKEN,
-    NEXT_PUBLIC_LOGSNAG_PROJECT: process.env.NEXT_PUBLIC_LOGSNAG_PROJECT,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
@@ -86,6 +82,9 @@ export const env = createEnv({
       process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
     BASELIME_SERVICE: process.env.BASELIME_SERVICE,
     BASELIME_API_KEY: process.env.BASELIME_API_KEY,
+    NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
+      process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
+    OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
