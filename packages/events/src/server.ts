@@ -12,8 +12,8 @@ export const setupAnalytics = async (options?: Props) => {
   const trackingConsent = cookies().get("tracking-consent")?.value === "0";
 
   const client = new OpenpanelSdk({
-    clientId: "{YOUR_CLIENT_ID}",
-    clientSecret: "{YOUR_CLIENT_SECRET}",
+    clientId: process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!,
+    clientSecret: process.env.OPENPANEL_SECRET_KEY!,
   });
 
   if (trackingConsent && userId && fullName) {
