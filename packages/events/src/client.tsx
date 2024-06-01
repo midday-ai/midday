@@ -1,4 +1,9 @@
-import { OpenpanelProvider, setProfile, trackEvent } from "@openpanel/nextjs";
+import {
+  OpenpanelProvider,
+  type PostEventPayload,
+  setProfile,
+  trackEvent,
+} from "@openpanel/nextjs";
 
 const Provider = () => (
   <OpenpanelProvider
@@ -10,4 +15,15 @@ const Provider = () => (
   />
 );
 
-export { Provider, trackEvent, setProfile };
+const track = (options: { event: string } & PostEventPayload["properties"]) => {
+  if (process.env.NODE_ENV !== "production") {
+    console.log("Track", options);
+    return;
+  }
+
+  const { event, ...rest } = options;
+
+  trackEvent(event, rest);
+};
+
+export { Provider, track, setProfile };

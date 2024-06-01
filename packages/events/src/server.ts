@@ -29,7 +29,6 @@ export const setupAnalytics = async (options?: Props) => {
   }
 
   return {
-    // ...logsnag,
     track: (options: { event: string } & PostEventPayload["properties"]) => {
       if (process.env.NODE_ENV !== "production") {
         console.log("Track", options);

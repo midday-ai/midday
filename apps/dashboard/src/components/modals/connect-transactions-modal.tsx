@@ -1,6 +1,6 @@
 "use client";
 
-import { trackEvent } from "@midday/events/client";
+import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
@@ -72,7 +72,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         enrollment_id: authorization.enrollment.id,
       });
 
-      trackEvent({
+      track({
         event: LogEvents.ConnectBankAuthorized.name,
         channel: LogEvents.ConnectBankAuthorized.channel,
         tags: {
@@ -83,7 +83,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
     onExit: () => {
       setParams({ step: "connect" });
 
-      trackEvent({
+      track({
         event: LogEvents.ConnectBankCanceled.name,
         channel: LogEvents.ConnectBankCanceled.channel,
         tags: {
@@ -119,7 +119,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         institution_id: metadata.institution?.institution_id,
       });
 
-      trackEvent({
+      track({
         event: LogEvents.ConnectBankAuthorized.name,
         channel: LogEvents.ConnectBankAuthorized.channel,
         tags: {
@@ -130,7 +130,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
     onExit: () => {
       setParams({ step: "connect" });
 
-      trackEvent({
+      track({
         event: LogEvents.ConnectBankCanceled.name,
         channel: LogEvents.ConnectBankCanceled.channel,
         tags: {
@@ -148,7 +148,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         "With Teller we can connect to  instantly with more than 5,000 financial institutions in the US.",
       logo: TellerLogo,
       onClick: () => {
-        trackEvent({
+        track({
           event: LogEvents.ConnectBankProvider.name,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
@@ -167,7 +167,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       description: `12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`,
       logo: PlaidLogo,
       onClick: () => {
-        trackEvent({
+        track({
           event: LogEvents.ConnectBankProvider.name,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
@@ -187,7 +187,7 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         "More than 2,500 connected banks in 31 countries across the UK and Europe.",
       logo: GoCardLessLogo,
       onClick: () => {
-        trackEvent({
+        track({
           event: LogEvents.ConnectBankProvider.name,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
