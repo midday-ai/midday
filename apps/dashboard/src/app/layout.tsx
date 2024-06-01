@@ -1,10 +1,9 @@
 // import { SystemBanner } from "@/components/system-banner";
 import "@/styles/globals.css";
-import { LogSnagProvider } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
+import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
-import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -36,12 +35,6 @@ export default function Layout({
 }) {
   return (
     <html lang={params.locale} suppressHydrationWarning>
-      <head>
-        <LogSnagProvider
-          token={process.env.NEXT_PUBLIC_LOGSNAG_TOKEN!}
-          project={process.env.NEXT_PUBLIC_LOGSNAG_PROJECT!}
-        />
-      </head>
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,

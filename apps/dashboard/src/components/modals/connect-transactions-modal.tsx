@@ -1,6 +1,6 @@
 "use client";
 
-import { useLogSnag } from "@midday/events/client";
+import { trackEvent } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
@@ -32,7 +32,6 @@ type Props = {
 };
 
 export function ConnectTransactionsModal({ isEU }: Props) {
-  const { track } = useLogSnag();
   const [token, setToken] = useState();
 
   const [params, setParams] = useQueryStates({
@@ -73,9 +72,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         enrollment_id: authorization.enrollment.id,
       });
 
-      track({
+      trackEvent({
         event: LogEvents.ConnectBankAuthorized.name,
-        icon: LogEvents.ConnectBankAuthorized.icon,
         channel: LogEvents.ConnectBankAuthorized.channel,
         tags: {
           provider: "teller",
@@ -85,9 +83,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
     onExit: () => {
       setParams({ step: "connect" });
 
-      track({
+      trackEvent({
         event: LogEvents.ConnectBankCanceled.name,
-        icon: LogEvents.ConnectBankCanceled.icon,
         channel: LogEvents.ConnectBankCanceled.channel,
         tags: {
           provider: "teller",
@@ -122,9 +119,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         institution_id: metadata.institution?.institution_id,
       });
 
-      track({
+      trackEvent({
         event: LogEvents.ConnectBankAuthorized.name,
-        icon: LogEvents.ConnectBankAuthorized.icon,
         channel: LogEvents.ConnectBankAuthorized.channel,
         tags: {
           provider: "plaid",
@@ -134,9 +130,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
     onExit: () => {
       setParams({ step: "connect" });
 
-      track({
+      trackEvent({
         event: LogEvents.ConnectBankCanceled.name,
-        icon: LogEvents.ConnectBankCanceled.icon,
         channel: LogEvents.ConnectBankCanceled.channel,
         tags: {
           provider: "plaid",
@@ -153,9 +148,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         "With Teller we can connect to  instantly with more than 5,000 financial institutions in the US.",
       logo: TellerLogo,
       onClick: () => {
-        track({
+        trackEvent({
           event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
             provider: "teller",
@@ -173,9 +167,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
       description: `12,000+ financial institutions across the US, Canada, UK, and Europe are covered by Plaid's network`,
       logo: PlaidLogo,
       onClick: () => {
-        track({
+        trackEvent({
           event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
             provider: "plaid",
@@ -194,9 +187,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
         "More than 2,500 connected banks in 31 countries across the UK and Europe.",
       logo: GoCardLessLogo,
       onClick: () => {
-        track({
+        trackEvent({
           event: LogEvents.ConnectBankProvider.name,
-          icon: LogEvents.ConnectBankProvider.icon,
           channel: LogEvents.ConnectBankProvider.channel,
           tags: {
             provider: "gocardless",

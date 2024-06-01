@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
@@ -17,7 +17,7 @@ export const connectBankAccountAction = action(
     const teamId = user.data.team_id;
     const supabase = createClient();
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: user.data.id,
       fullName: user.data.full_name,
     });
@@ -34,9 +34,8 @@ export const connectBankAccountAction = action(
     } catch (error) {
       console.log(error);
 
-      logsnag.track({
+      analytics.track({
         event: LogEvents.ConnectBankFailed.name,
-        icon: LogEvents.ConnectBankFailed.icon,
         channel: LogEvents.ConnectBankFailed.channel,
         tags: {
           provider,
@@ -53,9 +52,8 @@ export const connectBankAccountAction = action(
       },
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.ConnectBankCompleted.name,
-      icon: LogEvents.ConnectBankCompleted.icon,
       channel: LogEvents.ConnectBankCompleted.channel,
       tags: {
         provider,

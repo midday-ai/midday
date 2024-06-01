@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import {
@@ -30,14 +30,13 @@ export const deleteCategoriesAction = action(
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: user.data.id,
       fullName: user.data.full_name,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.CategoryDelete.name,
-      icon: LogEvents.CategoryDelete.icon,
       channel: LogEvents.CategoryDelete.channel,
     });
 

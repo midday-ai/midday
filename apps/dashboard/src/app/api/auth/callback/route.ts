@@ -1,6 +1,6 @@
 import { Cookies } from "@/utils/constants";
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
@@ -39,15 +39,13 @@ export async function GET(req: NextRequest) {
     if (session) {
       const userId = session.user.id;
 
-      const logsnag = await setupLogSnag({
+      const analytics = await setupAnalytics({
         userId,
         fullName: session?.user?.user_metadata?.full_name,
       });
 
-      await logsnag.track({
+      await analytics.track({
         event: LogEvents.SignIn.name,
-        icon: LogEvents.SignIn.icon,
-        notify: true,
         channel: LogEvents.SignIn.channel,
       });
     }

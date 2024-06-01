@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 
@@ -15,14 +15,13 @@ export async function signOutAction() {
     scope: "local",
   });
 
-  const logsnag = await setupLogSnag({
+  const analytics = await setupAnalytics({
     userId: session?.user.id,
     fullName: session?.user.user_metadata?.full_name,
   });
 
-  logsnag.track({
+  analytics.track({
     event: LogEvents.SignOut.name,
-    icon: LogEvents.SignOut.icon,
     channel: LogEvents.SignOut.channel,
   });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createAttachments } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -18,14 +18,13 @@ export const createAttachmentsAction = action(
 
     revalidateTag(`transactions_${user.data.team_id}`);
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: user.data.id,
       fullName: user.data.full_name,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.CreateAttachment.name,
-      icon: LogEvents.CreateAttachment.icon,
       channel: LogEvents.CreateAttachment.channel,
     });
 

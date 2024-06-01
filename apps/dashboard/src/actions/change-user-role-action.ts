@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { updateUserTeamRole } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
@@ -23,13 +23,12 @@ export const changeUserRoleAction = action(
       revalidatePathFunc(revalidatePath);
     }
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.UserRoleChange.name,
-      icon: LogEvents.UserRoleChange.icon,
       channel: LogEvents.UserRoleChange.channel,
     });
 

@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { PlainClient } from "@team-plain/typescript-sdk";
 import { action } from "./safe-action";
@@ -47,14 +47,13 @@ export const sendFeebackAction = action(
       ],
     });
 
-    const logsnag = await setupLogSnag({
+    const analytics = await setupAnalytics({
       userId: user.data.id,
       fullName: user.data.full_name,
     });
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.SendFeedback.name,
-      icon: LogEvents.SendFeedback.icon,
       channel: LogEvents.SendFeedback.channel,
     });
 

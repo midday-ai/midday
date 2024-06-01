@@ -1,7 +1,7 @@
 import { env } from "@/env.mjs";
 import { getAllowedAttachments, prepareDocument } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
 import { client as BackgroundClient, Events } from "@midday/jobs";
 import { client as RedisClient } from "@midday/kv";
@@ -67,11 +67,10 @@ export async function POST(req: Request) {
       .single()
       .throwOnError();
 
-    const logsnag = await setupLogSnag();
+    const analytics = await setupAnalytics();
 
-    logsnag.track({
+    analytics.track({
       event: LogEvents.InboxInbound.name,
-      icon: LogEvents.InboxInbound.icon,
       channel: LogEvents.InboxInbound.channel,
     });
 

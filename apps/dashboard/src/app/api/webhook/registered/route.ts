@@ -1,6 +1,6 @@
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
-import { setupLogSnag } from "@midday/events/server";
+import { setupAnalytics } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
 import { LoopsClient } from "loops";
 import { headers } from "next/headers";
@@ -24,18 +24,17 @@ export async function POST(req: Request) {
   const userId = body.record.id;
   const fullName = body.record.raw_user_meta_data.full_name;
 
-  const logsnag = await setupLogSnag({
+  const analytics = await setupAnalytics({
     userId,
     fullName,
   });
 
-  logsnag.track({
+  analytics.track({
     event: LogEvents.Registered.name,
-    icon: LogEvents.Registered.icon,
     channel: LogEvents.Registered.channel,
   });
 
-  client.sendEvent({
+  await client.sendEvent({
     id: userId,
     name: Events.ONBOARDING_EMAILS,
     payload: {
