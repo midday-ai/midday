@@ -18,7 +18,7 @@ function getUIComponentFromMessage(message) {
   if (message.role === "tool") {
     return message.content.map((tool) => {
       switch (tool.toolName) {
-        case "get_runway": {
+        case "getRunway": {
           return <RunwayUI {...tool.result} />;
         }
 

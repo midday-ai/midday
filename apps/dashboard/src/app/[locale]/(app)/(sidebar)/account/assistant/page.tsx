@@ -1,6 +1,6 @@
 import { getAssistantSettings } from "@/actions/ai/storage";
 import { AssistantHistory } from "@/components/assistant-history";
-import { AssistantProvider } from "@/components/assistant-provider";
+// import { AssistantProvider } from "@/components/assistant-provider";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export default async function Page() {
 
   return (
     <div className="space-y-12">
-      <AssistantProvider provider={settings?.provider} />
+      {/* <AssistantProvider provider={settings?.provider} /> */}
       <AssistantHistory enabled={settings?.enabled} />
     </div>
   );
