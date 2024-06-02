@@ -62,9 +62,9 @@ export function Hero() {
         </h1>
 
         <p className="mt-4 md:mt-6 max-w-[600px]">
-          An all-in-one tool for freelancers, contractors, consultants, and solo
-          entrepreneurs to manage their finances, track projects, store files,
-          and send invoices.
+          An all-in-one tool for freelancers, contractors, consultants, and
+          micro businesses to monitor financial health, time-track projects,
+          store files, and send invoices.
         </p>
 
         <div className="mt-8">
