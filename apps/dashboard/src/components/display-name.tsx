@@ -24,7 +24,11 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 
-export function DisplayName({ fullName }) {
+type Props = {
+  fullName: string;
+};
+
+export function DisplayName({ fullName }: Props) {
   const action = useAction(updateUserAction);
   const form = useForm<UpdateUserFormValues>({
     resolver: zodResolver(updateUserSchema),
@@ -65,7 +69,7 @@ export function DisplayName({ fullName }) {
                       autoCapitalize="none"
                       autoCorrect="off"
                       spellCheck="false"
-                      maxLength="32"
+                      maxLength={32}
                     />
                   </FormControl>
                   <FormMessage />

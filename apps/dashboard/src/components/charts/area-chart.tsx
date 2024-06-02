@@ -64,15 +64,31 @@ export function AreaChart({ currency, data, height = 290 }) {
     <ResponsiveContainer width="100%" height={height}>
       <BaseAreaChart data={data}>
         <defs>
-          <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-            <stop
-              offset="5%"
-              stopColor="hsl(var(--primary))"
-              stopOpacity={0.4}
-            />
-            <stop offset="95%" stopColor="transparent" stopOpacity={0} />
-          </linearGradient>
+          <pattern
+            id="raster"
+            patternUnits="userSpaceOnUse"
+            width="64"
+            height="64"
+          >
+            <path d="M-99 97L21 -23" stroke="#282828" />
+            <path d="M-91 97L29 -23" stroke="#282828" />
+            <path d="M-83 97L37 -23" stroke="#282828" />
+            <path d="M-75 97L45 -23" stroke="#282828" />
+            <path d="M-67 97L53 -23" stroke="#282828" />
+            <path d="M-59 97L61 -23" stroke="#282828" />
+            <path d="M-51 97L69 -23" stroke="#282828" />
+            <path d="M-43 97L77 -23" stroke="#282828" />
+            <path d="M-35 97L85 -23" stroke="#282828" />
+            <path d="M-27 97L93 -23" stroke="#282828" />
+            <path d="M-19 97L101 -23" stroke="#282828" />
+            <path d="M-11 97L109 -23" stroke="#282828" />
+            <path d="M-3 97L117 -23" stroke="#282828" />
+            <path d="M5 97L125 -23" stroke="#282828" />
+            <path d="M13 97L133 -23" stroke="#282828" />
+            <path d="M21 97L141 -23" stroke="#282828" />
+          </pattern>
         </defs>
+
         <CartesianGrid
           strokeDasharray="3 3"
           vertical={false}
@@ -125,7 +141,7 @@ export function AreaChart({ currency, data, height = 290 }) {
           type="monotone"
           dataKey="value"
           stroke="hsl(var(--primary))"
-          fill="url(#colorPv)"
+          fill="url(#raster)"
         />
       </BaseAreaChart>
     </ResponsiveContainer>
