@@ -16,15 +16,15 @@ export function SectionSix() {
 
         <div className="mt-6 md:max-w-[40%] md:ml-8">
           <h3 className="font-medium text-xl md:text-2xl mt-8 mb-4">
-            Your Virtual CFO
+            Assistant
           </h3>
 
           <p className="text-[#878787] text-sm">
-            With Midday AI, you can ask anything and gain insights into your
-            financial situation. Understand your major expenses and income
-            sources. Inquire about transactions without receipts or explore
-            revenue patterns like Burn rate or MRR. Learning from your financial
-            data helps you save money or increase earnings in the long run.
+            Ask Midday anything and get tailored insights into your financial
+            situation. Understand your biggest outgoings and incomings. Ask
+            Midday to find transactions without receipts or search for revenue
+            patterns. Get a better grasp on your financials to help you cut
+            costs, find opportunities and build a longer runway.
           </p>
 
           <div className="mt-8">

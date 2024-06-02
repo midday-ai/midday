@@ -40,7 +40,7 @@ export function Hero() {
             className="rounded-full border-border flex space-x-2 items-center"
           >
             <span className="font-mono text-xs">
-              Introducing Midday Assistant v1
+              Introducing Midday Assistant
             </span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -87,7 +87,7 @@ export function Hero() {
         <p className="text-xs text-[#707070] mt-8 font-mono">
           Used by over{" "}
           <Link href="/open-startup">
-            <span className="underline">3200+</span>
+            <span className="underline">3300+</span>
           </Link>{" "}
           businesses.
         </p>

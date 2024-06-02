@@ -13,8 +13,7 @@ export function Screens() {
         <div className="text-center pb-14">
           <h3 className="text-4xl md:text-6xl font-medium">The thin layer</h3>
           <p className="mt-4 text-[#878787]">
-            Bridging the gap between your bank and your accountants
-            <br /> software.
+            Bridging the gap between your bank and your accountants software.
           </p>
         </div>
 
