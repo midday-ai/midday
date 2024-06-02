@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export function Countdown() {
-  const countDownDate = new Date("2024-06-19");
+  const countDownDate = new Date("2024-06-26 12:01 AM PDT");
 
   const getTimeDifference = (countDownTime) => {
     const currentTime = new Date().getTime();

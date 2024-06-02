@@ -26,7 +26,7 @@ export default function Page() {
       <Countdown />
 
       <div className="mt-24">
-        <a href="https://go.midday.ai/ph">
+        <a href="https://go.midday.ai/htI3aDs">
           <Button className="space-x-2" size="lg">
             <svg
               xmlns="http://www.w3.org/2000/svg"
