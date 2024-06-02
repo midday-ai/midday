@@ -2,17 +2,14 @@
 
 import { signOutAction } from "@/actions/sign-out-action";
 import { DropdownMenuItem } from "@midday/ui/dropdown-menu";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function SignOut() {
   const [isLoading, setLoading] = useState(false);
-  const router = useRouter();
 
   const handleSignOut = async () => {
     setLoading(true);
     signOutAction();
-    router.refresh();
   };
 
   return (
