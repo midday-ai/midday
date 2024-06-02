@@ -3,6 +3,7 @@
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { mistral } from "@ai-sdk/mistral";
 import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import {
   getBankAccountsCurrencies,
@@ -18,6 +19,7 @@ import {
 } from "ai/rsc";
 import { startOfMonth, subMonths } from "date-fns";
 import { headers } from "next/headers";
+import { z } from "zod";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
@@ -26,6 +28,11 @@ import { getTransactionsTool } from "./tools/get-transactions";
 import { getProfitTool } from "./tools/profit";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
+
+const groq = createOpenAI({
+  baseURL: "https://api.groq.com/openai/v1",
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 const ratelimit = new Ratelimit({
   limiter: Ratelimit.fixedWindow(10, "10s"),
@@ -36,11 +43,12 @@ async function selectModel() {
   const settings = await getAssistantSettings();
 
   switch (settings.provider) {
-    case "mistralai": {
-      return mistral("mistral-large-latest");
-    }
+    // case "mistralai": {
+    //   return mistral("mistral-large-latest");
+    // }
     default: {
-      return openai("gpt-4o");
+      return groq("gemma-7b-it");
+      // return openai("gpt-4o");
     }
   }
 }
@@ -146,6 +154,16 @@ export async function submitUserMessage(
     },
     // toolChoice: "required", // force the model to call a tool
     tools: {
+      getWeather: {
+        description: "Get the weather in a location",
+        parameters: z.object({
+          location: z.string().describe("The location to get the weather for"),
+        }),
+        generate: async ({ location }: { location: string }) => ({
+          location,
+          temperature: 72 + Math.floor(Math.random() * 21) - 10,
+        }),
+      },
       getSpending: getSpendingTool({
         aiState,
         currency: defaultValues.currency,
