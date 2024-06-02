@@ -6,6 +6,9 @@ import { RunwayUI } from "./tools/ui/runway-ui";
 import { SpendingUI } from "./tools/ui/spending-ui";
 import { TransactionsUI } from "./tools/ui/transactions-ui";
 
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
 function getUIComponentFromMessage(message) {
   if (message.role === "user") {
     return <UserMessage>{message.content}</UserMessage>;

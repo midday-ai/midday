@@ -23,6 +23,7 @@ import { getBurnRateTool } from "./tools/burn-rate";
 import { getDocumentsTool } from "./tools/get-documents";
 import { getTransactionsTool } from "./tools/get-transactions";
 import { getProfitTool } from "./tools/profit";
+import { createReport } from "./tools/report";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
 
@@ -172,6 +173,14 @@ export async function submitUserMessage(
       }),
       getTransactions: getTransactionsTool({ aiState }),
       getDocuments: getDocumentsTool({ aiState, teamId }),
+      createReport: createReport({
+        aiState,
+        userId: user?.data?.id,
+        teamId,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
     },
   });
 

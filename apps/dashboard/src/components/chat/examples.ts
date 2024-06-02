@@ -8,4 +8,5 @@ export const chatExamples = [
   // "Show my revenue",
   `What's my profit for last year`,
   `What's my revenue`,
+  "Generate a report",
 ];

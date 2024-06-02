@@ -28,7 +28,7 @@ export const createProjectReport = action(
 
     const link = await dub.links.create({
       url: `${params.baseUrl}/report/project/${data?.id}`,
-      // rewrite: true,
+      rewrite: true,
     });
 
     const { data: linkData } = await supabase
