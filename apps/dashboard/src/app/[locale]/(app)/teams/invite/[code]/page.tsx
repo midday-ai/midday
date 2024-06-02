@@ -2,7 +2,7 @@ import { joinTeamByInviteCode } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { revalidateTag } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";

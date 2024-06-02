@@ -28,9 +28,7 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .default(currency)
         .describe("The currency for profit"),
     }),
-    generate: async function* (args) {
-      yield <div />;
-
+    generate: async (args) => {
       const { currency, startDate, endDate } = args;
 
       const data = await getMetrics({

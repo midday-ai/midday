@@ -190,7 +190,7 @@ export default async function Report({ params }) {
           </span>
         </div>
 
-        <Link href="/" className="absolute right-4">
+        <Link href="/" className="absolute right-4" prefetch>
           <Button variant="outline">Sign up</Button>
         </Link>
       </div>

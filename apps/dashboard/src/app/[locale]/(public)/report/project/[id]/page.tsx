@@ -71,7 +71,7 @@ export default async function ProjectReport({ params, searchParams }) {
           <span className="text-[#878787]">Time Report</span>
         </div>
 
-        <Link href="/" className="absolute right-4">
+        <Link href="/" className="absolute right-4" prefetch>
           <Button variant="outline">Sign up</Button>
         </Link>
       </div>

@@ -1,6 +1,7 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
+import { mistral } from "@ai-sdk/mistral";
 // import { mistral } from "@ai-sdk/mistral";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
@@ -36,9 +37,9 @@ async function selectModel() {
   const settings = await getAssistantSettings();
 
   switch (settings.provider) {
-    // case "mistralai": {
-    //   return mistral("mistral-large-latest");
-    // }
+    case "mistralai": {
+      return mistral("mistral-large-latest");
+    }
     default: {
       return openai("gpt-4o");
     }
@@ -98,15 +99,26 @@ export async function submitUserMessage(
 
   const result = await streamUI({
     model,
+    temperature: 0,
     initial: <SpinnerMessage />,
     system: `\
-    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.`,
+    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.
+
+    Messages inside [] means that it's a UI element or a user event.
+
+    If the user wants to see spending, call \`get_spending\` to show the spending UI.
+    If the user just wants the burn rate, call \`get_burn_rate\` to show the burn rate UI.
+    If the user just wants the runway, call \`get_runway\` to show the runway UI.
+    If the user just wants the profit, call \`get_profit\` to show the profit UI.
+    If the user just wants to find transactions, call \`get_transactions\` to show the transactions UI.
+    If the user just wants to find documents, invoices or receipts, call \`get_document\` to show the documents UI.
+    `,
     messages: [
-      ...aiState.get().messages,
-      {
-        role: "user",
-        content,
-      },
+      ...aiState.get().messages.map((message: ClientMessage) => ({
+        role: message.role,
+        content: message.content,
+        name: message.name,
+      })),
     ],
     text: ({ content, done, delta }) => {
       if (!textStream) {
@@ -134,32 +146,32 @@ export async function submitUserMessage(
       return textNode;
     },
     tools: {
-      get_spending: getSpendingTool({
+      getSpending: getSpendingTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_burn_rate: getBurnRateTool({
+      getBurnRate: getBurnRateTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_runway: getRunwayTool({
+      getRunway: getRunwayTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_profit: getProfitTool({
+      getProfit: getProfitTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_transactions: getTransactionsTool({ aiState }),
-      get_documents: getDocumentsTool({ aiState, teamId }),
+      getTransactions: getTransactionsTool({ aiState }),
+      getDocuments: getDocumentsTool({ aiState, teamId }),
     },
   });
 
