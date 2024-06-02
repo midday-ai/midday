@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 export function Countdown() {
-  const countDownDate = new Date("2024-06-26 12:01 AM PDT");
+  const countDownDate = new Date("2024-06-26");
 
   const getTimeDifference = (countDownTime) => {
     const currentTime = new Date().getTime();
