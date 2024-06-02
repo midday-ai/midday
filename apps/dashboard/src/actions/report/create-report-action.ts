@@ -31,7 +31,7 @@ export const createReportAction = action(createReportSchema, async (params) => {
   const link = await dub.links.create({
     url: `${params.baseUrl}/report/${data.id}`,
     expiresAt: params.expiresAt,
-    rewrite: true,
+    // rewrite: true,
   });
 
   const { data: linkData } = await supabase

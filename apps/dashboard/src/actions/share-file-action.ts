@@ -36,7 +36,7 @@ export const shareFileAction = action(shareFileSchema, async (value) => {
 
   const link = await dub.links.create({
     url: response?.data?.signedUrl,
-    rewrite: true,
+    // rewrite: true,
   });
 
   return link?.shortLink;

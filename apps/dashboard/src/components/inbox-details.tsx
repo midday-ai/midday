@@ -185,8 +185,6 @@ export function InboxDetails({
                 src={`/api/proxy?filePath=vault/${item?.file_path.join("/")}`}
                 name={item.name}
                 type={item.content_type}
-                width={680}
-                height={900}
                 disableFullscreen
               />
             )}
