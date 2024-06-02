@@ -43,7 +43,7 @@ export function getDocumentsTool({ aiState, teamId }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "get_documents",
+                toolName: "getDocuments",
                 toolCallId,
                 args,
               },
@@ -55,7 +55,7 @@ export function getDocumentsTool({ aiState, teamId }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "get_documents",
+                toolName: "getDocuments",
                 toolCallId,
                 result: props,
               },

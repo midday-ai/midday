@@ -18,11 +18,11 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
     parameters: z.object({
       startDate: z.coerce
         .date()
-        .describe("The start date for the burn rate period")
+        .describe("The start date of the burn rate, in ISO-8601 format")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date for the burn rate period")
+        .describe("The end date of the burn rate, in ISO-8601 format")
         .default(new Date(dateTo)),
       currency: z
         .string()
@@ -68,7 +68,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "burn_rate",
+                toolName: "getBurnRate",
                 toolCallId,
                 args,
               },
@@ -80,7 +80,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "burn_rate",
+                toolName: "getBurnRate",
                 toolCallId,
                 result: props,
               },

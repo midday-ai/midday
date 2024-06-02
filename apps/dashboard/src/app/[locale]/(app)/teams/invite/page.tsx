@@ -1,7 +1,7 @@
 import { InviteForm } from "@/components/forms/invite-form";
 import { UserMenu } from "@/components/user-menu";
 import { Icons } from "@midday/ui/icons";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 

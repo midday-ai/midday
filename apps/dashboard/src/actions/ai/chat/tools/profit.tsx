@@ -17,20 +17,18 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
     parameters: z.object({
       startDate: z.coerce
         .date()
-        .describe("The start date for the profit period")
+        .describe("The start date of the profit, in ISO-8601 format")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date for the profit period")
+        .describe("The end date of the profit, in ISO-8601 format")
         .default(new Date(dateTo)),
       currency: z
         .string()
         .default(currency)
         .describe("The currency for profit"),
     }),
-    generate: async function* (args) {
-      yield <div />;
-
+    generate: async (args) => {
       const { currency, startDate, endDate } = args;
 
       const data = await getMetrics({
@@ -59,7 +57,7 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "profit",
+                toolName: "getProfit",
                 toolCallId,
                 args,
               },
@@ -71,7 +69,7 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "profit",
+                toolName: "getProfit",
                 toolCallId,
                 result: props,
               },

@@ -57,18 +57,18 @@ export async function UserMenu({ onlySignOut }) {
             <DropdownMenuSeparator />
 
             <DropdownMenuGroup>
-              <Link href="/account">
+              <Link prefetch href="/account">
                 <DropdownMenuItem>
                   Account
                   <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </Link>
 
-              <Link href="/account/support">
+              <Link prefetch href="/account/support">
                 <DropdownMenuItem>Support</DropdownMenuItem>
               </Link>
 
-              <Link href="/account/teams">
+              <Link prefetch href="/account/teams">
                 <DropdownMenuItem>
                   Teams
                   <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>

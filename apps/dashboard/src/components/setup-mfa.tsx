@@ -29,7 +29,7 @@ function MfaStart({ setEnroll }) {
       </div>
 
       <div className="flex border-t-[1px] pt-4 mt-4 justify-center mb-6">
-        <Link href="/" className="text-medium text-sm">
+        <Link href="/" className="text-medium text-sm" prefetch>
           Skip
         </Link>
       </div>

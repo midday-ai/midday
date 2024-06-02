@@ -79,6 +79,7 @@ const Item = ({
   return (
     <TooltipProvider delayDuration={70}>
       <Link
+        prefetch
         href={item.path}
         onClick={(evt) => {
           if (isCustomizing) {

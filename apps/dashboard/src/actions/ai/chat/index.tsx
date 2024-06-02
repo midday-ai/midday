@@ -1,7 +1,6 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
-// import { mistral } from "@ai-sdk/mistral";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import {
@@ -33,16 +32,18 @@ const ratelimit = new Ratelimit({
 });
 
 async function selectModel() {
-  const settings = await getAssistantSettings();
+  return openai("gpt-4o");
 
-  switch (settings.provider) {
-    // case "mistralai": {
-    //   return mistral("mistral-large-latest");
-    // }
-    default: {
-      return openai("gpt-4o");
-    }
-  }
+  // const settings = await getAssistantSettings();
+
+  // switch (settings.provider) {
+  //   case "mistralai": {
+  //     return mistral("mistral-large-latest");
+  //   }
+  //   default: {
+  //     return openai("gpt-4o");
+  //   }
+  // }
 }
 
 export async function submitUserMessage(
@@ -100,13 +101,24 @@ export async function submitUserMessage(
     model,
     initial: <SpinnerMessage />,
     system: `\
-    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.`,
+    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.
+
+    If the user wants to see spending, call \`getSpending\` function.
+    If the user just wants the burn rate, call \`getBurnRate\` function.
+    If the user just wants the runway, call \`getRunway\` function.
+    If the user just wants the profit, call \`getProfit\` function.
+    If the user just wants to find transactions, call \`getTransactions\` function.
+    If the user just wants to find documents, invoices or receipts, call \`getDocuments\` function.
+
+    Allways try to call the functions with default values, otherwise ask the user to respond with parameters. Just show one example if you cant call the function.
+    
+    `,
     messages: [
-      ...aiState.get().messages,
-      {
-        role: "user",
-        content,
-      },
+      ...aiState.get().messages.map((message: any) => ({
+        role: message.role,
+        content: message.content,
+        name: message.name,
+      })),
     ],
     text: ({ content, done, delta }) => {
       if (!textStream) {
@@ -134,32 +146,32 @@ export async function submitUserMessage(
       return textNode;
     },
     tools: {
-      get_spending: getSpendingTool({
+      getSpending: getSpendingTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_burn_rate: getBurnRateTool({
+      getBurnRate: getBurnRateTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_runway: getRunwayTool({
+      getRunway: getRunwayTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_profit: getProfitTool({
+      getProfit: getProfitTool({
         aiState,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
-      get_transactions: getTransactionsTool({ aiState }),
-      get_documents: getDocumentsTool({ aiState, teamId }),
+      getTransactions: getTransactionsTool({ aiState }),
+      getDocuments: getDocumentsTool({ aiState, teamId }),
     },
   });
 
