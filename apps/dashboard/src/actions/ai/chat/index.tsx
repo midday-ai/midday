@@ -18,6 +18,7 @@ import {
 } from "ai/rsc";
 import { startOfMonth, subMonths } from "date-fns";
 import { headers } from "next/headers";
+import { ollama } from "ollama-ai-provider";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
@@ -40,7 +41,8 @@ async function selectModel() {
     //   return mistral("mistral-large-latest");
     // }
     default: {
-      return openai("gpt-4o");
+      return ollama("mistral");
+      // return openai("gpt-4o");
     }
   }
 }

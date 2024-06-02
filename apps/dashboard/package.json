@@ -53,6 +53,7 @@
     "next-safe-action": "6.2.0",
     "next-themes": "^0.3.0",
     "nuqs": "^1.17.4",
+    "ollama-ai-provider": "^0.7.0",
     "react": "18.3.1",
     "react-colorful": "^5.6.1",
     "react-dom": "18.3.1",
