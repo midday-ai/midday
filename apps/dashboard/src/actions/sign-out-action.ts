@@ -4,6 +4,7 @@ import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 
 export async function signOutAction() {
   const supabase = createClient();
@@ -26,4 +27,6 @@ export async function signOutAction() {
   });
 
   revalidateTag(`user_${session?.user.id}`);
+
+  return redirect("/login");
 }

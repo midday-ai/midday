@@ -1,4 +1,4 @@
-import { BotCard, BotMessage, UserMessage } from "@/components/chat/messages";
+import { BotMessage, UserMessage } from "@/components/chat/messages";
 import type { Chat } from "../types";
 import { BurnRateUI } from "./tools/ui/burn-rate-ui";
 import { DocumentsUI } from "./tools/ui/documents-ui";
