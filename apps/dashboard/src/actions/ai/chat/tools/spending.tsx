@@ -22,11 +22,11 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
       category: z.string().describe("The category for spending"),
       startDate: z.coerce
         .date()
-        .describe("The start date for spending")
+        .describe("The start date of the spending, in ISO-8601 format")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date for spending")
+        .describe("The end date of the spending, in ISO-8601 format")
         .default(new Date(dateTo)),
     }),
     generate: async (args) => {
@@ -62,7 +62,7 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "get_spending",
+                toolName: "getSpending",
                 toolCallId,
                 args,
               },
@@ -74,7 +74,7 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "get_spending",
+                toolName: "getSpending",
                 toolCallId,
                 result: props,
               },

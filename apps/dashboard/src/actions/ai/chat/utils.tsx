@@ -18,23 +18,23 @@ function getUIComponentFromMessage(message) {
   if (message.role === "tool") {
     return message.content.map((tool) => {
       switch (tool.toolName) {
-        case "runway": {
+        case "get_runway": {
           return <RunwayUI {...tool.result} />;
         }
 
-        case "burn_rate": {
+        case "getBurnRate": {
           return <BurnRateUI {...tool.result} />;
         }
 
-        case "get_spending": {
+        case "getSpending": {
           return <SpendingUI {...tool.result} />;
         }
 
-        case "get_transactions": {
+        case "getTransactions": {
           return <TransactionsUI {...tool.result} />;
         }
 
-        case "get_documents": {
+        case "getDocuments": {
           return <DocumentsUI {...tool.result} />;
         }
 

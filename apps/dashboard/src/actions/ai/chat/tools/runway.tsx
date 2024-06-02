@@ -17,11 +17,11 @@ export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
     parameters: z.object({
       startDate: z.coerce
         .date()
-        .describe("The start date for the runway period")
+        .describe("The start date of the runway, in ISO-8601 format")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date for the runway period")
+        .describe("The end date of the runway, in ISO-8601 format")
         .default(new Date(dateTo)),
       currency: z
         .string()
@@ -53,7 +53,7 @@ export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "runway",
+                toolName: "getRunway",
                 toolCallId,
                 args,
               },
@@ -65,7 +65,7 @@ export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "runway",
+                toolName: "getRunway",
                 toolCallId,
                 result: props,
               },

@@ -26,11 +26,11 @@ export function getTransactionsTool({ aiState }: Args) {
         .optional(),
       fromDate: z.coerce
         .date()
-        .describe("Filter transactions from this date")
+        .describe("Filter transactions from this date, in ISO-8601 format")
         .optional(),
       toDate: z.coerce
         .date()
-        .describe("Filter transactions to this date")
+        .describe("Filter transactions to this date, in ISO-8601 format")
         .optional(),
     }),
     generate: async (args) => {
@@ -73,7 +73,7 @@ export function getTransactionsTool({ aiState }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "get_transactions",
+                toolName: "getTransactions",
                 toolCallId,
                 args,
               },
@@ -85,7 +85,7 @@ export function getTransactionsTool({ aiState }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "get_transactions",
+                toolName: "getTransactions",
                 toolCallId,
                 result: props,
               },
