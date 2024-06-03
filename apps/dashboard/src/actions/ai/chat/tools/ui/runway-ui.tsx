@@ -1,3 +1,5 @@
+"use client";
+
 import { BotCard } from "@/components/chat/messages";
 import { addMonths, format } from "date-fns";
 

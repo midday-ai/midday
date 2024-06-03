@@ -1,3 +1,5 @@
+"use client";
+
 import { BotCard, BotMessage } from "@/components/chat/messages";
 
 type Props = {

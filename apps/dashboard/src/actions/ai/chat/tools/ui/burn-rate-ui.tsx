@@ -1,3 +1,5 @@
+"use client";
+
 import { AreaChart } from "@/components/charts/area-chart";
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
