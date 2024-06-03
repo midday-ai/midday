@@ -29,7 +29,7 @@ export function DocumentsUI({ data }: Props) {
   return (
     <BotCard className="font-sans space-y-4">
       <p className="font-mono">
-        We found {data.length} documents based on your query
+        We found {data.length} documents based on your search
       </p>
 
       <div className="w-full overflow-auto space-x-4 flex">

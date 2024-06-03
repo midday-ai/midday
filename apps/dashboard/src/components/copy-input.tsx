@@ -26,30 +26,30 @@ export function CopyInput({ value, className }: Props) {
   };
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={handleClipboard}
       className={cn(
-        "flex items-center relative w-full border py-2 px-4",
+        "flex items-center relative w-full border py-2 px-4 cursor-pointer",
         className
       )}
     >
       <div className="pr-7 text-[#878787] text-sm">{value}</div>
-      <button type="button" onClick={handleClipboard}>
-        <motion.div
-          className="absolute right-4 top-2.5"
-          initial={{ opacity: 1, scale: 1 }}
-          animate={{ opacity: isCopied ? 0 : 1, scale: isCopied ? 0 : 1 }}
-        >
-          <Icons.Copy />
-        </motion.div>
+      <motion.div
+        className="absolute right-4 top-2.5"
+        initial={{ opacity: 1, scale: 1 }}
+        animate={{ opacity: isCopied ? 0 : 1, scale: isCopied ? 0 : 1 }}
+      >
+        <Icons.Copy />
+      </motion.div>
 
-        <motion.div
-          className="absolute right-4 top-2.5"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: isCopied ? 1 : 0, scale: isCopied ? 1 : 0 }}
-        >
-          <Icons.Check />
-        </motion.div>
-      </button>
-    </div>
+      <motion.div
+        className="absolute right-4 top-2.5"
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: isCopied ? 1 : 0, scale: isCopied ? 1 : 0 }}
+      >
+        <Icons.Check />
+      </motion.div>
+    </button>
   );
 }

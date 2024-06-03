@@ -12,11 +12,11 @@ type Props = {
   endDate: string;
 };
 
-export function ProfitUI({ data, currency, startDate, endDate }: Props) {
+export function RevenueUI({ data, currency, startDate, endDate }: Props) {
   if (!data?.result?.length) {
     return (
       <BotCard>
-        We couldn't find any data to provide you with a profit summary.
+        We couldn't find any data to provide you with a revenue summary.
       </BotCard>
     );
   }
@@ -25,7 +25,7 @@ export function ProfitUI({ data, currency, startDate, endDate }: Props) {
       <div>
         <p className="font-mono">
           Based on the period from {format(new Date(startDate), "PP")} and{" "}
-          {format(new Date(endDate), "PP")} your current profit is{" "}
+          {format(new Date(endDate), "PP")} your revenue is{" "}
           <FormatAmount
             amount={data.summary.currentTotal}
             currency={data.summary.currency}

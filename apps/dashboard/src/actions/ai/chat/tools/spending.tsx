@@ -1,6 +1,7 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { getSpending } from "@midday/supabase/cached-queries";
 import { nanoid } from "ai";
+import { startOfMonth } from "date-fns";
 import { z } from "zod";
 import { SpendingUI } from "./ui/spending-ui";
 
@@ -34,8 +35,8 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
       const toolCallId = nanoid();
 
       const { data } = await getSpending({
-        from: startDate,
-        to: endDate,
+        from: startOfMonth(new Date(startDate)).toISOString(),
+        to: new Date(endDate).toISOString(),
         currency,
       });
 

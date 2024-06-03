@@ -70,22 +70,23 @@ export function AreaChart({ currency, data, height = 290 }) {
             width="64"
             height="64"
           >
-            <path d="M-99 97L21 -23" stroke="#282828" />
-            <path d="M-91 97L29 -23" stroke="#282828" />
-            <path d="M-83 97L37 -23" stroke="#282828" />
-            <path d="M-75 97L45 -23" stroke="#282828" />
-            <path d="M-67 97L53 -23" stroke="#282828" />
-            <path d="M-59 97L61 -23" stroke="#282828" />
-            <path d="M-51 97L69 -23" stroke="#282828" />
-            <path d="M-43 97L77 -23" stroke="#282828" />
-            <path d="M-35 97L85 -23" stroke="#282828" />
-            <path d="M-27 97L93 -23" stroke="#282828" />
-            <path d="M-19 97L101 -23" stroke="#282828" />
-            <path d="M-11 97L109 -23" stroke="#282828" />
-            <path d="M-3 97L117 -23" stroke="#282828" />
-            <path d="M5 97L125 -23" stroke="#282828" />
-            <path d="M13 97L133 -23" stroke="#282828" />
-            <path d="M21 97L141 -23" stroke="#282828" />
+            <path d="M-106 110L22 -18" stroke="#282828" />
+            <path d="M-98 110L30 -18" stroke="#282828" />
+            <path d="M-90 110L38 -18" stroke="#282828" />
+            <path d="M-82 110L46 -18" stroke="#282828" />
+            <path d="M-74 110L54 -18" stroke="#282828" />
+            <path d="M-66 110L62 -18" stroke="#282828" />
+            <path d="M-58 110L70 -18" stroke="#282828" />
+            <path d="M-50 110L78 -18" stroke="#282828" />
+            <path d="M-42 110L86 -18" stroke="#282828" />
+            <path d="M-34 110L94 -18" stroke="#282828" />
+            <path d="M-26 110L102 -18" stroke="#282828" />
+            <path d="M-18 110L110 -18" stroke="#282828" />
+            <path d="M-10 110L118 -18" stroke="#282828" />
+            <path d="M-2 110L126 -18" stroke="#282828" />
+            <path d="M6 110L134 -18" stroke="#282828" />
+            <path d="M14 110L142 -18" stroke="#282828" />
+            <path d="M22 110L150 -18" stroke="#282828" />
           </pattern>
         </defs>
 

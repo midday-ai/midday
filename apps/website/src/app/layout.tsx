@@ -9,8 +9,20 @@ import { Provider as Analytics } from "@midday/events/client";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import type { ReactElement } from "react";
 import { baseUrl } from "./sitemap";
+
+const PublicBetaBanner = dynamic(
+  () =>
+    import("@/components/public-beta-banner").then(
+      (mod) => mod.PublicBetaBanner
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -63,6 +75,7 @@ export default function Layout({ children }: { children: ReactElement }) {
         <Footer />
         <Analytics />
         <DevMessage />
+        <PublicBetaBanner />
       </body>
     </html>
   );

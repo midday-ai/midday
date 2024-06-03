@@ -1,3 +1,5 @@
+"use client";
+
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { format } from "date-fns";

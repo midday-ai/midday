@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export function Countdown() {
+export function CountdownSmall() {
   const countDownDate = new Date("2024-06-26");
 
   const getTimeDifference = (countDownTime) => {
@@ -58,53 +58,51 @@ export function Countdown() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 sm:gap-16">
-      <div className="flex justify-center gap-3 sm:gap-8 ">
+    <div className="flex flex-col items-center justify-center gap-8">
+      <div className="flex justify-center gap-2">
         <div className="flex flex-col relative">
-          <div className="h-16 w-16 sm:w-32 sm:h-32 lg:w-[230px] lg:h-[230px] flex justify-between items-center">
+          <div className="h-6 w-6 flex justify-between items-center">
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 !-left-[6px]" />
-            <span className="lg:text-[174px] sm:text-6xl text-6xl font-medium text-dotted font-mono">
-              {countDownTime?.days}
-            </span>
+            <span className="text-base font-medium">{countDownTime?.days}</span>
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 -right-[6px]" />
           </div>
-          <span className="text-sm text-center capitalize font-medium">
+          <span className="text-[9px] text-center text-[#707070]">
             {countDownTime?.days === 1 ? "Day" : "Days"}
           </span>
         </div>
         <div className="flex flex-col relative">
-          <div className="h-16 w-16 sm:w-32 sm:h-32 lg:w-[230px] lg:h-[230px] flex justify-between items-center">
+          <div className="h-6 w-6 flex justify-between items-center">
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 !-left-[6px]" />
-            <span className="lg:text-[174px] sm:text-6xl text-6xl font-medium text-dotted font-mono">
+            <span className="text-base font-medium">
               {countDownTime?.hours}
             </span>
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 -right-[6px]" />
           </div>
-          <span className="text-sm text-center font-medium">
+          <span className="text-[9px] text-center text-[#707070]">
             {countDownTime?.hours === 1 ? "Hour" : "Hours"}
           </span>
         </div>
         <div className="flex flex-col relative">
-          <div className="h-16 w-16 sm:w-32 sm:h-32 lg:w-[230px] lg:h-[230px] flex justify-between items-center">
+          <div className="h-6 w-6 flex justify-between items-center">
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 !-left-[6px]" />
-            <span className="lg:text-[174px] sm:text-6xl text-6xl font-medium text-dotted font-mono">
+            <span className="text-base font-medium">
               {countDownTime?.minutes}
             </span>
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 -right-[6px]" />
           </div>
-          <span className="text-sm text-center capitalize font-medium">
+          <span className="text-[9px] text-center text-[#707070]">
             {countDownTime?.minutes === 1 ? "Minute" : "Min"}
           </span>
         </div>
         <div className="flex flex-col relative">
-          <div className="h-16 w-16 sm:w-32 sm:h-32 lg:w-[230px] lg:h-[230px] flex justify-between items-center">
+          <div className="h-6 w-6 flex justify-between items-center">
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 !-left-[6px]" />
-            <span className="lg:text-[174px] sm:text-6xl text-6xl font-medium text-dotted font-mono">
+            <span className="text-base font-medium">
               {countDownTime?.seconds}
             </span>
             <div className="relative h-2.5 w-2.5 sm:h-3 sm:w-3 -right-[6px] font-medium" />
           </div>
-          <span className="text-sm text-center capitalize font-medium">
+          <span className="text-[9px] text-center text-[#707070]">
             {countDownTime?.seconds === 1 ? "Second" : "Sec"}
           </span>
         </div>

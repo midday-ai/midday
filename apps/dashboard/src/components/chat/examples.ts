@@ -5,7 +5,9 @@ export const chatExamples = [
   "What is my spending on Software",
   "Find a receipt or invoice",
   "Find a transaction",
-  // "Show my revenue",
   `What's my profit for last year`,
   `What's my revenue`,
+  "Create a report",
+  "Forecast profit",
+  "Forecast revenue",
 ];

@@ -20,9 +20,12 @@ import { headers } from "next/headers";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
+import { getForecastTool } from "./tools/forecast";
 import { getDocumentsTool } from "./tools/get-documents";
 import { getTransactionsTool } from "./tools/get-transactions";
 import { getProfitTool } from "./tools/profit";
+import { createReport } from "./tools/report";
+import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
 
@@ -31,7 +34,7 @@ const ratelimit = new Ratelimit({
   redis: RedisClient,
 });
 
-async function selectModel() {
+export async function selectModel() {
   return openai("gpt-4o");
 
   // const settings = await getAssistantSettings();
@@ -170,8 +173,28 @@ export async function submitUserMessage(
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
+      getRevenue: getRevenueTool({
+        aiState,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
+      getForecast: getForecastTool({
+        aiState,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
       getTransactions: getTransactionsTool({ aiState }),
       getDocuments: getDocumentsTool({ aiState, teamId }),
+      createReport: createReport({
+        aiState,
+        userId: user?.data?.id,
+        teamId,
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
     },
   });
 

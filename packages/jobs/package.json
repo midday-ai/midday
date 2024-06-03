@@ -10,18 +10,18 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@langchain/community": "^0.2.1",
-    "@langchain/core": "^0.2.0",
-    "@langchain/openai": "^0.0.33",
+    "@langchain/community": "^0.2.5",
+    "@langchain/core": "^0.2.5",
+    "@langchain/openai": "^0.1.1",
     "@midday/documents": "workspace:*",
     "@midday/import": "workspace:*",
-    "@trigger.dev/react": "^2.3.18",
-    "@trigger.dev/resend": "^2.3.18",
-    "@trigger.dev/sdk": "^2.3.18",
-    "@trigger.dev/supabase": "^2.3.18",
+    "@trigger.dev/react": "2.3.18",
+    "@trigger.dev/resend": "2.3.18",
+    "@trigger.dev/sdk": "2.3.18",
+    "@trigger.dev/supabase": "2.3.18",
     "@fast-csv/format": "5.0.0",
     "change-case": "^5.4.4",
-    "langchain": "^0.2.1",
+    "langchain": "^0.2.4",
     "nanoid": "^5.0.7"
   }
 }
