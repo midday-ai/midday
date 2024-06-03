@@ -1,6 +1,7 @@
 "use client";
 
 import { useAssistantStore } from "@/store/assistant";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -15,6 +16,11 @@ export function ShowAllButton({ path }: Props) {
     setOpen();
     router.push(path);
   };
+
+  if (isDesktopApp()) {
+    // TODO: Fix link in desktop
+    return null;
+  }
 
   return (
     <button

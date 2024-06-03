@@ -34,7 +34,7 @@
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.4.0",
     "@todesktop/runtime": "^1.6.2",
-    "@trigger.dev/nextjs": "^2.3.19",
+    "@trigger.dev/nextjs": "2.3.18",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^1.1.3",
     "@vercel/speed-insights": "^1.0.11",
