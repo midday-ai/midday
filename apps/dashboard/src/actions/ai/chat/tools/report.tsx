@@ -1,10 +1,11 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { createClient } from "@midday/supabase/server";
+import { nanoid } from "ai";
+import { startOfMonth } from "date-fns";
 import { Dub } from "dub";
-// import { getRunway } from "@midday/supabase/cached-queries";
 // import { nanoid } from "ai";
 import { z } from "zod";
-// import { RunwayUI } from "./ui/runway-ui";
+import { ReportUI } from "./ui/report-ui";
 
 const dub = new Dub({ projectSlug: "midday" });
 
@@ -53,8 +54,8 @@ export function createReport({
         .from("reports")
         .insert({
           team_id: teamId,
-          from: startDate,
-          to: endDate,
+          from: startOfMonth(new Date(startDate)).toISOString(),
+          to: new Date(endDate).toISOString(),
           type,
           expire_at: expiresAt,
           currency,
@@ -79,48 +80,46 @@ export function createReport({
         .select("*")
         .single();
 
-      console.log(linkData);
+      const props = {
+        startDate: linkData?.from,
+        endDate: linkData?.to,
+        shortLink: linkData?.short_link,
+        type: linkData?.type,
+      };
 
-      //   const { data } = await getRunway({
-      //     currency,
-      //     from: startDate.toString(),
-      //     to: endDate.toString(),
-      //   });
-      //   const toolCallId = nanoid();
-      //   const props = {
-      //     months: data,
-      //   };
-      //   aiState.done({
-      //     ...aiState.get(),
-      //     messages: [
-      //       ...aiState.get().messages,
-      //       {
-      //         id: nanoid(),
-      //         role: "assistant",
-      //         content: [
-      //           {
-      //             type: "tool-call",
-      //             toolName: "getRunway",
-      //             toolCallId,
-      //             args,
-      //           },
-      //         ],
-      //       },
-      //       {
-      //         id: nanoid(),
-      //         role: "tool",
-      //         content: [
-      //           {
-      //             type: "tool-result",
-      //             toolName: "getRunway",
-      //             toolCallId,
-      //             result: props,
-      //           },
-      //         ],
-      //       },
-      //     ],
-      //   });
-      //   return <RunwayUI {...props} />;
+      const toolCallId = nanoid();
+
+      aiState.done({
+        ...aiState.get(),
+        messages: [
+          ...aiState.get().messages,
+          {
+            id: nanoid(),
+            role: "assistant",
+            content: [
+              {
+                type: "tool-call",
+                toolName: "createReport",
+                toolCallId,
+                args,
+              },
+            ],
+          },
+          {
+            id: nanoid(),
+            role: "tool",
+            content: [
+              {
+                type: "tool-result",
+                toolName: "createReport",
+                toolCallId,
+                result: props,
+              },
+            ],
+          },
+        ],
+      });
+      return <ReportUI {...props} />;
     },
   };
 }

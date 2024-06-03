@@ -1,29 +1,37 @@
-import { AreaChart } from "@/components/charts/area-chart";
+"use client";
+
 import { BotCard } from "@/components/chat/messages";
-import { FormatAmount } from "@/components/format-amount";
-import { addMonths, format } from "date-fns";
+import { CopyInput } from "@/components/copy-input";
+import { useI18n } from "@/locales/client";
+import { format } from "date-fns";
 
 type Props = {
-  avarageBurnRate: number;
-  currency: string;
-  data: any;
-  months: number;
+  shortLink: string;
+  type: "burn_rate" | "profit" | "revenue";
+  startDate: string;
+  endDate: string;
 };
 
-export function ReportUI({ avarageBurnRate, currency, months, data }: Props) {
-  //   if (!data?.length) {
-  //     return (
-  //       <BotCard>
-  //         We couldn't find any historical data to provide you with a burn rate.
-  //       </BotCard>
-  //     );
-  //   }
+export function ReportUI({ shortLink, type, startDate, endDate }: Props) {
+  const t = useI18n();
+
+  if (!shortLink) {
+    return (
+      <BotCard>We couldn't create a report for you, please try again.</BotCard>
+    );
+  }
 
   return (
     <BotCard className="font-sans space-y-4">
-      <p className="font-mono">wfwef</p>
+      <p className="font-mono">
+        Here is your report for {t(`chart_type.${type}`)} between{" "}
+        {format(new Date(startDate), "PP")} and{" "}
+        {format(new Date(endDate), "PP")}
+      </p>
 
-      <AreaChart currency={currency} data={data} height={200} />
+      <div className="flex">
+        <CopyInput value={shortLink} className="w-auto" />
+      </div>
     </BotCard>
   );
 }

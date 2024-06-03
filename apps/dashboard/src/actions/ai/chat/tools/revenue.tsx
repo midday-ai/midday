@@ -1,10 +1,9 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { calculateAvgBurnRate } from "@/utils/format";
-import { getBurnRate, getRunway } from "@midday/supabase/cached-queries";
+import { getMetrics } from "@midday/supabase/cached-queries";
 import { nanoid } from "ai";
 import { startOfMonth } from "date-fns";
 import { z } from "zod";
-import { BurnRateUI } from "./ui/burn-rate-ui";
+import { RevenueUI } from "./ui/revenue-ui";
 
 type Args = {
   aiState: MutableAIState;
@@ -13,50 +12,40 @@ type Args = {
   dateTo: string;
 };
 
-export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getRevenueTool({ aiState, currency, dateFrom, dateTo }: Args) {
   return {
-    description: "Get burn rate",
+    description: "Get revenue",
     parameters: z.object({
       startDate: z.coerce
         .date()
-        .describe("The start date of the burn rate, in ISO-8601 format")
+        .describe("The start date of the revenue, in ISO-8601 format")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date of the burn rate, in ISO-8601 format")
+        .describe("The end date of the revenue, in ISO-8601 format")
         .default(new Date(dateTo)),
       currency: z
         .string()
         .default(currency)
-        .describe("The currency for the burn rate"),
+        .describe("The currency for revenue"),
     }),
     generate: async (args) => {
-      const toolCallId = nanoid();
-
       const { currency, startDate, endDate } = args;
 
-      const [{ data: months }, { data: burnRateData }] = await Promise.all([
-        getRunway({
-          currency,
-          from: startOfMonth(new Date(startDate)).toISOString(),
-          to: endDate.toISOString(),
-        }),
-        getBurnRate({
-          currency,
-          from: startDate.toISOString(),
-          to: endDate.toISOString(),
-        }),
-      ]);
+      const data = await getMetrics({
+        from: startOfMonth(new Date(startDate)).toISOString(),
+        to: new Date(endDate).toISOString(),
+        type: "revenue",
+        currency,
+      });
 
-      const avarageBurnRate = calculateAvgBurnRate(burnRateData);
+      const toolCallId = nanoid();
 
       const props = {
-        avarageBurnRate,
-        currency,
+        data,
         startDate,
         endDate,
-        months,
-        data: burnRateData,
+        currency,
       };
 
       aiState.done({
@@ -69,7 +58,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "getBurnRate",
+                toolName: "getRevenue",
                 toolCallId,
                 args,
               },
@@ -81,7 +70,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "getBurnRate",
+                toolName: "getRevenue",
                 toolCallId,
                 result: props,
               },
@@ -90,7 +79,7 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
         ],
       });
 
-      return <BurnRateUI {...props} />;
+      return <RevenueUI {...props} />;
     },
   };
 }
