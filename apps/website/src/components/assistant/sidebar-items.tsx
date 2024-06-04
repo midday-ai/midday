@@ -65,9 +65,9 @@ const items = {
   ],
 };
 
-export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
+export function SidebarItems({ onSelect }: SidebarItemsProps) {
   return (
-    <div className="overflow-auto relative h-[410px] mt-16 scrollbar-hide p-4 pt-0 pb-[50px] flex flex-col space-y-6">
+    <div className="overflow-auto relative h-[410px] mt-4 scrollbar-hide p-4 pt-0 pb-[70px] flex flex-col space-y-6">
       {!Object.keys(items).length && (
         <div className="flex flex-col justify-center items-center h-full">
           <div className="flex flex-col items-center -mt-12 text-xs space-y-1">
@@ -91,12 +91,7 @@ export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
             <div className="mt-1">
               {section?.map((chat) => {
                 return (
-                  <SidebarItem
-                    key={chat.id}
-                    chat={chat}
-                    onSelect={onSelect}
-                    chatId={chatId}
-                  />
+                  <SidebarItem key={chat.id} chat={chat} onSelect={onSelect} />
                 );
               })}
             </div>

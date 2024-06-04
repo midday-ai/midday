@@ -4,26 +4,19 @@ import { useEnterSubmit } from "@/hooks/use-enter-submit";
 import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
+import { motion } from "framer-motion";
 import { nanoid } from "nanoid";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChatEmpty } from "./chat-empty";
 import { ChatExamples } from "./chat-examples";
 import { ChatList } from "./chat-list";
 import { Footer } from "./footer";
 import { UserMessage } from "./messages";
 
-export function Chat({
-  messages,
-  message,
-  submitMessage,
-  user,
-  onNewChat,
-  input,
-  setInput,
-  showFeedback,
-}) {
+export function Chat({ messages, submitMessage, onNewChat, input, setInput }) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const ref = useRef(false);
+  const [isVisible, setVisible] = useState(false);
 
   const onSubmit = (input: string) => {
     const value = input.trim();
@@ -51,18 +44,18 @@ export function Chat({
     // ]);
   };
 
-  useEffect(() => {
-    if (!ref.current && message) {
-      onNewChat();
-      onSubmit(message);
-      ref.current = true;
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!ref.current && message) {
+  //     onNewChat();
+  //     onSubmit(message);
+  //     ref.current = true;
+  //   }
+  // }, []);
 
   const { messagesRef, scrollRef, visibilityRef, scrollToBottom } =
     useScrollAnchor();
 
-  const showExamples = messages.length === 0 && !input;
+  const showExamples = isVisible && messages.length === 0 && !input;
 
   return (
     <div className="relative h-[420px]">
@@ -100,7 +93,20 @@ export function Chat({
           />
         </form>
 
-        <Footer onSubmit={() => onSubmit(input)} />
+        <motion.div
+          onViewportEnter={() => {
+            if (!isVisible) {
+              setVisible(true);
+            }
+          }}
+          onViewportLeave={() => {
+            if (isVisible) {
+              setVisible(false);
+            }
+          }}
+        >
+          <Footer onSubmit={() => onSubmit(input)} />
+        </motion.div>
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 import Image from "next/image";
 import bg from "public/assistant-bg.png";
 import { Assistant } from "./assistant";
+import { Tray } from "./tray";
 
 export function SectionSix() {
   return (
     <section className="mt-24 mb-12 relative">
+      <Tray />
       <div className="absolute w-full h-full flex items-center justify-center flex-col">
         <h4 className="text-4xl mb-4 font-medium">Assistant</h4>
         <p className="max-w-[790px] px-4 text-center text-[#878787]">
@@ -34,7 +36,7 @@ export function SectionSix() {
       </div>
 
       <div>
-        <Image src={bg} alt="Assistant background" />
+        <Image src={bg} alt="Assistant background" priority />
       </div>
     </section>
   );
