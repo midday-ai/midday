@@ -9,8 +9,7 @@ export function SectionSix() {
         <h4 className="text-4xl mb-4 font-medium">Assistant</h4>
         <p className="max-w-[790px] px-4 text-center text-[#878787]">
           Ask Midday anything and get tailored insights into your financial
-          situation. Understand your biggest outgoings and incomings. Find
-          transactions without receipts or search for revenue patterns. Get a
+          situation. Understand your biggest outgoings and incomings to get a
           better grasp on your financials to help you cut costs, find
           opportunities and build a longer runway.
         </p>
