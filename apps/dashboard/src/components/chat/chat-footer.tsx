@@ -40,7 +40,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
             <li>
               <button
                 type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
+                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
                 onClick={() => handleOpenUrl("https://x.com/middayai")}
               >
                 <Icons.X className="w-[16px] h-[16px]" />
@@ -50,7 +50,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
             <li>
               <button
                 type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
+                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
                 onClick={() => handleOpenUrl("https://go.midday.ai/anPiuRx")}
               >
                 <Icons.Discord className="w-[16px] h-[16px]" />
@@ -61,7 +61,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
             <li>
               <button
                 type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
+                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
                 onClick={showFeedback}
               >
                 <Icons.ChatBubble className="w-[16px] h-[16px]" />
@@ -72,7 +72,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
             <li>
               <button
                 type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
+                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
                 onClick={() => handleOpenUrl("https://git.new/midday")}
               >
                 <Icons.GithubOutline className="w-[16px] h-[16px]" />
@@ -83,7 +83,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
             <li>
               <button
                 type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
+                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
                 onClick={() => {
                   router.push("/account/assistant");
                   setOpen();
@@ -97,7 +97,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
             <li className="hidden todesktop:block">
               <button
                 type="button"
-                className="flex space-x-2 items-center text-xs hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1 text-destructive"
+                className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1 text-destructive"
                 onClick={() => app.quit()}
               >
                 <Icons.ExitToApp className="w-[16px] h-[16px]" />
