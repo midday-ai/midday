@@ -32,7 +32,7 @@ const links = [
     name: "story",
   },
   {
-    title: "Download",
+    title: "Apps",
     path: "/download",
     name: "download",
   },

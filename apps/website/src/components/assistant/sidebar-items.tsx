@@ -1,6 +1,5 @@
-import type { Chat } from "@/actions/ai/types";
-import { useAIState } from "ai/rsc";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { chatExamples } from "./examples";
 import { SidebarItem } from "./sidebar-item";
 
 interface SidebarItemsProps {
@@ -23,10 +22,50 @@ const formatRange = (key: string) => {
   }
 };
 
-export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
-  const [items, setItems] = useState<Chat[]>([]);
-  const [isLoading, setLoading] = useState(false);
+const items = {
+  "1d": [
+    {
+      id: "1",
+      title: chatExamples.at(0),
+    },
+    {
+      id: "2",
+      title: chatExamples.at(2),
+    },
+  ],
+  "2d": [
+    {
+      id: "1",
+      title: chatExamples.at(3),
+    },
+    {
+      id: "2",
+      title: chatExamples.at(4),
+    },
+  ],
+  "7d": [
+    {
+      id: "1",
+      title: chatExamples.at(5),
+    },
+    {
+      id: "2",
+      title: chatExamples.at(6),
+    },
+  ],
+  "30d": [
+    {
+      id: "1",
+      title: chatExamples.at(2),
+    },
+    {
+      id: "2",
+      title: chatExamples.at(3),
+    },
+  ],
+};
 
+export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
   return (
     <div className="overflow-auto relative h-[410px] mt-16 scrollbar-hide p-4 pt-0 pb-[50px] flex flex-col space-y-6">
       {!Object.keys(items).length && (
