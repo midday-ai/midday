@@ -54,8 +54,8 @@ export function ChartSSR({
               y2="100%"
               gradientUnits="userSpaceOnUse"
             >
-              <stop offset="0%" stopColor="#00B35D" stopOpacity={0.2} />
-              <stop offset="50%" stopColor="#00B35D" stopOpacity={0.05} />
+              <stop offset="0%" stopColor="#00B35D" stopOpacity={0.9} />
+              <stop offset="50%" stopColor="#00B35D" stopOpacity={0.09} />
               <stop offset="100%" stopColor="04B560" stopOpacity={0} />
             </linearGradient>
           </defs>
