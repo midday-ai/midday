@@ -21,7 +21,7 @@
   "dependencies": {
     "@biomejs/biome": "1.8.0",
     "@manypkg/cli": "^0.21.4",
-    "turbo": "^2.0.1",
+    "turbo": "1.13.3",
     "typescript": "^5.4.5"
   },
   "packageManager": "bun@1.1.12",
