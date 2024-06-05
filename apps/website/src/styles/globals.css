@@ -101,7 +101,7 @@ pre code {
 
 .dotted-bg {
     background-image: radial-gradient(circle at 1px 1px, #232323 1px, transparent 0);
-    background-size: 10px 10px;
+    background-size: 8px 8px;
 }
 
 
