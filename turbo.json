@@ -1,46 +1,43 @@
 {
-	"$schema": "https://turborepo.org/schema.json",
-	"globalDependencies": ["**/.env"],
-	"pipeline": {
-		"topo": {
-			"dependsOn": ["^topo"]
-		},
-		"build": {
-			"dependsOn": ["^build"],
-			"outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
-		},
-		"start": {
-			"cache": false
-		},
-		"test": {
-			"cache": false
-		},
-		"dev": {
-			"persistent": true,
-			"cache": false
-		},
-		"jobs": {
-			"persistent": true,
-			"cache": false
-		},
-		"format": {
-			"outputMode": "new-only"
-		},
-		"lint": {
-			"dependsOn": ["^topo"]
-		},
-		"typecheck": {
-			"dependsOn": ["^topo"],
-			"outputs": ["node_modules/.cache/tsbuildinfo.json"]
-		},
-		"clean": {
-			"cache": false
-		},
-		"//#clean": {
-			"cache": false
-		}
+  "$schema": "https://turborepo.org/schema.json",
+  "globalDependencies": ["**/.env"],
+  "tasks": {
+    "topo": {
+      "dependsOn": ["^topo"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
+    },
+    "start": {
+      "cache": false
+    },
+    "test": {
+      "cache": false
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "jobs": {
+      "persistent": true,
+      "cache": false
+    },
+    "format": {
+		"cache": false
 	},
-	"globalEnv": [
-		"POSTGRES_URL"
-	]
+    "lint": {
+      "dependsOn": ["^topo"]
+    },
+    "typecheck": {
+      "dependsOn": ["^topo"],
+      "outputs": ["node_modules/.cache/tsbuildinfo.json"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "//#clean": {
+      "cache": false
+    }
+  }
 }

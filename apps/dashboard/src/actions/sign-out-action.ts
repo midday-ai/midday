@@ -2,6 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
+import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
@@ -10,7 +11,7 @@ export async function signOutAction() {
   const supabase = createClient();
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   await supabase.auth.signOut({
     scope: "local",

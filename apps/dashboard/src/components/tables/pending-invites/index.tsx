@@ -1,4 +1,3 @@
-import { getTeamInvites } from "@midday/supabase/cached-queries";
 import { getTeamUser } from "@midday/supabase/cached-queries";
 import { getTeamInvitesQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
