@@ -32,14 +32,15 @@ export function Breadcrumbs({ folders = [] }) {
     }
 
     return (
-      <div key={folder}>
-        <BreadcrumbItem>
+      <>
+        <BreadcrumbItem key={folder}>
           <BreadcrumbLink asChild>
             <Link href={href}>{translatedFolderName(t, folder)}</Link>
           </BreadcrumbLink>
+
+          <BreadcrumbSeparator />
         </BreadcrumbItem>
-        <BreadcrumbSeparator />
-      </div>
+      </>
     );
   });
 
