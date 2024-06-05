@@ -36,7 +36,59 @@ export function SectionSix() {
       </div>
 
       <div>
-        <Image src={bg} alt="Assistant background" priority />
+        <div className="absolute right-12 top-[200px] hidden xl:flex flex-col space-y-8 text-center items-center">
+          <div className="text-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={68}
+              height={54}
+              fill="none"
+            >
+              <path
+                fill="#878787"
+                d="M7.332 53.667c-1.833 0-3.403-.653-4.708-1.959C1.318 50.404.665 48.834.665 47V7c0-1.833.653-3.403 1.959-4.708C3.929.986 5.499.333 7.332.333h20L33.999 7h26.666c1.834 0 3.403.653 4.709 1.959 1.305 1.305 1.958 2.875 1.958 4.708V47c0 1.834-.653 3.403-1.958 4.709-1.306 1.305-2.875 1.958-4.709 1.958H7.332Z"
+              />
+            </svg>
+            <span className="text-sm mt-1 block">Misc</span>
+          </div>
+
+          <div className="text-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={68}
+              height={54}
+              fill="none"
+            >
+              <path
+                fill="#878787"
+                d="M7.332 53.667c-1.833 0-3.403-.653-4.708-1.959C1.318 50.404.665 48.834.665 47V7c0-1.833.653-3.403 1.959-4.708C3.929.986 5.499.333 7.332.333h20L33.999 7h26.666c1.834 0 3.403.653 4.709 1.959 1.305 1.305 1.958 2.875 1.958 4.708V47c0 1.834-.653 3.403-1.958 4.709-1.306 1.305-2.875 1.958-4.709 1.958H7.332Z"
+              />
+            </svg>
+            <span className="text-sm mt-1 block">untitled</span>
+          </div>
+
+          <div>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={80}
+              height={80}
+              fill="none"
+            >
+              <path fill="#1D1D1D" d="M0 0h80v80H0z" />
+              <path fill="#F5F5F3" d="M18 11h44v57H18z" />
+            </svg>
+
+            <span className="text-sm mt-1 block">invoice.pdf</span>
+          </div>
+        </div>
+
+        <Image
+          quality={100}
+          src={bg}
+          alt="Assistant background"
+          priority
+          style={{ width: "100%" }}
+        />
       </div>
     </section>
   );
