@@ -15,7 +15,7 @@ export function Tray() {
   }, []);
 
   return (
-    <div className="flex items-center space-x-3 absolute right-6 top-4">
+    <div className="flex items-center space-x-3 absolute top-2 right-4 md:right-6 md:top-4 scale-75 md:scale-100">
       <svg
         className="relative -top-0.5"
         xmlns="http://www.w3.org/2000/svg"

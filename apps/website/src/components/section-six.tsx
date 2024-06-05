@@ -5,18 +5,18 @@ import { Tray } from "./tray";
 
 export function SectionSix() {
   return (
-    <section className="mt-24 mb-12 relative">
+    <section className="mt-[300px] mb-[250px] md:mt-24 md:mb-12 relative">
       <Tray />
-      <div className="absolute w-full h-full flex items-center justify-center flex-col">
+      <div className="absolute w-full h-full flex items-center justify-center flex-col top-8 xl:top-0">
         <h4 className="text-4xl mb-4 font-medium">Assistant</h4>
-        <p className="max-w-[790px] px-4 text-center text-[#878787]">
+        <p className="max-w-[790px] px-4 text-center text-sm text-[#878787] mb-12 md:mb-0">
           Ask Midday anything and get tailored insights into your financial
           situation. Understand your biggest outgoings and incomings to get a
           better grasp on your financials to help you cut costs, find
           opportunities and build a longer runway.
         </p>
 
-        <div className="mt-6">
+        <div className="mt-6 hidden xl:block">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={139}
@@ -30,7 +30,7 @@ export function SectionSix() {
           </svg>
         </div>
 
-        <div className="mt-8 w-full flex justify-center">
+        <div className="xl:mt-14 w-full flex justify-center scale-[0.50] lg:scale-[0.80] xl:scale-100 min-w-[720px]">
           <Assistant />
         </div>
       </div>

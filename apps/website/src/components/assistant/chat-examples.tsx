@@ -27,7 +27,7 @@ export function ChatExamples({ onSubmit }) {
   const { events } = useDraggable(ref);
 
   const totalLength = chatExamples.reduce((accumulator, currentString) => {
-    return accumulator + currentString.length * 8.2 + 20;
+    return accumulator + currentString.title.length * 8.2 + 50;
   }, 0);
 
   return (
@@ -44,12 +44,16 @@ export function ChatExamples({ onSubmit }) {
         style={{ width: `${totalLength}px` }}
       >
         {chatExamples.map((example) => (
-          <button key={example} type="button" onClick={() => onSubmit(example)}>
+          <button
+            key={example.title}
+            type="button"
+            onClick={() => onSubmit(example.title)}
+          >
             <motion.li
               variants={itemVariant}
               className="font-mono text-[#878787] text-xs bg-[#1D1D1D] px-3 py-2 rounded-full cursor-default"
             >
-              {example}
+              {example.title}
             </motion.li>
           </button>
         ))}

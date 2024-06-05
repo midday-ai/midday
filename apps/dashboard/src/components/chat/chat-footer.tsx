@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 
 type Props = {
   onSubmit: () => void;
+  showFeedback: () => void;
 };
 
 export function ChatFooter({ onSubmit, showFeedback }: Props) {

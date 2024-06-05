@@ -12,7 +12,7 @@ export function ChatList({ messages }: Props) {
   }
 
   return (
-    <div className="flex flex-col  p-4 pb-8">
+    <div className="flex flex-col p-4 pb-8">
       {messages
         .filter((tool) => tool.display !== undefined)
         .map((message, index) => (

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { chatExamples } from "./examples";
 import { SidebarItem } from "./sidebar-item";
 
@@ -26,41 +25,65 @@ const items = {
   "1d": [
     {
       id: "1",
-      title: chatExamples.at(0),
+      title: chatExamples.at(0).title,
     },
     {
       id: "2",
-      title: chatExamples.at(2),
+      title: chatExamples.at(2).title,
     },
   ],
   "2d": [
     {
       id: "1",
-      title: chatExamples.at(3),
+      title: chatExamples.at(3).title,
     },
     {
       id: "2",
-      title: chatExamples.at(4),
+      title: chatExamples.at(4).title,
     },
   ],
   "7d": [
     {
       id: "1",
-      title: chatExamples.at(5),
+      title: chatExamples.at(5).title,
     },
     {
       id: "2",
-      title: chatExamples.at(6),
+      title: chatExamples.at(6).title,
+    },
+    {
+      id: "3",
+      title: chatExamples.at(0).title,
+    },
+    {
+      id: "4",
+      title: chatExamples.at(2).title,
+    },
+    {
+      id: "5",
+      title: chatExamples.at(3).title,
     },
   ],
   "30d": [
     {
       id: "1",
-      title: chatExamples.at(2),
+      title: chatExamples.at(2).title,
     },
     {
       id: "2",
-      title: chatExamples.at(3),
+      title: chatExamples.at(3).title,
+    },
+    {
+      id: "3",
+      title: chatExamples.at(4).title,
+    },
+    {
+      id: "4",
+      title: chatExamples.at(5).title,
+    },
+    {
+      id: "5",
+      title: chatExamples.at(6).title,
     },
   ],
 };

@@ -1,9 +1,12 @@
 "use client";
 
+import { nanoid } from "nanoid";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Chat } from "./chat";
+import { chatExamples } from "./examples";
 import { Header } from "./header";
+import { BotCard, UserMessage } from "./messages";
 import { Sidebar } from "./sidebar";
 
 export function Assistant() {
@@ -20,10 +23,26 @@ export function Assistant() {
   };
 
   const handleOnSelect = (message: string) => {
-    console.log(message);
+    const content = chatExamples.find(
+      (example) => example.title === message
+    )?.content;
+
     setExpanded(false);
-    setMessages([message]);
-    // setMessages((messages) => [...messages, {message}]);
+
+    if (content) {
+      setMessages([
+        {
+          id: nanoid(),
+          role: "user",
+          display: <UserMessage>{message}</UserMessage>,
+        },
+        {
+          id: nanoid(),
+          role: "assistant",
+          display: <BotCard content={content} />,
+        },
+      ]);
+    }
   };
 
   useHotkeys("meta+j", () => onNewChat(), {
@@ -31,7 +50,7 @@ export function Assistant() {
   });
 
   return (
-    <div className="overflow-hidden p-0 max-w-[760px] h-[480px] bg-background border-border border w-full rounded-md relative">
+    <div className="overflow-hidden p-0 max-w-[760px] h-[480px] backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-80 border-border border w-full rounded-md relative">
       <Header toggleSidebar={toggleOpen} isExpanded={isExpanded} />
       <Sidebar
         setExpanded={setExpanded}
