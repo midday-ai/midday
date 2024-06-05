@@ -39,8 +39,5 @@
 		"//#clean": {
 			"cache": false
 		}
-	},
-	"globalEnv": [
-		"POSTGRES_URL"
-	]
+	}
 }

@@ -1,6 +1,7 @@
 import { Cookies } from "@/utils/constants";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
+import { getSession } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
 
     const {
       data: { session },
-    } = await supabase.auth.getSession();
+    } = await getSession();
 
     if (session) {
       const userId = session.user.id;

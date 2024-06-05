@@ -1,13 +1,6 @@
 import { AI } from "@/actions/ai/chat";
-import { AssistantModal } from "@/components/assistant/assistant-modal";
-import { ExportStatus } from "@/components/export-status";
 import { Header } from "@/components/header";
-import { HotKeys } from "@/components/hot-keys";
 import { MobileOverview } from "@/components/mobile-overlay";
-import { ConnectGoCardLessModal } from "@/components/modals/connect-gocardless-modal";
-import { ConnectTransactionsModal } from "@/components/modals/connect-transactions-modal";
-import { ImportCSVModal } from "@/components/modals/import-csv-modal";
-import { SelectBankAccountsModal } from "@/components/modals/select-bank-accounts";
 import { Sidebar } from "@/components/sidebar";
 import { Cookies } from "@/utils/constants";
 import { setupAnalytics } from "@midday/events/server";
@@ -15,8 +8,80 @@ import { getCountryCode, isEUCountry } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "ai";
+import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+const AssistantModal = dynamic(
+  () =>
+    import("@/components/assistant/assistant-modal").then(
+      (mod) => mod.AssistantModal
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
+const ConnectGoCardLessModal = dynamic(
+  () =>
+    import("@/components/modals/connect-gocardless-modal").then(
+      (mod) => mod.ConnectGoCardLessModal
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
+const ExportStatus = dynamic(
+  () => import("@/components/export-status").then((mod) => mod.ExportStatus),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
+const SelectBankAccountsModal = dynamic(
+  () =>
+    import("@/components/modals/select-bank-accounts").then(
+      (mod) => mod.SelectBankAccountsModal
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
+const ConnectTransactionsModal = dynamic(
+  () =>
+    import("@/components/modals/connect-transactions-modal").then(
+      (mod) => mod.ConnectTransactionsModal
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
+const ImportCSVModal = dynamic(
+  () =>
+    import("@/components/modals/import-csv-modal").then(
+      (mod) => mod.ImportCSVModal
+    ),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
+
+const HotKeys = dynamic(
+  () => import("@/components/hot-keys").then((mod) => mod.HotKeys),
+  {
+    ssr: false,
+    loading: () => null,
+  }
+);
 
 const uniqueCurrencies = () => {
   const uniqueSet = new Set(Object.values(currencies));

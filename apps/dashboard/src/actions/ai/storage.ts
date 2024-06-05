@@ -2,15 +2,13 @@
 
 import { client as RedisClient } from "@midday/kv";
 import { getCountryCode, isEUCountry } from "@midday/location";
-import { createClient } from "@midday/supabase/server";
+import { getSession } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
 export async function getAssistantSettings(): Promise<SettingsResponse> {
-  const supabase = createClient();
-
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   const defaultSettings = {
     enabled: true,
@@ -38,10 +36,9 @@ export async function setAssistantSettings({
   settings,
   params,
 }: SetAassistant) {
-  const supabase = createClient();
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   const userId = session?.user.id;
 
@@ -52,10 +49,9 @@ export async function setAssistantSettings({
 }
 
 export async function clearChats() {
-  const supabase = createClient();
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   const userId = session?.user.id;
 
@@ -76,10 +72,9 @@ export async function clearChats() {
 }
 
 export async function getChats() {
-  const supabase = createClient();
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   const userId = session?.user.id;
   try {
@@ -106,10 +101,9 @@ export async function getChats() {
 }
 
 export async function getChat(id: string) {
-  const supabase = createClient();
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSession();
 
   const userId = session?.user.id;
 
