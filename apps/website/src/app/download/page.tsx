@@ -1,9 +1,9 @@
 import { CopyInput } from "@/components/copy-input";
+import { Keyboard } from "@/components/keyboard";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
 import appIcon from "public/app-icon.png";
-import panel from "public/panel.png";
 
 export const metadata: Metadata = {
   title: "Download",
@@ -16,17 +16,8 @@ export default function Page() {
         Always at your fingertips.
       </h1>
 
-      <div className="relative">
-        <Image
-          src={panel}
-          alt="Download Midday"
-          width={1223}
-          height={462}
-          className="z-10 relative"
-          quality={100}
-          priority
-        />
-      </div>
+      <Keyboard />
+
       <Image
         src={appIcon}
         alt="Midday App"

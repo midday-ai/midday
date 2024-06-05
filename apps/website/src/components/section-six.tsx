@@ -36,7 +36,7 @@ export function SectionSix() {
       </div>
 
       <div>
-        <div className="absolute right-12 top-[200px] hidden xl:flex flex-col space-y-8 text-center items-center">
+        <div className="absolute right-12 top-[120px] hidden xl:flex flex-col space-y-8 text-center items-center">
           <div className="text-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
