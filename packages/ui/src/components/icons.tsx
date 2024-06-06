@@ -1,5 +1,4 @@
 import { ArchiveIcon } from "@radix-ui/react-icons";
-import { Settings } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import {

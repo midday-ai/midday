@@ -1,6 +1,5 @@
 import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
-import { MobileOverview } from "@/components/mobile-overlay";
 import { Sidebar } from "@/components/sidebar";
 import { Cookies } from "@/utils/constants";
 import { setupAnalytics } from "@midday/events/server";
@@ -12,6 +11,13 @@ import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const MobileOverview = dynamic(
+  () => import("@/components/mobile-overlay").then((mod) => mod.MobileOverview),
+  {
+    ssr: false,
+  }
+);
+
 const AssistantModal = dynamic(
   () =>
     import("@/components/assistant/assistant-modal").then(
@@ -19,7 +25,6 @@ const AssistantModal = dynamic(
     ),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
@@ -30,7 +35,6 @@ const ConnectGoCardLessModal = dynamic(
     ),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
@@ -38,7 +42,6 @@ const ExportStatus = dynamic(
   () => import("@/components/export-status").then((mod) => mod.ExportStatus),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
@@ -49,7 +52,6 @@ const SelectBankAccountsModal = dynamic(
     ),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
@@ -60,7 +62,6 @@ const ConnectTransactionsModal = dynamic(
     ),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
@@ -71,7 +72,6 @@ const ImportCSVModal = dynamic(
     ),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
@@ -79,7 +79,6 @@ const HotKeys = dynamic(
   () => import("@/components/hot-keys").then((mod) => mod.HotKeys),
   {
     ssr: false,
-    loading: () => null,
   }
 );
 
