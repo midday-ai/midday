@@ -24,7 +24,7 @@ const config = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    instrumentationHook: true,
+    instrumentationHook: process.env.NODE_ENV === "production",
   },
   webpack: (config) => {
     /**
