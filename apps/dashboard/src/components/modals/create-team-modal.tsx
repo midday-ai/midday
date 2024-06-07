@@ -49,7 +49,9 @@ export function CreateTeamModal({ onOpenChange }: Props) {
 
         <DialogFooter>
           <div className="space-x-4">
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
             <Button
               disabled={createTeam.status === "executing"}
               onClick={() => createTeam.execute({ name })}
