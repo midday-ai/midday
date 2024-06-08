@@ -1,0 +1,31 @@
+import { UpdateTransactionValues } from "@/actions/schema";
+import { Textarea } from "@midday/ui/textarea";
+import { useState } from "react";
+
+type Props = {
+  id: string;
+  defaultValue: string;
+  updateTransaction: (values: UpdateTransactionValues) => void;
+};
+
+export function Note({ id, defaultValue, updateTransaction }: Props) {
+  const [value, setValue] = useState(defaultValue);
+
+  return (
+    <Textarea
+      name="feedback"
+      defaultValue={defaultValue}
+      required
+      autoFocus
+      placeholder="Note"
+      className="min-h-[100px] resize-none"
+      onBlur={() =>
+        updateTransaction({
+          id,
+          note: value,
+        })
+      }
+      onChange={(evt) => setValue(evt.target.value)}
+    />
+  );
+}

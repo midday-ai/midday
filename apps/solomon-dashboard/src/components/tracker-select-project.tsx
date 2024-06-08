@@ -1,0 +1,65 @@
+"use client";
+
+import { createProjectAction } from "@/actions/project/create-project-action";
+import { createClient } from "@midday/supabase/client";
+import { getTrackerProjectsQuery } from "@midday/supabase/queries";
+import { Combobox } from "@midday/ui/combobox";
+import { useToast } from "@midday/ui/use-toast";
+import { useAction } from "next-safe-action/hooks";
+import { useState } from "react";
+
+export function TrackerSelectProject({ setParams, teamId }) {
+  const { toast } = useToast();
+  const supabase = createClient();
+  const [value, setValue] = useState("");
+  const [data, setData] = useState([]);
+  const [isLoading, setLoading] = useState(false);
+
+  const action = useAction(createProjectAction, {
+    onSuccess: (project) => {
+      setParams({ projectId: project.id });
+    },
+    onError: () => {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
+
+  const onChangeValue = async (query: string) => {
+    setValue(query);
+    setLoading(true);
+
+    const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
+      teamId,
+      query,
+      search: {
+        query: value,
+        fuzzy: true,
+      },
+    });
+
+    setLoading(false);
+    setData(projectsData);
+  };
+
+  const onSelect = (project) => {
+    setParams({ projectId: project.id });
+  };
+
+  return (
+    <Combobox
+      placeholder="Search or create project"
+      classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
+      className="w-full bg-transparent px-12 border py-3 rounded-md"
+      value={value}
+      onValueChange={onChangeValue}
+      onSelect={onSelect}
+      options={data}
+      isLoading={isLoading}
+      onCreate={(name) => action.execute({ name })}
+    />
+  );
+}

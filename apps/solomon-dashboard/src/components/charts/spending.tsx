@@ -1,0 +1,21 @@
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { Suspense } from "react";
+import { ErrorFallback } from "../error-fallback";
+import { SpendingList, SpendingListSkeleton } from "./spending-list";
+import { SpendingPeriod } from "./spending-period";
+
+export async function Spending({ disabled, initialPeriod }) {
+  return (
+    <div className="border aspect-square relative overflow-hidden">
+      <div className="p-8 flex-col">
+        <SpendingPeriod initialPeriod={initialPeriod} />
+
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<SpendingListSkeleton />} key={initialPeriod}>
+            <SpendingList initialPeriod={initialPeriod} disabled={disabled} />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+    </div>
+  );
+}

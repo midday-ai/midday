@@ -9,7 +9,7 @@ on:
     branches-ignore:
       - main
     paths:
-      - apps/website/**
+      - apps/solomon-website/**
       - packages/**
 jobs:
   deploy-preview:
