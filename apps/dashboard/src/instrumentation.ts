@@ -11,6 +11,7 @@ export async function register() {
           plugins: [new VercelPlugin()],
         }),
       ],
+      baselimeKey: process.env.BASELIME_KEY,
     });
 
     sdk.start();
