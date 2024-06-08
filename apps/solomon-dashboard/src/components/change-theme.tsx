@@ -13,7 +13,7 @@ export function ChangeTheme() {
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
         <CardDescription>
-          Customize how Midday looks on your device.
+          Customize how Solomon AI looks on your device.
         </CardDescription>
       </CardHeader>
 

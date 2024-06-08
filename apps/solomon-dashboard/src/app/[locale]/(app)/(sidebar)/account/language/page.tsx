@@ -4,7 +4,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Language & region | Midday",
+  title: "Language & region | Solomon AI",
 };
 
 export default async function Language() {

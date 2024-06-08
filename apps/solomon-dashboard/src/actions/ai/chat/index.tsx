@@ -104,7 +104,7 @@ export async function submitUserMessage(
     model,
     initial: <SpinnerMessage />,
     system: `\
-    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.
+    You are a helful asssitant in Solomon AI that can help users ask questions around their transactions, revenue, spending find invoices and more.
 
     If the user wants to see spending, call \`getSpending\` function.
     If the user just wants the burn rate, call \`getBurnRate\` function.

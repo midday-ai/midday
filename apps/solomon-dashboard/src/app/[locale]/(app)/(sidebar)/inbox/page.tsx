@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Inbox | Midday",
+  title: "Inbox | Solomon AI",
 };
 
 type Props = {

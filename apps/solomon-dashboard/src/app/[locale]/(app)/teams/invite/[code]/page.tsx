@@ -8,7 +8,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Join team | Midday",
+  title: "Join team | Solomon AI",
 };
 
 export default async function InviteCode({ params }) {

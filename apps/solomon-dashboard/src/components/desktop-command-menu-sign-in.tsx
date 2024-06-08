@@ -10,7 +10,7 @@ export function DesktopCommandMenuSignIn() {
 
       <div className="flex items-center w-full justify-center h-full">
         <a href="midday://">
-          <Button variant="outline">Login to Midday</Button>
+          <Button variant="outline">Login to Solomon AI</Button>
         </a>
       </div>
     </div>

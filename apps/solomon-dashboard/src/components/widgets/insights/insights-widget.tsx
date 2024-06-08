@@ -32,7 +32,7 @@ export function InsightsWidget({ items }: Props) {
       <div className="absolute bottom-8 left-8 right-8">
         <div className="relative">
           <Input
-            placeholder="Ask Midday a question..."
+            placeholder="Ask Solomon a question..."
             className="w-full h-11 cursor-pointer bg-background"
             onFocus={() => setOpen()}
           />

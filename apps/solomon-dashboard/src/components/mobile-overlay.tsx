@@ -55,13 +55,13 @@ export function MobileOverview() {
 
         <div className="max-w-[380px] p-4 mb-[120px] flex flex-col">
           <span className="font-medium text-xl mb-2 block">
-            Midday is currently only available on desktop.
+            Solomon AI is currently only available on desktop.
           </span>
           <p className="text-[#878787] text-sm">
             We don’t support mobile web yet but we’re planning on releasing a
             native app later this year. If your interested feel free to get
             updates by filling in you email below. In the mean time we suggest
-            using Midday on a desktop.
+            using Solomon AI on a desktop.
           </p>
 
           <div className="mt-6 mb-6 relative">

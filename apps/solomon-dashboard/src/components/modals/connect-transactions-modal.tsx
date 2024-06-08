@@ -98,8 +98,8 @@ export function ConnectTransactionsModal({ isEU }: Props) {
     token,
     publicKey: "",
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
-    clientName: "Midday",
-    product: ["transactions"],
+    clientName: "Solomon AI",
+    product: ["investments", "liabilities", "transactions"],
     onSuccess: async (public_token, metadata) => {
       const response = await fetch("/api/plaid/exchange-public-token", {
         method: "POST",

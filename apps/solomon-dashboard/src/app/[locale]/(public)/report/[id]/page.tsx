@@ -204,10 +204,10 @@ export default async function Report({ params }) {
           <p className="text-[#878787] text-sm">
             Powered by{" "}
             <a
-              href="https://midday.ai?utm_source=report"
+              href="https://solomon-ai.app?utm_source=report"
               className="text-black dark:text-white"
             >
-              Midday
+              Solomon AI
             </a>
           </p>
         </div>

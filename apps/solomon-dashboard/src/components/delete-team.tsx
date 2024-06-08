@@ -35,7 +35,7 @@ export function DeleteTeam({ teamId }) {
       <CardHeader>
         <CardTitle>Delete team</CardTitle>
         <CardDescription>
-          Permanently remove your Team and all of its contents from the Midday
+          Permanently remove your Team and all of its contents from the Solomon AI
           platform. This action is not reversible — please continue with
           caution.
         </CardDescription>

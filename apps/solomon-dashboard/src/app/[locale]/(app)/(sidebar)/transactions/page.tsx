@@ -14,7 +14,7 @@ import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Transactions | Midday",
+  title: "Transactions | Solomon AI",
 };
 
 export default async function Transactions({

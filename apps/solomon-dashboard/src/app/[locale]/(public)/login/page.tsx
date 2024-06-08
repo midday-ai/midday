@@ -20,7 +20,7 @@ import Link from "next/link";
 import { userAgent } from "next/server";
 
 export const metadata: Metadata = {
-  title: "Login | Midday",
+  title: "Login | Solomon AI",
 };
 
 export default async function Page(params) {
@@ -169,12 +169,12 @@ export default async function Page(params) {
 
             <p className="text-xs text-[#878787]">
               By clicking continue, you acknowledge that you have read and agree
-              to Midday's{" "}
-              <a href="https://midday.ai/terms" className="underline">
+              to Solomon AI's{" "}
+              <a href="https://solomon-ai.app/terms" className="underline">
                 Terms of Service
               </a>{" "}
               and{" "}
-              <a href="https://midday.ai/policy" className="underline">
+              <a href="https://solomon-ai.app/policy" className="underline">
                 Privacy Policy
               </a>
               .

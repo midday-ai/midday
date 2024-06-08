@@ -14,7 +14,7 @@ export function InboxEmpty({ inboxId }: Props) {
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">Magic Inbox</h2>
           <p className="text-[#606060] text-sm">
-            Use this email to send invoices and receipts to Midday. We will
+            Use this email to send invoices and receipts to Solomon AI. We will
             extract and reconcile them against transactions. Additionally, you
             can search based on the information within them.
             <br />

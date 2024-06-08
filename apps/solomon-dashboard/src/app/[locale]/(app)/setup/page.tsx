@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Setup account | Midday",
+  title: "Setup account | Solomon AI",
 };
 
 export default function Page() {

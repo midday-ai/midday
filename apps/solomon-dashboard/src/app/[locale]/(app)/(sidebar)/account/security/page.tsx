@@ -4,7 +4,7 @@ import { AddNewDeviceModal } from "@/components/modals/add-new-device";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Security | Midday",
+  title: "Security | Solomon AI",
 };
 
 export default async function Security() {

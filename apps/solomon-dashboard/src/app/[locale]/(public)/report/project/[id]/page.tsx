@@ -96,10 +96,10 @@ export default async function ProjectReport({ params, searchParams }) {
           <p className="text-[#878787] text-sm">
             Powered by{" "}
             <a
-              href="https://midday.ai?utm_source=project"
+              href="https://solomon-ai.app?utm_source=project"
               className="text-black dark:text-white"
             >
-              Midday
+              Solomon AI
             </a>
           </p>
         </div>

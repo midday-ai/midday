@@ -165,7 +165,7 @@ export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
             </div>
             <DialogDescription>
               Start by selecting your business bank, once authenticated you can
-              select which accounts you want to link to Midday.
+              select which accounts you want to link to Solomon AI.
             </DialogDescription>
 
             <div>

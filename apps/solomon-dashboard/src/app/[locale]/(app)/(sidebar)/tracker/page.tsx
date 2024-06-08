@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Tracker | Midday",
+  title: "Tracker | Solomon AI",
 };
 
 export default async function Tracker({ searchParams }) {

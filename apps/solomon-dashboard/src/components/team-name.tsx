@@ -45,7 +45,7 @@ export function TeamName({ name }) {
           <CardHeader>
             <CardTitle>Team Name</CardTitle>
             <CardDescription>
-              This is your team's visible name within Midday. For example, the
+              This is your team's visible name within Solomon AI. For example, the
               name of your company or department.
             </CardDescription>
           </CardHeader>

@@ -102,7 +102,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
                 onClick={() => app.quit()}
               >
                 <Icons.ExitToApp className="w-[16px] h-[16px]" />
-                <span>Quit Midday</span>
+                <span>Quit Solomon AI</span>
               </button>
             </li>
           </ul>

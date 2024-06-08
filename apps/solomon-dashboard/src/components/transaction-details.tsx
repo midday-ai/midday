@@ -2,10 +2,9 @@ import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
 import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
-import { getTransactionQuery } from "@midday/supabase/queries";
 import {
   getCurrentUserTeamQuery,
-  getSimilarTransactions,
+  getSimilarTransactions, getTransactionQuery
 } from "@midday/supabase/queries";
 import {
   Accordion,
@@ -124,7 +123,7 @@ export function TransactionDetails({
       toast({
         duration: 6000,
         variant: "ai",
-        title: "Midday AI",
+        title: "Solomon AI",
         description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${category.name} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
