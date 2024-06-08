@@ -1,0 +1,50 @@
+import { Canvas, Controls, Meta, Source } from '@storybook/blocks';
+
+import { RadixPrimitiveDocsButton } from '../../storybook-utils/primitive-docs-button';
+import * as AlertDialogStories from './alert-dialog.stories';
+
+<Meta of={AlertDialogStories} />
+
+<RadixPrimitiveDocsButton name="alert-dialog" />
+
+# Alert Dialog
+
+A modal dialog that interrupts the user with important content and expects a response.
+
+## Preview
+
+<Canvas of={AlertDialogStories.Default} />
+
+## Usage
+
+export const importCode = `import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/primitives/alert-dialog";`;
+
+export const usageCode = `<AlertDialog>
+  <AlertDialogTrigger>Open</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. This will permanently delete your account
+        and remove your data from our servers.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <AlertDialogFooter>
+      <AlertDialogCancel>Cancel</AlertDialogCancel>
+      <AlertDialogAction>Continue</AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>`;
+
+<Source code={importCode} language="ts" dark />
+<Source code={usageCode} language="tsx" dark />

@@ -1,0 +1,39 @@
+import { Canvas, Controls, Meta, Source } from '@storybook/blocks';
+
+import { RadixPrimitiveDocsButton } from '../../storybook-utils/primitive-docs-button';
+import * as AccordionStories from './accordion.stories';
+
+<Meta of={AccordionStories} />
+
+<RadixPrimitiveDocsButton name="accordion" />
+
+# Accordion
+
+A vertically stacked set of interactive headings that each reveal a section of content.
+
+## Preview
+
+<Canvas of={AccordionStories.Single} />
+
+<Controls />
+
+## Usage
+
+export const importCode = `import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/primitives/accordion";`;
+
+export const usageCode = `<Accordion type="single" collapsible>
+  <AccordionItem value="item-1">
+    <AccordionTrigger>Is it accessible?</AccordionTrigger>
+    <AccordionContent>
+      Yes. It adheres to the WAI-ARIA design pattern.
+    </AccordionContent>
+  </AccordionItem>
+</Accordion>`;
+
+<Source code={importCode} language="ts" dark />
+<Source code={usageCode} language="tsx" dark />

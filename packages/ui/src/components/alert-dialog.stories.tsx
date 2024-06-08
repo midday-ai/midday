@@ -1,4 +1,5 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import { type Meta, type StoryObj } from '@storybook/react';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,12 +10,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "./alert-dialog";
-import { Button } from "./button";
+} from './alert-dialog';
+import { Button } from './button';
 
 const meta: Meta<typeof AlertDialog> = {
-  component: () => (
-    <AlertDialog>
+  component: AlertDialog,
+  render: (args) => (
+    <AlertDialog {...args}>
       <AlertDialogTrigger asChild>
         <Button variant="outline">Show Dialog</Button>
       </AlertDialogTrigger>

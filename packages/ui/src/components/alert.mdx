@@ -1,0 +1,41 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as AlertStories from "./alert.stories";
+
+<Meta of={AlertStories} />
+
+# Alert
+
+Displays a callout for user attention.
+
+## Preview
+
+<Canvas of={AlertStories.Default} />
+
+<Controls />
+
+## Usage
+
+export const importCode = `import { Alert, AlertDescription, AlertTitle } from "@/primitives/alert";`;
+
+export const exampleCode = `<Alert>
+  <Terminal className="h-4 w-4" />
+  <AlertTitle>Heads up!</AlertTitle>
+  <AlertDescription>
+    You can add components and dependencies to your app using the cli.
+  </AlertDescription>
+</Alert>
+`;
+
+<Source code={importCode} language="ts" dark />
+<Source code={exampleCode} language="tsx" dark />
+
+## Examples
+
+### Default
+
+<Canvas of={AlertStories.Default} />
+
+### Destructive
+
+<Canvas of={AlertStories.Destructive} />
