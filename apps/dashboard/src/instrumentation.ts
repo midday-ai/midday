@@ -10,8 +10,7 @@ export async function register() {
         new BetterHttpInstrumentation({
           plugins: [new VercelPlugin()],
         }),
-      ],
-      baselimeKey: process.env.BASELIME_KEY,
+      ]
     });
 
     sdk.start();
