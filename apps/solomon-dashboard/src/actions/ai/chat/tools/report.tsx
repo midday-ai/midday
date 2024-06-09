@@ -7,7 +7,7 @@ import { Dub } from "dub";
 import { z } from "zod";
 import { ReportUI } from "./ui/report-ui";
 
-const dub = new Dub({ projectSlug: "midday" });
+const dub = new Dub({ projectSlug: "solomon-ai", workspaceId: "ws_clx3ykffm0009ilhvrq3t25gv" });
 
 type Args = {
   aiState: MutableAIState;
@@ -65,7 +65,7 @@ export function createReport({
         .single();
 
       const link = await dub.links.create({
-        url: `https://app.midday.ai/report/${data.id}`,
+        url: `https://app.solomon-ai.app/report/${data.id}`,
         expiresAt,
         rewrite: true,
       });

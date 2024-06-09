@@ -9,7 +9,7 @@ export function DesktopSignInVerifyCode({ code }) {
 
   useEffect(() => {
     if (code && !hasRunned.current) {
-      window.location.replace(`solomonai://api/auth/callback?code=${code}`);
+      window.location.replace(`solomon-ai://api/auth/callback?code=${code}`);
       hasRunned.current = true;
     }
   }, [code]);
@@ -30,7 +30,7 @@ export function DesktopSignInVerifyCode({ code }) {
           If Solomon AI doesn't open in a few seconds,{" "}
           <a
             className="underline"
-            href={`solomonai://api/auth/callback?code=${code}`}
+            href={`solomon-ai://api/auth/callback?code=${code}`}
           >
             click here
           </a>

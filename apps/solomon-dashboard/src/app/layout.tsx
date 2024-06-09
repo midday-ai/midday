@@ -11,7 +11,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
+  metadataBase: new URL("https://app.solomon-ai.app"),
   title: "Solomon AI | Proactive Stress Testing for Your Practice",
   description:
     "Solomon AI equips your practice with advanced tools designed to conduct thorough financial stress tests.",

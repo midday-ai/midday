@@ -54,7 +54,7 @@ export function SetupMfa() {
   return (
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
-        <Link href="https://midday.ai">
+        <Link href="https://solomon-ai.app">
           <Icons.Logo />
         </Link>
       </div>

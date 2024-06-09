@@ -9,7 +9,7 @@ import { Dub } from "dub";
 import { action } from "./safe-action";
 import { shareFileSchema } from "./schema";
 
-const dub = new Dub({ projectSlug: "midday" });
+const dub = new Dub({ projectSlug: "solomon-ai", workspaceId: "ws_clx3ykffm0009ilhvrq3t25gv" });
 
 export const shareFileAction = action(shareFileSchema, async (value) => {
   const supabase = createClient();

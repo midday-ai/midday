@@ -8,7 +8,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { Dub } from "dub";
 
-const dub = new Dub({ projectSlug: "midday" });
+const dub = new Dub({ projectSlug: "solomon-ai", workspaceId: "ws_clx3ykffm0009ilhvrq3t25gv" });
 
 export const createProjectReport = action(
   createProjectReportSchema,

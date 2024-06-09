@@ -9,7 +9,7 @@ export function DesktopCommandMenuSignIn() {
       <Icons.Logo className="absolute top-8 left-8" />
 
       <div className="flex items-center w-full justify-center h-full">
-        <a href="midday://">
+        <a href="solomon-ai://">
           <Button variant="outline">Login to Solomon AI</Button>
         </a>
       </div>

@@ -22,7 +22,7 @@ export const createEndUserAgreementAction = action(
     });
 
     const url = `${protocol}://${domain}`;
-    const redirectBase = isDesktop ? "midday://" : url;
+    const redirectBase = isDesktop ? "solomon-ai://" : url;
     const redirectTo = `${redirectBase}/${pathname}?step=account&provider=gocardless`;
 
     const { link } = await api.buildLink({

@@ -16,7 +16,7 @@ export async function GET(req) {
   }
 
   if (isDesktop === "true") {
-    return NextResponse.redirect("midday://");
+    return NextResponse.redirect("solomon-ai://");
   }
 
   return NextResponse.redirect(requestUrl.origin);

@@ -13,13 +13,13 @@ export default async function Unsubscribe({
 
   try {
     await client.cancelRunsForEvent(decodedToken.id as string);
-  } catch {}
+  } catch { }
 
   return (
     <div>
       <header className="w-full absolute left-0 right-0">
         <div className="ml-5 mt-4 md:ml-10 md:mt-10">
-          <Link href="https://midday.ai">
+          <Link href="https://solomon-ai.app">
             <Icons.Logo />
           </Link>
         </div>
@@ -39,7 +39,7 @@ export default async function Unsubscribe({
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-4 space-y-4">
-              <Link href="https://app.midday.ai" className="w-full">
+              <Link href="https://app.solomon-ai.app" className="w-full">
                 <Button className="w-full h-10">Go to dashboard</Button>
               </Link>
             </div>

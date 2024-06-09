@@ -17,11 +17,11 @@ async function main() {
   });
 
   await object.on("open-discord", () => {
-    platform.os.openURL("https://discord.gg/ZmqcvWKH");
+    platform.os.openURL("https://discord.com/invite/xHwWKjf9");
   });
 
   await object.on("open-github", () => {
-    platform.os.openURL("https://github.com/midday-ai/midday");
+    platform.os.openURL("https://git.new/EGv4vBe");
   });
 
   // Command menu
