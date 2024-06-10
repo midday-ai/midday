@@ -41,6 +41,7 @@ app.openapi(indexRoute, async (c) => {
     provider,
     fetcher: c.env.TELLER_CERT,
     kv: c.env.KV,
+    envs,
   });
 
   try {

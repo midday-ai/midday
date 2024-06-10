@@ -3,6 +3,7 @@ import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetTransactionsRequest,
+  ProviderParams,
 } from "../types";
 import { PlaidApi } from "./plaid-api";
 import {
@@ -14,8 +15,8 @@ import {
 export class PlaidProvider implements Provider {
   #api: PlaidApi;
 
-  constructor() {
-    this.#api = new PlaidApi();
+  constructor(params: ProviderParams) {
+    this.#api = new PlaidApi(params);
   }
 
   async getTransactions({

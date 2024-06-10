@@ -1,4 +1,3 @@
-import { env } from "node:process";
 import {
   Configuration,
   CountryCode,
@@ -9,6 +8,7 @@ import {
   Products,
   type Transaction,
 } from "plaid";
+import type { ProviderParams } from "../types";
 import type {
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
@@ -23,13 +23,20 @@ import type {
 export class PlaidApi {
   #client: PlaidBaseApi;
 
-  constructor() {
+  #environment = "sandbox";
+  #clientId: string;
+  #clientSecret: string;
+
+  constructor(params: ProviderParams) {
+    this.#clientId = params.envs.PLAID_CLIENT_ID;
+    this.#clientSecret = params.envs.PLAID_SECRET;
+
     const configuration = new Configuration({
-      basePath: PlaidEnvironments[env.NEXT_PUBLIC_PLAID_ENVIRONMENT!],
+      basePath: PlaidEnvironments[this.#environment],
       baseOptions: {
         headers: {
-          "PLAID-CLIENT-ID": env.PLAID_CLIENT_ID,
-          "PLAID-SECRET": env.PLAID_SECRET,
+          "PLAID-CLIENT-ID": this.#clientId,
+          "PLAID-SECRET": this.#clientSecret,
         },
       },
     });
@@ -128,8 +135,8 @@ export class PlaidApi {
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
     return this.#client.linkTokenCreate({
-      client_id: env.PLAID_CLIENT_ID,
-      secret: env.PLAID_SECRET,
+      client_id: this.#clientId,
+      secret: this.#clientSecret,
       client_name: "Midday",
       products: [Products.Transactions],
       // TODO: Update language based on user preference

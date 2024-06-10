@@ -1,4 +1,3 @@
-import { env } from "node:process";
 import { formatISO, subMonths } from "date-fns";
 import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";
@@ -39,8 +38,13 @@ export class GoCardLessApi {
 
   #oneHour = 3600;
 
+  #secretKey;
+  #secretId;
+
   constructor(params: ProviderParams) {
     this.#kv = params.kv;
+    this.#secretId = params.envs.GOCARDLESS_SECRET_ID;
+    this.#secretKey = params.envs.GOCARDLESS_SECRET_KEY;
   }
 
   async getHealthCheck() {
@@ -87,8 +91,8 @@ export class GoCardLessApi {
       "/api/v2/token/new/",
       undefined,
       {
-        secret_id: env.GOCARDLESS_SECRET_ID,
-        secret_key: env.GOCARDLESS_SECRET_KEY,
+        secret_id: this.#secretId,
+        secret_key: this.#secretKey,
       }
     );
 

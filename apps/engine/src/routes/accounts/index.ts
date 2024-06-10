@@ -39,8 +39,8 @@ app.openapi(indexRoute, async (c) => {
 
   const api = new Provider({
     provider,
-    envs,
     fetcher: c.env.TELLER_CERT,
+    envs,
   });
 
   const data = await api.getAccounts(rest);
@@ -85,8 +85,8 @@ app.openapi(balanceRoute, async (c) => {
 
   const api = new Provider({
     provider,
-    envs,
     fetcher: c.env.TELLER_CERT,
+    envs,
   });
 
   const data = await api.getAccountBalance(rest);
