@@ -127,13 +127,13 @@ export class GoCardLessApi {
     return foundAccount?.balanceAmount;
   }
 
-  async getBanks(countryCode?: string): Promise<GetBanksResponse> {
+  async #getBanks(countryCode?: string): Promise<GetBanksResponse> {
     const cacheKey = `${this.#banksCacheKey}_${countryCode}`;
 
-    const banks: GetBanksResponse | null = await this.#kv.get(cacheKey);
+    const banks = await this.#kv.get(cacheKey);
 
     if (banks) {
-      return banks;
+      return JSON.parse(banks) as GetBanksResponse;
     }
 
     const token = await this.#getAccessToken();
@@ -141,7 +141,7 @@ export class GoCardLessApi {
     const response = await this.#get<GetBanksResponse>(
       "/api/v2/institutions/",
       token,
-      null,
+      undefined,
       {
         params: {
           country: countryCode,
@@ -149,7 +149,7 @@ export class GoCardLessApi {
       }
     );
 
-    this.#kv.put(cacheKey, response, {
+    this.#kv.put(cacheKey, JSON.stringify(response), {
       expirationTtl: this.#oneHour,
     });
 
@@ -214,7 +214,7 @@ export class GoCardLessApi {
     countryCode,
   }: GetAccountsRequest): Promise<GetAccountsResponse> {
     const [banks, response] = await Promise.all([
-      this.getBanks(countryCode),
+      this.#getBanks(countryCode),
       this.getRequestion(id),
     ]);
 
@@ -241,11 +241,13 @@ export class GoCardLessApi {
     const response = await this.#get<GetTransactionsResponse>(
       `/api/v2/accounts/${accountId}/transactions/`,
       token,
-      latest && {
-        date_from: formatISO(subMonths(new Date(), 1), {
-          representation: "date",
-        }),
-      }
+      latest
+        ? {
+            date_from: formatISO(subMonths(new Date(), 1), {
+              representation: "date",
+            }),
+          }
+        : undefined
     );
 
     return response?.transactions?.booked;

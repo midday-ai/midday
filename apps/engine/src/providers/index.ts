@@ -37,9 +37,9 @@ export class Provider {
 
     const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
       await Promise.all([
-        teller.getHealthCheck(),
-        gocardless.getHealthCheck(),
         plaid.getHealthCheck(),
+        gocardless.getHealthCheck(),
+        teller.getHealthCheck(),
       ]);
 
     return {

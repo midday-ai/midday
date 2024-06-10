@@ -20,9 +20,10 @@ export class TellerApi {
 
   async getHealthCheck() {
     try {
-      await this.#get("/health");
+      await fetch(`${this.#baseUrl}/health`);
       return true;
-    } catch {
+    } catch (error) {
+      console.log(error);
       return false;
     }
   }

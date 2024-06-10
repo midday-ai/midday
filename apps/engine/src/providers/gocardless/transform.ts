@@ -180,6 +180,6 @@ export const transformAccount = ({
 export const transformAccountBalance = (
   account?: TransformAccountBalance
 ): BaseAccountBalance => ({
-  currency: account?.currency,
-  amount: +account?.amount,
+  currency: account?.currency || "EUR",
+  amount: +(account?.amount ?? 0),
 });

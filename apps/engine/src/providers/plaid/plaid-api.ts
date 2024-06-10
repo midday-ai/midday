@@ -14,6 +14,7 @@ import type {
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetStatusResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
   ItemPublicTokenExchangeRequest,
@@ -50,9 +51,9 @@ export class PlaidApi {
         "https://status.plaid.com/api/v2/status.json"
       );
 
-      const data = await response.json();
+      const data: GetStatusResponse = await response.json();
 
-      return data?.status?.indicator === "none";
+      return data.status.indicator === "none";
     } catch {
       return false;
     }
