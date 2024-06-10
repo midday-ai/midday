@@ -1,6 +1,6 @@
-import * as https from "node:https";
-import axios from "axios";
-import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import https from "https";
+import xior from "xior";
+import type { XiorInstance, XiorRequestConfig } from "xior";
 import type {
   AuthenticatedRequest,
   GetAccountBalanceRequest,
@@ -13,7 +13,11 @@ import type {
 export class TellerApi {
   #baseUrl = "https://api.teller.io";
 
-  #api: AxiosInstance | null = null;
+  #api: XiorInstance | null = null;
+
+  async getHealthcheck() {
+    // https://api.teller.io/health
+  }
 
   async getAccounts({
     accessToken,
@@ -34,8 +38,7 @@ export class TellerApi {
       }
     );
 
-    // NOTE: Remove pending transactions until upsert issue is fixed
-    return result.filter((transaction) => transaction.status !== "pending");
+    return result;
   }
 
   async getAccountBalance({
@@ -50,7 +53,7 @@ export class TellerApi {
     return result;
   }
 
-  async #getApi(accessToken: string): Promise<AxiosInstance> {
+  async #getApi(accessToken: string): Promise<XiorInstance> {
     const cert = Buffer.from(
       process.env.TELLER_CERTIFICATE!,
       "base64"
@@ -67,7 +70,7 @@ export class TellerApi {
     });
 
     if (!this.#api) {
-      this.#api = axios.create({
+      this.#api = xior.create({
         httpsAgent: agent,
         baseURL: this.#baseUrl,
         timeout: 30_000,
@@ -88,7 +91,7 @@ export class TellerApi {
     path: string,
     accessToken: string,
     params?: unknown,
-    config?: AxiosRequestConfig
+    config?: XiorRequestConfig
   ): Promise<TResponse> {
     const api = await this.#getApi(accessToken);
 

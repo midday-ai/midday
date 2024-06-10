@@ -1,6 +1,6 @@
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 // import { PlaidProvider } from "./plaid/plaid-provider";
-// import { TellerProvider } from "./teller/teller-provider";
+import { TellerProvider } from "./teller/teller-provider";
 import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
@@ -16,15 +16,26 @@ export class Provider {
       case "gocardless":
         this.#provider = new GoCardLessProvider(params);
         break;
-      // case "teller":
-      //   this.#provider = new TellerProvider();
-      //   break;
+      case "teller":
+        this.#provider = new TellerProvider();
+        break;
       // case "plaid":
       //   this.#provider = new PlaidProvider();
       //   break;
       default:
         throw Error("No provider selected");
     }
+  }
+
+  async getHealthcheck() {
+    // const teller = new TellerProvider();
+    // const plaid = new PlaidProvider();
+    // const gocardless = new GoCardLessProvider();
+    // return Promise.all([
+    //   teller.getHealthcheck,
+    //   plaid.getHealthcheck,
+    //   gocardless.getHealthcheck,
+    // ]);
   }
 
   async getTransactions(params: GetTransactionsRequest) {

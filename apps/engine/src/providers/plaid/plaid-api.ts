@@ -36,6 +36,10 @@ export class PlaidApi {
     this.#client = new PlaidBaseApi(configuration);
   }
 
+  async getHealthcheck() {
+    // https://status.plaid.com/api/v2/status.json
+  }
+
   async getAccountBalance({
     accessToken,
     accountId,

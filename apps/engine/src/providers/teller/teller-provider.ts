@@ -19,7 +19,6 @@ export class TellerProvider implements Provider {
   }
 
   async getTransactions({
-    teamId,
     accountId,
     bankAccountId,
     accessToken,
@@ -35,13 +34,7 @@ export class TellerProvider implements Provider {
       latest,
     });
 
-    return response.map((transaction) =>
-      transformTransaction({
-        transaction,
-        teamId,
-        bankAccountId,
-      })
-    );
+    return response.map(transformTransaction);
   }
 
   async getAccounts({ accessToken }: GetAccountsRequest) {

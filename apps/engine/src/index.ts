@@ -5,9 +5,10 @@ import { cache } from "hono/cache";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
-import accounts from "./routes/accounts";
-import institutions from "./routes/institutions";
-import transactions from "./routes/transactions";
+import accountRoutes from "./routes/accounts";
+import healthRoutes from "./routes/health";
+import institutionRoutes from "./routes/institutions";
+import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono({
   defaultHook: (result, c) => {
@@ -39,9 +40,10 @@ app.use(
   prettyJSON()
 );
 
-app.route("/v1/transactions", transactions);
-app.route("/v1/accounts", accounts);
-app.route("/v1/institutions", institutions);
+app.route("/v1/transactions", transactionsRoutes);
+app.route("/v1/accounts", accountRoutes);
+app.route("/v1/institutions", institutionRoutes);
+app.route("/v1/health", healthRoutes);
 
 app.doc("/doc", {
   openapi: "3.0.0",

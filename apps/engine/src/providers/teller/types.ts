@@ -117,11 +117,7 @@ export type Account = DepositoryAccount | CreditAccount;
 
 export type GetAccountsResponse = Account[];
 
-export type TransformTransaction = {
-  transaction: Transaction;
-  teamId: string;
-  bankAccountId: string;
-};
+export type TransformTransaction = Transaction;
 
 export type TransformAccount = Account;
 

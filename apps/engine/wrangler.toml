@@ -1,3 +1,6 @@
 name = "engine"
 compatibility_date = "2023-12-01"
 node_compat = true
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "<CERTIFICATE_ID>" }
+]

@@ -52,6 +52,8 @@ export class GoCardLessApi {
     });
   }
 
+  async getHealthcheck() {}
+
   async #getRefreshToken(refresh: string): Promise<string> {
     const response = await this.#post<GetRefreshTokenResponse>(
       "/api/v2/token/refresh/",
