@@ -39,7 +39,8 @@ app.openapi(indexRoute, async (c) => {
 
   const api = new Provider({
     provider,
-    envs,
+    fetcher: c.env.TELLER_CERT,
+    kv: c.env.KV,
   });
 
   try {

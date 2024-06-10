@@ -1,6 +1,9 @@
 name = "engine"
 compatibility_date = "2023-12-01"
-node_compat = true
+compatibility_flags = [ "nodejs_compat" ]
 mtls_certificates = [
-  { binding = "TELLER_CERT", certificate_id = "<CERTIFICATE_ID>" }
+  { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
+]
+kv_namespaces = [
+  { binding = "KV", id = "1ce9f0355d854a569f72bfccbfbea369" }
 ]

@@ -3,24 +3,24 @@ import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetTransactionsRequest,
+  ProviderParams,
 } from "../types";
 import { TellerApi } from "./teller-api";
-import {
-  transformAccount,
-  // transformAccountBalance,
-  transformTransaction,
-} from "./transform";
+import { transformAccount, transformTransaction } from "./transform";
 
 export class TellerProvider implements Provider {
   #api: TellerApi;
 
-  constructor() {
-    this.#api = new TellerApi();
+  constructor(params: ProviderParams) {
+    this.#api = new TellerApi(params);
+  }
+
+  async getHealthCheck() {
+    return this.#api.getHealthCheck();
   }
 
   async getTransactions({
     accountId,
-    bankAccountId,
     accessToken,
     latest,
   }: GetTransactionsRequest) {
@@ -47,6 +47,8 @@ export class TellerProvider implements Provider {
     return response.map(transformAccount);
   }
 
+  async deleteAccount() {}
+
   async getAccountBalance({
     accessToken,
     accountId,
@@ -55,18 +57,9 @@ export class TellerProvider implements Provider {
       throw Error("Missing params");
     }
 
-    // const response = await this.#api.getAccountBalance({
-    //   accessToken,
-    //   accountId,
-    // });
-
-    // if (response) {
-    //   return transformAccountBalance(response);
-    // }
-
-    return {
-      currency: "USD",
-      amount: null,
-    };
+    return this.#api.getAccountBalance({
+      accessToken,
+      accountId,
+    });
   }
 }

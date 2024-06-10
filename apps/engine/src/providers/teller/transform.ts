@@ -1,13 +1,11 @@
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
-  Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
 } from "../types";
 import type {
   Transaction,
   TransformAccount,
-  TransformAccountBalance,
   TransformTransaction,
 } from "./types";
 
@@ -78,11 +76,9 @@ export const mapTransactionCategory = (transaction: Transaction) => {
   }
 };
 
-export const transformTransaction = ({
-  transaction,
-  teamId,
-  bankAccountId,
-}: TransformTransaction): BaseTransaction => {
+export const transformTransaction = (
+  transaction: TransformTransaction
+): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
 
   return {
@@ -90,12 +86,10 @@ export const transformTransaction = ({
     name: transaction.description && capitalCase(transaction.description),
     description: null,
     method,
-    internal_id: `${teamId}_${transaction.id}`,
+    internal_id: transaction.id,
     amount: +transaction.amount,
     currency: "USD",
-    bank_account_id: bankAccountId,
     category: mapTransactionCategory(transaction),
-    team_id: teamId,
     balance: transaction.running_balance,
     status: transaction?.status === "posted" ? "posted" : "pending",
   };
@@ -120,10 +114,3 @@ export const transformAccount = ({
     provider: "teller",
   };
 };
-
-export const transformAccountBalance = (
-  account: TransformAccountBalance
-): BaseAccountBalance => ({
-  currency: "USD",
-  amount: +account.available,
-});

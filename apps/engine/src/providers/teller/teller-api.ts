@@ -1,8 +1,7 @@
-import https from "https";
-import xior from "xior";
-import type { XiorInstance, XiorRequestConfig } from "xior";
+import type { ProviderParams } from "../types";
 import type {
   AuthenticatedRequest,
+  DeleteAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsResponse,
@@ -13,16 +12,25 @@ import type {
 export class TellerApi {
   #baseUrl = "https://api.teller.io";
 
-  #api: XiorInstance | null = null;
+  #fetcher: Fetcher;
+
+  constructor(params: ProviderParams) {
+    this.#fetcher = params.fetcher;
+  }
 
   async getHealthcheck() {
-    // https://api.teller.io/health
+    try {
+      await this.#get("/health");
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   async getAccounts({
     accessToken,
   }: AuthenticatedRequest): Promise<GetAccountsResponse> {
-    return this.#get<GetAccountsResponse>("/accounts", accessToken);
+    return this.#get("/accounts", accessToken);
   }
 
   async getTransactions({
@@ -30,73 +38,67 @@ export class TellerApi {
     accessToken,
     latest,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
-    const result = await this.#get<GetTransactionsResponse>(
+    return this.#get(
       `/accounts/${accountId}/transactions`,
       accessToken,
-      latest && {
-        count: 500,
-      }
+      latest
+        ? {
+            count: 500,
+          }
+        : undefined
     );
-
-    return result;
   }
 
   async getAccountBalance({
     accountId,
     accessToken,
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse> {
-    const result = await this.#get<GetAccountBalanceResponse>(
-      `/accounts/${accountId}/balances`,
-      accessToken
+    const transactions = await this.#get(
+      `/accounts/${accountId}/transactions`,
+      accessToken,
+      {
+        count: 1,
+      }
     );
 
-    return result;
+    return {
+      currency: "USD",
+      amount: +(transactions?.at(0)?.running_balance ?? 0),
+    };
   }
 
-  async #getApi(accessToken: string): Promise<XiorInstance> {
-    const cert = Buffer.from(
-      process.env.TELLER_CERTIFICATE!,
-      "base64"
-    ).toString("ascii");
-
-    const key = Buffer.from(
-      process.env.TELLER_CERTIFICATE_PRIVATE_KEY!,
-      "base64"
-    ).toString("ascii");
-
-    const agent = new https.Agent({
-      cert,
-      key,
+  async deleteAccount({
+    accountId,
+    accessToken,
+  }: DeleteAccountRequest): Promise<void> {
+    await this.#fetcher.fetch(`${this.#baseUrl}/accounts/${accountId}`, {
+      method: "delete",
+      headers: new Headers({
+        Authorization: `Basic ${btoa(`${accessToken}:`)}`,
+      }),
     });
-
-    if (!this.#api) {
-      this.#api = xior.create({
-        httpsAgent: agent,
-        baseURL: this.#baseUrl,
-        timeout: 30_000,
-        headers: {
-          Accept: "application/json",
-        },
-        auth: {
-          username: accessToken,
-          password: "",
-        },
-      });
-    }
-
-    return this.#api;
   }
 
   async #get<TResponse>(
     path: string,
-    accessToken: string,
-    params?: unknown,
-    config?: XiorRequestConfig
+    token?: string,
+    params?: Record<string, string | number>
   ): Promise<TResponse> {
-    const api = await this.#getApi(accessToken);
+    const url = new URL(`${this.#baseUrl}/${path}`);
 
-    return api
-      .get<TResponse>(path, { params, ...config })
-      .then(({ data }) => data);
+    if (params) {
+      for (const [key, value] of Object.entries(params)) {
+        url.searchParams.append(key, value.toString());
+      }
+    }
+
+    return this.#fetcher
+      .fetch(url.toString(), {
+        headers: new Headers({
+          Authorization: `Basic ${btoa(`${token}:`)}`,
+        }),
+      })
+      .then((response) => response.json())
+      .then((data) => data);
   }
 }

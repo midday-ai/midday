@@ -10,7 +10,12 @@ import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
 
-const app = new OpenAPIHono({
+type Bindings = {
+  KV: KVNamespace;
+  TELLER_CERT: Fetcher;
+};
+
+const app = new OpenAPIHono<{ Bindings: Bindings }>({
   defaultHook: (result, c) => {
     if (!result.success) {
       return c.json(

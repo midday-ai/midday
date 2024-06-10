@@ -1,4 +1,4 @@
-import { Redis } from "@upstash/redis/cloudflare";
+import { env } from "node:process";
 import { formatISO, subMonths } from "date-fns";
 import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";
@@ -35,24 +35,23 @@ export class GoCardLessApi {
   #refreshTokenCacheKey = "gocardless_refresh_token";
   #banksCacheKey = "gocardless_banks";
 
-  #redis: Redis;
-
-  #secretId;
-  #secretKey;
+  #kv: KVNamespace;
 
   #oneHour = 3600;
 
-  constructor({ envs }: ProviderParams) {
-    this.#secretId = envs.GOCARDLESS_SECRET_ID;
-    this.#secretKey = envs.GOCARDLESS_SECRET_KEY;
-
-    this.#redis = Redis.fromEnv({
-      UPSTASH_REDIS_REST_TOKEN: envs.UPSTASH_REDIS_REST_TOKEN,
-      UPSTASH_REDIS_REST_URL: envs.UPSTASH_REDIS_REST_URL,
-    });
+  constructor(params: ProviderParams) {
+    this.#kv = params.kv;
   }
 
-  async getHealthcheck() {}
+  async getHealthCheck() {
+    try {
+      await this.#get("/api/v2/swagger.json");
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
 
   async #getRefreshToken(refresh: string): Promise<string> {
     const response = await this.#post<GetRefreshTokenResponse>(
@@ -63,9 +62,8 @@ export class GoCardLessApi {
       }
     );
 
-    await this.#redis.set(this.#accessTokenCacheKey, response.access, {
-      ex: response.access_expires - this.#oneHour,
-      nx: true,
+    await this.#kv.put(this.#accessTokenCacheKey, response.access, {
+      expirationTtl: response.access_expires - this.#oneHour,
     });
 
     return response.refresh;
@@ -73,8 +71,8 @@ export class GoCardLessApi {
 
   async #getAccessToken(): Promise<string> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.#redis.get(this.#accessTokenCacheKey),
-      this.#redis.get(this.#refreshTokenCacheKey),
+      this.#kv.get(this.#accessTokenCacheKey),
+      this.#kv.get(this.#refreshTokenCacheKey),
     ]);
 
     if (typeof accessToken === "string") {
@@ -89,19 +87,17 @@ export class GoCardLessApi {
       "/api/v2/token/new/",
       undefined,
       {
-        secret_id: this.#secretId,
-        secret_key: this.#secretKey,
+        secret_id: env.GOCARDLESS_SECRET_ID,
+        secret_key: env.GOCARDLESS_SECRET_KEY,
       }
     );
 
     await Promise.all([
-      this.#redis.set(this.#accessTokenCacheKey, response.access, {
-        ex: response.access_expires - this.#oneHour,
-        nx: true,
+      this.#kv.put(this.#accessTokenCacheKey, response.access, {
+        expirationTtl: response.access_expires - this.#oneHour,
       }),
-      this.#redis.set(this.#refreshTokenCacheKey, response.refresh, {
-        ex: response.refresh_expires - this.#oneHour,
-        nx: true,
+      this.#kv.put(this.#refreshTokenCacheKey, response.refresh, {
+        expirationTtl: response.refresh_expires - this.#oneHour,
       }),
     ]);
 
@@ -130,7 +126,7 @@ export class GoCardLessApi {
   async getBanks(countryCode?: string): Promise<GetBanksResponse> {
     const cacheKey = `${this.#banksCacheKey}_${countryCode}`;
 
-    const banks: GetBanksResponse | null = await this.#redis.get(cacheKey);
+    const banks: GetBanksResponse | null = await this.#kv.get(cacheKey);
 
     if (banks) {
       return banks;
@@ -149,9 +145,8 @@ export class GoCardLessApi {
       }
     );
 
-    this.#redis.set(cacheKey, response, {
-      ex: this.#oneHour,
-      nx: true,
+    this.#kv.put(cacheKey, response, {
+      expirationTtl: this.#oneHour,
     });
 
     return response;

@@ -39,11 +39,7 @@ export type TransformAccount = AccountWithintitution;
 
 export type TransformAccountBalance = AccountsGetResponse["accounts"][0];
 
-export type TransformTransaction = {
-  teamId: string;
-  bankAccountId: string;
-  transaction: Transaction;
-};
+export type TransformTransaction = Transaction;
 
 export type GetTransactionsResponse = TransactionsSyncResponse["added"];
 

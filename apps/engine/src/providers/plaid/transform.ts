@@ -124,11 +124,9 @@ const transformToSignedAmount = (amount: number) => {
   return amount * -1;
 };
 
-export const transformTransaction = ({
-  transaction,
-  teamId,
-  bankAccountId,
-}: TransformTransaction): BaseTransaction => {
+export const transformTransaction = (
+  transaction: TransformTransaction
+): BaseTransaction => {
   const method = mapTransactionMethod(transaction?.transaction_code);
 
   return {
@@ -138,15 +136,13 @@ export const transformTransaction = ({
       ? capitalCase(transaction.original_description)
       : null,
     method,
-    internal_id: `${teamId}_${transaction.transaction_id}`,
+    internal_id: transaction.transaction_id,
     amount: transformToSignedAmount(transaction.amount),
     currency:
       transaction.iso_currency_code ||
       transaction.unofficial_currency_code ||
       "USD",
-    bank_account_id: bankAccountId,
     category: mapTransactionCategory(transaction),
-    team_id: teamId,
     balance: null,
     status: transaction.pending ? "pending" : "posted",
   };
@@ -169,7 +165,7 @@ export const transformAccount = ({
 };
 
 export const transformAccountBalance = (
-  account: TransformAccountBalance
+  account?: TransformAccountBalance
 ): BaseBalance => ({
   currency:
     account?.balances.iso_currency_code ||

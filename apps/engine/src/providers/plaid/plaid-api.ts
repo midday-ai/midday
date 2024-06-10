@@ -1,3 +1,4 @@
+import { env } from "node:process";
 import {
   Configuration,
   CountryCode,
@@ -24,11 +25,11 @@ export class PlaidApi {
 
   constructor() {
     const configuration = new Configuration({
-      basePath: PlaidEnvironments[process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!],
+      basePath: PlaidEnvironments[env.NEXT_PUBLIC_PLAID_ENVIRONMENT!],
       baseOptions: {
         headers: {
-          "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
-          "PLAID-SECRET": process.env.PLAID_SECRET,
+          "PLAID-CLIENT-ID": env.PLAID_CLIENT_ID,
+          "PLAID-SECRET": env.PLAID_SECRET,
         },
       },
     });
@@ -36,8 +37,18 @@ export class PlaidApi {
     this.#client = new PlaidBaseApi(configuration);
   }
 
-  async getHealthcheck() {
-    // https://status.plaid.com/api/v2/status.json
+  async getHealthCheck() {
+    try {
+      const response = await fetch(
+        "https://status.plaid.com/api/v2/status.json"
+      );
+
+      const data = await response.json();
+
+      return data?.status?.indicator === "none";
+    } catch {
+      return false;
+    }
   }
 
   async getAccountBalance({
@@ -117,8 +128,8 @@ export class PlaidApi {
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
     return this.#client.linkTokenCreate({
-      client_id: process.env.PLAID_CLIENT_ID,
-      secret: process.env.PLAID_SECRET,
+      client_id: env.PLAID_CLIENT_ID,
+      secret: env.PLAID_SECRET,
       client_name: "Midday",
       products: [Products.Transactions],
       // TODO: Update language based on user preference

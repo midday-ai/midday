@@ -19,8 +19,8 @@ export class GoCardLessProvider implements Provider {
     this.#api = new GoCardLessApi(params);
   }
 
-  async getHealthcheck() {
-    this.#api.getHealthcheck();
+  async getHealthCheck() {
+    return this.#api.getHealthCheck();
   }
 
   async getTransactions({ accountId, latest }: GetTransactionsRequest) {
@@ -52,8 +52,6 @@ export class GoCardLessProvider implements Provider {
 
     const response = await this.#api.getAccountBalance(accountId);
 
-    if (response) {
-      return transformAccountBalance(response);
-    }
+    return transformAccountBalance(response);
   }
 }

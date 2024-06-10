@@ -20,9 +20,7 @@ export class PlaidProvider implements Provider {
 
   async getTransactions({
     accessToken,
-    teamId,
     accountId,
-    bankAccountId,
     latest,
   }: GetTransactionsRequest) {
     if (!accessToken || !accountId) {
@@ -35,13 +33,11 @@ export class PlaidProvider implements Provider {
       latest,
     });
 
-    return response.map((transaction) =>
-      transformTransaction({
-        transaction,
-        teamId,
-        bankAccountId,
-      })
-    );
+    return response.map(transformTransaction);
+  }
+
+  async getHealthCheck() {
+    return this.#api.getHealthCheck();
   }
 
   async getAccounts({ accessToken, institutionId }: GetAccountsRequest) {
@@ -70,8 +66,6 @@ export class PlaidProvider implements Provider {
       accountId,
     });
 
-    if (response) {
-      return transformAccountBalance(response);
-    }
+    return transformAccountBalance(response);
   }
 }

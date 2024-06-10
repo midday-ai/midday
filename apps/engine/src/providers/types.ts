@@ -2,13 +2,9 @@ export type Providers = "teller" | "plaid" | "gocardless";
 
 export type ProviderParams = {
   provider: Providers;
+  kv: KVNamespace;
   environment?: "development" | "staging" | "production";
-  envs: {
-    UPSTASH_REDIS_REST_URL: string;
-    UPSTASH_REDIS_REST_TOKEN: string;
-    GOCARDLESS_SECRET_KEY: string;
-    GOCARDLESS_SECRET_ID: string;
-  };
+  fetcher?: Fetcher; // Teller
 };
 
 export type Transaction = {
@@ -47,7 +43,6 @@ export type Balance = {
 };
 
 export type GetTransactionsRequest = {
-  bankAccountId: string;
   accountId: string;
   latest?: boolean;
   accessToken?: string; // Teller & Plaid
@@ -65,6 +60,26 @@ export type GetAccountBalanceRequest = {
   accessToken?: string; // Teller & Plaid
 };
 
+export type GetAccountBalanceResponse = {
+  currency: string;
+  amount: number;
+};
+
+export type DeleteAccountRequest = {
+  accountId: string;
+  accessToken?: string; // Teller & Plaid
+};
+
 export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
+
+type HealthCheckResponse = {
+  healthy: boolean;
+};
+
+export type GetHealthCheckResponse = {
+  teller: HealthCheckResponse;
+  gocardless: HealthCheckResponse;
+  plaid: HealthCheckResponse;
+};

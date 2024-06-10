@@ -1,41 +1,58 @@
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
-// import { PlaidProvider } from "./plaid/plaid-provider";
+import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
+  DeleteAccountRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetHealthCheckResponse,
   GetTransactionsRequest,
   ProviderParams,
 } from "./types";
 
 export class Provider {
-  #provider;
+  #provider: PlaidProvider | TellerProvider | GoCardLessProvider | null = null;
 
-  constructor(params: ProviderParams) {
-    switch (params.provider) {
+  constructor(params?: ProviderParams) {
+    switch (params?.provider) {
       case "gocardless":
         this.#provider = new GoCardLessProvider(params);
         break;
       case "teller":
-        this.#provider = new TellerProvider();
+        this.#provider = new TellerProvider(params);
         break;
-      // case "plaid":
-      //   this.#provider = new PlaidProvider();
-      //   break;
+      case "plaid":
+        this.#provider = new PlaidProvider();
+        break;
       default:
-        throw Error("No provider selected");
     }
   }
 
-  async getHealthcheck() {
-    // const teller = new TellerProvider();
-    // const plaid = new PlaidProvider();
-    // const gocardless = new GoCardLessProvider();
-    // return Promise.all([
-    //   teller.getHealthcheck,
-    //   plaid.getHealthcheck,
-    //   gocardless.getHealthcheck,
-    // ]);
+  async getHealthCheck(
+    params: ProviderParams
+  ): Promise<GetHealthCheckResponse> {
+    const teller = new TellerProvider(params);
+    const plaid = new PlaidProvider();
+    const gocardless = new GoCardLessProvider(params);
+
+    const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
+      await Promise.all([
+        teller.getHealthCheck(),
+        gocardless.getHealthCheck(),
+        plaid.getHealthCheck(),
+      ]);
+
+    return {
+      plaid: {
+        healthy: isPlaidHealthy,
+      },
+      gocardless: {
+        healthy: isGocardlessHealthy,
+      },
+      teller: {
+        healthy: isTellerHealthy,
+      },
+    };
   }
 
   async getTransactions(params: GetTransactionsRequest) {
@@ -48,5 +65,9 @@ export class Provider {
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
     return this.#provider?.getAccountBalance(params);
+  }
+
+  async deleteAccount(params: DeleteAccountRequest) {
+    return this.#provider?.deleteAccount(params);
   }
 }

@@ -58,6 +58,11 @@ export type Transaction = {
 export type GetTransactionsResponse = Transaction[];
 export type GetTransactionResponse = Transaction;
 
+export type DeleteAccountRequest = {
+  accountId: string;
+  accessToken: string;
+};
+
 export interface GetTransactionsRequest extends AuthenticatedRequest {
   accountId: string;
   latest?: boolean;
@@ -126,13 +131,6 @@ export interface GetAccountBalanceRequest extends AuthenticatedRequest {
 }
 
 export type GetAccountBalanceResponse = {
-  ledger: string;
-  links: {
-    account: string;
-    self: string;
-  };
-  account_id: string;
-  available: string;
+  currency: string;
+  amount: number;
 };
-
-export type TransformAccountBalance = GetAccountBalanceResponse;
