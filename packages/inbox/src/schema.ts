@@ -27,6 +27,7 @@ export const inboxWebhookPostSchema = z.object({
   HtmlBody: z.string().optional(),
   FromFull: z.object({
     Name: z.string(),
+    Email: z.string(),
   }),
   MessageID: z.string({ required_error: "MessageID is required" }),
 });

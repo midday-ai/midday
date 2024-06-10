@@ -22,6 +22,8 @@ const ipRange = [
   "18.217.206.57",
 ];
 
+const FORWARD_FROM_EMAIL = "inbox@midday.ai";
+
 const resend = new Resend(env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
@@ -89,7 +91,7 @@ export async function POST(req: Request) {
 
       if (!isForwarded) {
         const { error } = await resend.emails.send({
-          from: `${FromFull?.Name} <inbox@midday.ai>`,
+          from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
           to: [forwardEmail],
           subject: fallbackName,
           text: TextBody,
@@ -113,13 +115,18 @@ export async function POST(req: Request) {
     const allowedAttachments = getAllowedAttachments(Attachments);
 
     // If no attachments we just want to forward the email
-    if (!allowedAttachments?.length && forwardEmail) {
+    // And ignore forward from our own domain to fix infinite loop
+    if (
+      !allowedAttachments?.length &&
+      forwardEmail &&
+      FromFull.Email !== FORWARD_FROM_EMAIL
+    ) {
       const messageKey = `message-id:${MessageID}`;
       const isForwarded = await RedisClient.exists(messageKey);
 
       if (!isForwarded) {
         const { error } = await resend.emails.send({
-          from: `${FromFull?.Name} <inbox@midday.ai>`,
+          from: `${FromFull?.Name} <${FORWARD_FROM_EMAIL}>`,
           to: [forwardEmail],
           subject: fallbackName,
           text: TextBody,
