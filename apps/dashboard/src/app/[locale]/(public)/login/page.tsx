@@ -37,7 +37,7 @@ export default async function Page(params) {
 
   let moreSignInOptions = null;
   let preferredSignInOption =
-    device?.vendor === "Apple" ? <AppleSignIn /> : <GoogleSignIn />;
+    device?.vendor === "Apple" ? <GoogleSignIn /> : <GoogleSignIn />;
 
   switch (preferred?.value) {
     case "apple":
