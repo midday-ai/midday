@@ -15,10 +15,10 @@ export class TellerApi {
   #fetcher: Fetcher;
 
   constructor(params: ProviderParams) {
-    this.#fetcher = params.fetcher;
+    this.#fetcher = params.fetcher as Fetcher;
   }
 
-  async getHealthcheck() {
+  async getHealthCheck() {
     try {
       await this.#get("/health");
       return true;
@@ -37,29 +37,22 @@ export class TellerApi {
     accountId,
     accessToken,
     latest,
+    count,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
-    return this.#get(
-      `/accounts/${accountId}/transactions`,
-      accessToken,
-      latest
-        ? {
-            count: 500,
-          }
-        : undefined
-    );
+    return this.#get(`/accounts/${accountId}/transactions`, accessToken, {
+      count: latest ? 500 : count,
+    });
   }
 
   async getAccountBalance({
     accountId,
     accessToken,
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse> {
-    const transactions = await this.#get(
-      `/accounts/${accountId}/transactions`,
+    const transactions = await this.getTransactions({
+      accountId,
       accessToken,
-      {
-        count: 1,
-      }
-    );
+      count: 1,
+    });
 
     return {
       currency: "USD",
@@ -82,17 +75,19 @@ export class TellerApi {
   async #get<TResponse>(
     path: string,
     token?: string,
-    params?: Record<string, string | number>
+    params?: Record<string, string | number | undefined>
   ): Promise<TResponse> {
     const url = new URL(`${this.#baseUrl}/${path}`);
 
     if (params) {
       for (const [key, value] of Object.entries(params)) {
-        url.searchParams.append(key, value.toString());
+        if (value) {
+          url.searchParams.append(key, value.toString());
+        }
       }
     }
 
-    return this.#fetcher
+    return <TResponse>this.#fetcher
       .fetch(url.toString(), {
         headers: new Headers({
           Authorization: `Basic ${btoa(`${token}:`)}`,

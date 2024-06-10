@@ -66,6 +66,7 @@ export type DeleteAccountRequest = {
 export interface GetTransactionsRequest extends AuthenticatedRequest {
   accountId: string;
   latest?: boolean;
+  count?: number;
 }
 
 export type AuthenticationResponse = {

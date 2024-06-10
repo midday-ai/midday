@@ -22,7 +22,7 @@ export class Provider {
         this.#provider = new TellerProvider(params);
         break;
       case "plaid":
-        this.#provider = new PlaidProvider();
+        this.#provider = new PlaidProvider(params);
         break;
       default:
     }
@@ -32,7 +32,7 @@ export class Provider {
     params: ProviderParams
   ): Promise<GetHealthCheckResponse> {
     const teller = new TellerProvider(params);
-    const plaid = new PlaidProvider();
+    const plaid = new PlaidProvider(params);
     const gocardless = new GoCardLessProvider(params);
 
     const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
@@ -67,7 +67,7 @@ export class Provider {
     return this.#provider?.getAccountBalance(params);
   }
 
-  async deleteAccount(params: DeleteAccountRequest) {
-    return this.#provider?.deleteAccount(params);
-  }
+  // async deleteAccount(params: DeleteAccountRequest) {
+  //   return this.#provider?.deleteAccount(params);
+  // }
 }
