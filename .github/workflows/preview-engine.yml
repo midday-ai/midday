@@ -7,7 +7,6 @@ on:
       - main
     paths:
       - apps/engine/**
-      - packages/providers/*
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
@@ -28,4 +27,5 @@ jobs:
           packageManager: bun
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "apps/engine"
+          wranglerVersion: "3.60.1"
           command: deploy --minify src/index.ts --name=engine-staging
