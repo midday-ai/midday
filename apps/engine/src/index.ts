@@ -1,4 +1,5 @@
 import { OpenAPIHono } from "@hono/zod-openapi";
+import type { Env } from "hono";
 import { env } from "hono/adapter";
 import { bearerAuth } from "hono/bearer-auth";
 import { cache } from "hono/cache";
@@ -61,4 +62,14 @@ app.doc("/doc", {
 
 export type AppType = typeof app.route;
 
-export default app;
+export default {
+  scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+    // const delayedProcessing = async () => {
+    //   // await cronTask(env);
+    // };
+    // ctx.waitUntil(delayedProcessing());
+  },
+  fetch(request: Request, env: Env, ctx: ExecutionContext) {
+    return app.fetch(request, env, ctx);
+  },
+};

@@ -1,3 +1,5 @@
+import { paginate } from "@/utils/paginate";
+import { withRetry } from "@/utils/retry";
 import {
   Configuration,
   CountryCode,
@@ -25,6 +27,27 @@ export class PlaidApi {
   #client: PlaidBaseApi;
   #clientId: string;
   #clientSecret: string;
+
+  #countryCodes = [
+    CountryCode.Ca,
+    CountryCode.Us,
+    // CountryCode.Se,
+    // CountryCode.Nl,
+    // CountryCode.Be,
+    // CountryCode.Gb,
+    // CountryCode.Es,
+    // CountryCode.Fr,
+    // CountryCode.Ie,
+    // CountryCode.De,
+    // CountryCode.It,
+    // CountryCode.Pl,
+    // CountryCode.Dk,
+    // CountryCode.No,
+    // CountryCode.Ee,
+    // CountryCode.Lt,
+    // CountryCode.Lv,
+    // CountryCode.Pt,
+  ];
 
   #environment = "sandbox";
 
@@ -127,6 +150,7 @@ export class PlaidApi {
 
   async linkTokenCreate({
     userId,
+    language = "en",
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -135,28 +159,8 @@ export class PlaidApi {
       secret: this.#clientSecret,
       client_name: "Midday",
       products: [Products.Transactions],
-      // TODO: Update language based on user preference
-      language: "en",
-      country_codes: [
-        CountryCode.Ca,
-        CountryCode.Us,
-        // CountryCode.Se,
-        // CountryCode.Nl,
-        // CountryCode.Be,
-        // CountryCode.Gb,
-        // CountryCode.Es,
-        // CountryCode.Fr,
-        // CountryCode.Ie,
-        // CountryCode.De,
-        // CountryCode.It,
-        // CountryCode.Pl,
-        // CountryCode.Dk,
-        // CountryCode.No,
-        // CountryCode.Ee,
-        // CountryCode.Lt,
-        // CountryCode.Lv,
-        // CountryCode.Pt,
-      ],
+      language,
+      country_codes: this.#countryCodes,
       transactions: {
         days_requested: 730,
       },
@@ -183,6 +187,27 @@ export class PlaidApi {
   > {
     return this.#client.itemPublicTokenExchange({
       public_token: publicToken,
+    });
+  }
+
+  async getInstitutions({ countryCode }: { countryCode: CountryCode }) {
+    return paginate({
+      pageSize: 500,
+      fetchData: (offset, count) =>
+        withRetry(() =>
+          this.#client
+            .institutionsGet({
+              country_codes: [countryCode],
+              count,
+              offset,
+              options: {
+                include_optional_metadata: true,
+              },
+            })
+            .then(({ data }) => {
+              return data.institutions;
+            })
+        ),
     });
   }
 }

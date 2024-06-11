@@ -61,6 +61,10 @@ export class TellerApi {
     };
   }
 
+  async getInstitutions({ accessToken }: AuthenticatedRequest) {
+    return this.#get("/institutions", accessToken);
+  }
+
   async deleteAccount({
     accountId,
     accessToken,

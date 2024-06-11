@@ -6,6 +6,7 @@ import type {
 
 export type LinkTokenCreateRequest = {
   userId: string;
+  language: string;
 };
 
 export type GetStatusResponse = {
