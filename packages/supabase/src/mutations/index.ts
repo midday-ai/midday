@@ -253,7 +253,7 @@ export async function updateBankAccount(
 
   return await supabase
     .from("bank_accounts")
-    .update(data)
+    .update({ ...data, original_name: data.name })
     .eq("id", id)
     .eq("team_id", teamId)
     .select()
