@@ -64,13 +64,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "bank_accounts_bank_connection_id_fkey";
-            columns: ["bank_connection_id"];
-            isOneToOne: false;
-            referencedRelation: "decrypted_bank_connections";
-            referencedColumns: ["id"];
-          },
-          {
             foreignKeyName: "bank_accounts_created_by_fkey";
             columns: ["created_by"];
             isOneToOne: false;
@@ -735,13 +728,6 @@ export type Database = {
             referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "transactions_bank_account_id_fkey";
-            columns: ["bank_account_id"];
-            isOneToOne: false;
-            referencedRelation: "decrypted_bank_accounts";
-            referencedColumns: ["id"];
-          },
-          {
             foreignKeyName: "transactions_category_slug_team_id_fkey";
             columns: ["category_slug", "team_id"];
             isOneToOne: false;
@@ -884,139 +870,6 @@ export type Database = {
       };
     };
     Views: {
-      decrypted_bank_accounts: {
-        Row: {
-          account_id: string | null;
-          balance: number | null;
-          bank_connection_id: string | null;
-          created_at: string | null;
-          created_by: string | null;
-          currency: string | null;
-          decrypted_name: string | null;
-          enabled: boolean | null;
-          id: string | null;
-          last_accessed: string | null;
-          manual: boolean | null;
-          name: string | null;
-          original_name: string | null;
-          team_id: string | null;
-        };
-        Insert: {
-          account_id?: string | null;
-          balance?: number | null;
-          bank_connection_id?: string | null;
-          created_at?: string | null;
-          created_by?: string | null;
-          currency?: string | null;
-          decrypted_name?: never;
-          enabled?: boolean | null;
-          id?: string | null;
-          last_accessed?: string | null;
-          manual?: boolean | null;
-          name?: string | null;
-          original_name?: string | null;
-          team_id?: string | null;
-        };
-        Update: {
-          account_id?: string | null;
-          balance?: number | null;
-          bank_connection_id?: string | null;
-          created_at?: string | null;
-          created_by?: string | null;
-          currency?: string | null;
-          decrypted_name?: never;
-          enabled?: boolean | null;
-          id?: string | null;
-          last_accessed?: string | null;
-          manual?: boolean | null;
-          name?: string | null;
-          original_name?: string | null;
-          team_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "bank_accounts_bank_connection_id_fkey";
-            columns: ["bank_connection_id"];
-            isOneToOne: false;
-            referencedRelation: "bank_connections";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "bank_accounts_bank_connection_id_fkey";
-            columns: ["bank_connection_id"];
-            isOneToOne: false;
-            referencedRelation: "decrypted_bank_connections";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "bank_accounts_created_by_fkey";
-            columns: ["created_by"];
-            isOneToOne: false;
-            referencedRelation: "users";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "public_bank_accounts_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
-      decrypted_bank_connections: {
-        Row: {
-          access_token: string | null;
-          created_at: string | null;
-          decrypted_name: string | null;
-          enrollment_id: string | null;
-          expires_at: string | null;
-          id: string | null;
-          institution_id: string | null;
-          logo_url: string | null;
-          name: string | null;
-          original_name: string | null;
-          provider: Database["public"]["Enums"]["bank_providers"] | null;
-          team_id: string | null;
-        };
-        Insert: {
-          access_token?: string | null;
-          created_at?: string | null;
-          decrypted_name?: never;
-          enrollment_id?: string | null;
-          expires_at?: string | null;
-          id?: string | null;
-          institution_id?: string | null;
-          logo_url?: string | null;
-          name?: string | null;
-          original_name?: string | null;
-          provider?: Database["public"]["Enums"]["bank_providers"] | null;
-          team_id?: string | null;
-        };
-        Update: {
-          access_token?: string | null;
-          created_at?: string | null;
-          decrypted_name?: never;
-          enrollment_id?: string | null;
-          expires_at?: string | null;
-          id?: string | null;
-          institution_id?: string | null;
-          logo_url?: string | null;
-          name?: string | null;
-          original_name?: string | null;
-          provider?: Database["public"]["Enums"]["bank_providers"] | null;
-          team_id?: string | null;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "bank_connections_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          }
-        ];
-      };
       decrypted_transaction_enrichments: {
         Row: {
           category_slug: string | null;
@@ -1159,13 +1012,6 @@ export type Database = {
             columns: ["bank_account_id"];
             isOneToOne: false;
             referencedRelation: "bank_accounts";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "transactions_bank_account_id_fkey";
-            columns: ["bank_account_id"];
-            isOneToOne: false;
-            referencedRelation: "decrypted_bank_accounts";
             referencedColumns: ["id"];
           },
           {
