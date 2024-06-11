@@ -712,7 +712,8 @@ export async function getInboxQuery(
     .from("inbox")
     .select(columns.join(","))
     .eq("team_id", teamId)
-    .order("created_at", { ascending });
+    .order("created_at", { ascending })
+    .neq("status", "deleted");
 
   if (done) {
     query.not("transaction_id", "is", null);
@@ -731,11 +732,9 @@ export async function getInboxQuery(
   }
 
   const { data } = await query.range(from, to);
-  // TODO: Fix neq in query
-  const filteredData = data?.filter((item) => item.status !== "deleted");
 
   return {
-    data: filteredData?.map((item) => {
+    data: data?.map((item) => {
       const pending = isWithinInterval(new Date(), {
         start: new Date(item.created_at),
         end: addDays(new Date(item.created_at), 45),

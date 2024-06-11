@@ -21,7 +21,7 @@ const model = new Supabase.ai.Session("gte-small");
 
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
-  const { id, name, system } = payload.record;
+  const { id, name } = payload.record;
 
   if (name === payload?.old_record?.name) {
     return new Response("No change");
