@@ -3,12 +3,12 @@ import { env } from "hono/adapter";
 import { bearerAuth } from "hono/bearer-auth";
 import { cache } from "hono/cache";
 import { logger } from "hono/logger";
-import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
 import accountRoutes from "./routes/accounts";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
+import { logger as customLogger } from "./utils/logger";
 
 type Bindings = {
   KV: KVNamespace;
@@ -30,6 +30,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>({
 });
 
 app.use(
+  "/v1/*",
   (c, next) => {
     const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
     const bearer = bearerAuth({ token: API_SECRET_KEY });
@@ -37,18 +38,18 @@ app.use(
     return bearer(c, next);
   },
   secureHeaders(),
-  logger(),
+  logger(customLogger),
   cache({
     cacheName: "engine",
     cacheControl: "max-age=3600",
-  }),
-  prettyJSON()
+  })
 );
 
 app.route("/v1/transactions", transactionsRoutes);
 app.route("/v1/accounts", accountRoutes);
 app.route("/v1/institutions", institutionRoutes);
-app.route("/v1/health", healthRoutes);
+
+app.route("/health", healthRoutes);
 
 app.doc("/doc", {
   openapi: "3.0.0",
@@ -57,5 +58,7 @@ app.doc("/doc", {
     title: "Midday Engine API",
   },
 });
+
+export type AppType = typeof app.route;
 
 export default app;

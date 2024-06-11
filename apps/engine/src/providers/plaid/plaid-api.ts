@@ -23,10 +23,10 @@ import type {
 
 export class PlaidApi {
   #client: PlaidBaseApi;
-
-  #environment = "sandbox";
   #clientId: string;
   #clientSecret: string;
+
+  #environment = "sandbox";
 
   constructor(params: ProviderParams) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
@@ -120,14 +120,9 @@ export class PlaidApi {
         cursor = data.next_cursor;
       }
     }
-    // NOTE: Plaid transactions for all accounts, we need to filter based on the
-    // Provided accountId
-    return (
-      added
-        .filter((transaction) => transaction.account_id === accountId)
-        // NOTE: Remove pending transactions until upsert issue is fixed
-        .filter((transaction) => !transaction.pending)
-    );
+    // NOTE: Plaid transactions for all accounts
+    // we need to filter based on the provided accountId
+    return added.filter((transaction) => transaction.account_id === accountId);
   }
 
   async linkTokenCreate({

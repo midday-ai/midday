@@ -1,7 +1,6 @@
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
-import { OpenAPIHono } from "@hono/zod-openapi";
-import { createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { AccountSchema, AccountsParamsSchema, AccountsSchema } from "./schema";
 

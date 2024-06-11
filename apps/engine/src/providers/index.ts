@@ -1,8 +1,8 @@
+import { logger } from "@/utils/logger";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
-  DeleteAccountRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetHealthCheckResponse,
@@ -56,14 +56,24 @@ export class Provider {
   }
 
   async getTransactions(params: GetTransactionsRequest) {
+    logger(
+      "getTransactions:",
+      `provider: ${this.#provider} id: ${params.accountId}`
+    );
+
     return this.#provider?.getTransactions(params);
   }
 
   async getAccounts(params: GetAccountsRequest) {
+    logger("getAccounts:", `provider: ${this.#provider}`);
     return this.#provider?.getAccounts(params);
   }
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
+    logger(
+      "getAccountBalance:",
+      `provider: ${this.#provider} id: ${params.accountId}`
+    );
     return this.#provider?.getAccountBalance(params);
   }
 

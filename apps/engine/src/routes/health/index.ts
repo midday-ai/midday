@@ -14,7 +14,9 @@ app.get("/", async (c) => {
     envs,
   });
 
-  return c.json(data);
+  const isHealthy = Object.values(data).every((service) => service.healthy);
+
+  return c.json(data, isHealthy ? 200 : 400);
 });
 
 export default app;
