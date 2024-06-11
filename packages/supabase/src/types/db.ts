@@ -16,11 +16,13 @@ export type Database = {
           bank_connection_id: string | null;
           created_at: string;
           created_by: string;
-          currency: string;
+          currency: string | null;
           enabled: boolean;
           id: string;
           last_accessed: string | null;
+          manual: boolean | null;
           name: string | null;
+          original_name: string | null;
           team_id: string;
         };
         Insert: {
@@ -29,11 +31,13 @@ export type Database = {
           bank_connection_id?: string | null;
           created_at?: string;
           created_by: string;
-          currency: string;
+          currency?: string | null;
           enabled?: boolean;
           id?: string;
           last_accessed?: string | null;
+          manual?: boolean | null;
           name?: string | null;
+          original_name?: string | null;
           team_id: string;
         };
         Update: {
@@ -42,11 +46,13 @@ export type Database = {
           bank_connection_id?: string | null;
           created_at?: string;
           created_by?: string;
-          currency?: string;
+          currency?: string | null;
           enabled?: boolean;
           id?: string;
           last_accessed?: string | null;
+          manual?: boolean | null;
           name?: string | null;
+          original_name?: string | null;
           team_id?: string;
         };
         Relationships: [
@@ -90,6 +96,7 @@ export type Database = {
           institution_id: string;
           logo_url: string | null;
           name: string;
+          original_name: string | null;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
           team_id: string;
         };
@@ -102,6 +109,7 @@ export type Database = {
           institution_id: string;
           logo_url?: string | null;
           name: string;
+          original_name?: string | null;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
           team_id: string;
         };
@@ -114,6 +122,7 @@ export type Database = {
           institution_id?: string;
           logo_url?: string | null;
           name?: string;
+          original_name?: string | null;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
           team_id?: string;
         };
@@ -548,6 +557,7 @@ export type Database = {
           color: string | null;
           created_at: string | null;
           description: string | null;
+          embedding: string | null;
           id: string;
           name: string;
           slug: string;
@@ -559,6 +569,7 @@ export type Database = {
           color?: string | null;
           created_at?: string | null;
           description?: string | null;
+          embedding?: string | null;
           id?: string;
           name: string;
           slug: string;
@@ -570,6 +581,7 @@ export type Database = {
           color?: string | null;
           created_at?: string | null;
           description?: string | null;
+          embedding?: string | null;
           id?: string;
           name?: string;
           slug?: string;
@@ -884,7 +896,9 @@ export type Database = {
           enabled: boolean | null;
           id: string | null;
           last_accessed: string | null;
+          manual: boolean | null;
           name: string | null;
+          original_name: string | null;
           team_id: string | null;
         };
         Insert: {
@@ -898,7 +912,9 @@ export type Database = {
           enabled?: boolean | null;
           id?: string | null;
           last_accessed?: string | null;
+          manual?: boolean | null;
           name?: string | null;
+          original_name?: string | null;
           team_id?: string | null;
         };
         Update: {
@@ -912,7 +928,9 @@ export type Database = {
           enabled?: boolean | null;
           id?: string | null;
           last_accessed?: string | null;
+          manual?: boolean | null;
           name?: string | null;
+          original_name?: string | null;
           team_id?: string | null;
         };
         Relationships: [
@@ -957,6 +975,7 @@ export type Database = {
           institution_id: string | null;
           logo_url: string | null;
           name: string | null;
+          original_name: string | null;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
           team_id: string | null;
         };
@@ -970,6 +989,7 @@ export type Database = {
           institution_id?: string | null;
           logo_url?: string | null;
           name?: string | null;
+          original_name?: string | null;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
           team_id?: string | null;
         };
@@ -983,6 +1003,7 @@ export type Database = {
           institution_id?: string | null;
           logo_url?: string | null;
           name?: string | null;
+          original_name?: string | null;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
           team_id?: string | null;
         };
@@ -1288,6 +1309,22 @@ export type Database = {
           percentage: number;
         }[];
       };
+      get_spending_v2: {
+        Args: {
+          team_id: string;
+          date_from: string;
+          date_to: string;
+          currency_target: string;
+        };
+        Returns: {
+          name: string;
+          slug: string;
+          amount: number;
+          currency: string;
+          color: string;
+          percentage: number;
+        }[];
+      };
       get_total_balance: {
         Args: {
           team_id: string;
@@ -1518,6 +1555,7 @@ export type Database = {
           institution_id: string;
           logo_url: string | null;
           name: string;
+          original_name: string | null;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
           team_id: string;
         };
