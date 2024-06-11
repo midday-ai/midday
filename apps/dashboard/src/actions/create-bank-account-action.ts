@@ -20,7 +20,6 @@ export const createBankAccountAction = action(
       .from("bank_accounts")
       .insert({
         name,
-        original_name: name,
         currency,
         team_id: teamId,
         created_by: user?.data?.id,
@@ -28,7 +27,7 @@ export const createBankAccountAction = action(
         account_id: nanoid(),
         manual: true,
       })
-      .select("id, name:original_name")
+      .select("id, name")
       .single();
 
     if (error) {

@@ -48,7 +48,6 @@ export async function createBankAccounts(
     .upsert(
       {
         institution_id: account.institution_id,
-        original_name: account.bank_name,
         name: account.bank_name,
         logo_url: account.logo_url,
         team_id: teamId,
@@ -73,7 +72,6 @@ export async function createBankAccounts(
           bank_connection_id: bankConnection?.data?.id,
           team_id: teamId,
           created_by: userId,
-          original_name: account.name,
           name: account.name,
           currency: account.currency,
           enabled: account.enabled,
@@ -253,7 +251,7 @@ export async function updateBankAccount(
 
   return await supabase
     .from("bank_accounts")
-    .update({ ...data, original_name: data.name })
+    .update(data)
     .eq("id", id)
     .eq("team_id", teamId)
     .select()
