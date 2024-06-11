@@ -31,9 +31,9 @@ client.defineJob({
     // NOTE: All inbox reciepts and invoices amount are
     // saved with positive values while transactions have signed values
     const { data: transactionData } = await io.supabase.client
-      .from("decrypted_transactions")
+      .from("transactions")
       .select(
-        "id, name:decrypted_name, team_id, attachments:transaction_attachments(*)"
+        "id, name:original_name, team_id, attachments:transaction_attachments(*)"
       )
       .eq("amount", -Math.abs(payload.amount))
       .eq("team_id", payload.teamId)

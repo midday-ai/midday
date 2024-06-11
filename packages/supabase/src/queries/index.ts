@@ -198,8 +198,8 @@ export async function getTransactionsQuery(
     "status",
     "note",
     "manual",
-    "name:decrypted_name",
-    "description:decrypted_description",
+    "name:original_name",
+    "description:original_description",
     "assigned:assigned_id(*)",
     "category:transaction_categories(id, name, color, slug)",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
@@ -208,7 +208,7 @@ export async function getTransactionsQuery(
   ];
 
   const query = supabase
-    .from("decrypted_transactions")
+    .from("transactions")
     .select(columns.join(","), { count: "exact" })
     .eq("team_id", teamId);
 
@@ -240,7 +240,7 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.like("amount_text", `%${searchQuery}%`);
     } else {
-      query.ilike("decrypted_name", `%${searchQuery}%`);
+      query.ilike("original_name", `%${searchQuery}%`);
     }
   }
 
@@ -314,12 +314,12 @@ export async function getTransactionsQuery(
 
 export async function getTransactionQuery(supabase: Client, id: string) {
   const { data } = await supabase
-    .from("decrypted_transactions")
+    .from("transactions")
     .select(
       `
       *,
-      name:decrypted_name,
-      description:decrypted_description,
+      name:original_name,
+      description:original_description,
       assigned:assigned_id(*),
       category:category_slug(id, name, vat),
       attachments:transaction_attachments(*),
@@ -349,9 +349,9 @@ export async function getSimilarTransactions(
   const { name, teamId } = params;
 
   return supabase
-    .from("decrypted_transactions")
+    .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
-    .eq("decrypted_name", name)
+    .eq("original_name", name)
     .eq("team_id", teamId)
     .throwOnError();
 }
@@ -705,7 +705,7 @@ export async function getInboxQuery(
     "created_at",
     "website",
     "due_date",
-    "transaction:decrypted_transactions(id, amount, currency, name:decrypted_name, date)",
+    "transaction:transactions(id, amount, currency, name:original_name, date)",
   ];
 
   const query = supabase

@@ -39,12 +39,12 @@ client.defineJob({
     });
 
     const { data, count } = await client
-      .from("decrypted_transactions")
+      .from("transactions")
       .select(
         `
         id,
         date,
-        name:decrypted_name,
+        name:original_name,
         amount,
         note,
         balance,

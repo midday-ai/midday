@@ -76,12 +76,12 @@ client.defineJob({
 
         const { error: transactionsError, data: transactionsData } =
           await supabase
-            .from("decrypted_transactions")
+            .from("transactions")
             .upsert(transactions, {
               onConflict: "internal_id",
               ignoreDuplicates: true,
             })
-            .select("*, name:decrypted_name");
+            .select("*, name:original_name");
 
         if (transactionsError) {
           await io.logger.error("Transactions error", transactionsError);
