@@ -1,6 +1,6 @@
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
-import type { Client, Database } from "../types";
+import type { Client } from "../types";
 
 type CreateBankAccountsPayload = {
   accounts: {
@@ -48,6 +48,7 @@ export async function createBankAccounts(
     .upsert(
       {
         institution_id: account.institution_id,
+        original_name: account.bank_name,
         name: account.bank_name,
         logo_url: account.logo_url,
         team_id: teamId,
@@ -72,6 +73,7 @@ export async function createBankAccounts(
           bank_connection_id: bankConnection?.data?.id,
           team_id: teamId,
           created_by: userId,
+          original_name: account.name,
           name: account.name,
           currency: account.currency,
           enabled: account.enabled,

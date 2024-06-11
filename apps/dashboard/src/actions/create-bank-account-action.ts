@@ -19,6 +19,7 @@ export const createBankAccountAction = action(
     const { data, error } = await supabase
       .from("bank_accounts")
       .insert({
+        name,
         original_name: name,
         currency,
         team_id: teamId,
