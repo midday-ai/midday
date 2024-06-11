@@ -120,6 +120,8 @@ export async function createTransactions(
   return supabase.from("transactions").insert(
     transactions.map((transaction) => ({
       ...transaction,
+      original_name: transaction.name,
+      original_description: transaction.description,
       team_id: teamId,
     }))
   );

@@ -71,6 +71,8 @@ client.defineJob({
       await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
         const formatted = batch.map(({ category, ...rest }) => ({
           ...rest,
+          original_name: rest.name,
+          original_description: rest.description,
           category_slug: category,
         }));
 
