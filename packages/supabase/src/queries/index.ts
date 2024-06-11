@@ -53,8 +53,8 @@ export async function getBankConnectionsByTeamIdQuery(
   teamId: string
 ) {
   return supabase
-    .from("decrypted_bank_connections")
-    .select("*, name:decrypted_name")
+    .from("bank_connections")
+    .select("*, name:original_name")
     .eq("team_id", teamId)
     .throwOnError();
 }
@@ -71,9 +71,9 @@ export async function getTeamBankAccountsQuery(
   const { teamId, enabled } = params;
 
   const query = supabase
-    .from("decrypted_bank_accounts")
+    .from("bank_accounts")
     .select(
-      "*, name:decrypted_name, bank:decrypted_bank_connections(*, name:decrypted_name)"
+      "*, name:original_name, bank:bank_connections(*, name:original_name)"
     )
     .eq("team_id", teamId)
     .order("created_at", { ascending: true })
@@ -204,7 +204,7 @@ export async function getTransactionsQuery(
     "description:decrypted_description",
     "assigned:assigned_id(*)",
     "category:transaction_categories(id, name, color, slug)",
-    "bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url))",
+    "bank_account:bank_accounts(id, name:original_name, currency, bank_connection:bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
     "vat:calculated_vat",
   ];
@@ -325,7 +325,7 @@ export async function getTransactionQuery(supabase: Client, id: string) {
       assigned:assigned_id(*),
       category:category_slug(id, name, vat),
       attachments:transaction_attachments(*),
-      bank_account:decrypted_bank_accounts(id, name:decrypted_name, currency, bank_connection:decrypted_bank_connections(id, logo_url)),
+      bank_account:bank_accounts(id, name:original_name, currency, bank_connection:bank_connections(id, logo_url)),
       vat:calculated_vat
     `
     )
