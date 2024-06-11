@@ -17,7 +17,7 @@ jobs:
         with:
           bun-version: latest
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
       # - name: 🔦 Run linter
       #   run: bun run lint --filter=@midday/engine
       # - name: 🪐 Check TypeScript
@@ -28,4 +28,4 @@ jobs:
           packageManager: bun
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "apps/engine"
-          command: deploy --minify src/index.ts
+          command: deploy --minify src/index.ts --name=engine-staging
