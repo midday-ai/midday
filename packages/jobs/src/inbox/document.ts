@@ -67,7 +67,7 @@ client.defineJob({
           display_name: result.name,
           website: result.website,
           due_date: result.date && new Date(result.date),
-          status: "processing",
+          status: "pending",
           meta: result.meta,
         })
         .eq("id", recordId)
