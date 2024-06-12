@@ -198,13 +198,13 @@ export async function getTransactionsQuery(
     "status",
     "note",
     "manual",
-    "name:original_name",
-    "description:original_description",
+    "name",
+    "description",
     "assigned:assigned_id(*)",
     "category:transaction_categories(id, name, color, slug)",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
-    // "vat:calculated_vat",
+    "vat:calculated_vat",
   ];
 
   const query = supabase
@@ -240,7 +240,7 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.like("amount_text", `%${searchQuery}%`);
     } else {
-      query.ilike("original_name", `%${searchQuery}%`);
+      query.ilike("name", `%${searchQuery}%`);
     }
   }
 
@@ -315,13 +315,13 @@ export async function getTransactionsQuery(
 export async function getTransactionQuery(supabase: Client, id: string) {
   const columns = [
     "*",
-    "name:original_name",
-    "description:original_description",
+    "name",
+    "description",
     "assigned:assigned_id(*)",
     "category:category_slug(id, name, vat)",
     "attachments:transaction_attachments(*)",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
-    // 'vat:calculated_vat'
+    "vat:calculated_vat",
   ];
 
   const { data } = await supabase
@@ -351,7 +351,7 @@ export async function getSimilarTransactions(
   return supabase
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
-    .eq("original_name", name)
+    .eq("name", name)
     .eq("team_id", teamId)
     .throwOnError();
 }
@@ -705,7 +705,7 @@ export async function getInboxQuery(
     "created_at",
     "website",
     "due_date",
-    "transaction:transactions(id, amount, currency, name:original_name, date)",
+    "transaction:transactions(id, amount, currency, name, date)",
   ];
 
   const query = supabase

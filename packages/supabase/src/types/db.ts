@@ -132,7 +132,6 @@ export type Database = {
           currency: string | null;
           display_name: string | null;
           due_date: string | null;
-          embedding: string | null;
           file_name: string | null;
           file_path: string[] | null;
           forwarded_to: string | null;
@@ -155,7 +154,6 @@ export type Database = {
           currency?: string | null;
           display_name?: string | null;
           due_date?: string | null;
-          embedding?: string | null;
           file_name?: string | null;
           file_path?: string[] | null;
           forwarded_to?: string | null;
@@ -177,7 +175,6 @@ export type Database = {
           currency?: string | null;
           display_name?: string | null;
           due_date?: string | null;
-          embedding?: string | null;
           file_name?: string | null;
           file_path?: string[] | null;
           forwarded_to?: string | null;
@@ -648,8 +645,11 @@ export type Database = {
           method: Database["public"]["Enums"]["transactionMethods"];
           name: string;
           note: string | null;
+          original_description: string | null;
+          original_name: string | null;
           status: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string;
+          calculated_vat: number | null;
         };
         Insert: {
           amount: number;
@@ -672,6 +672,8 @@ export type Database = {
           method: Database["public"]["Enums"]["transactionMethods"];
           name: string;
           note?: string | null;
+          original_description?: string | null;
+          original_name?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string;
         };
@@ -696,6 +698,8 @@ export type Database = {
           method?: Database["public"]["Enums"]["transactionMethods"];
           name?: string;
           note?: string | null;
+          original_description?: string | null;
+          original_name?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id?: string;
         };
@@ -886,6 +890,8 @@ export type Database = {
           method: Database["public"]["Enums"]["transactionMethods"] | null;
           name: string | null;
           note: string | null;
+          original_description: string | null;
+          original_name: string | null;
           status: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string | null;
         };
@@ -912,6 +918,8 @@ export type Database = {
           method?: Database["public"]["Enums"]["transactionMethods"] | null;
           name?: string | null;
           note?: string | null;
+          original_description?: string | null;
+          original_name?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id?: string | null;
         };
@@ -938,6 +946,8 @@ export type Database = {
           method?: Database["public"]["Enums"]["transactionMethods"] | null;
           name?: string | null;
           note?: string | null;
+          original_description?: string | null;
+          original_name?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id?: string | null;
         };
@@ -1207,88 +1217,13 @@ export type Database = {
               full_name: string;
             }[];
           };
-      query_inbox_embeddings:
-        | {
-            Args: {
-              embedding: string;
-              match_threshold: number;
-            };
-            Returns: {
-              id: string;
-              created_at: string;
-              name: string;
-              website: string;
-              file_path: string[];
-              amount: number;
-              currency: string;
-              content_type: string;
-              size: number;
-              attachment_id: string;
-              transaction_id: string;
-              due_date: string;
-              forwarded_to: string;
-              reference_id: string;
-              status: Database["public"]["Enums"]["inbox_status"];
-              transaction_amount: number;
-              transaction_currency: string;
-              transaction_name: string;
-              transaction_date: string;
-            }[];
-          }
-        | {
-            Args: {
-              embedding_vector: number[];
-              match_threshold: number;
-            };
-            Returns: {
-              id: string;
-              created_at: string;
-              name: string;
-              website: string;
-              file_path: string[];
-              amount: number;
-              currency: string;
-              content_type: string;
-              size: number;
-              attachment_id: string;
-              transaction_id: string;
-              due_date: string;
-              forwarded_to: string;
-              reference_id: string;
-              status: Database["public"]["Enums"]["inbox_status"];
-              transaction_amount: number;
-              transaction_currency: string;
-              transaction_date: string;
-            }[];
-          }
-        | {
-            Args: {
-              team_id: string;
-              embedding: string;
-              match_threshold: number;
-            };
-            Returns: {
-              id: string;
-              created_at: string;
-              display_name: string;
-              website: string;
-              file_path: string[];
-              amount: number;
-              currency: string;
-              content_type: string;
-              size: number;
-              attachment_id: string;
-              transaction_id: string;
-              due_date: string;
-              forwarded_to: string;
-              reference_id: string;
-              status: Database["public"]["Enums"]["inbox_status"];
-              transaction_amount: number;
-              transaction_currency: string;
-              transaction_name: string;
-              transaction_date: string;
-            }[];
-          };
+      safe_decrypt_name: {
+        Args: {
+          encoded_name: string;
+          key: string;
+        };
+        Returns: string;
+      };
       set_limit: {
         Args: {
           "": number;

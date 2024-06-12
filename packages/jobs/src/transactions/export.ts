@@ -44,7 +44,7 @@ client.defineJob({
         `
         id,
         date,
-        name:original_name,
+        name,
         amount,
         note,
         balance,

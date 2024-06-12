@@ -120,8 +120,6 @@ export async function createTransactions(
   return supabase.from("transactions").insert(
     transactions.map((transaction) => ({
       ...transaction,
-      original_name: transaction.name,
-      original_description: transaction.description,
       team_id: teamId,
     }))
   );
@@ -136,7 +134,7 @@ export async function updateTransaction(
     .from("transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, category_slug, team_id, name:original_name, status")
+    .select("id, category, category_slug, team_id, name, status")
     .single();
 }
 
@@ -273,7 +271,7 @@ export async function updateSimilarTransactions(
 
   const transaction = await supabase
     .from("transactions")
-    .select("name:original_name, category_slug")
+    .select("name, category_slug")
     .eq("id", id)
     .single();
 
@@ -284,7 +282,7 @@ export async function updateSimilarTransactions(
   return supabase
     .from("transactions")
     .update({ category_slug: transaction.data.category_slug })
-    .eq("original_name", transaction.data.name)
+    .eq("name", transaction.data.name)
     .eq("team_id", team_id)
     .select("id, team_id");
 }

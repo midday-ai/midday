@@ -32,9 +32,7 @@ client.defineJob({
     // saved with positive values while transactions have signed values
     const { data: transactionData } = await io.supabase.client
       .from("transactions")
-      .select(
-        "id, name:original_name, team_id, attachments:transaction_attachments(*)"
-      )
+      .select("id, name, team_id, attachments:transaction_attachments(*)")
       .eq("amount", -Math.abs(payload.amount))
       .eq("team_id", payload.teamId)
       .filter("transaction_attachments.id", "is", null)

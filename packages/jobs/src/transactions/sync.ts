@@ -81,7 +81,7 @@ client.defineJob({
               onConflict: "internal_id",
               ignoreDuplicates: true,
             })
-            .select("*, name:original_name");
+            .select("*");
 
         if (transactionsError) {
           await io.logger.error("Transactions error", transactionsError);
