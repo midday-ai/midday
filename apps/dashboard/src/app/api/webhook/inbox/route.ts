@@ -50,13 +50,28 @@ export async function POST(req: Request) {
     );
   }
 
-  const inboxId = getInboxIdFromEmail(parsedBody.data.OriginalRecipient);
+  const {
+    MessageID,
+    FromFull,
+    Subject,
+    Attachments,
+    TextBody,
+    HtmlBody,
+    OriginalRecipient,
+  } = parsedBody.data;
+
+  const inboxId = getInboxIdFromEmail(OriginalRecipient);
 
   if (!inboxId) {
     return NextResponse.json(
       { error: "Invalid OriginalRecipient email" },
       { status: 400 }
     );
+  }
+
+  // Ignore emails from our own domain to fix infinite loop
+  if (FromFull.Email === FORWARD_FROM_EMAIL) {
+    return NextResponse.json({ success: true });
   }
 
   const supabase = createClient({ admin: true });
@@ -77,9 +92,6 @@ export async function POST(req: Request) {
     });
 
     const teamId = teamData?.id;
-
-    const { MessageID, FromFull, Subject, Attachments, TextBody, HtmlBody } =
-      parsedBody.data;
 
     const fallbackName = Subject ?? FromFull?.Name;
     const forwardEmail = teamData?.inbox_email;
@@ -115,12 +127,7 @@ export async function POST(req: Request) {
     const allowedAttachments = getAllowedAttachments(Attachments);
 
     // If no attachments we just want to forward the email
-    // And ignore forward from our own domain to fix infinite loop
-    if (
-      !allowedAttachments?.length &&
-      forwardEmail &&
-      FromFull.Email !== FORWARD_FROM_EMAIL
-    ) {
+    if (!allowedAttachments?.length && forwardEmail) {
       const messageKey = `message-id:${MessageID}`;
       const isForwarded = await RedisClient.exists(messageKey);
 
@@ -210,7 +217,5 @@ export async function POST(req: Request) {
     );
   }
 
-  return NextResponse.json({
-    success: true,
-  });
+  return NextResponse.json({ success: true });
 }
