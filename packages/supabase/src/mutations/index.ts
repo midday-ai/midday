@@ -120,6 +120,8 @@ export async function createTransactions(
   return supabase.from("transactions").insert(
     transactions.map((transaction) => ({
       ...transaction,
+      original_name: transaction.name,
+      original_description: transaction.description,
       team_id: teamId,
     }))
   );
@@ -131,10 +133,10 @@ export async function updateTransaction(
   data: any
 ) {
   return supabase
-    .from("decrypted_transactions")
+    .from("transactions")
     .update(data)
     .eq("id", id)
-    .select("id, category, category_slug, team_id, name:decrypted_name, status")
+    .select("id, category, category_slug, team_id, name:original_name, status")
     .single();
 }
 
@@ -270,8 +272,8 @@ export async function updateSimilarTransactions(
   const { id, team_id } = params;
 
   const transaction = await supabase
-    .from("decrypted_transactions")
-    .select("name:decrypted_name, category_slug")
+    .from("transactions")
+    .select("name:original_name, category_slug")
     .eq("id", id)
     .single();
 
@@ -280,9 +282,9 @@ export async function updateSimilarTransactions(
   }
 
   return supabase
-    .from("decrypted_transactions")
+    .from("transactions")
     .update({ category_slug: transaction.data.category_slug })
-    .eq("decrypted_name", transaction.data.name)
+    .eq("original_name", transaction.data.name)
     .eq("team_id", team_id)
     .select("id, team_id");
 }
