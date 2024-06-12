@@ -48,7 +48,10 @@ client.defineJob({
           })
           .eq("id", account.id);
       } catch (error) {
-        await io.logger.error("Update Account Balance Error", error);
+        await io.logger.error(
+          `Update Account Balance Error. Provider: ${account.bank_connection.provider} Account id: ${account.account_id}`,
+          error
+        );
       }
 
       return provider.getTransactions({
