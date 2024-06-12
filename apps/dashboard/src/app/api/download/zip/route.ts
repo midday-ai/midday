@@ -4,7 +4,7 @@ import { createClient } from "@midday/supabase/server";
 import { download } from "@midday/supabase/storage";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 
-export const preferredRegion = ["fra1", "sfo1"];
+export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const dynamic = "force-dynamic";
 
 export async function GET(req, res) {

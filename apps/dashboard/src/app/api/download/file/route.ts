@@ -2,7 +2,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { download } from "@midday/supabase/storage";
 
-export const preferredRegion = ["fra1", "sfo1"];
+export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
 export async function GET(req, res) {
   const supabase = createClient();
