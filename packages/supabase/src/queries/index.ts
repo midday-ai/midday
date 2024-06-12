@@ -204,7 +204,7 @@ export async function getTransactionsQuery(
     "category:transaction_categories(id, name, color, slug)",
     "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
     "attachments:transaction_attachments(id, name, size, path, type)",
-    "vat:calculated_vat",
+    // "vat:calculated_vat",
   ];
 
   const query = supabase
@@ -313,20 +313,20 @@ export async function getTransactionsQuery(
 }
 
 export async function getTransactionQuery(supabase: Client, id: string) {
+  const columns = [
+    "*",
+    "name:original_name",
+    "description:original_description",
+    "assigned:assigned_id(*)",
+    "category:category_slug(id, name, vat)",
+    "attachments:transaction_attachments(*)",
+    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
+    // 'vat:calculated_vat'
+  ];
+
   const { data } = await supabase
     .from("transactions")
-    .select(
-      `
-      *,
-      name:original_name,
-      description:original_description,
-      assigned:assigned_id(*),
-      category:category_slug(id, name, vat),
-      attachments:transaction_attachments(*),
-      bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url)),
-      vat:calculated_vat
-    `
-    )
+    .select(columns.join(","))
     .eq("id", id)
     .single()
     .throwOnError();
