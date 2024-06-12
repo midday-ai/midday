@@ -10,9 +10,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@langchain/community": "^0.2.6",
+    "@langchain/community": "^0.2.10",
     "@langchain/core": "^0.2.6",
-    "@langchain/openai": "^0.1.1",
+    "@langchain/openai": "^0.1.3",
     "@midday/documents": "workspace:*",
     "@midday/import": "workspace:*",
     "@trigger.dev/react": "2.3.19",
