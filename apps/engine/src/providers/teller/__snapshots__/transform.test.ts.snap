@@ -1,0 +1,91 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": 83.62,
+  "balance": null,
+  "bank_account_id": "123",
+  "category": "income",
+  "currency": "USD",
+  "date": "2024-03-05",
+  "description": null,
+  "internal_id": "123_txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Online Check Deposit",
+  "status": "pending",
+  "team_id": "123",
+}
+`;
+
+exports[`Transform card payment transaction 1`] = `
+{
+  "amount": -68.9,
+  "balance": "83431.46",
+  "bank_account_id": "123",
+  "category": null,
+  "currency": "USD",
+  "date": "2024-03-01",
+  "description": null,
+  "internal_id": "123_txn_os41r5u90e29shubl2005",
+  "method": "card_purchase",
+  "name": "Nordstrom",
+  "status": "posted",
+  "team_id": "123",
+}
+`;
+
+exports[`Transform income transaction 1`] = `
+{
+  "amount": -20.21,
+  "balance": "83296.40",
+  "bank_account_id": "123",
+  "category": null,
+  "currency": "USD",
+  "date": "2024-03-03",
+  "description": null,
+  "internal_id": "123_txn_os41r5u90e29shubl2002",
+  "method": "card_purchase",
+  "name": "Exxon Mobil",
+  "status": "posted",
+  "team_id": "123",
+}
+`;
+
+exports[`Transform type transfer 1`] = `
+{
+  "amount": -37.99,
+  "balance": "85897.25",
+  "bank_account_id": "123",
+  "category": "transfer",
+  "currency": "USD",
+  "date": "2024-01-27",
+  "description": null,
+  "internal_id": "123_txn_os41r5ua0e29shubl2001",
+  "method": "transfer",
+  "name": "Recurring Transfer To Savings",
+  "status": "posted",
+  "team_id": "123",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "currency": "USD",
+  "enrollment_id": "enr_os557c8pck2deoskak000",
+  "id": "acc_os557c2mge29shubl2000",
+  "institution": {
+    "id": "mercury",
+    "logo": "https://teller.io/images/banks/mercury.jpg",
+    "name": "Mercury",
+  },
+  "name": "Platinum Card",
+  "provider": "teller",
+}
+`;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 99.41,
+  "currency": "USD",
+}
+`;

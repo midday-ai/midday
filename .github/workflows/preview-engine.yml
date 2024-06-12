@@ -1,0 +1,31 @@
+name: Preview Deployment - Engine
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+on:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - apps/engine/**
+      - packages/providers/*
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      # - name: 🔦 Run linter
+      #   run: bun run lint --filter=@midday/engine
+      # - name: 🪐 Check TypeScript
+      #   run: bun run typecheck --filter=@midday/engine
+      - name: Deploy Project Artifacts to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: "apps/engine"
+          command: deploy --minify src/index.ts

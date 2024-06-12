@@ -1,0 +1,23 @@
+{
+    "name": "@midday/engine",
+    "scripts": {
+      "dev": "wrangler dev src/index.ts",
+      "deploy": "wrangler deploy --minify src/index.ts",
+      "clean": "rm -rf .turbo node_modules",
+      "lint": "biome check .",
+      "format": "biome format --write .",
+      "check:types": "tsc --noEmit"
+    },
+    "dependencies": {
+      "@hono/zod-openapi": "^0.14.2",
+      "@hono/zod-validator": "^0.2.2",
+      "@upstash/redis": "^1.31.3",
+      "hono": "^4.4.4",
+      "xior": "^0.5.1",
+      "zod": "^3.23.8"
+    },
+    "devDependencies": {
+      "@cloudflare/workers-types": "^4.20240605.0",
+      "wrangler": "^3.60.0"
+    }
+  }

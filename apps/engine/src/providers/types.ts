@@ -16,8 +16,6 @@ export type Transaction = {
   currency: string;
   date: string;
   internal_id: string;
-  bank_account_id: string;
-  team_id: string;
   status: "posted" | "pending";
   balance?: string | null;
   category?: string | null;
@@ -49,7 +47,6 @@ export type Balance = {
 };
 
 export type GetTransactionsRequest = {
-  teamId: string;
   bankAccountId: string;
   accountId: string;
   latest?: boolean;
