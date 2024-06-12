@@ -49,14 +49,12 @@ export class PlaidApi {
     // CountryCode.Pt,
   ];
 
-  #environment = "sandbox";
-
   constructor(params: ProviderParams) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
     this.#clientSecret = params.envs.PLAID_SECRET;
 
     const configuration = new Configuration({
-      basePath: PlaidEnvironments[this.#environment],
+      basePath: PlaidEnvironments[params.envs.PLAID_ENVIRONMENT],
       baseOptions: {
         headers: {
           "PLAID-CLIENT-ID": this.#clientId,
