@@ -5,7 +5,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 
 export function InboxDetailsSkeleton() {
   return (
-    <div className="flex h-[calc(100vh-120px)] overflow-hidden flex-col border rounded-xl w-[1160px]">
+    <div className="flex h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px]">
       <div className="flex items-center py-2 h-[52px]">
         <div className="flex items-center gap-2" />
       </div>

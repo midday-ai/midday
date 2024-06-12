@@ -76,19 +76,17 @@ const RenderComponent = ({
   switch (type) {
     case FileType.Pdf:
       return (
-        <div style={{ width, height }} className="pdf-viewer">
-          <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
-            <div className="overflow-auto" style={{ height }}>
-              {Array.from(new Array(numPages), (_, index) => (
-                <Page
-                  key={`page_${index + 1}`}
-                  pageNumber={index + 1}
-                  width={width}
-                />
-              ))}
-            </div>
-          </Document>
-        </div>
+        <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
+          <div className="overflow-y-auto overflow-x-hidden max-h-screen">
+            {Array.from(new Array(numPages), (_, index) => (
+              <Page
+                key={`page_${index + 1}`}
+                pageNumber={index + 1}
+                width={width}
+              />
+            ))}
+          </div>
+        </Document>
       );
     default:
       return null;
