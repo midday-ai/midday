@@ -50,7 +50,7 @@ export function Assistant() {
   });
 
   return (
-    <div className="overflow-hidden p-0 w-[760px] h-[480px] backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-80 border-border border rounded-md relative">
+    <div className="overflow-hidden p-0 w-[760px] h-full md:h-[480px] backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-80 border-border border rounded-md relative">
       <Header toggleSidebar={toggleOpen} isExpanded={isExpanded} />
       <Sidebar
         setExpanded={setExpanded}

@@ -38,7 +38,7 @@ export async function ReconnectBank() {
         <Button
           variant="outline"
           size="icon"
-          className="rounded-full w-8 h-8 flex items-center"
+          className="rounded-full w-8 h-8 items-center hidden md:flex"
         >
           <Icons.Refresh
             size={16}

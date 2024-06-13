@@ -31,6 +31,7 @@ import {
   MdKeyboardArrowLeft,
   MdKeyboardArrowRight,
   MdKeyboardArrowUp,
+  MdMenu,
   MdMoreHoriz,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
@@ -537,4 +538,5 @@ export const Icons = {
   Palette: MdOutlinePalette,
   Subject: MdOutlineSubject,
   ChatBubble: MdOutlineChatBubbleOutline,
+  Menu: MdMenu,
 };

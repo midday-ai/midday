@@ -11,13 +11,6 @@ import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const MobileOverview = dynamic(
-  () => import("@/components/mobile-overlay").then((mod) => mod.MobileOverview),
-  {
-    ssr: false,
-  }
-);
-
 const AssistantModal = dynamic(
   () =>
     import("@/components/assistant/assistant-modal").then(
@@ -98,7 +91,6 @@ export default async function Layout({
     : getCountryCode();
 
   const isEU = isEUCountry(countryCode);
-  const mobileOverlay = cookies().has(Cookies.MobileOverlay);
 
   if (!user?.data?.team) {
     redirect("/teams");
@@ -111,11 +103,9 @@ export default async function Layout({
   return (
     <div className="relative">
       <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-        {!mobileOverlay && <MobileOverview />}
-
         <Sidebar />
 
-        <div className="ml-[95px] mr-10 pb-8">
+        <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
           <Header />
           {children}
         </div>

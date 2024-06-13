@@ -48,12 +48,12 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
         align: "start",
       }}
     >
-      <div className="ml-auto">
+      <div className="ml-auto hidden md:flex">
         <CarouselPrevious className="static p-0 border-none hover:bg-transparent" />
         <CarouselNext className="static p-0 border-none hover:bg-transparent" />
       </div>
 
-      <CarouselContent className="-ml-[20px] 2xl:-ml-[40px]">
+      <CarouselContent className="-ml-[20px] 2xl:-ml-[40px] flex-col md:flex-row space-y-6 md:space-y-0">
         {items.map((item, idx) => {
           return (
             <CarouselItem

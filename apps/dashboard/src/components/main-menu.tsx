@@ -72,6 +72,7 @@ const Item = ({
   onRemove,
   disableRemove,
   onDragEnd,
+  onSelect,
 }) => {
   const y = useMotionValue(0);
   const Icon = icons[item.path];
@@ -85,6 +86,8 @@ const Item = ({
           if (isCustomizing) {
             evt.preventDefault();
           }
+
+          onSelect?.();
         }}
         onMouseDown={(evt) => {
           if (isCustomizing) {
@@ -93,7 +96,7 @@ const Item = ({
         }}
       >
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger className="w-full">
             <Reorder.Item
               onDragEnd={onDragEnd}
               key={item.path}
@@ -102,7 +105,7 @@ const Item = ({
               style={{ y }}
               layoutRoot
               className={cn(
-                "relative rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
+                "relative rounded-lg border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
                 "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                 isActive &&
                   "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
@@ -129,12 +132,13 @@ const Item = ({
 
                 <div
                   className={cn(
-                    "flex space-x-3 p-0 items-center",
+                    "flex space-x-3 p-0 items-center pl-2 md:pl-0",
                     isCustomizing &&
                       "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none"
                   )}
                 >
                   <Icon />
+                  <span className="flex md:hidden">{item.name}</span>
                 </div>
               </motion.div>
             </Reorder.Item>
@@ -167,7 +171,7 @@ const itemVariant = {
   show: { opacity: 1 },
 };
 
-export function MainMenu({ initialItems }) {
+export function MainMenu({ initialItems, onSelect }) {
   const [items, setItems] = useState(initialItems ?? defaultItems);
   const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
@@ -234,6 +238,7 @@ export function MainMenu({ initialItems }) {
                   onRemove={onRemove}
                   disableRemove={items.length === 1}
                   onDragEnd={onDragEnd}
+                  onSelect={onSelect}
                 />
               );
             })}
@@ -257,7 +262,7 @@ export function MainMenu({ initialItems }) {
                   variants={itemVariant}
                   key={item.path}
                   className={cn(
-                    "rounded-lg border border-transparent w-[45px] h-[45px] flex items-center justify-center",
+                    "rounded-lg border border-transparent w-[45px] h-[45px] flex items-center md:justify-center",
                     "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                     "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
                   )}

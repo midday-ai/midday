@@ -22,7 +22,7 @@ export function AccountBalance({ data }) {
 
   return (
     <div className="flex justify-between mt-12 items-center flex-col space-y-6">
-      <div className="-mt-6 w-[75%] lg:w-[85%] 2xl:w-[80%] aspect-square rounded-full bg-[#F2F1EF] dark:bg-secondary flex items-center justify-center p-8 flex-col space-y-2">
+      <div className="-mt-6 w-[80%] md:w-[75%] lg:w-[85%] 2xl:w-[80%] aspect-square rounded-full bg-[#F2F1EF] dark:bg-secondary flex items-center justify-center p-8 flex-col space-y-2">
         <h2 className="font-mono font-medium text-2xl">
           <FormatAmount
             amount={activeAccount.balance}

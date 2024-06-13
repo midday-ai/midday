@@ -8,7 +8,7 @@ import {
 
 export async function AccountBalance() {
   return (
-    <div className="border relative aspect-square overflow-hidden p-8">
+    <div className="border relative aspect-square overflow-hidden p-4 md:p-8">
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense fallback={<AccountBalanceSkeleton />}>
           <AccountBalanceWidget />

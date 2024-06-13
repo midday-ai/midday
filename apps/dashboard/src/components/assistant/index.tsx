@@ -54,7 +54,7 @@ export function Assistant() {
   }, [chatId]);
 
   return (
-    <div className="overflow-hidden p-0 max-w-[760px] h-[480px]">
+    <div className="overflow-hidden p-0 h-full w-full md:max-w-[760px] md:h-[480px]">
       {showFeedback && (
         <AssistantFeedback onClose={() => setShowFeedback(false)} />
       )}
