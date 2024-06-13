@@ -51,11 +51,11 @@ export function InboxDetails({
   };
 
   if (isEmpty) {
-    return <div className="w-[1160px]" />;
+    return <div className="hidden md:block w-[1160px]" />;
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px]">
+    <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px] hidden md:flex">
       <div className="flex items-center p-2">
         <div className="flex items-center gap-2">
           <Tooltip>

@@ -164,6 +164,7 @@ export function InviteTeamMembersModal({ onOpenChange, isOpen }) {
               <Button
                 type="submit"
                 disabled={inviteMembers.status === "executing"}
+                className="w-full md:w-auto"
               >
                 {inviteMembers.status === "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
