@@ -29,7 +29,6 @@ export function Chat({
   const { formRef, onKeyDown } = useEnterSubmit();
   const ref = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const { message } = useAssistantStore();
 
@@ -69,9 +68,9 @@ export function Chat({
   }, []);
 
   useEffect(() => {
-    if (inputRef.current && isDesktop) {
-      inputRef.current.focus();
-    }
+    requestAnimationFrame(() => {
+      inputRef?.current.focus();
+    });
   }, [messages]);
 
   const { messagesRef, scrollRef, visibilityRef, scrollToBottom } =
@@ -113,7 +112,6 @@ export function Chat({
             value={input}
             className="h-12 min-h-12 pt-3 resize-none border-none"
             placeholder="Ask Midday a question..."
-            autoFocus={isDesktop}
             onKeyDown={onKeyDown}
             onChange={(evt) => {
               setInput(evt.target.value);
