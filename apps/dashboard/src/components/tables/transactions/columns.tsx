@@ -101,7 +101,10 @@ export const columns: ColumnDef<Transaction>[] = [
                 )}
               >
                 <div className="flex space-x-2 items-center">
-                  <span className="line-clamp-1">{row.original.name}</span>
+                  <span className="line-clamp-1 text-ellipsis max-w-[100px]">
+                    {row.original.name}
+                  </span>
+
                   {row.original.status === "pending" && (
                     <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
                       <span>Pending</span>

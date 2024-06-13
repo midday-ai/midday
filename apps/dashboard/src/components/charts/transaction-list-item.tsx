@@ -35,7 +35,7 @@ export function TransactionListItem({ transaction, disabled }: Props) {
           <div className="w-[35%]">
             <span
               className={cn(
-                "text-sm",
+                "text-sm line-clamp-1",
                 disabled && "skeleton-box",
                 transaction?.category?.slug === "income" && "text-[#00C969]"
               )}

@@ -79,11 +79,11 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             variant="outline"
             className="justify-start text-left font-medium space-x-2"
           >
-            <span>{placeholder}</span>
+            <span className="line-clamp-1 text-ellipsis">{placeholder}</span>
             <Icons.ChevronDown />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[450px] mt-2 pt-1" align="end">
+        <PopoverContent className="w-screen md:w-[450px] mt-2 pt-1" align="end">
           <MonthRangePicker setDate={handleChangePeriod} date={date} />
         </PopoverContent>
       </Popover>

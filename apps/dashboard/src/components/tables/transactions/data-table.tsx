@@ -8,6 +8,7 @@ import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
 import { Cookies } from "@/utils/constants";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
@@ -242,11 +243,22 @@ export function DataTable<TData, TValue>({
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className="h-[45px] cursor-default"
+                className="h-[40px] md:h-[45px] cursor-default"
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell
                     key={cell.id}
+                    className={cn(
+                      "px-3 md:px-4 py-2",
+                      (cell.column.id === "select" ||
+                        cell.column.id === "actions" ||
+                        cell.column.id === "category" ||
+                        cell.column.id === "bank_account" ||
+                        cell.column.id === "assigned" ||
+                        cell.column.id === "method" ||
+                        cell.column.id === "status") &&
+                        "hidden md:table-cell"
+                    )}
                     onClick={() => {
                       if (
                         cell.column.id !== "select" &&

@@ -90,7 +90,7 @@ const items = {
 
 export function SidebarItems({ onSelect }: SidebarItemsProps) {
   return (
-    <div className="overflow-auto relative h-[410px] mt-4 scrollbar-hide p-4 pt-0 pb-[70px] flex flex-col space-y-6">
+    <div className="overflow-auto relative h-full md:h-[410px] mt-4 scrollbar-hide p-4 pt-0 pb-[70px] flex flex-col space-y-6">
       {!Object.keys(items).length && (
         <div className="flex flex-col justify-center items-center h-full">
           <div className="flex flex-col items-center -mt-12 text-xs space-y-1">

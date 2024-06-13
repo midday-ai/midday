@@ -9,7 +9,7 @@ export async function ChartSelectors({ defaultValue, currency }) {
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   return (
-    <div className="flex justify-between mt-6">
+    <div className="flex justify-between mt-6 space-x-2">
       <div className="flex space-x-2">
         <ChartType initialValue={chartType} />
         <ChartCurrency defaultValue={currency} />

@@ -222,7 +222,7 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="h-[535px] w-[400px] mr-7 p-0 overflow-hidden relative"
+        className="h-[535px] w-screen md:w-[400px] mr-7 p-0 overflow-hidden relative"
         sideOffset={10}
       >
         <Tabs defaultValue="inbox">

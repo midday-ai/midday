@@ -29,7 +29,7 @@ export function InsightsWidget({ items }: Props) {
           </li>
         ))}
       </ul>
-      <div className="absolute bottom-8 left-8 right-8">
+      <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8">
         <div className="relative">
           <Input
             placeholder="Ask Midday a question..."

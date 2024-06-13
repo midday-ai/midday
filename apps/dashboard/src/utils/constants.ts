@@ -7,7 +7,6 @@ export const Cookies = {
   MfaSetupVisited: "mfa-setup-visited",
   MenuConfig: "menu-config",
   InboxFilter: "inbox-filter-v2",
-  MobileOverlay: "mobile-overlay",
   TrackingConsent: "tracking-consent",
   ChartCurrency: "chart-currency",
   InboxOrder: "inbox-order",

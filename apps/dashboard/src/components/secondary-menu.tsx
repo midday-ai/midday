@@ -9,7 +9,7 @@ export function SecondaryMenu({ items }) {
 
   return (
     <nav className="py-4">
-      <ul className="flex space-x-6 text-sm">
+      <ul className="flex space-x-6 text-sm overflow-auto scrollbar-hide">
         {items.map((item) => (
           <Link
             prefetch

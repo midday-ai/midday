@@ -29,7 +29,7 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 p-2 transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300",
+  "fixed z-50 gap-4 transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-200 data-[state=open]:duration-300",
   {
     variants: {
       side: {
@@ -60,10 +60,15 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       onOpenAutoFocus={(e) => e.preventDefault()}
       ref={ref}
-      className={cn(sheetVariants({ side }), className)}
+      className={cn("md:p-2", sheetVariants({ side }))}
       {...props}
     >
-      <div className="border w-full h-full bg-[#FAFAF9] dark:bg-[#121212] rounded-xl p-6 relative overflow-hidden">
+      <div
+        className={cn(
+          "border w-full h-full bg-[#FAFAF9] dark:bg-[#121212] rounded-xl p-6 relative overflow-hidden",
+          className
+        )}
+      >
         {children}
       </div>
     </SheetPrimitive.Content>

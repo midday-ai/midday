@@ -52,7 +52,7 @@ export function SidebarItems({ onSelect, chatId }: SidebarItemsProps) {
   }, [aiState]);
 
   return (
-    <div className="overflow-auto relative h-[410px] mt-16 scrollbar-hide p-4 pt-0 pb-[50px] flex flex-col space-y-6">
+    <div className="overflow-auto relative h-screen md:h-[410px] mt-16 scrollbar-hide p-4 pt-0 pb-[50px] flex flex-col space-y-6">
       {!Object.keys(items).length && (
         <div className="flex flex-col justify-center items-center h-full">
           <div className="flex flex-col items-center -mt-12 text-xs space-y-1">

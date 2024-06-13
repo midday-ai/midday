@@ -25,13 +25,13 @@ export function Sidebar({
       <div
         ref={ref}
         className={cn(
-          "w-[220px] h-[422px] bg-background dark:bg-[#131313] absolute -left-[220px] top-0 bottom-[1px] duration-200 ease-out transition-all border-border border-r-[1px] z-20 invisible",
+          "w-[220px] h-full md:h-[422px] bg-background dark:bg-[#131313] absolute -left-[220px] top-0 bottom-[1px] duration-200 ease-out transition-all border-border border-r-[1px] z-20 invisible",
           isExpanded && "visible translate-x-full"
         )}
       >
         <Toolbar onNewChat={onNewChat} />
         <SidebarItems onSelect={onSelect} />
-        <div className="absolute z-10 h-[422px] w-[45px] bg-gradient-to-r from-background/30 dark:from-[#131313]/30 to-background right-0 top-0 pointer-events-none" />
+        <div className="absolute z-10 h-full md:h-[422px] w-[45px] bg-gradient-to-r from-background/30 dark:from-[#131313]/30 to-background right-0 top-0 pointer-events-none" />
       </div>
 
       <div

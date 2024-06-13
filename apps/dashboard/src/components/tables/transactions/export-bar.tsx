@@ -47,7 +47,7 @@ export function ExportBar({ selected, deselectAll, transactionIds }: Props) {
         animate={{ y: isOpen ? 0 : 100 }}
         initial={{ y: 100 }}
       >
-        <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
+        <div className="mx-2 md:mx-0 backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg">
           <span className="text-sm">{selected} selected</span>
 
           <div className="flex items-center space-x-4">
