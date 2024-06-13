@@ -31,7 +31,7 @@ export function Header({ toggleSidebar, isExpanded }: Props) {
       </div>
 
       <Button
-        className="flex md:hidden"
+        className="flex md:hidden todesktop:hidden"
         size="icon"
         variant="ghost"
         onClick={() => setOpen()}
@@ -39,7 +39,7 @@ export function Header({ toggleSidebar, isExpanded }: Props) {
         <Icons.Close />
       </Button>
 
-      <div className="space-x-2 items-center hidden md:flex">
+      <div className="space-x-2 items-center hidden md:flex todesktop:flex">
         <Experimental className="border-border text-[#878787]" />
       </div>
     </div>

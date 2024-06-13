@@ -6,7 +6,7 @@ type Props = {
 
 export function ChatEmpty({ firstName }: Props) {
   return (
-    <div className="w-full mt-24 flex flex-col items-center justify-center text-center">
+    <div className="w-full mt-[200px] md:mt-24 flex flex-col items-center justify-center text-center">
       <Icons.LogoSmall />
       <span className="font-medium text-xl mt-6">
         Hi {firstName}, how can I help <br />

@@ -29,7 +29,7 @@ export function SearchField({ placeholder }: Props) {
   };
 
   return (
-    <div className="max-w-[350px] relative w-full">
+    <div className="w-full md:max-w-[350px] relative">
       <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
       <Input
         placeholder={placeholder}

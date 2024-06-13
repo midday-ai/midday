@@ -99,7 +99,7 @@ export function TransactionsActions({ categories, accounts }: Props) {
   }
 
   return (
-    <div className="flex space-x-2">
+    <div className="space-x-2 hidden md:flex">
       <Filter sections={sections} />
       <ColumnVisibility />
     </div>

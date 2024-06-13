@@ -145,7 +145,7 @@ const Item = ({
           </TooltipTrigger>
           <TooltipContent
             side="left"
-            className="px-3 py-1.5 text-xs"
+            className="px-3 py-1.5 text-xs hidden md:flex"
             sideOffset={10}
           >
             {item.name}

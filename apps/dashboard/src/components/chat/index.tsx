@@ -6,6 +6,7 @@ import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { useAssistantStore } from "@/store/assistant";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
+import { useMediaQuery } from "@uidotdev/usehooks";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
@@ -28,6 +29,7 @@ export function Chat({
   const { formRef, onKeyDown } = useEnterSubmit();
   const ref = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const { message } = useAssistantStore();
 
@@ -67,7 +69,7 @@ export function Chat({
   }, []);
 
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && isDesktop) {
       inputRef.current.focus();
     }
   }, [messages]);
@@ -79,7 +81,7 @@ export function Chat({
 
   return (
     <div className="relative">
-      <ScrollArea className="h-[335px]" ref={scrollRef}>
+      <ScrollArea className="todesktop:h-[335px] md:h-[335px]" ref={scrollRef}>
         <div ref={messagesRef}>
           {messages.length ? (
             <ChatList messages={messages} />
@@ -91,7 +93,7 @@ export function Chat({
         </div>
       </ScrollArea>
 
-      <div className="fixed bottom-[1px] left-[1px] right-[1px] h-[88px] bg-background border-border border-t-[1px]">
+      <div className="fixed bottom-[1px] left-[1px] right-[1px] todesktop:h-[88px] md:h-[88px] bg-background border-border border-t-[1px]">
         {showExamples && <ChatExamples onSubmit={onSubmit} />}
 
         <form
@@ -111,7 +113,7 @@ export function Chat({
             value={input}
             className="h-12 min-h-12 pt-3 resize-none border-none"
             placeholder="Ask Midday a question..."
-            autoFocus
+            autoFocus={isDesktop}
             onKeyDown={onKeyDown}
             onChange={(evt) => {
               setInput(evt.target.value);

@@ -36,9 +36,9 @@ const sheetVariants = cva(
         top: "inset-x-0 top-0 data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
         bottom:
           "inset-x-0 bottom-0 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        left: "inset-y-0 left-0 h-full w-3/4 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm md:border-r-[1px]",
+        left: "inset-y-0 left-0 h-full w-3/4 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
         right:
-          "inset-y-0 right-0 h-full w-3/4 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-[520px] border-l-[1px]",
+          "inset-y-0 right-0 h-full w-3/4 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-[520px]",
       },
     },
     defaultVariants: {
@@ -60,12 +60,12 @@ const SheetContent = React.forwardRef<
     <SheetPrimitive.Content
       onOpenAutoFocus={(e) => e.preventDefault()}
       ref={ref}
-      className={sheetVariants({ side })}
+      className={cn("md:p-2", sheetVariants({ side }))}
       {...props}
     >
       <div
         className={cn(
-          "w-full h-full bg-[#FAFAF9] dark:bg-[#121212] p-6 relative overflow-hidden",
+          "border w-full h-full bg-[#FAFAF9] dark:bg-[#121212] rounded-xl p-6 relative overflow-hidden",
           className
         )}
       >

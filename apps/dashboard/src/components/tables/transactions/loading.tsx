@@ -42,7 +42,7 @@ export function Loading() {
             <TableCell className="w-50px">
               <Skeleton className="h-[20px] w-[20px] rounded-full" />
             </TableCell>
-            <TableCell className="w-60px"></TableCell>
+            <TableCell className="w-60px" />
           </TableRow>
         ))}
       </TableBody>

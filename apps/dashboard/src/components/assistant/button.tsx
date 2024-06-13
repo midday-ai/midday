@@ -9,7 +9,7 @@ export function AssistantButton() {
   return (
     <Button
       variant="outline"
-      className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 border-0 p-0 hover:bg-transparent font-normal todesktop:hidden"
+      className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64 border-0 p-0 hover:bg-transparent font-normal no-drag"
       onClick={() => setOpen()}
     >
       <span className="ml-4 md:ml-0">Ask Midday a question...</span>
