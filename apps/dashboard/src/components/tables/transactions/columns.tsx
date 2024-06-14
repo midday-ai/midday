@@ -101,7 +101,7 @@ export const columns: ColumnDef<Transaction>[] = [
                 )}
               >
                 <div className="flex space-x-2 items-center">
-                  <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-auto">
+                  <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
                     {row.original.name}
                   </span>
 
