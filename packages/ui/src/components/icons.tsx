@@ -72,6 +72,7 @@ import {
   MdOutlineTune,
   MdOutlineVisibility,
   MdOutlineVolumeOff,
+  MdOutlineVolumeUp,
   MdPause,
   MdPauseCircle,
   MdPeople,
@@ -541,4 +542,5 @@ export const Icons = {
   ChatBubble: MdOutlineChatBubbleOutline,
   Menu: MdMenu,
   Mute: MdOutlineVolumeOff,
+  UnMute: MdOutlineVolumeUp,
 };

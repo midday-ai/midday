@@ -2,7 +2,6 @@
 
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -50,29 +49,19 @@ export function SectionVideo() {
     >
       <div className="relative">
         {isPlaying && (
-          <div
-            className={cn(
-              "absolute md:top-12 md:right-12 top-4 right-4 space-x-4 items-center justify-center opacity-0 z-30 transition-all",
-              isPlaying && "opacity-100"
-            )}
-          >
+          <div className="absolute md:top-12 md:right-12 top-4 right-4 space-x-4 items-center justify-center z-30 transition-all">
             <Button
               size="icon"
               className="rounded-full size-10 md:size-14"
               onClick={toggleMute}
             >
-              <Icons.Mute size={24} />
+              {isMuted ? <Icons.Mute size={24} /> : <Icons.UnMute size={24} />}
             </Button>
           </div>
         )}
 
         {!isPlaying && (
-          <div
-            className={cn(
-              "absolute md:top-12 md:right-12 top-4 right-4 space-x-4 items-center justify-center opacity-0 z-30 transition-all",
-              !isPlaying && "opacity-100"
-            )}
-          >
+          <div className="absolute md:top-12 md:right-12 top-4 right-4 space-x-4 items-center justify-center z-30 transition-all">
             <Button
               size="icon"
               className="rounded-full size-10 md:size-14"
