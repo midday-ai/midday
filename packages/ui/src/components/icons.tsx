@@ -71,6 +71,7 @@ import {
   MdOutlineTimer,
   MdOutlineTune,
   MdOutlineVisibility,
+  MdOutlineVolumeOff,
   MdPause,
   MdPauseCircle,
   MdPeople,
@@ -539,4 +540,5 @@ export const Icons = {
   Subject: MdOutlineSubject,
   ChatBubble: MdOutlineChatBubbleOutline,
   Menu: MdMenu,
+  Mute: MdOutlineVolumeOff,
 };

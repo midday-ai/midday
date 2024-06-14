@@ -1,5 +1,6 @@
 "use client";
 
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -14,7 +15,8 @@ const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
 export function SectionVideo() {
   const playerRef = useRef();
   const [isPlaying, setPlaying] = useState(false);
-  const [inViewport, setInViewport] = useState(false);
+  const [isMuted, setMuted] = useState(true);
+  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const togglePlay = () => {
     if (isPlaying) {
@@ -26,33 +28,60 @@ export function SectionVideo() {
     setPlaying((prev) => !prev);
   };
 
+  const toggleMute = () => {
+    setMuted((prev) => !prev);
+  };
+
   return (
     <motion.div
       className="flex flex-col justify-center container pb-20"
       onViewportEnter={() => {
-        setTimeout(() => {
-          setInViewport(true);
-        }, 300);
+        if (!isPlaying && isDesktop) {
+          setTimeout(() => {
+            playerRef.current?.play();
+            setPlaying(true);
+          }, 2000);
+        }
       }}
       onViewportLeave={() => {
-        setInViewport(false);
+        playerRef.current?.pause();
+        setPlaying(false);
       }}
     >
       <div className="relative">
-        <div
-          className={cn(
-            "absolute top-4 right-4 space-x-4 items-center justify-center opacity-0 z-30 transition-all",
-            inViewport && !isPlaying && "opacity-100"
-          )}
-        >
-          <Button
-            size="icon"
-            className="rounded-full size-14"
-            onClick={togglePlay}
+        {isPlaying && (
+          <div
+            className={cn(
+              "absolute md:top-12 md:right-12 top-4 right-4 space-x-4 items-center justify-center opacity-0 z-30 transition-all",
+              isPlaying && "opacity-100"
+            )}
           >
-            <Icons.PlayOutline size={24} />
-          </Button>
-        </div>
+            <Button
+              size="icon"
+              className="rounded-full size-10 md:size-14"
+              onClick={toggleMute}
+            >
+              <Icons.Mute size={24} />
+            </Button>
+          </div>
+        )}
+
+        {!isPlaying && (
+          <div
+            className={cn(
+              "absolute md:top-12 md:right-12 top-4 right-4 space-x-4 items-center justify-center opacity-0 z-30 transition-all",
+              !isPlaying && "opacity-100"
+            )}
+          >
+            <Button
+              size="icon"
+              className="rounded-full size-10 md:size-14"
+              onClick={togglePlay}
+            >
+              <Icons.Play size={24} />
+            </Button>
+          </div>
+        )}
 
         <ReactHlsPlayer
           onClick={togglePlay}
@@ -61,6 +90,8 @@ export function SectionVideo() {
           poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/poster.webp"
           playerRef={playerRef}
           className="w-full"
+          loop
+          muted={isMuted}
         />
       </div>
     </motion.div>
