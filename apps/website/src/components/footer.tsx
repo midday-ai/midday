@@ -34,22 +34,28 @@ export function Footer() {
               <span className="font-medium">Product</span>
               <ul>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/">Features</Link>
+                  <Link href="/overview">Overview</Link>
+                </li>
+                <li className="transition-colors text-[#878787]">
+                  <Link href="/inbox">Inbox</Link>
+                </li>
+                <li className="transition-colors text-[#878787]">
+                  <Link href="/vault">Vault</Link>
+                </li>
+                <li className="transition-colors text-[#878787]">
+                  <Link href="/tracker">Tracker</Link>
+                </li>
+                <li className="transition-colors text-[#878787]">
+                  <Link href="/invoice">Invoice</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/pricing">Pricing</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/story">Story</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/updates">Updates</Link>
+                  <Link href="/engine">Engine</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/download">Download</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/feature-request">Feature Request</Link>
                 </li>
               </ul>
             </div>
@@ -78,22 +84,20 @@ export function Footer() {
                 <li className="transition-colors text-[#878787]">
                   <Link href="/branding">Branding</Link>
                 </li>
+                <li className="transition-colors text-[#878787]">
+                  <Link href="/feature-request">Feature Request</Link>
+                </li>
               </ul>
             </div>
 
             <div>
-              <span>Solutions</span>
+              <span>Company</span>
               <ul>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/engine">Midday Engine</Link>
+                  <Link href="/story">Story</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="https://docs.midday.ai/self-hosted">
-                    Self hosted
-                  </Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/">SaaS hosting</Link>
+                  <Link href="/updates">Updates</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/open-startup">Open startup</Link>

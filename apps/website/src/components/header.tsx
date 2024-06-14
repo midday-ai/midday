@@ -9,32 +9,106 @@ import {
 } from "@midday/ui/context-menu";
 import { Icons } from "@midday/ui/icons";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import { FaGithub } from "react-icons/fa";
+import menuAssistant from "public/menu-assistant.jpg";
+import menuEngine from "public/menu-engine.png";
+import { useEffect, useState } from "react";
+import { FaDiscord, FaGithub } from "react-icons/fa";
+import {
+  MdOutlineDescription,
+  MdOutlineIntegrationInstructions,
+  MdOutlineMemory,
+} from "react-icons/md";
 import { LogoIcon } from "./logo-icon";
 
 const links = [
   {
+    title: "Product",
+    cover: (
+      <Link href="/#assistant">
+        <Image alt="Assistant" src={menuAssistant} quality={100} />
+      </Link>
+    ),
+    children: [
+      {
+        path: "/overview",
+        title: "Overview",
+        icon: <Icons.Overview size={20} />,
+      },
+      {
+        path: "/inbox",
+        title: "Inbox",
+        icon: <Icons.Inbox2 size={20} />,
+      },
+      {
+        path: "/vault",
+        title: "Vault",
+        icon: <Icons.Files size={20} />,
+      },
+      {
+        path: "/tracker",
+        title: "Tracker",
+        icon: <Icons.Tracker size={20} />,
+      },
+      {
+        path: "/invoice",
+        title: "Invoice",
+        icon: <Icons.Invoice size={20} />,
+      },
+    ],
+  },
+  {
     title: "Pricing",
     path: "/pricing",
-    name: "pricing",
   },
   {
     title: "Updates",
     path: "/updates",
-    name: "updates",
   },
   {
     title: "Story",
     path: "/story",
-    name: "story",
   },
   {
     title: "Download",
     path: "/download",
-    name: "download",
+  },
+  {
+    title: "Developers",
+    cover: (
+      <Link href="/engine">
+        <Image alt="Engine" src={menuEngine} quality={100} />
+      </Link>
+    ),
+    children: [
+      {
+        path: "https://git.new/midday",
+        title: "Open Source",
+        icon: <FaGithub size={19} />,
+      },
+      {
+        path: "https://docs.midday.ai",
+        title: "Documentation",
+        icon: <MdOutlineDescription size={20} />,
+      },
+      {
+        path: "/engine",
+        title: "Engine",
+        icon: <MdOutlineMemory size={20} />,
+      },
+      {
+        title: "Join the community",
+        path: "https://go.midday.ai/anPiuRx",
+        icon: <FaDiscord size={19} />,
+      },
+      {
+        title: "Apps & Integrations",
+        path: "https://docs.midday.ai",
+        icon: <MdOutlineIntegrationInstructions size={20} />,
+      },
+    ],
   },
 ];
 
@@ -58,6 +132,8 @@ const itemVariant = {
 export function Header() {
   const pathname = usePathname();
   const [isOpen, setOpen] = useState(false);
+  const [showBlur, setShowBlur] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   const lastPath = `/${pathname.split("/").pop()}`;
 
@@ -66,6 +142,15 @@ export function Header() {
       document.body.style.overflow = prev ? "" : "hidden";
       return !prev;
     });
+  };
+
+  const handleOnClick = () => {
+    setShowBlur(false);
+    setHidden(true);
+
+    setTimeout(() => {
+      setHidden(false);
+    }, 100);
   };
 
   if (pathname.includes("pitch")) {
@@ -80,7 +165,7 @@ export function Header() {
           "transition duration-1s ease-in-out animate-header-slide-down-fade"
       )}
     >
-      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 h-[50px]">
+      <nav className="border border-border px-4 flex items-center backdrop-filter backdrop-blur-xl bg-[#121212] bg-opacity-70 h-[50px] z-20">
         <ContextMenu>
           <ContextMenuTrigger>
             <Link href="/">
@@ -144,23 +229,62 @@ export function Header() {
         </ContextMenu>
 
         <ul className="space-x-2 font-medium text-sm hidden md:flex mx-3">
-          {links.map(({ path, name, title }) => {
-            const isActive =
-              path === "/updates"
-                ? pathname.includes("updates")
-                : path === lastPath;
+          {links.map(({ path, title, children, cover }) => {
+            if (path) {
+              return (
+                <li key={path}>
+                  <Link
+                    onClick={handleOnClick}
+                    href={path}
+                    className="h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex text-secondary-foreground transition-opacity hover:opacity-70 duration-200"
+                  >
+                    {title}
+                  </Link>
+                </li>
+              );
+            }
 
             return (
-              <li key={path}>
-                <Link
-                  href={path}
-                  className={cn(
-                    "h-8 items-center justify-center text-sm font-medium transition-colors px-3 py-2 inline-flex text-secondary-foreground hover:bg-secondary",
-                    isActive && "bg-secondary hover:bg-secondary"
-                  )}
-                >
+              <li
+                key={path}
+                className="group"
+                onMouseEnter={() => setShowBlur(true)}
+                onMouseLeave={() => setShowBlur(false)}
+              >
+                <span className="h-8 items-center justify-center text-sm font-medium transition-opacity hover:opacity-70 duration-200 px-3 py-2 inline-flex text-secondary-foreground cursor-pointer">
                   {title}
-                </Link>
+                </span>
+
+                {children && (
+                  <div
+                    className={cn(
+                      "absolute top-[48px] w-[671px] -left-[1px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l-[1px] border-r-[1px]",
+                      hidden && "hidden"
+                    )}
+                  >
+                    <ul className="p-4 w-[200px] flex-0 space-y-5 mt-2">
+                      {children.map((child) => {
+                        return (
+                          <li key={child.path}>
+                            <Link
+                              onClick={handleOnClick}
+                              href={child.path}
+                              className="flex space-x-2 items-center transition-opacity hover:opacity-70 duration-200"
+                            >
+                              <span>{child.icon}</span>
+                              <span className="text-sm font-medium">
+                                {child.title}
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+
+                    <div className="flex-1 p-4">{cover}</div>
+                    <div className="absolute bottom-0 w-full border-b-[1px]" />
+                  </div>
+                )}
               </li>
             );
           })}
@@ -194,7 +318,7 @@ export function Header() {
 
       {isOpen && (
         <motion.div
-          className="fixed bg-background top-0 right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
+          className="fixed bg-background -top-[3px] right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -228,23 +352,25 @@ export function Header() {
               className="px-3 pt-8 text-xl text-[#878787] space-y-8 mb-8"
               variants={listVariant}
             >
-              {links.map(({ path, name, title }) => {
+              {links.map(({ path, title }) => {
                 const isActive =
                   path === "/updates"
                     ? pathname.includes("updates")
                     : path === lastPath;
 
-                return (
-                  <motion.li variants={itemVariant} key={path}>
-                    <Link
-                      href={path}
-                      className={cn(isActive && "text-primary")}
-                      onClick={handleToggleMenu}
-                    >
-                      {title}
-                    </Link>
-                  </motion.li>
-                );
+                if (path) {
+                  return (
+                    <motion.li variants={itemVariant} key={path}>
+                      <Link
+                        href={path}
+                        className={cn(isActive && "text-primary")}
+                        onClick={handleToggleMenu}
+                      >
+                        {title}
+                      </Link>
+                    </motion.li>
+                  );
+                }
               })}
 
               <motion.li variants={itemVariant} onClick={handleToggleMenu}>
@@ -278,6 +404,13 @@ export function Header() {
           </div>
         </motion.div>
       )}
+
+      <div
+        className={cn(
+          "fixed w-screen h-screen backdrop-blur-md left-0 top-0 invisible opacity-0 transition-all duration-300 z-10",
+          showBlur && "visible opacity-100"
+        )}
+      />
     </header>
   );
 }

@@ -62,7 +62,7 @@ export function WaitlistInput() {
               }, 5000);
             }}
           >
-            <fieldset className="relative z-50">
+            <fieldset className="relative">
               <input
                 placeholder="Enter your email"
                 type="email"

@@ -5,7 +5,10 @@ import { Tray } from "./tray";
 
 export function SectionSix() {
   return (
-    <section className="mt-[300px] mb-[250px] md:mt-24 md:mb-12 relative">
+    <section
+      className="mt-[300px] mb-[250px] md:mt-24 md:mb-12 relative"
+      id="assistant"
+    >
       <Tray />
       <div className="absolute w-full h-full flex items-center justify-center flex-col top-8 xl:top-0">
         <h4 className="text-4xl mb-4 font-medium">Assistant</h4>
