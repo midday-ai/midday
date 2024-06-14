@@ -31,7 +31,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row w-full">
           <div className="flex flex-col space-y-8 md:space-y-0 md:flex-row md:w-6/12 justify-between leading-8">
             <div>
-              <span className="font-medium">Product</span>
+              <span className="font-medium">Features</span>
               <ul>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/overview">Overview</Link>

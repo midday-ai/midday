@@ -66,7 +66,7 @@ export function Header() {
 
   const links = [
     {
-      title: "Product",
+      title: "Features",
       cover: (
         <Link href="/#assistant" onClick={handleOnClick}>
           <Image alt="Assistant" src={menuAssistant} quality={100} />
@@ -258,7 +258,7 @@ export function Header() {
                 {children && (
                   <div
                     className={cn(
-                      "absolute top-[48px] w-[671px] -left-[1px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l-[1px] border-r-[1px]",
+                      "absolute top-[48px] w-[676px] -left-[1px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l-[1px] border-r-[1px]",
                       hidden && "hidden"
                     )}
                   >
