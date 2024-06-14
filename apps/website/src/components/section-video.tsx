@@ -3,16 +3,18 @@
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import { useMediaQuery } from "@uidotdev/usehooks";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
-import ReactHlsPlayer from "react-hls-player";
+
+const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
+  ssr: false,
+});
 
 export function SectionVideo() {
   const playerRef = useRef();
   const [isPlaying, setPlaying] = useState(false);
   const [inViewport, setInViewport] = useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const togglePlay = () => {
     if (isPlaying) {
@@ -39,7 +41,7 @@ export function SectionVideo() {
       <div className="relative">
         <div
           className={cn(
-            "absolute top-4 right-4 hidden md:flex space-x-4 items-center justify-center opacity-0 z-30 transition-all",
+            "absolute top-4 right-4 space-x-4 items-center justify-center opacity-0 z-30 transition-all",
             inViewport && !isPlaying && "opacity-100"
           )}
         >
@@ -56,7 +58,6 @@ export function SectionVideo() {
           onClick={togglePlay}
           src="https://customer-oh6t55xltlgrfayh.cloudflarestream.com/306702a5d5efbba0e9bcdd7cb17e9c5a/manifest/video.m3u8"
           autoPlay={false}
-          controls={!isDesktop}
           poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/poster.png"
           playerRef={playerRef}
           className="w-full"
