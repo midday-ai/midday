@@ -14,7 +14,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import menuAssistant from "public/menu-assistant.jpg";
 import menuEngine from "public/menu-engine.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   MdOutlineDescription,
@@ -133,6 +133,7 @@ export function Header() {
   const pathname = usePathname();
   const [isOpen, setOpen] = useState(false);
   const [showBlur, setShowBlur] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   const lastPath = `/${pathname.split("/").pop()}`;
 
@@ -141,6 +142,15 @@ export function Header() {
       document.body.style.overflow = prev ? "" : "hidden";
       return !prev;
     });
+  };
+
+  const handleOnClick = () => {
+    setShowBlur(false);
+    setHidden(true);
+
+    setTimeout(() => {
+      setHidden(false);
+    }, 100);
   };
 
   if (pathname.includes("pitch")) {
@@ -224,6 +234,7 @@ export function Header() {
               return (
                 <li key={path}>
                   <Link
+                    onClick={handleOnClick}
                     href={path}
                     className="h-8 items-center justify-center text-sm font-medium px-3 py-2 inline-flex text-secondary-foreground transition-opacity hover:opacity-70 duration-200"
                   >
@@ -245,12 +256,18 @@ export function Header() {
                 </span>
 
                 {children && (
-                  <div className="absolute top-[48px] w-[671px] -left-[1px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l-[1px] border-r-[1px]">
+                  <div
+                    className={cn(
+                      "absolute top-[48px] w-[671px] -left-[1px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l-[1px] border-r-[1px]",
+                      hidden && "hidden"
+                    )}
+                  >
                     <ul className="p-4 w-[200px] flex-0 space-y-5 mt-2">
                       {children.map((child) => {
                         return (
                           <li key={child.path}>
                             <Link
+                              onClick={handleOnClick}
                               href={child.path}
                               className="flex space-x-2 items-center transition-opacity hover:opacity-70 duration-200"
                             >
@@ -301,7 +318,7 @@ export function Header() {
 
       {isOpen && (
         <motion.div
-          className="fixed bg-background top-0 right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
+          className="fixed bg-background -top-[3px] right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >

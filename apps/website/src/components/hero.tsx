@@ -61,7 +61,7 @@ export function Hero() {
           <br /> business smarter.
         </h1>
 
-        <p className="mt-4 md:mt-6 max-w-[600px]">
+        <p className="mt-4 md:mt-6 max-w-[600px] text-[#878787]">
           An all-in-one tool for freelancers, contractors, consultants, and
           micro businesses to monitor financial health, time-track projects,
           store files, and send invoices.
