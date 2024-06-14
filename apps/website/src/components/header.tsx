@@ -23,95 +23,6 @@ import {
 } from "react-icons/md";
 import { LogoIcon } from "./logo-icon";
 
-const links = [
-  {
-    title: "Product",
-    cover: (
-      <Link href="/#assistant">
-        <Image alt="Assistant" src={menuAssistant} quality={100} />
-      </Link>
-    ),
-    children: [
-      {
-        path: "/overview",
-        title: "Overview",
-        icon: <Icons.Overview size={20} />,
-      },
-      {
-        path: "/inbox",
-        title: "Inbox",
-        icon: <Icons.Inbox2 size={20} />,
-      },
-      {
-        path: "/vault",
-        title: "Vault",
-        icon: <Icons.Files size={20} />,
-      },
-      {
-        path: "/tracker",
-        title: "Tracker",
-        icon: <Icons.Tracker size={20} />,
-      },
-      {
-        path: "/invoice",
-        title: "Invoice",
-        icon: <Icons.Invoice size={20} />,
-      },
-    ],
-  },
-  {
-    title: "Pricing",
-    path: "/pricing",
-  },
-  {
-    title: "Updates",
-    path: "/updates",
-  },
-  {
-    title: "Story",
-    path: "/story",
-  },
-  {
-    title: "Download",
-    path: "/download",
-  },
-  {
-    title: "Developers",
-    cover: (
-      <Link href="/engine">
-        <Image alt="Engine" src={menuEngine} quality={100} />
-      </Link>
-    ),
-    children: [
-      {
-        path: "https://git.new/midday",
-        title: "Open Source",
-        icon: <FaGithub size={19} />,
-      },
-      {
-        path: "https://docs.midday.ai",
-        title: "Documentation",
-        icon: <MdOutlineDescription size={20} />,
-      },
-      {
-        path: "/engine",
-        title: "Engine",
-        icon: <MdOutlineMemory size={20} />,
-      },
-      {
-        title: "Join the community",
-        path: "https://go.midday.ai/anPiuRx",
-        icon: <FaDiscord size={19} />,
-      },
-      {
-        title: "Apps & Integrations",
-        path: "https://docs.midday.ai",
-        icon: <MdOutlineIntegrationInstructions size={20} />,
-      },
-    ],
-  },
-];
-
 const listVariant = {
   show: {
     opacity: 1,
@@ -152,6 +63,95 @@ export function Header() {
       setHidden(false);
     }, 100);
   };
+
+  const links = [
+    {
+      title: "Product",
+      cover: (
+        <Link href="/#assistant" onClick={handleOnClick}>
+          <Image alt="Assistant" src={menuAssistant} quality={100} />
+        </Link>
+      ),
+      children: [
+        {
+          path: "/overview",
+          title: "Overview",
+          icon: <Icons.Overview size={20} />,
+        },
+        {
+          path: "/inbox",
+          title: "Inbox",
+          icon: <Icons.Inbox2 size={20} />,
+        },
+        {
+          path: "/vault",
+          title: "Vault",
+          icon: <Icons.Files size={20} />,
+        },
+        {
+          path: "/tracker",
+          title: "Tracker",
+          icon: <Icons.Tracker size={20} />,
+        },
+        {
+          path: "/invoice",
+          title: "Invoice",
+          icon: <Icons.Invoice size={20} />,
+        },
+      ],
+    },
+    {
+      title: "Pricing",
+      path: "/pricing",
+    },
+    {
+      title: "Updates",
+      path: "/updates",
+    },
+    {
+      title: "Story",
+      path: "/story",
+    },
+    {
+      title: "Download",
+      path: "/download",
+    },
+    {
+      title: "Developers",
+      cover: (
+        <Link href="/engine" onClick={handleOnClick}>
+          <Image alt="Engine" src={menuEngine} quality={100} />
+        </Link>
+      ),
+      children: [
+        {
+          path: "https://git.new/midday",
+          title: "Open Source",
+          icon: <FaGithub size={19} />,
+        },
+        {
+          path: "https://docs.midday.ai",
+          title: "Documentation",
+          icon: <MdOutlineDescription size={20} />,
+        },
+        {
+          path: "/engine",
+          title: "Engine",
+          icon: <MdOutlineMemory size={20} />,
+        },
+        {
+          title: "Join the community",
+          path: "https://go.midday.ai/anPiuRx",
+          icon: <FaDiscord size={19} />,
+        },
+        {
+          title: "Apps & Integrations",
+          path: "https://docs.midday.ai",
+          icon: <MdOutlineIntegrationInstructions size={20} />,
+        },
+      ],
+    },
+  ];
 
   if (pathname.includes("pitch")) {
     return null;
