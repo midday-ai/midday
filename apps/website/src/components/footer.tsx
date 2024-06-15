@@ -1,6 +1,7 @@
 "use client";
 
 import { LogoLarge } from "@/components/logo-large";
+import { SubscribeInput } from "@/components/subscribe-input";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GithubStars } from "./github-stars";

@@ -1,4 +1,4 @@
-import { WaitlistInput } from "@/components/waitlist-input";
+import { SubscribeInput } from "@/components/subscribe-input";
 import type { Metadata } from "next";
 import Image from "next/image";
 import engineSDK from "public/engine-sdk.png";
@@ -27,7 +27,7 @@ export default function Page() {
         </p>
       </div>
 
-      <WaitlistInput />
+      <SubscribeInput group="engine" />
 
       <div className="text-center flex flex-col items-center mt-[140px]">
         <h3 className="mb-4 text-2xl font-medium">

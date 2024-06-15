@@ -1,5 +1,5 @@
 import { FaGithub } from "react-icons/fa";
-import { FaLinkedinIn, FaProductHunt } from "react-icons/fa";
+import { FaLinkedinIn, FaProductHunt, FaYoutube } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { FaDiscord } from "react-icons/fa6";
 
@@ -34,6 +34,12 @@ export function SocialLinks() {
         <a target="_blank" rel="noreferrer" href="https://go.midday.ai/Ct3xybK">
           <span className="sr-only">LinkedIn</span>
           <FaLinkedinIn size={22} className="fill-[#878787]" />
+        </a>
+      </li>
+      <li>
+        <a target="_blank" rel="noreferrer" href="https://go.midday.ai/0yq8rfn">
+          <span className="sr-only">Youtube</span>
+          <FaYoutube size={22} className="fill-[#878787]" />
         </a>
       </li>
     </ul>

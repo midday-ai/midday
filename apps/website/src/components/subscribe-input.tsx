@@ -20,21 +20,25 @@ function SubmitButton() {
   return (
     <button
       type="submit"
-      className="absolute right-2 h-7 bg-primary top-2 px-4 rounded-md font-medium text-sm z-10 text-primary-foreground"
+      className="absolute right-2 h-7 bg-primary top-2 px-4 font-medium text-sm z-10 text-primary-foreground"
     >
       Join
     </button>
   );
 }
 
-export function WaitlistInput() {
+type Props = {
+  group: string;
+};
+
+export function SubscribeInput({ group }: Props) {
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
     <div>
       <div className="flex justify-center">
         {isSubmitted ? (
-          <div className="border border-[#2C2C2C] font-sm text-primary h-11 rounded-lg w-[330px] flex items-center py-1 px-3 justify-between">
+          <div className="border border-[#2C2C2C] font-sm text-primary h-11 w-[330px] flex items-center py-1 px-3 justify-between">
             <p>Subscribed</p>
 
             <svg
@@ -54,7 +58,7 @@ export function WaitlistInput() {
           <form
             action={async (formData) => {
               setSubmitted(true);
-              await subscribeAction(formData, "engine");
+              await subscribeAction(formData, group);
               const email = formData.get("email") as string;
 
               setTimeout(() => {
@@ -71,7 +75,7 @@ export function WaitlistInput() {
                 autoComplete="email"
                 aria-label="Email address"
                 required
-                className="bg-transparent font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] rounded-lg h-11 border border-border"
+                className="bg-transparent font-sm text-primary outline-none py-1 px-3 w-[360px] placeholder-[#606060] h-11 border border-border"
               />
               <SubmitButton />
             </fieldset>
