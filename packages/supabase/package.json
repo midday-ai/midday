@@ -14,7 +14,7 @@
     "@supabase/ssr": "^0.3.0",
     "react": "^18.3.1",
     "server-only": "^0.0.1",
-    "supabase": "^1.176.4"
+    "supabase": "^1.176.10"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.43.4",
