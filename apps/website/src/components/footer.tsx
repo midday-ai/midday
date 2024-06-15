@@ -112,7 +112,7 @@ export function Footer() {
 
           <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
             <div className="flex justify-between md:items-end flex-col space-y-14">
-              <div className="flex items-center">
+              <div className="flex items-start md:items-center flex-col md:flex-row space-y-6 md:space-y-0">
                 <GithubStars />
                 <SocialLinks />
               </div>
