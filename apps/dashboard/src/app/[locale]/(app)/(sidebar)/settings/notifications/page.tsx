@@ -1,5 +1,5 @@
 import { NotificationsSettingsList } from "@/components/notifications-settings-list";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
