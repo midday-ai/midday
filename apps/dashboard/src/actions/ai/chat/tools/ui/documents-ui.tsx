@@ -32,7 +32,7 @@ export function DocumentsUI({ data }: Props) {
         We found {data.length} documents based on your search
       </p>
 
-      <div className="w-full overflow-auto space-x-4 flex">
+      <div className="w-full overflow-auto space-x-4 flex scrollbar-hide">
         {data?.map((item) => {
           const filename = item.file_path?.at(-1);
           const [, ...rest] = item.file_path;

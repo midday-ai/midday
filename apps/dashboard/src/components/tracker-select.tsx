@@ -59,7 +59,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
   useHotkeys("arrowRight", selectNextDay);
 
   return (
-    <div className={cn("flex items-center border rounded-md h-9", className)}>
+    <div className={cn("flex items-center border h-9", className)}>
       <Button
         variant="ghost"
         size="icon"

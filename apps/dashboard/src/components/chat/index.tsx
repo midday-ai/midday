@@ -83,7 +83,7 @@ export function Chat({
       <ScrollArea className="todesktop:h-[335px] md:h-[335px]" ref={scrollRef}>
         <div ref={messagesRef}>
           {messages.length ? (
-            <ChatList messages={messages} />
+            <ChatList messages={messages} className="p-4 pb-8" />
           ) : (
             <ChatEmpty firstName={user.full_name.split(" ").at(0)} />
           )}
