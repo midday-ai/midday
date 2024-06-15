@@ -12,11 +12,11 @@ export default function Page() {
   return (
     <div className="container mb-52">
       <div className="mb-40">
-        <h1 className="mt-24 font-medium text-center text-[100px] md:text-[170px] mb-2 leading-none text-stroke">
+        <h1 className="mt-24 font-medium text-center text-[75px] md:text-[170px] mb-2 leading-none text-stroke">
           Financial
         </h1>
 
-        <h3 className="font-medium text-center text-[100px] md:text-[170px] mb-2 leading-none">
+        <h3 className="font-medium text-center text-[75px] md:text-[170px] mb-2 leading-none">
           Overview
         </h3>
 
@@ -54,13 +54,13 @@ export default function Page() {
           <h4 className="font-medium text-xl md:text-2xl mb-4">
             Use assistant to dive deeper
           </h4>
-          <p className="text-[#878787] text-sm mb-10">
+          <p className="text-[#878787] text-sm md:mb-10">
             Use the assistant to ask questions about your business's financials,
             all just one keystroke away.
           </p>
         </div>
 
-        <div className="text-left scale-[0.6] md:scale-100">
+        <div className="text-left scale-[0.45] md:scale-100 -mt-20 md:mt-0">
           <Assistant />
         </div>
       </div>

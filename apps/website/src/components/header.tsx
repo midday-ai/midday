@@ -323,7 +323,7 @@ export function Header() {
 
       {isOpen && (
         <motion.div
-          className="fixed bg-background -top-[3px] right-0 left-0 bottom-0 h-screen z-10 px-2 m-[1px]"
+          className="fixed bg-background -top-[3px] right-0 left-0 bottom-0 h-screen z-10 px-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -350,7 +350,7 @@ export function Header() {
             </button>
           </div>
 
-          <div className="h-full overflow-auto">
+          <div className="h-screen pb-[150px] overflow-auto">
             <motion.ul
               initial="hidden"
               animate="show"
@@ -381,9 +381,7 @@ export function Header() {
                   <li key={path}>
                     <Collapsible>
                       <CollapsibleTrigger className="flex items-center justify-between w-full">
-                        <span className="font-medium text-[#878787]">
-                          {title}
-                        </span>
+                        <span className="text-[#878787]">{title}</span>
                         <Icons.ChevronDown />
                       </CollapsibleTrigger>
 

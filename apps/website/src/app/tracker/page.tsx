@@ -12,11 +12,11 @@ export default function Page() {
   return (
     <div className="container mb-52">
       <div className="mb-40">
-        <h1 className="mt-24 font-medium text-center text-[100px] md:text-[170px] mb-2 leading-none text-stroke">
+        <h1 className="mt-24 font-medium text-center text-[75px] md:text-[170px] mb-2 leading-none text-stroke">
           Time
         </h1>
 
-        <h3 className="font-medium text-center text-[100px] md:text-[170px] mb-2 leading-none">
+        <h3 className="font-medium text-center text-[75px] md:text-[170px] mb-2 leading-none">
           Tracker
         </h3>
 
