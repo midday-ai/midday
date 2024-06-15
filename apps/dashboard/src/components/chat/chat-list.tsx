@@ -1,18 +1,20 @@
 "use client";
 
 import type { ClientMessage } from "@/actions/ai/types";
+import { cn } from "@midday/ui/cn";
 
 type Props = {
   messages: ClientMessage[];
+  className?: string;
 };
 
-export function ChatList({ messages }: Props) {
+export function ChatList({ messages, className }: Props) {
   if (!messages.length) {
     return null;
   }
 
   return (
-    <div className="flex flex-col p-4 pb-8">
+    <div className={cn("flex flex-col", className)}>
       {messages
         .filter((tool) => tool.display !== undefined)
         .map((message, index) => (

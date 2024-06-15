@@ -71,12 +71,36 @@ export async function clearChats() {
   await pipeline.exec();
 }
 
+export async function getLatestChat() {
+  const {
+    data: { session },
+  } = await getSession();
+
+  const userId = session?.user.id;
+
+  try {
+    const chat: string[] = await RedisClient.zrange(
+      `user:chat:${userId}`,
+      0,
+      1,
+      {
+        rev: true,
+      }
+    );
+
+    return RedisClient.hgetall(chat.at(0));
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function getChats() {
   const {
     data: { session },
   } = await getSession();
 
   const userId = session?.user.id;
+
   try {
     const pipeline = RedisClient.pipeline();
     const chats: string[] = await RedisClient.zrange(
