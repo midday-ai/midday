@@ -112,7 +112,7 @@ export function OTPSignIn({ className }: Props) {
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="Enter phonenumber or email"
+                    placeholder="Enter phone number or email"
                     {...field}
                     autoCapitalize="false"
                     autoCorrect="false"
