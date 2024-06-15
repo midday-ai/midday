@@ -47,7 +47,7 @@ export default function Page() {
 
       <CopyInput
         value="curl -sL https://go.midday.ai/d | tar -xz"
-        className="max-w-[410px] mt-8 font-mono font-normal"
+        className="max-w-[410px] mt-8 font-mono font-normal hidden md:block"
       />
     </div>
   );

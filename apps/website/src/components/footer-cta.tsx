@@ -17,9 +17,9 @@ export function FooterCTA() {
         Stress free by midday.
       </span>
       <p className="text-[#878787] mt-6">
-        An all-in-one tool for freelancers, contractors, consultants, and solo
+        An all-in-one tool for freelancers, contractors, consultants, and micro
         <br />
-        entrepreneurs to manage their finances, track projects, store files, and
+        businesses to manage their finances, track projects, store files, and
         send invoices.
       </p>
 

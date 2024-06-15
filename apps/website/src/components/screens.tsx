@@ -1,8 +1,8 @@
 import Image from "next/image";
-import screen1 from "public/screen-1.png";
+import screen1 from "public/product-overview.jpg";
+import screen4 from "public/product-vault.jpg";
 import screen2 from "public/screen-2.png";
 import screen3 from "public/screen-3.png";
-import screen4 from "public/screen-4.png";
 import screen5 from "public/screen-5.png";
 import { CardStack } from "./card-stack";
 

@@ -39,7 +39,7 @@ export function SectionVideo() {
           setTimeout(() => {
             playerRef.current?.play();
             setPlaying(true);
-          }, 2000);
+          }, 4000);
         }
       }}
       onViewportLeave={() => {

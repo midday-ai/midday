@@ -2,6 +2,11 @@
 
 import { cn } from "@midday/ui/cn";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@midday/ui/collapsible";
+import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
@@ -14,7 +19,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import menuAssistant from "public/menu-assistant.jpg";
 import menuEngine from "public/menu-engine.png";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   MdOutlineDescription,
@@ -349,10 +354,10 @@ export function Header() {
             <motion.ul
               initial="hidden"
               animate="show"
-              className="px-3 pt-8 text-xl text-[#878787] space-y-8 mb-8"
+              className="px-3 pt-8 text-xl text-[#878787] space-y-8 mb-8 overflow-auto"
               variants={listVariant}
             >
-              {links.map(({ path, title }) => {
+              {links.map(({ path, title, children }) => {
                 const isActive =
                   path === "/updates"
                     ? pathname.includes("updates")
@@ -371,23 +376,40 @@ export function Header() {
                     </motion.li>
                   );
                 }
+
+                return (
+                  <li key={path}>
+                    <Collapsible>
+                      <CollapsibleTrigger className="flex items-center justify-between w-full">
+                        <span className="font-medium text-[#878787]">
+                          {title}
+                        </span>
+                        <Icons.ChevronDown />
+                      </CollapsibleTrigger>
+
+                      {children && (
+                        <CollapsibleContent>
+                          <ul className="space-y-8 ml-4 mt-6" key={path}>
+                            {children.map((child) => {
+                              return (
+                                <li key={child.path}>
+                                  <Link
+                                    onClick={handleToggleMenu}
+                                    href={child.path}
+                                    className="text-[#878787]"
+                                  >
+                                    {child.title}
+                                  </Link>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
+                  </li>
+                );
               })}
-
-              <motion.li variants={itemVariant} onClick={handleToggleMenu}>
-                <Link href="/engine">Engine</Link>
-              </motion.li>
-
-              <motion.li variants={itemVariant}>
-                <Link href="https://app.midday.ai">Get started</Link>
-              </motion.li>
-
-              <motion.li
-                variants={itemVariant}
-                className="flex items-center space-x-2"
-              >
-                <FaGithub />
-                <Link href="https://git.new/midday">Open Source</Link>
-              </motion.li>
 
               <motion.li
                 className="mt-auto border-t-[1px] pt-8"

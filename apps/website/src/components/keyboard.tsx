@@ -9,12 +9,12 @@ export function Keyboard() {
   return (
     <div className="relative mb-[100px] text-left">
       <motion.div
-        className="absolute -right-[175px] -top-[130px] md:-top-[90px] lg:-top-9 xl:-top-4 md:-right-[200px] z-20 bg-gradient-to-l from-[#0C0C0C]"
+        className="absolute -right-[175px] -top-[130px] md:-top-[90px] lg:-top-9 xl:-top-4 md:-right-[200px] z-20 bg-gradient-to-l md:from-[#0C0C0C]"
         initial={{ opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.2 }}
       >
-        <div className="scale-[0.55] md:scale-[0.55] lg:scale-[0.7] xl:scale-[0.84]">
+        <div className="scale-[0.40] md:scale-[0.55] lg:scale-[0.7] xl:scale-[0.84]">
           <Assistant />
         </div>
       </motion.div>
