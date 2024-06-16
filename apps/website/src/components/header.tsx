@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@midday/ui/accordion";
 import { cn } from "@midday/ui/cn";
 import {
   Collapsible,
@@ -323,11 +329,11 @@ export function Header() {
 
       {isOpen && (
         <motion.div
-          className="fixed bg-background -top-[3px] right-0 left-0 bottom-0 h-screen z-10 px-2"
+          className="fixed bg-background -top-[2px] right-0 left-0 bottom-0 h-screen z-10 px-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <div className="mt-4 flex justify-between p-3 px-4 relative">
+          <div className="mt-4 flex justify-between p-3 px-4 relative ml-[1px]">
             <button type="button" onClick={handleToggleMenu}>
               <span className="sr-only">Midday Logo</span>
               <LogoIcon />
@@ -379,32 +385,33 @@ export function Header() {
 
                 return (
                   <li key={path}>
-                    <Collapsible>
-                      <CollapsibleTrigger className="flex items-center justify-between w-full">
-                        <span className="text-[#878787]">{title}</span>
-                        <Icons.ChevronDown />
-                      </CollapsibleTrigger>
+                    <Accordion collapsible type="single">
+                      <AccordionItem value="item-1" className="border-none">
+                        <AccordionTrigger className="flex items-center justify-between w-full font-normal p-0 hover:no-underline">
+                          <span className="text-[#878787]">{title}</span>
+                        </AccordionTrigger>
 
-                      {children && (
-                        <CollapsibleContent>
-                          <ul className="space-y-8 ml-4 mt-6" key={path}>
-                            {children.map((child) => {
-                              return (
-                                <li key={child.path}>
-                                  <Link
-                                    onClick={handleToggleMenu}
-                                    href={child.path}
-                                    className="text-[#878787]"
-                                  >
-                                    {child.title}
-                                  </Link>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </CollapsibleContent>
-                      )}
-                    </Collapsible>
+                        {children && (
+                          <AccordionContent className="text-xl">
+                            <ul className="space-y-8 ml-4 mt-6" key={path}>
+                              {children.map((child) => {
+                                return (
+                                  <li key={child.path}>
+                                    <Link
+                                      onClick={handleToggleMenu}
+                                      href={child.path}
+                                      className="text-[#878787]"
+                                    >
+                                      {child.title}
+                                    </Link>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </AccordionContent>
+                        )}
+                      </AccordionItem>
+                    </Accordion>
                   </li>
                 );
               })}
@@ -428,7 +435,7 @@ export function Header() {
       <div
         className={cn(
           "fixed w-screen h-screen backdrop-blur-md left-0 top-0 invisible opacity-0 transition-all duration-300 z-10",
-          showBlur && "visible opacity-100"
+          showBlur && "md:visible opacity-100"
         )}
       />
     </header>
