@@ -6,6 +6,39 @@
 			"dependsOn": ["^topo"]
 		},
 		"build": {
+			"env": [
+				"SUPABASE_SERVICE_KEY",
+				"RESEND_API_KEY",
+				"LOOPS_ENDPOINT",
+				"LOOPS_API_KEY",
+				"GOCARDLESS_SECRET_ID",
+				"GOCARDLESS_SECRET_KEY",
+				"UPSTASH_REDIS_REST_URL",
+				"UPSTASH_REDIS_REST_TOKEN",
+				"NOVU_API_KEY",
+				"DUB_API_KEY",
+				"API_ROUTE_SECRET",
+				"GOOGLE_APPLICATION_CREDENTIALS",
+				"GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID",
+				"GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID",
+				"TELLER_CERTIFICATE",
+				"TELLER_CERTIFICATE_PRIVATE_KEY",
+				"PLAID_CLIENT_ID",
+				"PLAID_SECRET",
+				"GITHUB_TOKEN",
+				"UNSUBSCRIBE_JWT_SECRET",
+				"UNSUBSCRIBE_JWT_ISSUER",
+				"PLAIN_API_KEY",
+				"BASELIME_SERVICE",
+				"BASELIME_API_KEY",
+				"OPENAI_API_KEY",
+				"MISTRAL_API_KEY",
+				"OPENPANEL_SECRET_KEY"
+			],
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env"
+			],
 			"dependsOn": ["^build"],
 			"outputs": [".next/**", "!.next/cache/**", "next-env.d.ts", ".expo/**"]
 		},
@@ -16,6 +49,10 @@
 			"cache": false
 		},
 		"dev": {
+			"inputs": [
+				"$TURBO_DEFAULT$",
+				".env"
+			],
 			"persistent": true,
 			"cache": false
 		},
@@ -30,12 +67,6 @@
 		"typecheck": {
 			"dependsOn": ["^topo"],
 			"outputs": ["node_modules/.cache/tsbuildinfo.json"]
-		},
-		"clean": {
-			"cache": false
-		},
-		"//#clean": {
-			"cache": false
 		}
 	}
 }
