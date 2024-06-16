@@ -136,6 +136,7 @@ export function FilePreview({
                   </DialogTrigger>
                 </motion.div>
               )}
+
               {downloadUrl && (
                 <motion.div
                   initial={{ y: 50, opacity: 0 }}
@@ -157,7 +158,7 @@ export function FilePreview({
             </div>
           )}
 
-          {download && downloadUrl && (
+          {disableFullscreen && download && downloadUrl && (
             <div className="absolute bottom-4 left-2 z-10">
               <motion.div
                 initial={{ y: 50, opacity: 0 }}
