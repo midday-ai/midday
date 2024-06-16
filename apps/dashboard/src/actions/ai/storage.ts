@@ -88,8 +88,10 @@ export async function getLatestChat() {
       }
     );
 
-    if (chat.at(0)) {
-      return RedisClient.hgetall(chat.at(0));
+    const lastId = chat.at(0);
+
+    if (lastId) {
+      return RedisClient.hgetall(lastId);
     }
   } catch (error) {
     return null;
