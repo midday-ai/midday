@@ -2,7 +2,11 @@
 
 import { Button } from "@midday/ui/button";
 
-export function UploadButton({ disableActions }) {
+type Props = {
+  disableActions?: boolean;
+};
+
+export function UploadButton({ disableActions }: Props) {
   return (
     <Button
       variant="outline"
