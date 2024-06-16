@@ -88,7 +88,9 @@ export async function getLatestChat() {
       }
     );
 
-    return RedisClient.hgetall(chat.at(0));
+    if (chat.at(0)) {
+      return RedisClient.hgetall(chat.at(0));
+    }
   } catch (error) {
     return null;
   }
