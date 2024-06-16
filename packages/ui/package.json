@@ -13,13 +13,13 @@
     "build": "storybook build"
   },
   "devDependencies": {
-    "@storybook/addon-essentials": "^8.1.7",
-    "@storybook/addon-links": "^8.1.7",
-    "@storybook/react-vite": "^8.1.7",
+    "@storybook/addon-essentials": "^8.1.9",
+    "@storybook/addon-links": "^8.1.9",
+    "@storybook/react-vite": "^8.1.9",
     "autoprefixer": "^10.4.19",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "storybook": "^8.1.7",
+    "storybook": "^8.1.9",
     "typescript": "^5.4.5"
   },
   "exports": {
@@ -73,7 +73,7 @@
     "./cn": "./src/utils/cn.ts"
   },
   "dependencies": {
-    "@mui/icons-material": "^5.15.19",
+    "@mui/icons-material": "^5.15.20",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-avatar": "^1.0.4",
@@ -98,16 +98,16 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@storybook/addon-styling": "^1.3.7",
-    "@storybook/addon-themes": "^8.1.7",
-    "@storybook/manager-api": "^8.1.7",
+    "@storybook/addon-themes": "^8.1.9",
+    "@storybook/manager-api": "^8.1.9",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "0.2.1",
     "date-fns": "^3.6.0",
-    "embla-carousel-react": "^8.1.4",
+    "embla-carousel-react": "^8.1.5",
     "input-otp": "^1.2.4",
     "jsonfile": "^6.1.0",
-    "lucide-react": "^0.394.0",
+    "lucide-react": "^0.395.0",
     "postcss": "^8.4.38",
     "react-day-picker": "^8.10.1",
     "react-icons": "^5.2.1",
