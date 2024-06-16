@@ -96,7 +96,7 @@ export function UploadZone({ children }) {
 
       setProgress(0);
       toast({
-        title: "Upload successfull.",
+        title: "Upload successful.",
         variant: "success",
         duration: 2000,
       });
