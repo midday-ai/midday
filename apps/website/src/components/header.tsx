@@ -8,11 +8,6 @@ import {
 } from "@midday/ui/accordion";
 import { cn } from "@midday/ui/cn";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@midday/ui/collapsible";
-import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
