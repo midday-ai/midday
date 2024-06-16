@@ -37,7 +37,7 @@ client.defineJob({
 
     const { data: inboxData } = await io.supabase.client
       .from("inbox")
-      .upsert({
+      .insert({
         // NOTE: If we can't parse the name using OCR this will be the fallback name
         display_name: filename,
         team_id: teamId,
