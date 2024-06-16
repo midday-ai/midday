@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { stripSpecialCharacters } from "@midday/utils";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRef } from "react";
@@ -23,9 +24,11 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
     const { files } = evt.target;
     const selectedFile = files as FileList;
 
+    const filename = stripSpecialCharacters(selectedFile[0]?.name);
+
     const { url } = await uploadFile({
       bucket: "avatars",
-      path: [teamId, selectedFile[0]?.name],
+      path: [teamId, filename],
       file: selectedFile[0] as File,
     });
 
