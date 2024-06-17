@@ -32,7 +32,7 @@ export function DocumentsUI({ data }: Props) {
         We found {data.length} documents based on your search
       </p>
 
-      <div className="w-full overflow-auto space-x-4 flex scrollbar-hide">
+      <div className="w-full overflow-auto space-x-4 flex scrollbar-hide max-w-[671px] pr-4">
         {data?.map((item) => {
           const filename = item.file_path?.at(-1);
           const [, ...rest] = item.file_path;
@@ -45,6 +45,7 @@ export function DocumentsUI({ data }: Props) {
               height={198}
               key={item.id}
               preview
+              disableFullscreen
               name={item.display_name}
               type={item.content_type}
               download
