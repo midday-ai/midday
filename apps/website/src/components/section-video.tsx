@@ -13,7 +13,8 @@ const ReactHlsPlayer = dynamic(() => import("react-hls-player"), {
 
 export function SectionVideo() {
   const playerRef = useRef();
-  const [isPlaying, setPlaying] = useState(false);
+  const timer = useRef();
+  const [isPlaying, setPlaying] = useState<Timer | undefined>(false);
   const [isMuted, setMuted] = useState(true);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -36,7 +37,7 @@ export function SectionVideo() {
       className="flex flex-col justify-center container pb-20"
       onViewportEnter={() => {
         if (!isPlaying && isDesktop) {
-          setTimeout(() => {
+          timer.current = setTimeout(() => {
             playerRef.current?.play();
             setPlaying(true);
           }, 4000);
@@ -45,6 +46,9 @@ export function SectionVideo() {
       onViewportLeave={() => {
         playerRef.current?.pause();
         setPlaying(false);
+        if (timer.current) {
+          clearTimeout(timer.current);
+        }
       }}
     >
       <div className="relative">
@@ -73,13 +77,13 @@ export function SectionVideo() {
         )}
 
         <ReactHlsPlayer
+          onEnded={() => playerRef.current?.load()}
           onClick={togglePlay}
           src="https://customer-oh6t55xltlgrfayh.cloudflarestream.com/306702a5d5efbba0e9bcdd7cb17e9c5a/manifest/video.m3u8"
           autoPlay={false}
           poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/poster.webp"
           playerRef={playerRef}
           className="w-full"
-          loop
           muted={isMuted}
         />
       </div>
