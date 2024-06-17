@@ -252,7 +252,7 @@ export function Header() {
 
             return (
               <li
-                key={path}
+                key={title}
                 className="group"
                 onMouseEnter={() => setShowBlur(true)}
                 onMouseLeave={() => setShowBlur(false)}
@@ -271,7 +271,7 @@ export function Header() {
                     <ul className="p-4 w-[200px] flex-0 space-y-5 mt-2">
                       {children.map((child) => {
                         return (
-                          <li key={child.path}>
+                          <li key={child.title}>
                             <Link
                               onClick={handleOnClick}
                               href={child.path}
