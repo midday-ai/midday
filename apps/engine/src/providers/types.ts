@@ -1,3 +1,5 @@
+import type { AccountType } from "@/utils/account";
+
 export type Providers = "teller" | "plaid" | "gocardless";
 
 export type ProviderParams = {
@@ -77,7 +79,13 @@ export type DeleteAccountRequest = {
   accessToken?: string; // Teller & Plaid
 };
 
-export type GetTransactionsResponse = Transaction[];
+export type GetTransactionsResponse = {
+  account: {
+    type: AccountType;
+    balance: GetAccountBalanceResponse;
+  };
+  data: Transaction[];
+};
 
 export type GetAccountsResponse = Account[];
 
