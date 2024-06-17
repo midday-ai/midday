@@ -36,55 +36,75 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
         columnOneContent={
           <Section className="text-left p-0 m-0">
             <Row>
-              <Text className="font-medium">Product</Text>
+              <Text className="font-medium">Features</Text>
             </Row>
+
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fhEy5CL"
+                href="https://go.midday.ai/bOp4NOx"
               >
-                Homepage
+                Overview
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/KKEB90F"
+                href="https://go.midday.ai/VFcNsmQ"
               >
-                Pricing
+                Inbox
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/Wa3TxOy"
+                href="https://go.midday.ai/uA06kWO"
               >
-                Story
+                Vault
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/jr5dX4W"
+                href="https://go.midday.ai/x7Fow9L"
               >
-                Updates
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/sXJM9Qv"
-              >
-                Download
+                Tracker
               </Link>
             </Row>
 
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://midday.ai/feature-request"
+                href="https://go.midday.ai/fkYXc95"
               >
-                Feature Request
+                Invoice
+              </Link>
+            </Row>
+
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] text-[14px]"
+                href="https://go.midday.ai/dEnP9h5"
+              >
+                Pricing
+              </Link>
+            </Row>
+
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] text-[14px]"
+                href="https://go.midday.ai/E24P3oY"
+              >
+                Engine
+              </Link>
+            </Row>
+
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] text-[14px]"
+                href="https://midday.ai/download"
+              >
+                Download
               </Link>
             </Row>
           </Section>
@@ -98,9 +118,9 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/aTNyqQH"
+                href="https://go.midday.ai/fhEy5CL"
               >
-                Roadmap
+                Homepage
               </Link>
             </Row>
             <Row className="mb-1.5">
@@ -114,7 +134,7 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/J2j4CM2"
+                href="https://go.midday.ai/ZrhEMbR"
               >
                 Support
               </Link>
@@ -135,12 +155,22 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
                 Privacy policy
               </Link>
             </Row>
+
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://app.midday.ai/account/support"
+                href="https://go.midday.ai/IQ1kcN0"
               >
-                Support
+                Branding
+              </Link>
+            </Row>
+
+            <Row className="mb-1.5">
+              <Link
+                className="text-[#707070] text-[14px]"
+                href="https://go.midday.ai/x5ohOs7"
+              >
+                Feature Request
               </Link>
             </Row>
           </Section>
@@ -149,22 +179,22 @@ export function Footer({ baseUrl, unsubscribeLink }: Props) {
         columnThreeContent={
           <Section className="text-left p-0 m-0">
             <Row>
-              <Text className="font-medium">Solutions</Text>
+              <Text className="font-medium">Company</Text>
             </Row>
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/cduCp4l"
+                href="https://go.midday.ai/186swoH"
               >
-                SaaS hosting
+                Story
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
                 className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/yrQlSIz"
+                href="https://go.midday.ai/QWyX8Um"
               >
-                Self hosted
+                Updates
               </Link>
             </Row>
             <Row className="mb-1.5">

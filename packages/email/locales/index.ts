@@ -31,7 +31,7 @@ function translations(locale: string, params?: any) {
             : "new transaction"
         }`,
         "transactions.description4":
-          "on your account, we will try to match those against receipts in your inbox for up to 45 days. Additionally, you can simply reply to this email with the attachments.",
+          "on your account, we will try to match those against receipts in your inbox for up to 45 days. Additionally, you can simply reply to this email with the receipts.",
         "transactions.button": "View transactions",
         "transactions.settings": "Notification preferences",
         "transactions.amount": "Amount",
@@ -78,7 +78,7 @@ function translations(locale: string, params?: any) {
             : "nya transaktion"
         }`,
         "transactions.description4":
-          "på ditt konto som vi försöker matcha mot kvitton i din inkorg i upp till 45 dagar. Du kan också svara på detta email med dina bilagor.",
+          "på ditt konto som vi försöker matcha mot kvitton i din inkorg i upp till 45 dagar. Du kan också svara på detta email med dina kvitton.",
         "transactions.button": "Visa transaktioner",
         "transactions.footer":
           " Nam imperdiet congue volutpat. Nulla quis facilisis lacus. Vivamus convallis sit amet lectus eget tincidunt. Vestibulum vehicula rutrum nisl, sed faucibus neque. Donec lacus mi, rhoncus at dictum eget, pulvinar at metus. Donec cursus tellus erat, a hendrerit elit rutrum ut. Fusce quis tristique ligula. Etiam sit amet enim vitae mauris auctor blandit id et nibh.",

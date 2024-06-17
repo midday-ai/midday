@@ -102,6 +102,7 @@ client.defineJob({
                 name: transaction.name,
                 currency: transaction.currency,
                 category: transaction.category_slug,
+                status: transaction.status,
               })),
             },
           });

@@ -28,6 +28,7 @@ client.defineJob({
           name: z.string(),
           currency: z.string(),
           category: z.string().optional().nullable(),
+          status: z.enum(["posted", "pending"]),
         })
       ),
     }),
