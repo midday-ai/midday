@@ -1,4 +1,5 @@
 import { getAssistantSettings } from "@/actions/ai/storage";
+import { AssistantCommandSettings } from "@/components/assistant-command-settings";
 import { AssistantHistory } from "@/components/assistant-history";
 // import { AssistantProvider } from "@/components/assistant-provider";
 import type { Metadata } from "next";
@@ -14,6 +15,7 @@ export default async function Page() {
     <div className="space-y-12">
       {/* <AssistantProvider provider={settings?.provider} /> */}
       <AssistantHistory enabled={settings?.enabled} />
+      <AssistantCommandSettings />
     </div>
   );
 }
