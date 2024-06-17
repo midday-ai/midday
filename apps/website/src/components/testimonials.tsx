@@ -37,7 +37,7 @@ const testimonials = [
   {
     name: "Zeno Rocha",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1145166093029265408/9gJSVrQ7_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1792735373887696896/Nys5Q2b3_400x400.jpg",
     handle: "@zenorocha",
     verified: true,
     quote: "this is absolutely amazing",
