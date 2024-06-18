@@ -1,4 +1,8 @@
-import { AccountType, formatAmountForAsset, getType } from "@/utils/account";
+import {
+  type AccountType,
+  formatAmountForAsset,
+  getType,
+} from "@/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
