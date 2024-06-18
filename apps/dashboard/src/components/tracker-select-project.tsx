@@ -53,7 +53,7 @@ export function TrackerSelectProject({ setParams, teamId }) {
     <Combobox
       placeholder="Search or create project"
       classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
-      className="w-full bg-transparent px-12 border py-3 rounded-md"
+      className="w-full bg-transparent px-12 border py-3"
       value={value}
       onValueChange={onChangeValue}
       onSelect={onSelect}

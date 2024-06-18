@@ -28,7 +28,7 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
   };
 
   return (
-    <div className="flex items-center border rounded-md h-9">
+    <div className="flex items-center border h-9">
       <Button
         variant="ghost"
         size="icon"
