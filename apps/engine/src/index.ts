@@ -1,3 +1,4 @@
+import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Env } from "hono";
 import { env } from "hono/adapter";
@@ -51,6 +52,8 @@ app.route("/v1/accounts", accountRoutes);
 app.route("/v1/institutions", institutionRoutes);
 
 app.route("/health", healthRoutes);
+
+app.get("/ui", swaggerUI({ url: "/doc" }));
 
 app.doc("/doc", {
   openapi: "3.0.0",

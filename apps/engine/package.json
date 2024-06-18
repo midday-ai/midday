@@ -1,22 +1,23 @@
 {
-    "name": "@midday/engine",
-    "scripts": {
-      "dev": "wrangler dev src/index.ts --port 3002",
-      "deploy": "wrangler deploy --minify src/index.ts",
-      "clean": "rm -rf .turbo node_modules",
-      "lint": "biome check .",
-      "format": "biome format --write .",
-      "check:types": "tsc --noEmit"
-    },
-    "dependencies": {
-      "@hono/zod-openapi": "^0.14.5",
-      "@hono/zod-validator": "^0.2.2",
-      "hono": "^4.4.6",
-      "xior": "^0.5.1",
-      "zod": "^3.23.8"
-    },
-    "devDependencies": {
-      "@cloudflare/workers-types": "^4.20240614.0",
-      "wrangler": "^3.60.3"
-    }
+  "name": "@midday/engine",
+  "scripts": {
+    "dev": "wrangler dev src/index.ts --port 3002",
+    "deploy": "wrangler deploy --minify src/index.ts",
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "check:types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/swagger-ui": "^0.2.2",
+    "@hono/zod-openapi": "^0.14.5",
+    "@hono/zod-validator": "^0.2.2",
+    "hono": "^4.4.6",
+    "xior": "^0.5.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240614.0",
+    "wrangler": "^3.60.3"
   }
+}
