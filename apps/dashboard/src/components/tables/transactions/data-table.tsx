@@ -233,7 +233,7 @@ export function DataTable<TData, TValue>({
   }, [initialData]);
 
   return (
-    <div className="rounded-md mb-8 relative">
+    <div className="mb-8 relative">
       <Table>
         <DataTableHeader table={table} />
 

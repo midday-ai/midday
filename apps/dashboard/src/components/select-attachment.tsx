@@ -89,7 +89,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
 
   return (
     <Combobox
-      className="border border-border rounded-md p-2 pl-10"
+      className="border border-border p-2 pl-10"
       placeholder={placeholder}
       onValueChange={(query) => {
         setLoading(true);
