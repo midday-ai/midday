@@ -52,13 +52,15 @@ export type GetAccountsResponse = AccountWithintitution[];
 
 export type TransformAccount = AccountWithintitution;
 
-export type TransformAccountBalance = AccountsGetResponse["accounts"][0];
+export type TransformAccountBalance =
+  AccountsGetResponse["accounts"][0]["balances"];
 
 export type TransformTransaction = Transaction;
 
 export type GetTransactionsResponse = TransactionsSyncResponse["added"];
 
-export type GetAccountBalanceResponse = AccountsGetResponse["accounts"][0];
+export type GetAccountBalanceResponse =
+  AccountsGetResponse["accounts"][0]["balances"];
 
 export interface GetAccountBalanceRequest {
   accessToken: string;

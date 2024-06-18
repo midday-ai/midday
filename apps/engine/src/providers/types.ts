@@ -43,6 +43,7 @@ export type Account = {
   currency: string;
   provider: Providers;
   institution?: Institution;
+  type: AccountType;
   enrollment_id?: string; // Teller
 };
 
@@ -55,6 +56,7 @@ export type GetTransactionsRequest = {
   accountId: string;
   latest?: boolean;
   accessToken?: string; // Teller & Plaid
+  accountType: AccountType;
 };
 
 export type GetAccountsRequest = {
@@ -79,13 +81,7 @@ export type DeleteAccountRequest = {
   accessToken?: string; // Teller & Plaid
 };
 
-export type GetTransactionsResponse = {
-  account: {
-    type: AccountType;
-    balance: GetAccountBalanceResponse;
-  };
-  data: Transaction[];
-};
+export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
 

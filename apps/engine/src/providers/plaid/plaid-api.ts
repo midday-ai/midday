@@ -86,11 +86,12 @@ export class PlaidApi {
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse | undefined> {
     const accounts = await this.#client.accountsGet({
       access_token: accessToken,
+      options: {
+        account_ids: [accountId],
+      },
     });
 
-    return accounts.data.accounts.find(
-      (account) => account?.account_id === accountId
-    );
+    return accounts.data.accounts.at(0)?.balances;
   }
 
   async getAccounts({
@@ -171,7 +172,7 @@ export class PlaidApi {
   async institutionsGetById(institution_id: string) {
     return this.#client.institutionsGetById({
       institution_id,
-      country_codes: [CountryCode.Ca, CountryCode.Us],
+      country_codes: this.#countryCodes,
       options: {
         include_auth_metadata: true,
       },

@@ -78,8 +78,4 @@ export class Provider {
 
     return withRetry(() => this.#provider?.getAccountBalance(params));
   }
-
-  // async deleteAccount(params: DeleteAccountRequest) {
-  //   return this.#provider?.deleteAccount(params);
-  // }
 }

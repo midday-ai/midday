@@ -34,22 +34,37 @@ const indexRoute = createRoute({
 
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
-  const { provider, ...rest } = c.req.query();
+  const { provider, accessToken, institutionId, id, countryCode } =
+    c.req.query();
 
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    envs,
-  });
+  try {
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      envs,
+    });
 
-  const data = await api.getAccounts(rest);
+    const data = await api.getAccounts({
+      id,
+      countryCode,
+      accessToken,
+      institutionId,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200
-  );
+    return c.json(
+      {
+        data,
+      },
+      200
+    );
+  } catch (error) {
+    return c.json(
+      {
+        message: error.message,
+      },
+      400
+    );
+  }
 });
 
 const balanceRoute = createRoute({
@@ -80,22 +95,36 @@ const balanceRoute = createRoute({
 
 app.openapi(balanceRoute, async (c) => {
   const envs = env(c);
-  const { provider, ...rest } = c.req.query();
+  const { provider, accessToken, accountId } = c.req.query();
 
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    envs,
-  });
+  try {
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      envs,
+    });
 
-  const data = await api.getAccountBalance(rest);
+    const data = await api.getAccountBalance({
+      accessToken,
+      accountId,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200
-  );
+    return c.json(
+      {
+        data,
+      },
+      200
+    );
+  } catch (error) {
+    console.log(error);
+
+    return c.json(
+      {
+        message: error.message,
+      },
+      400
+    );
+  }
 });
 
 export default app;

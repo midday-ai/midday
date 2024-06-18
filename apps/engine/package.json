@@ -9,7 +9,7 @@
       "check:types": "tsc --noEmit"
     },
     "dependencies": {
-      "@hono/zod-openapi": "^0.14.4",
+      "@hono/zod-openapi": "^0.14.5",
       "@hono/zod-validator": "^0.2.2",
       "hono": "^4.4.6",
       "xior": "^0.5.1",

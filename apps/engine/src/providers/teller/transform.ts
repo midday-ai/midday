@@ -1,3 +1,4 @@
+import { AccountType, formatAmountForAsset, getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -36,7 +37,15 @@ export const mapTransactionMethod = (type?: string) => {
   }
 };
 
-export const mapTransactionCategory = (transaction: Transaction) => {
+type MapTransactionCategory = {
+  transaction: Transaction;
+  amount: number;
+};
+
+export const mapTransactionCategory = ({
+  transaction,
+  amount,
+}: MapTransactionCategory) => {
   if (transaction.type === "transfer") {
     return "transfer";
   }
@@ -45,7 +54,7 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "fees";
   }
 
-  if (+transaction.amount > 0) {
+  if (amount > 0) {
     return "income";
   }
 
@@ -76,10 +85,21 @@ export const mapTransactionCategory = (transaction: Transaction) => {
   }
 };
 
-export const transformTransaction = (
-  transaction: TransformTransaction
-): BaseTransaction => {
+type TransformTransactionPayload = {
+  transaction: TransformTransaction;
+  accountType: AccountType;
+};
+
+export const transformTransaction = ({
+  transaction,
+  accountType,
+}: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
+
+  const amount = formatAmountForAsset({
+    amount: +transaction.amount,
+    type: accountType,
+  });
 
   return {
     date: transaction.date,
@@ -87,9 +107,9 @@ export const transformTransaction = (
     description: null,
     method,
     internal_id: transaction.id,
-    amount: +transaction.amount,
+    amount,
     currency: "USD",
-    category: mapTransactionCategory(transaction),
+    category: mapTransactionCategory({ transaction, amount }),
     balance: transaction.running_balance,
     status: transaction?.status === "posted" ? "posted" : "pending",
   };
@@ -101,6 +121,7 @@ export const transformAccount = ({
   currency,
   institution,
   enrollment_id,
+  type,
 }: TransformAccount): BaseAccount => {
   return {
     id,
@@ -112,5 +133,6 @@ export const transformAccount = ({
     },
     enrollment_id: enrollment_id,
     provider: "teller",
+    type: getType(type),
   };
 };

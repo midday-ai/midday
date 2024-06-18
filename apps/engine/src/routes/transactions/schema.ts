@@ -3,6 +3,10 @@ import { z } from "@hono/zod-openapi";
 
 export const TransactionsParamsSchema = z.object({
   provider: Providers.openapi({
+    param: {
+      name: "provider",
+      in: "query",
+    },
     example: "teller",
   }),
   accountId: z
@@ -15,6 +19,26 @@ export const TransactionsParamsSchema = z.object({
         in: "query",
       },
       example: "5341343-4234-4c65-815c-t234213442",
+    }),
+  accountType: z.enum(["credit", "depository"]).openapi({
+    description:
+      "Get transactions with the correct amount depending on credit or depository",
+    param: {
+      name: "accountType",
+      in: "query",
+    },
+    example: "depository",
+  }),
+  accessToken: z
+    .string()
+    .optional()
+    .openapi({
+      description: "Used for Teller and Plaid",
+      param: {
+        name: "accessToken",
+        in: "query",
+      },
+      example: "token-123",
     }),
   latest: z
     .string()

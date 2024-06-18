@@ -22,6 +22,7 @@ export class PlaidProvider implements Provider {
   async getTransactions({
     accessToken,
     accountId,
+    accountType,
     latest,
   }: GetTransactionsRequest) {
     if (!accessToken || !accountId) {
@@ -34,7 +35,12 @@ export class PlaidProvider implements Provider {
       latest,
     });
 
-    return response.map(transformTransaction);
+    return response.map((transaction) =>
+      transformTransaction({
+        transaction,
+        accountType,
+      })
+    );
   }
 
   async getHealthCheck() {

@@ -34,7 +34,8 @@ const indexRoute = createRoute({
 
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
-  const { provider, ...rest } = c.req.query();
+  const { provider, accountId, accountType, latest, accessToken } =
+    c.req.query();
 
   const api = new Provider({
     provider,
@@ -44,7 +45,12 @@ app.openapi(indexRoute, async (c) => {
   });
 
   try {
-    const data = await api.getTransactions(rest);
+    const data = await api.getTransactions({
+      accountId,
+      accessToken,
+      accountType,
+      latest,
+    });
 
     return c.json(
       {
@@ -57,7 +63,7 @@ app.openapi(indexRoute, async (c) => {
 
     return c.json(
       {
-        message: "Oops! Something went wrong.",
+        message: error.message,
       },
       400
     );

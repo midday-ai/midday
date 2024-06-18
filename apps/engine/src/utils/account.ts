@@ -35,16 +35,18 @@ export function getClassification(type: AccountType): AccountClassification {
 
 type FormatAmountForAssetParams = {
   amount: number;
-  type: AccountClassification;
+  type: AccountType;
 };
 
 export function formatAmountForAsset({
   amount,
   type,
 }: FormatAmountForAssetParams) {
-  if (type === AccountClassification.asset) {
-    return String(Number(amount) * -1);
+  const classification = getClassification(type);
+
+  if (classification === AccountClassification.asset) {
+    return +(amount * -1);
   }
 
-  return amount;
+  return +amount;
 }

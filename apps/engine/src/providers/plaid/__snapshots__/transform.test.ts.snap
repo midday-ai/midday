@@ -2,9 +2,9 @@
 
 exports[`Transform pending transaction 1`] = `
 {
-  "amount": -5.4,
+  "amount": 5.4,
   "balance": null,
-  "category": "travel",
+  "category": "income",
   "currency": "CAD",
   "date": "2024-02-24",
   "description": null,
@@ -32,7 +32,7 @@ exports[`Transform income transaction 1`] = `
 
 exports[`Transform type transfer 1`] = `
 {
-  "amount": -5.4,
+  "amount": 5.4,
   "balance": null,
   "category": "transfer",
   "currency": "CAD",
@@ -56,6 +56,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Plaid Mortgage",
   "provider": "plaid",
+  "type": "other_asset",
 }
 `;
 
