@@ -33,28 +33,29 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>({
   },
 });
 
-app.use(
-  "/v1/*",
-  (c, next) => {
-    const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
-    const bearer = bearerAuth({ token: API_SECRET_KEY });
+// app.use(
+//   "/v1/*",
+//   (c, next) => {
+//     const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
+//     const bearer = bearerAuth({ token: API_SECRET_KEY });
 
-    return bearer(c, next);
-  },
-  secureHeaders(),
-  logger(customLogger),
-  cache({
-    cacheName: "engine",
-    cacheControl: "max-age=3600",
-  })
-);
+//     return bearer(c, next);
+//   },
+//   secureHeaders(),
+//   logger(customLogger),
+//   cache({
+//     cacheName: "engine",
+//     cacheControl: "max-age=3600",
+//   })
+// );
 
 const apiRoutes = app
-  .route("/v1/transactions", transactionsRoutes)
-  .route("/v1/accounts", accountRoutes)
-  .route("/v1/institutions", institutionRoutes)
-  .route("/v1/auth", gocardlessRoutes)
-  .route("/v1/auth", plaidRoutes);
+  .basePath("/v1")
+  .route("/transactions", transactionsRoutes)
+  .route("/accounts", accountRoutes)
+  .route("/institutions", institutionRoutes)
+  .route("/auth", gocardlessRoutes)
+  .route("/auth", plaidRoutes);
 
 apiRoutes.get(
   "/",
