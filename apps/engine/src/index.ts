@@ -78,8 +78,6 @@ app.doc("/openapi", {
 
 app.route("/health", healthRoutes);
 
-export type ApiRoutes = typeof apiRoutes;
-
 export default {
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
     // const delayedProcessing = async () => {
