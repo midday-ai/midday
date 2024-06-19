@@ -1,4 +1,4 @@
-![hero](https://mintlify.s3-us-west-1.amazonaws.com/middaylabsab/images/header.png)
+![hero](github.png)
 
 <p align="center">
 	<h1 align="center"><b>Midday</b></h1>
