@@ -30,7 +30,7 @@
       "name": "Dashboard",
       "url": "https://app.midday.ai"
     },
-    "openapi": "http://localhost:3002/v1/openapi",
+    "openapi": "https://engine.midday.ai/openapi",
     "tabs": [
       {
         "name": "Engine API Reference",
