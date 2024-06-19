@@ -109,7 +109,6 @@ export class PlaidApi {
 
   async linkTokenCreate({
     userId,
-    language = "en",
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -118,7 +117,8 @@ export class PlaidApi {
       secret: process.env.PLAID_SECRET,
       client_name: "Midday",
       products: [Products.Transactions],
-      language,
+      // TODO: Update language based on user preference
+      language: "en",
       country_codes: [
         CountryCode.Ca,
         CountryCode.Us,
