@@ -9,6 +9,9 @@ import { secureHeaders } from "hono/secure-headers";
 import accountRoutes from "./routes/accounts";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
+import gocardlessRoutes from "./routes/providers/gocardless";
+import plaidRoutes from "./routes/providers/plaid";
+import tellerRoutes from "./routes/providers/teller";
 import transactionsRoutes from "./routes/transactions";
 import { logger as customLogger } from "./utils/logger";
 
@@ -48,20 +51,29 @@ app.use(
 );
 
 const apiRoutes = app
-  .basePath("/v1")
-  .route("/transactions", transactionsRoutes)
-  .route("/accounts", accountRoutes)
-  .route("/institutions", institutionRoutes);
+  .route("/v1/transactions", transactionsRoutes)
+  .route("/v1/accounts", accountRoutes)
+  .route("/v1/institutions", institutionRoutes)
+  .route("/v1/providers", gocardlessRoutes);
+// .route("/v1/providers/plaid", plaidRoutes)
+// .route("/v1/providers/teller", tellerRoutes);
 
-app.route("/health", healthRoutes);
-app.get("/ui", swaggerUI({ url: "/doc" }));
-app.doc("/doc", {
-  openapi: "3.0.0",
+apiRoutes.get(
+  "/ui",
+  swaggerUI({
+    url: "/doc",
+  })
+);
+
+apiRoutes.doc("/doc", {
+  openapi: "3.1.0",
   info: {
     version: "1.0.0",
     title: "Midday Engine API",
   },
 });
+
+app.route("/health", healthRoutes);
 
 export type ApiRoutes = typeof apiRoutes;
 
