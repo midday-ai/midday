@@ -59,11 +59,11 @@ const apiRoutes = app
 apiRoutes.get(
   "/",
   swaggerUI({
-    url: "/doc",
+    url: "/openapi",
   })
 );
 
-apiRoutes.doc("/doc", {
+apiRoutes.doc("/openapi", {
   openapi: "3.1.0",
   info: {
     version: "1.0.0",

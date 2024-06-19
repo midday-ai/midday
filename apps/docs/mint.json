@@ -30,18 +30,18 @@
       "name": "Dashboard",
       "url": "https://app.midday.ai"
     },
-    "openapi": "https://api.midday.ai",
+    "openapi": "https://engine.midday.ai/openapi",
     "tabs": [
       {
-        "name": "API Reference",
-        "url": "api-reference"
+        "name": "Engine API Reference",
+        "url": "engine-api-reference"
       }
     ],
     "anchors": [
       {
         "name": "Help Center",
         "icon": "question",
-        "url": "https://midday.ai/help"
+        "url": "https://midday.ai/support"
       },
       {
         "name": "GitHub",
@@ -57,6 +57,12 @@
       {
         "group": "Resources",
         "pages": ["integrations", "sdks", "examples"]
+      },
+      {
+        "group": "Engine API Reference",
+        "pages": [
+          "api-reference/engine/introduction"
+        ]
       }
     ],
     "api": {
@@ -68,6 +74,7 @@
     "footerSocials": {
       "twitter": "https://twitter.com/middayai",
       "github": "https://git.new/midday",
-      "website": "https://midday.ai"
+      "website": "https://midday.ai",
+      "linkedin": "https://www.linkedin.com/company/midday-ai"
     }
   }
