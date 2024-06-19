@@ -2,17 +2,16 @@ import { z } from "@hono/zod-openapi";
 
 export const LinkBodySchema = z
   .object({
-    id: z.string().openapi({
-      example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
+    institutionId: z.string().openapi({
+      example: "REVOLUT_REVOGB21",
     }),
-    name: z.string().openapi({
-      example: "Wells Fargo Bank",
+    redirect: z.string().openapi({
+      example: "http://www.yourwebpage.com",
     }),
-    logo: z
+    agreement: z
       .string()
       .openapi({
-        example:
-          "https://cdn.midday.ai/institution/9293961c-df93-4d6d-a2cc-fc3e353b2d10.webp",
+        example: "2dea1b84-97b0-4cb4-8805-302c227587c8",
       })
       .nullable(),
   })
@@ -20,31 +19,20 @@ export const LinkBodySchema = z
 
 export const LinkSchema = z
   .object({
-    id: z.string().openapi({
-      example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
+    link: z.string().openapi({
+      example:
+        "https://ob.gocardless.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/REVOLUT_REVOGB21",
     }),
-    name: z.string().openapi({
-      example: "Savings account",
-    }),
-    currency: z.string().openapi({
-      example: "USD",
-    }),
-
-    enrollment_id: z
-      .string()
-      .openapi({
-        example: "add29d44-1b36-4bcc-b317-b2cbc73ab8e7",
-      })
-      .nullable(),
   })
   .openapi("Auth");
 
 export const ExchangeBodySchema = z
   .object({
-    content: z.object({
-      token: z.string().openapi({
-        example: "ojwmef9823f892n9h98h2efoqed9823hdodfcoj13er92hef",
-      }),
+    institutionId: z.string().openapi({
+      example: "REVOLUT_REVOGB21",
+    }),
+    transactionTotalDays: z.string().openapi({
+      example: "90",
     }),
   })
   .openapi("Auth");
@@ -52,20 +40,16 @@ export const ExchangeBodySchema = z
 export const ExchangeSchema = z
   .object({
     id: z.string().openapi({
-      example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
+      example: "2dea1b84-97b0-4cb4-8805-302c227587c8",
     }),
-    name: z.string().openapi({
-      example: "Savings account",
+    access_valid_for_days: z.string().openapi({
+      example: "90",
     }),
-    currency: z.string().openapi({
-      example: "USD",
+    max_historical_days: z.string().openapi({
+      example: "90",
     }),
-
-    enrollment_id: z
-      .string()
-      .openapi({
-        example: "add29d44-1b36-4bcc-b317-b2cbc73ab8e7",
-      })
-      .nullable(),
+    institutionId: z.string().openapi({
+      example: "REVOLUT_REVOGB21",
+    }),
   })
   .openapi("Auth");

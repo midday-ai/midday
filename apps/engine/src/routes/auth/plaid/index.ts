@@ -1,5 +1,4 @@
 import { ErrorSchema } from "@/common/schema";
-import { Provider } from "@/providers";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -80,20 +79,22 @@ app.openapi(linkRoute, async (c) => {
   const envs = env(c);
 
   try {
-    const { userId } = await c.req.parseBody();
+    const { userId, language } = await c.req.json();
 
     const api = new PlaidApi({
       kv: c.env.KV,
       envs,
     });
 
-    const data = await api.linkTokenCreate({
+    const { data } = await api.linkTokenCreate({
       userId,
+      language,
     });
 
     return c.json(
       {
-        data,
+        link_token: data.link_token,
+        expiration: data.expiration,
       },
       200
     );
@@ -111,7 +112,7 @@ app.openapi(exchangeRoute, async (c) => {
   const envs = env(c);
 
   try {
-    const { token } = await c.req.parseBody();
+    const { token } = await c.req.json();
 
     const api = new PlaidApi({
       kv: c.env.KV,
