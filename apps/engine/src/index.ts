@@ -7,8 +7,7 @@ import { cache } from "hono/cache";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import accountRoutes from "./routes/accounts";
-import gocardlessRoutes from "./routes/auth/gocardless";
-import plaidRoutes from "./routes/auth/plaid";
+import authRoutes from "./routes/auth";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
@@ -53,8 +52,7 @@ apiRoutes
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
-  .route("/auth", gocardlessRoutes)
-  .route("/auth", plaidRoutes);
+  .route("/auth", authRoutes);
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",

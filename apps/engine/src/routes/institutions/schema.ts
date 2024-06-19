@@ -16,7 +16,7 @@ export const InstitutionSchema = z
       })
       .nullable(),
   })
-  .openapi("Institution");
+  .openapi("InstitutionSchema");
 
 export const SearchSchema = z
   .object({
@@ -24,4 +24,4 @@ export const SearchSchema = z
       example: "Chase",
     }),
   })
-  .openapi("Institution");
+  .openapi("SearchSchema");

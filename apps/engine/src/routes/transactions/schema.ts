@@ -1,57 +1,59 @@
 import { Providers } from "@/common/schema";
 import { z } from "@hono/zod-openapi";
 
-export const TransactionsParamsSchema = z.object({
-  provider: Providers.openapi({
-    param: {
-      name: "provider",
-      in: "query",
-    },
-    example: "teller",
-  }),
-  accountId: z
-    .string()
-    .optional()
-    .openapi({
-      description: "Get transactions by accountId",
+export const TransactionsParamsSchema = z
+  .object({
+    provider: Providers.openapi({
       param: {
-        name: "accountId",
+        name: "provider",
         in: "query",
       },
-      example: "5341343-4234-4c65-815c-t234213442",
+      example: "teller",
     }),
-  accountType: z.enum(["credit", "depository"]).openapi({
-    description:
-      "Get transactions with the correct amount depending on credit or depository",
-    param: {
-      name: "accountType",
-      in: "query",
-    },
-    example: "depository",
-  }),
-  accessToken: z
-    .string()
-    .optional()
-    .openapi({
-      description: "Used for Teller and Plaid",
+    accountId: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Get transactions by accountId",
+        param: {
+          name: "accountId",
+          in: "query",
+        },
+        example: "5341343-4234-4c65-815c-t234213442",
+      }),
+    accountType: z.enum(["credit", "depository"]).openapi({
+      description:
+        "Get transactions with the correct amount depending on credit or depository",
       param: {
-        name: "accessToken",
+        name: "accountType",
         in: "query",
       },
-      example: "token-123",
+      example: "depository",
     }),
-  latest: z
-    .string()
-    .optional()
-    .openapi({
-      description: "Get latest transactions",
-      param: {
-        name: "latest",
-        in: "query",
-      },
-      example: "true",
-    }),
-});
+    accessToken: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Used for Teller and Plaid",
+        param: {
+          name: "accessToken",
+          in: "query",
+        },
+        example: "token-123",
+      }),
+    latest: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Get latest transactions",
+        param: {
+          name: "latest",
+          in: "query",
+        },
+        example: "true",
+      }),
+  })
+  .openapi("TransactionsParamsSchema");
 
 export const TransactionSchema = z
   .object({
@@ -101,10 +103,10 @@ export const TransactionSchema = z
       })
       .nullable(),
   })
-  .openapi("Transaction");
+  .openapi("TransactionSchema");
 
 export const TransactionsSchema = z
   .object({
     data: z.array(TransactionSchema),
   })
-  .openapi("Transactions");
+  .openapi("TransactionsSchema");

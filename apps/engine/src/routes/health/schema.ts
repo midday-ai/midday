@@ -12,4 +12,4 @@ export const HealthSchema = z
       health: z.boolean(),
     }),
   })
-  .openapi("Health");
+  .openapi("HealthSchema");

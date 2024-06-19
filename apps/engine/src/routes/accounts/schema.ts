@@ -74,10 +74,10 @@ export const AccountSchema = z
       })
       .nullable(),
   })
-  .openapi("Account");
+  .openapi("AccountSchema");
 
 export const AccountsSchema = z
   .object({
     data: z.array(AccountSchema),
   })
-  .openapi("Accounts");
+  .openapi("AccountsSchema");
