@@ -30,18 +30,18 @@
       "name": "Dashboard",
       "url": "https://app.midday.ai"
     },
-    "openapi": "https://api.midday.ai",
+    "openapi": "https://engine.midday.ai/openapi",
     "tabs": [
       {
-        "name": "API Reference",
-        "url": "api-reference"
+        "name": "Engine API Reference",
+        "url": "api-reference/engine"
       }
     ],
     "anchors": [
       {
         "name": "Help Center",
         "icon": "question",
-        "url": "https://midday.ai/help"
+        "url": "https://midday.ai/support"
       },
       {
         "name": "GitHub",
@@ -52,11 +52,35 @@
     "navigation": [
       {
         "group": "Getting Started",
-        "pages": ["introduction", "local-development", "self-hosting"]
+        "pages": ["introduction"]
       },
       {
         "group": "Resources",
-        "pages": ["integrations", "sdks", "examples"]
+        "pages": ["integrations", "examples"]
+      },
+      {
+        "group": "Open source",
+        "pages": ["local-development", "self-hosting"]
+      },
+      {
+        "group": "Engine API Reference",
+        "pages": [
+          "api-reference/engine/introduction"
+        ]
+      },
+      {
+        "group": "Links",
+        "pages": [
+          "api-reference/engine/endpoint/get-transactions",
+          "api-reference/engine/endpoint/get-accounts",
+          "api-reference/engine/endpoint/get-account-balance",
+          "api-reference/engine/endpoint/search-institutions",
+          "api-reference/engine/endpoint/auth-link-gocardless",
+          "api-reference/engine/endpoint/exchange-token-gocardless",
+          "api-reference/engine/endpoint/auth-link-plaid",
+          "api-reference/engine/endpoint/exchange-token-plaid",
+          "api-reference/engine/endpoint/health"
+        ]
       }
     ],
     "api": {
@@ -68,6 +92,7 @@
     "footerSocials": {
       "twitter": "https://twitter.com/middayai",
       "github": "https://git.new/midday",
-      "website": "https://midday.ai"
+      "website": "https://midday.ai",
+      "linkedin": "https://www.linkedin.com/company/midday-ai"
     }
   }

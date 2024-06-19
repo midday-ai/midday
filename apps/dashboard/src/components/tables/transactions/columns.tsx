@@ -44,7 +44,11 @@ export type Transaction = {
   status: "posted" | "excluded" | "included" | "pending" | "completed";
   manual?: boolean;
   date: string;
-  category: string;
+  category?: {
+    slug: string;
+    name: string;
+    color: string;
+  };
   name: string;
   description?: string;
   currency: string;

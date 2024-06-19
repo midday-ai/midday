@@ -1,0 +1,28 @@
+compatibility_date = "2023-12-01"
+workers_dev = false
+
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
+]
+
+r2_buckets = [
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
+]
+
+[triggers]
+crons = ["0 */23 * * *"]
+
+[env.production]
+name = "engine"
+logpush = true
+route = { pattern = "engine.midday.ai/*", zone_name = "midday.ai" }
+kv_namespaces = [
+  { binding = "KV", id = "1ce9f0355d854a569f72bfccbfbea369" }
+]
+
+[env.staging]
+name = "engine-staging"
+route = { pattern = "engine-staging.midday.ai/*", zone_name = "midday.ai" }
+kv_namespaces = [
+  { binding = "KV", id = "825dc18b2a38463492ff0db06ba99fc8" }
+]

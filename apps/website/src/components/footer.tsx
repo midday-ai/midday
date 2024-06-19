@@ -77,9 +77,6 @@ export function Footer() {
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/open-startup">Open Startup</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
                   <Link href="/pitch">Investors</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">

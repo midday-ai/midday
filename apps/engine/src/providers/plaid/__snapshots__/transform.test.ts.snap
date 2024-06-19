@@ -1,0 +1,68 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": 5.4,
+  "balance": null,
+  "category": "income",
+  "currency": "CAD",
+  "date": "2024-02-24",
+  "description": null,
+  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "method": "other",
+  "name": "Uber 063015 SF**POOL**",
+  "status": "pending",
+}
+`;
+
+exports[`Transform income transaction 1`] = `
+{
+  "amount": 500,
+  "balance": null,
+  "category": "income",
+  "currency": "CAD",
+  "date": "2024-02-22",
+  "description": null,
+  "internal_id": "5QKmMdaKWgtzkvKEPmqriLZR1mV3kMF5X9EeX",
+  "method": "other",
+  "name": "United Airlines",
+  "status": "posted",
+}
+`;
+
+exports[`Transform type transfer 1`] = `
+{
+  "amount": 5.4,
+  "balance": null,
+  "category": "transfer",
+  "currency": "CAD",
+  "date": "2024-02-24",
+  "description": null,
+  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "method": "transfer",
+  "name": "Uber 063015 SF**POOL**",
+  "status": "pending",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "currency": "CAD",
+  "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
+  "institution": {
+    "id": "ins_100546",
+    "logo": null,
+    "name": "American Funds Retirement Solutions",
+  },
+  "name": "Plaid Mortgage",
+  "provider": "plaid",
+  "type": "other_asset",
+}
+`;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 2000,
+  "currency": "USD",
+}
+`;
