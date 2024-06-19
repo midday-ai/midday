@@ -1,0 +1,8 @@
+{
+    "extends": "@midday/tsconfig/base.json",
+    "compilerOptions": {
+      "strict": true
+    },
+    "include": ["src"],
+    "exclude": ["node_modules"]
+  }

@@ -47,14 +47,14 @@ app.use(
   })
 );
 
-app.route("/v1/transactions", transactionsRoutes);
-app.route("/v1/accounts", accountRoutes);
-app.route("/v1/institutions", institutionRoutes);
+const apiRoutes = app
+  .basePath("/v1")
+  .route("/transactions", transactionsRoutes)
+  .route("/accounts", accountRoutes)
+  .route("/institutions", institutionRoutes);
 
 app.route("/health", healthRoutes);
-
 app.get("/ui", swaggerUI({ url: "/doc" }));
-
 app.doc("/doc", {
   openapi: "3.0.0",
   info: {
@@ -63,7 +63,7 @@ app.doc("/doc", {
   },
 });
 
-export type AppType = typeof app.route;
+export type ApiRoutes = typeof apiRoutes;
 
 export default {
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {

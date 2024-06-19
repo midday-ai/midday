@@ -28,6 +28,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
+    "@midday/engine-rpc": "workspace:*",
     "@novu/headless": "^0.24.2",
     "@tanstack/react-table": "^8.17.3",
     "@team-plain/typescript-sdk": "4.5.0",

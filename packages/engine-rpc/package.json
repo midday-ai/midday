@@ -1,0 +1,9 @@
+{
+  "name": "@midday/engine-rpc",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "dependencies": {
+    "hono": "^4.4.6"
+  }
+}
