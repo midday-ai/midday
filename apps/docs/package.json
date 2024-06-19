@@ -1,8 +1,8 @@
 {
   "name": "@midday/docs",
   "scripts": {
-    "dev": "mintlify dev",
-    "generate:engine": "bunx @mintlify/scraping@latest openapi-file http://localhost:3002/openapi -o api-reference/engine/endpoint"
+    "dev": "mintlify dev --port 3004",
+    "generate:engine": "bunx @mintlify/scraping@latest openapi-file http://localhost:3002/v1/openapi -o api-reference/engine/endpoint"
   },
   "devDependencies": {
     "mintlify": "^4.0.170"

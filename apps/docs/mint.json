@@ -30,11 +30,11 @@
       "name": "Dashboard",
       "url": "https://app.midday.ai"
     },
-    "openapi": "https://engine.midday.ai/openapi",
+    "openapi": "http://localhost:3002/v1/openapi",
     "tabs": [
       {
         "name": "Engine API Reference",
-        "url": "engine-api-reference"
+        "url": "api-reference/engine"
       }
     ],
     "anchors": [
@@ -52,16 +52,33 @@
     "navigation": [
       {
         "group": "Getting Started",
-        "pages": ["introduction", "local-development", "self-hosting"]
+        "pages": ["introduction"]
       },
       {
         "group": "Resources",
-        "pages": ["integrations", "sdks", "examples"]
+        "pages": ["integrations", "examples"]
+      },
+      {
+        "group": "Open source",
+        "pages": ["local-development", "self-hosting"]
       },
       {
         "group": "Engine API Reference",
         "pages": [
           "api-reference/engine/introduction"
+        ]
+      },
+      {
+        "group": "Links",
+        "pages": [
+          "api-reference/engine/endpoint/get-transactions",
+          "api-reference/engine/endpoint/get-accounts",
+          "api-reference/engine/endpoint/get-accountsbalance",
+          "api-reference/engine/endpoint/get-institutionssearch",
+          "api-reference/engine/endpoint/post-authgocardlesslink",
+          "api-reference/engine/endpoint/post-authgocardlessexchange",
+          "api-reference/engine/endpoint/post-authplaidlink",
+          "api-reference/engine/endpoint/post-authplaidexchange"
         ]
       }
     ],
