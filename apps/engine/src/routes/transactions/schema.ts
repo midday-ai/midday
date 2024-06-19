@@ -58,12 +58,48 @@ export const TransactionSchema = z
     id: z.string().openapi({
       example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
     }),
+    description: z
+      .string()
+      .openapi({
+        example: "Transfer to bank account",
+      })
+      .nullable(),
+    method: z
+      .string()
+      .openapi({
+        example: "other",
+      })
+      .nullable(),
+    internal_id: z.string().openapi({
+      example: "zkeDvjAjLQsMgA6nO0gJIZv5Z7pKP4UvJJXwo",
+    }),
+    amount: z.number().openapi({
+      example: 100,
+    }),
     name: z.string().openapi({
       example: "Vercel Inc.",
+    }),
+    date: z.string().openapi({
+      example: "2024-06-12",
     }),
     currency: z.string().openapi({
       example: "USD",
     }),
+    status: z.enum(["pending", "posted"]).openapi({
+      example: "posted",
+    }),
+    category: z
+      .string()
+      .openapi({
+        example: "travel",
+      })
+      .nullable(),
+    balance: z
+      .number()
+      .openapi({
+        example: 10000,
+      })
+      .nullable(),
   })
   .openapi("Transaction");
 

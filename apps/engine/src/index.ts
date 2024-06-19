@@ -7,11 +7,10 @@ import { cache } from "hono/cache";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import accountRoutes from "./routes/accounts";
+import gocardlessRoutes from "./routes/auth/gocardless";
+import plaidRoutes from "./routes/auth/plaid";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
-import gocardlessRoutes from "./routes/providers/gocardless";
-import plaidRoutes from "./routes/providers/plaid";
-import tellerRoutes from "./routes/providers/teller";
 import transactionsRoutes from "./routes/transactions";
 import { logger as customLogger } from "./utils/logger";
 
@@ -54,12 +53,11 @@ const apiRoutes = app
   .route("/v1/transactions", transactionsRoutes)
   .route("/v1/accounts", accountRoutes)
   .route("/v1/institutions", institutionRoutes)
-  .route("/v1/providers", gocardlessRoutes);
-// .route("/v1/providers/plaid", plaidRoutes)
-// .route("/v1/providers/teller", tellerRoutes);
+  .route("/v1/auth", gocardlessRoutes)
+  .route("/v1/auth", plaidRoutes);
 
 apiRoutes.get(
-  "/ui",
+  "/",
   swaggerUI({
     url: "/doc",
   })

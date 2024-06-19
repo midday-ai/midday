@@ -3,9 +3,9 @@ import { Provider } from "@/providers";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
-  ExchangeParamsSchema,
+  ExchangeBodySchema,
   ExchangeSchema,
-  LinkParamsSchema,
+  LinkBodySchema,
   LinkSchema,
 } from "./schema";
 
@@ -15,7 +15,13 @@ const linkRoute = createRoute({
   method: "post",
   path: "/gocardless/link",
   request: {
-    query: LinkParamsSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: LinkBodySchema,
+        },
+      },
+    },
   },
   responses: {
     200: {
@@ -41,7 +47,13 @@ const exchangeRoute = createRoute({
   method: "post",
   path: "/gocardless/exchange",
   request: {
-    query: ExchangeParamsSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: ExchangeBodySchema,
+        },
+      },
+    },
   },
   responses: {
     200: {

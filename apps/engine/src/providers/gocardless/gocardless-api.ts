@@ -41,7 +41,7 @@ export class GoCardLessApi {
   #secretKey;
   #secretId;
 
-  constructor(params: ProviderParams) {
+  constructor(params: Omit<ProviderParams, "provider">) {
     this.#kv = params.kv;
     this.#secretId = params.envs.GOCARDLESS_SECRET_ID;
     this.#secretKey = params.envs.GOCARDLESS_SECRET_KEY;

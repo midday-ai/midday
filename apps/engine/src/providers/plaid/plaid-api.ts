@@ -49,7 +49,7 @@ export class PlaidApi {
     // CountryCode.Pt,
   ];
 
-  constructor(params: ProviderParams) {
+  constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
     this.#clientSecret = params.envs.PLAID_SECRET;
 

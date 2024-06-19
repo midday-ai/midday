@@ -17,3 +17,11 @@ export const InstitutionSchema = z
       .nullable(),
   })
   .openapi("Institution");
+
+export const SearchSchema = z
+  .object({
+    query: z.string().openapi({
+      example: "Chase",
+    }),
+  })
+  .openapi("Institution");

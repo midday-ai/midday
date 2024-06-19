@@ -1,10 +1,35 @@
+import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
-import { Hono } from "hono";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
+import { HealthSchema } from "./schema";
 
-const app = new Hono();
+const app = new OpenAPIHono();
 
-app.get("/", async (c) => {
+const indexRoute = createRoute({
+  method: "get",
+  path: "/",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: HealthSchema,
+        },
+      },
+      description: "Retrieve health",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "Returns an error",
+    },
+  },
+});
+
+app.openapi(indexRoute, async (c) => {
   const envs = env(c);
 
   const api = new Provider();

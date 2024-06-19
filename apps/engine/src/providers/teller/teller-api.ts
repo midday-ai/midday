@@ -14,7 +14,7 @@ export class TellerApi {
 
   #fetcher: Fetcher;
 
-  constructor(params: ProviderParams) {
+  constructor(params: Omit<ProviderParams, "provider">) {
     this.#fetcher = params.fetcher as Fetcher;
   }
 
