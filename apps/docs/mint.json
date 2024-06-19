@@ -73,12 +73,13 @@
         "pages": [
           "api-reference/engine/endpoint/get-transactions",
           "api-reference/engine/endpoint/get-accounts",
-          "api-reference/engine/endpoint/get-accountsbalance",
-          "api-reference/engine/endpoint/get-institutionssearch",
-          "api-reference/engine/endpoint/post-authgocardlesslink",
-          "api-reference/engine/endpoint/post-authgocardlessexchange",
-          "api-reference/engine/endpoint/post-authplaidlink",
-          "api-reference/engine/endpoint/post-authplaidexchange"
+          "api-reference/engine/endpoint/get-account-balance",
+          "api-reference/engine/endpoint/search-institutions",
+          "api-reference/engine/endpoint/auth-link-gocardless",
+          "api-reference/engine/endpoint/exchange-token-gocardless",
+          "api-reference/engine/endpoint/auth-link-plaid",
+          "api-reference/engine/endpoint/exchange-token-plaid",
+          "api-reference/engine/endpoint/health"
         ]
       }
     ],

@@ -33,29 +33,33 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>({
   },
 });
 
-// app.use(
-//   "/v1/*",
-//   (c, next) => {
-//     const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
-//     const bearer = bearerAuth({ token: API_SECRET_KEY });
+const apiRoutes = app.use(
+  "/api/*",
+  (c, next) => {
+    const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
+    const bearer = bearerAuth({ token: API_SECRET_KEY });
 
-//     return bearer(c, next);
-//   },
-//   secureHeaders(),
-//   logger(customLogger),
-//   cache({
-//     cacheName: "engine",
-//     cacheControl: "max-age=3600",
-//   })
-// );
+    return bearer(c, next);
+  },
+  secureHeaders(),
+  logger(customLogger),
+  cache({
+    cacheName: "engine",
+    cacheControl: "max-age=3600",
+  })
+);
 
-const apiRoutes = app
-  .basePath("/v1")
+apiRoutes
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
   .route("/auth", gocardlessRoutes)
   .route("/auth", plaidRoutes);
+
+app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
+  type: "http",
+  scheme: "bearer",
+});
 
 apiRoutes.get(
   "/",
@@ -64,7 +68,7 @@ apiRoutes.get(
   })
 );
 
-apiRoutes.doc("/openapi", {
+app.doc("/openapi", {
   openapi: "3.1.0",
   info: {
     version: "1.0.0",

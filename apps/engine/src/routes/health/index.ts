@@ -9,6 +9,7 @@ const app = new OpenAPIHono();
 const indexRoute = createRoute({
   method: "get",
   path: "/",
+  summary: "Health",
   responses: {
     200: {
       content: {

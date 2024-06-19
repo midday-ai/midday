@@ -14,6 +14,7 @@ const app = new OpenAPIHono();
 const linkRoute = createRoute({
   method: "post",
   path: "/plaid/link",
+  summary: "Auth Link (Plaid)",
   request: {
     body: {
       content: {
@@ -46,6 +47,7 @@ const linkRoute = createRoute({
 const exchangeRoute = createRoute({
   method: "post",
   path: "/plaid/exchange",
+  summary: "Exchange token (Plaid)",
   request: {
     body: {
       content: {

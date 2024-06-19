@@ -9,6 +9,7 @@ const app = new OpenAPIHono();
 const indexRoute = createRoute({
   method: "get",
   path: "/",
+  summary: "Get Accounts",
   request: {
     query: AccountsParamsSchema,
   },
@@ -70,6 +71,7 @@ app.openapi(indexRoute, async (c) => {
 const balanceRoute = createRoute({
   method: "get",
   path: "/balance",
+  summary: "Get Account Balance",
   request: {
     query: AccountsParamsSchema,
   },

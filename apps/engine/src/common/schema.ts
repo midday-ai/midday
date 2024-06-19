@@ -10,3 +10,9 @@ export const ErrorSchema = z.object({
 });
 
 export const Providers = z.enum(["teller", "plaid", "gocardless"]);
+
+export const HeadersSchema = z.object({
+  authorization: z.string().openapi({
+    example: "Bearer SECRET",
+  }),
+});

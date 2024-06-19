@@ -14,6 +14,7 @@ const app = new OpenAPIHono();
 const linkRoute = createRoute({
   method: "post",
   path: "/gocardless/link",
+  summary: "Auth link (GoCardLess)",
   request: {
     body: {
       content: {
@@ -46,6 +47,7 @@ const linkRoute = createRoute({
 const exchangeRoute = createRoute({
   method: "post",
   path: "/gocardless/exchange",
+  summary: "Exchange token (GoCardLess)",
   request: {
     body: {
       content: {

@@ -9,6 +9,7 @@ const app = new OpenAPIHono();
 const indexRoute = createRoute({
   method: "get",
   path: "/",
+  summary: "Get transactions",
   request: {
     query: TransactionsParamsSchema,
   },
