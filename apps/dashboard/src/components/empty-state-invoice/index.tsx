@@ -1,6 +1,11 @@
 "use client";
 
+import { requestAccessAction } from "@/actions/request-access-action";
+import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import Invoice1Light from "public/assets/invoice-1-light.png";
 import Invoice1 from "public/assets/invoice-1.png";
@@ -14,12 +19,15 @@ const images = [
 ];
 
 export function EmptyStateInvoice() {
+  const requestAccess = useAction(requestAccessAction);
   const [activeId, setActive] = useState(1);
+
+  const requested = requestAccess.status === "hasSucceeded";
 
   return (
     <div className="h-[calc(100vh-200px)] w-full">
       <div className="mt-8 flex flex-col items-center justify-center h-full">
-        <div className="text-[#878787] rounded-md py-1.5 px-3 border text-sm mb-8">
+        <div className="text-[#878787] rounded-full py-1.5 px-3 border text-xs mb-8 font-mono">
           Coming soon
         </div>
 
@@ -53,16 +61,7 @@ export function EmptyStateInvoice() {
           ))}
         </div>
 
-        <div className="flex justify-between items-center flex-col mt-8 text-center">
-          <h2 className="font-medium mb-4">Create invoices</h2>
-          <p className="text-sm text-[#878787]">
-            Soon we’ll be releasing our invoicing service, <br /> which can be
-            based on your tracked time and automatically
-            <br /> matched against incoming transactions.
-          </p>
-        </div>
-
-        <div className="flex justify-between mt-12 items-center">
+        <div className="flex justify-between mt-8 items-center">
           <div className="flex space-x-2">
             {images.map((image) => (
               <button
@@ -78,6 +77,31 @@ export function EmptyStateInvoice() {
             ))}
           </div>
         </div>
+
+        <div className="flex justify-between items-center flex-col mt-8 text-center mb-8">
+          <h2 className="font-medium mb-4">Create invoices</h2>
+          <p className="text-sm text-[#878787]">
+            Create web-based invoices in seconds. Have an easy overview <br />
+            of all your invoices and see your outstanding balance.
+          </p>
+        </div>
+
+        <Button
+          disabled={requested}
+          className="space-x-2"
+          onClick={() => requestAccess.execute()}
+        >
+          {requested ? (
+            <span>Requested access</span>
+          ) : (
+            <span>Request early access</span>
+          )}
+
+          {requestAccess.status === "executing" && (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          )}
+          {requested && <Icons.Check />}
+        </Button>
       </div>
     </div>
   );

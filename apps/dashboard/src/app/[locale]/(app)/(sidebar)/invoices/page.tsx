@@ -1,5 +1,5 @@
 import { EmptyStateInvoice } from "@/components/empty-state-invoice";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Invoices | Midday",
