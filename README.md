@@ -14,13 +14,35 @@
   </p>
 </p>
 
-# Under active development
+# About Midday
 
-> We have been working with Midday for the past 4 months and our philosophy has been "make it work, make it right". Currently, we're actively improving Midday's code quality and best practices. In the meantime, fasten your seatbelts and enjoy the ride!
+Midday is an all-in-one tool designed to help freelancers, contractors, consultants, and solo entrepreneurs manage their business operations more efficiently. It integrates various functions typically scattered across multiple platforms into a single, cohesive system.
+
+# Features:
+
+**Time Tracking**: Allows for live time tracking of projects to boost productivity and collaboration, providing insightful project overviews.<br/>
+**Invoicing**: An upcoming feature that will enable users to create web-based invoices, collaborate in real-time, and synchronize projects seamlessly.<br/>
+**Magic Inbox**: Automatically matches incoming invoices or receipts to the correct transactions, simplifying financial tracking and organization.<br/>
+**Vault**: Secure storage for important files like contracts and agreements, keeping everything in one place for easy access​.<br/>
+**Seamless Export**: Facilitates easy export of financial data, packaged neatly in CSV files for accountants.<br/>
+**Assistant**: Provides tailored insights into financial situations, helping users understand spending patterns, cut costs, and find documents.<br/>
+
+
+## Recognition
+
+<a href="https://news.ycombinator.com/item?id=40737901">
+  <img
+    style="width: 250px; height: 54px;" width="250" height="54"
+    alt="Featured on Hacker News"
+    src="https://hackernews-badge.vercel.app/api?id=40737901"
+  />
+</a>
+
+<br/>
 
 # Get started
 
-We are working on the documentation to get started with Midday for local development: https://docs.midday.ai/local-development
+We are working on the documentation to get started with Midday for local development: https://docs.midday.ai
 
 # App Architecture
 
