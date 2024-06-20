@@ -14,11 +14,11 @@
   </p>
 </p>
 
-# About Midday
+## About Midday
 
 Midday is an all-in-one tool designed to help freelancers, contractors, consultants, and solo entrepreneurs manage their business operations more efficiently. It integrates various functions typically scattered across multiple platforms into a single, cohesive system.
 
-# Features:
+## Features
 
 **Time Tracking**: Allows for live time tracking of projects to boost productivity and collaboration, providing insightful project overviews.<br/>
 **Invoicing**: An upcoming feature that will enable users to create web-based invoices, collaborate in real-time, and synchronize projects seamlessly.<br/>
@@ -40,11 +40,11 @@ Midday is an all-in-one tool designed to help freelancers, contractors, consulta
 
 <br/>
 
-# Get started
+## Get started
 
 We are working on the documentation to get started with Midday for local development: https://docs.midday.ai
 
-# App Architecture
+## App Architecture
 
 - Monorepo
 - Bun
