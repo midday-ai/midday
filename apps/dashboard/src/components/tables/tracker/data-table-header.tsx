@@ -75,7 +75,7 @@ export function DataTableHeader() {
         </TableHead>
         <TableHead>
           <Button
-            className="p-0 hover:bg-transparent space-x-2"
+            className="p-0 hover:bg-transparent space-x-2 min-w-[150px]"
             variant="ghost"
             onClick={() => createSortQuery("status")}
           >

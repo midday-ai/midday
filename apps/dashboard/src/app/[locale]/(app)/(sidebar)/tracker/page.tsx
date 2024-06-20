@@ -20,7 +20,7 @@ export default async function Tracker({ searchParams }) {
       {/* TODO: Fix skeleton with suspense */}
       <TrackerGraph date={searchParams?.date} />
 
-      <div className="mt-14 mb-6 flex items-center justify-between">
+      <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <SearchField placeholder="Search projects" />
         <div className="flex space-x-2">
           <TrackerChangeStatus />
