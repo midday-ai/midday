@@ -13,7 +13,7 @@ export const createTeamAction = action(
   createTeamSchema,
   async ({ name, redirectTo }) => {
     const supabase = createClient();
-    const { team_id } = await createTeam(supabase, { name });
+    const team_id = await createTeam(supabase, { name });
     const user = await updateUser(supabase, { team_id });
 
     revalidateTag(`user_${user.data.id}`);

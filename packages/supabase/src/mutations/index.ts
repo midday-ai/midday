@@ -330,36 +330,11 @@ type CreateTeamParams = {
 };
 
 export async function createTeam(supabase: Client, params: CreateTeamParams) {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data } = await supabase.rpc("create_team", {
+    name: params.name,
+  });
 
-  if (!session?.user) {
-    return;
-  }
-
-  const { data: teamData } = await supabase
-    .from("teams")
-    .insert({
-      name: params.name,
-    })
-    .select()
-    .single();
-
-  const { data: userData } = await supabase
-    .from("users_on_team")
-    .insert({
-      user_id: session.user.id,
-      team_id: teamData?.id,
-      role: "owner",
-    })
-    .select()
-    .single();
-
-  return {
-    ...teamData,
-    ...userData,
-  };
+  return data;
 }
 
 type LeaveTeamParams = {

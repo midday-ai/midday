@@ -23,6 +23,7 @@ export type Database = {
           manual: boolean | null;
           name: string | null;
           team_id: string;
+          type: Database["public"]["Enums"]["account_type"] | null;
         };
         Insert: {
           account_id: string;
@@ -37,6 +38,7 @@ export type Database = {
           manual?: boolean | null;
           name?: string | null;
           team_id: string;
+          type?: Database["public"]["Enums"]["account_type"] | null;
         };
         Update: {
           account_id?: string;
@@ -51,6 +53,7 @@ export type Database = {
           manual?: boolean | null;
           name?: string | null;
           team_id?: string;
+          type?: Database["public"]["Enums"]["account_type"] | null;
         };
         Relationships: [
           {
@@ -865,6 +868,12 @@ export type Database = {
         };
         Returns: number;
       };
+      create_team: {
+        Args: {
+          name: string;
+        };
+        Returns: string;
+      };
       extract_product_names: {
         Args: {
           products_json: Json;
@@ -1128,6 +1137,12 @@ export type Database = {
       };
     };
     Enums: {
+      account_type:
+        | "depository"
+        | "credit"
+        | "other_asset"
+        | "loan"
+        | "other_liability";
       bank_providers: "gocardless" | "plaid" | "teller";
       bankProviders: "gocardless" | "plaid" | "teller";
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted";
