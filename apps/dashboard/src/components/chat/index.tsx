@@ -85,7 +85,7 @@ export function Chat({
           {messages.length ? (
             <ChatList messages={messages} className="p-4 pb-8" />
           ) : (
-            <ChatEmpty firstName={user.full_name.split(" ").at(0)} />
+            <ChatEmpty firstName={user?.full_name.split(" ").at(0)} />
           )}
 
           <div className="w-full h-px" ref={visibilityRef} />

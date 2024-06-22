@@ -25,7 +25,7 @@ export async function UserMenu({ onlySignOut }) {
           {userData?.avatar_url && (
             <Image
               src={userData?.avatar_url}
-              alt={userData.full_name}
+              alt={userData?.full_name}
               width={32}
               height={32}
             />

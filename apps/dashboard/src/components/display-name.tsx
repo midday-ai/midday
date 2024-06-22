@@ -39,7 +39,7 @@ export function DisplayName({ fullName }: Props) {
 
   const onSubmit = form.handleSubmit((data) => {
     action.execute({
-      full_name: data.full_name,
+      full_name: data?.full_name,
     });
   });
 

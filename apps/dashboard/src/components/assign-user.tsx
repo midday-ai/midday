@@ -76,8 +76,8 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
               return (
                 <SelectItem key={user?.id} value={user?.id}>
                   <AssignedUser
-                    fullName={user.full_name}
-                    avatarUrl={user.avatar_url}
+                    fullName={user?.full_name}
+                    avatarUrl={user?.avatar_url}
                   />
                 </SelectItem>
               );
