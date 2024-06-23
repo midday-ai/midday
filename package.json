@@ -19,10 +19,10 @@
     "typecheck": "turbo typecheck"
   },
   "dependencies": {
-    "@biomejs/biome": "1.8.1",
+    "@biomejs/biome": "1.8.2",
     "@manypkg/cli": "^0.21.4",
     "turbo": "2.0.4",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "packageManager": "bun@1.1.13",
   "resolutions": {
