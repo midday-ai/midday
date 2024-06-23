@@ -7,18 +7,17 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "tsc --noEmit",
-    "login": "supabase login",
     "db:generate": "supabase gen types typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.3.0",
     "react": "^18.3.1",
     "server-only": "^0.0.1",
-    "supabase": "^1.176.10"
+    "supabase": "^1.178.2"
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.43.5",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "exports": {
     "./server": "./src/client/server.ts",
