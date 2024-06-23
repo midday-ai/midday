@@ -1,0 +1,6 @@
+project_id = "pytddvqiozwrhfbwqazp"
+
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_SECRET)"

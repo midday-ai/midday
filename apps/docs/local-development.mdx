@@ -15,6 +15,7 @@ Here's the monorepo structure:
 
 ```
 apps
+├── api
 ├── dashboard
 ├── docs
 ├── engine
@@ -38,7 +39,8 @@ packages
 
 The `apps` directory contains the code for:
 
-- `dashboard`: The entirety of Midday's application ([app.midday.ai](https://app.midday.ai)).
+- `api`: The backend for Midday (supabase).
+- `dashboard`: Midday's application ([app.midday.ai](https://app.midday.ai)).
 - `docs`: Midday's documentation site ([midday.ai/docs](https://midday.ai/docs)).
 - `engine`: Midday's bank engine ([midday.ai/engine](https://midday.ai/engine)).
 - `mobile`: Midday's mobile app.

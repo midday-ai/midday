@@ -6,10 +6,7 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "dev": "supabase start",
     "typecheck": "tsc --noEmit",
-    "login": "supabase login",
-    "db:reset": "",
     "db:generate": "supabase gen types typescript --project-id $PROJECT_ID --schema public > src/types/db.ts"
   },
   "dependencies": {
@@ -20,7 +17,6 @@
   },
   "devDependencies": {
     "@supabase/supabase-js": "^2.43.5",
-    "@types/pg": "^8.11.6",
     "typescript": "^5.5.2"
   },
   "exports": {

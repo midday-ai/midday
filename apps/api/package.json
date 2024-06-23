@@ -1,0 +1,12 @@
+{
+    "name": "@midday/api",
+    "private": true,
+    "scripts": {
+        "dev": "supabase start",
+        "login": "supabase login",
+        "db:reset": ""
+    },
+    "dependencies": {
+        "supabase": "^1.178.2"
+    }
+}
