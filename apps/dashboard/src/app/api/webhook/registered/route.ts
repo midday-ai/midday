@@ -1,3 +1,4 @@
+import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
@@ -12,13 +13,31 @@ const loops = new LoopsClient(env.LOOPS_API_KEY);
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
-  const key = headers().get("x-api-key");
+  const body = await req.json();
+  const signature = headers().get("x-supabase-signature");
 
-  if (key !== env.API_ROUTE_SECRET) {
-    return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
+  console.log("signature", signature);
+
+  if (!signature) {
+    return NextResponse.json({ message: "Missing signature" }, { status: 401 });
   }
 
-  const body = await req.json();
+  const decodedSignature = Buffer.from(signature, "base64");
+  const calculatedSignature = crypto
+    .createHmac("sha256", process.env.WEBHOOK_SECRET_KEY!)
+    .update(body)
+    .digest();
+
+  const hmacMatch = crypto.timingSafeEqual(
+    decodedSignature,
+    calculatedSignature
+  );
+
+  console.log("hmacMatch", hmacMatch);
+
+  if (!hmacMatch) {
+    return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
+  }
 
   const email = body.record.email;
   const userId = body.record.id;

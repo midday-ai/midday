@@ -1,4 +1,4 @@
-import { env } from "@/env.mjs";
+import * as crypto from "node:crypto";
 import { getI18n } from "@midday/email/locales";
 import {
   NotificationTypes,
@@ -16,15 +16,29 @@ export const maxDuration = 300; // 5min
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const key = headers().get("x-api-key");
+  const body = await req.json();
+  const signature = headers().get("x-supabase-signature");
 
-  if (key !== env.API_ROUTE_SECRET) {
+  if (!signature) {
+    return NextResponse.json({ message: "Missing signature" }, { status: 401 });
+  }
+
+  const decodedSignature = Buffer.from(signature, "base64");
+  const calculatedSignature = crypto
+    .createHmac("sha256", process.env.WEBHOOK_SECRET_KEY!)
+    .update(body)
+    .digest();
+
+  const hmacMatch = crypto.timingSafeEqual(
+    decodedSignature,
+    calculatedSignature
+  );
+
+  if (!hmacMatch) {
     return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
   }
 
   const supabase = createClient({ admin: true });
-
-  const body = await req.json();
 
   const { data: transactionData } = await supabase
     .from("transactions")
