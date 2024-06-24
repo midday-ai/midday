@@ -13,19 +13,18 @@ const loops = new LoopsClient(env.LOOPS_API_KEY);
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
-  const body = await req.json();
+  const text = await req.clone().text();
   const signature = headers().get("x-supabase-signature");
-
-  console.log("signature", signature);
 
   if (!signature) {
     return NextResponse.json({ message: "Missing signature" }, { status: 401 });
   }
 
   const decodedSignature = Buffer.from(signature, "base64");
+
   const calculatedSignature = crypto
     .createHmac("sha256", process.env.WEBHOOK_SECRET_KEY!)
-    .update(body)
+    .update(text)
     .digest();
 
   const hmacMatch = crypto.timingSafeEqual(
@@ -33,11 +32,11 @@ export async function POST(req: Request) {
     calculatedSignature
   );
 
-  console.log("hmacMatch", hmacMatch);
-
   if (!hmacMatch) {
     return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
   }
+
+  const body = await req.json();
 
   const email = body.record.email;
   const userId = body.record.id;
@@ -64,7 +63,7 @@ export async function POST(req: Request) {
 
   try {
     const found = await loops.findContact(email);
-    const [firstName, lastName] = fullName.split(" ");
+    const [firstName, lastName] = fullName?.split(" ") ?? [];
 
     if (found.length > 0) {
       const userId = found?.at(0)?.id;

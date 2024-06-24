@@ -16,7 +16,7 @@ export const maxDuration = 300; // 5min
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const body = await req.json();
+  const text = await req.clone().text();
   const signature = headers().get("x-supabase-signature");
 
   if (!signature) {
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const decodedSignature = Buffer.from(signature, "base64");
   const calculatedSignature = crypto
     .createHmac("sha256", process.env.WEBHOOK_SECRET_KEY!)
-    .update(body)
+    .update(text)
     .digest();
 
   const hmacMatch = crypto.timingSafeEqual(
@@ -38,6 +38,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Not Authorized" }, { status: 401 });
   }
 
+  const body = await req.json();
   const supabase = createClient({ admin: true });
 
   const { data: transactionData } = await supabase
