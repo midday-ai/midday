@@ -6,7 +6,7 @@ import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
-import { nanoid } from "ai";
+import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

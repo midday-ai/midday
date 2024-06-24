@@ -5,7 +5,10 @@ import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { deleteUser } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
+import { LoopsClient } from "loops";
 import { redirect } from "next/navigation";
+
+const loops = new LoopsClient(process.env.LOOPS_API_KEY!);
 
 export const deleteUserAction = async () => {
   const supabase = createClient();
@@ -26,6 +29,8 @@ export const deleteUserAction = async () => {
   }
 
   const userId = await deleteUser(supabase);
+
+  await loops.deleteContact({ userId });
 
   const analytics = await setupAnalytics({
     userId,

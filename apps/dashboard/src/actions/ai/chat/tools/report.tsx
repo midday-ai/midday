@@ -1,9 +1,8 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { createClient } from "@midday/supabase/server";
-import { nanoid } from "ai";
 import { startOfMonth } from "date-fns";
 import { Dub } from "dub";
-// import { nanoid } from "ai";
+import { nanoid } from "nanoid";
 import { z } from "zod";
 import { ReportUI } from "./ui/report-ui";
 
