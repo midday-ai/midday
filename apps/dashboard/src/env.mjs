@@ -17,7 +17,6 @@ export const env = createEnv({
     GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: z.string(),
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID: z.string(),
     PLAIN_API_KEY: z.string(),
-    API_ROUTE_SECRET: z.string(),
     OPENAI_API_KEY: z.string(),
     GROQ_API_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
@@ -34,6 +33,7 @@ export const env = createEnv({
     OPENPANEL_SECRET_KEY: z.string(),
     ENGINE_API_ENDPOINT: z.string(),
     ENGINE_API_SECRET: z.string(),
+    WEBHOOK_SECRET_KEY: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -77,7 +77,6 @@ export const env = createEnv({
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GROQ_API_KEY: process.env.GROQ_API_KEY,
-    API_ROUTE_SECRET: process.env.API_ROUTE_SECRET,
     PLAIN_API_KEY: process.env.PLAIN_API_KEY,
     GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
@@ -89,6 +88,7 @@ export const env = createEnv({
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
     ENGINE_API_ENDPOINT: process.env.ENGINE_API_ENDPOINT,
     ENGINE_API_SECRET: process.env.ENGINE_API_SECRET,
+    WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
