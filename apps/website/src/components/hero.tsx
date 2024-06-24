@@ -34,14 +34,12 @@ export function Hero() {
       }}
     >
       <div className="hero-slide-up flex flex-col mt-[240px]">
-        <Link href="/updates/assistant">
+        <Link href="/updates/public-beta">
           <Button
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">
-              Introducing Midday Assistant
-            </span>
+            <span className="font-mono text-xs">Announcing Public Beta</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}
@@ -79,7 +77,7 @@ export function Hero() {
             </Link>
 
             <a href="https://app.midday.ai">
-              <Button className="h-12 px-5">Get Early Access</Button>
+              <Button className="h-12 px-5">Get Started</Button>
             </a>
           </div>
         </div>
