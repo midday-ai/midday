@@ -12,6 +12,8 @@ SET row_security = off;
 
 CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
 
+CREATE EXTENSION IF NOT EXISTS "pgsodium" WITH SCHEMA "pgsodium";
+
 CREATE SCHEMA IF NOT EXISTS "private";
 
 ALTER SCHEMA "private" OWNER TO "postgres";
@@ -26,11 +28,23 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
 
 CREATE EXTENSION IF NOT EXISTS "pgjwt" WITH SCHEMA "extensions";
 
+CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
+
 CREATE EXTENSION IF NOT EXISTS "unaccent" WITH SCHEMA "public";
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 CREATE EXTENSION IF NOT EXISTS "vector" WITH SCHEMA "extensions";
+
+CREATE TYPE "public"."account_type" AS ENUM (
+    'depository',
+    'credit',
+    'other_asset',
+    'loan',
+    'other_liability'
+);
+
+ALTER TYPE "public"."account_type" OWNER TO "postgres";
 
 CREATE TYPE "public"."bankProviders" AS ENUM (
     'gocardless',
@@ -214,64 +228,23 @@ begin
 end;
 $_$;
 
-CREATE OR REPLACE FUNCTION public.webhook()
-    RETURNS trigger
-    SET search_path = public
-    SECURITY DEFINER
-    LANGUAGE 'plpgsql'
-AS
-$$
-DECLARE
-    url text;
-    secret text;
-    payload jsonb;
-    request_id bigint;
-    signature text;
-    path text;
-BEGIN
-    -- Extract the first item from TG_ARGV as path
-    path = TG_ARGV[0];
+ALTER FUNCTION "public"."calculated_vat"("public"."transactions") OWNER TO "postgres";
 
-    -- Get the webhook URL and secret from the vault
-    SELECT decrypted_secret INTO url FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_ENDPOINT' LIMIT 1;
-    SELECT decrypted_secret INTO secret FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_SECRET' LIMIT 1;
+CREATE OR REPLACE FUNCTION "public"."create_team"("name" character varying) RETURNS "uuid"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+declare
+    new_team_id uuid;
+begin
+    insert into teams (name) values (name) returning id into new_team_id;
+    insert into users_on_team (user_id, team_id, role) values (auth.uid(), new_team_id, 'owner');
 
-    -- Generate the payload
-    payload = jsonb_build_object(
-        'old_record', old,
-        'record', new,
-        'type', tg_op,
-        'table', tg_table_name,
-        'schema', tg_table_schema
-    );
-
-    -- Generate the signature
-    signature = generate_hmac(secret, payload::text);
-
-    -- Send the webhook request
-    SELECT http_post
-    INTO request_id
-    FROM
-        net.http_post(
-                url :=  url || '/' || path,
-                body := payload,
-                headers := jsonb_build_object(
-                        'Content-Type', 'application/json',
-                        'X-Supabase-Signature', signature
-                ),
-               timeout_milliseconds := 3000
-        );
-
-    -- Insert the request ID into the Supabase hooks table
-    INSERT INTO supabase_functions.hooks
-        (hook_table_id, hook_name, request_id)
-    VALUES (tg_relid, tg_name, request_id);
-
-    RETURN new;
-END;
+    return new_team_id;
+end;
 $$;
 
-ALTER FUNCTION "public"."calculated_vat"("public"."transactions") OWNER TO "postgres";
+ALTER FUNCTION "public"."create_team"("name" character varying) OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."extract_product_names"("products_json" "json") RETURNS "text"
     LANGUAGE "plpgsql" IMMUTABLE
@@ -285,6 +258,19 @@ end;
 $$;
 
 ALTER FUNCTION "public"."extract_product_names"("products_json" "json") OWNER TO "postgres";
+
+CREATE OR REPLACE FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") RETURNS "text"
+    LANGUAGE "plpgsql"
+    AS $$
+DECLARE
+    hmac_result bytea;
+BEGIN
+    hmac_result := extensions.hmac(message::bytea, secret_key::bytea, 'sha256');
+    RETURN encode(hmac_result, 'base64');
+END;
+$$;
+
+ALTER FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."generate_id"("size" integer) RETURNS "text"
     LANGUAGE "plpgsql"
@@ -994,6 +980,62 @@ end;$$;
 
 ALTER FUNCTION "public"."upsert_transaction_enrichment"() OWNER TO "postgres";
 
+CREATE OR REPLACE FUNCTION "public"."webhook"() RETURNS "trigger"
+    LANGUAGE "plpgsql" SECURITY DEFINER
+    SET "search_path" TO 'public'
+    AS $$
+DECLARE
+    url text;
+    secret text;
+    payload jsonb;
+    request_id bigint;
+    signature text;
+    path text;
+BEGIN
+    -- Extract the first item from TG_ARGV as path
+    path = TG_ARGV[0];
+
+    -- Get the webhook URL and secret from the vault
+    SELECT decrypted_secret INTO url FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_ENDPOINT' LIMIT 1;
+    SELECT decrypted_secret INTO secret FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_SECRET' LIMIT 1;
+
+    -- Generate the payload
+    payload = jsonb_build_object(
+        'old_record', old,
+        'record', new,
+        'type', tg_op,
+        'table', tg_table_name,
+        'schema', tg_table_schema
+    );
+
+    -- Generate the signature
+    signature = generate_hmac(secret, payload::text);
+
+    -- Send the webhook request
+    SELECT http_post
+    INTO request_id
+    FROM
+        net.http_post(
+                url :=  url || '/' || path,
+                body := payload,
+                headers := jsonb_build_object(
+                        'Content-Type', 'application/json',
+                        'X-Supabase-Signature', signature
+                ),
+               timeout_milliseconds := 3000
+        );
+
+    -- Insert the request ID into the Supabase hooks table
+    INSERT INTO supabase_functions.hooks
+        (hook_table_id, hook_name, request_id)
+    VALUES (tg_relid, tg_name, request_id);
+
+    RETURN new;
+END;
+$$;
+
+ALTER FUNCTION "public"."webhook"() OWNER TO "postgres";
+
 CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
     "id" "uuid" DEFAULT "gen_random_uuid"() NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL,
@@ -1006,7 +1048,8 @@ CREATE TABLE IF NOT EXISTS "public"."bank_accounts" (
     "enabled" boolean DEFAULT true NOT NULL,
     "account_id" "text" NOT NULL,
     "balance" numeric DEFAULT '0'::numeric,
-    "manual" boolean DEFAULT false
+    "manual" boolean DEFAULT false,
+    "type" "public"."account_type"
 );
 
 ALTER TABLE "public"."bank_accounts" OWNER TO "postgres";
@@ -1236,11 +1279,13 @@ CREATE INDEX "transactions_team_id_idx" ON "public"."transactions" USING "btree"
 
 CREATE INDEX "users_on_team_team_id_idx" ON "public"."users_on_team" USING "btree" ("team_id");
 
+CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json"}', '{}', '5000');
+
 CREATE OR REPLACE TRIGGER "generate_category_slug" BEFORE INSERT ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."generate_slug_from_name"();
 
 CREATE OR REPLACE TRIGGER "insert_system_categories_trigger" AFTER INSERT ON "public"."teams" FOR EACH ROW EXECUTE FUNCTION "public"."insert_system_categories"();
 
-CREATE OR REPLACE TRIGGER "match_transaction" AFTER INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "supabase_functions"."http_request"('https://app.midday.ai/api/webooks/inbox/match', 'POST', '{"Content-type":"application/json","x-api-key":"szlv1yTFbgV7rmwchh2r3Medq28ZbDMF4QiPKE2Mr5fGADKTl1xTH1vKjxLf2vsj"}', '{}', '1000');
+CREATE OR REPLACE TRIGGER "match_transaction" AFTER INSERT ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."webhook"('webhook/inbox/match');
 
 CREATE OR REPLACE TRIGGER "on_updated_transaction_category" AFTER UPDATE OF "category_slug" ON "public"."transactions" FOR EACH ROW EXECUTE FUNCTION "public"."upsert_transaction_enrichment"();
 
@@ -1363,11 +1408,7 @@ CREATE POLICY "Enable insert for authenticated users only" ON "public"."transact
 
 CREATE POLICY "Enable insert for authenticated users only" ON "public"."users_on_team" FOR INSERT TO "authenticated" WITH CHECK (true);
 
-CREATE POLICY "Enable select for authenticated users only" ON "public"."teams" FOR SELECT TO "authenticated" USING (true);
-
-CREATE POLICY "Enable select for authenticated users only" ON "public"."transaction_enrichments" FOR SELECT TO "authenticated" USING (true);
-
-CREATE POLICY "Enable select for authenticated users only" ON "public"."users_on_team" FOR SELECT TO "authenticated" USING (true);
+CREATE POLICY "Enable read access for all users" ON "public"."users_on_team" FOR SELECT USING (true);
 
 CREATE POLICY "Enable select for users based on email" ON "public"."user_invites" FOR SELECT USING ((("auth"."jwt"() ->> 'email'::"text") = "email"));
 
@@ -1443,11 +1484,11 @@ CREATE POLICY "User Invites can be updated by a member of the team" ON "public".
 
 CREATE POLICY "Users can insert their own profile." ON "public"."users" FOR INSERT WITH CHECK (("auth"."uid"() = "id"));
 
-CREATE POLICY "Users can read members belonging to the same team" ON "public"."users" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
-   FROM "public"."users_on_team"
-  WHERE ("users_on_team"."team_id" IN ( SELECT "private"."get_teams_for_authenticated_user"() AS "get_teams_for_authenticated_user")))));
-
 CREATE POLICY "Users can select their own profile." ON "public"."users" FOR SELECT USING (("auth"."uid"() = "id"));
+
+CREATE POLICY "Users can select users if they are in the same team" ON "public"."users" FOR SELECT TO "authenticated" USING ((EXISTS ( SELECT 1
+   FROM "public"."users_on_team"
+  WHERE (("users_on_team"."user_id" = ( SELECT "auth"."uid"() AS "uid")) AND ("users_on_team"."team_id" = "users"."team_id")))));
 
 CREATE POLICY "Users can update own profile." ON "public"."users" FOR UPDATE USING (("auth"."uid"() = "id"));
 
@@ -1516,9 +1557,17 @@ GRANT ALL ON FUNCTION "public"."calculated_vat"("public"."transactions") TO "ano
 GRANT ALL ON FUNCTION "public"."calculated_vat"("public"."transactions") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."calculated_vat"("public"."transactions") TO "service_role";
 
+GRANT ALL ON FUNCTION "public"."create_team"("name" character varying) TO "anon";
+GRANT ALL ON FUNCTION "public"."create_team"("name" character varying) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."create_team"("name" character varying) TO "service_role";
+
 GRANT ALL ON FUNCTION "public"."extract_product_names"("products_json" "json") TO "anon";
 GRANT ALL ON FUNCTION "public"."extract_product_names"("products_json" "json") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."extract_product_names"("products_json" "json") TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") TO "anon";
+GRANT ALL ON FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") TO "authenticated";
+GRANT ALL ON FUNCTION "public"."generate_hmac"("secret_key" "text", "message" "text") TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."generate_id"("size" integer) TO "anon";
 GRANT ALL ON FUNCTION "public"."generate_id"("size" integer) TO "authenticated";
@@ -1783,6 +1832,10 @@ GRANT ALL ON FUNCTION "public"."update_transactions_on_category_delete"() TO "se
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "anon";
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "authenticated";
 GRANT ALL ON FUNCTION "public"."upsert_transaction_enrichment"() TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."webhook"() TO "anon";
+GRANT ALL ON FUNCTION "public"."webhook"() TO "authenticated";
+GRANT ALL ON FUNCTION "public"."webhook"() TO "service_role";
 
 GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "postgres";
 GRANT ALL ON FUNCTION "public"."word_similarity"("text", "text") TO "anon";
