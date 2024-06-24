@@ -28,7 +28,7 @@ export default function Page() {
 
           <div className="flex items-center flex-col text-center relative">
             <div className="mt-12 mb-12" />
-            <p className="text-xl mt-4">Claim $30/mo deal</p>
+            <p className="text-xl mt-4">Claim $49/mo deal</p>
 
             <div className="mt-8">
               <div className="flex items-center space-x-4">
@@ -46,7 +46,7 @@ export default function Page() {
                   rel="noreferrer"
                   href="https://app.midday.ai"
                 >
-                  <Button className="h-12 px-5">Get Early Access</Button>
+                  <Button className="h-12 px-5">Get Started</Button>
                 </a>
               </div>
             </div>
