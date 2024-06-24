@@ -28,3 +28,9 @@ redirect_uri = "http://localhost:54321/auth/v1/callback"
 double_confirm_changes = true
 enable_confirmations = true
 enable_signup = true
+
+[analytics]
+enabled = true
+port = 54327
+vector_port = 54328
+backend = "postgres"
