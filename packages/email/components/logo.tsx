@@ -1,7 +1,10 @@
 import { Img, Section } from "@react-email/components";
-import React from "react";
 
-export function Logo({ baseUrl }) {
+type Props = {
+  baseUrl: string;
+};
+
+export function Logo({ baseUrl }: Props) {
   return (
     <Section className="mt-[32px]">
       <Img

@@ -1,5 +1,4 @@
 import { Button, Section } from "@react-email/components";
-import React from "react";
 
 export function GetStarted() {
   return (

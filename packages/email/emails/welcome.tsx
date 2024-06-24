@@ -10,14 +10,12 @@ import {
   Tailwind,
   Text,
 } from "@react-email/components";
-import * as React from "react";
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
 
-interface OverviewProps {
+interface WelcomeProps {
   fullName: string;
-  unsubscribeLink: string;
 }
 
 const baseUrl =
@@ -25,10 +23,7 @@ const baseUrl =
     ? "https://midday.ai/email"
     : "http://localhost:3000/email";
 
-export const WelcomeEmail = ({
-  fullName = "Viktor Hofte",
-  unsubscribeLink = "https://midday.ai",
-}: OverviewProps) => {
+export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
 
@@ -83,7 +78,7 @@ export const WelcomeEmail = ({
               help run your business smarter.
               <br />
               <br />
-              During our private beta phase, you may encounter some bugs, but we
+              During our beta phase, you may encounter some bugs, but we
               genuinely want all your feedback.
               <br />
               <br />
@@ -114,12 +109,6 @@ export const WelcomeEmail = ({
               className="block w-full w-[143px] h-[20px]"
             />
 
-            {/* <Img
-              src={`${baseUrl}/signature-dark.png`}
-              alt="Signature"
-              className="w-full w-[143px] h-[20px] hidden dark:block"
-            /> */}
-
             <br />
             <br />
 
@@ -127,7 +116,7 @@ export const WelcomeEmail = ({
 
             <br />
 
-            <Footer baseUrl={baseUrl} unsubscribeLink={unsubscribeLink} />
+            <Footer baseUrl={baseUrl} />
           </Container>
         </Body>
       </Tailwind>

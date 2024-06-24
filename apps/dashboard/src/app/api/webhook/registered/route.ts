@@ -1,15 +1,19 @@
 import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
+import WelcomeEmail from "@midday/email/emails/welcome";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { Events, client } from "@midday/jobs";
+import { renderAsync } from "@react-email/components";
 import { LoopsClient } from "loops";
+import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
 
 const loops = new LoopsClient(env.LOOPS_API_KEY);
+const resend = new Resend(env.RESEND_API_KEY);
 
 // NOTE: This is trigger from supabase database webhook
 export async function POST(req: Request) {
@@ -52,14 +56,21 @@ export async function POST(req: Request) {
     channel: LogEvents.Registered.channel,
   });
 
-  await client.sendEvent({
-    id: userId,
-    name: Events.ONBOARDING_EMAILS,
-    payload: {
-      fullName,
-      email,
-    },
-  });
+  if (fullName) {
+    await resend.emails.send({
+      to: email,
+      subject: "Welcome to Midday",
+      from: "Pontus from Midday <pontus@midday.ai>",
+      html: await renderAsync(
+        WelcomeEmail({
+          fullName,
+        })
+      ),
+      headers: {
+        "X-Entity-Ref-ID": nanoid(),
+      },
+    });
+  }
 
   try {
     const found = await loops.findContact(email);
