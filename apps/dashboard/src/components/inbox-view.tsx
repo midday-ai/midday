@@ -8,6 +8,7 @@ import { createClient } from "@midday/supabase/client";
 import { TabsContent } from "@midday/ui/tabs";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
+import { useDebounce } from "@uidotdev/usehooks";
 import { useOptimisticAction } from "next-safe-action/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
@@ -15,7 +16,6 @@ import { useEffect, useState } from "react";
 import { InboxHeader } from "./inbox-header";
 import { InboxStructure } from "./inbox-structure";
 import { InboxToolbar } from "./inbox-toolbar";
-import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = {
   items: any[];
