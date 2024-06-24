@@ -10,6 +10,7 @@
     "test": "turbo test --parallel",
     "start:dashboard": "turbo start --filter=@midday/dashboard",
     "start:website": "turbo start --filter=@midday/website",
+    "dev:api": "turbo dev --filter=@midday/api",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "dev:website": "turbo dev --filter=@midday/website ",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
@@ -24,7 +25,7 @@
     "turbo": "2.0.4",
     "typescript": "^5.5.2"
   },
-  "packageManager": "bun@1.1.13",
+  "packageManager": "bun@1.1.16",
   "resolutions": {
     "jackspeak": "2.1.1"
   }
