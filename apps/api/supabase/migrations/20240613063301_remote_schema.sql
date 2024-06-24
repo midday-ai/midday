@@ -214,6 +214,63 @@ begin
 end;
 $_$;
 
+CREATE OR REPLACE FUNCTION public.webhook()
+    RETURNS trigger
+    SET search_path = public
+    SECURITY DEFINER
+    LANGUAGE 'plpgsql'
+AS
+$$
+DECLARE
+    url text;
+    secret text;
+    payload jsonb;
+    request_id bigint;
+    signature text;
+    path text;
+BEGIN
+    -- Extract the first item from TG_ARGV as path
+    path = TG_ARGV[0];
+
+    -- Get the webhook URL and secret from the vault
+    SELECT decrypted_secret INTO url FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_ENDPOINT' LIMIT 1;
+    SELECT decrypted_secret INTO secret FROM vault.decrypted_secrets WHERE name = 'WEBHOOK_SECRET' LIMIT 1;
+
+    -- Generate the payload
+    payload = jsonb_build_object(
+        'old_record', old,
+        'record', new,
+        'type', tg_op,
+        'table', tg_table_name,
+        'schema', tg_table_schema
+    );
+
+    -- Generate the signature
+    signature = generate_hmac(secret, payload::text);
+
+    -- Send the webhook request
+    SELECT http_post
+    INTO request_id
+    FROM
+        net.http_post(
+                url :=  url || '/' || path,
+                body := payload,
+                headers := jsonb_build_object(
+                        'Content-Type', 'application/json',
+                        'X-Supabase-Signature', signature
+                ),
+               timeout_milliseconds := 3000
+        );
+
+    -- Insert the request ID into the Supabase hooks table
+    INSERT INTO supabase_functions.hooks
+        (hook_table_id, hook_name, request_id)
+    VALUES (tg_relid, tg_name, request_id);
+
+    RETURN new;
+END;
+$$;
+
 ALTER FUNCTION "public"."calculated_vat"("public"."transactions") OWNER TO "postgres";
 
 CREATE OR REPLACE FUNCTION "public"."extract_product_names"("products_json" "json") RETURNS "text"
@@ -1178,8 +1235,6 @@ CREATE INDEX "transactions_team_id_date_currency_bank_account_id_category_idx" O
 CREATE INDEX "transactions_team_id_idx" ON "public"."transactions" USING "btree" ("team_id");
 
 CREATE INDEX "users_on_team_team_id_idx" ON "public"."users_on_team" USING "btree" ("team_id");
-
-CREATE OR REPLACE TRIGGER "embed_category" AFTER INSERT OR UPDATE OF "name" ON "public"."transaction_categories" FOR EACH ROW WHEN (("new"."system" = false)) EXECUTE FUNCTION "supabase_functions"."http_request"('https://pytddvqiozwrhfbwqazp.supabase.co/functions/v1/generate-category-embedding', 'POST', '{"Content-type":"application/json","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5dGRkdnFpb3p3cmhmYndxYXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTY1ODM2MzgsImV4cCI6MjAxMjE1OTYzOH0.ICOeoR7nVt1bxKtTYfo1xe4m2l3d2CMmqh1kKZAb35c"}', '{}', '5000');
 
 CREATE OR REPLACE TRIGGER "generate_category_slug" BEFORE INSERT ON "public"."transaction_categories" FOR EACH ROW EXECUTE FUNCTION "public"."generate_slug_from_name"();
 
