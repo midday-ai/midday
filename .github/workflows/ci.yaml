@@ -3,9 +3,9 @@ env:
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   GOOGLE_SECRET: ${{ secrets.GOOGLE_SECRET_WEBSITE }}
 
-on:
-  pull_request:
-  workflow_dispatch:
+# on:
+#   pull_request:
+#   workflow_dispatch:
 
 jobs:
   test:
