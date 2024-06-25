@@ -64,6 +64,12 @@ client.defineJob({
         accountId: account.account_id,
         accessToken: account.bank_connection?.access_token,
         bankAccountId: account.id,
+        type: account.type, // TODO fix
+      });
+
+      const balance = await provider.getAccountBalance({
+        accountId: account.account_id,
+        accessToken: account.bank_connection?.access_token,
       });
 
       // NOTE: We will get all the transactions at once for each account so
@@ -85,6 +91,7 @@ client.defineJob({
         .from("bank_accounts")
         .update({
           last_accessed: new Date().toISOString(),
+          balance,
         })
         .eq("id", account.id);
     });

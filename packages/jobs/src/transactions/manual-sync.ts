@@ -77,11 +77,17 @@ client.defineJob({
       throw Error("Something went wrong");
     }
 
+    const balance = await provider.getAccountBalance({
+      accountId: account.account_id,
+      accessToken: account.bank_connection?.access_token,
+    });
+
     // Update bank account last_accessed
     await io.supabase.client
       .from("bank_accounts")
       .update({
         last_accessed: new Date().toISOString(),
+        balance,
       })
       .eq("id", account.id);
 

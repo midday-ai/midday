@@ -25,12 +25,13 @@ export class TellerApi {
     accountId,
     accessToken,
     latest,
+    count,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     const result = await this.#get<GetTransactionsResponse>(
       `/accounts/${accountId}/transactions`,
       accessToken,
-      latest && {
-        count: 500,
+      {
+        count: latest ? 500 : count,
       }
     );
 
@@ -42,12 +43,16 @@ export class TellerApi {
     accountId,
     accessToken,
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse> {
-    const result = await this.#get<GetAccountBalanceResponse>(
-      `/accounts/${accountId}/balances`,
-      accessToken
-    );
+    const transactions = await this.getTransactions({
+      accountId,
+      accessToken,
+      count: 1,
+    });
 
-    return result;
+    return {
+      currency: "USD",
+      amount: +(transactions?.at(0)?.running_balance ?? 0),
+    };
   }
 
   async #getApi(accessToken: string): Promise<AxiosInstance> {
@@ -87,7 +92,7 @@ export class TellerApi {
   async #get<TResponse>(
     path: string,
     accessToken: string,
-    params?: unknown,
+    params?: Record<string, string | number | undefined>,
     config?: AxiosRequestConfig
   ): Promise<TResponse> {
     const api = await this.#getApi(accessToken);

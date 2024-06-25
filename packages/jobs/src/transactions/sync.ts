@@ -71,8 +71,6 @@ client.defineJob({
           category_slug: category,
         }));
 
-        await io.logger.debug("Transactions", transactions);
-
         if (!transactions?.length) {
           return null;
         }

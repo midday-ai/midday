@@ -9,7 +9,7 @@ exports[`Transform pending transaction 1`] = `
   "currency": "CAD",
   "date": "2024-02-24",
   "description": null,
-  "internal_id": "123_NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
   "method": "other",
   "name": "Uber 063015 SF**POOL**",
   "status": "pending",
@@ -26,7 +26,7 @@ exports[`Transform income transaction 1`] = `
   "currency": "CAD",
   "date": "2024-02-22",
   "description": null,
-  "internal_id": "123_5QKmMdaKWgtzkvKEPmqriLZR1mV3kMF5X9EeX",
+  "internal_id": "5QKmMdaKWgtzkvKEPmqriLZR1mV3kMF5X9EeX",
   "method": "other",
   "name": "United Airlines",
   "status": "posted",
@@ -43,7 +43,7 @@ exports[`Transform type transfer 1`] = `
   "currency": "CAD",
   "date": "2024-02-24",
   "description": null,
-  "internal_id": "123_NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
   "method": "transfer",
   "name": "Uber 063015 SF**POOL**",
   "status": "pending",
@@ -62,6 +62,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Plaid Mortgage",
   "provider": "plaid",
+  "type": "other_asset",
 }
 `;
 

@@ -7,7 +7,7 @@ import type {
 import { TellerApi } from "./teller-api";
 import {
   transformAccount,
-  // transformAccountBalance,
+  transformAccountBalance,
   transformTransaction,
 } from "./transform";
 
@@ -24,6 +24,7 @@ export class TellerProvider implements Provider {
     bankAccountId,
     accessToken,
     latest,
+    accountType,
   }: GetTransactionsRequest) {
     if (!accessToken) {
       throw Error("accessToken missing");
@@ -40,6 +41,7 @@ export class TellerProvider implements Provider {
         transaction,
         teamId,
         bankAccountId,
+        accountType,
       })
     );
   }
@@ -62,14 +64,14 @@ export class TellerProvider implements Provider {
       throw Error("Missing params");
     }
 
-    // const response = await this.#api.getAccountBalance({
-    //   accessToken,
-    //   accountId,
-    // });
+    const response = await this.#api.getAccountBalance({
+      accessToken,
+      accountId,
+    });
 
-    // if (response) {
-    //   return transformAccountBalance(response);
-    // }
+    if (response) {
+      return transformAccountBalance(response);
+    }
 
     return {
       currency: "USD",
