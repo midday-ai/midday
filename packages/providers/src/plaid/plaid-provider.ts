@@ -24,6 +24,7 @@ export class PlaidProvider implements Provider {
     accountId,
     bankAccountId,
     latest,
+    accountType,
   }: GetTransactionsRequest) {
     if (!accessToken || !accountId) {
       throw Error("accessToken or accountId is missing");
@@ -40,6 +41,7 @@ export class PlaidProvider implements Provider {
         transaction,
         teamId,
         bankAccountId,
+        accountType,
       })
     );
   }

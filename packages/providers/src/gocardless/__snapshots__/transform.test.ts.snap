@@ -30,6 +30,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Pleo Account",
   "provider": "gocardless",
+  "type": "depository",
 }
 `;
 

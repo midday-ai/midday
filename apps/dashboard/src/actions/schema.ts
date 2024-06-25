@@ -132,6 +132,13 @@ export const connectBankAccountSchema = z.object({
       institution_id: z.string(),
       enabled: z.boolean(),
       logo_url: z.string().nullable().optional(),
+      type: z.enum([
+        "credit",
+        "depository",
+        "other_asset",
+        "loan",
+        "other_liability",
+      ]),
     })
   ),
 });

@@ -1,3 +1,4 @@
+import type { AccountType } from "@midday/engine/src/utils/account";
 import type {
   AccountsGetResponse,
   Transaction,
@@ -37,17 +38,20 @@ export type GetAccountsResponse = AccountWithintitution[];
 
 export type TransformAccount = AccountWithintitution;
 
-export type TransformAccountBalance = AccountsGetResponse["accounts"][0];
+export type TransformAccountBalance =
+  AccountsGetResponse["accounts"][0]["balances"];
 
 export type TransformTransaction = {
+  transaction: Transaction;
   teamId: string;
   bankAccountId: string;
-  transaction: Transaction;
+  accountType: AccountType;
 };
 
 export type GetTransactionsResponse = TransactionsSyncResponse["added"];
 
-export type GetAccountBalanceResponse = AccountsGetResponse["accounts"][0];
+export type GetAccountBalanceResponse =
+  AccountsGetResponse["accounts"][0]["balances"];
 
 export interface GetAccountBalanceRequest {
   accessToken: string;

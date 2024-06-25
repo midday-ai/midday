@@ -1,3 +1,7 @@
+import {
+  formatAmountForAsset,
+  getType,
+} from "@midday/engine/src/utils/account";
 import { capitalCase } from "change-case";
 import type { Transaction, TransactionCode } from "plaid";
 import type {
@@ -30,7 +34,15 @@ export const mapTransactionMethod = (type?: TransactionCode | null) => {
   }
 };
 
-export const mapTransactionCategory = (transaction: Transaction) => {
+type MapTransactionCategory = {
+  transaction: Transaction;
+  amount: number;
+};
+
+export const mapTransactionCategory = ({
+  transaction,
+  amount,
+}: MapTransactionCategory) => {
   if (transaction.personal_finance_category?.primary === "INCOME") {
     return "income";
   }
@@ -43,9 +55,7 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "transfer";
   }
 
-  // Positive values when money moves out of the account; negative values when money moves in.
-  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
-  if (transaction?.amount < 0) {
+  if (amount > 0) {
     return "income";
   }
 
@@ -114,22 +124,18 @@ export const mapTransactionCategory = (transaction: Transaction) => {
   return null;
 };
 
-const transformToSignedAmount = (amount: number) => {
-  // Positive values when money moves out of the account; negative values when money moves in.
-  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
-  if (amount > 0) {
-    return -amount;
-  }
-
-  return amount * -1;
-};
-
 export const transformTransaction = ({
   transaction,
-  teamId,
+  accountType,
   bankAccountId,
+  teamId,
 }: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction?.transaction_code);
+
+  const amount = formatAmountForAsset({
+    amount: transaction.amount,
+    type: accountType,
+  });
 
   return {
     date: transaction.date,
@@ -139,14 +145,14 @@ export const transformTransaction = ({
       : null,
     method,
     internal_id: `${teamId}_${transaction.transaction_id}`,
-    amount: transformToSignedAmount(transaction.amount),
+    amount,
+    team_id: teamId,
+    bank_account_id: bankAccountId,
     currency:
       transaction.iso_currency_code ||
       transaction.unofficial_currency_code ||
       "USD",
-    bank_account_id: bankAccountId,
-    category: mapTransactionCategory(transaction),
-    team_id: teamId,
+    category: mapTransactionCategory({ transaction, amount }),
     balance: null,
     status: transaction.pending ? "pending" : "posted",
   };
@@ -157,6 +163,7 @@ export const transformAccount = ({
   name,
   institution,
   balances,
+  type,
 }: TransformAccount): BaseAccount => {
   return {
     id: account_id,
@@ -165,15 +172,14 @@ export const transformAccount = ({
       balances.iso_currency_code || balances.unofficial_currency_code || "USD",
     institution,
     provider: "plaid",
+    type: getType(type),
   };
 };
 
 export const transformAccountBalance = (
-  account: TransformAccountBalance
+  balances?: TransformAccountBalance
 ): BaseBalance => ({
   currency:
-    account?.balances.iso_currency_code ||
-    account?.balances.unofficial_currency_code ||
-    "USD",
-  amount: account?.balances?.available ?? 0,
+    balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
+  amount: balances?.available ?? 0,
 });

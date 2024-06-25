@@ -62,6 +62,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Plaid Mortgage",
   "provider": "plaid",
+  "type": "other_asset",
 }
 `;
 

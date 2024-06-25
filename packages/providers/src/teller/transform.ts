@@ -1,3 +1,7 @@
+import {
+  formatAmountForAsset,
+  getType,
+} from "@midday/engine/src/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -37,8 +41,15 @@ export const mapTransactionMethod = (type?: string) => {
       return "other";
   }
 };
+type MapTransactionCategory = {
+  transaction: Transaction;
+  amount: number;
+};
 
-export const mapTransactionCategory = (transaction: Transaction) => {
+export const mapTransactionCategory = ({
+  transaction,
+  amount,
+}: MapTransactionCategory) => {
   if (transaction.type === "transfer") {
     return "transfer";
   }
@@ -47,7 +58,7 @@ export const mapTransactionCategory = (transaction: Transaction) => {
     return "fees";
   }
 
-  if (+transaction.amount > 0) {
+  if (amount > 0) {
     return "income";
   }
 
@@ -82,8 +93,14 @@ export const transformTransaction = ({
   transaction,
   teamId,
   bankAccountId,
+  accountType,
 }: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
+
+  const amount = formatAmountForAsset({
+    amount: +transaction.amount,
+    type: accountType,
+  });
 
   return {
     date: transaction.date,
@@ -91,12 +108,12 @@ export const transformTransaction = ({
     description: null,
     method,
     internal_id: `${teamId}_${transaction.id}`,
-    amount: +transaction.amount,
+    amount,
     currency: "USD",
-    bank_account_id: bankAccountId,
-    category: mapTransactionCategory(transaction),
-    team_id: teamId,
+    category: mapTransactionCategory({ transaction, amount }),
     balance: transaction.running_balance,
+    team_id: teamId,
+    bank_account_id: bankAccountId,
     status: transaction?.status === "posted" ? "posted" : "pending",
   };
 };
@@ -107,6 +124,7 @@ export const transformAccount = ({
   currency,
   institution,
   enrollment_id,
+  type,
 }: TransformAccount): BaseAccount => {
   return {
     id,
@@ -118,12 +136,13 @@ export const transformAccount = ({
     },
     enrollment_id: enrollment_id,
     provider: "teller",
+    type: getType(type),
   };
 };
 
 export const transformAccountBalance = (
   account: TransformAccountBalance
 ): BaseAccountBalance => ({
-  currency: "USD",
-  amount: +account.available,
+  currency: account.currency,
+  amount: +account.amount,
 });

@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { AccountType } from "@midday/engine/src/utils/account";
 import {
   transformAccount,
   transformAccountBalance,
@@ -8,6 +9,7 @@ import {
 test("Transform pending transaction", () => {
   expect(
     transformTransaction({
+      accountType: AccountType.DEPOSITORY,
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -39,6 +41,7 @@ test("Transform pending transaction", () => {
 test("Transform card payment transaction", () => {
   expect(
     transformTransaction({
+      accountType: AccountType.DEPOSITORY,
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -70,6 +73,7 @@ test("Transform card payment transaction", () => {
 test("Transform income transaction", () => {
   expect(
     transformTransaction({
+      accountType: AccountType.DEPOSITORY,
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -101,6 +105,7 @@ test("Transform income transaction", () => {
 test("Transform type transfer", () => {
   expect(
     transformTransaction({
+      accountType: AccountType.CREDIT,
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -158,13 +163,8 @@ test("Transform accounts", () => {
 test("Transform account balance", () => {
   expect(
     transformAccountBalance({
-      links: {
-        self: "https://api.teller.io/accounts/acc_ospjn0u132lp2et08s000/balances",
-        account: "https://api.teller.io/accounts/acc_ospjn0u132lp2et08s000",
-      },
-      ledger: "99.41",
-      available: "99.41",
-      account_id: "acc_ospjn0u132lp2et08s000",
+      currency: "USD",
+      amount: 2011100,
     })
   ).toMatchSnapshot();
 });

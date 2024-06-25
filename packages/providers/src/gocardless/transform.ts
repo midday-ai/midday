@@ -1,3 +1,4 @@
+import { AccountType } from "@midday/engine/src/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -178,6 +179,7 @@ export const transformAccount = ({
       name: bank?.name,
     },
     provider: "gocardless",
+    type: AccountType.DEPOSITORY,
   };
 };
 
