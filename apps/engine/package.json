@@ -9,15 +9,15 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/swagger-ui": "^0.2.2",
+    "@hono/swagger-ui": "^0.3.0",
     "@hono/zod-openapi": "^0.14.5",
     "@hono/zod-validator": "^0.2.2",
-    "hono": "^4.4.7",
+    "hono": "^4.4.8",
     "xior": "^0.5.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240614.0",
+    "@cloudflare/workers-types": "^4.20240620.0",
     "wrangler": "^3.61.0"
   }
 }

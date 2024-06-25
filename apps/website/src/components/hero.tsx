@@ -2,15 +2,10 @@
 
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import Spline from "@splinetool/react-spline";
 import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-
-const Spline = dynamic(() => import("@splinetool/react-spline"), {
-  ssr: false,
-  loading: () => null,
-});
 
 export function Hero() {
   const [isPlaying, setPlaying] = useState(false);
