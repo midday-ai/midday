@@ -146,6 +146,7 @@ export function SelectBankAccountsModal({ countryCode }: Props) {
             bank_name: account.institution.name,
             currency: account.currency,
             enabled: false,
+            type: account.type,
           })),
         });
       }

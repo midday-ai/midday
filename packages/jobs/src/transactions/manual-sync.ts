@@ -25,7 +25,7 @@ client.defineJob({
     const { data: account } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, bank_connection:bank_connection_id(provider, access_token)"
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
       )
       .eq("id", payload.accountId)
       .eq("enabled", true)
@@ -47,6 +47,7 @@ client.defineJob({
       accountId: account.account_id,
       accessToken: access_token,
       bankAccountId: account.id,
+      accountType: account.type,
     });
 
     const formatted = transactions.map(({ category, ...rest }) => ({

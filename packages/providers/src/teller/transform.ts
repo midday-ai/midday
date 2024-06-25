@@ -107,7 +107,7 @@ export const transformTransaction = ({
     name: transaction.description && capitalCase(transaction.description),
     description: null,
     method,
-    internal_id: transaction.id,
+    internal_id: `${teamId}_${transaction.id}`,
     amount,
     currency: "USD",
     category: mapTransactionCategory({ transaction, amount }),

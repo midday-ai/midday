@@ -11,7 +11,7 @@ type CreateBankAccountsPayload = {
     bank_name: string;
     currency: string;
     enabled: boolean;
-    type: "depository" | "credit";
+    type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
   }[];
   balance: number;
   accessToken?: string;

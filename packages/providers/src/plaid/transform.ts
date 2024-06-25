@@ -145,7 +145,7 @@ export const transformTransaction = ({
       ? capitalCase(transaction.original_description)
       : null,
     method,
-    internal_id: transaction.transaction_id,
+    internal_id: `${teamId}_${transaction.transaction_id}`,
     amount,
     team_id: teamId,
     bank_account_id: bankAccountId,
