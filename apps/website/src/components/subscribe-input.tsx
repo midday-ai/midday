@@ -22,7 +22,7 @@ function SubmitButton() {
       type="submit"
       className="absolute right-2 h-7 bg-primary top-2 px-4 font-medium text-sm z-10 text-primary-foreground"
     >
-      Join
+      Subscribe
     </button>
   );
 }
@@ -59,7 +59,6 @@ export function SubscribeInput({ group }: Props) {
             action={async (formData) => {
               setSubmitted(true);
               await subscribeAction(formData, group);
-              const email = formData.get("email") as string;
 
               setTimeout(() => {
                 setSubmitted(false);

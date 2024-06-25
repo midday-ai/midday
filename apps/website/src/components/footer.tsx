@@ -108,12 +108,16 @@ export function Footer() {
           </div>
 
           <div className="md:w-6/12 flex mt-8 md:mt-0 md:justify-end">
-            <div className="flex justify-between md:items-end flex-col space-y-14">
-              <div className="flex items-start md:items-center flex-col md:flex-row space-y-6 md:space-y-0">
+            <div className="flex md:items-end flex-col">
+              <div className="flex items-start md:items-center flex-col md:flex-row space-y-6 md:space-y-0 mb-8">
                 <GithubStars />
                 <SocialLinks />
               </div>
-              <div className="md:mr-0 mr-auto">
+
+              <div className="mb-8">
+                <SubscribeInput group="news" />
+              </div>
+              <div className="md:mr-0 mt-auto mr-auto">
                 <StatusWidget />
               </div>
             </div>
