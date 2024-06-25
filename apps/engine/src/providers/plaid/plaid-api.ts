@@ -74,7 +74,10 @@ export class PlaidApi {
 
       const data: GetStatusResponse = await response.json();
 
-      return data.status.indicator === "none";
+      return (
+        data.status.indicator === "none" ||
+        data.status.indicator === "maintenance"
+      );
     } catch {
       return false;
     }
