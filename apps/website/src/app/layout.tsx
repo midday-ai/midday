@@ -15,10 +15,10 @@ import { baseUrl } from "./sitemap";
 
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
-const PublicBetaBanner = dynamic(
+const ProductHuntBanner = dynamic(
   () =>
-    import("@/components/public-beta-banner").then(
-      (mod) => mod.PublicBetaBanner
+    import("@/components/product-hunt-banner").then(
+      (mod) => mod.ProductHuntBanner
     ),
   {
     ssr: false,
@@ -77,7 +77,7 @@ export default function Layout({ children }: { children: ReactElement }) {
         <Footer />
         <Analytics />
         <DevMessage />
-        <PublicBetaBanner />
+        <ProductHuntBanner />
       </body>
     </html>
   );
