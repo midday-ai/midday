@@ -122,7 +122,7 @@ export const mapTransactionCategory = ({
     return "activity";
   }
 
-  return null;
+  return "uncategorized";
 };
 
 type TransformTransactionPayload = {

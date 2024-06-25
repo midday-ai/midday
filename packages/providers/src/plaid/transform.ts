@@ -121,7 +121,7 @@ export const mapTransactionCategory = ({
     return "activity";
   }
 
-  return null;
+  return "uncategorized";
 };
 
 export const transformTransaction = ({

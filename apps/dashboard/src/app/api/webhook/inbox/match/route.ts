@@ -56,7 +56,6 @@ export async function POST(req: Request) {
     .select("*")
     .eq("amount", Math.abs(body.record.amount))
     .eq("team_id", body.record.team_id)
-    .eq("trash", false)
     .gte("created_at", subDays(new Date(), 45).toISOString())
     .is("transaction_id", null);
 
