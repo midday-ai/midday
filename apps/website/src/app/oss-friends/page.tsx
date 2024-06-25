@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "OSS Friends",
+  description:
+    "We believe in a better and more sustainable future powered by Open Source software.",
 };
 
 type Friend = {

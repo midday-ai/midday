@@ -6,6 +6,8 @@ import engine from "public/engine-ui.png";
 
 export const metadata: Metadata = {
   title: "Engine",
+  description:
+    "Midday engine streamlines banking integrations with a single API effortlessly connecting to multiple providers and get one unified format.",
 };
 
 export default function Page() {

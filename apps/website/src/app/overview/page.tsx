@@ -6,6 +6,8 @@ import Spending from "public/product-spending.png";
 
 export const metadata: Metadata = {
   title: "Financial Overview",
+  description:
+    "Get real-time insight into your business's financial state. Keep track of your spending, income and overall financial health.",
 };
 
 export default function Page() {

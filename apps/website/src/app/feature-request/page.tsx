@@ -7,6 +7,8 @@ import { features } from "./features";
 
 export const metadata: Metadata = {
   title: "Feature Request",
+  description:
+    "Follow our roadmap and vote for what will be our next priority.",
 };
 
 export default async function Page() {

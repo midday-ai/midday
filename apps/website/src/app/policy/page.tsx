@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Policy",
+  description: "Privacy Policy",
 };
 
 export default function Page() {

@@ -22,6 +22,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Open Startup",
+  description:
+    "We value transparency and aim to keep you informed about our journey every step of the way.",
 };
 
 export default async function Page() {

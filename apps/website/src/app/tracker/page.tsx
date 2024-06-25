@@ -6,6 +6,8 @@ import Tracker from "public/product-tracker.jpg";
 
 export const metadata: Metadata = {
   title: "Time Tracker",
+  description:
+    "Track your projects time and gain insightful project overviews.",
 };
 
 export default function Page() {

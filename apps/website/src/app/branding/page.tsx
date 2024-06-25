@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Branding",
+  description: "Download branding assets, logo, screenshots and more.",
 };
 
 export default function Page() {

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Public Beta",
+  description: "Product Hunt Public beta launch",
 };
 
 export default function Page() {

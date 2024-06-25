@@ -18,7 +18,6 @@ export const env = createEnv({
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID: z.string(),
     PLAIN_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
-    GROQ_API_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
     UPSTASH_REDIS_REST_URL: z.string(),
@@ -76,7 +75,6 @@ export const env = createEnv({
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
-    GROQ_API_KEY: process.env.GROQ_API_KEY,
     PLAIN_API_KEY: process.env.PLAIN_API_KEY,
     GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:

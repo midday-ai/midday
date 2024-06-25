@@ -5,6 +5,7 @@ import founders from "public/founders.png";
 
 export const metadata: Metadata = {
   title: "Story",
+  description: "This is why we’re building Midday.",
 };
 
 export default function Page() {

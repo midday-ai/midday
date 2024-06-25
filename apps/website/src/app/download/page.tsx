@@ -7,6 +7,8 @@ import appIcon from "public/app-icon.png";
 
 export const metadata: Metadata = {
   title: "Download",
+  description:
+    "With Midday on Mac you have everything accessible just one click away.",
 };
 
 export default function Page() {

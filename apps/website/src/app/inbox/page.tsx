@@ -7,6 +7,8 @@ import Receipt from "public/product-receipt.png";
 
 export const metadata: Metadata = {
   title: "Inbox",
+  description:
+    "Automatically match incoming invoices or receipts to the correct transaction.",
 };
 
 export default function Page() {

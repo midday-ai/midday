@@ -11,6 +11,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pricing",
+  description: "Midday's pricing",
 };
 
 export default function Page() {

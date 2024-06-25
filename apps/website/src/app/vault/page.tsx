@@ -6,6 +6,8 @@ import Vault from "public/product-vault.jpg";
 
 export const metadata: Metadata = {
   title: "Vault",
+  description:
+    "Don’t waste time searching through old emails and random folders. Keep all your contracts, agreements and more safe in one place.",
 };
 
 export default function Page() {
