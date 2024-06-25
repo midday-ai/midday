@@ -41,7 +41,9 @@ export async function SpendingList({ initialPeriod, disabled }) {
   if (!spending?.data?.length) {
     return (
       <div className="flex items-center justify-center aspect-square">
-        <p className="text-sm text-[#606060]">No transactions found</p>
+        <p className="text-sm text-[#606060]">
+          No transactions have been categorized yet.
+        </p>
       </div>
     );
   }

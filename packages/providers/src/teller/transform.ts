@@ -85,7 +85,7 @@ export const mapTransactionCategory = ({
     case "electronics":
       return "equipment";
     default:
-      return "uncategorized";
+      return null;
   }
 };
 
