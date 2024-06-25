@@ -88,7 +88,7 @@ client.defineJob({
       .from("bank_accounts")
       .update({
         last_accessed: new Date().toISOString(),
-        balance,
+        balance: balance?.amount,
       })
       .eq("id", account.id);
 
