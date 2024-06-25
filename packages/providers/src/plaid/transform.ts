@@ -1,5 +1,4 @@
 import {
-  AccountType,
   formatAmountForAsset,
   getType,
 } from "@midday/engine/src/utils/account";
@@ -178,11 +177,9 @@ export const transformAccount = ({
 };
 
 export const transformAccountBalance = (
-  account: TransformAccountBalance
+  balances?: TransformAccountBalance
 ): BaseBalance => ({
   currency:
-    account?.balances.iso_currency_code ||
-    account?.balances.unofficial_currency_code ||
-    "USD",
-  amount: account?.balances?.available ?? 0,
+    balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
+  amount: balances?.available ?? 0,
 });

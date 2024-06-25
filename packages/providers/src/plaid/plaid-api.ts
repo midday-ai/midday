@@ -42,11 +42,12 @@ export class PlaidApi {
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse | undefined> {
     const accounts = await this.#client.accountsGet({
       access_token: accessToken,
+      options: {
+        account_ids: [accountId],
+      },
     });
 
-    return accounts.data.accounts.find(
-      (account) => account?.account_id === accountId
-    );
+    return accounts.data.accounts.at(0)?.balances;
   }
 
   async getAccounts({

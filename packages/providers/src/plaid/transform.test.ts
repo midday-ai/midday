@@ -251,19 +251,11 @@ test("Transform accounts", () => {
 test("Transform account balance", () => {
   expect(
     transformAccountBalance({
-      account_id: "23rjf23fkqd13r23rfwef",
-      balances: {
-        available: 2000,
-        current: 0,
-        iso_currency_code: "USD",
-        limit: null,
-        unofficial_currency_code: null,
-      },
-      mask: "0174",
-      name: "Mercury Savings",
-      official_name: "Mercury Savings",
-      subtype: "savings",
-      type: "depository",
+      available: 2000,
+      current: 0,
+      iso_currency_code: "USD",
+      limit: null,
+      unofficial_currency_code: null,
     })
   ).toMatchSnapshot();
 });
