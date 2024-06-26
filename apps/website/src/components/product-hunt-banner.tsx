@@ -5,12 +5,11 @@ import { Icons } from "@midday/ui/icons";
 import { useLocalStorage } from "@uidotdev/usehooks";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { CountdownSmall } from "./countdown-small";
 
-export function PublicBetaBanner() {
+export function ProductHuntBanner() {
   const [isOpen, setOpen] = useState(false);
   const [showBanner, saveShowBanner] = useLocalStorage(
-    "show-public-beta-banner",
+    "show-product-hunt-banner",
     true
   );
 
@@ -33,14 +32,14 @@ export function PublicBetaBanner() {
 
   return (
     <a
-      href="https://go.midday.ai/htI3aDs"
+      href="https://go.midday.ai/ph"
       target="_blank"
       rel="noreferrer"
       onClick={handleOnClose}
     >
       <div
         className={cn(
-          "fixed z-50 bottom-2 md:bottom-4 right-2 md:right-4 w-[calc(100vw-16px)] max-w-[450px] border border-border p-4 transition-all bg-background h-[88px] group",
+          "fixed z-50 bottom-2 md:bottom-4 right-2 md:right-4 w-[calc(100vw-16px)] max-w-[350px] border border-border p-4 transition-all bg-background h-[88px] group",
           isOpen && "animate-in slide-in-from-bottom-full"
         )}
       >
@@ -53,13 +52,19 @@ export function PublicBetaBanner() {
         />
 
         <div className="flex justify-between">
-          <div className="flex flex-col space-y-0.5 pl-[40px] md:border-border md:border-r-[1px] pr-4">
-            <span className="text-sm font-medium">
-              Midday Public Beta Launch
-            </span>
+          <div className="flex flex-col space-y-0.5 pl-[40px]">
+            <div className="flex space-x-2 items-center">
+              <span className="text-sm font-medium">
+                We're live on Product Hunt!
+              </span>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-green-400" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500" />
+              </span>
+            </div>
             <p className="text-xs text-[#878787]">
-              We are launching on ProductHunt, stay <br />
-              up to date with our launch.
+              Join the conversation and help us get to #1 <br /> Product of the
+              Day ↗
             </p>
           </div>
 
@@ -70,10 +75,6 @@ export function PublicBetaBanner() {
           >
             <Icons.Close />
           </button>
-
-          <div className="hidden md:block mt-1.5">
-            <CountdownSmall />
-          </div>
         </div>
       </div>
     </a>
