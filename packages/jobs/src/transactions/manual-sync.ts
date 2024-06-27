@@ -78,7 +78,7 @@ client.defineJob({
       throw Error("Something went wrong");
     }
 
-    const balance = await provider.getAccountBalance({
+    const balance = await api.getAccountBalance({
       accountId: account.account_id,
       accessToken: account.bank_connection?.access_token,
     });
