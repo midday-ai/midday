@@ -65,7 +65,6 @@ client.defineJob({
           .from("transactions")
           .upsert(batch, {
             onConflict: "internal_id",
-            ignoreDuplicates: true,
           })
           .select();
       }
