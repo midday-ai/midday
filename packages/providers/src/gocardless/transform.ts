@@ -45,6 +45,14 @@ export const mapTransactionMethod = (type?: string) => {
 };
 
 export const transformTransactionName = (transaction: Transaction) => {
+  if (transaction?.creditorName) {
+    return capitalCase(transaction.creditorName);
+  }
+
+  if (transaction?.debtorName) {
+    return capitalCase(transaction?.debtorName);
+  }
+
   if (transaction?.additionalInformation) {
     return capitalCase(transaction.additionalInformation);
   }
@@ -55,14 +63,6 @@ export const transformTransactionName = (transaction: Transaction) => {
 
   if (transaction?.remittanceInformationUnstructured) {
     return capitalCase(transaction.remittanceInformationUnstructured);
-  }
-
-  if (transaction?.creditorName) {
-    return capitalCase(transaction.creditorName);
-  }
-
-  if (transaction?.debtorName) {
-    return capitalCase(transaction?.debtorName);
   }
 
   const remittanceInformation =
@@ -90,6 +90,10 @@ const transformDescription = ({
     if (description !== name) {
       return description;
     }
+  }
+
+  if (transaction.additionalInformation !== name) {
+    return transaction.additionalInformation;
   }
 
   return null;
