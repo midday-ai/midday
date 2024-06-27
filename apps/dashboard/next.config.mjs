@@ -40,6 +40,19 @@ const config = {
 
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default withBundleAnalyzer(config);
