@@ -9,22 +9,10 @@ import { Provider as Analytics } from "@midday/events/client";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import dynamic from "next/dynamic";
 import type { ReactElement } from "react";
 import { baseUrl } from "./sitemap";
 
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
-
-const ProductHuntBanner = dynamic(
-  () =>
-    import("@/components/product-hunt-banner").then(
-      (mod) => mod.ProductHuntBanner
-    ),
-  {
-    ssr: false,
-    loading: () => null,
-  }
-);
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -77,7 +65,6 @@ export default function Layout({ children }: { children: ReactElement }) {
         <Footer />
         <Analytics />
         <DevMessage />
-        <ProductHuntBanner />
       </body>
     </html>
   );

@@ -23,6 +23,11 @@ const config = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/public-beta",
+        destination: "/",
+        permanent: true,
+      },
     ];
   },
 };
