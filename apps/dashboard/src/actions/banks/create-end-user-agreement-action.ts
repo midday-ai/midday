@@ -23,7 +23,7 @@ export const createEndUserAgreementAction = action(
 
     const url = `${protocol}://${domain}`;
     const redirectBase = isDesktop ? "midday://" : url;
-    const redirectTo = decodeURIComponent(
+    const redirectTo = encodeURIComponent(
       `${redirectBase}/${pathname}?step=account&provider=gocardless`
     );
 
