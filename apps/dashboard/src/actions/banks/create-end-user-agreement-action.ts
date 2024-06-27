@@ -23,7 +23,9 @@ export const createEndUserAgreementAction = action(
 
     const url = `${protocol}://${domain}`;
     const redirectBase = isDesktop ? "midday://" : url;
-    const redirectTo = `${redirectBase}/${pathname}?step=account&provider=gocardless`;
+    const redirectTo = decodeURIComponent(
+      `${redirectBase}/${pathname}?step=account&provider=gocardless`
+    );
 
     const { link } = await api.buildLink({
       redirect: redirectTo,

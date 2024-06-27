@@ -250,7 +250,7 @@ export function SelectBankAccountsModal({ countryCode }: Props) {
                       />
                     ))}
 
-                    <div className="fixed bottom-6 left-6 right-6 z-10 bg-background pt-4">
+                    <div className="fixed bottom-0 left-0 right-0 z-10 bg-background pt-4 px-6 pb-6">
                       <Button
                         className="w-full"
                         type="submit"
