@@ -89,23 +89,31 @@ export const mapTransactionCategory = ({
   }
 };
 
+export const transformDescription = (transaction: Transaction) => {
+  const description =
+    transaction?.details?.counterparty?.name &&
+    capitalCase(transaction.details.counterparty.name);
+
+  if (transaction.description !== description && description) {
+    return capitalCase(description);
+  }
+
+  return null;
+};
+
 export const transformTransaction = ({
   transaction,
   teamId,
   bankAccountId,
-  accountType,
 }: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
-
-  const amount = formatAmountForAsset({
-    amount: +transaction.amount,
-    type: accountType,
-  });
+  const amount = +transaction.amount;
+  const description = transformDescription(transaction);
 
   return {
     date: transaction.date,
     name: transaction.description && capitalCase(transaction.description),
-    description: null,
+    description,
     method,
     internal_id: `${teamId}_${transaction.id}`,
     amount,
