@@ -1,8 +1,4 @@
-import {
-  type AccountType,
-  formatAmountForAsset,
-  getType,
-} from "@/utils/account";
+import { getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -98,6 +94,7 @@ export const transformTransaction = ({
 }: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
   const amount = +transaction.amount;
+  const name = capitalCase(transaction.description);
   const description =
     (transaction?.details?.counterparty?.name &&
       capitalCase(transaction.details.counterparty.name)) ||
@@ -105,7 +102,7 @@ export const transformTransaction = ({
 
   return {
     date: transaction.date,
-    name: transaction.description && capitalCase(transaction.description),
+    name,
     description,
     method,
     internal_id: transaction.id,

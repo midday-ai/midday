@@ -31,7 +31,7 @@ test("Transform pending transaction", () => {
         },
         description: "Online Check Deposit",
         date: "2024-03-05",
-        amount: "83.62",
+        amount: "-83.62",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
     })
@@ -95,7 +95,7 @@ test("Transform income transaction", () => {
         },
         description: "Exxon Mobil",
         date: "2024-03-03",
-        amount: "-20.21",
+        amount: "1000000",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
     })

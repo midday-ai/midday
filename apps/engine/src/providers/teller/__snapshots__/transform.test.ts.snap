@@ -1,5 +1,65 @@
 // Bun Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Transform pending transaction 1`] = `
+{
+  "amount": 83.62,
+  "balance": null,
+  "category": "income",
+  "currency": "USD",
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "internal_id": "txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Online Check Deposit",
+  "status": "pending",
+}
+`;
+
+exports[`Transform card payment transaction 1`] = `
+{
+  "amount": -68.9,
+  "balance": "83431.46",
+  "category": null,
+  "currency": "USD",
+  "date": "2024-03-01",
+  "description": "Nordstrom",
+  "internal_id": "txn_os41r5u90e29shubl2005",
+  "method": "card_purchase",
+  "name": "Nordstrom",
+  "status": "posted",
+}
+`;
+
+exports[`Transform income transaction 1`] = `
+{
+  "amount": -20.21,
+  "balance": "83296.40",
+  "category": null,
+  "currency": "USD",
+  "date": "2024-03-03",
+  "description": "Exxon Mobil",
+  "internal_id": "txn_os41r5u90e29shubl2002",
+  "method": "card_purchase",
+  "name": "Exxon Mobil",
+  "status": "posted",
+}
+`;
+
+exports[`Transform type transfer 1`] = `
+{
+  "amount": -37.99,
+  "balance": "85897.25",
+  "category": "transfer",
+  "currency": "USD",
+  "date": "2024-01-27",
+  "description": "Yourself",
+  "internal_id": "txn_os41r5ua0e29shubl2001",
+  "method": "transfer",
+  "name": "Recurring Transfer To Savings",
+  "status": "posted",
+}
+`;
+
 exports[`Transform accounts 1`] = `
 {
   "currency": "USD",

@@ -1,7 +1,4 @@
-import {
-  formatAmountForAsset,
-  getType,
-} from "@midday/engine/src/utils/account";
+import { getType } from "@midday/engine/src/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,

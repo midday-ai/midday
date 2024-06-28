@@ -1,8 +1,4 @@
-import {
-  type AccountType,
-  formatAmountForAsset,
-  getType,
-} from "@/utils/account";
+import { type AccountType, getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type { Transaction, TransactionCode } from "plaid";
 import type {
@@ -125,6 +121,27 @@ export const mapTransactionCategory = ({
   return null;
 };
 
+const formatAmout = (amount: number) => {
+  // Positive values when money moves out of the account; negative values when money moves in.
+  // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
+  return +(amount * -1);
+};
+
+const transformDescription = (transaction: Transaction) => {
+  if (transaction?.original_description) {
+    return capitalCase(transaction.original_description);
+  }
+
+  if (
+    transaction?.merchant_name &&
+    transaction?.merchant_name !== transaction.name
+  ) {
+    return transaction?.merchant_name;
+  }
+
+  return null;
+};
+
 type TransformTransactionPayload = {
   transaction: TransformTransaction;
   accountType: AccountType;
@@ -132,24 +149,17 @@ type TransformTransactionPayload = {
 
 export const transformTransaction = ({
   transaction,
-  accountType,
 }: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(transaction?.transaction_code);
-
-  const amount = formatAmountForAsset({
-    amount: transaction.amount,
-    type: accountType,
-  });
+  const amount = formatAmout(transaction.amount);
 
   return {
     date: transaction.date,
     name: transaction.name,
-    description: transaction?.original_description
-      ? capitalCase(transaction.original_description)
-      : null,
+    description: transformDescription(transaction),
     method,
     internal_id: transaction.transaction_id,
-    amount,
+    amount: formatAmout(amount),
     currency:
       transaction.iso_currency_code ||
       transaction.unofficial_currency_code ||
