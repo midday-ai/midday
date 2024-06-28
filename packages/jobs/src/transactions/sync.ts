@@ -84,6 +84,7 @@ client.defineJob({
           .from("transactions")
           .upsert(transactions, {
             onConflict: "internal_id",
+            ignoreDuplicates: true,
           })
           .select("*");
 

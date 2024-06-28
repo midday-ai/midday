@@ -82,6 +82,9 @@ export class PlaidApi {
     if (latest) {
       const { data } = await this.#client.transactionsSync({
         access_token: accessToken,
+        options: {
+          days_requested: 730,
+        },
         count: 500,
       });
 
