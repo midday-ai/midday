@@ -76,7 +76,7 @@ test("Transform pending transaction", () => {
   ).toMatchSnapshot();
 });
 
-test.only("Transform income transaction", () => {
+test("Transform income transaction", () => {
   expect(
     transformTransaction({
       accountType: "depository",
@@ -156,7 +156,7 @@ test("Transform type transfer", () => {
       transaction: {
         account_id: "AG7EkLW7DRSVaN8Z75jMT1DJN51QpWc9LKB7w",
         account_owner: null,
-        amount: 5.4,
+        amount: 31.53,
         authorized_date: "2024-02-23",
         authorized_datetime: null,
         category: ["Travel", "Taxi"],

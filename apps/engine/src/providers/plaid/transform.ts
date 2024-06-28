@@ -159,7 +159,7 @@ export const transformTransaction = ({
     description: transformDescription(transaction),
     method,
     internal_id: transaction.transaction_id,
-    amount: formatAmout(amount),
+    amount,
     currency:
       transaction.iso_currency_code ||
       transaction.unofficial_currency_code ||

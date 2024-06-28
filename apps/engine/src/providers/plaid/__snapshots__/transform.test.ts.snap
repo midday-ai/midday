@@ -2,7 +2,7 @@
 
 exports[`Transform pending transaction 1`] = `
 {
-  "amount": 5.4,
+  "amount": -5.4,
   "balance": null,
   "category": "travel",
   "currency": "CAD",
@@ -17,7 +17,7 @@ exports[`Transform pending transaction 1`] = `
 
 exports[`Transform income transaction 1`] = `
 {
-  "amount": 1500,
+  "amount": -1500,
   "balance": null,
   "category": "travel",
   "currency": "CAD",
@@ -27,5 +27,42 @@ exports[`Transform income transaction 1`] = `
   "method": "other",
   "name": "United Airlines",
   "status": "posted",
+}
+`;
+
+exports[`Transform type transfer 1`] = `
+{
+  "amount": -31.53,
+  "balance": null,
+  "category": "transfer",
+  "currency": "CAD",
+  "date": "2024-02-24",
+  "description": "Uber",
+  "internal_id": "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
+  "method": "transfer",
+  "name": "Uber 063015 SF**POOL**",
+  "status": "pending",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "currency": "CAD",
+  "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
+  "institution": {
+    "id": "ins_100546",
+    "logo": null,
+    "name": "American Funds Retirement Solutions",
+  },
+  "name": "Plaid Mortgage",
+  "provider": "plaid",
+  "type": "other_asset",
+}
+`;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 2000,
+  "currency": "USD",
 }
 `;
