@@ -46,7 +46,7 @@ export class TellerApi {
     const transactions = await this.getTransactions({
       accountId,
       accessToken,
-      count: 1,
+      count: 2,
     });
 
     return {
