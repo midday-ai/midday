@@ -91,24 +91,22 @@ export const mapTransactionCategory = ({
 
 type TransformTransactionPayload = {
   transaction: TransformTransaction;
-  accountType: AccountType;
 };
 
 export const transformTransaction = ({
   transaction,
-  accountType,
 }: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
-
-  const amount = formatAmountForAsset({
-    amount: +transaction.amount,
-    type: accountType,
-  });
+  const amount = +transaction.amount;
+  const description =
+    (transaction?.details?.counterparty?.name &&
+      capitalCase(transaction.details.counterparty.name)) ||
+    null;
 
   return {
     date: transaction.date,
     name: transaction.description && capitalCase(transaction.description),
-    description: null,
+    description,
     method,
     internal_id: transaction.id,
     amount,
