@@ -2,10 +2,10 @@
 
 exports[`Transform pending transaction 1`] = `
 {
-  "amount": 83.62,
+  "amount": -83.62,
   "balance": null,
   "bank_account_id": "123",
-  "category": "income",
+  "category": null,
   "currency": "USD",
   "date": "2024-03-05",
   "description": "Bank Of Many",
@@ -36,10 +36,10 @@ exports[`Transform card payment transaction 1`] = `
 
 exports[`Transform income transaction 1`] = `
 {
-  "amount": -20.21,
+  "amount": 1000000,
   "balance": "83296.40",
   "bank_account_id": "123",
-  "category": null,
+  "category": "income",
   "currency": "USD",
   "date": "2024-03-03",
   "description": null,
