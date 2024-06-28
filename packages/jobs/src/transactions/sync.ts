@@ -76,20 +76,26 @@ client.defineJob({
           return null;
         }
 
-        const { error: transactionsError, data: transactionsData } =
-          await supabase
-            .from("transactions")
-            .upsert(transactions, {
-              onConflict: "internal_id",
-              ignoreDuplicates: true,
-            })
-            .select("*");
+        const {
+          error: transactionsError,
+          data: transactionsData,
+          statusText,
+        } = await supabase
+          .from("transactions")
+          .upsert(transactions, {
+            onConflict: "internal_id",
+          })
+          .select("*");
 
         if (transactionsError) {
           await io.logger.error("Transactions error", transactionsError);
         }
 
-        if (transactionsData && transactionsData?.length > 0) {
+        if (
+          statusText === "Created" &&
+          transactionsData &&
+          transactionsData?.length > 0
+        ) {
           await io.sendEvent("🔔 Send notifications", {
             name: Events.TRANSACTIONS_NOTIFICATION,
             payload: {
