@@ -1,5 +1,7 @@
 // Thank you: https://github.com/maybe-finance/maybe-archive/blob/04bf3d135bdbb1fdaa2dd669dca4738c797cc382/libs/teller-api/src/types/accounts.ts
 
+import type { AccountType } from "@/utils/account";
+
 export type DetailCategory =
   | "accommodation"
   | "advertising"
@@ -123,8 +125,6 @@ export type Account = DepositoryAccount | CreditAccount;
 
 export type GetAccountsResponse = Account[];
 
-export type TransformTransaction = Transaction;
-
 export type TransformAccount = Account;
 
 export interface GetAccountBalanceRequest extends AuthenticatedRequest {
@@ -134,4 +134,16 @@ export interface GetAccountBalanceRequest extends AuthenticatedRequest {
 export type GetAccountBalanceResponse = {
   currency: string;
   amount: number;
+};
+
+export type TransformTransaction = {
+  transaction: Transaction;
+  teamId: string;
+  bankAccountId: string;
+  accountType: AccountType;
+};
+
+export type FormatAmount = {
+  amount: number;
+  accountType: AccountType;
 };
