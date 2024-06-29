@@ -1,10 +1,11 @@
-import { getType } from "@/utils/account";
+import { AccountType, getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
   Transaction as BaseTransaction,
 } from "../types";
 import type {
+  FormatAmount,
   Transaction,
   TransformAccount,
   TransformTransaction,
@@ -85,24 +86,41 @@ export const mapTransactionCategory = ({
   }
 };
 
-type TransformTransactionPayload = {
-  transaction: TransformTransaction;
+export const transformDescription = (transaction: Transaction) => {
+  const description =
+    transaction?.details?.counterparty?.name &&
+    capitalCase(transaction.details.counterparty.name);
+
+  if (transaction.description !== description && description) {
+    return capitalCase(description);
+  }
+
+  return null;
+};
+
+const formatAmout = ({ amount, accountType }: FormatAmount) => {
+  // NOTE: For account credit positive values when money moves out of the account; negative values when money moves in.
+  if (accountType === AccountType.CREDIT) {
+    return +(amount * -1);
+  }
+
+  return +amount;
 };
 
 export const transformTransaction = ({
   transaction,
-}: TransformTransactionPayload): BaseTransaction => {
+  accountType,
+}: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
-  const amount = +transaction.amount;
-  const name = capitalCase(transaction.description);
-  const description =
-    (transaction?.details?.counterparty?.name &&
-      capitalCase(transaction.details.counterparty.name)) ||
-    null;
+  const description = transformDescription(transaction);
+  const amount = formatAmout({
+    amount: +transaction.amount,
+    accountType,
+  });
 
   return {
     date: transaction.date,
-    name,
+    name: transaction.description && capitalCase(transaction.description),
     description,
     method,
     internal_id: transaction.id,

@@ -96,8 +96,8 @@ const transformDescription = ({
     transaction.additionalInformation &&
     capitalCase(transaction.additionalInformation);
 
-  if (additionalInformation !== name) {
-    return additionalInformation;
+  if (transaction?.additionalInformation && additionalInformation !== name) {
+    return capitalCase(transaction.additionalInformation);
   }
 
   return null;

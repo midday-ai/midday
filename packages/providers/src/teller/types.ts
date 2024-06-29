@@ -127,6 +127,11 @@ export type TransformTransaction = {
   accountType: AccountType;
 };
 
+export type FormatAmount = {
+  amount: number;
+  accountType: AccountType;
+};
+
 export type TransformAccount = Account;
 
 export interface GetAccountBalanceRequest extends AuthenticatedRequest {

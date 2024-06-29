@@ -17,6 +17,23 @@ exports[`Transform pending transaction 1`] = `
 }
 `;
 
+exports[`Transform pending transaction 2`] = `
+{
+  "amount": -29,
+  "balance": null,
+  "bank_account_id": "123",
+  "category": null,
+  "currency": "USD",
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "internal_id": "123_txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Technology",
+  "status": "pending",
+  "team_id": "123",
+}
+`;
+
 exports[`Transform card payment transaction 1`] = `
 {
   "amount": -68.9,

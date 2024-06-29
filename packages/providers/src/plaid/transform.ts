@@ -128,14 +128,16 @@ const formatAmout = (amount: number) => {
 };
 
 const transformDescription = (transaction: Transaction) => {
-  if (transaction?.original_description) {
+  const name = capitalCase(transaction.name);
+
+  if (
+    transaction?.original_description &&
+    transaction.original_description !== name
+  ) {
     return capitalCase(transaction.original_description);
   }
 
-  if (
-    transaction?.merchant_name &&
-    transaction?.merchant_name !== transaction.name
-  ) {
+  if (transaction?.merchant_name && transaction?.merchant_name !== name) {
     return transaction?.merchant_name;
   }
 
@@ -149,10 +151,11 @@ export const transformTransaction = ({
 }: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction?.transaction_code);
   const amount = formatAmout(+transaction.amount);
+  const name = capitalCase(transaction.name);
 
   return {
     date: transaction.date,
-    name: transaction.name,
+    name,
     description: transformDescription(transaction),
     method,
     internal_id: `${teamId}_${transaction.transaction_id}`,

@@ -11,7 +11,7 @@ exports[`Transform pending transaction 1`] = `
   "description": "Uber",
   "internal_id": "123_NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
   "method": "other",
-  "name": "Uber 063015 SF**POOL**",
+  "name": "Uber 063015 Sf Pool",
   "status": "pending",
   "team_id": "123",
 }
@@ -45,7 +45,7 @@ exports[`Transform type transfer 1`] = `
   "description": "Uber",
   "internal_id": "123_NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
   "method": "transfer",
-  "name": "Uber 063015 SF**POOL**",
+  "name": "Uber 063015 Sf Pool",
   "status": "pending",
   "team_id": "123",
 }

@@ -1,4 +1,4 @@
-import { getType } from "@midday/engine/src/utils/account";
+import { AccountType, getType } from "@midday/engine/src/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -6,6 +6,7 @@ import type {
   Transaction as BaseTransaction,
 } from "../types";
 import type {
+  FormatAmount,
   Transaction,
   TransformAccount,
   TransformAccountBalance,
@@ -38,6 +39,7 @@ export const mapTransactionMethod = (type?: string) => {
       return "other";
   }
 };
+
 type MapTransactionCategory = {
   transaction: Transaction;
   amount: number;
@@ -98,14 +100,27 @@ export const transformDescription = (transaction: Transaction) => {
   return null;
 };
 
+const formatAmout = ({ amount, accountType }: FormatAmount) => {
+  // NOTE: For account credit positive values when money moves out of the account; negative values when money moves in.
+  if (accountType === AccountType.CREDIT) {
+    return +(amount * -1);
+  }
+
+  return +amount;
+};
+
 export const transformTransaction = ({
   transaction,
   teamId,
   bankAccountId,
+  accountType,
 }: TransformTransaction): BaseTransaction => {
   const method = mapTransactionMethod(transaction.type);
-  const amount = +transaction.amount;
   const description = transformDescription(transaction);
+  const amount = formatAmout({
+    amount: +transaction.amount,
+    accountType,
+  });
 
   return {
     date: transaction.date,
