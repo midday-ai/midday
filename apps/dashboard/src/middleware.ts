@@ -34,6 +34,8 @@ export async function middleware(request: NextRequest) {
     }
   );
 
+  const { data } = await supabase.auth.getUser();
+
   const url = new URL("/", request.url);
   const nextUrl = request.nextUrl;
 
@@ -47,11 +49,9 @@ export async function middleware(request: NextRequest) {
   // Create a new URL without the locale in the pathname
   const newUrl = new URL(pathnameWithoutLocale || "/", request.url);
 
-  const { data } = await supabase.auth.getUser();
-
   // Not authenticated
   if (
-    !data &&
+    !data?.user &&
     newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/report") &&
     !newUrl.pathname.includes("/setup")
@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
   // If authenticated but no full_name redirect to user setup page
   if (
     newUrl.pathname !== "/setup" &&
-    data &&
+    data?.user &&
     !data?.user?.user_metadata?.full_name
   ) {
     return NextResponse.redirect(`${url.origin}/setup`);
