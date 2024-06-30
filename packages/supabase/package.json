@@ -16,14 +16,13 @@
     "supabase": "^1.178.2"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.43.6",
+    "@supabase/supabase-js": "^2.44.2",
     "typescript": "^5.5.2"
   },
   "exports": {
     "./server": "./src/client/server.ts",
     "./client": "./src/client/client.ts",
     "./mutations": "./src/mutations/index.ts",
-    "./middleware": "./src/client/middleware.ts",
     "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",

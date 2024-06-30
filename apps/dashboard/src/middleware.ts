@@ -1,5 +1,4 @@
-import { updateSession } from "@midday/supabase/middleware";
-import { createClient } from "@midday/supabase/server";
+import { createServerClient } from "@supabase/ssr";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -10,8 +9,31 @@ const I18nMiddleware = createI18nMiddleware({
 });
 
 export async function middleware(request: NextRequest) {
-  const response = await updateSession(request, I18nMiddleware(request));
-  const supabase = createClient();
+  let supabaseResponse = I18nMiddleware(request);
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          for (const { name, value } of cookiesToSet) {
+            request.cookies.set(name, value);
+          }
+
+          supabaseResponse = I18nMiddleware(request);
+
+          for (const { name, value, options } of cookiesToSet) {
+            supabaseResponse.cookies.set(name, value, options);
+          }
+        },
+      },
+    }
+  );
+
   const url = new URL("/", request.url);
   const nextUrl = request.nextUrl;
 
@@ -25,13 +47,11 @@ export async function middleware(request: NextRequest) {
   // Create a new URL without the locale in the pathname
   const newUrl = new URL(pathnameWithoutLocale || "/", request.url);
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getUser();
 
   // Not authenticated
   if (
-    !session &&
+    !data &&
     newUrl.pathname !== "/login" &&
     !newUrl.pathname.includes("/report") &&
     !newUrl.pathname.includes("/setup")
@@ -52,8 +72,8 @@ export async function middleware(request: NextRequest) {
   // If authenticated but no full_name redirect to user setup page
   if (
     newUrl.pathname !== "/setup" &&
-    session &&
-    !session?.user?.user_metadata?.full_name
+    data &&
+    !data?.user?.user_metadata?.full_name
   ) {
     return NextResponse.redirect(`${url.origin}/setup`);
   }
@@ -71,7 +91,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(`${url.origin}/mfa/verify`);
   }
 
-  return response;
+  return supabaseResponse;
 }
 
 export const config = {
