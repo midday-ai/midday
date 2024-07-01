@@ -8,7 +8,7 @@ import { createEndUserAgreementSchema } from "../schema";
 
 export const createEndUserAgreementAction = action(
   createEndUserAgreementSchema,
-  async ({ institutionId, transactionTotalDays, isDesktop }) => {
+  async ({ institutionId, transactionTotalDays, countryCode, isDesktop }) => {
     const api = new GoCardLessApi();
     const headersList = headers();
 
@@ -23,7 +23,7 @@ export const createEndUserAgreementAction = action(
 
     const url = `${protocol}://${domain}`;
     const redirectBase = isDesktop ? "midday://" : url;
-    const redirectTo = `${redirectBase}/${pathname}?step=account&provider=gocardless`;
+    const redirectTo = `${redirectBase}/${pathname}?step=account&countryCode=${countryCode}&provider=gocardless`;
 
     const { link } = await api.buildLink({
       redirect: redirectTo,
