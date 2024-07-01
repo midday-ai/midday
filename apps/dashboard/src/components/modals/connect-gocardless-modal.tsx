@@ -197,6 +197,7 @@ export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
                           institutionId: bank.id,
                           isDesktop: isDesktopApp(),
                           transactionTotalDays: +bank.transaction_total_days,
+                          countryCode,
                         });
                       }}
                     />
