@@ -10,5 +10,4 @@ export const Cookies = {
   TrackingConsent: "tracking-consent",
   ChartCurrency: "chart-currency",
   InboxOrder: "inbox-order",
-  CountryCode: "country-code",
 };

@@ -1,14 +1,12 @@
 import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
-import { Cookies } from "@/utils/constants";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode, isEUCountry } from "@midday/location";
 import { currencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const AssistantModal = dynamic(
@@ -86,9 +84,7 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const user = await getUser();
-  const countryCode = cookies().has(Cookies.CountryCode)
-    ? cookies().get(Cookies.CountryCode)?.value
-    : getCountryCode();
+  const countryCode = getCountryCode();
 
   const isEU = isEUCountry(countryCode);
 
@@ -113,7 +109,7 @@ export default async function Layout({
         <AssistantModal />
         <ConnectTransactionsModal isEU={isEU} />
         <ConnectGoCardLessModal countryCode={countryCode} />
-        <SelectBankAccountsModal countryCode={countryCode} />
+        <SelectBankAccountsModal />
         <ImportCSVModal
           currencies={uniqueCurrencies()}
           defaultCurrency={currencies[countryCode]}

@@ -2,7 +2,6 @@
 
 import { createEndUserAgreementAction } from "@/actions/banks/create-end-user-agreement-action";
 import { getBanks } from "@/actions/banks/get-banks";
-import { changeCountryCodeAction } from "@/actions/change-country-code-action";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -98,18 +97,16 @@ function Row({ id, name, logo, onSelect }) {
 }
 
 export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
-  const [countryCode, setCountryCode] = useState(initialCountryCode);
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
 
-  const changeCountryCode = useAction(changeCountryCodeAction, {
-    onSuccess: (value) => setCountryCode(value),
-  });
-
   const createEndUserAgreement = useAction(createEndUserAgreementAction);
 
   const [step, setStep] = useQueryState("step");
+  const [countryCode, setCountryCode] = useQueryState("contryCode", {
+    defaultValue: initialCountryCode,
+  });
 
   const isOpen = step === "gocardless";
 
@@ -182,7 +179,7 @@ export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
 
                 <CountrySelector
                   defaultValue={countryCode}
-                  onSelect={changeCountryCode.execute}
+                  onSelect={setCountryCode}
                 />
               </div>
 
