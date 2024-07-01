@@ -32,6 +32,7 @@ import {
   parseAsStringEnum,
   useQueryStates,
 } from "nuqs";
+import queryString from "query-string";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
@@ -68,7 +69,7 @@ export function SelectBankAccountsModal({ countryCode }: Props) {
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
 
-  const [params, setParams] = useQueryStates({
+  const [_, setParams] = useQueryStates({
     step: parseAsStringEnum(["connect", "account", "gocardless"]),
     error: parseAsBoolean,
     ref: parseAsString,
@@ -77,6 +78,12 @@ export function SelectBankAccountsModal({ countryCode }: Props) {
     institution_id: parseAsString,
     provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
   });
+
+  // NOTE: GoCardLess sometimes return amp; back in the redirect URL
+  // Once fixed we can use nuqs and uninstall query-string
+  const params = queryString.parse(
+    window.location.search.replaceAll("amp;", "")
+  );
 
   const { provider, step, error, token, ref, enrollment_id, institution_id } =
     params;
