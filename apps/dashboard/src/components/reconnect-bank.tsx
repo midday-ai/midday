@@ -49,7 +49,7 @@ export async function ReconnectBank() {
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="rounded-xl w-[350px] mr-7" sideOffset={10}>
+      <PopoverContent className="w-[350px] mr-7" sideOffset={10}>
         <div>
           {bankConnections?.data?.map((bank) => {
             const expiresInDays = differenceInDays(

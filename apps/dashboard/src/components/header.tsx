@@ -1,5 +1,5 @@
 import { AssistantButton } from "@/components/assistant/button";
-import { DesktopAssistantuButton } from "@/components/assistant/button-desktop";
+import { DesktopAssistantButton } from "@/components/assistant/button-desktop";
 import { NotificationCenter } from "@/components/notification-center";
 import { ReconnectBank } from "@/components/reconnect-bank";
 import { TrackerControl } from "@/components/tracker-contol";
@@ -9,6 +9,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Suspense } from "react";
 import { DesktopTrafficLight } from "./desktop-traffic-light";
+import { FeedbackForm } from "./feedback-form";
 import { MobileMenu } from "./mobile-menu";
 
 export function Header() {
@@ -22,7 +23,9 @@ export function Header() {
       <AssistantButton />
 
       <div className="flex space-x-2 no-drag ml-auto">
-        {isDesktopApp() && <DesktopAssistantuButton />}
+        {isDesktopApp() && <DesktopAssistantButton />}
+
+        <FeedbackForm />
 
         <TrackerControl />
 

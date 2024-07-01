@@ -4,7 +4,7 @@ import { useAssistantStore } from "@/store/assistant";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 
-export function DesktopAssistantuButton() {
+export function DesktopAssistantButton() {
   const { setOpen } = useAssistantStore();
 
   return (
