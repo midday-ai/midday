@@ -26,12 +26,13 @@ import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import {
-  parseAsBoolean,
-  parseAsString,
-  parseAsStringEnum,
-  useQueryStates,
-} from "nuqs";
+import { useRouter } from "next/navigation";
+// import {
+//   parseAsBoolean,
+//   parseAsString,
+//   parseAsStringEnum,
+//   useQueryStates,
+// } from "nuqs";
 import queryString from "query-string";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -59,25 +60,23 @@ function RowsSkeleton() {
   );
 }
 
-type Props = {
-  countryCode: string;
-};
-
-export function SelectBankAccountsModal({ countryCode }: Props) {
+export function SelectBankAccountsModal() {
   const { toast } = useToast();
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
+  const router = useRouter();
 
-  const [_, setParams] = useQueryStates({
-    step: parseAsStringEnum(["connect", "account", "gocardless"]),
-    error: parseAsBoolean,
-    ref: parseAsString,
-    token: parseAsString,
-    enrollment_id: parseAsString,
-    institution_id: parseAsString,
-    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
-  });
+  // const [_, setParams] = useQueryStates({
+  //   step: parseAsStringEnum(["connect", "account", "gocardless"]),
+  //   error: parseAsBoolean,
+  //   ref: parseAsString,
+  //   token: parseAsString,
+  //   enrollment_id: parseAsString,
+  //   institution_id: parseAsString,
+  //   provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
+  // countryCode: parseAsString
+  // });
 
   // NOTE: GoCardLess sometimes return amp; back in the redirect URL
   // Once fixed we can use nuqs and uninstall query-string
@@ -85,19 +84,28 @@ export function SelectBankAccountsModal({ countryCode }: Props) {
     window.location.search.replaceAll("amp;", "")
   );
 
-  const { provider, step, error, token, ref, enrollment_id, institution_id } =
-    params;
+  const {
+    provider,
+    step,
+    error,
+    token,
+    ref,
+    enrollment_id,
+    institution_id,
+    countryCode,
+  } = params;
 
   const isOpen = step === "account" && !error;
 
   const onClose = () => {
-    setParams(
-      { step: null },
-      {
-        // NOTE: Rerender so the overview modal is visible
-        shallow: false,
-      }
-    );
+    router.push("/");
+    // setParams(
+    //   { step: null },
+    //   {
+    //     // NOTE: Rerender so the overview modal is visible
+    //     shallow: false,
+    //   }
+    // );
   };
 
   const connectBankAction = useAction(connectBankAccountAction, {
