@@ -66,7 +66,6 @@ export function createReport({
       const link = await dub.links.create({
         url: `https://app.midday.ai/report/${data.id}`,
         expiresAt,
-        rewrite: true,
       });
 
       const { data: linkData } = await supabase

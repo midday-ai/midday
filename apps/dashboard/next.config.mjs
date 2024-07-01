@@ -7,6 +7,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 /** @type {import("next").NextConfig} */
 const config = {
+  poweredByHeader: false,
   reactStrictMode: true,
   images: {
     remotePatterns: [
@@ -48,6 +49,15 @@ const config = {
           {
             key: "X-Frame-Options",
             value: "DENY",
+          },
+        ],
+      },
+      {
+        source: "/report/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
           },
         ],
       },
