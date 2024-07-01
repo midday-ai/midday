@@ -1,5 +1,6 @@
 /** @type {import("next").NextConfig} */
 const config = {
+  poweredByHeader: false,
   reactStrictMode: true,
   transpilePackages: ["@midday/ui", "@midday/tailwind"],
   eslint: {
