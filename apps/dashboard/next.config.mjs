@@ -52,15 +52,6 @@ const config = {
           },
         ],
       },
-      {
-        source: "/report/(.*)",
-        headers: [
-          {
-            key: "X-Frame-Options",
-            value: "SAMEORIGIN",
-          },
-        ],
-      },
     ];
   },
 };
