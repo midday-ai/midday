@@ -103,17 +103,17 @@ const transformDescription = ({
 };
 
 export const transformTransaction = (
-  transaction: TransformTransaction
+  transaction: TransformTransaction,
 ): BaseTransaction => {
   const method = mapTransactionMethod(
-    transaction?.proprietaryBankTransactionCode
+    transaction?.proprietaryBankTransactionCode,
   );
 
   let currencyExchange: { rate: number; currency: string } | undefined;
 
   if (Array.isArray(transaction.currencyExchange)) {
     const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? ""
+      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
     );
 
     if (rate) {
@@ -186,7 +186,7 @@ export const transformAccount = ({
 };
 
 export const transformAccountBalance = (
-  account?: TransformAccountBalance
+  account?: TransformAccountBalance,
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),

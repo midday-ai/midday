@@ -15,7 +15,7 @@ import {
 export class PlaidProvider implements Provider {
   #api: PlaidApi;
 
-  constructor(params: ProviderParams) {
+  constructor(params: Omit<ProviderParams, "provider">) {
     this.#api = new PlaidApi(params);
   }
 

@@ -4,9 +4,9 @@ export type Providers = "teller" | "plaid" | "gocardless";
 
 export type ProviderParams = {
   provider: Providers;
-  kv: KVNamespace;
+  kv?: KVNamespace;
   environment?: "development" | "sandbox" | "production";
-  fetcher?: Fetcher; // Teller
+  fetcher?: Fetcher | null; // Teller
   envs: {
     GOCARDLESS_SECRET_KEY: string;
     GOCARDLESS_SECRET_ID: string;

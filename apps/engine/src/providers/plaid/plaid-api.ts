@@ -69,7 +69,7 @@ export class PlaidApi {
   async getHealthCheck() {
     try {
       const response = await fetch(
-        "https://status.plaid.com/api/v2/status.json"
+        "https://status.plaid.com/api/v2/status.json",
       );
 
       const data: GetStatusResponse = await response.json();
@@ -208,7 +208,7 @@ export class PlaidApi {
             })
             .then(({ data }) => {
               return data.institutions;
-            })
+            }),
         ),
     });
   }

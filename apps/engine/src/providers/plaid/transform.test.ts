@@ -72,7 +72,7 @@ test("Transform pending transaction", () => {
         unofficial_currency_code: null,
         website: "uber.com",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -145,7 +145,7 @@ test("Transform income transaction", () => {
         unofficial_currency_code: null,
         website: "united.com",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -216,7 +216,7 @@ test("Transform type transfer", () => {
         unofficial_currency_code: null,
         website: "uber.com",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -241,7 +241,7 @@ test("Transform accounts", () => {
         name: "American Funds Retirement Solutions",
         logo: null,
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -253,6 +253,6 @@ test("Transform account balance", () => {
       iso_currency_code: "USD",
       limit: null,
       unofficial_currency_code: null,
-    })
+    }),
   ).toMatchSnapshot();
 });

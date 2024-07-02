@@ -11,7 +11,7 @@ import { transformAccount, transformTransaction } from "./transform";
 export class TellerProvider implements Provider {
   #api: TellerApi;
 
-  constructor(params: ProviderParams) {
+  constructor(params: Omit<ProviderParams, "provider">) {
     this.#api = new TellerApi(params);
   }
 

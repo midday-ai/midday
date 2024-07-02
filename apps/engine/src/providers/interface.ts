@@ -9,11 +9,11 @@ import type {
 
 export interface Provider {
   getTransactions: (
-    params: GetTransactionsRequest
+    params: GetTransactionsRequest,
   ) => Promise<GetTransactionsResponse>;
   getAccounts: (params: GetAccountsRequest) => Promise<GetAccountsResponse>;
   getAccountBalance: (
-    params: GetAccountBalanceRequest
+    params: GetAccountBalanceRequest,
   ) => Promise<GetAccountBalanceResponse>;
   getHealthCheck: () => Promise<boolean>;
 }

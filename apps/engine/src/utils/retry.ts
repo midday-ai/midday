@@ -8,7 +8,7 @@ export async function withRetry<TResult>(
     maxRetries?: number;
     onError?(error: unknown, attempt: number): boolean | undefined;
     delay?: number;
-  } = {}
+  } = {},
 ) {
   let retries = 0;
   let lastError: unknown;

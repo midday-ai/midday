@@ -30,7 +30,7 @@ export class Provider {
   }
 
   async getHealthCheck(
-    params: ProviderParams
+    params: Omit<ProviderParams, "provider">
   ): Promise<GetHealthCheckResponse> {
     const teller = new TellerProvider(params);
     const plaid = new PlaidProvider(params);

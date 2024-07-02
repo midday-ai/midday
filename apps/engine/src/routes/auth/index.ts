@@ -1,7 +1,8 @@
 import { ErrorSchema } from "@/common/schema";
+import { app } from "@/index";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   GoCardLessExchangeBodySchema,
@@ -13,8 +14,6 @@ import {
   PlaidLinkBodySchema,
   PlaidLinkSchema,
 } from "./schema";
-
-const app = new OpenAPIHono();
 
 const linkPlaidRoute = createRoute({
   method: "post",
@@ -175,6 +174,7 @@ app.openapi(linkPlaidRoute, async (c) => {
     return c.json(
       {
         message: error.message,
+        code: 400,
       },
       400
     );
@@ -188,7 +188,7 @@ app.openapi(exchangePlaidRoute, async (c) => {
     const { token } = await c.req.json();
 
     const api = new PlaidApi({
-      kv: c.env.KV,
+      kv: c?.env?.KV,
       envs,
     });
 
@@ -206,6 +206,7 @@ app.openapi(exchangePlaidRoute, async (c) => {
     return c.json(
       {
         message: error.message,
+        code: 400,
       },
       400
     );
@@ -239,6 +240,7 @@ app.openapi(linkGoCardLessRoute, async (c) => {
     return c.json(
       {
         message: error.message,
+        code: 400,
       },
       400
     );
@@ -274,6 +276,7 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
     return c.json(
       {
         message: error.message,
+        code: 400,
       },
       400
     );

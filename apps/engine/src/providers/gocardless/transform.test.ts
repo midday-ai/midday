@@ -20,7 +20,7 @@ test("Transform income transaction", () => {
       additionalInformation: "LÖN         160434262327",
       proprietaryBankTransactionCode: "Transfer",
       internalTransactionId: "86b1bc36e6a6d2a5dee8ff7138920255",
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -50,7 +50,7 @@ test("Transform accounts", () => {
         countries: ["DK", "GB", "DE", "SE", "ES", "IE", "DK"],
         logo: "https://cdn-logos.gocardless.com/ais/PLEO_PLEODK00.png",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -59,6 +59,6 @@ test("Transform account balance", () => {
     transformAccountBalance({
       currency: "SEK",
       amount: "1942682.86",
-    })
+    }),
   ).toMatchSnapshot();
 });

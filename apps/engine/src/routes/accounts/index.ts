@@ -1,10 +1,9 @@
 import { ErrorSchema } from "@/common/schema";
+import { app } from "@/index";
 import { Provider } from "@/providers";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { AccountSchema, AccountsParamsSchema, AccountsSchema } from "./schema";
-
-const app = new OpenAPIHono();
 
 const indexRoute = createRoute({
   method: "get",
@@ -35,13 +34,14 @@ const indexRoute = createRoute({
 
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
+
   const { provider, accessToken, institutionId, id, countryCode } =
-    c.req.query();
+    c.req.valid("query");
 
   try {
     const api = new Provider({
       provider,
-      fetcher: c.env.TELLER_CERT,
+      fetcher: c?.env?.TELLER_CERT,
       envs,
     });
 
@@ -62,6 +62,7 @@ app.openapi(indexRoute, async (c) => {
     return c.json(
       {
         message: error.message,
+        code: 400,
       },
       400
     );
@@ -123,6 +124,7 @@ app.openapi(balanceRoute, async (c) => {
     return c.json(
       {
         message: error.message,
+        code: 400,
       },
       400
     );
