@@ -14,13 +14,13 @@
   },
   "dependencies": {
     "@midday/ui": "workspace:*",
-    "@react-email/components": "0.0.19",
+    "@react-email/components": "0.0.20",
     "@react-email/tailwind": "0.0.18",
     "date-fns": "^3.6.0",
     "react-email": "canary",
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.3"
   }
 }

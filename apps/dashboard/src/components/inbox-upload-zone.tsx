@@ -53,7 +53,7 @@ export function UploadZone({ children, teamId }: Props) {
     setShowProgress(true);
 
     // Add uploaded folder so we can filter background job on this
-    const filePath = [teamId, nanoid(), "inbox", "uploaded"];
+    const filePath = [teamId, "inbox", "uploaded", nanoid()];
 
     try {
       await Promise.all(
