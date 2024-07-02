@@ -13,12 +13,18 @@ import {
   endOfMonth,
   startOfMonth,
   startOfYear,
+  subDays,
   subMonths,
   subYears,
 } from "date-fns";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 const options = [
+  {
+    id: "last_30d",
+    from: subDays(new Date(), 30).toISOString(),
+    to: new Date().toISOString(),
+  },
   {
     id: "this_month",
     from: startOfMonth(new Date()).toISOString(),

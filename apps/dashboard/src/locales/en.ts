@@ -21,6 +21,7 @@ export default {
     sv: "Swedish",
   },
   spending_period: {
+    last_30d: "Last 30d",
     this_month: "This month",
     last_month: "Last month",
     this_year: "This year",
