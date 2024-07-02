@@ -39,36 +39,24 @@ app.openapi(indexRoute, async (c) => {
 
   const api = new Provider({
     provider,
-    fetcher: c?.env?.TELLER_CERT,
-    kv: c?.env?.KV,
+    fetcher: c.env.TELLER_CERT,
+    kv: c.env.KV,
     envs,
   });
 
-  try {
-    const data = await api.getTransactions({
-      accountId,
-      accessToken,
-      accountType,
-      latest,
-    });
+  const data = await api.getTransactions({
+    accountId,
+    accessToken,
+    accountType,
+    latest,
+  });
 
-    return c.json(
-      {
-        data,
-      },
-      200
-    );
-  } catch (error) {
-    console.log(error);
-
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      data,
+    },
+    200,
+  );
 });
 
 export default app;

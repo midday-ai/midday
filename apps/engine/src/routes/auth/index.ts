@@ -150,137 +150,97 @@ const exchangeGoCardLessRoute = createRoute({
 app.openapi(linkPlaidRoute, async (c) => {
   const envs = env(c);
 
-  try {
-    const { userId, language } = await c.req.json();
+  const { userId, language } = await c.req.json();
 
-    const api = new PlaidApi({
-      kv: c.env.KV,
-      envs,
-    });
+  const api = new PlaidApi({
+    kv: c.env.KV,
+    envs,
+  });
 
-    const { data } = await api.linkTokenCreate({
-      userId,
-      language,
-    });
+  const { data } = await api.linkTokenCreate({
+    userId,
+    language,
+  });
 
-    return c.json(
-      {
-        link_token: data.link_token,
-        expiration: data.expiration,
-      },
-      200
-    );
-  } catch (error) {
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      link_token: data.link_token,
+      expiration: data.expiration,
+    },
+    200,
+  );
 });
 
 app.openapi(exchangePlaidRoute, async (c) => {
   const envs = env(c);
 
-  try {
-    const { token } = await c.req.json();
+  const { token } = await c.req.json();
 
-    const api = new PlaidApi({
-      kv: c?.env?.KV,
-      envs,
-    });
+  const api = new PlaidApi({
+    kv: c.env.KV,
+    envs,
+  });
 
-    const data = await api.itemPublicTokenExchange({
-      publicToken: token,
-    });
+  const data = await api.itemPublicTokenExchange({
+    publicToken: token,
+  });
 
-    return c.json(
-      {
-        access_token: data.data.access_token,
-      },
-      200
-    );
-  } catch (error) {
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      access_token: data.data.access_token,
+    },
+    200,
+  );
 });
 
 app.openapi(linkGoCardLessRoute, async (c) => {
   const envs = env(c);
 
-  try {
-    const { institutionId, agreement, redirect } = await c.req.json();
+  const { institutionId, agreement, redirect } = await c.req.json();
 
-    const api = new GoCardLessApi({
-      kv: c.env.KV,
-      envs,
-    });
+  const api = new GoCardLessApi({
+    kv: c.env.KV,
+    envs,
+  });
 
-    const data = await api.buildLink({
-      institutionId,
-      agreement,
-      redirect,
-    });
+  const data = await api.buildLink({
+    institutionId,
+    agreement,
+    redirect,
+  });
 
-    return c.json(
-      {
-        link: data.link,
-      },
-      200
-    );
-  } catch (error) {
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      link: data.link,
+    },
+    200,
+  );
 });
 
 app.openapi(exchangeGoCardLessRoute, async (c) => {
   const envs = env(c);
 
-  try {
-    const { institutionId, transactionTotalDays } = await c.req.json();
+  const { institutionId, transactionTotalDays } = await c.req.json();
 
-    const api = new GoCardLessApi({
-      kv: c.env.KV,
-      envs,
-    });
+  const api = new GoCardLessApi({
+    kv: c.env.KV,
+    envs,
+  });
 
-    const data = await api.createEndUserAgreement({
-      institutionId,
-      transactionTotalDays,
-    });
+  const data = await api.createEndUserAgreement({
+    institutionId,
+    transactionTotalDays,
+  });
 
-    return c.json(
-      {
-        id: data.id,
-        access_valid_for_days: data.access_valid_for_days,
-        institution_id: data.institution_id,
-        max_historical_days: data.max_historical_days,
-      },
-      200
-    );
-  } catch (error) {
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      id: data.id,
+      access_valid_for_days: data.access_valid_for_days,
+      institution_id: data.institution_id,
+      max_historical_days: data.max_historical_days,
+    },
+    200,
+  );
 });
 
 export default app;

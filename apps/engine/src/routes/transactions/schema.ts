@@ -10,17 +10,14 @@ export const TransactionsParamsSchema = z
       },
       example: "teller",
     }),
-    accountId: z
-      .string()
-      .optional()
-      .openapi({
-        description: "Get transactions by accountId",
-        param: {
-          name: "accountId",
-          in: "query",
-        },
-        example: "5341343-4234-4c65-815c-t234213442",
-      }),
+    accountId: z.string().openapi({
+      description: "Get transactions by accountId",
+      param: {
+        name: "accountId",
+        in: "query",
+      },
+      example: "5341343-4234-4c65-815c-t234213442",
+    }),
     accountType: z.enum(["credit", "depository"]).openapi({
       description:
         "Get transactions with the correct amount depending on credit or depository",
@@ -42,7 +39,7 @@ export const TransactionsParamsSchema = z
         example: "token-123",
       }),
     latest: z
-      .string()
+      .boolean()
       .optional()
       .openapi({
         description: "Get latest transactions",
@@ -50,7 +47,7 @@ export const TransactionsParamsSchema = z
           name: "latest",
           in: "query",
         },
-        example: "true",
+        example: true,
       }),
   })
   .openapi("TransactionsParamsSchema");
@@ -72,9 +69,6 @@ export const TransactionSchema = z
         example: "other",
       })
       .nullable(),
-    internal_id: z.string().openapi({
-      example: "zkeDvjAjLQsMgA6nO0gJIZv5Z7pKP4UvJJXwo",
-    }),
     amount: z.number().openapi({
       example: 100,
     }),

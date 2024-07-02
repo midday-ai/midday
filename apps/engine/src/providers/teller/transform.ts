@@ -1,13 +1,15 @@
-import { AccountType, getType } from "@/utils/account";
+import { getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
+  Balance as BaseAccountBalance,
   Transaction as BaseTransaction,
 } from "../types";
 import type {
   FormatAmount,
   Transaction,
   TransformAccount,
+  TransformAccountBalance,
   TransformTransaction,
 } from "./types";
 
@@ -100,7 +102,7 @@ export const transformDescription = (transaction: Transaction) => {
 
 const formatAmout = ({ amount, accountType }: FormatAmount) => {
   // NOTE: For account credit positive values when money moves out of the account; negative values when money moves in.
-  if (accountType === AccountType.CREDIT) {
+  if (accountType === "credit") {
     return +(amount * -1);
   }
 
@@ -119,15 +121,17 @@ export const transformTransaction = ({
   });
 
   return {
+    id: transaction.id,
     date: transaction.date,
     name: transaction.description && capitalCase(transaction.description),
-    description,
+    description: description ?? null,
+    currency_rate: null,
+    currency_source: null,
     method,
-    internal_id: transaction.id,
     amount,
     currency: "USD",
     category: mapTransactionCategory({ transaction, amount }),
-    balance: transaction.running_balance,
+    balance: transaction?.running_balance ? +transaction.running_balance : null,
     status: transaction?.status === "posted" ? "posted" : "pending",
   };
 };
@@ -144,12 +148,21 @@ export const transformAccount = ({
     id,
     name,
     currency,
-    institution: {
-      ...institution,
-      logo: `https://teller.io/images/banks/${institution.id}.jpg`,
-    },
+    institution: institution
+      ? {
+          ...institution,
+          logo: `https://teller.io/images/banks/${institution.id}.jpg`,
+        }
+      : null,
     enrollment_id: enrollment_id,
     provider: "teller",
     type: getType(type),
   };
 };
+
+export const transformAccountBalance = (
+  account: TransformAccountBalance,
+): BaseAccountBalance => ({
+  currency: account.currency,
+  amount: +account.amount,
+});

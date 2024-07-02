@@ -30,50 +30,67 @@ export class Provider {
   }
 
   async getHealthCheck(
-    params: Omit<ProviderParams, "provider">
+    params: Omit<ProviderParams, "provider">,
   ): Promise<GetHealthCheckResponse> {
     const teller = new TellerProvider(params);
     const plaid = new PlaidProvider(params);
     const gocardless = new GoCardLessProvider(params);
 
-    const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
-      await Promise.all([
-        plaid.getHealthCheck(),
-        gocardless.getHealthCheck(),
-        teller.getHealthCheck(),
-      ]);
+    try {
+      const [isPlaidHealthy, isGocardlessHealthy, isTellerHealthy] =
+        await Promise.all([
+          plaid.getHealthCheck(),
+          gocardless.getHealthCheck(),
+          teller.getHealthCheck(),
+        ]);
 
-    return {
-      plaid: {
-        healthy: isPlaidHealthy,
-      },
-      gocardless: {
-        healthy: isGocardlessHealthy,
-      },
-      teller: {
-        healthy: isTellerHealthy,
-      },
-    };
+      return {
+        plaid: {
+          healthy: isPlaidHealthy,
+        },
+        gocardless: {
+          healthy: isGocardlessHealthy,
+        },
+        teller: {
+          healthy: isTellerHealthy,
+        },
+      };
+    } catch {
+      throw Error("Something went wrong");
+    }
   }
 
   async getTransactions(params: GetTransactionsRequest) {
     logger(
       "getTransactions:",
-      `provider: ${this.#provider} id: ${params.accountId}`
+      `provider: ${this.#provider} id: ${params.accountId}`,
     );
 
-    return withRetry(() => this.#provider?.getTransactions(params));
+    const data = await withRetry(() => this.#provider?.getTransactions(params));
+
+    if (data) {
+      return data;
+    }
+
+    return [];
   }
 
   async getAccounts(params: GetAccountsRequest) {
     logger("getAccounts:", `provider: ${this.#provider}`);
-    return withRetry(() => this.#provider?.getAccounts(params));
+
+    const data = await withRetry(() => this.#provider?.getAccounts(params));
+
+    if (data) {
+      return data;
+    }
+
+    return [];
   }
 
   async getAccountBalance(params: GetAccountBalanceRequest) {
     logger(
       "getAccountBalance:",
-      `provider: ${this.#provider} id: ${params.accountId}`
+      `provider: ${this.#provider} id: ${params.accountId}`,
     );
 
     return withRetry(() => this.#provider?.getAccountBalance(params));

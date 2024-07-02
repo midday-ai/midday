@@ -31,7 +31,7 @@ export const app = new OpenAPIHono<{ Bindings: Bindings }>({
           ok: false,
           source: "error",
         },
-        422
+        422,
       );
     }
   },
@@ -50,7 +50,7 @@ const apiRoutes = app.use(
   cache({
     cacheName: "engine",
     cacheControl: "max-age=3600",
-  })
+  }),
 );
 
 apiRoutes
@@ -68,7 +68,7 @@ apiRoutes.get(
   "/",
   swaggerUI({
     url: "/openapi",
-  })
+  }),
 );
 
 app.doc("/openapi", {

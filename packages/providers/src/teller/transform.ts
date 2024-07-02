@@ -1,4 +1,4 @@
-import { AccountType, getType } from "@midday/engine/src/utils/account";
+import { getType } from "@midday/engine/src/utils/account";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -102,7 +102,7 @@ export const transformDescription = (transaction: Transaction) => {
 
 const formatAmout = ({ amount, accountType }: FormatAmount) => {
   // NOTE: For account credit positive values when money moves out of the account; negative values when money moves in.
-  if (accountType === AccountType.CREDIT) {
+  if (accountType === "credit") {
     return +(amount * -1);
   }
 

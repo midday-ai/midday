@@ -60,13 +60,18 @@ export const AccountSchema = z
     name: z.string().openapi({
       example: "Savings account",
     }),
+    type: z
+      .enum(["depository", "credit", "other_asset", "loan", "other_liability"])
+      .openapi({
+        example: "depository",
+      }),
     currency: z.string().openapi({
       example: "USD",
     }),
     provider: Providers.openapi({
       example: "teller",
     }),
-    institution: InstitutionSchema,
+    institution: InstitutionSchema.nullable(),
     enrollment_id: z
       .string()
       .openapi({
@@ -81,3 +86,37 @@ export const AccountsSchema = z
     data: z.array(AccountSchema),
   })
   .openapi("AccountsSchema");
+
+export const AccountBalanceParamsSchema = z.object({
+  id: z.string().openapi({
+    description: "Account id",
+    param: {
+      name: "id",
+      in: "query",
+    },
+    example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  }),
+  provider: Providers.openapi({
+    example: "teller",
+  }),
+  accessToken: z
+    .string()
+    .optional()
+    .openapi({
+      description: "Teller & Plaid access token",
+      param: {
+        name: "accessToken",
+        in: "query",
+      },
+      example: "test_token_ky6igyqi3qxa4",
+    }),
+});
+
+export const AccountBalanceSchema = z.object({
+  amount: z.number().openapi({
+    example: 20000,
+  }),
+  currency: z.string().openapi({
+    example: "USD",
+  }),
+});

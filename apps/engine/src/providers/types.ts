@@ -4,7 +4,7 @@ export type Providers = "teller" | "plaid" | "gocardless";
 
 export type ProviderParams = {
   provider: Providers;
-  kv?: KVNamespace;
+  kv: KVNamespace;
   environment?: "development" | "sandbox" | "production";
   fetcher?: Fetcher | null; // Teller
   envs: {
@@ -17,24 +17,24 @@ export type ProviderParams = {
 };
 
 export type Transaction = {
+  id: string;
   amount: number;
   currency: string;
   date: string;
-  internal_id: string;
   status: "posted" | "pending";
-  balance?: string | null;
-  category?: string | null;
+  balance: number | null;
+  category: string | null;
   method: string;
   name: string;
-  description?: string | null;
-  currency_rate?: number | null;
-  currency_source?: string | null;
+  description: string | null;
+  currency_rate: number | null;
+  currency_source: string | null;
 };
 
 export type Institution = {
   id: string;
   name: string;
-  logo?: string | null;
+  logo: string | null;
 };
 
 export type Account = {
@@ -42,9 +42,9 @@ export type Account = {
   name: string;
   currency: string;
   provider: Providers;
-  institution?: Institution;
+  institution: Institution | null;
   type: AccountType;
-  enrollment_id?: string; // Teller
+  enrollment_id: string | null; // Teller
 };
 
 export type Balance = {

@@ -1,18 +1,17 @@
-export enum AccountType {
-  DEPOSITORY = "depository",
-  CREDIT = "credit",
-  OTHER_ASSET = "other_asset",
-  LOAN = "loan",
-  OTHER_LIABILITY = "other_liability",
-}
+export type AccountType =
+  | "depository"
+  | "credit"
+  | "other_asset"
+  | "loan"
+  | "other_liability";
 
 export function getType(type: string): AccountType {
   switch (type) {
     case "depository":
-      return AccountType.DEPOSITORY;
+      return "depository";
     case "credit":
-      return AccountType.CREDIT;
+      return "credit";
     default:
-      return AccountType.OTHER_ASSET;
+      return "other_asset";
   }
 }

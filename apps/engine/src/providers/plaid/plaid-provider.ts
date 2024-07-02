@@ -39,7 +39,7 @@ export class PlaidProvider implements Provider {
       transformTransaction({
         transaction,
         accountType,
-      })
+      }),
     );
   }
 

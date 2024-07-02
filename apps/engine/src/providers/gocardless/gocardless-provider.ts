@@ -46,9 +46,9 @@ export class GoCardLessProvider implements Provider {
   }
 
   async getAccountBalance({ accountId }: GetAccountBalanceRequest) {
-    if (!accountId) {
-      throw Error("Missing params");
-    }
+    // if (!accountId) {
+    //   throw Error("Missing params");
+    // }
 
     const response = await this.#api.getAccountBalance(accountId);
 

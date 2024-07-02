@@ -138,8 +138,6 @@ export type GetAccountBalanceResponse = {
 
 export type TransformTransaction = {
   transaction: Transaction;
-  teamId: string;
-  bankAccountId: string;
   accountType: AccountType;
 };
 
@@ -147,3 +145,5 @@ export type FormatAmount = {
   amount: number;
   accountType: AccountType;
 };
+
+export type TransformAccountBalance = GetAccountBalanceResponse;

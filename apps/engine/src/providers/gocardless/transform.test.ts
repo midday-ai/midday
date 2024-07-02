@@ -40,7 +40,8 @@ test("Transform accounts", () => {
         name: "Pleo Account",
         product: "Pleo",
         cashAccountType: "TRAN",
-        status: "enabled",
+        iban: "123",
+        ownerName: "Name",
       },
       bank: {
         id: "PLEO_PLEODK00",

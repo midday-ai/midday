@@ -34,34 +34,25 @@ app.openapi(indexRoute, async (c) => {
 
   const api = new Provider();
 
-  try {
-    const data = await api.getHealthCheck({
-      fetcher: c?.env?.TELLER_CERT,
-      envs,
-    });
+  const data = await api.getHealthCheck({
+    kv: c.env.KV,
+    fetcher: c.env.TELLER_CERT,
+    envs,
+  });
 
-    const isHealthy = Object.values(data).every((service) => service.healthy);
+  const isHealthy = Object.values(data).every((service) => service.healthy);
 
-    if (isHealthy) {
-      return c.json(data, 200);
-    }
-
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
-  } catch (error) {
-    return c.json(
-      {
-        message: error.message,
-        code: 400,
-      },
-      400
-    );
+  if (isHealthy) {
+    return c.json(data, 200);
   }
+
+  return c.json(
+    {
+      message: "Service unhelthy",
+      code: 400,
+    },
+    400,
+  );
 });
 
 export default app;

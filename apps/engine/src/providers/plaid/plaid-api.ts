@@ -145,6 +145,7 @@ export class PlaidApi {
         cursor = data.next_cursor;
       }
     }
+
     // NOTE: Plaid transactions for all accounts
     // we need to filter based on the provided accountId
     return added.filter((transaction) => transaction.account_id === accountId);

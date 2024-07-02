@@ -2,15 +2,34 @@
 
 exports[`Transform pending transaction 1`] = `
 {
-  "amount": 83.62,
+  "amount": -83.62,
   "balance": null,
-  "category": "income",
+  "category": null,
   "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
   "date": "2024-03-05",
   "description": "Bank Of Many",
-  "internal_id": "txn_os41r5u90e29shubl2000",
+  "id": "txn_os41r5u90e29shubl2000",
   "method": "other",
   "name": "Online Check Deposit",
+  "status": "pending",
+}
+`;
+
+exports[`Transform pending transaction 2`] = `
+{
+  "amount": -29,
+  "balance": null,
+  "category": null,
+  "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-03-05",
+  "description": "Bank Of Many",
+  "id": "txn_os41r5u90e29shubl2000",
+  "method": "other",
+  "name": "Technology",
   "status": "pending",
 }
 `;
@@ -18,12 +37,14 @@ exports[`Transform pending transaction 1`] = `
 exports[`Transform card payment transaction 1`] = `
 {
   "amount": -68.9,
-  "balance": "83431.46",
+  "balance": 83431.46,
   "category": null,
   "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
   "date": "2024-03-01",
-  "description": "Nordstrom",
-  "internal_id": "txn_os41r5u90e29shubl2005",
+  "description": null,
+  "id": "txn_os41r5u90e29shubl2005",
   "method": "card_purchase",
   "name": "Nordstrom",
   "status": "posted",
@@ -32,13 +53,15 @@ exports[`Transform card payment transaction 1`] = `
 
 exports[`Transform income transaction 1`] = `
 {
-  "amount": -20.21,
-  "balance": "83296.40",
-  "category": null,
+  "amount": 1000000,
+  "balance": 83296.4,
+  "category": "income",
   "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
   "date": "2024-03-03",
-  "description": "Exxon Mobil",
-  "internal_id": "txn_os41r5u90e29shubl2002",
+  "description": null,
+  "id": "txn_os41r5u90e29shubl2002",
   "method": "card_purchase",
   "name": "Exxon Mobil",
   "status": "posted",
@@ -48,12 +71,14 @@ exports[`Transform income transaction 1`] = `
 exports[`Transform type transfer 1`] = `
 {
   "amount": -37.99,
-  "balance": "85897.25",
+  "balance": 85897.25,
   "category": "transfer",
   "currency": "USD",
+  "currency_rate": null,
+  "currency_source": null,
   "date": "2024-01-27",
   "description": "Yourself",
-  "internal_id": "txn_os41r5ua0e29shubl2001",
+  "id": "txn_os41r5ua0e29shubl2001",
   "method": "transfer",
   "name": "Recurring Transfer To Savings",
   "status": "posted",
@@ -73,5 +98,12 @@ exports[`Transform accounts 1`] = `
   "name": "Platinum Card",
   "provider": "teller",
   "type": "credit",
+}
+`;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 2011100,
+  "currency": "USD",
 }
 `;

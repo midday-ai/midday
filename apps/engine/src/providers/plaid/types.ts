@@ -1,3 +1,4 @@
+import type { AccountType } from "@/utils/account";
 import type {
   AccountsGetResponse,
   Transaction,
@@ -66,3 +67,8 @@ export interface GetAccountBalanceRequest {
   accessToken: string;
   accountId: string;
 }
+
+export type TransformTransactionPayload = {
+  transaction: TransformTransaction;
+  accountType: AccountType;
+};

@@ -1,5 +1,4 @@
 import { expect, test } from "bun:test";
-import { AccountType } from "@midday/engine/src/utils/account";
 import {
   transformAccount,
   transformAccountBalance,
@@ -9,7 +8,7 @@ import {
 test("Transform pending transaction", () => {
   expect(
     transformTransaction({
-      accountType: AccountType.DEPOSITORY,
+      accountType: "depository",
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -41,7 +40,7 @@ test("Transform pending transaction", () => {
 test("Transform pending transaction", () => {
   expect(
     transformTransaction({
-      accountType: AccountType.CREDIT,
+      accountType: "credit",
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -73,7 +72,7 @@ test("Transform pending transaction", () => {
 test("Transform card payment transaction", () => {
   expect(
     transformTransaction({
-      accountType: AccountType.DEPOSITORY,
+      accountType: "depository",
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -105,7 +104,7 @@ test("Transform card payment transaction", () => {
 test("Transform income transaction", () => {
   expect(
     transformTransaction({
-      accountType: AccountType.DEPOSITORY,
+      accountType: "depository",
       bankAccountId: "123",
       teamId: "123",
       transaction: {
@@ -137,7 +136,7 @@ test("Transform income transaction", () => {
 test("Transform type transfer", () => {
   expect(
     transformTransaction({
-      accountType: AccountType.DEPOSITORY,
+      accountType: "depository",
       bankAccountId: "123",
       teamId: "123",
       transaction: {

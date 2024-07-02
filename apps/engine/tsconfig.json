@@ -6,7 +6,7 @@
       "@/*": ["./src/*"]
     },
     "strict": true,
-    "types": ["@cloudflare/workers-types"],
+    "types": ["@cloudflare/workers-types", "bun-types"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "lib": ["ESNext"],

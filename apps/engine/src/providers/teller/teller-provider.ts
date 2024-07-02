@@ -22,6 +22,7 @@ export class TellerProvider implements Provider {
   async getTransactions({
     accountId,
     accessToken,
+    accountType,
     latest,
   }: GetTransactionsRequest) {
     if (!accessToken) {
@@ -34,7 +35,12 @@ export class TellerProvider implements Provider {
       latest,
     });
 
-    return response.map(transformTransaction);
+    return response.map((transaction) =>
+      transformTransaction({
+        transaction,
+        accountType,
+      }),
+    );
   }
 
   async getAccounts({ accessToken }: GetAccountsRequest) {
@@ -46,8 +52,6 @@ export class TellerProvider implements Provider {
 
     return response.map(transformAccount);
   }
-
-  async deleteAccount() {}
 
   async getAccountBalance({
     accessToken,
