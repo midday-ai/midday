@@ -93,6 +93,14 @@ export class Provider {
       `provider: ${this.#provider} id: ${params.accountId}`,
     );
 
-    return withRetry(() => this.#provider?.getAccountBalance(params));
+    const data = await withRetry(() =>
+      this.#provider?.getAccountBalance(params),
+    );
+
+    if (data) {
+      return data;
+    }
+
+    return null;
   }
 }

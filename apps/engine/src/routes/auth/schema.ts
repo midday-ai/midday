@@ -13,11 +13,13 @@ export const PlaidLinkBodySchema = z
 
 export const PlaidLinkSchema = z
   .object({
-    link_token: z.string().openapi({
-      example: "ojwmef9823f892n9h98h2efoqed9823hdodfcoj13er92hef",
-    }),
-    expiration: z.string().openapi({
-      example: "2024-06-01",
+    data: z.object({
+      link_token: z.string().openapi({
+        example: "ojwmef9823f892n9h98h2efoqed9823hdodfcoj13er92hef",
+      }),
+      expiration: z.string().openapi({
+        example: "2024-06-01",
+      }),
     }),
   })
   .openapi("PlaidLinkSchema");
@@ -32,8 +34,10 @@ export const PlaidExchangeBodySchema = z
 
 export const PlaidExchangeSchema = z
   .object({
-    access_token: z.string().openapi({
-      example: "access_9293961c",
+    data: z.object({
+      access_token: z.string().openapi({
+        example: "access_9293961c",
+      }),
     }),
   })
   .openapi("PlaidExchangeSchema");
@@ -57,9 +61,11 @@ export const GoCardLessLinkBodySchema = z
 
 export const GoCardLessLinkSchema = z
   .object({
-    link: z.string().openapi({
-      example:
-        "https://ob.gocardless.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/REVOLUT_REVOGB21",
+    data: z.object({
+      link: z.string().openapi({
+        example:
+          "https://ob.gocardless.com/psd2/start/3fa85f64-5717-4562-b3fc-2c963f66afa6/REVOLUT_REVOGB21",
+      }),
     }),
   })
   .openapi("GoCardLessLinkSchema");
@@ -77,17 +83,19 @@ export const GoCardLessExchangeBodySchema = z
 
 export const GoCardLessExchangeSchema = z
   .object({
-    id: z.string().openapi({
-      example: "2dea1b84-97b0-4cb4-8805-302c227587c8",
-    }),
-    access_valid_for_days: z.number().openapi({
-      example: 90,
-    }),
-    max_historical_days: z.number().openapi({
-      example: 90,
-    }),
-    institution_id: z.string().openapi({
-      example: "REVOLUT_REVOGB21",
+    data: z.object({
+      id: z.string().openapi({
+        example: "2dea1b84-97b0-4cb4-8805-302c227587c8",
+      }),
+      access_valid_for_days: z.number().openapi({
+        example: 90,
+      }),
+      max_historical_days: z.number().openapi({
+        example: 90,
+      }),
+      institution_id: z.string().openapi({
+        example: "REVOLUT_REVOGB21",
+      }),
     }),
   })
   .openapi("GoCardLessExchangeSchema");

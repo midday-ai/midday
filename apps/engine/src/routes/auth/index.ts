@@ -157,18 +157,12 @@ app.openapi(linkPlaidRoute, async (c) => {
     envs,
   });
 
-  const { data } = await api.linkTokenCreate({
+  const data = await api.linkTokenCreate({
     userId,
     language,
   });
 
-  return c.json(
-    {
-      link_token: data.link_token,
-      expiration: data.expiration,
-    },
-    200,
-  );
+  return c.json(data, 200);
 });
 
 app.openapi(exchangePlaidRoute, async (c) => {
@@ -185,12 +179,7 @@ app.openapi(exchangePlaidRoute, async (c) => {
     publicToken: token,
   });
 
-  return c.json(
-    {
-      access_token: data.data.access_token,
-    },
-    200,
-  );
+  return c.json(data, 200);
 });
 
 app.openapi(linkGoCardLessRoute, async (c) => {
@@ -211,7 +200,7 @@ app.openapi(linkGoCardLessRoute, async (c) => {
 
   return c.json(
     {
-      link: data.link,
+      data,
     },
     200,
   );
@@ -234,10 +223,7 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
 
   return c.json(
     {
-      id: data.id,
-      access_valid_for_days: data.access_valid_for_days,
-      institution_id: data.institution_id,
-      max_historical_days: data.max_historical_days,
+      data,
     },
     200,
   );

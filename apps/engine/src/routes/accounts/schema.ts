@@ -113,10 +113,14 @@ export const AccountBalanceParamsSchema = z.object({
 });
 
 export const AccountBalanceSchema = z.object({
-  amount: z.number().openapi({
-    example: 20000,
-  }),
-  currency: z.string().openapi({
-    example: "USD",
-  }),
+  data: z
+    .object({
+      amount: z.number().openapi({
+        example: 20000,
+      }),
+      currency: z.string().openapi({
+        example: "USD",
+      }),
+    })
+    .nullable(),
 });

@@ -43,7 +43,12 @@ app.openapi(indexRoute, async (c) => {
   const isHealthy = Object.values(data).every((service) => service.healthy);
 
   if (isHealthy) {
-    return c.json(data, 200);
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
   }
 
   return c.json(
