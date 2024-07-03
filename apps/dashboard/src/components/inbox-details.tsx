@@ -94,7 +94,10 @@ export function InboxDetails({
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <a
-                  href={`/api/download/file?path=inbox/${item?.file_name}&filename=${item?.file_name}`}
+                  // href={`/api/download/file?path=inbox/${item?.file_name}&filename=${item?.file_name}`}
+                  href={`/api/download/file?path=${item?.file_path
+                    ?.slice(1)
+                    .join("/")}&filename=${item.file_name}`}
                   download
                 >
                   Download
