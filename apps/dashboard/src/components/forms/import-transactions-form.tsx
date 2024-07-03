@@ -35,6 +35,7 @@ import { useForm } from "react-hook-form";
 
 type Props = {
   defaultCurrency: string;
+  currencies: string[];
 };
 
 export function ImportTransactionsForm({

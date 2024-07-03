@@ -25,6 +25,7 @@ type Props = {
   teamId: string;
   ascending: boolean;
   query?: string;
+  currencies: string[];
 };
 
 export const TAB_ITEMS = ["todo", "done"];
@@ -47,6 +48,7 @@ export function InboxView({
   inboxId,
   ascending,
   query,
+  currencies,
 }: Props) {
   const supabase = createClient();
   const { toast } = useToast();
@@ -313,6 +315,7 @@ export function InboxView({
           onDelete={handleOnDelete}
           teamId={teamId}
           isEmpty={currentTabEmpty}
+          currencies={currencies}
         />
       }
     />

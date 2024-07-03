@@ -8,9 +8,10 @@ import { InboxView } from "./inbox-view";
 type Props = {
   ascending: boolean;
   query?: string;
+  currencies: string[];
 };
 
-export async function Inbox({ ascending, query }: Props) {
+export async function Inbox({ ascending, query, currencies }: Props) {
   const user = await getUser();
   const supabase = createClient();
 
@@ -40,6 +41,7 @@ export async function Inbox({ ascending, query }: Props) {
         inboxForwarding={user?.data?.team?.inbox_forwarding}
         ascending={ascending}
         query={query}
+        currencies={currencies}
       />
     </UploadZone>
   );

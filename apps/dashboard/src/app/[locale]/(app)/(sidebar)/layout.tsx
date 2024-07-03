@@ -3,7 +3,7 @@ import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode, isEUCountry } from "@midday/location";
-import { currencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
@@ -73,11 +73,6 @@ const HotKeys = dynamic(
   }
 );
 
-const uniqueCurrencies = () => {
-  const uniqueSet = new Set(Object.values(currencies));
-  return [...uniqueSet];
-};
-
 export default async function Layout({
   children,
 }: {
@@ -111,8 +106,8 @@ export default async function Layout({
         <ConnectGoCardLessModal countryCode={countryCode} />
         <SelectBankAccountsModal />
         <ImportCSVModal
-          currencies={uniqueCurrencies()}
-          defaultCurrency={currencies[countryCode]}
+          currencies={uniqueCurrencies}
+          defaultCurrency={uniqueCurrencies[countryCode]}
         />
         <ExportStatus />
         <HotKeys />

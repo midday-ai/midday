@@ -23,7 +23,12 @@ import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { ImportingTransactionsEvent } from "../importing-transactions-event";
 
-export function ImportCSVModal({ currencies, defaultCurrency }) {
+type Props = {
+  currencies: string[];
+  defaultCurrency: string;
+};
+
+export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
   const supabase = createClient();
   const [step, setStep] = useQueryState("step");
   const [eventId, setEventId] = useState();

@@ -13,8 +13,10 @@ import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
+import { EditInboxModal } from "./modals/edit-inbox-modal";
 import { SelectTransaction } from "./select-transaction";
 
 type Props = {
@@ -23,6 +25,7 @@ type Props = {
   onSelectTransaction: () => void;
   teamId: string;
   isEmpty?: boolean;
+  currencies: string[];
 };
 
 export function InboxDetails({
@@ -31,8 +34,10 @@ export function InboxDetails({
   onSelectTransaction,
   teamId,
   isEmpty,
+  currencies,
 }: Props) {
   const { toast } = useToast();
+  const [isOpen, setOpen] = useState(false);
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
@@ -84,6 +89,9 @@ export function InboxDetails({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                Edit
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <a
                   href={`/api/download/file?path=inbox/${item?.file_name}&filename=${item?.file_name}`}
@@ -206,6 +214,19 @@ export function InboxDetails({
           No attachment selected
         </div>
       )}
+
+      <EditInboxModal
+        key={item.id}
+        isOpen={isOpen}
+        onOpenChange={setOpen}
+        id={item.id}
+        currencies={currencies}
+        defaultValue={{
+          amount: item?.amount,
+          currency: item.currency,
+          display_name: item?.display_name,
+        }}
+      />
     </div>
   );
 }
