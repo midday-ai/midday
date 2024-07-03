@@ -92,6 +92,10 @@ const transformDescription = ({
     }
   }
 
+  if (transaction?.remittanceInformationUnstructured) {
+    return capitalCase(transaction.remittanceInformationUnstructured);
+  }
+
   const additionalInformation =
     transaction.additionalInformation &&
     capitalCase(transaction.additionalInformation);
