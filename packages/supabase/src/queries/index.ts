@@ -222,6 +222,8 @@ export async function getTransactionsQuery(
       query.order("assigned_id", { ascending });
     } else if (column === "bank_account") {
       query.order("bank_account_id", { ascending });
+    } else if (column === "category") {
+      query.order("category_slug", { ascending });
     } else {
       query.order(column, { ascending });
     }
