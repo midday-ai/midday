@@ -24,7 +24,7 @@ jobs:
         run: bun run check:types
         working-directory: ./apps/engine
       - name: 🧪 Run unit tests
-        run: bun run test
+        run: bun test
         working-directory: ./apps/engine
       - name: Deploy Project Artifacts to Cloudflare
         uses: cloudflare/wrangler-action@v3
