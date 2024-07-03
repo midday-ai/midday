@@ -64,6 +64,7 @@ export default {
   notifications: {
     inbox: "Receive notifications about new items in your inbox.",
     match: "Receive notifications about matches.",
+    transaction: "Receive notifications about a new transaction.",
     transactions: "Receive notifications about new transactions.",
   },
   widgets: {
