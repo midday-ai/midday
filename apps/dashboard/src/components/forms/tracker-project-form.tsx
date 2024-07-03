@@ -1,7 +1,7 @@
 "use client";
 
 import { useCurrentLocale } from "@/locales/client";
-import { currencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
 import {
@@ -26,11 +26,6 @@ import { Textarea } from "@midday/ui/textarea";
 import { CurrencyInput } from "headless-currency-input";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-
-const uniqueCurrencies = () => {
-  const uniqueSet = new Set(Object.values(currencies));
-  return [...uniqueSet];
-};
 
 export function TrackerProjectForm({ onSubmit, isSaving, form }) {
   const locale = useCurrentLocale();
@@ -197,7 +192,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-[300px]">
-                        {uniqueCurrencies().map((currency) => (
+                        {uniqueCurrencies.map((currency) => (
                           <SelectItem value={currency} key={currency}>
                             {currency}
                           </SelectItem>

@@ -496,3 +496,7 @@ export const currencies = {
   // Zimbabwe
   ZW: "ZWD",
 };
+
+const uniqueSet = new Set(Object.values(currencies));
+
+export const uniqueCurrencies = [...uniqueSet];

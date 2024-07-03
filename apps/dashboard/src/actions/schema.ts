@@ -276,8 +276,13 @@ export const inboxFilterSchema = z.enum(["done", "todo", "all"]);
 export const updateInboxSchema = z.object({
   id: z.string(),
   status: z.enum(["deleted", "pending"]).optional(),
+  display_name: z.string().optional(),
+  amount: z.string().optional(),
+  currency: z.string().optional(),
   transaction_id: z.string().nullable().optional(),
 });
+
+export type UpdateInboxFormValues = z.infer<typeof updateInboxSchema>;
 
 export const createProjectSchema = z.object({
   name: z.string().min(1),
