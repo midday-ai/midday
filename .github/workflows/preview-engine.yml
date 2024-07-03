@@ -18,9 +18,14 @@ jobs:
       - name: Install dependencies
         run: bun install
       - name: 🔦 Run linter
-        run: bun run lint --filter=@midday/engine
+        run: bun run lint
+        working-directory: ./apps/engine
       - name: 🪐 Check TypeScript
-        run: bun run typecheck --filter=@midday/engine
+        run: bun run check:types
+        working-directory: ./apps/engine
+      - name: 🧪 Run unit tests
+        run: bun run test
+        working-directory: ./apps/engine
       - name: Deploy Project Artifacts to Cloudflare
         uses: cloudflare/wrangler-action@v3
         with:
