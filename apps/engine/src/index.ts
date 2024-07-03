@@ -1,41 +1,17 @@
 import { swaggerUI } from "@hono/swagger-ui";
-import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Env } from "hono";
 import { env } from "hono/adapter";
 import { bearerAuth } from "hono/bearer-auth";
 import { cache } from "hono/cache";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
+import { app } from "./app";
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
 import { logger as customLogger } from "./utils/logger";
-
-type Bindings = {
-  KV: KVNamespace;
-  TELLER_CERT: Fetcher;
-  GOCARDLESS_SECRET_KEY: string;
-  GOCARDLESS_SECRET_ID: string;
-  PLAID_CLIENT_ID: string;
-  PLAID_SECRET: string;
-  PLAID_ENVIRONMENT: string;
-};
-
-export const app = new OpenAPIHono<{ Bindings: Bindings }>({
-  defaultHook: (result, c) => {
-    if (!result.success) {
-      return c.json(
-        {
-          ok: false,
-          source: "error",
-        },
-        422,
-      );
-    }
-  },
-});
 
 const apiRoutes = app.use(
   "/api/*",

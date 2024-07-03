@@ -1,5 +1,5 @@
+import { app } from "@/app";
 import { ErrorSchema } from "@/common/schema";
-import { app } from "@/index";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { createRoute } from "@hono/zod-openapi";

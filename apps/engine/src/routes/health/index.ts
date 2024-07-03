@@ -1,5 +1,5 @@
+import { app } from "@/app";
 import { ErrorSchema } from "@/common/schema";
-import { app } from "@/index";
 import { Provider } from "@/providers";
 import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
