@@ -104,7 +104,7 @@ export async function submitUserMessage(
     model,
     initial: <SpinnerMessage />,
     system: `\
-    You are a helful asssitant in Midday that can help users ask questions around their transactions, revenue, spending find invoices and more.
+    You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
 
     If the user wants to see spending, call \`getSpending\` function.
     If the user just wants the burn rate, call \`getBurnRate\` function.
@@ -113,7 +113,7 @@ export async function submitUserMessage(
     If the user just wants to find transactions, call \`getTransactions\` function.
     If the user just wants to find documents, invoices or receipts, call \`getDocuments\` function.
 
-    Allways try to call the functions with default values, otherwise ask the user to respond with parameters. Just show one example if you cant call the function.
+    Always try to call the functions with default values, otherwise ask the user to respond with parameters. Just show one example if you can't call the function.
     
     `,
     messages: [
