@@ -96,7 +96,7 @@ export const columns: ColumnDef<Transaction>[] = [
     header: "Description",
     cell: ({ row }) => {
       return (
-        <TooltipProvider delayDuration={0}>
+        <TooltipProvider delayDuration={20}>
           <Tooltip>
             <TooltipTrigger asChild>
               <span
@@ -119,7 +119,7 @@ export const columns: ColumnDef<Transaction>[] = [
             </TooltipTrigger>
             {row.original?.description && (
               <TooltipContent
-                className="px-3 py-1.5 text-xs"
+                className="px-3 py-1.5 text-xs max-w-[380px]"
                 side="left"
                 sideOffset={10}
               >
