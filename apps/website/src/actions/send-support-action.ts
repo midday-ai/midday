@@ -56,6 +56,5 @@ export const sendSupportAction = action(sendSupportSchema, async (data) => {
     ],
   });
 
-  console.log(response);
   return response;
 });
