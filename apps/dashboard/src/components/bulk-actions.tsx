@@ -32,6 +32,11 @@ const sections = [
     label: "Assign",
     icon: Icons.Face,
   },
+  {
+    id: "status",
+    label: "Status",
+    icon: Icons.AlertCircle,
+  },
 ];
 
 export function BulkActions({ ids }) {
@@ -47,7 +52,7 @@ export function BulkActions({ ids }) {
         setTransactionIds(undefined);
       }
     },
-    onSuccess: (data, input) => {
+    onSuccess: (data) => {
       setTransactionIds(undefined);
       toast({
         title: `Updated ${data.length} transactions.`,
@@ -175,6 +180,30 @@ export function BulkActions({ ids }) {
                       });
                     }}
                   />
+                )}
+
+                {section.id === "status" && (
+                  <RadioGroup
+                    onValueChange={(status) => {
+                      console.log(status);
+                      bulkUpdateTransactions.execute({
+                        type: "status",
+                        data: ids.map((transaction) => ({
+                          id: transaction,
+                          status,
+                        })),
+                      });
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="completed" id="completed" />
+                      <Label htmlFor="completed">Completed</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="posted" id="posted" />
+                      <Label htmlFor="posted">Uncompleted</Label>
+                    </div>
+                  </RadioGroup>
                 )}
               </Tabs.TabsContent>
             );

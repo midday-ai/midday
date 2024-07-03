@@ -26,7 +26,7 @@ export function TransactionStatus({ fullfilled }: Props) {
           side="left"
           sideOffset={10}
         >
-          Missing attachment
+          Missing receipt
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
