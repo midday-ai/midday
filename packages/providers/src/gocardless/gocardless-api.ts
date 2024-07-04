@@ -21,6 +21,7 @@ import type {
   PostRequisitionsRequest,
   PostRequisitionsResponse,
 } from "./types";
+import { getMaxHistoricalDays } from "./utils";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
@@ -162,6 +163,10 @@ export class GoCardLessApi {
     transactionTotalDays,
   }: PostEndUserAgreementRequest): Promise<PostCreateAgreementResponse> {
     const token = await this.#getAccessToken();
+    const maxHistoricalDays = getMaxHistoricalDays({
+      institutionId,
+      transactionTotalDays,
+    });
 
     return this.#post<PostCreateAgreementResponse>(
       "/api/v2/agreements/enduser/",
@@ -170,7 +175,7 @@ export class GoCardLessApi {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
         access_valid_for_days: this.#accessValidForDays,
-        max_historical_days: transactionTotalDays,
+        max_historical_days: maxHistoricalDays,
       }
     );
   }
