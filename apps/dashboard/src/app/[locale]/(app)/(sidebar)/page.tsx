@@ -37,7 +37,7 @@ export default async function Overview({ searchParams }) {
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
     : {
-        id: "last_30d",
+        id: "this_year",
         from: startOfMonth(new Date()).toISOString(),
         to: new Date().toISOString(),
       };

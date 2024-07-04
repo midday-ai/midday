@@ -26,7 +26,7 @@ export default {
     done: "Slutförda",
   },
   spending_period: {
-    last_30d: "Senaste 30d",
+    last_30d: "Senaste 30 dagarna",
     this_month: "Den här månaden",
     last_month: "Förra månaden",
     this_year: "Det här året",
