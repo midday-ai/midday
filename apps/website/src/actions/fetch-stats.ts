@@ -25,7 +25,7 @@ export async function fetchStats() {
     async () => {
       return Promise.all([
         supabase
-          .from("users")
+          .from("teams")
           .select("id", { count: "exact", head: true })
           .limit(1),
         supabase
