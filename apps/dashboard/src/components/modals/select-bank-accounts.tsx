@@ -26,14 +26,12 @@ import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-// import {
-//   parseAsBoolean,
-//   parseAsString,
-//   parseAsStringEnum,
-//   useQueryStates,
-// } from "nuqs";
-import queryString from "query-string";
+import {
+  parseAsBoolean,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryStates,
+} from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
@@ -65,24 +63,17 @@ export function SelectBankAccountsModal() {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
-  const router = useRouter();
 
-  // const [_, setParams] = useQueryStates({
-  //   step: parseAsStringEnum(["connect", "account", "gocardless"]),
-  //   error: parseAsBoolean,
-  //   ref: parseAsString,
-  //   token: parseAsString,
-  //   enrollment_id: parseAsString,
-  //   institution_id: parseAsString,
-  //   provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
-  // countryCode: parseAsString
-  // });
-
-  // NOTE: GoCardLess sometimes return amp; back in the redirect URL
-  // Once fixed we can use nuqs and uninstall query-string
-  const params = queryString.parse(
-    window.location.search.replaceAll("amp;", "")
-  );
+  const [params, setParams] = useQueryStates({
+    step: parseAsStringEnum(["connect", "account", "gocardless"]),
+    error: parseAsBoolean,
+    ref: parseAsString,
+    token: parseAsString,
+    enrollment_id: parseAsString,
+    institution_id: parseAsString,
+    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
+    countryCode: parseAsString,
+  });
 
   const {
     provider,
@@ -98,14 +89,13 @@ export function SelectBankAccountsModal() {
   const isOpen = step === "account" && !error;
 
   const onClose = () => {
-    router.push("/");
-    // setParams(
-    //   { step: null },
-    //   {
-    //     // NOTE: Rerender so the overview modal is visible
-    //     shallow: false,
-    //   }
-    // );
+    setParams(
+      { step: null },
+      {
+        // NOTE: Rerender so the overview modal is visible
+        shallow: false,
+      }
+    );
   };
 
   const connectBankAction = useAction(connectBankAccountAction, {

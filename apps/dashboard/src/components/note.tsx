@@ -1,4 +1,4 @@
-import { UpdateTransactionValues } from "@/actions/schema";
+import type { UpdateTransactionValues } from "@/actions/schema";
 import { Textarea } from "@midday/ui/textarea";
 import { useState } from "react";
 
@@ -19,12 +19,14 @@ export function Note({ id, defaultValue, updateTransaction }: Props) {
       autoFocus
       placeholder="Note"
       className="min-h-[100px] resize-none"
-      onBlur={() =>
-        updateTransaction({
-          id,
-          note: value,
-        })
-      }
+      onBlur={() => {
+        if (value?.length > 0) {
+          updateTransaction({
+            id,
+            note: value,
+          });
+        }
+      }}
       onChange={(evt) => setValue(evt.target.value)}
     />
   );
