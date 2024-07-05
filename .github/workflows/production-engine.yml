@@ -22,6 +22,7 @@ jobs:
         working-directory: ./apps/engine
       - name: 🪐 Check TypeScript
         run: bun run check:types
+        working-directory: ./apps/engine
       - name: 🧪 Run unit tests
         run: bun test
         working-directory: ./apps/engine
