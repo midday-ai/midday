@@ -1,7 +1,8 @@
-import { app } from "@/app";
+import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
 import { createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   AccountBalanceParamsSchema,
@@ -9,6 +10,8 @@ import {
   AccountsParamsSchema,
   AccountsSchema,
 } from "./schema";
+
+const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 const indexRoute = createRoute({
   method: "get",
@@ -88,7 +91,7 @@ app.openapi(indexRoute, async (c) => {
     {
       data,
     },
-    200,
+    200
   );
 });
 
@@ -112,7 +115,7 @@ app.openapi(balanceRoute, async (c) => {
     {
       data,
     },
-    200,
+    200
   );
 });
 

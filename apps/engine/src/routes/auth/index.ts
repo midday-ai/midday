@@ -1,8 +1,9 @@
-import { app } from "@/app";
+import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { createRoute } from "@hono/zod-openapi";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   GoCardLessExchangeBodySchema,
@@ -14,6 +15,8 @@ import {
   PlaidLinkBodySchema,
   PlaidLinkSchema,
 } from "./schema";
+
+const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 const linkPlaidRoute = createRoute({
   method: "post",
@@ -202,7 +205,7 @@ app.openapi(linkGoCardLessRoute, async (c) => {
     {
       data,
     },
-    200,
+    200
   );
 });
 
@@ -225,7 +228,7 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
     {
       data,
     },
-    200,
+    200
   );
 });
 

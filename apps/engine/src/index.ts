@@ -1,17 +1,20 @@
+import type { Bindings } from "@/common/bindings";
 import { swaggerUI } from "@hono/swagger-ui";
+import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Env } from "hono";
 import { env } from "hono/adapter";
 import { bearerAuth } from "hono/bearer-auth";
 import { cache } from "hono/cache";
 import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
-import { app } from "./app";
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
 import { logger as customLogger } from "./utils/logger";
+
+const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 const apiRoutes = app.use(
   "/api/*",
@@ -26,7 +29,7 @@ const apiRoutes = app.use(
   cache({
     cacheName: "engine",
     cacheControl: "max-age=3600",
-  }),
+  })
 );
 
 apiRoutes
@@ -44,7 +47,7 @@ apiRoutes.get(
   "/",
   swaggerUI({
     url: "/openapi",
-  }),
+  })
 );
 
 app.doc("/openapi", {
