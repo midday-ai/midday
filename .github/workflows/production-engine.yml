@@ -1,4 +1,4 @@
-name: Preview Deployment - Engine
+name: Production Deployment - Engine
 env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
 on:
@@ -8,7 +8,7 @@ on:
     paths:
       - apps/engine/**
 jobs:
-  deploy-preview:
+  deploy-production:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
