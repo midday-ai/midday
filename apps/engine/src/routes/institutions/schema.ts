@@ -1,4 +1,5 @@
 import { z } from "@hono/zod-openapi";
+import { object } from "zod";
 
 export const InstitutionSchema = z
   .object({
@@ -18,10 +19,6 @@ export const InstitutionSchema = z
   })
   .openapi("InstitutionSchema");
 
-export const SearchSchema = z
-  .object({
-    query: z.string().openapi({
-      example: "Chase",
-    }),
-  })
-  .openapi("SearchSchema");
+export const SearchSchema = z.object({
+  data: z.array(InstitutionSchema).openapi("SearchSchema"),
+});

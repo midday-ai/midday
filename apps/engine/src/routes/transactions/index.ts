@@ -1,10 +1,9 @@
+import { app } from "@/app";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { TransactionsParamsSchema, TransactionsSchema } from "./schema";
-
-const app = new OpenAPIHono();
 
 const indexRoute = createRoute({
   method: "get",
@@ -36,7 +35,7 @@ const indexRoute = createRoute({
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
   const { provider, accountId, accountType, latest, accessToken } =
-    c.req.query();
+    c.req.valid("query");
 
   const api = new Provider({
     provider,
@@ -45,30 +44,19 @@ app.openapi(indexRoute, async (c) => {
     envs,
   });
 
-  try {
-    const data = await api.getTransactions({
-      accountId,
-      accessToken,
-      accountType,
-      latest,
-    });
+  const data = await api.getTransactions({
+    accountId,
+    accessToken,
+    accountType,
+    latest,
+  });
 
-    return c.json(
-      {
-        data,
-      },
-      200
-    );
-  } catch (error) {
-    console.log(error);
-
-    return c.json(
-      {
-        message: error.message,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      data,
+    },
+    200,
+  );
 });
 
 export default app;

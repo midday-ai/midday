@@ -10,7 +10,7 @@ exports[`Transform income transaction 1`] = `
   "currency_source": null,
   "date": "2024-02-23",
   "description": null,
-  "internal_id": "86b1bc36e6a6d2a5dee8ff7138920255",
+  "id": "86b1bc36e6a6d2a5dee8ff7138920255",
   "method": "transfer",
   "name": "Lön 160434262327",
   "status": "posted",
@@ -20,6 +20,7 @@ exports[`Transform income transaction 1`] = `
 exports[`Transform accounts 1`] = `
 {
   "currency": "SEK",
+  "enrollment_id": null,
   "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
   "institution": {
     "id": "PLEO_PLEODK00",
@@ -28,6 +29,7 @@ exports[`Transform accounts 1`] = `
   },
   "name": "Pleo Account",
   "provider": "gocardless",
+  "type": "depository",
 }
 `;
 

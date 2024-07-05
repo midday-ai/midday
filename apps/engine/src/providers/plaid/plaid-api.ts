@@ -69,7 +69,7 @@ export class PlaidApi {
   async getHealthCheck() {
     try {
       const response = await fetch(
-        "https://status.plaid.com/api/v2/status.json"
+        "https://status.plaid.com/api/v2/status.json",
       );
 
       const data: GetStatusResponse = await response.json();
@@ -145,6 +145,7 @@ export class PlaidApi {
         cursor = data.next_cursor;
       }
     }
+
     // NOTE: Plaid transactions for all accounts
     // we need to filter based on the provided accountId
     return added.filter((transaction) => transaction.account_id === accountId);
@@ -208,7 +209,7 @@ export class PlaidApi {
             })
             .then(({ data }) => {
               return data.institutions;
-            })
+            }),
         ),
     });
   }

@@ -1,10 +1,9 @@
+import { app } from "@/app";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { HealthSchema } from "./schema";
-
-const app = new OpenAPIHono();
 
 const indexRoute = createRoute({
   method: "get",
@@ -36,13 +35,29 @@ app.openapi(indexRoute, async (c) => {
   const api = new Provider();
 
   const data = await api.getHealthCheck({
+    kv: c.env.KV,
     fetcher: c.env.TELLER_CERT,
     envs,
   });
 
   const isHealthy = Object.values(data).every((service) => service.healthy);
 
-  return c.json(data, isHealthy ? 200 : 400);
+  if (isHealthy) {
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  }
+
+  return c.json(
+    {
+      message: "Service unhelthy",
+      code: 400,
+    },
+    400,
+  );
 });
 
 export default app;

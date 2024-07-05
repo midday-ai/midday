@@ -103,17 +103,17 @@ const transformDescription = ({
 };
 
 export const transformTransaction = (
-  transaction: TransformTransaction
+  transaction: TransformTransaction,
 ): BaseTransaction => {
   const method = mapTransactionMethod(
-    transaction?.proprietaryBankTransactionCode
+    transaction?.proprietaryBankTransactionCode,
   );
 
   let currencyExchange: { rate: number; currency: string } | undefined;
 
   if (Array.isArray(transaction.currencyExchange)) {
     const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? ""
+      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
     );
 
     if (rate) {
@@ -129,20 +129,23 @@ export const transformTransaction = (
   }
 
   const name = transformTransactionName(transaction);
+  const description = transformDescription({ transaction, name }) ?? null;
+  const balance = transaction?.balanceAfterTransaction?.balanceAmount?.amount
+    ? +transaction.balanceAfterTransaction.balanceAmount.amount
+    : null;
 
   return {
+    id: transaction.internalTransactionId,
     date: transaction.bookingDate,
     name,
     method,
-    internal_id: transaction.internalTransactionId,
     amount: +transaction.transactionAmount.amount,
     currency: transaction.transactionAmount.currency,
     category: mapTransactionCategory(transaction),
     currency_rate: currencyExchange?.rate || null,
     currency_source: currencyExchange?.currency || null,
-    balance:
-      transaction?.balanceAfterTransaction?.balanceAmount?.amount || null,
-    description: transformDescription({ transaction, name }),
+    balance,
+    description,
     status: "posted",
   };
 };
@@ -170,23 +173,27 @@ export const transformAccount = ({
 }: TransformAccount): BaseAccount => {
   return {
     id,
+    type: "depository",
     name: transformAccountName({
       name: account.name,
       bank,
       product: account.product,
     }),
     currency: account.currency,
-    institution: bank && {
-      id: bank?.id,
-      logo: bank?.logo,
-      name: bank?.name,
-    },
+    institution: bank
+      ? {
+          id: bank?.id,
+          logo: bank?.logo,
+          name: bank?.name,
+        }
+      : null,
     provider: "gocardless",
+    enrollment_id: null,
   };
 };
 
 export const transformAccountBalance = (
-  account?: TransformAccountBalance
+  account?: TransformAccountBalance,
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),

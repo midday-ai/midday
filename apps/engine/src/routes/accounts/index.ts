@@ -1,10 +1,14 @@
+import { app } from "@/app";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
+import { createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import { AccountSchema, AccountsParamsSchema, AccountsSchema } from "./schema";
-
-const app = new OpenAPIHono();
+import {
+  AccountBalanceParamsSchema,
+  AccountBalanceSchema,
+  AccountsParamsSchema,
+  AccountsSchema,
+} from "./schema";
 
 const indexRoute = createRoute({
   method: "get",
@@ -33,53 +37,18 @@ const indexRoute = createRoute({
   },
 });
 
-app.openapi(indexRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accessToken, institutionId, id, countryCode } =
-    c.req.query();
-
-  try {
-    const api = new Provider({
-      provider,
-      fetcher: c.env.TELLER_CERT,
-      envs,
-    });
-
-    const data = await api.getAccounts({
-      id,
-      countryCode,
-      accessToken,
-      institutionId,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200
-    );
-  } catch (error) {
-    return c.json(
-      {
-        message: error.message,
-      },
-      400
-    );
-  }
-});
-
 const balanceRoute = createRoute({
   method: "get",
   path: "/balance",
   summary: "Get Account Balance",
   request: {
-    query: AccountsParamsSchema,
+    query: AccountBalanceParamsSchema,
   },
   responses: {
     200: {
       content: {
         "application/json": {
-          schema: AccountSchema,
+          schema: AccountBalanceSchema,
         },
       },
       description: "Retrieve account balance",
@@ -95,38 +64,56 @@ const balanceRoute = createRoute({
   },
 });
 
+app.openapi(indexRoute, async (c) => {
+  const envs = env(c);
+
+  const { provider, accessToken, institutionId, id, countryCode } =
+    c.req.valid("query");
+
+  const api = new Provider({
+    provider,
+    kv: c.env.KV,
+    fetcher: c.env.TELLER_CERT,
+    envs,
+  });
+
+  const data = await api.getAccounts({
+    id,
+    countryCode,
+    accessToken,
+    institutionId,
+  });
+
+  return c.json(
+    {
+      data,
+    },
+    200,
+  );
+});
+
 app.openapi(balanceRoute, async (c) => {
   const envs = env(c);
-  const { provider, accessToken, accountId } = c.req.query();
+  const { provider, accessToken, id } = c.req.valid("query");
 
-  try {
-    const api = new Provider({
-      provider,
-      fetcher: c.env.TELLER_CERT,
-      envs,
-    });
+  const api = new Provider({
+    provider,
+    fetcher: c.env.TELLER_CERT,
+    kv: c.env.KV,
+    envs,
+  });
 
-    const data = await api.getAccountBalance({
-      accessToken,
-      accountId,
-    });
+  const data = await api.getAccountBalance({
+    accessToken,
+    accountId: id,
+  });
 
-    return c.json(
-      {
-        data,
-      },
-      200
-    );
-  } catch (error) {
-    console.log(error);
-
-    return c.json(
-      {
-        message: error.message,
-      },
-      400
-    );
-  }
+  return c.json(
+    {
+      data,
+    },
+    200,
+  );
 });
 
 export default app;

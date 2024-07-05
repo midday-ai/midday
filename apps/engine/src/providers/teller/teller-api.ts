@@ -80,7 +80,7 @@ export class TellerApi {
   async #get<TResponse>(
     path: string,
     token?: string,
-    params?: Record<string, string | number | undefined>
+    params?: Record<string, string | number | undefined>,
   ): Promise<TResponse> {
     const url = new URL(`${this.#baseUrl}/${path}`);
 

@@ -1,20 +1,20 @@
 {
-    "compilerOptions": {
-      "target": "ESNext",
-      "module": "ESNext",
-      "moduleResolution": "Bundler",
-      "baseUrl": ".",
-        "paths": {
-          "@/*": ["./src/*"]
-        },
-      "strict": true,
-      "lib": [
-        "ESNext"
-      ],
-      "types": [
-        "@cloudflare/workers-types"
-      ],
-      "jsx": "react-jsx",
-      "jsxImportSource": "hono/jsx",
+  "compilerOptions": {
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
     },
+    "strict": true,
+    "types": ["@cloudflare/workers-types", "bun-types"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
+    "lib": ["ESNext"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true
   }
+}

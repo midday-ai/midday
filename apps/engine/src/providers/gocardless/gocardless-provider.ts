@@ -15,7 +15,7 @@ import {
 export class GoCardLessProvider implements Provider {
   #api: GoCardLessApi;
 
-  constructor(params: ProviderParams) {
+  constructor(params: Omit<ProviderParams, "provider">) {
     this.#api = new GoCardLessApi(params);
   }
 

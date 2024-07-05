@@ -1,5 +1,13 @@
 import { expect, test } from "bun:test";
 import {
+  AccountSubtype,
+  AccountType,
+  CounterpartyType,
+  TransactionCode,
+  TransactionPaymentChannelEnum,
+  TransactionTransactionTypeEnum,
+} from "plaid";
+import {
   transformAccount,
   transformAccountBalance,
   transformTransaction,
@@ -24,8 +32,7 @@ test("Transform pending transaction", () => {
             entity_id: "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
             logo_url: "https://plaid-merchant-logos.plaid.com/uber_1060.png",
             name: "Uber",
-            phone_number: null,
-            type: "merchant",
+            type: CounterpartyType.Merchant,
             website: "uber.com",
           },
         ],
@@ -46,7 +53,7 @@ test("Transform pending transaction", () => {
         merchant_entity_id: "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
         merchant_name: "Uber",
         name: "Uber 063015 SF**POOL**",
-        payment_channel: "online",
+        payment_channel: TransactionPaymentChannelEnum.Online,
         payment_meta: {
           by_order_of: null,
           payee: null,
@@ -68,11 +75,11 @@ test("Transform pending transaction", () => {
           "https://plaid-category-icons.plaid.com/PFC_TRANSPORTATION.png",
         transaction_code: null,
         transaction_id: "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
-        transaction_type: "special",
+        transaction_type: TransactionTransactionTypeEnum.Special,
         unofficial_currency_code: null,
         website: "uber.com",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -96,8 +103,7 @@ test("Transform income transaction", () => {
             logo_url:
               "https://plaid-merchant-logos.plaid.com/united_airlines_1065.png",
             name: "United Airlines",
-            phone_number: null,
-            type: "merchant",
+            type: CounterpartyType.Merchant,
             website: "united.com",
           },
         ],
@@ -119,7 +125,7 @@ test("Transform income transaction", () => {
         merchant_entity_id: "NKDjqyAdQQzpyeD8qpLnX0D6yvLe2KYKYYzQ4",
         merchant_name: "United Airlines",
         name: "United Airlines",
-        payment_channel: "in store",
+        payment_channel: TransactionPaymentChannelEnum.InStore,
         payment_meta: {
           by_order_of: null,
           payee: null,
@@ -141,11 +147,11 @@ test("Transform income transaction", () => {
           "https://plaid-category-icons.plaid.com/PFC_TRAVEL.png",
         transaction_code: null,
         transaction_id: "5QKmMdaKWgtzkvKEPmqriLZR1mV3kMF5X9EeX",
-        transaction_type: "special",
+        transaction_type: TransactionTransactionTypeEnum.Special,
         unofficial_currency_code: null,
         website: "united.com",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -168,8 +174,7 @@ test("Transform type transfer", () => {
             entity_id: "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
             logo_url: "https://plaid-merchant-logos.plaid.com/uber_1060.png",
             name: "Uber",
-            phone_number: null,
-            type: "merchant",
+            type: CounterpartyType.Merchant,
             website: "uber.com",
           },
         ],
@@ -190,7 +195,7 @@ test("Transform type transfer", () => {
         merchant_entity_id: "eyg8o776k0QmNgVpAmaQj4WgzW9Qzo6O51gdd",
         merchant_name: "Uber",
         name: "Uber 063015 SF**POOL**",
-        payment_channel: "online",
+        payment_channel: TransactionPaymentChannelEnum.Online,
         payment_meta: {
           by_order_of: null,
           payee: null,
@@ -210,13 +215,13 @@ test("Transform type transfer", () => {
         },
         personal_finance_category_icon_url:
           "https://plaid-category-icons.plaid.com/PFC_TRANSPORTATION.png",
-        transaction_code: "transfer",
+        transaction_code: TransactionCode.Transfer,
         transaction_id: "NxkDjlyk45cQoDm5PEqJuKJaw6qrj9cy89zBA",
-        transaction_type: "special",
+        transaction_type: TransactionTransactionTypeEnum.Special,
         unofficial_currency_code: null,
         website: "uber.com",
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -234,14 +239,14 @@ test("Transform accounts", () => {
       mask: "8888",
       name: "Plaid Mortgage",
       official_name: null,
-      subtype: "mortgage",
-      type: "loan",
+      subtype: AccountSubtype.Mortgage,
+      type: AccountType.Loan,
       institution: {
         id: "ins_100546",
         name: "American Funds Retirement Solutions",
         logo: null,
       },
-    })
+    }),
   ).toMatchSnapshot();
 });
 
@@ -253,6 +258,6 @@ test("Transform account balance", () => {
       iso_currency_code: "USD",
       limit: null,
       unofficial_currency_code: null,
-    })
+    }),
   ).toMatchSnapshot();
 });

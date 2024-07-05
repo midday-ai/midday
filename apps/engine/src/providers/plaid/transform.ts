@@ -1,4 +1,4 @@
-import { type AccountType, getType } from "@/utils/account";
+import { getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type { Transaction, TransactionCode } from "plaid";
 import type {
@@ -9,7 +9,7 @@ import type {
 import type {
   TransformAccount,
   TransformAccountBalance,
-  TransformTransaction,
+  TransformTransactionPayload,
 } from "./types";
 
 export const mapTransactionMethod = (type?: TransactionCode | null) => {
@@ -144,23 +144,21 @@ const transformDescription = (transaction: Transaction) => {
   return null;
 };
 
-type TransformTransactionPayload = {
-  transaction: TransformTransaction;
-  accountType: AccountType;
-};
-
 export const transformTransaction = ({
   transaction,
 }: TransformTransactionPayload): BaseTransaction => {
   const method = mapTransactionMethod(transaction?.transaction_code);
   const amount = formatAmout(transaction.amount);
+  const description = transformDescription(transaction) ?? null;
 
   return {
+    id: transaction.transaction_id,
     date: transaction.date,
     name: transaction.name,
-    description: transformDescription(transaction),
+    description,
+    currency_rate: null,
+    currency_source: null,
     method,
-    internal_id: transaction.transaction_id,
     amount,
     currency:
       transaction.iso_currency_code ||
@@ -184,14 +182,21 @@ export const transformAccount = ({
     name,
     currency:
       balances.iso_currency_code || balances.unofficial_currency_code || "USD",
-    institution,
+    institution: institution
+      ? {
+          id: institution.id,
+          name: institution.name,
+          logo: institution.logo ?? null,
+        }
+      : null,
     provider: "plaid",
     type: getType(type),
+    enrollment_id: null,
   };
 };
 
 export const transformAccountBalance = (
-  balances?: TransformAccountBalance
+  balances?: TransformAccountBalance,
 ): BaseBalance => ({
   currency:
     balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
