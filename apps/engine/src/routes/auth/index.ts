@@ -205,7 +205,7 @@ app.openapi(linkGoCardLessRoute, async (c) => {
     {
       data,
     },
-    200
+    200,
   );
 });
 
@@ -228,7 +228,7 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
     {
       data,
     },
-    200
+    200,
   );
 });
 

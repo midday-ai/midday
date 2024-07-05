@@ -29,7 +29,7 @@ const apiRoutes = app.use(
   cache({
     cacheName: "engine",
     cacheControl: "max-age=3600",
-  })
+  }),
 );
 
 apiRoutes
@@ -47,7 +47,7 @@ apiRoutes.get(
   "/",
   swaggerUI({
     url: "/openapi",
-  })
+  }),
 );
 
 app.doc("/openapi", {

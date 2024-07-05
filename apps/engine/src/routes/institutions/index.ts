@@ -35,7 +35,7 @@ app.openapi(indexRoute, async (c) => {
     {
       data: [],
     },
-    200
+    200,
   );
 });
 

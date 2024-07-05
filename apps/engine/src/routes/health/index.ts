@@ -50,7 +50,7 @@ app.openapi(indexRoute, async (c) => {
       {
         data,
       },
-      200
+      200,
     );
   }
 
@@ -59,7 +59,7 @@ app.openapi(indexRoute, async (c) => {
       message: "Service unhelthy",
       code: 400,
     },
-    400
+    400,
   );
 });
 
