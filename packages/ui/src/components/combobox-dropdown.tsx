@@ -77,7 +77,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between relative"
         >
           {selectedItem
             ? (
@@ -86,7 +86,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
                 </div>
               ) ?? selectedItem.label
             : placeholder ?? "Select item..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="size-4 opacity-50 absolute right-2" />
         </Button>
       </PopoverTrigger>
 

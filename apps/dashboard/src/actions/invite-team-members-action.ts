@@ -34,18 +34,12 @@ export const inviteTeamMembersAction = action(
       invited_by: user.data.id,
     }));
 
-    // TODO: Filter out members and previous invited emails
-    const filteredInvites = data.filter((invite) => {
-      if (invite.email === user.data.email) {
-        return false;
-      }
-
-      return true;
-    });
-
     const { data: invtesData } = await supabase
       .from("user_invites")
-      .insert(filteredInvites)
+      .upsert(data, {
+        onConflict: "email, team_id",
+        ignoreDuplicates: false,
+      })
       .select("email, code, user:invited_by(*), team:team_id(*)");
 
     const emails = invtesData?.map(async (invites) => ({

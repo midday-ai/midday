@@ -96,7 +96,9 @@ export function SelectCategory({ selected, onChange }: Props) {
       renderSelectedItem={(selectedItem) => (
         <div className="flex items-center space-x-2">
           <CategoryColor color={selectedItem.color} />
-          <span>{selectedItem.label}</span>
+          <span className="text-left truncate max-w-[90%]">
+            {selectedItem.label}
+          </span>
         </div>
       )}
       renderOnCreate={(value) => {
@@ -111,7 +113,7 @@ export function SelectCategory({ selected, onChange }: Props) {
         return (
           <div className="flex items-center space-x-2">
             <CategoryColor color={item.color} />
-            <span>{item.label}</span>
+            <span className="line-clamp-1">{item.label}</span>
           </div>
         );
       }}
