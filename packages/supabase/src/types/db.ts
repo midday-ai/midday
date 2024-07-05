@@ -880,6 +880,13 @@ export type Database = {
         };
         Returns: string;
       };
+      generate_hmac: {
+        Args: {
+          secret_key: string;
+          message: string;
+        };
+        Returns: string;
+      };
       generate_id: {
         Args: {
           size: number;
@@ -943,6 +950,10 @@ export type Database = {
         };
         Returns: number;
       };
+      get_current_user_team_id: {
+        Args: Record<PropertyKey, never>;
+        Returns: string;
+      };
       get_profit: {
         Args: {
           team_id: string;
@@ -977,22 +988,6 @@ export type Database = {
         Returns: number;
       };
       get_spending: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          currency_target: string;
-        };
-        Returns: {
-          name: string;
-          slug: string;
-          amount: number;
-          currency: string;
-          color: string;
-          percentage: number;
-        }[];
-      };
-      get_spending_v2: {
         Args: {
           team_id: string;
           date_from: string;
