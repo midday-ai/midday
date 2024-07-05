@@ -39,20 +39,6 @@ client.defineJob({
           accessToken: account.bank_connection?.access_token,
         });
 
-        const accounts = await provider.getAccounts({
-          id: account.account_id,
-          accessToken: account.bank_connection?.access_token,
-        });
-
-        const account = accounts.find(
-          (account) => account.id === account.account_id
-        );
-
-        await io.logger.debug("Account type", {
-          type: account?.type,
-          id: account.account_id,
-        });
-
         // Update bank account
         await io.supabase.client
           .from("bank_accounts")
