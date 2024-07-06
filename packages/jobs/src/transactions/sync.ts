@@ -106,6 +106,17 @@ client.defineJob({
             },
           });
 
+          // If unhandled inbox items
+          await io.sendEvent("Match Transactions", {
+            name: Events.TRANSACTIONS_MATCH,
+            payload: {
+              teamId,
+              transactionIds: transactionsData.map(
+                (transaction) => transaction.id
+              ),
+            },
+          });
+
           revalidateTag(`transactions_${teamId}`);
           revalidateTag(`spending_${teamId}`);
           revalidateTag(`metrics_${teamId}`);
