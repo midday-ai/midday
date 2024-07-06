@@ -39,11 +39,9 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const supabase = await io.supabase.client;
-
     const { filePath, teamId } = payload;
 
-    const { data } = await supabase.storage
+    const { data } = await io.supabase.client.storage
       .from("vault")
       .download(filePath.join("/"));
 

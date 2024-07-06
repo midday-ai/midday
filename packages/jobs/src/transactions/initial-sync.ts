@@ -21,8 +21,6 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const supabase = await io.supabase.client;
-
     const { teamId } = payload;
 
     const settingUpAccount = await io.createStatus("setting-up-account-bank", {
@@ -44,7 +42,7 @@ client.defineJob({
       await io.logger.debug(`Error register new scheduler for team: ${teamId}`);
     }
 
-    const { data: accountsData } = await supabase
+    const { data: accountsData } = await io.supabase.client
       .from("bank_accounts")
       .select(
         "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
@@ -80,7 +78,7 @@ client.defineJob({
           category_slug: category,
         }));
 
-        await supabase.from("transactions").upsert(formatted, {
+        await io.supabase.client.from("transactions").upsert(formatted, {
           onConflict: "internal_id",
           ignoreDuplicates: true,
         });

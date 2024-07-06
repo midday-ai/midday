@@ -21,8 +21,6 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const client = await io.supabase.client;
-
     const { transactionIds, teamId, locale } = payload;
 
     const filePath = `export-${new Date().toISOString()}`;
@@ -38,7 +36,7 @@ client.defineJob({
       },
     });
 
-    const { data, count } = await client
+    const { data, count } = await io.supabase.client
       .from("transactions")
       .select(
         `
@@ -182,7 +180,7 @@ client.defineJob({
       },
     });
 
-    await client.storage
+    await io.supabase.client.storage
       .from("vault")
       .upload(`${path}/${fileName}`, await zip.arrayBuffer(), {
         upsert: true,

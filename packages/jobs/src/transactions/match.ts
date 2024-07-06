@@ -27,9 +27,7 @@ client.defineJob({
   run: async (payload, io) => {
     const { transactionIds, teamId } = payload;
 
-    const client = await io.supabase.client;
-
-    const { data } = await client
+    const { data } = await io.supabase.client
       .from("transactions")
       .select("id, name, amount")
       .in("id", transactionIds)
@@ -38,7 +36,7 @@ client.defineJob({
     const promises = data?.map(async (transaction) => {
       // NOTE: All inbox receipts and invoices amount are
       // saved with positive values while transactions have signed values
-      const { data: inboxData } = await client
+      const { data: inboxData } = await io.supabase.client
         .from("inbox")
         .select("*")
         .eq("amount", Math.abs(transaction.amount))
@@ -48,7 +46,7 @@ client.defineJob({
       if (inboxData && inboxData.length === 1) {
         const inbox = inboxData.at(0);
 
-        const { data: attachmentData } = await client
+        const { data: attachmentData } = await io.supabase.client
           .from("transaction_attachments")
           .insert({
             type: inbox.content_type,
@@ -61,18 +59,21 @@ client.defineJob({
           .select()
           .single();
 
-        const { data: updatedInboxData } = await updateInboxById(client, {
-          id: inbox.id,
-          attachment_id: attachmentData.id,
-          transaction_id: transaction.id,
-          read: true,
-        });
+        const { data: updatedInboxData } = await updateInboxById(
+          io.supabase.client,
+          {
+            id: inbox.id,
+            attachment_id: attachmentData.id,
+            transaction_id: transaction.id,
+            read: true,
+          }
+        );
 
         if (!updatedInboxData) {
           return null;
         }
 
-        const { data: usersData } = await client
+        const { data: usersData } = await io.supabase.client
           .from("users_on_team")
           .select(
             "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
