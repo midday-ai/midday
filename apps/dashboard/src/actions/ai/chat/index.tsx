@@ -34,21 +34,6 @@ const ratelimit = new Ratelimit({
   redis: RedisClient,
 });
 
-export async function selectModel() {
-  return openai("gpt-4o");
-
-  // const settings = await getAssistantSettings();
-
-  // switch (settings.provider) {
-  //   case "mistralai": {
-  //     return mistral("mistral-large-latest");
-  //   }
-  //   default: {
-  //     return openai("gpt-4o");
-  //   }
-  // }
-}
-
 export async function submitUserMessage(
   content: string
 ): Promise<ClientMessage> {
@@ -63,8 +48,6 @@ export async function submitUserMessage(
     currency:
       (await getBankAccountsCurrencies())?.data?.at(0)?.currency ?? "USD",
   };
-
-  const model = await selectModel();
 
   const { success } = await ratelimit.limit(ip);
 
@@ -101,7 +84,7 @@ export async function submitUserMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model,
+    model: openai("gpt-4o"),
     initial: <SpinnerMessage />,
     system: `\
     You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.

@@ -1,4 +1,6 @@
 import "./src/env.mjs";
+import fs from "node:fs/promises";
+import path from "node:path";
 import bundleAnalyzer from "@next/bundle-analyzer";
 
 const withBundleAnalyzer = bundleAnalyzer({
@@ -57,3 +59,34 @@ const config = {
 };
 
 export default withBundleAnalyzer(config);
+
+async function copyFiles() {
+  try {
+    await fs.access("public/");
+  } catch {
+    await fs.mkdir("public/", { recursive: true });
+  }
+
+  const wasmFiles = (
+    await fs.readdir("../../node_modules/onnxruntime-web/dist/")
+  ).filter((file) => path.extname(file) === ".wasm");
+
+  await Promise.all([
+    fs.copyFile(
+      "../../node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js",
+      "public/vad.worklet.bundle.min.js",
+    ),
+    fs.copyFile(
+      "../../node_modules/@ricky0123/vad-web/dist/silero_vad.onnx",
+      "public/silero_vad.onnx",
+    ),
+    ...wasmFiles.map((file) =>
+      fs.copyFile(
+        `../../node_modules/onnxruntime-web/dist/${file}`,
+        `public/${file}`,
+      ),
+    ),
+  ]);
+}
+
+copyFiles();

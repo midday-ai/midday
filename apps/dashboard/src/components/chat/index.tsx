@@ -4,9 +4,11 @@ import type { ClientMessage } from "@/actions/ai/types";
 import { useEnterSubmit } from "@/hooks/use-enter-submit";
 import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { useAssistantStore } from "@/store/assistant";
+import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
-import { useMediaQuery } from "@uidotdev/usehooks";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
@@ -24,12 +26,14 @@ export function Chat({
   input,
   setInput,
   showFeedback,
+  openVocie,
+  isVoice,
+  isUserSpeaking,
 }) {
   const { submitUserMessage } = useActions();
   const { formRef, onKeyDown } = useEnterSubmit();
   const ref = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-
   const { message } = useAssistantStore();
 
   const onSubmit = async (input: string) => {
@@ -76,7 +80,7 @@ export function Chat({
   const { messagesRef, scrollRef, visibilityRef, scrollToBottom } =
     useScrollAnchor();
 
-  const showExamples = messages.length === 0 && !input;
+  const showExamples = messages.length === 0 && !input && !isVoice;
 
   return (
     <div className="relative">
@@ -85,7 +89,9 @@ export function Chat({
           {messages.length ? (
             <ChatList messages={messages} className="p-4 pb-8" />
           ) : (
-            <ChatEmpty firstName={user?.full_name.split(" ").at(0)} />
+            !isVoice && (
+              <ChatEmpty firstName={user?.full_name.split(" ").at(0)} />
+            )
           )}
 
           <div className="w-full h-px" ref={visibilityRef} />
@@ -117,6 +123,21 @@ export function Chat({
               setInput(evt.target.value);
             }}
           />
+
+          <Button
+            className="absolute top-[5px] right-2 hover:bg-transparent"
+            variant="ghost"
+            size="icon"
+            onClick={openVocie}
+          >
+            <Icons.Mic
+              className={cn(
+                "size-5",
+                isVoice && "text-red-500",
+                isUserSpeaking && "animate-pulse"
+              )}
+            />
+          </Button>
         </form>
 
         <ChatFooter

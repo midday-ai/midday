@@ -11,14 +11,17 @@ import { useHotkeys } from "react-hotkeys-hook";
 import { AssistantFeedback } from "./feedback";
 import { Header } from "./header";
 import { SidebarList } from "./sidebar-list";
+import { VoiceAssistant } from "./vocie-assistant";
 
 export function Assistant() {
   const [isExpanded, setExpanded] = useState(false);
+  const [isVoice, setVoice] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [chatId, setChatId] = useState();
   const [messages, setMessages] = useUIState<typeof AI>();
   const [aiState, setAIState] = useAIState<typeof AI>();
   const [input, setInput] = useState<string>("");
+  const [isUserSpeaking, setUserSpeeking] = useState(false);
 
   const toggleOpen = () => setExpanded((prev) => !prev);
 
@@ -69,6 +72,8 @@ export function Assistant() {
 
       <Header toggleSidebar={toggleOpen} isExpanded={isExpanded} />
 
+      {isVoice && <VoiceAssistant setUserSpeeking={setUserSpeeking} />}
+
       <Chat
         submitMessage={setMessages}
         messages={messages}
@@ -77,6 +82,9 @@ export function Assistant() {
         setInput={setInput}
         input={input}
         showFeedback={() => setShowFeedback(true)}
+        openVocie={() => setVoice((prev) => !prev)}
+        isVoice={isVoice}
+        isUserSpeaking={isUserSpeaking}
       />
     </div>
   );

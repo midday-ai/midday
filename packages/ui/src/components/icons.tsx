@@ -32,6 +32,7 @@ import {
   MdKeyboardArrowRight,
   MdKeyboardArrowUp,
   MdMenu,
+  MdMicNone,
   MdMoreHoriz,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
@@ -543,4 +544,5 @@ export const Icons = {
   Menu: MdMenu,
   Mute: MdOutlineVolumeOff,
   UnMute: MdOutlineVolumeUp,
+  Mic: MdMicNone,
 };

@@ -48,6 +48,7 @@ export const env = createEnv({
     NEXT_PUBLIC_TELLER_ENVIRONMENT: z.string(),
     NEXT_PUBLIC_PLAID_ENVIRONMENT: z.string(),
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID: z.string(),
+    NEXT_PUBLIC_CARTESIA_API_KEY: z.string(),
   },
   /**
    * Destructure all variables from `process.env` to make sure they aren't tree-shaken away.
@@ -87,6 +88,7 @@ export const env = createEnv({
     ENGINE_API_ENDPOINT: process.env.ENGINE_API_ENDPOINT,
     ENGINE_API_SECRET: process.env.ENGINE_API_SECRET,
     WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
+    NEXT_PUBLIC_CARTESIA_API_KEY: process.env.NEXT_PUBLIC_CARTESIA_API_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
