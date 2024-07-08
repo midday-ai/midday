@@ -4,6 +4,7 @@ import { openai } from "@ai-sdk/openai";
 import { getBankAccountsCurrencies } from "@midday/supabase/cached-queries";
 import { generateText } from "ai";
 import { startOfMonth, subMonths } from "date-fns";
+import { getProfitTool } from "./tools/profit";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
 
@@ -50,14 +51,13 @@ export async function voiceMessageAction(history: Message[]) {
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
+      getProfit: getProfitTool({
+        currency: defaultValues.currency,
+        dateFrom: defaultValues.from,
+        dateTo: defaultValues.to,
+      }),
     },
   });
-
-  console.log("here", text);
-
-  console.log(
-    text || toolResults.map((toolResult) => toolResult.result).join("\n")
-  );
 
   return {
     messages: [

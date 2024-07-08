@@ -41,14 +41,9 @@ export function getSpendingTool({ currency, dateFrom, dateTo }: Args) {
         (c) => category.toLowerCase() === c?.name?.toLowerCase()
       );
 
-      const formattedAmount = formatAmount({
-        amount: Math.abs(found.amount),
-        currency,
-      });
-
-      return `Your spending on ${
-        found?.name
-      } is ${formattedAmount} between ${format(
+      return `Your spending on ${found?.name} is ${Math.abs(
+        found.amount
+      )} swedish krona between ${format(
         new Date(startDate),
         "MM/dd/yyyy"
       )} and ${format(new Date(endDate), "MM/dd/yyyy")}`;
