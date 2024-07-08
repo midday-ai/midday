@@ -12,6 +12,7 @@ import {
 } from "plaid";
 import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
+  DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
@@ -29,7 +30,7 @@ export class PlaidApi {
   #clientSecret: string;
 
   #countryCodes = [
-    CountryCode.Ca,
+    // CountryCode.Ca,
     CountryCode.Us,
     // CountryCode.Se,
     // CountryCode.Nl,
@@ -153,7 +154,7 @@ export class PlaidApi {
 
   async linkTokenCreate({
     userId,
-    language = "en",
+    language = "en", // TODO: Add params to api request
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -193,8 +194,15 @@ export class PlaidApi {
     });
   }
 
+  async disconnect({ accessToken }: DisconnectAccountRequest) {
+    await this.#client.itemRemove({
+      access_token: accessToken,
+    });
+  }
+
   async getInstitutions({ countryCode }: GetInstitutionsRequest) {
     return paginate({
+      delay: { milliseconds: 500, onDelay: (message) => console.log(message) },
       pageSize: 500,
       fetchData: (offset, count) =>
         withRetry(() =>
@@ -205,6 +213,7 @@ export class PlaidApi {
               offset,
               options: {
                 include_optional_metadata: true,
+                products: [Products.Transactions],
               },
             })
             .then(({ data }) => {

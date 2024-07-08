@@ -1,15 +1,25 @@
-import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
-import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { TellerApi } from "@/providers/teller/teller-api";
+import { GoCardLessProvider } from "@/providers/gocardless/gocardless-provider";
+import { PlaidProvider } from "@/providers/plaid/plaid-provider";
+import { TellerProvider } from "@/providers/teller/teller-provider";
+import type { ProviderParams } from "@/providers/types";
 
-export async function getInstitutions(countryCode: string) {
-  const gocardless = new GoCardLessApi();
-  const teller = new TellerApi();
-  const plaid = new PlaidApi();
+export async function getInstitutions(
+  params: Omit<
+    ProviderParams & { countryCode: string; storage: R2Bucket },
+    "provider"
+  >
+) {
+  const { countryCode } = params;
 
-  return Promise.allSettled([
-    gocardless.getInstitutions({ countryCode }),
-    teller.getInstitutions({ countryCode }),
+  const gocardless = new GoCardLessProvider(params);
+  const teller = new TellerProvider(params);
+  const plaid = new PlaidProvider(params);
+
+  const result = await Promise.all([
+    // gocardless.getInstitutions({ countryCode }),
+    // teller.getInstitutions({ countryCode }),
     plaid.getInstitutions({ countryCode }),
   ]);
+
+  return result;
 }

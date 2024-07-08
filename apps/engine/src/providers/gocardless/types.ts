@@ -1,3 +1,5 @@
+import type { Providers } from "../types";
+
 export type Transaction = {
   transactionAmount: { amount: string; currency: string };
   currencyExchange?: {
@@ -180,6 +182,13 @@ export type TransactionDescription = {
 };
 
 export type TransformTransaction = Transaction;
+
+export type TransformInstitution = {
+  id: string;
+  name: string;
+  logo: string | null;
+  provider: Providers;
+};
 
 export type TransformAccount = GetAccountsResponse[0];
 

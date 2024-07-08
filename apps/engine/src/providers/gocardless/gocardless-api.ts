@@ -76,8 +76,8 @@ export class GoCardLessApi {
 
   async #getAccessToken(): Promise<string> {
     const [accessToken, refreshToken] = await Promise.all([
-      this.#kv.get(this.#accessTokenCacheKey),
-      this.#kv.get(this.#refreshTokenCacheKey),
+      this.#kv?.get(this.#accessTokenCacheKey),
+      this.#kv?.get(this.#refreshTokenCacheKey),
     ]);
 
     if (typeof accessToken === "string") {
@@ -98,10 +98,10 @@ export class GoCardLessApi {
     );
 
     await Promise.all([
-      this.#kv.put(this.#accessTokenCacheKey, response.access, {
+      this.#kv?.put(this.#accessTokenCacheKey, response.access, {
         expirationTtl: response.access_expires - this.#oneHour,
       }),
-      this.#kv.put(this.#refreshTokenCacheKey, response.refresh, {
+      this.#kv?.put(this.#refreshTokenCacheKey, response.refresh, {
         expirationTtl: response.refresh_expires - this.#oneHour,
       }),
     ]);
@@ -153,11 +153,13 @@ export class GoCardLessApi {
       }
     );
 
-    this.#kv.put(cacheKey, JSON.stringify(response), {
+    this.#kv?.put(cacheKey, JSON.stringify(response), {
       expirationTtl: this.#oneHour,
     });
 
-    return response;
+    return response.filter((insitution) =>
+      insitution.countries.includes(countryCode)
+    );
   }
 
   async buildLink({

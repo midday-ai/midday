@@ -2,6 +2,7 @@ import type { Provider } from "../interface";
 import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
@@ -9,6 +10,7 @@ import { GoCardLessApi } from "./gocardless-api";
 import {
   transformAccount,
   transformAccountBalance,
+  transformInstitution,
   transformTransaction,
 } from "./transform";
 
@@ -55,7 +57,13 @@ export class GoCardLessProvider implements Provider {
     return transformAccountBalance(response);
   }
 
-  async getInstitutions() {
-    return Promise.resolve([]);
+  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+    if (!countryCode) {
+      throw Error("Missing countryCode");
+    }
+
+    const response = await this.#api.getInstitutions({ countryCode });
+
+    return response.map(transformInstitution);
   }
 }

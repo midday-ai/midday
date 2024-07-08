@@ -1,10 +1,10 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
-import { Provider } from "@/providers";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import { InstitutionsSchema } from "./schema";
+import { InstitutionParamsSchema, InstitutionsSchema } from "./schema";
+import { getInstitutions } from "./utils";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -12,6 +12,9 @@ const indexRoute = createRoute({
   method: "get",
   path: "/",
   summary: "Get Institutions",
+  request: {
+    query: InstitutionParamsSchema,
+  },
   responses: {
     200: {
       content: {
@@ -34,26 +37,19 @@ const indexRoute = createRoute({
 
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
-  // const { countryCode } =
-  //   c.req.valid("query");
+  const { countryCode } = c.req.valid("query");
 
-  // const api = new Provider({
-  //   provider,
-  //   fetcher: c.env.TELLER_CERT,
-  //   kv: c.env.KV,
-  //   envs,
-  // });
-
-  // const data = await api.getTransactions({
-  //   accountId,
-  //   accessToken,
-  //   accountType,
-  //   latest,
-  // });
+  const data = await getInstitutions({
+    kv: c.env.KV,
+    fetcher: c.env.TELLER_CERT,
+    storage: c.env.STORAGE.put,
+    envs,
+    countryCode,
+  });
 
   return c.json(
     {
-      data: [],
+      data,
     },
     200
   );

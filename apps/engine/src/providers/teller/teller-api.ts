@@ -1,7 +1,7 @@
 import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
   AuthenticatedRequest,
-  DeleteAccountRequest,
+  DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsResponse,
@@ -62,15 +62,11 @@ export class TellerApi {
   }
 
   async getInstitutions({ countryCode }: GetInstitutionsRequest) {
-    console.log(countryCode);
     return this.#get("/institutions");
   }
 
-  async deleteAccount({
-    accountId,
-    accessToken,
-  }: DeleteAccountRequest): Promise<void> {
-    await this.#fetcher.fetch(`${this.#baseUrl}/accounts/${accountId}`, {
+  async disconnect({ accessToken }: DisconnectAccountRequest): Promise<void> {
+    await this.#fetcher.fetch(`${this.#baseUrl}/accounts`, {
       method: "delete",
       headers: new Headers({
         Authorization: `Basic ${btoa(`${accessToken}:`)}`,

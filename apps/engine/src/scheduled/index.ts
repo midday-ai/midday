@@ -1,12 +1,8 @@
-import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
-import type { ProviderParams } from "@/providers/types";
-import { contryCodes } from "@/utils/countries";
+import { getInstitutions } from "@/routes/institutions/utils";
 import type { Env } from "hono";
 
 export async function syncInstitutions(env: Env) {
-  const gocardless = new GoCardLessApi();
+  const result = await getInstitutions();
 
-  const intitutions = await gocardless.getInstitutions();
-
-  contryCodes.map((countrCode) => {});
+  console.log(result);
 }

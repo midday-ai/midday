@@ -60,8 +60,7 @@ export type Transaction = {
 export type GetTransactionsResponse = Transaction[];
 export type GetTransactionResponse = Transaction;
 
-export type DeleteAccountRequest = {
-  accountId: string;
+export type DisconnectAccountRequest = {
   accessToken: string;
 };
 

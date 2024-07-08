@@ -7,9 +7,9 @@ import type {
   Transaction as BaseTransaction,
 } from "../types";
 import type {
-  Institution,
   TransformAccount,
   TransformAccountBalance,
+  TransformInstitution,
   TransformTransactionPayload,
 } from "./types";
 
@@ -204,8 +204,9 @@ export const transformAccountBalance = (
   amount: balances?.available ?? 0,
 });
 
-export const transformInstitution = (institution: Institution) => ({
-  id: institution.id,
+export const transformInstitution = (institution: TransformInstitution) => ({
+  id: institution.institution_id,
   name: institution.name,
-  logo: institution.logo || null,
+  logo: null, // institution.logo (base64),
+  provider: "plaid",
 });

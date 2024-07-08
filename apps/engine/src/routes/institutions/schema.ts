@@ -1,3 +1,4 @@
+import { ALL_COUNTRIES } from "@/utils/countries";
 import { z } from "@hono/zod-openapi";
 
 export const InstitutionSchema = z
@@ -20,4 +21,15 @@ export const InstitutionSchema = z
 
 export const InstitutionsSchema = z.object({
   data: z.array(InstitutionSchema).openapi("InstitutionsSchema"),
+});
+
+export const InstitutionParamsSchema = z.object({
+  countryCode: z.enum(ALL_COUNTRIES as [string, ...string[]]).openapi({
+    description: "Country code",
+    param: {
+      name: "countryCode",
+      in: "query",
+    },
+    example: ALL_COUNTRIES.at(1),
+  }),
 });

@@ -45,6 +45,12 @@ export type Institution = {
   logo?: string | null;
 };
 
+export type TransformInstitution = {
+  institution_id: string;
+  name: string;
+  logo?: string | null;
+};
+
 export type AccountWithintitution = AccountsGetResponse["accounts"][0] & {
   institution: Institution;
 };
@@ -71,4 +77,8 @@ export interface GetAccountBalanceRequest {
 export type TransformTransactionPayload = {
   transaction: TransformTransaction;
   accountType: AccountType;
+};
+
+export type DisconnectAccountRequest = {
+  accessToken: string;
 };

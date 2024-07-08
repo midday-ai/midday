@@ -7,6 +7,7 @@ import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetHealthCheckResponse,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "./types";
@@ -104,7 +105,7 @@ export class Provider {
     return null;
   }
 
-  async getInstitutions(params: GetAccountsRequest) {
+  async getInstitutions(params: GetInstitutionsRequest) {
     logger("getInstitutions:", `provider: ${this.#provider}`);
 
     const data = await withRetry(() => this.#provider?.getInstitutions(params));

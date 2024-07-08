@@ -5,11 +5,13 @@ import type {
   Transaction as BaseTransaction,
 } from "../types";
 import type {
+  Institution,
   Transaction,
   TransactionDescription,
   TransformAccount,
   TransformAccountBalance,
   TransformAccountName,
+  TransformInstitution,
   TransformTransaction,
 } from "./types";
 
@@ -197,4 +199,13 @@ export const transformAccountBalance = (
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),
+});
+
+export const transformInstitution = (
+  insitution: Institution
+): TransformInstitution => ({
+  id: insitution.id,
+  name: insitution.name,
+  logo: insitution.logo ?? null,
+  provider: "gocardless",
 });
