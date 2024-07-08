@@ -74,16 +74,16 @@ async function copyFiles() {
   await Promise.all([
     fs.copyFile(
       "../../node_modules/@ricky0123/vad-web/dist/vad.worklet.bundle.min.js",
-      "public/vad.worklet.bundle.min.js",
+      "public/worker/vad.worklet.bundle.min.js",
     ),
     fs.copyFile(
       "../../node_modules/@ricky0123/vad-web/dist/silero_vad.onnx",
-      "public/silero_vad.onnx",
+      "public/worker/silero_vad.onnx",
     ),
     ...wasmFiles.map((file) =>
       fs.copyFile(
         `../../node_modules/onnxruntime-web/dist/${file}`,
-        `public/${file}`,
+        `public/worker/${file}`,
       ),
     ),
   ]);

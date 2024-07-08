@@ -56,3 +56,6 @@ tailwind.css
 # Supabase
 .branches
 .temp
+
+
+apps/dashboard/public/worker/*

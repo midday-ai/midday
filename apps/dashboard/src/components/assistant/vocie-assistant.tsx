@@ -20,7 +20,7 @@ export function VoiceAssistant({ setUserSpeeking }) {
   const [isThinking, setThinking] = useState(false);
 
   const tts = useTTS({
-    apiKey: "9b6a5add-8697-40ad-a44c-734052c2e7a4",
+    apiKey: process.env.NEXT_PUBLIC_CARTESIA_API_KEY!,
     sampleRate: 44100,
   });
 
@@ -68,8 +68,8 @@ export function VoiceAssistant({ setUserSpeeking }) {
 
       onSubmit(blob);
     },
-    workletURL: "/vad.worklet.bundle.min.js",
-    modelURL: "/silero_vad.onnx",
+    workletURL: "/worker/vad.worklet.bundle.min.js",
+    modelURL: "/worker/silero_vad.onnx",
     positiveSpeechThreshold: 0.6,
     minSpeechFrames: 4,
     ortConfig(ort) {
@@ -78,10 +78,10 @@ export function VoiceAssistant({ setUserSpeeking }) {
       );
       ort.env.wasm = {
         wasmPaths: {
-          "ort-wasm-simd-threaded.wasm": "/ort-wasm-simd-threaded.wasm",
-          "ort-wasm-simd.wasm": "/ort-wasm-simd.wasm",
-          "ort-wasm.wasm": "/ort-wasm.wasm",
-          "ort-wasm-threaded.wasm": "/ort-wasm-threaded.wasm",
+          "ort-wasm-simd-threaded.wasm": "/worker/ort-wasm-simd-threaded.wasm",
+          "ort-wasm-simd.wasm": "/worker/ort-wasm-simd.wasm",
+          "ort-wasm.wasm": "/worker/ort-wasm.wasm",
+          "ort-wasm-threaded.wasm": "/worker/ort-wasm-threaded.wasm",
         },
         numThreads: isSafari ? 1 : 4,
       };
