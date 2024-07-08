@@ -85,7 +85,19 @@ export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
 
-type HealthCheckResponse = {
+export type GetInstitutionsResponse = {
+  id: string;
+  name: string;
+  logo: string | null;
+  // institutionId?: string; // Plaid
+  // transactionTotalDays: string; // GoCardLess
+}[];
+
+export type GetInstitutionsRequest = {
+  countryCode: string;
+};
+
+export type HealthCheckResponse = {
   healthy: boolean;
 };
 

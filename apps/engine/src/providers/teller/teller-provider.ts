@@ -2,6 +2,7 @@ import type { Provider } from "../interface";
 import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
@@ -39,7 +40,7 @@ export class TellerProvider implements Provider {
       transformTransaction({
         transaction,
         accountType,
-      }),
+      })
     );
   }
 
@@ -65,5 +66,11 @@ export class TellerProvider implements Provider {
       accessToken,
       accountId,
     });
+  }
+
+  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+    const response = await this.#api.getInstitutions({ countryCode });
+
+    return response;
   }
 }

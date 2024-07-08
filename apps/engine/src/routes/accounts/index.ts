@@ -91,7 +91,7 @@ app.openapi(indexRoute, async (c) => {
     {
       data,
     },
-    200,
+    200
   );
 });
 
@@ -115,7 +115,7 @@ app.openapi(balanceRoute, async (c) => {
     {
       data,
     },
-    200,
+    200
   );
 });
 

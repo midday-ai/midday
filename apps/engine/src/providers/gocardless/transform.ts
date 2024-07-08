@@ -103,17 +103,17 @@ const transformDescription = ({
 };
 
 export const transformTransaction = (
-  transaction: TransformTransaction,
+  transaction: TransformTransaction
 ): BaseTransaction => {
   const method = mapTransactionMethod(
-    transaction?.proprietaryBankTransactionCode,
+    transaction?.proprietaryBankTransactionCode
   );
 
   let currencyExchange: { rate: number; currency: string } | undefined;
 
   if (Array.isArray(transaction.currencyExchange)) {
     const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
+      transaction.currencyExchange.at(0)?.exchangeRate ?? ""
     );
 
     if (rate) {
@@ -159,8 +159,8 @@ const transformAccountName = (account: TransformAccountName) => {
     return account.product;
   }
 
-  if (account?.bank?.name) {
-    return account.bank.name;
+  if (account?.institution?.name) {
+    return account.institution.name;
   }
 
   return "No name";
@@ -169,22 +169,22 @@ const transformAccountName = (account: TransformAccountName) => {
 export const transformAccount = ({
   id,
   account,
-  bank,
+  institution,
 }: TransformAccount): BaseAccount => {
   return {
     id,
     type: "depository",
     name: transformAccountName({
       name: account.name,
-      bank,
+      institution,
       product: account.product,
     }),
     currency: account.currency,
-    institution: bank
+    institution: institution
       ? {
-          id: bank?.id,
-          logo: bank?.logo,
-          name: bank?.name,
+          id: institution?.id,
+          logo: institution?.logo,
+          name: institution?.name,
         }
       : null,
     provider: "gocardless",
@@ -193,7 +193,7 @@ export const transformAccount = ({
 };
 
 export const transformAccountBalance = (
-  account?: TransformAccountBalance,
+  account?: TransformAccountBalance
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),

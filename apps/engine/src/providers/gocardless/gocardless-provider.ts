@@ -54,4 +54,8 @@ export class GoCardLessProvider implements Provider {
 
     return transformAccountBalance(response);
   }
+
+  async getInstitutions() {
+    return Promise.resolve([]);
+  }
 }

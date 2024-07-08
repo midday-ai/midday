@@ -2,6 +2,7 @@ import type { Provider } from "../interface";
 import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
@@ -9,6 +10,7 @@ import { PlaidApi } from "./plaid-api";
 import {
   transformAccount,
   transformAccountBalance,
+  transformInstitution,
   transformTransaction,
 } from "./transform";
 
@@ -39,7 +41,7 @@ export class PlaidProvider implements Provider {
       transformTransaction({
         transaction,
         accountType,
-      }),
+      })
     );
   }
 
@@ -74,5 +76,13 @@ export class PlaidProvider implements Provider {
     });
 
     return transformAccountBalance(response);
+  }
+
+  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+    const response = await this.#api.getInstitutions({
+      countryCode,
+    });
+
+    return response?.map(transformInstitution);
   }
 }

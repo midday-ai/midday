@@ -27,7 +27,7 @@ export type Transaction = {
   };
 };
 
-export type Bank = {
+export type Institution = {
   id: string;
   name: string;
   bic: string;
@@ -50,7 +50,7 @@ export type GetAccessTokenResponse = {
   refresh_expires: number;
 };
 
-export type GetBanksResponse = Bank[];
+export type GetInstitutionsResponse = Institution[];
 
 export type PostRequisitionsRequest = {
   institutionId: string;
@@ -159,7 +159,7 @@ export type GetAccountsResponse = {
   status: string;
   owner_name?: string;
   account: Account;
-  bank?: Bank;
+  institution?: Institution;
 }[];
 
 export type GetTransactionsRequest = {
@@ -185,7 +185,7 @@ export type TransformAccount = GetAccountsResponse[0];
 
 export type TransformAccountName = {
   name: string;
-  bank?: Bank;
+  institution?: Institution;
   product: string;
 };
 

@@ -6,4 +6,5 @@ export type Bindings = {
   PLAID_CLIENT_ID: string;
   PLAID_SECRET: string;
   PLAID_ENVIRONMENT: string;
+  API_SECRET_KEY: string;
 };

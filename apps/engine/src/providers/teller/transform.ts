@@ -161,7 +161,7 @@ export const transformAccount = ({
 };
 
 export const transformAccountBalance = (
-  account: TransformAccountBalance,
+  account: TransformAccountBalance
 ): BaseAccountBalance => ({
   currency: account.currency,
   amount: +account.amount,

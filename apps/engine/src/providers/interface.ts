@@ -3,17 +3,22 @@ import type {
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetInstitutionsRequest,
+  GetInstitutionsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
 } from "./types";
 
 export interface Provider {
   getTransactions: (
-    params: GetTransactionsRequest,
+    params: GetTransactionsRequest
   ) => Promise<GetTransactionsResponse>;
   getAccounts: (params: GetAccountsRequest) => Promise<GetAccountsResponse>;
   getAccountBalance: (
-    params: GetAccountBalanceRequest,
+    params: GetAccountBalanceRequest
   ) => Promise<GetAccountBalanceResponse>;
+  getInstitutions: (
+    params: GetInstitutionsRequest
+  ) => Promise<GetInstitutionsResponse>;
   getHealthCheck: () => Promise<boolean>;
 }

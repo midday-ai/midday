@@ -7,6 +7,7 @@ import type {
   Transaction as BaseTransaction,
 } from "../types";
 import type {
+  Institution,
   TransformAccount,
   TransformAccountBalance,
   TransformTransactionPayload,
@@ -196,9 +197,15 @@ export const transformAccount = ({
 };
 
 export const transformAccountBalance = (
-  balances?: TransformAccountBalance,
+  balances?: TransformAccountBalance
 ): BaseBalance => ({
   currency:
     balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
   amount: balances?.available ?? 0,
+});
+
+export const transformInstitution = (institution: Institution) => ({
+  id: institution.id,
+  name: institution.name,
+  logo: institution.logo || null,
 });

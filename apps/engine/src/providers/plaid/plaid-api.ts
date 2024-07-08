@@ -10,7 +10,7 @@ import {
   Products,
   type Transaction,
 } from "plaid";
-import type { ProviderParams } from "../types";
+import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
@@ -69,7 +69,7 @@ export class PlaidApi {
   async getHealthCheck() {
     try {
       const response = await fetch(
-        "https://status.plaid.com/api/v2/status.json",
+        "https://status.plaid.com/api/v2/status.json"
       );
 
       const data: GetStatusResponse = await response.json();
@@ -193,14 +193,14 @@ export class PlaidApi {
     });
   }
 
-  async getInstitutions({ countryCode }: { countryCode: CountryCode }) {
+  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
     return paginate({
       pageSize: 500,
       fetchData: (offset, count) =>
         withRetry(() =>
           this.#client
             .institutionsGet({
-              country_codes: [countryCode],
+              country_codes: [countryCode as CountryCode],
               count,
               offset,
               options: {
@@ -209,7 +209,7 @@ export class PlaidApi {
             })
             .then(({ data }) => {
               return data.institutions;
-            }),
+            })
         ),
     });
   }

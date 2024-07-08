@@ -12,6 +12,7 @@ import authRoutes from "./routes/auth";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
+import { syncInstitutions } from "./scheduled";
 import { logger as customLogger } from "./utils/logger";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -19,7 +20,7 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>();
 const apiRoutes = app.use(
   "/api/*",
   (c, next) => {
-    const { API_SECRET_KEY } = env<{ API_SECRET_KEY: string }>(c);
+    const { API_SECRET_KEY } = env(c);
     const bearer = bearerAuth({ token: API_SECRET_KEY });
 
     return bearer(c, next);
@@ -29,7 +30,7 @@ const apiRoutes = app.use(
   cache({
     cacheName: "engine",
     cacheControl: "max-age=3600",
-  }),
+  })
 );
 
 apiRoutes
@@ -47,7 +48,7 @@ apiRoutes.get(
   "/",
   swaggerUI({
     url: "/openapi",
-  }),
+  })
 );
 
 app.doc("/openapi", {
@@ -62,10 +63,7 @@ app.route("/health", healthRoutes);
 
 export default {
   scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
-    // const delayedProcessing = async () => {
-    //   // await cronTask(env);
-    // };
-    // ctx.waitUntil(delayedProcessing());
+    ctx.waitUntil(syncInstitutions(env));
   },
   fetch(request: Request, env: Env, ctx: ExecutionContext) {
     return app.fetch(request, env, ctx);

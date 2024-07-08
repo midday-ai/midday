@@ -31,7 +31,7 @@ test("Transform pending transaction", () => {
         amount: "-83.62",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
-    }),
+    })
   ).toMatchSnapshot();
 });
 
@@ -61,7 +61,7 @@ test("Transform pending transaction", () => {
         amount: "29",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
-    }),
+    })
   ).toMatchSnapshot();
 });
 
@@ -91,7 +91,7 @@ test("Transform card payment transaction", () => {
         amount: "-68.90",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
-    }),
+    })
   ).toMatchSnapshot();
 });
 
@@ -121,7 +121,7 @@ test("Transform income transaction", () => {
         amount: "1000000",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
-    }),
+    })
   ).toMatchSnapshot();
 });
 
@@ -151,7 +151,7 @@ test("Transform type transfer", () => {
         amount: "-37.99",
         account_id: "acc_os41qe3a66ks2djhss000",
       },
-    }),
+    })
   ).toMatchSnapshot();
 });
 
@@ -177,7 +177,7 @@ test("Transform accounts", () => {
       id: "acc_os557c2mge29shubl2000",
       enrollment_id: "enr_os557c8pck2deoskak000",
       currency: "USD",
-    }),
+    })
   ).toMatchSnapshot();
 });
 
@@ -186,6 +186,6 @@ test("Transform account balance", () => {
     transformAccountBalance({
       currency: "USD",
       amount: 2011100,
-    }),
+    })
   ).toMatchSnapshot();
 });
