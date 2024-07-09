@@ -36,7 +36,7 @@ export function getMaxHistoricalDays({
     "OPYN_BITAITRRB2B",
     "PAYTIPPER_PAYTITM1",
     "SELLA_PERSONAL_CREDIT_SELBIT22",
-    // "LUMINOR_", TODO: Fix based on contry (all countries)
+    // "LUMINOR_", TODO: Fix based on country (all countries)
     // 'SEB_', (Baltics)
   ];
 

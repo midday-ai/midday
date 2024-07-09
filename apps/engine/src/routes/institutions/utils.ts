@@ -16,8 +16,8 @@ export async function getInstitutions(
   const plaid = new PlaidProvider(params);
 
   const result = await Promise.all([
-    // gocardless.getInstitutions({ countryCode }),
-    // teller.getInstitutions({ countryCode }),
+    teller.getInstitutions(),
+    gocardless.getInstitutions({ countryCode }),
     plaid.getInstitutions({ countryCode }),
   ]);
 
