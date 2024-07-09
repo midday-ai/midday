@@ -4,6 +4,7 @@ import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetHealthCheckResponse,
@@ -31,7 +32,7 @@ export class Provider {
   }
 
   async getHealthCheck(
-    params: Omit<ProviderParams, "provider">
+    params: Omit<ProviderParams, "provider">,
   ): Promise<GetHealthCheckResponse> {
     const teller = new TellerProvider(params);
     const plaid = new PlaidProvider(params);
@@ -64,7 +65,7 @@ export class Provider {
   async getTransactions(params: GetTransactionsRequest) {
     logger(
       "getTransactions:",
-      `provider: ${this.#provider} id: ${params.accountId}`
+      `provider: ${this.#provider} id: ${params.accountId}`,
     );
 
     const data = await withRetry(() => this.#provider?.getTransactions(params));
@@ -91,11 +92,11 @@ export class Provider {
   async getAccountBalance(params: GetAccountBalanceRequest) {
     logger(
       "getAccountBalance:",
-      `provider: ${this.#provider} id: ${params.accountId}`
+      `provider: ${this.#provider} id: ${params.accountId}`,
     );
 
     const data = await withRetry(() =>
-      this.#provider?.getAccountBalance(params)
+      this.#provider?.getAccountBalance(params),
     );
 
     if (data) {
@@ -115,5 +116,11 @@ export class Provider {
     }
 
     return [];
+  }
+
+  async deleteAccounts(params: DeleteAccountsRequest) {
+    logger("delete:", `provider: ${this.#provider}`);
+
+    return withRetry(() => this.#provider?.deleteAccounts(params));
   }
 }

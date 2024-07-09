@@ -1,3 +1,4 @@
+import { Providers } from "@/common/schema";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -105,17 +106,17 @@ const transformDescription = ({
 };
 
 export const transformTransaction = (
-  transaction: TransformTransaction
+  transaction: TransformTransaction,
 ): BaseTransaction => {
   const method = mapTransactionMethod(
-    transaction?.proprietaryBankTransactionCode
+    transaction?.proprietaryBankTransactionCode,
   );
 
   let currencyExchange: { rate: number; currency: string } | undefined;
 
   if (Array.isArray(transaction.currencyExchange)) {
     const rate = Number.parseFloat(
-      transaction.currencyExchange.at(0)?.exchangeRate ?? ""
+      transaction.currencyExchange.at(0)?.exchangeRate ?? "",
     );
 
     if (rate) {
@@ -189,23 +190,23 @@ export const transformAccount = ({
           name: institution?.name,
         }
       : null,
-    provider: "gocardless",
+    provider: Providers.Enum.gocardless,
     enrollment_id: null,
   };
 };
 
 export const transformAccountBalance = (
-  account?: TransformAccountBalance
+  account?: TransformAccountBalance,
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),
 });
 
 export const transformInstitution = (
-  insitution: Institution
+  insitution: Institution,
 ): TransformInstitution => ({
   id: insitution.id,
   name: insitution.name,
   logo: insitution.logo ?? null,
-  provider: "gocardless",
+  provider: Providers.Enum.gocardless,
 });

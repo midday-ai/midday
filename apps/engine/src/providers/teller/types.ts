@@ -79,8 +79,9 @@ export type AuthenticatedRequest = {
 };
 
 type Institution = {
-  name: string;
   id: string;
+  name: string;
+  capabilities: string[];
 };
 
 interface BaseAccount {
@@ -146,3 +147,7 @@ export type FormatAmount = {
 };
 
 export type TransformAccountBalance = GetAccountBalanceResponse;
+
+export type GetInstitutionsResponse = Institution[];
+
+export type TransformInstitution = Institution;

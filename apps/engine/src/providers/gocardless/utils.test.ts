@@ -6,7 +6,7 @@ test("Should return 90 days", () => {
     getMaxHistoricalDays({
       institutionId: "SWEDBANK_SWEDSESS",
       transactionTotalDays: 720,
-    })
+    }),
   ).toEqual(90);
 });
 
@@ -15,6 +15,6 @@ test("Should return 720 days", () => {
     getMaxHistoricalDays({
       institutionId: "NOT_RESTRICTED",
       transactionTotalDays: 720,
-    })
+    }),
   ).toEqual(720);
 });

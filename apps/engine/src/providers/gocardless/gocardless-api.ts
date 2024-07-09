@@ -64,7 +64,7 @@ export class GoCardLessApi {
       undefined,
       {
         refresh,
-      }
+      },
     );
 
     await this.#kv.put(this.#accessTokenCacheKey, response.access, {
@@ -94,7 +94,7 @@ export class GoCardLessApi {
       {
         secret_id: this.#secretId,
         secret_key: this.#secretKey,
-      }
+      },
     );
 
     await Promise.all([
@@ -110,7 +110,7 @@ export class GoCardLessApi {
   }
 
   async getAccountBalance(
-    accountId: string
+    accountId: string,
   ): Promise<
     GetAccountBalanceResponse["balances"][0]["balanceAmount"] | undefined
   > {
@@ -118,18 +118,18 @@ export class GoCardLessApi {
 
     const { balances } = await this.#get<GetAccountBalanceResponse>(
       `/api/v2/accounts/${accountId}/balances/`,
-      token
+      token,
     );
 
     const foundAccount = balances?.find(
-      (account) => account.balanceType === "interimAvailable"
+      (account) => account.balanceType === "interimAvailable",
     );
 
     return foundAccount?.balanceAmount;
   }
 
   async getInstitutions(
-    params: GetInstitutionsRequest
+    params: GetInstitutionsRequest,
   ): Promise<GetInstitutionsResponse> {
     const { countryCode } = params;
     const cacheKey = `${this.#institutionsCacheKey}_${countryCode}`;
@@ -150,7 +150,7 @@ export class GoCardLessApi {
         params: {
           country: countryCode,
         },
-      }
+      },
     );
 
     this.#kv?.put(cacheKey, JSON.stringify(response), {
@@ -158,7 +158,7 @@ export class GoCardLessApi {
     });
 
     return response.filter((insitution) =>
-      insitution.countries.includes(countryCode)
+      insitution.countries.includes(countryCode),
     );
   }
 
@@ -176,7 +176,7 @@ export class GoCardLessApi {
         redirect,
         institution_id: institutionId,
         agreement,
-      }
+      },
     );
   }
 
@@ -198,7 +198,7 @@ export class GoCardLessApi {
         access_scope: ["balances", "details", "transactions"],
         access_valid_for_days: this.#accessValidForDays,
         max_historical_days: maxHistoricalDays,
-      }
+      },
     );
   }
 
@@ -209,7 +209,7 @@ export class GoCardLessApi {
       this.#get<GetAccountResponse>(`/api/v2/accounts/${id}/`, token),
       this.#get<GetAccountDetailsResponse>(
         `/api/v2/accounts/${id}/details/`,
-        token
+        token,
       ),
     ]);
 
@@ -235,10 +235,10 @@ export class GoCardLessApi {
         return {
           ...accountDetails,
           institution: intitutions.find(
-            (institution) => institution.id === accountDetails.institution_id
+            (institution) => institution.id === accountDetails.institution_id,
           ),
         };
-      })
+      }),
     );
   }
 
@@ -259,7 +259,7 @@ export class GoCardLessApi {
               representation: "date",
             }),
           }
-        : undefined
+        : undefined,
     );
 
     return response?.transactions?.booked;
@@ -276,7 +276,7 @@ export class GoCardLessApi {
 
     return this.#get<GetRequisitionResponse>(
       `/api/v2/requisitions/${id}/`,
-      token
+      token,
     );
   }
 
@@ -285,7 +285,7 @@ export class GoCardLessApi {
 
     return this.#_delete<DeleteRequistionResponse>(
       `/api/v2/requisitions/${id}/`,
-      token
+      token,
     );
   }
 
@@ -308,7 +308,7 @@ export class GoCardLessApi {
     path: string,
     token?: string,
     params?: Record<string, string>,
-    config?: XiorRequestConfig
+    config?: XiorRequestConfig,
   ): Promise<TResponse> {
     const api = await this.#getApi(token);
 
@@ -321,7 +321,7 @@ export class GoCardLessApi {
     path: string,
     token?: string,
     body?: unknown,
-    config?: XiorRequestConfig
+    config?: XiorRequestConfig,
   ): Promise<TResponse> {
     const api = await this.#getApi(token);
     return api.post<TResponse>(path, body, config).then(({ data }) => data);
@@ -331,7 +331,7 @@ export class GoCardLessApi {
     path: string,
     token: string,
     params?: Record<string, string>,
-    config?: XiorRequestConfig
+    config?: XiorRequestConfig,
   ): Promise<TResponse> {
     const api = await this.#getApi(token);
 

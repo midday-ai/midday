@@ -1,6 +1,7 @@
 import type { AccountType } from "@/utils/account";
 import type {
   AccountsGetResponse,
+  Institution as BaseInstitution,
   Transaction,
   TransactionsSyncResponse,
 } from "plaid";
@@ -45,11 +46,7 @@ export type Institution = {
   logo?: string | null;
 };
 
-export type TransformInstitution = {
-  institution_id: string;
-  name: string;
-  logo?: string | null;
-};
+export type TransformInstitution = BaseInstitution;
 
 export type AccountWithintitution = AccountsGetResponse["accounts"][0] & {
   institution: Institution;

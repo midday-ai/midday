@@ -1,5 +1,6 @@
 import type { Provider } from "../interface";
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetInstitutionsRequest,
@@ -41,7 +42,7 @@ export class PlaidProvider implements Provider {
       transformTransaction({
         transaction,
         accountType,
-      })
+      }),
     );
   }
 
@@ -83,6 +84,16 @@ export class PlaidProvider implements Provider {
       countryCode,
     });
 
-    return response?.map(transformInstitution);
+    return response.map(transformInstitution);
+  }
+
+  async deleteAccounts({ accessToken }: DeleteAccountsRequest) {
+    if (!accessToken) {
+      throw Error("accessToken is missing");
+    }
+
+    await this.#api.deleteAccounts({
+      accessToken,
+    });
   }
 }

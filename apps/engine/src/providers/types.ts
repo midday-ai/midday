@@ -76,8 +76,8 @@ export type GetAccountBalanceResponse = {
   amount: number;
 };
 
-export type DeleteAccountRequest = {
-  accountId: string;
+export type DeleteAccountsRequest = {
+  accountId?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
 };
 
@@ -89,8 +89,7 @@ export type GetInstitutionsResponse = {
   id: string;
   name: string;
   logo: string | null;
-  // institutionId?: string; // Plaid
-  // transactionTotalDays: string; // GoCardLess
+  provider: Providers;
 }[];
 
 export type GetInstitutionsRequest = {

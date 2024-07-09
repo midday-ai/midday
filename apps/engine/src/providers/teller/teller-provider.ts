@@ -1,13 +1,17 @@
 import type { Provider } from "../interface";
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
-  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
 import { TellerApi } from "./teller-api";
-import { transformAccount, transformTransaction } from "./transform";
+import {
+  transformAccount,
+  transformInstitution,
+  transformTransaction,
+} from "./transform";
 
 export class TellerProvider implements Provider {
   #api: TellerApi;
@@ -40,7 +44,7 @@ export class TellerProvider implements Provider {
       transformTransaction({
         transaction,
         accountType,
-      })
+      }),
     );
   }
 
@@ -68,9 +72,19 @@ export class TellerProvider implements Provider {
     });
   }
 
-  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
-    const response = await this.#api.getInstitutions({ countryCode });
+  async getInstitutions() {
+    const response = await this.#api.getInstitutions();
 
-    return response;
+    return response.map(transformInstitution);
+  }
+
+  async deleteAccounts({ accessToken }: DeleteAccountsRequest) {
+    if (!accessToken) {
+      throw Error("accessToken is missing");
+    }
+
+    await this.#api.deleteAccounts({
+      accessToken,
+    });
   }
 }

@@ -42,7 +42,7 @@ app.openapi(indexRoute, async (c) => {
   const data = await getInstitutions({
     kv: c.env.KV,
     fetcher: c.env.TELLER_CERT,
-    storage: c.env.STORAGE.put,
+    storage: c.env.STORAGE,
     envs,
     countryCode,
   });
@@ -51,7 +51,7 @@ app.openapi(indexRoute, async (c) => {
     {
       data,
     },
-    200
+    200,
   );
 });
 

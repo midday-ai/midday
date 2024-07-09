@@ -1,3 +1,4 @@
+import { Providers } from "@/common/schema";
 import { ALL_COUNTRIES } from "@/utils/countries";
 import { z } from "@hono/zod-openapi";
 
@@ -9,6 +10,7 @@ export const InstitutionSchema = z
     name: z.string().openapi({
       example: "Wells Fargo Bank",
     }),
+
     logo: z
       .string()
       .openapi({
@@ -16,6 +18,9 @@ export const InstitutionSchema = z
           "https://cdn.midday.ai/institution/9293961c-df93-4d6d-a2cc-fc3e353b2d10.webp",
       })
       .nullable(),
+    provider: Providers.openapi({
+      example: "teller",
+    }),
   })
   .openapi("InstitutionSchema");
 

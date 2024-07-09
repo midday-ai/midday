@@ -1,3 +1,4 @@
+import { Providers } from "@/common/schema";
 import { getType } from "@/utils/account";
 import { capitalCase } from "change-case";
 import type { Transaction, TransactionCode } from "plaid";
@@ -190,14 +191,14 @@ export const transformAccount = ({
           logo: institution.logo ?? null,
         }
       : null,
-    provider: "plaid",
+    provider: Providers.Enum.plaid,
     type: getType(type),
     enrollment_id: null,
   };
 };
 
 export const transformAccountBalance = (
-  balances?: TransformAccountBalance
+  balances?: TransformAccountBalance,
 ): BaseBalance => ({
   currency:
     balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
@@ -207,6 +208,6 @@ export const transformAccountBalance = (
 export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.institution_id,
   name: institution.name,
-  logo: null, // institution.logo (base64),
-  provider: "plaid",
+  logo: institution.logo ?? null,
+  provider: Providers.Enum.plaid,
 });

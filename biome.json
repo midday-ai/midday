@@ -4,6 +4,7 @@
 		"enabled": true
 	},
 	"linter": {
+		"ignore": [".wrangler", "node_modules"],
 		"enabled": true,
 		"rules": {
 			"recommended": true,
@@ -16,7 +17,6 @@
  		}
 	},
 	"formatter": {
-		"ignore": [],
 		"indentStyle": "space"
 	}
 }

@@ -1,10 +1,11 @@
-import type { GetInstitutionsRequest, ProviderParams } from "../types";
+import type { ProviderParams } from "../types";
 import type {
   AuthenticatedRequest,
   DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsResponse,
+  GetInstitutionsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
 } from "./types";
@@ -61,11 +62,13 @@ export class TellerApi {
     };
   }
 
-  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+  async getInstitutions(): Promise<GetInstitutionsResponse> {
     return this.#get("/institutions");
   }
 
-  async disconnect({ accessToken }: DisconnectAccountRequest): Promise<void> {
+  async deleteAccounts({
+    accessToken,
+  }: DisconnectAccountRequest): Promise<void> {
     await this.#fetcher.fetch(`${this.#baseUrl}/accounts`, {
       method: "delete",
       headers: new Headers({
@@ -77,7 +80,7 @@ export class TellerApi {
   async #get<TResponse>(
     path: string,
     token?: string,
-    params?: Record<string, string | number | undefined>
+    params?: Record<string, string | number | undefined>,
   ): Promise<TResponse> {
     const url = new URL(`${this.#baseUrl}/${path}`);
 

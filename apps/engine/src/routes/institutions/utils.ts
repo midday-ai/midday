@@ -7,7 +7,7 @@ export async function getInstitutions(
   params: Omit<
     ProviderParams & { countryCode: string; storage: R2Bucket },
     "provider"
-  >
+  >,
 ) {
   const { countryCode } = params;
 
@@ -21,5 +21,5 @@ export async function getInstitutions(
     plaid.getInstitutions({ countryCode }),
   ]);
 
-  return result;
+  return result.flat();
 }

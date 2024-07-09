@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
 import {
@@ -30,8 +31,8 @@ export class PlaidApi {
   #clientSecret: string;
 
   #countryCodes = [
-    // CountryCode.Ca,
     CountryCode.Us,
+    // CountryCode.Ca,
     // CountryCode.Se,
     // CountryCode.Nl,
     // CountryCode.Be,
@@ -70,7 +71,7 @@ export class PlaidApi {
   async getHealthCheck() {
     try {
       const response = await fetch(
-        "https://status.plaid.com/api/v2/status.json"
+        "https://status.plaid.com/api/v2/status.json",
       );
 
       const data: GetStatusResponse = await response.json();
@@ -194,7 +195,7 @@ export class PlaidApi {
     });
   }
 
-  async disconnect({ accessToken }: DisconnectAccountRequest) {
+  async deleteAccounts({ accessToken }: DisconnectAccountRequest) {
     await this.#client.itemRemove({
       access_token: accessToken,
     });
@@ -202,7 +203,7 @@ export class PlaidApi {
 
   async getInstitutions({ countryCode }: GetInstitutionsRequest) {
     return paginate({
-      delay: { milliseconds: 500, onDelay: (message) => console.log(message) },
+      delay: { milliseconds: 500, onDelay: (message) => logger(message) },
       pageSize: 500,
       fetchData: (offset, count) =>
         withRetry(() =>
@@ -218,7 +219,7 @@ export class PlaidApi {
             })
             .then(({ data }) => {
               return data.institutions;
-            })
+            }),
         ),
     });
   }
