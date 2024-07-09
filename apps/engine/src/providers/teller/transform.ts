@@ -154,6 +154,7 @@ export const transformAccount = ({
       ? {
           ...institution,
           logo: `https://teller.io/images/banks/${institution.id}.jpg`,
+          provider: Providers.Enum.teller,
         }
       : null,
     enrollment_id: enrollment_id,

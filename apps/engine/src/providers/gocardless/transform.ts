@@ -188,6 +188,7 @@ export const transformAccount = ({
           id: institution?.id,
           logo: institution?.logo,
           name: institution?.name,
+          provider: Providers.Enum.gocardless,
         }
       : null,
     provider: Providers.Enum.gocardless,

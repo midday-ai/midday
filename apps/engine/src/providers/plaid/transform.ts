@@ -189,6 +189,7 @@ export const transformAccount = ({
           id: institution.id,
           name: institution.name,
           logo: institution.logo ?? null,
+          provider: Providers.Enum.plaid,
         }
       : null,
     provider: Providers.Enum.plaid,

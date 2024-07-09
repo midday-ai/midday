@@ -94,6 +94,7 @@ exports[`Transform accounts 1`] = `
     "id": "mercury",
     "logo": "https://teller.io/images/banks/mercury.jpg",
     "name": "Mercury",
+    "provider": "teller",
   },
   "name": "Platinum Card",
   "provider": "teller",

@@ -10,7 +10,6 @@ export const InstitutionSchema = z
     name: z.string().openapi({
       example: "Wells Fargo Bank",
     }),
-
     logo: z
       .string()
       .openapi({
@@ -19,7 +18,7 @@ export const InstitutionSchema = z
       })
       .nullable(),
     provider: Providers.openapi({
-      example: "teller",
+      example: Providers.Enum.teller,
     }),
   })
   .openapi("InstitutionSchema");

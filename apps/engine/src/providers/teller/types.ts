@@ -81,7 +81,6 @@ export type AuthenticatedRequest = {
 type Institution = {
   id: string;
   name: string;
-  capabilities: string[];
 };
 
 interface BaseAccount {

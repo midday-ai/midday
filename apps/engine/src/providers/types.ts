@@ -35,6 +35,7 @@ export type Institution = {
   id: string;
   name: string;
   logo: string | null;
+  provider: Providers;
 };
 
 export type Account = {
