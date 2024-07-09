@@ -34,38 +34,11 @@ const ratelimit = new Ratelimit({
   redis: RedisClient,
 });
 
-export async function selectModel() {
-  return openai("gpt-4o");
-
-  // const settings = await getAssistantSettings();
-
-  // switch (settings.provider) {
-  //   case "mistralai": {
-  //     return mistral("mistral-large-latest");
-  //   }
-  //   default: {
-  //     return openai("gpt-4o");
-  //   }
-  // }
-}
-
 export async function submitUserMessage(
   content: string
 ): Promise<ClientMessage> {
   "use server";
   const ip = headers().get("x-forwarded-for");
-  const user = await getUser();
-  const teamId = user?.data?.team_id as string;
-
-  const defaultValues = {
-    from: subMonths(startOfMonth(new Date()), 12).toISOString(),
-    to: new Date().toISOString(),
-    currency:
-      (await getBankAccountsCurrencies())?.data?.at(0)?.currency ?? "USD",
-  };
-
-  const model = await selectModel();
-
   const { success } = await ratelimit.limit(ip);
 
   const aiState = getMutableAIState<typeof AI>();
@@ -83,7 +56,25 @@ export async function submitUserMessage(
         },
       ],
     });
+
+    return {
+      id: nanoid(),
+      role: "assistant",
+      display: (
+        <BotMessage content="Not so fast, tiger. You've reached your message limit. Please wait a minute and try again." />
+      ),
+    };
   }
+
+  const user = await getUser();
+  const teamId = user?.data?.team_id as string;
+
+  const defaultValues = {
+    from: subMonths(startOfMonth(new Date()), 12).toISOString(),
+    to: new Date().toISOString(),
+    currency:
+      (await getBankAccountsCurrencies())?.data?.at(0)?.currency ?? "USD",
+  };
 
   aiState.update({
     ...aiState.get(),
@@ -101,7 +92,7 @@ export async function submitUserMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model,
+    model: openai("gpt-4o"),
     initial: <SpinnerMessage />,
     system: `\
     You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
