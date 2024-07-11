@@ -67,7 +67,7 @@ export class GoCardLessApi {
       },
     );
 
-    await this.#kv.put(this.#accessTokenCacheKey, response.access, {
+    await this.#kv?.put(this.#accessTokenCacheKey, response.access, {
       expirationTtl: response.access_expires - this.#oneHour,
     });
 
@@ -134,7 +134,7 @@ export class GoCardLessApi {
     const { countryCode } = params;
     const cacheKey = `${this.#institutionsCacheKey}_${countryCode}`;
 
-    const institutions = await this.#kv.get(cacheKey);
+    const institutions = await this.#kv?.get(cacheKey);
 
     if (institutions) {
       return JSON.parse(institutions) as GetInstitutionsResponse;
