@@ -129,9 +129,9 @@ export class GoCardLessApi {
   }
 
   async getInstitutions(
-    params: GetInstitutionsRequest,
+    params?: GetInstitutionsRequest,
   ): Promise<GetInstitutionsResponse> {
-    const { countryCode } = params;
+    const countryCode = params?.countryCode;
     const cacheKey = `${this.#institutionsCacheKey}_${countryCode}`;
 
     const institutions = await this.#kv?.get(cacheKey);
@@ -157,9 +157,13 @@ export class GoCardLessApi {
       expirationTtl: this.#oneHour,
     });
 
-    return response.filter((insitution) =>
-      insitution.countries.includes(countryCode),
-    );
+    if (countryCode) {
+      return response.filter((insitution) =>
+        insitution.countries.includes(countryCode),
+      );
+    }
+
+    return response;
   }
 
   async buildLink({

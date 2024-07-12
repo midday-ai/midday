@@ -8,4 +8,7 @@ export type Bindings = {
   PLAID_SECRET: string;
   PLAID_ENVIRONMENT: string;
   API_SECRET_KEY: string;
+  UPSTASH_REDIS_REST_URL: string;
+  UPSTASH_REDIS_REST_TOKEN: string;
+  TYPESENSE_API_KEY: string;
 };

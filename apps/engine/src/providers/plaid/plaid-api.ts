@@ -30,26 +30,7 @@ export class PlaidApi {
   #clientId: string;
   #clientSecret: string;
 
-  #countryCodes = [
-    CountryCode.Us,
-    // CountryCode.Ca,
-    // CountryCode.Se,
-    // CountryCode.Nl,
-    // CountryCode.Be,
-    // CountryCode.Gb,
-    // CountryCode.Es,
-    // CountryCode.Fr,
-    // CountryCode.Ie,
-    // CountryCode.De,
-    // CountryCode.It,
-    // CountryCode.Pl,
-    // CountryCode.Dk,
-    // CountryCode.No,
-    // CountryCode.Ee,
-    // CountryCode.Lt,
-    // CountryCode.Lv,
-    // CountryCode.Pt,
-  ];
+  #countryCodes = [CountryCode.Us];
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
@@ -201,9 +182,11 @@ export class PlaidApi {
     });
   }
 
-  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+  async getInstitutions(params?: GetInstitutionsRequest) {
+    const countryCode = params?.countryCode ?? CountryCode.Us;
+
     return paginate({
-      delay: { milliseconds: 500, onDelay: (message) => logger(message) },
+      delay: { milliseconds: 100, onDelay: (message) => logger(message) },
       pageSize: 500,
       fetchData: (offset, count) =>
         withRetry(() =>

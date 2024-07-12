@@ -1,10 +1,12 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
+import type { Providers } from "@/providers/types";
+import { getNearestNode, getNodes } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
+import Typesense from "typesense";
 import { InstitutionParamsSchema, InstitutionsSchema } from "./schema";
-import { getInstitutions } from "./utils";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -35,21 +37,57 @@ const indexRoute = createRoute({
   },
 });
 
+type SearchResult = {
+  hits: {
+    document: {
+      id: string;
+      name: string;
+      logo: string | null;
+      available_history: number | null;
+      provider: Providers;
+    };
+  }[];
+};
+
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
-  const { countryCode } = c.req.valid("query");
+  const { countryCode, q = "*", limit = "50" } = c.req.valid("query");
 
-  const data = await getInstitutions({
-    kv: c.env.KV,
-    fetcher: c.env.TELLER_CERT,
-    storage: c.env.STORAGE,
-    envs,
-    countryCode,
+  const typesense = new Typesense.Client({
+    nearestNode: getNearestNode(),
+    nodes: getNodes(),
+    apiKey: envs.TYPESENSE_API_KEY,
+    connectionTimeoutSeconds: 2,
   });
+
+  const searchParameters = {
+    q,
+    query_by: "name",
+    filter_by: `countries:=[${countryCode}]`,
+    limit: +limit,
+  };
+
+  const result = await typesense
+    .collections("institutions")
+    .documents()
+    .search(searchParameters);
+
+  const resultString: string =
+    typeof result === "string" ? result : JSON.stringify(result);
+
+  const data: SearchResult = JSON.parse(resultString);
 
   return c.json(
     {
-      data,
+      data: data.hits?.map(({ document }) => ({
+        id: document.id,
+        name: document.name,
+        logo: document.logo,
+        available_history: document.available_history
+          ? +document.available_history
+          : null,
+        provider: document.provider,
+      })),
     },
     200,
   );

@@ -94,7 +94,7 @@ export type GetInstitutionsResponse = {
 }[];
 
 export type GetInstitutionsRequest = {
-  countryCode: string;
+  countryCode?: string;
 };
 
 export type HealthCheckResponse = {
