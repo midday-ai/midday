@@ -9,6 +9,7 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
+    "@hono/swagger-ui": "^0.4.0",
     "@hono/zod-openapi": "^0.14.9",
     "@hono/zod-validator": "^0.2.2",
     "hono": "^4.4.12",

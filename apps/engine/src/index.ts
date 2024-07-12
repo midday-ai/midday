@@ -1,4 +1,5 @@
 import type { Bindings } from "@/common/bindings";
+import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Env } from "hono";
 import { env } from "hono/adapter";
@@ -16,9 +17,14 @@ import { logger as customLogger } from "./utils/logger";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
-const apiRoutes = app.use(
-  "/*",
+const PUBLIC_PATHS = ["/", "/openapi"];
+
+app.use(
   (c, next) => {
+    if (PUBLIC_PATHS.includes(c.req.path)) {
+      return next();
+    }
+
     const { API_SECRET_KEY } = env(c);
     const bearer = bearerAuth({ token: API_SECRET_KEY });
 
@@ -32,7 +38,7 @@ const apiRoutes = app.use(
   }),
 );
 
-apiRoutes
+app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
@@ -42,6 +48,13 @@ app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
   type: "http",
   scheme: "bearer",
 });
+
+app.get(
+  "/",
+  swaggerUI({
+    url: "/openapi",
+  }),
+);
 
 app.doc("/openapi", {
   openapi: "3.1.0",
