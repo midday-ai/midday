@@ -16,7 +16,7 @@ crons = ["0 */23 * * *"]
 name = "engine"
 logpush = true
 route = { pattern = "engine.midday.ai/*", zone_name = "midday.ai" }
-tail_consumers = [{service = "engine-worker"}]
+tail_consumers = [{service = "engine-tail"}]
 kv_namespaces = [
   { binding = "KV", id = "1ce9f0355d854a569f72bfccbfbea369" }
 ]
