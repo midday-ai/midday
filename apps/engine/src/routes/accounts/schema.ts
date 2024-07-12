@@ -15,7 +15,7 @@ export const AccountsParamsSchema = z.object({
       example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     }),
   provider: Providers.openapi({
-    example: "teller",
+    example: Providers.Enum.teller,
   }),
   countryCode: z
     .string()
@@ -69,7 +69,7 @@ export const AccountSchema = z
       example: "USD",
     }),
     provider: Providers.openapi({
-      example: "teller",
+      example: Providers.Enum.teller,
     }),
     institution: InstitutionSchema.nullable(),
     enrollment_id: z
@@ -87,40 +87,79 @@ export const AccountsSchema = z
   })
   .openapi("AccountsSchema");
 
-export const AccountBalanceParamsSchema = z.object({
-  id: z.string().openapi({
-    description: "Account id",
-    param: {
-      name: "id",
-      in: "query",
-    },
-    example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-  }),
-  provider: Providers.openapi({
-    example: "teller",
-  }),
-  accessToken: z
-    .string()
-    .optional()
-    .openapi({
-      description: "Teller & Plaid access token",
+export const AccountBalanceParamsSchema = z
+  .object({
+    id: z.string().openapi({
+      description: "Account id",
       param: {
-        name: "accessToken",
+        name: "id",
         in: "query",
       },
-      example: "test_token_ky6igyqi3qxa4",
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     }),
-});
+    provider: Providers.openapi({
+      example: Providers.Enum.teller,
+    }),
+    accessToken: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Teller & Plaid access token",
+        param: {
+          name: "accessToken",
+          in: "query",
+        },
+        example: "test_token_ky6igyqi3qxa4",
+      }),
+  })
+  .openapi("AccountBalanceParamsSchema");
 
-export const AccountBalanceSchema = z.object({
-  data: z
-    .object({
-      amount: z.number().openapi({
-        example: 20000,
+export const AccountBalanceSchema = z
+  .object({
+    data: z
+      .object({
+        amount: z.number().openapi({
+          example: 20000,
+        }),
+        currency: z.string().openapi({
+          example: "USD",
+        }),
+      })
+      .nullable(),
+  })
+  .openapi("AccountBalanceSchema");
+
+export const DeleteAccountsParamsSchema = z
+  .object({
+    accountId: z.string().openapi({
+      description: "Account id (GoCardLess)",
+      param: {
+        name: "accountId",
+        in: "query",
+      },
+      example: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    }),
+    provider: Providers.openapi({
+      example: Providers.Enum.teller,
+    }),
+    accessToken: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Teller & Plaid access token",
+        param: {
+          name: "accessToken",
+          in: "query",
+        },
+        example: "test_token_ky6igyqi3qxa4",
       }),
-      currency: z.string().openapi({
-        example: "USD",
-      }),
-    })
-    .nullable(),
-});
+  })
+  .openapi("DeleteAccountsParamsSchema");
+
+export const DeleteSchema = z
+  .object({
+    success: z.boolean().openapi({
+      example: true,
+    }),
+  })
+  .openapi("DeleteSchema");

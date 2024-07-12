@@ -26,6 +26,7 @@ exports[`Transform accounts 1`] = `
     "id": "PLEO_PLEODK00",
     "logo": "https://cdn-logos.gocardless.com/ais/PLEO_PLEODK00.png",
     "name": "Pleo",
+    "provider": "gocardless",
   },
   "name": "Pleo Account",
   "provider": "gocardless",

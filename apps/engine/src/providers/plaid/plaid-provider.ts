@@ -1,7 +1,9 @@
 import type { Provider } from "../interface";
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
@@ -9,6 +11,7 @@ import { PlaidApi } from "./plaid-api";
 import {
   transformAccount,
   transformAccountBalance,
+  transformInstitution,
   transformTransaction,
 } from "./transform";
 
@@ -74,5 +77,23 @@ export class PlaidProvider implements Provider {
     });
 
     return transformAccountBalance(response);
+  }
+
+  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+    const response = await this.#api.getInstitutions({
+      countryCode,
+    });
+
+    return response.map(transformInstitution);
+  }
+
+  async deleteAccounts({ accessToken }: DeleteAccountsRequest) {
+    if (!accessToken) {
+      throw Error("accessToken is missing");
+    }
+
+    await this.#api.deleteAccounts({
+      accessToken,
+    });
   }
 }

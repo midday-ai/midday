@@ -43,7 +43,7 @@ test("Transform accounts", () => {
         iban: "123",
         ownerName: "Name",
       },
-      bank: {
+      institution: {
         id: "PLEO_PLEODK00",
         name: "Pleo",
         bic: "PLEODK00",

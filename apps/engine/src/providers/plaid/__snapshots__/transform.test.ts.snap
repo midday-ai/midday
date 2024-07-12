@@ -60,6 +60,7 @@ exports[`Transform accounts 1`] = `
     "id": "ins_100546",
     "logo": null,
     "name": "American Funds Retirement Solutions",
+    "provider": "plaid",
   },
   "name": "Plaid Mortgage",
   "provider": "plaid",

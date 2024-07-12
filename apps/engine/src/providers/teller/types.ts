@@ -60,8 +60,7 @@ export type Transaction = {
 export type GetTransactionsResponse = Transaction[];
 export type GetTransactionResponse = Transaction;
 
-export type DeleteAccountRequest = {
-  accountId: string;
+export type DisconnectAccountRequest = {
   accessToken: string;
 };
 
@@ -80,8 +79,8 @@ export type AuthenticatedRequest = {
 };
 
 type Institution = {
-  name: string;
   id: string;
+  name: string;
 };
 
 interface BaseAccount {
@@ -147,3 +146,7 @@ export type FormatAmount = {
 };
 
 export type TransformAccountBalance = GetAccountBalanceResponse;
+
+export type GetInstitutionsResponse = Institution[];
+
+export type TransformInstitution = Institution;

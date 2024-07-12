@@ -35,6 +35,7 @@ export type Institution = {
   id: string;
   name: string;
   logo: string | null;
+  provider: Providers;
 };
 
 export type Account = {
@@ -76,8 +77,8 @@ export type GetAccountBalanceResponse = {
   amount: number;
 };
 
-export type DeleteAccountRequest = {
-  accountId: string;
+export type DeleteAccountsRequest = {
+  accountId?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
 };
 
@@ -85,7 +86,18 @@ export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
 
-type HealthCheckResponse = {
+export type GetInstitutionsResponse = {
+  id: string;
+  name: string;
+  logo: string | null;
+  provider: Providers;
+}[];
+
+export type GetInstitutionsRequest = {
+  countryCode?: string;
+};
+
+export type HealthCheckResponse = {
   healthy: boolean;
 };
 

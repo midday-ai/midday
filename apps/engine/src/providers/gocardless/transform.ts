@@ -1,3 +1,4 @@
+import { Providers } from "@/common/schema";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -5,11 +6,13 @@ import type {
   Transaction as BaseTransaction,
 } from "../types";
 import type {
+  Institution,
   Transaction,
   TransactionDescription,
   TransformAccount,
   TransformAccountBalance,
   TransformAccountName,
+  TransformInstitution,
   TransformTransaction,
 } from "./types";
 
@@ -159,8 +162,8 @@ const transformAccountName = (account: TransformAccountName) => {
     return account.product;
   }
 
-  if (account?.bank?.name) {
-    return account.bank.name;
+  if (account?.institution?.name) {
+    return account.institution.name;
   }
 
   return "No name";
@@ -169,25 +172,26 @@ const transformAccountName = (account: TransformAccountName) => {
 export const transformAccount = ({
   id,
   account,
-  bank,
+  institution,
 }: TransformAccount): BaseAccount => {
   return {
     id,
     type: "depository",
     name: transformAccountName({
       name: account.name,
-      bank,
+      institution,
       product: account.product,
     }),
     currency: account.currency,
-    institution: bank
+    institution: institution
       ? {
-          id: bank?.id,
-          logo: bank?.logo,
-          name: bank?.name,
+          id: institution?.id,
+          logo: institution?.logo,
+          name: institution?.name,
+          provider: Providers.Enum.gocardless,
         }
       : null,
-    provider: "gocardless",
+    provider: Providers.Enum.gocardless,
     enrollment_id: null,
   };
 };
@@ -197,4 +201,13 @@ export const transformAccountBalance = (
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),
+});
+
+export const transformInstitution = (
+  insitution: Institution,
+): TransformInstitution => ({
+  id: insitution.id,
+  name: insitution.name,
+  logo: insitution.logo ?? null,
+  provider: Providers.Enum.gocardless,
 });

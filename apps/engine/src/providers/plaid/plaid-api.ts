@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
 import {
@@ -10,8 +11,9 @@ import {
   Products,
   type Transaction,
 } from "plaid";
-import type { ProviderParams } from "../types";
+import type { GetInstitutionsRequest, ProviderParams } from "../types";
 import type {
+  DisconnectAccountRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
@@ -28,26 +30,7 @@ export class PlaidApi {
   #clientId: string;
   #clientSecret: string;
 
-  #countryCodes = [
-    CountryCode.Ca,
-    CountryCode.Us,
-    // CountryCode.Se,
-    // CountryCode.Nl,
-    // CountryCode.Be,
-    // CountryCode.Gb,
-    // CountryCode.Es,
-    // CountryCode.Fr,
-    // CountryCode.Ie,
-    // CountryCode.De,
-    // CountryCode.It,
-    // CountryCode.Pl,
-    // CountryCode.Dk,
-    // CountryCode.No,
-    // CountryCode.Ee,
-    // CountryCode.Lt,
-    // CountryCode.Lv,
-    // CountryCode.Pt,
-  ];
+  #countryCodes = [CountryCode.Us];
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
@@ -153,7 +136,7 @@ export class PlaidApi {
 
   async linkTokenCreate({
     userId,
-    language = "en",
+    language = "en", // TODO: Add params to api request
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -193,18 +176,28 @@ export class PlaidApi {
     });
   }
 
-  async getInstitutions({ countryCode }: { countryCode: CountryCode }) {
+  async deleteAccounts({ accessToken }: DisconnectAccountRequest) {
+    await this.#client.itemRemove({
+      access_token: accessToken,
+    });
+  }
+
+  async getInstitutions(params?: GetInstitutionsRequest) {
+    const countryCode = params?.countryCode ?? CountryCode.Us;
+
     return paginate({
+      delay: { milliseconds: 100, onDelay: (message) => logger(message) },
       pageSize: 500,
       fetchData: (offset, count) =>
         withRetry(() =>
           this.#client
             .institutionsGet({
-              country_codes: [countryCode],
+              country_codes: [countryCode as CountryCode],
               count,
               offset,
               options: {
                 include_optional_metadata: true,
+                products: [Products.Transactions],
               },
             })
             .then(({ data }) => {

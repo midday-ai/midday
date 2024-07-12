@@ -1,8 +1,11 @@
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetInstitutionsRequest,
+  GetInstitutionsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
 } from "./types";
@@ -15,5 +18,9 @@ export interface Provider {
   getAccountBalance: (
     params: GetAccountBalanceRequest,
   ) => Promise<GetAccountBalanceResponse>;
+  getInstitutions: (
+    params: GetInstitutionsRequest,
+  ) => Promise<GetInstitutionsResponse>;
   getHealthCheck: () => Promise<boolean>;
+  deleteAccounts: (params: DeleteAccountsRequest) => void;
 }

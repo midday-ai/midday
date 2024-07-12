@@ -1,9 +1,17 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.organizeImports.biome": "explicit"
-  },
+  "editor.defaultFormatter": "biomejs.biome",
   "[javascript]": {
     "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "explicit"
   },
   "editor.formatOnSave": true,
   "typescript.enablePromptUseWorkspaceTsdk": true,
@@ -15,5 +23,5 @@
   "terminal.integrated.localEchoStyle": "dim",
   "search.exclude": {
     "**/node_modules": true
-   }
+  }
 }

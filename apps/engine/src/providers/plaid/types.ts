@@ -1,6 +1,7 @@
 import type { AccountType } from "@/utils/account";
 import type {
   AccountsGetResponse,
+  Institution as BaseInstitution,
   Transaction,
   TransactionsSyncResponse,
 } from "plaid";
@@ -45,6 +46,8 @@ export type Institution = {
   logo?: string | null;
 };
 
+export type TransformInstitution = BaseInstitution;
+
 export type AccountWithintitution = AccountsGetResponse["accounts"][0] & {
   institution: Institution;
 };
@@ -71,4 +74,8 @@ export interface GetAccountBalanceRequest {
 export type TransformTransactionPayload = {
   transaction: TransformTransaction;
   accountType: AccountType;
+};
+
+export type DisconnectAccountRequest = {
+  accessToken: string;
 };

@@ -1,7 +1,9 @@
 import type { Provider } from "../interface";
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "../types";
@@ -9,6 +11,7 @@ import { GoCardLessApi } from "./gocardless-api";
 import {
   transformAccount,
   transformAccountBalance,
+  transformInstitution,
   transformTransaction,
 } from "./transform";
 
@@ -53,5 +56,23 @@ export class GoCardLessProvider implements Provider {
     const response = await this.#api.getAccountBalance(accountId);
 
     return transformAccountBalance(response);
+  }
+
+  async getInstitutions({ countryCode }: GetInstitutionsRequest) {
+    if (!countryCode) {
+      throw Error("Missing countryCode");
+    }
+
+    const response = await this.#api.getInstitutions({ countryCode });
+
+    return response.map(transformInstitution);
+  }
+
+  async deleteAccounts({ accountId }: DeleteAccountsRequest) {
+    if (!accountId) {
+      throw Error("Missing params");
+    }
+
+    await this.#api.deleteRequisition(accountId);
   }
 }

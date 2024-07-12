@@ -9,6 +9,8 @@ import {
   AccountBalanceSchema,
   AccountsParamsSchema,
   AccountsSchema,
+  DeleteAccountsParamsSchema,
+  DeleteSchema,
 } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -25,6 +27,33 @@ const indexRoute = createRoute({
       content: {
         "application/json": {
           schema: AccountsSchema,
+        },
+      },
+      description: "Retrieve accounts",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "Returns an error",
+    },
+  },
+});
+
+const deleteRoute = createRoute({
+  method: "delete",
+  path: "/",
+  summary: "Delete Accounts",
+  request: {
+    query: DeleteAccountsParamsSchema,
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: DeleteSchema,
         },
       },
       description: "Retrieve accounts",
@@ -114,6 +143,30 @@ app.openapi(balanceRoute, async (c) => {
   return c.json(
     {
       data,
+    },
+    200,
+  );
+});
+
+app.openapi(deleteRoute, async (c) => {
+  const envs = env(c);
+  const { provider, accountId, accessToken } = c.req.valid("query");
+
+  const api = new Provider({
+    provider,
+    fetcher: c.env.TELLER_CERT,
+    kv: c.env.KV,
+    envs,
+  });
+
+  await api.deleteAccounts({
+    accessToken,
+    accountId,
+  });
+
+  return c.json(
+    {
+      success: true,
     },
     200,
   );

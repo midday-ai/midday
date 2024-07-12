@@ -4,9 +4,11 @@ import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
+  DeleteAccountsRequest,
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetHealthCheckResponse,
+  GetInstitutionsRequest,
   GetTransactionsRequest,
   ProviderParams,
 } from "./types";
@@ -102,5 +104,23 @@ export class Provider {
     }
 
     return null;
+  }
+
+  async getInstitutions(params: GetInstitutionsRequest) {
+    logger("getInstitutions:", `provider: ${this.#provider}`);
+
+    const data = await withRetry(() => this.#provider?.getInstitutions(params));
+
+    if (data) {
+      return data;
+    }
+
+    return [];
+  }
+
+  async deleteAccounts(params: DeleteAccountsRequest) {
+    logger("delete:", `provider: ${this.#provider}`);
+
+    return withRetry(() => this.#provider?.deleteAccounts(params));
   }
 }
