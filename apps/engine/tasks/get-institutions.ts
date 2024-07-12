@@ -73,8 +73,8 @@ export async function getPlaidInstitutions() {
 
 export async function getInstitutions() {
   const data = await Promise.all([
-    // getGoCardLessInstitutions(),
-    // getTellerInstitutions(),
+    getGoCardLessInstitutions(),
+    getTellerInstitutions(),
     getPlaidInstitutions(),
   ]);
 
