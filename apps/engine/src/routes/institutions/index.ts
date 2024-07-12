@@ -1,10 +1,10 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import type { Providers } from "@/providers/types";
+import { SearchClient } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import Typesense from "typesense";
 import { InstitutionParamsSchema, InstitutionsSchema } from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -52,20 +52,7 @@ app.openapi(indexRoute, async (c) => {
   const envs = env(c);
   const { countryCode, q = "*", limit = "50" } = c.req.valid("query");
 
-  const typesense = new Typesense.Client({
-    nearestNode: {
-      host: envs.TYPESENSE_ENDPOINT!,
-      port: 443,
-      protocol: "https",
-    },
-    nodes: [
-      { host: envs.TYPESENSE_ENDPOINT_US!, port: 443, protocol: "https" },
-      { host: envs.TYPESENSE_ENDPOINT_EU!, port: 443, protocol: "https" },
-      { host: envs.TYPESENSE_ENDPOINT_AU!, port: 443, protocol: "https" },
-    ],
-    apiKey: envs.TYPESENSE_API_KEY,
-    connectionTimeoutSeconds: 2,
-  });
+  const typesense = SearchClient(envs);
 
   const searchParameters = {
     q,
