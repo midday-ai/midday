@@ -17,7 +17,7 @@ import { logger as customLogger } from "./utils/logger";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
-const PUBLIC_PATHS = ["/", "/openapi"];
+const PUBLIC_PATHS = ["/", "/openapi", "/health"];
 
 app.use(
   (c, next) => {
