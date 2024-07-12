@@ -11,4 +11,8 @@ export type Bindings = {
   UPSTASH_REDIS_REST_URL: string;
   UPSTASH_REDIS_REST_TOKEN: string;
   TYPESENSE_API_KEY: string;
+  TYPESENSE_ENDPOINT: string;
+  TYPESENSE_ENDPOINT_US: string;
+  TYPESENSE_ENDPOINT_EU: string;
+  TYPESENSE_ENDPOINT_AU: string;
 };

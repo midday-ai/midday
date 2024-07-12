@@ -1,7 +1,6 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import type { Providers } from "@/providers/types";
-import { getNearestNode, getNodes } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -54,8 +53,16 @@ app.openapi(indexRoute, async (c) => {
   const { countryCode, q = "*", limit = "50" } = c.req.valid("query");
 
   const typesense = new Typesense.Client({
-    nearestNode: getNearestNode(),
-    nodes: getNodes(),
+    nearestNode: {
+      host: envs.TYPESENSE_ENDPOINT!,
+      port: 443,
+      protocol: "https",
+    },
+    nodes: [
+      { host: envs.TYPESENSE_ENDPOINT_US!, port: 443, protocol: "https" },
+      { host: envs.TYPESENSE_ENDPOINT_EU!, port: 443, protocol: "https" },
+      { host: envs.TYPESENSE_ENDPOINT_AU!, port: 443, protocol: "https" },
+    ],
     apiKey: envs.TYPESENSE_API_KEY,
     connectionTimeoutSeconds: 2,
   });
