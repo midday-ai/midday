@@ -30,12 +30,18 @@ app.use(
 
     return bearer(c, next);
   },
+  (c, next) => {
+    if (PUBLIC_PATHS.includes(c.req.path)) {
+      return next();
+    }
+
+    return cache({
+      cacheName: "engine",
+      cacheControl: "max-age=3600",
+    })(c, next);
+  },
   secureHeaders(),
   logger(customLogger),
-  cache({
-    cacheName: "engine",
-    cacheControl: "max-age=3600",
-  }),
 );
 
 app

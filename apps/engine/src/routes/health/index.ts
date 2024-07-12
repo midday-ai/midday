@@ -1,6 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
+import { SearchClient } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -37,18 +38,31 @@ app.openapi(indexRoute, async (c) => {
 
   const api = new Provider();
 
-  const data = await api.getHealthCheck({
+  const providers = await api.getHealthCheck({
     kv: c.env.KV,
     fetcher: c.env.TELLER_CERT,
     envs,
   });
 
-  const isHealthy = Object.values(data).every((service) => service.healthy);
+  const typesense = SearchClient(envs);
+  const searchResponse = await typesense.health.retrieve();
+
+  const allServices = {
+    ...providers,
+    search: {
+      healthy:
+        typeof searchResponse === "string" && JSON.parse(searchResponse).ok,
+    },
+  };
+
+  const isHealthy = Object.values(allServices).every(
+    (service) => service.healthy,
+  );
 
   if (isHealthy) {
     return c.json(
       {
-        data,
+        data: allServices,
       },
       200,
     );
