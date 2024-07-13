@@ -1,7 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
-import { SearchClient } from "@/utils/search";
+import { getHealthCheck } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -44,15 +44,11 @@ app.openapi(indexRoute, async (c) => {
     envs,
   });
 
-  const typesense = SearchClient(envs);
-  const searchResponse = await typesense.health.retrieve();
+  const search = await getHealthCheck(envs);
 
   const allServices = {
     ...providers,
-    search: {
-      healthy:
-        typeof searchResponse === "string" && JSON.parse(searchResponse).ok,
-    },
+    search,
   };
 
   const isHealthy = Object.values(allServices).every(

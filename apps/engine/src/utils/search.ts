@@ -17,3 +17,13 @@ export function SearchClient(envs: Bindings) {
     connectionTimeoutSeconds: 2,
   });
 }
+
+export async function getHealthCheck(envs: Bindings) {
+  const typesense = SearchClient(envs);
+  const searchResponse = await typesense.health.retrieve();
+
+  return {
+    healthy:
+      typeof searchResponse === "string" && JSON.parse(searchResponse).ok,
+  };
+}
