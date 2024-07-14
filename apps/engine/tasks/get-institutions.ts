@@ -2,6 +2,14 @@ import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { getFileExtension } from "./utils";
 
+const TELLER_ENDPOINT = "https://api.teller.io/institutions";
+
+type TellerResponse = {
+  id: string;
+  name: string;
+  capabilities: string[];
+};
+
 export async function getGoCardLessInstitutions() {
   const provider = new GoCardLessApi({
     // @ts-ignore
@@ -26,14 +34,6 @@ export async function getGoCardLessInstitutions() {
     };
   });
 }
-
-const TELLER_ENDPOINT = "https://api.teller.io/institutions";
-
-type TellerResponse = {
-  id: string;
-  name: string;
-  capabilities: string[];
-};
 
 export async function getTellerInstitutions() {
   const response = await fetch(TELLER_ENDPOINT);
@@ -64,7 +64,9 @@ export async function getPlaidInstitutions() {
     return {
       id: institution.institution_id,
       name: institution.name,
-      // logo: `https://cdn-engine.midday.ai/${institution.id}.${ext}`,
+      logo: institution.logo
+        ? `https://cdn-engine.midday.ai/${institution.institution_id}.jpg`
+        : null,
       countries: institution.country_codes,
       provider: "plaid",
     };

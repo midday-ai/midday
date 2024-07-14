@@ -45,9 +45,13 @@ async function main() {
   try {
     // await typesense.collections().create(schema);
 
-    await typesense.collections("institutions").documents().import(documents);
+    await typesense
+      .collections("institutions")
+      .documents()
+      .import(documents, { action: "upsert" });
   } catch (error) {
-    console.log(error);
+    // @ts-ignore
+    console.log(error.importResults);
   }
 }
 
