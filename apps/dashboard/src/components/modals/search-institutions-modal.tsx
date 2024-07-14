@@ -1,7 +1,7 @@
 "use client";
 
-import { createEndUserAgreementAction } from "@/actions/banks/create-end-user-agreement-action";
-import { getBanks } from "@/actions/banks/get-banks";
+import { getInstitutions } from "@/actions/institutions/get-institutions";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -14,10 +14,15 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { useDebounce } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import { useQueryState } from "nuqs";
+import {
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
+} from "nuqs";
 import { useEffect, useState } from "react";
 import { CountrySelector } from "../country-selector";
 
@@ -60,7 +65,15 @@ function RowsSkeleton() {
   );
 }
 
-function Row({ id, name, logo, onSelect }) {
+type RowProps = {
+  id: string;
+  name: string;
+  logo: string;
+  onSelect: (id: string) => void;
+  provider: string;
+};
+
+function Row({ id, name, logo, onSelect, provider }: RowProps) {
   const [loading, setLoading] = useState(false);
 
   const handleOnSelect = () => {
@@ -71,18 +84,19 @@ function Row({ id, name, logo, onSelect }) {
   return (
     <div className="flex justify-between">
       <div className="flex items-center">
-        <Image
-          src={logo}
-          alt={name}
-          className="border rounded-full aspect-square"
-          width={36}
-          height={36}
-        />
+        <Avatar>
+          <AvatarImage src={logo} alt={name} />
+          <AvatarFallback>CN</AvatarFallback>
+        </Avatar>
 
         <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">{name}</p>
+          <p className="text-sm font-medium leading-none capitalize">
+            {name.toLowerCase()}
+          </p>
+          <span className="text-[#878787] text-xs capitalize">{provider}</span>
         </div>
       </div>
+
       <Button
         variant="outline"
         onClick={handleOnSelect}
@@ -96,35 +110,42 @@ function Row({ id, name, logo, onSelect }) {
   );
 }
 
-export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
+type SearchInstitutionsModalProps = {
+  countryCode: string;
+};
+
+export function SearchInstitutionsModal({
+  countryCode: initialCountryCode,
+}: SearchInstitutionsModalProps) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
-  const [filteredResults, setFilteredResults] = useState([]);
 
-  const createEndUserAgreement = useAction(createEndUserAgreementAction);
-
-  const [step, setStep] = useQueryState("step");
-  const [countryCode, setCountryCode] = useQueryState("contryCode", {
-    defaultValue: initialCountryCode,
+  const [params, setParams] = useQueryStates({
+    step: parseAsStringEnum(["connect", "account", "gocardless"]),
+    countryCode: parseAsString.withDefault(initialCountryCode),
+    q: parseAsString,
   });
 
-  const isOpen = step === "gocardless";
+  const { countryCode, q: query } = params;
+
+  const debouncedSearchTerm = useDebounce(query, 100);
+
+  const isOpen = params.step === "connect";
+
+  async function fetchData(query?: string) {
+    try {
+      setLoading(true);
+      const { data } = await getInstitutions({ countryCode, query });
+      setLoading(false);
+
+      setResults(data);
+    } catch {
+      setLoading(false);
+      setResults([]);
+    }
+  }
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const banks = await getBanks({ countryCode });
-        setLoading(false);
-
-        setResults(banks);
-        setFilteredResults(banks);
-      } catch {
-        setLoading(false);
-        setResults([]);
-        setFilteredResults([]);
-      }
-    }
-
     if (
       (isOpen && !results?.length > 0) ||
       countryCode !== initialCountryCode
@@ -133,78 +154,80 @@ export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
     }
   }, [isOpen, countryCode]);
 
-  const handleFilterBanks = (value: string) => {
-    if (!value) {
-      setFilteredResults(results);
+  useEffect(() => {
+    if (isOpen) {
+      fetchData(debouncedSearchTerm ?? undefined);
     }
+  }, [debouncedSearchTerm, isOpen]);
 
-    setFilteredResults(
-      results.filter((bank) =>
-        bank.name.toLowerCase().includes(value.toLowerCase())
-      )
-    );
-  };
+  const onChange = (value: string) => {};
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => setStep(null)}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={() =>
+        setParams({
+          step: null,
+          countryCode: null,
+          q: null,
+        })
+      }
+    >
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
-            <div className="flex space-x-4 items-center mb-4">
-              <button
-                type="button"
-                className="items-center rounded border bg-accent p-1"
-                onClick={() => setStep("connect")}
-              >
-                <Icons.ArrowBack />
-              </button>
-              <DialogTitle className="m-0 p-0">Search Bank</DialogTitle>
-            </div>
+            <DialogTitle>Connect Bank</DialogTitle>
+
             <DialogDescription>
               Start by selecting your business bank, once authenticated you can
               select which accounts you want to link to Midday.
             </DialogDescription>
 
             <div>
-              <div className="flex space-x-2 my-3">
+              <div className="flex space-x-2 my-3 relative">
                 <Input
                   placeholder="Search bank..."
                   type="search"
-                  onChange={(evt) => handleFilterBanks(evt.target.value)}
+                  onChange={(evt) => setParams({ q: evt.target.value })}
                   autoComplete="off"
                   autoCapitalize="none"
                   autoCorrect="off"
                   spellCheck="false"
+                  value={query ?? ""}
                 />
 
-                <CountrySelector
-                  defaultValue={countryCode}
-                  onSelect={setCountryCode}
-                />
+                <div className="absolute right-0">
+                  <CountrySelector
+                    defaultValue={countryCode}
+                    onSelect={(countryCode) => setParams({ countryCode })}
+                  />
+                </div>
               </div>
 
               <div className="space-y-4 pt-4 h-[400px] overflow-auto scrollbar-hide">
                 {loading && <RowsSkeleton />}
-                {filteredResults?.map((bank) => {
+
+                {results?.map((bank) => {
                   return (
                     <Row
                       key={bank.id}
                       id={bank.id}
                       name={bank.name}
                       logo={bank.logo}
-                      onSelect={() => {
-                        createEndUserAgreement.execute({
-                          institutionId: bank.id,
-                          isDesktop: isDesktopApp(),
-                          transactionTotalDays: +bank.transaction_total_days,
-                          countryCode,
-                        });
-                      }}
+                      provider={bank.provider}
+                      // onSelect={() => {
+                      //   createEndUserAgreement.execute({
+                      //     institutionId: bank.id,
+                      //     isDesktop: isDesktopApp(),
+                      //     transactionTotalDays: +bank.transaction_total_days,
+                      //     countryCode,
+                      //   });
+                      // }}
                     />
                   );
                 })}
 
-                {!loading && filteredResults.length === 0 && (
+                {!loading && results.length === 0 && (
                   <div className="flex flex-col items-center justify-center min-h-[300px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">
@@ -212,11 +235,7 @@ export function ConnectGoCardLessModal({ countryCode: initialCountryCode }) {
                       <br /> criteria let us know which bank you are looking for
                     </p>
 
-                    <Button
-                      variant="outline"
-                      className="mt-4"
-                      onClick={() => setStep("connect")}
-                    >
+                    <Button variant="outline" className="mt-4">
                       Try another provider
                     </Button>
                   </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import { getAccounts } from "@/actions/banks/get-accounts";
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { connectBankAccountSchema } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -94,7 +93,7 @@ export function SelectBankAccountsModal() {
       {
         // NOTE: Rerender so the overview modal is visible
         shallow: false,
-      }
+      },
     );
   };
 
@@ -124,43 +123,43 @@ export function SelectBankAccountsModal() {
     connectBankAction.execute(values);
   }
 
-  useEffect(() => {
-    async function fetchData() {
-      const data = await getAccounts({
-        provider,
-        id: ref,
-        countryCode,
-        accessToken: token,
-        institutionId: institution_id,
-      });
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     const data = await getAccounts({
+  //       provider,
+  //       id: ref,
+  //       countryCode,
+  //       accessToken: token,
+  //       institutionId: institution_id,
+  //     });
 
-      setAccounts(data);
-      setLoading(false);
+  //     setAccounts(data);
+  //     setLoading(false);
 
-      // Set all accounts to checked
-      if (!form.formState.isValid) {
-        form.reset({
-          provider,
-          accessToken: token,
-          enrollmentId: enrollment_id,
-          accounts: data.map((account) => ({
-            name: account.name,
-            institution_id: account.institution.id,
-            logo_url: account.institution?.logo,
-            account_id: account.id,
-            bank_name: account.institution.name,
-            currency: account.currency,
-            enabled: false,
-            type: account.type,
-          })),
-        });
-      }
-    }
+  //     // Set all accounts to checked
+  //     if (!form.formState.isValid) {
+  //       form.reset({
+  //         provider,
+  //         accessToken: token,
+  //         enrollmentId: enrollment_id,
+  //         accounts: data.map((account) => ({
+  //           name: account.name,
+  //           institution_id: account.institution.id,
+  //           logo_url: account.institution?.logo,
+  //           account_id: account.id,
+  //           bank_name: account.institution.name,
+  //           currency: account.currency,
+  //           enabled: false,
+  //           type: account.type,
+  //         })),
+  //       });
+  //     }
+  //   }
 
-    if (isOpen && !accounts.length) {
-      fetchData();
-    }
-  }, [isOpen, provider]);
+  //   if (isOpen && !accounts.length) {
+  //     fetchData();
+  //   }
+  // }, [isOpen, provider]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -229,7 +228,7 @@ export function SelectBankAccountsModal() {
                                     checked={
                                       field.value.find(
                                         (value) =>
-                                          value.account_id === account.id
+                                          value.account_id === account.id,
                                       )?.enabled
                                     }
                                     onCheckedChange={(checked) => {
@@ -243,7 +242,7 @@ export function SelectBankAccountsModal() {
                                           }
 
                                           return value;
-                                        })
+                                        }),
                                       );
                                     }}
                                   />

@@ -2,7 +2,7 @@ import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
-import { getCountryCode, isEUCountry } from "@midday/location";
+import { getCountryCode } from "@midday/location";
 import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
@@ -12,65 +12,55 @@ import { redirect } from "next/navigation";
 const AssistantModal = dynamic(
   () =>
     import("@/components/assistant/assistant-modal").then(
-      (mod) => mod.AssistantModal
+      (mod) => mod.AssistantModal,
     ),
   {
     ssr: false,
-  }
-);
-
-const ConnectGoCardLessModal = dynamic(
-  () =>
-    import("@/components/modals/connect-gocardless-modal").then(
-      (mod) => mod.ConnectGoCardLessModal
-    ),
-  {
-    ssr: false,
-  }
+  },
 );
 
 const ExportStatus = dynamic(
   () => import("@/components/export-status").then((mod) => mod.ExportStatus),
   {
     ssr: false,
-  }
+  },
 );
 
 const SelectBankAccountsModal = dynamic(
   () =>
     import("@/components/modals/select-bank-accounts").then(
-      (mod) => mod.SelectBankAccountsModal
+      (mod) => mod.SelectBankAccountsModal,
     ),
   {
     ssr: false,
-  }
-);
-
-const ConnectTransactionsModal = dynamic(
-  () =>
-    import("@/components/modals/connect-transactions-modal").then(
-      (mod) => mod.ConnectTransactionsModal
-    ),
-  {
-    ssr: false,
-  }
+  },
 );
 
 const ImportCSVModal = dynamic(
   () =>
     import("@/components/modals/import-csv-modal").then(
-      (mod) => mod.ImportCSVModal
+      (mod) => mod.ImportCSVModal,
     ),
   {
     ssr: false,
-  }
+  },
 );
 
 const HotKeys = dynamic(
   () => import("@/components/hot-keys").then((mod) => mod.HotKeys),
   {
     ssr: false,
-  }
+  },
+);
+
+const SearchInstitutionsModal = dynamic(
+  () =>
+    import("@/components/modals/search-institutions-modal").then(
+      (mod) => mod.SearchInstitutionsModal,
+    ),
+  {
+    ssr: false,
+  },
 );
 
 export default async function Layout({
@@ -80,8 +70,6 @@ export default async function Layout({
 }) {
   const user = await getUser();
   const countryCode = getCountryCode();
-
-  const isEU = isEUCountry(countryCode);
 
   if (!user?.data?.team) {
     redirect("/teams");
@@ -102,8 +90,7 @@ export default async function Layout({
         </div>
 
         <AssistantModal />
-        <ConnectTransactionsModal isEU={isEU} />
-        <ConnectGoCardLessModal countryCode={countryCode} />
+        <SearchInstitutionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />
         <ImportCSVModal
           currencies={uniqueCurrencies}
