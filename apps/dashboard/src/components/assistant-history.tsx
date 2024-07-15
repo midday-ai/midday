@@ -16,7 +16,11 @@ import { useToast } from "@midday/ui/use-toast";
 import { useUIState } from "ai/rsc";
 import { useAction, useOptimisticAction } from "next-safe-action/hooks";
 
-export function AssistantHistory({ enabled }) {
+type Props = {
+  enabled: boolean;
+};
+
+export function AssistantHistory({ enabled }: Props) {
   const { toast } = useToast();
   const [_, setMessages] = useUIState<typeof AI>();
 
@@ -25,7 +29,7 @@ export function AssistantHistory({ enabled }) {
     enabled,
     (_, { enabled }) => {
       return enabled;
-    }
+    },
   );
 
   const clearHistory = useAction(clearHistoryAction, {
@@ -64,7 +68,7 @@ export function AssistantHistory({ enabled }) {
           <Button
             variant="outline"
             onClick={() => {
-              clearHistory.execute(null);
+              clearHistory.execute(undefined);
               setMessages([]);
             }}
             disabled={clearHistory.status === "executing"}

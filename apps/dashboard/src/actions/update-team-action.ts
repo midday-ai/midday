@@ -1,28 +1,28 @@
 "use server";
 
-import { getUser } from "@midday/supabase/cached-queries";
 import { updateTeam } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
 import {
   revalidatePath as revalidatePathFunc,
   revalidateTag,
 } from "next/cache";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { updateTeamSchema } from "./schema";
 
-export const updateTeamAction = action(
-  updateTeamSchema,
-  async ({ revalidatePath, ...data }) => {
-    const supabase = createClient();
-    const team = await updateTeam(supabase, data);
-    const user = await getUser();
+export const updateTeamAction = authActionClient
+  .schema(updateTeamSchema)
+  .action(
+    async ({
+      parsedInput: { revalidatePath, ...data },
+      ctx: { user, supabase },
+    }) => {
+      const team = await updateTeam(supabase, data);
 
-    if (revalidatePath) {
-      revalidatePathFunc(revalidatePath);
-    }
+      if (revalidatePath) {
+        revalidatePathFunc(revalidatePath);
+      }
 
-    revalidateTag(`user_${user.data.id}`);
+      revalidateTag(`user_${user.id}`);
 
-    return team;
-  }
-);
+      return team;
+    },
+  );

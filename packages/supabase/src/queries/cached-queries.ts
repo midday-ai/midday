@@ -37,7 +37,7 @@ import {
 } from "../queries";
 
 export const getTransactions = async (
-  params: Omit<GetTransactionsParams, "teamId">
+  params: Omit<GetTransactionsParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -55,7 +55,7 @@ export const getTransactions = async (
     {
       revalidate: 180,
       tags: [`transactions_${teamId}`],
-    }
+    },
   )(params);
 };
 
@@ -85,7 +85,7 @@ export const getUser = async () => {
     {
       tags: [`user_${userId}`],
       revalidate: 180,
-    }
+    },
   )(userId);
 };
 
@@ -104,7 +104,7 @@ export const getTeamUser = async () => {
     {
       tags: [`team_user_${data.id}`],
       revalidate: 180,
-    }
+    },
   )(data.id);
 };
 
@@ -125,12 +125,12 @@ export const getBankConnectionsByTeamId = async () => {
     {
       tags: [`bank_connections_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(teamId);
 };
 
 export const getTeamBankAccounts = async (
-  params?: Omit<GetTeamBankAccountsParams, "teamId">
+  params?: Omit<GetTeamBankAccountsParams, "teamId">,
 ) => {
   const supabase = createClient();
 
@@ -149,7 +149,7 @@ export const getTeamBankAccounts = async (
     {
       tags: [`bank_accounts_${teamId}`],
       revalidate: 180,
-    }
+    },
   )(params);
 };
 
@@ -171,12 +171,12 @@ export const getTeamMembers = async () => {
     {
       tags: [`team_members_${teamId}`],
       revalidate: 180,
-    }
+    },
   )(teamId);
 };
 
 export const getSpending = async (
-  params: Omit<GetSpendingParams, "teamId">
+  params: Omit<GetSpendingParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -194,7 +194,7 @@ export const getSpending = async (
     {
       tags: [`spending_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
@@ -218,7 +218,7 @@ export const getBankAccountsCurrencies = async () => {
     {
       tags: [`bank_accounts_currencies_${teamId}`],
       revalidate: 180,
-    }
+    },
   )();
 };
 
@@ -240,7 +240,7 @@ export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
     {
       tags: [`metrics_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
@@ -262,7 +262,7 @@ export const getVault = async (params: GetVaultParams) => {
     {
       tags: [`vault_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
@@ -284,7 +284,7 @@ export const getTeams = async () => {
     {
       tags: [`teams_${userId}`],
       revalidate: 180,
-    }
+    },
   )();
 };
 
@@ -306,7 +306,7 @@ export const getTeamInvites = async () => {
     {
       tags: [`team_invites_${teamId}`],
       revalidate: 180,
-    }
+    },
   )();
 };
 
@@ -324,12 +324,12 @@ export const getUserInvites = async () => {
     {
       tags: [`user_invites_${email}`],
       revalidate: 180,
-    }
+    },
   )();
 };
 
 export const getTrackerProjects = async (
-  params: GetTrackerProjectsQueryParams
+  params: GetTrackerProjectsQueryParams,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -343,12 +343,12 @@ export const getTrackerProjects = async (
     {
       tags: [`tracker_projects_${teamId}`],
       revalidate: 180,
-    }
+    },
   )(params);
 };
 
 export const getTrackerRecordsByRange = async (
-  params: GetTrackerRecordsByRangeParams
+  params: GetTrackerRecordsByRangeParams,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -362,12 +362,12 @@ export const getTrackerRecordsByRange = async (
     {
       tags: [`tracker_entries_${teamId}`],
       revalidate: 180,
-    }
+    },
   )(params);
 };
 
 export const getBurnRate = async (
-  params: Omit<GetBurnRateQueryParams, "teamId">
+  params: Omit<GetBurnRateQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -381,12 +381,12 @@ export const getBurnRate = async (
     {
       tags: [`burn_rate_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getCurrentBurnRate = async (
-  params: Omit<GetCurrentBurnRateQueryParams, "teamId">
+  params: Omit<GetCurrentBurnRateQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -400,12 +400,12 @@ export const getCurrentBurnRate = async (
     {
       tags: [`current_burn_rate_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getRunway = async (
-  params: Omit<GetRunwayQueryParams, "teamId">
+  params: Omit<GetRunwayQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -419,12 +419,12 @@ export const getRunway = async (
     {
       tags: [`runway_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getCategories = async (
-  params?: Omit<GetCategoriesParams, "teamId">
+  params?: Omit<GetCategoriesParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -438,6 +438,6 @@ export const getCategories = async (
     {
       tags: [`transaction_categories_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };

@@ -1,20 +1,17 @@
 "use server";
 
-import { action } from "@/actions/safe-action";
+import { authActionClient } from "@/actions/safe-action";
 import { manualSyncTransactionsSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { Events, client } from "@midday/jobs";
-import { getUser } from "@midday/supabase/cached-queries";
 
-export const manualSyncTransactionsAction = action(
-  manualSyncTransactionsSchema,
-  async ({ accountId }) => {
-    const user = await getUser();
-
+export const manualSyncTransactionsAction = authActionClient
+  .schema(manualSyncTransactionsSchema)
+  .action(async ({ parsedInput: { accountId }, ctx: { user } }) => {
     const analytics = await setupAnalytics({
-      userId: user.data.id,
-      fullName: user.data.full_name,
+      userId: user.id,
+      fullName: user.full_name,
     });
 
     analytics.track({
@@ -30,5 +27,4 @@ export const manualSyncTransactionsAction = action(
     });
 
     return event;
-  }
-);
+  });

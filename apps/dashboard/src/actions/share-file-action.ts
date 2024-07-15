@@ -1,42 +1,36 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { share } from "@midday/supabase/storage";
 import { Dub } from "dub";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { shareFileSchema } from "./schema";
 
 const dub = new Dub({ projectSlug: "midday" });
 
-export const shareFileAction = action(shareFileSchema, async (value) => {
-  const supabase = createClient();
-  const user = await getUser();
-
-  const response = await share(supabase, {
-    bucket: "vault",
-    path: `${user.data.team_id}/${value.filepath}`,
-    expireIn: value.expireIn,
-    options: {
-      download: true,
-    },
-  });
-
-  const analytics = await setupAnalytics({
-    userId: user.data.id,
-    fullName: user.data.full_name,
-  });
-
-  analytics.track({
+export const shareFileAction = authActionClient
+  .schema(shareFileSchema)
+  .metadata({
     event: LogEvents.ShareFile.name,
     channel: LogEvents.ShareFile.channel,
-  });
+  })
+  .action(async ({ parsedInput: value, ctx: { supabase, user } }) => {
+    const response = await share(supabase, {
+      bucket: "vault",
+      path: `${user.team_id}/${value.filepath}`,
+      expireIn: value.expireIn,
+      options: {
+        download: true,
+      },
+    });
 
-  const link = await dub.links.create({
-    url: response?.data?.signedUrl,
-  });
+    if (!response.data) {
+      return null;
+    }
 
-  return link?.shortLink;
-});
+    const link = await dub.links.create({
+      url: response?.data?.signedUrl,
+    });
+
+    return link?.shortLink;
+  });

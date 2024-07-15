@@ -1,7 +1,9 @@
 "use client";
 
 import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
+import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
+import { updateInstitutionUsageAction } from "@/actions/institutions/update-institution-usage";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
@@ -65,16 +67,68 @@ type RowProps = {
   id: string;
   name: string;
   logo: string;
-  onSelect: (id: string) => void;
   provider: string;
+  countryCode: string;
+  availableHistory: number;
 };
 
-function Row({ id, name, logo, onSelect, provider }: RowProps) {
-  const [loading, setLoading] = useState(false);
+function Row({
+  id,
+  name,
+  logo,
+  provider,
+  countryCode,
+  availableHistory,
+}: RowProps) {
+  const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
+  const createGoCardLessLink = useAction(createGoCardLessLinkAction, {
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (data) => {
+      console.log("error", data);
+    },
+  });
+
+  const createPlaidLinkToken = useAction(createPlaidLinkTokenAction, {
+    onSuccess: (data) => {
+      console.log(data);
+    },
+    onError: (data) => {
+      console.log("error", data);
+    },
+  });
+
+  const isLoading =
+    createGoCardLessLink.status === "executing" ||
+    createPlaidLinkToken.status === "executing";
 
   const handleOnSelect = () => {
-    setLoading(true);
-    onSelect(id);
+    updateInstitutionUsage.execute({
+      institutionId: id,
+    });
+
+    switch (provider) {
+      case "gocardless": {
+        createGoCardLessLink.execute({
+          institutionId: id,
+          availableHistory,
+          countryCode,
+          redirectBase: isDesktopApp() ? "midday://" : window.location.origin,
+        });
+
+        return;
+      }
+
+      case "plaid": {
+        createPlaidLinkToken.execute(undefined);
+
+        return;
+      }
+
+      default:
+        return;
+    }
   };
 
   const getInitials = (name: string) => {
@@ -112,7 +166,7 @@ function Row({ id, name, logo, onSelect, provider }: RowProps) {
         data-icon="🏦"
         data-channel="bank"
       >
-        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
+        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
       </Button>
     </div>
   );
@@ -127,7 +181,6 @@ export function SearchInstitutionsModal({
 }: SearchInstitutionsModalProps) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
-  const createGoCardLessLink = useAction(createGoCardLessLinkAction);
 
   const [params, setParams] = useQueryStates({
     step: parseAsStringEnum(["connect", "account", "gocardless"]),
@@ -167,26 +220,6 @@ export function SearchInstitutionsModal({
       fetchData(debouncedSearchTerm ?? undefined);
     }
   }, [debouncedSearchTerm, isOpen]);
-
-  const onChange = (value: string) => {};
-
-  const handleOnSelect = (institution) => {
-    switch (institution.provider) {
-      case "gocardless": {
-        createGoCardLessLink.execute({
-          institutionId: institution.id,
-          availableHistory: +institution.available_history,
-          countryCode,
-          redirectBase: isDesktopApp() ? "midday://" : window.location.origin,
-        });
-
-        return;
-      }
-
-      default:
-        return;
-    }
-  };
 
   return (
     <Dialog
@@ -241,7 +274,8 @@ export function SearchInstitutionsModal({
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}
-                      onSelect={() => handleOnSelect(institution)}
+                      availableHistory={+institution.availableHistory}
+                      countryCode={countryCode}
                     />
                   );
                 })}

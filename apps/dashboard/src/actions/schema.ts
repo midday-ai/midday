@@ -350,6 +350,10 @@ export const createGoCardLessLinkSchema = z.object({
   redirectBase: z.string(),
 });
 
+export const updateInstitutionUsageSchema = z.object({
+  institutionId: z.string(),
+});
+
 export const importTransactionsSchema = z.object({
   filePath: z.array(z.string()),
 });

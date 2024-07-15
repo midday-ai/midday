@@ -1,35 +1,35 @@
 "use server";
 
-import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { bulkUpdateTransactionsSchema } from "./schema";
 
-export const bulkUpdateTransactionsAction = action(
-  bulkUpdateTransactionsSchema,
-  async (payload) => {
+export const bulkUpdateTransactionsAction = authActionClient
+  .schema(bulkUpdateTransactionsSchema)
+  .action(async ({ parsedInput: payload, ctx: { user } }) => {
     const supabase = createClient();
-    const user = await getUser();
-    const teamId = user?.data?.team_id;
+
+    if (!user.team_id) {
+      return;
+    }
 
     const updatePromises = payload.data.map(async ({ id, ...params }) => {
       return supabase
         .from("transactions")
         .update(params)
         .eq("id", id)
-        .eq("team_id", teamId)
+        .eq("team_id", user.team_id)
         .select();
     });
 
     const data = await Promise.all(updatePromises);
 
-    revalidateTag(`transactions_${teamId}`);
-    revalidateTag(`spending_${teamId}`);
-    revalidateTag(`metrics_${teamId}`);
-    revalidateTag(`current_burn_rate_${teamId}`);
-    revalidateTag(`burn_rate_${teamId}`);
+    revalidateTag(`transactions_${user.team_id}`);
+    revalidateTag(`spending_${user.team_id}`);
+    revalidateTag(`metrics_${user.team_id}`);
+    revalidateTag(`current_burn_rate_${user.team_id}`);
+    revalidateTag(`burn_rate_${user.team_id}`);
 
     return data;
-  }
-);
+  });

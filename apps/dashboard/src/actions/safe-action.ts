@@ -1,15 +1,51 @@
-import { createSafeActionClient } from "next-safe-action";
+import { setupAnalytics } from "@midday/events/server";
+import { getUser } from "@midday/supabase/cached-queries";
+import { createClient } from "@midday/supabase/server";
+import {
+  DEFAULT_SERVER_ERROR_MESSAGE,
+  createSafeActionClient,
+} from "next-safe-action";
+import { z } from "zod";
 
-export const action = createSafeActionClient({
-  handleReturnedServerError: (e) => {
+export const actionClient = createSafeActionClient({
+  handleReturnedServerError(e) {
     if (e instanceof Error) {
-      return {
-        serverError: e.message,
-      };
+      return e.message;
     }
 
-    return {
-      serverError: "Oh no, something went wrong!",
-    };
+    return DEFAULT_SERVER_ERROR_MESSAGE;
   },
+  defineMetadataSchema() {
+    return z
+      .object({
+        event: z.string().optional(),
+        channel: z.string().optional(),
+      })
+      .optional();
+  },
+});
+
+export const authActionClient = actionClient.use(async ({ next, metadata }) => {
+  const user = await getUser();
+  const supabase = createClient();
+
+  if (!user?.data) {
+    throw new Error("Unauthorized");
+  }
+
+  if (metadata) {
+    const analytics = await setupAnalytics({
+      userId: user.data.id,
+      fullName: user.data.full_name,
+    });
+
+    analytics.track(metadata);
+  }
+
+  return next({
+    ctx: {
+      user: user.data,
+      supabase,
+    },
+  });
 });

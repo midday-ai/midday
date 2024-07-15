@@ -1,11 +1,11 @@
 "use server";
 
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { subscribeSchema } from "./schema";
 
-export const subscribeAction = action(
-  subscribeSchema,
-  async ({ email, userGroup }) => {
+export const subscribeAction = authActionClient
+  .schema(subscribeSchema)
+  .action(async ({ parsedInput: { email, userGroup } }) => {
     const res = await fetch(
       "https://app.loops.so/api/newsletter-form/clna1p09j00d3l60og56gj3u1",
       {
@@ -17,11 +17,8 @@ export const subscribeAction = action(
           email,
           userGroup,
         }),
-      }
+      },
     );
 
-    const json = await res.json();
-
-    return json;
-  }
-);
+    return res.json();
+  });

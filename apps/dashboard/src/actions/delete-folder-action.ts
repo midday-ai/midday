@@ -1,34 +1,24 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
 import { deleteFolder } from "@midday/supabase/storage";
 import { revalidateTag } from "next/cache";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { deleteFolderSchema } from "./schema";
 
-export const deleteFolderAction = action(deleteFolderSchema, async (value) => {
-  const supabase = createClient();
-  const user = await getUser();
-
-  await deleteFolder(supabase, {
-    bucket: "vault",
-    path: [user.data.team_id, ...value.path],
-  });
-
-  await revalidateTag(`vault_${user.data.team_id}`);
-
-  const analytics = await setupAnalytics({
-    userId: user.data.id,
-    fullName: user.data.full_name,
-  });
-
-  analytics.track({
+export const deleteFolderAction = authActionClient
+  .schema(deleteFolderSchema)
+  .metadata({
     event: LogEvents.DeleteFolder.name,
     channel: LogEvents.DeleteFolder.channel,
-  });
+  })
+  .action(async ({ parsedInput: { value }, ctx: { user, supabase } }) => {
+    await deleteFolder(supabase, {
+      bucket: "vault",
+      path: [user.team_id, ...value.path],
+    });
 
-  return value;
-});
+    revalidateTag(`vault_${user.team_id}`);
+
+    return value;
+  });

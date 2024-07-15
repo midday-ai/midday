@@ -32,7 +32,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import {
-  ColumnDef,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
   useReactTable,
@@ -294,7 +294,7 @@ export function DataTable({ data }) {
                     key={cell.id}
                     className={cn(
                       "border-r-[0px] py-4",
-                      cell.column.columnDef.meta?.className
+                      cell.column.columnDef.meta?.className,
                     )}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

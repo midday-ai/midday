@@ -1,10 +1,8 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
 import { PlainClient } from "@team-plain/typescript-sdk";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { sendSupportSchema } from "./schema";
 
 const client = new PlainClient({
@@ -26,51 +24,45 @@ const mapToPriorityNumber = (priority: string) => {
   }
 };
 
-export const sendSupportAction = action(sendSupportSchema, async (data) => {
-  const user = await getUser();
-
-  const customer = await client.upsertCustomer({
-    identifier: {
-      emailAddress: user.data.email,
-    },
-    onCreate: {
-      fullName: user.data.full_name,
-      externalId: user.data.id,
-      email: {
-        email: user.data.email,
-        isVerified: true,
-      },
-    },
-    onUpdate: {},
-  });
-
-  const response = await client.createThread({
-    title: data.subject,
-    description: data.message,
-    priority: mapToPriorityNumber(data.priority),
-    customerIdentifier: {
-      customerId: customer.data?.customer.id,
-    },
-    // Support
-    labelTypeIds: ["lt_01HV93FQT6NSC1EN2HHA6BG9WK"],
-    components: [
-      {
-        componentText: {
-          text: data.message,
-        },
-      },
-    ],
-  });
-
-  const analytics = await setupAnalytics({
-    userId: user.data.id,
-    fullName: user.data.full_name,
-  });
-
-  analytics.track({
+export const sendSupportAction = authActionClient
+  .schema(sendSupportSchema)
+  .metadata({
     event: LogEvents.SupportTicket.name,
     channel: LogEvents.SupportTicket.channel,
-  });
+  })
+  .action(async ({ parsedInput: data, ctx: { user } }) => {
+    const customer = await client.upsertCustomer({
+      identifier: {
+        emailAddress: user.email,
+      },
+      onCreate: {
+        fullName: user.full_name,
+        externalId: user.id,
+        email: {
+          email: user.email,
+          isVerified: true,
+        },
+      },
+      onUpdate: {},
+    });
 
-  return response;
-});
+    const response = await client.createThread({
+      title: data.subject,
+      description: data.message,
+      priority: mapToPriorityNumber(data.priority),
+      customerIdentifier: {
+        customerId: customer.data?.customer.id,
+      },
+      // Support
+      labelTypeIds: ["lt_01HV93FQT6NSC1EN2HHA6BG9WK"],
+      components: [
+        {
+          componentText: {
+            text: data.message,
+          },
+        },
+      ],
+    });
+
+    return response;
+  });

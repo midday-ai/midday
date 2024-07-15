@@ -1,30 +1,32 @@
 "use server";
 
-import { action } from "@/actions/safe-action";
+import { authActionClient } from "@/actions/safe-action";
 import { createProjectReportSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import { Dub } from "dub";
 
 const dub = new Dub({ projectSlug: "midday" });
 
-export const createProjectReport = action(
-  createProjectReportSchema,
-  async (params) => {
+export const createProjectReport = authActionClient
+  .schema(createProjectReportSchema)
+  .action(async ({ parsedInput: params, ctx: { user } }) => {
     const supabase = createClient();
-    const user = await getUser();
 
     const { data } = await supabase
       .from("tracker_reports")
       .insert({
-        team_id: user?.data?.team_id,
+        team_id: user.team_id,
         project_id: params.projectId,
-        created_by: user?.data?.id,
+        created_by: user.id,
       })
       .select("*")
       .single();
+
+    if (!data) {
+      return;
+    }
 
     const link = await dub.links.create({
       url: `${params.baseUrl}/report/project/${data?.id}`,
@@ -41,8 +43,8 @@ export const createProjectReport = action(
       .single();
 
     const analytics = await setupAnalytics({
-      userId: user?.data?.id,
-      fullName: user?.data?.full_name,
+      userId: user.id,
+      fullName: user.full_name,
     });
 
     analytics.track({
@@ -51,5 +53,4 @@ export const createProjectReport = action(
     });
 
     return linkData;
-  }
-);
+  });

@@ -1,37 +1,24 @@
 "use server";
 
-import { action } from "@/actions/safe-action";
+import { authActionClient } from "@/actions/safe-action";
 import { createProjectSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getUser } from "@midday/supabase/cached-queries";
 import { createProject } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 
-export const createProjectAction = action(
-  createProjectSchema,
-  async (params) => {
-    const supabase = createClient();
-    const user = await getUser();
-
+export const createProjectAction = authActionClient
+  .schema(createProjectSchema)
+  .metadata({
+    event: LogEvents.ProjectCreated.name,
+    channel: LogEvents.ProjectCreated.channel,
+  })
+  .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await createProject(supabase, {
       ...params,
-      team_id: user?.data?.team_id,
+      team_id: user.team_id,
     });
 
-    revalidateTag(`tracker_projects_${user?.data?.team_id}`);
-
-    const analytics = await setupAnalytics({
-      userId: user?.data?.id,
-      fullName: user?.data?.full_name,
-    });
-
-    analytics.track({
-      event: LogEvents.ProjectCreated.name,
-      channel: LogEvents.ProjectCreated.channel,
-    });
+    revalidateTag(`tracker_projects_${user.team_id}`);
 
     return data;
-  }
-);
+  });

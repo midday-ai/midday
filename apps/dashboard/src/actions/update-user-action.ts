@@ -1,16 +1,16 @@
 "use server";
 
 import { updateUser } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { updateUserSchema } from "./schema";
 
-export const updateUserAction = action(updateUserSchema, async (data) => {
-  const supabase = createClient();
-  const user = await updateUser(supabase, data);
+export const updateUserAction = authActionClient
+  .schema(updateUserSchema)
+  .action(async ({ parsedInput: data, ctx: { user, supabase } }) => {
+    await updateUser(supabase, data);
 
-  revalidateTag(`user_${user.data.id}`);
+    revalidateTag(`user_${user.id}`);
 
-  return user;
-});
+    return user;
+  });

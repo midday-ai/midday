@@ -2,36 +2,48 @@
 
 import Midday from "@midday-ai/engine";
 import { redirect } from "next/navigation";
-import { action } from "../safe-action";
+import { authActionClient } from "../safe-action";
 import { createGoCardLessLinkSchema } from "../schema";
 
 const engine = new Midday();
 
-export const createGoCardLessLinkAction = action(
-  createGoCardLessLinkSchema,
-  async ({ institutionId, availableHistory, countryCode, redirectBase }) => {
-    await engine.institutions.usage.update(institutionId);
+export const createGoCardLessLinkAction = authActionClient
+  .schema(createGoCardLessLinkSchema)
+  .action(
+    async ({
+      parsedInput: {
+        institutionId,
+        availableHistory,
+        countryCode,
+        redirectBase,
+      },
+    }) => {
+      try {
+        await engine.institutions.usage.update(institutionId);
 
-    const redirectTo = new URL(redirectBase);
+        const redirectTo = new URL(redirectBase);
 
-    redirectTo.searchParams.append("step", "account");
-    redirectTo.searchParams.append("countryCode", countryCode);
-    redirectTo.searchParams.append("provider", "gocardless");
+        redirectTo.searchParams.append("step", "account");
+        redirectTo.searchParams.append("countryCode", countryCode);
+        redirectTo.searchParams.append("provider", "gocardless");
 
-    const { data: agreementData } =
-      await engine.auth.gocardless.agreement.create({
-        institution_id: institutionId,
-        transactionTotalDays: availableHistory,
-      });
+        const { data: agreementData } =
+          await engine.auth.gocardless.agreement.create({
+            institution_id: institutionId,
+            transactionTotalDays: availableHistory,
+          });
 
-    console.log(agreementData);
+        const { data } = await engine.auth.gocardless.link({
+          agreement: agreementData.id,
+          institution_id: institutionId,
+          redirect: redirectTo.toString(),
+        });
 
-    const { data } = await engine.auth.gocardless.link({
-      agreement: agreementData.id,
-      institution_id: institutionId,
-      redirect: redirectTo.toString(),
-    });
+        return redirect(data.link);
+      } catch (error) {
+        console.log(error);
 
-    return redirect(data.link);
-  },
-);
+        throw Error("Something went wrong.");
+      }
+    },
+  );
