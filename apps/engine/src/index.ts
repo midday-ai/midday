@@ -4,7 +4,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Env } from "hono";
 import {
   authMiddleware,
-  cacheMiddleware,
+  // cacheMiddleware,
   loggingMiddleware,
   securityMiddleware,
 } from "./middleware";
@@ -18,7 +18,7 @@ import { syncInstitutions } from "./scheduled";
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 app.use(authMiddleware);
-app.use(cacheMiddleware);
+// app.use(cacheMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
 
