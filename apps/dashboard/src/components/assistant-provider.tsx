@@ -23,12 +23,12 @@ type Props = {
 };
 
 export function AssistantProvider({ provider }: Props) {
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     assistantSettingsAction,
-    provider,
-    (_, { provider }) => {
-      return provider;
-    }
+    {
+      currentState: provider,
+      updateFn: (_, { provider }) => provider,
+    },
   );
 
   return (
@@ -44,7 +44,7 @@ export function AssistantProvider({ provider }: Props) {
 
       <CardContent>
         <Select
-          value={optimisticData}
+          value={optimisticState}
           onValueChange={(provider) => execute({ provider })}
         >
           <SelectTrigger className="w-[260px]">

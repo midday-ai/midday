@@ -21,21 +21,21 @@ type Props = {
 
 export function ChartType({ initialValue, disabled }: Props) {
   const t = useI18n();
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     changeChartTypeAction,
-    initialValue,
-    (_, newState) => {
-      return newState;
-    }
+    {
+      currentState: initialValue,
+      updateFn: (_, newState) => newState,
+    },
   );
 
   return (
-    <Select defaultValue={optimisticData} onValueChange={execute}>
+    <Select defaultValue={optimisticState} onValueChange={execute}>
       <SelectTrigger
         className="flex-1 space-x-1 font-medium"
         disabled={disabled}
       >
-        <span>{t(`chart_type.${optimisticData}`)}</span>
+        <span>{t(`chart_type.${optimisticState}`)}</span>
       </SelectTrigger>
       <SelectContent>
         <SelectGroup>

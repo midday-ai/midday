@@ -24,11 +24,11 @@ export function AssistantHistory({ enabled }: Props) {
   const { toast } = useToast();
   const [_, setMessages] = useUIState<typeof AI>();
 
-  const { execute, status, optimisticData } = useOptimisticAction(
+  const { execute, status, optimisticState } = useOptimisticAction(
     assistantSettingsAction,
-    enabled,
-    (_, { enabled }) => {
-      return enabled;
+    {
+      currentState: enabled,
+      updateFn: (_, { enabled }) => enabled,
     },
   );
 
@@ -56,7 +56,7 @@ export function AssistantHistory({ enabled }: Props) {
         <div className="flex justify-between items-center border-border border-b-[1px] pb-6">
           <span className="font-medium text-sm">Enabled</span>
           <Switch
-            checked={optimisticData}
+            checked={optimisticState}
             disabled={status === "executing"}
             onCheckedChange={(enabled: boolean) => {
               execute({ enabled });

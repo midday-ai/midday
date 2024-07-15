@@ -20,12 +20,12 @@ type Props = {
 
 export function InboxHeader({ filter, disabled }: Props) {
   const t = useI18n();
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     changeInboxFilterAction,
-    filter,
-    (_, newState) => {
-      return newState;
-    }
+    {
+      currentState: filter,
+      updateFn: (_, newState) => newState,
+    },
   );
 
   return (
@@ -37,7 +37,7 @@ export function InboxHeader({ filter, disabled }: Props) {
       <DropdownMenu>
         <DropdownMenuTrigger disabled={disabled}>
           <div className="flex items-center space-x-2">
-            <span>{t(`inbox_filter.${optimisticData}`)}</span>
+            <span>{t(`inbox_filter.${optimisticState}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
@@ -46,7 +46,7 @@ export function InboxHeader({ filter, disabled }: Props) {
             <DropdownMenuCheckboxItem
               key={option}
               onCheckedChange={() => execute(option)}
-              checked={option === optimisticData}
+              checked={option === optimisticState}
             >
               {t(`inbox_filter.${option}`)}
             </DropdownMenuCheckboxItem>

@@ -15,15 +15,17 @@ export function NotificationSetting({
   updateSubscriberPreferenceAction,
 }) {
   const t = useI18n();
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     updateSubscriberPreferenceAction,
-    { enabled },
-    (state) => {
-      return {
-        ...state,
-        enabled: !state.enabled,
-      };
-    }
+    {
+      currentState: enabled,
+      updateFn: (state) => {
+        return {
+          ...state,
+          enabled: !state.enabled,
+        };
+      },
+    },
   );
 
   const onChange = () => {
@@ -47,7 +49,7 @@ export function NotificationSetting({
       </div>
       <Switch
         id={id}
-        checked={optimisticData.enabled}
+        checked={optimisticState.enabled}
         onCheckedChange={onChange}
       />
     </div>
