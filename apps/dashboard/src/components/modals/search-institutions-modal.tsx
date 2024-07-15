@@ -1,6 +1,6 @@
 "use client";
 
-import { createAuthLinkAction } from "@/actions/institutions/create-auth-link";
+import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -127,7 +127,7 @@ export function SearchInstitutionsModal({
 }: SearchInstitutionsModalProps) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
-  const createAuthLink = useAction(createAuthLinkAction);
+  const createGoCardLessLink = useAction(createGoCardLessLinkAction);
 
   const [params, setParams] = useQueryStates({
     step: parseAsStringEnum(["connect", "account", "gocardless"]),
@@ -169,6 +169,24 @@ export function SearchInstitutionsModal({
   }, [debouncedSearchTerm, isOpen]);
 
   const onChange = (value: string) => {};
+
+  const handleOnSelect = (institution) => {
+    switch (institution.provider) {
+      case "gocardless": {
+        createGoCardLessLink.execute({
+          institutionId: institution.id,
+          availableHistory: +institution.available_history,
+          countryCode,
+          redirectBase: isDesktopApp() ? "midday://" : window.location.origin,
+        });
+
+        return;
+      }
+
+      default:
+        return;
+    }
+  };
 
   return (
     <Dialog
@@ -223,16 +241,7 @@ export function SearchInstitutionsModal({
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}
-                      onSelect={() => {
-                        createAuthLink.execute({
-                          institutionId: institution.id,
-                          availableHistory: +institution.available_history,
-                          countryCode,
-                          redirectBase: isDesktopApp()
-                            ? "midday://"
-                            : window.location.origin,
-                        });
-                      }}
+                      onSelect={() => handleOnSelect(institution)}
                     />
                   );
                 })}

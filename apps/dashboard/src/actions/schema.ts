@@ -343,7 +343,7 @@ export const manualSyncTransactionsSchema = z.object({
   accountId: z.string().uuid(),
 });
 
-export const createAuthLinkSchema = z.object({
+export const createGoCardLessLinkSchema = z.object({
   institutionId: z.string(),
   countryCode: z.string(),
   availableHistory: z.number(),
