@@ -30,53 +30,61 @@ export const InstitutionSchema = z
   })
   .openapi("InstitutionSchema");
 
-export const InstitutionsSchema = z.object({
-  data: z.array(InstitutionSchema).openapi("InstitutionsSchema"),
-});
+export const InstitutionsSchema = z
+  .object({
+    data: z.array(InstitutionSchema),
+  })
+  .openapi("InstitutionsSchema");
 
-export const UpdateUsageParamsSchema = z.object({
-  id: z.string().openapi({
-    param: {
-      name: "id",
-      in: "path",
-    },
-    example: "STARLING_SRLGGB3L",
-  }),
-});
-
-export const UpdateUsageSchema = z.object({
-  data: InstitutionSchema,
-});
-
-export const InstitutionParamsSchema = z.object({
-  q: z
-    .string()
-    .optional()
-    .openapi({
-      description: "Search query",
+export const UpdateUsageParamsSchema = z
+  .object({
+    id: z.string().openapi({
       param: {
-        name: "q",
+        name: "id",
+        in: "path",
+      },
+      example: "STARLING_SRLGGB3L",
+    }),
+  })
+  .openapi("UpdateUsageParamsSchema");
+
+export const UpdateUsageSchema = z
+  .object({
+    data: InstitutionSchema,
+  })
+  .openapi("UpdateUsageSchema");
+
+export const InstitutionParamsSchema = z
+  .object({
+    q: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Search query",
+        param: {
+          name: "q",
+          in: "query",
+        },
+        example: "Swedbank",
+      }),
+    limit: z
+      .string()
+      .optional()
+      .openapi({
+        description: "Limit results",
+        param: {
+          name: "limit",
+          in: "query",
+        },
+        example: "50",
+      }),
+    countryCode: z.enum(ALL_COUNTRIES as [string, ...string[]]).openapi({
+      description: "Country code",
+      param: {
+        name: "countryCode",
         in: "query",
       },
-      example: "Swedbank",
+      example: ALL_COUNTRIES.at(1),
     }),
-  limit: z
-    .string()
-    .optional()
-    .openapi({
-      description: "Limit results",
-      param: {
-        name: "limit",
-        in: "query",
-      },
-      example: "50",
-    }),
-  countryCode: z.enum(ALL_COUNTRIES as [string, ...string[]]).openapi({
-    description: "Country code",
-    param: {
-      name: "countryCode",
-      in: "query",
-    },
-    example: ALL_COUNTRIES.at(1),
-  }),
-});
+  })
+  .openapi("InstitutionParamsSchema");
