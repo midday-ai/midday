@@ -14,7 +14,7 @@ export const InstitutionSchema = z
       .string()
       .openapi({
         example:
-          "https://cdn.midday.ai/institution/9293961c-df93-4d6d-a2cc-fc3e353b2d10.webp",
+          "https://cdn.midday.ai/institution/9293961c-df93-4d6d-a2cc-fc3e353b2d10.jpg",
       })
       .nullable(),
     available_history: z
@@ -32,6 +32,16 @@ export const InstitutionSchema = z
 
 export const InstitutionsSchema = z.object({
   data: z.array(InstitutionSchema).openapi("InstitutionsSchema"),
+});
+
+export const UpdateUsageParamsSchema = z.object({
+  id: z.string().openapi({
+    param: {
+      name: "id",
+      in: "path",
+    },
+    example: "STARLING_SRLGGB3L",
+  }),
 });
 
 export const UpdateUsageSchema = z.object({

@@ -8,6 +8,7 @@ import { env } from "hono/adapter";
 import {
   InstitutionParamsSchema,
   InstitutionsSchema,
+  UpdateUsageParamsSchema,
   UpdateUsageSchema,
 } from "./schema";
 
@@ -44,6 +45,9 @@ const updateUsageRoute = createRoute({
   method: "put",
   path: "/:id/usage",
   summary: "Update Institution Usage",
+  request: {
+    params: UpdateUsageParamsSchema,
+  },
   responses: {
     200: {
       content: {
