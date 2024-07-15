@@ -10,19 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
-import {
-  parseAsString,
-  parseAsStringEnum,
-  useQueryState,
-  useQueryStates,
-} from "nuqs";
+import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { CountrySelector } from "../country-selector";
 
@@ -81,19 +74,29 @@ function Row({ id, name, logo, onSelect, provider }: RowProps) {
     onSelect(id);
   };
 
+  const getInitials = (name: string) => {
+    const parts = name.split(" ");
+
+    if (parts.length > 1) {
+      return `${parts.at(0)?.charAt(0)}${parts.at(1)?.charAt(0)}`;
+    }
+
+    return `${name.charAt(0)}${name.charAt(1)}`;
+  };
+
   return (
     <div className="flex justify-between">
       <div className="flex items-center">
         <Avatar>
           <AvatarImage src={logo} alt={name} />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarFallback>{getInitials(name)}</AvatarFallback>
         </Avatar>
 
         <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none capitalize">
-            {name.toLowerCase()}
-          </p>
-          <span className="text-[#878787] text-xs capitalize">{provider}</span>
+          <p className="text-sm font-medium leading-none">{name}</p>
+          <span className="text-[#878787] text-xs capitalize">
+            Via {provider}
+          </span>
         </div>
       </div>
 
@@ -179,8 +182,8 @@ export function SearchInstitutionsModal({
             <DialogTitle>Connect Bank</DialogTitle>
 
             <DialogDescription>
-              Start by selecting your business bank, once authenticated you can
-              select which accounts you want to link to Midday.
+              Start by selecting your bank, once authenticated you can select
+              which accounts you want to link to Midday.
             </DialogDescription>
 
             <div>

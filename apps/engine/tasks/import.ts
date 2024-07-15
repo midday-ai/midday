@@ -34,7 +34,13 @@ const typesense = new Typesense.Client({
 //       type: "string",
 //       facet: true,
 //     },
+//     {
+//       name: "popularity",
+//       type: "int32",
+//       facet: false,
+//     },
 //   ],
+//   default_sorting_field: "popularity",
 // };
 
 async function main() {
@@ -44,7 +50,6 @@ async function main() {
 
   try {
     // await typesense.collections().create(schema);
-
     await typesense
       .collections("institutions")
       .documents()
