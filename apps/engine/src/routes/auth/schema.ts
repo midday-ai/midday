@@ -99,3 +99,39 @@ export const GoCardLessExchangeSchema = z
     }),
   })
   .openapi("GoCardLessExchangeSchema");
+
+export const GoCardLessAgreementBodySchema = z
+  .object({
+    institution_id: z.string().openapi({
+      example: "REVOLUT_REVOGB21",
+    }),
+    transactionTotalDays: z.number().openapi({
+      example: 90,
+    }),
+  })
+  .openapi("GoCardLessAgreementBodySchema");
+
+export const GoCardLessAgreementSchema = z
+  .object({
+    data: z.object({
+      id: z.string().openapi({
+        example: "2dea1b84-97b0-4cb4-8805-302c227587c8",
+      }),
+      created: z.string().openapi({
+        example: "2024-01-01",
+      }),
+      access_valid_for_days: z.number().openapi({
+        example: 90,
+      }),
+      max_historical_days: z.number().openapi({
+        example: 90,
+      }),
+      institution_id: z.string().openapi({
+        example: "REVOLUT_REVOGB21",
+      }),
+      accepted: z.boolean().openapi({
+        example: true,
+      }),
+    }),
+  })
+  .openapi("GoCardLessAgreementSchema");

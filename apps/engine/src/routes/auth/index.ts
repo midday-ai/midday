@@ -6,6 +6,8 @@ import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
+  GoCardLessAgreementBodySchema,
+  GoCardLessAgreementSchema,
   GoCardLessExchangeBodySchema,
   GoCardLessExchangeSchema,
   GoCardLessLinkBodySchema,
@@ -117,6 +119,39 @@ const linkGoCardLessRoute = createRoute({
   },
 });
 
+const agreementGoCardLessRoute = createRoute({
+  method: "post",
+  path: "/gocardless/agreement",
+  summary: "Agreement (GoCardLess)",
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: GoCardLessAgreementBodySchema,
+        },
+      },
+    },
+  },
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: GoCardLessAgreementSchema,
+        },
+      },
+      description: "Retrieve Agreement",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "Returns an error",
+    },
+  },
+});
+
 const exchangeGoCardLessRoute = createRoute({
   method: "post",
   path: "/gocardless/exchange",
@@ -210,6 +245,29 @@ app.openapi(linkGoCardLessRoute, async (c) => {
 });
 
 app.openapi(exchangeGoCardLessRoute, async (c) => {
+  const envs = env(c);
+
+  const { institutionId, transactionTotalDays } = await c.req.json();
+
+  const api = new GoCardLessApi({
+    kv: c.env.KV,
+    envs,
+  });
+
+  const data = await api.createEndUserAgreement({
+    institutionId,
+    transactionTotalDays,
+  });
+
+  return c.json(
+    {
+      data,
+    },
+    200,
+  );
+});
+
+app.openapi(agreementGoCardLessRoute, async (c) => {
   const envs = env(c);
 
   const { institutionId, transactionTotalDays } = await c.req.json();

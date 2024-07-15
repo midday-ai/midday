@@ -9,9 +9,6 @@ r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "", jurisdiction = "eu" }
 ]
 
-[triggers]
-crons = ["0 */23 * * *"]
-
 [env.production]
 name = "engine"
 logpush = true
