@@ -43,7 +43,7 @@ const indexRoute = createRoute({
 
 const updateUsageRoute = createRoute({
   method: "put",
-  path: "/:id/usage",
+  path: "/{id}/usage",
   summary: "Update Institution Usage",
   request: {
     params: UpdateUsageParamsSchema,
