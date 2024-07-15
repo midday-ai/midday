@@ -30,8 +30,8 @@ client.defineJob({
   integrations: {
     supabase,
   },
-  run: async (payload, io, ctx) => {
-    const { path_tokens, metadata } = payload.record;
+  run: async (payload, io) => {
+    const { path_tokens, metadata, id } = payload.record;
     const teamId = path_tokens.at(0);
     const filename = path_tokens.at(-1);
 
@@ -44,7 +44,7 @@ client.defineJob({
         file_path: path_tokens,
         file_name: filename,
         content_type: metadata.mimetype,
-        reference_id: `${ctx.source?.id}_${filename}`,
+        reference_id: `${id}_${filename}`,
         size: metadata.size,
       })
       .select("*")
