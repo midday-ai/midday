@@ -3,17 +3,17 @@
 import { authActionClient } from "@/actions/safe-action";
 import { createReportSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { createClient } from "@midday/supabase/server";
 import { Dub } from "dub";
 
 const dub = new Dub({ projectSlug: "midday" });
 
 export const createReportAction = authActionClient
   .schema(createReportSchema)
-  .action(async ({ parsedInput: params, ctx: { user } }) => {
-    const supabase = createClient();
-
+  .metadata({
+    event: LogEvents.OverviewReport.name,
+    channel: LogEvents.OverviewReport.channel,
+  })
+  .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await supabase
       .from("reports")
       .insert({
@@ -46,16 +46,6 @@ export const createReportAction = authActionClient
       .eq("id", data.id)
       .select("*")
       .single();
-
-    const analytics = await setupAnalytics({
-      userId: user.id,
-      fullName: user.full_name,
-    });
-
-    analytics.track({
-      event: LogEvents.OverviewReport.name,
-      channel: LogEvents.OverviewReport.channel,
-    });
 
     return linkData;
   });

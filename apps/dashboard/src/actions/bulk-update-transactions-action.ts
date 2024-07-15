@@ -1,19 +1,12 @@
 "use server";
 
-import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { bulkUpdateTransactionsSchema } from "./schema";
 
 export const bulkUpdateTransactionsAction = authActionClient
   .schema(bulkUpdateTransactionsSchema)
-  .action(async ({ parsedInput: payload, ctx: { user } }) => {
-    const supabase = createClient();
-
-    if (!user.team_id) {
-      return;
-    }
-
+  .action(async ({ parsedInput: payload, ctx: { user, supabase } }) => {
     const updatePromises = payload.data.map(async ({ id, ...params }) => {
       return supabase
         .from("transactions")
