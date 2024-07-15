@@ -64,7 +64,7 @@ export function SelectBankAccountsModal() {
   const [eventId, setEventId] = useState<string>();
 
   const [params, setParams] = useQueryStates({
-    step: parseAsStringEnum(["connect", "account", "gocardless"]),
+    step: parseAsStringEnum(["connect", "account"]),
     error: parseAsBoolean,
     ref: parseAsString,
     token: parseAsString,
