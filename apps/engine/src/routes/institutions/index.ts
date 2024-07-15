@@ -5,7 +5,11 @@ import { SearchClient } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import { InstitutionParamsSchema, InstitutionsSchema } from "./schema";
+import {
+  InstitutionParamsSchema,
+  InstitutionsSchema,
+  UpdateUsageSchema,
+} from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -36,15 +40,42 @@ const indexRoute = createRoute({
   },
 });
 
+const updateUsageRoute = createRoute({
+  method: "put",
+  path: "/:id/usage",
+  summary: "Update Institution Usage",
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: UpdateUsageSchema,
+        },
+      },
+      description: "Update institution usage",
+    },
+    400: {
+      content: {
+        "application/json": {
+          schema: ErrorSchema,
+        },
+      },
+      description: "Returns an error",
+    },
+  },
+});
+
+type Document = {
+  id: string;
+  name: string;
+  logo: string | null;
+  available_history: number | null;
+  provider: Providers;
+  popularity: number;
+};
+
 type SearchResult = {
   hits: {
-    document: {
-      id: string;
-      name: string;
-      logo: string | null;
-      available_history: number | null;
-      provider: Providers;
-    };
+    document: Document;
   }[];
 };
 
@@ -76,12 +107,44 @@ app.openapi(indexRoute, async (c) => {
       data: data.hits?.map(({ document }) => ({
         id: document.id,
         name: document.name,
-        logo: document.logo,
+        logo: document.logo ?? null,
+        popularity: document.popularity,
         available_history: document.available_history
           ? +document.available_history
           : null,
         provider: document.provider,
       })),
+    },
+    200,
+  );
+});
+
+app.openapi(updateUsageRoute, async (c) => {
+  const envs = env(c);
+  const id = c.req.param("id");
+
+  const typesense = SearchClient(envs);
+
+  const original = await typesense
+    .collections("institutions")
+    .documents(id)
+    .retrieve();
+
+  const originalData: Document =
+    typeof original === "string" && JSON.parse(original);
+
+  const result = await typesense
+    .collections("institutions")
+    .documents(id)
+    .update({
+      popularity: originalData?.popularity + 1 || 0,
+    });
+
+  const data: Document = typeof result === "string" ? JSON.parse(result) : [];
+
+  return c.json(
+    {
+      data,
     },
     200,
   );

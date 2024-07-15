@@ -34,6 +34,10 @@ export const InstitutionsSchema = z.object({
   data: z.array(InstitutionSchema).openapi("InstitutionsSchema"),
 });
 
+export const UpdateUsageSchema = z.object({
+  data: InstitutionSchema,
+});
+
 export const InstitutionParamsSchema = z.object({
   q: z
     .string()
