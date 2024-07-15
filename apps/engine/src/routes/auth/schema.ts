@@ -2,10 +2,10 @@ import { z } from "@hono/zod-openapi";
 
 export const PlaidLinkBodySchema = z
   .object({
-    userId: z.string().openapi({
+    userId: z.string().optional().openapi({
       example: "9293961c-df93-4d6d-a2cc-fc3e353b2d10",
     }),
-    language: z.string().openapi({
+    language: z.string().optional().openapi({
       example: "en",
     }),
   })
