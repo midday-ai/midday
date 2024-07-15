@@ -83,7 +83,7 @@ export const createAttachmentsSchema = z.array(
     size: z.number(),
     transaction_id: z.string(),
     type: z.string(),
-  })
+  }),
 );
 
 export const deleteAttachmentSchema = z.string();
@@ -139,7 +139,7 @@ export const connectBankAccountSchema = z.object({
         "loan",
         "other_liability",
       ]),
-    })
+    }),
   ),
 });
 
@@ -179,7 +179,7 @@ export const updaterMenuSchema = z.array(
   z.object({
     path: z.string(),
     name: z.string(),
-  })
+  }),
 );
 
 export const changeTeamSchema = z.object({
@@ -223,7 +223,7 @@ export const inviteTeamMembersSchema = z.object({
     z.object({
       email: z.string().email().optional(),
       role: z.enum(["owner", "member"]),
-    })
+    }),
   ),
   redirectTo: z.string().optional(),
   revalidatePath: z.string().optional(),
@@ -240,7 +240,7 @@ export const createCategoriesSchema = z.object({
       description: z.string().optional(),
       color: z.string().optional(),
       vat: z.string().optional(),
-    })
+    }),
   ),
 });
 
@@ -343,11 +343,11 @@ export const manualSyncTransactionsSchema = z.object({
   accountId: z.string().uuid(),
 });
 
-export const createEndUserAgreementSchema = z.object({
+export const createAuthLinkSchema = z.object({
   institutionId: z.string(),
   countryCode: z.string(),
-  transactionTotalDays: z.number(),
-  isDesktop: z.boolean().optional(),
+  availableHistory: z.number(),
+  redirectBase: z.string(),
 });
 
 export const importTransactionsSchema = z.object({
@@ -403,7 +403,7 @@ export const createTransactionsSchema = z.object({
       method: z.enum(["other"]),
       manual: z.boolean(),
       category_slug: z.enum(["income"]).nullable(),
-    })
+    }),
   ),
 });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { createAuthLinkAction } from "@/actions/institutions/create-auth-link";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -15,9 +16,11 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useDebounce } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { CountrySelector } from "../country-selector";
+import { InstitutionInfo } from "../institution-info";
 
 function RowsSkeleton() {
   return (
@@ -45,7 +48,7 @@ function RowsSkeleton() {
       <div className="flex items-center space-x-4">
         <Skeleton className="h-9 w-9 rounded-full" />
         <Skeleton className="h-3.5 w-[200px]" />
-      </div>{" "}
+      </div>
       <div className="flex items-center space-x-4">
         <Skeleton className="h-9 w-9 rounded-full" />
         <Skeleton className="h-3.5 w-[130px]" />
@@ -92,11 +95,13 @@ function Row({ id, name, logo, onSelect, provider }: RowProps) {
           <AvatarFallback>{getInitials(name)}</AvatarFallback>
         </Avatar>
 
-        <div className="ml-4 space-y-1">
+        <div className="ml-4 space-y-1 cursor-default">
           <p className="text-sm font-medium leading-none">{name}</p>
-          <span className="text-[#878787] text-xs capitalize">
-            Via {provider}
-          </span>
+          <InstitutionInfo provider={provider}>
+            <span className="text-[#878787] text-xs capitalize">
+              Via {provider}
+            </span>
+          </InstitutionInfo>
         </div>
       </div>
 
@@ -122,6 +127,7 @@ export function SearchInstitutionsModal({
 }: SearchInstitutionsModalProps) {
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
+  const createAuthLink = useAction(createAuthLinkAction);
 
   const [params, setParams] = useQueryStates({
     step: parseAsStringEnum(["connect", "account", "gocardless"]),
@@ -129,11 +135,10 @@ export function SearchInstitutionsModal({
     q: parseAsString,
   });
 
-  const { countryCode, q: query } = params;
+  const { countryCode, q: query, step } = params;
 
+  const isOpen = step === "connect";
   const debouncedSearchTerm = useDebounce(query, 100);
-
-  const isOpen = params.step === "connect";
 
   async function fetchData(query?: string) {
     try {
@@ -210,22 +215,24 @@ export function SearchInstitutionsModal({
               <div className="space-y-4 pt-4 h-[400px] overflow-auto scrollbar-hide">
                 {loading && <RowsSkeleton />}
 
-                {results?.map((bank) => {
+                {results?.map((institution) => {
                   return (
                     <Row
-                      key={bank.id}
-                      id={bank.id}
-                      name={bank.name}
-                      logo={bank.logo}
-                      provider={bank.provider}
-                      // onSelect={() => {
-                      //   createEndUserAgreement.execute({
-                      //     institutionId: bank.id,
-                      //     isDesktop: isDesktopApp(),
-                      //     transactionTotalDays: +bank.transaction_total_days,
-                      //     countryCode,
-                      //   });
-                      // }}
+                      key={institution.id}
+                      id={institution.id}
+                      name={institution.name}
+                      logo={institution.logo}
+                      provider={institution.provider}
+                      onSelect={() => {
+                        createAuthLink.execute({
+                          institutionId: institution.id,
+                          availableHistory: +institution.available_history,
+                          countryCode,
+                          redirectBase: isDesktopApp()
+                            ? "midday://"
+                            : window.location.origin,
+                        });
+                      }}
                     />
                   );
                 })}

@@ -1,9 +1,10 @@
+import { PLAID_COUNTRIES } from "@/utils/countries";
 import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
 import {
   Configuration,
-  CountryCode,
+  type CountryCode,
   type ItemPublicTokenExchangeResponse,
   type LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
@@ -30,7 +31,7 @@ export class PlaidApi {
   #clientId: string;
   #clientSecret: string;
 
-  #countryCodes = [CountryCode.Us];
+  #countryCodes = PLAID_COUNTRIES as CountryCode[];
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
@@ -185,7 +186,8 @@ export class PlaidApi {
   }
 
   async getInstitutions(params?: GetInstitutionsRequest) {
-    const countryCode = params?.countryCode ?? CountryCode.Us;
+    const countryCode =
+      [params?.countryCode as CountryCode] ?? this.#countryCodes;
 
     return paginate({
       delay: { milliseconds: 100, onDelay: (message) => logger(message) },
@@ -194,7 +196,7 @@ export class PlaidApi {
         withRetry(() =>
           this.#client
             .institutionsGet({
-              country_codes: [countryCode as CountryCode],
+              country_codes: countryCode,
               count,
               offset,
               options: {
