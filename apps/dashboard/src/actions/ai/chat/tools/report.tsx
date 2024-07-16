@@ -1,12 +1,10 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { createClient } from "@midday/supabase/server";
 import { startOfMonth } from "date-fns";
-import { Dub } from "dub";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 import { ReportUI } from "./ui/report-ui";
-
-const dub = new Dub({ projectSlug: "midday" });
+import { dub } from "@/utils/dub";
 
 type Args = {
   aiState: MutableAIState;

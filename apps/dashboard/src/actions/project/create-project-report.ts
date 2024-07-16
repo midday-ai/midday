@@ -2,13 +2,11 @@
 
 import { action } from "@/actions/safe-action";
 import { createProjectReportSchema } from "@/actions/schema";
+import { dub } from "@/utils/dub";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
-import { Dub } from "dub";
-
-const dub = new Dub({ projectSlug: "midday" });
 
 export const createProjectReport = action(
   createProjectReportSchema,
