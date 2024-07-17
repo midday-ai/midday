@@ -1,10 +1,7 @@
 "use client";
 
-import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
-import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
-import { updateInstitutionUsageAction } from "@/actions/institutions/update-institution-usage";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { useConnectParams } from "@/hooks/use-connect-params";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -15,16 +12,15 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
-import { useDebounce } from "@uidotdev/usehooks";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
+import { useDebounce, useScript } from "@uidotdev/usehooks";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BankLogo } from "../bank-logo";
+import { ConnectBankProvider } from "../connect-bank-provider";
 import { CountrySelector } from "../country-selector";
 import { InstitutionInfo } from "../institution-info";
 
-function RowsSkeleton() {
+function SearchSkeleton() {
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-4">
@@ -63,7 +59,7 @@ function RowsSkeleton() {
   );
 }
 
-type RowProps = {
+type SearchResultProps = {
   id: string;
   name: string;
   logo: string;
@@ -72,82 +68,11 @@ type RowProps = {
   availableHistory: number;
 };
 
-function Row({
-  id,
-  name,
-  logo,
-  provider,
-  countryCode,
-  availableHistory,
-}: RowProps) {
-  const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
-  const createGoCardLessLink = useAction(createGoCardLessLinkAction, {
-    onSuccess: (data) => {
-      console.log(data);
-    },
-    onError: (data) => {
-      console.log("error", data);
-    },
-  });
-
-  const createPlaidLinkToken = useAction(createPlaidLinkTokenAction, {
-    onSuccess: (data) => {
-      console.log(data);
-    },
-    onError: (data) => {
-      console.log("error", data);
-    },
-  });
-
-  const isLoading =
-    createGoCardLessLink.status === "executing" ||
-    createPlaidLinkToken.status === "executing";
-
-  const handleOnSelect = () => {
-    updateInstitutionUsage.execute({
-      institutionId: id,
-    });
-
-    switch (provider) {
-      case "gocardless": {
-        createGoCardLessLink.execute({
-          institutionId: id,
-          availableHistory,
-          countryCode,
-          redirectBase: isDesktopApp() ? "midday://" : window.location.origin,
-        });
-
-        return;
-      }
-
-      case "plaid": {
-        createPlaidLinkToken.execute(undefined);
-
-        return;
-      }
-
-      default:
-        return;
-    }
-  };
-
-  const getInitials = (name: string) => {
-    const parts = name.split(" ");
-
-    if (parts.length > 1) {
-      return `${parts.at(0)?.charAt(0)}${parts.at(1)?.charAt(0)}`;
-    }
-
-    return `${name.charAt(0)}${name.charAt(1)}`;
-  };
-
+function SearchResult({ id, name, logo, provider }: SearchResultProps) {
   return (
     <div className="flex justify-between">
       <div className="flex items-center">
-        <Avatar>
-          <AvatarImage src={logo} alt={name} />
-          <AvatarFallback>{getInitials(name)}</AvatarFallback>
-        </Avatar>
+        <BankLogo src={logo} alt={name} />
 
         <div className="ml-4 space-y-1 cursor-default">
           <p className="text-sm font-medium leading-none">{name}</p>
@@ -159,15 +84,7 @@ function Row({
         </div>
       </div>
 
-      <Button
-        variant="outline"
-        onClick={handleOnSelect}
-        data-event="Bank Selected"
-        data-icon="🏦"
-        data-channel="bank"
-      >
-        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
-      </Button>
+      <ConnectBankProvider id={id} provider={provider} />
     </div>
   );
 }
@@ -179,19 +96,32 @@ type SearchInstitutionsModalProps = {
 export function SearchInstitutionsModal({
   countryCode: initialCountryCode,
 }: SearchInstitutionsModalProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
 
-  const [params, setParams] = useQueryStates({
-    step: parseAsStringEnum(["connect", "account", "gocardless"]),
-    countryCode: parseAsString.withDefault(initialCountryCode),
-    q: parseAsString,
+  // NOTE: Load Teller SDK here so it's not unmonted
+  useScript("https://cdn.teller.io/connect/connect.js", {
+    removeOnUnmount: false,
   });
 
-  const { countryCode, q: query, step } = params;
+  const {
+    countryCode,
+    q: query,
+    step,
+    setParams,
+  } = useConnectParams(initialCountryCode);
 
   const isOpen = step === "connect";
   const debouncedSearchTerm = useDebounce(query, 100);
+
+  const handleOnClose = () => {
+    setParams({
+      step: null,
+      countryCode: null,
+      q: null,
+    });
+  };
 
   async function fetchData(query?: string) {
     try {
@@ -222,16 +152,7 @@ export function SearchInstitutionsModal({
   }, [debouncedSearchTerm, isOpen]);
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={() =>
-        setParams({
-          step: null,
-          countryCode: null,
-          q: null,
-        })
-      }
-    >
+    <Dialog open={isOpen} onOpenChange={handleOnClose}>
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
@@ -264,17 +185,16 @@ export function SearchInstitutionsModal({
               </div>
 
               <div className="space-y-4 pt-4 h-[400px] overflow-auto scrollbar-hide">
-                {loading && <RowsSkeleton />}
+                {loading && <SearchSkeleton />}
 
                 {results?.map((institution) => {
                   return (
-                    <Row
+                    <SearchResult
                       key={institution.id}
                       id={institution.id}
                       name={institution.name}
                       logo={institution.logo}
                       provider={institution.provider}
-                      availableHistory={+institution.availableHistory}
                       countryCode={countryCode}
                     />
                   );
@@ -284,12 +204,18 @@ export function SearchInstitutionsModal({
                   <div className="flex flex-col items-center justify-center min-h-[300px]">
                     <p className="font-medium mb-2">No banks found</p>
                     <p className="text-sm text-center text-[#878787]">
-                      We could not find any banks matching your
-                      <br /> criteria let us know which bank you are looking for
+                      We could not find any banks matching your criteria. <br />
+                      Please let us know which bank you are looking for.
                     </p>
 
-                    <Button variant="outline" className="mt-4">
-                      Try another provider
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => {
+                        router.push("/account/support");
+                      }}
+                    >
+                      Contact us
                     </Button>
                   </div>
                 )}

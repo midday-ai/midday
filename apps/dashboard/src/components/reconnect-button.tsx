@@ -16,7 +16,6 @@ export function ReconnectButton({ institutionId }: Props) {
   return (
     <Button
       variant="outline"
-      size="icon"
       // onClick={() =>
       //   createEndUserAgreement.execute({
       //     isDesktop: isDesktopApp(),
@@ -25,7 +24,7 @@ export function ReconnectButton({ institutionId }: Props) {
       //   })
       // }
     >
-      <Icons.Refresh size={16} />
+      Reconnect
     </Button>
   );
 }

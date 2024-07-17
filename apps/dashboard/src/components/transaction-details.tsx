@@ -35,7 +35,7 @@ type Props = {
   ids?: string[];
   updateTransaction: (
     values: UpdateTransactionValues,
-    optimisticData: any
+    optimisticData: any,
   ) => void;
 };
 
@@ -77,7 +77,7 @@ export function TransactionDetails({
         }
       }
     },
-    { enabled }
+    { enabled },
   );
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export function TransactionDetails({
   }) => {
     updateTransaction(
       { id: data?.id, category_slug: category.slug },
-      { category }
+      { category },
     );
 
     const user = await getCurrentUserTeamQuery(supabase);
@@ -194,7 +194,7 @@ export function TransactionDetails({
                 <span
                   className={cn(
                     "text-4xl font-mono",
-                    data?.category?.slug === "income" && "text-[#00C969]"
+                    data?.category?.slug === "income" && "text-[#00C969]",
                   )}
                 >
                   <FormatAmount
@@ -246,7 +246,7 @@ export function TransactionDetails({
             onSelect={(user) => {
               updateTransaction(
                 { assigned_id: user?.id, id: data?.id },
-                { assigned: user }
+                { assigned: user },
               );
             }}
           />

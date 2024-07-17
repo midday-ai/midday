@@ -1,5 +1,5 @@
+import { BankLogo } from "@/components/bank-logo";
 import { cn } from "@midday/ui/cn";
-import Image from "next/image";
 
 type Props = {
   logoUrl?: string;
@@ -18,14 +18,7 @@ export function TransactionBankAccount({
     <div className="flex space-x-2 mt-1 items-center">
       {logoUrl && (
         <div className="rounded-full overflow-hidden">
-          <Image
-            src={logoUrl}
-            alt={name ?? ""}
-            width={size}
-            height={size}
-            className="aspect-square"
-            quality={100}
-          />
+          <BankLogo size={size} src={logoUrl} alt={name ?? ""} />
         </div>
       )}
       <span className={cn("text-sm line-clamp-1", className)}>{name}</span>

@@ -13,7 +13,7 @@ export function ConnectBankButton() {
       data-channel="bank"
       onClick={() => setStep("connect")}
     >
-      Connect account
+      Connect bank
     </Button>
   );
 }

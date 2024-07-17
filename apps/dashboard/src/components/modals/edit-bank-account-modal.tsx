@@ -1,4 +1,3 @@
-import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
@@ -10,12 +9,6 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import {
   Form,
   FormControl,
   FormField,
@@ -24,7 +17,6 @@ import {
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
-import { MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -48,10 +40,6 @@ export function EditBankAccountModal({
   isOpen,
   defaultValue,
 }: Props) {
-  const deleteAccount = useAction(deleteBankAccountAction, {
-    onSuccess: () => onOpenChange(false),
-  });
-
   const updateAccount = useAction(updateBankAccountAction, {
     onSuccess: () => onOpenChange(false),
   });
@@ -73,20 +61,7 @@ export function EditBankAccountModal({
         <div className="p-4">
           <DialogHeader>
             <DialogTitle className="flex justify-between">
-              <span>Edit Account</span>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="mr-8 -mt-[5px]">
-                  <MoreHorizontal size={20} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    className="text-[#F84E4E]"
-                    onClick={() => deleteAccount.execute({ id })}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              Edit Account
             </DialogTitle>
           </DialogHeader>
 

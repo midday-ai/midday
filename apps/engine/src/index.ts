@@ -16,7 +16,7 @@ import transactionsRoutes from "./routes/transactions";
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 app.use(authMiddleware);
-app.use(cacheMiddleware);
+// app.use(cacheMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
 

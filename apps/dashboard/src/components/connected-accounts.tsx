@@ -12,7 +12,7 @@ import {
 } from "@midday/ui/card";
 import { Suspense } from "react";
 
-export async function ConnectedAccounts() {
+export function ConnectedAccounts() {
   return (
     <Card>
       <CardHeader>

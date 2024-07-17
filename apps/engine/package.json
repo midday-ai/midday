@@ -12,7 +12,7 @@
     "@hono/swagger-ui": "^0.4.0",
     "@hono/zod-openapi": "^0.14.9",
     "@hono/zod-validator": "^0.2.2",
-    "hono": "^4.4.13",
+    "hono": "^4.5.0",
     "typesense": "^1.8.2",
     "xior": "^0.5.3",
     "zod": "^3.23.8"
@@ -20,6 +20,6 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240712.0",
     "@types/bun": "^1.1.6",
-    "wrangler": "^3.64.0"
+    "wrangler": "^3.65.0"
   }
 }

@@ -1,30 +1,25 @@
 "use server";
 
 import Midday from "@midday-ai/engine";
+import { getSession } from "@midday/supabase/cached-queries";
 import { authActionClient } from "../safe-action";
 
 const engine = new Midday();
 
 export const createPlaidLinkTokenAction = authActionClient.action(async () => {
-  console.log("here");
+  try {
+    const {
+      data: { session },
+    } = await getSession();
 
-  return;
+    const { data } = await engine.auth.plaid.link({
+      userId: session?.user.id,
+    });
 
-  //   try {
-  //     const {
-  //       data: { session },
-  //     } = await getSession();
+    return data.link_token;
+  } catch (error) {
+    console.log(error);
 
-  //     const { data } = await engine.auth.plaid.link({
-  //       userId: session?.user.id,
-  //     });
-
-  //     console.log(data.link_token);
-
-  //     return data.link_token;
-  //   } catch (error) {
-  //     console.log(error);
-
-  //     throw Error("Something went wrong.");
-  //   }
+    throw Error("Something went wrong.");
+  }
 });

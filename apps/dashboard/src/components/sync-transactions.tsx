@@ -38,7 +38,7 @@ export function SyncTransactions({
         </TooltipTrigger>
 
         <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={10}>
-          Get latest transactions
+          Synchronize
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

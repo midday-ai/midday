@@ -10,7 +10,6 @@ import { changeSpendingPeriodSchema } from "./schema";
 export const changeSpendingPeriodAction = authActionClient
   .schema(changeSpendingPeriodSchema)
   .action(async ({ parsedInput: params, ctx: { user } }) => {
-    console.log("katt", params);
     cookies().set({
       name: Cookies.SpendingPeriod,
       value: JSON.stringify(params),

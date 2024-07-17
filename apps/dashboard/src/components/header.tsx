@@ -8,6 +8,7 @@ import { BrowserNavigation } from "@/desktop/components/browser-navigation";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Suspense } from "react";
+import { ConnectionError } from "./connection-error";
 import { DesktopTrafficLight } from "./desktop-traffic-light";
 import { FeedbackForm } from "./feedback-form";
 import { MobileMenu } from "./mobile-menu";
@@ -28,6 +29,10 @@ export function Header() {
         <FeedbackForm />
 
         <TrackerControl />
+
+        <Suspense>
+          <ConnectionError />
+        </Suspense>
 
         <Suspense>
           <ReconnectBank />

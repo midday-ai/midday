@@ -186,8 +186,9 @@ export class PlaidApi {
   }
 
   async getInstitutions(params?: GetInstitutionsRequest) {
-    const countryCode =
-      [params?.countryCode as CountryCode] ?? this.#countryCodes;
+    const countryCode = params?.countryCode
+      ? [params.countryCode as CountryCode]
+      : this.#countryCodes;
 
     return paginate({
       delay: { milliseconds: 100, onDelay: (message) => logger(message) },

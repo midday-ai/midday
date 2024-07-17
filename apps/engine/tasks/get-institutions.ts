@@ -4,16 +4,9 @@ import {
   getFileExtension,
   getLogoURL,
   getPopularity,
+  getTellerData,
   matchLogoURL,
 } from "./utils";
-
-const TELLER_ENDPOINT = "https://api.teller.io/institutions";
-
-type TellerResponse = {
-  id: string;
-  name: string;
-  capabilities: string[];
-};
 
 export async function getGoCardLessInstitutions() {
   const provider = new GoCardLessApi({
@@ -42,16 +35,14 @@ export async function getGoCardLessInstitutions() {
 }
 
 export async function getTellerInstitutions() {
-  const response = await fetch(TELLER_ENDPOINT);
-
-  const data: TellerResponse[] = await response.json();
+  const data = await getTellerData();
 
   return data.map((institution) => ({
     id: institution.id,
     name: institution.name,
     logo: getLogoURL(institution.id),
     countries: ["US"],
-    popularity: getPopularity(institution.id),
+    popularity: getPopularity(institution.id) ?? 10, // Make Teller higher priority,
     provider: "teller",
   }));
 }
@@ -67,6 +58,8 @@ export async function getPlaidInstitutions() {
 
   const data = await provider.getInstitutions();
 
+  console.log(data.length);
+
   return data.map((institution) => {
     return {
       id: institution.institution_id,
@@ -76,6 +69,7 @@ export async function getPlaidInstitutions() {
         : matchLogoURL(institution.institution_id),
       countries: institution.country_codes,
       popularity: getPopularity(institution.institution_id),
+      routing_numbers: institution.routing_numbers,
       provider: "plaid",
     };
   });
