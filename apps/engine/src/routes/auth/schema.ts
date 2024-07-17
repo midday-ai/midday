@@ -8,6 +8,10 @@ export const PlaidLinkBodySchema = z
     language: z.string().optional().openapi({
       example: "en",
     }),
+    routingNumber: z.string().optional().openapi({
+      example: "8422944",
+      description: "The routing number of the bank to highlight in Link",
+    }),
   })
   .openapi("PlaidLinkBodySchema");
 
