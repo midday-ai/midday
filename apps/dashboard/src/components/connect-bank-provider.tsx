@@ -6,7 +6,13 @@ import { useAction } from "next-safe-action/hooks";
 import { PlaidConnect } from "./plaid-connect";
 import { TellerConnect } from "./teller-connect";
 
-export function ConnectBankProvider({ provider, id }) {
+type Props = {
+  id: string;
+  provider: string;
+  routingNumber?: string;
+};
+
+export function ConnectBankProvider({ id, provider, routingNumber }: Props) {
   const { setParams } = useConnectParams();
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
 
@@ -33,6 +39,7 @@ export function ConnectBankProvider({ provider, id }) {
       return (
         <PlaidConnect
           id={id}
+          routingNumber={routingNumber}
           onSelect={() => {
             setParams({ step: null });
             updateUsage();

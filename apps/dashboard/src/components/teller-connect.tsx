@@ -1,6 +1,6 @@
 import { useConnectParams } from "@/hooks/use-connect-params";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import type { TellerConnectOptions } from "teller-connect-react";
 import { BankConnectButton } from "./bank-connect-button";
 
 type Props = {
@@ -12,6 +12,7 @@ export function TellerConnect({ id, onSelect }: Props) {
   const [institution, setInstitution] = useState<string | undefined>();
   const [isLoading, setLoading] = useState(false);
   const { setParams } = useConnectParams();
+  const { theme } = useTheme();
 
   useEffect(() => {
     if (institution) {
@@ -19,9 +20,9 @@ export function TellerConnect({ id, onSelect }: Props) {
 
       const teller = window.TellerConnect.setup({
         applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
-        environment: process.env
-          .NEXT_PUBLIC_TELLER_ENVIRONMENT as TellerConnectOptions["environment"],
+        environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
         institution,
+        appearance: theme,
         onSuccess: (authorization) => {
           setParams({
             step: "account",

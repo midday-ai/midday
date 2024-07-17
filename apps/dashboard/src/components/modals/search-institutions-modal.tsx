@@ -15,6 +15,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { useDebounce, useScript } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { usePlaidLink } from "react-plaid-link";
 import { BankLogo } from "../bank-logo";
 import { ConnectBankProvider } from "../connect-bank-provider";
 import { CountrySelector } from "../country-selector";
@@ -66,9 +67,16 @@ type SearchResultProps = {
   provider: string;
   countryCode: string;
   availableHistory: number;
+  routingNumber?: string;
 };
 
-function SearchResult({ id, name, logo, provider }: SearchResultProps) {
+function SearchResult({
+  id,
+  name,
+  logo,
+  provider,
+  routingNumber,
+}: SearchResultProps) {
   return (
     <div className="flex justify-between">
       <div className="flex items-center">
@@ -84,7 +92,11 @@ function SearchResult({ id, name, logo, provider }: SearchResultProps) {
         </div>
       </div>
 
-      <ConnectBankProvider id={id} provider={provider} />
+      <ConnectBankProvider
+        id={id}
+        provider={provider}
+        routingNumber={routingNumber}
+      />
     </div>
   );
 }
@@ -100,9 +112,19 @@ export function SearchInstitutionsModal({
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
 
-  // NOTE: Load Teller SDK here so it's not unmonted
+  // NOTE: Load SDKs here so it's not unmonted
   useScript("https://cdn.teller.io/connect/connect.js", {
     removeOnUnmount: false,
+  });
+
+  usePlaidLink({
+    token: null,
+    publicKey: "",
+    env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
+    clientName: "Midday",
+    product: ["transactions"],
+    onSuccess: async (public_token, metadata) => {},
+    onExit: () => {},
   });
 
   const {
@@ -196,6 +218,7 @@ export function SearchInstitutionsModal({
                       logo={institution.logo}
                       provider={institution.provider}
                       countryCode={countryCode}
+                      routingNumber={institution?.routing_numbers?.at(0)}
                     />
                   );
                 })}

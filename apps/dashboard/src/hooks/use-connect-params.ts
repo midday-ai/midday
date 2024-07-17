@@ -7,6 +7,7 @@ export function useConnectParams(initialCountryCode?: string) {
     provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
     token: parseAsString,
     enrollment_id: parseAsString,
+    institution_id: parseAsString,
     q: parseAsString,
   });
 

@@ -90,6 +90,7 @@ export function BankConnections({ data }) {
                   {connection.accounts.map((account) => {
                     return (
                       <BankAccount
+                        key={account.id}
                         id={account.id}
                         name={account.name}
                         enabled={account.enabled}
