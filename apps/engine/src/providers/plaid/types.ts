@@ -2,6 +2,7 @@ import type { AccountType } from "@/utils/account";
 import type {
   AccountsGetResponse,
   Institution as BaseInstitution,
+  LinkTokenCreateInstitutionData,
   Transaction,
   TransactionsSyncResponse,
 } from "plaid";
@@ -9,6 +10,7 @@ import type {
 export type LinkTokenCreateRequest = {
   userId: string;
   language?: string;
+  institutionData?: LinkTokenCreateInstitutionData;
 };
 
 export type GetStatusResponse = {
