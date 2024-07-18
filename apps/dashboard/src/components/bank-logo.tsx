@@ -1,7 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarImage } from "@midday/ui/avatar";
 
 type Props = {
-  src?: string;
+  src: string | null;
   alt: string;
   size?: number;
 };
@@ -12,7 +12,7 @@ export function BankLogo({ src, alt, size = 34 }: Props) {
       style={{ width: size, height: size }}
       className="border border-border"
     >
-      <AvatarImage src={src} alt={alt} />
+      {src && <AvatarImage src={src} alt={alt} />}
       <AvatarImage src="https://cdn-engine.midday.ai/default.jpg" alt={alt} />
     </Avatar>
   );

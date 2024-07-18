@@ -1,12 +1,19 @@
 import { Button } from "@midday/ui/button";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   onClick: () => void;
-  isLoading: boolean;
 };
 
-export function BankConnectButton({ onClick, isLoading }: Props) {
+export function BankConnectButton({ onClick }: Props) {
+  const [isLoading, setLoading] = useState(false);
+
+  const handleOnClick = () => {
+    setLoading(true);
+    onClick();
+  };
+
   return (
     <Button
       variant="outline"
@@ -14,7 +21,7 @@ export function BankConnectButton({ onClick, isLoading }: Props) {
       data-icon="🏦"
       data-channel="bank"
       disabled={isLoading}
-      onClick={onClick}
+      onClick={handleOnClick}
     >
       {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
     </Button>

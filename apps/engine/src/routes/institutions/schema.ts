@@ -24,13 +24,6 @@ export const InstitutionSchema = z
         example: 365,
       })
       .nullable(),
-
-    routing_numbers: z
-      .array(z.string())
-      .nullable()
-      .openapi({
-        example: ["081500028", "081510001", "081510024"],
-      }),
     provider: Providers.openapi({
       example: Providers.Enum.teller,
     }),

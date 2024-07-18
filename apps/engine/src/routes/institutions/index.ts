@@ -75,7 +75,6 @@ type Document = {
   available_history: number | null;
   provider: Providers;
   popularity: number;
-  routing_numbers: string[] | null;
 };
 
 type SearchResult = {
@@ -117,7 +116,6 @@ app.openapi(indexRoute, async (c) => {
         available_history: document.available_history
           ? +document.available_history
           : null,
-        routing_numbers: document.routing_numbers ?? null,
         provider: document.provider,
       })),
     },

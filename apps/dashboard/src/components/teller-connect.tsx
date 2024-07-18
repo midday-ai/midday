@@ -1,4 +1,6 @@
 import { useConnectParams } from "@/hooks/use-connect-params";
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { BankConnectButton } from "./bank-connect-button";
@@ -10,14 +12,11 @@ type Props = {
 
 export function TellerConnect({ id, onSelect }: Props) {
   const [institution, setInstitution] = useState<string | undefined>();
-  const [isLoading, setLoading] = useState(false);
   const { setParams } = useConnectParams();
   const { theme } = useTheme();
 
   useEffect(() => {
     if (institution) {
-      setLoading(true);
-
       const teller = window.TellerConnect.setup({
         applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
         environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
@@ -31,20 +30,21 @@ export function TellerConnect({ id, onSelect }: Props) {
             enrollment_id: authorization.enrollment.id,
           });
 
-          // track({
-          //   event: LogEvents.ConnectBankAuthorized.name,
-          //   channel: LogEvents.ConnectBankAuthorized.channel,
-          //   provider: "teller",
-          // });
+          track({
+            event: LogEvents.ConnectBankAuthorized.name,
+            channel: LogEvents.ConnectBankAuthorized.channel,
+            provider: "teller",
+          });
         },
         onExit: () => {
           setParams({ step: "connect" });
-          // track({
-          //   event: LogEvents.ConnectBankCanceled.name,
-          //   channel: LogEvents.ConnectBankCanceled.channel,
-          //   provider: "teller",
-          // });
-          //   setParams({ step: "connect" });
+          track({
+            event: LogEvents.ConnectBankCanceled.name,
+            channel: LogEvents.ConnectBankCanceled.channel,
+            provider: "teller",
+          });
+
+          setParams({ step: "connect" });
         },
         onFailure: () => {
           setParams({ step: "connect" });
@@ -54,7 +54,6 @@ export function TellerConnect({ id, onSelect }: Props) {
       // NOTE: Because we are configure Teller with institution we need to
       // Regenerate the SDK, and that gives us a white background, let's wait until it's fully loaded
       setTimeout(() => {
-        setLoading(false);
         teller.open();
       }, 1000);
     }
@@ -66,7 +65,6 @@ export function TellerConnect({ id, onSelect }: Props) {
         onSelect(id);
         setInstitution(id);
       }}
-      isLoading={isLoading}
     />
   );
 }

@@ -1,7 +1,12 @@
 "use client";
 
+import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
+import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
 import { useConnectParams } from "@/hooks/use-connect-params";
+import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
+import { track } from "@midday/events/client";
+import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -63,11 +68,11 @@ function SearchSkeleton() {
 type SearchResultProps = {
   id: string;
   name: string;
-  logo: string;
+  logo: string | null;
   provider: string;
   countryCode: string;
   availableHistory: number;
-  routingNumber?: string;
+  openPlaid: () => void;
 };
 
 function SearchResult({
@@ -75,7 +80,9 @@ function SearchResult({
   name,
   logo,
   provider,
-  routingNumber,
+  availableHistory,
+  countryCode,
+  openPlaid,
 }: SearchResultProps) {
   return (
     <div className="flex justify-between">
@@ -95,7 +102,9 @@ function SearchResult({
       <ConnectBankProvider
         id={id}
         provider={provider}
-        routingNumber={routingNumber}
+        openPlaid={openPlaid}
+        availableHistory={availableHistory}
+        countryCode={countryCode}
       />
     </div>
   );
@@ -110,22 +119,8 @@ export function SearchInstitutionsModal({
 }: SearchInstitutionsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState([]);
-
-  // NOTE: Load SDKs here so it's not unmonted
-  useScript("https://cdn.teller.io/connect/connect.js", {
-    removeOnUnmount: false,
-  });
-
-  usePlaidLink({
-    token: null,
-    publicKey: "",
-    env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
-    clientName: "Midday",
-    product: ["transactions"],
-    onSuccess: async (public_token, metadata) => {},
-    onExit: () => {},
-  });
+  const [results, setResults] = useState<Institutions["data"]>([]);
+  const [plaidToken, setPlaidToken] = useState<string | undefined>();
 
   const {
     countryCode,
@@ -136,6 +131,43 @@ export function SearchInstitutionsModal({
 
   const isOpen = step === "connect";
   const debouncedSearchTerm = useDebounce(query, 100);
+
+  // NOTE: Load SDKs here so it's not unmonted
+  useScript("https://cdn.teller.io/connect/connect.js", {
+    removeOnUnmount: false,
+  });
+
+  const { open: openPlaid } = usePlaidLink({
+    token: plaidToken,
+    publicKey: "",
+    env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
+    clientName: "Midday",
+    product: ["transactions"],
+    onSuccess: async (public_token, metadata) => {
+      const accessToken = await exchangePublicToken(public_token);
+
+      setParams({
+        step: "account",
+        provider: "plaid",
+        token: accessToken,
+        institution_id: metadata.institution?.institution_id,
+      });
+      track({
+        event: LogEvents.ConnectBankAuthorized.name,
+        channel: LogEvents.ConnectBankAuthorized.channel,
+        provider: "plaid",
+      });
+    },
+    onExit: () => {
+      setParams({ step: "connect" });
+
+      track({
+        event: LogEvents.ConnectBankCanceled.name,
+        channel: LogEvents.ConnectBankCanceled.channel,
+        provider: "plaid",
+      });
+    },
+  });
 
   const handleOnClose = () => {
     setParams({
@@ -172,6 +204,20 @@ export function SearchInstitutionsModal({
       fetchData(debouncedSearchTerm ?? undefined);
     }
   }, [debouncedSearchTerm, isOpen]);
+
+  useEffect(() => {
+    async function createLinkToken() {
+      const token = await createPlaidLinkTokenAction();
+
+      if (token) {
+        setPlaidToken(token);
+      }
+    }
+
+    if (isOpen) {
+      createLinkToken();
+    }
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>
@@ -210,6 +256,10 @@ export function SearchInstitutionsModal({
                 {loading && <SearchSkeleton />}
 
                 {results?.map((institution) => {
+                  if (!institution) {
+                    return null;
+                  }
+
                   return (
                     <SearchResult
                       key={institution.id}
@@ -218,7 +268,15 @@ export function SearchInstitutionsModal({
                       logo={institution.logo}
                       provider={institution.provider}
                       countryCode={countryCode}
-                      routingNumber={institution?.routing_numbers?.at(0)}
+                      availableHistory={
+                        institution.available_history
+                          ? +institution.available_history
+                          : 0
+                      }
+                      openPlaid={() => {
+                        setParams({ step: null });
+                        openPlaid();
+                      }}
                     />
                   );
                 })}

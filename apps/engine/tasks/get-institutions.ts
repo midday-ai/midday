@@ -58,8 +58,6 @@ export async function getPlaidInstitutions() {
 
   const data = await provider.getInstitutions();
 
-  console.log(data.length);
-
   return data.map((institution) => {
     return {
       id: institution.institution_id,
@@ -69,7 +67,6 @@ export async function getPlaidInstitutions() {
         : matchLogoURL(institution.institution_id),
       countries: institution.country_codes,
       popularity: getPopularity(institution.institution_id),
-      routing_numbers: institution.routing_numbers,
       provider: "plaid",
     };
   });

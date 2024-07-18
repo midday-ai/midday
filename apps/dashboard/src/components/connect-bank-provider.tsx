@@ -1,18 +1,25 @@
-"use client";
-
 import { updateInstitutionUsageAction } from "@/actions/institutions/update-institution-usage";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useAction } from "next-safe-action/hooks";
-import { PlaidConnect } from "./plaid-connect";
+import { BankConnectButton } from "./bank-connect-button";
+import { GoCardLessConnect } from "./gocardless-connect";
 import { TellerConnect } from "./teller-connect";
 
 type Props = {
   id: string;
   provider: string;
-  routingNumber?: string;
+  availableHistory: number;
+  countryCode: string;
+  openPlaid: () => void;
 };
 
-export function ConnectBankProvider({ id, provider, routingNumber }: Props) {
+export function ConnectBankProvider({
+  id,
+  provider,
+  openPlaid,
+  availableHistory,
+  countryCode,
+}: Props) {
   const { setParams } = useConnectParams();
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
 
@@ -35,22 +42,27 @@ export function ConnectBankProvider({ id, provider, routingNumber }: Props) {
           }}
         />
       );
-    case "plaid": {
+    case "gocardless": {
       return (
-        <PlaidConnect
+        <GoCardLessConnect
           id={id}
-          routingNumber={routingNumber}
+          countryCode={countryCode}
+          availableHistory={availableHistory}
           onSelect={() => {
-            setParams({ step: null });
             updateUsage();
           }}
         />
       );
     }
-
-    case "gocardless": {
-      return null;
-    }
+    case "plaid":
+      return (
+        <BankConnectButton
+          onClick={() => {
+            updateUsage();
+            openPlaid();
+          }}
+        />
+      );
     default:
       return null;
   }
