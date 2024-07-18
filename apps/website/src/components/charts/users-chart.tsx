@@ -5,7 +5,7 @@ export async function UsersChart() {
 
   return (
     <div className="flex border flex-col items-center justify-center border-border bg-background px-6 pt-8 pb-6 space-y-4">
-      <h2 className="text-2xl">Customers</h2>
+      <h2 className="text-2xl">Businesses</h2>
       <p className="text-[#878787] text-sm text-center">
         This is the number of customers currently using Midday.
       </p>
