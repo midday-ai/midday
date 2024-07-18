@@ -3,7 +3,6 @@
 import { authActionClient } from "@/actions/safe-action";
 import { deleteProjectSchema } from "@/actions/schema";
 import { LogEvents } from "@midday/events/events";
-import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
 
 export const deleteProjectAction = authActionClient

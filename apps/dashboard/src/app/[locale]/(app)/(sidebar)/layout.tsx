@@ -53,10 +53,10 @@ const HotKeys = dynamic(
   },
 );
 
-const SearchInstitutionsModal = dynamic(
+const ConnectTransactionsModal = dynamic(
   () =>
-    import("@/components/modals/search-institutions-modal").then(
-      (mod) => mod.SearchInstitutionsModal,
+    import("@/components/modals/connect-transactions-modal").then(
+      (mod) => mod.ConnectTransactionsModal,
     ),
   {
     ssr: false,
@@ -90,7 +90,7 @@ export default async function Layout({
         </div>
 
         <AssistantModal />
-        <SearchInstitutionsModal countryCode={countryCode} />
+        <ConnectTransactionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />
         <ImportCSVModal
           currencies={uniqueCurrencies}

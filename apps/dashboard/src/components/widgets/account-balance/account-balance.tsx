@@ -1,6 +1,6 @@
 "use client";
 
-import { ConnectBankButton } from "@/components/connect-bank-button";
+import { AddAccountButton } from "@/components/add-account-button";
 import { FormatAmount } from "@/components/format-amount";
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
@@ -15,7 +15,7 @@ export function AccountBalance({ data }) {
   if (!activeAccount) {
     return (
       <div className="flex justify-center items-center h-full">
-        <ConnectBankButton />
+        <AddAccountButton />
       </div>
     );
   }
@@ -58,7 +58,7 @@ export function AccountBalance({ data }) {
               key={account.id}
               className={cn(
                 "w-[8px] h-[8px] rounded-full bg-[#1D1D1D] dark:bg-[#D9D9D9] opacity-30 transition-all cursor-pointer",
-                idx === activeIndex && "opacity-1"
+                idx === activeIndex && "opacity-1",
               )}
             />
           ))}

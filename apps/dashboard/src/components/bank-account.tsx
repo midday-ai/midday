@@ -1,6 +1,18 @@
 "use client";
 
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
+import { leaveTeam } from "@midday/supabase/mutations";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -12,8 +24,12 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Switch } from "@midday/ui/switch";
 import { MoreHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useQueryState } from "nuqs";
+import { useState } from "react";
 import { FormatAmount } from "./format-amount";
+import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 
 type Props = {
   id: string;
@@ -35,6 +51,8 @@ export function BankAccount({
   type,
 }: Props) {
   const updateAccount = useAction(updateBankAccountAction);
+  const [_, setStep] = useQueryState("step");
+  const [isOpen, setOpen] = useState(false);
 
   const getInitials = () => {
     const formatted = name.toUpperCase();
@@ -77,20 +95,60 @@ export function BankAccount({
       </div>
 
       <div className="flex items-center space-x-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <MoreHorizontal size={20} />
-          </DropdownMenuTrigger>
-          {enabled && (
+        <AlertDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <MoreHorizontal size={20} />
+            </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                Edit
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Import</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setStep("import-csv");
+                }}
+              >
+                Import
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Remove</DropdownMenuItem>
+              <DropdownMenuItem>
+                <AlertDialogTrigger>Remove</AlertDialogTrigger>
+              </DropdownMenuItem>
             </DropdownMenuContent>
-          )}
-        </DropdownMenu>
+          </DropdownMenu>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Account</AlertDialogTitle>
+              <AlertDialogDescription>
+                You are about to delete a bank account. If you proceed, all
+                transactions associated with this account will also be deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+              // disabled={leaveTeam.status === "executing"}
+              // onClick={() =>
+              //   leaveTeam.execute({
+              //     teamId: row.original.team.id,
+              //     role: row.original.role,
+              //     revalidatePath: "/account/teams",
+              //   })
+              // }
+              >
+                Confirm
+                {/* {leaveTeam.status === "executing" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Confirm"
+            )} */}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {!manual && (
           <Switch
@@ -102,6 +160,13 @@ export function BankAccount({
           />
         )}
       </div>
+
+      <EditBankAccountModal
+        id={id}
+        onOpenChange={setOpen}
+        isOpen={isOpen}
+        defaultValue={name}
+      />
     </div>
   );
 }

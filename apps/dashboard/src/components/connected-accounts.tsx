@@ -1,8 +1,8 @@
+import { AddAccountButton } from "@/components/add-account-button";
 import {
   BankAccountList,
   BankAccountListSkeleton,
 } from "@/components/bank-account-list";
-import { ConnectBankButton } from "@/components/connect-bank-button";
 import {
   Card,
   CardDescription,
@@ -29,7 +29,7 @@ export function ConnectedAccounts() {
       <CardFooter className="flex justify-between">
         <div />
 
-        <ConnectBankButton />
+        <AddAccountButton />
       </CardFooter>
     </Card>
   );

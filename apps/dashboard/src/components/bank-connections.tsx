@@ -20,13 +20,15 @@ import { BankLogo } from "./bank-logo";
 import { SyncTransactions } from "./sync-transactions";
 
 export function BankConnections({ data }) {
+  const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
+
   return (
     <div className="px-6 pb-6 space-y-6 divide-y">
-      <Accordion type="multiple" className="w-full">
-        {data.map((connection) => {
+      <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
+        {data.map((connection, index) => {
           return (
             <AccordionItem
-              value={connection.id}
+              value={`connection-${index}`}
               key={connection.id}
               className="border-none"
             >
@@ -70,8 +72,8 @@ export function BankConnections({ data }) {
                               side="left"
                             >
                               The login details for this connection have changed
-                              (credentials, MFA, or similar) click here to
-                              restore the connection to a good state.
+                              (credentials, MFA, or similar) restore the
+                              connection to a good state.
                             </TooltipContent>
                           )}
                         </Tooltip>

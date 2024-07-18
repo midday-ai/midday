@@ -12,6 +12,10 @@ export function BankConnectButton({ onClick }: Props) {
   const handleOnClick = () => {
     setLoading(true);
     onClick();
+
+    setTimeout(() => {
+      setLoading(false);
+    }, 3000);
   };
 
   return (
