@@ -80,4 +80,11 @@ export default {
     multi_currency: "Multi currency",
     description: "Includes transactions from all pages of results",
   },
+  account_type: {
+    depository: "Depository",
+    credit: "Credit",
+    other_asset: "Other Asset",
+    loan: "Loan",
+    other_liability: "Other Liability",
+  },
 } as const;

@@ -42,6 +42,10 @@ export const updateBankAccountSchema = z.object({
   id: z.string().uuid(),
   name: z.string().optional(),
   enabled: z.boolean().optional(),
+  type: z
+    .enum(["depository", "credit", "other_asset", "loan", "other_liability"])
+    .optional()
+    .nullable(),
 });
 
 export type DeleteBankAccountFormValues = z.infer<

@@ -2,6 +2,7 @@
 
 import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
+import { useI18n } from "@/locales/client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -52,6 +53,7 @@ export function BankAccount({
 }: Props) {
   const [_, setStep] = useQueryState("step");
   const [isOpen, setOpen] = useState(false);
+  const t = useI18n();
 
   const updateAccount = useAction(updateBankAccountAction);
   const deleteAccount = useAction(deleteBankAccountAction);
@@ -64,23 +66,6 @@ export function BankAccount({
     }
 
     return formatted.charAt(0);
-  };
-
-  const accountType = () => {
-    switch (type) {
-      case "depository":
-        return "Depository";
-      case "credit":
-        return "Credit";
-      case "other_asset":
-        return "Other Asset";
-      case "loan":
-        return "Loan";
-      case "other_liability":
-        return "Other Liability";
-      default:
-        return null;
-    }
   };
 
   return (
@@ -103,7 +88,7 @@ export function BankAccount({
               {name} ({currency})
             </p>
             <span className="text-xs text-[#878787] font-normal">
-              {accountType()}
+              {t(`account_type.${type}`)}
             </span>
           </div>
 
@@ -183,7 +168,8 @@ export function BankAccount({
         id={id}
         onOpenChange={setOpen}
         isOpen={isOpen}
-        defaultValue={name}
+        defaultName={name}
+        defaultType={type}
       />
     </div>
   );

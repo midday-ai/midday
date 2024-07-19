@@ -242,6 +242,7 @@ type UpdateBankAccountParams = {
   id: string;
   teamId: string;
   name: string;
+  type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
 };
 
 export async function updateBankAccount(
