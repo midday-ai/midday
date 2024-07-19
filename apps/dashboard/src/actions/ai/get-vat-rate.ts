@@ -9,7 +9,7 @@ import { getVatRateSchema } from "../schema";
 
 const model = new ChatOpenAI({
   temperature: 0,
-  model: "gpt-4o",
+  model: "gpt-4o-mini",
   apiKey: process.env.OPENAI_API_KEY,
 });
 

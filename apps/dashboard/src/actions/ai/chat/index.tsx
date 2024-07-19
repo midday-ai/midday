@@ -35,7 +35,7 @@ const ratelimit = new Ratelimit({
 });
 
 export async function submitUserMessage(
-  content: string
+  content: string,
 ): Promise<ClientMessage> {
   "use server";
   const ip = headers().get("x-forwarded-for");
@@ -92,7 +92,7 @@ export async function submitUserMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model: openai("gpt-4o"),
+    model: openai("gpt-4o-mini"),
     initial: <SpinnerMessage />,
     system: `\
     You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
