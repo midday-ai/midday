@@ -11,11 +11,12 @@ export const manualSyncTransactionsAction = authActionClient
     event: LogEvents.TransactionsManualSync.name,
     channel: LogEvents.TransactionsManualSync.channel,
   })
-  .action(async ({ parsedInput: { accountId }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { connectionId }, ctx: { user } }) => {
     const event = await client.sendEvent({
       name: Events.TRANSACTIONS_MANUAL_SYNC,
       payload: {
-        accountId,
+        connectionId,
+        teamId: user.team_id,
       },
     });
 

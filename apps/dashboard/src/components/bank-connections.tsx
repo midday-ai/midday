@@ -94,9 +94,11 @@ function ConnectionState({ connection, isSyncing }) {
   }
 
   if (connection.last_accessed) {
-    return `Updated ${formatDistanceToNow(
-      new Date(connection.last_accessed),
-    )} ago`;
+    return (
+      <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
+        new Date(connection.last_accessed),
+      )} ago`}</span>
+    );
   }
 
   return <div className="text-xs font-normal">Never accessed</div>;
@@ -154,7 +156,7 @@ export function BankConnection({ connection }) {
             eventId={eventId}
             isSyncing={isSyncing}
             onClick={() =>
-              manualSyncTransactions.execute({ accountId: connection.id })
+              manualSyncTransactions.execute({ connectionId: connection.id })
             }
           />
         </div>

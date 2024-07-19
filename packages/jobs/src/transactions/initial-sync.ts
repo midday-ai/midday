@@ -50,9 +50,7 @@ client.defineJob({
         "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
       )
       .eq("team_id", teamId)
-      .eq("enabled", true)
-      // NOTE: Only new accounts
-      .is("last_accessed", null);
+      .eq("enabled", true);
 
     const promises = accountsData?.map(async (account) => {
       const provider = new Provider({
@@ -97,7 +95,7 @@ client.defineJob({
       // Update bank connection last accessed
       // TODO: Fix so it only update once per connection
       await io.supabase.client
-        .from("bank_connection")
+        .from("bank_connections")
         .update({ last_accessed: new Date().toISOString() })
         .eq("id", account.bank_connection.id);
     });

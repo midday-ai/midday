@@ -48,7 +48,7 @@ client.defineJob({
         // Update bank connection last accessed
         // TODO: Fix so it only update once per connection
         await io.supabase.client
-          .from("bank_connection")
+          .from("bank_connections")
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
       } catch (error) {

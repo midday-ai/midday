@@ -344,7 +344,7 @@ export const updateEntriesSchema = z.object({
 });
 
 export const manualSyncTransactionsSchema = z.object({
-  accountId: z.string().uuid(),
+  connectionId: z.string().uuid(),
 });
 
 export const createGoCardLessLinkSchema = z.object({
