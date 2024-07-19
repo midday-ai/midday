@@ -9,15 +9,21 @@ import {
 } from "@midday/ui/tooltip";
 import { useEventDetails } from "@trigger.dev/react";
 
+type Props = {
+  eventId?: string;
+  onClick: () => void;
+  isSyncing: boolean;
+};
+
 export function SyncTransactions({
   eventId,
   onClick,
-  isLoading: initialIsLoading,
-}) {
+  isSyncing: initialSyncing,
+}: Props) {
   const { data } = useEventDetails(eventId);
   const firstRun = data?.runs?.at(0);
 
-  const isLoading = firstRun?.status === "EXECUTING" || initialIsLoading;
+  const isLoading = firstRun?.status === "EXECUTING" || initialSyncing;
 
   return (
     <TooltipProvider delayDuration={70}>
