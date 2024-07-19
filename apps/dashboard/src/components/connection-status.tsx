@@ -1,4 +1,4 @@
-import { getConnectionStatus } from "@/utils/connection-status";
+import { getConnectionsStatus } from "@/utils/connection-status";
 import { getBankConnectionsByTeamId } from "@midday/supabase/cached-queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
@@ -54,7 +54,7 @@ export async function ConnectionStatus() {
     return null;
   }
 
-  const { warning, error, show } = getConnectionStatus(bankConnections.data);
+  const { warning, error, show } = getConnectionsStatus(bankConnections.data);
 
   if (!show) {
     return null;

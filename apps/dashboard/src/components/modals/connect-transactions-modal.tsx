@@ -367,7 +367,7 @@ export function ConnectTransactionsModal({
                           </div>
 
                           {provider.logoDark && (
-                            <div className="mt-4 dark:hidden">
+                            <div className="mt-[22px] dark:hidden self-start">
                               <Image
                                 src={provider.logoDark}
                                 width={40}

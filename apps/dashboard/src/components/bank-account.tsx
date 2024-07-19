@@ -1,7 +1,7 @@
 "use client";
 
+import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
-import { leaveTeam } from "@midday/supabase/mutations";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -50,9 +50,11 @@ export function BankAccount({
   manual,
   type,
 }: Props) {
-  const updateAccount = useAction(updateBankAccountAction);
   const [_, setStep] = useQueryState("step");
   const [isOpen, setOpen] = useState(false);
+
+  const updateAccount = useAction(updateBankAccountAction);
+  const deleteAccount = useAction(deleteBankAccountAction);
 
   const getInitials = () => {
     const formatted = name.toUpperCase();
@@ -62,6 +64,23 @@ export function BankAccount({
     }
 
     return formatted.charAt(0);
+  };
+
+  const accountType = () => {
+    switch (type) {
+      case "depository":
+        return "Depository";
+      case "credit":
+        return "Credit";
+      case "other_asset":
+        return "Other Asset";
+      case "loan":
+        return "Loan";
+      case "other_liability":
+        return "Other Liability";
+      default:
+        return null;
+    }
   };
 
   return (
@@ -84,7 +103,7 @@ export function BankAccount({
               {name} ({currency})
             </p>
             <span className="text-xs text-[#878787] font-normal">
-              {type === "depository" ? "Depository" : "Credit"}
+              {accountType()}
             </span>
           </div>
 
@@ -114,7 +133,9 @@ export function BankAccount({
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <AlertDialogTrigger>Remove</AlertDialogTrigger>
+                <AlertDialogTrigger className="w-full text-left">
+                  Remove
+                </AlertDialogTrigger>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -130,21 +151,18 @@ export function BankAccount({
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
-              // disabled={leaveTeam.status === "executing"}
-              // onClick={() =>
-              //   leaveTeam.execute({
-              //     teamId: row.original.team.id,
-              //     role: row.original.role,
-              //     revalidatePath: "/account/teams",
-              //   })
-              // }
+                disabled={deleteAccount.status === "executing"}
+                onClick={() =>
+                  deleteAccount.execute({
+                    id,
+                  })
+                }
               >
-                Confirm
-                {/* {leaveTeam.status === "executing" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              "Confirm"
-            )} */}
+                {deleteAccount.status === "executing" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Confirm"
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

@@ -1,12 +1,12 @@
 "use client";
 
+import { connectionStatus } from "@/utils/connection-status";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -14,10 +14,80 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { formatDistanceToNow } from "date-fns";
+import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { SyncTransactions } from "./sync-transactions";
+
+function ConnectionState({ connection }) {
+  const { show, expired } = connectionStatus(connection);
+
+  if (connection.error) {
+    switch (connection.error_code) {
+      case "AUTH_ERROR":
+        return (
+          <>
+            <div className="text-xs font-normal flex items-center space-x-1 text-[#FFD02B]">
+              <Icons.AlertCircle />
+              <span>Syncing issue detected</span>
+            </div>
+
+            <TooltipContent
+              className="px-3 py-1.5 text-xs max-w-[430px]"
+              sideOffset={20}
+              side="left"
+            >
+              The login details for this connection have changed (credentials,
+              MFA, or similar) restore the connection to a good state.
+            </TooltipContent>
+          </>
+        );
+
+      default:
+        return null;
+    }
+  }
+
+  if (show) {
+    return (
+      <>
+        <div className="text-xs font-normal flex items-center space-x-1 text-[#FFD02B]">
+          <Icons.AlertCircle />
+          <span>Connection expires soon</span>
+        </div>
+
+        {connection.expires_at && (
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[430px]"
+            sideOffset={20}
+            side="left"
+          >
+            We only have access to your bank for another{" "}
+            {differenceInDays(new Date(connection.expires_at), new Date())}{" "}
+            days. Please update the connection to keep everything in sync.
+          </TooltipContent>
+        )}
+      </>
+    );
+  }
+
+  if (expired) {
+    return (
+      <div className="text-xs font-normal flex items-center space-x-1 text-[#c33839]">
+        <Icons.Error />
+        <span>Connection expired</span>
+      </div>
+    );
+  }
+
+  if (connection.last_accessed) {
+    return `Updated ${formatDistanceToNow(
+      new Date(connection.last_accessed),
+    )} ago`;
+  }
+
+  return <div className="text-xs font-normal">Never accessed</div>;
+}
 
 export function BankConnections({ data }) {
   const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
@@ -46,36 +116,10 @@ export function BankConnections({ data }) {
                       <TooltipProvider delayDuration={70}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div
-                              className={cn(
-                                "text-xs text-[#878787] font-normal flex items-center space-x-1",
-                                connection.error && "text-[#c33839]",
-                              )}
-                            >
-                              {connection.error && <Icons.Error />}
-                              <span>
-                                {connection.error
-                                  ? "Syncing issue detected"
-                                  : connection.last_accessed
-                                    ? `Updated ${formatDistanceToNow(
-                                        new Date(connection.last_accessed),
-                                      )} ago`
-                                    : "Never accessed"}
-                              </span>
+                            <div>
+                              <ConnectionState connection={connection} />
                             </div>
                           </TooltipTrigger>
-
-                          {connection.error && (
-                            <TooltipContent
-                              className="px-3 py-1.5 text-xs max-w-[430px]"
-                              sideOffset={20}
-                              side="left"
-                            >
-                              The login details for this connection have changed
-                              (credentials, MFA, or similar) restore the
-                              connection to a good state.
-                            </TooltipContent>
-                          )}
                         </Tooltip>
                       </TooltipProvider>
                     </div>
