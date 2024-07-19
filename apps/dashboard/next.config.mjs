@@ -42,8 +42,6 @@ const config = {
         __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
       }),
     );
-
-    return config;
   },
   async headers() {
     return [

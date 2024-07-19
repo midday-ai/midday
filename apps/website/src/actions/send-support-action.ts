@@ -1,7 +1,7 @@
 "use server";
 
 import { PlainClient } from "@team-plain/typescript-sdk";
-import { action } from "./safe-action";
+import { actionClient } from "./safe-action";
 import { sendSupportSchema } from "./schema";
 
 const client = new PlainClient({
@@ -23,38 +23,40 @@ const mapToPriorityNumber = (priority: string) => {
   }
 };
 
-export const sendSupportAction = action(sendSupportSchema, async (data) => {
-  const customer = await client.upsertCustomer({
-    identifier: {
-      emailAddress: data.email,
-    },
-    onCreate: {
-      fullName: data.fullName,
-      email: {
-        email: data.email,
-        isVerified: true,
+export const sendSupportAction = actionClient
+  .schema(sendSupportSchema)
+  .action(async ({ parsedInput: data }) => {
+    const customer = await client.upsertCustomer({
+      identifier: {
+        emailAddress: data.email,
       },
-    },
-    onUpdate: {},
-  });
-
-  const response = await client.createThread({
-    title: data.subject,
-    description: data.message,
-    priority: mapToPriorityNumber(data.priority),
-    customerIdentifier: {
-      customerId: customer.data?.customer.id,
-    },
-    // Support
-    labelTypeIds: ["lt_01HV93FQT6NSC1EN2HHA6BG9WK"],
-    components: [
-      {
-        componentText: {
-          text: data.message,
+      onCreate: {
+        fullName: data.fullName,
+        email: {
+          email: data.email,
+          isVerified: true,
         },
       },
-    ],
-  });
+      onUpdate: {},
+    });
 
-  return response;
-});
+    const response = await client.createThread({
+      title: data.subject,
+      description: data.message,
+      priority: mapToPriorityNumber(data.priority),
+      customerIdentifier: {
+        customerId: customer.data?.customer.id,
+      },
+      // Support
+      labelTypeIds: ["lt_01HV93FQT6NSC1EN2HHA6BG9WK"],
+      components: [
+        {
+          componentText: {
+            text: data.message,
+          },
+        },
+      ],
+    });
+
+    return response;
+  });

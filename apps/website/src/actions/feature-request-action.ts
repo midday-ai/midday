@@ -1,17 +1,16 @@
 "use server";
 
 import { PlainClient } from "@team-plain/typescript-sdk";
-import { action } from "./safe-action";
+import { actionClient } from "./safe-action";
 import { featureRequestSchema } from "./schema";
 
 const client = new PlainClient({
   apiKey: process.env.PLAIN_API_KEY!,
 });
 
-export const featureRequestAction = action(
-  featureRequestSchema,
-  async (data) => {
-    console.log(data);
+export const featureRequestAction = actionClient
+  .schema(featureRequestSchema)
+  .action(async ({ parsedInput: data }) => {
     const response = await client.createThread({
       title: data.title,
       customerIdentifier: {
@@ -33,8 +32,5 @@ export const featureRequestAction = action(
       ],
     });
 
-    console.log(response);
-
     return response;
-  }
-);
+  });
