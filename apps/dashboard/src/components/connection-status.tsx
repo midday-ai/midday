@@ -4,18 +4,56 @@ import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 import { ReconnectButton } from "./reconnect-button";
 
 const WARNING_DAYS = 14;
 const ERROR_DAYS = 7;
 const DISPLAY_DAYS = 60;
 
-export async function ReconnectBank() {
+export async function ConnectionStatus() {
   const bankConnections = await getBankConnectionsByTeamId();
 
   if (!bankConnections?.data?.length) {
     return null;
+  }
+
+  const connectionIssue = bankConnections?.data?.some((bank) =>
+    Boolean(bank.connection_error),
+  );
+
+  if (connectionIssue) {
+    return (
+      <TooltipProvider delayDuration={70}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link href="/settings/accounts" prefetch>
+              <Button
+                variant="outline"
+                size="icon"
+                className="rounded-full w-8 h-8 items-center hidden md:flex"
+              >
+                <Icons.Error size={16} className="text-[#FF3638]" />
+              </Button>
+            </Link>
+          </TooltipTrigger>
+
+          <TooltipContent
+            className="px-3 py-1.5 text-xs max-w-[230px]"
+            sideOffset={10}
+          >
+            There is a connection issue with one of your banks.
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
   }
 
   // NOTE: No connections with expire_at (Only GoCardLess)

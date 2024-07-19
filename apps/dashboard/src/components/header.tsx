@@ -1,14 +1,13 @@
 import { AssistantButton } from "@/components/assistant/button";
 import { DesktopAssistantButton } from "@/components/assistant/button-desktop";
+import { ConnectionStatus } from "@/components/connection-status";
 import { NotificationCenter } from "@/components/notification-center";
-import { ReconnectBank } from "@/components/reconnect-bank";
 import { TrackerControl } from "@/components/tracker-contol";
 import { UserMenu } from "@/components/user-menu";
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
 import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Suspense } from "react";
-import { ConnectionError } from "./connection-error";
 import { DesktopTrafficLight } from "./desktop-traffic-light";
 import { FeedbackForm } from "./feedback-form";
 import { MobileMenu } from "./mobile-menu";
@@ -31,11 +30,7 @@ export function Header() {
         <TrackerControl />
 
         <Suspense>
-          <ConnectionError />
-        </Suspense>
-
-        <Suspense>
-          <ReconnectBank />
+          <ConnectionStatus />
         </Suspense>
 
         <NotificationCenter />
