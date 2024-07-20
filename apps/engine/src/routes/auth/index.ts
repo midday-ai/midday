@@ -188,7 +188,7 @@ const exchangeGoCardLessRoute = createRoute({
 app.openapi(linkPlaidRoute, async (c) => {
   const envs = env(c);
 
-  const { userId, language, routingNumber } = await c.req.json();
+  const { userId, language, accessToken } = await c.req.json();
 
   const api = new PlaidApi({
     kv: c.env.KV,
@@ -198,9 +198,7 @@ app.openapi(linkPlaidRoute, async (c) => {
   const data = await api.linkTokenCreate({
     userId,
     language,
-    institutionData: {
-      routing_number: routingNumber,
-    },
+    accessToken,
   });
 
   return c.json(data, 200);

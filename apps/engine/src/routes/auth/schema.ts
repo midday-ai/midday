@@ -8,9 +8,9 @@ export const PlaidLinkBodySchema = z
     language: z.string().optional().openapi({
       example: "en",
     }),
-    routingNumber: z.string().optional().openapi({
-      example: "8422944",
-      description: "The routing number of the bank to highlight in Link",
+    accessToken: z.string().optional().openapi({
+      example: "ojwmef9823f892n9h98h2efoqed9823hdodfcoj13er92hef",
+      description: "Used when initiating the reconnect flow",
     }),
   })
   .openapi("PlaidLinkBodySchema");

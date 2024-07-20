@@ -137,7 +137,7 @@ export class PlaidApi {
   async linkTokenCreate({
     userId,
     language = "en",
-    institutionData,
+    accessToken,
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
@@ -147,7 +147,7 @@ export class PlaidApi {
       client_name: "Midday",
       products: [Products.Transactions],
       language,
-      institution_data: institutionData,
+      access_token: accessToken,
       country_codes: this.#countryCodes,
       transactions: {
         days_requested: 730,
