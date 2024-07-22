@@ -2,6 +2,7 @@
 
 import { addMonths, addWeeks, isAfter, isBefore, isToday } from "date-fns";
 import { getChats } from "../storage";
+import type { Chat } from "../types";
 
 export async function getChatsAction() {
   const data = await getChats();
@@ -10,7 +11,7 @@ export async function getChatsAction() {
     return [];
   }
 
-  const base = {
+  const base: { "1d": Chat[]; "7d": Chat[]; "30d": Chat[] } = {
     "1d": [],
     "7d": [],
     "30d": [],

@@ -15,7 +15,7 @@ import { Tracker } from "./widgets/tracker";
 
 type Props = {
   disabled: boolean;
-  initialPeriod: any;
+  initialPeriod: Date | string;
   searchParams: { [key: string]: string | string[] | undefined };
 };
 

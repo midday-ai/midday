@@ -4,7 +4,13 @@ import Image from "next/image";
 import appIcon from "public/appicon.png";
 import { useEffect, useRef } from "react";
 
-export function DesktopSignInVerifyCode({ code }) {
+interface DesktopSignInVerifyCodeProps {
+  code: string;
+}
+
+export function DesktopSignInVerifyCode({
+  code,
+}: DesktopSignInVerifyCodeProps) {
   const hasRunned = useRef(false);
 
   useEffect(() => {

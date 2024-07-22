@@ -10,7 +10,7 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
     data: { session },
   } = await getSession();
 
-  const defaultSettings = {
+  const defaultSettings: SettingsResponse = {
     enabled: true,
     provider: isEUCountry(getCountryCode()) ? "mistralai" : "openai",
   };
@@ -20,7 +20,7 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
 
   return {
     ...defaultSettings,
-    ...settings,
+    ...(settings || {}),
   };
 }
 

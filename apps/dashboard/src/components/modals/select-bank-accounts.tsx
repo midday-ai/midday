@@ -2,6 +2,7 @@
 
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { connectBankAccountSchema } from "@/actions/schema";
+import { useConnectParams } from "@/hooks/use-connect-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -25,12 +26,6 @@ import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import {
-  parseAsBoolean,
-  parseAsString,
-  parseAsStringEnum,
-  useQueryStates,
-} from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
@@ -63,29 +58,21 @@ export function SelectBankAccountsModal() {
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
 
-  const [params, setParams] = useQueryStates({
-    step: parseAsStringEnum(["connect", "account"]),
-    error: parseAsBoolean,
-    ref: parseAsString,
-    token: parseAsString,
-    enrollment_id: parseAsString,
-    institution_id: parseAsString,
-    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
-    countryCode: parseAsString,
-  });
+  const { step, error, setParams } = useConnectParams();
 
-  const {
-    provider,
-    step,
-    error,
-    token,
-    ref,
-    enrollment_id,
-    institution_id,
-    countryCode,
-  } = params;
+  const isOpen = step === "account";
 
-  const isOpen = step === "account" && !error;
+  useEffect(() => {
+    if (error) {
+      // NOTE: On GoCardLess cancel flow
+      setParams({
+        step: "connect",
+        error: null,
+        details: null,
+        provider: null,
+      });
+    }
+  }, [error]);
 
   const onClose = () => {
     setParams(
