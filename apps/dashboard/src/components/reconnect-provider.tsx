@@ -92,8 +92,10 @@ export function ReconnectProvider({
         return createGoCardLessLink.execute({
           institutionId,
           step: "reconnect",
-          availableHistory: 30,
-          redirectBase: isDesktopApp() ? "midday://" : window.location.origin,
+          availableHistory: 60,
+          redirectBase: isDesktopApp()
+            ? "midday://settings/accounts"
+            : window.location.origin,
         });
       }
       case "teller":

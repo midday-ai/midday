@@ -21,14 +21,12 @@ import type {
   PostRequisitionsRequest,
   PostRequisitionsResponse,
 } from "./types";
-import { getMaxHistoricalDays } from "./utils";
+import { getAccessValidForDays, getMaxHistoricalDays } from "./utils";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
 
   #api: XiorInstance | null = null;
-
-  #accessValidForDays = 180;
 
   // Cache keys
   #accessTokenCacheKey = "gocardless_access_token";
@@ -200,7 +198,7 @@ export class GoCardLessApi {
       {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
-        access_valid_for_days: this.#accessValidForDays,
+        access_valid_for_days: getAccessValidForDays(institutionId),
         max_historical_days: maxHistoricalDays,
       },
     );

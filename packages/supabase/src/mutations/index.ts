@@ -1,3 +1,4 @@
+import { getAccessValidForDays } from "@midday/engine/src/providers/gocardless/utils";
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
@@ -39,10 +40,13 @@ export async function createBankAccounts(
     return;
   }
 
-  // NOTE: GoCardLess connection expires after 180 days
+  // NOTE: GoCardLess connection expires after 90-180 days
   const expiresAt =
     provider === "gocardless"
-      ? addDays(new Date(), 180).toDateString()
+      ? addDays(
+          new Date(),
+          getAccessValidForDays({ institutionId: account.institution_id }),
+        ).toDateString()
       : undefined;
 
   const bankConnection = await supabase
@@ -101,7 +105,10 @@ export async function updateBankConnection(
   return await supabase
     .from("bank_connections")
     .update({
-      expires_at: addDays(new Date(), 180).toDateString(),
+      expires_at: addDays(
+        new Date(),
+        getAccessValidForDays({ institutionId: data.id }),
+      ).toDateString(),
     })
     .eq("id", id)
     .select();

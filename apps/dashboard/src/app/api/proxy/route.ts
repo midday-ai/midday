@@ -14,6 +14,6 @@ export async function GET(req) {
       headers: {
         authorization: `Bearer ${session.access_token}`,
       },
-    }
+    },
   );
 }
