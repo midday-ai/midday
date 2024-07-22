@@ -58,7 +58,7 @@ export async function clearChats() {
   const chats: string[] = await RedisClient.zrange(
     `user:chat:${userId}`,
     0,
-    -1
+    -1,
   );
 
   const pipeline = RedisClient.pipeline();
@@ -85,7 +85,7 @@ export async function getLatestChat() {
       1,
       {
         rev: true,
-      }
+      },
     );
 
     const lastId = chat.at(0);
@@ -113,7 +113,7 @@ export async function getChats() {
       -1,
       {
         rev: true,
-      }
+      },
     );
 
     for (const chat of chats) {

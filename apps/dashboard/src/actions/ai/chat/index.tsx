@@ -17,6 +17,7 @@ import {
 import { startOfMonth, subMonths } from "date-fns";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
+import { attachmentsToParts } from "../attachments-to-parts";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
@@ -34,12 +35,19 @@ const ratelimit = new Ratelimit({
   redis: RedisClient,
 });
 
-export async function submitUserMessage(
-  content: string,
-): Promise<ClientMessage> {
+export async function submitUserMessage({
+  content,
+  experimental_attachments,
+}: {
+  content: string;
+  experimental_attachments: FileList | undefined;
+}): Promise<ClientMessage> {
   "use server";
-  const ip = headers().get("x-forwarded-for");
+  const ip = headers().get("x-forwarded-for") ?? "unknown";
   const { success } = await ratelimit.limit(ip);
+
+  console.log("experimental_attachments", experimental_attachments);
+  console.log(attachmentsToParts(experimental_attachments));
 
   const aiState = getMutableAIState<typeof AI>();
 
@@ -110,7 +118,12 @@ export async function submitUserMessage(
     messages: [
       ...aiState.get().messages.map((message: any) => ({
         role: message.role,
-        content: message.content,
+        content: experimental_attachments
+          ? [
+              { type: "text", text: content },
+              ...attachmentsToParts(experimental_attachments),
+            ]
+          : content,
         name: message.name,
       })),
     ],

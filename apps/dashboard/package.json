@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.36",
+    "@ai-sdk/openai": "^0.0.37",
     "@baselime/node-opentelemetry": "^0.5.8",
     "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.6.0",
@@ -39,7 +39,7 @@
     "@upstash/ratelimit": "^1.2.1",
     "@vercel/speed-insights": "^1.0.12",
     "@zip.js/zip.js": "2.7.45",
-    "ai": "^3.2.29",
+    "ai": "^3.2.32",
     "change-case": "^5.4.4",
     "dub": "^0.29.18",
     "framer-motion": "^11.2.12",
