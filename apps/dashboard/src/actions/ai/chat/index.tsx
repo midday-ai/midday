@@ -2,6 +2,7 @@
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
 import { client as RedisClient } from "@midday/kv";
 import {
   getBankAccountsCurrencies,
@@ -17,7 +18,6 @@ import {
 import { startOfMonth, subMonths } from "date-fns";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
-import { attachmentsToParts } from "../attachments-to-parts";
 import { getAssistantSettings, saveChat } from "../storage";
 import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
@@ -35,19 +35,43 @@ const ratelimit = new Ratelimit({
   redis: RedisClient,
 });
 
-export async function submitUserMessage({
-  content,
-  experimental_attachments,
-}: {
-  content: string;
-  experimental_attachments: FileList | undefined;
-}): Promise<ClientMessage> {
+async function convertToPrompt(content: string, attachment?: File) {
+  const fileData = await attachment?.arrayBuffer();
+
+  switch (attachment?.type) {
+    case "application/pdf": {
+      if (fileData) {
+        const loader = new PDFLoader(new Blob([fileData]));
+
+        const docs = await loader.load();
+
+        return [
+          { type: "text", text: content },
+          ...docs.map((doc) => ({
+            type: "text",
+            text: doc.pageContent,
+          })),
+        ];
+      }
+      return;
+    }
+    default:
+      return content;
+  }
+}
+
+export async function submitUserMessage(
+  formData: FormData,
+): Promise<ClientMessage> {
   "use server";
+
   const ip = headers().get("x-forwarded-for") ?? "unknown";
   const { success } = await ratelimit.limit(ip);
 
-  console.log("experimental_attachments", experimental_attachments);
-  console.log(attachmentsToParts(experimental_attachments));
+  const input = formData.get("content") as string;
+  const attachment = formData.get("attachment") as File;
+
+  const content = await convertToPrompt(input, attachment);
 
   const aiState = getMutableAIState<typeof AI>();
 
@@ -118,12 +142,7 @@ export async function submitUserMessage({
     messages: [
       ...aiState.get().messages.map((message: any) => ({
         role: message.role,
-        content: experimental_attachments
-          ? [
-              { type: "text", text: content },
-              ...attachmentsToParts(experimental_attachments),
-            ]
-          : content,
+        content: content,
         name: message.name,
       })),
     ],

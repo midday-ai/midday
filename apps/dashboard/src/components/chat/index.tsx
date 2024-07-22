@@ -9,6 +9,7 @@ import { Textarea } from "@midday/ui/textarea";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useEffect, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { ChatEmpty } from "./chat-empty";
 import { ChatExamples } from "./chat-examples";
 import { ChatFooter } from "./chat-footer";
@@ -28,8 +29,23 @@ export function Chat({
   const { formRef, onKeyDown } = useEnterSubmit();
   const ref = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [files, setFiles] = useState<FileList | undefined>(undefined);
+  const [attachment, setAttachment] = useState<File | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const onDrop = (acceptedFiles) => {
+    setAttachment(acceptedFiles.at(0));
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+
+    maxSize: 3000000, // 3MB
+    accept: {
+      // "image/png": [".png"],
+      // "image/jpeg": [".jpg", ".jpeg"],
+      "application/pdf": [".pdf"],
+    },
+  });
 
   const { message } = useAssistantStore();
 
@@ -40,25 +56,27 @@ export function Chat({
       return null;
     }
 
+    const formData = new FormData();
+
+    if (attachment) {
+      formData.append("attachment", attachment);
+    }
+
+    formData.append("content", value);
+
     setInput("");
     scrollToBottom();
-
-    console.log(files);
 
     submitMessage((message: ClientMessage[]) => [
       ...message,
       {
         id: nanoid(),
         role: "user",
-        experimental_attachments: files,
         display: <UserMessage>{value}</UserMessage>,
       },
     ]);
 
-    const responseMessage = await submitUserMessage({
-      content: value,
-      experimental_attachments: files,
-    });
+    const responseMessage = await submitUserMessage(formData);
 
     submitMessage((messages: ClientMessage[]) => [
       ...messages,
@@ -86,11 +104,20 @@ export function Chat({
   const showExamples = messages.length === 0 && !input;
 
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      {...getRootProps({
+        onClick: (event) => event.stopPropagation(),
+      })}
+    >
       <ScrollArea className="todesktop:h-[335px] md:h-[335px]" ref={scrollRef}>
         <div ref={messagesRef}>
           {messages.length ? (
             <ChatList messages={messages} className="p-4 pb-8" />
+          ) : isDragActive ? (
+            <div className="flex items-center justify-center mt-[150px]">
+              <p className="text-xs">Drop your files upload</p>
+            </div>
           ) : (
             <ChatEmpty firstName={user?.full_name.split(" ").at(0)} />
           )}
@@ -100,14 +127,20 @@ export function Chat({
       </ScrollArea>
 
       <div className="fixed bottom-[1px] left-[1px] right-[1px] todesktop:h-[88px] md:h-[88px] bg-background border-border border-t-[1px]">
-        {showExamples && <ChatExamples onSubmit={onSubmit} />}
+        {!isDragActive && showExamples && !attachment && (
+          <ChatExamples onSubmit={onSubmit} />
+        )}
+
+        <div className="flex flex-row gap-2 fixed right-2 bottom-28 items-end text-xs">
+          {attachment?.name}
+        </div>
 
         <form
           ref={formRef}
           onSubmit={(evt) => {
             evt.preventDefault();
             onSubmit(input);
-            setFiles(undefined);
+            setAttachment(undefined);
 
             if (fileInputRef.current) {
               fileInputRef.current.value = "";
@@ -117,18 +150,14 @@ export function Chat({
           <input
             type="file"
             className="hidden"
-            onChange={(event) => {
-              if (event.target.files) {
-                setFiles(event.target.files);
-              }
-            }}
-            multiple
             ref={fileInputRef}
+            {...getInputProps()}
           />
+
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-3 top-[6px] rounded-full"
+            className="absolute size-7 left-3 top-[9px] rounded-full"
             onClick={() => fileInputRef.current?.click()}
           >
             <Icons.Add />
@@ -142,7 +171,7 @@ export function Chat({
             autoComplete="off"
             autoCorrect="off"
             value={input}
-            className="h-12 min-h-12 pt-3 pl-14 resize-none border-none"
+            className="h-12 min-h-12 pt-3 pl-12 resize-none border-none"
             placeholder="Ask Midday a question..."
             onKeyDown={onKeyDown}
             onChange={(evt) => {

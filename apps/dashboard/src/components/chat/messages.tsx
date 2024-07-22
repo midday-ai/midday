@@ -51,7 +51,7 @@ export function BotMessage({
           <ChatAvatar role="assistant" />
         </div>
 
-        <div className="ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono">
+        <div className="ml-4 flex-1 overflow-hidden pl-2 text-xs font-mono">
           <MemoizedReactMarkdown
             className="prose break-words dark:prose-invert leading-relaxed prose-pre:p-0 mb-2 last:mb-0 text-xs font-mono"
             components={{
@@ -59,14 +59,10 @@ export function BotMessage({
                 return children;
               },
               ol({ children }) {
-                return (
-                  <ol className="list-disc ml-3 leading-none">{children}</ol>
-                );
+                return <ol className="">{children}</ol>;
               },
               ul({ children }) {
-                return (
-                  <ul className="list-disc ml-3 leading-none">{children}</ul>
-                );
+                return <ul className="">{children}</ul>;
               },
             }}
           >
@@ -97,7 +93,7 @@ export function BotCard({
         <div
           className={cn(
             "ml-4 flex-1 space-y-2 overflow-hidden pl-2 text-xs font-mono leading-relaxed",
-            className
+            className,
           )}
         >
           {children}
