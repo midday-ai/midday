@@ -40,15 +40,10 @@
     "@upstash/ratelimit": "^2.0.1",
     "@vercel/speed-insights": "^1.0.12",
     "@zip.js/zip.js": "2.7.47",
-    "ai": "^3.2.32",
+    "ai": "^3.2.33",
     "change-case": "^5.4.4",
-<<<<<<< HEAD
     "dub": "^0.29.18",
-    "framer-motion": "^11.3.2",
-=======
-    "dub": "^0.34.0",
     "framer-motion": "^11.3.8",
->>>>>>> 95422695 (Update dependencies)
     "geist": "^1.3.1",
     "headless-currency-input": "^1.1.0",
     "loops": "1.0.1",
@@ -56,7 +51,7 @@
     "ms": "^2.1.3",
     "next": "^14.2.5",
     "next-international": "1.2.4",
-    "next-safe-action": "^7.4.1",
+    "next-safe-action": "^7.4.2",
     "next-themes": "^0.3.0",
     "nuqs": "^1.17.5",
     "react": "18.3.1",
@@ -81,7 +76,7 @@
   "devDependencies": {
     "@midday/tsconfig": "workspace:*",
     "@next/bundle-analyzer": "^14.2.5",
-    "@t3-oss/env-nextjs": "^0.10.1",
+    "@t3-oss/env-nextjs": "^0.11.0",
     "@todesktop/tailwind-variants": "^1.0.1",
     "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",

@@ -21,7 +21,33 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
+import { ReconnectProvider } from "./reconnect-provider";
 import { SyncTransactions } from "./sync-transactions";
+
+interface BankConnectionProps {
+  connection: {
+    id: string;
+    name: string;
+    logo_url: string;
+    provider: string;
+    expires_at?: string;
+    enrollment_id: string | null;
+    institution_id: string;
+    last_accessed?: string;
+    access_token: string | null;
+    error?: string;
+    error_code?: string;
+    accounts: Array<{
+      id: string;
+      name: string;
+      enabled: boolean;
+      manual: boolean;
+      currency: string;
+      balance?: number;
+      type: string;
+    }>;
+  };
+}
 
 function ConnectionState({ connection, isSyncing }) {
   const { show, expired } = connectionStatus(connection);
@@ -104,7 +130,7 @@ function ConnectionState({ connection, isSyncing }) {
   return <div className="text-xs font-normal">Never accessed</div>;
 }
 
-export function BankConnection({ connection }) {
+export function BankConnection({ connection }: BankConnectionProps) {
   const [eventId, setEventId] = useState<string>();
   const [isSyncing, setSyncing] = useState(false);
 
@@ -151,7 +177,13 @@ export function BankConnection({ connection }) {
           </div>
         </AccordionTrigger>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex space-x-2">
+          <ReconnectProvider
+            provider={connection.provider}
+            enrollmentId={connection.enrollmentId}
+            institutionId={connection.institution_id}
+            accessToken={connection.access_token}
+          />
           <SyncTransactions
             eventId={eventId}
             isSyncing={isSyncing}

@@ -40,14 +40,8 @@ function SearchSkeleton() {
         <div className="flex items-center space-x-4" key={index.toString()}>
           <Skeleton className="h-9 w-9 rounded-full" />
           <div className="flex flex-col space-y-1">
-            <Skeleton
-              className="h-2 rounded-none"
-              style={{ width: Math.floor(Math.random() * (160 - 80 + 1)) + 80 }}
-            />
-            <Skeleton
-              className="h-2 rounded-none"
-              style={{ width: Math.floor(Math.random() * (20 - 40 + 1)) + 40 }}
-            />
+            <Skeleton className="h-2 rounded-none w-[140px]" />
+            <Skeleton className="h-2 rounded-none w-[40px]" />
           </div>
         </div>
       ))}
