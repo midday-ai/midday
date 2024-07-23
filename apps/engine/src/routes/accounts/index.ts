@@ -100,6 +100,8 @@ const balanceRoute = createRoute({
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
 
+  console.log("KV", c.env.KV);
+
   const { provider, accessToken, institutionId, id, countryCode } =
     c.req.valid("query");
 

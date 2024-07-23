@@ -2,6 +2,7 @@
 
 import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
+import { logger } from "@/utils/logger";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -10,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useToast } from "@midday/ui/use-toast";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useScript } from "@uidotdev/usehooks";
 import { useAction } from "next-safe-action/hooks";
@@ -30,7 +32,17 @@ export function ReconnectProvider({
   institutionId,
   accessToken,
 }: Props) {
-  const createGoCardLessLink = useAction(createGoCardLessLinkAction);
+  const { toast } = useToast();
+
+  const createGoCardLessLink = useAction(createGoCardLessLinkAction, {
+    onError: () => {
+      toast({
+        duration: 2500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    },
+  });
   const { theme } = useTheme();
 
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
