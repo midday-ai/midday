@@ -6,16 +6,10 @@ import { BankConnectButton } from "./bank-connect-button";
 type Props = {
   id: string;
   availableHistory: number;
-  countryCode: string;
   onSelect: () => void;
 };
 
-export function GoCardLessConnect({
-  onSelect,
-  id,
-  availableHistory,
-  countryCode,
-}: Props) {
+export function GoCardLessConnect({ onSelect, id, availableHistory }: Props) {
   const createGoCardLessLink = useAction(createGoCardLessLinkAction);
 
   const handleOnSelect = () => {
@@ -24,7 +18,6 @@ export function GoCardLessConnect({
     createGoCardLessLink.execute({
       institutionId: id,
       availableHistory: availableHistory,
-      countryCode,
       redirectBase: isDesktopApp() ? "midday://" : window.location.origin,
     });
   };

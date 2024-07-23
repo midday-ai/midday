@@ -350,7 +350,6 @@ export const manualSyncTransactionsSchema = z.object({
 export const createGoCardLessLinkSchema = z.object({
   institutionId: z.string(),
   step: z.string().optional(),
-  countryCode: z.string().optional(),
   availableHistory: z.number(),
   redirectBase: z.string(),
 });

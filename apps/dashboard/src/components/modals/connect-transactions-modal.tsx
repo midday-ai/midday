@@ -54,7 +54,6 @@ type SearchResultProps = {
   name: string;
   logo: string | null;
   provider: string;
-  countryCode: string;
   availableHistory: number;
   openPlaid: () => void;
 };
@@ -65,7 +64,6 @@ function SearchResult({
   logo,
   provider,
   availableHistory,
-  countryCode,
   openPlaid,
 }: SearchResultProps) {
   return (
@@ -88,7 +86,6 @@ function SearchResult({
         provider={provider}
         openPlaid={openPlaid}
         availableHistory={availableHistory}
-        countryCode={countryCode}
       />
     </div>
   );
@@ -290,7 +287,6 @@ export function ConnectTransactionsModal({
                         name={institution.name}
                         logo={institution.logo}
                         provider={institution.provider}
-                        countryCode={countryCode}
                         availableHistory={
                           institution.available_history
                             ? +institution.available_history

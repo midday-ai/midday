@@ -9,7 +9,6 @@ type Props = {
   id: string;
   provider: string;
   availableHistory: number;
-  countryCode: string;
   openPlaid: () => void;
 };
 
@@ -18,7 +17,6 @@ export function ConnectBankProvider({
   provider,
   openPlaid,
   availableHistory,
-  countryCode,
 }: Props) {
   const { setParams } = useConnectParams();
   const updateInstitutionUsage = useAction(updateInstitutionUsageAction);
@@ -46,7 +44,6 @@ export function ConnectBankProvider({
       return (
         <GoCardLessConnect
           id={id}
-          countryCode={countryCode}
           availableHistory={availableHistory}
           onSelect={() => {
             updateUsage();

@@ -17,7 +17,6 @@ export const createGoCardLessLinkAction = authActionClient
       parsedInput: {
         institutionId,
         availableHistory,
-        countryCode,
         redirectBase,
         step = "account",
       },
@@ -28,10 +27,6 @@ export const createGoCardLessLinkAction = authActionClient
 
       redirectTo.searchParams.append("step", step);
       redirectTo.searchParams.append("provider", "gocardless");
-
-      if (countryCode) {
-        redirectTo.searchParams.append("countryCode", countryCode);
-      }
 
       const { data: agreementData } =
         await engine.auth.gocardless.agreement.create({
