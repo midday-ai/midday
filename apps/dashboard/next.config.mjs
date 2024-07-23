@@ -27,10 +27,10 @@ const config = {
   },
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
-    outputFileTracingExcludes: { "/**": ["**canvas**"] },
+    // outputFileTracingExcludes: { "/**": ["**canvas**"] },
   },
   webpack: (config, { webpack }) => {
-    config.externals = [...config.externals, "canvas"];
+    // config.externals = [...config.externals, "canvas"];
 
     config.plugins.push(
       new webpack.DefinePlugin({
@@ -60,8 +60,8 @@ const config = {
 };
 
 export default withSentryConfig(withBundleAnalyzer(config), {
-  org: "midday",
-  project: "dashboard",
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
   hideSourceMaps: true,
