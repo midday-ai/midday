@@ -30,6 +30,34 @@ export const metadata: Metadata = {
       "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 800,
+        height: 600,
+      },
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 1800,
+        height: 1600,
+      },
+    ],
+  },
+  twitter: {
+    title: "Midday | Run your business smarter",
+    description: "This is my portfolio.",
+    images: [
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 800,
+        height: 600,
+      },
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 1800,
+        height: 1600,
+      },
+    ],
   },
   robots: {
     index: true,
@@ -54,7 +82,7 @@ export default function Layout({ children }: { children: ReactElement }) {
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "bg-[#0C0C0C] overflow-x-hidden dark antialiased"
+          "bg-[#0C0C0C] overflow-x-hidden dark antialiased",
         )}
       >
         <Header />

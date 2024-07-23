@@ -81,7 +81,7 @@ export function SectionVideo() {
           onClick={togglePlay}
           src="https://customer-oh6t55xltlgrfayh.cloudflarestream.com/306702a5d5efbba0e9bcdd7cb17e9c5a/manifest/video.m3u8"
           autoPlay={false}
-          poster="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/poster.webp"
+          poster="https://cdn.midday.ai/poster.webp"
           playerRef={playerRef}
           className="w-full"
           muted={isMuted}

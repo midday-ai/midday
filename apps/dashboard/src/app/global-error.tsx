@@ -2,10 +2,9 @@
 
 import { Button } from "@midday/ui/button";
 import * as Sentry from "@sentry/nextjs";
-import Link from "next/link";
 import { useEffect } from "react";
 
-export default function ErrorPage({
+export default function GlobalError({
   reset,
   error,
 }: { reset: () => void; error: Error & { digest?: string } }) {
@@ -29,9 +28,9 @@ export default function ErrorPage({
             Try again
           </Button>
 
-          <Link href="/account/support">
+          <a href="https://midday.ai/support" target="_blank" rel="noreferrer">
             <Button>Contact us</Button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>

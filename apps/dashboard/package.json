@@ -29,6 +29,7 @@
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
     "@novu/headless": "^0.24.2",
+    "@sentry/nextjs": "^8",
     "@tanstack/react-table": "^8.19.2",
     "@team-plain/typescript-sdk": "4.5.0",
     "@todesktop/client-active-win": "^0.15.0",

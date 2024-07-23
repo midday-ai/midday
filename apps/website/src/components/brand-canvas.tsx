@@ -97,9 +97,7 @@ const assets = [
 const repeated = [...assets, ...assets, ...assets, ...assets, ...assets];
 
 export function BrandCanvas() {
-  const [value, setValue] = useState(
-    "https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/all.zip"
-  );
+  const [value, setValue] = useState("https://cdn.midday.ai/all.zip");
   const ref = useRef();
   const { events } = useDraggable(ref);
 
@@ -129,16 +127,16 @@ export function BrandCanvas() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/all.zip">
+                <SelectItem value="https://cdn.midday.ai/all.zip">
                   All
                 </SelectItem>
-                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/videos.zip">
+                <SelectItem value="https://cdn.midday.ai/videos.zip">
                   Videos
                 </SelectItem>
-                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/founders.zip">
+                <SelectItem value="https://cdn.midday.ai/founders.zip">
                   Founders
                 </SelectItem>
-                <SelectItem value="https://pub-842eaa8107354d468d572ebfca43b6e3.r2.dev/screens.zip">
+                <SelectItem value="https://cdn.midday.ai/screens.zip">
                   Screens
                 </SelectItem>
               </SelectGroup>

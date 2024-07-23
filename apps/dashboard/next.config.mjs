@@ -1,5 +1,7 @@
 import "./src/env.mjs";
+
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -26,18 +28,20 @@ const config = {
   },
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
+    outputFileTracingExcludes: {
+      "*": ["node_modules/canvas*"],
+    },
   },
-  webpack: (config) => {
-    /**
-     * Critical: prevents " ⨯ ./node_modules/canvas/build/Release/canvas.node
-     * Module parse failed: Unexpected character '�' (1:0)" error
-     */
-    config.resolve.alias.canvas = false;
-
-    // You may not need this, it's just to support moduleResolution: 'node16'
-    config.resolve.extensionAlias = {
-      ".js": [".js", ".ts", ".tsx"],
-    };
+  webpack: (config, { webpack }) => {
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        __SENTRY_DEBUG__: false,
+        __SENTRY_TRACING__: false,
+        __RRWEB_EXCLUDE_IFRAME__: true,
+        __RRWEB_EXCLUDE_SHADOW_DOM__: true,
+        __SENTRY_EXCLUDE_REPLAY_WORKER__: true,
+      }),
+    );
 
     return config;
   },
@@ -56,4 +60,11 @@ const config = {
   },
 };
 
-export default withBundleAnalyzer(config);
+export default withSentryConfig(withBundleAnalyzer(config), {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+});
