@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import "./src/env.mjs";
 import bundleAnalyzer from "@next/bundle-analyzer";
 
@@ -56,4 +57,12 @@ const config = {
   },
 };
 
-export default withBundleAnalyzer(config);
+export default withSentryConfig(withBundleAnalyzer(config), {
+  org: "midday",
+  project: "dashboard",
+  silent: !process.env.CI,
+  widenClientFileUpload: true,
+  hideSourceMaps: true,
+  disableLogger: true,
+  automaticVercelMonitors: true,
+});
