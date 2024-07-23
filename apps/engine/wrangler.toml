@@ -3,7 +3,6 @@ compatibility_date = "2023-12-01"
 workers_dev = false
 logpush = true
 route = { pattern = "engine.midday.ai/*", zone_name = "midday.ai" }
-tail_consumers = [{ service = "engine-tail" }]
 
 mtls_certificates = [
   { binding = "TELLER_CERT", certificate_id = "76fdbac8-e96b-4a1e-922c-e54891b7371c" }
