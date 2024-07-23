@@ -8,6 +8,7 @@ import {
   type ItemPublicTokenExchangeResponse,
   type LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
+  PlaidEnvironments,
   Products,
   type Transaction,
 } from "plaid";
@@ -37,6 +38,7 @@ export class PlaidApi {
     this.#clientSecret = params.envs.PLAID_SECRET;
 
     const configuration = new Configuration({
+      basePath: PlaidEnvironments.Production,
       baseOptions: {
         headers: {
           "PLAID-CLIENT-ID": this.#clientId,
