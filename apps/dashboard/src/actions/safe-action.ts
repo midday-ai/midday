@@ -18,8 +18,8 @@ export const actionClient = createSafeActionClient({
   defineMetadataSchema() {
     return z
       .object({
-        event: z.string().optional(),
-        channel: z.string().optional(),
+        event: z.string(),
+        channel: z.string(),
       })
       .optional();
   },
