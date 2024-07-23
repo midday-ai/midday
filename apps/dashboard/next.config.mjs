@@ -1,6 +1,7 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import "./src/env.mjs";
+
 import bundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
@@ -32,8 +33,6 @@ const config = {
     },
   },
   webpack: (config, { webpack }) => {
-    // config.externals = [...config.externals, "canvas"];
-
     config.plugins.push(
       new webpack.DefinePlugin({
         __SENTRY_DEBUG__: false,
