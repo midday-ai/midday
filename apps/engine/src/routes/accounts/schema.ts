@@ -7,7 +7,7 @@ export const AccountsParamsSchema = z.object({
     .string()
     .optional()
     .openapi({
-      description: "GoCardLess account id",
+      description: "GoCardLess reference id",
       param: {
         name: "id",
         in: "query",

@@ -68,7 +68,7 @@ app.openapi(indexRoute, async (c) => {
     {
       requestId: c.get("requestId"),
       message: "Service unhelthy",
-      code: 400,
+      code: "bad_request",
     },
     400,
   );

@@ -6,7 +6,6 @@ export type Bindings = {
   GOCARDLESS_SECRET_ID: string;
   PLAID_CLIENT_ID: string;
   PLAID_SECRET: string;
-  PLAID_ENVIRONMENT: string;
   API_SECRET_KEY: string;
   UPSTASH_REDIS_REST_URL: string;
   UPSTASH_REDIS_REST_TOKEN: string;

@@ -131,7 +131,7 @@ app.openapi(indexRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
@@ -170,7 +170,7 @@ app.openapi(balanceRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
@@ -209,7 +209,7 @@ app.openapi(deleteRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );

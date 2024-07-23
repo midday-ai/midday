@@ -213,7 +213,7 @@ app.openapi(linkPlaidRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
@@ -245,7 +245,7 @@ app.openapi(exchangePlaidRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
@@ -284,7 +284,7 @@ app.openapi(linkGoCardLessRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
@@ -322,7 +322,7 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
@@ -360,7 +360,7 @@ app.openapi(agreementGoCardLessRoute, async (c) => {
       {
         requestId: c.get("requestId"),
         message,
-        code: 400,
+        code: "bad_request",
       },
       400,
     );
