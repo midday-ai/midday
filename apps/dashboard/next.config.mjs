@@ -64,5 +64,4 @@ export default withSentryConfig(withBundleAnalyzer(config), {
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,
-  automaticVercelMonitors: true,
 });
