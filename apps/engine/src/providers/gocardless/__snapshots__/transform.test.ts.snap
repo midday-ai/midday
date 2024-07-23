@@ -19,17 +19,20 @@ exports[`Transform income transaction 1`] = `
 
 exports[`Transform accounts 1`] = `
 {
+  "balance": {
+    "amount": 1942682.86,
+    "currency": "SEK",
+  },
   "currency": "SEK",
   "enrollment_id": null,
   "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
   "institution": {
     "id": "PLEO_PLEODK00",
-    "logo": "https://cdn-logos.gocardless.com/ais/PLEO_PLEODK00.png",
+    "logo": "https://cdn-engine.midday.ai/PLEO_PLEODK00.png",
     "name": "Pleo",
     "provider": "gocardless",
   },
   "name": "Pleo Account",
-  "provider": "gocardless",
   "type": "depository",
 }
 `;

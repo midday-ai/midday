@@ -1,12 +1,7 @@
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
-import {
-  getFileExtension,
-  getLogoURL,
-  getPopularity,
-  getTellerData,
-  matchLogoURL,
-} from "./utils";
+import { getFileExtension, getLogoURL } from "@/utils/logo";
+import { getPopularity, getTellerData, matchLogoURL } from "./utils";
 
 export async function getGoCardLessInstitutions() {
   const provider = new GoCardLessApi({

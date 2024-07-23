@@ -1,4 +1,4 @@
-import type { Providers } from "../types";
+import type { Balance, Providers } from "../types";
 
 export type Transaction = {
   transactionAmount: { amount: string; currency: string };
@@ -53,6 +53,7 @@ export type GetAccessTokenResponse = {
 };
 
 export type GetInstitutionsResponse = Institution[];
+export type GetInstitutionResponse = Institution;
 
 export type PostRequisitionsRequest = {
   institutionId: string;
@@ -118,7 +119,6 @@ export type GetAccountDetailsResponse = GetAccountResponse & AccountDetails;
 
 export type GetAccountsRequest = {
   id: string;
-  countryCode: string;
 };
 
 export type Requestion = {
@@ -152,6 +152,11 @@ export type DeleteRequistionResponse = {
   status_code: number;
 };
 
+export type GetBalanceRequest = {
+  amount: string;
+  currency: string;
+};
+
 export type GetAccountsResponse = {
   id: string;
   created: string;
@@ -161,7 +166,8 @@ export type GetAccountsResponse = {
   status: string;
   owner_name?: string;
   account: Account;
-  institution?: Institution;
+  balance?: GetBalanceRequest;
+  institution: Institution;
 }[];
 
 export type GetTransactionsRequest = {
@@ -194,7 +200,6 @@ export type TransformAccount = GetAccountsResponse[0];
 
 export type TransformAccountName = {
   name: string;
-  institution?: Institution;
   product: string;
 };
 
@@ -211,4 +216,4 @@ export type GetAccountBalanceResponse = {
   balances: AccountBalance[];
 };
 
-export type TransformAccountBalance = AccountBalance["balanceAmount"];
+export type TransformAccountBalance = GetBalanceRequest;

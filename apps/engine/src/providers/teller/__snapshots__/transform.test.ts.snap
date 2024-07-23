@@ -87,17 +87,20 @@ exports[`Transform type transfer 1`] = `
 
 exports[`Transform accounts 1`] = `
 {
+  "balance": {
+    "amount": 2011100,
+    "currency": "USD",
+  },
   "currency": "USD",
   "enrollment_id": "enr_os557c8pck2deoskak000",
   "id": "acc_os557c2mge29shubl2000",
   "institution": {
     "id": "mercury",
-    "logo": "https://teller.io/images/banks/mercury.jpg",
+    "logo": "https://cdn-engine.midday.ai/mercury.jpg",
     "name": "Mercury",
     "provider": "teller",
   },
   "name": "Platinum Card",
-  "provider": "teller",
   "type": "credit",
 }
 `;

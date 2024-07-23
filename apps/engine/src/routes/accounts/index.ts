@@ -100,10 +100,7 @@ const balanceRoute = createRoute({
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
 
-  console.log("KV", c.env.KV);
-
-  const { provider, accessToken, institutionId, id, countryCode } =
-    c.req.valid("query");
+  const { provider, accessToken, institutionId, id } = c.req.valid("query");
 
   const api = new Provider({
     provider,
@@ -115,7 +112,6 @@ app.openapi(indexRoute, async (c) => {
   try {
     const data = await api.getAccounts({
       id,
-      countryCode,
       accessToken,
       institutionId,
     });

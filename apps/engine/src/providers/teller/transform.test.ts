@@ -174,6 +174,10 @@ test("Transform accounts", () => {
         name: "Mercury",
         id: "mercury",
       },
+      balance: {
+        currency: "USD",
+        amount: 2011100,
+      },
       id: "acc_os557c2mge29shubl2000",
       enrollment_id: "enr_os557c8pck2deoskak000",
       currency: "USD",

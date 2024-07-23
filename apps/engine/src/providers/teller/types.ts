@@ -122,9 +122,11 @@ interface CreditAccount extends BaseAccount {
 
 export type Account = DepositoryAccount | CreditAccount;
 
-export type GetAccountsResponse = Account[];
+export type TransformAccount = Account & {
+  balance: GetAccountBalanceResponse;
+};
 
-export type TransformAccount = Account;
+export type GetAccountsResponse = TransformAccount[];
 
 export interface GetAccountBalanceRequest extends AuthenticatedRequest {
   accountId: string;

@@ -17,17 +17,6 @@ export const AccountsParamsSchema = z.object({
   provider: Providers.openapi({
     example: Providers.Enum.teller,
   }),
-  countryCode: z
-    .string()
-    .optional()
-    .openapi({
-      description: "GoCardLess country code",
-      param: {
-        name: "countryCode",
-        in: "query",
-      },
-      example: "SE",
-    }),
   accessToken: z
     .string()
     .optional()
@@ -65,13 +54,18 @@ export const AccountSchema = z
       .openapi({
         example: "depository",
       }),
+    balance: z.object({
+      amount: z.number().openapi({
+        example: 100.0,
+      }),
+      currency: z.string().openapi({
+        example: "USD",
+      }),
+    }),
     currency: z.string().openapi({
       example: "USD",
     }),
-    provider: Providers.openapi({
-      example: Providers.Enum.teller,
-    }),
-    institution: InstitutionSchema.nullable(),
+    institution: InstitutionSchema,
     enrollment_id: z
       .string()
       .openapi({

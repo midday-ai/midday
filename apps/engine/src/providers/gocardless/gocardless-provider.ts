@@ -35,15 +35,12 @@ export class GoCardLessProvider implements Provider {
     return response.map(transformTransaction);
   }
 
-  async getAccounts({ id, countryCode }: GetAccountsRequest) {
-    if (!countryCode || !id) {
+  async getAccounts({ id }: GetAccountsRequest) {
+    if (!id) {
       throw Error("Missing params");
     }
 
-    const response = await this.#api.getAccounts({
-      id,
-      countryCode,
-    });
+    const response = await this.#api.getAccounts({ id });
 
     return response.map(transformAccount);
   }

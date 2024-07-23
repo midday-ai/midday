@@ -90,13 +90,12 @@ export class PlaidApi {
     });
 
     const institution = await this.institutionsGetById(institutionId);
+
     return accounts.data.accounts.map((account) => ({
       ...account,
       institution: {
         id: institution.data.institution.institution_id,
         name: institution.data.institution.name,
-        // NOTE: Currently not in use, base64 and usually unavailable
-        logo: institution.data.institution?.logo ?? null,
       },
     }));
   }

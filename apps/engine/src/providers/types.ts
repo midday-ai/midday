@@ -42,9 +42,9 @@ export type Account = {
   id: string;
   name: string;
   currency: string;
-  provider: Providers;
-  institution: Institution | null;
   type: AccountType;
+  institution: Institution;
+  balance: Balance;
   enrollment_id: string | null; // Teller
 };
 
@@ -62,7 +62,6 @@ export type GetTransactionsRequest = {
 
 export type GetAccountsRequest = {
   id?: string; // GoCardLess
-  countryCode?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
   institutionId?: string; // Plaid
 };

@@ -1,5 +1,6 @@
 import { Providers } from "@/common/schema";
 import { getType } from "@/utils/account";
+import { getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -142,24 +143,19 @@ export const transformAccount = ({
   id,
   name,
   currency,
-  institution,
   enrollment_id,
   type,
+  institution,
+  balance,
 }: TransformAccount): BaseAccount => {
   return {
     id,
     name,
     currency,
-    institution: institution
-      ? {
-          ...institution,
-          logo: `https://teller.io/images/banks/${institution.id}.jpg`,
-          provider: Providers.Enum.teller,
-        }
-      : null,
     enrollment_id: enrollment_id,
-    provider: Providers.Enum.teller,
+    institution: transformInstitution(institution),
     type: getType(type),
+    balance: transformAccountBalance(balance),
   };
 };
 
@@ -173,6 +169,6 @@ export const transformAccountBalance = (
 export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.id,
   name: institution.name,
-  logo: `https://teller.io/images/banks/${institution.id}.jpg`,
+  logo: getLogoURL(institution.id),
   provider: Providers.Enum.teller,
 });

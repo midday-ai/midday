@@ -1,13 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-
-export function getLogoURL(id: string, ext?: string) {
-  return `https://cdn-engine.midday.ai/${id}.${ext || "jpg"}`;
-}
-
-export function getFileExtension(url: string) {
-  return url.split(".").pop();
-}
+import { getLogoURL } from "@/utils/logo";
 
 const PRIORITY_INSTITUTIONS = [
   // US
