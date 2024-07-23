@@ -14,7 +14,6 @@ export interface Chat extends Record<string, unknown> {
 }
 
 export type SettingsResponse = {
-  provider: "openai" | "mistralai";
   enabled: boolean;
 };
 

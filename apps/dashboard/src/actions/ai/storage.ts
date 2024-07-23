@@ -1,7 +1,6 @@
 "use server";
 
 import { client as RedisClient } from "@midday/kv";
-import { getCountryCode, isEUCountry } from "@midday/location";
 import { getSession } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
@@ -12,7 +11,6 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
 
   const defaultSettings: SettingsResponse = {
     enabled: true,
-    provider: isEUCountry(getCountryCode()) ? "mistralai" : "openai",
   };
 
   const userId = session?.user.id;
@@ -27,7 +25,6 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
 type SetAassistant = {
   settings: SettingsResponse;
   params: {
-    provider?: "openai" | "mistralai" | undefined;
     enabled?: boolean | undefined;
   };
 };
