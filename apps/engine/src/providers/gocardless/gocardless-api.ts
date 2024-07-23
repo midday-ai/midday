@@ -198,7 +198,7 @@ export class GoCardLessApi {
       {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
-        access_valid_for_days: getAccessValidForDays(institutionId),
+        access_valid_for_days: getAccessValidForDays({ institutionId }),
         max_historical_days: maxHistoricalDays,
       },
     );
