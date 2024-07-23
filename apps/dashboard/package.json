@@ -31,7 +31,7 @@
     "@novu/headless": "^0.24.2",
     "@sentry/nextjs": "^8",
     "@tanstack/react-table": "^8.19.3",
-    "@team-plain/typescript-sdk": "4.6.1",
+    "@team-plain/typescript-sdk": "4.7.0",
     "@todesktop/client-active-win": "^0.15.0",
     "@todesktop/client-core": "^1.7.0",
     "@todesktop/runtime": "^1.6.3",
@@ -66,7 +66,7 @@
     "react-plaid-link": "^3.5.2",
     "react-use-draggable-scroll": "^0.4.7",
     "recharts": "^2.12.7",
-    "resend": "^3.4.0",
+    "resend": "^3.5.0",
     "sharp": "^0.33.4",
     "tus-js-client": "^4.1.0",
     "use-long-press": "^3.2.0",
@@ -81,6 +81,6 @@
     "@types/node": "^20.14.11",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   }
 }

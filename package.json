@@ -25,7 +25,7 @@
     "@biomejs/biome": "1.8.3",
     "@manypkg/cli": "^0.21.4",
     "turbo": "2.0.9",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   },
   "packageManager": "bun@1.1.16",
   "resolutions": {

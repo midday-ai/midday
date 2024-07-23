@@ -19,7 +19,7 @@
     "@openstatus/react": "^0.0.3",
     "@splinetool/react-spline": "4.0.0",
     "@splinetool/runtime": "1.9.2",
-    "@team-plain/typescript-sdk": "4.6.1",
+    "@team-plain/typescript-sdk": "4.7.0",
     "@uidotdev/usehooks": "^2.4.1",
     "d3": "^7.9.0",
     "date-fns": "^3.6.0",

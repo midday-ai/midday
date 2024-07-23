@@ -20,7 +20,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "storybook": "^8.2.5",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   },
   "exports": {
     "./accordion": "./src/components/accordion.tsx",
@@ -107,9 +107,9 @@
     "embla-carousel-react": "^8.1.7",
     "input-otp": "^1.2.4",
     "jsonfile": "^6.1.0",
-    "lucide-react": "^0.412.0",
+    "lucide-react": "^0.414.0",
     "postcss": "^8.4.39",
-    "react-day-picker": "^9.0.1",
+    "react-day-picker": "^9.0.3",
     "react-icons": "^5.2.1",
     "storybook-dark-mode": "^4.0.2",
     "tailwind-merge": "2.4.0",
