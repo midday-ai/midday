@@ -10,9 +10,7 @@ export const assistantSettingsAction = authActionClient
   .metadata({
     name: "assistant-settings",
   })
-  .action(async ({ parsedInput }) => {
-    const params = parsedInput;
-
+  .action(async ({ parsedInput: params }) => {
     const settings = await getAssistantSettings();
     await setAssistantSettings({ settings, params });
 
