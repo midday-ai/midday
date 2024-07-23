@@ -33,6 +33,7 @@ export const env = createEnv({
     ENGINE_API_ENDPOINT: z.string(),
     ENGINE_API_SECRET: z.string(),
     WEBHOOK_SECRET_KEY: z.string(),
+    SENTRY_DSN: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
