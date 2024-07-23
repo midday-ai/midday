@@ -8,8 +8,11 @@ import { declineInviteSchema } from "./schema";
 export const declineInviteAction = authActionClient
   .schema(declineInviteSchema)
   .metadata({
-    event: LogEvents.DeclineInvite.name,
-    channel: LogEvents.DeclineInvite.channel,
+    name: "decline-invite",
+    track: {
+      event: LogEvents.DeclineInvite.name,
+      channel: LogEvents.DeclineInvite.channel,
+    },
   })
   .action(
     async ({ parsedInput: { id, revalidatePath }, ctx: { supabase } }) => {

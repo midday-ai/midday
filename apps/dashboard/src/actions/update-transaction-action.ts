@@ -7,6 +7,9 @@ import { updateTransactionSchema } from "./schema";
 
 export const updateTransactionAction = authActionClient
   .schema(updateTransactionSchema)
+  .metadata({
+    name: "update-transaction",
+  })
   .action(
     async ({ parsedInput: { id, ...payload }, ctx: { user, supabase } }) => {
       const { data } = await updateTransaction(supabase, id, payload);

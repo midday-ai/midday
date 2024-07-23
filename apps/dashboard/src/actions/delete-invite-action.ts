@@ -8,8 +8,11 @@ import { deleteInviteSchema } from "./schema";
 export const deleteInviteAction = authActionClient
   .schema(deleteInviteSchema)
   .metadata({
-    event: LogEvents.DeleteInvite.name,
-    channel: LogEvents.DeleteInvite.channel,
+    name: "delete-invite",
+    track: {
+      event: LogEvents.DeleteInvite.name,
+      channel: LogEvents.DeleteInvite.channel,
+    },
   })
   .action(
     async ({ parsedInput: { id, revalidatePath }, ctx: { supabase } }) => {

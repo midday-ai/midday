@@ -10,8 +10,11 @@ import { connectBankAccountSchema } from "./schema";
 export const connectBankAccountAction = authActionClient
   .schema(connectBankAccountSchema)
   .metadata({
-    event: LogEvents.ConnectBankCompleted.name,
-    channel: LogEvents.ConnectBankCompleted.channel,
+    name: "connect-bank-account",
+    track: {
+      event: LogEvents.ConnectBankCompleted.name,
+      channel: LogEvents.ConnectBankCompleted.channel,
+    },
   })
   .action(
     async ({

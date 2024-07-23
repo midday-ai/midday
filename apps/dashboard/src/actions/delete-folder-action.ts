@@ -9,16 +9,19 @@ import { deleteFolderSchema } from "./schema";
 export const deleteFolderAction = authActionClient
   .schema(deleteFolderSchema)
   .metadata({
-    event: LogEvents.DeleteFolder.name,
-    channel: LogEvents.DeleteFolder.channel,
+    name: "delete-folder",
+    track: {
+      event: LogEvents.DeleteFolder.name,
+      channel: LogEvents.DeleteFolder.channel,
+    },
   })
-  .action(async ({ parsedInput: { value }, ctx: { user, supabase } }) => {
+  .action(async ({ parsedInput: { path }, ctx: { user, supabase } }) => {
     await deleteFolder(supabase, {
       bucket: "vault",
-      path: [user.team_id, ...value.path],
+      path: [user.team_id, ...path],
     });
 
     revalidateTag(`vault_${user.team_id}`);
 
-    return value;
+    return;
   });

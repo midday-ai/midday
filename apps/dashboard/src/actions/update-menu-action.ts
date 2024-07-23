@@ -8,6 +8,9 @@ import { updaterMenuSchema } from "./schema";
 
 export const updateMenuAction = authActionClient
   .schema(updaterMenuSchema)
+  .metadata({
+    name: "update-menu",
+  })
   .action(async ({ parsedInput: value }) => {
     cookies().set({
       name: Cookies.MenuConfig,

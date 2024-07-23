@@ -10,8 +10,11 @@ import { changeTeamSchema } from "./schema";
 export const changeTeamAction = authActionClient
   .schema(changeTeamSchema)
   .metadata({
-    event: LogEvents.ChangeTeam.name,
-    channel: LogEvents.ChangeTeam.channel,
+    name: "change-team",
+    track: {
+      event: LogEvents.ChangeTeam.name,
+      channel: LogEvents.ChangeTeam.channel,
+    },
   })
   .action(
     async ({ parsedInput: { teamId, redirectTo }, ctx: { supabase } }) => {

@@ -9,16 +9,19 @@ import { deleteFileSchema } from "./schema";
 export const deleteFileAction = authActionClient
   .schema(deleteFileSchema)
   .metadata({
-    event: LogEvents.DeleteFile.name,
-    channel: LogEvents.DeleteFile.channel,
+    name: "delete-file",
+    track: {
+      event: LogEvents.DeleteFile.name,
+      channel: LogEvents.DeleteFile.channel,
+    },
   })
-  .action(async ({ parsedInput: { value }, ctx: { user, supabase } }) => {
+  .action(async ({ parsedInput: { path, id }, ctx: { user, supabase } }) => {
     await remove(supabase, {
       bucket: "vault",
-      path: [user.team_id, ...value.path],
+      path: [user.team_id, ...path],
     });
 
     revalidateTag(`vault_${user.team_id}`);
 
-    return value;
+    return id;
   });

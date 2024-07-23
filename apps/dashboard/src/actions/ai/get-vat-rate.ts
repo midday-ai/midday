@@ -4,7 +4,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { ChatOpenAI } from "@langchain/openai";
 import { getCountry } from "@midday/location";
 import { z } from "zod";
-import { actionClient } from "../safe-action";
+import { authActionClient } from "../safe-action";
 import { getVatRateSchema } from "../schema";
 
 const model = new ChatOpenAI({
@@ -19,8 +19,11 @@ const vatSchema = z.object({
 
 const modelWithStructuredOutput = model.withStructuredOutput(vatSchema);
 
-export const getVatRateAction = actionClient
+export const getVatRateAction = authActionClient
   .schema(getVatRateSchema)
+  .metadata({
+    name: "get-vat-rate",
+  })
   .action(async ({ parsedInput: { name } }) => {
     const country = getCountry();
 

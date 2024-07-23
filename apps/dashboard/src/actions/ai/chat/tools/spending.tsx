@@ -41,7 +41,7 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
       });
 
       const found = data.find(
-        (c) => category.toLowerCase() === c?.name?.toLowerCase()
+        (c) => category.toLowerCase() === c?.name?.toLowerCase(),
       );
 
       const props = {

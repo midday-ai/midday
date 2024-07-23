@@ -9,6 +9,9 @@ import { changeSpendingPeriodSchema } from "./schema";
 
 export const changeSpendingPeriodAction = authActionClient
   .schema(changeSpendingPeriodSchema)
+  .metadata({
+    name: "change-spending-period",
+  })
   .action(async ({ parsedInput: params, ctx: { user } }) => {
     cookies().set({
       name: Cookies.SpendingPeriod,

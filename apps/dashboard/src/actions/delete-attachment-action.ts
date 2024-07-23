@@ -9,8 +9,11 @@ import { deleteAttachmentSchema } from "./schema";
 export const deleteAttachmentAction = authActionClient
   .schema(deleteAttachmentSchema)
   .metadata({
-    event: LogEvents.DeleteAttachment.name,
-    channel: LogEvents.DeleteAttachment.channel,
+    name: "delete-attachment",
+    track: {
+      event: LogEvents.DeleteAttachment.name,
+      channel: LogEvents.DeleteAttachment.channel,
+    },
   })
   .action(async ({ parsedInput: files, ctx: { user, supabase } }) => {
     const data = await deleteAttachment(supabase, files);

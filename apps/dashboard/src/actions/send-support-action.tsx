@@ -27,8 +27,11 @@ const mapToPriorityNumber = (priority: string) => {
 export const sendSupportAction = authActionClient
   .schema(sendSupportSchema)
   .metadata({
-    event: LogEvents.SupportTicket.name,
-    channel: LogEvents.SupportTicket.channel,
+    name: "send-support",
+    track: {
+      event: LogEvents.SupportTicket.name,
+      channel: LogEvents.SupportTicket.channel,
+    },
   })
   .action(async ({ parsedInput: data, ctx: { user } }) => {
     const customer = await client.upsertCustomer({

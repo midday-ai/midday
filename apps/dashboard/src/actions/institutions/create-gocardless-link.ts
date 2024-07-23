@@ -9,6 +9,9 @@ const engine = new Midday();
 
 export const createGoCardLessLinkAction = authActionClient
   .schema(createGoCardLessLinkSchema)
+  .metadata({
+    name: "create-gocardless-link",
+  })
   .action(
     async ({
       parsedInput: {

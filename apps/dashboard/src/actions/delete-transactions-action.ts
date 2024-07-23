@@ -6,6 +6,9 @@ import { deleteTransactionSchema } from "./schema";
 
 export const deleteTransactionsAction = authActionClient
   .schema(deleteTransactionSchema)
+  .metadata({
+    name: "delete-transactions",
+  })
   .action(async ({ parsedInput: { ids }, ctx: { user, supabase } }) => {
     await supabase
       .from("transactions")

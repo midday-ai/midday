@@ -8,8 +8,11 @@ import { revalidateTag } from "next/cache";
 export const updateProjectAction = authActionClient
   .schema(updateProjectSchema)
   .metadata({
-    event: LogEvents.ProjectUpdated.name,
-    channel: LogEvents.ProjectUpdated.channel,
+    name: "update-project",
+    track: {
+      event: LogEvents.ProjectUpdated.name,
+      channel: LogEvents.ProjectUpdated.channel,
+    },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { id, ...data } = params;

@@ -11,8 +11,11 @@ import { acceptInviteSchema } from "./schema";
 export const acceptInviteAction = authActionClient
   .schema(acceptInviteSchema)
   .metadata({
-    event: LogEvents.AcceptInvite.name,
-    channel: LogEvents.AcceptInvite.channel,
+    name: "accept-invite",
+    track: {
+      event: LogEvents.AcceptInvite.name,
+      channel: LogEvents.AcceptInvite.channel,
+    },
   })
   .action(
     async ({

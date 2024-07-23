@@ -8,6 +8,9 @@ import { setupUserSchema } from "./schema";
 
 export const setupUserAction = authActionClient
   .schema(setupUserSchema)
+  .metadata({
+    name: "setup-user",
+  })
   .action(
     async ({
       parsedInput: { full_name, team_name },

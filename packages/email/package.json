@@ -15,6 +15,7 @@
   "dependencies": {
     "@midday/ui": "workspace:*",
     "@react-email/components": "0.0.21",
+    "@react-email/render": "^0.0.16",
     "@react-email/tailwind": "0.0.18",
     "date-fns": "^3.6.0",
     "react-email": "canary",

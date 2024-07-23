@@ -8,8 +8,11 @@ import { mfaVerifySchema } from "./schema";
 export const mfaVerifyAction = authActionClient
   .schema(mfaVerifySchema)
   .metadata({
-    event: LogEvents.MfaVerify.name,
-    channel: LogEvents.MfaVerify.channel,
+    name: "mfa-verify",
+    track: {
+      event: LogEvents.MfaVerify.name,
+      channel: LogEvents.MfaVerify.channel,
+    },
   })
   .action(
     async ({

@@ -8,8 +8,11 @@ import { createCategoriesSchema } from "./schema";
 export const createCategoriesAction = authActionClient
   .schema(createCategoriesSchema)
   .metadata({
-    event: LogEvents.CategoryCreate.name,
-    channel: LogEvents.CategoryCreate.channel,
+    name: "create-categories",
+    track: {
+      event: LogEvents.CategoryCreate.name,
+      channel: LogEvents.CategoryCreate.channel,
+    },
   })
   .action(async ({ parsedInput: { categories }, ctx: { user, supabase } }) => {
     const teamId = user.team_id;

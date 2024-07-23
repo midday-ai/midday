@@ -9,6 +9,9 @@ const BATCH_LIMIT = 300;
 
 export const createTransactionsAction = authActionClient
   .schema(createTransactionsSchema)
+  .metadata({
+    name: "create-transactions",
+  })
   .action(
     async ({
       parsedInput: { currency, transactions, accountId },

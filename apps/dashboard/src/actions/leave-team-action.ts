@@ -14,8 +14,11 @@ import { leaveTeamSchema } from "./schema";
 export const leaveTeamAction = authActionClient
   .schema(leaveTeamSchema)
   .metadata({
-    event: LogEvents.LeaveTeam.name,
-    channel: LogEvents.LeaveTeam.channel,
+    name: "leave-team",
+    track: {
+      event: LogEvents.LeaveTeam.name,
+      channel: LogEvents.LeaveTeam.channel,
+    },
   })
   .action(
     async ({

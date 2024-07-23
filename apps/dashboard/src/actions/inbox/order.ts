@@ -1,22 +1,25 @@
 "use server";
 
-import { actionClient } from "@/actions/safe-action";
+import { authActionClient } from "@/actions/safe-action";
 import { inboxOrder } from "@/actions/schema";
 import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 
-export const inboxOrderAction = actionClient
+export const inboxOrderAction = authActionClient
   .schema(inboxOrder)
-  .action(({ parsedInput }) => {
+  .metadata({
+    name: "inbox-order",
+  })
+  .action(({ parsedInput: value }) => {
     cookies().set({
       name: Cookies.InboxOrder,
-      value: parsedInput.toString(),
+      value: value.toString(),
       expires: addYears(new Date(), 1),
     });
 
     revalidatePath("/inbox");
 
-    return parsedInput;
+    return Promise.resolve(value);
   });

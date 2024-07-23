@@ -6,6 +6,9 @@ import { unenrollMfaSchema } from "./schema";
 
 export const unenrollMfaAction = authActionClient
   .schema(unenrollMfaSchema)
+  .metadata({
+    name: "unenroll-mfa",
+  })
   .action(async ({ parsedInput: { factorId }, ctx: { supabase } }) => {
     const { data, error } = await supabase.auth.mfa.unenroll({
       factorId,

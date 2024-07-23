@@ -1,8 +1,12 @@
 "use server";
 
-import { actionClient } from "../safe-action";
+import { authActionClient } from "../safe-action";
 import { clearChats } from "./storage";
 
-export const clearHistoryAction = actionClient.action(async () => {
-  return clearChats();
-});
+export const clearHistoryAction = authActionClient
+  .metadata({
+    name: "clear-history",
+  })
+  .action(async () => {
+    return clearChats();
+  });

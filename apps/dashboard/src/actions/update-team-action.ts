@@ -10,6 +10,9 @@ import { updateTeamSchema } from "./schema";
 
 export const updateTeamAction = authActionClient
   .schema(updateTeamSchema)
+  .metadata({
+    name: "update-team",
+  })
   .action(
     async ({
       parsedInput: { revalidatePath, ...data },

@@ -6,6 +6,9 @@ import { bulkUpdateTransactionsSchema } from "./schema";
 
 export const bulkUpdateTransactionsAction = authActionClient
   .schema(bulkUpdateTransactionsSchema)
+  .metadata({
+    name: "accept-invite",
+  })
   .action(async ({ parsedInput: payload, ctx: { user, supabase } }) => {
     const updatePromises = payload.data.map(async ({ id, ...params }) => {
       return supabase

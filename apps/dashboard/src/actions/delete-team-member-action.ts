@@ -9,8 +9,11 @@ import { deleteTeamMemberSchema } from "./schema";
 export const deleteTeamMemberAction = authActionClient
   .schema(deleteTeamMemberSchema)
   .metadata({
-    event: LogEvents.DeleteTeamMember.name,
-    channel: LogEvents.DeleteTeamMember.channel,
+    name: "delete-team-member",
+    track: {
+      event: LogEvents.DeleteTeamMember.name,
+      channel: LogEvents.DeleteTeamMember.channel,
+    },
   })
   .action(
     async ({

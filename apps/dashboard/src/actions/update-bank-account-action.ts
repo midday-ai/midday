@@ -9,8 +9,11 @@ import { updateBankAccountSchema } from "./schema";
 export const updateBankAccountAction = authActionClient
   .schema(updateBankAccountSchema)
   .metadata({
-    event: LogEvents.DeleteBank.name,
-    channel: LogEvents.DeleteBank.channel,
+    name: "update-bank-account",
+    track: {
+      event: LogEvents.DeleteBank.name,
+      channel: LogEvents.DeleteBank.channel,
+    },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await updateBankAccount(supabase, {

@@ -12,8 +12,11 @@ const client = new PlainClient({
 export const sendFeebackAction = authActionClient
   .schema(sendFeedbackSchema)
   .metadata({
-    event: LogEvents.SendFeedback.name,
-    channel: LogEvents.SendFeedback.channel,
+    name: "send-feedback",
+    track: {
+      event: LogEvents.SendFeedback.name,
+      channel: LogEvents.SendFeedback.channel,
+    },
   })
   .action(async ({ parsedInput: { feedback }, ctx: { user } }) => {
     const customer = await client.upsertCustomer({

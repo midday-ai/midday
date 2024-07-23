@@ -6,6 +6,9 @@ import { updateCategorySchema } from "./schema";
 
 export const updateCategoryAction = authActionClient
   .schema(updateCategorySchema)
+  .metadata({
+    name: "update-category",
+  })
   .action(
     async ({
       parsedInput: { id, name, color, description, vat },

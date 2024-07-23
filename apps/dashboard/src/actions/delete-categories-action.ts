@@ -11,8 +11,11 @@ import { deleteCategoriesSchema } from "./schema";
 export const deleteCategoriesAction = authActionClient
   .schema(deleteCategoriesSchema)
   .metadata({
-    event: LogEvents.CategoryDelete.name,
-    channel: LogEvents.CategoryDelete.channel,
+    name: "delete-categories",
+    track: {
+      event: LogEvents.CategoryDelete.name,
+      channel: LogEvents.CategoryDelete.channel,
+    },
   })
   .action(
     async ({

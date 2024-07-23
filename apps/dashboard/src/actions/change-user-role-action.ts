@@ -9,18 +9,16 @@ import { changeUserRoleSchema } from "./schema";
 export const changeUserRoleAction = authActionClient
   .schema(changeUserRoleSchema)
   .metadata({
-    event: LogEvents.UserRoleChange.name,
-    channel: LogEvents.UserRoleChange.channel,
+    name: "change-user-role",
+    track: {
+      event: LogEvents.UserRoleChange.name,
+      channel: LogEvents.UserRoleChange.channel,
+    },
   })
   .action(
     async ({
-      parsedInput: {
-        userId,
-        teamId,
-        role,
-        revalidatePath,
-        ctx: { supabase },
-      },
+      parsedInput: { userId, teamId, role, revalidatePath },
+      ctx: { supabase },
     }) => {
       const { data } = await updateUserTeamRole(supabase, {
         userId,

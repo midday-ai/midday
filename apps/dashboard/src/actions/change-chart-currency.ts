@@ -9,6 +9,9 @@ import { changeChartCurrencySchema } from "./schema";
 
 export const changeChartCurrencyAction = authActionClient
   .schema(changeChartCurrencySchema)
+  .metadata({
+    name: "change-chart-currency",
+  })
   .action(async ({ parsedInput: value, ctx: { user } }) => {
     cookies().set({
       name: Cookies.ChartCurrency,

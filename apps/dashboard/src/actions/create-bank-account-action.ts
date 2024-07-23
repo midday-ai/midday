@@ -9,8 +9,11 @@ import { createBankAccountSchema } from "./schema";
 export const createBankAccountAction = authActionClient
   .schema(createBankAccountSchema)
   .metadata({
-    event: LogEvents.BankAccountCreate.name,
-    channel: LogEvents.BankAccountCreate.channel,
+    name: "create-bank-account",
+    track: {
+      event: LogEvents.BankAccountCreate.name,
+      channel: LogEvents.BankAccountCreate.channel,
+    },
   })
   .action(
     async ({ parsedInput: { name, currency }, ctx: { user, supabase } }) => {

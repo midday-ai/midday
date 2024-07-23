@@ -8,8 +8,11 @@ import { importTransactionsSchema } from "../schema";
 export const importTransactionsAction = authActionClient
   .schema(importTransactionsSchema)
   .metadata({
-    event: LogEvents.ImportTransactions.name,
-    channel: LogEvents.ImportTransactions.channel,
+    name: "import-transactions",
+    track: {
+      event: LogEvents.ImportTransactions.name,
+      channel: LogEvents.ImportTransactions.channel,
+    },
   })
   .action(async ({ parsedInput: { filePath }, ctx: { user } }) => {
     const event = await client.sendEvent({

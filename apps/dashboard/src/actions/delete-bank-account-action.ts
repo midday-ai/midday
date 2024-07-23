@@ -9,8 +9,11 @@ import { deleteBankAccountSchema } from "./schema";
 export const deleteBankAccountAction = authActionClient
   .schema(deleteBankAccountSchema)
   .metadata({
-    event: LogEvents.DeleteBank.name,
-    channel: LogEvents.DeleteBank.channel,
+    name: "delete-bank-account",
+    track: {
+      event: LogEvents.DeleteBank.name,
+      channel: LogEvents.DeleteBank.channel,
+    },
   })
   .action(async ({ parsedInput: { id }, ctx: { user, supabase } }) => {
     await deleteBankAccount(supabase, id);

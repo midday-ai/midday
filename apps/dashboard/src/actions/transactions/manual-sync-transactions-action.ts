@@ -8,8 +8,11 @@ import { Events, client } from "@midday/jobs";
 export const manualSyncTransactionsAction = authActionClient
   .schema(manualSyncTransactionsSchema)
   .metadata({
-    event: LogEvents.TransactionsManualSync.name,
-    channel: LogEvents.TransactionsManualSync.channel,
+    name: "manual-sync-transactions",
+    track: {
+      event: LogEvents.TransactionsManualSync.name,
+      channel: LogEvents.TransactionsManualSync.channel,
+    },
   })
   .action(async ({ parsedInput: { connectionId }, ctx: { user } }) => {
     const event = await client.sendEvent({

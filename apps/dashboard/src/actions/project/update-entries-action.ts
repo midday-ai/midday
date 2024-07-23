@@ -8,8 +8,11 @@ import { revalidateTag } from "next/cache";
 export const updateEntriesAction = authActionClient
   .schema(updateEntriesSchema)
   .metadata({
-    event: LogEvents.TrackerCreateEntry.name,
-    channel: LogEvents.TrackerCreateEntry.channel,
+    name: "update-entries",
+    track: {
+      event: LogEvents.TrackerCreateEntry.name,
+      channel: LogEvents.TrackerCreateEntry.channel,
+    },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { action, ...payload } = params;

@@ -4,7 +4,7 @@ import { env } from "@/env.mjs";
 import InviteEmail from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { LogEvents } from "@midday/events/events";
-import { renderAsync } from "@react-email/components";
+import { renderAsync } from "@react-email/render";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -17,8 +17,11 @@ const resend = new Resend(env.RESEND_API_KEY);
 export const inviteTeamMembersAction = authActionClient
   .schema(inviteTeamMembersSchema)
   .metadata({
-    event: LogEvents.InviteTeamMembers.name,
-    channel: LogEvents.InviteTeamMembers.channel,
+    name: "invite-team-members",
+    track: {
+      event: LogEvents.InviteTeamMembers.name,
+      channel: LogEvents.InviteTeamMembers.channel,
+    },
   })
   .action(
     async ({

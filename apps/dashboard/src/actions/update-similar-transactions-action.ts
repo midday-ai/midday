@@ -7,6 +7,9 @@ import { updateSimilarTransactionsSchema } from "./schema";
 
 export const updateSimilarTransactionsAction = authActionClient
   .schema(updateSimilarTransactionsSchema)
+  .metadata({
+    name: "update-similar-transactions",
+  })
   .action(async ({ parsedInput: { id }, ctx: { user, supabase } }) => {
     await updateSimilarTransactions(supabase, {
       team_id: user.team_id,

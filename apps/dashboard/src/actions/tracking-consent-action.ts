@@ -8,6 +8,9 @@ import { trackingConsentSchema } from "./schema";
 
 export const trackingConsentAction = authActionClient
   .schema(trackingConsentSchema)
+  .metadata({
+    name: "tracking-consent",
+  })
   .action(async ({ parsedInput: value }) => {
     cookies().set({
       name: Cookies.TrackingConsent,

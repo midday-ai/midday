@@ -11,8 +11,11 @@ const dub = new Dub({ projectSlug: "midday" });
 export const shareFileAction = authActionClient
   .schema(shareFileSchema)
   .metadata({
-    event: LogEvents.ShareFile.name,
-    channel: LogEvents.ShareFile.channel,
+    name: "share-file",
+    track: {
+      event: LogEvents.ShareFile.name,
+      channel: LogEvents.ShareFile.channel,
+    },
   })
   .action(async ({ parsedInput: value, ctx: { supabase, user } }) => {
     const response = await share(supabase, {

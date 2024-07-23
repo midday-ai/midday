@@ -9,8 +9,11 @@ import { revalidateTag } from "next/cache";
 export const createProjectAction = authActionClient
   .schema(createProjectSchema)
   .metadata({
-    event: LogEvents.ProjectCreated.name,
-    channel: LogEvents.ProjectCreated.channel,
+    name: "create-project",
+    track: {
+      event: LogEvents.ProjectCreated.name,
+      channel: LogEvents.ProjectCreated.channel,
+    },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await createProject(supabase, {

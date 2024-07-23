@@ -8,8 +8,11 @@ import { revalidateTag } from "next/cache";
 export const deleteEntriesAction = authActionClient
   .schema(deleteEntriesSchema)
   .metadata({
-    event: LogEvents.TrackerDeleteEntry.name,
-    channel: LogEvents.TrackerDeleteEntry.channel,
+    name: "delete-entries",
+    track: {
+      event: LogEvents.TrackerDeleteEntry.name,
+      channel: LogEvents.TrackerDeleteEntry.channel,
+    },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     await supabase.from("tracker_entries").delete().eq("id", params.id);

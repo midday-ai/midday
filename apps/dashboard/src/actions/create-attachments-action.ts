@@ -9,8 +9,11 @@ import { createAttachmentsSchema } from "./schema";
 export const createAttachmentsAction = authActionClient
   .schema(createAttachmentsSchema)
   .metadata({
-    event: LogEvents.CreateAttachment.name,
-    channel: LogEvents.CreateAttachment.channel,
+    name: "create-attachments",
+    track: {
+      event: LogEvents.CreateAttachment.name,
+      channel: LogEvents.CreateAttachment.channel,
+    },
   })
   .action(async ({ parsedInput: files, ctx: { user, supabase } }) => {
     const data = await createAttachments(supabase, files);

@@ -9,6 +9,9 @@ import { changeChartTypeSchema } from "./schema";
 
 export const changeChartTypeAction = authActionClient
   .schema(changeChartTypeSchema)
+  .metadata({
+    name: "change-chart-type",
+  })
   .action(async ({ parsedInput: value, ctx: { user } }) => {
     cookies().set({
       name: Cookies.ChartType,

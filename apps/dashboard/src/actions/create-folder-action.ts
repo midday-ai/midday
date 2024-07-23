@@ -9,8 +9,11 @@ import { createFolderSchema } from "./schema";
 export const createFolderAction = authActionClient
   .schema(createFolderSchema)
   .metadata({
-    event: LogEvents.CreateFolder.name,
-    channel: LogEvents.CreateFolder.channel,
+    name: "create-folder",
+    track: {
+      event: LogEvents.CreateFolder.name,
+      channel: LogEvents.CreateFolder.channel,
+    },
   })
   .action(async ({ parsedInput: { value }, ctx: { user, supabase } }) => {
     const data = await createFolder(supabase, {

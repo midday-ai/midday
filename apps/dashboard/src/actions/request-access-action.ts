@@ -10,6 +10,9 @@ const client = new PlainClient({
 
 export const requestAccessAction = authActionClient
   .schema(requestAccessSchema)
+  .metadata({
+    name: "request-access",
+  })
   .action(async ({ ctx: { user } }) => {
     const customer = await client.upsertCustomer({
       identifier: {

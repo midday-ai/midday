@@ -4,15 +4,18 @@ import { Cookies } from "@/utils/constants";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { actionClient } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { verifyOtpSchema } from "./schema";
 
-export const verifyOtpAction = actionClient
+export const verifyOtpAction = authActionClient
   .schema(verifyOtpSchema)
+  .metadata({
+    name: "update-user",
+  })
   .action(
     async ({
-      parsedInput: { email, phone, token, type },
-      ctx: { supabase },
+      parsedInput: { type, email, token, phone },
+      ctx: { user, supabase },
     }) => {
       const options =
         type === "email"

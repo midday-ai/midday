@@ -10,8 +10,11 @@ const dub = new Dub({ projectSlug: "midday" });
 export const createProjectReport = authActionClient
   .schema(createProjectReportSchema)
   .metadata({
-    event: LogEvents.ProjectReport.name,
-    channel: LogEvents.ProjectReport.channel,
+    name: "create-project-report",
+    track: {
+      event: LogEvents.ProjectReport.name,
+      channel: LogEvents.ProjectReport.channel,
+    },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { data } = await supabase

@@ -68,7 +68,7 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
                     className={cn(
                       "font-normal line-clamp-1",
                       transaction.category?.slug === "income" &&
-                        "text-[#00C969]"
+                        "text-[#00C969]",
                     )}
                   >
                     {transaction.name}
@@ -77,7 +77,7 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
                     className={cn(
                       "font-normal",
                       transaction.category?.slug === "income" &&
-                        "text-[#00C969]"
+                        "text-[#00C969]",
                     )}
                   >
                     <FormatAmount
