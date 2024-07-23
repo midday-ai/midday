@@ -5,8 +5,17 @@ export const ErrorSchema = z.object({
     example: 400,
   }),
   message: z.string().openapi({
-    example: "Bad Request",
+    example: "The provided input is invalid.",
   }),
+  requestId: z.string().openapi({
+    example: "123e4567-e89b-12d3-a456-426655440000",
+  }),
+  details: z
+    .string()
+    .openapi({
+      example: "Provider must be defined.",
+    })
+    .optional(),
 });
 
 export const Providers = z.enum(["teller", "plaid", "gocardless"]);

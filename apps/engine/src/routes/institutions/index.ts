@@ -1,6 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import type { Providers } from "@/providers/types";
+import { logger } from "@/utils/logger";
 import { SearchClient } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -96,31 +97,46 @@ app.openapi(indexRoute, async (c) => {
     limit: +limit,
   };
 
-  const result = await typesense
-    .collections("institutions")
-    .documents()
-    .search(searchParameters);
+  try {
+    const result = await typesense
+      .collections("institutions")
+      .documents()
+      .search(searchParameters);
 
-  const resultString: string =
-    typeof result === "string" ? result : JSON.stringify(result);
+    const resultString: string =
+      typeof result === "string" ? result : JSON.stringify(result);
 
-  const data: SearchResult = JSON.parse(resultString);
+    const data: SearchResult = JSON.parse(resultString);
 
-  return c.json(
-    {
-      data: data.hits?.map(({ document }) => ({
-        id: document.id,
-        name: document.name,
-        logo: document.logo ?? null,
-        popularity: document.popularity,
-        available_history: document.available_history
-          ? +document.available_history
-          : null,
-        provider: document.provider,
-      })),
-    },
-    200,
-  );
+    return c.json(
+      {
+        data: data.hits?.map(({ document }) => ({
+          id: document.id,
+          name: document.name,
+          logo: document.logo ?? null,
+          popularity: document.popularity,
+          available_history: document.available_history
+            ? +document.available_history
+            : null,
+          provider: document.provider,
+        })),
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: 400,
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(updateUsageRoute, async (c) => {
@@ -129,29 +145,44 @@ app.openapi(updateUsageRoute, async (c) => {
 
   const typesense = SearchClient(envs);
 
-  const original = await typesense
-    .collections("institutions")
-    .documents(id)
-    .retrieve();
+  try {
+    const original = await typesense
+      .collections("institutions")
+      .documents(id)
+      .retrieve();
 
-  const originalData: Document =
-    typeof original === "string" && JSON.parse(original);
+    const originalData: Document =
+      typeof original === "string" && JSON.parse(original);
 
-  const result = await typesense
-    .collections("institutions")
-    .documents(id)
-    .update({
-      popularity: originalData?.popularity + 1 || 0,
-    });
+    const result = await typesense
+      .collections("institutions")
+      .documents(id)
+      .update({
+        popularity: originalData?.popularity + 1 || 0,
+      });
 
-  const data: Document = typeof result === "string" ? JSON.parse(result) : [];
+    const data: Document = typeof result === "string" ? JSON.parse(result) : [];
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: 400,
+      },
+      400,
+    );
+  }
 });
 
 export default app;

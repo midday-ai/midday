@@ -1,6 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
+import { requestId } from "hono/request-id";
 import {
   authMiddleware,
   cacheMiddleware,
@@ -13,8 +14,16 @@ import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import transactionsRoutes from "./routes/transactions";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+const app = new OpenAPIHono<{ Bindings: Bindings }>({
+  defaultHook: (result, c) => {
+    console.log(result);
+    if (!result.success) {
+      return c.json({ success: false, errors: result.error.errors }, 422);
+    }
+  },
+});
 
+app.use("*", requestId());
 app.use(cacheMiddleware);
 app.use(authMiddleware);
 app.use(securityMiddleware);

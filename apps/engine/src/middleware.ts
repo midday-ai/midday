@@ -20,9 +20,9 @@ const authMiddleware = (c: Context, next: Next) => {
 };
 
 const cacheMiddleware = (c: Context, next: Next) => {
-  // if (PUBLIC_PATHS.includes(c.req.path)) {
-  //   return next();
-  // }
+  if (PUBLIC_PATHS.includes(c.req.path)) {
+    return next();
+  }
 
   return cache({
     cacheName: "engine",

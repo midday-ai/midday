@@ -1,6 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { Provider } from "@/providers";
+import { logger } from "@/utils/logger";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -109,19 +110,34 @@ app.openapi(indexRoute, async (c) => {
     envs,
   });
 
-  const data = await api.getAccounts({
-    id,
-    countryCode,
-    accessToken,
-    institutionId,
-  });
+  try {
+    const data = await api.getAccounts({
+      id,
+      countryCode,
+      accessToken,
+      institutionId,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: 400,
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(balanceRoute, async (c) => {
@@ -135,17 +151,32 @@ app.openapi(balanceRoute, async (c) => {
     envs,
   });
 
-  const data = await api.getAccountBalance({
-    accessToken,
-    accountId: id,
-  });
+  try {
+    const data = await api.getAccountBalance({
+      accessToken,
+      accountId: id,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: 400,
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(deleteRoute, async (c) => {
@@ -159,17 +190,32 @@ app.openapi(deleteRoute, async (c) => {
     envs,
   });
 
-  await api.deleteAccounts({
-    accessToken,
-    accountId,
-  });
+  try {
+    await api.deleteAccounts({
+      accessToken,
+      accountId,
+    });
 
-  return c.json(
-    {
-      success: true,
-    },
-    200,
-  );
+    return c.json(
+      {
+        success: true,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: 400,
+      },
+      400,
+    );
+  }
 });
 
 export default app;
