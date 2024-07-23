@@ -1,5 +1,6 @@
 import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
+import { logger } from "@/utils/logger";
 import WelcomeEmail from "@midday/email/emails/welcome";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
@@ -97,8 +98,10 @@ export async function POST(req: Request) {
         lastName,
       });
     }
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
   }
 
   return NextResponse.json({ success: true });

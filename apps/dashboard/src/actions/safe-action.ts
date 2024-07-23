@@ -1,3 +1,4 @@
+import { logger } from "@/utils/logger";
 import { setupAnalytics } from "@midday/events/server";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
@@ -29,31 +30,45 @@ export const actionClient = createSafeActionClient({
   },
 });
 
-export const authActionClient = actionClient.use(async ({ next, metadata }) => {
-  const user = await getUser();
-  const supabase = createClient();
+export const authActionClient = actionClient
+  .use(async ({ next, clientInput, metadata }) => {
+    const result = await next({ ctx: null });
 
-  if (!user?.data) {
-    throw new Error("Unauthorized");
-  }
+    if (process.env.NODE_ENV === "development") {
+      logger("Result ->", result);
+      logger("Client input ->", clientInput);
+      logger("Metadata ->", metadata);
 
-  if (metadata) {
-    const analytics = await setupAnalytics({
-      userId: user.data.id,
-      fullName: user.data.full_name,
-    });
-
-    if (metadata.track) {
-      analytics.track(metadata.track);
+      return result;
     }
-  }
 
-  return Sentry.withServerActionInstrumentation(metadata.name, async () => {
-    return next({
-      ctx: {
-        supabase,
-        user: user.data,
-      },
+    return result;
+  })
+  .use(async ({ next, metadata }) => {
+    const user = await getUser();
+    const supabase = createClient();
+
+    if (!user?.data) {
+      throw new Error("Unauthorized");
+    }
+
+    if (metadata) {
+      const analytics = await setupAnalytics({
+        userId: user.data.id,
+        fullName: user.data.full_name,
+      });
+
+      if (metadata.track) {
+        analytics.track(metadata.track);
+      }
+    }
+
+    return Sentry.withServerActionInstrumentation(metadata.name, async () => {
+      return next({
+        ctx: {
+          supabase,
+          user: user.data,
+        },
+      });
     });
   });
-});

@@ -22,35 +22,29 @@ export const createGoCardLessLinkAction = authActionClient
         step = "account",
       },
     }) => {
-      try {
-        await engine.institutions.usage.update(institutionId);
+      await engine.institutions.usage.update(institutionId);
 
-        const redirectTo = new URL(redirectBase);
+      const redirectTo = new URL(redirectBase);
 
-        redirectTo.searchParams.append("step", step);
-        redirectTo.searchParams.append("provider", "gocardless");
+      redirectTo.searchParams.append("step", step);
+      redirectTo.searchParams.append("provider", "gocardless");
 
-        if (countryCode) {
-          redirectTo.searchParams.append("countryCode", countryCode);
-        }
+      if (countryCode) {
+        redirectTo.searchParams.append("countryCode", countryCode);
+      }
 
-        const { data: agreementData } =
-          await engine.auth.gocardless.agreement.create({
-            institution_id: institutionId,
-            transactionTotalDays: availableHistory,
-          });
-
-        const { data } = await engine.auth.gocardless.link({
-          agreement: agreementData.id,
+      const { data: agreementData } =
+        await engine.auth.gocardless.agreement.create({
           institution_id: institutionId,
-          redirect: redirectTo.toString(),
+          transactionTotalDays: availableHistory,
         });
 
-        return redirect(data.link);
-      } catch (error) {
-        console.log(error);
+      const { data } = await engine.auth.gocardless.link({
+        agreement: agreementData.id,
+        institution_id: institutionId,
+        redirect: redirectTo.toString(),
+      });
 
-        throw Error("Something went wrong.");
-      }
+      return redirect(data.link);
     },
   );
