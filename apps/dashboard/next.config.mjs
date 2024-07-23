@@ -27,7 +27,9 @@ const config = {
   },
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
-    // outputFileTracingExcludes: { "/**": ["**canvas**"] },
+    outputFileTracingExcludes: {
+      "*": ["node_modules/canvas*"],
+    },
   },
   webpack: (config, { webpack }) => {
     // config.externals = [...config.externals, "canvas"];
