@@ -28,7 +28,7 @@ const config = {
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
   },
-  webpack: (config) => {
+  webpack: (config, { webpack }) => {
     /**
      * Critical: prevents " ⨯ ./node_modules/canvas/build/Release/canvas.node
      * Module parse failed: Unexpected character '�' (1:0)" error

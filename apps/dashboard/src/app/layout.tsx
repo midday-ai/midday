@@ -15,6 +15,44 @@ export const metadata: Metadata = {
   title: "Midday | Run your business smarter",
   description:
     "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+  twitter: {
+    title: "Midday | Run your business smarter",
+    description:
+      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    images: [
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 800,
+        height: 600,
+      },
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 1800,
+        height: 1600,
+      },
+    ],
+  },
+  openGraph: {
+    title: "Midday | Run your business smarter",
+    description:
+      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    url: "https://app.midday.ai",
+    siteName: "Midday",
+    images: [
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 800,
+        height: 600,
+      },
+      {
+        url: "https://cdn.midday.ai/opengraph-image.jpg",
+        width: 1800,
+        height: 1600,
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
 };
 
 export const viewport = {
@@ -42,7 +80,7 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "whitespace-pre-line overscroll-none"
+          "whitespace-pre-line overscroll-none",
         )}
       >
         {/* <SystemBanner /> */}
