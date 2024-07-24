@@ -20,6 +20,7 @@ import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
@@ -139,6 +140,11 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
   const { isLoading, error } = useEventDetails(eventId);
 
+  const [params] = useQueryStates({
+    step: parseAsString,
+    id: parseAsString,
+  });
+
   const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
     onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
@@ -185,6 +191,17 @@ export function BankConnection({ connection }: BankConnectionProps) {
     }
   }, [error]);
 
+  // NOTE: GoCardLess reconnect flow (redirect from API route)
+  useEffect(() => {
+    if (params.step === "reconnect" && params.id) {
+      manualSyncTransactions.execute({ connectionId: params.id });
+    }
+  }, [params]);
+
+  const handleManualSync = () => {
+    manualSyncTransactions.execute({ connectionId: connection.id });
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center">
@@ -221,13 +238,9 @@ export function BankConnection({ connection }: BankConnectionProps) {
             enrollmentId={connection.enrollment_id}
             institutionId={connection.institution_id}
             accessToken={connection.access_token}
+            onManualSync={handleManualSync}
           />
-          <SyncTransactions
-            disabled={isSyncing}
-            onClick={() =>
-              manualSyncTransactions.execute({ connectionId: connection.id })
-            }
-          />
+          <SyncTransactions disabled={isSyncing} onClick={handleManualSync} />
         </div>
       </div>
 

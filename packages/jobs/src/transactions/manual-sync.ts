@@ -86,10 +86,13 @@ client.defineJob({
       throw Error("Something went wrong");
     }
 
-    // Update bank connection last accessed
+    // Update bank connection last accessed and clear error
     await io.supabase.client
       .from("bank_connections")
-      .update({ last_accessed: new Date().toISOString() })
+      .update({
+        last_accessed: new Date().toISOString(),
+        connection_error: null,
+      })
       .eq("id", connectionId);
 
     revalidateTag(`bank_connections_${teamId}`);

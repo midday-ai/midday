@@ -1,5 +1,3 @@
-"use client";
-
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
 import { Button } from "@midday/ui/button";
@@ -24,6 +22,7 @@ type Props = {
   enrollmentId: string | null;
   institutionId: string;
   accessToken: string | null;
+  onManualSync: () => void;
 };
 
 export function ReconnectProvider({
@@ -32,6 +31,7 @@ export function ReconnectProvider({
   enrollmentId,
   institutionId,
   accessToken,
+  onManualSync,
 }: Props) {
   const { toast } = useToast();
 
@@ -60,6 +60,7 @@ export function ReconnectProvider({
     product: ["transactions"],
     onSuccess: () => {
       setPlaidToken(undefined);
+      onManualSync();
     },
     onExit: () => {
       setPlaidToken(undefined);
@@ -72,7 +73,9 @@ export function ReconnectProvider({
       environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
       enrollmentId,
       appearance: theme,
-      onSuccess: (authorization) => {},
+      onSuccess: () => {
+        onManualSync();
+      },
       onFailure: () => {},
     });
 
