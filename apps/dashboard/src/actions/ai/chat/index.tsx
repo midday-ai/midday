@@ -2,6 +2,7 @@
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
+import { createOpenAI as createGroq } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import {
   getBankAccountsCurrencies,
@@ -28,6 +29,11 @@ import { createReport } from "./tools/report";
 import { getRevenueTool } from "./tools/revenue";
 import { getRunwayTool } from "./tools/runway";
 import { getSpendingTool } from "./tools/spending";
+
+const groq = createGroq({
+  baseURL: "https://api.groq.com/openai/v1",
+  apiKey: process.env.GROQ_API_KEY,
+});
 
 const ratelimit = new Ratelimit({
   limiter: Ratelimit.fixedWindow(10, "10s"),
@@ -92,7 +98,7 @@ export async function submitUserMessage(
   let textNode: undefined | React.ReactNode;
 
   const result = await streamUI({
-    model: openai("gpt-4o-mini"),
+    model: groq("llama-3.1-8b-instant"),
     initial: <SpinnerMessage />,
     system: `\
     You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
