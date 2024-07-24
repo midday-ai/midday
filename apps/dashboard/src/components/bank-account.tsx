@@ -3,6 +3,7 @@
 import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { useI18n } from "@/locales/client";
+import { getInitials } from "@/utils/format";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,16 +59,6 @@ export function BankAccount({
   const updateAccount = useAction(updateBankAccountAction);
   const deleteAccount = useAction(deleteBankAccountAction);
 
-  const getInitials = () => {
-    const formatted = name.toUpperCase();
-
-    if (formatted.split(" ").length > 1) {
-      return `${formatted.charAt(0)}${formatted.charAt(1)}`;
-    }
-
-    return formatted.charAt(0);
-  };
-
   return (
     <div
       className={cn(
@@ -78,15 +69,13 @@ export function BankAccount({
       <div className="flex items-center space-x-4 w-full mr-8">
         <Avatar className="size-[34px]">
           <AvatarFallback className="text-[11px]">
-            {getInitials()}
+            {getInitials(name)}
           </AvatarFallback>
         </Avatar>
 
         <div className="flex items-center justify-between w-full">
           <div className="flex flex-col">
-            <p className="font-medium leading-none mb-1 text-sm">
-              {name} ({currency})
-            </p>
+            <p className="font-medium leading-none mb-1 text-sm">{name}</p>
             <span className="text-xs text-[#878787] font-normal">
               {t(`account_type.${type}`)}
             </span>

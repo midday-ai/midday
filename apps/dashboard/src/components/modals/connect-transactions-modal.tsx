@@ -268,7 +268,10 @@ export function ConnectTransactionsModal({
                   <div className="absolute right-0">
                     <CountrySelector
                       defaultValue={countryCode}
-                      onSelect={(countryCode) => setParams({ countryCode })}
+                      onSelect={(countryCode) => {
+                        setParams({ countryCode });
+                        setResults([]);
+                      }}
                     />
                   </div>
                 </div>
@@ -302,23 +305,22 @@ export function ConnectTransactionsModal({
                   })}
 
                   {!loading && results.length === 0 && (
-                    <div className="flex flex-col items-center justify-center min-h-[300px]">
+                    <div className="flex flex-col items-center justify-center min-h-[350px]">
                       <p className="font-medium mb-2">No banks found</p>
                       <p className="text-sm text-center text-[#878787]">
-                        No banks matched your criteria. Please specify the bank
-                        <br /> you're looking for or use manual import.
+                        We couldn't find a bank matching your criteria.
+                        <br /> Let us know, or start with manual import.
                       </p>
 
                       <div className="mt-4 flex space-x-2">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           onClick={() => setParams({ step: "import-csv" })}
                         >
                           Import
                         </Button>
 
                         <Button
-                          variant="outline"
                           onClick={() => {
                             router.push("/account/support");
                           }}

@@ -5,7 +5,7 @@ export function formatSize(bytes: number): string {
 
   const unitIndex = Math.max(
     0,
-    Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
+    Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1),
   );
 
   return Intl.NumberFormat("en-US", {
@@ -75,4 +75,18 @@ export function formatTransactionDate(date: string) {
   }
 
   return format(new Date(date), "P");
+}
+
+export function getInitials(value: string) {
+  const formatted = value.toUpperCase();
+
+  if (formatted.split(" ").length > 1) {
+    return `${formatted.charAt(0)}${formatted.charAt(1)}`;
+  }
+
+  if (value.length > 1) {
+    return formatted.charAt(0) + formatted.charAt(1);
+  }
+
+  return formatted.charAt(0);
 }

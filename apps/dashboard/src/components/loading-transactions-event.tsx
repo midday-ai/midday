@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@midday/ui/cn";
 import { useEventRunStatuses } from "@trigger.dev/react";
 import { useTheme } from "next-themes";
@@ -10,13 +8,17 @@ const Lottie = dynamic(() => import("lottie-react"), {
   ssr: false,
 });
 
+type Props = {
+  eventId: string;
+  setEventId: (eventId?: string) => void;
+  onClose: () => void;
+};
+
 export function LoadingTransactionsEvent({
   eventId,
   setEventId,
   onClose,
-}: {
-  eventId: string;
-}) {
+}: Props) {
   const { statuses } = useEventRunStatuses(eventId);
   const status = statuses?.at(0);
   const [step, setStep] = useState(1);
@@ -64,7 +66,7 @@ export function LoadingTransactionsEvent({
         <li
           className={cn(
             "opacity-50 dark:opacity-20",
-            step > 0 && "!opacity-100"
+            step > 0 && "!opacity-100",
           )}
         >
           Connecting bank
@@ -73,7 +75,7 @@ export function LoadingTransactionsEvent({
         <li
           className={cn(
             "opacity-50 dark:opacity-20",
-            step > 1 && "!opacity-100"
+            step > 1 && "!opacity-100",
           )}
         >
           Getting transactions
@@ -82,7 +84,7 @@ export function LoadingTransactionsEvent({
         <li
           className={cn(
             "opacity-50 dark:opacity-20",
-            step > 2 && "!opacity-100"
+            step > 2 && "!opacity-100",
           )}
         >
           Completed

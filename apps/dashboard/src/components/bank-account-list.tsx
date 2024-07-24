@@ -47,41 +47,6 @@ export async function BankAccountList() {
 
   // Convert the map to an array
   const result = Object.values(bankMap);
-  // [
-  //   ...Object.values(bankMap),
-  //   {
-  //     id: "mercury",
-  //     name: "Mercury",
-  //     logo_url: "https://cdn-engine.midday.ai/mercury.jpg",
-  //     last_accessed: "2024-07-18",
-  //     accounts: [
-  //       {
-  //         id: "1",
-  //         type: "credit",
-  //         name: "Credit Account",
-  //         currency: "USD",
-  //         balance: 34411,
-  //         enabled: true,
-  //       },
-  //       {
-  //         id: "2",
-  //         type: "depository",
-  //         name: "Depository",
-  //         currency: "USD",
-  //         balance: 553311,
-  //         enabled: true,
-  //       },
-  //     ],
-  //   },
-  //   {
-  //     id: "wells",
-  //     name: "Wells Fargo",
-  //     logo_url: "https://cdn-engine.midday.ai/wells_fargo.jpg",
-  //     error: true,
-  //     last_accessed: "2024-07-18",
-  //     accounts: [],
-  //   },
-  // ];
 
   function sortAccountsByEnabled(accounts) {
     return accounts.sort((a, b) => b.enabled - a.enabled);

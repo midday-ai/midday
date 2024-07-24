@@ -1,30 +1,26 @@
 "use server";
 
-import { Provider } from "@midday/providers";
+import Midday from "@midday-ai/engine";
 
 type GetAccountParams = {
-  id: string;
-  countryCode?: string;
+  id?: string;
   accessToken?: string;
   institutionId?: string; // Plaid
   provider: "gocardless" | "teller" | "plaid";
 };
 
+const engine = new Midday();
+
 export async function getAccounts({
   id,
-  countryCode,
   provider,
   accessToken,
   institutionId,
 }: GetAccountParams) {
-  const api = new Provider({ provider });
-
-  const data = await api.getAccounts({
+  return engine.accounts.list({
     id,
-    countryCode,
+    provider,
     accessToken,
     institutionId,
   });
-
-  return data;
 }
