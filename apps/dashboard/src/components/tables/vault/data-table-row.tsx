@@ -150,7 +150,7 @@ export function DataTableRow({ data, teamId }) {
   });
 
   const deleteFile = useAction(deleteFileAction, {
-    onExecute: ({ id }) => deleteItem(id),
+    onExecute: ({ input: { id } }) => deleteItem(id),
     onError: () => {
       toast({
         duration: 3500,
@@ -173,7 +173,7 @@ export function DataTableRow({ data, teamId }) {
   };
 
   const shareFile = useAction(shareFileAction, {
-    onSuccess: async (url) => {
+    onSuccess: async ({ data: url }) => {
       try {
         await navigator.clipboard.writeText(url);
 

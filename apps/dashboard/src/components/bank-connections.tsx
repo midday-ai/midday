@@ -15,10 +15,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { useToast } from "@midday/ui/use-toast";
+import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
 import { BankLogo } from "./bank-logo";
 import { ReconnectProvider } from "./reconnect-provider";
@@ -131,22 +133,57 @@ function ConnectionState({ connection, isSyncing }) {
 }
 
 export function BankConnection({ connection }: BankConnectionProps) {
-  const [eventId, setEventId] = useState<string>();
+  const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
+  const { toast, dismiss } = useToast();
+
+  const { isLoading, error } = useEventDetails(eventId);
 
   const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
     onExecute: () => setSyncing(true),
-    onSuccess: (data) => {
-      if (data.id) {
+    onSuccess: ({ data }) => {
+      if (data?.id) {
         setEventId(data.id);
       }
-
-      setTimeout(() => {
-        // NOTE: Wait to event status is EXECUTING
-        setSyncing(false);
-      }, 1500);
+    },
+    onError: () => {
+      setSyncing(false);
+      setEventId(undefined);
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
     },
   });
+
+  useEffect(() => {
+    if (isLoading || isSyncing) {
+      toast({
+        title: "Syncing...",
+        description: "We're connecting to your bank, please wait.",
+        duration: Number.POSITIVE_INFINITY,
+        variant: "spinner",
+      });
+    } else {
+      dismiss();
+      setEventId(undefined);
+      setSyncing(false);
+    }
+  }, [isLoading, isSyncing]);
+
+  useEffect(() => {
+    if (error) {
+      setSyncing(false);
+      setEventId(undefined);
+
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
+    }
+  }, [error]);
 
   return (
     <div>
@@ -179,14 +216,14 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
         <div className="ml-auto flex space-x-2">
           <ReconnectProvider
+            id={connection.id}
             provider={connection.provider}
-            enrollmentId={connection.enrollmentId}
+            enrollmentId={connection.enrollment_id}
             institutionId={connection.institution_id}
             accessToken={connection.access_token}
           />
           <SyncTransactions
-            eventId={eventId}
-            isSyncing={isSyncing}
+            disabled={isSyncing}
             onClick={() =>
               manualSyncTransactions.execute({ connectionId: connection.id })
             }

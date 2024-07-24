@@ -1,6 +1,7 @@
 import { getSession } from "@midday/supabase/cached-queries";
 import { updateBankConnection } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
+import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -21,13 +22,15 @@ export async function GET(req: NextRequest) {
   const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
-    await updateBankConnection(supabase, { id });
-    // TODO: RevalidateTag
+    const { data } = await updateBankConnection(supabase, { id });
+    revalidateTag(`bank_connections_${data?.team_id}`);
   }
 
   if (isDesktop === "true") {
-    return NextResponse.redirect("midday://");
+    return NextResponse.redirect(`midday://settings/accounts?id=${id}`);
   }
 
-  return NextResponse.redirect(requestUrl.origin);
+  return NextResponse.redirect(
+    `${requestUrl.origin}/settings/accounts?id=${id}`,
+  );
 }

@@ -4,7 +4,6 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { requestId } from "hono/request-id";
 import {
   authMiddleware,
-  cacheMiddleware,
   loggingMiddleware,
   securityMiddleware,
 } from "./middleware";
@@ -24,7 +23,6 @@ const app = new OpenAPIHono<{ Bindings: Bindings }>({
 });
 
 app.use("*", requestId());
-app.use(cacheMiddleware);
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);

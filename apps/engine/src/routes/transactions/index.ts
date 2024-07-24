@@ -1,5 +1,6 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
+import { cacheMiddleware } from "@/middleware";
 import { Provider } from "@/providers";
 import { logger } from "@/utils/logger";
 import { createRoute } from "@hono/zod-openapi";
@@ -36,46 +37,48 @@ const indexRoute = createRoute({
   },
 });
 
-app.openapi(indexRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accountId, accountType, latest, accessToken } =
-    c.req.valid("query");
+app
+  .openapi(indexRoute, async (c) => {
+    const envs = env(c);
+    const { provider, accountId, accountType, latest, accessToken } =
+      c.req.valid("query");
 
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    kv: c.env.KV,
-    envs,
-  });
-
-  try {
-    const data = await api.getTransactions({
-      accountId,
-      accessToken,
-      accountType,
-      latest,
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      kv: c.env.KV,
+      envs,
     });
 
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    try {
+      const data = await api.getTransactions({
+        accountId,
+        accessToken,
+        accountType,
+        latest,
+      });
 
-    logger(message);
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
 
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
-  }
-});
+      logger(message);
+
+      return c.json(
+        {
+          requestId: c.get("requestId"),
+          message,
+          code: "bad_request",
+        },
+        400,
+      );
+    }
+  })
+  .use(cacheMiddleware);
 
 export default app;

@@ -26,7 +26,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
   const debouncedSearchTerm = useDebounce(query, 300);
 
   const search = useAction(searchAction, {
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setItems(data);
       setLoading(false);
     },

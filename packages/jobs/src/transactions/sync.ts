@@ -40,10 +40,12 @@ client.defineJob({
         });
 
         // Update account balance
-        await io.supabase.client
-          .from("bank_accounts")
-          .update({ balance: balance?.amount })
-          .eq("id", account.id);
+        if (balance?.amount) {
+          await io.supabase.client
+            .from("bank_accounts")
+            .update({ balance: balance.amount })
+            .eq("id", account.id);
+        }
 
         // Update bank connection last accessed
         // TODO: Fix so it only update once per connection

@@ -30,8 +30,7 @@ export const env = createEnv({
     BASELIME_SERVICE: z.string(),
     BASELIME_API_KEY: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
-    ENGINE_API_ENDPOINT: z.string(),
-    ENGINE_API_SECRET: z.string(),
+    MIDDAY_ENGINE_API_KEY: z.string(),
     WEBHOOK_SECRET_KEY: z.string(),
   },
   /**
@@ -84,8 +83,7 @@ export const env = createEnv({
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
-    ENGINE_API_ENDPOINT: process.env.ENGINE_API_ENDPOINT,
-    ENGINE_API_SECRET: process.env.ENGINE_API_SECRET,
+    MIDDAY_ENGINE_API_KEY: process.env.MIDDAY_ENGINE_API_KEY,
     WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,

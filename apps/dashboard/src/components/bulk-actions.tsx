@@ -47,15 +47,15 @@ export function BulkActions({ ids }) {
   const { setTransactionIds } = useTransactionsStore();
 
   const bulkUpdateTransactions = useAction(bulkUpdateTransactionsAction, {
-    onExecute: (input) => {
+    onExecute: ({ input }) => {
       if (input.type === "status") {
         setTransactionIds(undefined);
       }
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setTransactionIds(undefined);
       toast({
-        title: `Updated ${data.length} transactions.`,
+        title: `Updated ${data?.length} transactions.`,
         variant: "success",
         duration: 3500,
       });

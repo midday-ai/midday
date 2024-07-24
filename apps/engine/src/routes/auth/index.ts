@@ -197,13 +197,18 @@ app.openapi(linkPlaidRoute, async (c) => {
   });
 
   try {
-    const data = await api.linkTokenCreate({
+    const { data } = await api.linkTokenCreate({
       userId,
       language,
       accessToken,
     });
 
-    return c.json(data, 200);
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
 

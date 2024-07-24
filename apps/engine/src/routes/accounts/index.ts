@@ -1,5 +1,6 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
+import { cacheMiddleware } from "@/middleware";
 import { Provider } from "@/providers";
 import { logger } from "@/utils/logger";
 import { createRoute } from "@hono/zod-openapi";
@@ -97,85 +98,89 @@ const balanceRoute = createRoute({
   },
 });
 
-app.openapi(indexRoute, async (c) => {
-  const envs = env(c);
+app
+  .openapi(indexRoute, async (c) => {
+    const envs = env(c);
 
-  const { provider, accessToken, institutionId, id } = c.req.valid("query");
+    const { provider, accessToken, institutionId, id } = c.req.valid("query");
 
-  const api = new Provider({
-    provider,
-    kv: c.env.KV,
-    fetcher: c.env.TELLER_CERT,
-    envs,
-  });
-
-  try {
-    const data = await api.getAccounts({
-      id,
-      accessToken,
-      institutionId,
+    const api = new Provider({
+      provider,
+      kv: c.env.KV,
+      fetcher: c.env.TELLER_CERT,
+      envs,
     });
 
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    try {
+      const data = await api.getAccounts({
+        id,
+        accessToken,
+        institutionId,
+      });
 
-    logger(message);
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
 
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
-  }
-});
+      logger(message);
 
-app.openapi(balanceRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accessToken, id } = c.req.valid("query");
+      return c.json(
+        {
+          requestId: c.get("requestId"),
+          message,
+          code: "bad_request",
+        },
+        400,
+      );
+    }
+  })
+  .use(cacheMiddleware);
 
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    kv: c.env.KV,
-    envs,
-  });
+app
+  .openapi(balanceRoute, async (c) => {
+    const envs = env(c);
+    const { provider, accessToken, id } = c.req.valid("query");
 
-  try {
-    const data = await api.getAccountBalance({
-      accessToken,
-      accountId: id,
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      kv: c.env.KV,
+      envs,
     });
 
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    try {
+      const data = await api.getAccountBalance({
+        accessToken,
+        accountId: id,
+      });
 
-    logger(message);
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
 
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
-  }
-});
+      logger(message);
+
+      return c.json(
+        {
+          requestId: c.get("requestId"),
+          message,
+          code: "bad_request",
+        },
+        400,
+      );
+    }
+  })
+  .use(cacheMiddleware);
 
 app.openapi(deleteRoute, async (c) => {
   const envs = env(c);

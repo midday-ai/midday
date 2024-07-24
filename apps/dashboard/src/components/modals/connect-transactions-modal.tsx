@@ -201,10 +201,11 @@ export function ConnectTransactionsModal({
       }
     }
 
-    if (isOpen) {
+    // NOTE: Only run where Plaid is supported
+    if ((isOpen && countryCode === "US") || (isOpen && countryCode === "CA")) {
       createLinkToken();
     }
-  }, [isOpen]);
+  }, [isOpen, countryCode]);
 
   const imports = [
     {

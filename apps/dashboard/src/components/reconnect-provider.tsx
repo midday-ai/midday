@@ -1,8 +1,7 @@
 "use client";
 
-import { createGoCardLessLinkAction } from "@/actions/institutions/create-gocardless-link";
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
-import { logger } from "@/utils/logger";
+import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -20,6 +19,7 @@ import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 
 type Props = {
+  id: string;
   provider: string;
   enrollmentId: string | null;
   institutionId: string;
@@ -27,6 +27,7 @@ type Props = {
 };
 
 export function ReconnectProvider({
+  id,
   provider,
   enrollmentId,
   institutionId,
@@ -34,7 +35,7 @@ export function ReconnectProvider({
 }: Props) {
   const { toast } = useToast();
 
-  const createGoCardLessLink = useAction(createGoCardLessLinkAction, {
+  const reconnectGoCardLessLink = useAction(reconnectGoCardLessLinkAction, {
     onError: () => {
       toast({
         duration: 2500,
@@ -72,7 +73,6 @@ export function ReconnectProvider({
       enrollmentId,
       appearance: theme,
       onSuccess: (authorization) => {},
-      onExit: () => {},
       onFailure: () => {},
     });
 
@@ -101,13 +101,12 @@ export function ReconnectProvider({
         return;
       }
       case "gocardless": {
-        return createGoCardLessLink.execute({
+        return reconnectGoCardLessLink.execute({
+          id,
           institutionId,
-          step: "reconnect",
           availableHistory: 60,
-          redirectBase: isDesktopApp()
-            ? "midday://settings/accounts"
-            : window.location.origin,
+          redirectTo: `${window.location.origin}/api/gocardless/reconnect`,
+          isDesktop: isDesktopApp(),
         });
       }
       case "teller":

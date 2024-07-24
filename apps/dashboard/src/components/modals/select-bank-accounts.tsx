@@ -92,7 +92,7 @@ export function SelectBankAccountsModal() {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       if (data.id) {
         setEventId(data.id);
       }

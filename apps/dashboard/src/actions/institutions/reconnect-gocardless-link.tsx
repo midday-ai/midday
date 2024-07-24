@@ -2,31 +2,43 @@
 
 import Midday from "@midday-ai/engine";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { authActionClient } from "../safe-action";
-import { createGoCardLessLinkSchema } from "../schema";
 
 const engine = new Midday();
 
-export const createGoCardLessLinkAction = authActionClient
-  .schema(createGoCardLessLinkSchema)
+export const reconnectGoCardLessLinkAction = authActionClient
+  .schema(
+    z.object({
+      id: z.string(),
+      institutionId: z.string(),
+      availableHistory: z.number(),
+      isDesktop: z.boolean(),
+      redirectTo: z.string(),
+    }),
+  )
   .metadata({
     name: "create-gocardless-link",
   })
   .action(
     async ({
       parsedInput: {
+        id,
         institutionId,
         availableHistory,
-        redirectBase,
-        step = "account",
+        redirectTo,
+        isDesktop,
       },
     }) => {
       await engine.institutions.usage.update(institutionId);
 
-      const redirectTo = new URL(redirectBase);
+      const link = new URL(redirectTo);
 
-      redirectTo.searchParams.append("step", step);
-      redirectTo.searchParams.append("provider", "gocardless");
+      link.searchParams.append("id", id);
+
+      if (isDesktop) {
+        link.searchParams.append("desktop", "true");
+      }
 
       const { data: agreementData } =
         await engine.auth.gocardless.agreement.create({
@@ -34,10 +46,12 @@ export const createGoCardLessLinkAction = authActionClient
           transactionTotalDays: availableHistory,
         });
 
+      console.log(link.toString());
+
       const { data } = await engine.auth.gocardless.link({
         agreement: agreementData.id,
         institutionId,
-        redirect: redirectTo.toString(),
+        redirect: link.toString(),
       });
 
       return redirect(data.link);

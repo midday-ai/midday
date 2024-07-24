@@ -111,7 +111,8 @@ export async function updateBankConnection(
       ).toDateString(),
     })
     .eq("id", id)
-    .select();
+    .select()
+    .single();
 }
 
 type CreateTransactionsData = {

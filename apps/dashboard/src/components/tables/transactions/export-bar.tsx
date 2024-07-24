@@ -19,8 +19,8 @@ export function ExportBar({ selected, deselectAll, transactionIds }: Props) {
   const [isOpen, setOpen] = useState(false);
 
   const { execute, status } = useAction(exportTransactionsAction, {
-    onSuccess: ({ id }) => {
-      setExportId(id);
+    onSuccess: ({ data }) => {
+      setExportId(data?.id);
       setOpen(false);
     },
     onError: () => {

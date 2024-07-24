@@ -66,11 +66,11 @@ export function InboxView({
   const debouncedSearchTerm = useDebounce(params.q, 300);
 
   const search = useAction(searchAction, {
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setLoading(false);
 
       if (data?.length) {
-        setParams({ id: data?.at(0)?.id });
+        setParams({ id: data?.at(0)?.id || null });
       }
     },
     onError: () => setLoading(false),

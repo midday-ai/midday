@@ -24,7 +24,6 @@ client.defineJob({
     const supabase = await io.supabase.client;
 
     const { teamId, connectionId } = payload;
-    console.log(connectionId);
 
     const { data: accountsData } = await supabase
       .from("bank_accounts")
@@ -52,6 +51,16 @@ client.defineJob({
         accountId: account.account_id,
         accessToken: account.bank_connection?.access_token,
       });
+
+      // Update account balance
+      if (balance?.amount) {
+        await supabase
+          .from("bank_accounts")
+          .update({
+            balance: balance.amount,
+          })
+          .eq("id", account.id);
+      }
 
       // NOTE: We will get all the transactions at once for each account so
       // we need to guard against massive payloads
