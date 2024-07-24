@@ -10,6 +10,7 @@ export const Jobs = {
   TRANSACTIONS_INITIAL_SYNC: "transactions-initial-sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions-manual-sync",
   TRANSACTIONS_IMPORT: "transactions-import",
+  TRANSACTIONS_MATCH: "transactions-match",
 };
 
 export const Events = {
@@ -21,4 +22,5 @@ export const Events = {
   TRANSACTIONS_INITIAL_SYNC: "transactions.initial.sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
   TRANSACTIONS_IMPORT: "transactions.import",
+  TRANSACTIONS_MATCH: "transactions.match",
 };

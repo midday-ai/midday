@@ -11,18 +11,17 @@ client.defineJob({
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    const supabase = await io.supabase.client;
-
     const teamId = ctx.source?.id as string;
 
-    const { data: accountsData, error: accountsError } = await supabase
-      .from("bank_accounts")
-      .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
-      )
-      .eq("team_id", teamId)
-      .eq("enabled", true)
-      .eq("manual", false);
+    const { data: accountsData, error: accountsError } =
+      await io.supabase.client
+        .from("bank_accounts")
+        .select(
+          "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
+        )
+        .eq("team_id", teamId)
+        .eq("enabled", true)
+        .eq("manual", false);
 
     if (accountsError) {
       await io.logger.error("Accounts Error", accountsError);
@@ -103,6 +102,17 @@ client.defineJob({
                 category: transaction.category_slug,
                 status: transaction.status,
               })),
+            },
+          });
+
+          // If unhandled inbox items
+          await io.sendEvent("Match Transactions", {
+            name: Events.TRANSACTIONS_MATCH,
+            payload: {
+              teamId,
+              transactionIds: transactionsData.map(
+                (transaction) => transaction.id
+              ),
             },
           });
 

@@ -20,9 +20,7 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const supabase = await io.supabase.client;
-
-    const { data: account } = await supabase
+    const { data: account } = await io.supabase.client
       .from("bank_accounts")
       .select(
         "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
@@ -61,7 +59,7 @@ client.defineJob({
       formatted,
       BATCH_LIMIT,
       async (batch) => {
-        return supabase
+        return io.supabase.client
           .from("transactions")
           .upsert(batch, {
             onConflict: "internal_id",
