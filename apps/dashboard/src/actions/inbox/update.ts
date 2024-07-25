@@ -7,6 +7,9 @@ import { revalidatePath, revalidateTag } from "next/cache";
 
 export const updateInboxAction = authActionClient
   .schema(updateInboxSchema)
+  .metadata({
+    name: "update-inbox",
+  })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const teamId = user.team_id;
 

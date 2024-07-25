@@ -17,6 +17,16 @@ export const actionClient = createSafeActionClient({
 
     return DEFAULT_SERVER_ERROR_MESSAGE;
   },
+});
+
+export const actionClientWithMeta = createSafeActionClient({
+  handleReturnedServerError(e) {
+    if (e instanceof Error) {
+      return e.message;
+    }
+
+    return DEFAULT_SERVER_ERROR_MESSAGE;
+  },
   defineMetadataSchema() {
     return z.object({
       name: z.string(),
@@ -30,7 +40,7 @@ export const actionClient = createSafeActionClient({
   },
 });
 
-export const authActionClient = actionClient
+export const authActionClient = actionClientWithMeta
   .use(async ({ next, clientInput, metadata }) => {
     const result = await next({ ctx: null });
 

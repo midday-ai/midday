@@ -7,6 +7,9 @@ import { searchSchema } from "./schema";
 
 export const searchAction = authActionClient
   .schema(searchSchema)
+  .metadata({
+    name: "search",
+  })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {
     const { query: searchQuery, type, limit = 10 } = params;
 

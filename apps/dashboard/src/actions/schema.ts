@@ -154,7 +154,7 @@ export const sendFeedbackSchema = z.object({
 
 export const updateTransactionSchema = z.object({
   id: z.string().uuid(),
-  note: z.string().optional(),
+  note: z.string().optional().nullable(),
   category_slug: z.string().optional(),
   assigned_id: z.string().uuid().optional(),
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
