@@ -1,13 +1,21 @@
 import { logger } from "@/utils/logger";
 import { setupAnalytics } from "@midday/events/server";
+import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
 import { createClient } from "@midday/supabase/server";
 import * as Sentry from "@sentry/nextjs";
+import { Ratelimit } from "@upstash/ratelimit";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
   createSafeActionClient,
 } from "next-safe-action";
+import { headers } from "next/headers";
 import { z } from "zod";
+
+const ratelimit = new Ratelimit({
+  limiter: Ratelimit.fixedWindow(10, "10s"),
+  redis: RedisClient,
+});
 
 export const actionClient = createSafeActionClient({
   handleReturnedServerError(e) {
@@ -53,6 +61,25 @@ export const authActionClient = actionClientWithMeta
     }
 
     return result;
+  })
+  .use(async ({ next, metadata }) => {
+    const ip = headers().get("x-forwarded-for");
+
+    const { success, remaining } = await ratelimit.limit(
+      `${ip}-${metadata.name}`,
+    );
+
+    if (!success) {
+      throw new Error("Too many requests");
+    }
+
+    return next({
+      ctx: {
+        ratelimit: {
+          remaining,
+        },
+      },
+    });
   })
   .use(async ({ next, metadata }) => {
     const user = await getUser();
