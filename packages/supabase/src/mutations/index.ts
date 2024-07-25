@@ -17,6 +17,7 @@ type CreateBankAccountsPayload = {
   balance: number;
   accessToken?: string;
   enrollmentId?: string;
+  referenceId?: string;
   teamId: string;
   userId: string;
   provider: "gocardless" | "teller" | "plaid";
@@ -28,6 +29,7 @@ export async function createBankAccounts(
     accounts,
     accessToken,
     enrollmentId,
+    referenceId,
     teamId,
     userId,
     provider,
@@ -60,6 +62,7 @@ export async function createBankAccounts(
         provider,
         access_token: accessToken,
         enrollment_id: enrollmentId,
+        reference_id: referenceId,
         expires_at: expiresAt,
       },
       {
@@ -93,6 +96,7 @@ export async function createBankAccounts(
 
 type UpdateBankConnectionData = {
   id: string;
+  referenceId?: string;
 };
 
 // NOTE: Only GoCardLess needs to be updated
@@ -100,15 +104,16 @@ export async function updateBankConnection(
   supabase: Client,
   data: UpdateBankConnectionData,
 ) {
-  const { id } = data;
+  const { id, referenceId } = data;
 
   return await supabase
     .from("bank_connections")
     .update({
       expires_at: addDays(
         new Date(),
-        getAccessValidForDays({ institutionId: data.id }),
+        getAccessValidForDays({ institutionId: id }),
       ).toDateString(),
+      reference_id: referenceId,
     })
     .eq("id", id)
     .select()

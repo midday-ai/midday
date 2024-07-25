@@ -19,10 +19,11 @@ export async function GET(req: NextRequest) {
   const supabase = createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
+  const referenceId = requestUrl.searchParams.get("reference_id");
   const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {
-    const { data } = await updateBankConnection(supabase, { id });
+    const { data } = await updateBankConnection(supabase, { id, referenceId });
     revalidateTag(`bank_connections_${data?.team_id}`);
   }
 

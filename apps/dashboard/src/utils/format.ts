@@ -78,7 +78,7 @@ export function formatTransactionDate(date: string) {
 }
 
 export function getInitials(value: string) {
-  const formatted = value.toUpperCase();
+  const formatted = value.toUpperCase().replace(/[\s.-]/g, "");
 
   if (formatted.split(" ").length > 1) {
     return `${formatted.charAt(0)}${formatted.charAt(1)}`;

@@ -18,7 +18,13 @@ export const connectBankAccountAction = authActionClient
   })
   .action(
     async ({
-      parsedInput: { provider, accounts, accessToken, enrollmentId },
+      parsedInput: {
+        provider,
+        accounts,
+        accessToken,
+        enrollmentId,
+        referenceId,
+      },
       ctx: { supabase, user },
     }) => {
       const teamId = user.team_id;
@@ -26,6 +32,7 @@ export const connectBankAccountAction = authActionClient
       await createBankAccounts(supabase, {
         accessToken,
         enrollmentId,
+        referenceId,
         teamId,
         userId: user.id,
         accounts,

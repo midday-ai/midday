@@ -17,10 +17,14 @@ export async function getAccounts({
   accessToken,
   institutionId,
 }: GetAccountParams) {
-  return engine.accounts.list({
+  const { data } = await engine.accounts.list({
     id,
     provider,
     accessToken,
     institutionId,
   });
+
+  return {
+    data: data.sort((a, b) => b.balance.amount - a.balance.amount),
+  };
 }
