@@ -15,81 +15,85 @@ client.defineJob({
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_MANUAL_SYNC,
     schema: z.object({
-      accountId: z.string(),
+      connectionId: z.string(),
+      teamId: z.string(),
     }),
   }),
   integrations: { supabase },
   run: async (payload, io) => {
     const supabase = await io.supabase.client;
 
-    const { data: account } = await supabase
+    const { teamId, connectionId } = payload;
+
+    const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
       )
-      .eq("id", payload.accountId)
-      .eq("enabled", true)
-      .single();
+      .eq("bank_connection_id", connectionId)
+      .eq("team_id", teamId)
+      .eq("enabled", true);
 
-    if (!account) {
-      return null;
-    }
+    const promises = accountsData?.map(async (account) => {
+      const provider = new Provider({
+        provider: account.bank_connection.provider,
+      });
 
-    const { provider, access_token } = account.bank_connection;
-    const teamId = account.team_id;
+      const transactions = await provider.getTransactions({
+        teamId: account.team_id,
+        accountId: account.account_id,
+        accessToken: account.bank_connection?.access_token,
+        bankAccountId: account.id,
+        accountType: account.type,
+      });
 
-    const api = new Provider({
-      provider,
-    });
+      const balance = await provider.getAccountBalance({
+        accountId: account.account_id,
+        accessToken: account.bank_connection?.access_token,
+      });
 
-    const transactions = await api.getTransactions({
-      teamId: account.team_id,
-      accountId: account.account_id,
-      accessToken: access_token,
-      bankAccountId: account.id,
-      accountType: account.type,
-    });
-
-    const formatted = transactions.map(({ category, ...rest }) => ({
-      ...rest,
-      category_slug: category,
-    }));
-
-    // NOTE: We will get all the transactions at once for each account so
-    // we need to guard against massive payloads
-    const promises = await processPromisesBatch(
-      formatted,
-      BATCH_LIMIT,
-      async (batch) => {
-        return supabase
-          .from("transactions")
-          .upsert(batch, {
-            onConflict: "internal_id",
+      // Update account balance
+      if (balance?.amount) {
+        await supabase
+          .from("bank_accounts")
+          .update({
+            balance: balance.amount,
           })
-          .select();
+          .eq("id", account.id);
       }
-    );
+
+      // NOTE: We will get all the transactions at once for each account so
+      // we need to guard against massive payloads
+      await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
+        const formatted = batch.map(({ category, ...rest }) => ({
+          ...rest,
+          category_slug: category,
+        }));
+
+        await supabase.from("transactions").upsert(formatted, {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        });
+      });
+    });
 
     try {
-      await Promise.all(promises);
+      if (promises) {
+        await Promise.all(promises);
+      }
     } catch (error) {
       await io.logger.error(error);
       throw Error("Something went wrong");
     }
 
-    const balance = await api.getAccountBalance({
-      accountId: account.account_id,
-      accessToken: account.bank_connection?.access_token,
-    });
-
-    // Update bank account last_accessed
+    // Update bank connection last accessed and clear error
     await io.supabase.client
-      .from("bank_accounts")
+      .from("bank_connections")
       .update({
         last_accessed: new Date().toISOString(),
-        balance: balance?.amount,
+        connection_error: null,
       })
-      .eq("id", account.id);
+      .eq("id", connectionId);
 
     revalidateTag(`bank_connections_${teamId}`);
     revalidateTag(`transactions_${teamId}`);

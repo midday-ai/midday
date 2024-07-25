@@ -1,15 +1,15 @@
 "use server";
 
-import { createClient } from "@midday/supabase/server";
 import { revalidatePath } from "next/cache";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { unenrollMfaSchema } from "./schema";
 
-export const unenrollMfaAction = action(
-  unenrollMfaSchema,
-  async ({ factorId }) => {
-    const supabase = createClient();
-
+export const unenrollMfaAction = authActionClient
+  .schema(unenrollMfaSchema)
+  .metadata({
+    name: "unenroll-mfa",
+  })
+  .action(async ({ parsedInput: { factorId }, ctx: { supabase } }) => {
     const { data, error } = await supabase.auth.mfa.unenroll({
       factorId,
       issuer: "app.midday.ai",
@@ -22,5 +22,4 @@ export const unenrollMfaAction = action(
     revalidatePath("/account/security");
 
     return data;
-  }
-);
+  });

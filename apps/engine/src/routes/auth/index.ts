@@ -2,6 +2,7 @@ import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
+import { logger } from "@/utils/logger";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -195,13 +196,33 @@ app.openapi(linkPlaidRoute, async (c) => {
     envs,
   });
 
-  const data = await api.linkTokenCreate({
-    userId,
-    language,
-    accessToken,
-  });
+  try {
+    const { data } = await api.linkTokenCreate({
+      userId,
+      language,
+      accessToken,
+    });
 
-  return c.json(data, 200);
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: "bad_request",
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(exchangePlaidRoute, async (c) => {
@@ -214,11 +235,26 @@ app.openapi(exchangePlaidRoute, async (c) => {
     envs,
   });
 
-  const data = await api.itemPublicTokenExchange({
-    publicToken: token,
-  });
+  try {
+    const data = await api.itemPublicTokenExchange({
+      publicToken: token,
+    });
 
-  return c.json(data, 200);
+    return c.json(data, 200);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: "bad_request",
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(linkGoCardLessRoute, async (c) => {
@@ -231,18 +267,33 @@ app.openapi(linkGoCardLessRoute, async (c) => {
     envs,
   });
 
-  const data = await api.buildLink({
-    institutionId,
-    agreement,
-    redirect,
-  });
+  try {
+    const data = await api.buildLink({
+      institutionId,
+      agreement,
+      redirect,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: "bad_request",
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(exchangeGoCardLessRoute, async (c) => {
@@ -255,17 +306,32 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
     envs,
   });
 
-  const data = await api.createEndUserAgreement({
-    institutionId,
-    transactionTotalDays,
-  });
+  try {
+    const data = await api.createEndUserAgreement({
+      institutionId,
+      transactionTotalDays,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: "bad_request",
+      },
+      400,
+    );
+  }
 });
 
 app.openapi(agreementGoCardLessRoute, async (c) => {
@@ -278,17 +344,32 @@ app.openapi(agreementGoCardLessRoute, async (c) => {
     envs,
   });
 
-  const data = await api.createEndUserAgreement({
-    institutionId,
-    transactionTotalDays,
-  });
+  try {
+    const data = await api.createEndUserAgreement({
+      institutionId,
+      transactionTotalDays,
+    });
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
+    return c.json(
+      {
+        data,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: "bad_request",
+      },
+      400,
+    );
+  }
 });
 
 export default app;

@@ -20,7 +20,7 @@ const authMiddleware = (c: Context, next: Next) => {
 };
 
 const cacheMiddleware = (c: Context, next: Next) => {
-  if (PUBLIC_PATHS.includes(c.req.path)) {
+  if (process.env.NODE_ENV === "development") {
     return next();
   }
 

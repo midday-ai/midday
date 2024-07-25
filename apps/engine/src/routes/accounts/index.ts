@@ -1,6 +1,8 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
+import { cacheMiddleware } from "@/middleware";
 import { Provider } from "@/providers";
+import { logger } from "@/utils/logger";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -96,57 +98,89 @@ const balanceRoute = createRoute({
   },
 });
 
-app.openapi(indexRoute, async (c) => {
-  const envs = env(c);
+app
+  .openapi(indexRoute, async (c) => {
+    const envs = env(c);
 
-  const { provider, accessToken, institutionId, id, countryCode } =
-    c.req.valid("query");
+    const { provider, accessToken, institutionId, id } = c.req.valid("query");
 
-  const api = new Provider({
-    provider,
-    kv: c.env.KV,
-    fetcher: c.env.TELLER_CERT,
-    envs,
-  });
+    const api = new Provider({
+      provider,
+      kv: c.env.KV,
+      fetcher: c.env.TELLER_CERT,
+      envs,
+    });
 
-  const data = await api.getAccounts({
-    id,
-    countryCode,
-    accessToken,
-    institutionId,
-  });
+    try {
+      const data = await api.getAccounts({
+        id,
+        accessToken,
+        institutionId,
+      });
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
-});
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
 
-app.openapi(balanceRoute, async (c) => {
-  const envs = env(c);
-  const { provider, accessToken, id } = c.req.valid("query");
+      logger(message);
 
-  const api = new Provider({
-    provider,
-    fetcher: c.env.TELLER_CERT,
-    kv: c.env.KV,
-    envs,
-  });
+      return c.json(
+        {
+          requestId: c.get("requestId"),
+          message,
+          code: "bad_request",
+        },
+        400,
+      );
+    }
+  })
+  .use(cacheMiddleware);
 
-  const data = await api.getAccountBalance({
-    accessToken,
-    accountId: id,
-  });
+app
+  .openapi(balanceRoute, async (c) => {
+    const envs = env(c);
+    const { provider, accessToken, id } = c.req.valid("query");
 
-  return c.json(
-    {
-      data,
-    },
-    200,
-  );
-});
+    const api = new Provider({
+      provider,
+      fetcher: c.env.TELLER_CERT,
+      kv: c.env.KV,
+      envs,
+    });
+
+    try {
+      const data = await api.getAccountBalance({
+        accessToken,
+        accountId: id,
+      });
+
+      return c.json(
+        {
+          data,
+        },
+        200,
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+
+      logger(message);
+
+      return c.json(
+        {
+          requestId: c.get("requestId"),
+          message,
+          code: "bad_request",
+        },
+        400,
+      );
+    }
+  })
+  .use(cacheMiddleware);
 
 app.openapi(deleteRoute, async (c) => {
   const envs = env(c);
@@ -159,17 +193,32 @@ app.openapi(deleteRoute, async (c) => {
     envs,
   });
 
-  await api.deleteAccounts({
-    accessToken,
-    accountId,
-  });
+  try {
+    await api.deleteAccounts({
+      accessToken,
+      accountId,
+    });
 
-  return c.json(
-    {
-      success: true,
-    },
-    200,
-  );
+    return c.json(
+      {
+        success: true,
+      },
+      200,
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
+
+    return c.json(
+      {
+        requestId: c.get("requestId"),
+        message,
+        code: "bad_request",
+      },
+      400,
+    );
+  }
 });
 
 export default app;

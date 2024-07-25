@@ -56,8 +56,8 @@ export function SelectCategory({ selected, onChange }: Props) {
   }, [data]);
 
   const createCategories = useAction(createCategoriesAction, {
-    onSuccess: (data) => {
-      const category = data.at(0);
+    onSuccess: ({ data }) => {
+      const category = data?.at(0);
 
       if (category) {
         setData((prev) => [transformCategory(category), ...prev]);

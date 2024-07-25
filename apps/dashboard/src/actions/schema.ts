@@ -42,6 +42,10 @@ export const updateBankAccountSchema = z.object({
   id: z.string().uuid(),
   name: z.string().optional(),
   enabled: z.boolean().optional(),
+  type: z
+    .enum(["depository", "credit", "other_asset", "loan", "other_liability"])
+    .optional()
+    .nullable(),
 });
 
 export type DeleteBankAccountFormValues = z.infer<
@@ -83,7 +87,7 @@ export const createAttachmentsSchema = z.array(
     size: z.number(),
     transaction_id: z.string(),
     type: z.string(),
-  })
+  }),
 );
 
 export const deleteAttachmentSchema = z.string();
@@ -120,6 +124,7 @@ export const shareFileSchema = z.object({
 });
 
 export const connectBankAccountSchema = z.object({
+  referenceId: z.string().nullable().optional(), // GoCardLess
   accessToken: z.string().nullable().optional(), // Teller
   enrollmentId: z.string().nullable().optional(), // Teller
   provider: z.enum(["gocardless", "plaid", "teller"]),
@@ -139,7 +144,7 @@ export const connectBankAccountSchema = z.object({
         "loan",
         "other_liability",
       ]),
-    })
+    }),
   ),
 });
 
@@ -149,7 +154,7 @@ export const sendFeedbackSchema = z.object({
 
 export const updateTransactionSchema = z.object({
   id: z.string().uuid(),
-  note: z.string().optional(),
+  note: z.string().optional().nullable(),
   category_slug: z.string().optional(),
   assigned_id: z.string().uuid().optional(),
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
@@ -179,7 +184,7 @@ export const updaterMenuSchema = z.array(
   z.object({
     path: z.string(),
     name: z.string(),
-  })
+  }),
 );
 
 export const changeTeamSchema = z.object({
@@ -223,7 +228,7 @@ export const inviteTeamMembersSchema = z.object({
     z.object({
       email: z.string().email().optional(),
       role: z.enum(["owner", "member"]),
-    })
+    }),
   ),
   redirectTo: z.string().optional(),
   revalidatePath: z.string().optional(),
@@ -240,7 +245,7 @@ export const createCategoriesSchema = z.object({
       description: z.string().optional(),
       color: z.string().optional(),
       vat: z.string().optional(),
-    })
+    }),
   ),
 });
 
@@ -340,14 +345,18 @@ export const updateEntriesSchema = z.object({
 });
 
 export const manualSyncTransactionsSchema = z.object({
-  accountId: z.string().uuid(),
+  connectionId: z.string().uuid(),
 });
 
-export const createEndUserAgreementSchema = z.object({
+export const createGoCardLessLinkSchema = z.object({
   institutionId: z.string(),
-  countryCode: z.string(),
-  transactionTotalDays: z.number(),
-  isDesktop: z.boolean().optional(),
+  step: z.string().optional(),
+  availableHistory: z.number(),
+  redirectBase: z.string(),
+});
+
+export const updateInstitutionUsageSchema = z.object({
+  institutionId: z.string(),
 });
 
 export const importTransactionsSchema = z.object({
@@ -403,7 +412,7 @@ export const createTransactionsSchema = z.object({
       method: z.enum(["other"]),
       manual: z.boolean(),
       category_slug: z.enum(["income"]).nullable(),
-    })
+    }),
   ),
 });
 
@@ -413,7 +422,6 @@ export type CreateTransactionsFormValues = z.infer<
 
 export const assistantSettingsSchema = z.object({
   enabled: z.boolean().optional(),
-  provider: z.enum(["openai", "mistralai"]).optional(),
 });
 
 export const requestAccessSchema = z.void();

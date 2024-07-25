@@ -1,4 +1,5 @@
 import { env } from "@/env.mjs";
+import { logger } from "@/utils/logger";
 import { getAllowedAttachments, prepareDocument } from "@midday/documents";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { error: "Invalid request body", errors },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -65,7 +66,7 @@ export async function POST(req: Request) {
   if (!inboxId) {
     return NextResponse.json(
       { error: "Invalid OriginalRecipient email" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -160,9 +161,8 @@ export async function POST(req: Request) {
 
     // Transform and upload files
     const uploadedAttachments = allowedAttachments?.map(async (attachment) => {
-      const { content, mimeType, size, fileName, name } = await prepareDocument(
-        attachment
-      );
+      const { content, mimeType, size, fileName, name } =
+        await prepareDocument(attachment);
 
       const { data } = await supabase.storage
         .from("vault")
@@ -205,15 +205,17 @@ export async function POST(req: Request) {
             recordId: inbox.id,
             teamId,
           },
-        })
-      )
+        }),
+      ),
     );
   } catch (error) {
-    console.log(error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
 
     return NextResponse.json(
       { error: `Failed to create record for ${inboxId}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 

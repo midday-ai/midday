@@ -1,14 +1,7 @@
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { getFileExtension } from "./utils";
-
-const TELLER_ENDPOINT = "https://api.teller.io/institutions";
-
-type TellerResponse = {
-  id: string;
-  name: string;
-  capabilities: string[];
-};
+import { getFileExtension, getLogoURL } from "@/utils/logo";
+import { getPopularity, getTellerData, matchLogoURL } from "./utils";
 
 export async function getGoCardLessInstitutions() {
   const provider = new GoCardLessApi({
@@ -27,24 +20,24 @@ export async function getGoCardLessInstitutions() {
     return {
       id: institution.id,
       name: institution.name,
-      logo: `https://cdn-engine.midday.ai/${institution.id}.${ext}`,
+      logo: getLogoURL(institution.id, ext),
       countries: institution.countries,
       available_history: institution.transaction_total_days,
+      popularity: getPopularity(institution.id),
       provider: "gocardless",
     };
   });
 }
 
 export async function getTellerInstitutions() {
-  const response = await fetch(TELLER_ENDPOINT);
-
-  const data: TellerResponse[] = await response.json();
+  const data = await getTellerData();
 
   return data.map((institution) => ({
     id: institution.id,
     name: institution.name,
-    logo: `https://cdn-engine.midday.ai/${institution.id}.jpg`,
+    logo: getLogoURL(institution.id),
     countries: ["US"],
+    popularity: getPopularity(institution.id) ?? 10, // Make Teller higher priority,
     provider: "teller",
   }));
 }
@@ -65,9 +58,10 @@ export async function getPlaidInstitutions() {
       id: institution.institution_id,
       name: institution.name,
       logo: institution.logo
-        ? `https://cdn-engine.midday.ai/${institution.institution_id}.jpg`
-        : null,
+        ? getLogoURL(institution.institution_id)
+        : matchLogoURL(institution.institution_id),
       countries: institution.country_codes,
+      popularity: getPopularity(institution.institution_id),
       provider: "plaid",
     };
   });

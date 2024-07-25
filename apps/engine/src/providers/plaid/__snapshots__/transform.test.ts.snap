@@ -53,17 +53,20 @@ exports[`Transform type transfer 1`] = `
 
 exports[`Transform accounts 1`] = `
 {
+  "balance": {
+    "amount": 56302.06,
+    "currency": "CAD",
+  },
   "currency": "CAD",
   "enrollment_id": null,
   "id": "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
   "institution": {
     "id": "ins_100546",
-    "logo": null,
+    "logo": "https://cdn-engine.midday.ai/ins_100546.jpg",
     "name": "American Funds Retirement Solutions",
     "provider": "plaid",
   },
   "name": "Plaid Mortgage",
-  "provider": "plaid",
   "type": "other_asset",
 }
 `;

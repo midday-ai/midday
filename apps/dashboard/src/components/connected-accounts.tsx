@@ -1,8 +1,8 @@
+import { AddAccountButton } from "@/components/add-account-button";
 import {
   BankAccountList,
   BankAccountListSkeleton,
 } from "@/components/bank-account-list";
-import { ConnectBankButton } from "@/components/connect-bank-button";
 import {
   Card,
   CardDescription,
@@ -12,7 +12,7 @@ import {
 } from "@midday/ui/card";
 import { Suspense } from "react";
 
-export async function ConnectedAccounts() {
+export function ConnectedAccounts() {
   return (
     <Card>
       <CardHeader>
@@ -29,7 +29,7 @@ export async function ConnectedAccounts() {
       <CardFooter className="flex justify-between">
         <div />
 
-        <ConnectBankButton />
+        <AddAccountButton />
       </CardFooter>
     </Card>
   );

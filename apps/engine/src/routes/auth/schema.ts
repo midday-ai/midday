@@ -48,7 +48,7 @@ export const PlaidExchangeSchema = z
 
 export const GoCardLessLinkBodySchema = z
   .object({
-    institution_id: z.string().openapi({
+    institutionId: z.string().openapi({
       example: "REVOLUT_REVOGB21",
     }),
     redirect: z.string().openapi({
@@ -76,10 +76,10 @@ export const GoCardLessLinkSchema = z
 
 export const GoCardLessExchangeBodySchema = z
   .object({
-    institution_id: z.string().openapi({
+    institutionId: z.string().openapi({
       example: "REVOLUT_REVOGB21",
     }),
-    transaction_total_days: z.number().openapi({
+    transactionTotalDays: z.number().openapi({
       example: 90,
     }),
   })
@@ -106,7 +106,7 @@ export const GoCardLessExchangeSchema = z
 
 export const GoCardLessAgreementBodySchema = z
   .object({
-    institution_id: z.string().openapi({
+    institutionId: z.string().openapi({
       example: "REVOLUT_REVOGB21",
     }),
     transactionTotalDays: z.number().openapi({

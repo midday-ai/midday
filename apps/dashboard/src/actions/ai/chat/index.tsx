@@ -112,6 +112,7 @@ export async function submitUserMessage(
         role: message.role,
         content: message.content,
         name: message.name,
+        display: null,
       })),
     ],
     text: ({ content, done, delta }) => {
@@ -180,7 +181,7 @@ export async function submitUserMessage(
       getDocuments: getDocumentsTool({ aiState, teamId }),
       createReport: createReport({
         aiState,
-        userId: user?.data?.id,
+        userId: user?.data?.id ?? "",
         teamId,
         currency: defaultValues.currency,
         dateFrom: defaultValues.from,
@@ -210,8 +211,11 @@ export const AI = createAI<AIState, UIState>({
 
     const { chatId, messages } = state;
 
-    const firstMessageContent = messages?.at(0).content as string;
-    const title = firstMessageContent.substring(0, 100);
+    const firstMessageContent = messages?.at(0)?.content ?? "";
+    const title =
+      typeof firstMessageContent === "string"
+        ? firstMessageContent.substring(0, 100)
+        : "";
 
     const chat: Chat = {
       id: chatId,

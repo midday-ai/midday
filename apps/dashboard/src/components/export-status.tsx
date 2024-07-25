@@ -46,8 +46,8 @@ export function ExportStatus() {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: async (url) => {
-      await navigator.clipboard.writeText(url);
+    onSuccess: async ({ data }) => {
+      await navigator.clipboard.writeText(data ?? "");
 
       toast({
         duration: 2500,
@@ -87,7 +87,7 @@ export function ExportStatus() {
       const { id } = toast({
         title: "Export completed",
         description: `Your export is ready based on ${status?.data?.totalItems} transactions. It's stored in your Vault.`,
-        duration: Infinity,
+        duration: Number.POSITIVE_INFINITY,
         footer: (
           <div className="mt-4 flex space-x-4">
             <DropdownMenu>

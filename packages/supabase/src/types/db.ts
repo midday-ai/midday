@@ -76,17 +76,19 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       bank_connections: {
         Row: {
           access_token: string | null;
+          connection_error: string | null;
           created_at: string;
           enrollment_id: string | null;
           expires_at: string | null;
           id: string;
           institution_id: string;
+          last_accessed: string | null;
           logo_url: string | null;
           name: string;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
@@ -94,11 +96,13 @@ export type Database = {
         };
         Insert: {
           access_token?: string | null;
+          connection_error?: string | null;
           created_at?: string;
           enrollment_id?: string | null;
           expires_at?: string | null;
           id?: string;
           institution_id: string;
+          last_accessed?: string | null;
           logo_url?: string | null;
           name: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
@@ -106,11 +110,13 @@ export type Database = {
         };
         Update: {
           access_token?: string | null;
+          connection_error?: string | null;
           created_at?: string;
           enrollment_id?: string | null;
           expires_at?: string | null;
           id?: string;
           institution_id?: string;
+          last_accessed?: string | null;
           logo_url?: string | null;
           name?: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
@@ -123,7 +129,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       inbox: {
@@ -212,7 +218,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "transactions";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       reports: {
@@ -269,7 +275,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       teams: {
@@ -373,7 +379,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       tracker_projects: {
@@ -422,7 +428,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       tracker_reports: {
@@ -474,7 +480,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       transaction_attachments: {
@@ -522,7 +528,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "transactions";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       transaction_categories: {
@@ -569,7 +575,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       transaction_enrichments: {
@@ -611,7 +617,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       transactions: {
@@ -636,6 +642,7 @@ export type Database = {
           note: string | null;
           status: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string;
+          updated_at: string | null;
           amount_text: string | null;
           calculated_vat: number | null;
           is_fulfilled: boolean | null;
@@ -663,6 +670,7 @@ export type Database = {
           note?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string;
+          updated_at?: string | null;
         };
         Update: {
           amount?: number;
@@ -687,6 +695,7 @@ export type Database = {
           note?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id?: string;
+          updated_at?: string | null;
         };
         Relationships: [
           {
@@ -716,7 +725,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "transaction_categories";
             referencedColumns: ["slug", "team_id"];
-          }
+          },
         ];
       };
       user_invites: {
@@ -761,7 +770,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "users";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       users: {
@@ -809,7 +818,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "teams";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
       users_on_team: {
@@ -848,7 +857,7 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "users";
             referencedColumns: ["id"];
-          }
+          },
         ];
       };
     };
@@ -1193,7 +1202,7 @@ export type Tables<
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
         Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
       Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
@@ -1202,14 +1211,14 @@ export type Tables<
     ? R
     : never
   : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-      PublicSchema["Views"])
-  ? (PublicSchema["Tables"] &
-      PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-      Row: infer R;
-    }
-    ? R
-    : never
-  : never;
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R;
+      }
+      ? R
+      : never
+    : never;
 
 export type TablesInsert<
   PublicTableNameOrOptions extends
@@ -1217,7 +1226,7 @@ export type TablesInsert<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I;
@@ -1225,12 +1234,12 @@ export type TablesInsert<
     ? I
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Insert: infer I;
-    }
-    ? I
-    : never
-  : never;
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I;
+      }
+      ? I
+      : never
+    : never;
 
 export type TablesUpdate<
   PublicTableNameOrOptions extends
@@ -1238,7 +1247,7 @@ export type TablesUpdate<
     | { schema: keyof Database },
   TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never
+    : never = never,
 > = PublicTableNameOrOptions extends { schema: keyof Database }
   ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U;
@@ -1246,12 +1255,12 @@ export type TablesUpdate<
     ? U
     : never
   : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-      Update: infer U;
-    }
-    ? U
-    : never
-  : never;
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U;
+      }
+      ? U
+      : never
+    : never;
 
 export type Enums<
   PublicEnumNameOrOptions extends
@@ -1259,9 +1268,9 @@ export type Enums<
     | { schema: keyof Database },
   EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
     ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never
+    : never = never,
 > = PublicEnumNameOrOptions extends { schema: keyof Database }
   ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-  : never;
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never;

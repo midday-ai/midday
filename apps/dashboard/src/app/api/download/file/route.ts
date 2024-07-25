@@ -20,7 +20,7 @@ export async function GET(req, res) {
 
   responseHeaders.set(
     "Content-Disposition",
-    `attachment; filename="${filename}"`
+    `attachment; filename="${filename}"`,
   );
 
   return new Response(data, {

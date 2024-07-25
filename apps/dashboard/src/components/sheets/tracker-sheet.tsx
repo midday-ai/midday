@@ -36,10 +36,10 @@ export function TrackerSheet({ setParams, isOpen, params, project, user }) {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: async (params) => {
+    onSuccess: async ({ data }) => {
       await fetchData({
-        day: params.date,
-        projectId: params.project_id,
+        day: data.date,
+        projectId: data.project_id,
       });
     },
   });

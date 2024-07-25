@@ -1,32 +1,24 @@
 "use server";
 
-import { getUser } from "@midday/supabase/cached-queries";
 import { updateSimilarTransactions } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
 import { revalidateTag } from "next/cache";
-import { action } from "./safe-action";
+import { authActionClient } from "./safe-action";
 import { updateSimilarTransactionsSchema } from "./schema";
 
-export const updateSimilarTransactionsAction = action(
-  updateSimilarTransactionsSchema,
-  async ({ id }) => {
-    const supabase = createClient();
-    const user = await getUser();
-    const teamId = user?.data?.team_id;
-
-    if (!teamId) {
-      return null;
-    }
-
+export const updateSimilarTransactionsAction = authActionClient
+  .schema(updateSimilarTransactionsSchema)
+  .metadata({
+    name: "update-similar-transactions",
+  })
+  .action(async ({ parsedInput: { id }, ctx: { user, supabase } }) => {
     await updateSimilarTransactions(supabase, {
-      team_id: teamId,
+      team_id: user.team_id,
       id,
     });
 
-    revalidateTag(`transactions_${teamId}`);
-    revalidateTag(`spending_${teamId}`);
-    revalidateTag(`metrics_${teamId}`);
-    revalidateTag(`current_burn_rate_${teamId}`);
-    revalidateTag(`burn_rate_${teamId}`);
-  }
-);
+    revalidateTag(`transactions_${user.team_id}`);
+    revalidateTag(`spending_${user.team_id}`);
+    revalidateTag(`metrics_${user.team_id}`);
+    revalidateTag(`current_burn_rate_${user.team_id}`);
+    revalidateTag(`burn_rate_${user.team_id}`);
+  });

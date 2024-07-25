@@ -26,7 +26,7 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
   const supabase = createClient();
 
   const createBankAccount = useAction(createBankAccountAction, {
-    onSuccess: async (result) => {
+    onSuccess: async ({ data: result }) => {
       if (result) {
         onChange(result);
         setData((prev) => [{ id: result.id, label: result.name }, ...prev]);
@@ -48,7 +48,7 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
             label: account.name,
             logo: account?.logo_url,
             currency: account.currency,
-          }))
+          })),
         );
       }
     }

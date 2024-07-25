@@ -1,9 +1,10 @@
+import { PLAID_COUNTRIES } from "@/utils/countries";
 import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
 import {
   Configuration,
-  CountryCode,
+  type CountryCode,
   type ItemPublicTokenExchangeResponse,
   type LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
@@ -30,14 +31,15 @@ export class PlaidApi {
   #clientId: string;
   #clientSecret: string;
 
-  #countryCodes = [CountryCode.Us];
+  #countryCodes = PLAID_COUNTRIES as CountryCode[];
 
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
     this.#clientSecret = params.envs.PLAID_SECRET;
 
     const configuration = new Configuration({
-      basePath: PlaidEnvironments[params.envs.PLAID_ENVIRONMENT],
+      basePath:
+        PlaidEnvironments[params.envs.PLAID_ENVIRONMENT || "production"],
       baseOptions: {
         headers: {
           "PLAID-CLIENT-ID": this.#clientId,
@@ -89,13 +91,12 @@ export class PlaidApi {
     });
 
     const institution = await this.institutionsGetById(institutionId);
+
     return accounts.data.accounts.map((account) => ({
       ...account,
       institution: {
         id: institution.data.institution.institution_id,
         name: institution.data.institution.name,
-        // NOTE: Currently not in use, base64 and usually unavailable
-        logo: institution.data.institution?.logo ?? null,
       },
     }));
   }
@@ -185,7 +186,9 @@ export class PlaidApi {
   }
 
   async getInstitutions(params?: GetInstitutionsRequest) {
-    const countryCode = params?.countryCode ?? CountryCode.Us;
+    const countryCode = params?.countryCode
+      ? [params.countryCode as CountryCode]
+      : this.#countryCodes;
 
     return paginate({
       delay: { milliseconds: 100, onDelay: (message) => logger(message) },
@@ -194,7 +197,7 @@ export class PlaidApi {
         withRetry(() =>
           this.#client
             .institutionsGet({
-              country_codes: [countryCode as CountryCode],
+              country_codes: countryCode,
               count,
               offset,
               options: {

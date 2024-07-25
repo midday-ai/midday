@@ -1,7 +1,7 @@
 import { AssistantButton } from "@/components/assistant/button";
 import { DesktopAssistantButton } from "@/components/assistant/button-desktop";
+import { ConnectionStatus } from "@/components/connection-status";
 import { NotificationCenter } from "@/components/notification-center";
-import { ReconnectBank } from "@/components/reconnect-bank";
 import { TrackerControl } from "@/components/tracker-contol";
 import { UserMenu } from "@/components/user-menu";
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
@@ -30,7 +30,7 @@ export function Header() {
         <TrackerControl />
 
         <Suspense>
-          <ReconnectBank />
+          <ConnectionStatus />
         </Suspense>
 
         <NotificationCenter />

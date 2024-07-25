@@ -16,12 +16,12 @@ type Props = {
 };
 
 export function InboxOrdering({ ascending }: Props) {
-  const { execute: inboxOrder, optimisticData } = useOptimisticAction(
+  const { execute: inboxOrder, optimisticState } = useOptimisticAction(
     inboxOrderAction,
-    ascending,
-    (state) => {
-      return !state;
-    }
+    {
+      currentState: ascending,
+      updateFn: (_, state) => !state,
+    },
   );
 
   return (
@@ -33,14 +33,14 @@ export function InboxOrdering({ ascending }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuCheckboxItem
-          checked={!optimisticData}
+          checked={!optimisticState}
           onCheckedChange={() => inboxOrder(false)}
         >
           Most recent
         </DropdownMenuCheckboxItem>
 
         <DropdownMenuCheckboxItem
-          checked={optimisticData}
+          checked={optimisticState}
           onCheckedChange={() => inboxOrder(true)}
         >
           Oldest first

@@ -1,7 +1,6 @@
 "use server";
 
 import { client as RedisClient } from "@midday/kv";
-import { getCountryCode, isEUCountry } from "@midday/location";
 import { getSession } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
@@ -10,9 +9,8 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
     data: { session },
   } = await getSession();
 
-  const defaultSettings = {
+  const defaultSettings: SettingsResponse = {
     enabled: true,
-    provider: isEUCountry(getCountryCode()) ? "mistralai" : "openai",
   };
 
   const userId = session?.user.id;
@@ -20,14 +18,13 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
 
   return {
     ...defaultSettings,
-    ...settings,
+    ...(settings || {}),
   };
 }
 
 type SetAassistant = {
   settings: SettingsResponse;
   params: {
-    provider?: "openai" | "mistralai" | undefined;
     enabled?: boolean | undefined;
   };
 };
@@ -58,7 +55,7 @@ export async function clearChats() {
   const chats: string[] = await RedisClient.zrange(
     `user:chat:${userId}`,
     0,
-    -1
+    -1,
   );
 
   const pipeline = RedisClient.pipeline();
@@ -85,7 +82,7 @@ export async function getLatestChat() {
       1,
       {
         rev: true,
-      }
+      },
     );
 
     const lastId = chat.at(0);
@@ -113,7 +110,7 @@ export async function getChats() {
       -1,
       {
         rev: true,
-      }
+      },
     );
 
     for (const chat of chats) {

@@ -3,17 +3,17 @@
 import { Button } from "@midday/ui/button";
 import { useQueryState } from "nuqs";
 
-export function ConnectBankButton() {
+export function AddAccountButton() {
   const [_, setStep] = useQueryState("step");
 
   return (
     <Button
-      data-event="Connect Bank"
+      data-event="Add account"
       data-icon="🏦"
       data-channel="bank"
       onClick={() => setStep("connect")}
     >
-      Connect account
+      Add account
     </Button>
   );
 }

@@ -1,10 +1,9 @@
 "use server";
 
-import { Provider } from "@midday/providers";
+import { engine } from "@/utils/engine";
 
 type GetAccountParams = {
-  id: string;
-  countryCode?: string;
+  id?: string;
   accessToken?: string;
   institutionId?: string; // Plaid
   provider: "gocardless" | "teller" | "plaid";
@@ -12,19 +11,18 @@ type GetAccountParams = {
 
 export async function getAccounts({
   id,
-  countryCode,
   provider,
   accessToken,
   institutionId,
 }: GetAccountParams) {
-  const api = new Provider({ provider });
-
-  const data = await api.getAccounts({
+  const { data } = await engine.accounts.list({
     id,
-    countryCode,
+    provider,
     accessToken,
     institutionId,
   });
 
-  return data;
+  return {
+    data: data.sort((a, b) => b.balance.amount - a.balance.amount),
+  };
 }

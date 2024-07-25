@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.0",
-    "@langchain/community": "^0.2.16",
-    "@langchain/core": "^0.2.12",
-    "@langchain/openai": "^0.2.1",
+    "@langchain/community": "^0.2.20",
+    "@langchain/core": "^0.2.18",
+    "@langchain/openai": "^0.2.5",
     "@midday/documents": "workspace:*",
     "@midday/import": "workspace:*",
     "@trigger.dev/react": "2.3.19",
@@ -21,7 +21,7 @@
     "@trigger.dev/sdk": "2.3.19",
     "@trigger.dev/supabase": "^2.3.19",
     "change-case": "^5.4.4",
-    "langchain": "^0.2.8",
+    "langchain": "^0.2.11",
     "nanoid": "^5.0.7"
   }
 }

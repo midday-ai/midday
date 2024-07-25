@@ -1,7 +1,7 @@
 {
   "name": "@midday/engine",
   "scripts": {
-    "dev": "wrangler dev src/index.ts --port 3002",
+    "dev": "NODE_ENV=development wrangler dev src/index.ts --port 3002",
     "deploy": "wrangler deploy --minify src/index.ts",
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -10,16 +10,16 @@
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.4.0",
-    "@hono/zod-openapi": "^0.14.9",
+    "@hono/zod-openapi": "^0.15.1",
     "@hono/zod-validator": "^0.2.2",
-    "hono": "^4.4.13",
+    "hono": "^4.5.1",
     "typesense": "^1.8.2",
-    "xior": "^0.5.3",
+    "xior": "^0.5.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240712.0",
+    "@cloudflare/workers-types": "^4.20240722.0",
     "@types/bun": "^1.1.6",
-    "wrangler": "^3.64.0"
+    "wrangler": "^3.66.0"
   }
 }

@@ -1,9 +1,12 @@
 "use server";
 
-import { z } from "zod";
-import { action } from "../safe-action";
+import { authActionClient } from "../safe-action";
 import { clearChats } from "./storage";
 
-export const clearHistoryAction = action(z.null(), async () => {
-  return clearChats();
-});
+export const clearHistoryAction = authActionClient
+  .metadata({
+    name: "clear-history",
+  })
+  .action(async () => {
+    return clearChats();
+  });

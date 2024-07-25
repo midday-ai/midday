@@ -47,15 +47,15 @@ export function BulkActions({ ids }) {
   const { setTransactionIds } = useTransactionsStore();
 
   const bulkUpdateTransactions = useAction(bulkUpdateTransactionsAction, {
-    onExecute: (input) => {
+    onExecute: ({ input }) => {
       if (input.type === "status") {
         setTransactionIds(undefined);
       }
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setTransactionIds(undefined);
       toast({
-        title: `Updated ${data.length} transactions.`,
+        title: `Updated ${data?.length} transactions.`,
         variant: "success",
         duration: 3500,
       });
@@ -96,7 +96,7 @@ export function BulkActions({ ids }) {
                   <Button
                     className={cn(
                       "w-[190px] items-center justify-start relative mb-1.5 group",
-                      isActive && "bg-secondary"
+                      isActive && "bg-secondary",
                     )}
                     variant="ghost"
                   >
@@ -104,7 +104,7 @@ export function BulkActions({ ids }) {
                     <p
                       className={cn(
                         "p-sm font-normal ml-2 text-primary",
-                        isActive && "bg-secondary"
+                        isActive && "bg-secondary",
                       )}
                     >
                       {label}
@@ -113,7 +113,7 @@ export function BulkActions({ ids }) {
                       size={16}
                       className={cn(
                         "absolute right-2 invisible group-hover:visible",
-                        isActive && "visible"
+                        isActive && "visible",
                       )}
                     />
                   </Button>
@@ -185,7 +185,6 @@ export function BulkActions({ ids }) {
                 {section.id === "status" && (
                   <RadioGroup
                     onValueChange={(status) => {
-                      console.log(status);
                       bulkUpdateTransactions.execute({
                         type: "status",
                         data: ids.map((transaction) => ({

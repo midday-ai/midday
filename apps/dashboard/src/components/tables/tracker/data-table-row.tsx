@@ -53,7 +53,7 @@ export function DataTableRow({ row, setParams }) {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       const { id } = toast({
         title: "Time Report Published",
         description: "Your report is ready to share.",

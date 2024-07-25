@@ -1,9 +1,14 @@
 "use client";
 
-import { getAccounts } from "@/actions/banks/get-accounts";
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
+import { getAccounts } from "@/actions/institutions/get-accounts";
 import { connectBankAccountSchema } from "@/actions/schema";
+import { useConnectParams } from "@/hooks/use-connect-params";
+import { useI18n } from "@/locales/client";
+import { getInitials } from "@/utils/format";
 import { zodResolver } from "@hookform/resolvers/zod";
+import type { Accounts } from "@midday-ai/engine/resources/accounts.mjs";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -25,16 +30,10 @@ import { Tabs, TabsContent } from "@midday/ui/tabs";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import Image from "next/image";
-import {
-  parseAsBoolean,
-  parseAsString,
-  parseAsStringEnum,
-  useQueryStates,
-} from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import type z from "zod";
+import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
 function RowsSkeleton() {
@@ -43,15 +42,15 @@ function RowsSkeleton() {
       <div className="flex items-center space-x-4">
         <Skeleton className="h-9 w-9 rounded-full" />
         <div className="space-y-2">
-          <Skeleton className="h-3.5 w-[210px]" />
-          <Skeleton className="h-2.5 w-[180px]" />
+          <Skeleton className="h-3.5 w-[210px] rounded-none" />
+          <Skeleton className="h-2.5 w-[180px] rounded-none" />
         </div>
       </div>
       <div className="flex items-center space-x-4">
         <Skeleton className="h-9 w-9 rounded-full" />
         <div className="space-y-2">
-          <Skeleton className="h-3.5 w-[250px]" />
-          <Skeleton className="h-2.5 w-[200px]" />
+          <Skeleton className="h-3.5 w-[250px] rounded-none" />
+          <Skeleton className="h-2.5 w-[200px] rounded-none" />
         </div>
       </div>
     </div>
@@ -60,33 +59,35 @@ function RowsSkeleton() {
 
 export function SelectBankAccountsModal() {
   const { toast } = useToast();
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useState<Accounts.Data[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
-
-  const [params, setParams] = useQueryStates({
-    step: parseAsStringEnum(["connect", "account", "gocardless"]),
-    error: parseAsBoolean,
-    ref: parseAsString,
-    token: parseAsString,
-    enrollment_id: parseAsString,
-    institution_id: parseAsString,
-    provider: parseAsStringEnum(["teller", "plaid", "gocardless"]),
-    countryCode: parseAsString,
-  });
+  const t = useI18n();
 
   const {
-    provider,
     step,
     error,
-    token,
+    setParams,
+    provider,
     ref,
-    enrollment_id,
     institution_id,
-    countryCode,
-  } = params;
+    token,
+    enrollment_id,
+  } = useConnectParams();
 
-  const isOpen = step === "account" && !error;
+  const isOpen = step === "account";
+
+  useEffect(() => {
+    if (error) {
+      // NOTE: On GoCardLess cancel flow
+      setParams({
+        step: "connect",
+        error: null,
+        details: null,
+        provider: null,
+      });
+    }
+  }, [error, setParams]);
 
   const onClose = () => {
     setParams(
@@ -94,7 +95,7 @@ export function SelectBankAccountsModal() {
       {
         // NOTE: Rerender so the overview modal is visible
         shallow: false,
-      }
+      },
     );
   };
 
@@ -106,7 +107,7 @@ export function SelectBankAccountsModal() {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       if (data.id) {
         setEventId(data.id);
       }
@@ -126,23 +127,22 @@ export function SelectBankAccountsModal() {
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getAccounts({
-        provider,
-        id: ref,
-        countryCode,
-        accessToken: token,
-        institutionId: institution_id,
+      const { data } = await getAccounts({
+        provider: provider as "teller" | "plaid" | "gocardless",
+        id: ref ?? undefined,
+        accessToken: token ?? undefined,
+        institutionId: institution_id ?? undefined,
       });
 
       setAccounts(data);
       setLoading(false);
 
-      // Set all accounts to checked
       if (!form.formState.isValid) {
         form.reset({
-          provider,
-          accessToken: token,
-          enrollmentId: enrollment_id,
+          provider: provider as "gocardless" | "plaid" | "teller",
+          accessToken: token ?? undefined,
+          enrollmentId: enrollment_id ?? undefined,
+          referenceId: ref ?? undefined,
           accounts: data.map((account) => ({
             name: account.name,
             institution_id: account.institution.id,
@@ -160,7 +160,16 @@ export function SelectBankAccountsModal() {
     if (isOpen && !accounts.length) {
       fetchData();
     }
-  }, [isOpen, provider]);
+  }, [
+    isOpen,
+    provider,
+    form,
+    accounts,
+    ref,
+    token,
+    institution_id,
+    enrollment_id,
+  ]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -178,16 +187,16 @@ export function SelectBankAccountsModal() {
                 <DialogHeader className="mb-8">
                   <DialogTitle>Select Accounts</DialogTitle>
                   <DialogDescription>
-                    Choose the accounts from which you wish to receive
-                    transactions. You can enable or disable accounts in team
-                    settings later if needed.
+                    Select the accounts to receive transactions. You can enable
+                    or disable them later in settings if needed. Note: Initial
+                    loading may take some time.
                   </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6 max-h-[320px] overflow-auto pb-[60px] relative scrollbar-hide"
+                    className="space-y-6 max-h-[320px] overflow-auto pb-[80px] relative scrollbar-hide"
                   >
                     {loading && <RowsSkeleton />}
 
@@ -202,24 +211,29 @@ export function SelectBankAccountsModal() {
                               key={account.id}
                               className="flex justify-between"
                             >
-                              <FormLabel className="flex items-between space-x-4">
-                                {account?.institution?.logo && (
-                                  <Image
-                                    src={account.institution.logo}
-                                    alt={account?.institution?.name}
-                                    width={34}
-                                    height={34}
-                                    className="rounded-full overflow-hidden border"
-                                  />
-                                )}
-                                <div className="space-y-1">
-                                  <p className="text-sm font-medium leading-none mb-1">
-                                    {account.name}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {account?.institution?.name} (
-                                    {account?.currency})
-                                  </p>
+                              <FormLabel className="flex items-center space-x-4 w-full mr-8">
+                                <Avatar className="size-[34px]">
+                                  <AvatarFallback className="text-[11px]">
+                                    {getInitials(account.name)}
+                                  </AvatarFallback>
+                                </Avatar>
+
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex flex-col">
+                                    <p className="font-medium leading-none mb-1 text-sm">
+                                      {account.name}
+                                    </p>
+                                    <span className="text-xs text-[#878787] font-normal">
+                                      {t(`account_type.${account.type}`)}
+                                    </span>
+                                  </div>
+
+                                  <span className="text-[#878787] text-sm">
+                                    <FormatAmount
+                                      amount={account.balance.amount}
+                                      currency={account.balance.currency}
+                                    />
+                                  </span>
                                 </div>
                               </FormLabel>
 
@@ -229,7 +243,7 @@ export function SelectBankAccountsModal() {
                                     checked={
                                       field.value.find(
                                         (value) =>
-                                          value.account_id === account.id
+                                          value.account_id === account.id,
                                       )?.enabled
                                     }
                                     onCheckedChange={(checked) => {
@@ -243,7 +257,7 @@ export function SelectBankAccountsModal() {
                                           }
 
                                           return value;
-                                        })
+                                        }),
                                       );
                                     }}
                                   />

@@ -1,91 +1,146 @@
 "use client";
 
-import { manualSyncTransactionsAction } from "@/actions/transactions/manual-sync-transactions-action";
+import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
+import { useI18n } from "@/locales/client";
+import { getInitials } from "@/utils/format";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@midday/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@midday/ui/avatar";
+import { cn } from "@midday/ui/cn";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@midday/ui/dropdown-menu";
 import { Switch } from "@midday/ui/switch";
-import { formatDistanceToNow } from "date-fns";
+import { MoreHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import Image from "next/image";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
+import { FormatAmount } from "./format-amount";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
-import { SyncTransactions } from "./sync-transactions";
+
+type Props = {
+  id: string;
+  name: string;
+  balance: number;
+  currency: string;
+  enabled: boolean;
+  manual: boolean;
+  type: string;
+};
 
 export function BankAccount({
   id,
   name,
-  bank_name,
-  logo,
-  last_accessed,
   currency,
+  balance,
   enabled,
   manual,
-}) {
+  type,
+}: Props) {
+  const [_, setStep] = useQueryState("step");
   const [isOpen, setOpen] = useState(false);
-  const [eventId, setEventId] = useState<string>();
-  const [isLoading, setLoading] = useState(false);
+  const t = useI18n();
 
   const updateAccount = useAction(updateBankAccountAction);
-
-  const manualSyncTransactions = useAction(manualSyncTransactionsAction, {
-    onExecute: () => setLoading(true),
-    onSuccess: (data) => {
-      if (data.id) {
-        setEventId(data.id);
-      }
-
-      setTimeout(() => {
-        // NOTE: Wait to event status is EXECUTING
-        setLoading(false);
-      }, 1500);
-    },
-  });
+  const deleteAccount = useAction(deleteBankAccountAction);
 
   return (
-    <div className="flex justify-between pt-6 items-center">
-      <div className="flex items-center">
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex text-start items-center w-full space-x-4"
-        >
-          {logo && (
-            <Image
-              src={logo}
-              alt={name}
-              width={34}
-              height={34}
-              quality={100}
-              className="rounded-full border border-1 aspect-square"
-            />
-          )}
+    <div
+      className={cn(
+        "flex justify-between items-center mb-4 pt-4",
+        !enabled && "opacity-60",
+      )}
+    >
+      <div className="flex items-center space-x-4 w-full mr-8">
+        <Avatar className="size-[34px]">
+          <AvatarFallback className="text-[11px]">
+            {getInitials(name)}
+          </AvatarFallback>
+        </Avatar>
 
+        <div className="flex items-center justify-between w-full">
           <div className="flex flex-col">
-            <p className="text-sm font-medium leading-none mb-1">{name}</p>
-            <span className="text-xs font-medium text-[#606060]">
-              {bank_name} {currency && `(${currency})`}
+            <p className="font-medium leading-none mb-1 text-sm">{name}</p>
+            <span className="text-xs text-[#878787] font-normal">
+              {t(`account_type.${type}`)}
             </span>
-
-            {!manual && (
-              <span className="text-xs text-[#606060]">
-                {last_accessed
-                  ? `Last accessed ${formatDistanceToNow(
-                      new Date(last_accessed)
-                    )} ago`
-                  : "Never accessed"}
-              </span>
-            )}
           </div>
-        </button>
+
+          <span className="text-[#878787] text-sm">
+            <FormatAmount amount={balance} currency={currency} />
+          </span>
+        </div>
       </div>
 
       <div className="flex items-center space-x-4">
-        {!manual && enabled && (
-          <SyncTransactions
-            eventId={eventId}
-            onClick={() => manualSyncTransactions.execute({ accountId: id })}
-            isLoading={isLoading}
-          />
-        )}
+        <AlertDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <MoreHorizontal size={20} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48">
+              <DropdownMenuItem onClick={() => setOpen(true)}>
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => {
+                  setStep("import-csv");
+                }}
+              >
+                Import
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>
+                <AlertDialogTrigger className="w-full text-left">
+                  Remove
+                </AlertDialogTrigger>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Account</AlertDialogTitle>
+              <AlertDialogDescription>
+                You are about to delete a bank account. If you proceed, all
+                transactions associated with this account will also be deleted.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={deleteAccount.status === "executing"}
+                onClick={() =>
+                  deleteAccount.execute({
+                    id,
+                  })
+                }
+              >
+                {deleteAccount.status === "executing" ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Confirm"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {!manual && (
           <Switch
@@ -102,7 +157,8 @@ export function BankAccount({
         id={id}
         onOpenChange={setOpen}
         isOpen={isOpen}
-        defaultValue={name}
+        defaultName={name}
+        defaultType={type}
       />
     </div>
   );

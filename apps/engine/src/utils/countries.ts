@@ -30,11 +30,11 @@ export const GOCARDLESS_COUNTRIES = [
   "ES",
   "SE",
   "GB",
-] as const;
+];
 
 export const PLAID_COUNTRIES = ["US", "CA"];
 
-export const TELLER_COUNTRIES = ["US"] as const;
+export const TELLER_COUNTRIES = ["US"];
 
 const combinedCountries = [
   ...new Set([

@@ -1,5 +1,5 @@
-import { deleteBankAccountAction } from "@/actions/delete-bank-account-action";
 import { updateBankAccountAction } from "@/actions/update-bank-account-action";
+import { useI18n } from "@/locales/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -10,21 +10,23 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 import { Loader2 } from "lucide-react";
-import { MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -33,24 +35,25 @@ const formSchema = z.object({
   name: z.string().min(1, {
     message: "Account Name must be at least 1 characters.",
   }),
+  type: z.string(),
 });
 
 type Props = {
   id: string;
   onOpenChange: (isOpen: boolean) => void;
   isOpen: boolean;
-  defaultValue: string;
+  defaultName: string;
+  defaultType?: string;
 };
 
 export function EditBankAccountModal({
   id,
   onOpenChange,
   isOpen,
-  defaultValue,
+  defaultName,
+  defaultType,
 }: Props) {
-  const deleteAccount = useAction(deleteBankAccountAction, {
-    onSuccess: () => onOpenChange(false),
-  });
+  const t = useI18n();
 
   const updateAccount = useAction(updateBankAccountAction, {
     onSuccess: () => onOpenChange(false),
@@ -59,7 +62,8 @@ export function EditBankAccountModal({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: defaultValue,
+      name: defaultName,
+      type: defaultType,
     },
   });
 
@@ -67,36 +71,41 @@ export function EditBankAccountModal({
     updateAccount.execute({ id, ...values });
   }
 
+  const accountTypes = () => {
+    return [
+      "depository",
+      "credit",
+      "other_asset",
+      "loan",
+      "other_liability",
+    ].map((type) => (
+      <SelectItem key={type} value={type}>
+        {t(`account_type.${type}`)}
+      </SelectItem>
+    ));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[455px]">
+      <DialogContent
+        className="max-w-[455px]"
+        onOpenAutoFocus={(evt) => evt.preventDefault()}
+      >
         <div className="p-4">
           <DialogHeader>
             <DialogTitle className="flex justify-between">
-              <span>Edit Account</span>
-              <DropdownMenu>
-                <DropdownMenuTrigger className="mr-8 -mt-[5px]">
-                  <MoreHorizontal size={20} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    className="text-[#F84E4E]"
-                    onClick={() => deleteAccount.execute({ id })}
-                  >
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              Edit Account
             </DialogTitle>
           </DialogHeader>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 mb-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
+                    <FormLabel>Name</FormLabel>
                     <FormControl>
                       <Input
                         autoFocus
@@ -108,13 +117,37 @@ export function EditBankAccountModal({
                         {...field}
                       />
                     </FormControl>
-
+                    <FormDescription>
+                      You can change the name of the account here
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <DialogFooter className="mt-12 w-full">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Type</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Change account type" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>{accountTypes()}</SelectContent>
+                    </Select>
+                    <FormDescription>Change the account type</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter className="mt-10 w-full">
                 <div className="space-y-4 w-full">
                   <Button
                     disabled={updateAccount.status === "executing"}

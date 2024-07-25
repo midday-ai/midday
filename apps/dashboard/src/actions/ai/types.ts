@@ -5,7 +5,7 @@ export type Message = CoreMessage & {
   id: string;
 };
 
-export interface Chat extends Record<string, any> {
+export interface Chat extends Record<string, unknown> {
   id: string;
   title: string;
   createdAt: Date;
@@ -14,7 +14,6 @@ export interface Chat extends Record<string, any> {
 }
 
 export type SettingsResponse = {
-  provider: "openai" | "mistralai";
   enabled: boolean;
 };
 
@@ -45,6 +44,8 @@ export interface ClientMessage {
   role: "user" | "assistant";
   display: ReactNode;
 }
+
+type ValueOrUpdater<T> = T | ((prevState: T) => T);
 
 export type MutableAIState = {
   get: () => AIState;

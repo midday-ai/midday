@@ -24,7 +24,11 @@ import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
 
-export function DeleteTeam({ teamId }) {
+interface DeleteTeamProps {
+  teamId: string;
+}
+
+export function DeleteTeam({ teamId }: DeleteTeamProps) {
   const router = useRouter();
   const deleteTeam = useAction(deleteTeamAction, {
     onSuccess: () => router.push("/teams"),

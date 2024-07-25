@@ -79,7 +79,7 @@ export function ShareReport({ defaultValue, type, currency }: Props) {
         title: "Something went wrong pleaase try again.",
       });
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setOpen(false);
 
       const { id } = toast({

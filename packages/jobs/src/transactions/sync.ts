@@ -18,7 +18,7 @@ client.defineJob({
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(provider, access_token)"
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
       )
       .eq("team_id", teamId)
       .eq("enabled", true)
@@ -39,18 +39,24 @@ client.defineJob({
           accessToken: account.bank_connection?.access_token,
         });
 
-        // Update bank account
+        // Update account balance
+        if (balance?.amount) {
+          await io.supabase.client
+            .from("bank_accounts")
+            .update({ balance: balance.amount })
+            .eq("id", account.id);
+        }
+
+        // Update bank connection last accessed
+        // TODO: Fix so it only update once per connection
         await io.supabase.client
-          .from("bank_accounts")
-          .update({
-            balance: balance?.amount,
-            last_accessed: new Date().toISOString(),
-          })
-          .eq("id", account.id);
+          .from("bank_connections")
+          .update({ last_accessed: new Date().toISOString() })
+          .eq("id", account.bank_connection.id);
       } catch (error) {
         await io.logger.error(
           `Update Account Balance Error. Provider: ${account.bank_connection.provider} Account id: ${account.account_id}`,
-          error
+          error,
         );
       }
 

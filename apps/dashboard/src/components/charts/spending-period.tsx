@@ -49,12 +49,12 @@ const options = [
 
 export function SpendingPeriod({ initialPeriod }) {
   const t = useI18n();
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     changeSpendingPeriodAction,
-    initialPeriod,
-    (_, newState) => {
-      return newState;
-    }
+    {
+      currentState: initialPeriod,
+      updateFn: (_, newState) => newState,
+    },
   );
 
   return (
@@ -66,7 +66,7 @@ export function SpendingPeriod({ initialPeriod }) {
       <DropdownMenu>
         <DropdownMenuTrigger>
           <div className="flex items-center space-x-2">
-            <span>{t(`spending_period.${optimisticData.id}`)}</span>
+            <span>{t(`spending_period.${optimisticState.id}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
@@ -75,7 +75,7 @@ export function SpendingPeriod({ initialPeriod }) {
             <DropdownMenuCheckboxItem
               key={option.id}
               onCheckedChange={() => execute(option)}
-              checked={option.id === optimisticData?.id}
+              checked={option.id === optimisticState?.id}
             >
               {t(`spending_period.${option.id}`)}
             </DropdownMenuCheckboxItem>

@@ -24,21 +24,21 @@ export function SelectChartCurrency({
   defaultValue,
   className,
 }: Props) {
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     changeChartCurrencyAction,
-    defaultValue,
-    (_, newState) => {
-      return newState;
-    }
+    {
+      currentState: defaultValue,
+      updateFn: (_, newState) => newState,
+    },
   );
 
   return (
     <Select
-      defaultValue={optimisticData || currencies.at(0)?.id}
+      defaultValue={optimisticState || currencies.at(0)?.id}
       onValueChange={execute}
     >
       <SelectTrigger className={cn("w-[90px] font-medium", className)}>
-        <span>{optimisticData}</span>
+        <span>{optimisticState}</span>
       </SelectTrigger>
       <SelectContent>
         {currencies.map((currency) => {

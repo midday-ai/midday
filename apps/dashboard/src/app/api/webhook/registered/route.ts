@@ -1,9 +1,10 @@
 import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
+import { logger } from "@/utils/logger";
 import WelcomeEmail from "@midday/email/emails/welcome";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { renderAsync } from "@react-email/components";
+import { renderAsync } from "@react-email/render";
 import { LoopsClient } from "loops";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
@@ -33,7 +34,7 @@ export async function POST(req: Request) {
 
   const hmacMatch = crypto.timingSafeEqual(
     decodedSignature,
-    calculatedSignature
+    calculatedSignature,
   );
 
   if (!hmacMatch) {
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
       html: await renderAsync(
         WelcomeEmail({
           fullName,
-        })
+        }),
       ),
       headers: {
         "X-Entity-Ref-ID": nanoid(),
@@ -97,8 +98,10 @@ export async function POST(req: Request) {
         lastName,
       });
     }
-  } catch (err) {
-    console.log(err);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+
+    logger(message);
   }
 
   return NextResponse.json({ success: true });

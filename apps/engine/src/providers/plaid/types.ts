@@ -5,6 +5,7 @@ import type {
   Transaction,
   TransactionsSyncResponse,
 } from "plaid";
+import type { Balance } from "../types";
 
 export type LinkTokenCreateRequest = {
   userId: string;
@@ -49,13 +50,13 @@ export type Institution = {
 
 export type TransformInstitution = BaseInstitution;
 
-export type AccountWithintitution = AccountsGetResponse["accounts"][0] & {
+export type AccountWithInstitution = AccountsGetResponse["accounts"][0] & {
   institution: Institution;
 };
 
-export type GetAccountsResponse = AccountWithintitution[];
+export type GetAccountsResponse = AccountWithInstitution[];
 
-export type TransformAccount = AccountWithintitution;
+export type TransformAccount = AccountWithInstitution;
 
 export type TransformAccountBalance =
   AccountsGetResponse["accounts"][0]["balances"];

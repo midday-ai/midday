@@ -16,8 +16,8 @@ export function TrackerSelectProject({ setParams, teamId }) {
   const [isLoading, setLoading] = useState(false);
 
   const action = useAction(createProjectAction, {
-    onSuccess: (project) => {
-      setParams({ projectId: project.id });
+    onSuccess: ({ data: project }) => {
+      setParams({ projectId: project?.id || null });
     },
     onError: () => {
       toast({

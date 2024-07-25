@@ -43,6 +43,10 @@ test("Transform accounts", () => {
         iban: "123",
         ownerName: "Name",
       },
+      balance: {
+        currency: "SEK",
+        amount: "1942682.86",
+      },
       institution: {
         id: "PLEO_PLEODK00",
         name: "Pleo",

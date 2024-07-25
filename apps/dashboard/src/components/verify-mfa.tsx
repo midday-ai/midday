@@ -22,6 +22,12 @@ export function VerifyMfa() {
         setError(true);
       }
 
+      if (!factors.data) {
+        setValidating(false);
+        setError(true);
+        return;
+      }
+
       const totpFactor = factors.data.totp[0];
 
       if (!totpFactor) {
@@ -74,8 +80,7 @@ export function VerifyMfa() {
         <InputOTP
           onComplete={onComplete}
           maxLength={6}
-          numeric="numeric"
-          className={error && "invalid"}
+          className={error ? "invalid" : undefined}
           disabled={isValidating}
           render={({ slots }) => (
             <InputOTPGroup>

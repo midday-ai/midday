@@ -230,7 +230,7 @@ test("Transform accounts", () => {
     transformAccount({
       account_id: "kKZWQnoZVqcBeN71qdyoh8mVoErgb7tL7gmBL",
       balances: {
-        available: null,
+        available: 56302.06,
         current: 56302.06,
         iso_currency_code: "CAD",
         limit: null,

@@ -1,3 +1,4 @@
+import { getAccessValidForDays } from "@midday/engine/src/providers/gocardless/utils";
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";
@@ -16,6 +17,7 @@ type CreateBankAccountsPayload = {
   balance: number;
   accessToken?: string;
   enrollmentId?: string;
+  referenceId?: string;
   teamId: string;
   userId: string;
   provider: "gocardless" | "teller" | "plaid";
@@ -27,10 +29,11 @@ export async function createBankAccounts(
     accounts,
     accessToken,
     enrollmentId,
+    referenceId,
     teamId,
     userId,
     provider,
-  }: CreateBankAccountsPayload
+  }: CreateBankAccountsPayload,
 ) {
   // Get first account to create a bank connection
   const account = accounts?.at(0);
@@ -39,10 +42,13 @@ export async function createBankAccounts(
     return;
   }
 
-  // NOTE: GoCardLess connection expires after 180 days
+  // NOTE: GoCardLess connection expires after 90-180 days
   const expiresAt =
     provider === "gocardless"
-      ? addDays(new Date(), 180).toDateString()
+      ? addDays(
+          new Date(),
+          getAccessValidForDays({ institutionId: account.institution_id }),
+        ).toDateString()
       : undefined;
 
   const bankConnection = await supabase
@@ -56,11 +62,12 @@ export async function createBankAccounts(
         provider,
         access_token: accessToken,
         enrollment_id: enrollmentId,
+        reference_id: referenceId,
         expires_at: expiresAt,
       },
       {
         onConflict: "institution_id, team_id",
-      }
+      },
     )
     .select()
     .single();
@@ -81,32 +88,36 @@ export async function createBankAccounts(
         }),
         {
           onConflict: "account_id",
-        }
-      )
+        },
+      ),
     )
     .select();
 }
 
 type UpdateBankConnectionData = {
   id: string;
-  teamId: string;
+  referenceId?: string;
 };
 
 // NOTE: Only GoCardLess needs to be updated
 export async function updateBankConnection(
   supabase: Client,
-  data: UpdateBankConnectionData
+  data: UpdateBankConnectionData,
 ) {
-  const { id, teamId } = data;
+  const { id, referenceId } = data;
 
   return await supabase
     .from("bank_connections")
     .update({
-      expires_at: addDays(new Date(), 180).toDateString(),
+      expires_at: addDays(
+        new Date(),
+        getAccessValidForDays({ institutionId: id }),
+      ).toDateString(),
+      reference_id: referenceId,
     })
-    .eq("team_id", teamId)
     .eq("id", id)
-    .select();
+    .select()
+    .single();
 }
 
 type CreateTransactionsData = {
@@ -116,7 +127,7 @@ type CreateTransactionsData = {
 
 export async function createTransactions(
   supabase: Client,
-  data: CreateTransactionsData
+  data: CreateTransactionsData,
 ) {
   const { transactions, teamId } = data;
 
@@ -124,14 +135,14 @@ export async function createTransactions(
     transactions.map((transaction) => ({
       ...transaction,
       team_id: teamId,
-    }))
+    })),
   );
 }
 
 export async function updateTransaction(
   supabase: Client,
   id: string,
-  data: any
+  data: any,
 ) {
   return supabase
     .from("transactions")
@@ -194,7 +205,7 @@ type UpdateUserTeamRoleParams = {
 
 export async function updateUserTeamRole(
   supabase: Client,
-  params: UpdateUserTeamRoleParams
+  params: UpdateUserTeamRoleParams,
 ) {
   const { role, userId, teamId } = params;
 
@@ -220,7 +231,7 @@ type DeleteTeamMemberParams = {
 
 export async function deleteTeamMember(
   supabase: Client,
-  params: DeleteTeamMemberParams
+  params: DeleteTeamMemberParams,
 ) {
   return supabase
     .from("users_on_team")
@@ -244,11 +255,12 @@ type UpdateBankAccountParams = {
   id: string;
   teamId: string;
   name: string;
+  type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
 };
 
 export async function updateBankAccount(
   supabase: Client,
-  params: UpdateBankAccountParams
+  params: UpdateBankAccountParams,
 ) {
   const { id, teamId, ...data } = params;
 
@@ -268,7 +280,7 @@ type UpdateSimilarTransactionsParams = {
 
 export async function updateSimilarTransactions(
   supabase: Client,
-  params: UpdateSimilarTransactionsParams
+  params: UpdateSimilarTransactionsParams,
 ) {
   const { id, team_id } = params;
 
@@ -300,7 +312,7 @@ export type Attachment = {
 
 export async function createAttachments(
   supabase: Client,
-  attachments: Attachment[]
+  attachments: Attachment[],
 ) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
@@ -310,7 +322,7 @@ export async function createAttachments(
       attachments.map((attachment) => ({
         ...attachment,
         team_id: userData?.team_id,
-      }))
+      })),
     )
     .select();
 
@@ -415,7 +427,7 @@ type UpdateInboxByIdParams = {
 
 export async function updateInboxById(
   supabase: Client,
-  params: UpdateInboxByIdParams
+  params: UpdateInboxByIdParams,
 ) {
   const { id, teamId, ...data } = params;
 
@@ -473,7 +485,7 @@ type CreateProjectParams = {
 
 export async function createProject(
   supabase: Client,
-  params: CreateProjectParams
+  params: CreateProjectParams,
 ) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
 

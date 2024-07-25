@@ -37,7 +37,6 @@ const RenderComponent = ({
   src,
   className,
   width,
-  height,
   onLoaded,
   setError,
 }) => {
@@ -184,14 +183,14 @@ export function FilePreview({
           className={cn(
             "absolute top-0 left-0 z-20 pointer-events-none w-full h-full rounded-none",
             isLoaded && "hidden",
-            error && "hidden"
+            error && "hidden",
           )}
         />
         <div
           className={cn(
             "w-full h-full items-center flex justify-center bg-[#F2F1EF] dark:bg-secondary",
             !isLoaded && "opacity-0",
-            error && "opacity-1 bg-transparent"
+            error && "opacity-1 bg-transparent",
           )}
         >
           {error ? (

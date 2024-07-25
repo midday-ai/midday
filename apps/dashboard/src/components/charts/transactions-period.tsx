@@ -15,12 +15,12 @@ const options = ["all", "income", "expense"];
 
 export function TransactionsPeriod({ type, disabled }) {
   const t = useI18n();
-  const { execute, optimisticData } = useOptimisticAction(
+  const { execute, optimisticState } = useOptimisticAction(
     changeTransactionsPeriodAction,
-    type,
-    (_, newState) => {
-      return newState;
-    }
+    {
+      currentState: type,
+      updateFn: (_, newState) => newState,
+    },
   );
 
   return (
@@ -32,7 +32,7 @@ export function TransactionsPeriod({ type, disabled }) {
       <DropdownMenu>
         <DropdownMenuTrigger disabled={disabled}>
           <div className="flex items-center space-x-2">
-            <span>{t(`transactions_period.${optimisticData}`)}</span>
+            <span>{t(`transactions_period.${optimisticState}`)}</span>
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
@@ -41,7 +41,7 @@ export function TransactionsPeriod({ type, disabled }) {
             <DropdownMenuCheckboxItem
               key={option}
               onCheckedChange={() => execute(option)}
-              checked={option === optimisticData}
+              checked={option === optimisticState}
             >
               {t(`transactions_period.${option}`)}
             </DropdownMenuCheckboxItem>

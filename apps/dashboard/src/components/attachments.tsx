@@ -27,8 +27,8 @@ export function Attachments({ id, data }) {
   const { uploadFile } = useUpload();
 
   const createAttachments = useAction(createAttachmentsAction, {
-    onSuccess: (newFiles) => {
-      const uniqueFiles = new Set([...files, ...newFiles]);
+    onSuccess: ({ data }) => {
+      const uniqueFiles = new Set([...files, ...(data ?? [])]);
       setFiles([...uniqueFiles]);
     },
   });
@@ -68,7 +68,7 @@ export function Attachments({ id, data }) {
           transaction_id: id,
           type: acceptedFile.type,
         };
-      })
+      }),
     );
 
     createAttachments.execute(uploadedFiles);
@@ -129,7 +129,7 @@ export function Attachments({ id, data }) {
       <div
         className={cn(
           "mt-4 w-full h-[120px] border-dotted border-2 border-border text-center flex flex-col justify-center space-y-1 transition-colors text-[#606060]",
-          isDragActive && "bg-secondary text-primary"
+          isDragActive && "bg-secondary text-primary",
         )}
         {...getRootProps()}
       >

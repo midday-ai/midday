@@ -12,6 +12,9 @@ export const HealthSchema = z
       teller: z.object({
         healthy: z.boolean(),
       }),
+      search: z.object({
+        healthy: z.boolean(),
+      }),
     }),
   })
   .openapi("HealthSchema");

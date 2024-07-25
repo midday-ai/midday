@@ -10,6 +10,7 @@ import type {
   GetAccountResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetInstitutionResponse,
   GetInstitutionsResponse,
   GetRefreshTokenResponse,
   GetRequisitionResponse,
@@ -21,14 +22,12 @@ import type {
   PostRequisitionsRequest,
   PostRequisitionsResponse,
 } from "./types";
-import { getMaxHistoricalDays } from "./utils";
+import { getAccessValidForDays, getMaxHistoricalDays } from "./utils";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
 
   #api: XiorInstance | null = null;
-
-  #accessValidForDays = 180;
 
   // Cache keys
   #accessTokenCacheKey = "gocardless_access_token";
@@ -158,8 +157,8 @@ export class GoCardLessApi {
     });
 
     if (countryCode) {
-      return response.filter((insitution) =>
-        insitution.countries.includes(countryCode),
+      return response.filter((institution) =>
+        institution.countries.includes(countryCode),
       );
     }
 
@@ -200,7 +199,7 @@ export class GoCardLessApi {
       {
         institution_id: institutionId,
         access_scope: ["balances", "details", "transactions"],
-        access_valid_for_days: this.#accessValidForDays,
+        access_valid_for_days: getAccessValidForDays({ institutionId }),
         max_historical_days: maxHistoricalDays,
       },
     );
@@ -223,24 +222,30 @@ export class GoCardLessApi {
     };
   }
 
-  async getAccounts({
-    id,
-    countryCode,
-  }: GetAccountsRequest): Promise<GetAccountsResponse> {
-    const [intitutions, response] = await Promise.all([
-      this.getInstitutions({ countryCode }),
-      this.getRequestion(id),
-    ]);
+  async getInstitution(id: string): Promise<GetInstitutionResponse> {
+    const token = await this.#getAccessToken();
+
+    return this.#get<GetInstitutionResponse>(
+      `/api/v2/institutions/${id}/`,
+      token,
+    );
+  }
+
+  async getAccounts({ id }: GetAccountsRequest): Promise<GetAccountsResponse> {
+    const response = await this.getRequestion(id);
 
     return Promise.all(
       response.accounts?.map(async (acountId: string) => {
-        const accountDetails = await this.getAccountDetails(acountId);
+        const [details, balance, institution] = await Promise.all([
+          this.getAccountDetails(acountId),
+          this.getAccountBalance(acountId),
+          this.getInstitution(response.institution_id),
+        ]);
 
         return {
-          ...accountDetails,
-          institution: intitutions.find(
-            (institution) => institution.id === accountDetails.institution_id,
-          ),
+          balance,
+          institution,
+          ...details,
         };
       }),
     );

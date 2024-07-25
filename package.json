@@ -13,6 +13,7 @@
     "dev:api": "turbo dev --filter=@midday/api",
     "dev:dashboard": "turbo dev --filter=@midday/dashboard",
     "build:dashboard": "turbo build --filter=@midday/dashboard",
+    "dev:engine": "turbo dev --filter=@midday/engine",
     "dev:website": "turbo dev --filter=@midday/website ",
     "dev:desktop": "turbo dev --filter=@midday/desktop",
     "jobs:dashboard": "turbo jobs --filter=@midday/dashboard",
@@ -23,8 +24,8 @@
   "dependencies": {
     "@biomejs/biome": "1.8.3",
     "@manypkg/cli": "^0.21.4",
-    "turbo": "2.0.6",
-    "typescript": "^5.5.3"
+    "turbo": "2.0.9",
+    "typescript": "^5.5.4"
   },
   "packageManager": "bun@1.1.16",
   "resolutions": {

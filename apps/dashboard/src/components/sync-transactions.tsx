@@ -1,5 +1,4 @@
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -7,18 +6,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { useEventDetails } from "@trigger.dev/react";
 
-export function SyncTransactions({
-  eventId,
-  onClick,
-  isLoading: initialIsLoading,
-}) {
-  const { data } = useEventDetails(eventId);
-  const firstRun = data?.runs?.at(0);
+type Props = {
+  disabled: boolean;
+  onClick: () => void;
+};
 
-  const isLoading = firstRun?.status === "EXECUTING" || initialIsLoading;
-
+export function SyncTransactions({ onClick, disabled }: Props) {
   return (
     <TooltipProvider delayDuration={70}>
       <Tooltip>
@@ -27,18 +21,15 @@ export function SyncTransactions({
             variant="outline"
             size="icon"
             className="rounded-full w-7 h-7 flex items-center"
-            disabled={isLoading}
+            disabled={disabled}
             onClick={onClick}
           >
-            <Icons.Refresh
-              size={16}
-              className={cn(isLoading && "animate-spin")}
-            />
+            <Icons.Refresh size={16} />
           </Button>
         </TooltipTrigger>
 
         <TooltipContent className="px-3 py-1.5 text-xs" sideOffset={10}>
-          Get latest transactions
+          Synchronize
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

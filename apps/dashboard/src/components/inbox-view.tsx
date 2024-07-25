@@ -57,7 +57,7 @@ export function InboxView({
 
   const [params, setParams] = useQueryStates({
     inboxId: parseAsString.withDefault(
-      items.filter(todoFilter)?.at(0)?.id ?? null
+      items.filter(todoFilter)?.at(0)?.id ?? null,
     ),
     q: parseAsString.withDefault(""),
     tab: parseAsStringEnum(TAB_ITEMS).withDefault("todo"),
@@ -66,11 +66,11 @@ export function InboxView({
   const debouncedSearchTerm = useDebounce(params.q, 300);
 
   const search = useAction(searchAction, {
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setLoading(false);
 
       if (data?.length) {
-        setParams({ id: data?.at(0)?.id });
+        setParams({ id: data?.at(0)?.id || null });
       }
     },
     onError: () => setLoading(false),
@@ -118,7 +118,7 @@ export function InboxView({
             default:
               break;
           }
-        }
+        },
       )
       .subscribe();
 
@@ -145,48 +145,50 @@ export function InboxView({
 
   const data = params.q ? search.result?.data || [] : items;
 
-  const { execute: updateInbox, optimisticData } = useOptimisticAction(
+  const { execute: updateInbox, optimisticState } = useOptimisticAction(
     updateInboxAction,
-    data,
-    (state, payload) => {
-      if (payload.status === "deleted") {
-        return state.filter((item) => item.id !== payload.id);
-      }
-
-      return items.map((item) => {
-        if (item.id === payload.id) {
-          return {
-            ...item,
-            ...payload,
-          };
+    {
+      currentState: data,
+      updateFn: (state, payload) => {
+        if (payload.status === "deleted") {
+          return state.filter((item) => item.id !== payload.id);
         }
 
-        return item;
-      });
-    }
+        return items.map((item) => {
+          if (item.id === payload.id) {
+            return {
+              ...item,
+              ...payload,
+            };
+          }
+
+          return item;
+        });
+      },
+    },
   );
 
   const getCurrentItems = (tab: (typeof TAB_ITEMS)[0]) => {
     if (params.q) {
-      return optimisticData;
+      return optimisticState;
     }
 
     switch (tab) {
       case "todo":
-        return optimisticData?.filter(todoFilter);
+        return optimisticState?.filter(todoFilter);
       case "done":
-        return optimisticData?.filter(doneFilter);
+        return optimisticState?.filter(doneFilter);
       default:
-        return optimisticData?.filter(todoFilter);
+        return optimisticState?.filter(todoFilter);
     }
   };
 
   const currentItems = getCurrentItems(params.tab);
   const selectedItems = currentItems?.find(
-    (item) => item.id === params.inboxId
+    (item) => item.id === params.inboxId,
   );
   const currentIndex = currentItems?.findIndex(
-    (item) => item.id === params.inboxId
+    (item) => item.id === params.inboxId,
   );
   const currentTabEmpty = Boolean(currentItems?.length === 0);
 

@@ -1,4 +1,5 @@
 import { Providers } from "@/common/schema";
+import { getFileExtension, getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
 import type {
   Account as BaseAccount,
@@ -162,16 +163,13 @@ const transformAccountName = (account: TransformAccountName) => {
     return account.product;
   }
 
-  if (account?.institution?.name) {
-    return account.institution.name;
-  }
-
   return "No name";
 };
 
 export const transformAccount = ({
   id,
   account,
+  balance,
   institution,
 }: TransformAccount): BaseAccount => {
   return {
@@ -179,20 +177,12 @@ export const transformAccount = ({
     type: "depository",
     name: transformAccountName({
       name: account.name,
-      institution,
       product: account.product,
     }),
     currency: account.currency,
-    institution: institution
-      ? {
-          id: institution?.id,
-          logo: institution?.logo,
-          name: institution?.name,
-          provider: Providers.Enum.gocardless,
-        }
-      : null,
-    provider: Providers.Enum.gocardless,
     enrollment_id: null,
+    balance: transformAccountBalance(balance),
+    institution: transformInstitution(institution),
   };
 };
 
@@ -204,10 +194,10 @@ export const transformAccountBalance = (
 });
 
 export const transformInstitution = (
-  insitution: Institution,
+  institution: Institution,
 ): TransformInstitution => ({
-  id: insitution.id,
-  name: insitution.name,
-  logo: insitution.logo ?? null,
+  id: institution.id,
+  name: institution.name,
+  logo: getLogoURL(institution.id, getFileExtension(institution.logo)),
   provider: Providers.Enum.gocardless,
 });

@@ -26,7 +26,7 @@ export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
   const [isLoading, setLoading] = useState(false);
 
   const getVatRate = useAction(getVatRateAction, {
-    onSuccess: (data) => {
+    onSuccess: ({ data }) => {
       setLoading(false);
 
       if (data) {
@@ -60,7 +60,7 @@ export function VatAssistant({ name, onSelect, isFocused, value }: Props) {
               className={cn(
                 "pointer-events-none opacity-50 transition-colors",
                 result?.vat && "opacity-100",
-                isLoading && "animate-pulse opacity-100"
+                isLoading && "animate-pulse opacity-100",
               )}
             />
           </div>
