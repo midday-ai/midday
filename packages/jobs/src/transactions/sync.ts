@@ -1,7 +1,7 @@
-import { Provider } from "@midday/providers";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
+import { engine } from "../engine";
 import { scheduler } from "./scheduler";
 
 client.defineJob({
@@ -29,13 +29,10 @@ client.defineJob({
     }
 
     const promises = accountsData?.map(async (account) => {
-      const provider = new Provider({
-        provider: account.bank_connection.provider,
-      });
-
       try {
-        const balance = await provider.getAccountBalance({
-          accountId: account.account_id,
+        const balance = await engine.accounts.balance({
+          provider: account.bank_connection.provider,
+          id: account.account_id,
           accessToken: account.bank_connection?.access_token,
         });
 
@@ -60,13 +57,11 @@ client.defineJob({
         );
       }
 
-      return provider.getTransactions({
-        teamId: account.team_id,
+      return engine.transactions.list({
+        provider: account.bank_connection.provider,
         accountId: account.account_id,
-        accessToken: account.bank_connection?.access_token,
-        bankAccountId: account.id,
-        latest: true,
         accountType: account.type,
+        latest: true,
       });
     });
 

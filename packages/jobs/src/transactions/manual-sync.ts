@@ -1,10 +1,10 @@
 import { processPromisesBatch } from "@/utils/process";
-import { Provider } from "@midday/providers";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
+import { engine } from "../engine";
 
 const BATCH_LIMIT = 300;
 
@@ -35,20 +35,15 @@ client.defineJob({
       .eq("enabled", true);
 
     const promises = accountsData?.map(async (account) => {
-      const provider = new Provider({
+      const transactions = await engine.transactions.list({
         provider: account.bank_connection.provider,
-      });
-
-      const transactions = await provider.getTransactions({
-        teamId: account.team_id,
         accountId: account.account_id,
-        accessToken: account.bank_connection?.access_token,
-        bankAccountId: account.id,
         accountType: account.type,
       });
 
-      const balance = await provider.getAccountBalance({
-        accountId: account.account_id,
+      const balance = await engine.accounts.balance({
+        provider: account.bank_connection.provider,
+        id: account.account_id,
         accessToken: account.bank_connection?.access_token,
       });
 

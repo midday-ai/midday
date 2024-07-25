@@ -16,3 +16,9 @@ export type FindIndexesByKeyParams = {
   key: "date" | "amount" | "description";
   parse?: (value: string | number) => string | number;
 };
+
+export type Transaction = {
+  date: string;
+  description: string;
+  amount: number;
+};

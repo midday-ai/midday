@@ -1,10 +1,13 @@
 import crypto from "node:crypto";
-import type { Transaction } from "@midday/providers/src/types";
 import { capitalCase } from "change-case";
 import { parse } from "csv-parse/sync";
 import { formatISO } from "date-fns";
 import { z } from "zod";
-import type { ExtractedTransaction, FindIndexesByKeyParams } from "./types";
+import type {
+  ExtractedTransaction,
+  FindIndexesByKeyParams,
+  Transaction,
+} from "./types";
 
 function generateId(value: string) {
   const hash = crypto.createHash("sha256");
@@ -47,7 +50,7 @@ function detectDelimiter(input: string) {
   const idx = delimiters
     .map((d) => input.indexOf(d))
     .reduce((prev, cur) =>
-      prev === -1 || (cur !== -1 && cur < prev) ? cur : prev
+      prev === -1 || (cur !== -1 && cur < prev) ? cur : prev,
     );
 
   return input[idx] || ",";
@@ -87,7 +90,7 @@ export const findIndexesByKey = ({
   const values = input.map((v) => parse(v[key]));
 
   const matchIndices = raw.map((r) =>
-    r.findIndex((v) => values.includes(parse(v)))
+    r.findIndex((v) => values.includes(parse(v))),
   );
 
   return Math.max(...matchIndices);
