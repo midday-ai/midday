@@ -1,6 +1,6 @@
 "use server";
 
-import Midday from "@midday-ai/engine";
+import { engine } from "@/utils/engine";
 
 type GetAccountParams = {
   id?: string;
@@ -8,8 +8,6 @@ type GetAccountParams = {
   institutionId?: string; // Plaid
   provider: "gocardless" | "teller" | "plaid";
 };
-
-const engine = new Midday();
 
 export async function getAccounts({
   id,

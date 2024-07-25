@@ -1,11 +1,9 @@
 "use server";
 
-import Midday from "@midday-ai/engine";
+import { engine } from "@/utils/engine";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
-
-const engine = new Midday();
 
 export const reconnectGoCardLessLinkAction = authActionClient
   .schema(

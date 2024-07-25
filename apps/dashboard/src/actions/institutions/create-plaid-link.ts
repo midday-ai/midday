@@ -1,9 +1,7 @@
 "use server";
 
-import Midday from "@midday-ai/engine";
+import { engine } from "@/utils/engine";
 import { getSession } from "@midday/supabase/cached-queries";
-
-const engine = new Midday();
 
 export const createPlaidLinkTokenAction = async (accessToken?: string) => {
   const {

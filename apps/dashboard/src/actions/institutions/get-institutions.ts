@@ -1,13 +1,11 @@
 "use server";
 
-import Midday from "@midday-ai/engine";
+import { engine } from "@/utils/engine";
 
 type GetAccountParams = {
   countryCode: string;
   query?: string;
 };
-
-const engine = new Midday();
 
 export async function getInstitutions({
   countryCode,

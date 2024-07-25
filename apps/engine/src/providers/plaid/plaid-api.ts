@@ -38,7 +38,8 @@ export class PlaidApi {
     this.#clientSecret = params.envs.PLAID_SECRET;
 
     const configuration = new Configuration({
-      basePath: PlaidEnvironments.Production,
+      basePath:
+        PlaidEnvironments[params.envs.PLAID_ENVIRONMENT || "production"],
       baseOptions: {
         headers: {
           "PLAID-CLIENT-ID": this.#clientId,

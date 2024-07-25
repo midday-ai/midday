@@ -1,8 +1,6 @@
 "use server";
 
-import Midday from "@midday-ai/engine";
-
-const engine = new Midday();
+import { engine } from "@/utils/engine";
 
 export const exchangePublicToken = async (token: string) => {
   const { data } = await engine.auth.plaid.exchange({ token });

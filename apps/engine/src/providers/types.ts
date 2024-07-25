@@ -11,6 +11,7 @@ export type ProviderParams = {
     GOCARDLESS_SECRET_ID: string;
     PLAID_CLIENT_ID: string;
     PLAID_SECRET: string;
+    PLAID_ENVIRONMENT: string;
   };
 };
 

@@ -1,10 +1,8 @@
 "use server";
 
-import Midday from "@midday-ai/engine";
+import { engine } from "@/utils/engine";
 import { authActionClient } from "../safe-action";
 import { updateInstitutionUsageSchema } from "../schema";
-
-const engine = new Midday();
 
 export const updateInstitutionUsageAction = authActionClient
   .schema(updateInstitutionUsageSchema)

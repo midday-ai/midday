@@ -13,11 +13,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.39",
+    "@ai-sdk/openai": "^0.0.40",
     "@baselime/node-opentelemetry": "^0.5.8",
     "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.9.0",
-    "@midday-ai/engine": "^0.1.0-alpha.18",
+    "@midday-ai/engine": "^0.1.0-alpha.19",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/jobs": "workspace:*",
@@ -40,7 +40,7 @@
     "@upstash/ratelimit": "^2.0.1",
     "@vercel/speed-insights": "^1.0.12",
     "@zip.js/zip.js": "2.7.47",
-    "ai": "^3.2.35",
+    "ai": "^3.2.36",
     "change-case": "^5.4.4",
     "dub": "^0.29.18",
     "framer-motion": "^11.3.17",
