@@ -13,6 +13,7 @@
     "@hono/zod-openapi": "^0.15.1",
     "@hono/zod-validator": "^0.2.2",
     "hono": "^4.5.1",
+    "plaid": "^26.0.0",
     "typesense": "^1.8.2",
     "xior": "^0.5.5",
     "zod": "^3.23.8"
