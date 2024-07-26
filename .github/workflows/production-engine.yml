@@ -33,4 +33,4 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "apps/engine"
           wranglerVersion: "3.66.0"
-          command: deploy --minify src/index.ts --name=engine
+          command: deploy --minify src/index.ts --env production
