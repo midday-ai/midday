@@ -8,6 +8,7 @@ env:
   SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
   SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
   SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+  MIDDAY_ENGINE_API_KEY: secret # Needed for build
   SENTRY_LOG_LEVEL: info
   NODE_OPTIONS: "--max_old_space_size=4096"
 on:
