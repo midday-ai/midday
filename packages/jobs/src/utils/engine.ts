@@ -6,5 +6,5 @@ export const engine = new Midday({
     | "staging"
     | "development"
     | undefined,
-  bearerToken: process.env.MIDDAY_ENGINE_BEARER_TOKEN ?? "",
+  bearerToken: process.env.MIDDAY_ENGINE_API_KEY ?? "",
 });
