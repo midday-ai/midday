@@ -4,6 +4,7 @@ import { OpenAPIHono } from "@hono/zod-openapi";
 import { requestId } from "hono/request-id";
 import {
   authMiddleware,
+  cacheMiddleware,
   loggingMiddleware,
   securityMiddleware,
 } from "./middleware";
@@ -26,6 +27,12 @@ app.use("*", requestId());
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
+
+// Enable cache for the following routes
+app.get("/institutions", cacheMiddleware);
+app.get("/accounts", cacheMiddleware);
+app.get("/accounts/balance", cacheMiddleware);
+app.get("/transactions", cacheMiddleware);
 
 app
   .route("/transactions", transactionsRoutes)
