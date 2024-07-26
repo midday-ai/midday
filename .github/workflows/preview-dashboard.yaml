@@ -9,7 +9,6 @@ env:
   SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
   SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
   SENTRY_LOG_LEVEL: info
-  NODE_OPTIONS: "--max_old_space_size=4096"
 on:
   push:
     branches-ignore:
@@ -37,5 +36,7 @@ jobs:
         run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts
         run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
       - name: Deploy Project Artifacts to Vercel
         run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
