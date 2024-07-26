@@ -28,7 +28,7 @@ export function AssistantHistory({ enabled }: Props) {
     assistantSettingsAction,
     {
       currentState: enabled,
-      updateFn: (_, { enabled }) => enabled,
+      updateFn: (_, { enabled }) => Boolean(enabled),
     },
   );
 

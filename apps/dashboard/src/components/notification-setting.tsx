@@ -1,9 +1,19 @@
 "use client";
 
+import { updateSubscriberPreferenceAction } from "@/actions/update-subscriber-preference-action";
 import { useI18n } from "@/locales/client";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
 import { useOptimisticAction } from "next-safe-action/hooks";
+
+type Props = {
+  id: string;
+  name: string;
+  enabled: boolean;
+  subscriberId: string;
+  teamId: string;
+  type: string;
+};
 
 export function NotificationSetting({
   id,
@@ -12,13 +22,12 @@ export function NotificationSetting({
   subscriberId,
   teamId,
   type,
-  updateSubscriberPreferenceAction,
-}) {
+}: Props) {
   const t = useI18n();
   const { execute, optimisticState } = useOptimisticAction(
     updateSubscriberPreferenceAction,
     {
-      currentState: enabled,
+      currentState: { enabled },
       updateFn: (state) => {
         return {
           ...state,

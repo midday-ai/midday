@@ -1,4 +1,3 @@
-import { updateSubscriberPreferenceAction } from "@/actions/update-subscriber-preference-action";
 import { getSubscriberPreferences } from "@midday/notification";
 import { getUser } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -19,7 +18,7 @@ export async function NotificationSettings() {
 
   const inAppSettings = subscriberPreferences
     ?.filter((setting) =>
-      Object.keys(setting.preference.channels).includes("in_app")
+      Object.keys(setting.preference.channels).includes("in_app"),
     )
     .map((setting) => {
       return (
@@ -28,7 +27,6 @@ export async function NotificationSettings() {
           id={setting.template._id}
           name={setting.template.name}
           enabled={setting.preference.channels?.in_app}
-          updateSubscriberPreferenceAction={updateSubscriberPreferenceAction}
           subscriberId={userData.id}
           teamId={userData.team_id}
           type="in_app"
@@ -38,7 +36,7 @@ export async function NotificationSettings() {
 
   const emailSettings = subscriberPreferences
     ?.filter((setting) =>
-      Object.keys(setting.preference.channels).includes("email")
+      Object.keys(setting.preference.channels).includes("email"),
     )
     .map((setting) => {
       return (
@@ -47,7 +45,6 @@ export async function NotificationSettings() {
           id={setting.template._id}
           name={setting.template.name}
           enabled={setting.preference.channels?.email}
-          updateSubscriberPreferenceAction={updateSubscriberPreferenceAction}
           subscriberId={userData.id}
           teamId={userData.team_id}
           type="email"

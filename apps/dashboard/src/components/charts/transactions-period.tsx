@@ -11,9 +11,15 @@ import {
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["all", "income", "expense"];
+const options = ["all", "income", "expense"] as const;
+type TransactionType = (typeof options)[number];
 
-export function TransactionsPeriod({ type, disabled }) {
+type Props = {
+  type: "all" | "income" | "expense";
+  disabled: boolean;
+};
+
+export function TransactionsPeriod({ type, disabled }: Props) {
   const t = useI18n();
   const { execute, optimisticState } = useOptimisticAction(
     changeTransactionsPeriodAction,
@@ -40,7 +46,7 @@ export function TransactionsPeriod({ type, disabled }) {
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option}
-              onCheckedChange={() => execute(option)}
+              onCheckedChange={() => execute(option as TransactionType)}
               checked={option === optimisticState}
             >
               {t(`transactions_period.${option}`)}

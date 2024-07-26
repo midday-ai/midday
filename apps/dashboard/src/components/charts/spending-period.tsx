@@ -47,7 +47,11 @@ const options = [
   },
 ];
 
-export function SpendingPeriod({ initialPeriod }) {
+type Props = {
+  initialPeriod: { id: string; from: string; to: string };
+};
+
+export function SpendingPeriod({ initialPeriod }: Props) {
   const t = useI18n();
   const { execute, optimisticState } = useOptimisticAction(
     changeSpendingPeriodAction,
