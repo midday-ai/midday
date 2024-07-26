@@ -94,7 +94,7 @@ const testimonials = [
   {
     name: "Gokul",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1687344852600516608/gVS34j7h_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1805103400549318656/EEQpiO7e_400x400.jpg",
     handle: "@KyTechInc",
     verified: true,
     quote: "🖤 Awesome work. just love it.",
