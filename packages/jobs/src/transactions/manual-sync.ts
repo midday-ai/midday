@@ -1,9 +1,9 @@
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
+import { engine } from "../../../../apps/dashboard/src/utils/engine";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-import { engine } from "../utils/engine";
 import { processBatch } from "../utils/process";
 import { transformTransaction } from "../utils/transform";
 
