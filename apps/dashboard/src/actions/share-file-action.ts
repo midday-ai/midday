@@ -1,12 +1,10 @@
 "use server";
 
+import { dub } from "@/utils/dub";
 import { LogEvents } from "@midday/events/events";
 import { share } from "@midday/supabase/storage";
-import { Dub } from "dub";
 import { authActionClient } from "./safe-action";
 import { shareFileSchema } from "./schema";
-
-const dub = new Dub({ projectSlug: "midday" });
 
 export const shareFileAction = authActionClient
   .schema(shareFileSchema)

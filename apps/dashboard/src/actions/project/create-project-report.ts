@@ -2,10 +2,8 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { createProjectReportSchema } from "@/actions/schema";
+import { dub } from "@/utils/dub";
 import { LogEvents } from "@midday/events/events";
-import { Dub } from "dub";
-
-const dub = new Dub({ projectSlug: "midday" });
 
 export const createProjectReport = authActionClient
   .schema(createProjectReportSchema)
