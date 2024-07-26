@@ -1,10 +1,11 @@
-import { processPromisesBatch } from "@/utils/process";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
-import { engine } from "../engine";
+import { engine } from "../utils/engine";
+import { processBatch } from "../utils/process";
+import { transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
 const BATCH_LIMIT = 300;
@@ -59,33 +60,38 @@ client.defineJob({
         accountType: account.type,
       });
 
+      const formattedTransactions = transactions.data?.map((transaction) => {
+        return transformTransaction({
+          transaction,
+          teamId,
+          bankAccountId: account.id,
+        });
+      });
+
+      // NOTE: We will get all the transactions at once for each account so
+      // we need to guard against massive payloads
+      await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
+        await supabase.from("transactions").upsert(batch, {
+          onConflict: "internal_id",
+          ignoreDuplicates: true,
+        });
+      });
+
       const balance = await engine.accounts.balance({
         provider: account.bank_connection.provider,
         id: account.account_id,
         accessToken: account.bank_connection?.access_token,
       });
 
-      // NOTE: We will get all the transactions at once for each account so
-      // we need to guard against massive payloads
-      await processPromisesBatch(transactions, BATCH_LIMIT, async (batch) => {
-        const formatted = batch.map(({ category, ...rest }) => ({
-          ...rest,
-          category_slug: category,
-        }));
-
-        await supabase.from("transactions").upsert(formatted, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
-        });
-      });
-
       // Update bank account balance
-      await io.supabase.client
-        .from("bank_accounts")
-        .update({
-          balance: balance?.amount,
-        })
-        .eq("id", account.id);
+      if (balance.data?.amount) {
+        await io.supabase.client
+          .from("bank_accounts")
+          .update({
+            balance: balance.data.amount,
+          })
+          .eq("id", account.id);
+      }
 
       // Update bank connection last accessed
       // TODO: Fix so it only update once per connection
@@ -106,8 +112,10 @@ client.defineJob({
         await Promise.all(promises);
       }
     } catch (error) {
-      await io.logger.error(error);
-      throw Error("Something went wrong");
+      await io.logger.error(
+        error instanceof Error ? error.message : String(error),
+      );
+      throw new Error("Something went wrong");
     }
 
     revalidateTag(`bank_connections_${teamId}`);

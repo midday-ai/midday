@@ -1,8 +1,8 @@
 import { differenceInDays } from "date-fns";
 
+const DISPLAY_DAYS = 30;
 const WARNING_DAYS = 14;
 const ERROR_DAYS = 7;
-const DISPLAY_DAYS = 60;
 
 type Connection = {
   expires_at: string | null;

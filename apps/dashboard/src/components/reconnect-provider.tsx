@@ -11,6 +11,7 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useScript } from "@uidotdev/usehooks";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -34,19 +35,27 @@ export function ReconnectProvider({
   onManualSync,
 }: Props) {
   const { toast } = useToast();
+  const { theme } = useTheme();
+  const [plaidToken, setPlaidToken] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
 
   const reconnectGoCardLessLink = useAction(reconnectGoCardLessLinkAction, {
+    onExecute: () => {
+      setIsLoading(true);
+    },
     onError: () => {
+      setIsLoading(false);
+
       toast({
         duration: 2500,
         variant: "error",
         title: "Something went wrong pleaase try again.",
       });
     },
+    onSuccess: () => {
+      setIsLoading(false);
+    },
   });
-  const { theme } = useTheme();
-
-  const [plaidToken, setPlaidToken] = useState<string | undefined>();
 
   useScript("https://cdn.teller.io/connect/connect.js", {
     removeOnUnmount: false,
@@ -129,7 +138,11 @@ export function ReconnectProvider({
             className="rounded-full w-7 h-7 flex items-center"
             onClick={handleOnClick}
           >
-            <Icons.Reconnect size={16} />
+            {isLoading ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Icons.Reconnect size={16} />
+            )}
           </Button>
         </TooltipTrigger>
 
