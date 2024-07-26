@@ -32,7 +32,7 @@
     "@tanstack/react-table": "^8.19.3",
     "@team-plain/typescript-sdk": "4.7.0",
     "@todesktop/client-active-win": "^0.15.0",
-    "@todesktop/client-core": "^1.7.0",
+    "@todesktop/client-core": "^1.8.0",
     "@todesktop/runtime": "^1.6.4",
     "@trigger.dev/nextjs": "^2.3.19",
     "@uidotdev/usehooks": "^2.4.1",
