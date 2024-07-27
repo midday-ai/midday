@@ -61,6 +61,7 @@ client.defineJob({
         provider: account.bank_connection.provider,
         accountId: account.account_id,
         accountType: account.type,
+        accessToken: account.bank_connection?.access_token,
         latest: true,
       });
 
