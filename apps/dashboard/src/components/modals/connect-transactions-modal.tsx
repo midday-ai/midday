@@ -264,6 +264,7 @@ export function ConnectTransactionsModal({
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck="false"
+                    autoFocus
                     value={query ?? ""}
                   />
 
