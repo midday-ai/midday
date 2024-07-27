@@ -116,6 +116,7 @@ client.defineJob({
       await io.logger.error(
         error instanceof Error ? error.message : String(error),
       );
+
       throw new Error("Something went wrong");
     }
 

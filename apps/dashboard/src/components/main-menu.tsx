@@ -12,12 +12,7 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { useClickAway } from "@uidotdev/usehooks";
-import {
-  AnimatePresence,
-  Reorder,
-  motion,
-  useMotionValue,
-} from "framer-motion";
+import { Reorder, motion, useMotionValue } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -65,6 +60,16 @@ const defaultItems = [
   },
 ];
 
+interface ItemProps {
+  item: { path: string; name: string };
+  isActive: boolean;
+  isCustomizing: boolean;
+  onRemove: (path: string) => void;
+  disableRemove: boolean;
+  onDragEnd: () => void;
+  onSelect?: () => void;
+}
+
 const Item = ({
   item,
   isActive,
@@ -73,7 +78,7 @@ const Item = ({
   disableRemove,
   onDragEnd,
   onSelect,
-}) => {
+}: ItemProps) => {
   const y = useMotionValue(0);
   const Icon = icons[item.path];
 
@@ -110,7 +115,7 @@ const Item = ({
                 isActive &&
                   "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
                 isCustomizing &&
-                  "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
+                  "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
               )}
             >
               <motion.div
@@ -134,7 +139,7 @@ const Item = ({
                   className={cn(
                     "flex space-x-3 p-0 items-center pl-2 md:pl-0",
                     isCustomizing &&
-                      "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none"
+                      "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
                   )}
                 >
                   <Icon />
@@ -171,7 +176,12 @@ const itemVariant = {
   show: { opacity: 1 },
 };
 
-export function MainMenu({ initialItems, onSelect }) {
+type Props = {
+  initialItems?: { path: string; name: string }[];
+  onSelect?: () => void;
+};
+
+export function MainMenu({ initialItems, onSelect }: Props) {
   const [items, setItems] = useState(initialItems ?? defaultItems);
   const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
@@ -179,7 +189,7 @@ export function MainMenu({ initialItems, onSelect }) {
   const updateMenu = useAction(updateMenuAction);
 
   const hiddenItems = defaultItems.filter(
-    (item) => !items.some((i) => i.path === item.path)
+    (item) => !items.some((i) => i.path === item.path),
   );
 
   const onReorder = (items) => {
@@ -207,7 +217,7 @@ export function MainMenu({ initialItems, onSelect }) {
     },
     {
       cancelOnMovement: 0,
-    }
+    },
   );
 
   const ref = useClickAway(() => {
@@ -216,35 +226,33 @@ export function MainMenu({ initialItems, onSelect }) {
 
   return (
     <div className="mt-6" {...bind()} ref={ref}>
-      <AnimatePresence>
-        <nav>
-          <Reorder.Group
-            axis="y"
-            onReorder={onReorder}
-            values={items}
-            className="flex flex-col gap-1.5"
-          >
-            {items.map((item) => {
-              const isActive =
-                (pathname === "/" && item.path === "/") ||
-                (pathname !== "/" && item.path.startsWith(`/${part}`));
+      <nav>
+        <Reorder.Group
+          axis="y"
+          onReorder={onReorder}
+          values={items}
+          className="flex flex-col gap-1.5"
+        >
+          {items.map((item) => {
+            const isActive =
+              (pathname === "/" && item.path === "/") ||
+              (pathname !== "/" && item.path.startsWith(`/${part}`));
 
-              return (
-                <Item
-                  key={item.path}
-                  item={item}
-                  isActive={isActive}
-                  isCustomizing={isCustomizing}
-                  onRemove={onRemove}
-                  disableRemove={items.length === 1}
-                  onDragEnd={onDragEnd}
-                  onSelect={onSelect}
-                />
-              );
-            })}
-          </Reorder.Group>
-        </nav>
-      </AnimatePresence>
+            return (
+              <Item
+                key={item.path}
+                item={item}
+                isActive={isActive}
+                isCustomizing={isCustomizing}
+                onRemove={onRemove}
+                disableRemove={items.length === 1}
+                onDragEnd={onDragEnd}
+                onSelect={onSelect}
+              />
+            );
+          })}
+        </Reorder.Group>
+      </nav>
 
       {hiddenItems.length > 0 && isCustomizing && (
         <nav className="border-t-[1px] mt-6 pt-6">
@@ -264,7 +272,7 @@ export function MainMenu({ initialItems, onSelect }) {
                   className={cn(
                     "rounded-lg border border-transparent w-[45px] h-[45px] flex items-center md:justify-center",
                     "hover:bg-secondary hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
-                    "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]"
+                    "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
                   )}
                 >
                   <div className="relative">
