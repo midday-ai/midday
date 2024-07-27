@@ -67,7 +67,7 @@ client.defineJob({
       const formattedTransactions = transactions.data?.map((transaction) => {
         return transformTransaction({
           transaction,
-          teamId,
+          teamId: account.team_id,
           bankAccountId: account.id,
         });
       });
