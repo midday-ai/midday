@@ -1,4 +1,5 @@
 import type { Transactions } from "@midday-ai/engine/resources/transactions";
+import type { Database } from "@midday/supabase/types";
 
 type TransformTransactionData = {
   transaction: Transactions.Data;
@@ -40,4 +41,15 @@ export function transformTransaction({
     team_id: teamId,
     status: transaction.status,
   };
+}
+
+export function getClassification(
+  type: Database["public"]["Enums"]["account_type"],
+) {
+  switch (type) {
+    case "credit":
+      return "credit";
+    default:
+      return "depository";
+  }
 }

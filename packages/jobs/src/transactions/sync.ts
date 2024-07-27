@@ -2,7 +2,7 @@ import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
-import { transformTransaction } from "../utils/transform";
+import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
 client.defineJob({
@@ -60,7 +60,7 @@ client.defineJob({
       const transactions = await engine.transactions.list({
         provider: account.bank_connection.provider,
         accountId: account.account_id,
-        accountType: account.type,
+        accountType: getClassification(account.type),
         accessToken: account.bank_connection?.access_token,
         latest: true,
       });

@@ -5,7 +5,7 @@ import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { processBatch } from "../utils/process";
-import { transformTransaction } from "../utils/transform";
+import { getClassification, transformTransaction } from "../utils/transform";
 
 const BATCH_LIMIT = 300;
 
@@ -39,8 +39,9 @@ client.defineJob({
       const transactions = await engine.transactions.list({
         provider: account.bank_connection.provider,
         accountId: account.account_id,
-        accountType: account.type,
+        accountType: getClassification(account.type),
         accessToken: account.bank_connection?.access_token,
+        latest: true,
       });
 
       const formattedTransactions = transactions.data?.map((transaction) => {

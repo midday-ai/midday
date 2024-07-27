@@ -39,7 +39,8 @@ export const TransactionsParamsSchema = z
         example: "token-123",
       }),
     latest: z
-      .boolean()
+      .enum(["true", "false"])
+      .transform((value) => value === "true")
       .optional()
       .openapi({
         description: "Get latest transactions",
@@ -47,7 +48,7 @@ export const TransactionsParamsSchema = z
           name: "latest",
           in: "query",
         },
-        example: true,
+        example: "true",
       }),
   })
   .openapi("TransactionsParamsSchema");
