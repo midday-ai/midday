@@ -55,9 +55,16 @@ export class TellerApi {
     latest,
     count,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
-    return this.#get(`/accounts/${accountId}/transactions`, accessToken, {
-      count: latest ? 500 : count,
-    });
+    const result = await this.#get<GetTransactionsResponse>(
+      `/accounts/${accountId}/transactions`,
+      accessToken,
+      {
+        count: latest ? 500 : count,
+      },
+    );
+
+    // NOTE: Remove pending transactions until upsert issue is fixed
+    return result.filter((transaction) => transaction.status !== "pending");
   }
 
   async getAccountBalance({
