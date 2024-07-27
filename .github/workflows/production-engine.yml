@@ -32,5 +32,5 @@ jobs:
           packageManager: bun
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           workingDirectory: "apps/engine"
-          wranglerVersion: "3.66.0"
+          wranglerVersion: "3.67.1"
           command: deploy --minify src/index.ts --env production

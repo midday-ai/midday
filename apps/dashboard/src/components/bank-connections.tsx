@@ -18,7 +18,6 @@ import {
 import { useToast } from "@midday/ui/use-toast";
 import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
-import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
@@ -58,7 +57,6 @@ function ConnectionState({ connection, isSyncing }) {
   if (isSyncing) {
     return (
       <div className="text-xs font-normal flex items-center space-x-1">
-        <Loader2 className="size-3.5 animate-spin" />
         <span>Syncing...</span>
       </div>
     );
@@ -124,9 +122,11 @@ function ConnectionState({ connection, isSyncing }) {
 
   if (connection.last_accessed) {
     return (
-      <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
-        new Date(connection.last_accessed),
-      )} ago`}</span>
+      <div className="text-xs font-normal flex items-center space-x-1">
+        <span className="text-xs font-normal">{`Updated ${formatDistanceToNow(
+          new Date(connection.last_accessed),
+        )} ago`}</span>
+      </div>
     );
   }
 
@@ -137,8 +137,11 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const [eventId, setEventId] = useState<string | undefined>();
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
+  const { data } = useEventDetails(eventId);
 
-  const { isLoading, error } = useEventDetails(eventId);
+  const status = data?.runs.at(-1)?.status;
+
+  const error = status === "FAILURE" || status === "TIMED_OUT";
 
   const [params] = useQueryStates({
     step: parseAsString,
@@ -164,19 +167,23 @@ export function BankConnection({ connection }: BankConnectionProps) {
   });
 
   useEffect(() => {
-    if (isLoading || isSyncing) {
+    if (status === "SUCCESS") {
+      dismiss();
+      setEventId(undefined);
+      setSyncing(false);
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (isSyncing) {
       toast({
         title: "Syncing...",
         description: "We're connecting to your bank, please wait.",
         duration: Number.POSITIVE_INFINITY,
         variant: "spinner",
       });
-    } else {
-      dismiss();
-      setEventId(undefined);
-      setSyncing(false);
     }
-  }, [isLoading, isSyncing]);
+  }, [isSyncing]);
 
   useEffect(() => {
     if (error) {
