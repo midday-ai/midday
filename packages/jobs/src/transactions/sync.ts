@@ -1,7 +1,8 @@
-import { Provider } from "@midday/providers";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
+import { engine } from "../utils/engine";
+import { transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
 client.defineJob({
@@ -29,21 +30,18 @@ client.defineJob({
     }
 
     const promises = accountsData?.map(async (account) => {
-      const provider = new Provider({
-        provider: account.bank_connection.provider,
-      });
-
       try {
-        const balance = await provider.getAccountBalance({
-          accountId: account.account_id,
+        const balance = await engine.accounts.balance({
+          provider: account.bank_connection.provider,
+          id: account.account_id,
           accessToken: account.bank_connection?.access_token,
         });
 
         // Update account balance
-        if (balance?.amount) {
+        if (balance.data?.amount) {
           await io.supabase.client
             .from("bank_accounts")
-            .update({ balance: balance.amount })
+            .update({ balance: balance.data.amount })
             .eq("id", account.id);
         }
 
@@ -55,28 +53,33 @@ client.defineJob({
           .eq("id", account.bank_connection.id);
       } catch (error) {
         await io.logger.error(
-          `Update Account Balance Error. Provider: ${account.bank_connection.provider} Account id: ${account.account_id}`,
-          error,
+          error instanceof Error ? error.message : String(error),
         );
       }
 
-      return provider.getTransactions({
-        teamId: account.team_id,
+      const transactions = await engine.transactions.list({
+        provider: account.bank_connection.provider,
         accountId: account.account_id,
-        accessToken: account.bank_connection?.access_token,
-        bankAccountId: account.id,
-        latest: true,
         accountType: account.type,
+        accessToken: account.bank_connection?.access_token,
+        latest: true,
       });
+
+      const formattedTransactions = transactions.data?.map((transaction) => {
+        return transformTransaction({
+          transaction,
+          teamId: account.team_id,
+          bankAccountId: account.id,
+        });
+      });
+
+      return formattedTransactions;
     });
 
     try {
       if (promises) {
         const result = await Promise.all(promises);
-        const transactions = result.flat()?.map(({ category, ...rest }) => ({
-          ...rest,
-          category_slug: category,
-        }));
+        const transactions = result.flat();
 
         if (!transactions?.length) {
           return null;
@@ -120,7 +123,9 @@ client.defineJob({
         revalidateTag(`bank_accounts_${teamId}`);
       }
     } catch (error) {
-      await io.logger.error(JSON.stringify(error, null, 2));
+      await io.logger.error(
+        error instanceof Error ? error.message : String(error),
+      );
     }
   },
 });

@@ -1,22 +1,25 @@
 {
-	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
-	"linter": {
-		"ignore": [".wrangler", "node_modules"],
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"a11y": {
-				"noSvgWithoutTitle": "off"
-			},
-			"style": {
-				"noNonNullAssertion": "off"
-			}
- 		}
-	},
-	"formatter": {
-		"indentStyle": "space"
-	}
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "organizeImports": {
+    "enabled": true
+  },
+  "linter": {
+    "ignore": [".wrangler", "node_modules"],
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "a11y": {
+        "noSvgWithoutTitle": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
+      },
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      }
+    }
+  },
+  "formatter": {
+    "indentStyle": "space"
+  }
 }

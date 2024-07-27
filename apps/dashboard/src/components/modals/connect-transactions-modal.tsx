@@ -111,7 +111,7 @@ export function ConnectTransactionsModal({
   } = useConnectParams(initialCountryCode);
 
   const isOpen = step === "connect";
-  const debouncedSearchTerm = useDebounce(query, 100);
+  const debouncedSearchTerm = useDebounce(query, 200);
 
   // NOTE: Load SDKs here so it's not unmonted
   useScript("https://cdn.teller.io/connect/connect.js", {
@@ -257,7 +257,9 @@ export function ConnectTransactionsModal({
                   <Input
                     placeholder="Search bank..."
                     type="search"
-                    onChange={(evt) => setParams({ q: evt.target.value })}
+                    onChange={(evt) =>
+                      setParams({ q: evt.target.value || null })
+                    }
                     autoComplete="off"
                     autoCapitalize="none"
                     autoCorrect="off"

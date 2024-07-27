@@ -52,7 +52,7 @@ client.defineJob({
         vat:calculated_vat,
         attachments:transaction_attachments(*)
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .in("id", transactionIds)
       .eq("team_id", teamId);
@@ -92,9 +92,9 @@ client.defineJob({
               name,
               blob: data,
             };
-          }
+          },
         );
-      })
+      }),
     );
 
     await generateExport.update("generate-export-attachments-end", {
@@ -168,7 +168,7 @@ client.defineJob({
       if (attachment?.value?.blob) {
         zipWriter.add(
           attachment.value.name,
-          new BlobReader(attachment.value.blob)
+          new BlobReader(attachment.value.blob),
         );
       }
     });

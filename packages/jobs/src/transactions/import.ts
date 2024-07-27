@@ -14,7 +14,7 @@ const transactionSchema = z.object({
   amount: z
     .number()
     .describe(
-      "The amount involved in the transaction, including the minus sign if present"
+      "The amount involved in the transaction, including the minus sign if present",
     ),
 });
 
@@ -54,7 +54,7 @@ client.defineJob({
         data: {
           step: "analyzing",
         },
-      }
+      },
     );
 
     if (!data) {
@@ -91,7 +91,7 @@ client.defineJob({
     ]);
 
     const extractionChain = prompt.pipe(
-      llm.withStructuredOutput(extractionDataSchema)
+      llm.withStructuredOutput(extractionDataSchema),
     );
 
     await transactionsImport.update("transactions-import-transforming", {
