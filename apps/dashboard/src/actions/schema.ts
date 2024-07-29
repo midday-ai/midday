@@ -422,6 +422,7 @@ export type CreateTransactionsFormValues = z.infer<
 
 export const assistantSettingsSchema = z.object({
   enabled: z.boolean().optional(),
+  model: z.enum(["llama", "openai"]).optional(),
 });
 
 export const requestAccessSchema = z.void();
