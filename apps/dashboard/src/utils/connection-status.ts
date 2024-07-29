@@ -5,7 +5,7 @@ const WARNING_DAYS = 14;
 const ERROR_DAYS = 7;
 
 type Connection = {
-  expires_at: string | null;
+  expires_at?: string | null;
 };
 
 export function getConnectionsStatus(connections: Connection[] | null) {

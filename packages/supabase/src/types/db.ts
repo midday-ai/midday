@@ -19,7 +19,6 @@ export type Database = {
           currency: string | null;
           enabled: boolean;
           id: string;
-          last_accessed: string | null;
           manual: boolean | null;
           name: string | null;
           team_id: string;
@@ -34,7 +33,6 @@ export type Database = {
           currency?: string | null;
           enabled?: boolean;
           id?: string;
-          last_accessed?: string | null;
           manual?: boolean | null;
           name?: string | null;
           team_id: string;
@@ -49,7 +47,6 @@ export type Database = {
           currency?: string | null;
           enabled?: boolean;
           id?: string;
-          last_accessed?: string | null;
           manual?: boolean | null;
           name?: string | null;
           team_id?: string;
@@ -92,6 +89,7 @@ export type Database = {
           logo_url: string | null;
           name: string;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
+          reference_id: string | null;
           team_id: string;
         };
         Insert: {
@@ -106,6 +104,7 @@ export type Database = {
           logo_url?: string | null;
           name: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
+          reference_id?: string | null;
           team_id: string;
         };
         Update: {
@@ -120,6 +119,7 @@ export type Database = {
           logo_url?: string | null;
           name?: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
+          reference_id?: string | null;
           team_id?: string;
         };
         Relationships: [
@@ -630,8 +630,6 @@ export type Database = {
           category_slug: string | null;
           created_at: string;
           currency: string;
-          currency_rate: number | null;
-          currency_source: string | null;
           date: string;
           description: string | null;
           id: string;
@@ -658,8 +656,6 @@ export type Database = {
           category_slug?: string | null;
           created_at?: string;
           currency: string;
-          currency_rate?: number | null;
-          currency_source?: string | null;
           date: string;
           description?: string | null;
           id?: string;
@@ -683,8 +679,6 @@ export type Database = {
           category_slug?: string | null;
           created_at?: string;
           currency?: string;
-          currency_rate?: number | null;
-          currency_source?: string | null;
           date?: string;
           description?: string | null;
           id?: string;

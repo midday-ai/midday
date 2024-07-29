@@ -24,6 +24,7 @@ type Props = {
   institutionId: string;
   accessToken: string | null;
   onManualSync: () => void;
+  variant?: "button" | "icon";
 };
 
 export function ReconnectProvider({
@@ -33,6 +34,7 @@ export function ReconnectProvider({
   institutionId,
   accessToken,
   onManualSync,
+  variant,
 }: Props) {
   const { toast } = useToast();
   const { theme } = useTheme();
@@ -128,6 +130,18 @@ export function ReconnectProvider({
     }
   };
 
+  if (variant === "button") {
+    return (
+      <Button variant="outline" onClick={handleOnClick} disabled={isLoading}>
+        {isLoading ? (
+          <Loader2 className="size-3.5 animate-spin" />
+        ) : (
+          "Reconnect"
+        )}
+      </Button>
+    );
+  }
+
   return (
     <TooltipProvider delayDuration={70}>
       <Tooltip>
@@ -137,6 +151,7 @@ export function ReconnectProvider({
             size="icon"
             className="rounded-full w-7 h-7 flex items-center"
             onClick={handleOnClick}
+            disabled={isLoading}
           >
             {isLoading ? (
               <Loader2 className="size-3.5 animate-spin" />
