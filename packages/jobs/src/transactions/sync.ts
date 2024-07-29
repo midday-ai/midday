@@ -52,6 +52,10 @@ client.defineJob({
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
       } catch (error) {
+        await io.logger.debug(
+          `Provider: ${account.bank_connection.provider}, Account ID: ${account.account_id}`,
+        );
+
         await io.logger.error(
           error instanceof Error ? error.message : String(error),
         );
@@ -123,6 +127,8 @@ client.defineJob({
         revalidateTag(`bank_accounts_${teamId}`);
       }
     } catch (error) {
+      await io.logger.debug(`Team id: ${teamId}`);
+
       await io.logger.error(
         error instanceof Error ? error.message : String(error),
       );
