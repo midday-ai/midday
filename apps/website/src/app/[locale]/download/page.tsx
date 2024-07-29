@@ -1,7 +1,9 @@
 import { CopyInput } from "@/components/copy-input";
 import { Keyboard } from "@/components/keyboard";
+import { getStaticParams } from "@/locales/server";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import appIcon from "public/app-icon.png";
 
@@ -11,7 +13,15 @@ export const metadata: Metadata = {
     "With Midday on Mac you have everything accessible just one click away.",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="container flex flex-col items-center mb-12 md:mb-48 text-center">
       <h1 className="mt-24 font-medium text-center text-5xl mb-24">

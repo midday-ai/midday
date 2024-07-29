@@ -1,5 +1,7 @@
 import { CopyInput } from "@/components/copy-input";
+import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import Inbox from "public/product-inbox.jpg";
 import Match from "public/product-match.png";
@@ -11,7 +13,15 @@ export const metadata: Metadata = {
     "Automatically match incoming invoices or receipts to the correct transaction.",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="container mb-52">
       <div className="mb-40">

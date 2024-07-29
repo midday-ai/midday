@@ -8,6 +8,7 @@ import { TransactionEnrichmentsChart } from "@/components/charts/transaction-enr
 import { TransactionsChart } from "@/components/charts/transactions-chart";
 import { UsersChart } from "@/components/charts/users-chart";
 import { VaultChart } from "@/components/charts/vault-chart";
+import { getStaticParams } from "@/locales/server";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 
 export const metadata: Metadata = {
   title: "Open Startup",
@@ -26,7 +28,15 @@ export const metadata: Metadata = {
     "We value transparency and aim to keep you informed about our journey every step of the way.",
 };
 
-export default async function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="container max-w-[1050px]">
       <h1 className="mt-24 font-medium text-center text-5xl mb-8">

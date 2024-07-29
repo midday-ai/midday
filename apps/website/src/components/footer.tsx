@@ -34,7 +34,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row w-full">
           <div className="flex flex-col space-y-8 md:space-y-0 md:flex-row md:w-6/12 justify-between leading-8">
             <div>
-              <span className="font-medium">Features</span>
+              <span className="font-medium">{t("footer.features")}</span>
               <ul>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/overview">Overview</Link>
@@ -52,7 +52,7 @@ export function Footer() {
                   <Link href="/invoice">Invoice</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/pricing">Pricing</Link>
+                  <Link href="/pricing">{t("footer.price")}</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/engine">Engine</Link>
@@ -67,22 +67,22 @@ export function Footer() {
                   <Link href="https://git.new/midday">Github</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/support">Support</Link>
+                  <Link href="/support">{t("footer.support")}</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/policy">Privacy policy</Link>
+                  <Link href="/policy">{t("footer.privacy")}</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/terms">Terms and Conditions</Link>
+                  <Link href="/terms">{t("footer.terms")}</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/branding">Branding</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/feature-request">Feature Request</Link>
+                  <Link href="/feature-request">{t("footer.request")}</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/download">Download</Link>
+                  <Link href="/download">{t("footer.download")}</Link>
                 </li>
               </ul>
             </div>
@@ -97,10 +97,10 @@ export function Footer() {
                   <Link href="/updates">Updates</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/open-startup">Open startup</Link>
+                  <Link href="/open-startup">{t("footer.openStartup")}</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/oss-friends">OSS friends</Link>
+                  <Link href="/oss-friends">{t("footer.ossFriends")}</Link>
                 </li>
               </ul>
             </div>

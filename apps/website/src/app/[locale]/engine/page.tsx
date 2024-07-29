@@ -1,5 +1,7 @@
 import { SubscribeInput } from "@/components/subscribe-input";
+import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import engineSDK from "public/engine-sdk.png";
 import engine from "public/engine-ui.png";
@@ -10,7 +12,15 @@ export const metadata: Metadata = {
     "Midday engine streamlines banking integrations with a single API effortlessly connecting to multiple providers and get one unified format.",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="w-full bg-[#0C0C0C] flex flex-col items-center justify-center mt-24">
       <h1 className="text-[100px] md:text-[170px] font-medium text-center text-white relative z-20 leading-none">

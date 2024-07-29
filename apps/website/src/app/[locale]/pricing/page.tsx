@@ -1,4 +1,5 @@
 import { Testimonials } from "@/components/testimonials";
+import { getStaticParams } from "@/locales/server";
 import {
   Accordion,
   AccordionContent,
@@ -7,6 +8,7 @@ import {
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -14,7 +16,15 @@ export const metadata: Metadata = {
   description: "Midday's pricing",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <>
       <div className="container">

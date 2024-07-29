@@ -38,7 +38,7 @@ const data = [
 ];
 
 export function NotFoundStatuses() {
-  const [statuses, setStatuses] = useState();
+  const [statuses, setStatuses] = useState<typeof data>([]);
   const ref = useRef(false);
   const scrollRef = useRef();
 

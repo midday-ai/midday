@@ -1,5 +1,7 @@
 import { Assistant } from "@/components/assistant";
+import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import Overview from "public/product-overview.jpg";
 import Spending from "public/product-spending.png";
@@ -10,7 +12,15 @@ export const metadata: Metadata = {
     "Get real-time insight into your business's financial state. Keep track of your spending, income and overall financial health.",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="container mb-52">
       <div className="mb-40">

@@ -7,7 +7,7 @@ const testimonials = [
   {
     name: "Lucas Grey",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1744288035314008064/kAQycMrk_400x400.png",
+      "https://pbs.twimg.com/profile_images/1803830464605753393/dIvu3zC7_400x400.jpg",
     handle: "@ImLucasGrey",
     verified: true,
     quote: "This is so ingenious and good!",
@@ -105,7 +105,7 @@ const testimonials = [
   {
     name: "Peer Richelsen — oss/acc",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1623291991709700097/aBL_VpMC_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1816814706000080897/uSIidPHz_400x400.png",
     handle: "@peer_rich",
     verified: true,
     quote:

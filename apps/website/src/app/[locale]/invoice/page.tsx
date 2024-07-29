@@ -1,4 +1,6 @@
+import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import Clients from "public/product-clients.png";
 import Invoice from "public/product-invoice.jpg";
@@ -10,7 +12,15 @@ export const metadata: Metadata = {
     "Create web-based invoices in seconds. Have an easy overview of all your invoices and see your outstanding balance.",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="container mb-52">
       <div className="mb-40">

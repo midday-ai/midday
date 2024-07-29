@@ -1,12 +1,13 @@
 "use client";
 
 import { subscribeAction } from "@/actions/subscribe-action";
-import { LogEvents } from "@midday/events/events";
+import { useI18n } from "@/locales/client";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
 function SubmitButton() {
+  const t = useI18n();
   const { pending } = useFormStatus();
 
   if (pending) {
@@ -22,7 +23,7 @@ function SubmitButton() {
       type="submit"
       className="absolute right-2 h-7 bg-primary top-2 px-4 font-medium text-sm z-10 text-primary-foreground"
     >
-      Subscribe
+      {t("subscribe.submit")}
     </button>
   );
 }
@@ -32,6 +33,7 @@ type Props = {
 };
 
 export function SubscribeInput({ group }: Props) {
+  const t = useI18n();
   const [isSubmitted, setSubmitted] = useState(false);
 
   return (
@@ -67,7 +69,7 @@ export function SubscribeInput({ group }: Props) {
           >
             <fieldset className="relative">
               <input
-                placeholder="Enter your email"
+                placeholder={t("subscribe.placeholder")}
                 type="email"
                 name="email"
                 id="email"

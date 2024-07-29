@@ -1,4 +1,6 @@
+import { getStaticParams } from "@/locales/server";
 import type { Metadata } from "next";
+import { setStaticParamsLocale } from "next-international/server";
 import Image from "next/image";
 import signature from "public/email/signature-dark.png";
 import founders from "public/founders.png";
@@ -8,7 +10,15 @@ export const metadata: Metadata = {
   description: "This is why we’re building Midday.",
 };
 
-export default function Page() {
+export function generateStaticParams() {
+  return getStaticParams();
+}
+
+export default function Page({
+  params: { locale },
+}: { params: { locale: string } }) {
+  setStaticParamsLocale(locale);
+
   return (
     <div className="container max-w-[750px]">
       <h1 className="mt-24 font-medium text-center text-5xl mb-16 leading-snug">

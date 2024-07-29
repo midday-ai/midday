@@ -1,4 +1,9 @@
 export default {
+  metadata: {
+    title: "Midday | Driv ditt företag smartare",
+    description:
+      "Midday ger dig större insikt i ditt företag och automatiserar de tråkiga uppgifterna, så att du kan fokusera på det du älskar att göra istället.",
+  },
   general: {
     comingSoon: "Kommer snart",
   },
@@ -103,6 +108,15 @@ export default {
   },
   footer: {
     title: "Driv ditt företag smartare.",
+    features: "Funktioner",
+    price: "Pris",
+    request: "Funktionsförfrågan",
+    support: "Support",
+    privacy: "Policy",
+    terms: "Villkor",
+    download: "Ladda ner",
+    openStartup: "Öppen startup",
+    ossFriends: "OSS kompisar",
   },
   footerCta: {
     title: "Stressfritt med midday.",
@@ -112,5 +126,9 @@ export default {
       "för att övervaka ekonomin, tidsrapportera, lagra filer och skicka fakturor.",
     talkToUs: "Boka möte",
     getStarted: "Kom igång",
+  },
+  subscribe: {
+    placeholder: "Ange e-postadress",
+    submit: "Skicka",
   },
 } as const;

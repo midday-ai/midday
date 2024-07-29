@@ -1,4 +1,9 @@
 export default {
+  metadata: {
+    title: "Midday | Run your business smarter",
+    description:
+      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
+  },
   general: {
     comingSoon: "Coming soon",
   },
@@ -105,6 +110,15 @@ export default {
   },
   footer: {
     title: "Run your business smarter.",
+    features: "Features",
+    price: "Price",
+    support: "Support",
+    privacy: "Privacy policy",
+    terms: "Terms and Conditions",
+    request: "Feature Request",
+    download: "Download",
+    openStartup: "Open startup",
+    ossFriends: "OSS friends",
   },
   footerCta: {
     title: "Stress free by midday.",
@@ -114,5 +128,9 @@ export default {
       "businesses to manage their finances, track projects, store files, and send invoices.",
     talkToUs: "Talk to us",
     getStarted: "Get started",
+  },
+  subscribe: {
+    placeholder: "Enter your email",
+    submit: "Subscribe",
   },
 } as const;
