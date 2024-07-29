@@ -14,15 +14,15 @@ function parseFrontmatter(fileContent: string) {
   const match = frontmatterRegex.exec(fileContent);
   const frontMatterBlock = match![1];
   const content = fileContent.replace(frontmatterRegex, "").trim();
-  const frontMatterLines = frontMatterBlock.trim().split("\n");
+  const frontMatterLines = frontMatterBlock?.trim().split("\n");
   const metadata: Partial<Metadata> = {};
 
-  frontMatterLines.forEach((line) => {
+  for (const line of frontMatterLines) {
     const [key, ...valueArr] = line.split(": ");
     let value = valueArr.join(": ").trim();
     value = value.replace(/^['"](.*)['"]$/, "$1"); // Remove quotes
     metadata[key.trim() as keyof Metadata] = value;
-  });
+  }
 
   return { metadata: metadata as Metadata, content };
 }
@@ -51,5 +51,7 @@ function getMDXData(dir: string) {
 }
 
 export function getBlogPosts() {
-  return getMDXData(path.join(process.cwd(), "src", "app", "updates", "posts"));
+  return getMDXData(
+    path.join(process.cwd(), "src", "app", "[locale]", "updates", "posts"),
+  );
 }

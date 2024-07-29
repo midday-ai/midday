@@ -2,6 +2,7 @@ import { DevMessage } from "@/components/dev-message";
 import { Footer } from "@/components/footer";
 import { FooterCTA } from "@/components/footer-cta";
 import { Header } from "@/components/header";
+import { I18nProviderClient } from "@/locales/client";
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
@@ -10,7 +11,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { baseUrl } from "./sitemap";
+import { baseUrl } from "../sitemap";
 
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 
@@ -76,23 +77,28 @@ export const viewport = {
   themeColor: [{ media: "(prefers-color-scheme: dark)" }],
 };
 
-export default function Layout({ children }: { children: ReactElement }) {
+export default function Layout({
+  children,
+  params: { locale },
+}: { children: ReactElement; params: { locale: string } }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
           "bg-[#0C0C0C] overflow-x-hidden dark antialiased",
         )}
       >
-        <Header />
-        <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
-          {children}
-        </main>
-        <FooterCTA />
-        <Footer />
-        <Analytics />
-        <DevMessage />
+        <I18nProviderClient locale={locale}>
+          <Header />
+          <main className="container mx-auto px-4 overflow-hidden md:overflow-visible">
+            {children}
+          </main>
+          <FooterCTA />
+          <Footer />
+          <Analytics />
+          <DevMessage />
+        </I18nProviderClient>
       </body>
     </html>
   );

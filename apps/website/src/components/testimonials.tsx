@@ -1,4 +1,7 @@
+"use client";
+
 import { InfiniteMovingCards } from "@/components/infinite-moving-cards";
+import { useI18n } from "@/locales/client";
 
 const testimonials = [
   {
@@ -111,9 +114,11 @@ const testimonials = [
 ];
 
 export function Testimonials() {
+  const t = useI18n();
+
   return (
     <div className="relative pb-22">
-      <h3 className="text-4xl mb-8 font-medium">What people say</h3>
+      <h3 className="text-4xl mb-8 font-medium">{t("testimonials.title")}</h3>
       <InfiniteMovingCards items={testimonials} direction="left" speed="slow" />
     </div>
   );

@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/locales/client";
 import Image from "next/image";
 import screen1 from "public/product-overview.jpg";
 import screen4 from "public/product-vault.jpg";
@@ -7,14 +10,16 @@ import screen5 from "public/screen-5.png";
 import { CardStack } from "./card-stack";
 
 export function Screens() {
+  const t = useI18n();
+
   return (
     <div className="mt-20 md:mt-[250px] relative pt-12 pb-16">
       <div className="relative z-10 flex flex-col items-center">
         <div className="text-center pb-14">
-          <h3 className="text-4xl md:text-6xl font-medium">The thin layer</h3>
-          <p className="mt-4 text-[#878787]">
-            Bridging the gap between your bank and your accountants software.
-          </p>
+          <h3 className="text-4xl md:text-6xl font-medium">
+            {t("screens.title")}
+          </h3>
+          <p className="mt-4 text-[#878787]">{t("screens.description")}</p>
         </div>
 
         <CardStack

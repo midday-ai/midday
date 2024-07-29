@@ -2,6 +2,7 @@
 
 import { LogoLarge } from "@/components/logo-large";
 import { SubscribeInput } from "@/components/subscribe-input";
+import { useI18n } from "@/locales/client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GithubStars } from "./github-stars";
@@ -9,6 +10,7 @@ import { SocialLinks } from "./social-links";
 import { StatusWidget } from "./status-widget";
 
 export function Footer() {
+  const t = useI18n();
   const pathname = usePathname();
 
   if (pathname.includes("pitch")) {
@@ -25,7 +27,7 @@ export function Footer() {
           </Link>
 
           <span className="font-normal md:text-2xl text-right">
-            Run your business smarter.
+            {t("footer.title")}
           </span>
         </div>
 
@@ -55,9 +57,6 @@ export function Footer() {
                 <li className="transition-colors text-[#878787]">
                   <Link href="/engine">Engine</Link>
                 </li>
-                <li className="transition-colors text-[#878787]">
-                  <Link href="/download">Download</Link>
-                </li>
               </ul>
             </div>
 
@@ -77,13 +76,13 @@ export function Footer() {
                   <Link href="/terms">Terms and Conditions</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
-                  <Link href="/pitch">Investors</Link>
-                </li>
-                <li className="transition-colors text-[#878787]">
                   <Link href="/branding">Branding</Link>
                 </li>
                 <li className="transition-colors text-[#878787]">
                   <Link href="/feature-request">Feature Request</Link>
+                </li>
+                <li className="transition-colors text-[#878787]">
+                  <Link href="/download">Download</Link>
                 </li>
               </ul>
             </div>

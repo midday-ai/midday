@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/locales/client";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import Spline from "@splinetool/react-spline";
@@ -9,6 +10,7 @@ import { useEffect, useState } from "react";
 
 export function Hero() {
   const [isPlaying, setPlaying] = useState(false);
+  const t = useI18n();
 
   useEffect(() => {
     setPlaying(true);
@@ -34,7 +36,7 @@ export function Hero() {
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">Announcing Public Beta</span>
+            <span className="font-mono text-xs">{t("hero.announcment")}</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}
@@ -50,14 +52,13 @@ export function Hero() {
         </Link>
 
         <h1 className="text-[30px] md:text-[90px] font-medium mt-6 leading-none">
-          Run your
-          <br /> business smarter.
+          {t("hero.headline")}
+          <br />
+          {t("hero.headline_2")}
         </h1>
 
         <p className="mt-4 md:mt-6 max-w-[600px] text-[#878787]">
-          An all-in-one tool for freelancers, contractors, consultants, and
-          micro businesses to monitor financial health, time-track projects,
-          store files, and send invoices.
+          {t("hero.description")}
         </p>
 
         <div className="mt-8">
@@ -67,22 +68,22 @@ export function Hero() {
                 variant="outline"
                 className="border border-primary h-12 px-6"
               >
-                Talk to us
+                {t("hero.talkToUs")}
               </Button>
             </Link>
 
             <a href="https://app.midday.ai">
-              <Button className="h-12 px-5">Get Started</Button>
+              <Button className="h-12 px-5">{t("hero.getStarted")}</Button>
             </a>
           </div>
         </div>
 
         <p className="text-xs text-[#707070] mt-8 font-mono">
-          Used by over{" "}
+          {t("hero.usedBy")}{" "}
           <Link href="/open-startup" prefetch>
             <span className="underline">5200+</span>
           </Link>{" "}
-          businesses.
+          {t("hero.usedBy_2")}
         </p>
       </div>
 

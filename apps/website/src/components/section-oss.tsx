@@ -1,3 +1,6 @@
+"use client";
+
+import { useI18n } from "@/locales/client";
 import {
   Accordion,
   AccordionContent,
@@ -15,30 +18,12 @@ import {
 import { GithubStats } from "./github-stats";
 
 export function SectionOSS() {
+  const t = useI18n();
+
   return (
     <section className="container mb-16 md:mb-32">
       <div className="mb-12">
-        <h2 className="text-4xl mb-4 font-medium">Open startup</h2>
-        <p className="text-[#707070] max-w-[500px]">
-          We believe in being as transparent as possible, from{" "}
-          <a
-            href="https://git.new/midday"
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
-            code
-          </a>{" "}
-          to{" "}
-          <Link href="/open-startup" className="underline">
-            metrics
-          </Link>
-          . You can also{" "}
-          <Link href="/feature-request" className="underline">
-            request a feature
-          </Link>{" "}
-          and vote on which ones we should prioritize.
-        </p>
+        <h2 className="text-4xl mb-4 font-medium">{t("sectionOSS.title")}</h2>
       </div>
 
       <div className="border border-border bg-[#121212] p-8 md:p-10">
@@ -53,14 +38,13 @@ export function SectionOSS() {
               <AccordionItem value="item-1">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
                   <MdDataArray size={32} className="!rotate-0" />
-                  <span className="w-full text-left text-lg">Open source</span>
+                  <span className="w-full text-left text-lg">
+                    {t("sectionOSS.accordionOneTitle")}
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
                   <div className="flex-col">
-                    <p>
-                      All of our code is fully open source, clone, fork and
-                      contribute to Midday.
-                    </p>
+                    <p>{t("sectionOSS.accordionOneDescription")}</p>
 
                     <a
                       href="https://git.new/midday"
@@ -71,7 +55,7 @@ export function SectionOSS() {
                         variant="outline"
                         className="mt-8 mb-2 border-primary text-primary"
                       >
-                        View repository
+                        {t("sectionOSS.accordionOneButton")}
                       </Button>
                     </a>
                   </div>
@@ -80,14 +64,13 @@ export function SectionOSS() {
               <AccordionItem value="item-2">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
                   <MdOutlineDiversity2 size={32} className="!rotate-0" />
-                  <span className="w-full text-left text-lg">Community</span>
+                  <span className="w-full text-left text-lg">
+                    {t("sectionOSS.accordionTwoTitle")}
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
                   <div className="flex-col">
-                    <p>
-                      A welcoming community of hundreds of developers that
-                      shares expertise and offers support.
-                    </p>
+                    <p>{t("sectionOSS.accordionTwoDescription")}</p>
                     <a
                       href="https://go.midday.ai/anPiuRx"
                       target="_blank"
@@ -97,7 +80,7 @@ export function SectionOSS() {
                         variant="outline"
                         className="mt-8 mb-2 border-primary text-primary"
                       >
-                        Join the community
+                        {t("sectionOSS.accordionTwoButton")}
                       </Button>
                     </a>
                   </div>
@@ -106,14 +89,13 @@ export function SectionOSS() {
               <AccordionItem value="item-3">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
                   <MdEditRoad size={32} className="!rotate-0" />
-                  <span className="w-full text-left text-lg">Open roadmap</span>
+                  <span className="w-full text-left text-lg">
+                    {t("sectionOSS.accordionThreeTitle")}
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
                   <div className="flex-col">
-                    <p>
-                      Missing a feature? Start a discussion, report an issue,
-                      contribute the code, or even fork the repository.
-                    </p>
+                    <p>{t("sectionOSS.accordionThreeDescription")}</p>
                     <a
                       href="https://go.midday.ai/aTNyqQH"
                       target="_blank"
@@ -123,7 +105,7 @@ export function SectionOSS() {
                         variant="outline"
                         className="mt-8 mb-2 border-primary text-primary"
                       >
-                        Open roadmap
+                        {t("sectionOSS.accordionThreeButton")}
                       </Button>
                     </a>
                   </div>
@@ -132,13 +114,12 @@ export function SectionOSS() {
               <AccordionItem value="item-4">
                 <AccordionTrigger className="flex items-center justify-start space-x-2">
                   <MdOutlineAssuredWorkload size={32} className="!rotate-0" />
-                  <span className="w-full text-left text-lg">Security</span>
+                  <span className="w-full text-left text-lg">
+                    {t("sectionOSS.accordionFourTitle")}
+                  </span>
                 </AccordionTrigger>
                 <AccordionContent className="text-[#707070]">
-                  Benefit from the collective oversight of a global community
-                  that quickly identifies and resolves issues. The data are
-                  secured at rest, sensitive data are also encrypted at column
-                  level. You can also enable 2FA for extra security.
+                  <p>{t("sectionOSS.accordionFourDescription")}</p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
