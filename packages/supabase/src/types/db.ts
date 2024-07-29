@@ -79,9 +79,9 @@ export type Database = {
       bank_connections: {
         Row: {
           access_token: string | null;
-          connection_error: string | null;
           created_at: string;
           enrollment_id: string | null;
+          error_details: string | null;
           expires_at: string | null;
           id: string;
           institution_id: string;
@@ -90,13 +90,14 @@ export type Database = {
           name: string;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
           reference_id: string | null;
+          status: Database["public"]["Enums"]["connection_status"] | null;
           team_id: string;
         };
         Insert: {
           access_token?: string | null;
-          connection_error?: string | null;
           created_at?: string;
           enrollment_id?: string | null;
+          error_details?: string | null;
           expires_at?: string | null;
           id?: string;
           institution_id: string;
@@ -105,13 +106,14 @@ export type Database = {
           name: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
           reference_id?: string | null;
+          status?: Database["public"]["Enums"]["connection_status"] | null;
           team_id: string;
         };
         Update: {
           access_token?: string | null;
-          connection_error?: string | null;
           created_at?: string;
           enrollment_id?: string | null;
+          error_details?: string | null;
           expires_at?: string | null;
           id?: string;
           institution_id?: string;
@@ -120,6 +122,7 @@ export type Database = {
           name?: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
           reference_id?: string | null;
+          status?: Database["public"]["Enums"]["connection_status"] | null;
           team_id?: string;
         };
         Relationships: [
@@ -1143,6 +1146,7 @@ export type Database = {
         | "other_liability";
       bank_providers: "gocardless" | "plaid" | "teller";
       bankProviders: "gocardless" | "plaid" | "teller";
+      connection_status: "disconnected" | "connected" | "unknown";
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted";
       reportTypes: "profit" | "revenue" | "burn_rate";
       teamRoles: "owner" | "member";

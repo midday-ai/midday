@@ -4,6 +4,7 @@ import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
+import { ProviderError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
@@ -54,29 +55,44 @@ client.defineJob({
       .eq("enabled", true);
 
     const promises = accountsData?.map(async (account) => {
-      const transactions = await engine.transactions.list({
-        provider: account.bank_connection.provider,
-        accountId: account.account_id,
-        accountType: getClassification(account.type),
-        accessToken: account.bank_connection?.access_token,
-      });
-
-      const formattedTransactions = transactions.data?.map((transaction) => {
-        return transformTransaction({
-          transaction,
-          teamId: account.team_id,
-          bankAccountId: account.id,
+      try {
+        const transactions = await engine.transactions.list({
+          provider: account.bank_connection.provider,
+          accountId: account.account_id,
+          accountType: getClassification(account.type),
+          accessToken: account.bank_connection?.access_token,
         });
-      });
 
-      // NOTE: We will get all the transactions at once for each account so
-      // we need to guard against massive payloads
-      await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
-        await supabase.from("transactions").upsert(batch, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
+        const formattedTransactions = transactions.data?.map((transaction) => {
+          return transformTransaction({
+            transaction,
+            teamId: account.team_id,
+            bankAccountId: account.id,
+          });
         });
-      });
+
+        // NOTE: We will get all the transactions at once for each account so
+        // we need to guard against massive payloads
+        await processBatch(
+          formattedTransactions,
+          BATCH_LIMIT,
+          async (batch) => {
+            await supabase.from("transactions").upsert(batch, {
+              onConflict: "internal_id",
+              ignoreDuplicates: true,
+            });
+          },
+        );
+      } catch (error) {
+        if (error instanceof ProviderError) {
+          await io.supabase.client
+            .from("bank_connections")
+            .update({ status: error.code, details: error.message })
+            .eq("id", account.bank_connection.id);
+        }
+
+        throw new Error(error instanceof Error ? error.message : String(error));
+      }
 
       const balance = await engine.accounts.balance({
         provider: account.bank_connection.provider,
@@ -113,10 +129,6 @@ client.defineJob({
         await Promise.all(promises);
       }
     } catch (error) {
-      await io.logger.error(
-        error instanceof Error ? error.message : String(error),
-      );
-
       throw new Error("Something went wrong");
     }
 
