@@ -18,6 +18,7 @@ import { Logo } from "../components/logo";
 
 interface WelcomeProps {
   fullName: string;
+  expireAt: string;
 }
 
 const baseUrl =
