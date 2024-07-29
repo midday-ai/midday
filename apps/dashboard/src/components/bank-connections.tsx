@@ -38,7 +38,7 @@ interface BankConnectionProps {
     last_accessed?: string;
     access_token: string | null;
     error?: string;
-    error_code?: string;
+    status: "connected" | "disconnected" | "unknown";
     accounts: Array<{
       id: string;
       name: string;
@@ -65,29 +65,23 @@ function ConnectionState({
     );
   }
 
-  if (connection.error) {
-    switch (connection.error_code) {
-      case "disconnected":
-        return (
-          <>
-            <div className="text-xs font-normal flex items-center space-x-1 text-[#c33839]">
-              <Icons.AlertCircle />
-              <span>Connection issue</span>
-            </div>
+  if (connection.status === "disconnected") {
+    return (
+      <>
+        <div className="text-xs font-normal flex items-center space-x-1 text-[#c33839]">
+          <Icons.AlertCircle />
+          <span>Connection issue</span>
+        </div>
 
-            <TooltipContent
-              className="px-3 py-1.5 text-xs max-w-[430px]"
-              sideOffset={20}
-              side="left"
-            >
-              Please reconnect to restore the connection to a good state.
-            </TooltipContent>
-          </>
-        );
-
-      default:
-        return null;
-    }
+        <TooltipContent
+          className="px-3 py-1.5 text-xs max-w-[430px]"
+          sideOffset={20}
+          side="left"
+        >
+          Please reconnect to restore the connection to a good state.
+        </TooltipContent>
+      </>
+    );
   }
 
   if (show) {
@@ -241,7 +235,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
         </AccordionTrigger>
 
         <div className="ml-auto flex space-x-2">
-          {connection.error_code === "disconnected" ? (
+          {connection.status === "disconnected" ? (
             <ReconnectProvider
               variant="button"
               id={connection.id}
