@@ -38,7 +38,7 @@ export class PlaidProvider implements Provider {
       latest,
     });
 
-    return response.map((transaction) =>
+    return (response ?? []).map((transaction) =>
       transformTransaction({
         transaction,
         accountType,
@@ -60,7 +60,7 @@ export class PlaidProvider implements Provider {
       institutionId,
     });
 
-    return response?.map(transformAccount);
+    return (response ?? []).map(transformAccount);
   }
 
   async getAccountBalance({
