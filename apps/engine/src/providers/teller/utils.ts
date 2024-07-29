@@ -6,10 +6,6 @@ export function isError(error: unknown) {
     error: { code: string; message: string };
   };
 
-  if (!("error" in tellerError)) {
-    return false;
-  }
-
   return {
     code: tellerError.error.code,
     message: tellerError.error.message,

@@ -5,8 +5,6 @@ export function isError(error: unknown) {
   if (!axios.isAxiosError(error)) return false;
   if (typeof error.response?.data !== "object") return false;
 
-  console.log(error);
-
   const { data } = error.response;
 
   return {

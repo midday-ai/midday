@@ -1,3 +1,4 @@
+import { ProviderError } from "@/utils/error";
 import { formatISO, subMonths } from "date-fns";
 import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";
@@ -22,7 +23,7 @@ import type {
   PostRequisitionsRequest,
   PostRequisitionsResponse,
 } from "./types";
-import { getAccessValidForDays, getMaxHistoricalDays } from "./utils";
+import { getAccessValidForDays, getMaxHistoricalDays, isError } from "./utils";
 
 export class GoCardLessApi {
   #baseUrl = "https://bankaccountdata.gocardless.com";
@@ -115,20 +116,16 @@ export class GoCardLessApi {
   > {
     const token = await this.#getAccessToken();
 
-    try {
-      const { balances } = await this.#get<GetAccountBalanceResponse>(
-        `/api/v2/accounts/${accountId}/balances/`,
-        token,
-      );
+    const { balances } = await this.#get<GetAccountBalanceResponse>(
+      `/api/v2/accounts/${accountId}/balances/`,
+      token,
+    );
 
-      const foundAccount = balances?.find(
-        (account) => account.balanceType === "interimAvailable",
-      );
+    const foundAccount = balances?.find(
+      (account) => account.balanceType === "interimAvailable",
+    );
 
-      return foundAccount?.balanceAmount;
-    } catch (error) {
-      throw Error("Failed to get account balance");
-    }
+    return foundAccount?.balanceAmount;
   }
 
   async getInstitutions(
@@ -235,47 +232,65 @@ export class GoCardLessApi {
     );
   }
 
-  async getAccounts({ id }: GetAccountsRequest): Promise<GetAccountsResponse> {
+  async getAccounts({
+    id,
+  }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
     const response = await this.getRequestion(id);
 
-    return Promise.all(
-      response.accounts?.map(async (acountId: string) => {
-        const [details, balance, institution] = await Promise.all([
-          this.getAccountDetails(acountId),
-          this.getAccountBalance(acountId),
-          this.getInstitution(response.institution_id),
-        ]);
+    try {
+      return Promise.all(
+        response.accounts?.map(async (acountId: string) => {
+          const [details, balance, institution] = await Promise.all([
+            this.getAccountDetails(acountId),
+            this.getAccountBalance(acountId),
+            this.getInstitution(response.institution_id),
+          ]);
 
-        return {
-          balance,
-          institution,
-          ...details,
-        };
-      }),
-    );
+          return {
+            balance,
+            institution,
+            ...details,
+          };
+        }),
+      );
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+    }
   }
 
   async getTransactions({
     accountId,
     latest,
   }: GetTransactionsRequest): Promise<
-    GetTransactionsResponse["transactions"]["booked"]
+    GetTransactionsResponse["transactions"]["booked"] | undefined
   > {
     const token = await this.#getAccessToken();
 
-    const response = await this.#get<GetTransactionsResponse>(
-      `/api/v2/accounts/${accountId}/transactions/`,
-      token,
-      latest
-        ? {
-            date_from: formatISO(subMonths(new Date(), 1), {
-              representation: "date",
-            }),
-          }
-        : undefined,
-    );
+    try {
+      const response = await this.#get<GetTransactionsResponse>(
+        `/api/v2/accounts/${accountId}/transactions/`,
+        token,
+        latest
+          ? {
+              date_from: formatISO(subMonths(new Date(), 1), {
+                representation: "date",
+              }),
+            }
+          : undefined,
+      );
 
-    return response?.transactions?.booked;
+      return response?.transactions?.booked;
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+    }
   }
 
   async getRequisitions(): Promise<GetRequisitionsResponse> {

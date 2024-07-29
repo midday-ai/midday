@@ -32,7 +32,7 @@ export class GoCardLessProvider implements Provider {
       accountId,
     });
 
-    return response.map(transformTransaction);
+    return (response ?? []).map(transformTransaction);
   }
 
   async getAccounts({ id }: GetAccountsRequest) {
@@ -42,7 +42,7 @@ export class GoCardLessProvider implements Provider {
 
     const response = await this.#api.getAccounts({ id });
 
-    return response.map(transformAccount);
+    return (response ?? []).map(transformAccount);
   }
 
   async getAccountBalance({ accountId }: GetAccountBalanceRequest) {

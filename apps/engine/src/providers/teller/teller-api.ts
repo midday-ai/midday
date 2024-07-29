@@ -22,7 +22,12 @@ export class TellerApi {
   }
 
   async getHealthCheck() {
-    return fetch(`${this.#baseUrl}/health`);
+    try {
+      await fetch(`${this.#baseUrl}/health`);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 
   async getAccounts({

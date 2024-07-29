@@ -26,7 +26,14 @@ export class ProviderError extends Error {
       case "ITEM_LOCKED":
       case "ITEM_CONCURRENTLY_DELETED":
       case "ACCESS_NOT_GRANTED":
+
+      // GoCardLess
+      case "AccessExpiredError":
+      case "AccountInactiveError":
+      case "Account suspended":
         logger("disconnected", this.message);
+
+        console.log("disconnected");
 
         return "disconnected";
       default:

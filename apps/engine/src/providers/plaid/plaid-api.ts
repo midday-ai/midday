@@ -154,7 +154,6 @@ export class PlaidApi {
         .filter((transaction) => transaction.account_id === accountId)
         .filter((transaction) => !transaction.pending);
     } catch (error) {
-      console.log(error);
       const parsedError = isError(error);
 
       if (parsedError) {
