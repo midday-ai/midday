@@ -235,11 +235,15 @@ export class GoCardLessApi {
   async getAccounts({
     id,
   }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
-    const response = await this.getRequestion(id);
-
     try {
+      const response = await this.getRequestion(id);
+
+      if (!response?.accounts) {
+        return undefined;
+      }
+
       return Promise.all(
-        response.accounts?.map(async (acountId: string) => {
+        response.accounts.map(async (acountId: string) => {
           const [details, balance, institution] = await Promise.all([
             this.getAccountDetails(acountId),
             this.getAccountBalance(acountId),
@@ -299,13 +303,21 @@ export class GoCardLessApi {
     return this.#get<GetRequisitionsResponse>("/api/v2/requisitions/", token);
   }
 
-  async getRequestion(id: string): Promise<GetRequisitionResponse> {
-    const token = await this.#getAccessToken();
+  async getRequestion(id: string): Promise<GetRequisitionResponse | undefined> {
+    try {
+      const token = await this.#getAccessToken();
 
-    return this.#get<GetRequisitionResponse>(
-      `/api/v2/requisitions/${id}/`,
-      token,
-    );
+      return this.#get<GetRequisitionResponse>(
+        `/api/v2/requisitions/${id}/`,
+        token,
+      );
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+    }
   }
 
   async deleteRequisition(id: string): Promise<DeleteRequistionResponse> {

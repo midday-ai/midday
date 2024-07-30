@@ -1,10 +1,11 @@
-export function isError(error: unknown) {
-  if (!error) return false;
-  if (typeof error !== "object") return false;
+export function isError(
+  data: unknown,
+): false | { code: string; message: string } {
+  if (typeof data !== "object" || data === null || !("error" in data)) {
+    return false;
+  }
 
-  const tellerError = error as {
-    error: { code: string; message: string };
-  };
+  const tellerError = data as { error: { code: string; message: string } };
 
   return {
     code: tellerError.error.code,

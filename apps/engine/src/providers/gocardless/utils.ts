@@ -1,6 +1,5 @@
 export function isError(error: unknown) {
   if (!error) return false;
-  if (typeof error !== "object") return false;
 
   const goCardLessError = error as {
     response: {
