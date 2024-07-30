@@ -1,10 +1,11 @@
+import Midday from "@midday-ai/engine";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
-import { ProviderError } from "../utils/error";
+import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
@@ -84,10 +85,15 @@ client.defineJob({
         await Promise.all(promises);
       }
     } catch (error) {
-      if (error instanceof ProviderError) {
+      if (error instanceof Midday.APIError) {
+        const parsedError = parseAPIError(error);
+
         await io.supabase.client
           .from("bank_connections")
-          .update({ status: error.code, details: error.message })
+          .update({
+            status: parsedError.code,
+            error_details: parsedError.message,
+          })
           .eq("id", connectionId);
       }
 

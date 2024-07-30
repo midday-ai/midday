@@ -1,8 +1,9 @@
+import Midday from "@midday-ai/engine";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
-import { ProviderError } from "../utils/error";
+import { parseAPIError } from "../utils/error";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
@@ -53,20 +54,17 @@ client.defineJob({
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
       } catch (error) {
-        if (error instanceof ProviderError) {
+        if (error instanceof Midday.APIError) {
+          const parsedError = parseAPIError(error);
+
           await io.supabase.client
             .from("bank_connections")
-            .update({ status: error.code, details: error.message })
+            .update({
+              status: parsedError.code,
+              error_details: parsedError.message,
+            })
             .eq("id", account.bank_connection.id);
         }
-
-        await io.logger.error(
-          error instanceof Error ? error.message : String(error),
-        );
-
-        await io.logger.debug(
-          `Provider: ${account.bank_connection.provider}, Account ID: ${account.account_id}`,
-        );
       }
 
       const transactions = await engine.transactions.list({
