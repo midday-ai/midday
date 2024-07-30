@@ -116,16 +116,24 @@ export class GoCardLessApi {
   > {
     const token = await this.#getAccessToken();
 
-    const { balances } = await this.#get<GetAccountBalanceResponse>(
-      `/api/v2/accounts/${accountId}/balances/`,
-      token,
-    );
+    try {
+      const { balances } = await this.#get<GetAccountBalanceResponse>(
+        `/api/v2/accounts/${accountId}/balances/`,
+        token,
+      );
 
-    const foundAccount = balances?.find(
-      (account) => account.balanceType === "interimAvailable",
-    );
+      const foundAccount = balances?.find(
+        (account) => account.balanceType === "interimAvailable",
+      );
 
-    return foundAccount?.balanceAmount;
+      return foundAccount?.balanceAmount;
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+    }
   }
 
   async getInstitutions(
