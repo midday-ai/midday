@@ -13,7 +13,7 @@ client.defineJob({
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    const supabase = await io.supabase.client;
+    const supabase = io.supabase.client;
 
     const teamId = ctx.source?.id as string;
 
