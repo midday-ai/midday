@@ -104,7 +104,7 @@ export function EnrollMFA() {
 
       <div className="flex w-full">
         <InputOTP
-          className={error && "invalid"}
+          className={error ? "invalid" : ""}
           maxLength={6}
           onComplete={onComplete}
           numeric="numeric"

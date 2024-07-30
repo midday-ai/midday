@@ -31,6 +31,11 @@ export function AddNewDeviceModal() {
 
       const challenge = await supabase.auth.mfa.challenge({ factorId });
 
+      if (!challenge.data) {
+        setError(true);
+        return;
+      }
+
       verify.execute({
         factorId,
         challengeId: challenge.data.id,
@@ -106,7 +111,7 @@ export function AddNewDeviceModal() {
               onComplete={onComplete}
               numeric="numeric"
               disabled={isValidating}
-              className={error && "invalid"}
+              className={error ? "invalid" : ""}
               render={({ slots }) => (
                 <InputOTPGroup>
                   {slots.map((slot, index) => (
