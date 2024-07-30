@@ -1,3 +1,25 @@
+export function isError(error: unknown) {
+  if (!error) return false;
+  if (typeof error !== "object") return false;
+
+  const goCardLessError = error as {
+    response: {
+      data: {
+        summary: string;
+        detail: string;
+        type?: string;
+      };
+    };
+  };
+
+  return {
+    code:
+      goCardLessError.response.data.type ||
+      goCardLessError.response.data.summary,
+    message: goCardLessError.response.data.detail,
+  };
+}
+
 type GetMaxHistoricalDays = {
   transactionTotalDays: number;
   institutionId: string;

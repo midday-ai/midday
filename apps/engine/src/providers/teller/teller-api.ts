@@ -1,3 +1,4 @@
+import { ProviderError } from "@/utils/error";
 import type { ProviderParams } from "../types";
 import type {
   AuthenticatedRequest,
@@ -9,6 +10,7 @@ import type {
   GetTransactionsRequest,
   GetTransactionsResponse,
 } from "./types";
+import { isError } from "./utils";
 
 export class TellerApi {
   #baseUrl = "https://api.teller.io";
@@ -24,7 +26,6 @@ export class TellerApi {
       await fetch(`${this.#baseUrl}/health`);
       return true;
     } catch (error) {
-      console.log(error);
       return false;
     }
   }
@@ -124,6 +125,14 @@ export class TellerApi {
         }),
       })
       .then((response) => response.json())
-      .then((data) => data);
+      .then((data) => {
+        const error = isError(data);
+
+        if (error) {
+          throw new ProviderError(error);
+        }
+
+        return data as TResponse;
+      });
   }
 }

@@ -1,4 +1,5 @@
 import { PLAID_COUNTRIES } from "@/utils/countries";
+import { ProviderError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
@@ -25,6 +26,7 @@ import type {
   ItemPublicTokenExchangeRequest,
   LinkTokenCreateRequest,
 } from "./types";
+import { isError } from "./utils";
 
 export class PlaidApi {
   #client: PlaidBaseApi;
@@ -72,69 +74,92 @@ export class PlaidApi {
     accessToken,
     accountId,
   }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse | undefined> {
-    const accounts = await this.#client.accountsGet({
-      access_token: accessToken,
-      options: {
-        account_ids: [accountId],
-      },
-    });
+    try {
+      const accounts = await this.#client.accountsGet({
+        access_token: accessToken,
+        options: {
+          account_ids: [accountId],
+        },
+      });
 
-    return accounts.data.accounts.at(0)?.balances;
+      return accounts.data.accounts.at(0)?.balances;
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+    }
   }
 
   async getAccounts({
     accessToken,
     institutionId,
-  }: GetAccountsRequest): Promise<GetAccountsResponse> {
-    const accounts = await this.#client.accountsGet({
-      access_token: accessToken,
-    });
+  }: GetAccountsRequest): Promise<GetAccountsResponse | undefined> {
+    try {
+      const accounts = await this.#client.accountsGet({
+        access_token: accessToken,
+      });
 
-    const institution = await this.institutionsGetById(institutionId);
+      const institution = await this.institutionsGetById(institutionId);
 
-    return accounts.data.accounts.map((account) => ({
-      ...account,
-      institution: {
-        id: institution.data.institution.institution_id,
-        name: institution.data.institution.name,
-      },
-    }));
+      return accounts.data.accounts.map((account) => ({
+        ...account,
+        institution: {
+          id: institution.data.institution.institution_id,
+          name: institution.data.institution.name,
+        },
+      }));
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
+    }
   }
 
   async getTransactions({
     accessToken,
     accountId,
     latest,
-  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
+  }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
     let added: Array<Transaction> = [];
     let cursor = undefined;
     let hasMore = true;
-
-    if (latest) {
-      const { data } = await this.#client.transactionsSync({
-        access_token: accessToken,
-        count: 500,
-      });
-
-      added = added.concat(data.added);
-    } else {
-      while (hasMore) {
+    try {
+      if (latest) {
         const { data } = await this.#client.transactionsSync({
           access_token: accessToken,
-          cursor,
+          count: 500,
         });
 
         added = added.concat(data.added);
-        hasMore = data.has_more;
-        cursor = data.next_cursor;
+      } else {
+        while (hasMore) {
+          const { data } = await this.#client.transactionsSync({
+            access_token: accessToken,
+            cursor,
+          });
+
+          added = added.concat(data.added);
+          hasMore = data.has_more;
+          cursor = data.next_cursor;
+        }
+      }
+
+      // NOTE: Plaid transactions for all accounts
+      // we need to filter based on the provided accountId and pending status
+      return added
+        .filter((transaction) => transaction.account_id === accountId)
+        .filter((transaction) => !transaction.pending);
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
       }
     }
-
-    // NOTE: Plaid transactions for all accounts
-    // we need to filter based on the provided accountId and pending status
-    return added
-      .filter((transaction) => transaction.account_id === accountId)
-      .filter((transaction) => !transaction.pending);
   }
 
   async linkTokenCreate({

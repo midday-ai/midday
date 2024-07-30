@@ -1,7 +1,7 @@
 import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import type { Providers } from "@/providers/types";
-import { logger } from "@/utils/logger";
+import { createErrorResponse } from "@/utils/error";
 import { SearchClient } from "@/utils/search";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -124,18 +124,9 @@ app.openapi(indexRoute, async (c) => {
       200,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 
@@ -170,18 +161,9 @@ app.openapi(updateUsageRoute, async (c) => {
       200,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 

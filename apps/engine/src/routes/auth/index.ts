@@ -2,7 +2,7 @@ import type { Bindings } from "@/common/bindings";
 import { ErrorSchema } from "@/common/schema";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { logger } from "@/utils/logger";
+import { createErrorResponse } from "@/utils/error";
 import { createRoute } from "@hono/zod-openapi";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
@@ -210,18 +210,9 @@ app.openapi(linkPlaidRoute, async (c) => {
       200,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 
@@ -242,18 +233,9 @@ app.openapi(exchangePlaidRoute, async (c) => {
 
     return c.json(data, 200);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 
@@ -281,18 +263,9 @@ app.openapi(linkGoCardLessRoute, async (c) => {
       200,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 
@@ -319,18 +292,9 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
       200,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 
@@ -357,18 +321,9 @@ app.openapi(agreementGoCardLessRoute, async (c) => {
       200,
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
+    const errorResponse = createErrorResponse(error, c.get("requestId"));
 
-    logger(message);
-
-    return c.json(
-      {
-        requestId: c.get("requestId"),
-        message,
-        code: "bad_request",
-      },
-      400,
-    );
+    return c.json(errorResponse, 400);
   }
 });
 

@@ -192,7 +192,7 @@ export const TransactionsEmail = ({
                         className={cn(
                           "text-[#121212]",
                           transaction?.category === "income" &&
-                            "!text-[#00C969]"
+                            "!text-[#00C969]",
                         )}
                       >
                         <div className="flex space-x-2 items-center">
@@ -213,7 +213,7 @@ export const TransactionsEmail = ({
                         className={cn(
                           "text-[14px] m-0 p-0 mt-1 pb-1 text-[#121212]",
                           transaction?.category === "income" &&
-                            "!text-[#00C969]"
+                            "!text-[#00C969]",
                         )}
                       >
                         {Intl.NumberFormat(locale, {

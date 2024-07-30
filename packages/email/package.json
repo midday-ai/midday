@@ -18,7 +18,7 @@
     "@react-email/render": "^0.0.17",
     "@react-email/tailwind": "0.0.19",
     "date-fns": "^3.6.0",
-    "react-email": "canary",
+    "react-email": "2.1.4",
     "responsive-react-email": "^0.0.5"
   },
   "devDependencies": {

@@ -38,7 +38,7 @@ interface BankConnectionProps {
     last_accessed?: string;
     access_token: string | null;
     error?: string;
-    error_code?: string;
+    status: "connected" | "disconnected" | "unknown";
     accounts: Array<{
       id: string;
       name: string;
@@ -51,7 +51,10 @@ interface BankConnectionProps {
   };
 }
 
-function ConnectionState({ connection, isSyncing }) {
+function ConnectionState({
+  connection,
+  isSyncing,
+}: { connection: BankConnectionProps["connection"]; isSyncing: boolean }) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {
@@ -62,30 +65,23 @@ function ConnectionState({ connection, isSyncing }) {
     );
   }
 
-  if (connection.error) {
-    switch (connection.error_code) {
-      case "AUTH_ERROR":
-        return (
-          <>
-            <div className="text-xs font-normal flex items-center space-x-1 text-[#FFD02B]">
-              <Icons.AlertCircle />
-              <span>Syncing issue detected</span>
-            </div>
+  if (connection.status === "disconnected") {
+    return (
+      <>
+        <div className="text-xs font-normal flex items-center space-x-1 text-[#c33839]">
+          <Icons.AlertCircle />
+          <span>Connection issue</span>
+        </div>
 
-            <TooltipContent
-              className="px-3 py-1.5 text-xs max-w-[430px]"
-              sideOffset={20}
-              side="left"
-            >
-              The login details for this connection have changed (credentials,
-              MFA, or similar) restore the connection to a good state.
-            </TooltipContent>
-          </>
-        );
-
-      default:
-        return null;
-    }
+        <TooltipContent
+          className="px-3 py-1.5 text-xs max-w-[430px]"
+          sideOffset={20}
+          side="left"
+        >
+          Please reconnect to restore the connection to a good state.
+        </TooltipContent>
+      </>
+    );
   }
 
   if (show) {
@@ -239,15 +235,32 @@ export function BankConnection({ connection }: BankConnectionProps) {
         </AccordionTrigger>
 
         <div className="ml-auto flex space-x-2">
-          <ReconnectProvider
-            id={connection.id}
-            provider={connection.provider}
-            enrollmentId={connection.enrollment_id}
-            institutionId={connection.institution_id}
-            accessToken={connection.access_token}
-            onManualSync={handleManualSync}
-          />
-          <SyncTransactions disabled={isSyncing} onClick={handleManualSync} />
+          {connection.status === "disconnected" ? (
+            <ReconnectProvider
+              variant="button"
+              id={connection.id}
+              provider={connection.provider}
+              enrollmentId={connection.enrollment_id}
+              institutionId={connection.institution_id}
+              accessToken={connection.access_token}
+              onManualSync={handleManualSync}
+            />
+          ) : (
+            <>
+              <ReconnectProvider
+                id={connection.id}
+                provider={connection.provider}
+                enrollmentId={connection.enrollment_id}
+                institutionId={connection.institution_id}
+                accessToken={connection.access_token}
+                onManualSync={handleManualSync}
+              />
+              <SyncTransactions
+                disabled={isSyncing}
+                onClick={handleManualSync}
+              />
+            </>
+          )}
         </div>
       </div>
 
@@ -273,7 +286,9 @@ export function BankConnection({ connection }: BankConnectionProps) {
   );
 }
 
-export function BankConnections({ data }) {
+export function BankConnections({
+  data,
+}: { data: BankConnectionProps["connection"][] }) {
   const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
 
   return (

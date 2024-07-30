@@ -4,6 +4,7 @@ import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
+import { ProviderError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
@@ -83,19 +84,23 @@ client.defineJob({
         await Promise.all(promises);
       }
     } catch (error) {
-      await io.logger.error(
-        error instanceof Error ? error.message : String(error),
-      );
+      if (error instanceof ProviderError) {
+        await io.supabase.client
+          .from("bank_connections")
+          .update({ status: error.code, details: error.message })
+          .eq("id", connectionId);
+      }
 
-      throw new Error("Something went wrong");
+      throw new Error(error instanceof Error ? error.message : String(error));
     }
 
-    // Update bank connection last accessed and clear error
+    // Update bank connection last accessed and restore connection status
     await io.supabase.client
       .from("bank_connections")
       .update({
         last_accessed: new Date().toISOString(),
-        connection_error: null,
+        status: "connected",
+        error_details: null,
       })
       .eq("id", connectionId);
 
