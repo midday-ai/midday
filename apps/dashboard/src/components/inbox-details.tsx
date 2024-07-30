@@ -19,8 +19,23 @@ import { FormatAmount } from "./format-amount";
 import { EditInboxModal } from "./modals/edit-inbox-modal";
 import { SelectTransaction } from "./select-transaction";
 
+type InboxItem = {
+  id: string;
+  status?: string;
+  file_path?: string[];
+  file_name?: string;
+  website?: string;
+  display_name?: string;
+  amount?: number;
+  currency?: string;
+  due_date?: string;
+  forwarded_to?: string;
+  content_type?: string;
+  transaction?: any;
+};
+
 type Props = {
-  item: any[];
+  item: InboxItem;
   onDelete: () => void;
   onSelectTransaction: () => void;
   teamId: string;
@@ -44,7 +59,7 @@ export function InboxDetails({
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/inbox?id=${item.id}`
+        `${window.location.origin}/inbox?id=${item.id}`,
       );
 
       toast({
@@ -96,7 +111,7 @@ export function InboxDetails({
                 <a
                   href={`/api/download/file?path=${item?.file_path
                     ?.slice(1)
-                    .join("/")}&filename=${item.file_name}`}
+                    .join("/")}&filename=${item?.file_name}`}
                   download
                 >
                   Download
@@ -111,7 +126,7 @@ export function InboxDetails({
       </div>
       <Separator />
 
-      {item ? (
+      {item?.id ? (
         <div className="flex flex-1 flex-col">
           <div className="flex items-start p-4">
             <div className="flex items-start gap-4 text-sm relative">
@@ -210,25 +225,25 @@ export function InboxDetails({
               key={item.id}
             />
           </div>
+
+          <EditInboxModal
+            key={item.id}
+            isOpen={isOpen}
+            onOpenChange={setOpen}
+            id={item.id}
+            currencies={currencies}
+            defaultValue={{
+              amount: item?.amount,
+              currency: item.currency,
+              display_name: item?.display_name,
+            }}
+          />
         </div>
       ) : (
         <div className="p-8 text-center text-muted-foreground">
           No attachment selected
         </div>
       )}
-
-      <EditInboxModal
-        key={item.id}
-        isOpen={isOpen}
-        onOpenChange={setOpen}
-        id={item.id}
-        currencies={currencies}
-        defaultValue={{
-          amount: item?.amount,
-          currency: item.currency,
-          display_name: item?.display_name,
-        }}
-      />
     </div>
   );
 }
