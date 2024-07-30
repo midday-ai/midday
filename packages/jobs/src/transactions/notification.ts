@@ -29,7 +29,7 @@ client.defineJob({
           currency: z.string(),
           category: z.string().optional().nullable(),
           status: z.enum(["posted", "pending"]),
-        })
+        }),
       ),
     }),
   }),
@@ -38,13 +38,13 @@ client.defineJob({
     const { transactions, teamId } = payload;
 
     const sortedTransactions = transactions.sort(
-      (a, b) => new Date(b.date) - new Date(a.date)
+      (a, b) => b.date.getTime() - a.date.getTime(),
     );
 
     const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
-        "id, team_id, team:teams(inbox_id), user:users(id, full_name, avatar_url, email, locale)"
+        "id, team_id, team:teams(inbox_id), user:users(id, full_name, avatar_url, email, locale)",
       )
       .eq("team_id", teamId);
 
@@ -118,7 +118,7 @@ client.defineJob({
           fullName: user.full_name,
           transactions: sortedTransactions,
           locale: user.locale,
-        })
+        }),
       );
 
       return {
@@ -138,11 +138,11 @@ client.defineJob({
       };
     });
 
-    const emailEvents = await Promise.all(emailPromises);
+    const emailEvents = await Promise.all(emailPromises ?? []);
 
-    if (emailEvents?.length) {
+    if (emailEvents.length) {
       try {
-        await triggerBulk(emailEvents.flat());
+        await triggerBulk(emailEvents);
       } catch (error) {
         await io.logger.error("email events", error);
       }

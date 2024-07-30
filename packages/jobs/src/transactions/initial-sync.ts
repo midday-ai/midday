@@ -23,7 +23,7 @@ client.defineJob({
   }),
   integrations: { supabase },
   run: async (payload, io) => {
-    const supabase = await io.supabase.client;
+    const supabase = io.supabase.client;
 
     const { teamId } = payload;
 

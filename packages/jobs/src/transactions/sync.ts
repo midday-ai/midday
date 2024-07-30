@@ -13,7 +13,7 @@ client.defineJob({
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
-    const supabase = await io.supabase.client;
+    const supabase = io.supabase.client;
 
     const teamId = ctx.source?.id as string;
 
@@ -60,7 +60,13 @@ client.defineJob({
             .eq("id", account.bank_connection.id);
         }
 
-        throw new Error(error instanceof Error ? error.message : String(error));
+        await io.logger.error(
+          error instanceof Error ? error.message : String(error),
+        );
+
+        await io.logger.debug(
+          `Provider: ${account.bank_connection.provider}, Account ID: ${account.account_id}`,
+        );
       }
 
       const transactions = await engine.transactions.list({
