@@ -27,8 +27,6 @@ export const env = createEnv({
     GOCARDLESS_SECRET_KEY: z.string(),
     NOVU_API_KEY: z.string(),
     RESEND_API_KEY: z.string(),
-    BASELIME_SERVICE: z.string(),
-    BASELIME_API_KEY: z.string(),
     OPENPANEL_SECRET_KEY: z.string(),
     MIDDAY_ENGINE_API_KEY: z.string(),
     WEBHOOK_SECRET_KEY: z.string(),
@@ -79,8 +77,6 @@ export const env = createEnv({
     GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
     GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
       process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
-    BASELIME_SERVICE: process.env.BASELIME_SERVICE,
-    BASELIME_API_KEY: process.env.BASELIME_API_KEY,
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
