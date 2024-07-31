@@ -4,7 +4,6 @@ import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
@@ -86,7 +85,6 @@ export default function Layout({
       >
         {/* <SystemBanner /> */}
         {children}
-        <SpeedInsights />
         <Toaster />
         <Analytics />
       </body>

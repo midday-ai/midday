@@ -36,7 +36,6 @@
     "@trigger.dev/nextjs": "^2.3.19",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.1",
-    "@vercel/speed-insights": "^1.0.12",
     "@zip.js/zip.js": "2.7.47",
     "ai": "^3.2.37",
     "change-case": "^5.4.4",
