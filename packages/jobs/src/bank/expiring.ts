@@ -70,7 +70,7 @@ client.defineJob({
     });
 
     await processBatch(emails, 50, async (batch) => {
-      // await resend.batch.send("send-email", batch);
+      await resend.batch.send("send-email", batch);
     });
   },
 });
