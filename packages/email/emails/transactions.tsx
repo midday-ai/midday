@@ -25,6 +25,7 @@ type Transaction = {
   currency: string;
   category?: string;
   status: "pending" | "posted";
+  teamName: string;
 };
 
 interface TransactionsEmailEmailProps {
@@ -83,6 +84,7 @@ export const TransactionsEmail = ({
   fullName = "Viktor Hofte",
   transactions = defaultTransactions,
   locale = "en",
+  teamName = "Viktor Hofte AB",
 }: TransactionsEmailEmailProps) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);
@@ -146,7 +148,7 @@ export const TransactionsEmail = ({
                   numberOfTransactions: transactions.length,
                 })}{" "}
               </span>
-              {t("transactions.description4")}
+              {t("transactions.description4", { teamName })}
             </Text>
 
             <br />
