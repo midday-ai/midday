@@ -67,4 +67,5 @@ export default withSentryConfig(withBundleAnalyzer(config), {
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,
+  release: "v0.0.1",
 });

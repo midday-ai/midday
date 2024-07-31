@@ -73,7 +73,7 @@
     "./cn": "./src/utils/cn.ts"
   },
   "dependencies": {
-    "@mui/icons-material": "^5.16.5",
+    "@mui/icons-material": "^5.16.6",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-avatar": "^1.1.0",
@@ -107,9 +107,9 @@
     "embla-carousel-react": "^8.1.7",
     "input-otp": "^1.2.4",
     "jsonfile": "^6.1.0",
-    "lucide-react": "^0.416.0",
+    "lucide-react": "^0.417.0",
     "postcss": "^8.4.40",
-    "react-day-picker": "^9.0.4",
+    "react-day-picker": "^9.0.6",
     "react-icons": "^5.2.1",
     "storybook-dark-mode": "^4.0.2",
     "tailwind-merge": "2.4.0",

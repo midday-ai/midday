@@ -7,6 +7,6 @@
         "db:reset": ""
     },
     "dependencies": {
-        "supabase": "^1.187.3"
+        "supabase": "^1.187.10"
     }
 }
