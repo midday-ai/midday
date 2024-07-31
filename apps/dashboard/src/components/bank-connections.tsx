@@ -19,6 +19,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { useEventDetails } from "@trigger.dev/react";
 import { differenceInDays, formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { BankAccount } from "./bank-account";
@@ -134,6 +135,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const [isSyncing, setSyncing] = useState(false);
   const { toast, dismiss } = useToast();
   const { data } = useEventDetails(eventId);
+  const router = useRouter();
 
   const status = data?.runs.at(-1)?.status;
 
@@ -167,6 +169,8 @@ export function BankConnection({ connection }: BankConnectionProps) {
       dismiss();
       setEventId(undefined);
       setSyncing(false);
+      router.replace("/settings/accounts");
+      router.refresh();
     }
   }, [status]);
 

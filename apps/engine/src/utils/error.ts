@@ -9,6 +9,16 @@ export class ProviderError extends Error {
   }
 
   setCode(code: string) {
+    // Teller
+    if (this.message === "The requested account is closed") {
+      return "disconnected";
+    }
+
+    // GoCardLess
+    if (this.message.startsWith("EUA was valid for")) {
+      return "disconnected";
+    }
+
     switch (code) {
       // Teller
       case "enrollment.disconnected":
@@ -32,8 +42,6 @@ export class ProviderError extends Error {
       case "AccountInactiveError":
       case "Account suspended":
         logger("disconnected", this.message);
-
-        console.log("disconnected");
 
         return "disconnected";
       default:

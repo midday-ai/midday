@@ -5,8 +5,6 @@ import {
   Font,
   Heading,
   Html,
-  Img,
-  Link,
   Preview,
   Section,
   Tailwind,
@@ -17,6 +15,8 @@ import { Logo } from "../components/logo";
 
 interface WelcomeProps {
   fullName: string;
+  bankName: string;
+  teamName: string;
 }
 
 const baseUrl =
@@ -26,9 +26,11 @@ const baseUrl =
 
 export const ConnectionIssueEmail = ({
   fullName = "Viktor Hofte",
+  bankName = "Revolut",
+  teamName = "Midday",
 }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, We wanted to let you know about a small issue with the connection to your bank. To keep Midday running smoothly, we'll need you to reconnect your bank account.`;
+  const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
 
   return (
     <Html>
@@ -65,7 +67,7 @@ export const ConnectionIssueEmail = ({
           >
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Connection to your bank
+              Bank Connection Issue
             </Heading>
 
             <br />
@@ -75,9 +77,10 @@ export const ConnectionIssueEmail = ({
               We hope you're having a great day!
               <br />
               <br />
-              We wanted to let you know about a small issue with the connection
-              to your bank. To keep Midday running smoothly, we'll need you to
-              reconnect your bank account.
+              We wanted to let you know that your bank{" "}
+              <strong>{bankName}</strong> for team <strong>{teamName}</strong>{" "}
+              is currently disconnected. To keep Midday running smoothly, we'll
+              need you to reconnect your bank.
               <br />
               <br />
               The good news? It only takes 60 seconds to get everything back on

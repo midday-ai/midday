@@ -18,8 +18,8 @@ export async function ConnectionStatus() {
     return null;
   }
 
-  const connectionIssue = bankConnections?.data?.some((bank) =>
-    Boolean(bank.connection_error),
+  const connectionIssue = bankConnections?.data?.some(
+    (bank) => bank.status === "disconnected",
   );
 
   if (connectionIssue) {
