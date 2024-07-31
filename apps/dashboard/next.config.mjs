@@ -61,8 +61,6 @@ const config = {
 };
 
 export default withSentryConfig(withBundleAnalyzer(config), {
-  org: process.env.SENTRY_ORG,
-  project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   telemetry: false,
   widenClientFileUpload: true,
