@@ -45,7 +45,11 @@ export async function BankAccountList() {
   const bankMap = {};
 
   for (const item of data) {
-    const bankId = item.bank.id;
+    const bankId = item.bank?.id;
+
+    if (!bankId) {
+      continue;
+    }
 
     if (!bankMap[bankId]) {
       // If the bank is not in the map, add it

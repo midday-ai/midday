@@ -1,6 +1,7 @@
 "use server";
 
 import { engine } from "@/utils/engine";
+import { logger } from "@/utils/logger";
 
 type GetAccountParams = {
   countryCode: string;
@@ -11,8 +12,13 @@ export async function getInstitutions({
   countryCode,
   query,
 }: GetAccountParams) {
-  return engine.institutions.list({
-    countryCode,
-    q: query,
-  });
+  try {
+    return engine.institutions.list({
+      countryCode,
+      q: query,
+    });
+  } catch (error) {
+    logger(error instanceof Error ? error.message : String(error));
+    return [];
+  }
 }

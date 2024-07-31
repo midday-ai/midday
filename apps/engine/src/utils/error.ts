@@ -14,6 +14,11 @@ export class ProviderError extends Error {
       return "disconnected";
     }
 
+    // GoCardLess
+    if (this.message.startsWith("EUA was valid for")) {
+      return "disconnected";
+    }
+
     switch (code) {
       // Teller
       case "enrollment.disconnected":
