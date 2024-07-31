@@ -63,7 +63,8 @@ const config = {
 export default withSentryConfig(config, {
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
-  silent: !process.env.CI,
+  silent: false, //!process.env.CI,
+  telemetry: false,
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,

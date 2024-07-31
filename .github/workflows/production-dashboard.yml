@@ -9,6 +9,7 @@ env:
   SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
   SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
   SENTRY_LOG_LEVEL: info
+  SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: true
 on:
   push:
     branches:
