@@ -3,9 +3,9 @@ import "./src/env.mjs";
 import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
 
-const withBundleAnalyzer = bundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
+// const withBundleAnalyzer = bundleAnalyzer({
+//   enabled: process.env.ANALYZE === "true",
+// });
 
 /** @type {import("next").NextConfig} */
 const config = {
@@ -60,12 +60,11 @@ const config = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(config), {
+export default withSentryConfig({
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,
-  release: "v0.0.1",
 });
