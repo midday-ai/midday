@@ -61,12 +61,8 @@ client.defineJob({
 
     const emails = await Promise.all(emailPromises);
 
-    await io.logger.debug("Sending email batch", {
-      batch: JSON.stringify(emails),
-    });
-
     await processBatch(emails, 50, async (batch) => {
-      await resend.batch.send("send-email", batch);
+      await io.resend.batch.send("send-email", batch);
     });
   },
 });
