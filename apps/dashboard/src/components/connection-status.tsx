@@ -73,8 +73,8 @@ export async function ConnectionStatus() {
               <Icons.Refresh
                 size={16}
                 className={cn(
-                  warning && "text-[#FFD02B]",
                   error && "text-[#FF3638]",
+                  warning && "text-[#FFD02B]",
                 )}
               />
             </Button>
