@@ -69,15 +69,6 @@ export default async function Overview({ searchParams }) {
           />
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            throw new Error("Sentry Frontend Error");
-          }}
-        >
-          Throw error
-        </button>
-
         <Widgets
           initialPeriod={initialPeriod}
           disabled={empty}
