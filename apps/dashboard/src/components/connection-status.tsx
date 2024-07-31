@@ -70,7 +70,7 @@ export async function ConnectionStatus() {
               size="icon"
               className="rounded-full w-8 h-8 items-center hidden md:flex"
             >
-              <Icons.Refresh
+              <Icons.Error
                 size={16}
                 className={cn(
                   error && "text-[#FF3638]",

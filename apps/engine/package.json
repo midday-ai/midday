@@ -12,7 +12,7 @@
     "@hono/swagger-ui": "^0.4.0",
     "@hono/zod-openapi": "^0.15.1",
     "@hono/zod-validator": "^0.2.2",
-    "hono": "^4.5.2",
+    "hono": "^4.5.3",
     "plaid": "^26.0.0",
     "typesense": "^1.8.2",
     "xior": "^0.5.5",

@@ -29,7 +29,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
     },
     {
       shallow: false,
-    }
+    },
   );
 
   if (state?.from) {
@@ -41,12 +41,12 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
   if (state?.to) {
     placeholder = `${placeholder} - ${format(
       new Date(state.to),
-      "LLL dd, y"
+      "LLL dd, y",
     )} `;
   } else {
     placeholder = `${placeholder} - ${format(
       new Date(defaultValue.to),
-      "LLL dd, y"
+      "LLL dd, y",
     )} `;
   }
 
@@ -73,8 +73,17 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
 
   return (
     <div className="flex space-x-4">
+      <button
+        type="button"
+        onClick={() => {
+          throw new Error("Sentry Frontend Error");
+        }}
+      >
+        Throw error
+      </button>
+
       <Popover>
-        <PopoverTrigger asChild disabled={disabled}>
+        <PopoverTrigger asChild disabled={Boolean(disabled)}>
           <Button
             variant="outline"
             className="justify-start text-left font-medium space-x-2"
