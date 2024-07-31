@@ -39,5 +39,6 @@ jobs:
         run: bunx vercel build --token=${{ secrets.VERCEL_TOKEN }}
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       - name: Deploy Project Artifacts to Vercel
         run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}
