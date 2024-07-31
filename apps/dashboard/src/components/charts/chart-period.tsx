@@ -73,6 +73,15 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
 
   return (
     <div className="flex space-x-4">
+      <button
+        type="button"
+        onClick={() => {
+          throw new Error("Sentry Frontend Error");
+        }}
+      >
+        Throw error
+      </button>
+
       <Popover>
         <PopoverTrigger asChild disabled={Boolean(disabled)}>
           <Button
