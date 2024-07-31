@@ -22,7 +22,8 @@ client.defineJob({
       .from("bank_connections")
       .select("id, team:team_id(id, name), name, expires_at")
       .eq("status", "connected")
-      .lte("expires_at", addDays(new Date(), 17).toISOString());
+      .lte("expires_at", addDays(new Date(), 17).toISOString())
+      .gt("expires_at", new Date().toISOString());
 
     const usersPromises =
       data?.map(async ({ team, name, expires_at }) => {
