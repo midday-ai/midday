@@ -4,11 +4,6 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_DASHBOARD }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
-  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-  SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
-  SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
-  SENTRY_LOG_LEVEL: info
-  SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: true
 on:
   push:
     branches-ignore:
@@ -39,5 +34,10 @@ jobs:
         env:
           NODE_OPTIONS: "--max_old_space_size=4096"
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_LOG_LEVEL: info
+          SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: true
       - name: Deploy Project Artifacts to Vercel
         run: bunx vercel deploy --prebuilt --archive=tgz --token=${{ secrets.VERCEL_TOKEN }}

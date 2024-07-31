@@ -68,6 +68,4 @@ export default withSentryConfig(config, {
   widenClientFileUpload: true,
   hideSourceMaps: true,
   disableLogger: true,
-  authToken:
-    "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",
 });
