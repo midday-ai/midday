@@ -61,8 +61,8 @@ client.defineJob({
 
     const emails = await Promise.all(emailPromises);
 
-    await processBatch(emails, 50, async (batch) => {
-      await io.resend.batch.send("send-email", batch);
+    await processBatch(emails, 50, async (batch, index) => {
+      await io.resend.batch.send(`send-email-${index}`, batch);
     });
   },
 });
