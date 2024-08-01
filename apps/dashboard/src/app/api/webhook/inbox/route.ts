@@ -181,6 +181,7 @@ export async function POST(req: Request) {
         forwarded_to: forwardingEnabled ? forwardEmail : null,
         reference_id: `${MessageID}_${fileName}`,
         size,
+        // TODO: add website
       };
     });
 

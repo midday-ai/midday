@@ -11,8 +11,8 @@
     "test": "bun test src"
   },
   "dependencies": {
+    "@azure-rest/ai-document-intelligence": "^1.0.0-beta.2",
     "@midday/utils": "workspace:*",
-    "@google-cloud/documentai": "^8.8.0",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.4",
     "heic-convert": "1.2.4"
@@ -23,4 +23,3 @@
     "request": "^2.88.2"
   }
 }
-

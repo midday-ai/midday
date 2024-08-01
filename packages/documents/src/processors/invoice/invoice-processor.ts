@@ -1,51 +1,60 @@
+import {
+  type AnalyzeResultOperationOutput,
+  getLongRunningPoller,
+  isUnexpected,
+} from "@azure-rest/ai-document-intelligence";
 import { capitalCase } from "change-case";
 import type { Processor } from "../../interface";
-import { GoogleDocumentClient, credentials } from "../../providers/google";
+import { client } from "../../provider/azure";
 import type { GetDocumentRequest } from "../../types";
 import {
-  extractDomain,
-  findValue,
+  extractRootDomain,
   getCurrency,
   getDomainFromEmail,
-  getInvoiceMetaData,
 } from "../../utils";
 
 export class InvoiceProcessor implements Processor {
   async #processDocument(content: string) {
-    const [result] = await GoogleDocumentClient.processDocument({
-      name: `projects/${credentials.project_id}/locations/eu/processors/${process.env.GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID}`,
-      rawDocument: {
-        content,
-        mimeType: "application/pdf",
-      },
-    });
+    const initialResponse = await client
+      .path("/documentModels/{modelId}:analyze", "prebuilt-invoice")
+      .post({
+        contentType: "application/json",
+        body: {
+          base64Source: content,
+        },
+        queryParameters: {
+          features: ["queryFields"],
+          queryFields: ["VendorEmail", "CustomerEmail"],
+          split: "none",
+        },
+      });
 
-    const entities = result.document.entities;
+    if (isUnexpected(initialResponse)) {
+      throw initialResponse.body.error;
+    }
+    const poller = await getLongRunningPoller(client, initialResponse);
+    const result = (await poller.pollUntilDone())
+      .body as AnalyzeResultOperationOutput;
 
-    // Fallback to USD, user can change in settings
-    const currency = getCurrency(entities);
+    const invoice = result?.analyzeResult?.documents?.at(0)?.fields;
 
-    const date =
-      findValue(entities, "due_date") ||
-      findValue(entities, "invoice_date") ||
-      null;
-    const foundName = findValue(entities, "supplier_name");
-    const name = (foundName && capitalCase(foundName)) || null;
-    const amount = findValue(entities, "total_amount") ?? null;
-    const email = findValue(entities, "supplier_email") ?? null;
     const website =
-      extractDomain(findValue(entities, "supplier_website")) ||
-      getDomainFromEmail(email) ||
+      // First try to get the email domain
+      getDomainFromEmail(invoice?.VendorEmail?.valueString) ||
+      // Then try to get the website from the content
+      extractRootDomain(result?.analyzeResult?.content) ||
       null;
-    const meta = getInvoiceMetaData(entities);
 
     return {
-      name,
-      date,
-      currency,
-      amount,
+      name:
+        (invoice?.VendorName?.valueString &&
+          capitalCase(invoice?.VendorName?.valueString)) ??
+        null,
+      date:
+        invoice?.DueDate?.valueDate || invoice?.InvoiceDate?.valueDate || null,
+      currency: getCurrency(invoice?.InvoiceTotal),
+      amount: invoice?.InvoiceTotal?.valueCurrency?.amount ?? null,
       website,
-      meta,
     };
   }
 

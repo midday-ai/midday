@@ -1,37 +1,5 @@
-import type { Attachments, Entries } from "./types";
-
-export function cleanText(text?: string) {
-  return text?.trim().replace(/\n/g, "");
-}
-
-export function findValue(entities: Entries, type: string) {
-  const found = entities.find((entry) => entry.type === type);
-  return cleanText(found?.normalizedValue?.text || found?.mentionText);
-}
-
-export function getDomainFromEmail(email: string | null) {
-  return email?.split("@").at(1);
-}
-
-export function getLineItems(entities: Entries) {
-  const items = entities.filter((entry) => entry.type === "line_item");
-
-  return items.map((item) =>
-    cleanText(item?.normalizedValue?.text || item?.mentionText),
-  );
-}
-
-export function cleanMetaData(data: any) {
-  for (const [key, value] of Object.entries(data)) {
-    if (value === undefined) {
-      delete data[key];
-    } else if (typeof value === "object" && value !== null) {
-      cleanMetaData(value);
-    }
-  }
-
-  return data;
-}
+import type { DocumentFieldOutput } from "@azure-rest/ai-document-intelligence";
+import type { Attachments } from "./types";
 
 export const allowedMimeTypes = [
   "image/heic",
@@ -48,57 +16,42 @@ export function getAllowedAttachments(attachments?: Attachments) {
   );
 }
 
-export function getCurrency(entities: Entries) {
-  return findValue(entities, "currency") ?? "USD";
+export function getCurrency(field?: DocumentFieldOutput) {
+  return field?.valueCurrency?.currencyCode ?? "USD";
 }
 
-// TODO: Exclude undefined values
-export function getInvoiceMetaData(entities: Entries) {
-  const currency = getCurrency(entities);
+export function extractRootDomain(content?: string) {
+  const domainPattern =
+    /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,})(?:\/|$)/g;
 
-  return cleanMetaData({
-    "Invoice id": findValue(entities, "invoice_id"),
-    "Invoice date": findValue(entities, "invoice_date"),
-    "Due date": findValue(entities, "due_date"),
-    Supplier: findValue(entities, "supplier_name"),
-    "Supplier address": findValue(entities, "supplier_address"),
-    "Receiver address": findValue(entities, "receiver_address"),
-    Phone: findValue(entities, "supplier_phone"),
-    Email: findValue(entities, "supplier_email"),
-    Products: getLineItems(entities),
-    "Net amount": `${findValue(entities, "net_amount")} ${currency}`,
-    "Total amount": `${findValue(entities, "total_amount")} ${currency}`,
-  });
-}
+  const match = content?.match(domainPattern);
 
-// TODO: Exclude undefined values
-export function getExpenseMetaData(entities: Entries) {
-  const currency = getCurrency(entities);
-
-  return cleanMetaData({
-    Supplier: findValue(entities, "supplier_name"),
-    Date: findValue(entities, "receipt_date"),
-    Address: findValue(entities, "supplier_address"),
-    City: findValue(entities, "supplier_city"),
-    Phone: findValue(entities, "supplier_phone"),
-    Email: findValue(entities, "supplier_email"),
-    Products: getLineItems(entities),
-    "Net amount": `${findValue(entities, "net_amount")} ${currency}`,
-    "Total amount": `${findValue(entities, "total_amount")} ${currency}`,
-  });
-}
-
-export function extractDomain(url?: string | null): string | null {
-  if (!url) return null;
-
-  try {
-    const { hostname } = new URL(
-      url.startsWith("http") ? url : `http://${url}`,
-    );
-    const parts = hostname.split(".");
-    return parts.slice(-2).join(".");
-  } catch (error) {
-    console.error("Invalid URL:", url);
+  if (!match) {
     return null;
   }
+
+  const matchWithoutProtocol = match[0].replace(
+    /(?:https?:\/\/)?(?:www\.)?/,
+    "",
+  );
+
+  const rootDomain = matchWithoutProtocol.split("/")[0];
+
+  return rootDomain;
+}
+
+export function getDomainFromEmail(email?: string | null): string | null {
+  const emailPattern = /^[^\s@]+@([^\s@]+)$/;
+  const match = email?.match(emailPattern);
+  const domain = match?.[1];
+
+  if (!domain) return null;
+
+  const domainParts = domain.split(".");
+
+  if (domainParts.length > 2) {
+    return domainParts.slice(-2).join(".");
+  }
+
+  return domain;
 }

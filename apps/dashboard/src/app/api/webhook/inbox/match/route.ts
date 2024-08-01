@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
   const hmacMatch = crypto.timingSafeEqual(
     decodedSignature,
-    calculatedSignature
+    calculatedSignature,
   );
 
   if (!hmacMatch) {
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
     const { data: usersData } = await supabase
       .from("users_on_team")
       .select(
-        "id, team_id, user:users(id, full_name, avatar_url, email, locale)"
+        "id, team_id, user:users(id, full_name, avatar_url, email, locale)",
       )
       .eq("team_id", body.record.team_id);
 
