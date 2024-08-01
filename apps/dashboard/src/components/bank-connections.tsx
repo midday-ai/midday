@@ -138,6 +138,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
   const router = useRouter();
 
   const status = data?.runs.at(-1)?.status;
+  const { show } = connectionStatus(connection);
 
   const error = status === "FAILURE" || status === "TIMED_OUT";
 
@@ -239,7 +240,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
         </AccordionTrigger>
 
         <div className="ml-auto flex space-x-2">
-          {connection.status === "disconnected" ? (
+          {connection.status === "disconnected" || show ? (
             <ReconnectProvider
               variant="button"
               id={connection.id}

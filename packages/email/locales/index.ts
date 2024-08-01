@@ -30,8 +30,7 @@ function translations(locale: string, params?: any) {
             ? "new transactions"
             : "new transaction"
         }`,
-        "transactions.description4":
-          "on your account, we will try to match those against receipts in your inbox for up to 45 days. Additionally, you can simply reply to this email with the receipts.",
+        "transactions.description4": `for your team ${params?.teamName}, we will try to match those against receipts in your inbox for up to 45 days. Additionally, you can simply reply to this email with the receipts.`,
         "transactions.button": "View transactions",
         "transactions.settings": "Notification preferences",
         "transactions.amount": "Amount",

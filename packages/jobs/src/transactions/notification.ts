@@ -44,7 +44,7 @@ client.defineJob({
     const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
-        "id, team_id, team:teams(inbox_id), user:users(id, full_name, avatar_url, email, locale)",
+        "id, team_id, team:teams(inbox_id, name), user:users(id, full_name, avatar_url, email, locale)",
       )
       .eq("team_id", teamId);
 
@@ -118,6 +118,7 @@ client.defineJob({
           fullName: user.full_name,
           transactions: sortedTransactions,
           locale: user.locale,
+          teamName: team?.name,
         }),
       );
 
