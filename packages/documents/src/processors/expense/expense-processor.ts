@@ -2,7 +2,12 @@ import { capitalCase } from "change-case";
 import type { Processor } from "../../interface";
 import { GoogleDocumentClient, credentials } from "../../providers/google";
 import type { GetDocumentRequest } from "../../types";
-import { findValue, getDomainFromEmail, getExpenseMetaData } from "../../utils";
+import {
+  findValue,
+  getCurrency,
+  getDomainFromEmail,
+  getExpenseMetaData,
+} from "../../utils";
 
 export class ExpenseProcessor implements Processor {
   async #processDocument(content: string) {
@@ -16,7 +21,7 @@ export class ExpenseProcessor implements Processor {
 
     const entities = result.document.entities;
 
-    const currency = findValue(entities, "currency") ?? null;
+    const currency = getCurrency(entities);
     const date = findValue(entities, "receipt_date") ?? null;
     const foundName = findValue(entities, "supplier_name");
     const name = (foundName && capitalCase(foundName)) || null;

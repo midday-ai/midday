@@ -2,7 +2,13 @@ import { capitalCase } from "change-case";
 import type { Processor } from "../../interface";
 import { GoogleDocumentClient, credentials } from "../../providers/google";
 import type { GetDocumentRequest } from "../../types";
-import { findValue, getDomainFromEmail, getInvoiceMetaData } from "../../utils";
+import {
+  extractDomain,
+  findValue,
+  getCurrency,
+  getDomainFromEmail,
+  getInvoiceMetaData,
+} from "../../utils";
 
 export class InvoiceProcessor implements Processor {
   async #processDocument(content: string) {
@@ -15,7 +21,10 @@ export class InvoiceProcessor implements Processor {
     });
 
     const entities = result.document.entities;
-    const currency = findValue(entities, "currency") ?? null;
+
+    // Fallback to USD, user can change in settings
+    const currency = getCurrency(entities);
+
     const date =
       findValue(entities, "due_date") ||
       findValue(entities, "invoice_date") ||
@@ -24,7 +33,10 @@ export class InvoiceProcessor implements Processor {
     const name = (foundName && capitalCase(foundName)) || null;
     const amount = findValue(entities, "total_amount") ?? null;
     const email = findValue(entities, "supplier_email") ?? null;
-    const website = getDomainFromEmail(email) ?? null;
+    const website =
+      extractDomain(findValue(entities, "supplier_website")) ||
+      getDomainFromEmail(email) ||
+      null;
     const meta = getInvoiceMetaData(entities);
 
     return {

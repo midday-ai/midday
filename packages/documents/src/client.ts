@@ -20,7 +20,7 @@ export class DocumentClient {
   }
 
   public async getDocument(
-    params: GetDocumentRequest
+    params: GetDocumentRequest,
   ): Promise<GetDocumentResponse> {
     return this.#processor.getDocument(params);
   }

@@ -114,7 +114,7 @@ client.defineJob({
               avatarUrl: user.avatar_url,
             },
           }));
-        })
+        }),
       );
 
       if (notificationEvents.length) {
