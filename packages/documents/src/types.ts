@@ -26,21 +26,13 @@ export type GetDocumentRequest = {
 export type GetDocumentResponse = {
   name?: string | null;
   date?: string | null;
-  amount?: string | null;
+  amount?: number | null;
   currency?: string | null;
   website?: string | null;
   meta?: {
     [key: string]: unknown;
   };
 };
-
-export type Entries = {
-  normalizedValue?: {
-    text: string;
-  };
-  mentionText?: string;
-  type: string;
-}[];
 
 export interface Attachment {
   ContentLength: number;

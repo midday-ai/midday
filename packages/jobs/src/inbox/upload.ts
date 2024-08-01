@@ -80,7 +80,6 @@ client.defineJob({
           website: result.website,
           due_date: result.date && new Date(result.date),
           status: "pending",
-          meta: result.meta,
         })
         .eq("id", inboxData.id)
         .select()

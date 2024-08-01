@@ -14,8 +14,6 @@ export const env = createEnv({
    * built with invalid env vars.
    */
   server: {
-    GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: z.string(),
-    GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID: z.string(),
     PLAIN_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
     SUPABASE_SERVICE_KEY: z.string(),
@@ -30,6 +28,8 @@ export const env = createEnv({
     OPENPANEL_SECRET_KEY: z.string(),
     MIDDAY_ENGINE_API_KEY: z.string(),
     WEBHOOK_SECRET_KEY: z.string(),
+    AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT: z.string(),
+    AZURE_DOCUMENT_INTELLIGENCE_KEY: z.string(),
   },
   /**
    * Specify your client-side environment variables schema here.
@@ -74,14 +74,15 @@ export const env = createEnv({
     SUPABASE_SERVICE_KEY: process.env.SUPABASE_SERVICE_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     PLAIN_API_KEY: process.env.PLAIN_API_KEY,
-    GOOGLE_APPLICATION_INVOICE_PROCESSOR_ID: process.env.PLAIN_API_KEY,
-    GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID:
-      process.env.GOOGLE_APPLICATION_EXPENSE_PROCESSOR_ID,
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     OPENPANEL_SECRET_KEY: process.env.OPENPANEL_SECRET_KEY,
     MIDDAY_ENGINE_API_KEY: process.env.MIDDAY_ENGINE_API_KEY,
     WEBHOOK_SECRET_KEY: process.env.WEBHOOK_SECRET_KEY,
+    AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT:
+      process.env.AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT,
+    AZURE_DOCUMENT_INTELLIGENCE_KEY:
+      process.env.AZURE_DOCUMENT_INTELLIGENCE_KEY,
   },
   skipValidation: !!process.env.CI || !!process.env.SKIP_ENV_VALIDATION,
 });
