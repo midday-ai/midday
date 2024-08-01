@@ -12,6 +12,7 @@ import {
   getCurrency,
   getDomainFromEmail,
 } from "../../utils";
+import { LlmProcessor } from "../llm/llm-processor";
 
 export class InvoiceProcessor implements Processor {
   async #processDocument(content: string) {
@@ -32,30 +33,58 @@ export class InvoiceProcessor implements Processor {
     if (isUnexpected(initialResponse)) {
       throw initialResponse.body.error;
     }
+
     const poller = await getLongRunningPoller(client, initialResponse);
     const result = (await poller.pollUntilDone())
       .body as AnalyzeResultOperationOutput;
 
-    const invoice = result?.analyzeResult?.documents?.at(0)?.fields;
+    return this.#extractData(result);
+  }
+
+  async #extractData(data: AnalyzeResultOperationOutput) {
+    const fields = data.analyzeResult?.documents?.[0]?.fields;
+    const content = data.analyzeResult?.content;
 
     const website =
       // First try to get the email domain
-      getDomainFromEmail(invoice?.VendorEmail?.valueString) ||
+      getDomainFromEmail(fields?.VendorEmail?.valueString) ||
       // Then try to get the website from the content
-      extractRootDomain(result?.analyzeResult?.content) ||
+      extractRootDomain(content) ||
       null;
 
-    return {
+    const result = {
       name:
-        (invoice?.VendorName?.valueString &&
-          capitalCase(invoice?.VendorName?.valueString)) ??
+        (fields?.VendorName?.valueString &&
+          capitalCase(fields?.VendorName?.valueString)) ??
         null,
       date:
-        invoice?.DueDate?.valueDate || invoice?.InvoiceDate?.valueDate || null,
-      currency: getCurrency(invoice?.InvoiceTotal),
-      amount: invoice?.InvoiceTotal?.valueCurrency?.amount ?? null,
+        fields?.DueDate?.valueDate || fields?.InvoiceDate?.valueDate || null,
+      currency: getCurrency(fields?.InvoiceTotal),
+      amount: fields?.InvoiceTotal?.valueCurrency?.amount ?? null,
       website,
     };
+
+    if (Object.values(result).every((value) => value !== null)) {
+      return result;
+    }
+
+    const fallback = content ? await this.#fallbackToLlm(content) : null;
+
+    console.log(fallback);
+
+    // Only replace null values from LLM
+    return Object.fromEntries(
+      Object.entries(result).map(([key, value]) => [
+        key,
+        value ?? fallback?.[key as keyof typeof result],
+      ]),
+    );
+  }
+
+  async #fallbackToLlm(content: string) {
+    const llm = new LlmProcessor();
+
+    return llm.getStructuredData(content);
   }
 
   public async getDocument(params: GetDocumentRequest) {

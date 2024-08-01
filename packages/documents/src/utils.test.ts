@@ -36,6 +36,6 @@ test("Should return 2 allowed attachments", () => {
         ContentID: "",
         Content: "",
       },
-    ])
+    ]),
   ).toBeArrayOfSize(2);
 });
