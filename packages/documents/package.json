@@ -11,11 +11,14 @@
     "test": "bun test src"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^0.0.40",
     "@azure-rest/ai-document-intelligence": "^1.0.0-beta.2",
     "@midday/utils": "workspace:*",
+    "ai": "^3.2.45",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.4",
-    "heic-convert": "1.2.4"
+    "heic-convert": "1.2.4",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@types/bun": "^1.1.6",

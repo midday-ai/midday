@@ -11,7 +11,7 @@ type InboxListProps = {
     display_name: string;
     created_at: string;
     file_name?: string;
-    due_date?: string;
+    date?: string;
     currency?: string;
     amount?: number;
   }[];

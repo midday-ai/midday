@@ -56,7 +56,7 @@ export function SelectAttachment({ placeholder, onSelect }: Props) {
                 {item.display_name}
               </div>
               <div className="w-[70px]">
-                {item.due_date ? format(new Date(item.due_date), "d MMM") : "-"}
+                {item.date ? format(new Date(item.date), "d MMM") : "-"}
               </div>
               <div className="flex-1 text-right">
                 {item.amount && item.currency && (

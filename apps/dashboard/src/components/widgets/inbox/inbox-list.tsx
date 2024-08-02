@@ -27,7 +27,7 @@ export function InboxList({ data }) {
                   </div>
                 </div>
                 <div className="ml-auto text-xs text-muted-foreground">
-                  {item.due_date && format(new Date(item.due_date), "PP")}
+                  {item.date && format(new Date(item.date), "PP")}
                 </div>
               </div>
               <div className="flex">

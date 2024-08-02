@@ -28,7 +28,7 @@ type InboxItem = {
   display_name?: string;
   amount?: number;
   currency?: string;
-  due_date?: string;
+  date?: string;
   forwarded_to?: string;
   content_type?: string;
   transaction?: any;
@@ -178,10 +178,10 @@ export function InboxDetails({
             </div>
             <div className="grid gap-1 ml-auto text-right">
               <div className="text-xs text-muted-foreground">
-                {isProcessing && !item.due_date && (
+                {isProcessing && !item.date && (
                   <Skeleton className="h-3 w-[50px] rounded-sm" />
                 )}
-                {item.due_date && format(new Date(item.due_date), "PP")}
+                {item.date && format(new Date(item.date), "PP")}
               </div>
 
               <div className="flex space-x-2 items-center ml-auto mt-1">

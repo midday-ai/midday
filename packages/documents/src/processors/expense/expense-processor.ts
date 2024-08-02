@@ -7,7 +7,12 @@ import { capitalCase } from "change-case";
 import type { Processor } from "../../interface";
 import { client } from "../../provider/azure";
 import type { GetDocumentRequest } from "../../types";
-import { getCurrency } from "../../utils";
+import {
+  extractRootDomain,
+  getCurrency,
+  getDomainFromEmail,
+} from "../../utils";
+import { LlmProcessor } from "../llm/llm-processor";
 
 export class ExpenseProcessor implements Processor {
   async #processDocument(content: string) {
@@ -18,6 +23,10 @@ export class ExpenseProcessor implements Processor {
         body: {
           base64Source: content,
         },
+        queryParameters: {
+          features: ["queryFields"],
+          queryFields: ["Email", "Website"],
+        },
       });
 
     if (isUnexpected(initialResponse)) {
@@ -27,18 +36,68 @@ export class ExpenseProcessor implements Processor {
     const result = (await poller.pollUntilDone())
       .body as AnalyzeResultOperationOutput;
 
-    const receipt = result?.analyzeResult?.documents?.at(0)?.fields;
+    return this.#extractData(result);
+  }
+
+  #getWebsiteFromFields(
+    fields?: Record<string, { valueString?: string }>,
+    content?: string,
+  ) {
+    const website =
+      // First try to get the email domain
+      getDomainFromEmail(fields?.Email?.valueString) ||
+      fields?.Website?.valueString ||
+      // Then try to get the website from the content
+      extractRootDomain(content) ||
+      null;
+
+    return website;
+  }
+
+  async #extractData(data: AnalyzeResultOperationOutput) {
+    const fields = data.analyzeResult?.documents?.[0]?.fields;
+    const content = data.analyzeResult?.content;
+
+    const website = this.#getWebsiteFromFields(fields, content);
+
+    const result = {
+      name:
+        (fields?.MerchantName?.valueString &&
+          capitalCase(fields?.MerchantName?.valueString)) ??
+        null,
+      date: fields?.TransactionDate?.valueDate || null,
+      currency: getCurrency(fields?.Total),
+      amount: fields?.Total?.valueCurrency?.amount ?? null,
+      type: "expense",
+      website,
+    };
+
+    // Return if all values are not null
+    if (Object.values(result).every((value) => value !== null)) {
+      return result;
+    }
+
+    const fallback = content ? await this.#fallbackToLlm(content) : null;
+
+    // Only replace null values from LLM
+    const mappedResult = Object.fromEntries(
+      Object.entries(result).map(([key, value]) => [
+        key,
+        value ?? fallback?.[key as keyof typeof result] ?? null,
+      ]),
+    );
 
     return {
-      name:
-        (receipt?.MerchantName?.valueString &&
-          capitalCase(receipt?.MerchantName?.valueString)) ??
-        null,
-      date: receipt?.TransactionDate?.valueDate || null,
-      currency: getCurrency(receipt?.Total),
-      amount: receipt?.Total?.valueCurrency?.amount ?? null,
-      website: null,
+      ...mappedResult,
+      // We only have description from LLM
+      description: fallback?.description ?? null,
     };
+  }
+
+  async #fallbackToLlm(content: string) {
+    const llm = new LlmProcessor();
+    const fallbackData = await llm.getStructuredData(content);
+    return { ...fallbackData, type: "expense" };
   }
 
   public async getDocument(params: GetDocumentRequest) {
