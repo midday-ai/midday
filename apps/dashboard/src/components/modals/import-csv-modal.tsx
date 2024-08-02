@@ -90,7 +90,7 @@ export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
                   <div className="flex space-x-4 items-center mb-4">
                     <button
                       type="button"
-                      className="items-center rounded border bg-accent p-1"
+                      className="items-center border bg-accent p-1"
                       onClick={() => setStep("connect")}
                     >
                       <Icons.ArrowBack />
@@ -143,7 +143,7 @@ export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
                 <div className="flex space-x-4 items-center mb-4">
                   <button
                     type="button"
-                    className="items-center rounded border bg-accent p-1"
+                    className="items-center border bg-accent p-1"
                     onClick={() => {
                       setEventId(undefined);
                       setActiveId("upload");

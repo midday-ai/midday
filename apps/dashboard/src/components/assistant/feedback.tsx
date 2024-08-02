@@ -24,7 +24,7 @@ export function AssistantFeedback({ onClose }: Props) {
       <div className="p-5 flex items-center space-x-3">
         <button
           type="button"
-          className="items-center rounded border bg-accent p-1"
+          className="items-center border bg-accent p-1"
           onClick={onClose}
         >
           <Icons.ArrowBack />

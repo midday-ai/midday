@@ -17,7 +17,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
     },
     {
       enabled: !isFirst,
-    }
+    },
   );
 
   useHotkeys(
@@ -27,7 +27,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
     },
     {
       enabled: !isLast,
-    }
+    },
   );
 
   useHotkeys("arrowRight", () => {
@@ -50,7 +50,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
           className="flex items-center space-x-2"
           onClick={() => onAction()}
         >
-          <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+          <kbd className="pointer-events-none h-6 select-none items-center gap-1 border bg-accent px-1.5 font-mono text-xs font-medium flex bg-[#2C2C2C]">
             <span className="text-[16px]">⌘</span>
             <Icons.Backspace />
           </kbd>
@@ -58,12 +58,12 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
         </button>
         <div className="flex items-center space-x-2">
           <button type="button" onClick={() => onKeyPress("left")}>
-            <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+            <kbd className="pointer-events-none h-6 select-none items-center border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
               <Icons.KeyboardArrowLeft size={16} />
             </kbd>
           </button>
           <button type="button" onClick={() => onKeyPress("right")}>
-            <kbd className="pointer-events-none h-6 select-none items-center rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+            <kbd className="pointer-events-none h-6 select-none items-center border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
               <Icons.KeyboardArrowRight size={16} />
             </kbd>
           </button>
@@ -75,7 +75,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
           onClick={() => onKeyPress("up")}
           className={cn("flex items-center space-x-2", isFirst && "opacity-50")}
         >
-          <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+          <kbd className="pointer-events-none h-6 select-none items-center gap-1 border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
             <Icons.KeyboardArrowUp size={16} />
           </kbd>
           <span className="text-xs">Previous</span>
@@ -86,7 +86,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
           onClick={() => onKeyPress("down")}
           className={cn("flex items-center space-x-2", isLast && "opacity-50")}
         >
-          <kbd className="pointer-events-none h-6 select-none items-center gap-1 rounded border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
+          <kbd className="pointer-events-none h-6 select-none items-center gap-1 border bg-accent px-1 font-mono text-xs font-medium flex bg-[#2C2C2C]">
             <Icons.KeyboardArrowDown size={16} />
           </kbd>
           <span className="text-xs">Next</span>

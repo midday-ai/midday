@@ -246,7 +246,7 @@ export function InboxDetails({
             )}
           </div>
 
-          <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg fixed bottom-14 right-[160px] z-50 w-[400px]">
+          <div className="h-12 dark:bg-[#1A1A1A] bg-[#F6F6F3] justify-between items-center flex border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full fixed bottom-14 right-[160px] z-50 w-[400px]">
             <SelectTransaction
               placeholder="Select transaction"
               teamId={teamId}
