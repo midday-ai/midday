@@ -41,16 +41,26 @@ export class InvoiceProcessor implements Processor {
     return this.#extractData(result);
   }
 
+  #getWebsiteFromFields(
+    fields?: Record<string, { valueString?: string }>,
+    content?: string,
+  ) {
+    const website =
+      // First try to get the email domain
+      getDomainFromEmail(fields?.VendorEmail?.valueString) ||
+      fields?.Website?.valueString ||
+      // Then try to get the website from the content
+      extractRootDomain(content) ||
+      null;
+
+    return website;
+  }
+
   async #extractData(data: AnalyzeResultOperationOutput) {
     const fields = data.analyzeResult?.documents?.[0]?.fields;
     const content = data.analyzeResult?.content;
 
-    const website =
-      // First try to get the email domain
-      getDomainFromEmail(fields?.VendorEmail?.valueString) ||
-      // Then try to get the website from the content
-      extractRootDomain(content) ||
-      null;
+    const website = this.#getWebsiteFromFields(fields, content);
 
     const result = {
       name:
@@ -64,6 +74,7 @@ export class InvoiceProcessor implements Processor {
       website,
     };
 
+    // Return if all values are not null
     if (Object.values(result).every((value) => value !== null)) {
       return result;
     }

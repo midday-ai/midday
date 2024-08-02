@@ -13,7 +13,7 @@ const schema = z.object({
   website: z
     .string()
     .describe(
-      "Website of the supplier or company without protocol (e.g. example.com).",
+      "Website of the supplier or company without protocol (e.g. example.com) and only return if it's not null otherwise get the domain namn from the supplier name.",
     ),
   currency: z.string().describe("Currency code of the invoice."),
 });

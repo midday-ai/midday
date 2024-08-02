@@ -30,12 +30,11 @@ export function extractRootDomain(content?: string) {
     return null;
   }
 
-  const matchWithoutProtocol = match[0].replace(
-    /(?:https?:\/\/)?(?:www\.)?/,
-    "",
-  );
+  const matchWithoutProtocol = match
+    .at(0)
+    ?.replace(/(?:https?:\/\/)?(?:www\.)?/, "");
 
-  const rootDomain = matchWithoutProtocol.split("/")[0];
+  const rootDomain = matchWithoutProtocol?.split("/").at(0);
 
   return rootDomain;
 }
@@ -43,7 +42,7 @@ export function extractRootDomain(content?: string) {
 export function getDomainFromEmail(email?: string | null): string | null {
   const emailPattern = /^[^\s@]+@([^\s@]+)$/;
   const match = email?.match(emailPattern);
-  const domain = match?.[1];
+  const domain = match?.at(1);
 
   if (!domain) return null;
 
