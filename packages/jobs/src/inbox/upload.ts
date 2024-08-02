@@ -78,7 +78,9 @@ client.defineJob({
           currency: result.currency,
           display_name: result.name,
           website: result.website,
-          due_date: result.date && new Date(result.date),
+          date: result.date && new Date(result.date),
+          type: result.type,
+          description: result.description,
           status: "pending",
         })
         .eq("id", inboxData.id)

@@ -29,9 +29,8 @@ export type GetDocumentResponse = {
   amount?: number | null;
   currency?: string | null;
   website?: string | null;
-  meta?: {
-    [key: string]: unknown;
-  };
+  type?: string | null;
+  description?: string | null;
 };
 
 export interface Attachment {

@@ -71,6 +71,7 @@ export class InvoiceProcessor implements Processor {
         fields?.DueDate?.valueDate || fields?.InvoiceDate?.valueDate || null,
       currency: getCurrency(fields?.InvoiceTotal),
       amount: fields?.InvoiceTotal?.valueCurrency?.amount ?? null,
+      type: "invoice",
       website,
     };
 
@@ -82,18 +83,24 @@ export class InvoiceProcessor implements Processor {
     const fallback = content ? await this.#fallbackToLlm(content) : null;
 
     // Only replace null values from LLM
-    return Object.fromEntries(
+    const mappedResult = Object.fromEntries(
       Object.entries(result).map(([key, value]) => [
         key,
-        value ?? fallback?.[key as keyof typeof result],
+        value ?? fallback?.[key as keyof typeof result] ?? null,
       ]),
     );
+
+    return {
+      ...mappedResult,
+      // We only have description from LLM
+      description: fallback?.description ?? null,
+    };
   }
 
   async #fallbackToLlm(content: string) {
     const llm = new LlmProcessor();
-
-    return llm.getStructuredData(content);
+    const fallbackData = await llm.getStructuredData(content);
+    return { ...fallbackData, type: "invoice" };
   }
 
   public async getDocument(params: GetDocumentRequest) {
