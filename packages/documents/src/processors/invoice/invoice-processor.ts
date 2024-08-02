@@ -70,8 +70,6 @@ export class InvoiceProcessor implements Processor {
 
     const fallback = content ? await this.#fallbackToLlm(content) : null;
 
-    console.log(fallback);
-
     // Only replace null values from LLM
     return Object.fromEntries(
       Object.entries(result).map(([key, value]) => [
