@@ -81,7 +81,7 @@ export function InboxDetails({
     setShowFallback(false);
   }, [item]);
 
-  const fallback = showFallback || (!item.website && item?.display_name);
+  const fallback = showFallback || (!item?.website && item?.display_name);
 
   return (
     <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px] hidden md:flex">

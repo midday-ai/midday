@@ -104,6 +104,15 @@ export function InboxView({
               break;
             case "UPDATE":
               {
+                if (payload.new.transaction_id) {
+                  toast({
+                    title: "Sucessfully matched transaction",
+                    description:
+                      "We've found a transaction for this attachment.",
+                    variant: "success",
+                  });
+                }
+
                 setItems((prev) => {
                   return prev.map((item) => {
                     if (item.id === payload.new.id) {
