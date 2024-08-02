@@ -706,6 +706,7 @@ export async function getInboxQuery(
     "forwarded_to",
     "created_at",
     "website",
+    "description",
     "transaction:transactions(id, amount, currency, name, date)",
   ];
 
@@ -897,7 +898,7 @@ export async function getInboxSearchQuery(
   const query = supabase
     .from("inbox")
     .select(
-      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size",
+      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description",
     )
     .eq("team_id", teamId)
     .neq("status", "deleted")

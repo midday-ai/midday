@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
@@ -13,7 +14,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FilePreview } from "./file-preview";
 import { FormatAmount } from "./format-amount";
 import { EditInboxModal } from "./modals/edit-inbox-modal";
@@ -31,6 +32,7 @@ type InboxItem = {
   date?: string;
   forwarded_to?: string;
   content_type?: string;
+  description?: string;
   transaction?: any;
 };
 
@@ -53,6 +55,7 @@ export function InboxDetails({
 }: Props) {
   const { toast } = useToast();
   const [isOpen, setOpen] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
@@ -73,6 +76,12 @@ export function InboxDetails({
   if (isEmpty) {
     return <div className="hidden md:block w-[1160px]" />;
   }
+
+  useEffect(() => {
+    setShowFallback(false);
+  }, [item]);
+
+  const fallback = showFallback || (!item.website && item?.display_name);
 
   return (
     <div className="h-[calc(100vh-120px)] overflow-hidden flex-col border w-[1160px] hidden md:flex">
@@ -139,14 +148,21 @@ export function InboxDetails({
                       alt={item.website}
                       width={40}
                       height={40}
-                      className="rounded-full overflow-hidden"
+                      className={cn(
+                        "rounded-full overflow-hidden",
+                        showFallback && "hidden",
+                      )}
                       src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
+                      onError={() => {
+                        setShowFallback(true);
+                      }}
                     />
                   )}
-                  {!item.website && item?.display_name && (
+
+                  {fallback && (
                     <AvatarFallback>
-                      {item.display_name
-                        .split(" ")
+                      {item?.display_name
+                        ?.split(" ")
                         .slice(0, 2)
                         .map((chunk) => chunk[0])
                         .join("")}
@@ -185,6 +201,21 @@ export function InboxDetails({
               </div>
 
               <div className="flex space-x-2 items-center ml-auto mt-1">
+                {item.description && (
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Icons.Info />
+                    </TooltipTrigger>
+                    <TooltipContent
+                      className="px-3 py-1.5 text-xs"
+                      side="left"
+                      sideOffset={8}
+                    >
+                      {item.description}
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+
                 {item.forwarded_to && (
                   <Tooltip>
                     <TooltipTrigger>
