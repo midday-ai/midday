@@ -1,6 +1,8 @@
 import { createClient } from "@midday/supabase/server";
 import Link from "next/link";
 
+const currency = "USD";
+
 export async function Ticker() {
   const client = createClient({
     admin: true,
@@ -12,7 +14,7 @@ export async function Ticker() {
     { count: transactionCount },
   ] = await Promise.all([
     client.rpc("calculate_total_sum", {
-      target_currency: "USD",
+      target_currency: currency,
     }),
     client.from("teams").select("id", { count: "exact", head: true }).limit(1),
     client
@@ -24,7 +26,11 @@ export async function Ticker() {
   return (
     <div className="text-center flex flex-col mt-[120px] md:mt-[250px] space-y-4 md:space-y-10">
       <span className="font-medium text-center text-[50px] md:text-[110px] lg:text-[140px] xl:text-[160px] 2xl:text-[180px] md:mb-2 text-stroke leading-none">
-        ${totalSum}
+        {Intl.NumberFormat("en-US", {
+          style: "currency",
+          currency: currency,
+          maximumFractionDigits: 2,
+        }).format(totalSum ?? 0)}
       </span>
       <span>
         Join over{" "}
