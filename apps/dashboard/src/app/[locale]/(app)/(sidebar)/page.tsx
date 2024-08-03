@@ -38,7 +38,7 @@ export default async function Overview({ searchParams }) {
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
     : {
         id: "this_year",
-        from: startOfMonth(new Date()).toISOString(),
+        from: startOfYear(new Date()).toISOString(),
         to: new Date().toISOString(),
       };
 
