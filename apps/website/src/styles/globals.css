@@ -21,6 +21,20 @@
     padding: 3px 2px;
 }
 
+.updates h2 {
+    font-size: 26px;
+    margin-top: .8em;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.updates strong {
+    display: block;
+    font-weight: medium;
+    color: white;
+    margin-top: 15px;
+}
+
 .updates h3 {
     font-size: 1.25em;
     margin-top: .8em;
