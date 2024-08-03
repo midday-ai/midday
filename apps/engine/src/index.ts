@@ -12,6 +12,7 @@ import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
 import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
+import ratesRoutes from "./routes/rates";
 import transactionsRoutes from "./routes/transactions";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>({
@@ -33,11 +34,13 @@ app.get("/institutions", cacheMiddleware);
 app.get("/accounts", cacheMiddleware);
 app.get("/accounts/balance", cacheMiddleware);
 app.get("/transactions", cacheMiddleware);
+app.get("/rates", cacheMiddleware);
 
 app
   .route("/transactions", transactionsRoutes)
   .route("/accounts", accountRoutes)
   .route("/institutions", institutionRoutes)
+  .route("/rates", ratesRoutes)
   .route("/auth", authRoutes);
 
 app.openAPIRegistry.registerComponent("securitySchemes", "Bearer", {
