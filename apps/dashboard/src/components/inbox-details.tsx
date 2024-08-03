@@ -59,6 +59,10 @@ export function InboxDetails({
 
   const isProcessing = item?.status === "processing" || item?.status === "new";
 
+  useEffect(() => {
+    setShowFallback(false);
+  }, [item]);
+
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(
@@ -76,10 +80,6 @@ export function InboxDetails({
   if (isEmpty) {
     return <div className="hidden md:block w-[1160px]" />;
   }
-
-  useEffect(() => {
-    setShowFallback(false);
-  }, [item]);
 
   const fallback = showFallback || (!item?.website && item?.display_name);
 
