@@ -32,7 +32,7 @@ export async function Ticker() {
           maximumFractionDigits: 2,
         }).format(totalSum ?? 0)}
       </span>
-      <span>
+      <span className="text-[#878787]">
         Join over{" "}
         <Link href="/open-startup" className="underline">
           {Intl.NumberFormat("en-US", {
