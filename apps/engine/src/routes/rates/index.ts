@@ -44,8 +44,8 @@ app.openapi(indexRoute, async (c) => {
     return c.json(
       {
         error: "Internal server error",
-        requestId: c.get("requestId"),
         message: "Internal server error",
+        requestId: c.get("requestId"),
         code: "400",
       },
       400,

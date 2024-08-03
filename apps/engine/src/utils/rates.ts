@@ -9,14 +9,15 @@ async function getCurrency(currency: string) {
   return response.json();
 }
 
-function transformKeysToUppercase(obj) {
-  // Convert the object into an array of [key, value] pairs
+function transformKeysToUppercase(obj: Record<string, number>) {
   const entries = Object.entries(obj);
 
   // Transform each entry's key to uppercase
-  const upperCaseEntries = entries.map(([key, value]) => {
-    return [key.toUpperCase(), value];
-  });
+  const upperCaseEntries = entries
+    .map(([key, value]) => {
+      return [key.toUpperCase(), value];
+    })
+    .filter(([key]) => uniqueCurrencies.includes(key as string));
 
   // Convert the transformed entries back into an object
   const transformedObject = Object.fromEntries(upperCaseEntries);
@@ -30,15 +31,27 @@ export async function getRates() {
   );
 
   return rates
-    .filter((rate) => rate.status === "fulfilled")
+    .filter(
+      (rate): rate is PromiseFulfilledResult<Record<string, unknown>> =>
+        rate.status === "fulfilled",
+    )
     .map((rate) => rate.value)
     .map((value) => {
       const currency = Object.keys(value).at(1);
 
+      if (!currency) {
+        return null;
+      }
+
+      const currencyData = value[currency];
+      if (typeof currencyData !== "object" || currencyData === null) {
+        return null;
+      }
+
       return {
-        source: currency?.toUpperCase(),
-        rates: transformKeysToUppercase(value[currency]),
-        // TODO: Filter currencies that are not in the list of unique currencies
+        source: currency.toUpperCase(),
+        rates: transformKeysToUppercase(currencyData as Record<string, number>),
       };
-    });
+    })
+    .filter((item) => item !== null);
 }
