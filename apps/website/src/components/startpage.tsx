@@ -10,11 +10,13 @@ import { SectionThree } from "@/components/section-three";
 import { SectionTwo } from "@/components/section-two";
 import { Testimonials } from "@/components/testimonials";
 import { SectionVideo } from "./section-video";
+import { Ticker } from "./ticker";
 
 export function StartPage() {
   return (
     <>
       <Hero />
+      <Ticker />
       <Screens />
       <SectionOne />
       <SectionTwo />

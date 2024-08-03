@@ -102,7 +102,7 @@ const testimonials = [
   {
     name: "Peer Richelsen — oss/acc",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1623291991709700097/aBL_VpMC_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1816814706000080897/uSIidPHz_400x400.png",
     handle: "@peer_rich",
     verified: true,
     quote:

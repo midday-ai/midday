@@ -13,7 +13,7 @@ console.warn = (...args) => {
   const match = args.find((arg) =>
     typeof arg === "string"
       ? IGNORE_WARNINGS.find((warning) => arg.includes(warning))
-      : false
+      : false,
   );
   if (!match) {
     conWarn(...args);
@@ -24,7 +24,7 @@ console.log = (...args) => {
   const match = args.find((arg) =>
     typeof arg === "string"
       ? IGNORE_WARNINGS.find((warning) => arg.includes(warning))
-      : false
+      : false,
   );
   if (!match) {
     conLog(...args);
@@ -80,6 +80,6 @@ export const createClient = (options?: CreateClientOptions) => {
           "user-agent": headers().get("user-agent") as string,
         },
       },
-    }
+    },
   );
 };
