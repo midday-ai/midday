@@ -9,7 +9,7 @@ import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
-const BATCH_LIMIT = 300;
+const BATCH_LIMIT = 500;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_MANUAL_SYNC,
