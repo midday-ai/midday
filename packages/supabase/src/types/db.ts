@@ -138,23 +138,23 @@ export type Database = {
       exchange_rates: {
         Row: {
           base: string | null
-          code: string | null
           id: string
           rate: number | null
+          target: string | null
           updated_at: string | null
         }
         Insert: {
           base?: string | null
-          code?: string | null
           id?: string
           rate?: number | null
+          target?: string | null
           updated_at?: string | null
         }
         Update: {
           base?: string | null
-          code?: string | null
           id?: string
           rate?: number | null
+          target?: string | null
           updated_at?: string | null
         }
         Relationships: []
@@ -893,6 +893,12 @@ export type Database = {
           "": unknown
         }
         Returns: string
+      }
+      calculate_total_sum: {
+        Args: {
+          target_currency: string
+        }
+        Returns: number
       }
       calculated_vat: {
         Args: {
