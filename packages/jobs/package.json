@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.0",
-    "@langchain/community": "^0.2.22",
-    "@langchain/core": "^0.2.18",
+    "@langchain/community": "^0.2.23",
+    "@langchain/core": "^0.2.20",
     "@langchain/openai": "^0.2.5",
     "@midday/documents": "workspace:*",
     "@midday/import": "workspace:*",
