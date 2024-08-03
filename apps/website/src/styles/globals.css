@@ -28,9 +28,9 @@
     font-weight: 500;
 }
 
-.updates strong {
+.updates h4 {
     display: block;
-    font-weight: medium;
+    font-weight: 600;
     color: white;
     margin-top: 15px;
 }
