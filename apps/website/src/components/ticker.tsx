@@ -23,7 +23,7 @@ export async function Ticker() {
 
   return (
     <div className="text-center flex flex-col mt-[120px] md:mt-[250px] space-y-4 md:space-y-10">
-      <span className="font-medium text-center text-[55px] md:text-[110px] lg:text-[140px] xl:text-[160px] 2xl:text-[180px] md:mb-2 text-stroke leading-none">
+      <span className="font-medium text-center text-[50px] md:text-[110px] lg:text-[140px] xl:text-[160px] 2xl:text-[180px] md:mb-2 text-stroke leading-none">
         ${totalSum}
       </span>
       <span>
