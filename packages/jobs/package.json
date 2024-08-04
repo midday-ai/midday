@@ -17,7 +17,7 @@
     "@langchain/openai": "^0.2.5",
     "@midday/documents": "workspace:*",
     "@midday/import": "workspace:*",
-    "@midday-ai/engine": "^0.1.0-alpha.20",
+    "@midday-ai/engine": "^0.1.0-alpha.22",
     "@trigger.dev/react": "2.3.19",
     "@trigger.dev/resend": "2.3.19",
     "@trigger.dev/sdk": "2.3.19",

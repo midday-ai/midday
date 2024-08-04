@@ -7,6 +7,9 @@ export const RatesSchema = z
         source: z.string().openapi({
           example: "USD",
         }),
+        date: z.string().openapi({
+          example: "2024-02-29",
+        }),
         rates: z.record(z.string(), z.number()).openapi({
           example: {
             EUR: 0.925393,

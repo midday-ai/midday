@@ -16,7 +16,7 @@
     "@ai-sdk/openai": "^0.0.40",
     "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.9.0",
-    "@midday-ai/engine": "^0.1.0-alpha.20",
+    "@midday-ai/engine": "^0.1.0-alpha.22",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
     "@midday/jobs": "workspace:*",

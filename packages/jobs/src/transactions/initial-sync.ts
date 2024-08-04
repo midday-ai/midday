@@ -10,7 +10,7 @@ import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
-const BATCH_LIMIT = 300;
+const BATCH_LIMIT = 500;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,

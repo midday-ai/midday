@@ -37,6 +37,7 @@ export async function getRates() {
     )
     .map((rate) => rate.value)
     .map((value) => {
+      const date = Object.values(value).at(0);
       const currency = Object.keys(value).at(1);
 
       if (!currency) {
@@ -50,6 +51,7 @@ export async function getRates() {
 
       return {
         source: currency.toUpperCase(),
+        date,
         rates: transformKeysToUppercase(currencyData as Record<string, number>),
       };
     })
