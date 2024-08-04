@@ -25,7 +25,7 @@ export async function Ticker() {
 
   return (
     <div className="text-center flex flex-col mt-[120px] md:mt-[250px] space-y-4 md:space-y-10">
-      <span className="font-medium font-mono text-center text-[40px] md:text-[90px] lg:text-[120px] xl:text-[140px] 2xl:text-[160px] md:mb-2 text-stroke leading-none">
+      <span className="font-medium font-mono text-center text-[40px] md:text-[80px] lg:text-[100px] xl:text-[130px] 2xl:text-[160px] md:mb-2 text-stroke leading-none">
         {Intl.NumberFormat("en-US", {
           style: "currency",
           currency: currency,
