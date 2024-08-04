@@ -33,19 +33,19 @@ export async function Ticker() {
         }).format(totalSum ?? 0)}
       </span>
       <span className="text-[#878787]">
-        Join over{" "}
-        <Link href="/open-startup" className="underline">
-          {Intl.NumberFormat("en-US", {
-            maximumFractionDigits: 0,
-          }).format(businessCount ?? 0)}
-        </Link>{" "}
-        businesses that rely on us to gain valuable insights from{" "}
+        Through our system{" "}
         <Link href="/open-startup" className="underline">
           {Intl.NumberFormat("en-US", {
             maximumFractionDigits: 0,
           }).format(transactionCount ?? 0)}
         </Link>{" "}
-        transactions.
+        transactions across{" "}
+        <Link href="/open-startup" className="underline">
+          {Intl.NumberFormat("en-US", {
+            maximumFractionDigits: 0,
+          }).format(businessCount ?? 0)}
+        </Link>{" "}
+        businesses.
       </span>
     </div>
   );
