@@ -1,4 +1,4 @@
-import { BaseCurrency } from "@/components/base-currency";
+import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { ConnectedAccounts } from "@/components/connected-accounts";
 import type { Metadata } from "next";
 
