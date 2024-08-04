@@ -200,7 +200,7 @@ export function InboxDetails({
                 {item.date && format(new Date(item.date), "PP")}
               </div>
 
-              <div className="flex space-x-2 items-center ml-auto mt-1">
+              <div className="flex space-x-4 items-center ml-auto mt-1">
                 {item.description && (
                   <Tooltip>
                     <TooltipTrigger>

@@ -44,7 +44,7 @@ export function InboxToolbar({ isFirst, isLast, onKeyPress, onAction }: Props) {
 
   return (
     <div className="left-0 right-0 absolute bottom-0 hidden md:flex items-center justify-center">
-      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 justify-between items-center flex px-2 rounded-lg space-x-4 text-[#878787]">
+      <div className="backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-10 justify-between items-center flex px-2 space-x-4 text-[#878787]">
         <button
           type="button"
           className="flex items-center space-x-2"
