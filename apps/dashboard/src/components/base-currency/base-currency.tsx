@@ -15,10 +15,9 @@ export function BaseCurrency() {
       <CardHeader>
         <CardTitle>Base currency</CardTitle>
         <CardDescription>
-          If you have multiple currencies, you can set the base currency for
-          your account. This will be used for financial insights so you can see
-          your total balance in the currency you want to. We update the rate
-          every 24 hours.
+          If you have multiple currencies, you can set a base currency for your
+          account to view your total balance in your preferred currency.
+          Exchange rates are updated every 24 hours.
         </CardDescription>
       </CardHeader>
 
