@@ -1,8 +1,7 @@
 "use client";
 
-import { updateBaseCurrencyAction } from "@/actions/transactions/update-base-currency-action";
+import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
-import { connectionStatus } from "@/utils/connection-status";
 import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
@@ -20,7 +19,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
 
   const error = status === "FAILURE" || status === "TIMED_OUT";
 
-  const updateBaseCurrency = useAction(updateBaseCurrencyAction, {
+  const updateCurrency = useAction(updateCurrencyAction, {
     onExecute: () => setSyncing(true),
     onSuccess: ({ data }) => {
       if (data?.id) {
@@ -37,15 +36,15 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
     },
   });
 
-  const handleChange = async (currency: string) => {
-    if (defaultValue && currency !== defaultValue) {
+  const handleChange = async (baseCurrency: string) => {
+    if (defaultValue && baseCurrency !== defaultValue) {
       toast({
         title: "Update base currency",
         description:
           "This will update the base currency for all transactions and account balances.",
         duration: 7000,
         footer: (
-          <Button onClick={() => updateBaseCurrency.execute({ currency })}>
+          <Button onClick={() => updateCurrency.execute({ baseCurrency })}>
             Update
           </Button>
         ),
