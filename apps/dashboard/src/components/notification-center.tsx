@@ -186,7 +186,7 @@ function NotificationItem({
 export function NotificationCenter() {
   const [isOpen, setOpen] = useState(false);
   const {
-    hasUnseenNotificaitons,
+    hasUnseenNotifications,
     notifications,
     markMessageAsRead,
     markAllMessagesAsSeen,
@@ -202,10 +202,10 @@ export function NotificationCenter() {
   );
 
   useEffect(() => {
-    if (isOpen && hasUnseenNotificaitons) {
+    if (isOpen && hasUnseenNotifications) {
       markAllMessagesAsSeen();
     }
-  }, [hasUnseenNotificaitons, isOpen]);
+  }, [hasUnseenNotifications, isOpen]);
 
   return (
     <Popover onOpenChange={setOpen} open={isOpen}>
@@ -215,7 +215,7 @@ export function NotificationCenter() {
           size="icon"
           className="rounded-full w-8 h-8 flex items-center relative"
         >
-          {hasUnseenNotificaitons && (
+          {hasUnseenNotifications && (
             <div className="w-1.5 h-1.5 bg-[#FFD02B] rounded-full absolute top-0 right-0" />
           )}
           <Icons.Notifications size={16} />
