@@ -32,10 +32,10 @@ export function SupportForm() {
   const form = useForm<z.infer<typeof sendSupportSchema>>({
     resolver: zodResolver(sendSupportSchema),
     defaultValues: {
-      subject: "",
-      type: "",
-      priority: "",
-      message: "",
+      subject: undefined,
+      type: undefined,
+      priority: undefined,
+      message: undefined,
     },
   });
 
@@ -158,7 +158,12 @@ export function SupportForm() {
           )}
         />
 
-        <Button type="submit" disabled={sendSupport.status === "executing"}>
+        <Button
+          type="submit"
+          disabled={
+            sendSupport.status === "executing" || !form.formState.isValid
+          }
+        >
           {sendSupport.status === "executing" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (

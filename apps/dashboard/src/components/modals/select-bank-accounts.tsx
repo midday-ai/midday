@@ -3,6 +3,7 @@
 import { connectBankAccountAction } from "@/actions/connect-bank-account-action";
 import { getAccounts } from "@/actions/institutions/get-accounts";
 import { connectBankAccountSchema } from "@/actions/schema";
+import { sendSupportAction } from "@/actions/send-support-action";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import { useI18n } from "@/locales/client";
 import { getInitials } from "@/utils/format";
@@ -24,15 +25,17 @@ import {
   FormItem,
   FormLabel,
 } from "@midday/ui/form";
+import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { Switch } from "@midday/ui/switch";
 import { Tabs, TabsContent } from "@midday/ui/tabs";
+import { Textarea } from "@midday/ui/textarea";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import type z from "zod";
+import z from "zod";
 import { FormatAmount } from "../format-amount";
 import { LoadingTransactionsEvent } from "../loading-transactions-event";
 
@@ -57,11 +60,91 @@ function RowsSkeleton() {
   );
 }
 
+function SupportForm() {
+  const form = useForm({
+    resolver: zodResolver(z.object({ message: z.string() })),
+    defaultValues: {
+      message: "",
+    },
+  });
+
+  const sendSupport = useAction(sendSupportAction, {
+    onSuccess: () => {
+      form.reset();
+    },
+  });
+
+  const handleOnSubmit = form.handleSubmit((values) => {
+    sendSupport.execute({
+      message: values.message,
+      type: "bank-connection",
+      priority: "3",
+      subject: "Select bank accounts",
+      url: document.URL,
+    });
+  });
+
+  if (sendSupport.status === "hasSucceeded") {
+    return (
+      <div className="h-[250px] flex items-center justify-center flex-col space-y-1">
+        <p className="font-medium text-sm">Thank you!</p>
+        <p className="text-sm text-[#4C4C4C]">
+          We will be back with you as soon as possible.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={handleOnSubmit}>
+        <FormField
+          control={form.control}
+          name="message"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Message</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Describe the issue you're facing, along with any relevant information. Please be as detailed and specific as possible."
+                  className="resize-none min-h-[150px]"
+                  autoFocus
+                  {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            disabled={
+              sendSupport.status === "executing" || !form.formState.isValid
+            }
+            className="mt-4"
+          >
+            {sendSupport.status === "executing" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              "Submit"
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 export function SelectBankAccountsModal() {
   const { toast } = useToast();
   const [accounts, setAccounts] = useState<Accounts.Data[]>([]);
   const [loading, setLoading] = useState(true);
   const [eventId, setEventId] = useState<string>();
+  const [activeTab, setActiveTab] = useState<
+    "select-accounts" | "loading" | "support"
+  >("select-accounts");
+
   const t = useI18n();
 
   const {
@@ -108,8 +191,9 @@ export function SelectBankAccountsModal() {
       });
     },
     onSuccess: ({ data }) => {
-      if (data.id) {
+      if (data?.id) {
         setEventId(data.id);
+        setActiveTab("loading");
       }
     },
   });
@@ -150,7 +234,7 @@ export function SelectBankAccountsModal() {
             account_id: account.id,
             bank_name: account.institution.name,
             currency: account.currency,
-            enabled: false,
+            enabled: true,
             type: account.type,
           })),
         });
@@ -178,10 +262,7 @@ export function SelectBankAccountsModal() {
         onEscapeKeyDown={(event) => event.preventDefault()}
       >
         <div className="p-4">
-          <Tabs
-            defaultValue="select-accounts"
-            value={eventId ? "loading" : "select-accounts"}
-          >
+          <Tabs defaultValue="select-accounts" value={activeTab}>
             <TabsContent value="select-accounts">
               <>
                 <DialogHeader className="mb-8">
@@ -196,7 +277,7 @@ export function SelectBankAccountsModal() {
                 <Form {...form}>
                   <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="space-y-6 max-h-[320px] overflow-auto pb-[80px] relative scrollbar-hide"
+                    className="space-y-6 h-[300px] overflow-auto pb-[80px] relative scrollbar-hide"
                   >
                     {loading && <RowsSkeleton />}
 
@@ -286,6 +367,16 @@ export function SelectBankAccountsModal() {
                           "Save"
                         )}
                       </Button>
+
+                      <div className="flex justify-center mt-4">
+                        <button
+                          type="button"
+                          className="text-sm"
+                          onClick={() => setActiveTab("support")}
+                        >
+                          Need support
+                        </button>
+                      </div>
                     </div>
                   </form>
                 </Form>
@@ -300,6 +391,20 @@ export function SelectBankAccountsModal() {
                   onClose={onClose}
                 />
               )}
+            </TabsContent>
+
+            <TabsContent value="support">
+              <div className="flex items-center space-x-3 mb-6">
+                <button
+                  type="button"
+                  className="items-center border bg-accent p-1"
+                  onClick={() => setActiveTab("select-accounts")}
+                >
+                  <Icons.ArrowBack />
+                </button>
+                <h2>Support</h2>
+              </div>
+              <SupportForm />
             </TabsContent>
           </Tabs>
         </div>
