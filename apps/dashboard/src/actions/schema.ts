@@ -16,6 +16,7 @@ export const sendSupportSchema = z.object({
   priority: z.string(),
   type: z.string(),
   message: z.string(),
+  url: z.string().optional(),
 });
 
 export const updateTeamSchema = z.object({

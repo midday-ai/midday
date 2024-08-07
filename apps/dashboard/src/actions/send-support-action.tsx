@@ -1,7 +1,7 @@
 "use server";
 
 import { LogEvents } from "@midday/events/events";
-import { PlainClient } from "@team-plain/typescript-sdk";
+import { PlainClient, ThreadFieldSchemaType } from "@team-plain/typescript-sdk";
 import { authActionClient } from "./safe-action";
 import { sendSupportSchema } from "./schema";
 
@@ -65,6 +65,15 @@ export const sendSupportAction = authActionClient
           },
         },
       ],
+      threadFields: data.url
+        ? [
+            {
+              type: ThreadFieldSchemaType.String,
+              key: "url",
+              stringValue: data.url,
+            },
+          ]
+        : undefined,
     });
 
     return response;

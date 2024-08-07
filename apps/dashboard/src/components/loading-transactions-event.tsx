@@ -25,7 +25,7 @@ export function LoadingTransactionsEvent({
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
-    if (status?.data.step) {
+    if (status?.data?.step) {
       if (status.data.step === "getting_transactions") {
         setStep(2);
       }
