@@ -108,7 +108,7 @@ export function FilterList({
       variants={listVariant}
       initial="hidden"
       animate="show"
-      className="flex space-x-4"
+      className="flex space-x-2"
     >
       {Object.entries(filters)
         .filter(([key, value]) => value !== null && key !== "end")
