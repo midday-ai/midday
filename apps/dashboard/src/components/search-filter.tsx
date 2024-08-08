@@ -40,7 +40,7 @@ const defaultSearch = {
   end: null,
   categories: null,
   accounts: null,
-  members: null,
+  assignees: null,
 };
 
 export function SearchFilter({

@@ -20,10 +20,7 @@ export function SpendingCategoryList({ categories, period }) {
               <HoverCardTrigger asChild>
                 <Link
                   className="flex items-center"
-                  href={`/transactions?filter=${JSON.stringify({
-                    categories: [slug],
-                    date: { from: period?.from, to: period?.to },
-                  })}`}
+                  href={`/transactions?categories=${slug}&start=${period?.from}&end=${period?.to}`}
                 >
                   <Category
                     key={slug}

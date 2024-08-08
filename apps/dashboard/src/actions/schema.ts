@@ -457,10 +457,10 @@ export const filterQuerySchema = z.object({
     .array(z.string())
     .optional()
     .describe(
-      "This can be the user who was assigned the transaction or who made the purchase",
+      "The assignees to filter by. This can be the user who was assigned the transaction or who made the purchase only return if specified.",
     ),
   accounts: z
     .array(z.string())
     .optional()
-    .describe("The bank accounts to filter by"),
+    .describe("The accounts to filter by, only return if specified."),
 });

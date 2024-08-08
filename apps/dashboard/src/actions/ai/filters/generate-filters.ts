@@ -17,6 +17,7 @@ export async function generateFilters(
       model: openai("gpt-4o-mini"),
       system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
+               Only use categories, buyers and accounts if it's specificed in the prompt. \n
                ${context}
       `,
       schema: filterQuerySchema.pick({

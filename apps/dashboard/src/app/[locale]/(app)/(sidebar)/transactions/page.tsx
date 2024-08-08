@@ -35,6 +35,7 @@ export default async function Transactions({
     assignees,
   } = searchParamsCache.parse(searchParams);
 
+  // Move this in a suspense
   const [accountsData, categoriesData, teamMembersData] = await Promise.all([
     getTeamBankAccounts(),
     getCategories(),
