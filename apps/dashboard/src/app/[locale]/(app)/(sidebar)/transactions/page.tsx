@@ -4,7 +4,11 @@ import { SearchFilter } from "@/components/search-filter";
 import { Table } from "@/components/tables/transactions";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import {
+  getCategories,
+  getTeamBankAccounts,
+  getTeamMembers,
+} from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -27,19 +31,28 @@ export default async function Transactions({
     attachments,
     start,
     end,
+    categories,
+    assignees,
   } = searchParamsCache.parse(searchParams);
-  const accounts = await getTeamBankAccounts();
+
+  const [accountsData, categoriesData, teamMembersData] = await Promise.all([
+    getTeamBankAccounts(),
+    getCategories(),
+    getTeamMembers(),
+  ]);
 
   const filter = {
     attachments,
     start,
     end,
+    categories,
+    assignees,
   };
 
   const sort = searchParams?.sort?.split(":");
 
   const isOpen = Boolean(searchParams.step);
-  const isEmpty = !accounts?.data?.length && !isOpen;
+  const isEmpty = !accountsData?.data?.length && !isOpen;
   const loadingKey = JSON.stringify({
     page,
     filter,
@@ -53,6 +66,19 @@ export default async function Transactions({
         <SearchFilter
           placeholder="Search or type filter"
           validFilters={VALID_FILTERS}
+          categories={categoriesData?.data?.map((category) => ({
+            slug: category.slug,
+            name: category.name,
+          }))}
+          accounts={accountsData?.data?.map((account) => ({
+            id: account.id,
+            name: account.name,
+            currency: account.currency,
+          }))}
+          members={teamMembersData?.data?.map((member) => ({
+            id: member?.user.id,
+            name: member.user?.full_name,
+          }))}
         />
         <TransactionsActions />
       </div>

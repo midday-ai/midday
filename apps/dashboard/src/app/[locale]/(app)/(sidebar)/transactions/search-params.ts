@@ -1,5 +1,6 @@
 import {
   createSearchParamsCache,
+  parseAsArrayOf,
   parseAsInteger,
   parseAsString,
   parseAsStringLiteral,
@@ -11,4 +12,7 @@ export const searchParamsCache = createSearchParamsCache({
   attachments: parseAsStringLiteral(["exclude", "include"] as const),
   start: parseAsString,
   end: parseAsString,
+  categories: parseAsArrayOf(parseAsString),
+  accounts: parseAsArrayOf(parseAsString),
+  assignees: parseAsArrayOf(parseAsString),
 });

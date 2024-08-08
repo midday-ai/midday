@@ -434,6 +434,7 @@ export const parseDateSchema = z
   .refine((v) => !!v, { message: "Invalid date" });
 
 export const filterQuerySchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
   start: parseDateSchema
     .optional()
     .describe("The start date when to retrieve from. Return ISO-8601 format."),
@@ -448,4 +449,18 @@ export const filterQuerySchema = z.object({
     .describe(
       "Whether to include or exclude results with attachments or receipts.",
     ),
+  categories: z
+    .array(z.string())
+    .optional()
+    .describe("The categories to filter by"),
+  assignees: z
+    .array(z.string())
+    .optional()
+    .describe(
+      "This can be the user who was assigned the transaction or who made the purchase",
+    ),
+  accounts: z
+    .array(z.string())
+    .optional()
+    .describe("The bank accounts to filter by"),
 });

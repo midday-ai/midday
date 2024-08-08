@@ -7,6 +7,9 @@ export function FilterList({
   filters,
   loading,
   onRemove,
+  categories,
+  accounts,
+  members,
 }: { filters: any; loading: boolean; onRemove: (key: string) => void }) {
   if (loading) {
     return (
@@ -37,6 +40,34 @@ export function FilterList({
         }
         return "With reciepts";
       }
+
+      case "categories": {
+        return value
+          .map(
+            (slug) =>
+              categories?.find((category) => category.slug === slug)?.name,
+          )
+          .join(", ");
+      }
+
+      case "accounts": {
+        return value
+          .map((id) => {
+            const account = accounts?.find((account) => account.id === id);
+            return `${account.name} (${account.currency})`;
+          })
+          .join(", ");
+      }
+
+      case "assignees": {
+        return value
+          .map((id) => {
+            const member = members?.find((member) => member.id === id);
+            return member?.name;
+          })
+          .join(", ");
+      }
+
       default:
         return null;
     }
@@ -61,7 +92,7 @@ export function FilterList({
           return (
             <Button
               key={key}
-              className="rounded-full h-8 bg-secondary hover:bg-secondary font-normal text-[#878787] flex space-x-1 items-center group"
+              className="rounded-full h-8 px-3 bg-secondary hover:bg-secondary font-normal text-[#878787] flex space-x-1 items-center group"
               onClick={() => handleOnRemove(key)}
             >
               <Icons.Clear className="scale-0 group-hover:scale-100 transition-all w-0 group-hover:w-4" />

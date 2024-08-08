@@ -50,6 +50,7 @@ import {
   MdOutlineExitToApp,
   MdOutlineFace,
   MdOutlineFileDownload,
+  MdOutlineFilterList,
   MdOutlineForwardToInbox,
   MdOutlineHandyman,
   MdOutlineHourglassTop,
@@ -557,4 +558,5 @@ export const Icons = {
   Mute: MdOutlineVolumeOff,
   UnMute: MdOutlineVolumeUp,
   Clear: MdOutlineClear,
+  Filter: MdOutlineFilterList,
 };

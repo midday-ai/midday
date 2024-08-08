@@ -1,10 +1,16 @@
 "use client";
 
 import { generateFilters } from "@/actions/ai/filters/generate-filters";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { readStreamableValue } from "ai/rsc";
-import { parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
+import {
+  parseAsArrayOf,
+  parseAsString,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
@@ -12,6 +18,19 @@ import { FilterList } from "./filter-list";
 type Props = {
   placeholder: string;
   validFilters: string[];
+  categories?: {
+    slug: string;
+    name: string;
+  }[];
+  accounts?: {
+    id: string;
+    name: string;
+    currency: string;
+  }[];
+  members?: {
+    id: string;
+    name: string;
+  }[];
 };
 
 const defaultSearch = {
@@ -19,9 +38,18 @@ const defaultSearch = {
   attachments: null,
   start: null,
   end: null,
+  categories: null,
+  accounts: null,
+  members: null,
 };
 
-export function SearchFilter({ placeholder, validFilters }: Props) {
+export function SearchFilter({
+  placeholder,
+  validFilters,
+  categories,
+  accounts,
+  members,
+}: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
@@ -32,6 +60,9 @@ export function SearchFilter({ placeholder, validFilters }: Props) {
       attachments: parseAsStringLiteral(["exclude", "include"] as const),
       start: parseAsString,
       end: parseAsString,
+      categories: parseAsArrayOf(parseAsString),
+      accounts: parseAsArrayOf(parseAsString),
+      assignees: parseAsArrayOf(parseAsString),
     },
     {
       shallow: false,
@@ -49,7 +80,7 @@ export function SearchFilter({ placeholder, validFilters }: Props) {
     },
   );
 
-  useHotkeys("meta+f", (evt) => {
+  useHotkeys("meta+s", (evt) => {
     evt.preventDefault();
     inputRef.current?.focus();
   });
@@ -70,12 +101,41 @@ export function SearchFilter({ placeholder, validFilters }: Props) {
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
-      const { object } = await generateFilters(prompt, validFilters);
+      const { object } = await generateFilters(
+        prompt,
+        validFilters,
+        categories
+          ? `Categories: ${categories?.map((category) => category.name).join(", ")} \n
+             Accounts: ${accounts?.map((account) => account.name).join(", ")} \n
+             Buyers: ${members?.map((member) => member.name).join(", ")}
+              `
+          : "",
+      );
+
       let finalObject = {};
 
       for await (const partialObject of readStreamableValue(object)) {
         if (partialObject) {
-          finalObject = { ...finalObject, ...partialObject };
+          finalObject = {
+            ...finalObject,
+            ...partialObject,
+            categories:
+              partialObject?.categories?.map(
+                (name: string) =>
+                  categories?.find((category) => category.name === name)?.slug,
+              ) ?? null,
+            accounts:
+              partialObject?.accounts?.map(
+                (name: string) =>
+                  accounts?.find((account) => account.name === name)?.id,
+              ) ?? null,
+            assignees:
+              partialObject?.assignees?.map(
+                (name: string) =>
+                  members?.find((member) => member.name === name)?.id,
+              ) ?? null,
+            q: partialObject?.name ?? null,
+          };
         }
       }
 
@@ -90,6 +150,11 @@ export function SearchFilter({ placeholder, validFilters }: Props) {
     }
   };
 
+  const hasValidFilters =
+    Object.entries(filters).filter(
+      ([key, value]) => value !== null && key !== "q",
+    ).length > 0;
+
   return (
     <div className="flex space-x-4 items-center">
       <form
@@ -103,7 +168,7 @@ export function SearchFilter({ placeholder, validFilters }: Props) {
         <Input
           ref={inputRef}
           placeholder={placeholder}
-          className="pl-9 w-full md:w-[300px]"
+          className="pl-9 w-full md:w-[320px] pr-8"
           value={prompt}
           onChange={handleSearch}
           autoComplete="off"
@@ -111,12 +176,22 @@ export function SearchFilter({ placeholder, validFilters }: Props) {
           autoCorrect="off"
           spellCheck="false"
         />
-        <kbd className="pointer-events-none absolute right-1.5 top-[8px] h-5 select-none items-center gap-0.5 flex px-1.5 font-mono text-[10px] font-medium text-[#878787]">
-          <span className="text-[15px]">⌘</span>F
-        </kbd>
+        <Icons.Filter
+          className={cn(
+            "absolute right-3 top-[10px] opacity-50 transition-opacity duration-300",
+            hasValidFilters && "opacity-1",
+          )}
+        />
       </form>
 
-      <FilterList filters={filters} loading={streaming} onRemove={setFilters} />
+      <FilterList
+        filters={filters}
+        loading={streaming}
+        onRemove={setFilters}
+        categories={categories}
+        accounts={accounts}
+        members={members}
+      />
     </div>
   );
 }
