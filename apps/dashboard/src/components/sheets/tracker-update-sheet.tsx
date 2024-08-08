@@ -4,7 +4,6 @@ import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
 import { updateProjectSchema } from "@/actions/schema";
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertDialog,
@@ -24,6 +23,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { useMediaQuery } from "@midday/ui/hooks";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
@@ -78,7 +78,7 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
   const handleShareURL = async (id: string) => {
     try {
       await navigator.clipboard.writeText(
-        `${window.location.origin}/tracker?projectId=${id}`
+        `${window.location.origin}/tracker?projectId=${id}`,
       );
 
       toast({

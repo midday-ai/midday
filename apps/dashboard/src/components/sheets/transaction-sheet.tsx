@@ -1,6 +1,6 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
+import { useMediaQuery } from "@midday/ui/hooks";
 import { Sheet, SheetContent } from "@midday/ui/sheet";
 import React from "react";
 import { TransactionDetails } from "../transaction-details";
@@ -12,7 +12,7 @@ type Props = {
   ids?: string[];
   updateTransaction: (
     values: UpdateTransactionValues,
-    optimisticData: any
+    optimisticData: any,
   ) => void;
 };
 

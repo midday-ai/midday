@@ -1,7 +1,7 @@
 "use client";
 
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { Button } from "@midday/ui/button";
+import { useMediaQuery } from "@midday/ui/hooks";
 import { Icons } from "@midday/ui/icons";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -27,7 +27,7 @@ export function SectionDemo({ playVideo }: Props) {
     () => {
       togglePlay();
     },
-    []
+    [],
   );
 
   useHotkeys(
@@ -35,7 +35,7 @@ export function SectionDemo({ playVideo }: Props) {
     () => {
       handleRestart();
     },
-    [playerRef]
+    [playerRef],
   );
 
   useEffect(() => {

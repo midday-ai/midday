@@ -1,6 +1,6 @@
 "use client";
 
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { useMediaQuery } from "@midday/ui/hooks";
 import {
   Tooltip,
   TooltipContent,

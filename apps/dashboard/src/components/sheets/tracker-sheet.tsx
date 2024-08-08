@@ -3,11 +3,11 @@
 import { updateEntriesAction } from "@/actions/project/update-entries-action";
 import { TrackerMonthGraph } from "@/components/tracker-month-graph";
 import { TrackerSelect } from "@/components/tracker-select";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
+import { useMediaQuery } from "@midday/ui/hooks";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useToast } from "@midday/ui/use-toast";

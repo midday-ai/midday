@@ -426,3 +426,20 @@ export const assistantSettingsSchema = z.object({
 });
 
 export const requestAccessSchema = z.void();
+
+export const filterQuerySchema = z.object({
+  // start: z
+  //   .string()
+  //   .optional()
+  //   .describe("The start date and time when to retrieve from."),
+  // end: z
+  //   .string()
+  //   .optional()
+  //   .describe(
+  //     "The end date and time when to retrieve tra from. If not provided, defaults to the current date.",
+  //   ),
+  attachments: z
+    .enum(["exclude", "include"])
+    .optional()
+    .describe("Whether to include or exclude results with attachments."),
+});
