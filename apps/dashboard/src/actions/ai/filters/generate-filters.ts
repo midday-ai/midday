@@ -11,6 +11,7 @@ export async function generateFilters(prompt: string, validFilters: string[]) {
   (async () => {
     const { partialObjectStream } = await streamObject({
       model: openai("gpt-4o-mini"),
+      system: `You are a helpful assistant that generates filters for a given prompt. The current year is: ${new Date().getFullYear()}`,
       schema: filterQuerySchema.pick({
         ...(validFilters.reduce((acc, filter) => {
           acc[filter] = true;
@@ -18,7 +19,7 @@ export async function generateFilters(prompt: string, validFilters: string[]) {
         }, {}) as any),
       }),
       prompt,
-      temperature: 0.4,
+      temperature: 0.8,
     });
 
     for await (const partialObject of partialObjectStream) {

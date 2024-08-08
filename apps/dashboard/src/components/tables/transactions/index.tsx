@@ -14,11 +14,11 @@ type Props = {
   page: number;
   sort: any;
   noAccounts: boolean;
-  query?: string;
+  query: string | null;
 };
 
 export async function Table({ filter, page, sort, noAccounts, query }: Props) {
-  const hasFilters = Object.values(filter).some((value) => value !== undefined);
+  const hasFilters = Object.values(filter).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
     cookies().get(Cookies.TransactionsColumns)?.value || "[]",
   );
@@ -30,7 +30,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
     from: 0,
     filter,
     sort,
-    searchQuery: query,
+    searchQuery: query ?? undefined,
   });
 
   const { data, meta } = transactions ?? {};
@@ -43,7 +43,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
       from: from + 1,
       filter,
       sort,
-      searchQuery: query,
+      searchQuery: query ?? undefined,
     });
   }
 

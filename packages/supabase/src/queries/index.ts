@@ -168,10 +168,8 @@ export type GetTransactionsParams = {
     categories?: string[];
     accounts?: string[];
     type?: "income" | "expense";
-    date?: {
-      from?: string;
-      to?: string;
-    };
+    start?: string;
+    end?: string;
   };
 };
 
@@ -180,14 +178,8 @@ export async function getTransactionsQuery(
   params: GetTransactionsParams,
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
-  const {
-    date = {},
-    status,
-    attachments,
-    categories,
-    type,
-    accounts,
-  } = filter || {};
+  const { status, attachments, categories, type, accounts, start, end } =
+    filter || {};
 
   const columns = [
     "id",
@@ -233,9 +225,9 @@ export async function getTransactionsQuery(
       .order("created_at", { ascending: false });
   }
 
-  if (date?.from && date?.to) {
-    query.gte("date", date.from);
-    query.lte("date", date.to);
+  if (start && end) {
+    query.gte("date", start);
+    query.lte("date", end);
   }
 
   if (searchQuery) {

@@ -1,3 +1,4 @@
+import { isValid } from "date-fns";
 import { z } from "zod";
 
 export const updateUserSchema = z.object({
@@ -427,19 +428,24 @@ export const assistantSettingsSchema = z.object({
 
 export const requestAccessSchema = z.void();
 
+export const parseDateSchema = z
+  .string()
+  .transform((v) => isValid(v))
+  .refine((v) => !!v, { message: "Invalid date" });
+
 export const filterQuerySchema = z.object({
-  // start: z
-  //   .string()
-  //   .optional()
-  //   .describe("The start date and time when to retrieve from."),
-  // end: z
-  //   .string()
-  //   .optional()
-  //   .describe(
-  //     "The end date and time when to retrieve tra from. If not provided, defaults to the current date.",
-  //   ),
+  start: parseDateSchema
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: parseDateSchema
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
   attachments: z
     .enum(["exclude", "include"])
     .optional()
-    .describe("Whether to include or exclude results with attachments."),
+    .describe(
+      "Whether to include or exclude results with attachments or receipts.",
+    ),
 });

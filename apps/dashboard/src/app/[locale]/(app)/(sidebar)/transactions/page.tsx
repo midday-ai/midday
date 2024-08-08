@@ -9,25 +9,33 @@ import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
+import { VALID_FILTERS } from "./filters";
+import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
   title: "Transactions | Midday",
 };
 
-const VALID_FILTERS = ["attachments", "category", "date"];
-
 export default async function Transactions({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: Record<string, string | string[] | undefined>;
 }) {
-  // TODO: remove this
+  const {
+    q: query,
+    page,
+    attachments,
+    start,
+    end,
+  } = searchParamsCache.parse(searchParams);
   const accounts = await getTeamBankAccounts();
 
-  const page = typeof searchParams.page === "string" ? +searchParams.page : 0;
   const filter = {
-    attachments: searchParams?.attachments,
+    attachments,
+    start,
+    end,
   };
+
   const sort = searchParams?.sort?.split(":");
 
   const isOpen = Boolean(searchParams.step);
@@ -36,7 +44,7 @@ export default async function Transactions({
     page,
     filter,
     sort,
-    query: searchParams?.q,
+    query,
   });
 
   return (
@@ -57,7 +65,7 @@ export default async function Transactions({
               page={page}
               sort={sort}
               noAccounts={isEmpty}
-              query={searchParams?.q}
+              query={query}
             />
           </Suspense>
         </ErrorBoundary>

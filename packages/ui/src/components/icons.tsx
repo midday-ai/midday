@@ -41,6 +41,7 @@ import {
   MdOutlineCancel,
   MdOutlineCategory,
   MdOutlineChatBubbleOutline,
+  MdOutlineClear,
   MdOutlineContentCopy,
   MdOutlineDashboardCustomize,
   MdOutlineDelete,
@@ -555,4 +556,5 @@ export const Icons = {
   Menu: MdMenu,
   Mute: MdOutlineVolumeOff,
   UnMute: MdOutlineVolumeUp,
+  Clear: MdOutlineClear,
 };

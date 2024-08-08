@@ -34,7 +34,7 @@ export function BottomBar({ count, show, totalAmount }: Props) {
           amount: total?.amount,
           currency: total.currency,
           locale,
-        })
+        }),
       )
       .join(", ");
 
@@ -45,7 +45,7 @@ export function BottomBar({ count, show, totalAmount }: Props) {
         animate={{ y: show ? 0 : 100 }}
         initial={{ y: 100 }}
       >
-        <div className="pointer-events-auto backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-lg space-x-2">
+        <div className="pointer-events-auto backdrop-filter backdrop-blur-lg dark:bg-[#1A1A1A]/80 bg-[#F6F6F3]/80 h-12 justify-between items-center flex px-4 border dark:border-[#2C2C2C] border-[#DCDAD2] rounded-full space-x-2">
           <TooltipProvider delayDuration={0}>
             <Tooltip>
               <TooltipTrigger className="flex items-center space-x-2">
