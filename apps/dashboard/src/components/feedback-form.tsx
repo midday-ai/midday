@@ -19,7 +19,7 @@ export function FeedbackForm() {
 
   return (
     <Popover>
-      <PopoverTrigger asChild className="hidden md:block">
+      <PopoverTrigger asChild className="hidden md:flex-inline">
         <Button variant="outline" className="rounded-full font-normal">
           Feedback
         </Button>
