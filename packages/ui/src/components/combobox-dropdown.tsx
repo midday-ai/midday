@@ -37,9 +37,11 @@ type Props<T> = {
   popoverProps?: React.ComponentProps<typeof PopoverContent>;
   disabled?: boolean;
   onCreate?: (value: string) => void;
+  headless?: boolean;
 };
 
 export function ComboboxDropdown<T extends ComboboxItem>({
+  headless,
   placeholder,
   searchPlaceholder,
   items,
@@ -62,13 +64,89 @@ export function ComboboxDropdown<T extends ComboboxItem>({
   const selectedItem = incomingSelectedItem ?? internalSelectedItem;
 
   const filteredItems = items.filter((item) =>
-    item.label.toLowerCase().includes(inputValue.toLowerCase())
+    item.label.toLowerCase().includes(inputValue.toLowerCase()),
   );
 
   const showCreate =
     onCreate &&
     inputValue &&
     !items?.find((o) => o.label.toLowerCase() === inputValue.toLowerCase());
+
+  const Component = (
+    <Command loop shouldFilter={false}>
+      <CommandInput
+        value={inputValue}
+        onValueChange={setInputValue}
+        placeholder={searchPlaceholder ?? "Search item..."}
+        className="px-3"
+      />
+
+      <CommandEmpty>{emptyResults ?? "No item found"}</CommandEmpty>
+      <CommandGroup>
+        <CommandList className="max-h-[225px] overflow-auto">
+          {filteredItems.map((item) => {
+            const isChecked = selectedItem?.id === item.id;
+
+            return (
+              <CommandItem
+                disabled={item.disabled}
+                className="cursor-pointer"
+                key={item.id}
+                value={item.id}
+                onSelect={(id) => {
+                  const foundItem = items.find((item) => item.id === id);
+
+                  if (!foundItem) {
+                    return;
+                  }
+
+                  onSelect(foundItem);
+                  setInternalSelectedItem(foundItem);
+                  setOpen(false);
+                }}
+              >
+                {renderListItem ? (
+                  renderListItem({ isChecked, item })
+                ) : (
+                  <>
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        isChecked ? "opacity-100" : "opacity-0",
+                      )}
+                    />
+                    {item.label}
+                  </>
+                )}
+              </CommandItem>
+            );
+          })}
+
+          {showCreate && (
+            <CommandItem
+              key={inputValue}
+              value={inputValue}
+              onSelect={() => {
+                onCreate(inputValue);
+                setOpen(false);
+                setInputValue("");
+              }}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+              }}
+            >
+              {renderOnCreate ? renderOnCreate(inputValue) : null}
+            </CommandItem>
+          )}
+        </CommandList>
+      </CommandGroup>
+    </Command>
+  );
+
+  if (headless) {
+    return Component;
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen} modal={true}>
@@ -98,75 +176,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
           ...popoverProps?.style,
         }}
       >
-        <Command loop shouldFilter={false}>
-          <CommandInput
-            value={inputValue}
-            onValueChange={setInputValue}
-            placeholder={searchPlaceholder ?? "Search item..."}
-            className="px-3"
-          />
-
-          <CommandEmpty>{emptyResults ?? "No item found"}</CommandEmpty>
-          <CommandGroup>
-            <CommandList className="max-h-[225px] overflow-auto">
-              {filteredItems.map((item) => {
-                const isChecked = selectedItem?.id === item.id;
-
-                return (
-                  <CommandItem
-                    disabled={item.disabled}
-                    className="cursor-pointer"
-                    key={item.id}
-                    value={item.id}
-                    onSelect={(id) => {
-                      const foundItem = items.find((item) => item.id === id);
-
-                      if (!foundItem) {
-                        return;
-                      }
-
-                      onSelect(foundItem);
-                      setInternalSelectedItem(foundItem);
-                      setOpen(false);
-                    }}
-                  >
-                    {renderListItem ? (
-                      renderListItem({ isChecked, item })
-                    ) : (
-                      <>
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            isChecked ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {item.label}
-                      </>
-                    )}
-                  </CommandItem>
-                );
-              })}
-
-              {showCreate && (
-                <CommandItem
-                  key={inputValue}
-                  value={inputValue}
-                  onSelect={() => {
-                    onCreate(inputValue);
-                    setOpen(false);
-                    setInputValue("");
-                  }}
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                >
-                  {renderOnCreate ? renderOnCreate(inputValue) : null}
-                </CommandItem>
-              )}
-            </CommandList>
-          </CommandGroup>
-        </Command>
+        {Component}
       </PopoverContent>
     </Popover>
   );

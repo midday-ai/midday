@@ -2,10 +2,11 @@
 
 import { changeChartPeriodAction } from "@/actions/change-chart-period-action";
 import { Button } from "@midday/ui/button";
+import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
-import { MonthRangePicker } from "@midday/ui/month-range-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
+import { formatISO } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 
@@ -50,23 +51,9 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
     )} `;
   }
 
-  const handleChangePeriod = (params) => {
-    const prevRange = state;
-
-    if (params.from || params.to) {
-      const range = {
-        ...prevRange,
-        ...params,
-      };
-
-      setState(range);
-      execute(range);
-    } else {
-      setState({
-        from: "",
-        to: "",
-      });
-    }
+  const handleChangePeriod = (range) => {
+    setState(range);
+    execute(range);
   };
 
   const date = state.from || state.to ? state : defaultValue;
@@ -83,8 +70,28 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             <Icons.ChevronDown />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-screen md:w-[450px] mt-2 pt-1" align="end">
-          <MonthRangePicker setDate={handleChangePeriod} date={date} />
+        <PopoverContent
+          className="w-screen md:w-[550px] p-0"
+          align="end"
+          sideOffset={10}
+        >
+          <Calendar
+            mode="range"
+            numberOfMonths={2}
+            today={state.from ? new Date(state.from) : new Date()}
+            selected={{
+              from: state.from ? new Date(state.from) : undefined,
+              to: state.to ? new Date(state.to) : undefined,
+            }}
+            initialFocus
+            toDate={new Date()}
+            onSelect={({ from, to }) => {
+              handleChangePeriod({
+                from: from ? formatISO(from, { representation: "date" }) : null,
+                to: to ? formatISO(to, { representation: "date" }) : null,
+              });
+            }}
+          />
         </PopoverContent>
       </Popover>
     </div>

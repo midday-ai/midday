@@ -6,6 +6,7 @@ import {
   getCurrentUserTeamQuery,
 } from "@midday/supabase/queries";
 import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
+import { Spinner } from "@midday/ui/spinner";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { CategoryColor } from "./category";
@@ -20,6 +21,7 @@ type Selected = {
 type Props = {
   selected?: Selected;
   onChange: (selected: Selected) => void;
+  headless?: boolean;
 };
 
 function transformCategory(category) {
@@ -31,13 +33,15 @@ function transformCategory(category) {
   };
 }
 
-export function SelectCategory({ selected, onChange }: Props) {
+export function SelectCategory({ selected, onChange, headless }: Props) {
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
   useEffect(() => {
     async function fetchData() {
       const { data: userData } = await getCurrentUserTeamQuery(supabase);
+
       if (userData?.team_id) {
         const response = await getCategoriesQuery(supabase, {
           teamId: userData.team_id,
@@ -48,6 +52,8 @@ export function SelectCategory({ selected, onChange }: Props) {
           setData(response.data.map(transformCategory));
         }
       }
+
+      setIsLoading(false);
     }
 
     if (!data.length) {
@@ -68,8 +74,17 @@ export function SelectCategory({ selected, onChange }: Props) {
 
   const selectedValue = selected ? transformCategory(selected) : undefined;
 
+  if (!selected && isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
   return (
     <ComboboxDropdown
+      headless={headless}
       disabled={createCategories.status === "executing"}
       placeholder="Select category"
       searchPlaceholder="Search category"
@@ -84,14 +99,16 @@ export function SelectCategory({ selected, onChange }: Props) {
         });
       }}
       onCreate={(value) => {
-        createCategories.execute({
-          categories: [
-            {
-              name: value,
-              color: getColorFromName(value),
-            },
-          ],
-        });
+        if (!headless) {
+          createCategories.execute({
+            categories: [
+              {
+                name: value,
+                color: getColorFromName(value),
+              },
+            ],
+          });
+        }
       }}
       renderSelectedItem={(selectedItem) => (
         <div className="flex items-center space-x-2">
@@ -102,12 +119,14 @@ export function SelectCategory({ selected, onChange }: Props) {
         </div>
       )}
       renderOnCreate={(value) => {
-        return (
-          <div className="flex items-center space-x-2">
-            <CategoryColor color={getColorFromName(value)} />
-            <span>{`Create "${value}"`}</span>
-          </div>
-        );
+        if (!headless) {
+          return (
+            <div className="flex items-center space-x-2">
+              <CategoryColor color={getColorFromName(value)} />
+              <span>{`Create "${value}"`}</span>
+            </div>
+          );
+        }
       }}
       renderListItem={({ item }) => {
         return (

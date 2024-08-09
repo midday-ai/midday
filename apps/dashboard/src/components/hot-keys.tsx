@@ -12,11 +12,6 @@ export function HotKeys() {
     router.refresh();
   };
 
-  useHotkeys("meta+s", (evt) => {
-    evt.preventDefault();
-    router.push("/settings");
-  });
-
   useHotkeys("ctrl+m", (evt) => {
     evt.preventDefault();
     router.push("/settings/members");

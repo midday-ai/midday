@@ -1,6 +1,6 @@
 "use client";
 
-import { useEnterSubmit } from "@/hooks/use-enter-submit";
+import { useEnterSubmit } from "@midday/ui/hooks";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
 import { motion } from "framer-motion";
@@ -13,7 +13,7 @@ import { chatExamples } from "./examples";
 import { Footer } from "./footer";
 import { BotCard, SignUpCard, UserMessage } from "./messages";
 
-export function Chat({ messages, submitMessage, onNewChat, input, setInput }) {
+export function Chat({ messages, submitMessage, input, setInput }) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const [isVisible, setVisible] = useState(false);
 
@@ -36,7 +36,7 @@ export function Chat({ messages, submitMessage, onNewChat, input, setInput }) {
     ]);
 
     const content = chatExamples.find(
-      (example) => example.title === input
+      (example) => example.title === input,
     )?.content;
 
     if (content) {
@@ -57,7 +57,7 @@ export function Chat({ messages, submitMessage, onNewChat, input, setInput }) {
               ),
             },
           ]),
-        500
+        500,
       );
     } else {
       setTimeout(
@@ -70,7 +70,7 @@ export function Chat({ messages, submitMessage, onNewChat, input, setInput }) {
               display: <SignUpCard />,
             },
           ]),
-        200
+        200,
       );
     }
   };

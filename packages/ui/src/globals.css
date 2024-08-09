@@ -252,3 +252,12 @@
     width: 1.25em;    
   }
 }
+
+/* Date picker */
+.rdp-tbody .rdp-button {
+  border-radius: 100%;
+}
+
+.aria-selected\:text-accent-foreground[aria-selected="true"] {
+  border-radius: 0px;
+}

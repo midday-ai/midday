@@ -6,7 +6,6 @@ import { useScrollAnchor } from "@/hooks/use-scroll-anchor";
 import { useAssistantStore } from "@/store/assistant";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { Textarea } from "@midday/ui/textarea";
-import { useMediaQuery } from "@uidotdev/usehooks";
 import { useActions } from "ai/rsc";
 import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";

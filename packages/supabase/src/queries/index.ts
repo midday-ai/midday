@@ -163,15 +163,14 @@ export type GetTransactionsParams = {
   };
   searchQuery?: string;
   filter?: {
-    status?: "fullfilled" | "unfullfilled" | "excluded";
+    statuses?: string[];
     attachments?: "include" | "exclude";
     categories?: string[];
     accounts?: string[];
+    assignees?: string[];
     type?: "income" | "expense";
-    date?: {
-      from?: string;
-      to?: string;
-    };
+    start?: string;
+    end?: string;
   };
 };
 
@@ -181,12 +180,14 @@ export async function getTransactionsQuery(
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
   const {
-    date = {},
-    status,
+    statuses,
     attachments,
     categories,
     type,
     accounts,
+    start,
+    end,
+    assignees,
   } = filter || {};
 
   const columns = [
@@ -233,9 +234,9 @@ export async function getTransactionsQuery(
       .order("created_at", { ascending: false });
   }
 
-  if (date?.from && date?.to) {
-    query.gte("date", date.from);
-    query.lte("date", date.to);
+  if (start && end) {
+    query.gte("date", start);
+    query.lte("date", end);
   }
 
   if (searchQuery) {
@@ -246,15 +247,15 @@ export async function getTransactionsQuery(
     }
   }
 
-  if (status?.includes("fullfilled") || attachments === "include") {
+  if (statuses?.includes("fullfilled") || attachments === "include") {
     query.eq("is_fulfilled", true);
   }
 
-  if (status?.includes("unfulfilled") || attachments === "exclude") {
+  if (statuses?.includes("unfulfilled") || attachments === "exclude") {
     query.eq("is_fulfilled", false);
   }
 
-  if (status?.includes("excluded")) {
+  if (statuses?.includes("excluded")) {
     query.eq("status", "excluded");
   } else {
     query.or("status.eq.pending,status.eq.posted,status.eq.completed");
@@ -284,6 +285,10 @@ export async function getTransactionsQuery(
 
   if (accounts?.length) {
     query.in("bank_account_id", accounts);
+  }
+
+  if (assignees?.length) {
+    query.in("assigned_id", assignees);
   }
 
   const { data, count } = await query.range(from, to);

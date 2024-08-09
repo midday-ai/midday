@@ -14,13 +14,13 @@ type Props = {
   page: number;
   sort: any;
   noAccounts: boolean;
-  query?: string;
+  query: string | null;
 };
 
 export async function Table({ filter, page, sort, noAccounts, query }: Props) {
-  const hasFilters = Object.keys(filter).length > 0;
+  const hasFilters = Object.values(filter).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
-    cookies().get(Cookies.TransactionsColumns)?.value || "[]"
+    cookies().get(Cookies.TransactionsColumns)?.value || "[]",
   );
 
   // NOTE: When we have a filter we want to show all results so users can select
@@ -30,7 +30,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
     from: 0,
     filter,
     sort,
-    searchQuery: query,
+    searchQuery: query ?? undefined,
   });
 
   const { data, meta } = transactions ?? {};
@@ -43,7 +43,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
       from: from + 1,
       filter,
       sort,
-      searchQuery: query,
+      searchQuery: query ?? undefined,
     });
   }
 
@@ -60,7 +60,7 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
   }
 
   const hasNextPage = Boolean(
-    meta?.count && meta.count / (page + 1) > pageSize
+    meta?.count && meta.count / (page + 1) > pageSize,
   );
 
   return (
