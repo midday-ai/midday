@@ -18,7 +18,7 @@ type Props = {
   meta: any;
   data: any;
   q: string;
-  filter: string[];
+  filter: Record<string, string>;
 };
 
 export function TransactionsUI({ meta, data, q, filter }: Props) {
@@ -95,11 +95,7 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
         </Table>
       )}
 
-      {meta.count > 5 && (
-        <ShowAllButton
-          path={`/transactions?q=${q}&filter=${JSON.stringify(filter)}`}
-        />
-      )}
+      {meta.count > 5 && <ShowAllButton filter={filter} q={q} />}
     </BotCard>
   );
 }

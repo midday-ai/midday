@@ -163,7 +163,7 @@ export type GetTransactionsParams = {
   };
   searchQuery?: string;
   filter?: {
-    status?: "fullfilled" | "unfullfilled" | "excluded";
+    statuses?: string[];
     attachments?: "include" | "exclude";
     categories?: string[];
     accounts?: string[];
@@ -180,7 +180,7 @@ export async function getTransactionsQuery(
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
   const {
-    status,
+    statuses,
     attachments,
     categories,
     type,
@@ -247,15 +247,15 @@ export async function getTransactionsQuery(
     }
   }
 
-  if (status?.includes("fullfilled") || attachments === "include") {
+  if (statuses?.includes("fullfilled") || attachments === "include") {
     query.eq("is_fulfilled", true);
   }
 
-  if (status?.includes("unfulfilled") || attachments === "exclude") {
+  if (statuses?.includes("unfulfilled") || attachments === "exclude") {
     query.eq("is_fulfilled", false);
   }
 
-  if (status?.includes("excluded")) {
+  if (statuses?.includes("excluded")) {
     query.eq("status", "excluded");
   } else {
     query.or("status.eq.pending,status.eq.posted,status.eq.completed");

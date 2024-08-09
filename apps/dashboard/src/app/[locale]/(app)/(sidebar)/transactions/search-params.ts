@@ -15,4 +15,9 @@ export const searchParamsCache = createSearchParamsCache({
   categories: parseAsArrayOf(parseAsString),
   accounts: parseAsArrayOf(parseAsString),
   assignees: parseAsArrayOf(parseAsString),
+  statuses: parseAsStringLiteral([
+    "fullfilled",
+    "unfulfilled",
+    "excluded",
+  ] as const),
 });

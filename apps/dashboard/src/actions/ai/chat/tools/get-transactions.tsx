@@ -41,10 +41,8 @@ export function getTransactionsTool({ aiState }: Args) {
       const searchQuery = name || amount;
 
       const filter = {
-        date: {
-          from: fromDate,
-          to: toDate,
-        },
+        start: fromDate,
+        end: toDate,
         categories,
         attachments,
       };

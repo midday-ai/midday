@@ -21,6 +21,17 @@ const itemVariant = {
   show: { y: 0, opacity: 1 },
 };
 
+type Props = {
+  filters: { [key: string]: string | number | boolean | string[] | number[] };
+  loading: boolean;
+  onRemove: (key: string) => void;
+  categories?: { id: string; name: string; slug: string }[];
+  accounts?: { id: string; name: string; currency: string }[];
+  members?: { id: string; name: string }[];
+  statusFilters: { id: string; name: string }[];
+  attachmentsFilters: { id: string; name: string }[];
+};
+
 export function FilterList({
   filters,
   loading,
@@ -28,16 +39,9 @@ export function FilterList({
   categories,
   accounts,
   members,
-}: { filters: any; loading: boolean; onRemove: (key: string) => void }) {
-  if (loading) {
-    return (
-      <div className="flex space-x-2">
-        <Skeleton className="rounded-full h-8 w-[100px]" />
-        <Skeleton className="rounded-full h-8 w-[100px]" />
-      </div>
-    );
-  }
-
+  statusFilters,
+  attachmentsFilters,
+}: Props) {
   const renderFilter = ({ key, value }) => {
     switch (key) {
       case "start": {
@@ -52,11 +56,18 @@ export function FilterList({
           key === "start" && value && format(new Date(value), "MMM d, yyyy")
         );
       }
+
       case "attachments": {
-        if (value === "exclude") {
-          return "Without reciepts";
-        }
-        return "With reciepts";
+        return attachmentsFilters?.find((filter) => filter.id === value)?.name;
+      }
+
+      case "statuses": {
+        return value
+          .map(
+            (status) =>
+              statusFilters.find((filter) => filter.id === status)?.name,
+          )
+          .join(", ");
       }
 
       case "categories": {
@@ -110,26 +121,38 @@ export function FilterList({
       animate="show"
       className="flex space-x-2"
     >
-      {Object.entries(filters)
-        .filter(([key, value]) => value !== null && key !== "end")
-        .map(([key, value]) => {
-          return (
-            <motion.li key={key} variants={itemVariant}>
-              <Button
-                className="rounded-full h-8 px-3 bg-secondary hover:bg-secondary font-normal text-[#878787] flex space-x-1 items-center group"
-                onClick={() => handleOnRemove(key)}
-              >
-                <Icons.Clear className="scale-0 group-hover:scale-100 transition-all w-0 group-hover:w-4" />
-                <span>
-                  {renderFilter({
-                    key,
-                    value,
-                  })}
-                </span>
-              </Button>
-            </motion.li>
-          );
-        })}
+      {loading && (
+        <div className="flex space-x-2">
+          <motion.li key="1" variants={itemVariant}>
+            <Skeleton className="rounded-full h-8 w-[100px]" />
+          </motion.li>
+          <motion.li key="1" variants={itemVariant}>
+            <Skeleton className="rounded-full h-8 w-[100px]" />
+          </motion.li>
+        </div>
+      )}
+
+      {!loading &&
+        Object.entries(filters)
+          .filter(([key, value]) => value !== null && key !== "end")
+          .map(([key, value]) => {
+            return (
+              <motion.li key={key} variants={itemVariant}>
+                <Button
+                  className="rounded-full h-8 px-3 bg-secondary hover:bg-secondary font-normal text-[#878787] flex space-x-1 items-center group"
+                  onClick={() => handleOnRemove(key)}
+                >
+                  <Icons.Clear className="scale-0 group-hover:scale-100 transition-all w-0 group-hover:w-4" />
+                  <span>
+                    {renderFilter({
+                      key,
+                      value,
+                    })}
+                  </span>
+                </Button>
+              </motion.li>
+            );
+          })}
     </motion.ul>
   );
 }

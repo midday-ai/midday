@@ -1,9 +1,9 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
-import { SearchFilter } from "@/components/search-filter";
 import { Table } from "@/components/tables/transactions";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
+import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
 import {
   getCategories,
   getTeamBankAccounts,
@@ -33,6 +33,7 @@ export default async function Transactions({
     end,
     categories,
     assignees,
+    statuses,
   } = searchParamsCache.parse(searchParams);
 
   // Move this in a suspense
@@ -48,6 +49,7 @@ export default async function Transactions({
     end,
     categories,
     assignees,
+    statuses,
   };
 
   const sort = searchParams?.sort?.split(":");
@@ -64,7 +66,7 @@ export default async function Transactions({
   return (
     <>
       <div className="flex justify-between py-6">
-        <SearchFilter
+        <TransactionsSearchFilter
           placeholder="Search or type filter"
           validFilters={VALID_FILTERS}
           categories={categoriesData?.data?.map((category) => ({
