@@ -266,7 +266,9 @@ export function TransactionsSearchFilter({
               >
                 <Calendar
                   mode="range"
+                  initialFocus
                   today={filters.start ? new Date(filters.start) : new Date()}
+                  toDate={new Date()}
                   selected={{
                     from: filters.start ? new Date(filters.start) : undefined,
                     to: filters.end ? new Date(filters.end) : undefined,

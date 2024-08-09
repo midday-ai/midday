@@ -49,7 +49,6 @@
     "./input": "./src/components/input.tsx",
     "./input-otp": "./src/components/input-otp.tsx",
     "./label": "./src/components/label.tsx",
-    "./month-range-picker": "./src/components/month-range-picker.tsx",
     "./navigation-menu": "./src/components/navigation-menu.tsx",
     "./popover": "./src/components/popover.tsx",
     "./postcss": "./postcss.config.js",
