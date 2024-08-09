@@ -56,8 +56,6 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
     execute(range);
   };
 
-  const date = state.from || state.to ? state : defaultValue;
-
   return (
     <div className="flex space-x-4">
       <Popover>
@@ -80,9 +78,12 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             numberOfMonths={2}
             today={state.from ? new Date(state.from) : new Date()}
             selected={{
-              from: state.from ? new Date(state.from) : undefined,
-              to: state.to ? new Date(state.to) : undefined,
+              from: state.from ? new Date(state.from) : defaultValue.from,
+              to: state.to ? new Date(state.to) : defaultValue.to,
             }}
+            defaultMonth={
+              new Date(new Date().setMonth(new Date().getMonth() - 1))
+            }
             initialFocus
             toDate={new Date()}
             onSelect={({ from, to }) => {
