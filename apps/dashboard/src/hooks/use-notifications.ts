@@ -141,7 +141,7 @@ export function useNotifications() {
     markAllMessagesAsRead,
     markMessageAsRead,
     markAllMessagesAsSeen,
-    hasUnseenNotificaitons: notifications.some(
+    hasUnseenNotifications: notifications.some(
       (notification) => !notification.seen
     ),
     notifications,
