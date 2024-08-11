@@ -23,6 +23,7 @@
     "typescript": "^5.5.4"
   },
   "exports": {
+    "./animated-size-container": "./src/components/animated-size-container.tsx",
     "./accordion": "./src/components/accordion.tsx",
     "./alert-dialog": "./src/components/alert-dialog.tsx",
     "./breadcrumb": "./src/components/breadcrumb.tsx",
@@ -70,6 +71,7 @@
     "./tooltip": "./src/components/tooltip.tsx",
     "./use-toast": "./src/components/use-toast.tsx",
     "./cn": "./src/utils/cn.ts",
+    "./truncate": "./src/utils/truncate.ts",
     "./hooks": "./src/hooks/index.ts"
   },
   "dependencies": {

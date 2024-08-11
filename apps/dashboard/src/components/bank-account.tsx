@@ -100,7 +100,7 @@ export function BankAccount({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  setStep("import-csv");
+                  setStep("import");
                 }}
               >
                 Import

@@ -6,6 +6,7 @@ import {
   MdArrowBack,
   MdArrowLeft,
   MdArrowRight,
+  MdArrowRightAlt,
   MdArrowUpward,
   MdAutoAwesome,
   MdBarChart,
@@ -568,4 +569,5 @@ export const Icons = {
   Attachments: MdOutlineAttachFile,
   Accounts: MdOutlineAccountBalance,
   Categories: MdOutlineCategory,
+  ArrowRightAlt: MdArrowRightAlt,
 };

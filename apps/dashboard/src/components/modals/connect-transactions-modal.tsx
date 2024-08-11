@@ -8,8 +8,6 @@ import type { Institutions } from "@midday-ai/engine/resources/institutions/inst
 import { track } from "@midday/events/client";
 import { LogEvents } from "@midday/events/events";
 import { Button } from "@midday/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
-import { cn } from "@midday/ui/cn";
 import {
   Dialog,
   DialogContent,
@@ -19,13 +17,8 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { useDebounce, useScript } from "@uidotdev/usehooks";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
-import CsvLogoDark from "public/assets/csv-dark.png";
-import CsvLogo from "public/assets/csv.png";
-import ZapierLogo from "public/assets/zapier.png";
 import { useEffect, useState } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { BankLogo } from "../bank-logo";
@@ -207,28 +200,6 @@ export function ConnectTransactionsModal({
     }
   }, [isOpen, countryCode]);
 
-  const imports = [
-    {
-      id: "csc",
-      name: "CSV",
-      description:
-        "Import transactions using a CSV file, you can also use this for backfilling.",
-      logo: CsvLogo,
-      logoDark: CsvLogoDark,
-      onClick: () => {
-        setParams({ step: "import-csv" });
-      },
-    },
-    {
-      id: "zapier",
-      name: "Zapier",
-      description:
-        "With 6,000+ apps you can automate your process of importing transactions from your bank. For example using a SpreadSheet.",
-      logo: ZapierLogo,
-      disabled: true,
-    },
-  ];
-
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>
       <DialogContent>
@@ -238,165 +209,98 @@ export function ConnectTransactionsModal({
 
             <DialogDescription>
               We work with a variety of banking providers to support as many
-              banks as possible. If you can't find yours, manual import is
-              available as an alternative.
+              banks as possible. If you can't find yours,{" "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => setParams({ step: "import-csv" })}
+              >
+                manual import
+              </button>{" "}
+              is available as an alternative.
             </DialogDescription>
 
-            <Tabs defaultValue="banks" className="pt-2">
-              <TabsList className="p-0 h-auto space-x-4 bg-transparent">
-                <TabsTrigger className="p-0" value="banks">
-                  Banks
-                </TabsTrigger>
-                <TabsTrigger className="p-0" value="import">
-                  Import
-                </TabsTrigger>
-              </TabsList>
+            <div className="pt-4">
+              <div className="flex space-x-2 relative">
+                <Input
+                  placeholder="Search bank..."
+                  type="search"
+                  onChange={(evt) => setParams({ q: evt.target.value || null })}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  autoFocus
+                  value={query ?? ""}
+                />
 
-              <TabsContent value="banks" className="mt-3">
-                <div className="flex space-x-2 relative">
-                  <Input
-                    placeholder="Search bank..."
-                    type="search"
-                    onChange={(evt) =>
-                      setParams({ q: evt.target.value || null })
-                    }
-                    autoComplete="off"
-                    autoCapitalize="none"
-                    autoCorrect="off"
-                    spellCheck="false"
-                    autoFocus
-                    value={query ?? ""}
+                <div className="absolute right-0">
+                  <CountrySelector
+                    defaultValue={countryCode}
+                    onSelect={(countryCode) => {
+                      setParams({ countryCode });
+                      setResults([]);
+                    }}
                   />
+                </div>
+              </div>
 
-                  <div className="absolute right-0">
-                    <CountrySelector
-                      defaultValue={countryCode}
-                      onSelect={(countryCode) => {
-                        setParams({ countryCode });
-                        setResults([]);
+              <div className="h-[430px] space-y-4 overflow-auto scrollbar-hide pt-2 mt-2">
+                {loading && <SearchSkeleton />}
+
+                {results?.map((institution) => {
+                  if (!institution) {
+                    return null;
+                  }
+
+                  return (
+                    <SearchResult
+                      key={institution.id}
+                      id={institution.id}
+                      name={institution.name}
+                      logo={institution.logo}
+                      provider={institution.provider}
+                      availableHistory={
+                        institution.available_history
+                          ? +institution.available_history
+                          : 0
+                      }
+                      openPlaid={() => {
+                        setParams({ step: null });
+                        openPlaid();
                       }}
                     />
-                  </div>
-                </div>
-
-                <div className="h-[430px] space-y-4 overflow-auto scrollbar-hide pt-2 mt-2">
-                  {loading && <SearchSkeleton />}
-
-                  {results?.map((institution) => {
-                    if (!institution) {
-                      return null;
-                    }
-
-                    return (
-                      <SearchResult
-                        key={institution.id}
-                        id={institution.id}
-                        name={institution.name}
-                        logo={institution.logo}
-                        provider={institution.provider}
-                        availableHistory={
-                          institution.available_history
-                            ? +institution.available_history
-                            : 0
-                        }
-                        openPlaid={() => {
-                          setParams({ step: null });
-                          openPlaid();
-                        }}
-                      />
-                    );
-                  })}
-
-                  {!loading && results.length === 0 && (
-                    <div className="flex flex-col items-center justify-center min-h-[350px]">
-                      <p className="font-medium mb-2">No banks found</p>
-                      <p className="text-sm text-center text-[#878787]">
-                        We couldn't find a bank matching your criteria.
-                        <br /> Let us know, or start with manual import.
-                      </p>
-
-                      <div className="mt-4 flex space-x-2">
-                        <Button
-                          variant="outline"
-                          onClick={() => setParams({ step: "import-csv" })}
-                        >
-                          Import
-                        </Button>
-
-                        <Button
-                          onClick={() => {
-                            router.push("/account/support");
-                          }}
-                        >
-                          Contact us
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </TabsContent>
-
-              <TabsContent value="import" className="space-y-4 mt-4">
-                {imports.map((provider) => {
-                  return (
-                    <Card key={provider.id}>
-                      <button
-                        type="button"
-                        className="text-left"
-                        onClick={provider.onClick}
-                        disabled={provider.disabled}
-                      >
-                        <div className="flex space-x-2 items-center ml-4">
-                          <div
-                            className={cn(
-                              "w-[40px] h-[40px] mt-[22px] self-start",
-                              provider.logoDark && "hidden dark:block",
-                            )}
-                          >
-                            <Image
-                              src={provider.logo}
-                              width={40}
-                              height={40}
-                              alt={provider.name}
-                              quality={100}
-                            />
-                          </div>
-
-                          {provider.logoDark && (
-                            <div className="mt-[22px] dark:hidden self-start">
-                              <Image
-                                src={provider.logoDark}
-                                width={40}
-                                height={40}
-                                alt={provider.name}
-                                quality={100}
-                              />
-                            </div>
-                          )}
-
-                          <CardHeader className="p-4 pl-2 flex-1">
-                            <div className="flex space-x-2">
-                              <CardTitle className="text-md mb-0">
-                                {provider.name}
-                              </CardTitle>
-
-                              {provider.disabled && (
-                                <div className="text-[#878787] rounded-md py-1 px-2 border text-[10px]">
-                                  Coming soon
-                                </div>
-                              )}
-                            </div>
-                            <CardDescription className="text-sm">
-                              {provider.description}
-                            </CardDescription>
-                          </CardHeader>
-                        </div>
-                      </button>
-                    </Card>
                   );
                 })}
-              </TabsContent>
-            </Tabs>
+
+                {!loading && results.length === 0 && (
+                  <div className="flex flex-col items-center justify-center min-h-[350px]">
+                    <p className="font-medium mb-2">No banks found</p>
+                    <p className="text-sm text-center text-[#878787]">
+                      We couldn't find a bank matching your criteria.
+                      <br /> Let us know, or start with manual import.
+                    </p>
+
+                    <div className="mt-4 flex space-x-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => setParams({ step: "import-csv" })}
+                      >
+                        Import
+                      </Button>
+
+                      <Button
+                        onClick={() => {
+                          router.push("/account/support");
+                        }}
+                      >
+                        Contact us
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </DialogHeader>
         </div>
       </DialogContent>
