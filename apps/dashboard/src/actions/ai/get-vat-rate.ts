@@ -1,23 +1,11 @@
 "use server";
 
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOpenAI } from "@langchain/openai";
+import { openai } from "@ai-sdk/openai";
 import { getCountry } from "@midday/location";
+import { generateObject } from "ai";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 import { getVatRateSchema } from "../schema";
-
-const model = new ChatOpenAI({
-  temperature: 0,
-  model: "gpt-4o-mini",
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const vatSchema = z.object({
-  vat: z.number().min(5).max(100),
-});
-
-const modelWithStructuredOutput = model.withStructuredOutput(vatSchema);
 
 export const getVatRateAction = authActionClient
   .schema(getVatRateSchema)
@@ -27,19 +15,22 @@ export const getVatRateAction = authActionClient
   .action(async ({ parsedInput: { name } }) => {
     const country = getCountry();
 
-    const prompt = ChatPromptTemplate.fromMessages([
-      [
-        "system",
-        "You are an expert in VAT rates for the specific country and category",
-      ],
-      ["human", `What's the VAT rate for category ${name} in ${country.name}?`],
-    ]);
-
-    const chain = prompt.pipe(modelWithStructuredOutput);
-    const result = await chain.invoke({});
+    const { object } = await generateObject({
+      model: openai("gpt-4o-mini"),
+      schemaName: "Vat",
+      schemaDescription: "A recipe for a dish.",
+      schema: z.object({
+        vat: z.number().min(5).max(100),
+      }),
+      prompt: `
+        You are an expert in VAT rates for the specific country and category \n
+        What's the VAT rate for category ${name} in ${country.name}?
+      `,
+      temperature: 0.8,
+    });
 
     return {
-      vat: result.vat,
+      vat: object.vat,
       country: country.name,
     };
   });

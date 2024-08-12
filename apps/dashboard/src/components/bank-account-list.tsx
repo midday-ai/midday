@@ -1,6 +1,7 @@
 import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { BankConnections } from "./bank-connections";
+import { ManualAccounts } from "./manual-accounts";
 
 export function BankAccountListSkeleton() {
   return (
@@ -42,6 +43,8 @@ export function BankAccountListSkeleton() {
 export async function BankAccountList() {
   const { data } = await getTeamBankAccounts();
 
+  const manualAccounts = data.filter((account) => account.manual);
+
   const bankMap = {};
 
   for (const item of data) {
@@ -77,5 +80,10 @@ export async function BankAccountList() {
     }
   }
 
-  return <BankConnections data={result} />;
+  return (
+    <>
+      <BankConnections data={result} />
+      <ManualAccounts data={manualAccounts} />
+    </>
+  );
 }

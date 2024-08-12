@@ -42,7 +42,7 @@ export async function SpendingList({ initialPeriod, disabled }) {
     return (
       <div className="flex items-center justify-center aspect-square">
         <p className="text-sm text-[#606060]">
-          No transactions have been categorized yet.
+          No transactions have been categorized in this period.
         </p>
       </div>
     );

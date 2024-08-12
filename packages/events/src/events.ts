@@ -67,6 +67,10 @@ export const LogEvents = {
     name: "Delete Bank",
     channel: "bank",
   },
+  UpdateBank: {
+    name: "Update Bank",
+    channel: "bank",
+  },
   OverviewReport: {
     name: "Overview Report",
     channel: "report",

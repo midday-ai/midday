@@ -1,119 +1,136 @@
-import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOpenAI } from "@langchain/openai";
-import { csvTransformed } from "@midday/import";
+import { transform } from "@midday/import/src/transform";
+import type { Transaction } from "@midday/import/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { TokenTextSplitter } from "langchain/text_splitter";
+import { revalidateTag } from "next/cache";
+import Papa from "papaparse";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
+import { processBatch } from "../utils/process";
 
-const transactionSchema = z.object({
-  date: z.string().describe("The date usually in the format YYYY-MM-DD"),
-  description: z.string().describe("The text describing the transaction"),
-  amount: z
-    .number()
-    .describe(
-      "The amount involved in the transaction, including the minus sign if present",
-    ),
+const BATCH_LIMIT = 500;
+
+const createTransactionSchema = z.object({
+  amount: z.number(),
+  date: z.coerce.date(),
+  description: z.string(),
+  currency: z.string(),
+  bank_account_id: z.string(),
+  team_id: z.string(),
 });
-
-const extractionDataSchema = z.object({
-  transactions: z.array(transactionSchema),
-});
-
-const SYSTEM_PROMPT_TEMPLATE = `You are an expert extraction algorithm.
-Only extract relevant information from the text.
-You are extracting bank transaction information`;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_IMPORT,
   name: "Transactions - Import",
-  version: "0.0.1",
+  version: "0.0.2",
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_IMPORT,
     schema: z.object({
+      importType: z.enum(["csv", "image"]),
       filePath: z.array(z.string()),
+      bankAccountId: z.string(),
+      currency: z.string(),
       teamId: z.string(),
+      mappings: z.object({
+        amount: z.string(),
+        date: z.string(),
+        description: z.string(),
+      }),
     }),
   }),
   integrations: { supabase },
   run: async (payload, io) => {
     const supabase = io.supabase.client;
 
-    const { filePath, teamId } = payload;
+    const { teamId, filePath, bankAccountId, currency, mappings } = payload;
 
     const { data } = await supabase.storage
       .from("vault")
       .download(filePath.join("/"));
 
-    const transactionsImport = await io.createStatus(
-      "transactions-import-analyzing",
-      {
-        label: "Transactions import",
-        data: {
-          step: "analyzing",
+    const content = await data?.text();
+
+    await new Promise((resolve, reject) => {
+      Papa.parse(content, {
+        header: true,
+        skipEmptyLines: true,
+        worker: false,
+        complete: resolve,
+        error: reject,
+        chunk: async (
+          chunk: {
+            data?: Record<string, string>[];
+            errors: { message: string }[];
+          },
+          parser,
+        ) => {
+          parser.pause();
+
+          const { data } = chunk;
+
+          if (!data?.length) {
+            console.warn("No data in CSV import chunk", chunk.errors);
+            return;
+          }
+
+          const mappedTransactions = data.map((row): Transaction => {
+            return {
+              ...(Object.fromEntries(
+                Object.entries(mappings).map(([key, value]) => [
+                  key,
+                  row[value],
+                ]),
+              ) as Transaction),
+              currency,
+              teamId,
+              bankAccountId,
+            };
+          });
+
+          const transactions = mappedTransactions.map(transform);
+
+          const processedTransactions = transactions.map((transaction) => {
+            return createTransactionSchema.safeParse(transaction);
+          });
+
+          const validTransactions = processedTransactions.filter(
+            (transaction) => transaction.success,
+          );
+
+          const invalidTransactions = processedTransactions.filter(
+            (transaction) => !transaction.success,
+          );
+
+          if (invalidTransactions.length > 0) {
+            await io.logger.error("Invalid transactions", {
+              invalidTransactions,
+            });
+          }
+
+          // Only valid transactions need to be processed
+          if (invalidTransactions.length > 0) {
+            await processBatch(
+              validTransactions,
+              BATCH_LIMIT,
+              async (batch) => {
+                await supabase.from("transactions").upsert(batch, {
+                  onConflict: "internal_id",
+                  ignoreDuplicates: true,
+                });
+              },
+            );
+          }
+
+          parser.resume();
         },
-      },
-    );
-
-    if (!data) {
-      return null;
-    }
-
-    const loader = new CSVLoader(data);
-
-    const docs = await loader.load();
-    const rawText = await data.text();
-
-    const textSplitter = new TokenTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 0,
+      });
     });
 
-    const splitDocs = await textSplitter.splitDocuments(docs);
-
-    // Skip first 5 because it can be a header
-    const firstFewRows = splitDocs.splice(5, 15).map((doc) => doc.pageContent);
-
-    const extractionChainParams = firstFewRows.map((text) => {
-      return { text };
-    });
-
-    const llm = new ChatOpenAI({
-      modelName: "gpt-4o",
-      temperature: 0,
-    });
-
-    const prompt = ChatPromptTemplate.fromMessages([
-      ["system", SYSTEM_PROMPT_TEMPLATE],
-      ["human", "{text}"],
-    ]);
-
-    const extractionChain = prompt.pipe(
-      llm.withStructuredOutput(extractionDataSchema),
-    );
-
-    await transactionsImport.update("transactions-import-transforming", {
-      data: {
-        step: "transforming",
-      },
-    });
-
-    const results = await extractionChain.batch(extractionChainParams);
-    const transactions = results.flatMap((result) => result.transactions);
-
-    const transformedTransactions = csvTransformed({
-      raw: rawText,
-      extracted: transactions,
-      teamId,
-    });
-
-    await transactionsImport.update("transactions-import-completed", {
-      data: {
-        step: "completed",
-        transactions: transformedTransactions,
-      },
-    });
+    revalidateTag(`bank_connections_${teamId}`);
+    revalidateTag(`transactions_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`bank_accounts_${teamId}`);
+    revalidateTag(`insights_${teamId}`);
   },
 });

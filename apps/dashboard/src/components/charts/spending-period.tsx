@@ -74,7 +74,7 @@ export function SpendingPeriod({ initialPeriod }: Props) {
             <Icons.ChevronDown />
           </div>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[150px]">
+        <DropdownMenuContent className="w-[180px]">
           {options.map((option) => (
             <DropdownMenuCheckboxItem
               key={option.id}

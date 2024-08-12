@@ -297,7 +297,7 @@ export function BankConnections({
   const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
 
   return (
-    <div className="px-6 pb-6 space-y-6 divide-y">
+    <div className="px-6 divide-y">
       <Accordion type="multiple" className="w-full" defaultValue={defaultValue}>
         {data.map((connection, index) => {
           return (

@@ -3,7 +3,7 @@ import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import { currencies, uniqueCurrencies } from "@midday/location/src/currencies";
 import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
@@ -36,11 +36,9 @@ const SelectBankAccountsModal = dynamic(
   },
 );
 
-const ImportCSVModal = dynamic(
+const ImportModal = dynamic(
   () =>
-    import("@/components/modals/import-csv-modal").then(
-      (mod) => mod.ImportCSVModal,
-    ),
+    import("@/components/modals/import-modal").then((mod) => mod.ImportModal),
   {
     ssr: false,
   },
@@ -92,9 +90,9 @@ export default async function Layout({
         <AssistantModal />
         <ConnectTransactionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />
-        <ImportCSVModal
+        <ImportModal
           currencies={uniqueCurrencies}
-          defaultCurrency={uniqueCurrencies[countryCode]}
+          defaultCurrency={currencies[countryCode]}
         />
         <ExportStatus />
         <HotKeys />

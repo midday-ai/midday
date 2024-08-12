@@ -18,7 +18,7 @@ export async function subscribeAction(formData: FormData, userGroup: string) {
         userGroup,
         country,
       }),
-    }
+    },
   );
 
   const json = await res.json();
