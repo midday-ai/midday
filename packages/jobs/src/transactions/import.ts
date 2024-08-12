@@ -10,6 +10,15 @@ import { processBatch } from "../utils/process";
 
 const BATCH_LIMIT = 500;
 
+const createTransactionSchema = z.object({
+  amount: z.number(),
+  date: z.coerce.date(),
+  description: z.string(),
+  currency: z.string(),
+  bank_account_id: z.string(),
+  team_id: z.string(),
+});
+
 client.defineJob({
   id: Jobs.TRANSACTIONS_IMPORT,
   name: "Transactions - Import",
@@ -80,15 +89,37 @@ client.defineJob({
 
           const transactions = mappedTransactions.map(transform);
 
-          // we need to guard against massive payloads
-          await processBatch(transactions, BATCH_LIMIT, async (batch) => {
-            const katt = await supabase.from("transactions").upsert(batch, {
-              onConflict: "internal_id",
-              ignoreDuplicates: true,
-            });
-
-            console.log(katt);
+          const processedTransactions = transactions.map((transaction) => {
+            return createTransactionSchema.safeParse(transaction);
           });
+
+          const validTransactions = processedTransactions.filter(
+            (transaction) => transaction.success,
+          );
+
+          const invalidTransactions = processedTransactions.filter(
+            (transaction) => !transaction.success,
+          );
+
+          if (invalidTransactions.length > 0) {
+            await io.logger.error("Invalid transactions", {
+              invalidTransactions,
+            });
+          }
+
+          // Only valid transactions need to be processed
+          if (invalidTransactions.length > 0) {
+            await processBatch(
+              validTransactions,
+              BATCH_LIMIT,
+              async (batch) => {
+                await supabase.from("transactions").upsert(batch, {
+                  onConflict: "internal_id",
+                  ignoreDuplicates: true,
+                });
+              },
+            );
+          }
 
           parser.resume();
         },

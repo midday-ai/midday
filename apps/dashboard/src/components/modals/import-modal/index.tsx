@@ -15,8 +15,12 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
+import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
+import { useEventDetails } from "@trigger.dev/react";
+import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -36,6 +40,27 @@ type Props = {
 };
 
 export function ImportModal({ currencies, defaultCurrency }: Props) {
+  const [eventId, setEventId] = useState<string | undefined>();
+  const [isImporting, setIsImporting] = useState(false);
+  const [fileColumns, setFileColumns] = useState<string[] | null>(null);
+  const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(
+    null,
+  );
+
+  const [pageNumber, setPageNumber] = useState<number>(0);
+  const page = pages[pageNumber];
+
+  const supabase = createClient();
+  const { uploadFile } = useUpload();
+
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const { data: eventData } = useEventDetails(eventId);
+
+  const status = eventData?.runs.at(-1)?.status;
+  const error = status === "FAILURE" || status === "TIMED_OUT";
+
   const [params, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
@@ -44,13 +69,19 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const isOpen = params.step === "import";
 
   const importTransactions = useAction(importTransactionsAction, {
-    onSuccess: (data) => {
-      console.log(data);
-      //
+    onSuccess: ({ data }) => {
+      if (data?.id) {
+        setEventId(data.id);
+      }
     },
-    onError: (data) => {
-      console.log(data);
-      //
+    onError: () => {
+      setIsImporting(false);
+      setEventId(undefined);
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again.",
+      });
     },
   });
 
@@ -60,7 +91,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     setValue,
     handleSubmit,
     reset,
-    formState: { isSubmitting, isValid },
+    formState: { isValid },
   } = useForm<ImportCsvFormData>({
     resolver: zodResolver(importSchema),
     defaultValues: {
@@ -69,24 +100,41 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     },
   });
 
+  const file = watch("file");
+
   useEffect(() => {
     if (params.accountId) {
       setValue("bank_account_id", params.accountId);
     }
   }, [params.accountId]);
 
-  const supabase = createClient();
-  const { uploadFile } = useUpload();
+  useEffect(() => {
+    if (error) {
+      setIsImporting(false);
+      setEventId(undefined);
 
-  const [pageNumber, setPageNumber] = useState<number>(0);
-  const page = pages[pageNumber];
+      toast({
+        duration: 3500,
+        variant: "error",
+        title: "Something went wrong pleaase try again or contact support.",
+      });
+    }
+  }, [error]);
 
-  const [fileColumns, setFileColumns] = useState<string[] | null>(null);
-  const [firstRows, setFirstRows] = useState<Record<string, string>[] | null>(
-    null,
-  );
+  useEffect(() => {
+    if (status === "SUCCESS") {
+      setEventId(undefined);
+      setIsImporting(false);
+      setParams({ step: null, accountId: null });
+      router.refresh();
 
-  const file = watch("file");
+      toast({
+        duration: 3500,
+        variant: "success",
+        title: "Transactions imported successfully.",
+      });
+    }
+  }, [status]);
 
   // Go to second page if file looks good
   useEffect(() => {
@@ -120,7 +168,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="relative mt-6">
+          <div className="relative">
             <AnimatedSizeContainer height>
               <ImportCsvContext.Provider
                 value={{
@@ -137,6 +185,8 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {
+                      setIsImporting(true);
+
                       const { data: userData } =
                         await getCurrentUserTeamQuery(supabase);
 
@@ -167,15 +217,19 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         <FieldMapping currencies={currencies} />
 
                         <Button
-                          disabled={isSubmitting || !isValid}
+                          disabled={!isValid || isImporting}
                           className="mt-4"
                         >
-                          Confirm import
+                          {isImporting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            "Confirm import"
+                          )}
                         </Button>
 
                         <button
                           type="button"
-                          className="text-sm mb-4"
+                          className="text-sm mb-4 text-[#878787]"
                           onClick={() => {
                             setPageNumber(0);
                             reset();

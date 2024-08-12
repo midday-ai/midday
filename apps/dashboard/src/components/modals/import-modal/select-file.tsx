@@ -59,7 +59,7 @@ export function SelectFile() {
             onDrop={([file]) => onChange(file)}
             maxFiles={1}
             accept={{ "text/csv": [".csv"] }}
-            maxSize={1000000}
+            maxSize={3000000}
           >
             {({ getRootProps, getInputProps, isDragActive, isDragReject }) => (
               <div
@@ -73,7 +73,7 @@ export function SelectFile() {
                 <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787]">
                   <input {...getInputProps()} onBlur={onBlur} />
                   <p>Drop your file here, or click to browse.</p>
-                  <span>1MB file limit.</span>
+                  <span>3MB file limit.</span>
 
                   {error && (
                     <p className="text-center text-sm text-red-600 mt-4">

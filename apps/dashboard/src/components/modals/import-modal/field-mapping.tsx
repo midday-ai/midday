@@ -59,7 +59,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
   }, [fileColumns, firstRows]);
 
   return (
-    <div>
+    <div className="mt-6">
       <Controller
         control={control}
         name="bank_account_id"
