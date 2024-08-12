@@ -15,7 +15,7 @@ export function CategoryColor({
 }: CategoryIconProps) {
   return (
     <div
-      className={cn("rounded-[2px]", className)}
+      className={className}
       style={{
         backgroundColor: color,
         width: size,

@@ -179,7 +179,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
             </div>
             <DialogDescription>
               {page === "select-file" &&
-                "Upload a CSV file or a screenshot of your bank statements."}
+                "Upload a CSV file or a screenshot of your transactions."}
               {page === "confirm-import" &&
                 "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
             </DialogDescription>

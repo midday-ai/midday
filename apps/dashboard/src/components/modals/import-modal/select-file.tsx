@@ -1,4 +1,6 @@
+import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
+import { stripSpecialCharacters } from "@midday/utils";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
@@ -8,12 +10,29 @@ import { readLines } from "./utils";
 
 export function SelectFile() {
   const { watch, control, setFileColumns, setFirstRows } = useCsvContext();
-  const file = watch("file");
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const file = watch("file");
+
+  useEffect(async () => {
     if (!file) {
       setFileColumns(null);
+      return;
+    }
+
+    if (file?.type !== "text/csv") {
+      const { data: userData } = await getCurrentUserTeamQuery(supabase);
+
+      const filename = stripSpecialCharacters(file.name);
+
+      const { path } = await uploadFile({
+        bucket: "vault",
+        path: [userData?.team_id, "imports", filename],
+        file,
+      });
+
+      console.log(path);
+
       return;
     }
 
@@ -93,4 +112,9 @@ export function SelectFile() {
       />
     </div>
   );
+}
+function uploadFile(arg0: { bucket: string; path: any[]; file: File }):
+  | { path: any }
+  | PromiseLike<{ path: any }> {
+  throw new Error("Function not implemented.");
 }
