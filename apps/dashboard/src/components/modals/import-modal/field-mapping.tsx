@@ -138,7 +138,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
 
         {showCurrency && (
           <>
-            <Label className="mb-2 block">Currency</Label>
+            <Label className="mb-2 mt-4 block">Currency</Label>
             <Controller
               control={control}
               name="currency"
