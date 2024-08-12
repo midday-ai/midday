@@ -10,7 +10,10 @@ export function generateId(value: string) {
   return hash.digest("hex");
 }
 
-export function transform(transaction: Transaction) {
+export function transform({
+  transaction,
+  inverted,
+}: { transaction: Transaction; inverted: boolean }) {
   const internalId = generateId(
     `${transaction.date}-${transaction.description}`,
   );
@@ -21,10 +24,13 @@ export function transform(transaction: Transaction) {
     status: "posted",
     method: "other",
     date: formatDate(transaction.date),
-    amount: formatAmountValue(transaction.amount),
+    amount: formatAmountValue({ amount: transaction.amount, inverted }),
     name: transaction?.description && capitalCase(transaction.description),
     manual: true,
-    category_slug: formatAmountValue(transaction.amount) > 0 ? "income" : null,
+    category_slug:
+      formatAmountValue({ amount: transaction.amount, inverted }) > 0
+        ? "income"
+        : null,
     bank_account_id: transaction.bankAccountId,
     currency: transaction.currency,
   };

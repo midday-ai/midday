@@ -52,9 +52,10 @@ export function BankAccount({
   manual,
   type,
 }: Props) {
-  const [params, setParams] = useQueryStates({
+  const [_, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
+    type: parseAsString,
   });
 
   const [isOpen, setOpen] = useState(false);
@@ -106,7 +107,7 @@ export function BankAccount({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  setParams({ step: "import", accountId: id });
+                  setParams({ step: "import", accountId: id, type });
                 }}
               >
                 Import

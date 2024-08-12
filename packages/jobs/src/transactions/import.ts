@@ -32,6 +32,7 @@ client.defineJob({
     name: Events.TRANSACTIONS_IMPORT,
     schema: z.object({
       importType: z.enum(["csv", "image"]),
+      inverted: z.boolean(),
       filePath: z.array(z.string()),
       bankAccountId: z.string(),
       currency: z.string(),
@@ -47,7 +48,8 @@ client.defineJob({
   run: async (payload, io) => {
     const supabase = io.supabase.client;
 
-    const { teamId, filePath, bankAccountId, currency, mappings } = payload;
+    const { teamId, filePath, bankAccountId, currency, mappings, inverted } =
+      payload;
 
     const { data } = await supabase.storage
       .from("vault")
@@ -92,7 +94,9 @@ client.defineJob({
             };
           });
 
-          const transactions = mappedTransactions.map(transform);
+          const transactions = mappedTransactions.map((transaction) =>
+            transform({ transaction, inverted }),
+          );
 
           const processedTransactions = transactions.map((transaction) => {
             return createTransactionSchema.safeParse(transaction);

@@ -18,6 +18,7 @@ type Props = {
     label: string;
     logo?: string;
     currency?: string;
+    type?: string;
   }) => void;
 };
 
@@ -48,6 +49,7 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
             label: account.name,
             logo: account?.logo_url,
             currency: account.currency,
+            type: account.type,
           })),
         );
       }

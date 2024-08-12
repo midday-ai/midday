@@ -6,6 +6,7 @@ import { SelectCurrency } from "@/components/select-currency";
 import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@midday/import";
 import { Icons } from "@midday/ui/icons";
+import { Label } from "@midday/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,6 +17,7 @@ import {
   SelectValue,
 } from "@midday/ui/select";
 import { Spinner } from "@midday/ui/spinner";
+import { Switch } from "@midday/ui/switch";
 import {
   Tooltip,
   TooltipContent,
@@ -60,50 +62,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
 
   return (
     <div className="mt-6">
-      <Controller
-        control={control}
-        name="bank_account_id"
-        render={({ field: { value, onChange } }) => (
-          <SelectAccount
-            className="w-full"
-            placeholder="Select account"
-            value={value}
-            onChange={(account) => {
-              onChange(account.id);
-
-              if (account?.currency) {
-                setValue("currency", account.currency, {
-                  shouldValidate: true,
-                });
-
-                setShowCurrency(false);
-              } else {
-                // Show currency select if account has no currency
-                setShowCurrency(!account.currency);
-              }
-            }}
-          />
-        )}
-      />
-
-      {showCurrency && (
-        <Controller
-          control={control}
-          name="currency"
-          render={({ field: { onChange, value } }) => (
-            <SelectCurrency
-              className="w-full mt-4"
-              value={value}
-              onChange={onChange}
-              currencies={Object.values(currencies)?.map(
-                (currency) => currency,
-              )}
-            />
-          )}
-        />
-      )}
-
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-6 mt-6 border-t-[1px] border-border">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div className="text-sm">CSV Data column</div>
         <div className="text-sm">Midday data column</div>
         {(Object.keys(mappableFields) as (keyof typeof mappableFields)[]).map(
@@ -115,6 +74,86 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
               currency={watch("currency")}
             />
           ),
+        )}
+      </div>
+
+      <div className="mt-6 pt-6 border-t-[1px] border-border">
+        <h2 className="mb-6 font-medium">Settings</h2>
+
+        <Controller
+          control={control}
+          name="inverted"
+          render={({ field: { onChange, value } }) => (
+            <div className="space-y-1">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="inverted">Inverted amount</Label>
+                <Switch
+                  id="inverted"
+                  checked={value}
+                  onCheckedChange={onChange}
+                />
+              </div>
+              <p className="text-sm text-[#606060]">
+                If the transactions are from credit account, you can invert the
+                amount.
+              </p>
+            </div>
+          )}
+        />
+
+        <div className="mt-6">
+          <Label className="mb-2 block">Account</Label>
+          <Controller
+            control={control}
+            name="bank_account_id"
+            render={({ field: { value, onChange } }) => (
+              <SelectAccount
+                className="w-full"
+                placeholder="Select account"
+                value={value}
+                onChange={(account) => {
+                  onChange(account.id);
+
+                  if (account.type === "credit") {
+                    setValue("inverted", true, {
+                      shouldValidate: true,
+                    });
+                  }
+
+                  if (account?.currency) {
+                    setValue("currency", account.currency, {
+                      shouldValidate: true,
+                    });
+
+                    setShowCurrency(false);
+                  } else {
+                    // Show currency select if account has no currency
+                    setShowCurrency(!account.currency);
+                  }
+                }}
+              />
+            )}
+          />
+        </div>
+
+        {showCurrency && (
+          <>
+            <Label className="mb-2 block">Currency</Label>
+            <Controller
+              control={control}
+              name="currency"
+              render={({ field: { onChange, value } }) => (
+                <SelectCurrency
+                  className="w-full mt-4"
+                  value={value}
+                  onChange={onChange}
+                  currencies={Object.values(currencies)?.map(
+                    (currency) => currency,
+                  )}
+                />
+              )}
+            />
+          </>
         )}
       </div>
     </div>
@@ -134,6 +173,7 @@ function FieldRow({
   const { control, watch, fileColumns, firstRows } = useCsvContext();
 
   const value = watch(field);
+  const inverted = watch("inverted");
 
   const isLoading = isStreaming && !value;
 
@@ -148,8 +188,18 @@ function FieldRow({
       return formatDate(description);
     }
 
-    if (field === "amount" || field === "balance") {
-      const amount = formatAmountValue(description);
+    if (field === "amount") {
+      const amount = formatAmountValue({ amount: description, inverted });
+
+      if (currency) {
+        return formatAmount({ currency, amount });
+      }
+
+      return amount;
+    }
+
+    if (field === "balance") {
+      const amount = formatAmountValue({ amount: description });
 
       if (currency) {
         return formatAmount({ currency, amount });

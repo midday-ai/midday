@@ -6,6 +6,15 @@ export function formatDate(date: string) {
   });
 }
 
-export function formatAmountValue(amount: string) {
-  return +amount.replaceAll(",", ".").replace(/[^\d.-]/g, "");
+export function formatAmountValue({
+  amount,
+  inverted,
+}: { amount: string; inverted: boolean }) {
+  const value = +amount.replaceAll(",", ".").replace(/[^\d.-]/g, "");
+
+  if (inverted) {
+    return +(value * -1);
+  }
+
+  return value;
 }

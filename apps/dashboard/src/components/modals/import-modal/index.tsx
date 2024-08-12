@@ -39,6 +39,12 @@ type Props = {
   defaultCurrency: string;
 };
 
+const defaultParams = {
+  step: null,
+  accountId: null,
+  type: null,
+};
+
 export function ImportModal({ currencies, defaultCurrency }: Props) {
   const [eventId, setEventId] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
@@ -64,6 +70,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const [params, setParams] = useQueryStates({
     step: parseAsString,
     accountId: parseAsString,
+    type: parseAsString,
   });
 
   const isOpen = params.step === "import";
@@ -97,6 +104,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     defaultValues: {
       currency: defaultCurrency,
       bank_account_id: params.accountId ?? undefined,
+      inverted: params.type === "credit",
     },
   });
 
@@ -107,6 +115,12 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       setValue("bank_account_id", params.accountId);
     }
   }, [params.accountId]);
+
+  useEffect(() => {
+    if (params.type) {
+      setValue("inverted", params.type === "credit");
+    }
+  }, [params.type]);
 
   useEffect(() => {
     if (error) {
@@ -125,7 +139,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     if (status === "SUCCESS") {
       setEventId(undefined);
       setIsImporting(false);
-      setParams({ step: null, accountId: null });
+      setParams(defaultParams);
       router.refresh();
 
       toast({
@@ -144,7 +158,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   }, [file, fileColumns, pageNumber]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => setParams({ step: null })}>
+    <Dialog open={isOpen} onOpenChange={() => setParams(defaultParams)}>
       <DialogContent>
         <div className="p-4 pb-0">
           <DialogHeader>
@@ -206,6 +220,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         currency: data.currency,
                         bankAccountId: data.bank_account_id,
                         currentBalance: data.balance,
+                        inverted: data.inverted,
                         mappings: {
                           amount: data.amount,
                           date: data.date,

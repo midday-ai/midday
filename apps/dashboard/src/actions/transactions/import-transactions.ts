@@ -13,6 +13,7 @@ export const importTransactionsAction = authActionClient
       bankAccountId: z.string(),
       currency: z.string(),
       currentBalance: z.string().optional(),
+      inverted: z.boolean(),
       mappings: z.object({
         amount: z.string(),
         date: z.string(),
@@ -36,11 +37,14 @@ export const importTransactionsAction = authActionClient
         currency,
         mappings,
         currentBalance,
+        inverted,
       },
       ctx: { user, supabase },
     }) => {
       // Update currency for account
-      const balance = currentBalance ? formatAmountValue(currentBalance) : null;
+      const balance = currentBalance
+        ? formatAmountValue({ amount: currentBalance })
+        : null;
 
       await supabase
         .from("bank_accounts")
@@ -55,6 +59,7 @@ export const importTransactionsAction = authActionClient
           currency,
           mappings,
           teamId: user.team_id,
+          inverted,
           importType: "csv",
         },
       });

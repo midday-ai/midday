@@ -29,12 +29,14 @@ export const importSchema = z.object({
   balance: z.string().optional(),
   date: z.string(),
   description: z.string(),
+  inverted: z.boolean(),
 });
 
 export type ImportCsvFormData = {
   file: File | null;
   currency: string;
   bank_account_id: string;
+  inverted: boolean;
 } & Record<keyof typeof mappableFields, string>;
 
 export const ImportCsvContext = createContext<{
