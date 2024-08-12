@@ -76,7 +76,7 @@ export function ShareReport({ defaultValue, type, currency }: Props) {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
     onSuccess: ({ data }) => {

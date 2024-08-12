@@ -172,34 +172,40 @@ function FieldRow({
           control={control}
           name={field}
           rules={{ required }}
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="w-full relative" hideIcon={isLoading}>
-                <SelectValue placeholder={`Select ${label}`} />
+          render={({ field }) => {
+            return (
+              <Select
+                value={field?.value ?? undefined}
+                onValueChange={field.onChange}
+              >
+                <SelectTrigger className="w-full relative" hideIcon={isLoading}>
+                  <SelectValue placeholder={`Select ${label}`} />
 
-                {isLoading && (
-                  <div className="absolute right-2">
-                    <Spinner />
-                  </div>
-                )}
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>{label}</SelectLabel>
-                  {[
-                    ...(fileColumns || []),
-                    ...(field.value && !required ? ["None"] : []),
-                  ]?.map((column) => {
-                    return (
-                      <SelectItem key={column} value={column}>
-                        {column}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
+                  {isLoading && (
+                    <div className="absolute right-2">
+                      <Spinner />
+                    </div>
+                  )}
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>{label}</SelectLabel>
+                    {[
+                      // Filter out empty columns
+                      ...(fileColumns?.filter((column) => column !== "") || []),
+                      ...(field.value && !required ? ["None"] : []),
+                    ]?.map((column) => {
+                      return (
+                        <SelectItem key={column} value={column}>
+                          {column}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            );
+          }}
         />
 
         <div className="flex items-center justify-end">

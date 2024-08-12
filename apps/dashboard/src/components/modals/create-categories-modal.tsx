@@ -52,7 +52,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
@@ -73,7 +73,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
   const onSubmit = form.handleSubmit((data) => {
     createCategories.execute({
       categories: data.categories.filter(
-        (category) => category.name !== undefined
+        (category) => category.name !== undefined,
       ),
     });
   });
@@ -112,12 +112,12 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                                 field.onChange(name);
                                 form.setValue(
                                   `categories.${index}.color`,
-                                  color
+                                  color,
                                 );
                               }}
                               defaultValue={field.value}
                               defaultColor={form.watch(
-                                `categories.${index}.color`
+                                `categories.${index}.color`,
                               )}
                             />
                           </FormControl>
@@ -142,7 +142,7 @@ export function CreateCategoriesModal({ onOpenChange, isOpen }: Props) {
                                   if (vat) {
                                     form.setValue(
                                       `categories.${index}.vat`,
-                                      vat.toString()
+                                      vat.toString(),
                                     );
                                   }
                                 }}

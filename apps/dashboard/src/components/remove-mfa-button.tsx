@@ -17,7 +17,7 @@ export function RemoveMFAButton({ factorId }: Props) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });

@@ -50,7 +50,7 @@ export function DataTableRow({ row, setParams }) {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
     onSuccess: ({ data }) => {
@@ -79,7 +79,7 @@ export function DataTableRow({ row, setParams }) {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
@@ -89,7 +89,7 @@ export function DataTableRow({ row, setParams }) {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
