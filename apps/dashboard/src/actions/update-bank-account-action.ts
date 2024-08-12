@@ -11,8 +11,8 @@ export const updateBankAccountAction = authActionClient
   .metadata({
     name: "update-bank-account",
     track: {
-      event: LogEvents.DeleteBank.name,
-      channel: LogEvents.DeleteBank.channel,
+      event: LogEvents.UpdateBank.name,
+      channel: LogEvents.UpdateBank.channel,
     },
   })
   .action(async ({ parsedInput: params, ctx: { user, supabase } }) => {

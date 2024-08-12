@@ -15,6 +15,10 @@ export const mappableFields = {
     label: "Amount",
     required: true,
   },
+  balance: {
+    label: "Balance",
+    required: false,
+  },
 } as const;
 
 export const importSchema = z.object({
@@ -22,6 +26,7 @@ export const importSchema = z.object({
   currency: z.string(),
   bank_account_id: z.string(),
   amount: z.string(),
+  balance: z.string().optional(),
   date: z.string(),
   description: z.string(),
 });

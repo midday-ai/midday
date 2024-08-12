@@ -44,10 +44,12 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   const isOpen = params.step === "import";
 
   const importTransactions = useAction(importTransactionsAction, {
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log(data);
       //
     },
-    onError: () => {
+    onError: (data) => {
+      console.log(data);
       //
     },
   });
@@ -66,6 +68,12 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       bank_account_id: params.accountId ?? undefined,
     },
   });
+
+  useEffect(() => {
+    if (params.accountId) {
+      setValue("bank_account_id", params.accountId);
+    }
+  }, [params.accountId]);
 
   const supabase = createClient();
   const { uploadFile } = useUpload();
@@ -144,6 +152,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         filePath: path,
                         currency: data.currency,
                         bankAccountId: data.bank_account_id,
+                        currentBalance: data.balance,
                         mappings: {
                           amount: data.amount,
                           date: data.date,

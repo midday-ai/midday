@@ -1,28 +1,32 @@
+import { transform } from "@midday/import/src/transform";
+import type { Transaction } from "@midday/import/src/types";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import Papa from "papaparse";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
+import { processBatch } from "../utils/process";
 
 const BATCH_LIMIT = 500;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_IMPORT,
   name: "Transactions - Import",
-  version: "0.0.1",
+  version: "0.0.2",
   trigger: eventTrigger({
-    name: Events.TRANSACTIONS_MANUAL_SYNC,
+    name: Events.TRANSACTIONS_IMPORT,
     schema: z.object({
+      importType: z.enum(["csv", "image"]),
       filePath: z.array(z.string()),
       bankAccountId: z.string(),
       currency: z.string(),
+      teamId: z.string(),
       mappings: z.object({
         amount: z.string(),
         date: z.string(),
         description: z.string(),
       }),
-      teamId: z.string(),
     }),
   }),
   integrations: { supabase },
@@ -35,11 +39,12 @@ client.defineJob({
       .from("vault")
       .download(filePath.join("/"));
 
+    const content = await data?.text();
+
     await new Promise((resolve, reject) => {
-      Papa.parse(data, {
+      Papa.parse(content, {
         header: true,
         skipEmptyLines: true,
-        // skipFirstNLines: cursor,
         worker: false,
         complete: resolve,
         error: reject,
@@ -50,39 +55,51 @@ client.defineJob({
           },
           parser,
         ) => {
-          parser.pause(); // Pause parsing until we finish processing this chunk
+          parser.pause();
 
           const { data } = chunk;
+
           if (!data?.length) {
             console.warn("No data in CSV import chunk", chunk.errors);
             return;
           }
+
+          const mappedTransactions = data.map((row): Transaction => {
+            return {
+              ...(Object.fromEntries(
+                Object.entries(mappings).map(([key, value]) => [
+                  key,
+                  row[value],
+                ]),
+              ) as Transaction),
+              currency,
+              teamId,
+              bankAccountId,
+            };
+          });
+
+          const transactions = mappedTransactions.map(transform);
+
+          // we need to guard against massive payloads
+          await processBatch(transactions, BATCH_LIMIT, async (batch) => {
+            const katt = await supabase.from("transactions").upsert(batch, {
+              onConflict: "internal_id",
+              ignoreDuplicates: true,
+            });
+
+            console.log(katt);
+          });
+
           parser.resume();
         },
       });
     });
 
-    //   const formattedTransactions = transactions.data?.map((transaction) => {
-    //     return transformTransaction({
-    //       transaction,
-    //       teamId: account.team_id,
-    //       bankAccountId: account.id,
-    //     });
-    //   });
-
-    //    // we need to guard against massive payloads
-    //    await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
-    //     await supabase.from("transactions").upsert(batch, {
-    //       onConflict: "internal_id",
-    //       ignoreDuplicates: true,
-    //     });
-    //   });
-
-    // revalidateTag(`bank_connections_${teamId}`);
-    // revalidateTag(`transactions_${teamId}`);
-    // revalidateTag(`spending_${teamId}`);
-    // revalidateTag(`metrics_${teamId}`);
-    // revalidateTag(`bank_accounts_${teamId}`);
-    // revalidateTag(`insights_${teamId}`);
+    revalidateTag(`bank_connections_${teamId}`);
+    revalidateTag(`transactions_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`bank_accounts_${teamId}`);
+    revalidateTag(`insights_${teamId}`);
   },
 });

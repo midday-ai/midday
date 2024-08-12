@@ -4,6 +4,7 @@ import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
 import { formatAmount } from "@/utils/format";
+import { formatAmountValue, formatDate } from "@midday/import";
 import { Icons } from "@midday/ui/icons";
 import {
   Select,
@@ -23,20 +24,9 @@ import {
 } from "@midday/ui/tooltip";
 import { readStreamableValue } from "ai/rsc";
 import { capitalCase } from "change-case";
-import { formatISO } from "date-fns";
 import { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { mappableFields, useCsvContext } from "./context";
-
-function formatDate(date: string) {
-  return formatISO(date, {
-    representation: "date",
-  });
-}
-
-function formatAmountValue(amount: string) {
-  return +amount.replaceAll(",", ".").replace(/[^\d.-]/g, "");
-}
 
 export function FieldMapping({ currencies }: { currencies: string[] }) {
   const { fileColumns, firstRows, setValue, control, watch } = useCsvContext();
@@ -147,7 +137,7 @@ function FieldRow({
 
   const isLoading = isStreaming && !value;
 
-  const firstRow = firstRows?.[0];
+  const firstRow = firstRows?.at(0);
 
   const description = firstRow?.[value as keyof typeof firstRow];
 
@@ -158,7 +148,7 @@ function FieldRow({
       return formatDate(description);
     }
 
-    if (field === "amount") {
+    if (field === "amount" || field === "balance") {
       const amount = formatAmountValue(description);
 
       if (currency) {

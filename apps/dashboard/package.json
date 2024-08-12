@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.44",
+    "@ai-sdk/openai": "0.0.43",
     "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.9.0",
     "@midday-ai/engine": "^0.1.0-alpha.22",
@@ -38,7 +38,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.1",
     "@zip.js/zip.js": "2.7.48",
-    "ai": "^3.3.5",
+    "ai": "3.3.3",
     "change-case": "^5.4.4",
     "dub": "^0.35.0",
     "framer-motion": "^11.3.24",

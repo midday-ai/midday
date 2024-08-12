@@ -36,11 +36,11 @@ import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
 type Props = {
   id: string;
   name: string;
-  balance: number;
+  balance?: number;
   currency: string;
   enabled: boolean;
   manual: boolean;
-  type: string;
+  type?: string;
 };
 
 export function BankAccount({
@@ -81,13 +81,15 @@ export function BankAccount({
           <div className="flex flex-col">
             <p className="font-medium leading-none mb-1 text-sm">{name}</p>
             <span className="text-xs text-[#878787] font-normal">
-              {t(`account_type.${type}`)}
+              {type && t(`account_type.${type}`)}
             </span>
           </div>
 
-          <span className="text-[#878787] text-sm">
-            <FormatAmount amount={balance} currency={currency} />
-          </span>
+          {balance && (
+            <span className="text-[#878787] text-sm">
+              <FormatAmount amount={balance} currency={currency} />
+            </span>
+          )}
         </div>
       </div>
 
