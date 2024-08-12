@@ -36,11 +36,9 @@ const SelectBankAccountsModal = dynamic(
   },
 );
 
-const ImportCSVModal = dynamic(
+const ImportModal = dynamic(
   () =>
-    import("@/components/modals/import-csv-modal").then(
-      (mod) => mod.ImportCSVModal,
-    ),
+    import("@/components/modals/import-modal").then((mod) => mod.ImportModal),
   {
     ssr: false,
   },
@@ -92,7 +90,7 @@ export default async function Layout({
         <AssistantModal />
         <ConnectTransactionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />
-        <ImportCSVModal
+        <ImportModal
           currencies={uniqueCurrencies}
           defaultCurrency={currencies[countryCode]}
         />

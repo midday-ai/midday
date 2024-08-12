@@ -9,6 +9,7 @@ export const Jobs = {
   INBOX_UPLOAD: "inbox-upload",
   TRANSACTIONS_INITIAL_SYNC: "transactions-initial-sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions-manual-sync",
+  TRANSACTIONS_IMPORT: "transactions-import",
 };
 
 export const Events = {
@@ -19,4 +20,5 @@ export const Events = {
   INBOX_MATCH: "inbox.match",
   TRANSACTIONS_INITIAL_SYNC: "transactions.initial.sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
+  TRANSACTIONS_IMPORT: "transactions.import",
 };

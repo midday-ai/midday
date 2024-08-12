@@ -213,7 +213,7 @@ export function ConnectTransactionsModal({
               <button
                 type="button"
                 className="underline"
-                onClick={() => setParams({ step: "import-csv" })}
+                onClick={() => setParams({ step: "import" })}
               >
                 manual import
               </button>{" "}
@@ -284,7 +284,7 @@ export function ConnectTransactionsModal({
                     <div className="mt-4 flex space-x-2">
                       <Button
                         variant="outline"
-                        onClick={() => setParams({ step: "import-csv" })}
+                        onClick={() => setParams({ step: "import" })}
                       >
                         Import
                       </Button>

@@ -28,7 +28,7 @@ import { Switch } from "@midday/ui/switch";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useQueryState } from "nuqs";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { FormatAmount } from "./format-amount";
 import { EditBankAccountModal } from "./modals/edit-bank-account-modal";
@@ -52,7 +52,11 @@ export function BankAccount({
   manual,
   type,
 }: Props) {
-  const [_, setStep] = useQueryState("step");
+  const [params, setParams] = useQueryStates({
+    step: parseAsString,
+    accountId: parseAsString,
+  });
+
   const [isOpen, setOpen] = useState(false);
   const t = useI18n();
 
@@ -100,7 +104,7 @@ export function BankAccount({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  setStep("import");
+                  setParams({ step: "import", accountId: id });
                 }}
               >
                 Import

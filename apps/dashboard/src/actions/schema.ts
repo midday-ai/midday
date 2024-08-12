@@ -361,10 +361,6 @@ export const updateInstitutionUsageSchema = z.object({
   institutionId: z.string(),
 });
 
-export const importTransactionsSchema = z.object({
-  filePath: z.array(z.string()),
-});
-
 export const setupUserSchema = z.object({
   full_name: z.string().min(2, {
     message: "Name must be at least 2 characters.",

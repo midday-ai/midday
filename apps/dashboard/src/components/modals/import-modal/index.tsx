@@ -1,5 +1,10 @@
 "use client";
 
+import { importTransactionsAction } from "@/actions/transactions/import-transactions";
+import { useUpload } from "@/hooks/use-upload";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createClient } from "@midday/supabase/client";
+import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
 import { Button } from "@midday/ui/button";
 import {
@@ -10,10 +15,16 @@ import {
   DialogTitle,
 } from "@midday/ui/dialog";
 import { Icons } from "@midday/ui/icons";
-import { useQueryState } from "nuqs";
+import { stripSpecialCharacters } from "@midday/utils";
+import { useAction } from "next-safe-action/hooks";
+import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ImportCsvContext, type ImportCsvFormData } from "./context";
+import {
+  ImportCsvContext,
+  type ImportCsvFormData,
+  importSchema,
+} from "./context";
 import { FieldMapping } from "./field-mapping";
 import { SelectFile } from "./select-file";
 
@@ -24,10 +35,22 @@ type Props = {
   defaultCurrency: string;
 };
 
-export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
-  const [step, setStep] = useQueryState("step");
-  console.log(defaultCurrency);
-  const isOpen = step === "import-csv";
+export function ImportModal({ currencies, defaultCurrency }: Props) {
+  const [params, setParams] = useQueryStates({
+    step: parseAsString,
+    accountId: parseAsString,
+  });
+
+  const isOpen = params.step === "import";
+
+  const importTransactions = useAction(importTransactionsAction, {
+    onSuccess: () => {
+      //
+    },
+    onError: () => {
+      //
+    },
+  });
 
   const {
     control,
@@ -37,10 +60,15 @@ export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
     reset,
     formState: { isSubmitting, isValid },
   } = useForm<ImportCsvFormData>({
+    resolver: zodResolver(importSchema),
     defaultValues: {
       currency: defaultCurrency,
+      bank_account_id: params.accountId ?? undefined,
     },
   });
+
+  const supabase = createClient();
+  const { uploadFile } = useUpload();
 
   const [pageNumber, setPageNumber] = useState<number>(0);
   const page = pages[pageNumber];
@@ -60,19 +88,21 @@ export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
   }, [file, fileColumns, pageNumber]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => setStep(null)}>
+    <Dialog open={isOpen} onOpenChange={() => setParams({ step: null })}>
       <DialogContent>
         <div className="p-4 pb-0">
           <DialogHeader>
             <div className="flex space-x-4 items-center mb-4">
-              <button
-                type="button"
-                className="items-center border bg-accent p-1"
-                onClick={() => setStep("connect")}
-              >
-                <Icons.ArrowBack />
-              </button>
-              <DialogTitle className="m-0 p-0">Import CSV</DialogTitle>
+              {!params.accountId && (
+                <button
+                  type="button"
+                  className="items-center border bg-accent p-1"
+                  onClick={() => setParams({ step: "connect" })}
+                >
+                  <Icons.ArrowBack />
+                </button>
+              )}
+              <DialogTitle className="m-0 p-0">Confirm import</DialogTitle>
             </div>
             <DialogDescription>
               {page === "select-file" &&
@@ -99,7 +129,27 @@ export function ImportCSVModal({ currencies, defaultCurrency }: Props) {
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {
-                      console.log(data);
+                      const { data: userData } =
+                        await getCurrentUserTeamQuery(supabase);
+
+                      const filename = stripSpecialCharacters(data.file.name);
+
+                      const { path } = await uploadFile({
+                        bucket: "vault",
+                        path: [userData?.team_id, "imports", filename],
+                        file,
+                      });
+
+                      importTransactions.execute({
+                        filePath: path,
+                        currency: data.currency,
+                        bankAccountId: data.bank_account_id,
+                        mappings: {
+                          amount: data.amount,
+                          date: data.date,
+                          description: data.description,
+                        },
+                      });
                     })}
                   >
                     {page === "select-file" && <SelectFile />}

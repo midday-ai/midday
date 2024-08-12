@@ -1,15 +1,13 @@
 import { cn } from "@midday/ui/cn";
-import { Spinner } from "@midday/ui/spinner";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
 import { Controller } from "react-hook-form";
 import { useCsvContext } from "./context";
-import { listColumns, readLines } from "./utils";
+import { readLines } from "./utils";
 
 export function SelectFile() {
-  const { watch, control, fileColumns, setFileColumns, setFirstRows } =
-    useCsvContext();
+  const { watch, control, setFileColumns, setFirstRows } = useCsvContext();
   const file = watch("file");
   const [error, setError] = useState<string | null>(null);
 
@@ -76,19 +74,13 @@ export function SelectFile() {
                   <input {...getInputProps()} onBlur={onBlur} />
                   <p>Drop your file here, or click to browse.</p>
                   <span>1MB file limit.</span>
-                </div>
 
-                {error ? (
-                  <p className="text-center text-sm text-red-600">{error}</p>
-                ) : fileColumns ? (
-                  <p className="text-sm text-gray-600">
-                    Columns found: {listColumns(fileColumns)}
-                  </p>
-                ) : file ? (
-                  <div className="flex items-center justify-center">
-                    <Spinner />
-                  </div>
-                ) : null}
+                  {error && (
+                    <p className="text-center text-sm text-red-600 mt-4">
+                      {error}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
           </Dropzone>

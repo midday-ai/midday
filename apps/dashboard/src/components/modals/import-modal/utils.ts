@@ -1,18 +1,3 @@
-import { truncate } from "@midday/ui/truncate";
-
-const maxColumns = 4;
-
-export const listColumns = (columns: string[]) => {
-  const eachTruncated = columns.map((column) => truncate(column, 16));
-  const allTruncated =
-    eachTruncated.length <= maxColumns
-      ? eachTruncated
-      : eachTruncated
-          .slice(0, maxColumns)
-          .concat(`and ${eachTruncated.length - maxColumns} more`);
-  return allTruncated.join(", ");
-};
-
 export const readLines = async (file: File, count = 4): Promise<string> => {
   const reader = file.stream().getReader();
   const decoder = new TextDecoder("utf-8");

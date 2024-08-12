@@ -16,7 +16,7 @@ export function InboxList({ data }) {
           <Link
             key={item.id}
             href={`/inbox?inboxId=${item.id}&tab=${tab}`}
-            className="flex flex-col items-start gap-2 rounded-xl border p-4 text-left text-sm transition-all"
+            className="flex flex-col items-start gap-2 border p-4 text-left text-sm transition-all"
           >
             <div className="flex w-full flex-col gap-1">
               <div className="flex items-center mb-1">
