@@ -160,7 +160,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
@@ -194,7 +194,7 @@ export function BankConnection({ connection }: BankConnectionProps) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     }
   }, [error]);

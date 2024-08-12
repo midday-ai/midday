@@ -43,7 +43,7 @@ export function ExportStatus() {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
     onSuccess: async ({ data }) => {
@@ -141,7 +141,7 @@ export function ExportStatus() {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
 
       setToastId(null);

@@ -80,7 +80,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
@@ -116,7 +116,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again or contact support.",
+        title: "Something went wrong please try again or contact support.",
       });
     }
   }, [error]);
@@ -158,11 +158,14 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                   <Icons.ArrowBack />
                 </button>
               )}
-              <DialogTitle className="m-0 p-0">Confirm import</DialogTitle>
+              <DialogTitle className="m-0 p-0">
+                {page === "select-file" && "Select file"}
+                {page === "confirm-import" && "Confirm import"}
+              </DialogTitle>
             </div>
             <DialogDescription>
               {page === "select-file" &&
-                "Upload your CSV file with transactions."}
+                "Upload a CSV file or a screenshot of your bank statements."}
               {page === "confirm-import" &&
                 "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
             </DialogDescription>

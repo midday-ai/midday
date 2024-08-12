@@ -59,7 +59,7 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
       toast({
         duration: 2500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
@@ -70,7 +70,7 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });

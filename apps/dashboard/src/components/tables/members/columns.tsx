@@ -1,7 +1,3 @@
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useRouter } from "next/navigation";
 import { changeUserRoleAction } from "@/actions/change-user-role-action";
 import { deleteTeamMemberAction } from "@/actions/delete-team-member-action";
 import { leaveTeamAction } from "@/actions/leave-team-action";
@@ -18,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +30,10 @@ import {
 } from "@midday/ui/select";
 import { useToast } from "@midday/ui/use-toast";
 import type { ColumnDef } from "@tanstack/react-table";
-import { Button } from "@midday/ui/button";
+import { MoreHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef[] = [
   {
@@ -83,7 +83,7 @@ export const columns: ColumnDef[] = [
           toast({
             duration: 3500,
             variant: "error",
-            title: "Something went wrong pleaase try again.",
+            title: "Something went wrong please try again.",
           });
         },
       });
@@ -100,7 +100,7 @@ export const columns: ColumnDef[] = [
           toast({
             duration: 3500,
             variant: "error",
-            title: "Something went wrong pleaase try again.",
+            title: "Something went wrong please try again.",
           });
         },
       });

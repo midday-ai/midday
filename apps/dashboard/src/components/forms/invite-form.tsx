@@ -2,7 +2,7 @@
 
 import { inviteTeamMembersAction } from "@/actions/invite-team-members-action";
 import {
-  InviteTeamMembersFormValues,
+  type InviteTeamMembersFormValues,
   inviteTeamMembersSchema,
 } from "@/actions/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,7 +31,7 @@ export function InviteForm() {
       toast({
         duration: 3500,
         variant: "error",
-        title: "Something went wrong pleaase try again.",
+        title: "Something went wrong please try again.",
       });
     },
   });
