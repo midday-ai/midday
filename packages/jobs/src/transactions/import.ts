@@ -114,7 +114,7 @@ client.defineJob({
 
           // Only valid transactions need to be processed
           if (validTransactions.length > 0) {
-            const katt = await processBatch(
+            await processBatch(
               validTransactions.map(({ data }) => data),
               BATCH_LIMIT,
               async (batch) => {
@@ -124,8 +124,6 @@ client.defineJob({
                 });
               },
             );
-
-            console.log(katt);
           }
 
           parser.resume();
