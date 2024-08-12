@@ -11,12 +11,17 @@ import { processBatch } from "../utils/process";
 const BATCH_LIMIT = 500;
 
 const createTransactionSchema = z.object({
-  amount: z.number(),
-  date: z.coerce.date(),
-  description: z.string(),
+  name: z.string(),
   currency: z.string(),
   bank_account_id: z.string(),
   team_id: z.string(),
+  internal_id: z.string(),
+  status: z.enum(["posted", "pending"]),
+  method: z.enum(["card", "bank", "other"]),
+  date: z.coerce.date(),
+  amount: z.number(),
+  manual: z.boolean(),
+  category_slug: z.string().nullable(),
 });
 
 client.defineJob({
@@ -76,10 +81,10 @@ client.defineJob({
           const mappedTransactions = data.map((row): Transaction => {
             return {
               ...(Object.fromEntries(
-                Object.entries(mappings).map(([key, value]) => [
-                  key,
-                  row[value],
-                ]),
+                Object.entries(mappings)
+                  // Filter out empty values
+                  .filter(([_, value]) => value !== "")
+                  .map(([key, value]) => [key, row[value]]),
               ) as Transaction),
               currency,
               teamId,
@@ -108,9 +113,9 @@ client.defineJob({
           }
 
           // Only valid transactions need to be processed
-          if (invalidTransactions.length > 0) {
-            await processBatch(
-              validTransactions,
+          if (validTransactions.length > 0) {
+            const katt = await processBatch(
+              validTransactions.map(({ data }) => data),
               BATCH_LIMIT,
               async (batch) => {
                 await supabase.from("transactions").upsert(batch, {
@@ -119,6 +124,8 @@ client.defineJob({
                 });
               },
             );
+
+            console.log(katt);
           }
 
           parser.resume();
