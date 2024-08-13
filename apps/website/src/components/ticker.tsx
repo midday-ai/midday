@@ -1,12 +1,27 @@
-import { createClient } from "@midday/supabase/server";
+import type { Database } from "@midday/supabase/types";
+import { createServerClient } from "@supabase/ssr";
 import Link from "next/link";
 
 const currency = "USD";
 
 export async function Ticker() {
-  const client = createClient({
-    admin: true,
-  });
+  const client = createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+    {
+      cookies: {
+        get() {
+          return null;
+        },
+        set() {
+          return null;
+        },
+        remove() {
+          return null;
+        },
+      },
+    },
+  );
 
   const [
     { data: totalSum },
