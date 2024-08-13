@@ -49,7 +49,7 @@
     "ms": "^2.1.3",
     "next": "14.2.1",
     "next-international": "1.2.4",
-    "next-safe-action": "^7.5.0",
+    "next-safe-action": "^7.6.0",
     "next-themes": "^0.3.0",
     "nuqs": "^1.17.8",
     "papaparse": "^5.4.1",
