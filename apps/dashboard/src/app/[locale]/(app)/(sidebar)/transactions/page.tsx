@@ -79,7 +79,7 @@ export default async function Transactions({
             currency: account.currency,
           }))}
           members={teamMembersData?.data?.map((member) => ({
-            id: member?.user.id,
+            id: member?.user?.id,
             name: member.user?.full_name,
           }))}
         />
