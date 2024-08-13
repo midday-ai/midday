@@ -17,7 +17,7 @@ export default function ErrorPage({
     <div className="h-[calc(100vh-200px)] w-full">
       <div className="mt-8 flex flex-col items-center justify-center h-full">
         <div className="flex justify-between items-center flex-col mt-8 text-center mb-8">
-          <h2 className="font-medium mb-4">Somethng went wrong</h2>
+          <h2 className="font-medium mb-4">Something went wrong</h2>
           <p className="text-sm text-[#878787]">
             An unexpected error has occurred. Please try again
             <br /> or contact support if the issue persists.

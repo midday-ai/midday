@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
 
   // Remove the locale from the pathname
   const pathnameWithoutLocale = nextUrl.pathname.slice(
-    pathnameLocale.length + 1
+    pathnameLocale.length + 1,
   );
 
   // Create a new URL without the locale in the pathname
@@ -75,5 +75,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|api).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|api|monitoring).*)"],
 };
