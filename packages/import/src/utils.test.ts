@@ -1,0 +1,65 @@
+import { describe, expect, it } from "bun:test";
+import { formatAmountValue, formatDate } from "./utils";
+
+describe("formatAmountValue", () => {
+  it("should handle numbers with comma as decimal separator", () => {
+    expect(formatAmountValue({ amount: "1.234,56" })).toBe(1234.56);
+  });
+
+  it("should handle numbers with period as thousands separator", () => {
+    expect(formatAmountValue({ amount: "1.234.56" })).toBe(1234.56);
+  });
+
+  it("should handle numbers with period as decimal separator", () => {
+    expect(formatAmountValue({ amount: "1234.56" })).toBe(1234.56);
+  });
+
+  it("should handle plain numbers", () => {
+    expect(formatAmountValue({ amount: "1234" })).toBe(1234);
+  });
+
+  it("should invert the amount when inverted is true", () => {
+    expect(formatAmountValue({ amount: "1234.56", inverted: true })).toBe(
+      -1234.56,
+    );
+  });
+
+  it("should handle negative numbers", () => {
+    expect(formatAmountValue({ amount: "-1234.56" })).toBe(-1234.56);
+  });
+
+  it("should invert negative numbers when inverted is true", () => {
+    expect(formatAmountValue({ amount: "-1234.56", inverted: true })).toBe(
+      1234.56,
+    );
+  });
+
+  it("should handle zero", () => {
+    expect(formatAmountValue({ amount: "0" })).toBe(0);
+    expect(formatAmountValue({ amount: "0", inverted: true })).toBe(-0);
+  });
+});
+
+describe("formatDate", () => {
+  it("should format a valid date string", () => {
+    expect(formatDate("2023-05-15")).toBe("2023-05-15");
+  });
+
+  it("should handle date strings with non-date characters", () => {
+    expect(formatDate("2023/05/15")).toBe("2023-05-15");
+    expect(formatDate("May 15, 2023")).toBe("2023-05-15");
+  });
+
+  it("should return undefined for invalid date strings", () => {
+    expect(formatDate("invalid-date")).toBeUndefined();
+    expect(formatDate("2023-13-45")).toBeUndefined();
+  });
+
+  it("should handle different date formats", () => {
+    expect(formatDate("05/15/2023")).toBe("2023-05-15");
+  });
+
+  it("should handle dates with time", () => {
+    expect(formatDate("2023-05-15T14:30:00")).toBe("2023-05-15");
+  });
+});

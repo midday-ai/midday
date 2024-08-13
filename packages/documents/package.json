@@ -11,7 +11,7 @@
     "test": "bun test src"
   },
   "dependencies": {
-    "@ai-sdk/openai": "0.0.43",
+    "@ai-sdk/openai": "^0.0.45",
     "@azure-rest/ai-document-intelligence": "^1.0.0-beta.2",
     "@midday/utils": "workspace:*",
     "ai": "3.3.3",

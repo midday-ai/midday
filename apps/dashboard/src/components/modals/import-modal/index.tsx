@@ -39,12 +39,6 @@ type Props = {
   defaultCurrency: string;
 };
 
-const defaultParams = {
-  step: null,
-  accountId: null,
-  type: null,
-};
-
 export function ImportModal({ currencies, defaultCurrency }: Props) {
   const [eventId, setEventId] = useState<string | undefined>();
   const [isImporting, setIsImporting] = useState(false);
@@ -110,6 +104,19 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
 
   const file = watch("file");
 
+  const onclose = () => {
+    setFileColumns(null);
+    setFirstRows(null);
+    setPageNumber(0);
+    reset();
+
+    setParams({
+      step: null,
+      accountId: null,
+      type: null,
+    });
+  };
+
   useEffect(() => {
     if (params.accountId) {
       setValue("bank_account_id", params.accountId);
@@ -139,7 +146,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     if (status === "SUCCESS") {
       setEventId(undefined);
       setIsImporting(false);
-      setParams(defaultParams);
+      onclose();
       router.refresh();
 
       toast({
@@ -158,7 +165,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
   }, [file, fileColumns, pageNumber]);
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => setParams(defaultParams)}>
+    <Dialog open={isOpen} onOpenChange={onclose}>
       <DialogContent>
         <div className="p-4 pb-0">
           <DialogHeader>
@@ -179,7 +186,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
             </div>
             <DialogDescription>
               {page === "select-file" &&
-                "Upload a CSV file or a screenshot of your bank statements."}
+                "Upload a CSV file or a screenshot of your transactions."}
               {page === "confirm-import" &&
                 "We’ve mapped each column to what we believe is correct, but please review the data below to confirm it’s accurate."}
             </DialogDescription>
@@ -202,25 +209,32 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {
+                      let filePath = null;
+
                       setIsImporting(true);
 
-                      const { data: userData } =
-                        await getCurrentUserTeamQuery(supabase);
+                      if (data.import_type === "csv") {
+                        const { data: userData } =
+                          await getCurrentUserTeamQuery(supabase);
 
-                      const filename = stripSpecialCharacters(data.file.name);
+                        const filename = stripSpecialCharacters(data.file.name);
+                        const { path } = await uploadFile({
+                          bucket: "vault",
+                          path: [userData?.team_id, "imports", filename],
+                          file,
+                        });
 
-                      const { path } = await uploadFile({
-                        bucket: "vault",
-                        path: [userData?.team_id, "imports", filename],
-                        file,
-                      });
+                        filePath = path;
+                      }
 
                       importTransactions.execute({
-                        filePath: path,
+                        filePath,
                         currency: data.currency,
                         bankAccountId: data.bank_account_id,
                         currentBalance: data.balance,
                         inverted: data.inverted,
+                        table: data.table,
+                        importType: data.import_type,
                         mappings: {
                           amount: data.amount,
                           date: data.date,
