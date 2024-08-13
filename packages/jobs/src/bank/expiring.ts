@@ -2,6 +2,7 @@ import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
 import { renderAsync } from "@react-email/components";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { addDays } from "date-fns";
+import { nanoid } from "nanoid";
 import { client, resend, supabase } from "../client";
 import { processBatch } from "../utils/process";
 
@@ -66,8 +67,8 @@ client.defineJob({
 
     const emails = await Promise.all(emailPromises);
 
-    await processBatch(emails, 50, async (batch, index) => {
-      await io.resend.batch.send(`send-email-${index}`, batch);
+    await processBatch(emails, 50, async (batch) => {
+      await io.resend.batch.send(`send-email-${nanoid()}`, batch);
     });
   },
 });

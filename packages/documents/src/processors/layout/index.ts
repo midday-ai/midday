@@ -31,6 +31,7 @@ export class LayoutProcessor {
     const tables = data.analyzeResult?.tables;
 
     const firstTable = tables?.at(0);
+
     if (!firstTable?.cells?.length) return null;
 
     const cellsByRow = firstTable.cells.reduce(
@@ -48,14 +49,17 @@ export class LayoutProcessor {
       {} as Record<number, { columnIndex: number; content: string }[]>,
     );
 
-    return Object.fromEntries(
-      Object.entries(cellsByRow)
-        .sort(([a], [b]) => Number(a) - Number(b))
-        .map(([rowIndex, cells]) => [
-          rowIndex,
-          cells.sort((a, b) => a.columnIndex - b.columnIndex),
-        ]),
-    );
+    return Object.entries(cellsByRow)
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([rowIndex, cells]) => ({
+        rowIndex: Number(rowIndex),
+        cells: cells
+          .sort((a, b) => a.columnIndex - b.columnIndex)
+          .map((cell) => ({
+            columnIndex: cell.columnIndex,
+            content: cell.content,
+          })),
+      }));
   }
 
   public async getDocument(params: GetDocumentRequest) {

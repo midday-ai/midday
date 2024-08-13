@@ -1,6 +1,11 @@
+import { getTransactionsFromLayout } from "@/actions/transactions/get-transactions-from-layout";
+import { useUpload } from "@/hooks/use-upload";
+import { createClient } from "@midday/supabase/client";
 import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
+import { Spinner } from "@midday/ui/spinner";
 import { stripSpecialCharacters } from "@midday/utils";
+import { useAction } from "next-safe-action/hooks";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";
 import Dropzone from "react-dropzone";
@@ -9,32 +14,64 @@ import { useCsvContext } from "./context";
 import { readLines } from "./utils";
 
 export function SelectFile() {
-  const { watch, control, setFileColumns, setFirstRows } = useCsvContext();
+  const supabase = createClient();
+  const { watch, control, setFileColumns, setFirstRows, setValue } =
+    useCsvContext();
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const { uploadFile } = useUpload();
+
+  const getTransactions = useAction(getTransactionsFromLayout, {
+    onSuccess: ({ data }) => {
+      const { columns, results } = data;
+
+      setValue("table", results);
+      setFileColumns(columns);
+
+      // Skip the first row because it can be the header row
+      setFirstRows(results.slice(1, 4));
+      setIsLoading(false);
+    },
+    onError: () => {
+      setError("Something went wrong while processing the file.");
+      setIsLoading(false);
+    },
+  });
 
   const file = watch("file");
 
-  useEffect(async () => {
+  async function processFile() {
     if (!file) {
       setFileColumns(null);
       return;
     }
 
+    setIsLoading(true);
+
     if (file?.type !== "text/csv") {
-      const { data: userData } = await getCurrentUserTeamQuery(supabase);
+      try {
+        setValue("import_type", "image");
 
-      const filename = stripSpecialCharacters(file.name);
+        const { data: userData } = await getCurrentUserTeamQuery(supabase);
 
-      const { path } = await uploadFile({
-        bucket: "vault",
-        path: [userData?.team_id, "imports", filename],
-        file,
-      });
+        const filename = stripSpecialCharacters(file.name);
 
-      console.log(path);
+        const { path } = await uploadFile({
+          bucket: "vault",
+          path: [userData?.team_id, "imports", filename],
+          file,
+        });
+
+        getTransactions.execute({ filePath: path });
+      } catch (error) {
+        setError("Something went wrong while processing the file.");
+        setIsLoading(false);
+      }
 
       return;
     }
+
+    setValue("import_type", "csv");
 
     readLines(file, 4)
       .then((lines) => {
@@ -48,6 +85,7 @@ export function SelectFile() {
           setError("CSV file must have at least 2 rows.");
           setFileColumns(null);
           setFirstRows(null);
+          setIsLoading(false);
           return;
         }
 
@@ -55,17 +93,24 @@ export function SelectFile() {
           setError("Failed to retrieve CSV column data.");
           setFileColumns(null);
           setFirstRows(null);
+          setIsLoading(false);
           return;
         }
 
         setFileColumns(meta.fields);
         setFirstRows(data);
+        setIsLoading(false);
       })
       .catch(() => {
         setError("Failed to read CSV file.");
         setFileColumns(null);
         setFirstRows(null);
+        setIsLoading(false);
       });
+  }
+
+  useEffect(() => {
+    processFile();
   }, [file]);
 
   return (
@@ -95,9 +140,21 @@ export function SelectFile() {
               >
                 <div className="text-center flex items-center justify-center flex-col text-xs text-[#878787]">
                   <input {...getInputProps()} onBlur={onBlur} />
-                  <p>Drop your file here, or click to browse.</p>
-                  <span>5MB file limit.</span>
-                  <span className="mt-2 text-[10px]">CSV, PDF, jpg or png</span>
+
+                  {isLoading ? (
+                    <div className="flex space-x-1 items-center">
+                      <Spinner />
+                      <span>Loading...</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <p>Drop your file here, or click to browse.</p>
+                      <span>5MB file limit.</span>
+                      <span className="mt-2 text-[10px]">
+                        CSV, PDF, jpg or png
+                      </span>
+                    </div>
+                  )}
 
                   {error && (
                     <p className="text-center text-sm text-red-600 mt-4">
@@ -112,9 +169,4 @@ export function SelectFile() {
       />
     </div>
   );
-}
-function uploadFile(arg0: { bucket: string; path: any[]; file: File }):
-  | { path: any }
-  | PromiseLike<{ path: any }> {
-  throw new Error("Function not implemented.");
 }
