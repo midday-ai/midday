@@ -4,14 +4,15 @@ import { Table } from "@/components/tables/transactions";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
+import { Cookies } from "@/utils/constants";
 import {
   getCategories,
   getTeamBankAccounts,
   getTeamMembers,
 } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/cn";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 import { VALID_FILTERS } from "./filters";
 import { searchParamsCache } from "./search-params";
@@ -54,6 +55,8 @@ export default async function Transactions({
 
   const sort = searchParams?.sort?.split(":");
 
+  const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
+
   const isOpen = Boolean(searchParams.step);
   const isEmpty = !accountsData?.data?.length && !isOpen;
   const loadingKey = JSON.stringify({
@@ -83,24 +86,22 @@ export default async function Transactions({
             name: member.user?.full_name,
           }))}
         />
-        <TransactionsActions />
+        <TransactionsActions isEmpty={isEmpty} />
       </div>
 
-      <div className={cn(isEmpty && "opacity-20 pointer-events-none")}>
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense fallback={<Loading />} key={loadingKey}>
-            <Table
-              filter={filter}
-              page={page}
-              sort={sort}
-              noAccounts={isEmpty}
-              query={query}
-            />
-          </Suspense>
-        </ErrorBoundary>
-      </div>
+      <ErrorBoundary errorComponent={ErrorFallback}>
+        <Suspense fallback={<Loading />} key={loadingKey}>
+          <Table
+            filter={filter}
+            page={page}
+            sort={sort}
+            noAccounts={isEmpty}
+            query={query}
+          />
+        </Suspense>
+      </ErrorBoundary>
 
-      {!isOpen && isEmpty && <TransactionsModal />}
+      <TransactionsModal defaultOpen={isEmpty && !hideConnectFlow} />
     </>
   );
 }

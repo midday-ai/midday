@@ -14,7 +14,12 @@ export function AccountBalance({ data }) {
 
   if (!activeAccount) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center h-full flex-col">
+        <h2 className="font-medium mb-1">No accounts connected</h2>
+        <p className="text-[#606060] text-sm mb-8 text-center">
+          Get your balance in real-time by connecting <br />
+          your bank account.
+        </p>
         <AddAccountButton />
       </div>
     );

@@ -1,8 +1,10 @@
 "use client";
 
+import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
 import { AddAccountButton } from "@/components/add-account-button";
 import { cn } from "@midday/ui/cn";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
+import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import OverViewScreenOneLight from "public/assets/overview-1-light.png";
 import OverViewScreenOne from "public/assets/overview-1.png";
@@ -19,10 +21,29 @@ export function OverviewModal({
   defaultOpen = false,
 }: { defaultOpen?: boolean }) {
   const [activeId, setActive] = useState(1);
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  const hideConnectFlow = useAction(hideConnectFlowAction);
+
+  const handleOnOpenChange = () => {
+    setIsOpen(!isOpen);
+
+    if (isOpen) {
+      hideConnectFlow.execute();
+    }
+  };
 
   return (
-    <Dialog defaultOpen={defaultOpen}>
-      <DialogContent>
+    <Dialog
+      defaultOpen={defaultOpen}
+      open={isOpen}
+      onOpenChange={handleOnOpenChange}
+    >
+      <DialogContent
+        onInteractOutside={(e) => {
+          e.preventDefault();
+        }}
+      >
         <div className="bg-background p-2">
           <div className="p-4">
             <div className="mb-8 space-y-5">
@@ -82,7 +103,7 @@ export function OverviewModal({
                 ))}
               </div>
 
-              <AddAccountButton />
+              <AddAccountButton onClick={handleOnOpenChange} />
             </div>
           </div>
         </div>

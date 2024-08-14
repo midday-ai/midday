@@ -205,7 +205,7 @@ export function ConnectTransactionsModal({
       <DialogContent>
         <div className="p-4">
           <DialogHeader>
-            <DialogTitle>Connect Transactions</DialogTitle>
+            <DialogTitle>Connect bank account</DialogTitle>
 
             <DialogDescription>
               We work with a variety of banking providers to support as many

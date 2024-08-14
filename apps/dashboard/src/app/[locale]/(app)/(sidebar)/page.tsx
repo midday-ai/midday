@@ -1,5 +1,6 @@
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
+import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
@@ -7,6 +8,7 @@ import {
   getBankAccountsCurrencies,
   getTeamBankAccounts,
 } from "@midday/supabase/cached-queries";
+import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -28,6 +30,8 @@ const defaultValue = {
 export default async function Overview({ searchParams }) {
   const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
+
+  const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
   const currency = cookies().has(Cookies.ChartCurrency)
     ? cookies().get(Cookies.ChartCurrency)?.value
@@ -52,15 +56,22 @@ export default async function Overview({ searchParams }) {
   return (
     <>
       <div>
-        <div className="h-[520px]">
+        <div className="h-[560px] mb-4">
           <ChartSelectors defaultValue={defaultValue} currency={currency} />
-          <Charts
-            value={value}
-            defaultValue={defaultValue}
-            disabled={isEmpty}
-            currency={currency}
-            type={chartType}
-          />
+
+          <div className="p-8 border border-border mt-5 relative">
+            {isEmpty && <EmptyState />}
+
+            <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
+              <Charts
+                value={value}
+                defaultValue={defaultValue}
+                disabled={isEmpty}
+                currency={currency}
+                type={chartType}
+              />
+            </div>
+          </div>
         </div>
 
         <Widgets
@@ -70,7 +81,7 @@ export default async function Overview({ searchParams }) {
         />
       </div>
 
-      <OverviewModal defaultOpen={isEmpty} />
+      <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
     </>
   );
 }

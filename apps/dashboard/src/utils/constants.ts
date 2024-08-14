@@ -10,4 +10,5 @@ export const Cookies = {
   TrackingConsent: "tracking-consent",
   ChartCurrency: "chart-currency",
   InboxOrder: "inbox-order",
+  HideConnectFlow: "hide-connect-flow",
 };

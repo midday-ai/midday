@@ -3,7 +3,7 @@ import { Cookies } from "@/utils/constants";
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { columns } from "./columns";
-import { NoResults } from "./empty-states";
+import { NoAccounts, NoResults } from "./empty-states";
 import { Loading } from "./loading";
 
 const pageSize = 50;
@@ -49,7 +49,12 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
 
   if (!data?.length) {
     if (noAccounts) {
-      return <Loading />;
+      return (
+        <div className="relative">
+          <NoAccounts />
+          <Loading isEmpty />
+        </div>
+      );
     }
 
     if (query?.length) {

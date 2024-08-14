@@ -25,8 +25,8 @@ export function TransactionListItem({ transaction, disabled }: Props) {
             <span
               className={cn(
                 "text-sm line-clamp-1",
-                disabled && "skeleton-box",
-                transaction?.category?.slug === "income" && "text-[#00C969]"
+                disabled && "skeleton-box animate-none",
+                transaction?.category?.slug === "income" && "text-[#00C969]",
               )}
             >
               {transaction.name}
@@ -36,8 +36,8 @@ export function TransactionListItem({ transaction, disabled }: Props) {
             <span
               className={cn(
                 "text-sm line-clamp-1",
-                disabled && "skeleton-box",
-                transaction?.category?.slug === "income" && "text-[#00C969]"
+                disabled && "skeleton-box animate-none",
+                transaction?.category?.slug === "income" && "text-[#00C969]",
               )}
             >
               <FormatAmount
