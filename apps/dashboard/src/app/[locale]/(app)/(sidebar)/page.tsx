@@ -7,7 +7,6 @@ import {
   getBankAccountsCurrencies,
   getTeamBankAccounts,
 } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -48,22 +47,17 @@ export default async function Overview({ searchParams }) {
     period: searchParams.period,
   };
 
-  // NOTE: error is when a user cancel gocardless authentication
-  const isOpen = Boolean(searchParams.step) && !searchParams.error;
-
-  const empty =
-    !accounts?.data?.length ||
-    (Boolean(searchParams.error) && Boolean(searchParams.step));
+  const isEmpty = !accounts?.data?.length;
 
   return (
     <>
-      <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
+      <div>
         <div className="h-[520px]">
           <ChartSelectors defaultValue={defaultValue} currency={currency} />
           <Charts
             value={value}
             defaultValue={defaultValue}
-            disabled={empty}
+            disabled={isEmpty}
             currency={currency}
             type={chartType}
           />
@@ -71,11 +65,12 @@ export default async function Overview({ searchParams }) {
 
         <Widgets
           initialPeriod={initialPeriod}
-          disabled={empty}
+          disabled={isEmpty}
           searchParams={searchParams}
         />
       </div>
-      {!isOpen && empty && <OverviewModal />}
+
+      <OverviewModal defaultOpen={isEmpty} />
     </>
   );
 }
