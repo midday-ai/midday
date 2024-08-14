@@ -209,7 +209,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                   <form
                     className="flex flex-col gap-y-4"
                     onSubmit={handleSubmit(async (data) => {
-                      let filePath = null;
+                      let filePath = undefined;
 
                       setIsImporting(true);
 
