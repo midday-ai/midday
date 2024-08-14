@@ -1,5 +1,6 @@
 import { calculateAvgBurnRate } from "@/utils/format";
 import { getBurnRate, getRunway } from "@midday/supabase/cached-queries";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
   Tooltip,
@@ -9,29 +10,38 @@ import {
 } from "@midday/ui/tooltip";
 import { FormatAmount } from "../format-amount";
 import { AreaChart } from "./area-chart";
+import { burnRateExamleData } from "./data";
 
 type Props = {
   value: unknown;
   defaultValue: unknown;
   currency: string;
+  disabled?: boolean;
 };
 
-export async function BurnRateChart({ value, defaultValue, currency }: Props) {
-  const [{ data: burnRateData }, { data: runway }] = await Promise.all([
-    getBurnRate({
-      ...defaultValue,
-      ...value,
-      currency,
-    }),
-    getRunway({
-      ...defaultValue,
-      ...value,
-      currency,
-    }),
-  ]);
+export async function BurnRateChart({
+  value,
+  defaultValue,
+  currency,
+  disabled,
+}: Props) {
+  const [{ data: burnRateData }, { data: runway }] = disabled
+    ? burnRateExamleData
+    : await Promise.all([
+        getBurnRate({
+          ...defaultValue,
+          ...value,
+          currency,
+        }),
+        getRunway({
+          ...defaultValue,
+          ...value,
+          currency,
+        }),
+      ]);
 
   return (
-    <div className="mt-5">
+    <div className={cn(disabled && "pointer-events-none select-none")}>
       <div className="space-y-2 mb-14">
         <h1 className="text-4xl font-mono">
           <FormatAmount
@@ -60,9 +70,8 @@ export async function BurnRateChart({ value, defaultValue, currency }: Props) {
           )}
         </div>
       </div>
-      <div className="h-[260px]">
-        <AreaChart currency={currency} data={burnRateData} />
-      </div>
+
+      <AreaChart currency={currency} data={burnRateData} />
     </div>
   );
 }

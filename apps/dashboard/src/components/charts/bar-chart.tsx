@@ -67,7 +67,7 @@ const ToolTipContent = ({ payload = {} }) => {
               ? current?.payload?.current?.date &&
                 `Week ${format(
                   new Date(current.payload.current.date),
-                  "ww, y"
+                  "ww, y",
                 )}`
               : current?.payload?.current?.date &&
                 format(new Date(current.payload.current.date), "MMM, y")}
@@ -93,7 +93,7 @@ const ToolTipContent = ({ payload = {} }) => {
               ? previous?.payload?.previous?.date &&
                 `Week ${format(
                   new Date(previous.payload.previous.date),
-                  "ww, y"
+                  "ww, y",
                 )}`
               : previous?.payload?.previous?.date &&
                 format(new Date(previous.payload.previous.date), "MMM, y")}
@@ -112,7 +112,7 @@ export function BarChart({ data, disabled, currency, height = 290 }) {
     meta: data.meta,
     date: format(
       new Date(item.date),
-      data.meta.period === "weekly" ? "w" : "MMM"
+      data.meta.period === "weekly" ? "w" : "MMM",
     ),
   }));
 
@@ -129,9 +129,9 @@ export function BarChart({ data, disabled, currency, height = 290 }) {
   const getLabelMaxValue = getLabel(
     roundToNearestFactor(
       data?.result.map((item) =>
-        Math.max(item.current.value, item.previous.value)
-      )
-    )
+        Math.max(item.current.value, item.previous.value),
+      ),
+    ),
   );
 
   return (
@@ -192,7 +192,7 @@ export function BarChart({ data, disabled, currency, height = 290 }) {
                 className={cn(
                   "fill-[#41191A]",
                   +entry.previous.value > 0 &&
-                    "dark:fill-[#323232] fill-[#C6C6C6]"
+                    "dark:fill-[#323232] fill-[#C6C6C6]",
                 )}
               />
             ))}
@@ -205,7 +205,7 @@ export function BarChart({ data, disabled, currency, height = 290 }) {
                 className={cn(
                   "fill-[#FF3638]",
                   +entry.current.value > 0 &&
-                    "dark:fill-[#F5F5F3] fill-[#121212]"
+                    "dark:fill-[#F5F5F3] fill-[#121212]",
                 )}
               />
             ))}

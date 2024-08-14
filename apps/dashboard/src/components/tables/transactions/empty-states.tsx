@@ -1,5 +1,6 @@
 "use client";
 
+import { AddAccountButton } from "@/components/add-account-button";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { useRouter } from "next/navigation";
@@ -32,6 +33,23 @@ export function NoResults({ hasFilters }: Props) {
             Clear filters
           </Button>
         )}
+      </div>
+    </div>
+  );
+}
+
+export function NoAccounts() {
+  return (
+    <div className="absolute w-full h-[calc(100vh-300px)] top-0 left-0 flex items-center justify-center z-20">
+      <div className="text-center max-w-sm mx-auto flex flex-col items-center justify-center">
+        <h2 className="text-xl font-medium mb-2">Connect bank account</h2>
+        <p className="text-sm text-[#878787] mb-6">
+          Get instant transaction insights. Easily spot missing receipts,
+          categorize expenses, and reconcile everything seamlessly for
+          accounting.
+        </p>
+
+        <AddAccountButton />
       </div>
     </div>
   );

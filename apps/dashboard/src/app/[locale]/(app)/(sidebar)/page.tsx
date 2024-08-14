@@ -1,5 +1,6 @@
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
+import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
@@ -30,6 +31,8 @@ export default async function Overview({ searchParams }) {
   const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
+  const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
+
   const currency = cookies().has(Cookies.ChartCurrency)
     ? cookies().get(Cookies.ChartCurrency)?.value
     : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
@@ -48,34 +51,37 @@ export default async function Overview({ searchParams }) {
     period: searchParams.period,
   };
 
-  // NOTE: error is when a user cancel gocardless authentication
-  const isOpen = Boolean(searchParams.step) && !searchParams.error;
-
-  const empty =
-    !accounts?.data?.length ||
-    (Boolean(searchParams.error) && Boolean(searchParams.step));
+  const isEmpty = !accounts?.data?.length;
 
   return (
     <>
-      <div className={cn(empty && !isOpen && "opacity-20 pointer-events-none")}>
-        <div className="h-[520px]">
+      <div>
+        <div className="h-[530px] mb-4">
           <ChartSelectors defaultValue={defaultValue} currency={currency} />
-          <Charts
-            value={value}
-            defaultValue={defaultValue}
-            disabled={empty}
-            currency={currency}
-            type={chartType}
-          />
+
+          <div className="mt-8 relative">
+            {isEmpty && <EmptyState />}
+
+            <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
+              <Charts
+                value={value}
+                defaultValue={defaultValue}
+                disabled={isEmpty}
+                currency={currency}
+                type={chartType}
+              />
+            </div>
+          </div>
         </div>
 
         <Widgets
           initialPeriod={initialPeriod}
-          disabled={empty}
+          disabled={isEmpty}
           searchParams={searchParams}
         />
       </div>
-      {!isOpen && empty && <OverviewModal />}
+
+      <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
     </>
   );
 }

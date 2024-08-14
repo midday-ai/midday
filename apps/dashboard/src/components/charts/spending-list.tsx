@@ -5,7 +5,7 @@ import {
 } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cookies } from "next/headers";
-import { spendingData } from "./data";
+import { spendingExampleData } from "./data";
 import { SpendingCategoryList } from "./spending-category-list";
 
 export function SpendingListSkeleton() {
@@ -29,13 +29,18 @@ export function SpendingListSkeleton() {
   );
 }
 
-export async function SpendingList({ initialPeriod, disabled }) {
+type Props = {
+  initialPeriod: any;
+  disabled: boolean;
+};
+
+export async function SpendingList({ initialPeriod, disabled }: Props) {
   const currency = cookies().has(Cookies.ChartCurrency)
     ? cookies().get(Cookies.ChartCurrency)?.value
     : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
 
   const spending = disabled
-    ? spendingData
+    ? spendingExampleData
     : await getSpending({ ...initialPeriod, currency });
 
   if (!spending?.data?.length) {
@@ -49,6 +54,10 @@ export async function SpendingList({ initialPeriod, disabled }) {
   }
 
   return (
-    <SpendingCategoryList categories={spending?.data} period={initialPeriod} />
+    <SpendingCategoryList
+      categories={spending?.data}
+      period={initialPeriod}
+      disabled={disabled}
+    />
   );
 }

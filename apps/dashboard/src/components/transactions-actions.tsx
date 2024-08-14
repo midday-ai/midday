@@ -1,6 +1,8 @@
 "use client";
 
 import { deleteTransactionsAction } from "@/actions/delete-transactions-action";
+import { AddTransactions } from "@/components/add-transactions";
+import { BulkActions } from "@/components/bulk-actions";
 import { ColumnVisibility } from "@/components/column-visibility";
 import { useTransactionsStore } from "@/store/transactions";
 import {
@@ -19,9 +21,8 @@ import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { BulkActions } from "./bulk-actions";
 
-export function TransactionsActions() {
+export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
   const { toast } = useToast();
   const { transactionIds, canDelete } = useTransactionsStore();
 
@@ -92,7 +93,8 @@ export function TransactionsActions() {
 
   return (
     <div className="space-x-2 hidden md:flex">
-      <ColumnVisibility />
+      <ColumnVisibility disabled={isEmpty} />
+      <AddTransactions />
     </div>
   );
 }

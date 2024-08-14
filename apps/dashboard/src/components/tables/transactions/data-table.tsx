@@ -71,8 +71,8 @@ export function DataTable<TData, TValue>({
   );
 
   const updateTransaction = useAction(updateTransactionAction, {
-    onSuccess: ({ status }) => {
-      if (status === "excluded") {
+    onSuccess: ({ data }) => {
+      if (data?.status === "excluded") {
         toast({
           duration: 3500,
           title: "Transaction excluded",

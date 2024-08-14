@@ -10,7 +10,13 @@ import Link from "next/link";
 import { Category } from "../category";
 import { SpendingCategoryItem } from "./spending-category-item";
 
-export function SpendingCategoryList({ categories, period }) {
+type Props = {
+  categories: any;
+  period: any;
+  disabled: boolean;
+};
+
+export function SpendingCategoryList({ categories, period, disabled }: Props) {
   return (
     <ul className="mt-8 space-y-4 overflow-auto scrollbar-hide aspect-square pb-14">
       {categories.map(({ slug, name, color, percentage, amount, currency }) => {
@@ -36,15 +42,17 @@ export function SpendingCategoryList({ categories, period }) {
                 </Link>
               </HoverCardTrigger>
 
-              <HoverCardContent className="border shadow-sm bg-background py-2 px-2">
-                <SpendingCategoryItem
-                  color={color}
-                  name={name}
-                  amount={amount}
-                  currency={currency}
-                  percentage={percentage}
-                />
-              </HoverCardContent>
+              {!disabled && (
+                <HoverCardContent className="border shadow-sm bg-background py-1 px-0">
+                  <SpendingCategoryItem
+                    color={color}
+                    name={name}
+                    amount={amount}
+                    currency={currency}
+                    percentage={percentage}
+                  />
+                </HoverCardContent>
+              )}
             </HoverCard>
           </li>
         );

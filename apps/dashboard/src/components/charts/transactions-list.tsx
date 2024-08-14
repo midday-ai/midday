@@ -1,6 +1,6 @@
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
-import { transactionList } from "./data";
+import { transactionExampleData } from "./data";
 import { TransactionsItemList } from "./transactions-item-list";
 
 export function TransactionsListHeader() {
@@ -33,9 +33,14 @@ export function TransactionsListSkeleton() {
   );
 }
 
-export async function TransactionsList({ type, disabled }) {
+type Props = {
+  type: string;
+  disabled: boolean;
+};
+
+export async function TransactionsList({ type, disabled }: Props) {
   const transactions = disabled
-    ? transactionList
+    ? transactionExampleData
     : await getTransactions({
         to: 15,
         from: 0,
