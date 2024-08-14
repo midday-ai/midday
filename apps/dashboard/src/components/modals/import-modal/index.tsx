@@ -21,7 +21,7 @@ import { useEventDetails } from "@trigger.dev/react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRouter } from "next/navigation";
-import { parseAsString, useQueryStates } from "nuqs";
+import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -65,6 +65,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
     step: parseAsString,
     accountId: parseAsString,
     type: parseAsString,
+    hide: parseAsBoolean.withDefault(false),
   });
 
   const isOpen = params.step === "import";
@@ -114,6 +115,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
       step: null,
       accountId: null,
       type: null,
+      hide: null,
     });
   };
 
@@ -170,7 +172,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
         <div className="p-4 pb-0">
           <DialogHeader>
             <div className="flex space-x-4 items-center mb-4">
-              {!params.accountId && (
+              {!params.hide && (
                 <button
                   type="button"
                   className="items-center border bg-accent p-1"

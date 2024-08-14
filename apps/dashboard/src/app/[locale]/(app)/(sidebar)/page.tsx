@@ -56,10 +56,10 @@ export default async function Overview({ searchParams }) {
   return (
     <>
       <div>
-        <div className="h-[560px] mb-4">
+        <div className="h-[530px] mb-4">
           <ChartSelectors defaultValue={defaultValue} currency={currency} />
 
-          <div className="p-8 border border-border mt-5 relative">
+          <div className="mt-8 relative">
             {isEmpty && <EmptyState />}
 
             <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
