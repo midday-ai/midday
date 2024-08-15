@@ -51,6 +51,13 @@ const testimonials = [
     quote: "Awesome man, looks amazing 🔥",
   },
   {
+    name: "Darshan Gajara",
+    handle: "@WeirdoWizard",
+    verified: false,
+    quote: "No sweat! Your smooth integration with banking data blew me away.",
+    avatarUrl: "https://pbs.twimg.com/profile_images/1117472858836434944/FbWce7CZ_400x400.jpg"
+  },
+  {
     name: "Cal.com",
     avatarUrl:
       "https://pbs.twimg.com/profile_images/1729977047999524864/suW5VpQZ_400x400.jpg",
