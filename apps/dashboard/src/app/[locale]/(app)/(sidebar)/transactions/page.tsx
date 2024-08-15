@@ -1,6 +1,8 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
+import { CreateTransactionSheet } from "@/components/sheets/create-transaction-sheet";
 import { Table } from "@/components/tables/transactions";
+import { NoAccounts } from "@/components/tables/transactions/empty-states";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
@@ -89,19 +91,21 @@ export default async function Transactions({
         <TransactionsActions isEmpty={isEmpty} />
       </div>
 
-      <ErrorBoundary errorComponent={ErrorFallback}>
-        <Suspense fallback={<Loading />} key={loadingKey}>
-          <Table
-            filter={filter}
-            page={page}
-            sort={sort}
-            noAccounts={isEmpty}
-            query={query}
-          />
-        </Suspense>
-      </ErrorBoundary>
+      {isEmpty ? (
+        <div className="relative h-[calc(100vh-200px)] overflow-hidden">
+          <NoAccounts />
+          <Loading isEmpty />
+        </div>
+      ) : (
+        <ErrorBoundary errorComponent={ErrorFallback}>
+          <Suspense fallback={<Loading />} key={loadingKey}>
+            <Table filter={filter} page={page} sort={sort} query={query} />
+          </Suspense>
+        </ErrorBoundary>
+      )}
 
       <TransactionsModal defaultOpen={isEmpty && !hideConnectFlow} />
+      <CreateTransactionSheet />
     </>
   );
 }

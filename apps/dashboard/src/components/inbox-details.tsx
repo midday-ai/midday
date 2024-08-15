@@ -152,7 +152,7 @@ export function InboxDetails({
                         "rounded-full overflow-hidden",
                         showFallback && "hidden",
                       )}
-                      src={`https://t2.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://${item.website}&size=128`}
+                      src={`https://img.logo.dev/${item.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ`}
                       onError={() => {
                         setShowFallback(true);
                       }}
