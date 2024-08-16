@@ -51,7 +51,8 @@ client.defineJob({
         currency,
         vat:calculated_vat,
         attachments:transaction_attachments(*),
-        category:transaction_categories(id, name)
+        category:transaction_categories(id, name),
+        bank_account:bank_accounts(id, name)
       `,
         { count: "exact" },
       )
@@ -133,6 +134,7 @@ client.defineJob({
         transaction?.attachments?.length > 0 ? `${idx + 1}.pdf` : null,
         transaction?.attachments?.length > 0 ? "✔️" : "❌",
         transaction?.balance ?? "",
+        transaction?.bank_account?.name ?? "",
         transaction?.note ?? "",
       ]);
 
@@ -147,6 +149,7 @@ client.defineJob({
         "Attachment name",
         "Attachment",
         "Balance",
+        "Account",
         "Note",
       ],
     });
