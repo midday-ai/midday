@@ -450,3 +450,14 @@ export const filterQuerySchema = z.object({
     .optional()
     .describe("The categories to filter by"),
 });
+
+export const createTransactionSchema = z.object({
+  name: z.string(),
+  amount: z.number(),
+  currency: z.string(),
+  date: z.string(),
+  category_slug: z.string(),
+  account_id: z.string(),
+});
+
+export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;

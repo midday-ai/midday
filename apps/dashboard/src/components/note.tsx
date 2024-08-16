@@ -20,10 +20,12 @@ export function Note({ id, defaultValue, updateTransaction }: Props) {
       placeholder="Note"
       className="min-h-[100px] resize-none"
       onBlur={() => {
-        updateTransaction({
-          id,
-          note: value?.length > 0 ? value : null,
-        });
+        if (value !== defaultValue) {
+          updateTransaction({
+            id,
+            note: value?.length > 0 ? value : null,
+          });
+        }
       }}
       onChange={(evt) => setValue(evt.target.value)}
     />

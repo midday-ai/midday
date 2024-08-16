@@ -1,18 +1,26 @@
-import { createTeamSchema } from "@/actions/schema";
+import { findMatchingCategory } from "@/actions/ai/find-matching-category";
+import { createTransactionSchema } from "@/actions/schema";
 import { useCurrentLocale } from "@/locales/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
+import { Calendar } from "@midday/ui/calendar";
+import { cn } from "@midday/ui/cn";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import {
   Select,
   SelectContent,
@@ -20,54 +28,73 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@midday/ui/select";
-import { Textarea } from "@midday/ui/textarea";
+import { readStreamableValue } from "ai/rsc";
+import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { Attachments } from "../attachments";
+import { Note } from "../note";
+import { SelectAccount } from "../select-account";
+import { SelectCategory } from "../select-category";
 
-export function CreateTransactionForm() {
+export function CreateTransactionForm({ categories }: { categories: any }) {
   const locale = useCurrentLocale();
   const isSaving = false;
+  const [streaming, setStreaming] = useState(false);
 
-  //   const createTeam = useAction(createTeamAction);
-
-  const form = useForm<z.infer<typeof createTeamSchema>>({
-    resolver: zodResolver(createTeamSchema),
+  const form = useForm<z.infer<typeof createTransactionSchema>>({
+    resolver: zodResolver(createTransactionSchema),
     defaultValues: {
       name: "",
+      category_slug: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof createTeamSchema>) {
+  function onSubmit(values: z.infer<typeof createTransactionSchema>) {
     // createTeam.execute({ name: values.name, redirectTo: "/teams/invite" });
   }
+
+  const handleOnBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    // If the user is typing a query with multiple words, we want to stream the results
+
+    // If no category set and name run
+
+    const prompt = e.target.value;
+
+    setStreaming(true);
+
+    const { object } = await findMatchingCategory(
+      prompt,
+      categories?.map((category) => category.name),
+    );
+
+    let finalObject = {};
+
+    for await (const partialObject of readStreamableValue(object)) {
+      if (partialObject) {
+        finalObject = {
+          category: categories?.find(
+            (category) => category.name === partialObject?.category,
+          ),
+        };
+      }
+    }
+
+    if (finalObject?.category?.slug) {
+      console.log(finalObject.category.slug);
+      form.setValue("category_slug", finalObject.category.slug, {
+        shouldValidate: true,
+      });
+    }
+
+    setStreaming(false);
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  autoComplete="off"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck="false"
-                />
-              </FormControl>
-              <FormDescription>
-                This is the project display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="description"
@@ -75,11 +102,16 @@ export function CreateTransactionForm() {
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea className="resize-none" {...field} />
+                <Input
+                  {...field}
+                  onBlur={handleOnBlur}
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck="false"
+                />
               </FormControl>
-              <FormDescription>
-                Add a short description about the project.
-              </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
@@ -88,10 +120,10 @@ export function CreateTransactionForm() {
         <div className="flex space-x-4 mt-4">
           <FormField
             control={form.control}
-            name="estimate"
+            name="amount"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Time Estimate</FormLabel>
+              <FormItem className="w-full">
+                <FormLabel>Amount</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="0"
@@ -105,10 +137,7 @@ export function CreateTransactionForm() {
                     spellCheck="false"
                   />
                 </FormControl>
-                <FormDescription>
-                  Set a goal for how long your project should take to complete
-                  in hours.
-                </FormDescription>
+
                 <FormMessage />
               </FormItem>
             )}
@@ -116,10 +145,10 @@ export function CreateTransactionForm() {
 
           <FormField
             control={form.control}
-            name="status"
+            name="currency"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel>Status</FormLabel>
+                <FormLabel>Currency</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -130,8 +159,9 @@ export function CreateTransactionForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="usd">USD</SelectItem>
+                    <SelectItem value="eur">EUR</SelectItem>
+                    <SelectItem value="gbp">GBP</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -141,83 +171,126 @@ export function CreateTransactionForm() {
           />
         </div>
 
-        {/* <Collapsible open={isOpen}>
-          <FormItem className="flex justify-between items-center">
-            <FormLabel>Billable</FormLabel>
+        <div className="flex space-x-4 mt-4">
+          <FormField
+            control={form.control}
+            name="account"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Account</FormLabel>
+                <FormControl>
+                  <SelectAccount
+                    onChange={field.onChange}
+                    placeholder="Select account"
+                  />
+                </FormControl>
 
-            <FormField
-              control={form.control}
-              name="billable"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={(value) => {
-                        setIsOpen((prev) => !prev);
-                        field.onChange(value);
-                      }}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </FormItem>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <CollapsibleContent className="space-y-2 w-full">
-            <div className="flex space-x-4 mt-4">
-              <FormField
-                control={form.control}
-                name="rate"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Hourly Rate</FormLabel>
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <FormControl>
-                      <CurrencyInput
-                        className="flex h-9 w-full rounded-md border bg-transparent px-3 py-2 text-sm focus-visible:outline-none"
-                        onValueChange={(values) => {
-                          field.onChange(values.floatValue);
-                        }}
-                        currency={form.watch("currency")}
-                        locale={locale}
-                      />
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Select date</span>
+                        )}
+                      </Button>
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </FormItem>
+            )}
+          />
+        </div>
 
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem className="w-full">
-                    <FormLabel>Currency</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="max-h-[300px]">
-                        {uniqueCurrencies.map((currency) => (
-                          <SelectItem value={currency} key={currency}>
-                            {currency}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+        <div className="flex space-x-4 mt-4">
+          <FormField
+            control={form.control}
+            name="category_slug"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Category</FormLabel>
+                <FormControl>
+                  <SelectCategory
+                    onChange={field.onChange}
+                    selected={categories?.find(
+                      (category) => category.slug === field.value,
+                    )}
+                    hideLoading
+                  />
+                </FormControl>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="assign"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Assign</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                </Select>
+
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <Accordion type="multiple" defaultValue={["attachment"]}>
+          <AccordionItem value="attachment">
+            <AccordionTrigger>Attachment</AccordionTrigger>
+            <AccordionContent>
+              <Attachments id="" data={null} />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="note">
+            <AccordionTrigger>Note</AccordionTrigger>
+            <AccordionContent>
+              <Note
+                id=""
+                //    updateTransaction={updateTransaction}
               />
-            </div>
-          </CollapsibleContent>
-        </Collapsible> */}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
         <div className="fixed bottom-8 w-full sm:max-w-[455px] right-8">
           <Button className="w-full" disabled={isSaving}>

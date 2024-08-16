@@ -105,7 +105,7 @@ export default async function Transactions({
       )}
 
       <TransactionsModal defaultOpen={isEmpty && !hideConnectFlow} />
-      <CreateTransactionSheet />
+      <CreateTransactionSheet categories={categoriesData?.data} />
     </>
   );
 }

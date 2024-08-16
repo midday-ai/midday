@@ -1,13 +1,13 @@
 "use client";
 
+import { CreateTransactionForm } from "@/components/forms/create-transaction-form";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@midday/ui/sheet";
 import { useQueryState } from "nuqs";
 import React from "react";
-import { CreateTransactionForm } from "../forms/create-transaction-form";
 
-export function CreateTransactionSheet() {
+export function CreateTransactionSheet({ categories }: { categories: any }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [open, setOpen] = useQueryState("create");
 
@@ -24,7 +24,7 @@ export function CreateTransactionSheet() {
           <SheetHeader className="mb-8">
             <SheetTitle>Create Transaction</SheetTitle>
           </SheetHeader>
-          <CreateTransactionForm />
+          <CreateTransactionForm categories={categories} />
         </SheetContent>
       </Sheet>
     );
@@ -33,7 +33,7 @@ export function CreateTransactionSheet() {
   return (
     <Drawer open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="p-6">
-        <CreateTransactionForm />
+        <CreateTransactionForm categories={categories} />
       </DrawerContent>
     </Drawer>
   );
