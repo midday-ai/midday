@@ -50,7 +50,8 @@ client.defineJob({
         balance,
         currency,
         vat:calculated_vat,
-        attachments:transaction_attachments(*)
+        attachments:transaction_attachments(*),
+        category:transaction_categories(id, name)
       `,
         { count: "exact" },
       )
@@ -89,6 +90,7 @@ client.defineJob({
             });
 
             return {
+              id: transaction.id,
               name,
               blob: data,
             };
@@ -114,7 +116,7 @@ client.defineJob({
     const rows = data
       ?.sort((a, b) => a.date - b.date)
       .map((transaction, idx) => [
-        idx + 1,
+        transaction?.id,
         transaction.date,
         transaction.name,
         Intl.NumberFormat(locale, {
@@ -127,9 +129,11 @@ client.defineJob({
               currency: transaction.currency,
             }).format(transaction?.vat)
           : "",
+        transaction?.category?.name ?? "",
+        transaction?.attachments?.length > 0 ? `${idx + 1}.pdf` : null,
         transaction?.attachments?.length > 0 ? "✔️" : "❌",
-        transaction?.note ?? "",
         transaction?.balance ?? "",
+        transaction?.note ?? "",
       ]);
 
     const csv = await writeToString(rows, {
@@ -139,9 +143,11 @@ client.defineJob({
         "Description",
         "Amount",
         "VAT",
+        "Category",
+        "Attachment name",
         "Attachment",
-        "Note",
         "Balance",
+        "Note",
       ],
     });
 

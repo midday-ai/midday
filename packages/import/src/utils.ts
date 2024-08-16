@@ -1,6 +1,14 @@
-import { formatISO, isValid } from "date-fns";
+import { formatISO, isValid, parse } from "date-fns";
 
 export function formatDate(date: string) {
+  const parsedDate = parse(date, "dd/MM/yyyy", new Date());
+
+  if (isValid(new Date(parsedDate))) {
+    return formatISO(parsedDate, {
+      representation: "date",
+    });
+  }
+
   if (isValid(new Date(date))) {
     return formatISO(date, {
       representation: "date",

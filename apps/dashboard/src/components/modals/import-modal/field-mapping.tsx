@@ -47,8 +47,9 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
             for (const [field, value] of Object.entries(partialObject)) {
               if (
                 Object.keys(mappableFields).includes(field) &&
-                fileColumns.includes(value)
+                fileColumns.includes(value as string)
               ) {
+                console.log(field, value);
                 setValue(field as keyof typeof mappableFields, value, {
                   shouldValidate: true,
                 });
@@ -201,11 +202,14 @@ function FieldRow({
     if (field === "balance") {
       const amount = formatAmountValue({ amount: description });
 
+      // Always invert the amount for balance
+      const balance = +(amount * -1);
+
       if (currency) {
-        return formatAmount({ currency, amount });
+        return formatAmount({ currency, amount: balance });
       }
 
-      return amount;
+      return balance;
     }
 
     if (field === "description") {

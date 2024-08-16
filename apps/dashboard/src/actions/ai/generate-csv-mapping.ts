@@ -17,7 +17,9 @@ export async function generateCsvMapping(
       schema: z.object({
         date: z
           .string()
-          .describe("The date usually in the format ISO-8601 format"),
+          .describe(
+            "The date of the transaction, return it in ISO-8601 format",
+          ),
         description: z.string().describe("The text describing the transaction"),
         amount: z
           .number()
