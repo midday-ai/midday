@@ -17,8 +17,6 @@ export const getVatRateAction = authActionClient
 
     const { object } = await generateObject({
       model: openai("gpt-4o-mini"),
-      schemaName: "Vat",
-      schemaDescription: "A recipe for a dish.",
       schema: z.object({
         vat: z.number().min(5).max(100),
       }),
