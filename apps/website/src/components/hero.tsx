@@ -2,10 +2,11 @@
 
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import Spline from "@splinetool/react-spline";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { lazy, useEffect, useState } from "react";
+
+const Spline = lazy(() => import("@splinetool/react-spline"));
 
 export function Hero() {
   const [isPlaying, setPlaying] = useState(false);
