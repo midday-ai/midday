@@ -42,6 +42,7 @@ export function CreateTransactionSheet({
               userId={userId}
               accountId={accountId}
               currency={currency}
+              onCreate={() => setOpen(null)}
             />
           </ScrollArea>
         </SheetContent>
@@ -57,6 +58,7 @@ export function CreateTransactionSheet({
           userId={userId}
           accountId={accountId}
           currency={currency}
+          onCreate={() => setOpen(null)}
         />
       </DrawerContent>
     </Drawer>

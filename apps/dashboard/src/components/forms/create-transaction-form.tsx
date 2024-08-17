@@ -30,6 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { Select } from "@midday/ui/select";
 import { SubmitButton } from "@midday/ui/submit-button";
 import { Textarea } from "@midday/ui/textarea";
+import { useToast } from "@midday/ui/use-toast";
 import { readStreamableValue } from "ai/rsc";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
@@ -42,14 +43,28 @@ export function CreateTransactionForm({
   userId,
   accountId,
   currency,
+  onCreate,
 }: {
   currency: string;
   categories: any;
   userId: string;
   accountId: string;
+  onCreate: () => void;
 }) {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const createTransaction = useAction(createTransactionAction);
+
+  const createTransaction = useAction(createTransactionAction, {
+    onSuccess: () => {
+      onCreate();
+
+      toast({
+        title: "Transaction created",
+        description: "Transaction created successfully",
+        variant: "success",
+      });
+    },
+  });
 
   const form = useForm<z.infer<typeof createTransactionSchema>>({
     resolver: zodResolver(createTransactionSchema),
