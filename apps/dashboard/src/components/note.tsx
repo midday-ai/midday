@@ -13,17 +13,18 @@ export function Note({ id, defaultValue, updateTransaction }: Props) {
 
   return (
     <Textarea
-      name="feedback"
       defaultValue={defaultValue}
       required
       autoFocus
       placeholder="Note"
       className="min-h-[100px] resize-none"
       onBlur={() => {
-        updateTransaction({
-          id,
-          note: value?.length > 0 ? value : null,
-        });
+        if (value !== defaultValue) {
+          updateTransaction({
+            id,
+            note: value?.length > 0 ? value : null,
+          });
+        }
       }}
       onChange={(evt) => setValue(evt.target.value)}
     />

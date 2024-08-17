@@ -4,6 +4,7 @@ import { useCurrentLocale } from "@/locales/client";
 import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { Button } from "@midday/ui/button";
 import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
+import { CurrencyInput } from "@midday/ui/currency-input";
 import {
   Form,
   FormControl,
@@ -23,7 +24,6 @@ import {
 } from "@midday/ui/select";
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
-import { CurrencyInput } from "headless-currency-input";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -163,12 +163,10 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }) {
                     <FormLabel>Hourly Rate</FormLabel>
                     <FormControl>
                       <CurrencyInput
-                        className="flex h-9 w-full rounded-md border bg-transparent px-3 py-2 text-sm focus-visible:outline-none"
+                        value={field.value}
                         onValueChange={(values) => {
                           field.onChange(values.floatValue);
                         }}
-                        currency={form.watch("currency")}
-                        locale={locale}
                       />
                     </FormControl>
                     <FormMessage />

@@ -306,7 +306,7 @@ export type Attachment = {
   type: string;
   name: string;
   size: number;
-  path: string;
+  path: string[];
   transaction_id: string;
 };
 

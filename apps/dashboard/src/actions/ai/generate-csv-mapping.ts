@@ -16,7 +16,8 @@ export async function generateCsvMapping(
       model: openai("gpt-4o-mini"),
       schema: z.object({
         date: z
-          .string()
+          .date()
+          .transform((value) => new Date(value))
           .describe(
             "The date of the transaction, return it in ISO-8601 format",
           ),
@@ -30,7 +31,7 @@ export async function generateCsvMapping(
           .number()
           .optional()
           .describe(
-            "The balance of the account after the transaction, typically a cumulative value that changes with each transaction. It's usually a larger number compared to individual transaction amounts and always positive.",
+            "The balance of the account after the transaction, typically a cumulative value that changes with each transaction. It's usually a larger number compared to individual transaction amounts.",
           ),
       }),
       prompt: `

@@ -179,4 +179,8 @@ export const LogEvents = {
     name: "Category Delete",
     channel: "category",
   },
+  CreateTransaction: {
+    name: "Create Transaction",
+    channel: "transaction",
+  },
 };

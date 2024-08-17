@@ -22,6 +22,7 @@ type Props = {
   selected?: Selected;
   onChange: (selected: Selected) => void;
   headless?: boolean;
+  hideLoading?: boolean;
 };
 
 function transformCategory(category) {
@@ -33,7 +34,12 @@ function transformCategory(category) {
   };
 }
 
-export function SelectCategory({ selected, onChange, headless }: Props) {
+export function SelectCategory({
+  selected,
+  onChange,
+  headless,
+  hideLoading,
+}: Props) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
@@ -74,7 +80,7 @@ export function SelectCategory({ selected, onChange, headless }: Props) {
 
   const selectedValue = selected ? transformCategory(selected) : undefined;
 
-  if (!selected && isLoading) {
+  if (!selected && isLoading && !hideLoading) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <Spinner />

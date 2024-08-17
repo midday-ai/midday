@@ -3,8 +3,7 @@ import { Cookies } from "@/utils/constants";
 import { getTransactions } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { columns } from "./columns";
-import { NoAccounts, NoResults } from "./empty-states";
-import { Loading } from "./loading";
+import { NoResults } from "./empty-states";
 
 const pageSize = 50;
 const maxItems = 100000;
@@ -13,11 +12,10 @@ type Props = {
   filter: any;
   page: number;
   sort: any;
-  noAccounts: boolean;
   query: string | null;
 };
 
-export async function Table({ filter, page, sort, noAccounts, query }: Props) {
+export async function Table({ filter, page, sort, query }: Props) {
   const hasFilters = Object.values(filter).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
     cookies().get(Cookies.TransactionsColumns)?.value || "[]",
@@ -48,15 +46,6 @@ export async function Table({ filter, page, sort, noAccounts, query }: Props) {
   }
 
   if (!data?.length) {
-    if (noAccounts) {
-      return (
-        <div className="relative">
-          <NoAccounts />
-          <Loading isEmpty />
-        </div>
-      );
-    }
-
     if (query?.length) {
       return <NoResults hasFilters />;
     }
