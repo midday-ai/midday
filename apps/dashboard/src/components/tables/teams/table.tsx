@@ -246,8 +246,9 @@ export function TeamsSkeleton() {
 }
 
 export function DataTableHeader({ table }) {
+  const [isOpen, onOpenChange] = React.useState(false);
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <div className="flex items-center pb-4 space-x-4">
         <Input
           className="flex-1"
@@ -264,7 +265,7 @@ export function DataTableHeader({ table }) {
         <DialogTrigger asChild>
           <Button>Create team</Button>
         </DialogTrigger>
-        <CreateTeamModal />
+        <CreateTeamModal onOpenChange={onOpenChange} />
       </div>
     </Dialog>
   );
