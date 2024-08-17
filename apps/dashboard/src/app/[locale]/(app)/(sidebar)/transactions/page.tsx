@@ -41,11 +41,13 @@ export default async function Transactions({
   } = searchParamsCache.parse(searchParams);
 
   // Move this in a suspense
-  const [accountsData, categoriesData, teamMembersData] = await Promise.all([
-    getTeamBankAccounts(),
-    getCategories(),
-    getTeamMembers(),
-  ]);
+  const [accountsData, categoriesData, teamMembersData, userData] =
+    await Promise.all([
+      getTeamBankAccounts(),
+      getCategories(),
+      getTeamMembers(),
+      getUser(),
+    ]);
 
   const filter = {
     attachments,
@@ -57,7 +59,6 @@ export default async function Transactions({
   };
 
   const sort = searchParams?.sort?.split(":");
-  const user = await getUser();
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
   const isOpen = Boolean(searchParams.step);
@@ -108,7 +109,7 @@ export default async function Transactions({
       <TransactionsModal defaultOpen={isEmpty && !hideConnectFlow} />
       <CreateTransactionSheet
         categories={categoriesData?.data}
-        userId={user?.data?.id}
+        userId={userData?.data?.id}
         accountId={accountsData?.data?.at(0)?.id}
         currency={accountsData?.data?.at(0)?.currency}
       />
