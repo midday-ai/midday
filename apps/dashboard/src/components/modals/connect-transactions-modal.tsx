@@ -149,6 +149,7 @@ export function ConnectTransactionsModal({
         step: null,
         countryCode: null,
         q: null,
+        ref: null,
       },
       {
         // NOTE: Rerender so the overview modal is visible

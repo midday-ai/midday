@@ -11,6 +11,7 @@ import {
   getCategories,
   getTeamBankAccounts,
   getTeamMembers,
+  getUser,
 } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -56,7 +57,7 @@ export default async function Transactions({
   };
 
   const sort = searchParams?.sort?.split(":");
-
+  const user = await getUser();
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
   const isOpen = Boolean(searchParams.step);
@@ -105,7 +106,12 @@ export default async function Transactions({
       )}
 
       <TransactionsModal defaultOpen={isEmpty && !hideConnectFlow} />
-      <CreateTransactionSheet categories={categoriesData?.data} />
+      <CreateTransactionSheet
+        categories={categoriesData?.data}
+        userId={user?.data?.id}
+        accountId={accountsData?.data?.at(0)?.id}
+        currency={accountsData?.data?.at(0)?.currency}
+      />
     </>
   );
 }

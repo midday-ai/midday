@@ -1,6 +1,6 @@
+import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
-import { useI18n } from "@/locales/client";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
 import {
@@ -47,10 +47,10 @@ export function TransactionDetails({
   const [data, setData] = useState(initialData);
   const [transactionId, setTransactionId] = useQueryState("id");
   const { toast } = useToast();
-  const t = useI18n();
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
   const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
+  const createAttachments = useAction(createAttachmentsAction);
 
   useHotkeys("esc", () => setTransactionId(null));
 
@@ -257,7 +257,20 @@ export function TransactionDetails({
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
           <AccordionContent>
-            <Attachments id={data?.id} data={data?.attachments} />
+            <Attachments
+              prefix={data?.id}
+              data={data?.attachments}
+              onUpload={(files) => {
+                if (files) {
+                  createAttachments.execute(
+                    files.map((file) => ({
+                      ...file,
+                      transaction_id: data?.id,
+                    })),
+                  );
+                }
+              }}
+            />
           </AccordionContent>
         </AccordionItem>
 

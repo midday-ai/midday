@@ -1,6 +1,5 @@
 "use client";
 
-import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import { deleteAttachmentAction } from "@/actions/delete-attachment-action";
 import { useUpload } from "@/hooks/use-upload";
 import { createClient } from "@midday/supabase/client";
@@ -8,30 +7,36 @@ import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
 import { stripSpecialCharacters } from "@midday/utils";
-import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { AttachmentItem } from "./attachment-item";
 import { SelectAttachment } from "./select-attachment";
 
 type Attachment = {
+  id?: string;
   type: string;
   name: string;
   size: number;
 };
 
-export function Attachments({ id, data }) {
+type ReturnedAttachment = {
+  path: string[];
+  name: string;
+  size: number;
+  type: string;
+};
+
+type Props = {
+  prefix: string;
+  data?: Attachment[];
+  onUpload: (files: ReturnedAttachment[]) => void;
+};
+
+export function Attachments({ prefix, data, onUpload }: Props) {
   const supabase = createClient();
   const { toast } = useToast();
   const [files, setFiles] = useState<Attachment[]>([]);
   const { uploadFile } = useUpload();
-
-  const createAttachments = useAction(createAttachmentsAction, {
-    onSuccess: ({ data }) => {
-      const uniqueFiles = new Set([...files, ...(data ?? [])]);
-      setFiles([...uniqueFiles]);
-    },
-  });
 
   const handleOnDelete = async (id: string) => {
     setFiles((files) => files.filter((file) => file?.id !== id));
@@ -57,7 +62,7 @@ export function Attachments({ id, data }) {
 
         const { path } = await uploadFile({
           bucket: "vault",
-          path: [userData?.team_id, "transactions", id, filename],
+          path: [userData?.team_id, "transactions", prefix, filename],
           file: acceptedFile,
         });
 
@@ -65,18 +70,16 @@ export function Attachments({ id, data }) {
           path,
           name: filename,
           size: acceptedFile.size,
-          transaction_id: id,
           type: acceptedFile.type,
         };
       }),
     );
 
-    createAttachments.execute(uploadedFiles);
+    onUpload(uploadedFiles);
   };
 
   const handleOnSelectFile = (file) => {
     const item = {
-      transaction_id: id,
       name: file.name,
       size: file.data.size,
       type: file.data.content_type,
@@ -84,7 +87,7 @@ export function Attachments({ id, data }) {
     };
 
     setFiles((prev) => [item, ...prev]);
-    createAttachments.execute([item]);
+    onUpload([item]);
   };
 
   useEffect(() => {
@@ -152,10 +155,10 @@ export function Attachments({ id, data }) {
       </div>
 
       <ul className="mt-4 space-y-4">
-        {files.map((file) => (
+        {files.map((file, idx) => (
           <AttachmentItem
-            key={file.name}
-            id={id}
+            key={`${file.name}-${idx}`}
+            id={file.name}
             file={file}
             onDelete={() => handleOnDelete(file?.id)}
           />

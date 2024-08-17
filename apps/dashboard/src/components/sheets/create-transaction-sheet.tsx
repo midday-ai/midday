@@ -3,11 +3,22 @@
 import { CreateTransactionForm } from "@/components/forms/create-transaction-form";
 import { Drawer, DrawerContent } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
+import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@midday/ui/sheet";
 import { useQueryState } from "nuqs";
 import React from "react";
 
-export function CreateTransactionSheet({ categories }: { categories: any }) {
+export function CreateTransactionSheet({
+  categories,
+  userId,
+  accountId,
+  currency,
+}: {
+  categories: any;
+  userId: string;
+  accountId: string;
+  currency: string;
+}) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [open, setOpen] = useQueryState("create");
 
@@ -24,7 +35,15 @@ export function CreateTransactionSheet({ categories }: { categories: any }) {
           <SheetHeader className="mb-8">
             <SheetTitle>Create Transaction</SheetTitle>
           </SheetHeader>
-          <CreateTransactionForm categories={categories} />
+
+          <ScrollArea className="h-full p-0 pb-[100px]" hideScrollbar>
+            <CreateTransactionForm
+              categories={categories}
+              userId={userId}
+              accountId={accountId}
+              currency={currency}
+            />
+          </ScrollArea>
         </SheetContent>
       </Sheet>
     );
@@ -33,7 +52,12 @@ export function CreateTransactionSheet({ categories }: { categories: any }) {
   return (
     <Drawer open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerContent className="p-6">
-        <CreateTransactionForm categories={categories} />
+        <CreateTransactionForm
+          categories={categories}
+          userId={userId}
+          accountId={accountId}
+          currency={currency}
+        />
       </DrawerContent>
     </Drawer>
   );

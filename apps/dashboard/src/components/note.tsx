@@ -13,7 +13,6 @@ export function Note({ id, defaultValue, updateTransaction }: Props) {
 
   return (
     <Textarea
-      name="feedback"
       defaultValue={defaultValue}
       required
       autoFocus

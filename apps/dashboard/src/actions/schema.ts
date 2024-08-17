@@ -456,8 +456,20 @@ export const createTransactionSchema = z.object({
   amount: z.number(),
   currency: z.string(),
   date: z.string(),
-  category_slug: z.string(),
-  account_id: z.string(),
+  bank_account_id: z.string(),
+  assigned_id: z.string().optional(),
+  category_slug: z.string().optional(),
+  note: z.string().optional(),
+  attachments: z
+    .array(
+      z.object({
+        path: z.array(z.string()),
+        name: z.string(),
+        size: z.number(),
+        type: z.string(),
+      }),
+    )
+    .optional(),
 });
 
 export type CreateTransactionSchema = z.infer<typeof createTransactionSchema>;
