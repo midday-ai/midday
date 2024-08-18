@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import countries from "./countries.json";
 import flags from "./country-flag";
+import { EU_COUNTRY_CODES } from "./eu-countries";
 
 export function getCountryCode() {
   return headers().get("x-vercel-ip-country") || "SE";
@@ -25,9 +26,13 @@ export function getCountryInfo() {
 }
 
 export function isEU() {
-  const continent = headers().get("x-vercel-ip-continent") || "EU";
+  const countryCode = headers().get("x-vercel-ip-country");
 
-  return continent === "EU";
+  if (countryCode && EU_COUNTRY_CODES.includes(countryCode)) {
+    return true;
+  }
+
+  return false;
 }
 
 export function getCountry() {
