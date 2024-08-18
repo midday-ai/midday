@@ -1,33 +1,10 @@
-"use client";
-
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import Spline from "@splinetool/react-spline";
-import { motion } from "framer-motion";
+import Spline from "@splinetool/react-spline/next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
 export function Hero() {
-  const [isPlaying, setPlaying] = useState(false);
-
-  useEffect(() => {
-    setPlaying(true);
-  }, []);
-
   return (
-    <motion.section
-      className="md:mt-[250px] relative md:min-h-[375px]"
-      onViewportEnter={() => {
-        if (!isPlaying) {
-          setPlaying(true);
-        }
-      }}
-      onViewportLeave={() => {
-        if (isPlaying) {
-          setPlaying(false);
-        }
-      }}
-    >
+    <section className="md:mt-[250px] relative md:min-h-[375px]">
       <div className="hero-slide-up flex flex-col mt-[240px]">
         <Link href="/updates/july-product-updates">
           <Button
@@ -87,19 +64,17 @@ export function Hero() {
       </div>
 
       <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
-        <div className={cn(isPlaying && "animate-webgl-scale-in-fade")}>
-          {isPlaying && (
-            <Spline
-              scene="https://prod.spline.design/HAMm7mSDmXF4PVqs/scene.splinecode"
-              style={{
-                width: "auto",
-                height: "auto",
-                background: "transparent",
-              }}
-            />
-          )}
+        <div className="animate-webgl-scale-in-fade">
+          <Spline
+            scene="https://prod.spline.design/I1f8fchdJE1WyzX4/scene.splinecode"
+            style={{
+              width: "auto",
+              height: "auto",
+              background: "transparent",
+            }}
+          />
         </div>
       </div>
-    </motion.section>
+    </section>
   );
 }
