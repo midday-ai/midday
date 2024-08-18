@@ -159,6 +159,10 @@ export function CreateTransactionForm({
                     value={field.value}
                     onValueChange={(values) => {
                       field.onChange(values.floatValue);
+
+                      if (values.floatValue && values.floatValue > 0) {
+                        form.setValue("category_slug", "income");
+                      }
                     }}
                   />
                 </FormControl>

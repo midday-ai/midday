@@ -5,12 +5,5 @@ export function CurrencyInput({
   thousandSeparator = true,
   ...props
 }: NumericFormatProps) {
-  return (
-    <NumericFormat
-      thousandSeparator
-      allowNegative={false}
-      customInput={Input}
-      {...props}
-    />
-  );
+  return <NumericFormat thousandSeparator customInput={Input} {...props} />;
 }
