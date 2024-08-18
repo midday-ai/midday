@@ -1,6 +1,7 @@
 "use client";
 
 import { generateFilters } from "@/actions/ai/filters/generate-filters";
+import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -411,7 +412,10 @@ export function TransactionsSearchFilter({
                       });
                     }}
                   >
-                    {account.name} ({account.currency})
+                    {formatAccountName({
+                      name: account.name,
+                      currency: account.currency,
+                    })}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { SectionType } from "@/components/filter";
+import { formatAccountName } from "@/utils/format";
 import {
   endOfDay,
   endOfMonth,
@@ -139,9 +140,10 @@ export function transactionSections({ categories, accounts }) {
       renderLabel: (value) => value.name,
       options: accounts.map((account) => ({
         id: account.id,
-        label: account?.currency
-          ? `${account.name} (${account.currency})`
-          : account.name,
+        label: formatAccountName({
+          name: account.name,
+          currency: account.currency,
+        }),
       })),
     },
   ];

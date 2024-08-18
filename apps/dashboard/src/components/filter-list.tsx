@@ -1,3 +1,4 @@
+import { formatAccountName } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -83,7 +84,10 @@ export function FilterList({
         return value
           .map((id) => {
             const account = accounts?.find((account) => account.id === id);
-            return `${account.name} (${account.currency})`;
+            return formatAccountName({
+              name: account?.name,
+              currency: account?.currency,
+            });
           })
           .join(", ");
       }

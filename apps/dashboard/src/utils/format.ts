@@ -90,3 +90,14 @@ export function getInitials(value: string) {
 
   return formatted.charAt(0);
 }
+
+export function formatAccountName({
+  name,
+  currency,
+}: { name?: string; currency?: string }) {
+  if (currency) {
+    return `${name} (${currency})`;
+  }
+
+  return name;
+}

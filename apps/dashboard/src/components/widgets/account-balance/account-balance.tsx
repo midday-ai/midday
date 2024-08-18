@@ -2,6 +2,7 @@
 
 import { AddAccountButton } from "@/components/add-account-button";
 import { FormatAmount } from "@/components/format-amount";
+import { formatAccountName } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import Image from "next/image";
 import { useState } from "react";
@@ -48,7 +49,10 @@ export function AccountBalance({ data }) {
           )}
 
           <span className="text-xs font-medium text-[#606060]">
-            {activeAccount?.name} ({activeAccount.currency})
+            {formatAccountName({
+              name: activeAccount.name,
+              currency: activeAccount.currency,
+            })}
           </span>
         </div>
       </div>

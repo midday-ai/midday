@@ -1,4 +1,5 @@
 import { createBankAccountAction } from "@/actions/create-bank-account-action";
+import { formatAccountName } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import {
   getCurrentUserTeamQuery,
@@ -76,9 +77,10 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
       renderSelectedItem={(selectedItem) => {
         return (
           <TransactionBankAccount
-            name={`${selectedItem.label} ${
-              selectedItem.currency ? `(${selectedItem.currency})` : ""
-            }`}
+            name={formatAccountName({
+              name: selectedItem.label,
+              currency: selectedItem.currency,
+            })}
             logoUrl={selectedItem.logo}
           />
         );
@@ -93,7 +95,10 @@ export function SelectAccount({ placeholder, onChange, value }: Props) {
       renderListItem={({ item }) => {
         return (
           <TransactionBankAccount
-            name={`${item.label} ${item.currency ? `(${item.currency})` : ""}`}
+            name={formatAccountName({
+              name: item.label,
+              currency: item.currency,
+            })}
             logoUrl={item.logo}
           />
         );
