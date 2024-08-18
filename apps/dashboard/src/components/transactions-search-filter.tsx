@@ -327,7 +327,6 @@ export function TransactionsSearchFilter({
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.Attachments className="mr-2 h-4 w-4" />
-
               <span>Attachments</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -358,7 +357,6 @@ export function TransactionsSearchFilter({
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.Category className="mr-2 h-4 w-4" />
-
               <span>Categories</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -391,7 +389,6 @@ export function TransactionsSearchFilter({
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.Accounts className="mr-2 h-4 w-4" />
-
               <span>Accounts</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>

@@ -194,11 +194,11 @@ export function NotificationCenter() {
   } = useNotifications();
 
   const unreadNotifications = notifications.filter(
-    (notification) => !notification.read
+    (notification) => !notification.read,
   );
 
   const archivedNotifications = notifications.filter(
-    (notification) => notification.read
+    (notification) => notification.read,
   );
 
   useEffect(() => {
@@ -222,7 +222,8 @@ export function NotificationCenter() {
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        className="h-[535px] w-screen md:w-[400px] mr-7 p-0 overflow-hidden relative"
+        className="h-[535px] w-screen md:w-[400px] p-0 overflow-hidden relative"
+        align="end"
         sideOffset={10}
       >
         <Tabs defaultValue="inbox">

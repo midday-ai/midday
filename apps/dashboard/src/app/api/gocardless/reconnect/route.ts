@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   const supabase = createClient();
   const requestUrl = new URL(req.url);
   const id = requestUrl.searchParams.get("id");
-  const referenceId = requestUrl.searchParams.get("reference_id");
+  const referenceId = requestUrl.searchParams.get("reference_id") ?? undefined;
   const isDesktop = requestUrl.searchParams.get("desktop");
 
   if (id) {

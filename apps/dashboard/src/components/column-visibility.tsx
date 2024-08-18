@@ -16,12 +16,6 @@ export function ColumnVisibility({ disabled }: { disabled?: boolean }) {
       </PopoverTrigger>
 
       <PopoverContent className="w-[200px] p-0" align="end" sideOffset={8}>
-        <div className="border-b-[1px] p-4">
-          <p className="font-medium text-sm peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            Hide columns
-          </p>
-        </div>
-
         <div className="flex flex-col p-4 space-y-2 max-h-[352px] overflow-auto">
           {columns
             .filter((column: any) =>
