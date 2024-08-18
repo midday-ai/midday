@@ -163,6 +163,14 @@ export function CreateTransactionForm({
                       if (values.floatValue && values.floatValue > 0) {
                         form.setValue("category_slug", "income");
                       }
+
+                      if (
+                        category === "income" &&
+                        values.floatValue !== undefined &&
+                        values.floatValue < 0
+                      ) {
+                        form.setValue("category_slug", undefined);
+                      }
                     }}
                   />
                 </FormControl>
