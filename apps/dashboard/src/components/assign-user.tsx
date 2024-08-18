@@ -21,7 +21,7 @@ type User = {
 };
 
 type Props = {
-  selectedId: string;
+  selectedId?: string;
   isLoading: boolean;
   onSelect: (user?: User) => void;
 };
@@ -42,7 +42,7 @@ export function AssignUser({ selectedId, isLoading, onSelect }: Props) {
       if (userData?.team_id) {
         const { data: membersData } = await getTeamMembersQuery(
           supabase,
-          userData.team_id
+          userData.team_id,
         );
 
         setUsers(membersData?.map(({ user }) => user));

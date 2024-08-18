@@ -20,11 +20,18 @@ export function FeedbackForm() {
   return (
     <Popover>
       <PopoverTrigger asChild className="hidden md:block">
-        <Button variant="outline" className="rounded-full font-normal">
+        <Button
+          variant="outline"
+          className="rounded-full font-normal h-[32px] p-0 px-3"
+        >
           Feedback
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] h-[200px]" sideOffset={10}>
+      <PopoverContent
+        className="w-[320px] h-[200px]"
+        sideOffset={10}
+        align="end"
+      >
         {action.status === "hasSucceeded" ? (
           <div className="flex items-center justify-center flex-col space-y-1 mt-10 text-center">
             <p className="font-medium text-sm">Thank you for your feedback!</p>

@@ -7,7 +7,7 @@ type Props = {
 
 export function AssignedUser({ avatarUrl, fullName }: Props) {
   return (
-    <div className="flex space-x-2">
+    <div className="flex space-x-2 items-center">
       {avatarUrl && (
         <Avatar className="h-5 w-5">
           <AvatarImage src={avatarUrl} alt={fullName ?? ""} />
