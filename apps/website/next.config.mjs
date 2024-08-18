@@ -17,9 +17,6 @@ const config = {
       },
     ],
   },
-  experimental: {
-    ppr: true,
-  },
   async redirects() {
     return [
       {
