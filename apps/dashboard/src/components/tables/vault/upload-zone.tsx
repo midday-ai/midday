@@ -133,12 +133,13 @@ export function UploadZone({ children }) {
         });
       }
     },
-    maxSize: 3000000, // 3MB
+    maxSize: 8000000, // 8MB
     accept: {
       "image/png": [".png"],
       "image/jpeg": [".jpg", ".jpeg"],
       "application/pdf": [".pdf"],
       "application/zip": [".zip"],
+      "text/csv": [".csv"],
     },
   });
 

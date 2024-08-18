@@ -540,6 +540,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     basePath = `${basePath}/${path}`;
   }
 
+  // TODO: Change to real sql query and index
   const { data } = await supabase.storage.from("vault").list(basePath, {
     sortBy: { column: "name", order: "asc" },
   });

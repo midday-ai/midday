@@ -1,6 +1,6 @@
 "use client";
 
-import { VaultContext, VaultProps, createVaultStore } from "./store";
+import { VaultContext, type VaultProps, createVaultStore } from "./store";
 
 type VaultProviderProps = React.PropsWithChildren<VaultProps>;
 

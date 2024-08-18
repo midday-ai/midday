@@ -39,7 +39,7 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
     deleteItem: (id) =>
       set((state) => ({
         data: state.data.filter((item) =>
-          item.isFolder ? item.name !== id : item.id !== id
+          item.isFolder ? item.name !== id : item.id !== id,
         ),
       })),
 

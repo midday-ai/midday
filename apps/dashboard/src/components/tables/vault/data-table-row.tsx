@@ -73,7 +73,14 @@ export const translatedFolderName = (t: any, folder: string) => {
   }
 };
 
-function RowTitle({ isEditing, name: initialName, path, href }) {
+type Props = {
+  isEditing: boolean;
+  name: string;
+  path: string;
+  href: string;
+};
+
+function RowTitle({ isEditing, name: initialName, path, href }: Props) {
   const t = useI18n();
   const { toast } = useToast();
   const [name, setName] = useState(initialName ?? "Untitled Folder");
@@ -195,7 +202,7 @@ export function DataTableRow({ data, teamId }) {
           <TableRow className="h-[45px] cursor-default">
             <TableCell>
               <HoverCard openDelay={200}>
-                <HoverCardTrigger>
+                <HoverCardTrigger asChild>
                   <div className="flex items-center space-x-2">
                     <FileIcon
                       mimetype={data?.metadata?.mimetype}

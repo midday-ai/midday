@@ -1,17 +1,16 @@
 import { Table } from "@/components/tables/vault";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Vault | Midday",
 };
 
-export default function Vault({ params }) {
-  const disableActions = [
-    "exports",
-    "inbox",
-    "imports",
-    "transactions",
-  ].includes(params?.folders?.at(0));
+type Props = {
+  params: {
+    folders: string[];
+  };
+};
 
-  return <Table folders={params.folders} disableActions={disableActions} />;
+export default function Vault({ params }: Props) {
+  return <Table folders={params.folders ?? []} />;
 }
