@@ -15,7 +15,7 @@ export const createFolderAction = authActionClient
       channel: LogEvents.CreateFolder.channel,
     },
   })
-  .action(async ({ parsedInput: { value }, ctx: { user, supabase } }) => {
+  .action(async ({ parsedInput: value, ctx: { user, supabase } }) => {
     const data = await createFolder(supabase, {
       bucket: "vault",
       path: [user.team_id, value.path],
