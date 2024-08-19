@@ -31,8 +31,8 @@ export async function VaultActivity() {
         id: file.id,
         name: file.name,
         path: [...file.path_tokens, filename],
-        size: file.metadata.size,
-        mimetype: file.metadata.mimetype,
+        size: file.metadata?.size ?? 0,
+        mimetype: file.metadata?.mimetype,
         createdAt: file.created_at,
       };
     });

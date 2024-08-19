@@ -530,6 +530,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     .from("objects")
     .select("*")
     .eq("team_id", teamId)
+    .eq("path", path || teamId)
     .eq("bucket_id", "vault")
     .limit(limit)
     .order("name", { ascending: true });
@@ -543,34 +544,20 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
         { name: "transactions", isFolder: true },
       ];
 
-  // We get all the files in the current "folder" we know if it's a folder if it includes the .emptyFolderPlaceholder file name
-  // Otherwise we need to get all folders from the path_tokens array, and only add if they are not already in the array
-  // We need to sort the data so that folders are always at the top of the list
-
-  const folders = Array.from(
-    new Set(
-      data?.map((item) => item.path_tokens?.at(-2)).filter(Boolean) || [],
-    ),
-  );
-
-  // const filteredData = (data ?? [])
-  //   .map((item) => ({
-  //     ...item,
-  //     name:
-  //       item.path_tokens?.at(-1) === EMPTY_FOLDER_PLACEHOLDER_FILE_NAME
-  //         ? item.path_tokens?.at(-2)
-  //         : item.path_tokens?.at(-1),
-  //     isFolder: item.path_tokens?.at(-1) === EMPTY_FOLDER_PLACEHOLDER_FILE_NAME,
-  //   }))
-  //   .sort((a, b) => {
-  //     if (a.isFolder && !b.isFolder) return -1;
-  //     if (!a.isFolder && b.isFolder) return 1;
-  //     return 0;
-  //   });
-
-  // console.log("filteredData", filteredData);
-
-  const filteredData = [];
+  const filteredData = (data ?? [])
+    .map((item) => ({
+      ...item,
+      name:
+        item.path_tokens?.at(-1) === ".folderPlaceholder"
+          ? item.path_tokens?.at(-2)
+          : item.path_tokens?.at(-1),
+      isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
+    }))
+    .sort((a, b) => {
+      if (a.isFolder && !b.isFolder) return -1;
+      if (!a.isFolder && b.isFolder) return 1;
+      return 0;
+    });
 
   const mergedMap = new Map(
     [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj]),
