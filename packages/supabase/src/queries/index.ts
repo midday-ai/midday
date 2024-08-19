@@ -530,7 +530,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     .from("objects")
     .select("*")
     .eq("team_id", teamId)
-    .eq("path", path || teamId)
+    .eq("parent_path", path || teamId)
     .eq("bucket_id", "vault")
     .limit(limit)
     .order("name", { ascending: true });
@@ -553,6 +553,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
           : item.path_tokens?.at(-1),
       isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
     }))
+    .filter((item) => item.name !== ".emptyFolderPlaceholder")
     .sort((a, b) => {
       if (a.isFolder && !b.isFolder) return -1;
       if (!a.isFolder && b.isFolder) return 1;
@@ -576,6 +577,7 @@ export async function getVaultActivityQuery(supabase: Client, teamId: string) {
     .select("*")
     .eq("team_id", teamId)
     .limit(20)
+    .not("name", "ilike", "%.folderPlaceholder")
     .order("created_at", { ascending: false });
 }
 
