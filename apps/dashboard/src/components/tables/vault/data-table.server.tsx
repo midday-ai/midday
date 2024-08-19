@@ -10,7 +10,7 @@ type Props = {
 };
 
 export async function DataTableServer({ folders }: Props) {
-  const path = folders?.join("/");
+  const path = folders.at(-1);
 
   const { data } = await getVault({
     path: path && decodeURIComponent(path),

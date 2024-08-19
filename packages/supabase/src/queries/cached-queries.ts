@@ -245,7 +245,7 @@ export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
 };
 
 export const getVault = async (params: GetVaultParams) => {
-  const supabase = createClient();
+  const supabase = createClient({ db: { schema: "storage" } });
 
   const user = await getUser();
   const teamId = user?.data?.team_id;

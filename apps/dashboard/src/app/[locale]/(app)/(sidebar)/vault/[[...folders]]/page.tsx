@@ -6,11 +6,18 @@ export const metadata: Metadata = {
 };
 
 type Props = {
-  params: {
-    folders: string[];
-  };
+  params: { folders: string[] };
 };
 
 export default function Vault({ params }: Props) {
-  return <Table folders={params.folders ?? []} />;
+  const disableActions = [
+    "exports",
+    "inbox",
+    "imports",
+    "transactions",
+  ].includes(params.folders?.[0] ?? "");
+
+  return (
+    <Table folders={params.folders ?? []} disableActions={disableActions} />
+  );
 }

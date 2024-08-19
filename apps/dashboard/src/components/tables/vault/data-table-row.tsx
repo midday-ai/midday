@@ -217,7 +217,7 @@ export function DataTableRow({ data, teamId }) {
                       path={folderPath}
                     />
 
-                    {data?.metadata?.size && (
+                    {data?.metadata?.size > 0 && (
                       <span className="text-[#878787]">
                         {formatSize(data.metadata.size)}
                       </span>
