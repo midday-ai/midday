@@ -76,10 +76,18 @@ export default async function Transactions({
         <TransactionsSearchFilter
           placeholder="Search or type filter"
           validFilters={VALID_FILTERS}
-          categories={categoriesData?.data?.map((category) => ({
-            slug: category.slug,
-            name: category.name,
-          }))}
+          categories={[
+            ...categoriesData?.data?.map((category) => ({
+              slug: category.slug,
+              name: category.name,
+            })),
+            {
+              // TODO, move this to the database
+              id: "uncategorized",
+              name: "Uncategorized",
+              slug: "uncategorized",
+            },
+          ]}
           accounts={accountsData?.data?.map((account) => ({
             id: account.id,
             name: account.name,

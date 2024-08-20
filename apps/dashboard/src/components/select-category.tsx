@@ -55,7 +55,15 @@ export function SelectCategory({
         });
 
         if (response.data) {
-          setData(response.data.map(transformCategory));
+          setData([
+            ...response.data.map(transformCategory),
+            {
+              id: "uncategorized",
+              label: "Uncategorized",
+              color: "#606060",
+              slug: "uncategorized",
+            },
+          ]);
         }
       }
 
