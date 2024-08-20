@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { FormatAmount } from "../format-amount";
+import { AnimatedNumber } from "../animated-number";
 import { AreaChart } from "./area-chart";
 import { burnRateExamleData } from "./data";
 
@@ -44,8 +44,8 @@ export async function BurnRateChart({
     <div className={cn(disabled && "pointer-events-none select-none")}>
       <div className="space-y-2 mb-14">
         <h1 className="text-4xl font-mono">
-          <FormatAmount
-            amount={calculateAvgBurnRate(burnRateData)}
+          <AnimatedNumber
+            value={calculateAvgBurnRate(burnRateData)}
             currency={currency}
           />
         </h1>

@@ -1,5 +1,6 @@
 import { getMetrics } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
+import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";
 import { chartExampleData } from "./data";
@@ -27,8 +28,8 @@ export async function ProfitRevenueChart({
     <div className={cn(disabled && "pointer-events-none select-none")}>
       <div className="space-y-2 mb-14 inline-block">
         <h1 className="text-4xl font-mono">
-          <FormatAmount
-            amount={data?.summary?.currentTotal ?? 0}
+          <AnimatedNumber
+            value={data?.summary?.currentTotal ?? 0}
             currency={data?.summary?.currency ?? "USD"}
           />
         </h1>
