@@ -247,11 +247,6 @@ export function DataTableRow({ data, teamId }) {
             </TableCell>
             <TableCell>
               <div className="flex justify-between">
-                <span>
-                  {data?.updated_at
-                    ? format(new Date(data.updated_at), "Pp")
-                    : "-"}
-                </span>
                 <DropdownMenu>
                   <DropdownMenuTrigger>
                     <Icons.MoreHoriz />

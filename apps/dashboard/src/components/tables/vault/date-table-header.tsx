@@ -5,8 +5,7 @@ export function DataTableHeader() {
     <TableHeader className="border-0">
       <TableRow>
         <TableHead className="w-[60%]">Name</TableHead>
-        <TableHead className="w-[15%]">Created at</TableHead>
-        <TableHead className="w-full">Last modified at</TableHead>
+        <TableHead className="w-full">Created at</TableHead>
       </TableRow>
     </TableHeader>
   );

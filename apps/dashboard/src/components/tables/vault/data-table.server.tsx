@@ -2,15 +2,15 @@ import { VaultProvider } from "@/store/vault/provider";
 import { getUser, getVault } from "@midday/supabase/cached-queries";
 import { DataTable } from "./data-table";
 import { EmptyTable } from "./empty-table";
-import { Test } from "./test";
 import { UploadZone } from "./upload-zone";
+import { VaultActions } from "./vault-actions";
 
 type Props = {
   folders: string[];
   disableActions: boolean;
 };
 
-export async function DataTableServer({ folders }: Props) {
+export async function DataTableServer({ folders, disableActions }: Props) {
   const path = folders.at(-1);
 
   const { data } = await getVault({
@@ -21,12 +21,15 @@ export async function DataTableServer({ folders }: Props) {
 
   return (
     <VaultProvider data={data}>
-      <Test />
-      <div className="mt-6 h-[calc(100vh-400px)] border overflow-scroll relative">
-        <UploadZone>
-          <DataTable teamId={userData.team_id} />
-          {data.length === 0 && <EmptyTable type={path} />}
-        </UploadZone>
+      <div className="relative">
+        <VaultActions disableActions={disableActions} />
+
+        <div className="mt-6 h-[calc(100vh-400px)] border overflow-scroll relative">
+          <UploadZone>
+            <DataTable teamId={userData.team_id} />
+            {data.length === 0 && <EmptyTable type={path} />}
+          </UploadZone>
+        </div>
       </div>
     </VaultProvider>
   );

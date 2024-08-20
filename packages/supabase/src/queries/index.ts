@@ -529,10 +529,10 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { data } = await supabase
     .from("documents")
     .select("*")
-    // .eq("team_id", teamId)
-    // .eq("parent_id", path || teamId)
+    .eq("team_id", teamId)
+    .eq("parent_id", path || teamId)
     .limit(limit)
-    .order("name", { ascending: true });
+    .order("created_at", { ascending: true });
 
   const defaultFolders = path
     ? []
@@ -543,21 +543,14 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
         { name: "transactions", isFolder: true },
       ];
 
-  const filteredData = (data ?? [])
-    .map((item) => ({
-      ...item,
-      name:
-        item.path_tokens?.at(-1) === ".folderPlaceholder"
-          ? item.path_tokens?.at(-2)
-          : item.path_tokens?.at(-1),
-      isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
-    }))
-    .filter((item) => item.name !== ".emptyFolderPlaceholder")
-    .sort((a, b) => {
-      if (a.isFolder && !b.isFolder) return -1;
-      if (!a.isFolder && b.isFolder) return 1;
-      return 0;
-    });
+  const filteredData = (data ?? []).map((item) => ({
+    ...item,
+    name:
+      item.path_tokens?.at(-1) === ".folderPlaceholder"
+        ? item.path_tokens?.at(-2)
+        : item.path_tokens?.at(-1),
+    isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
+  }));
 
   const mergedMap = new Map(
     [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj]),
@@ -571,15 +564,13 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 }
 
 export async function getVaultActivityQuery(supabase: Client, teamId: string) {
-  return (
-    supabase
-      .from("documents")
-      .select("*")
-      // .eq("team_id", teamId)
-      .limit(20)
-      .not("name", "ilike", "%.folderPlaceholder")
-      .order("created_at", { ascending: false })
-  );
+  return supabase
+    .from("documents")
+    .select("*")
+    .eq("team_id", teamId)
+    .limit(20)
+    .not("name", "ilike", "%.folderPlaceholder")
+    .order("created_at", { ascending: false });
 }
 
 type GetVaultRecursiveParams = {

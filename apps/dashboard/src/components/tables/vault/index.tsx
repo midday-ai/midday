@@ -12,9 +12,8 @@ type Props = {
 export function Table({ folders, disableActions }: Props) {
   return (
     <div>
-      <div className="flex justify-between items-center h-[32px] mt-6">
+      <div className="h-[32px] mt-6">
         <Breadcrumbs folders={folders} />
-        <VaultActions disableActions={disableActions} />
       </div>
 
       <Suspense fallback={<Loading />}>
