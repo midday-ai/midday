@@ -121,7 +121,11 @@ function RowTitle({ isEditing, name: initialName, path, href }: Props) {
   }
 
   if (href) {
-    return <Link href={href}>{translatedFolderName(t, name)}</Link>;
+    return (
+      <Link prefetch href={href}>
+        {translatedFolderName(t, name)}
+      </Link>
+    );
   }
 
   return <span>{translatedFolderName(t, name)}</span>;

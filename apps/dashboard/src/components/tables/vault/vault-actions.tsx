@@ -10,12 +10,6 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 
-// const createFolder = useVaultContext((s) => s.createFolder);
-
-// const handleCreateFolder = () => {
-//   createFolder({ name: "Untitled folder" });
-// };
-
 export function VaultActions({ disableActions }: { disableActions: boolean }) {
   return (
     <DropdownMenu>

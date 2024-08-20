@@ -14,7 +14,7 @@ const defaultFolders = [
 ];
 
 export async function VaultActivity() {
-  const supabase = createClient({ db: { schema: "storage" } });
+  const supabase = createClient();
   const { data: userData } = await getUser();
 
   const { data: storageData } = await getVaultActivityQuery(
@@ -53,7 +53,7 @@ export async function VaultActivity() {
         {defaultFolders.map((folder) => {
           return (
             <div className="w-[80px]" key={folder.id}>
-              <Link href={`/vault/${folder.id}`}>
+              <Link href={`/vault/${folder.id}`} prefetch>
                 <div className="text-center flex flex-col items-center">
                   <Icons.Folder
                     size={65}

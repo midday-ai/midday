@@ -2,6 +2,7 @@ import { VaultProvider } from "@/store/vault/provider";
 import { getUser, getVault } from "@midday/supabase/cached-queries";
 import { DataTable } from "./data-table";
 import { EmptyTable } from "./empty-table";
+import { Test } from "./test";
 import { UploadZone } from "./upload-zone";
 
 type Props = {
@@ -20,6 +21,7 @@ export async function DataTableServer({ folders }: Props) {
 
   return (
     <VaultProvider data={data}>
+      <Test />
       <div className="mt-6 h-[calc(100vh-400px)] border overflow-scroll relative">
         <UploadZone>
           <DataTable teamId={userData.team_id} />

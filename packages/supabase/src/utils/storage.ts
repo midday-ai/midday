@@ -10,7 +10,7 @@ type UploadParams = {
 
 export async function upload(
   client: SupabaseClient,
-  { file, path, bucket }: UploadParams
+  { file, path, bucket }: UploadParams,
 ) {
   const storage = client.storage.from(bucket);
 
@@ -33,7 +33,7 @@ type RemoveParams = {
 
 export async function remove(
   client: SupabaseClient,
-  { bucket, path }: RemoveParams
+  { bucket, path }: RemoveParams,
 ) {
   return client.storage
     .from(bucket)
@@ -47,7 +47,7 @@ type DeleteFolderParams = {
 
 export async function deleteFolder(
   client: SupabaseClient,
-  { bucket, path }: DeleteFolderParams
+  { bucket, path }: DeleteFolderParams,
 ) {
   const { data: list } = await client.storage
     .from(bucket)
@@ -58,7 +58,7 @@ export async function deleteFolder(
     if (!file.id) {
       return [
         `${decodeURIComponent(
-          [...path, file.name].join("/")
+          [...path, file.name].join("/"),
         )}/${EMPTY_FOLDER_PLACEHOLDER_FILE_NAME}`,
         decodeURIComponent([...path, file.name].join("/")),
       ];
@@ -78,10 +78,10 @@ type CreateFolderParams = {
 
 export async function createFolder(
   client: SupabaseClient,
-  { bucket, path, name }: CreateFolderParams
+  { bucket, path, name }: CreateFolderParams,
 ) {
   const fullPath = decodeURIComponent(
-    [...path, name, EMPTY_FOLDER_PLACEHOLDER_FILE_NAME].join("/")
+    [...path, name, EMPTY_FOLDER_PLACEHOLDER_FILE_NAME].join("/"),
   );
 
   const { error, data } = await client.storage
@@ -102,7 +102,7 @@ type DownloadParams = {
 
 export async function download(
   client: SupabaseClient,
-  { bucket, path }: DownloadParams
+  { bucket, path }: DownloadParams,
 ) {
   return client.storage.from(bucket).download(path);
 }
@@ -118,7 +118,7 @@ type ShareParams = {
 
 export async function share(
   client: SupabaseClient,
-  { bucket, path, expireIn, options }: ShareParams
+  { bucket, path, expireIn, options }: ShareParams,
 ) {
   return client.storage.from(bucket).createSignedUrl(path, expireIn, options);
 }

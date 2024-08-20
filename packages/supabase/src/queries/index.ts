@@ -527,11 +527,10 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { teamId, path, limit = 10000 } = params;
 
   const { data } = await supabase
-    .from("objects")
+    .from("documents")
     .select("*")
-    .eq("team_id", teamId)
-    .eq("parent_path", path || teamId)
-    .eq("bucket_id", "vault")
+    // .eq("team_id", teamId)
+    // .eq("parent_id", path || teamId)
     .limit(limit)
     .order("name", { ascending: true });
 
@@ -572,13 +571,15 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 }
 
 export async function getVaultActivityQuery(supabase: Client, teamId: string) {
-  return supabase
-    .from("objects")
-    .select("*")
-    .eq("team_id", teamId)
-    .limit(20)
-    .not("name", "ilike", "%.folderPlaceholder")
-    .order("created_at", { ascending: false });
+  return (
+    supabase
+      .from("documents")
+      .select("*")
+      // .eq("team_id", teamId)
+      .limit(20)
+      .not("name", "ilike", "%.folderPlaceholder")
+      .order("created_at", { ascending: false })
+  );
 }
 
 type GetVaultRecursiveParams = {
