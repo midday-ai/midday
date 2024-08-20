@@ -11,8 +11,6 @@ type Props = {
 export function AnimatedNumber({ value, currency }: Props) {
   const locale = useCurrentLocale();
 
-  console.log(locale);
-
   return (
     <MotionNumber
       value={value}
@@ -20,7 +18,7 @@ export function AnimatedNumber({ value, currency }: Props) {
         style: "currency",
         currency: currency,
       }}
-      locales="en-US" // Intl.NumberFormat() locales
+      locales={locale}
     />
   );
 }
