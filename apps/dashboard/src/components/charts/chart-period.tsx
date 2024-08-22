@@ -5,8 +5,8 @@ import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { format } from "date-fns";
 import { formatISO } from "date-fns";
+import { formatDateRange } from "little-date";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, useQueryStates } from "nuqs";
 
@@ -19,37 +19,17 @@ type Props = {
 };
 
 export function ChartPeriod({ defaultValue, disabled }: Props) {
-  let placeholder: string;
-
   const { execute } = useAction(changeChartPeriodAction);
 
   const [state, setState] = useQueryStates(
     {
-      from: parseAsString.withDefault(""),
-      to: parseAsString.withDefault(""),
+      from: parseAsString.withDefault(defaultValue.from),
+      to: parseAsString.withDefault(defaultValue.to),
     },
     {
       shallow: false,
     },
   );
-
-  if (state?.from) {
-    placeholder = format(new Date(state.from), "LLL dd, y");
-  } else {
-    placeholder = format(new Date(defaultValue.from), "LLL dd, y");
-  }
-
-  if (state?.to) {
-    placeholder = `${placeholder} - ${format(
-      new Date(state.to),
-      "LLL dd, y",
-    )} `;
-  } else {
-    placeholder = `${placeholder} - ${format(
-      new Date(defaultValue.to),
-      "LLL dd, y",
-    )} `;
-  }
 
   const handleChangePeriod = (range) => {
     setState(range);
@@ -64,7 +44,11 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             variant="outline"
             className="justify-start text-left font-medium space-x-2"
           >
-            <span className="line-clamp-1 text-ellipsis">{placeholder}</span>
+            <span className="line-clamp-1 text-ellipsis">
+              {formatDateRange(new Date(state.from), new Date(state.to), {
+                includeTime: false,
+              })}
+            </span>
             <Icons.ChevronDown />
           </Button>
         </PopoverTrigger>
@@ -78,8 +62,8 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             numberOfMonths={2}
             today={state.from ? new Date(state.from) : new Date()}
             selected={{
-              from: state.from ? new Date(state.from) : defaultValue.from,
-              to: state.to ? new Date(state.to) : defaultValue.to,
+              from: state.from && new Date(state.from),
+              to: state.to && new Date(state.to),
             }}
             defaultMonth={
               new Date(new Date().setMonth(new Date().getMonth() - 1))

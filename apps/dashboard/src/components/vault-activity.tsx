@@ -38,10 +38,10 @@ export async function VaultActivity() {
     });
 
   return (
-    <div className="mt-6 mb-10">
+    <div className="my-6">
       <span className="text-sm font-medium">Recent activity</span>
 
-      <div className="flex space-x-20 mt-6 overflow-auto w-full md:w-[calc(100vw-130px)] scrollbar-hide">
+      <div className="flex space-x-20 mt-6 overflow-auto w-full md:w-[calc(100vw-130px)] scrollbar-hide h-[130px]">
         {files?.map((file) => {
           return (
             <div className="w-[80px]" key={file.id}>

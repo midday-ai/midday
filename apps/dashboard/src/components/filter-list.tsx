@@ -4,6 +4,7 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { formatDateRange } from "little-date";
 
 const listVariant = {
   hidden: { y: 10, opacity: 0 },
@@ -47,10 +48,9 @@ export function FilterList({
     switch (key) {
       case "start": {
         if (key === "start" && value && filters.end) {
-          return `${format(new Date(value), "MMM d, yyyy")} - ${format(
-            new Date(filters.end),
-            "MMM d, yyyy",
-          )}`;
+          return formatDateRange(new Date(value), new Date(filters.end), {
+            includeTime: false,
+          });
         }
 
         return (

@@ -4,7 +4,7 @@ import { DataTableHeader } from "./date-table-header";
 
 export function Loading() {
   return (
-    <div className="mt-6 h-[calc(100vh-400px)] border overflow-scroll relative">
+    <div className="mt-3 h-[calc(100vh-370px)] border overflow-scroll relative">
       <Table>
         <DataTableHeader />
         <TableBody className="border-r-0 border-l-0">

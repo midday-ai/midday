@@ -54,7 +54,7 @@ import ms from "ms";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const translatedFolderName = (t: any, folder: string) => {
   switch (folder) {
@@ -81,6 +81,7 @@ type Props = {
 };
 
 function RowTitle({ isEditing, name: initialName, path, href }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const t = useI18n();
   const { toast } = useToast();
   const [name, setName] = useState(initialName ?? "Untitled Folder");
@@ -107,12 +108,18 @@ function RowTitle({ isEditing, name: initialName, path, href }: Props) {
     }
   };
 
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus();
+    }
+  }, [isEditing]);
+
   if (isEditing) {
     return (
       <Input
+        ref={inputRef}
         className="w-auto border-0"
         value={name}
-        autoFocus
         onBlur={handleOnBlur}
         onKeyDown={handleOnKeyDown}
         onChange={(evt) => setName(evt.target.value)}
@@ -131,7 +138,7 @@ function RowTitle({ isEditing, name: initialName, path, href }: Props) {
   return <span>{translatedFolderName(t, name)}</span>;
 }
 
-export function DataTableRow({ data, teamId }) {
+export function DataTableRow({ data }) {
   const { toast } = useToast();
   const pathname = usePathname();
   const params = useParams();
@@ -233,7 +240,7 @@ export function DataTableRow({ data, teamId }) {
                     <FilePreview
                       width={280}
                       height={365}
-                      src={`/api/proxy?filePath=vault/${teamId}/${filepath}`}
+                      src={`/api/proxy?filePath=vault/${data.team_id}/${filepath}`}
                       downloadUrl={`/api/download/file?path=${filepath}&filename=${data.name}`}
                       name={data.name}
                       type={data?.metadata?.mimetype}
@@ -298,9 +305,6 @@ export function DataTableRow({ data, teamId }) {
                       </DropdownMenuSub>
                     )}
 
-                    {/* {!disableActions && !isDefaultFolder && (
-                      <DropdownMenuItem>Rename</DropdownMenuItem>
-                    )} */}
                     <DropdownMenuItem>
                       {data.isFolder ? (
                         <a

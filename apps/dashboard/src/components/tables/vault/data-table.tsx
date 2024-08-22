@@ -5,11 +5,7 @@ import { Table, TableBody } from "@midday/ui/table";
 import { DataTableRow } from "./data-table-row";
 import { DataTableHeader } from "./date-table-header";
 
-type Props = {
-  teamId: string;
-};
-
-export function DataTable({ teamId }: Props) {
+export function DataTable() {
   const data = useVaultContext((s) => s.data);
 
   return (
@@ -17,7 +13,7 @@ export function DataTable({ teamId }: Props) {
       <DataTableHeader />
       <TableBody className="border-r-0 border-l-0">
         {data?.map((row) => (
-          <DataTableRow key={row.name} data={row} teamId={teamId} />
+          <DataTableRow key={row.name} data={row} />
         ))}
       </TableBody>
     </Table>

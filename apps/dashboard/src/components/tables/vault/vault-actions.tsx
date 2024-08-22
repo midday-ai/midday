@@ -30,7 +30,7 @@ export function VaultActions({ disableActions }: { disableActions: boolean }) {
   });
 
   return (
-    <div className="absolute -top-[70px] right-0">
+    <div className="absolute -top-[55px] right-0">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon">
