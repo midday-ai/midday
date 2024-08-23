@@ -76,6 +76,7 @@ export const translatedFolderName = (t: any, folder: string) => {
 function RowTitle({ isEditing, name: initialName, path, href }) {
   const t = useI18n();
   const { toast } = useToast();
+  const existingFolders = useVaultContext((s) => s.data);
   const [name, setName] = useState(initialName ?? "Untitled Folder");
 
   const createFolder = useAction(createFolderAction, {
@@ -90,13 +91,24 @@ function RowTitle({ isEditing, name: initialName, path, href }) {
     },
   });
 
-  const handleOnBlur = () => {
+  const checkAndCreateFolder = () => {
+    if (
+      existingFolders.some((folder) => folder.name === name && folder.isFolder)
+    ) {
+      toast({
+        duration: 3500,
+        variant: "error",
+        title:
+          "A folder with this name already exists. Please use a different name.",
+      });
+      return;
+    }
     createFolder.execute({ path, name });
   };
 
   const handleOnKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.key === "Enter") {
-      createFolder.execute({ path, name });
+      checkAndCreateFolder();
     }
   };
 
@@ -106,9 +118,10 @@ function RowTitle({ isEditing, name: initialName, path, href }) {
         className="w-auto border-0"
         value={name}
         autoFocus
-        onBlur={handleOnBlur}
+        onBlur={checkAndCreateFolder}
         onKeyDown={handleOnKeyDown}
         onChange={(evt) => setName(evt.target.value)}
+        aria-label="Folder name"
       />
     );
   }

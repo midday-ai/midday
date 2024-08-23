@@ -44,17 +44,20 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
       })),
 
     createFolder: (item) =>
-      set((state) => ({
-        data: [
-          ...state.data,
-          {
-            ...item,
-            isEditing: true,
-            isFolder: true,
-            id: item.name,
-          },
-        ],
-      })),
+      set((state) => {
+        if (state.data.some((existingItem) => existingItem.name === "Untitled folder" && existingItem.isFolder)) return state;
+        return {
+          data: [
+            ...state.data,
+            {
+              ...item,
+              isEditing: true,
+              isFolder: true,
+              id: item.name,
+            },
+          ],
+        };
+      }),
 
     updateItem: (id, payload) =>
       set((state) => ({
