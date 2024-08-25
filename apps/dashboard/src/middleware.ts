@@ -54,6 +54,11 @@ export async function middleware(request: NextRequest) {
     session &&
     !session?.user?.user_metadata?.full_name
   ) {
+    // Check if the URL contains an invite code
+    const inviteCodeMatch = newUrl.pathname.startsWith("/teams/invite/");
+    if (inviteCodeMatch) {
+      return NextResponse.redirect(`${url.origin}${newUrl.pathname}`);
+    }
     return NextResponse.redirect(`${url.origin}/setup`);
   }
 
