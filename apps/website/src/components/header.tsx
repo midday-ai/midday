@@ -264,7 +264,7 @@ export function Header() {
                 {children && (
                   <div
                     className={cn(
-                      "absolute top-[48px] w-[676px] -left-[1px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l-[1px] border-r-[1px]",
+                      "absolute top-[48px] -ml-[0.8px] -right-[0.8px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
                       hidden && "hidden"
                     )}
                   >
