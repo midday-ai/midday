@@ -20,7 +20,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import menuAssistant from "public/menu-assistant.jpg";
 import menuEngine from "public/menu-engine.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaDiscord, FaGithub } from "react-icons/fa";
 import {
   MdOutlineDescription,
@@ -51,9 +51,20 @@ export function Header() {
   const [isOpen, setOpen] = useState(false);
   const [showBlur, setShowBlur] = useState(false);
   const [hidden, setHidden] = useState(false);
-
   const lastPath = `/${pathname.split("/").pop()}`;
 
+  useEffect(() => {
+    const setPixelRatio = () => {
+      const pixelRatio = window.devicePixelRatio || 1;
+      document.documentElement.style.setProperty('--pixel-ratio', `${1 / pixelRatio}`);
+    };
+  
+    setPixelRatio();
+    window.addEventListener('resize', setPixelRatio);
+  
+    return () => window.removeEventListener('resize', setPixelRatio);
+  }, []);
+  
   const handleToggleMenu = () => {
     setOpen((prev) => {
       document.body.style.overflow = prev ? "" : "hidden";
@@ -264,8 +275,8 @@ export function Header() {
                 {children && (
                   <div
                     className={cn(
-                      "absolute top-[48px] -ml-[0.8px] -right-[0.8px] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
-                      hidden && "hidden"
+                      "absolute top-[48px] left-0 -mx-[calc(var(--pixel-ratio)_*_1px)] bg-[#121212] flex h-0 group-hover:h-[250px] overflow-hidden transition-all duration-300 ease-in-out border-l border-r",
+                      hidden && "hidden",
                     )}
                   >
                     <ul className="p-4 w-[200px] flex-0 space-y-5 mt-2">
