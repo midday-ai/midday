@@ -27,23 +27,25 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
     data: [],
   };
 
-  return createStore<VaultState>()((set) => ({
+  return createStore<VaultState>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
 
-    addItems: (items) =>
+    addItems: (items) => {
       set((state) => ({
         data: [...state.data, ...items],
-      })),
+      }));
+    },
 
-    deleteItem: (id) =>
+    deleteItem: (id) => {
       set((state) => ({
         data: state.data.filter((item) =>
           item.isFolder ? item.name !== id : item.id !== id,
         ),
-      })),
+      }));
+    },
 
-    createFolder: (item) =>
+    createFolder: (item) => {
       set((state) => ({
         data: [
           ...state.data,
@@ -54,11 +56,13 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
             id: item.name,
           },
         ],
-      })),
+      }));
+    },
 
-    updateItem: (id, payload) =>
+    updateItem: (id, payload) => {
       set((state) => ({
         data: state.data.map((d) => (d.id === id ? payload : d)),
-      })),
+      }));
+    },
   }));
 };

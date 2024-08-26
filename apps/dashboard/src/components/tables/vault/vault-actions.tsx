@@ -11,12 +11,13 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useHotkeys } from "react-hotkeys-hook";
+import { DEFAULT_FOLDER_NAME } from "./contants";
 
 export function VaultActions({ disableActions }: { disableActions: boolean }) {
   const createFolder = useVaultContext((s) => s.createFolder);
 
   const handleCreateFolder = () => {
-    createFolder({ name: "Untitled folder" });
+    createFolder({ name: DEFAULT_FOLDER_NAME });
   };
 
   useHotkeys("shift+meta+u", (evt) => {

@@ -21,7 +21,7 @@ type Props = {
 export function ChartPeriod({ defaultValue, disabled }: Props) {
   const { execute } = useAction(changeChartPeriodAction);
 
-  const [state, setState] = useQueryStates(
+  const [params, setParams] = useQueryStates(
     {
       from: parseAsString.withDefault(defaultValue.from),
       to: parseAsString.withDefault(defaultValue.to),
@@ -32,7 +32,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
   );
 
   const handleChangePeriod = (range) => {
-    setState(range);
+    setParams(range);
     execute(range);
   };
 
@@ -45,7 +45,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             className="justify-start text-left font-medium space-x-2"
           >
             <span className="line-clamp-1 text-ellipsis">
-              {formatDateRange(new Date(state.from), new Date(state.to), {
+              {formatDateRange(new Date(params.from), new Date(params.to), {
                 includeTime: false,
               })}
             </span>
@@ -60,10 +60,10 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
           <Calendar
             mode="range"
             numberOfMonths={2}
-            today={state.from ? new Date(state.from) : new Date()}
+            today={params.from ? new Date(params.from) : new Date()}
             selected={{
-              from: state.from && new Date(state.from),
-              to: state.to && new Date(state.to),
+              from: params.from && new Date(params.from),
+              to: params.to && new Date(params.to),
             }}
             defaultMonth={
               new Date(new Date().setMonth(new Date().getMonth() - 1))
