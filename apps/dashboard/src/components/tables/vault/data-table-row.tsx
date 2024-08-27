@@ -4,8 +4,11 @@ import { createFolderAction } from "@/actions/create-folder-action";
 import { deleteFileAction } from "@/actions/delete-file-action";
 import { deleteFolderAction } from "@/actions/delete-folder-action";
 import { shareFileAction } from "@/actions/share-file-action";
+import { updateDocumentAction } from "@/actions/update-document-action";
+import { AssignedUser } from "@/components/assigned-user";
 import { FileIcon } from "@/components/file-icon";
 import { FilePreview } from "@/components/file-preview";
+import { SelectTag } from "@/components/select-tag";
 import { useI18n } from "@/locales/client";
 import { useVaultContext } from "@/store/vault/hook";
 import { formatSize } from "@/utils/format";
@@ -57,6 +60,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { DEFAULT_FOLDER_NAME } from "./contants";
+import { Tag } from "./tag";
 
 export const translatedFolderName = (t: any, folder: string) => {
   switch (folder) {
@@ -167,6 +171,7 @@ export function DataTableRow({ data }: { data: any }) {
   const { toast } = useToast();
   const pathname = usePathname();
   const params = useParams();
+  const updateDocument = useAction(updateDocumentAction);
   const { deleteItem, createFolder } = useVaultContext((s) => s);
 
   const folders = params?.folders ?? [];
@@ -275,6 +280,15 @@ export function DataTableRow({ data }: { data: any }) {
               </HoverCard>
             </TableCell>
             <TableCell>
+              <AssignedUser
+                fullName={data?.owner?.full_name}
+                avatarUrl={data?.owner?.avatar_url}
+              />
+            </TableCell>
+            <TableCell>
+              <Tag name={data.tag} />
+            </TableCell>
+            <TableCell>
               {data?.created_at ? format(new Date(data.created_at), "Pp") : "-"}
             </TableCell>
             <TableCell>
@@ -287,6 +301,26 @@ export function DataTableRow({ data }: { data: any }) {
                   sideOffset={10}
                   align="end"
                 >
+                  {!disableActions && !isDefaultFolder && (
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>Edit tag</DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          <SelectTag
+                            headless
+                            selectedId={data.tag}
+                            onChange={(tag) => {
+                              updateDocument.execute({
+                                id: data.id,
+                                tag: tag.slug,
+                              });
+                            }}
+                          />
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  )}
+
                   {!data.isFolder && (
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger>Share URL</DropdownMenuSubTrigger>
@@ -327,9 +361,6 @@ export function DataTableRow({ data }: { data: any }) {
                     </DropdownMenuSub>
                   )}
 
-                  {/* {!disableActions && !isDefaultFolder && (
-                      <DropdownMenuItem>Rename</DropdownMenuItem>
-                    )} */}
                   <DropdownMenuItem>
                     {data.isFolder ? (
                       <a

@@ -32,6 +32,7 @@ type Props = {
   members?: { id: string; name: string }[];
   statusFilters: { id: string; name: string }[];
   attachmentsFilters: { id: string; name: string }[];
+  tags?: { id: string; name: string; slug: string }[];
 };
 
 export function FilterList({
@@ -41,6 +42,7 @@ export function FilterList({
   categories,
   accounts,
   members,
+  tags,
   statusFilters,
   attachmentsFilters,
 }: Props) {
@@ -80,6 +82,12 @@ export function FilterList({
           .join(", ");
       }
 
+      case "tags": {
+        return value
+          .map((slug) => tags?.find((tag) => tag.slug === slug)?.name)
+          .join(", ");
+      }
+
       case "accounts": {
         return value
           .map((id) => {
@@ -92,7 +100,8 @@ export function FilterList({
           .join(", ");
       }
 
-      case "assignees": {
+      case "assignees":
+      case "owners": {
         return value
           .map((id) => {
             const member = members?.find((member) => member.id === id);

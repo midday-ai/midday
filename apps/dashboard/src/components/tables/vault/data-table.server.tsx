@@ -10,11 +10,15 @@ type Props = {
   disableActions: boolean;
 };
 
-export async function DataTableServer({ folders, disableActions }: Props) {
+export async function DataTableServer({
+  folders,
+  disableActions,
+  filter,
+}: Props) {
   const path = folders.at(-1);
-
   const { data } = await getVault({
     path: path && decodeURIComponent(path),
+    filter,
   });
 
   return (
@@ -22,7 +26,7 @@ export async function DataTableServer({ folders, disableActions }: Props) {
       <div className="relative">
         <VaultActions disableActions={disableActions} />
 
-        <div className="mt-3 h-[calc(100vh-370px)] border overflow-scroll relative">
+        <div className="mt-3 h-[calc(100vh-380px)] border overflow-scroll relative">
           <UploadZone>
             <DataTable />
             {data.length === 0 && <EmptyTable type={path} />}

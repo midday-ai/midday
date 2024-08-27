@@ -1,7 +1,7 @@
 "use client";
 
-import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
-import { formatAccountName } from "@/utils/format";
+import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filters";
+import { useI18n } from "@/locales/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -19,106 +19,47 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import {
-  parseAsArrayOf,
-  parseAsString,
-  parseAsStringLiteral,
-  useQueryStates,
-} from "nuqs";
+import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
-import { SelectCategory } from "./select-category";
-
-type Props = {
-  placeholder: string;
-  categories?: {
-    id: string;
-    slug: string;
-    name: string;
-  }[];
-  accounts?: {
-    id: string;
-    name: string;
-    currency: string;
-  }[];
-  members?: {
-    id: string;
-    name: string;
-  }[];
-  tags?: {
-    id: string;
-    slug: string;
-    name: string;
-  }[];
-};
+import { SelectTag } from "./select-tag";
+import { TAGS } from "./tables/vault/contants";
 
 const defaultSearch = {
   q: null,
-  attachments: null,
   start: null,
   end: null,
-  categories: null,
-  accounts: null,
-  assignees: null,
-  statuses: null,
+  owners: null,
+  tags: null,
 };
 
-const statusFilters = [
-  { id: "fullfilled", name: "Fulfilled" },
-  { id: "unfulfilled", name: "Unfulfilled" },
-  { id: "excluded", name: "Excluded" },
-];
-
-const attachmentsFilters = [
-  { id: "include", name: "Has attachments" },
-  { id: "exclude", name: "No attachments" },
-];
-
-const PLACEHOLDERS = [
-  "Software and taxes last month",
-  "Income last year",
-  "Software last Q4",
-  "From Google without receipt",
-  "Search or filter",
-  "Without receipts this month",
-];
-
-const placeholder =
-  PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
-
-export function TransactionsSearchFilter({
-  categories,
-  accounts,
-  members,
-  tags,
-}: Props) {
+export function VaultSearchFilter({ members }: { members: any[] }) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
+  const t = useI18n();
+
   const [filters, setFilters] = useQueryStates(
     {
       q: parseAsString,
-      attachments: parseAsStringLiteral(["exclude", "include"] as const),
       start: parseAsString,
       end: parseAsString,
-      categories: parseAsArrayOf(parseAsString),
-      accounts: parseAsArrayOf(parseAsString),
-      assignees: parseAsArrayOf(parseAsString),
-      statuses: parseAsArrayOf(
-        parseAsStringLiteral([
-          "fullfilled",
-          "unfulfilled",
-          "excluded",
-        ] as const),
-      ),
+      owners: parseAsArrayOf(parseAsString),
+      tags: parseAsArrayOf(parseAsString),
     },
     {
       shallow: false,
     },
   );
+
+  const tags = TAGS.map((tag) => ({
+    id: tag,
+    name: t(`tags.${tag}`),
+    slug: tag,
+  }));
 
   useHotkeys(
     "esc",
@@ -158,11 +99,12 @@ export function TransactionsSearchFilter({
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
-      const { object } = await generateTransactionsFilters(
+      const { object } = await generateVaultFilters(
         prompt,
-        categories
-          ? `Categories: ${categories?.map((category) => category.name).join(", ")}`
-          : "",
+        `
+        Users: ${members.map((member) => member.name).join(", ")},
+        Tags: ${tags.map((tag) => tag.name).join(", ")},
+        `,
       );
 
       let finalObject = {};
@@ -172,14 +114,14 @@ export function TransactionsSearchFilter({
           finalObject = {
             ...finalObject,
             ...partialObject,
-            categories:
-              partialObject?.categories?.map(
+            owners:
+              partialObject?.owners?.map(
                 (name: string) =>
-                  categories?.find((category) => category.name === name)?.slug,
+                  members?.find((member) => member.name === name)?.id,
               ) ?? null,
             tags:
               partialObject?.tags?.map(
-                (name: string) => tags?.find((tag) => tag.name === name)?.slug,
+                (name: string) => tags?.find((tag) => tag.name === name)?.id,
               ) ?? null,
             q: partialObject?.name ?? null,
           };
@@ -205,6 +147,14 @@ export function TransactionsSearchFilter({
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex space-x-4 items-center">
+        <FilterList
+          filters={filters}
+          loading={streaming}
+          onRemove={setFilters}
+          members={members}
+          tags={tags}
+        />
+
         <form
           className="relative"
           onSubmit={(e) => {
@@ -215,7 +165,7 @@ export function TransactionsSearchFilter({
           <Icons.Search className="absolute pointer-events-none left-3 top-[11px]" />
           <Input
             ref={inputRef}
-            placeholder={placeholder}
+            placeholder="Search for..."
             className="pl-9 w-full md:w-[350px] pr-8"
             value={prompt}
             onChange={handleSearch}
@@ -239,26 +189,14 @@ export function TransactionsSearchFilter({
             </button>
           </DropdownMenuTrigger>
         </form>
-
-        <FilterList
-          filters={filters}
-          loading={streaming}
-          onRemove={setFilters}
-          categories={categories}
-          accounts={accounts}
-          members={members}
-          statusFilters={statusFilters}
-          attachmentsFilters={attachmentsFilters}
-          tags={tags}
-        />
       </div>
 
       <DropdownMenuContent
         className="w-[350px]"
-        align="end"
         sideOffset={19}
         alignOffset={-11}
-        side="top"
+        side="bottom"
+        align="end"
       >
         <DropdownMenuGroup>
           <DropdownMenuSub>
@@ -300,8 +238,8 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
-              <span>Status</span>
+              <Icons.Face className="mr-2 h-4 w-4" />
+              <span>Members</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -309,21 +247,21 @@ export function TransactionsSearchFilter({
                 alignOffset={-4}
                 className="p-0"
               >
-                {statusFilters.map(({ id, name }) => (
+                {members?.map((member) => (
                   <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filters?.statuses?.includes(id)}
+                    key={member.id}
                     onCheckedChange={() => {
                       setFilters({
-                        statuses: filters?.statuses?.includes(id)
-                          ? filters.statuses.filter((s) => s !== id).length > 0
-                            ? filters.statuses.filter((s) => s !== id)
+                        owners: filters?.owners?.includes(member.id)
+                          ? filters.owners.filter((s) => s !== member.id)
+                              .length > 0
+                            ? filters.owners.filter((s) => s !== member.id)
                             : null
-                          : [...(filters?.statuses ?? []), id],
+                          : [...(filters?.owners ?? []), member.id],
                       });
                     }}
                   >
-                    {name}
+                    {member.name}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>
@@ -334,8 +272,8 @@ export function TransactionsSearchFilter({
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Attachments className="mr-2 h-4 w-4" />
-              <span>Attachments</span>
+              <Icons.Status className="mr-2 h-4 w-4" />
+              <span>Tags</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -343,88 +281,19 @@ export function TransactionsSearchFilter({
                 alignOffset={-4}
                 className="p-0"
               >
-                {attachmentsFilters.map(({ id, name }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filters?.attachments?.includes(id)}
-                    onCheckedChange={() => {
-                      setFilters({
-                        attachments: id,
-                      });
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Category className="mr-2 h-4 w-4" />
-              <span>Categories</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-101}
-                className="p-0 w-[250px] h-[270px]"
-              >
-                <SelectCategory
+                <SelectTag
+                  headless
                   onChange={(selected) => {
                     setFilters({
-                      categories: filters?.categories?.includes(selected.slug)
-                        ? filters.categories.filter((s) => s !== selected.slug)
+                      tags: filters?.tags?.includes(selected.slug)
+                        ? filters.tags.filter((s) => s !== selected.slug)
                             .length > 0
-                          ? filters.categories.filter(
-                              (s) => s !== selected.slug,
-                            )
+                          ? filters.tags.filter((s) => s !== selected.slug)
                           : null
-                        : [...(filters?.categories ?? []), selected.slug],
+                        : [...(filters?.tags ?? []), selected.slug],
                     });
                   }}
-                  headless
                 />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
-
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Accounts className="mr-2 h-4 w-4" />
-              <span>Accounts</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {accounts?.map((account) => (
-                  <DropdownMenuCheckboxItem
-                    key={account.id}
-                    onCheckedChange={() => {
-                      setFilters({
-                        accounts: filters?.accounts?.includes(account.id)
-                          ? filters.accounts.filter((s) => s !== account.id)
-                              .length > 0
-                            ? filters.accounts.filter((s) => s !== account.id)
-                            : null
-                          : [...(filters?.accounts ?? []), account.id],
-                      });
-                    }}
-                  >
-                    {formatAccountName({
-                      name: account.name,
-                      currency: account.currency,
-                    })}
-                  </DropdownMenuCheckboxItem>
-                ))}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

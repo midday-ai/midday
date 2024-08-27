@@ -429,7 +429,7 @@ export const parseDateSchema = z
   .transform((v) => isValid(v))
   .refine((v) => !!v, { message: "Invalid date" });
 
-export const filterQuerySchema = z.object({
+export const filterTransactionsSchema = z.object({
   name: z.string().optional().describe("The name to search for"),
   start: parseDateSchema
     .optional()
@@ -449,6 +449,20 @@ export const filterQuerySchema = z.object({
     .array(z.string())
     .optional()
     .describe("The categories to filter by"),
+});
+
+export const filterVaultSchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  tags: z.array(z.string()).optional().describe("The tags to filter by"),
+  start: parseDateSchema
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: parseDateSchema
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  owners: z.array(z.string()).optional().describe("The owners to filter by"),
 });
 
 export const createTransactionSchema = z.object({

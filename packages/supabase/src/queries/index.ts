@@ -521,27 +521,51 @@ export type GetVaultParams = {
   teamId: string;
   path?: string;
   limit?: number;
+  searchQuery?: string;
+  filter?: {
+    start?: string;
+    end?: string;
+    owners?: string[];
+  };
 };
 
 export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
-  const { teamId, path, limit = 10000 } = params;
+  const { teamId, path, limit = 10000, searchQuery, filter } = params;
 
-  const { data } = await supabase
+  const { start, end, owners } = filter || {};
+
+  const isSearch =
+    Object.values(filter).some((value) => value !== null) ||
+    Boolean(searchQuery);
+
+  const query = supabase
     .from("documents")
-    .select("*")
+    .select("*, owner:owner_id(*)")
     .eq("team_id", teamId)
     .eq("parent_id", path || teamId)
     .limit(limit)
     .order("created_at", { ascending: true });
 
-  const defaultFolders = path
-    ? []
-    : [
-        { name: "exports", isFolder: true },
-        { name: "inbox", isFolder: true },
-        { name: "imports", isFolder: true },
-        { name: "transactions", isFolder: true },
-      ];
+  if (owners?.length) {
+    query.in("owner_id", owners);
+  }
+
+  if (start && end) {
+    query.gte("created_at", start);
+    query.lte("created_at", end);
+  }
+
+  const { data } = await query;
+
+  const defaultFolders =
+    path || isSearch
+      ? []
+      : [
+          { name: "exports", isFolder: true },
+          { name: "inbox", isFolder: true },
+          { name: "imports", isFolder: true },
+          { name: "transactions", isFolder: true },
+        ];
 
   const filteredData = (data ?? []).map((item) => ({
     ...item,
