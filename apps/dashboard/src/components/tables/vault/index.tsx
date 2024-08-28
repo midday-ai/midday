@@ -13,6 +13,7 @@ type Props = {
 
 export async function Table({ folders, disableActions, filter }: Props) {
   const members = await getTeamMembers();
+  const teamId = members?.data?.at(0)?.team_id;
 
   return (
     <div>
@@ -35,6 +36,7 @@ export async function Table({ folders, disableActions, filter }: Props) {
           folders={folders}
           disableActions={disableActions}
           filter={filter}
+          teamId={teamId}
         />
       </Suspense>
     </div>

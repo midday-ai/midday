@@ -164,7 +164,11 @@ function RowTitle({ name: initialName, isEditing, path, href }: Props) {
     );
   }
 
-  return <span>{translatedFolderName(t, name)}</span>;
+  return (
+    <span className="line-clamp-1 max-w-[70%]">
+      {translatedFolderName(t, name)}
+    </span>
+  );
 }
 
 export function DataTableRow({ data }: { data: any }) {
@@ -286,7 +290,7 @@ export function DataTableRow({ data }: { data: any }) {
               />
             </TableCell>
             <TableCell>
-              <Tag name={data.tag} />
+              <Tag name={data.tag} isFolder={data.isFolder} />
             </TableCell>
             <TableCell>
               {data?.created_at ? format(new Date(data.created_at), "Pp") : "-"}

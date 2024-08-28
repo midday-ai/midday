@@ -519,20 +519,21 @@ export async function getMetricsQuery(
 
 export type GetVaultParams = {
   teamId: string;
-  path?: string;
+  parentId?: string;
   limit?: number;
   searchQuery?: string;
   filter?: {
     start?: string;
     end?: string;
     owners?: string[];
+    tags?: string[];
   };
 };
 
 export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
-  const { teamId, path, limit = 10000, searchQuery, filter } = params;
+  const { teamId, parentId, limit = 10000, searchQuery, filter } = params;
 
-  const { start, end, owners } = filter || {};
+  const { start, end, owners, tags } = filter || {};
 
   const isSearch =
     Object.values(filter).some((value) => value !== null) ||
@@ -542,12 +543,16 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     .from("documents")
     .select("*, owner:owner_id(*)")
     .eq("team_id", teamId)
-    .eq("parent_id", path || teamId)
+    .eq("parent_id", parentId || teamId)
     .limit(limit)
     .order("created_at", { ascending: true });
 
   if (owners?.length) {
     query.in("owner_id", owners);
+  }
+
+  if (tags?.length) {
+    query.in("tag", tags);
   }
 
   if (start && end) {
@@ -558,7 +563,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { data } = await query;
 
   const defaultFolders =
-    path || isSearch
+    parentId || isSearch
       ? []
       : [
           { name: "exports", isFolder: true },

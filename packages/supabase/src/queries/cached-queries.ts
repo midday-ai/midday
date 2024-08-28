@@ -244,7 +244,7 @@ export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
   )(params);
 };
 
-export const getVault = async (params: GetVaultParams) => {
+export const getVault = async (params: Omit<GetVaultParams, "teamId">) => {
   const supabase = createClient();
 
   const user = await getUser();

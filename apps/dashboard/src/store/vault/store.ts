@@ -3,9 +3,11 @@ import { createStore } from "zustand";
 
 type Item = {
   id?: string;
-  name: string;
+  name?: string;
+  tag?: string;
   isFolder?: boolean;
   isEditing?: boolean;
+  isLoading?: boolean;
 };
 
 export interface VaultProps {
@@ -13,7 +15,6 @@ export interface VaultProps {
 }
 
 export interface VaultState extends VaultProps {
-  addItems: (items: Item[]) => void;
   deleteItem: (id: string) => void;
   createFolder: (item: Item) => void;
   updateItem: (id: string, payload: Item) => void;
@@ -30,12 +31,6 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
   return createStore<VaultState>()((set, get) => ({
     ...DEFAULT_PROPS,
     ...initProps,
-
-    addItems: (items) => {
-      set((state) => ({
-        data: [...state.data, ...items],
-      }));
-    },
 
     deleteItem: (id) => {
       set((state) => ({
@@ -60,9 +55,15 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
     },
 
     updateItem: (id, payload) => {
-      set((state) => ({
-        data: state.data.map((d) => (d.id === id ? payload : d)),
-      }));
+      set((state) => {
+        console.log(
+          "updated",
+          state.data.map((d) => (d.id === id ? { ...d, ...payload } : d)),
+        );
+        return {
+          data: state.data.map((d) => (d.id === id ? { ...d, ...payload } : d)),
+        };
+      });
     },
   }));
 };

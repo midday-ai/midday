@@ -141,12 +141,51 @@ export type Database = {
           },
         ]
       }
+      document_sections: {
+        Row: {
+          created_at: string
+          document_id: string
+          embedding: string | null
+          id: string
+          team_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          id?: string
+          team_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          id?: string
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_sections_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_sections_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
-          content: string | null
+          body: string | null
           created_at: string | null
-          embedding: string | null
-          fts: unknown | null
+          fts_body: unknown | null
+          fts_title: unknown | null
           id: string
           metadata: Json | null
           name: string | null
@@ -156,12 +195,13 @@ export type Database = {
           path_tokens: string[] | null
           tag: string | null
           team_id: string | null
+          title: string | null
         }
         Insert: {
-          content?: string | null
+          body?: string | null
           created_at?: string | null
-          embedding?: string | null
-          fts?: unknown | null
+          fts_body?: unknown | null
+          fts_title?: unknown | null
           id?: string
           metadata?: Json | null
           name?: string | null
@@ -171,12 +211,13 @@ export type Database = {
           path_tokens?: string[] | null
           tag?: string | null
           team_id?: string | null
+          title?: string | null
         }
         Update: {
-          content?: string | null
+          body?: string | null
           created_at?: string | null
-          embedding?: string | null
-          fts?: unknown | null
+          fts_body?: unknown | null
+          fts_title?: unknown | null
           id?: string
           metadata?: Json | null
           name?: string | null
@@ -186,6 +227,7 @@ export type Database = {
           path_tokens?: string[] | null
           tag?: string | null
           team_id?: string | null
+          title?: string | null
         }
         Relationships: [
           {

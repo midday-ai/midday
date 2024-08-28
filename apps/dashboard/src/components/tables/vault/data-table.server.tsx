@@ -8,28 +8,36 @@ import { VaultActions } from "./vault-actions";
 type Props = {
   folders: string[];
   disableActions: boolean;
+  teamId: string;
 };
 
 export async function DataTableServer({
   folders,
   disableActions,
   filter,
+  teamId,
 }: Props) {
-  const path = folders.at(-1);
+  const parentId = folders.at(-1);
+
   const { data } = await getVault({
-    path: path && decodeURIComponent(path),
+    parentId,
     filter,
   });
 
+  const isSearch = Object.values(filter).some((value) => value !== null);
+
   return (
-    <VaultProvider data={data}>
+    <VaultProvider data={data} key={data?.length}>
       <div className="relative">
         <VaultActions disableActions={disableActions} />
 
-        <div className="mt-3 h-[calc(100vh-380px)] border overflow-scroll relative">
+        <div className="mt-3 h-[calc(100vh-380px)] border">
           <UploadZone>
-            <DataTable />
-            {data.length === 0 && <EmptyTable type={path} />}
+            <DataTable teamId={teamId} />
+
+            {data.length === 0 && (
+              <EmptyTable type={isSearch ? "search" : parentId} />
+            )}
           </UploadZone>
         </div>
       </div>

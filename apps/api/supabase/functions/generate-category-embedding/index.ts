@@ -1,6 +1,6 @@
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
-import { createClient } from "npm:@supabase/supabase-js@2.42.7";
+import { createClient } from "npm:@supabase/supabase-js@2.45.2";
 import type { Database, Tables } from "../../src/types";
 
 type TransactionCategoriesRecord = Tables<"transaction_categories">;
@@ -14,7 +14,7 @@ interface WebhookPayload {
 
 const supabase = createClient<Database>(
   Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
 const model = new Supabase.ai.Session("gte-small");

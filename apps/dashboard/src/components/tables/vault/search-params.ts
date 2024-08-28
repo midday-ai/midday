@@ -9,4 +9,5 @@ export const searchParamsCache = createSearchParamsCache({
   start: parseAsString,
   end: parseAsString,
   owners: parseAsArrayOf(parseAsString),
+  tags: parseAsArrayOf(parseAsString),
 });

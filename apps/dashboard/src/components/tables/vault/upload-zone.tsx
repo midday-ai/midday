@@ -16,8 +16,13 @@ import { useToast } from "@midday/ui/use-toast";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import { DEFAULT_FOLDER_NAME } from "./contants";
 
-export function UploadZone({ children }) {
+type Props = {
+  children: React.ReactNode;
+};
+
+export function UploadZone({ children }: Props) {
   const supabase = createClient();
   const [progress, setProgress] = useState(0);
   const [showProgress, setShowProgress] = useState(false);
@@ -33,7 +38,7 @@ export function UploadZone({ children }) {
     "inbox",
     "import",
     "transactions",
-  ].includes(folders.at(0));
+  ].includes(folders?.at(0) ?? "");
 
   useEffect(() => {
     if (!toastId && showProgress) {
@@ -166,13 +171,15 @@ export function UploadZone({ children }) {
             </div>
           </div>
 
-          {children}
+          <div className="overflow-scroll h-full">{children}</div>
         </div>
       </ContextMenuTrigger>
 
       {!isDefaultFolder && (
         <ContextMenuContent>
-          <ContextMenuItem onClick={createFolder}>
+          <ContextMenuItem
+            onClick={() => createFolder({ name: DEFAULT_FOLDER_NAME })}
+          >
             Create folder
           </ContextMenuItem>
         </ContextMenuContent>
