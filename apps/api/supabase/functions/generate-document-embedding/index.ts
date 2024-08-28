@@ -109,6 +109,7 @@ Deno.serve(async (req) => {
     prompt: `
         You are an expert in document analysis.
         Extract the title and tag from the document.
+        Only return a tag if it matches one of the predefined tags in the tag enum. If no matching tag is found, return null.
         Document: ${document.slice(0, 500)}
     `,
     temperature: 0.1,

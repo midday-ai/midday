@@ -244,28 +244,6 @@ export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
   )(params);
 };
 
-export const getVault = async (params: Omit<GetVaultParams, "teamId">) => {
-  const supabase = createClient();
-
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  if (!teamId) {
-    return null;
-  }
-
-  return unstable_cache(
-    async () => {
-      return getVaultQuery(supabase, { ...params, teamId });
-    },
-    ["vault", teamId],
-    {
-      tags: [`vault_${teamId}`],
-      revalidate: 3600,
-    },
-  )(params);
-};
-
 export const getTeams = async () => {
   const supabase = createClient();
 

@@ -13,7 +13,7 @@ export function Tag({
   const t = useI18n();
 
   if (isLoading) {
-    return <Skeleton className="w-24 h-7 rounded-full" />;
+    return <Skeleton className="w-24 h-6 rounded-full" />;
   }
 
   if (!name) {
@@ -21,7 +21,7 @@ export function Tag({
   }
 
   return (
-    <div className="p-1 text-[#878787] bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D] px-3 py-1.5 rounded-full cursor-default font-mono inline-block">
+    <div className="p-1 text-[#878787] bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full cursor-default font-mono inline-block">
       {t(`tags.${name}`)}
     </div>
   );

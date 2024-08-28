@@ -23,6 +23,7 @@ export const TAGS = [
   "vendor_agreements",
   "compliance_reports",
   "regulatory_filings",
+  "financial_records",
   "advertising_copy",
   "press_releases",
   "branding_guidelines",

@@ -107,7 +107,7 @@ export default {
     trademarks: "Trademarks",
     copyrights: "Copyrights",
     client_contracts: "Client Contracts",
-    vendor_agreements: "Vendor Agreements",
+    financial_records: "Financial Records",
     compliance_reports: "Compliance Reports",
     regulatory_filings: "Regulatory Filings",
     advertising_copy: "Advertising Copy",

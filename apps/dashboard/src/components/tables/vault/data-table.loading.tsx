@@ -20,6 +20,9 @@ export function Loading() {
                 <Skeleton className="h-[20px] w-[25%]" />
               </TableCell>
               <TableCell>
+                <Skeleton className="w-24 h-7 rounded-full" />
+              </TableCell>
+              <TableCell>
                 <Skeleton className="h-[20px] w-[10%]" />
               </TableCell>
             </TableRow>

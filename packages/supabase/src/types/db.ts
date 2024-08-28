@@ -184,8 +184,7 @@ export type Database = {
         Row: {
           body: string | null
           created_at: string | null
-          fts_body: unknown | null
-          fts_title: unknown | null
+          fts: unknown | null
           id: string
           metadata: Json | null
           name: string | null
@@ -200,8 +199,7 @@ export type Database = {
         Insert: {
           body?: string | null
           created_at?: string | null
-          fts_body?: unknown | null
-          fts_title?: unknown | null
+          fts?: unknown | null
           id?: string
           metadata?: Json | null
           name?: string | null
@@ -216,8 +214,7 @@ export type Database = {
         Update: {
           body?: string | null
           created_at?: string | null
-          fts_body?: unknown | null
-          fts_title?: unknown | null
+          fts?: unknown | null
           id?: string
           metadata?: Json | null
           name?: string | null

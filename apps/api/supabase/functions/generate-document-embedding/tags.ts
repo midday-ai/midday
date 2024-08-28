@@ -38,6 +38,7 @@ export const TAGS = z.enum([
   "sales_contracts",
   "sales_reports",
   "client_proposals",
+  "financial_records",
   "customer_order_forms",
   "sales_presentations",
   "data_security_plans",

@@ -95,48 +95,43 @@ export function VaultSearchFilter({ members }: { members: any[] }) {
   };
 
   const handleSubmit = async () => {
-    // If the user is typing a query with multiple words, we want to stream the results
-    if (prompt.split(" ").length > 1) {
-      setStreaming(true);
+    setStreaming(true);
 
-      const { object } = await generateVaultFilters(
-        prompt,
-        `
+    const { object } = await generateVaultFilters(
+      prompt,
+      `
         Users: ${members.map((member) => member.name).join(", ")},
         Tags: ${tags.map((tag) => tag.name).join(", ")},
         `,
-      );
+    );
 
-      let finalObject = {};
+    let finalObject = {};
 
-      for await (const partialObject of readStreamableValue(object)) {
-        if (partialObject) {
-          finalObject = {
-            ...finalObject,
-            ...partialObject,
-            owners:
-              partialObject?.owners?.map(
-                (name: string) =>
-                  members?.find((member) => member.name === name)?.id,
-              ) ?? null,
-            tags:
-              partialObject?.tags?.map(
-                (name: string) => tags?.find((tag) => tag.name === name)?.id,
-              ) ?? null,
-            q: partialObject?.name ?? null,
-          };
-        }
+    for await (const partialObject of readStreamableValue(object)) {
+      if (partialObject) {
+        finalObject = {
+          ...finalObject,
+          ...partialObject,
+          owners:
+            partialObject?.owners?.map(
+              (name: string) =>
+                members?.find((member) => member.name === name)?.id,
+            ) ?? null,
+          tags:
+            partialObject?.tags?.map(
+              (name: string) => tags?.find((tag) => tag.name === name)?.id,
+            ) ?? null,
+          q: partialObject?.name ?? null,
+        };
       }
-
-      setFilters({
-        q: null,
-        ...finalObject,
-      });
-
-      setStreaming(false);
-    } else {
-      setFilters({ q: prompt.length > 0 ? prompt : null });
     }
+
+    setFilters({
+      q: null,
+      ...finalObject,
+    });
+
+    setStreaming(false);
   };
 
   const hasValidFilters =

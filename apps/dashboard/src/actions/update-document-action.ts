@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
 
@@ -23,7 +23,7 @@ export const updateDocumentAction = authActionClient
         .select()
         .single();
 
-      revalidateTag(`vault_${user.team_id}`);
+      revalidatePath("/vault");
 
       return data;
     },

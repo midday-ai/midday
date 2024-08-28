@@ -2,7 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { deleteFolder } from "@midday/supabase/storage";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { deleteFolderSchema } from "./schema";
 
@@ -21,7 +21,7 @@ export const deleteFolderAction = authActionClient
       path: [user.team_id, ...path],
     });
 
-    revalidateTag(`vault_${user.team_id}`);
+    revalidatePath("/vault");
 
     return;
   });

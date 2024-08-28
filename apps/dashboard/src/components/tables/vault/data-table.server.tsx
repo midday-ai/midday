@@ -1,5 +1,6 @@
 import { VaultProvider } from "@/store/vault/provider";
-import { getVault } from "@midday/supabase/cached-queries";
+import { getVaultQuery } from "@midday/supabase/queries";
+import { createClient } from "@midday/supabase/server";
 import { DataTable } from "./data-table";
 import { EmptyTable } from "./empty-table";
 import { UploadZone } from "./upload-zone";
@@ -18,10 +19,13 @@ export async function DataTableServer({
   teamId,
 }: Props) {
   const parentId = folders.at(-1);
+  const supabase = createClient();
 
-  const { data } = await getVault({
+  const { data } = await getVaultQuery(supabase, {
+    teamId,
     parentId,
     filter,
+    searchQuery: filter?.q,
   });
 
   const isSearch = Object.values(filter).some((value) => value !== null);

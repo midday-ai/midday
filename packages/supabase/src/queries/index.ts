@@ -560,6 +560,10 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
     query.lte("created_at", end);
   }
 
+  if (searchQuery) {
+    query.textSearch("fts", `${searchQuery}:*`);
+  }
+
   const { data } = await query;
 
   const defaultFolders =
