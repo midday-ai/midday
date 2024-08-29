@@ -541,7 +541,9 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   const query = supabase
     .from("documents")
-    .select("*, owner:owner_id(*)")
+    .select(
+      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
+    )
     .eq("team_id", teamId)
     .eq("parent_id", parentId || teamId)
     .limit(limit)
@@ -561,7 +563,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   }
 
   if (searchQuery) {
-    query.textSearch("fts", `${searchQuery}:*`);
+    query.textSearch("fts", `'${searchQuery}'`);
   }
 
   const { data } = await query;
@@ -599,7 +601,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 export async function getVaultActivityQuery(supabase: Client, teamId: string) {
   return supabase
     .from("documents")
-    .select("*")
+    .select("id, name, metadata, path_tokens")
     .eq("team_id", teamId)
     .limit(20)
     .not("name", "ilike", "%.folderPlaceholder")
@@ -618,7 +620,7 @@ export async function getVaultRecursiveQuery(
   supabase: Client,
   params: GetVaultRecursiveParams,
 ) {
-  const { teamId, path, folder, limit = 10000, offset = 0 } = params;
+  const { teamId, path, folder, limit = 10000 } = params;
 
   let basePath = teamId;
 

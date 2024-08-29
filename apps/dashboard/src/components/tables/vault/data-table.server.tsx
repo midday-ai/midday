@@ -31,7 +31,7 @@ export async function DataTableServer({
   const isSearch = Object.values(filter).some((value) => value !== null);
 
   return (
-    <VaultProvider data={data} key={data?.length}>
+    <VaultProvider data={data}>
       <div className="relative">
         <VaultActions disableActions={disableActions} />
 

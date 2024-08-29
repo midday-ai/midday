@@ -189,12 +189,13 @@ export async function deleteUser(supabase: Client) {
 
 export async function updateTeam(supabase: Client, data: any) {
   const { data: userData } = await getCurrentUserTeamQuery(supabase);
+
   return supabase
     .from("teams")
     .update(data)
     .eq("id", userData?.team_id)
-    .select()
-    .single();
+    .select("*")
+    .maybeSingle();
 }
 
 type UpdateUserTeamRoleParams = {

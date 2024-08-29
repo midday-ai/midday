@@ -23,8 +23,9 @@ export function DataTable({ teamId }: { teamId: string }) {
           filter: `team_id=eq.${teamId}`,
         },
         (payload) => {
-          if (payload.new.id) {
-            updateItem(payload.new.id, {
+          // Update if the document is not classified
+          if (!payload.old.tag && payload.old.id) {
+            updateItem(payload.old.id, {
               tag: payload.new?.tag,
             });
           }

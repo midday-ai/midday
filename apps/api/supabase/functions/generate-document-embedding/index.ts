@@ -26,8 +26,6 @@ const supabase = createClient<Database>(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
 );
 
-const model = new Supabase.ai.Session("gte-small");
-
 Deno.serve(async (req) => {
   const payload: WebhookPayload = await req.json();
 
@@ -97,53 +95,51 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { object } = await generateObject({
-    model: openai("gpt-4o"),
-    schema: z.object({
-      title: z
-        .string()
-        .nullable()
-        .describe("Company name, supplier name, or a document name"),
-      tag: TAGS.describe("Classification of the document").nullable(),
-    }),
-    prompt: `
-        You are an expert in document analysis.
-        Extract the title and tag from the document.
-        Only return a tag if it matches one of the predefined tags in the tag enum. If no matching tag is found, return null.
-        Document: ${document.slice(0, 500)}
+  const { data: teamData } = await supabase
+    .from("teams")
+    .select("id, document_classification")
+    .eq("id", team_id)
+    .single();
+
+  let response: { title: string | null; tag: string | null } | null = null;
+
+  if (teamData?.document_classification) {
+    const { object } = await generateObject({
+      model: openai("gpt-4o"),
+      schema: z.object({
+        title: z
+          .string()
+          .nullable()
+          .describe("Company name, supplier name, or a document name"),
+        tag: TAGS.describe("Classification of the document").nullable(),
+      }),
+      prompt: `
+        Analyze the document and extract:
+        1. Title: Company name, supplier name, or document name
+        2. Tag: Classify using predefined tags only; return null if no match
+        Provide concise, accurate results based on the document content.
+        Document: ${document.slice(0, 1000)}
     `,
-    temperature: 0.1,
-  });
+      temperature: 0.5,
+    });
+
+    response = {
+      title: object?.title ?? null,
+      tag: object?.tag ?? null,
+    };
+  }
 
   const { error: updateError } = await supabase
     .from("documents")
     .update({
-      title: object?.title ?? null,
+      title: response?.title,
       body: document,
-      tag: object?.tag ?? null,
+      tag: response?.tag,
     })
     .eq("id", id);
 
   if (updateError) {
     console.log(`Error updating document: ${updateError.message}`);
-  }
-
-  const embedding = await model.run(document, {
-    mean_pool: true,
-    normalize: true,
-    dimensions: 1536,
-  });
-
-  const { error: insertError } = await supabase
-    .from("document_sections")
-    .insert({
-      document_id: id,
-      team_id,
-      embedding,
-    });
-
-  if (insertError) {
-    console.log(`Error inserting chunk: ${insertError.message}`);
   }
 
   return new Response("Document processed and embedded successfully", {

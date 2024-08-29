@@ -141,45 +141,6 @@ export type Database = {
           },
         ]
       }
-      document_sections: {
-        Row: {
-          created_at: string
-          document_id: string
-          embedding: string | null
-          id: string
-          team_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          document_id: string
-          embedding?: string | null
-          id?: string
-          team_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          document_id?: string
-          embedding?: string | null
-          id?: string
-          team_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "document_sections_document_id_fkey"
-            columns: ["document_id"]
-            isOneToOne: false
-            referencedRelation: "documents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_sections_team_id_fkey"
-            columns: ["team_id"]
-            isOneToOne: false
-            referencedRelation: "teams"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       documents: {
         Row: {
           body: string | null
@@ -423,6 +384,7 @@ export type Database = {
         Row: {
           base_currency: string | null
           created_at: string
+          document_classification: boolean | null
           email: string | null
           id: string
           inbox_email: string | null
@@ -434,6 +396,7 @@ export type Database = {
         Insert: {
           base_currency?: string | null
           created_at?: string
+          document_classification?: boolean | null
           email?: string | null
           id?: string
           inbox_email?: string | null
@@ -445,6 +408,7 @@ export type Database = {
         Update: {
           base_currency?: string | null
           created_at?: string
+          document_classification?: boolean | null
           email?: string | null
           id?: string
           inbox_email?: string | null

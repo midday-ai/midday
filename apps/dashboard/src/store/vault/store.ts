@@ -23,12 +23,12 @@ export interface VaultState extends VaultProps {
 export type VaultStore = ReturnType<typeof createVaultStore>;
 export const VaultContext = createContext<VaultStore | null>(null);
 
-export const createVaultStore = (initProps?: Partial<VaultProps>) => {
-  const DEFAULT_PROPS: VaultProps = {
-    data: [],
-  };
+const DEFAULT_PROPS: VaultProps = {
+  data: [],
+};
 
-  return createStore<VaultState>()((set, get) => ({
+export const createVaultStore = (initProps?: Partial<VaultProps>) => {
+  return createStore<VaultState>()((set) => ({
     ...DEFAULT_PROPS,
     ...initProps,
 

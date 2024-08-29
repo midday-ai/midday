@@ -290,7 +290,7 @@ export function DataTableRow({ data }: { data: any }) {
               />
             </TableCell>
             <TableCell>
-              <Tag name={data.tag} isFolder={data.isFolder} />
+              <Tag name={data.tag} />
             </TableCell>
             <TableCell>
               {data?.created_at ? format(new Date(data.created_at), "Pp") : "-"}

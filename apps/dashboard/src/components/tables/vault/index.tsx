@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
+import { VaultSettingsModal } from "@/components/modals/vault-settings-modal";
 import { VaultSearchFilter } from "@/components/vault-search-filter";
-import { getTeamMembers } from "@midday/supabase/cached-queries";
+import { getTeamMembers, getUser } from "@midday/supabase/cached-queries";
 import { Suspense } from "react";
 import { Loading } from "./data-table.loading";
 import { DataTableServer } from "./data-table.server";
@@ -12,23 +13,30 @@ type Props = {
 };
 
 export async function Table({ folders, disableActions, filter }: Props) {
-  const members = await getTeamMembers();
-  const teamId = members?.data?.at(0)?.team_id;
+  const [members, user] = await Promise.all([getTeamMembers(), getUser()]);
+
+  const team = user?.data?.team;
 
   return (
     <div>
-      <div className="h-[32px] mt-6 mb-[21px] flex items-center justify-between mr-12">
+      <div className="h-[32px] mt-6 mb-[21px] flex items-center justify-between mr-11">
         <Breadcrumbs
           folders={folders}
           hide={Object.values(filter).some((value) => value !== null)}
         />
 
-        <VaultSearchFilter
-          members={members?.data?.map((member) => ({
-            id: member?.user?.id,
-            name: member.user?.full_name,
-          }))}
-        />
+        <div className="flex items-center gap-2">
+          <VaultSearchFilter
+            members={members?.data?.map((member) => ({
+              id: member?.user?.id,
+              name: member.user?.full_name,
+            }))}
+          />
+
+          <VaultSettingsModal
+            documentClassification={team?.document_classification}
+          />
+        </div>
       </div>
 
       <Suspense fallback={<Loading />}>
@@ -36,7 +44,7 @@ export async function Table({ folders, disableActions, filter }: Props) {
           folders={folders}
           disableActions={disableActions}
           filter={filter}
-          teamId={teamId}
+          teamId={team?.id}
         />
       </Suspense>
     </div>

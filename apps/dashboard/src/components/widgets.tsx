@@ -1,10 +1,3 @@
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@midday/ui/carousel";
 import * as React from "react";
 import { Spending } from "./charts/spending";
 import { Transactions } from "./charts/transactions";
@@ -42,29 +35,10 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
   ];
 
   return (
-    <Carousel
-      className="flex flex-col"
-      opts={{
-        align: "start",
-      }}
-    >
-      <div className="ml-auto hidden md:flex">
-        <CarouselPrevious className="static p-0 border-none hover:bg-transparent" />
-        <CarouselNext className="static p-0 border-none hover:bg-transparent" />
-      </div>
-
-      <CarouselContent className="-ml-[20px] 2xl:-ml-[40px] flex-col md:flex-row space-y-6 md:space-y-0">
-        {items.map((item, idx) => {
-          return (
-            <CarouselItem
-              className="lg:basis-1/2 xl:basis-1/3 3xl:basis-1/4 pl-[20px] 2xl:pl-[40px]"
-              key={idx.toString()}
-            >
-              {item}
-            </CarouselItem>
-          );
-        })}
-      </CarouselContent>
-    </Carousel>
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+      {items.map((item, idx) => {
+        return <div key={idx.toString()}>{item}</div>;
+      })}
+    </div>
   );
 }
