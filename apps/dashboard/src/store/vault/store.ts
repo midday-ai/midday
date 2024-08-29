@@ -56,10 +56,6 @@ export const createVaultStore = (initProps?: Partial<VaultProps>) => {
 
     updateItem: (id, payload) => {
       set((state) => {
-        console.log(
-          "updated",
-          state.data.map((d) => (d.id === id ? { ...d, ...payload } : d)),
-        );
         return {
           data: state.data.map((d) => (d.id === id ? { ...d, ...payload } : d)),
         };
