@@ -5,7 +5,6 @@ import { resumableUpload } from "@/utils/upload";
 import { createClient } from "@midday/supabase/client";
 import { cn } from "@midday/ui/cn";
 import { useToast } from "@midday/ui/use-toast";
-import { nanoid } from "nanoid";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -52,18 +51,16 @@ export function UploadZone({ children, teamId }: Props) {
 
     setShowProgress(true);
 
-    const filePath = [teamId, "inbox"];
+    // Add uploaded folder so we can filter background job on this
+    const filePath = [teamId, "inbox", "uploaded"];
 
     try {
       await Promise.all(
-        files.map(async (file, idx) => {
-          return resumableUpload(supabase, {
+        files.map(async (file, idx) =>
+          resumableUpload(supabase, {
             bucket: "vault",
             path: filePath,
-            // Add uploaded so we can filter background job on this
-            file: new File([file], file.name.replace(".", ".uploaded."), {
-              type: file.type,
-            }),
+            file,
             onProgress: (bytesUploaded, bytesTotal) => {
               uploadProgress.current[idx] = (bytesUploaded / bytesTotal) * 100;
 
@@ -76,8 +73,8 @@ export function UploadZone({ children, teamId }: Props) {
 
               setProgress(Math.round(_progress / files.length));
             },
-          });
-        }),
+          }),
+        ),
       );
 
       // Reset once done

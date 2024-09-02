@@ -18,10 +18,10 @@ client.defineJob({
     filter: {
       record: {
         bucket_id: ["vault"],
-        // NOTE: This ensures jobs run only for files uploaded through the inbox bulk upload.
         path_tokens: [
           {
-            $includes: ".uploaded.",
+            // NOTE: This ensures jobs run only for files uploaded through the inbox bulk upload.
+            $includes: "uploaded",
           },
         ],
       },
@@ -38,7 +38,7 @@ client.defineJob({
     const { data: inboxData } = await io.supabase.client
       .from("inbox")
       .insert({
-        // NOTE: If we can't parse the name using OCR, this will be the fallback name
+        // NOTE: If we can't parse the name using OCR this will be the fallback name
         display_name: filename,
         team_id: teamId,
         file_path: path_tokens,
