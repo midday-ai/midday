@@ -7,7 +7,6 @@ import {
   subYears,
 } from "date-fns";
 import type { Client } from "../types";
-import { EMPTY_FOLDER_PLACEHOLDER_FILE_NAME } from "../utils/storage";
 
 function transactionCategory(transaction) {
   return (
@@ -545,7 +544,6 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
       "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
     )
     .eq("team_id", teamId)
-    .eq("parent_id", parentId || teamId)
     .limit(limit)
     .order("created_at", { ascending: true });
 
@@ -560,6 +558,11 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   if (start && end) {
     query.gte("created_at", start);
     query.lte("created_at", end);
+  }
+
+  if (!isSearch) {
+    // if no search query, we want to get the default folders
+    query.eq("parent_id", parentId || teamId);
   }
 
   if (searchQuery) {
