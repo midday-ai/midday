@@ -164,9 +164,11 @@ export async function POST(req: Request) {
       const { content, mimeType, size, fileName, name } =
         await prepareDocument(attachment);
 
+      const uniqueFileName = `${fileName}_${nanoid(4)}`;
+
       const { data } = await supabase.storage
         .from("vault")
-        .upload(`${teamId}/inbox/${MessageID}/${fileName}`, content, {
+        .upload(`${teamId}/inbox/${uniqueFileName}`, content, {
           contentType: mimeType,
           upsert: true,
         });
@@ -176,10 +178,10 @@ export async function POST(req: Request) {
         display_name: Subject || name,
         team_id: teamId,
         file_path: data?.path.split("/"),
-        file_name: fileName,
+        file_name: uniqueFileName,
         content_type: mimeType,
         forwarded_to: forwardingEnabled ? forwardEmail : null,
-        reference_id: `${MessageID}_${fileName}`,
+        reference_id: `${MessageID}_${uniqueFileName}`,
         size,
       };
     });
