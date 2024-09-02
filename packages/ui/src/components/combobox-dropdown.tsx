@@ -67,10 +67,7 @@ export function ComboboxDropdown<T extends ComboboxItem>({
     item.label.toLowerCase().includes(inputValue.toLowerCase()),
   );
 
-  const showCreate =
-    onCreate &&
-    inputValue &&
-    !items?.find((o) => o.label.toLowerCase() === inputValue.toLowerCase());
+  const showCreate = onCreate && Boolean(inputValue) && !filteredItems.length;
 
   const Component = (
     <Command loop shouldFilter={false}>
@@ -81,7 +78,6 @@ export function ComboboxDropdown<T extends ComboboxItem>({
         className="px-3"
       />
 
-      <CommandEmpty>{emptyResults ?? "No item found"}</CommandEmpty>
       <CommandGroup>
         <CommandList className="max-h-[225px] overflow-auto">
           {filteredItems.map((item) => {
@@ -121,6 +117,8 @@ export function ComboboxDropdown<T extends ComboboxItem>({
               </CommandItem>
             );
           })}
+
+          <CommandEmpty>{emptyResults ?? "No item found"}</CommandEmpty>
 
           {showCreate && (
             <CommandItem

@@ -112,8 +112,8 @@ export function SelectCategory({
           slug: item.slug,
         });
       }}
-      onCreate={(value) => {
-        if (!headless) {
+      {...(!headless && {
+        onCreate: (value) => {
           createCategories.execute({
             categories: [
               {
@@ -122,8 +122,8 @@ export function SelectCategory({
               },
             ],
           });
-        }
-      }}
+        },
+      })}
       renderSelectedItem={(selectedItem) => (
         <div className="flex items-center space-x-2">
           <CategoryColor color={selectedItem.color} />

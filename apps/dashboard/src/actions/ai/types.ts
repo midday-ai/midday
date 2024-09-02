@@ -10,6 +10,7 @@ export interface Chat extends Record<string, unknown> {
   title: string;
   createdAt: Date;
   userId: string;
+  teamId: string;
   messages: Message[];
 }
 
@@ -19,6 +20,7 @@ export type SettingsResponse = {
 
 export type User = {
   id: string;
+  team_id: string;
   full_name: string;
   avatar_url: string;
 };
