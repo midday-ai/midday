@@ -208,7 +208,7 @@ export const AI = createAI<AIState, UIState>({
     const settings = await getAssistantSettings();
     const createdAt = new Date();
     const userId = state.user.id;
-
+    const teamId = state.user.team_id;
     const { chatId, messages } = state;
 
     const firstMessageContent = messages?.at(0)?.content ?? "";
@@ -223,6 +223,7 @@ export const AI = createAI<AIState, UIState>({
       userId,
       createdAt,
       messages,
+      teamId,
     };
 
     if (done && settings?.enabled) {

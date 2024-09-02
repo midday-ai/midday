@@ -426,7 +426,8 @@ export const assistantSettingsSchema = z.object({
 export const requestAccessSchema = z.void();
 
 export const parseDateSchema = z
-  .string()
+  .date()
+  .transform((value) => new Date(value))
   .transform((v) => isValid(v))
   .refine((v) => !!v, { message: "Invalid date" });
 

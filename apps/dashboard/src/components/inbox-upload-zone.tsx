@@ -52,16 +52,18 @@ export function UploadZone({ children, teamId }: Props) {
 
     setShowProgress(true);
 
-    // Add uploaded folder so we can filter background job on this
-    const filePath = [teamId, "inbox", "uploaded", nanoid()];
+    const filePath = [teamId, "inbox"];
 
     try {
       await Promise.all(
-        files.map(async (file, idx) =>
-          resumableUpload(supabase, {
+        files.map(async (file, idx) => {
+          return resumableUpload(supabase, {
             bucket: "vault",
             path: filePath,
-            file,
+            // Add uploaded so we can filter background job on this
+            file: new File([file], file.name.replace(".", ".uploaded."), {
+              type: file.type,
+            }),
             onProgress: (bytesUploaded, bytesTotal) => {
               uploadProgress.current[idx] = (bytesUploaded / bytesTotal) * 100;
 
@@ -74,8 +76,8 @@ export function UploadZone({ children, teamId }: Props) {
 
               setProgress(Math.round(_progress / files.length));
             },
-          }),
-        ),
+          });
+        }),
       );
 
       // Reset once done

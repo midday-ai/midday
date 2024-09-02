@@ -1,7 +1,7 @@
 "use server";
 
 import { client as RedisClient } from "@midday/kv";
-import { getSession } from "@midday/supabase/cached-queries";
+import { getSession, getUser } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
 export async function getAssistantSettings(): Promise<SettingsResponse> {
@@ -69,15 +69,14 @@ export async function clearChats() {
 }
 
 export async function getLatestChat() {
-  const {
-    data: { session },
-  } = await getSession();
+  const user = await getUser();
 
-  const userId = session?.user.id;
+  const teamId = user?.data?.team_id;
+  const userId = user?.data?.id;
 
   try {
     const chat: string[] = await RedisClient.zrange(
-      `user:chat:${userId}`,
+      `chat:${teamId}:user:${userId}`,
       0,
       1,
       {
@@ -96,16 +95,15 @@ export async function getLatestChat() {
 }
 
 export async function getChats() {
-  const {
-    data: { session },
-  } = await getSession();
+  const user = await getUser();
 
-  const userId = session?.user.id;
+  const teamId = user?.data?.team_id;
+  const userId = user?.data?.id;
 
   try {
     const pipeline = RedisClient.pipeline();
     const chats: string[] = await RedisClient.zrange(
-      `user:chat:${userId}`,
+      `chat:${teamId}:user:${userId}`,
       0,
       -1,
       {
@@ -145,7 +143,8 @@ export async function saveChat(chat: Chat) {
   const pipeline = RedisClient.pipeline();
   pipeline.hmset(`chat:${chat.id}`, chat);
 
-  const chatKey = `user:chat:${chat.userId}`;
+  const chatKey = `chat:${chat.teamId}:user:${chat.userId}`;
+
   pipeline
     .zadd(chatKey, {
       score: Date.now(),
