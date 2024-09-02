@@ -11,14 +11,14 @@ type ResumableUploadParmas = {
 
 export async function resumableUpload(
   client: SupabaseClient,
-  { file, path, bucket, onProgress }: ResumableUploadParmas
+  { file, path, bucket, onProgress }: ResumableUploadParmas,
 ) {
   const {
     data: { session },
   } = await client.auth.getSession();
 
   const fullPath = decodeURIComponent(
-    [...path, stripSpecialCharacters(file.name)].join("/")
+    [...path, stripSpecialCharacters(file.name)].join("/"),
   );
 
   return new Promise((resolve, reject) => {
