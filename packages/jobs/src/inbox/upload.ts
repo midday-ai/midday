@@ -18,10 +18,19 @@ client.defineJob({
     filter: {
       record: {
         bucket_id: ["vault"],
+        // NOTE: This ensures jobs run only for files uploaded through the inbox bulk upload.
         path_tokens: [
           {
-            // NOTE: This ensures jobs run only for files uploaded through the inbox bulk upload.
-            $includes: "uploaded",
+            $endsWith: ".uploaded.pdf",
+          },
+          {
+            $endsWith: ".uploaded.png",
+          },
+          {
+            $endsWith: ".uploaded.jpg",
+          },
+          {
+            $endsWith: ".uploaded.jpeg",
           },
         ],
       },
