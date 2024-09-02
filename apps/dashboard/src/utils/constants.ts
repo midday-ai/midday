@@ -11,4 +11,5 @@ export const Cookies = {
   ChartCurrency: "chart-currency",
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",
+  RequestAccess: "request-access",
 };
