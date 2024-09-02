@@ -23,7 +23,7 @@ export async function DataTableServer({
 
   const { data } = await getVaultQuery(supabase, {
     teamId,
-    parentId,
+    parentId: parentId && decodeURIComponent(parentId),
     filter,
     searchQuery: filter?.q,
   });

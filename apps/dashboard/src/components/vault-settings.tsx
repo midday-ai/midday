@@ -43,7 +43,7 @@ export function VaultSettings({ documentClassification, onSuccess }: Props) {
             control={form.control}
             name="document_classification"
             render={({ field }) => (
-              <FormItem className="space-y-0">
+              <FormItem>
                 <div className="flex justify-between items-center w-full">
                   <FormLabel>Document classification</FormLabel>
                   <FormControl>
@@ -54,7 +54,9 @@ export function VaultSettings({ documentClassification, onSuccess }: Props) {
                   </FormControl>
                 </div>
                 <FormDescription>
-                  We use AI to classify your documents.
+                  We use AI to classify your documents, enabling this will
+                  automatically classify your documents into categories such as
+                  contracts, invoices, etc.
                 </FormDescription>
               </FormItem>
             )}
