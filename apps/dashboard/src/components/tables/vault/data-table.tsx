@@ -1,30 +1,50 @@
 "use client";
 
 import { useVaultContext } from "@/store/vault/hook";
-import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@midday/ui/table";
+import { createClient } from "@midday/supabase/client";
+import { Table, TableBody } from "@midday/ui/table";
+import { useEffect } from "react";
 import { DataTableRow } from "./data-table-row";
+import { DataTableHeader } from "./date-table-header";
 
-export function DataTable({ teamId }) {
-  const data = useVaultContext((s) => s.data);
+export function DataTable({ teamId }: { teamId: string }) {
+  const { data, updateItem } = useVaultContext((s) => s);
+  const supabase = createClient();
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("realtime_documents")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "documents",
+          filter: `team_id=eq.${teamId}`,
+        },
+        (payload) => {
+          // Update if the document is not classified
+          if (!payload.old.tag && payload.old.id) {
+            updateItem(payload.old.id, {
+              tag: payload.new?.tag,
+            });
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <Table>
-      <TableHeader className="border-0">
-        <TableRow>
-          <TableHead className="w-[60%]">Name</TableHead>
-          <TableHead className="w-[15%]">Created at</TableHead>
-          <TableHead className="w-full">Last modified at</TableHead>
-        </TableRow>
-      </TableHeader>
+      <DataTableHeader />
+
       <TableBody className="border-r-0 border-l-0">
         {data?.map((row) => (
-          <DataTableRow key={row.name} data={row} teamId={teamId} />
+          <DataTableRow key={row.name} data={row} />
         ))}
       </TableBody>
     </Table>

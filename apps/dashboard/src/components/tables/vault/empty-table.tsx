@@ -1,5 +1,5 @@
 type Props = {
-  type: string;
+  type?: string;
 };
 
 export function EmptyTable({ type }: Props) {
@@ -54,6 +54,16 @@ export function EmptyTable({ type }: Props) {
               <br />
               will end up.
             </p>
+          </div>
+        </div>
+      );
+
+    case "search":
+      return (
+        <div className="h-[calc(100%-80px)] p-4 flex justify-center items-center">
+          <div className="items-center flex flex-col text-center">
+            <h2 className="mb-2">No results found.</h2>
+            <p className="text-sm text-[#878787]">Try adjusting your search.</p>
           </div>
         </div>
       );

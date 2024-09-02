@@ -519,35 +519,73 @@ export async function getMetricsQuery(
 
 export type GetVaultParams = {
   teamId: string;
-  path?: string;
+  parentId?: string;
+  limit?: number;
+  searchQuery?: string;
+  filter?: {
+    start?: string;
+    end?: string;
+    owners?: string[];
+    tags?: string[];
+  };
 };
 
 export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
-  const { teamId, path } = params;
+  const { teamId, parentId, limit = 10000, searchQuery, filter } = params;
 
-  const defaultFolders = path
-    ? []
-    : [
-        { name: "exports", isFolder: true },
-        { name: "inbox", isFolder: true },
-        { name: "imports", isFolder: true },
-        { name: "transactions", isFolder: true },
-      ];
+  const { start, end, owners, tags } = filter || {};
 
-  let basePath = teamId;
+  const isSearch =
+    Object.values(filter).some((value) => value !== null) ||
+    Boolean(searchQuery);
 
-  if (path) {
-    basePath = `${basePath}/${path}`;
+  const query = supabase
+    .from("documents")
+    .select(
+      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
+    )
+    .eq("team_id", teamId)
+    .eq("parent_id", parentId || teamId)
+    .limit(limit)
+    .order("created_at", { ascending: true });
+
+  if (owners?.length) {
+    query.in("owner_id", owners);
   }
 
-  const { data } = await supabase.storage.from("vault").list(basePath, {
-    sortBy: { column: "name", order: "asc" },
-  });
+  if (tags?.length) {
+    query.in("tag", tags);
+  }
 
-  const filteredData =
-    data
-      ?.filter((file) => file.name !== EMPTY_FOLDER_PLACEHOLDER_FILE_NAME)
-      .map((item) => ({ ...item, isFolder: !item.id })) ?? [];
+  if (start && end) {
+    query.gte("created_at", start);
+    query.lte("created_at", end);
+  }
+
+  if (searchQuery) {
+    query.textSearch("fts", `'${searchQuery}'`);
+  }
+
+  const { data } = await query;
+
+  const defaultFolders =
+    parentId || isSearch
+      ? []
+      : [
+          { name: "exports", isFolder: true },
+          { name: "inbox", isFolder: true },
+          { name: "imports", isFolder: true },
+          { name: "transactions", isFolder: true },
+        ];
+
+  const filteredData = (data ?? []).map((item) => ({
+    ...item,
+    name:
+      item.path_tokens?.at(-1) === ".folderPlaceholder"
+        ? item.path_tokens?.at(-2)
+        : item.path_tokens?.at(-1),
+    isFolder: item.path_tokens?.at(-1) === ".folderPlaceholder",
+  }));
 
   const mergedMap = new Map(
     [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj]),
@@ -560,12 +598,13 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   };
 }
 
-export async function getVaultActivityQuery(supabase: Client, userId: string) {
+export async function getVaultActivityQuery(supabase: Client, teamId: string) {
   return supabase
-    .from("objects")
-    .select("*")
-    .eq("owner_id", userId)
+    .from("documents")
+    .select("id, name, metadata, path_tokens")
+    .eq("team_id", teamId)
     .limit(20)
+    .not("name", "ilike", "%.folderPlaceholder")
     .order("created_at", { ascending: false });
 }
 
@@ -581,7 +620,7 @@ export async function getVaultRecursiveQuery(
   supabase: Client,
   params: GetVaultRecursiveParams,
 ) {
-  const { teamId, path, folder, limit = 10000, offset = 0 } = params;
+  const { teamId, path, folder, limit = 10000 } = params;
 
   let basePath = teamId;
 

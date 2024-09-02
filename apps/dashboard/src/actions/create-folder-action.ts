@@ -2,7 +2,7 @@
 
 import { LogEvents } from "@midday/events/events";
 import { createFolder } from "@midday/supabase/storage";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { createFolderSchema } from "./schema";
 
@@ -22,7 +22,7 @@ export const createFolderAction = authActionClient
       name: value.name,
     });
 
-    revalidateTag(`vault_${user.team_id}`);
+    revalidatePath("/vault");
 
     return data;
   });

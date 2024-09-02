@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
-import { VaultContext, VaultState } from "./store";
+import { VaultContext, type VaultState } from "./store";
 
 export function useVaultContext<T>(selector: (state: VaultState) => T): T {
   const store = useContext(VaultContext);

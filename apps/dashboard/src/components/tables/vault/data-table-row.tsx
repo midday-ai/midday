@@ -4,8 +4,11 @@ import { createFolderAction } from "@/actions/create-folder-action";
 import { deleteFileAction } from "@/actions/delete-file-action";
 import { deleteFolderAction } from "@/actions/delete-folder-action";
 import { shareFileAction } from "@/actions/share-file-action";
+import { updateDocumentAction } from "@/actions/update-document-action";
+import { AssignedUser } from "@/components/assigned-user";
 import { FileIcon } from "@/components/file-icon";
 import { FilePreview } from "@/components/file-preview";
+import { SelectTag } from "@/components/select-tag";
 import { useI18n } from "@/locales/client";
 import { useVaultContext } from "@/store/vault/hook";
 import { formatSize } from "@/utils/format";
@@ -54,7 +57,10 @@ import ms from "ms";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { DEFAULT_FOLDER_NAME } from "./contants";
+import { Tag } from "./tag";
 
 export const translatedFolderName = (t: any, folder: string) => {
   switch (folder) {
@@ -73,10 +79,38 @@ export const translatedFolderName = (t: any, folder: string) => {
   }
 };
 
-function RowTitle({ isEditing, name: initialName, path, href }) {
+type Props = {
+  isEditing: boolean;
+  name: string;
+  path: string;
+  href: string;
+};
+
+function RowTitle({ name: initialName, isEditing, path, href }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
   const t = useI18n();
+  const [cancelled, setCancelled] = useState(false);
   const { toast } = useToast();
-  const [name, setName] = useState(initialName ?? "Untitled Folder");
+  const [name, setName] = useState(initialName ?? DEFAULT_FOLDER_NAME);
+  const { deleteItem, data } = useVaultContext((s) => s);
+
+  useEffect(() => {
+    if (isEditing) {
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 200);
+    }
+  }, [isEditing]);
+
+  useHotkeys(
+    "esc",
+    () => {
+      const name = initialName ?? DEFAULT_FOLDER_NAME;
+      deleteItem(name);
+      setCancelled(true);
+    },
+    { enableOnFormTags: true, enabled: isEditing },
+  );
 
   const createFolder = useAction(createFolderAction, {
     onExecute: () => {},
@@ -85,45 +119,63 @@ function RowTitle({ isEditing, name: initialName, path, href }) {
         duration: 3500,
         variant: "error",
         title:
-          "The folder already exists in the current directory. Please use a different name.",
+          "A folder with this name already exists. Please use a different name.",
       });
     },
   });
 
-  const handleOnBlur = () => {
+  const checkAndCreateFolder = () => {
+    if (
+      !cancelled &&
+      name === initialName &&
+      data.some((folder) => folder.name === name && folder.isFolder)
+    ) {
+      return;
+    }
+
     createFolder.execute({ path, name });
   };
 
   const handleOnKeyDown = (evt: React.KeyboardEvent<HTMLInputElement>) => {
     if (evt.key === "Enter") {
-      createFolder.execute({ path, name });
+      checkAndCreateFolder();
     }
   };
 
   if (isEditing) {
     return (
       <Input
-        className="w-auto border-0"
+        ref={inputRef}
+        className="w-auto border-0 h-auto p-0"
         value={name}
-        autoFocus
-        onBlur={handleOnBlur}
+        onBlur={checkAndCreateFolder}
         onKeyDown={handleOnKeyDown}
         onChange={(evt) => setName(evt.target.value)}
+        onFocus={(evt) => evt.target.select()}
       />
     );
   }
 
   if (href) {
-    return <Link href={href}>{translatedFolderName(t, name)}</Link>;
+    return (
+      <Link prefetch href={href}>
+        {translatedFolderName(t, name)}
+      </Link>
+    );
   }
 
-  return <span>{translatedFolderName(t, name)}</span>;
+  return (
+    <span className="line-clamp-1 max-w-[70%]">
+      {translatedFolderName(t, name)}
+    </span>
+  );
 }
 
-export function DataTableRow({ data, teamId }) {
+export function DataTableRow({ data }: { data: any }) {
   const { toast } = useToast();
   const pathname = usePathname();
   const params = useParams();
+  const updateDocument = useAction(updateDocumentAction);
   const { deleteItem, createFolder } = useVaultContext((s) => s);
 
   const folders = params?.folders ?? [];
@@ -169,7 +221,7 @@ export function DataTableRow({ data, teamId }) {
   };
 
   const handleCreateFolder = () => {
-    createFolder({ path: folderPath, name: "Untitled folder" });
+    createFolder({ name: DEFAULT_FOLDER_NAME });
   };
 
   const shareFile = useAction(shareFileAction, {
@@ -195,7 +247,7 @@ export function DataTableRow({ data, teamId }) {
           <TableRow className="h-[45px] cursor-default">
             <TableCell>
               <HoverCard openDelay={200}>
-                <HoverCardTrigger>
+                <HoverCardTrigger asChild>
                   <div className="flex items-center space-x-2">
                     <FileIcon
                       mimetype={data?.metadata?.mimetype}
@@ -204,9 +256,9 @@ export function DataTableRow({ data, teamId }) {
                     />
 
                     <RowTitle
+                      isEditing={Boolean(data.isEditing)}
                       href={data.isFolder && `${pathname}/${data.name}`}
                       name={data.name}
-                      isEditing={data.isEditing}
                       path={folderPath}
                     />
 
@@ -222,7 +274,7 @@ export function DataTableRow({ data, teamId }) {
                     <FilePreview
                       width={280}
                       height={365}
-                      src={`/api/proxy?filePath=vault/${teamId}/${filepath}`}
+                      src={`/api/proxy?filePath=vault/${data.team_id}/${filepath}`}
                       downloadUrl={`/api/download/file?path=${filepath}&filename=${data.name}`}
                       name={data.name}
                       type={data?.metadata?.mimetype}
@@ -232,98 +284,115 @@ export function DataTableRow({ data, teamId }) {
               </HoverCard>
             </TableCell>
             <TableCell>
+              <AssignedUser
+                fullName={data?.owner?.full_name}
+                avatarUrl={data?.owner?.avatar_url}
+              />
+            </TableCell>
+            <TableCell>
+              <Tag name={data.tag} />
+            </TableCell>
+            <TableCell>
               {data?.created_at ? format(new Date(data.created_at), "Pp") : "-"}
             </TableCell>
             <TableCell>
-              <div className="flex justify-between">
-                <span>
-                  {data?.updated_at
-                    ? format(new Date(data.updated_at), "Pp")
-                    : "-"}
-                </span>
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <Icons.MoreHoriz />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-42"
-                    sideOffset={10}
-                    align="end"
-                  >
-                    {!data.isFolder && (
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          Share URL
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                shareFile.execute({
-                                  filepath,
-                                  expireIn: ms("7d"),
-                                })
-                              }
-                            >
-                              Expire in 1 week
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                shareFile.execute({
-                                  filepath,
-                                  expireIn: ms("30d"),
-                                })
-                              }
-                            >
-                              Expire in 1 month
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                shareFile.execute({
-                                  filepath,
-                                  expireIn: ms("1y"),
-                                })
-                              }
-                            >
-                              Expire in 1 year
-                            </DropdownMenuItem>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                    )}
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Icons.MoreHoriz />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-42"
+                  sideOffset={10}
+                  align="end"
+                >
+                  {!disableActions && !isDefaultFolder && (
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>Edit tag</DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          <SelectTag
+                            headless
+                            selectedId={data.tag}
+                            onChange={(tag) => {
+                              updateDocument.execute({
+                                id: data.id,
+                                tag: tag.slug,
+                              });
+                            }}
+                          />
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  )}
 
-                    {/* {!disableActions && !isDefaultFolder && (
-                      <DropdownMenuItem>Rename</DropdownMenuItem>
-                    )} */}
-                    <DropdownMenuItem>
-                      {data.isFolder ? (
-                        <a
-                          href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
-                          download
-                          className="truncate w-full"
-                        >
-                          Download
-                        </a>
-                      ) : (
-                        <a
-                          href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
-                          download
-                          className="truncate w-full"
-                        >
-                          Download
-                        </a>
-                      )}
-                    </DropdownMenuItem>
-                    {!disableActions && !isDefaultFolder && (
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem className="text-destructive">
-                          Delete
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
+                  {!data.isFolder && (
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>Share URL</DropdownMenuSubTrigger>
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              shareFile.execute({
+                                filepath,
+                                expireIn: ms("7d"),
+                              })
+                            }
+                          >
+                            Expire in 1 week
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              shareFile.execute({
+                                filepath,
+                                expireIn: ms("30d"),
+                              })
+                            }
+                          >
+                            Expire in 1 month
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              shareFile.execute({
+                                filepath,
+                                expireIn: ms("1y"),
+                              })
+                            }
+                          >
+                            Expire in 1 year
+                          </DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  )}
+
+                  <DropdownMenuItem>
+                    {data.isFolder ? (
+                      <a
+                        href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
+                        download
+                        className="truncate w-full"
+                      >
+                        Download
+                      </a>
+                    ) : (
+                      <a
+                        href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
+                        download
+                        className="truncate w-full"
+                      >
+                        Download
+                      </a>
                     )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                  </DropdownMenuItem>
+                  {!disableActions && !isDefaultFolder && (
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive">
+                        Delete
+                      </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </TableCell>
           </TableRow>
         </ContextMenuTrigger>

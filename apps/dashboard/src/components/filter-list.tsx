@@ -4,6 +4,7 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { formatDateRange } from "little-date";
 
 const listVariant = {
   hidden: { y: 10, opacity: 0 },
@@ -31,6 +32,7 @@ type Props = {
   members?: { id: string; name: string }[];
   statusFilters: { id: string; name: string }[];
   attachmentsFilters: { id: string; name: string }[];
+  tags?: { id: string; name: string; slug: string }[];
 };
 
 export function FilterList({
@@ -40,6 +42,7 @@ export function FilterList({
   categories,
   accounts,
   members,
+  tags,
   statusFilters,
   attachmentsFilters,
 }: Props) {
@@ -47,10 +50,9 @@ export function FilterList({
     switch (key) {
       case "start": {
         if (key === "start" && value && filters.end) {
-          return `${format(new Date(value), "MMM d, yyyy")} - ${format(
-            new Date(filters.end),
-            "MMM d, yyyy",
-          )}`;
+          return formatDateRange(new Date(value), new Date(filters.end), {
+            includeTime: false,
+          });
         }
 
         return (
@@ -80,6 +82,12 @@ export function FilterList({
           .join(", ");
       }
 
+      case "tags": {
+        return value
+          .map((slug) => tags?.find((tag) => tag.slug === slug)?.name)
+          .join(", ");
+      }
+
       case "accounts": {
         return value
           .map((id) => {
@@ -92,7 +100,8 @@ export function FilterList({
           .join(", ");
       }
 
-      case "assignees": {
+      case "assignees":
+      case "owners": {
         return value
           .map((id) => {
             const member = members?.find((member) => member.id === id);

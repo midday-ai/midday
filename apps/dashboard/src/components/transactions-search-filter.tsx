@@ -1,6 +1,6 @@
 "use client";
 
-import { generateFilters } from "@/actions/ai/filters/generate-filters";
+import { generateTransactionsFilters } from "@/actions/ai/filters/generate-transactions-filters";
 import { formatAccountName } from "@/utils/format";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -32,7 +32,6 @@ import { SelectCategory } from "./select-category";
 
 type Props = {
   placeholder: string;
-  validFilters: string[];
   categories?: {
     id: string;
     slug: string;
@@ -45,6 +44,11 @@ type Props = {
   }[];
   members?: {
     id: string;
+    name: string;
+  }[];
+  tags?: {
+    id: string;
+    slug: string;
     name: string;
   }[];
 };
@@ -84,10 +88,10 @@ const placeholder =
   PLACEHOLDERS[Math.floor(Math.random() * PLACEHOLDERS.length)];
 
 export function TransactionsSearchFilter({
-  validFilters,
   categories,
   accounts,
   members,
+  tags,
 }: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -154,12 +158,10 @@ export function TransactionsSearchFilter({
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
-      const { object } = await generateFilters(
+      const { object } = await generateTransactionsFilters(
         prompt,
-        validFilters,
         categories
-          ? `Categories: ${categories?.map((category) => category.name).join(", ")}
-            `
+          ? `Categories: ${categories?.map((category) => category.name).join(", ")}`
           : "",
       );
 
@@ -174,6 +176,10 @@ export function TransactionsSearchFilter({
               partialObject?.categories?.map(
                 (name: string) =>
                   categories?.find((category) => category.name === name)?.slug,
+              ) ?? null,
+            tags:
+              partialObject?.tags?.map(
+                (name: string) => tags?.find((tag) => tag.name === name)?.slug,
               ) ?? null,
             q: partialObject?.name ?? null,
           };
@@ -243,6 +249,7 @@ export function TransactionsSearchFilter({
           members={members}
           statusFilters={statusFilters}
           attachmentsFilters={attachmentsFilters}
+          tags={tags}
         />
       </div>
 

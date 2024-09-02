@@ -14,6 +14,8 @@ export type Database = {
           account_id: string
           balance: number | null
           bank_connection_id: string | null
+          base_balance: number | null
+          base_currency: string | null
           created_at: string
           created_by: string
           currency: string | null
@@ -28,6 +30,8 @@ export type Database = {
           account_id: string
           balance?: number | null
           bank_connection_id?: string | null
+          base_balance?: number | null
+          base_currency?: string | null
           created_at?: string
           created_by: string
           currency?: string | null
@@ -42,6 +46,8 @@ export type Database = {
           account_id?: string
           balance?: number | null
           bank_connection_id?: string | null
+          base_balance?: number | null
+          base_currency?: string | null
           created_at?: string
           created_by?: string
           currency?: string | null
@@ -128,6 +134,69 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "bank_connections_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          body: string | null
+          created_at: string | null
+          fts: unknown | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          object_id: string | null
+          owner_id: string | null
+          parent_id: string | null
+          path_tokens: string[] | null
+          tag: string | null
+          team_id: string | null
+          title: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string | null
+          fts?: unknown | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          object_id?: string | null
+          owner_id?: string | null
+          parent_id?: string | null
+          path_tokens?: string[] | null
+          tag?: string | null
+          team_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string | null
+          fts?: unknown | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          object_id?: string | null
+          owner_id?: string | null
+          parent_id?: string | null
+          path_tokens?: string[] | null
+          tag?: string | null
+          team_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_created_by_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storage_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -313,7 +382,9 @@ export type Database = {
       }
       teams: {
         Row: {
+          base_currency: string | null
           created_at: string
+          document_classification: boolean | null
           email: string | null
           id: string
           inbox_email: string | null
@@ -323,7 +394,9 @@ export type Database = {
           name: string | null
         }
         Insert: {
+          base_currency?: string | null
           created_at?: string
+          document_classification?: boolean | null
           email?: string | null
           id?: string
           inbox_email?: string | null
@@ -333,7 +406,9 @@ export type Database = {
           name?: string | null
         }
         Update: {
+          base_currency?: string | null
           created_at?: string
+          document_classification?: boolean | null
           email?: string | null
           id?: string
           inbox_email?: string | null
@@ -659,6 +734,8 @@ export type Database = {
           assigned_id: string | null
           balance: number | null
           bank_account_id: string | null
+          base_amount: number | null
+          base_currency: string | null
           category: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug: string | null
           created_at: string
@@ -683,6 +760,8 @@ export type Database = {
           assigned_id?: string | null
           balance?: number | null
           bank_account_id?: string | null
+          base_amount?: number | null
+          base_currency?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string
@@ -704,6 +783,8 @@ export type Database = {
           assigned_id?: string | null
           balance?: number | null
           bank_account_id?: string | null
+          base_amount?: number | null
+          base_currency?: string | null
           category?: Database["public"]["Enums"]["transactionCategories"] | null
           category_slug?: string | null
           created_at?: string
@@ -961,6 +1042,34 @@ export type Database = {
             }
             Returns: unknown
           }
+      get_all_transactions_by_account: {
+        Args: {
+          account_id: string
+        }
+        Returns: {
+          amount: number
+          assigned_id: string | null
+          balance: number | null
+          bank_account_id: string | null
+          base_amount: number | null
+          base_currency: string | null
+          category: Database["public"]["Enums"]["transactionCategories"] | null
+          category_slug: string | null
+          created_at: string
+          currency: string
+          date: string
+          description: string | null
+          id: string
+          internal_id: string
+          manual: boolean | null
+          method: Database["public"]["Enums"]["transactionMethods"]
+          name: string
+          note: string | null
+          status: Database["public"]["Enums"]["transactionStatus"] | null
+          team_id: string
+          updated_at: string | null
+        }[]
+      }
       get_bank_account_currencies: {
         Args: {
           team_id: string

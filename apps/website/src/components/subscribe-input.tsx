@@ -1,7 +1,6 @@
 "use client";
 
 import { subscribeAction } from "@/actions/subscribe-action";
-import { LogEvents } from "@midday/events/events";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";

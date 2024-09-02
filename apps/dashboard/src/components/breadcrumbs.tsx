@@ -9,10 +9,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@midday/ui/breadcrumb";
+import { cn } from "@midday/ui/cn";
 import Link from "next/link";
 import { translatedFolderName } from "./tables/vault/data-table-row";
 
-export function Breadcrumbs({ folders = [] }) {
+type Props = {
+  folders?: string[];
+  hide?: boolean;
+};
+
+export function Breadcrumbs({ folders = [], hide }: Props) {
   const t = useI18n();
 
   const allFolders = ["all", ...folders];
@@ -32,20 +38,19 @@ export function Breadcrumbs({ folders = [] }) {
     }
 
     return (
-      <>
-        <BreadcrumbItem key={folder}>
+      <div key={folder} className="flex items-center gap-2">
+        <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link href={href}>{translatedFolderName(t, folder)}</Link>
           </BreadcrumbLink>
-
-          <BreadcrumbSeparator />
         </BreadcrumbItem>
-      </>
+        <BreadcrumbSeparator />
+      </div>
     );
   });
 
   return (
-    <Breadcrumb>
+    <Breadcrumb className={cn("animate-fade-in", hide && "opacity-0")}>
       <BreadcrumbList>{links}</BreadcrumbList>
     </Breadcrumb>
   );

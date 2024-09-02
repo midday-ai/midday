@@ -17,7 +17,6 @@ import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { VALID_FILTERS } from "./filters";
 import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
@@ -75,7 +74,6 @@ export default async function Transactions({
       <div className="flex justify-between py-6">
         <TransactionsSearchFilter
           placeholder="Search or type filter"
-          validFilters={VALID_FILTERS}
           categories={[
             ...categoriesData?.data?.map((category) => ({
               slug: category.slug,

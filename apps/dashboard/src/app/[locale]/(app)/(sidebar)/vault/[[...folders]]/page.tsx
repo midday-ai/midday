@@ -1,17 +1,37 @@
 import { Table } from "@/components/tables/vault";
-import { Metadata } from "next";
+import { searchParamsCache } from "@/components/tables/vault/search-params";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Vault | Midday",
 };
 
-export default function Vault({ params }) {
+type Props = {
+  searchParams: { [key: string]: string | string[] | undefined };
+  params: {
+    folders: string[];
+    q?: string;
+    owners?: string;
+    start?: string;
+    end?: string;
+  };
+};
+
+export default function Vault({ params, searchParams }: Props) {
   const disableActions = [
     "exports",
     "inbox",
     "imports",
     "transactions",
-  ].includes(params?.folders?.at(0));
+  ].includes(params.folders?.[0] ?? "");
 
-  return <Table folders={params.folders} disableActions={disableActions} />;
+  const filter = searchParamsCache.parse(searchParams);
+
+  return (
+    <Table
+      folders={params.folders ?? []}
+      disableActions={disableActions}
+      filter={filter}
+    />
+  );
 }

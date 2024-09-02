@@ -1,15 +1,13 @@
 "use server";
 
-import { filterQuerySchema } from "@/actions/schema";
+import { filterVaultSchema } from "@/actions/schema";
 import { openai } from "@ai-sdk/openai";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 
-export async function generateFilters(
-  prompt: string,
-  validFilters: string[],
-  context: string,
-) {
+const VALID_FILTERS = ["name", "start", "end", "owners", "tags"];
+
+export async function generateVaultFilters(prompt: string, context?: string) {
   const stream = createStreamableValue();
 
   (async () => {
@@ -17,11 +15,10 @@ export async function generateFilters(
       model: openai("gpt-4o-mini"),
       system: `You are a helpful assistant that generates filters for a given prompt. \n
                Current date is: ${new Date().toISOString().split("T")[0]} \n
-               Only use categories if it's specificed in the prompt. \n
                ${context}
       `,
-      schema: filterQuerySchema.pick({
-        ...(validFilters.reduce((acc, filter) => {
+      schema: filterVaultSchema.pick({
+        ...(VALID_FILTERS.reduce((acc, filter) => {
           acc[filter] = true;
           return acc;
         }, {}) as any),

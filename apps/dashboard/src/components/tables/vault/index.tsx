@@ -1,43 +1,52 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
-import { VaultActivity } from "@/components/vault-activity";
-import { VaultProvider } from "@/store/vault/provider";
-import { getUser, getVault } from "@midday/supabase/cached-queries";
-import { CreateFolderButton } from "./create-folder-button";
-import { DataTable } from "./data-table";
-import { EmptyTable } from "./empty-table";
-import { UploadButton } from "./upload-button";
-import { UploadZone } from "./upload-zone";
+import { VaultSettingsModal } from "@/components/modals/vault-settings-modal";
+import { VaultSearchFilter } from "@/components/vault-search-filter";
+import { getTeamMembers, getUser } from "@midday/supabase/cached-queries";
+import { Suspense } from "react";
+import { Loading } from "./data-table.loading";
+import { DataTableServer } from "./data-table.server";
 
-export async function Table({ folders, disableActions }) {
-  const path = folders?.join("/");
+type Props = {
+  folders: string[];
+  disableActions: boolean;
+  hideBreadcrumbs?: boolean;
+};
 
-  const { data } = await getVault({
-    path: path && decodeURIComponent(path),
-  });
+export async function Table({ folders, disableActions, filter }: Props) {
+  const [members, user] = await Promise.all([getTeamMembers(), getUser()]);
 
-  const { data: userData } = await getUser();
+  const team = user?.data?.team;
 
   return (
     <div>
-      <VaultProvider data={data}>
-        <VaultActivity />
+      <div className="h-[32px] mt-6 mb-[21px] flex items-center justify-between mr-11">
+        <Breadcrumbs
+          folders={folders}
+          hide={Object.values(filter).some((value) => value !== null)}
+        />
 
-        <div className="flex justify-between items-center h-[32px] mt-6">
-          <Breadcrumbs folders={folders} />
+        <div className="flex items-center gap-2">
+          <VaultSearchFilter
+            members={members?.data?.map((member) => ({
+              id: member?.user?.id,
+              name: member.user?.full_name,
+            }))}
+          />
 
-          <div className="flex space-x-2">
-            <CreateFolderButton disableActions={disableActions} />
-            <UploadButton disableActions={disableActions} />
-          </div>
+          <VaultSettingsModal
+            documentClassification={team?.document_classification}
+          />
         </div>
+      </div>
 
-        <div className="mt-6 h-[calc(100vh-400px)] border overflow-scroll relative">
-          <UploadZone>
-            <DataTable teamId={userData.team_id} />
-            {data.length === 0 && <EmptyTable type={path} />}
-          </UploadZone>
-        </div>
-      </VaultProvider>
+      <Suspense fallback={<Loading />}>
+        <DataTableServer
+          folders={folders}
+          disableActions={disableActions}
+          filter={filter}
+          teamId={team?.id}
+        />
+      </Suspense>
     </div>
   );
 }
