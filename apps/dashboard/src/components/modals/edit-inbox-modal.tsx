@@ -16,6 +16,7 @@ import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { SelectCurrency } from "../select-currency";
 
@@ -44,13 +45,16 @@ export function EditInboxModal({
 
   const form = useForm<UpdateInboxFormValues>({
     resolver: zodResolver(updateInboxSchema),
-    defaultValues: {
+  });
+
+  useEffect(() => {
+    form.reset({
       id,
       display_name: defaultValue.display_name,
       amount: defaultValue.amount?.toString(),
       currency: defaultValue.currency ?? undefined,
-    },
-  });
+    });
+  }, [id]);
 
   function onSubmit(values: UpdateInboxFormValues) {
     updateCategory.execute(values);
@@ -102,7 +106,7 @@ export function EditInboxModal({
                             className="w-full"
                             {...field}
                             currencies={Object.values(currencies)?.map(
-                              (currency) => currency
+                              (currency) => currency,
                             )}
                           />
                         </FormControl>

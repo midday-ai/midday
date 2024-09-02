@@ -258,7 +258,6 @@ export function InboxDetails({
           </div>
 
           <EditInboxModal
-            key={item.id}
             isOpen={isOpen}
             onOpenChange={setOpen}
             id={item.id}
