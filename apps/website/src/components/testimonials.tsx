@@ -4,7 +4,7 @@ const testimonials = [
   {
     name: "Lucas Grey",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1744288035314008064/kAQycMrk_400x400.png",
+      "https://pbs.twimg.com/profile_images/1803830464605753393/dIvu3zC7_400x400.jpg",
     handle: "@ImLucasGrey",
     verified: true,
     quote: "This is so ingenious and good!",
@@ -55,7 +55,8 @@ const testimonials = [
     handle: "@WeirdoWizard",
     verified: false,
     quote: "No sweat! Your smooth integration with banking data blew me away.",
-    avatarUrl: "https://pbs.twimg.com/profile_images/1117472858836434944/FbWce7CZ_400x400.jpg"
+    avatarUrl:
+      "https://pbs.twimg.com/profile_images/1117472858836434944/FbWce7CZ_400x400.jpg",
   },
   {
     name: "Cal.com",
