@@ -99,7 +99,9 @@ export function InboxView({
                 setItems((prev) => [payload.new, ...prev]);
 
                 if (params.inboxId) {
-                  setParams({ inboxId: payload.new.id });
+                  setTimeout(() => {
+                    setParams({ inboxId: payload.new.id });
+                  }, 100);
                 }
               }
               break;
