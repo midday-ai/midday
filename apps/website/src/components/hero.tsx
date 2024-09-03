@@ -1,10 +1,7 @@
 import { Button } from "@midday/ui/button";
-import dynamic from "next/dynamic";
 import Link from "next/link";
-
-const Donut = dynamic(() => import("./donut").then((mod) => mod.Donut), {
-  ssr: false,
-});
+import { Suspense } from "react";
+import { Donut } from "./donut";
 
 export function Hero() {
   return (
@@ -68,7 +65,9 @@ export function Hero() {
       </div>
 
       <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
-        <Donut />
+        <Suspense>
+          <Donut />
+        </Suspense>
       </div>
     </section>
   );

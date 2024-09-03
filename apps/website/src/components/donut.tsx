@@ -1,4 +1,4 @@
-import Spline from "@splinetool/react-spline";
+import Spline from "@splinetool/react-spline/next";
 
 export async function Donut() {
   return (

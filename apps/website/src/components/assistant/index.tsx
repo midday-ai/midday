@@ -24,7 +24,7 @@ export function Assistant() {
 
   const handleOnSelect = (message: string) => {
     const content = chatExamples.find(
-      (example) => example.title === message
+      (example) => example.title === message,
     )?.content;
 
     setExpanded(false);

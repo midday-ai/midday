@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
+  "files": [
+    "tailwind.config.ts",
+    "postcss.config.js",
+    "globals.css"
+  ],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -17,8 +21,8 @@
     "@storybook/addon-links": "^8.2.8",
     "@storybook/react-vite": "^8.2.8",
     "autoprefixer": "^10.4.20",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "storybook": "^8.2.8",
     "typescript": "^5.5.4"
   },
