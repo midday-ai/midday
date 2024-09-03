@@ -3,11 +3,12 @@ import { getVaultRecursiveQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { download } from "@midday/supabase/storage";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
+import type { NextRequest, NextResponse } from "next/server";
 
 export const preferredRegion = ["fra1", "sfo1", "iad1"];
 export const dynamic = "force-dynamic";
 
-export async function GET(req, res) {
+export async function GET(req: NextRequest, res: NextResponse) {
   const requestUrl = new URL(req.url);
   const supabase = createClient();
   const user = await getUser();
@@ -26,7 +27,7 @@ export async function GET(req, res) {
       download(supabase, {
         bucket: "vault",
         path: `${file.basePath}/${file.name}`,
-      })
+      }),
     );
   });
 
@@ -54,7 +55,7 @@ export async function GET(req, res) {
 
   responseHeaders.set(
     "Content-Disposition",
-    `attachment; filename="${filename}.zip"`
+    `attachment; filename="${filename}.zip"`,
   );
 
   const data = await zipWriter.close();

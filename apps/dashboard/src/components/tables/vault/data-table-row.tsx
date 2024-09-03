@@ -188,7 +188,10 @@ export function DataTableRow({ data }: { data: any }) {
 
   const disableActions = ["transactions"].includes(folders?.at(0));
   const folderPath = folders.join("/");
-  const filepath = [...folders, data.name].join("/");
+  const [_, ...pathWithoutTeamId] = data?.path_tokens ?? [];
+
+  const filepath = pathWithoutTeamId?.join("/");
+  const oldFilepath = [...folders, data.name].join("/");
 
   const deleteFolder = useAction(deleteFolderAction, {
     onExecute: () => deleteItem(data.name),
@@ -368,7 +371,7 @@ export function DataTableRow({ data }: { data: any }) {
                   <DropdownMenuItem>
                     {data.isFolder ? (
                       <a
-                        href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
+                        href={`/api/download/zip?path=${oldFilepath}/${data.name}&filename=${data.name}`}
                         download
                         className="truncate w-full"
                       >
@@ -376,7 +379,7 @@ export function DataTableRow({ data }: { data: any }) {
                       </a>
                     ) : (
                       <a
-                        href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
+                        href={`/api/download/file?path=${filepath}&filename=${data.name}`}
                         download
                         className="truncate w-full"
                       >
@@ -443,7 +446,7 @@ export function DataTableRow({ data }: { data: any }) {
           <ContextMenuItem>
             {data.isFolder ? (
               <a
-                href={`/api/download/zip?path=${filepath}/${data.name}&filename=${data.name}`}
+                href={`/api/download/zip?path=${oldFilepath}/${data.name}&filename=${data.name}`}
                 download
                 className="truncate"
               >
@@ -451,7 +454,7 @@ export function DataTableRow({ data }: { data: any }) {
               </a>
             ) : (
               <a
-                href={`/api/download/file?path=${folderPath}/${data.name}&filename=${data.name}`}
+                href={`/api/download/file?path=${filepath}&filename=${data.name}`}
                 download
                 className="truncate"
               >
