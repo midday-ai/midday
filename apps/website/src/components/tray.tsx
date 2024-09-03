@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
 export function Tray() {
-  const [date, setDate] = useState(new Date().toISOString());
+  const [date, setDate] = useState<string | undefined>();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -126,7 +126,9 @@ export function Tray() {
       <span className="text-sm font-medium">
         {format(new Date(), "eee d MMM")}
       </span>
-      <span className="text-sm font-medium">{format(new Date(date), "p")}</span>
+      <span className="text-sm font-medium">
+        {date && format(new Date(date), "p")}
+      </span>
     </div>
   );
 }
