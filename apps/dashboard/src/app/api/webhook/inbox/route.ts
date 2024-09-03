@@ -164,7 +164,7 @@ export async function POST(req: Request) {
       const { content, mimeType, size, fileName, name } =
         await prepareDocument(attachment);
 
-      const uniqueFileName = `${fileName}_${nanoid(4)}`;
+      const uniqueFileName = `${nanoid(4)}_${fileName}`;
 
       const { data } = await supabase.storage
         .from("vault")
