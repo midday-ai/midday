@@ -562,7 +562,13 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 
   if (!isSearch) {
     // if no search query, we want to get the default folders
-    query.eq("parent_id", parentId || teamId);
+    if (parentId === "inbox") {
+      query
+        .or(`parent_id.eq.${parentId || teamId},parent_id.eq.uploaded`)
+        .not("path_tokens", "cs", '{"uploaded",".folderPlaceholder"}');
+    } else {
+      query.or(`parent_id.eq.${parentId || teamId}`);
+    }
   }
 
   if (searchQuery) {

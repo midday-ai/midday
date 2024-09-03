@@ -186,7 +186,7 @@ export async function POST(req: Request) {
       };
     });
 
-    const insertData = await Promise.all(uploadedAttachments);
+    const insertData = await Promise.all(uploadedAttachments ?? []);
 
     // Insert records
     const { data: inboxData } = await supabase
