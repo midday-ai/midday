@@ -1,4 +1,5 @@
 import { DocumentClient } from "@midday/documents";
+import { revalidatePath } from "next/cache";
 import { client, db, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 
@@ -86,6 +87,9 @@ client.defineJob({
         .eq("id", inboxData.id)
         .select()
         .single();
+
+      // NOTE: Revalidate the inbox to show the new document, especially important the first time a document is uploaded
+      revalidatePath("/inbox");
 
       if (updatedInbox?.amount) {
         await io.sendEvent("Match Inbox", {
