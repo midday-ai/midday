@@ -13,6 +13,7 @@ import { useOptimisticAction } from "next-safe-action/hooks";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsString, parseAsStringEnum, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
+import { InboxEmpty } from "./inbox-empty";
 import { InboxHeader } from "./inbox-header";
 import { InboxStructure } from "./inbox-structure";
 import { InboxToolbar } from "./inbox-toolbar";
@@ -193,12 +194,15 @@ export function InboxView({
   };
 
   const currentItems = getCurrentItems(params.tab);
+
   const selectedItems = currentItems?.find(
     (item) => item.id === params.inboxId,
   );
+
   const currentIndex = currentItems?.findIndex(
     (item) => item.id === params.inboxId,
   );
+
   const currentTabEmpty = Boolean(currentItems?.length === 0);
 
   const selectNextItem = () => {
@@ -280,6 +284,10 @@ export function InboxView({
     selectNextItem();
     updateInbox(item);
   };
+
+  if (!items.length) {
+    return <InboxEmpty inboxId={inboxId} />;
+  }
 
   return (
     <InboxStructure

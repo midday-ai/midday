@@ -1,7 +1,6 @@
 import { getUser } from "@midday/supabase/cached-queries";
 import { getInboxQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
-import { InboxEmpty } from "./inbox-empty";
 import { UploadZone } from "./inbox-upload-zone";
 import { InboxView } from "./inbox-view";
 
@@ -22,14 +21,6 @@ export async function Inbox({ ascending, query, currencies }: Props) {
     teamId,
     ascending,
   });
-
-  if (!inbox?.data?.length && !query) {
-    return (
-      <UploadZone teamId={teamId}>
-        <InboxEmpty inboxId={user?.data?.team?.inbox_id} />
-      </UploadZone>
-    );
-  }
 
   return (
     <UploadZone teamId={teamId}>
