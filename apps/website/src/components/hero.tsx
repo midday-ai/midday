@@ -66,7 +66,7 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
+      <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none hidden transform-gpu grayscale xl:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense>
             <Donut />
