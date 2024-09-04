@@ -1,5 +1,8 @@
 "use client";
 
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
+
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
@@ -13,8 +16,6 @@ import { FileType } from "@midday/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
@@ -30,6 +31,7 @@ type Props = {
   disableFullscreen?: boolean;
   onLoaded?: () => void;
   download?: boolean;
+  isFullscreen?: boolean;
 };
 
 const RenderComponent = ({
@@ -37,6 +39,7 @@ const RenderComponent = ({
   src,
   className,
   width,
+  height,
   onLoaded,
   setError,
 }) => {
@@ -76,12 +79,16 @@ const RenderComponent = ({
     case FileType.Pdf:
       return (
         <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
-          <div className="overflow-y-auto overflow-x-hidden max-h-screen">
+          <div
+            className="overflow-y-auto overflow-x-hidden max-h-screen"
+            style={{ width: width, height: height }}
+          >
             {Array.from(new Array(numPages), (_, index) => (
               <Page
                 key={`page_${index + 1}`}
                 pageNumber={index + 1}
                 width={width}
+                height={height}
               />
             ))}
           </div>
@@ -103,6 +110,7 @@ export function FilePreview({
   height,
   disableFullscreen,
   download = true,
+  isFullscreen,
   onLoaded,
 }: Props) {
   const [isLoaded, setLoaded] = useState(false);
@@ -179,13 +187,24 @@ export function FilePreview({
           )}
         </AnimatePresence>
 
-        <Skeleton
+        <div
           className={cn(
-            "absolute top-0 left-0 z-20 pointer-events-none w-full h-full rounded-none",
+            "w-full h-full flex items-center justify-center pointer-events-none",
             isLoaded && "hidden",
             error && "hidden",
           )}
-        />
+        >
+          <Skeleton
+            style={{ width: width, height: height }}
+            className={cn(
+              isLoaded && "hidden",
+              error && "hidden",
+              isFullscreen &&
+                "absolute top-0 left-0 z-20 pointer-events-none w-full h-full",
+            )}
+          />
+        </div>
+
         <div
           className={cn(
             "w-full h-full items-center flex justify-center bg-[#F2F1EF] dark:bg-secondary",

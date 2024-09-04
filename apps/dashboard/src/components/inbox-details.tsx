@@ -242,6 +242,7 @@ export function InboxDetails({
                 name={item.name}
                 type={item.content_type}
                 disableFullscreen
+                isFullscreen
               />
             )}
           </div>

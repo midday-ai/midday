@@ -13,10 +13,9 @@ import { FilePreview } from "./file-preview";
 type Props = {
   file: any;
   onDelete: () => void;
-  id: string;
 };
 
-export function AttachmentItem({ file, onDelete, id }: Props) {
+export function AttachmentItem({ file, onDelete }: Props) {
   const filePreviewSupported = isSupportedFilePreview(file.type);
 
   return (
