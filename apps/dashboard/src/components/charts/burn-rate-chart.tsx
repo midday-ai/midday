@@ -52,11 +52,11 @@ export async function BurnRateChart({
 
         <div className="text-sm text-[#606060] flex items-center space-x-2">
           <span>
-            {runway && runway > 0
+            {typeof runway === "number" && runway > 0
               ? `${runway} months runway`
               : "Average burn rate"}
           </span>
-          {runway && runway > 0 && (
+          {typeof runway === "number" && runway > 0 && (
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>

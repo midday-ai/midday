@@ -15,7 +15,6 @@ import {
   YAxis,
 } from "recharts";
 import { Status } from "./status";
-import { getYAxisWidth, roundToNearestFactor } from "./utils";
 
 // Override console.error
 // This is a hack to suppress the warning about missing defaultProps in recharts library as of version 2.12
@@ -104,7 +103,7 @@ const ToolTipContent = ({ payload = {} }) => {
   );
 };
 
-export function BarChart({ data, disabled, currency, height = 290 }) {
+export function BarChart({ data, height = 290 }) {
   const locale = useCurrentLocale();
 
   const formattedData = data.result.map((item) => ({
@@ -115,24 +114,6 @@ export function BarChart({ data, disabled, currency, height = 290 }) {
       data.meta.period === "weekly" ? "w" : "MMM",
     ),
   }));
-
-  const getLabel = (value: number) => {
-    return formatAmount({
-      maximumFractionDigits: 0,
-      minimumFractionDigits: 0,
-      currency,
-      amount: value,
-      locale,
-    });
-  };
-
-  const getLabelMaxValue = getLabel(
-    roundToNearestFactor(
-      data?.result.map((item) =>
-        Math.max(item.current.value, item.previous.value),
-      ),
-    ),
-  );
 
   return (
     <div className="relative">
@@ -166,10 +147,9 @@ export function BarChart({ data, disabled, currency, height = 290 }) {
           <YAxis
             stroke="#888888"
             fontSize={12}
+            tickMargin={10}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => getLabel(disabled ? 0 : value)}
-            width={getYAxisWidth(getLabelMaxValue)}
             tick={{
               fill: "#606060",
               fontSize: 12,
