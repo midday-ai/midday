@@ -4,10 +4,12 @@ export function Iframe({
   height,
   onLoaded,
   setError,
+  preview,
 }: {
   src: string;
   width: number;
   height: number;
+  preview: boolean;
   onLoaded: (loaded: boolean) => void;
   setError: (error: boolean) => void;
 }) {
@@ -26,10 +28,10 @@ export function Iframe({
         allowTransparency
         allowFullScreen={false}
         style={{
-          marginLeft: -8,
-          marginTop: -8,
-          width: "calc(100% + 16px)",
-          height: "calc(100% + 16px)",
+          marginLeft: preview ? 0 : -8,
+          marginTop: preview ? 0 : -8,
+          width: preview ? width : "calc(100% + 16px)",
+          height: preview ? height : "calc(100% + 16px)",
           overflow: "hidden",
         }}
         onError={() => setError(true)}

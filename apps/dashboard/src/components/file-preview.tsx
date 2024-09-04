@@ -40,6 +40,7 @@ const RenderComponent = ({
   className,
   width,
   height,
+  preview,
   onLoaded,
   setError,
 }: {
@@ -48,6 +49,7 @@ const RenderComponent = ({
   className?: string;
   width: number;
   height: number;
+  preview: boolean;
   onLoaded: (loaded: boolean) => void;
   setError: (error: boolean) => void;
 }) => {
@@ -77,6 +79,7 @@ const RenderComponent = ({
         height={height}
         onLoaded={handleOnLoaded}
         setError={setError}
+        preview={preview}
       />
     );
   }
@@ -225,6 +228,7 @@ export function FilePreview({
               height={height}
               onLoaded={handleLoaded}
               setError={setError}
+              preview={preview}
             />
           )}
         </div>
