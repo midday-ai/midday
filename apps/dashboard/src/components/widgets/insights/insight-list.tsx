@@ -6,7 +6,7 @@ export function InsightList({ items }: { items: string[] }) {
   const { setOpen } = useAssistantStore();
 
   return (
-    <div className="mt-12">
+    <div className="mb-12">
       <ul className="flex flex-col justify-center items-center space-y-3 flex-shrink">
         {items.map((example) => (
           <li
