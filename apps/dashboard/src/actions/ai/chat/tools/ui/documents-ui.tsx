@@ -40,18 +40,19 @@ export function DocumentsUI({ data }: Props) {
           const downloadPath = rest.join("/");
 
           return (
-            <FilePreview
-              width={150}
-              height={198}
-              key={item.id}
-              preview
-              disableFullscreen
-              name={item.display_name}
-              type={item.content_type}
-              download
-              downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}
-              src={`/api/proxy?filePath=vault/${item?.file_path?.join("/")}`}
-            />
+            <div key={item.id}>
+              <FilePreview
+                width={150}
+                height={198}
+                preview
+                disableFullscreen
+                name={item.display_name}
+                type={item.content_type}
+                download
+                downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}
+                src={`/api/proxy?filePath=vault/${item?.file_path?.join("/")}`}
+              />
+            </div>
           );
         })}
       </div>
