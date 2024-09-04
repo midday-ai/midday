@@ -1,12 +1,21 @@
 "use client";
 
+import { chatExamples } from "@/components/chat/examples";
 import { useAssistantStore } from "@/store/assistant";
+import { shuffle } from "@midday/utils";
+import { useEffect, useState } from "react";
 
-export function InsightList({ items }: { items: string[] }) {
+export function InsightList() {
   const { setOpen } = useAssistantStore();
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    const items = shuffle(chatExamples).slice(0, 4);
+    setItems(items);
+  }, []);
 
   return (
-    <div className="mb-12">
+    <div className="mb-16">
       <ul className="flex flex-col justify-center items-center space-y-3 flex-shrink">
         {items.map((example) => (
           <li
