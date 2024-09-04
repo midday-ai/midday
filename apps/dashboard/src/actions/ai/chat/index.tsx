@@ -22,6 +22,7 @@ import type { AIState, Chat, ClientMessage, UIState } from "../types";
 import { getBurnRateTool } from "./tools/burn-rate";
 import { getForecastTool } from "./tools/forecast";
 import { getDocumentsTool } from "./tools/get-documents";
+import { getInvoicesTool } from "./tools/get-invoces";
 import { getTransactionsTool } from "./tools/get-transactions";
 import { getProfitTool } from "./tools/profit";
 import { createReport } from "./tools/report";
@@ -102,9 +103,11 @@ export async function submitUserMessage(
     If the user just wants the runway, call \`getRunway\` function.
     If the user just wants the profit, call \`getProfit\` function.
     If the user just wants to find transactions, call \`getTransactions\` function.
-    If the user just wants to find documents, invoices or receipts, call \`getDocuments\` function.
+    If the user just wants to find invoices or receipts, call \`getInvoices\` function.
+    If the user just wants to find documents, call \`getDocuments\` function.
 
     Always try to call the functions with default values, otherwise ask the user to respond with parameters. Just show one example if you can't call the function.
+    Current date is: ${new Date().toISOString()}
     
     `,
     messages: [
@@ -178,6 +181,7 @@ export async function submitUserMessage(
         dateTo: defaultValues.to,
       }),
       getTransactions: getTransactionsTool({ aiState }),
+      getInvoices: getInvoicesTool({ aiState, teamId }),
       getDocuments: getDocumentsTool({ aiState, teamId }),
       createReport: createReport({
         aiState,

@@ -1,5 +1,5 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { getVaultQuery } from "@midday/supabase/queries";
+import { getInboxSearchQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -10,30 +10,25 @@ type Args = {
   teamId: string;
 };
 
-export function getDocumentsTool({ aiState, teamId }: Args) {
+export function getInvoicesTool({ aiState, teamId }: Args) {
   return {
-    description: "Find documents",
+    description: "Find reciept or invoice",
     parameters: z.object({
-      name: z.string().describe("The name of the document"),
+      name: z.string().describe("The name of the invoice or reciept"),
     }),
     generate: async (args) => {
-      const { name } = args;
+      const { name, amount } = args;
       const supabase = createClient();
 
-      const { data } = await getVaultQuery(supabase, {
+      const searchQuery = name || amount;
+
+      const data = await getInboxSearchQuery(supabase, {
         teamId,
-        searchQuery: name,
+        q: searchQuery,
       });
 
-      const formattedData = data?.map((item) => ({
-        ...item,
-        content_type: item?.metadata?.mimetype,
-        display_name: item?.name,
-        file_path: item?.path_tokens,
-      }));
-
       const props = {
-        data: formattedData,
+        data,
       };
 
       const toolCallId = nanoid();
@@ -48,7 +43,7 @@ export function getDocumentsTool({ aiState, teamId }: Args) {
             content: [
               {
                 type: "tool-call",
-                toolName: "getDocuments",
+                toolName: "getInvoices",
                 toolCallId,
                 args,
               },
@@ -60,7 +55,7 @@ export function getDocumentsTool({ aiState, teamId }: Args) {
             content: [
               {
                 type: "tool-result",
-                toolName: "getDocuments",
+                toolName: "getInvoices",
                 toolCallId,
                 result: props,
               },

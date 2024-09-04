@@ -122,71 +122,7 @@ export function FilePreview({
 
   return (
     <Dialog>
-      <div className={cn(className, "relative h-full")}>
-        <AnimatePresence>
-          {!preview && isLoaded && (
-            <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
-              {!disableFullscreen && (
-                <motion.div
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -50, opacity: 0 }}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="secondary"
-                      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
-                      size="icon"
-                    >
-                      <Icons.OpenInFull />
-                    </Button>
-                  </DialogTrigger>
-                </motion.div>
-              )}
-
-              {downloadUrl && (
-                <motion.div
-                  initial={{ y: 50, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -50, opacity: 0 }}
-                  transition={{ delay: 0.04 }}
-                >
-                  <a href={downloadUrl} download>
-                    <Button
-                      variant="secondary"
-                      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
-                      size="icon"
-                    >
-                      <Icons.FileDownload />
-                    </Button>
-                  </a>
-                </motion.div>
-              )}
-            </div>
-          )}
-
-          {disableFullscreen && download && downloadUrl && (
-            <div className="absolute bottom-4 left-2 z-10">
-              <motion.div
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ delay: 0.04 }}
-              >
-                <a href={downloadUrl} download>
-                  <Button
-                    variant="secondary"
-                    className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
-                    size="icon"
-                  >
-                    <Icons.FileDownload />
-                  </Button>
-                </a>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
-
+      <div className={cn(className, "relative h-full overflow-hidden")}>
         <div
           className={cn(
             "w-full h-full flex items-center justify-center pointer-events-none",
@@ -208,10 +144,74 @@ export function FilePreview({
         <div
           className={cn(
             "w-full h-full items-center flex justify-center bg-[#F2F1EF] dark:bg-secondary",
-            !isLoaded && "opacity-0",
-            error && "opacity-1 bg-transparent",
+            !isLoaded && "hidden",
+            error && "visible bg-transparent",
           )}
         >
+          <AnimatePresence>
+            {!preview && isLoaded && (
+              <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
+                {!disableFullscreen && (
+                  <motion.div
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -50, opacity: 0 }}
+                  >
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="secondary"
+                        className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
+                        size="icon"
+                      >
+                        <Icons.OpenInFull />
+                      </Button>
+                    </DialogTrigger>
+                  </motion.div>
+                )}
+
+                {downloadUrl && (
+                  <motion.div
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -50, opacity: 0 }}
+                    transition={{ delay: 0.04 }}
+                  >
+                    <a href={downloadUrl} download>
+                      <Button
+                        variant="secondary"
+                        className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
+                        size="icon"
+                      >
+                        <Icons.FileDownload />
+                      </Button>
+                    </a>
+                  </motion.div>
+                )}
+              </div>
+            )}
+
+            {disableFullscreen && download && downloadUrl && (
+              <div className="absolute bottom-4 left-2 z-10">
+                <motion.div
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -50, opacity: 0 }}
+                  transition={{ delay: 0.04 }}
+                >
+                  <a href={downloadUrl} download>
+                    <Button
+                      variant="secondary"
+                      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
+                      size="icon"
+                    >
+                      <Icons.FileDownload />
+                    </Button>
+                  </a>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+
           {error ? (
             <Icons.Image size={16} />
           ) : (

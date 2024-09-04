@@ -535,7 +535,10 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const { start, end, owners, tags } = filter || {};
 
   const isSearch =
-    Object.values(filter).some((value) => value !== null) ||
+    (filter !== undefined &&
+      Object.values(filter).some(
+        (value) => value !== undefined && value !== null,
+      )) ||
     Boolean(searchQuery);
 
   const query = supabase
