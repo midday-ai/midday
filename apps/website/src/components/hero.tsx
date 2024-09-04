@@ -3,6 +3,7 @@ import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Donut } from "./donut";
+import { ErrorFallback } from "./error-fallback";
 
 export function Hero() {
   return (
@@ -66,7 +67,7 @@ export function Hero() {
       </div>
 
       <div className="scale-50 md:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale md:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
-        <ErrorBoundary errorComponent={() => null}>
+        <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense>
             <Donut />
           </Suspense>
