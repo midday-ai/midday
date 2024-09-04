@@ -104,8 +104,6 @@ const ToolTipContent = ({ payload = {} }) => {
 };
 
 export function BarChart({ data, height = 290 }) {
-  const locale = useCurrentLocale();
-
   const formattedData = data.result.map((item) => ({
     ...item,
     meta: data.meta,
@@ -116,7 +114,7 @@ export function BarChart({ data, height = 290 }) {
   }));
 
   return (
-    <div className="relative">
+    <div className="relative h-full w-full">
       <div className="space-x-4 absolute right-0 -top-10 hidden md:flex">
         <div className="flex space-x-2 items-center">
           <span className="w-2 h-2 rounded-full bg-[#121212] dark:bg-[#F5F5F3]" />
