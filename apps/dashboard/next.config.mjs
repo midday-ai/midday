@@ -28,14 +28,11 @@ const config = {
   },
   experimental: {
     instrumentationHook: process.env.NODE_ENV === "production",
-    outputFileTracingExcludes: {
-      "*": ["node_modules/canvas*"],
-    },
   },
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: "/((?!api/proxy).*)",
         headers: [
           {
             key: "X-Frame-Options",

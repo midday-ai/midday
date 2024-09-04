@@ -46,7 +46,7 @@ export function VaultPreview({
           >
             <FilePreview
               src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
-              name={filename}
+              name={filename ?? ""}
               type={file.mimetype}
               preview
               width={width}
@@ -69,7 +69,7 @@ export function VaultPreview({
             <FilePreview
               src={`/api/proxy?filePath=vault/${file?.path?.join("/")}`}
               downloadUrl={`/api/download/file?path=${downloadPath}&filename=${filename}`}
-              name={filename}
+              name={filename ?? ""}
               type={file.mimetype}
               width={280}
               height={365}
@@ -85,13 +85,13 @@ export function VaultPreview({
       <FileIcon
         isFolder={false}
         mimetype={file.mimetype}
-        name={file.name}
+        name={filename ?? ""}
         size={65}
         className="dark:text-[#2C2C2C] mb-0"
       />
       <span className="text-sm truncate w-[70px]">{filename}</span>
       <span className="text-sm mt-1 text-[#878787]">
-        {formatSize(file.size)}
+        {file.size && formatSize(file.size)}
       </span>
     </div>
   );

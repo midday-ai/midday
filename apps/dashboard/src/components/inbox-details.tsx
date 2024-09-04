@@ -243,6 +243,8 @@ export function InboxDetails({
                 type={item.content_type}
                 disableFullscreen
                 isFullscreen
+                width={680}
+                height={780}
               />
             )}
           </div>

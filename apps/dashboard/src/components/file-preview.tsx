@@ -1,8 +1,5 @@
 "use client";
 
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
-
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
@@ -14,10 +11,13 @@ import { Icons } from "@midday/ui/icons";
 import { Skeleton } from "@midday/ui/skeleton";
 import { FileType } from "@midday/utils";
 import { AnimatePresence, motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
+import React from "react";
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+const Iframe = dynamic(() => import("./iframe").then((mod) => mod.Iframe), {
+  ssr: false,
+});
 
 type Props = {
   type: FileType;
@@ -42,26 +42,20 @@ const RenderComponent = ({
   height,
   onLoaded,
   setError,
+}: {
+  type: FileType;
+  src: string;
+  className?: string;
+  width: number;
+  height: number;
+  onLoaded: (loaded: boolean) => void;
+  setError: (error: boolean) => void;
 }) => {
-  const [numPages, setNumPages] = useState<number>(0);
-
-  const onDocumentLoadSuccess = ({
-    numPages: nextNumPages,
-  }: {
-    numPages: number;
-  }) => {
-    onLoaded(true);
-    setNumPages(nextNumPages);
-  };
-
   const handleOnLoaded = () => {
     onLoaded(true);
   };
 
   if (type?.startsWith("image")) {
-    // NOTE: Can't get initial onLoad event to fire
-    onLoaded(true);
-
     return (
       <div className={cn("flex items-center justify-center", className)}>
         <img
@@ -75,28 +69,78 @@ const RenderComponent = ({
     );
   }
 
-  switch (type) {
-    case FileType.Pdf:
-      return (
-        <Document file={src} onLoadSuccess={onDocumentLoadSuccess}>
-          <div
-            className="overflow-y-auto overflow-x-hidden max-h-screen"
-            style={{ width: width, height: height }}
-          >
-            {Array.from(new Array(numPages), (_, index) => (
-              <Page
-                key={`page_${index + 1}`}
-                pageNumber={index + 1}
-                width={width}
-                height={height}
-              />
-            ))}
-          </div>
-        </Document>
-      );
-    default:
-      return null;
+  if (type === FileType.Pdf) {
+    return (
+      <Iframe
+        src={src}
+        width={width}
+        height={height}
+        onLoaded={handleOnLoaded}
+        setError={setError}
+      />
+    );
   }
+
+  return null;
+};
+
+const DownloadButton = ({ url }: { url: string }) => (
+  <a href={url} download>
+    <Button
+      variant="secondary"
+      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
+      size="icon"
+    >
+      <Icons.FileDownload />
+    </Button>
+  </a>
+);
+
+const RenderButtons = ({
+  preview,
+  isLoaded,
+  disableFullscreen,
+  downloadUrl,
+}: {
+  preview: boolean;
+  isLoaded: boolean;
+  disableFullscreen: boolean;
+  downloadUrl?: string;
+}) => {
+  if (preview || !isLoaded) return null;
+
+  return (
+    <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
+      {!disableFullscreen && (
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -50, opacity: 0 }}
+        >
+          <DialogTrigger asChild>
+            <Button
+              variant="secondary"
+              className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
+              size="icon"
+            >
+              <Icons.OpenInFull />
+            </Button>
+          </DialogTrigger>
+        </motion.div>
+      )}
+
+      {downloadUrl && (
+        <motion.div
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -50, opacity: 0 }}
+          transition={{ delay: 0.04 }}
+        >
+          <DownloadButton url={downloadUrl} />
+        </motion.div>
+      )}
+    </div>
+  );
 };
 
 export function FilePreview({
@@ -120,26 +164,27 @@ export function FilePreview({
     setLoaded(false);
   }, [src]);
 
+  function handleLoaded() {
+    setLoaded(true);
+    onLoaded?.();
+  }
+
   return (
     <Dialog>
       <div className={cn(className, "relative h-full overflow-hidden")}>
-        <div
-          className={cn(
-            "w-full h-full flex items-center justify-center pointer-events-none",
-            isLoaded && "hidden",
-            error && "hidden",
-          )}
-        >
-          <Skeleton
-            style={{ width: width, height: height }}
-            className={cn(
-              isLoaded && "hidden",
-              error && "hidden",
-              isFullscreen &&
-                "absolute top-0 left-0 z-20 pointer-events-none w-full h-full",
-            )}
-          />
-        </div>
+        {!isLoaded && !error && (
+          <div className="w-full h-full flex items-center justify-center pointer-events-none">
+            <Skeleton
+              style={{ width, height }}
+              className={cn(
+                isLoaded && "hidden",
+                error && "hidden",
+                isFullscreen &&
+                  "absolute top-0 left-0 z-20 pointer-events-none w-full h-full",
+              )}
+            />
+          </div>
+        )}
 
         <div
           className={cn(
@@ -149,47 +194,12 @@ export function FilePreview({
           )}
         >
           <AnimatePresence>
-            {!preview && isLoaded && (
-              <div className="absolute bottom-4 left-2 flex space-x-2 z-10">
-                {!disableFullscreen && (
-                  <motion.div
-                    initial={{ y: 50, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -50, opacity: 0 }}
-                  >
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
-                        size="icon"
-                      >
-                        <Icons.OpenInFull />
-                      </Button>
-                    </DialogTrigger>
-                  </motion.div>
-                )}
-
-                {downloadUrl && (
-                  <motion.div
-                    initial={{ y: 50, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -50, opacity: 0 }}
-                    transition={{ delay: 0.04 }}
-                  >
-                    <a href={downloadUrl} download>
-                      <Button
-                        variant="secondary"
-                        className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
-                        size="icon"
-                      >
-                        <Icons.FileDownload />
-                      </Button>
-                    </a>
-                  </motion.div>
-                )}
-              </div>
-            )}
-
+            <RenderButtons
+              preview={preview}
+              isLoaded={isLoaded}
+              disableFullscreen={disableFullscreen}
+              downloadUrl={downloadUrl}
+            />
             {disableFullscreen && download && downloadUrl && (
               <div className="absolute bottom-4 left-2 z-10">
                 <motion.div
@@ -198,15 +208,7 @@ export function FilePreview({
                   exit={{ y: -50, opacity: 0 }}
                   transition={{ delay: 0.04 }}
                 >
-                  <a href={downloadUrl} download>
-                    <Button
-                      variant="secondary"
-                      className="w-[32px] h-[32px] bg-white/80 hover:bg-white dark:bg-black/80 dark:hover:bg-black border"
-                      size="icon"
-                    >
-                      <Icons.FileDownload />
-                    </Button>
-                  </a>
+                  <DownloadButton url={downloadUrl} />
                 </motion.div>
               </div>
             )}
@@ -221,17 +223,14 @@ export function FilePreview({
               className={className}
               width={width}
               height={height}
-              onLoaded={() => {
-                setLoaded(true);
-                onLoaded?.();
-              }}
+              onLoaded={handleLoaded}
               setError={setError}
             />
           )}
         </div>
       </div>
 
-      <DialogContentFrameless className="max-w-[680px] max-h-[800px] overflow-auto p-0 m-0">
+      <DialogContentFrameless className="w-[680px] h-[800px] overflow-auto p-0 m-0">
         <FilePreview
           src={src}
           name={name}
