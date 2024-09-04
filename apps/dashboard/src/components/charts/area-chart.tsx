@@ -13,11 +13,14 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getYAxisWidth, roundToNearestFactor } from "./utils";
 
-const ToolTipContent = ({ payload, currency }) => {
+type ToolTipContentProps = {
+  payload: any;
+  currency: string;
+};
+
+const ToolTipContent = ({ payload, currency }: ToolTipContentProps) => {
   const { value = 0, date } = payload.at(0)?.payload ?? {};
-
   const locale = useCurrentLocale();
 
   return (
@@ -42,24 +45,13 @@ const ToolTipContent = ({ payload, currency }) => {
   );
 };
 
-export function AreaChart({ currency, data, height = 290 }) {
-  const locale = useCurrentLocale();
+type AreaChartProps = {
+  currency: string;
+  data: any;
+  height?: number;
+};
 
-  const getLabel = (value: number) => {
-    return formatAmount({
-      maximumFractionDigits: 0,
-      minimumFractionDigits: 0,
-      currency,
-      amount: value,
-      locale,
-    });
-  };
-
-  // TODO: Get highest value used in yAxis
-  const getLabelMaxValue = getLabel(
-    roundToNearestFactor(data?.map(({ value }) => value))
-  );
-
+export function AreaChart({ currency, data, height = 290 }: AreaChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BaseAreaChart data={data}>
@@ -126,8 +118,6 @@ export function AreaChart({ currency, data, height = 290 }) {
           tickLine={false}
           axisLine={false}
           tickMargin={10}
-          tickFormatter={getLabel}
-          width={getYAxisWidth(getLabelMaxValue)}
           tick={{
             fill: "#606060",
             fontSize: 12,

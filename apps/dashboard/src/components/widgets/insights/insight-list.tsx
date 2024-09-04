@@ -1,13 +1,9 @@
 "use client";
 
-import { chatExamples } from "@/components/chat/examples";
 import { useAssistantStore } from "@/store/assistant";
-import { shuffle } from "@midday/utils";
 
-export function InsightList() {
+export function InsightList({ items }: { items: string[] }) {
   const { setOpen } = useAssistantStore();
-
-  const items = shuffle(chatExamples).slice(0, 4);
 
   return (
     <div className="mt-12">

@@ -3,11 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "files": [
-    "tailwind.config.ts",
-    "postcss.config.js",
-    "globals.css"
-  ],
+  "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -32,6 +28,7 @@
     "./alert-dialog": "./src/components/alert-dialog.tsx",
     "./breadcrumb": "./src/components/breadcrumb.tsx",
     "./alert": "./src/components/alert.tsx",
+    "./chart": "./src/components/chart.tsx",
     "./currency-input": "./src/components/currency-input.tsx",
     "./submit-button": "./src/components/submit-button.tsx",
     "./avatar": "./src/components/avatar.tsx",
@@ -120,6 +117,7 @@
     "react-day-picker": "8.10.1",
     "react-icons": "^5.3.0",
     "react-number-format": "^5.4.0",
+    "recharts": "^2.12.7",
     "storybook-dark-mode": "^4.0.2",
     "tailwind-merge": "2.4.0",
     "tailwindcss": "^3.4.9",
