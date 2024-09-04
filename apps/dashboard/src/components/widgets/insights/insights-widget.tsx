@@ -13,7 +13,7 @@ export async function InsightsWidget() {
 
   return (
     <div>
-      <div className="mt-8 overflow-auto scrollbar-hide pb-28 aspect-square flex flex-col-reverse">
+      <div className="mt-8 overflow-auto scrollbar-hide pb-32 aspect-square flex flex-col-reverse">
         {chat ? (
           <ChatList messages={getUIStateFromAIState(chat)} />
         ) : (
