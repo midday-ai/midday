@@ -1,5 +1,3 @@
-"use client";
-
 import { TransactionListItem } from "@/components/charts/transaction-list-item";
 
 export function TransactionsItemList({ transactions, disabled }) {
