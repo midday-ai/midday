@@ -61,7 +61,7 @@ const testimonials = [
   {
     name: "Cal.com",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1729977047999524864/suW5VpQZ_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1826608625340514304/glxnI9mS_400x400.jpg",
     handle: "@calcom",
     verified: true,
     quote: "We love @middayai 🖤",
