@@ -49,7 +49,7 @@ const RenderComponent = ({
   className?: string;
   width: number;
   height: number;
-  preview: boolean;
+  preview?: boolean;
   onLoaded: (loaded: boolean) => void;
   setError: (error: boolean) => void;
 }) => {
@@ -174,7 +174,10 @@ export function FilePreview({
 
   return (
     <Dialog>
-      <div className={cn(className, "relative h-full overflow-hidden")}>
+      <div
+        className={cn(className, "relative h-full overflow-hidden")}
+        style={preview ? { width: width - 2, height: height - 5 } : undefined}
+      >
         {!isLoaded && !error && (
           <div className="w-full h-full flex items-center justify-center pointer-events-none">
             <Skeleton

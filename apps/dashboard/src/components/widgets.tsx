@@ -12,19 +12,12 @@ import { AccountBalance } from "./widgets/account-balance";
 import { Inbox } from "./widgets/inbox";
 import { Insights } from "./widgets/insights";
 import { Tracker } from "./widgets/tracker";
+import { Vault } from "./widgets/vault";
 
 type Props = {
   disabled: boolean;
   initialPeriod: Date | string;
   searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export const initialWidgetsVisibility = {
-  insights: true,
-  spending: true,
-  tracker: true,
-  inbox: false,
-  transactions: false,
 };
 
 export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
@@ -39,6 +32,7 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
     <Transactions key="transactions" disabled={disabled} />,
     <Inbox key="inbox" disabled={disabled} />,
     <AccountBalance key="account-balance" />,
+    <Vault key="vault" />,
   ];
 
   return (

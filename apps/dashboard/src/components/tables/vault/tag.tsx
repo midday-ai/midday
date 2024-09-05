@@ -7,8 +7,8 @@ export function Tag({
   name,
   isLoading,
 }: {
-  name: string;
-  isLoading: boolean;
+  name?: string;
+  isLoading?: boolean;
 }) {
   const t = useI18n();
 

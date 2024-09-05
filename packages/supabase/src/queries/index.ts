@@ -613,7 +613,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
 export async function getVaultActivityQuery(supabase: Client, teamId: string) {
   return supabase
     .from("documents")
-    .select("id, name, metadata, path_tokens")
+    .select("id, name, metadata, path_tokens, tag, team_id")
     .eq("team_id", teamId)
     .limit(20)
     .not("name", "ilike", "%.folderPlaceholder")

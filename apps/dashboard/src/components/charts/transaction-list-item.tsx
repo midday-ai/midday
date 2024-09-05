@@ -20,7 +20,7 @@ export function TransactionListItem({ transaction, disabled }: Props) {
   return (
     <>
       <div onClick={() => setOpen(true)} className="w-full">
-        <div className="flex items-center p-3">
+        <div className="flex items-center py-3">
           <div className="w-[50%] flex space-x-2">
             <span
               className={cn(
