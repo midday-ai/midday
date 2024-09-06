@@ -48,10 +48,10 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
         }),
       ]);
 
-      const avarageBurnRate = calculateAvgBurnRate(burnRateData);
+      const averageBurnRate = calculateAvgBurnRate(burnRateData);
 
       const props = {
-        avarageBurnRate,
+        averageBurnRate,
         currency,
         startDate,
         endDate,

@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  value: z.string().min(1),
+  email: z.string().email(),
 });
 
 type Props = {
@@ -26,48 +26,34 @@ export function OTPSignIn({ className }: Props) {
   const verifyOtp = useAction(verifyOtpAction);
   const [isLoading, setLoading] = useState(false);
   const [isSent, setSent] = useState(false);
-  const [phone, setPhone] = useState();
-  const [email, setEmail] = useState();
-  const [type, setType] = useState<"email" | "phone">();
+  const [email, setEmail] = useState<string>();
   const supabase = createClient();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      value: "",
+      email: "",
     },
   });
 
-  async function onSubmit({ value }: z.infer<typeof formSchema>) {
+  async function onSubmit({ email }: z.infer<typeof formSchema>) {
     setLoading(true);
 
-    const isPhone = value.startsWith("+");
+    setEmail(email);
 
-    setType(isPhone ? "phone" : "email");
-
-    if (isPhone) {
-      setPhone(value);
-    } else {
-      setEmail(value);
-    }
-
-    const options = isPhone ? { phone: value } : { email: value };
-
-    await supabase.auth.signInWithOtp(options);
+    await supabase.auth.signInWithOtp({ email });
 
     setSent(true);
     setLoading(false);
   }
 
   async function onComplete(token: string) {
-    if (type) {
-      verifyOtp.execute({
-        type,
-        token,
-        phone,
-        email,
-      });
-    }
+    if (!email) return;
+
+    verifyOtp.execute({
+      token,
+      email,
+    });
   }
 
   if (isSent) {
@@ -75,6 +61,7 @@ export function OTPSignIn({ className }: Props) {
       <div className={cn("flex flex-col space-y-4 items-center", className)}>
         <InputOTP
           maxLength={6}
+          autoFocus
           onComplete={onComplete}
           disabled={verifyOtp.status === "executing"}
           render={({ slots }) => (
@@ -93,9 +80,9 @@ export function OTPSignIn({ className }: Props) {
         <button
           onClick={() => setSent(false)}
           type="button"
-          className="text-sm"
+          className="text-sm text-primary"
         >
-          Try again
+          Resend code
         </button>
       </div>
     );
@@ -107,12 +94,12 @@ export function OTPSignIn({ className }: Props) {
         <div className={cn("flex flex-col space-y-4", className)}>
           <FormField
             control={form.control}
-            name="value"
+            name="email"
             render={({ field }) => (
               <FormItem>
                 <FormControl>
                   <Input
-                    placeholder="Enter phone number or email"
+                    placeholder="Enter email address"
                     {...field}
                     autoCapitalize="false"
                     autoCorrect="false"

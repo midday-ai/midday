@@ -6,13 +6,13 @@ import { FormatAmount } from "@/components/format-amount";
 import { addMonths, format } from "date-fns";
 
 type Props = {
-  avarageBurnRate: number;
+  averageBurnRate: number;
   currency: string;
   data: any;
   months: number;
 };
 
-export function BurnRateUI({ avarageBurnRate, currency, months, data }: Props) {
+export function BurnRateUI({ averageBurnRate, currency, months, data }: Props) {
   if (!data?.length) {
     return (
       <BotCard>
@@ -24,7 +24,7 @@ export function BurnRateUI({ avarageBurnRate, currency, months, data }: Props) {
     <BotCard className="font-sans space-y-4">
       <p className="font-mono">
         Based on your historical data, your avarage burn rate is{" "}
-        <FormatAmount amount={avarageBurnRate} currency={currency} /> per month.
+        <FormatAmount amount={averageBurnRate} currency={currency} /> per month.
         Your expected runway is {months} months, ending in{" "}
         {format(addMonths(new Date(), months), "PP")}.
       </p>

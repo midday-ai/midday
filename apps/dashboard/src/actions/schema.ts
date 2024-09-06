@@ -372,10 +372,8 @@ export const setupUserSchema = z.object({
 });
 
 export const verifyOtpSchema = z.object({
-  type: z.enum(["phone", "email"]),
   token: z.string(),
-  phone: z.string().optional(),
-  email: z.string().optional(),
+  email: z.string(),
 });
 
 export const searchSchema = z.object({

@@ -33,7 +33,7 @@ export function Vault({ files }: Props) {
                     <span className="text-sm line-clamp-1">{file.name}</span>
                   </div>
 
-                  <div className="ml-auto">
+                  <div className="ml-auto w-[40%] flex justify-end">
                     <Tag name={file.tag} />
                   </div>
                 </div>

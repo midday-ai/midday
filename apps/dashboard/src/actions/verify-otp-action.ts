@@ -11,23 +11,14 @@ import { verifyOtpSchema } from "./schema";
 export const verifyOtpAction = actionClient
   .schema(verifyOtpSchema)
 
-  .action(async ({ parsedInput: { type, email, token, phone } }) => {
+  .action(async ({ parsedInput: { email, token } }) => {
     const supabase = createClient();
 
-    const options =
-      type === "email"
-        ? {
-            email,
-            token,
-            type: "email",
-          }
-        : {
-            phone,
-            token,
-            type: "sms",
-          };
-
-    await supabase.auth.verifyOtp(options);
+    await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
 
     cookies().set(Cookies.PreferredSignInProvider, "otp", {
       expires: addYears(new Date(), 1),
