@@ -77,13 +77,18 @@ export function OTPSignIn({ className }: Props) {
           )}
         />
 
-        <button
-          onClick={() => setSent(false)}
-          type="button"
-          className="text-sm text-primary"
-        >
-          Resend code
-        </button>
+        <div className="flex space-x-2">
+          <span className="text-sm text-[#878787]">
+            Didn't receive the email?
+          </span>
+          <button
+            onClick={() => setSent(false)}
+            type="button"
+            className="text-sm text-primary underline font-medium"
+          >
+            Resend code
+          </button>
+        </div>
       </div>
     );
   }
