@@ -62,4 +62,20 @@ describe("formatDate", () => {
   it("should handle dates with time", () => {
     expect(formatDate("2023-05-15T14:30:00")).toBe("2023-05-15");
   });
+
+  it("should handle dates dot separated", () => {
+    expect(formatDate("04.09.2024")).toBe("2024-09-04");
+  });
+
+  it("should handle dates with time", () => {
+    expect(formatDate("08.05.2024 09:12:07")).toBe("2024-05-08");
+  });
+
+  it("should handle dates 07/Aug/2024", () => {
+    expect(formatDate("07/Aug/2024")).toBe("2024-08-07");
+  });
+
+  it("should handle dates 24-08-2024", () => {
+    expect(formatDate("24-08-2024")).toBe("2024-08-24");
+  });
 });
