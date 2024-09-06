@@ -1,13 +1,35 @@
 import { SetupForm } from "@/components/setup-form";
+import { getSession } from "@midday/supabase/cached-queries";
+import { createClient } from "@midday/supabase/server";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Setup account | Midday",
 };
 
-export default function Page() {
+export default async function Page() {
+  const supabase = createClient();
+
+  const {
+    data: { session },
+  } = await getSession();
+
+  const userId = session?.user.id;
+
+  if (!userId) {
+    return redirect("/");
+  }
+
+  const { data: noTeamData } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .is("team_id", null)
+    .single();
+
   return (
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
@@ -22,7 +44,7 @@ export default function Page() {
             <h1 className="font-medium pb-1 text-3xl">Setup your account.</h1>
           </div>
 
-          <SetupForm />
+          <SetupForm showTeamName={noTeamData} />
         </div>
       </div>
     </div>

@@ -13,7 +13,9 @@ export const metadata: Metadata = {
   title: "Join team | Midday",
 };
 
-export default async function InviteCode({ params }) {
+export default async function InviteCode({
+  params,
+}: { params: { code: string } }) {
   const supabase = createClient();
   const { code } = params;
 
@@ -23,6 +25,11 @@ export default async function InviteCode({ params }) {
     if (user) {
       revalidateTag(`user_${user.id}`);
       revalidateTag(`teams_${user.id}`);
+
+      if (!user.full_name) {
+        redirect("/setup");
+      }
+
       redirect("/");
     }
   }
@@ -57,7 +64,7 @@ export default async function InviteCode({ params }) {
             </p>
 
             <div className="pointer-events-auto mt-6 flex flex-col mb-4">
-              <Link href="/" className="w-full">
+              <Link href="/teams" className="w-full">
                 <Button className="w-full">Go to teams</Button>
               </Link>
             </div>

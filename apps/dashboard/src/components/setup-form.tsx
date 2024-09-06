@@ -20,7 +20,7 @@ import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-export function SetupForm() {
+export function SetupForm({ showTeamName }: { showTeamName: boolean }) {
   const { toast } = useToast();
 
   const setupUser = useAction(setupUserAction, {
@@ -37,7 +37,7 @@ export function SetupForm() {
     resolver: zodResolver(setupUserSchema),
     defaultValues: {
       full_name: "",
-      team_name: "",
+      team_name: showTeamName ? "" : undefined,
     },
   });
 
@@ -55,9 +55,9 @@ export function SetupForm() {
           name="full_name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Full name</FormLabel>
               <FormControl>
-                <Input placeholder="Name" {...field} />
+                <Input placeholder="John Doe" {...field} />
               </FormControl>
               <FormDescription>
                 This is your first and last name.
@@ -67,26 +67,28 @@ export function SetupForm() {
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="team_name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Team name</FormLabel>
-              <FormControl>
-                <Input placeholder="Team name" {...field} />
-              </FormControl>
-              <FormDescription>This is your team name.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {showTeamName && (
+          <FormField
+            control={form.control}
+            name="team_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Team name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Team name" {...field} />
+                </FormControl>
+                <FormDescription>This is your team name.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            <span>Submit</span>
+            <span>Save</span>
           )}
         </Button>
       </form>

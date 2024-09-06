@@ -25,10 +25,13 @@ export const setupUserAction = authActionClient
         updateUser(supabase, {
           full_name,
         }),
-        updateTeam(supabase, {
-          name: team_name,
-        }),
       ]);
+
+      if (team_name) {
+        await updateTeam(supabase, {
+          name: team_name,
+        });
+      }
 
       revalidateTag(`user_${user.id}`);
       revalidateTag(`team_${user.team_id}`);

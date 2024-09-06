@@ -366,9 +366,12 @@ export const setupUserSchema = z.object({
   full_name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  team_name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
+  team_name: z
+    .string()
+    .min(2, {
+      message: "Name must be at least 2 characters.",
+    })
+    .optional(),
 });
 
 export const verifyOtpSchema = z.object({
