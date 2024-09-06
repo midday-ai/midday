@@ -164,7 +164,12 @@ export async function POST(req: Request) {
       const { content, mimeType, size, fileName, name } =
         await prepareDocument(attachment);
 
-      const uniqueFileName = `${nanoid(4)}_${fileName}`;
+      // Add a random 4 character string to the end of the file name
+      // to make it unique before the extension
+      const uniqueFileName = fileName.replace(
+        /(\.[^.]+)$/,
+        (ext) => `_${nanoid(4)}${ext}`,
+      );
 
       const { data } = await supabase.storage
         .from("vault")
