@@ -1,5 +1,5 @@
 import { Cookies } from "@/utils/constants";
-import { getSpending } from "@midday/supabase/cached-queries";
+import { getSpending, getTeamSettings } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
 import { cookies } from "next/headers";
 import { spendingExampleData } from "./data";
@@ -32,9 +32,9 @@ type Props = {
 };
 
 export async function SpendingList({ initialPeriod, disabled }: Props) {
-  const currency =
-    cookies().has(Cookies.ChartCurrency) &&
-    cookies().get(Cookies.ChartCurrency)?.value;
+  const currency = cookies().has(Cookies.ChartCurrency)
+    ? cookies().get(Cookies.ChartCurrency)?.value
+    : (await getTeamSettings())?.data?.base_currency;
 
   const spending = disabled
     ? spendingExampleData

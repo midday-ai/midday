@@ -970,3 +970,7 @@ export async function getInboxSearchQuery(
 
   return data;
 }
+
+export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
+  return supabase.from("teams").select("*").eq("id", teamId).single();
+}

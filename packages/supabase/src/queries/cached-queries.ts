@@ -14,7 +14,6 @@ import {
   type GetTrackerProjectsQueryParams,
   type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
-  type GetVaultParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
@@ -26,6 +25,7 @@ import {
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
+  getTeamSettingsQuery,
   getTeamUserQuery,
   getTeamsByUserIdQuery,
   getTrackerProjectsQuery,
@@ -33,7 +33,6 @@ import {
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
-  getVaultQuery,
 } from "../queries";
 
 export const getTransactions = async (
@@ -418,4 +417,25 @@ export const getCategories = async (
       revalidate: 3600,
     },
   )(params);
+};
+
+export const getTeamSettings = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTeamSettingsQuery(supabase, teamId);
+    },
+    ["team_settings", teamId],
+    {
+      tags: [`team_settings_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
 };

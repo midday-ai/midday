@@ -4,7 +4,10 @@ import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import {
+  getTeamBankAccounts,
+  getTeamSettings,
+} from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
@@ -30,9 +33,9 @@ export default async function Overview({ searchParams }) {
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
-  const currency =
-    cookies().has(Cookies.ChartCurrency) &&
-    cookies().get(Cookies.ChartCurrency)?.value;
+  const currency = cookies().has(Cookies.ChartCurrency)
+    ? cookies().get(Cookies.ChartCurrency)?.value
+    : (await getTeamSettings())?.data?.base_currency;
 
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)

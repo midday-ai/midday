@@ -4,7 +4,8 @@ import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import {
-  getBankAccountsCurrencies,
+  getTeamSettings,
+  getTeamUser,
   getUser,
 } from "@midday/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -73,8 +74,7 @@ export async function submitUserMessage(
   const defaultValues = {
     from: subMonths(startOfMonth(new Date()), 12).toISOString(),
     to: new Date().toISOString(),
-    currency:
-      (await getBankAccountsCurrencies())?.data?.at(0)?.currency ?? "USD",
+    currency: (await getTeamSettings())?.data?.base_currency,
   };
 
   aiState.update({
