@@ -1,8 +1,8 @@
-import { getUser } from "@midday/supabase/cached-queries";
+import { getTeamSettings } from "@midday/supabase/cached-queries";
 import { SelectCurrency } from "./select-currency";
 
 export async function BaseCurrencyServer() {
-  const user = await getUser();
+  const { data } = await getTeamSettings();
 
-  return <SelectCurrency defaultValue={user?.data?.team?.base_currency} />;
+  return <SelectCurrency defaultValue={data?.base_currency} />;
 }

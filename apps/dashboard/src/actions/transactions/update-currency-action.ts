@@ -27,7 +27,7 @@ export const updateCurrencyAction = authActionClient
         base_currency: baseCurrency,
       });
 
-      revalidateTag(`user_${user.id}`);
+      revalidateTag(`team_settings_${user.team_id}`);
       revalidatePath("/settings/accounts");
 
       const event = await client.sendEvent({
