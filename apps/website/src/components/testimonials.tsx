@@ -12,7 +12,7 @@ const testimonials = [
   {
     name: "Patrick Tobler",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1643364165627551744/Z92S8fqD_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1821352126406127616/We8itUSn_400x400.jpg",
     handle: "@Padierfind",
     verified: true,
     quote: "I love this",
