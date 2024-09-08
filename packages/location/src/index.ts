@@ -2,9 +2,18 @@ import { headers } from "next/headers";
 import countries from "./countries.json";
 import flags from "./country-flag";
 import { EU_COUNTRY_CODES } from "./eu-countries";
+import timezones from "./timezones.json";
 
 export function getCountryCode() {
   return headers().get("x-vercel-ip-country") || "SE";
+}
+
+export function getTimezone() {
+  return headers().get("x-vercel-ip-timezone") || "Europe/Berlin";
+}
+
+export function getTimezones() {
+  return timezones;
 }
 
 export function getCountryInfo() {

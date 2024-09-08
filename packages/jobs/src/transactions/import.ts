@@ -20,6 +20,7 @@ client.defineJob({
       currency: z.string(),
       teamId: z.string(),
       table: z.array(z.record(z.string(), z.string())).optional(),
+      timezone: z.string(),
       mappings: z.object({
         amount: z.string(),
         date: z.string(),
@@ -40,6 +41,7 @@ client.defineJob({
       mappings,
       inverted,
       table,
+      timezone,
     } = payload;
 
     switch (importType) {
@@ -111,7 +113,7 @@ client.defineJob({
         );
 
         const transactions = mappedTransactions.map((transaction) =>
-          transform({ transaction, inverted }),
+          transform({ transaction, inverted, timezone }),
         );
 
         await processTransactions({ transactions, io, supabase, teamId });

@@ -6,6 +6,7 @@ export const updateUserSchema = z.object({
   avatar_url: z.string().url().optional(),
   locale: z.string().optional(),
   week_starts_on_monday: z.boolean().optional(),
+  timezone: z.string().optional(),
 });
 
 export type UpdateUserFormValues = z.infer<typeof updateUserSchema>;

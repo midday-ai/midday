@@ -20,6 +20,11 @@ export default {
     en: "English",
     sv: "Swedish",
   },
+  timezone: {
+    title: "Time Zone",
+    description: "Current time zone setting.",
+    placeholder: "Select timezone",
+  },
   spending_period: {
     last_30d: "Last 30 days",
     this_month: "This month",

@@ -20,6 +20,11 @@ export default {
     en: "Engelska",
     sv: "Svenska",
   },
+  timezone: {
+    title: "Tidzon",
+    description: "Aktuell tidzoninställning.",
+    placeholder: "Välj tidzon",
+  },
   inbox_filter: {
     all: "Alla",
     todo: "Att göra",

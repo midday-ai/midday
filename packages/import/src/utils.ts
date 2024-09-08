@@ -1,6 +1,7 @@
-import { formatISO, isValid, parse } from "date-fns";
+import { isValid, parse } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
-export function formatDate(date: string) {
+export function formatDate(date: string, timezone = "America/New_York") {
   const formats = [
     "dd/MM/yyyy",
     "yyyy-MM-dd",
@@ -20,24 +21,26 @@ export function formatDate(date: string) {
     "yyyy/MM/dd HH:mm:ss",
     "dd.MM.yyyy HH:mm:ss",
     "dd-MM-yyyy HH:mm:ss",
+    "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+    "yyyy-MM-dd'T'HH:mm:ss",
   ];
 
   for (const format of formats) {
     const parsedDate = parse(date, format, new Date());
     if (isValid(parsedDate)) {
-      return formatISO(parsedDate, { representation: "date" });
+      return formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd");
     }
   }
 
   if (isValid(new Date(date))) {
-    return formatISO(new Date(date), { representation: "date" });
+    return formatInTimeZone(new Date(date), timezone, "yyyy-MM-dd");
   }
 
   // If the date includes a time, we don't need to remove the time.
   const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
 
   if (isValid(new Date(value))) {
-    return formatISO(new Date(value), { representation: "date" });
+    return formatInTimeZone(new Date(value), timezone, "yyyy-MM-dd");
   }
 
   // If all parsing attempts fail, return undefined
