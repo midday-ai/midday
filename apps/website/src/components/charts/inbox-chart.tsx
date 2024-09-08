@@ -1,4 +1,4 @@
-import { fetchStats } from "@/actions/fetch-stats";
+import { fetchStats } from "@/lib/fetch-stats";
 
 export async function InboxChart() {
   const { inboxItems } = await fetchStats();

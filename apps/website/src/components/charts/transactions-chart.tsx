@@ -1,4 +1,4 @@
-import { fetchStats } from "@/actions/fetch-stats";
+import { fetchStats } from "@/lib/fetch-stats";
 
 export async function TransactionsChart() {
   const { transactions } = await fetchStats();
@@ -19,7 +19,7 @@ export async function TransactionsChart() {
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {transactions &&
             Intl.NumberFormat("en", { notation: "compact" }).format(
-              transactions
+              transactions,
             )}
         </span>
       </div>
