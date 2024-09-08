@@ -1,7 +1,7 @@
-export async function GithubStars() {
-  const response = await fetch("https://api.github.com/repos/midday-ai/midday");
+import { fetchGithubStars } from "@/lib/fetch-github-stars";
 
-  const data = await response.json();
+export async function GithubStars() {
+  const data = await fetchGithubStars();
 
   return (
     <a
