@@ -1,20 +1,11 @@
-"use client";
-
 import { LogoLarge } from "@/components/logo-large";
 import { SubscribeInput } from "@/components/subscribe-input";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { GithubStars } from "./github-stars";
 import { SocialLinks } from "./social-links";
 import { StatusWidget } from "./status-widget";
 
 export function Footer() {
-  const pathname = usePathname();
-
-  if (pathname.includes("pitch")) {
-    return null;
-  }
-
   return (
     <footer className="border-t-[1px] border-border px-4 md:px-6 pt-10 md:pt-16 bg-[#0C0C0C] overflow-hidden md:max-h-[820px]">
       <div className="container">

@@ -12,9 +12,6 @@ async function getAllStargazers({ owner, name }) {
         "Content-Type": "application/json",
         Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
       },
-      next: {
-        revalidate: 3600,
-      },
       body: JSON.stringify({
         variables: { after: endCursor, owner, name },
         query: `query Repository($owner: String!, $name: String!, $after: String) {
@@ -49,9 +46,6 @@ async function githubRequest({ owner, name }) {
     headers: {
       "Content-Type": "application/json",
       Authorization: `bearer ${process.env.GITHUB_TOKEN}`,
-    },
-    next: {
-      revalidate: 3600,
     },
     body: JSON.stringify({
       variables: { owner, name },

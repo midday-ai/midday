@@ -1,8 +1,5 @@
-"use client";
-
-import { getGithubStats } from "@/actions/fetch-github-stats";
 import { ChartSSR } from "@/components/chart-ssr";
-import { useEffect, useState } from "react";
+import { getGithubStats } from "@/lib/fetch-github";
 import { LuGitFork } from "react-icons/lu";
 import {
   MdBalance,
@@ -11,19 +8,8 @@ import {
   MdOutlineStarBorder,
 } from "react-icons/md";
 
-export function GithubStats() {
-  const [data, setData] = useState();
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await getGithubStats();
-        setData(response);
-      } catch {}
-    }
-
-    fetchData();
-  }, []);
+export async function GithubStats() {
+  const data = await getGithubStats();
 
   return (
     <>

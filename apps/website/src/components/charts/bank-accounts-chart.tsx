@@ -1,4 +1,4 @@
-import { fetchStats } from "@/actions/fetch-stats";
+import { fetchStats } from "@/lib/fetch-stats";
 
 export async function BankAccountsChart() {
   const { bankAccounts } = await fetchStats();
@@ -19,7 +19,7 @@ export async function BankAccountsChart() {
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {bankAccounts &&
             Intl.NumberFormat("en", { notation: "compact" }).format(
-              bankAccounts
+              bankAccounts,
             )}
         </span>
       </div>

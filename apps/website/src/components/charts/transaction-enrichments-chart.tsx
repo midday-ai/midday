@@ -1,4 +1,4 @@
-import { fetchStats } from "@/actions/fetch-stats";
+import { fetchStats } from "@/lib/fetch-stats";
 import Link from "next/link";
 
 export async function TransactionEnrichmentsChart() {
@@ -24,7 +24,7 @@ export async function TransactionEnrichmentsChart() {
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {transactionEnrichments &&
             Intl.NumberFormat("en", { notation: "compact" }).format(
-              transactionEnrichments
+              transactionEnrichments,
             )}
         </span>
       </div>

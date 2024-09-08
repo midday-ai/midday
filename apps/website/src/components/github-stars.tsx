@@ -1,21 +1,7 @@
-"use client";
+export async function GithubStars() {
+  const response = await fetch("https://api.github.com/repos/midday-ai/midday");
 
-import { fetchGithubStars } from "@/actions/fetch-github-stars";
-import { useEffect, useState } from "react";
-
-export function GithubStars() {
-  const [data, setData] = useState(0);
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const response = await fetchGithubStars();
-        setData(response);
-      } catch {}
-    }
-
-    fetchData();
-  }, []);
+  const data = await response.json();
 
   return (
     <a

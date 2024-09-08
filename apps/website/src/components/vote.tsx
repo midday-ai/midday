@@ -8,5 +8,5 @@ type Props = {
 export async function Vote({ id }: Props) {
   const count = await client.mget(`apps:${id}`);
 
-  return <VoteButton count={count} id={id} />;
+  return <VoteButton count={count.at(0)} id={id} />;
 }

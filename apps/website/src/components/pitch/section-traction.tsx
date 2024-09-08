@@ -1,7 +1,7 @@
 "use client";
 
-import { fetchGithubStars } from "@/actions/fetch-github-stars";
-import { fetchStats } from "@/actions/fetch-stats";
+import { fetchGithubStars } from "@/lib/fetch-github-stars";
+import { fetchStats } from "@/lib/fetch-stats";
 import { Button } from "@midday/ui/button";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,7 +11,7 @@ import customers from "./customers.png";
 import { Card } from "./ui";
 
 export function SectionTraction() {
-  const [stars, setStars] = useState(0);
+  const [stars, setStars] = useState<number | null>(null);
   const [users, setUsers] = useState(0);
   const [transactions, setTransactions] = useState(0);
 
@@ -119,7 +119,7 @@ export function SectionTraction() {
                 <span className="mt-auto font-mono text-[80px] md:text-[122px]">
                   {transactions &&
                     Intl.NumberFormat("en", { notation: "compact" }).format(
-                      transactions
+                      transactions,
                     )}
                 </span>
               </div>

@@ -1,4 +1,4 @@
-import { fetchStats } from "@/actions/fetch-stats";
+import { fetchStats } from "@/lib/fetch-stats";
 
 export async function TrackerEntriesChart() {
   const { trackerEntries } = await fetchStats();
@@ -19,7 +19,7 @@ export async function TrackerEntriesChart() {
         <span className="mt-auto font-mono text-[80px] md:text-[122px]">
           {trackerEntries &&
             Intl.NumberFormat("en", { notation: "compact" }).format(
-              trackerEntries
+              trackerEntries,
             )}
         </span>
       </div>

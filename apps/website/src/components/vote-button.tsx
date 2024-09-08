@@ -11,13 +11,12 @@ type Props = {
 };
 
 export function VoteButton({ count, id }: Props) {
-  const { execute, optimisticData } = useOptimisticAction(
-    voteAction,
-    count,
-    (prevCount) => {
-      return +prevCount + 1;
-    }
-  );
+  const { execute, optimisticState } = useOptimisticAction(voteAction, {
+    currentState: count,
+    updateFn: (_, state) => {
+      return +count + 1;
+    },
+  });
 
   return (
     <Button
@@ -27,7 +26,7 @@ export function VoteButton({ count, id }: Props) {
     >
       <div className="flex space-x-2 items-center flex-col">
         <ChevronUp size={16} />
-        {optimisticData}
+        {optimisticState}
       </div>
     </Button>
   );
