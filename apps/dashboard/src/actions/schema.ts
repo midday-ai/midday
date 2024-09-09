@@ -136,6 +136,7 @@ export const connectBankAccountSchema = z.object({
     z.object({
       account_id: z.string(),
       bank_name: z.string(),
+      balance: z.number().optional(),
       currency: z.string(),
       name: z.string(),
       institution_id: z.string(),
