@@ -9,13 +9,6 @@ import {
 } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import { format } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -157,18 +150,6 @@ export default async function Report({ params }) {
                     ? `${runway} months runway`
                     : "Average burn rate"}
                 </span>
-                {runway && runway > 0 && (
-                  <TooltipProvider delayDuration={100}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Icons.Info className="h-4 w-4 mt-1" />
-                      </TooltipTrigger>
-                      <TooltipContent className="px-3 py-1.5 text-xs">
-                        Average burn rate / Total balance
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                )}
               </div>
             </div>
             <AreaChart currency={data.currency} data={burnRateData} />
