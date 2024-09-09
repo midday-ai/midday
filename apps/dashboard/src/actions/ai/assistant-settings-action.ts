@@ -10,9 +10,15 @@ export const assistantSettingsAction = authActionClient
   .metadata({
     name: "assistant-settings",
   })
-  .action(async ({ parsedInput: params }) => {
+  .action(async ({ parsedInput: params, ctx: { user } }) => {
     const settings = await getAssistantSettings();
-    await setAssistantSettings({ settings, params });
+
+    await setAssistantSettings({
+      settings,
+      params,
+      userId: user?.id,
+      teamId: user?.team_id,
+    });
 
     revalidatePath("/account/assistant");
 

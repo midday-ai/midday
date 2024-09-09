@@ -326,7 +326,6 @@ export const createReportSchema = z.object({
   baseUrl: z.string().url(),
   from: z.string(),
   to: z.string(),
-  currency: z.string(),
   type: changeChartTypeSchema,
   expiresAt: z.string().datetime().optional(),
 });

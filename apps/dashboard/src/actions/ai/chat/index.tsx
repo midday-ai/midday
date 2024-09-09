@@ -198,9 +198,11 @@ export const AI = createAI<AIState, UIState>({
     "use server";
 
     const settings = await getAssistantSettings();
+
     const createdAt = new Date();
     const userId = state.user.id;
     const teamId = state.user.team_id;
+
     const { chatId, messages } = state;
 
     const firstMessageContent = messages?.at(0)?.content ?? "";

@@ -5,16 +5,18 @@ import { getSession, getUser } from "@midday/supabase/cached-queries";
 import type { Chat, SettingsResponse } from "./types";
 
 export async function getAssistantSettings(): Promise<SettingsResponse> {
-  const {
-    data: { session },
-  } = await getSession();
+  const user = await getUser();
+
+  const teamId = user?.data?.team_id;
+  const userId = user?.data?.id;
 
   const defaultSettings: SettingsResponse = {
     enabled: true,
   };
 
-  const userId = session?.user.id;
-  const settings = await RedisClient.get(`assistant:user:${userId}:settings`);
+  const settings = await RedisClient.get(
+    `assistant:${teamId}:user:${userId}:settings`,
+  );
 
   return {
     ...defaultSettings,
@@ -24,6 +26,8 @@ export async function getAssistantSettings(): Promise<SettingsResponse> {
 
 type SetAassistant = {
   settings: SettingsResponse;
+  userId: string;
+  teamId: string;
   params: {
     enabled?: boolean | undefined;
   };
@@ -32,28 +36,25 @@ type SetAassistant = {
 export async function setAssistantSettings({
   settings,
   params,
+  userId,
+  teamId,
 }: SetAassistant) {
   const {
     data: { session },
   } = await getSession();
 
-  const userId = session?.user.id;
-
-  return RedisClient.set(`assistant:user:${userId}:settings`, {
+  return RedisClient.set(`assistant:${teamId}:user:${userId}:settings`, {
     ...settings,
     ...params,
   });
 }
 
-export async function clearChats() {
-  const {
-    data: { session },
-  } = await getSession();
-
-  const userId = session?.user.id;
-
+export async function clearChats({
+  teamId,
+  userId,
+}: { teamId: string; userId: string }) {
   const chats: string[] = await RedisClient.zrange(
-    `user:chat:${userId}`,
+    `chat:${teamId}:user:${userId}`,
     0,
     -1,
   );
@@ -62,13 +63,16 @@ export async function clearChats() {
 
   for (const chat of chats) {
     pipeline.del(chat);
-    pipeline.zrem(`user:chat:${userId}`, chat);
+    pipeline.zrem(`chat:${teamId}:user:${userId}`, chat);
   }
 
   await pipeline.exec();
 }
 
 export async function getLatestChat() {
+  const settings = await getAssistantSettings();
+  if (!settings?.enabled) return null;
+
   const user = await getUser();
 
   const teamId = user?.data?.team_id;

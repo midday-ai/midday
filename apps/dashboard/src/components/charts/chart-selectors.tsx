@@ -15,7 +15,7 @@ export async function ChartSelectors({ defaultValue }) {
 
       <div className="flex space-x-2">
         <ChartPeriod defaultValue={defaultValue} />
-        <ChartMore defaultValue={defaultValue} />
+        <ChartMore defaultValue={defaultValue} type={chartType} />
       </div>
     </div>
   );

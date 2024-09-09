@@ -38,10 +38,19 @@ export function getForecastTool({ aiState, dateFrom, dateTo }: Args) {
         baseCurrency: currency,
       });
 
+      console.log(data);
+
+      console.log({
+        from: startOfMonth(new Date(startDate)).toISOString(),
+        to: new Date(endDate).toISOString(),
+        type,
+        baseCurrency: currency,
+      });
+
       const prev = data?.result?.map((d) => {
         return `${d.current.date}: ${Intl.NumberFormat("en", {
           style: "currency",
-          currency,
+          currency: data.meta.currency,
         }).format(d.current.value)}\n`;
       });
 
@@ -49,7 +58,9 @@ export function getForecastTool({ aiState, dateFrom, dateTo }: Args) {
         model: openai("gpt-4o-mini"),
         system:
           "You are a financial forecaster and analyst. Your task is to provide simple, clear, and concise content. Return only the result with a short description only with text. Make sure to mention that this is an indication of the forecast and should be verified.",
-        prompt: `forecast next month ${type} based on the last 12 months ${type}:\n${prev}`,
+        prompt: `forecast next month ${type} based on the last 12 months ${type}:\n${prev}
+          Current date: ${new Date().toISOString()}
+        `,
       });
 
       const toolCallId = nanoid();

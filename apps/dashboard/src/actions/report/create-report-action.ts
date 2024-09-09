@@ -23,7 +23,6 @@ export const createReportAction = authActionClient
         to: params.to,
         type: params.type,
         expire_at: params.expiresAt,
-        currency: params.currency,
         created_by: user.id,
       })
       .select("*")

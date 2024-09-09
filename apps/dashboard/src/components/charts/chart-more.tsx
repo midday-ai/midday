@@ -17,11 +17,11 @@ type Props = {
     from: string;
     to: string;
     type: "profit" | "revenue";
-    currency: string;
   };
+  type: "profit" | "revenue";
 };
 
-export function ChartMore({ defaultValue }: Props) {
+export function ChartMore({ defaultValue, type }: Props) {
   const [isOpen, setOpen] = useState(false);
 
   return (
@@ -39,12 +39,7 @@ export function ChartMore({ defaultValue }: Props) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ShareReport
-        defaultValue={defaultValue}
-        type={defaultValue.type}
-        currency={defaultValue.currency}
-        setOpen={setOpen}
-      />
+      <ShareReport defaultValue={defaultValue} type={type} setOpen={setOpen} />
     </Dialog>
   );
 }

@@ -41,11 +41,10 @@ type Props = {
     to: string;
   };
   type: "profit" | "revenue";
-  currency: string;
   setOpen: (open: boolean) => void;
 };
 
-export function ShareReport({ defaultValue, type, currency, setOpen }: Props) {
+export function ShareReport({ defaultValue, type, setOpen }: Props) {
   const { toast, dismiss } = useToast();
 
   const searchParams = useSearchParams();
@@ -63,7 +62,6 @@ export function ShareReport({ defaultValue, type, currency, setOpen }: Props) {
       to,
       type,
       expiresAt: data.expireAt && new Date(data.expireAt).toISOString(),
-      currency,
     });
   }
 
