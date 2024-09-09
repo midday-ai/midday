@@ -41,7 +41,6 @@ export function getRevenueTool({ aiState, dateFrom, dateTo }: Args) {
         data,
         startDate,
         endDate,
-        currency,
       };
 
       aiState.done({

@@ -41,7 +41,7 @@ export function getSpendingTool({ aiState, dateFrom, dateTo }: Args) {
       );
 
       const props = {
-        currency,
+        currency: found?.currency,
         category,
         amount: found?.amount,
         name: found?.name,

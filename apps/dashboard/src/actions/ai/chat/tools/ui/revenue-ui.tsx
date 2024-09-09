@@ -6,13 +6,12 @@ import { FormatAmount } from "@/components/format-amount";
 import { format } from "date-fns";
 
 type Props = {
-  currency: string;
   data: any;
   startDate: string;
   endDate: string;
 };
 
-export function RevenueUI({ data, currency, startDate, endDate }: Props) {
+export function RevenueUI({ data, startDate, endDate }: Props) {
   if (!data?.result?.length) {
     return (
       <BotCard>
@@ -41,7 +40,7 @@ export function RevenueUI({ data, currency, startDate, endDate }: Props) {
         </p>
       </div>
 
-      <BarChart data={data} currency={currency} height={200} />
+      <BarChart data={data} currency={data.summary.currency} height={200} />
     </BotCard>
   );
 }

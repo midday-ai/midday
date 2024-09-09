@@ -41,7 +41,6 @@ export function getProfitTool({ aiState, dateFrom, dateTo }: Args) {
         data,
         startDate: startOfMonth(new Date(startDate)).toISOString(),
         endDate: new Date(endDate).toISOString(),
-        currency,
       };
 
       aiState.done({
