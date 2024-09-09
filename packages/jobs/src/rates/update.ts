@@ -1,12 +1,13 @@
 import { cronTrigger } from "@trigger.dev/sdk";
 import { client, supabase } from "../client";
+import { Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { processBatch } from "../utils/process";
 
 client.defineJob({
-  id: "exchange-rates-update",
+  id: Jobs.EXCHANGE_RATES_UPDATE,
   name: "Exchange Rates - Update",
-  version: "0.1.1",
+  version: "0.1.2",
   trigger: cronTrigger({
     cron: "0 12 * * *",
   }),
@@ -24,6 +25,8 @@ client.defineJob({
         updated_at: rate.date,
       }));
     });
+
+    await io.logger.info("Updating exchange rates", { data });
 
     await processBatch(data, 500, async (batch) => {
       await io.supabase.client.from("exchange_rates").upsert(batch, {

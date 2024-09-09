@@ -7,12 +7,11 @@ import { RevenueUI } from "./ui/revenue-ui";
 
 type Args = {
   aiState: MutableAIState;
-  currency: string;
   dateFrom: string;
   dateTo: string;
 };
 
-export function getRevenueTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getRevenueTool({ aiState, dateFrom, dateTo }: Args) {
   return {
     description: "Get revenue",
     parameters: z.object({
@@ -24,10 +23,7 @@ export function getRevenueTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .date()
         .describe("The end date of the revenue, in ISO-8601 format")
         .default(new Date(dateTo)),
-      currency: z
-        .string()
-        .default(currency)
-        .describe("The currency for revenue"),
+      currency: z.string().describe("The currency for revenue").optional(),
     }),
     generate: async (args) => {
       const { currency, startDate, endDate } = args;
@@ -36,7 +32,7 @@ export function getRevenueTool({ aiState, currency, dateFrom, dateTo }: Args) {
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         type: "revenue",
-        currency,
+        baseCurrency: currency,
       });
 
       const toolCallId = nanoid();

@@ -13,6 +13,7 @@ export const Jobs = {
   UPDATE_CURRENCY: "update-base-currency",
   BANK_CONNECTION_DISCONNECTED: "bank-connection-disconnected",
   BANK_CONNECTION_EXPIRING: "bank-connection-expiring",
+  EXCHANGE_RATES_UPDATE: "exchange-rates-update",
 };
 
 export const Events = {

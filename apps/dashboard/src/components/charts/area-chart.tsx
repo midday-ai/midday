@@ -16,11 +16,10 @@ import {
 
 type ToolTipContentProps = {
   payload: any;
-  currency: string;
 };
 
-const ToolTipContent = ({ payload, currency }: ToolTipContentProps) => {
-  const { value = 0, date } = payload.at(0)?.payload ?? {};
+const ToolTipContent = ({ payload }: ToolTipContentProps) => {
+  const { value = 0, date, currency } = payload.at(0)?.payload ?? {};
   const locale = useCurrentLocale();
 
   return (
@@ -46,12 +45,11 @@ const ToolTipContent = ({ payload, currency }: ToolTipContentProps) => {
 };
 
 type AreaChartProps = {
-  currency: string;
   data: any;
   height?: number;
 };
 
-export function AreaChart({ currency, data, height = 290 }: AreaChartProps) {
+export function AreaChart({ data, height = 290 }: AreaChartProps) {
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BaseAreaChart data={data}>
@@ -89,9 +87,7 @@ export function AreaChart({ currency, data, height = 290 }: AreaChartProps) {
         />
 
         <Tooltip
-          content={(content) => (
-            <ToolTipContent {...content} currency={currency} />
-          )}
+          content={(content) => <ToolTipContent {...content} />}
           cursor={false}
         />
 

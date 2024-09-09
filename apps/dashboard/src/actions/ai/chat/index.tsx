@@ -3,11 +3,7 @@
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
-import {
-  getTeamSettings,
-  getTeamUser,
-  getUser,
-} from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
 import {
   createAI,
@@ -74,7 +70,6 @@ export async function submitUserMessage(
   const defaultValues = {
     from: subMonths(startOfMonth(new Date()), 12).toISOString(),
     to: new Date().toISOString(),
-    currency: (await getTeamSettings())?.data?.base_currency,
   };
 
   aiState.update({
@@ -146,37 +141,31 @@ export async function submitUserMessage(
     tools: {
       getSpending: getSpendingTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getBurnRate: getBurnRateTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getRunway: getRunwayTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getProfit: getProfitTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getRevenue: getRevenueTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getForecast: getForecastTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
@@ -187,7 +176,6 @@ export async function submitUserMessage(
         aiState,
         userId: user?.data?.id ?? "",
         teamId,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),

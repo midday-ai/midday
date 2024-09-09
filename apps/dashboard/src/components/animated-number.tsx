@@ -8,7 +8,7 @@ type Props = {
   currency: string;
 };
 
-export function AnimatedNumber({ value, currency }: Props) {
+export function AnimatedNumber({ value, currency = "USD" }: Props) {
   const locale = useCurrentLocale();
 
   return (

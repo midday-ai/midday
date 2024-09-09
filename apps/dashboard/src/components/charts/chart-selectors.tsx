@@ -1,3 +1,4 @@
+import { ChartMore } from "@/components/charts/chart-more";
 import { ChartPeriod } from "@/components/charts/chart-period";
 import { ChartType } from "@/components/charts/chart-type";
 import { Cookies } from "@/utils/constants";
@@ -14,6 +15,7 @@ export async function ChartSelectors({ defaultValue }) {
 
       <div className="flex space-x-2">
         <ChartPeriod defaultValue={defaultValue} />
+        <ChartMore defaultValue={defaultValue} />
       </div>
     </div>
   );

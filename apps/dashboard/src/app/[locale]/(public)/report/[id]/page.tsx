@@ -27,7 +27,7 @@ export const fetchCache = "force-cache";
 function getReportMeta(data) {
   const period = `${format(new Date(data.from), "LLL dd, y")} - ${format(
     new Date(data.to),
-    "LLL dd, y"
+    "LLL dd, y",
   )}`;
 
   switch (data.type) {
@@ -129,14 +129,14 @@ export default async function Report({ params }) {
             from: data.from,
             to: data.to,
             type: data.type,
-            currency: data.currency,
+            baseCurrency: data.currency,
           }),
           getRunwayQuery(supabase, {
             teamId: data.team_id,
             from: data.from,
             to: data.to,
             type: data.type,
-            currency: data.currency,
+            baseCurrency: data.currency,
           }),
         ]);
 

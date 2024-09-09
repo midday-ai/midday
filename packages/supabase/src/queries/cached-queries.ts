@@ -362,25 +362,6 @@ export const getBurnRate = async (
   )(params);
 };
 
-export const getCurrentBurnRate = async (
-  params: Omit<GetCurrentBurnRateQueryParams, "teamId">,
-) => {
-  const supabase = createClient();
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  return unstable_cache(
-    async () => {
-      return getCurrentBurnRateQuery(supabase, { ...params, teamId });
-    },
-    ["current_burn_rate", teamId],
-    {
-      tags: [`current_burn_rate_${teamId}`],
-      revalidate: 3600,
-    },
-  )(params);
-};
-
 export const getRunway = async (
   params: Omit<GetRunwayQueryParams, "teamId">,
 ) => {

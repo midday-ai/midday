@@ -13,7 +13,7 @@ type Args = {
   dateTo: string;
 };
 
-export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getBurnRateTool({ aiState, dateFrom, dateTo }: Args) {
   return {
     description: "Get burn rate",
     parameters: z.object({
@@ -27,8 +27,8 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .default(new Date(dateTo)),
       currency: z
         .string()
-        .default(currency)
-        .describe("The currency for the burn rate"),
+        .describe("The currency for the burn rate")
+        .optional(),
     }),
     generate: async (args) => {
       const toolCallId = nanoid();
@@ -37,14 +37,14 @@ export function getBurnRateTool({ aiState, currency, dateFrom, dateTo }: Args) {
 
       const [{ data: months }, { data: burnRateData }] = await Promise.all([
         getRunway({
-          currency,
+          baseCurrency: currency,
           from: startOfMonth(new Date(startDate)).toISOString(),
           to: endDate.toISOString(),
         }),
         getBurnRate({
-          currency,
           from: startDate.toISOString(),
           to: endDate.toISOString(),
+          baseCurrency: currency,
         }),
       ]);
 

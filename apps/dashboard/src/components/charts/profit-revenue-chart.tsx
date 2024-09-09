@@ -8,7 +8,6 @@ import { chartExampleData } from "./data";
 type Props = {
   value: any;
   defaultValue: any;
-  currency: string;
   type: string;
   disabled?: boolean;
 };
@@ -16,13 +15,12 @@ type Props = {
 export async function ProfitRevenueChart({
   value,
   defaultValue,
-  currency,
   type,
   disabled,
 }: Props) {
   const data = disabled
     ? chartExampleData
-    : await getMetrics({ ...defaultValue, ...value, type, currency });
+    : await getMetrics({ ...defaultValue, ...value, type });
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
@@ -39,12 +37,12 @@ export async function ProfitRevenueChart({
             maximumFractionDigits={0}
             minimumFractionDigits={0}
             amount={data?.summary?.prevTotal ?? 0}
-            currency={data?.summary?.currency ?? "USD"}
+            currency={data?.meta?.currency ?? "USD"}
           />{" "}
           last period
         </p>
       </div>
-      <BarChart data={data} currency={currency} disabled={disabled} />
+      <BarChart data={data} disabled={disabled} />
     </div>
   );
 }

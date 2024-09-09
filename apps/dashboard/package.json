@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.45",
-    "@date-fns/utc": "^1.2.0",
     "@hookform/resolvers": "^3.9.0",
     "@midday-ai/engine": "^0.1.0-alpha.22",
     "@midday/events": "workspace:*",

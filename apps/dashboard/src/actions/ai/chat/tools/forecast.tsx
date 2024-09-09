@@ -9,12 +9,11 @@ import { ForecastUI } from "./ui/forecast-ui";
 
 type Args = {
   aiState: MutableAIState;
-  currency: string;
   dateFrom: string;
   dateTo: string;
 };
 
-export function getForecastTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getForecastTool({ aiState, dateFrom, dateTo }: Args) {
   return {
     description: "Forecast profit or revenue",
     parameters: z.object({
@@ -27,10 +26,7 @@ export function getForecastTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .describe("The end date of the forecast, in ISO-8601 format")
         .default(new Date(dateTo)),
       type: z.enum(["profit", "revenue"]).describe("The type of forecast"),
-      currency: z
-        .string()
-        .default(currency)
-        .describe("The currency for forecast"),
+      currency: z.string().describe("The currency for forecast").optional(),
     }),
     generate: async (args) => {
       const { currency, startDate, endDate, type } = args;
@@ -39,7 +35,7 @@ export function getForecastTool({ aiState, currency, dateFrom, dateTo }: Args) {
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         type,
-        currency,
+        baseCurrency: currency,
       });
 
       const prev = data?.result?.map((d) => {

@@ -15,28 +15,20 @@ import { burnRateExamleData } from "./data";
 type Props = {
   value: unknown;
   defaultValue: unknown;
-  currency: string;
   disabled?: boolean;
 };
 
-export async function BurnRateChart({
-  value,
-  defaultValue,
-  currency,
-  disabled,
-}: Props) {
-  const [{ data: burnRateData }, { data: runway }] = disabled
+export async function BurnRateChart({ value, defaultValue, disabled }: Props) {
+  const [{ data: burnRateData, currency }, { data: runway }] = disabled
     ? burnRateExamleData
     : await Promise.all([
         getBurnRate({
           ...defaultValue,
           ...value,
-          currency,
         }),
         getRunway({
           ...defaultValue,
           ...value,
-          currency,
         }),
       ]);
 
@@ -71,7 +63,7 @@ export async function BurnRateChart({
         </div>
       </div>
 
-      <AreaChart currency={currency} data={burnRateData} />
+      <AreaChart data={burnRateData} />
     </div>
   );
 }

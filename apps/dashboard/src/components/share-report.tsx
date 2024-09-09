@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
 import {
-  Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -18,10 +17,8 @@ import {
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@midday/ui/form";
-import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
@@ -30,7 +27,6 @@ import { CalendarIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CopyInput } from "./copy-input";
@@ -46,10 +42,10 @@ type Props = {
   };
   type: "profit" | "revenue";
   currency: string;
+  setOpen: (open: boolean) => void;
 };
 
-export function ShareReport({ defaultValue, type, currency }: Props) {
-  const [isOpen, setOpen] = useState(false);
+export function ShareReport({ defaultValue, type, currency, setOpen }: Props) {
   const { toast, dismiss } = useToast();
 
   const searchParams = useSearchParams();
@@ -103,76 +99,67 @@ export function ShareReport({ defaultValue, type, currency }: Props) {
   });
 
   return (
-    <Dialog open={isOpen} onOpenChange={setOpen}>
-      <Button variant="outline" onClick={() => setOpen(true)} size="icon">
-        <Icons.Share size={16} />
-      </Button>
+    <DialogContent className="sm:max-w-[425px]">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="p-4 space-y-8">
+          <DialogHeader>
+            <DialogTitle>Share report</DialogTitle>
+            <DialogDescription>
+              Share a report from the period.
+            </DialogDescription>
+          </DialogHeader>
 
-      <DialogContent className="sm:max-w-[425px]">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="p-4 space-y-8"
-          >
-            <DialogHeader>
-              <DialogTitle>Share report</DialogTitle>
-              <DialogDescription>
-                Share a report from the period.
-              </DialogDescription>
-            </DialogHeader>
+          <FormField
+            control={form.control}
+            name="expireAt"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button variant="outline">
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Expire at</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                      disabled={(date) => date < new Date()}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormDescription>
+                  A date when the report link will expire.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="expireAt"
-              render={({ field }) => (
-                <FormItem className="flex flex-col">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button variant="outline">
-                          {field.value ? (
-                            format(field.value, "PPP")
-                          ) : (
-                            <span>Expire at</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                        disabled={(date) => date < new Date()}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormDescription>
-                    A date when the report link will expire.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
+          <DialogFooter>
+            <Button
+              type="submit"
+              disabled={createReport.status === "executing"}
+              className="w-full"
+            >
+              {createReport.status === "executing" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Publish"
               )}
-            />
-
-            <DialogFooter>
-              <Button
-                type="submit"
-                disabled={createReport.status === "executing"}
-                className="w-full"
-              >
-                {createReport.status === "executing" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  "Publish"
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+            </Button>
+          </DialogFooter>
+        </form>
+      </Form>
+    </DialogContent>
   );
 }

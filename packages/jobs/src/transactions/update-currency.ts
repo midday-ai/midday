@@ -1,5 +1,4 @@
 import { eventTrigger } from "@trigger.dev/sdk";
-import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
@@ -49,7 +48,7 @@ function getTransactionAmount({
 
 client.defineJob({
   id: Jobs.UPDATE_CURRENCY,
-  name: "Update Currency",
+  name: "Transactions - Update Base Currency",
   version: "0.0.1",
   trigger: eventTrigger({
     name: Events.UPDATE_CURRENCY,

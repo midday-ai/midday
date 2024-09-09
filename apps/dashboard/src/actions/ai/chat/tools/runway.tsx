@@ -7,12 +7,11 @@ import { RunwayUI } from "./ui/runway-ui";
 
 type Args = {
   aiState: MutableAIState;
-  currency: string;
   dateFrom: string;
   dateTo: string;
 };
 
-export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getRunwayTool({ aiState, dateFrom, dateTo }: Args) {
   return {
     description: "Get runway",
     parameters: z.object({
@@ -24,16 +23,13 @@ export function getRunwayTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .date()
         .describe("The end date of the runway, in ISO-8601 format")
         .default(new Date(dateTo)),
-      currency: z
-        .string()
-        .default(currency)
-        .describe("The currency for the runway"),
+      currency: z.string().describe("The currency for the runway").optional(),
     }),
     generate: async (args) => {
       const { currency, startDate, endDate } = args;
 
       const { data } = await getRunway({
-        currency,
+        baseCurrency: currency,
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: endDate.toISOString(),
       });

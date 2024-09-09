@@ -7,12 +7,11 @@ import { ProfitUI } from "./ui/profit-ui";
 
 type Args = {
   aiState: MutableAIState;
-  currency: string;
   dateFrom: string;
   dateTo: string;
 };
 
-export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getProfitTool({ aiState, dateFrom, dateTo }: Args) {
   return {
     description: "Get profit",
     parameters: z.object({
@@ -24,10 +23,7 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
         .date()
         .describe("The end date of the profit, in ISO-8601 format")
         .default(new Date(dateTo)),
-      currency: z
-        .string()
-        .default(currency)
-        .describe("The currency for profit"),
+      currency: z.string().describe("The currency for profit").optional(),
     }),
     generate: async (args) => {
       const { currency, startDate, endDate } = args;
@@ -36,7 +32,7 @@ export function getProfitTool({ aiState, currency, dateFrom, dateTo }: Args) {
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         type: "profit",
-        currency,
+        baseCurrency: currency,
       });
 
       const toolCallId = nanoid();

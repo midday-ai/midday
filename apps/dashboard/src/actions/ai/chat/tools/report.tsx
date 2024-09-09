@@ -10,7 +10,6 @@ type Args = {
   aiState: MutableAIState;
   userId: string;
   teamId: string;
-  currency: string;
   dateFrom: string;
   dateTo: string;
 };
@@ -19,7 +18,6 @@ export function createReport({
   aiState,
   userId,
   teamId,
-  currency,
   dateFrom,
   dateTo,
 }: Args) {
@@ -28,19 +26,16 @@ export function createReport({
     parameters: z.object({
       startDate: z.coerce
         .date()
-        .describe("The start date of the runway, in ISO-8601 format")
+        .describe("The start date of the report, in ISO-8601 format")
         .default(new Date(dateFrom)),
       endDate: z.coerce
         .date()
-        .describe("The end date of the runway, in ISO-8601 format")
+        .describe("The end date of the report, in ISO-8601 format")
         .default(new Date(dateTo)),
       type: z
         .enum(["profit", "revenue", "burn_rate"])
         .describe("The report type"),
-      currency: z
-        .string()
-        .default(currency)
-        .describe("The currency for the runway"),
+      currency: z.string().describe("The currency for the report").optional(),
     }),
     generate: async (args) => {
       const { currency, startDate, endDate, type, expiresAt } = args;
