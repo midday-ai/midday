@@ -8,7 +8,7 @@ import { CardStack } from "./card-stack";
 
 export function Screens() {
   return (
-    <div className="mt-20 md:mt-[150px] relative pt-12 pb-16">
+    <div className="mt-[120px] md:mt-[240px] relative pt-12 pb-16">
       <div className="relative z-10 flex flex-col items-center">
         <div className="text-center pb-14">
           <h3 className="text-4xl md:text-6xl font-medium">The thin layer</h3>

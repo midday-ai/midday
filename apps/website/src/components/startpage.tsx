@@ -16,7 +16,6 @@ export function StartPage() {
   return (
     <>
       <Hero />
-      <Ticker />
       <Screens />
       <SectionOne />
       <SectionTwo />
@@ -27,6 +26,7 @@ export function StartPage() {
       <SectionSeven />
       <SectionVideo />
       <SectionOSS />
+      <Ticker />
       <Testimonials />
     </>
   );
