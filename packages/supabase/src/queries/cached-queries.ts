@@ -6,7 +6,6 @@ import { createClient } from "../client/server";
 import {
   type GetBurnRateQueryParams,
   type GetCategoriesParams,
-  type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
   type GetSpendingParams,
@@ -18,7 +17,6 @@ import {
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
-  getCurrentBurnRateQuery,
   getMetricsQuery,
   getRunwayQuery,
   getSpendingQuery,

@@ -1,4 +1,5 @@
 import { eventTrigger } from "@trigger.dev/sdk";
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
@@ -111,8 +112,6 @@ client.defineJob({
         base_currency: baseCurrency,
       }));
 
-      console.log(formattedTransactions);
-
       await processBatch(
         formattedTransactions ?? [],
         BATCH_LIMIT,
@@ -129,12 +128,11 @@ client.defineJob({
       await Promise.all(promises);
     }
 
-    // revalidateTag(`bank_connections_${teamId}`);
-    // revalidateTag(`transactions_${teamId}`);
-    // revalidateTag(`spending_${teamId}`);
-    // revalidateTag(`metrics_${teamId}`);
-    // revalidateTag(`bank_accounts_${teamId}`);
-    // revalidateTag(`insights_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`insights_${teamId}`);
+    revalidateTag(`runway_${teamId}`);
+    revalidateTag(`burn_rate_${teamId}`);
 
     return;
   },
