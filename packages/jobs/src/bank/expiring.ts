@@ -4,10 +4,11 @@ import { cronTrigger } from "@trigger.dev/sdk";
 import { addDays } from "date-fns";
 import { nanoid } from "nanoid";
 import { client, resend, supabase } from "../client";
+import { Jobs } from "../constants";
 import { processBatch } from "../utils/process";
 
 client.defineJob({
-  id: "bank-connection-expiring",
+  id: Jobs.BANK_CONNECTION_EXPIRING,
   name: "Bank - Connection Expiring",
   version: "0.1.1",
   trigger: cronTrigger({

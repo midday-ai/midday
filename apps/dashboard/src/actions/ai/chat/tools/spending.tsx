@@ -7,19 +7,15 @@ import { SpendingUI } from "./ui/spending-ui";
 
 type Args = {
   aiState: MutableAIState;
-  currency: string;
   dateFrom: string;
   dateTo: string;
 };
 
-export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
+export function getSpendingTool({ aiState, dateFrom, dateTo }: Args) {
   return {
     description: "Get spending from transactions",
     parameters: z.object({
-      currency: z
-        .string()
-        .default(currency)
-        .describe("The currency for spending"),
+      currency: z.string().describe("The currency for spending").optional(),
       category: z.string().describe("The category for spending"),
       startDate: z.coerce
         .date()
@@ -37,7 +33,7 @@ export function getSpendingTool({ aiState, currency, dateFrom, dateTo }: Args) {
       const { data } = await getSpending({
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
-        currency,
+        baseCurrency: currency,
       });
 
       const found = data.find(

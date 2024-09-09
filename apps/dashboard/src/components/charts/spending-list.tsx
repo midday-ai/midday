@@ -1,10 +1,5 @@
-import { Cookies } from "@/utils/constants";
-import {
-  getBankAccountsCurrencies,
-  getSpending,
-} from "@midday/supabase/cached-queries";
+import { getSpending } from "@midday/supabase/cached-queries";
 import { Skeleton } from "@midday/ui/skeleton";
-import { cookies } from "next/headers";
 import { spendingExampleData } from "./data";
 import { SpendingCategoryList } from "./spending-category-list";
 
@@ -35,13 +30,9 @@ type Props = {
 };
 
 export async function SpendingList({ initialPeriod, disabled }: Props) {
-  const currency = cookies().has(Cookies.ChartCurrency)
-    ? cookies().get(Cookies.ChartCurrency)?.value
-    : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
-
   const spending = disabled
     ? spendingExampleData
-    : await getSpending({ ...initialPeriod, currency });
+    : await getSpending(initialPeriod);
 
   if (!spending?.data?.length) {
     return (

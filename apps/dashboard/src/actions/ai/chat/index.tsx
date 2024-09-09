@@ -3,10 +3,7 @@
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
-import {
-  getBankAccountsCurrencies,
-  getUser,
-} from "@midday/supabase/cached-queries";
+import { getUser } from "@midday/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
 import {
   createAI,
@@ -73,8 +70,6 @@ export async function submitUserMessage(
   const defaultValues = {
     from: subMonths(startOfMonth(new Date()), 12).toISOString(),
     to: new Date().toISOString(),
-    currency:
-      (await getBankAccountsCurrencies())?.data?.at(0)?.currency ?? "USD",
   };
 
   aiState.update({
@@ -146,37 +141,31 @@ export async function submitUserMessage(
     tools: {
       getSpending: getSpendingTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getBurnRate: getBurnRateTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getRunway: getRunwayTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getProfit: getProfitTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getRevenue: getRevenueTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
       getForecast: getForecastTool({
         aiState,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
@@ -187,7 +176,6 @@ export async function submitUserMessage(
         aiState,
         userId: user?.data?.id ?? "",
         teamId,
-        currency: defaultValues.currency,
         dateFrom: defaultValues.from,
         dateTo: defaultValues.to,
       }),
@@ -210,9 +198,11 @@ export const AI = createAI<AIState, UIState>({
     "use server";
 
     const settings = await getAssistantSettings();
+
     const createdAt = new Date();
     const userId = state.user.id;
     const teamId = state.user.team_id;
+
     const { chatId, messages } = state;
 
     const firstMessageContent = messages?.at(0)?.content ?? "";

@@ -137,18 +137,18 @@ export type GetSpendingParams = {
   from: string;
   to: string;
   teamId: string;
-  currency: string;
+  baseCurrency?: string;
 };
 
 export async function getSpendingQuery(
   supabase: Client,
   params: GetSpendingParams,
 ) {
-  return supabase.rpc("get_spending", {
+  return supabase.rpc("get_spending_v2", {
     team_id: params.teamId,
     date_from: params.from,
     date_to: params.to,
-    currency_target: params.currency,
+    base_currency: params.baseCurrency,
   });
 }
 
@@ -379,64 +379,52 @@ export type GetBurnRateQueryParams = {
   teamId: string;
   from: string;
   to: string;
-  currency: string;
+  baseCurrency?: string;
 };
 
 export async function getBurnRateQuery(
   supabase: Client,
   params: GetBurnRateQueryParams,
 ) {
-  const { teamId, from, to, currency } = params;
+  const { teamId, from, to, baseCurrency } = params;
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_burn_rate", {
+  const { data } = await supabase.rpc("get_burn_rate_v2", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
-    currency,
+    base_currency: baseCurrency,
   });
+
+  return {
+    data,
+    currency: data?.at(0)?.currency,
+  };
 }
 
 export type GetRunwayQueryParams = {
   teamId: string;
   from: string;
   to: string;
-  currency: string;
+  baseCurrency?: string;
 };
 
 export async function getRunwayQuery(
   supabase: Client,
   params: GetRunwayQueryParams,
 ) {
-  const { teamId, from, to, currency } = params;
+  const { teamId, from, to, baseCurrency } = params;
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_runway", {
+  return supabase.rpc("get_runway_v2", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
-    currency,
-  });
-}
-
-export type GetCurrentBurnRateQueryParams = {
-  teamId: string;
-  currency: string;
-};
-
-export async function getCurrentBurnRateQuery(
-  supabase: Client,
-  params: GetCurrentBurnRateQueryParams,
-) {
-  const { teamId, currency } = params;
-
-  return supabase.rpc("get_current_burn_rate", {
-    team_id: teamId,
-    currency,
+    base_currency: baseCurrency,
   });
 }
 
@@ -444,7 +432,7 @@ export type GetMetricsParams = {
   teamId: string;
   from: string;
   to: string;
-  currency: string;
+  baseCurrency?: string;
   type?: "revenue" | "profit";
 };
 
@@ -452,9 +440,9 @@ export async function getMetricsQuery(
   supabase: Client,
   params: GetMetricsParams,
 ) {
-  const { teamId, from, to, type = "profit", currency } = params;
+  const { teamId, from, to, type = "profit", baseCurrency } = params;
 
-  const rpc = type === "profit" ? "get_profit" : "get_revenue";
+  const rpc = type === "profit" ? "get_profit_v2" : "get_revenue_v2";
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
@@ -464,13 +452,13 @@ export async function getMetricsQuery(
       team_id: teamId,
       date_from: subYears(startOfMonth(fromDate), 1).toDateString(),
       date_to: subYears(endOfMonth(toDate), 1).toDateString(),
-      currency,
+      base_currency: baseCurrency,
     }),
     supabase.rpc(rpc, {
       team_id: teamId,
       date_from: startOfMonth(fromDate).toDateString(),
       date_to: endOfMonth(toDate).toDateString(),
-      currency,
+      base_currency: baseCurrency,
     }),
   ]);
 
@@ -480,6 +468,8 @@ export async function getMetricsQuery(
     0,
   );
 
+  const currency = currentData?.at(0)?.currency;
+
   return {
     summary: {
       currentTotal,
@@ -488,6 +478,7 @@ export async function getMetricsQuery(
     },
     meta: {
       type,
+      currency,
     },
     result: currentData?.map((record, index) => {
       const prev = prevData?.at(index);
@@ -969,4 +960,8 @@ export async function getInboxSearchQuery(
   const { data } = await query.range(0, limit);
 
   return data;
+}
+
+export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
+  return supabase.from("teams").select("*").eq("id", teamId).single();
 }

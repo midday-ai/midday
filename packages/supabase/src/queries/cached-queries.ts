@@ -6,7 +6,6 @@ import { createClient } from "../client/server";
 import {
   type GetBurnRateQueryParams,
   type GetCategoriesParams,
-  type GetCurrentBurnRateQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
   type GetSpendingParams,
@@ -14,18 +13,17 @@ import {
   type GetTrackerProjectsQueryParams,
   type GetTrackerRecordsByRangeParams,
   type GetTransactionsParams,
-  type GetVaultParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
-  getCurrentBurnRateQuery,
   getMetricsQuery,
   getRunwayQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
   getTeamInvitesQuery,
   getTeamMembersQuery,
+  getTeamSettingsQuery,
   getTeamUserQuery,
   getTeamsByUserIdQuery,
   getTrackerProjectsQuery,
@@ -33,7 +31,6 @@ import {
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
-  getVaultQuery,
 } from "../queries";
 
 export const getTransactions = async (
@@ -363,25 +360,6 @@ export const getBurnRate = async (
   )(params);
 };
 
-export const getCurrentBurnRate = async (
-  params: Omit<GetCurrentBurnRateQueryParams, "teamId">,
-) => {
-  const supabase = createClient();
-  const user = await getUser();
-  const teamId = user?.data?.team_id;
-
-  return unstable_cache(
-    async () => {
-      return getCurrentBurnRateQuery(supabase, { ...params, teamId });
-    },
-    ["current_burn_rate", teamId],
-    {
-      tags: [`current_burn_rate_${teamId}`],
-      revalidate: 3600,
-    },
-  )(params);
-};
-
 export const getRunway = async (
   params: Omit<GetRunwayQueryParams, "teamId">,
 ) => {
@@ -418,4 +396,25 @@ export const getCategories = async (
       revalidate: 3600,
     },
   )(params);
+};
+
+export const getTeamSettings = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTeamSettingsQuery(supabase, teamId);
+    },
+    ["team_settings", teamId],
+    {
+      tags: [`team_settings_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
 };

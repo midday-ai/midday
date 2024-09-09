@@ -8,7 +8,6 @@ export const Cookies = {
   MenuConfig: "menu-config",
   InboxFilter: "inbox-filter-v2",
   TrackingConsent: "tracking-consent",
-  ChartCurrency: "chart-currency",
   InboxOrder: "inbox-order",
   HideConnectFlow: "hide-connect-flow",
   RequestAccess: "request-access",

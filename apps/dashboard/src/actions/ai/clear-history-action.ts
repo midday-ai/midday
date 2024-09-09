@@ -7,6 +7,9 @@ export const clearHistoryAction = authActionClient
   .metadata({
     name: "clear-history",
   })
-  .action(async () => {
-    return clearChats();
+  .action(async ({ ctx: { user } }) => {
+    return clearChats({
+      teamId: user?.team_id,
+      userId: user?.id,
+    });
   });

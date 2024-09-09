@@ -27,6 +27,7 @@ export const updateTeamSchema = z.object({
   inbox_email: z.string().email().optional().nullable(),
   inbox_forwarding: z.boolean().optional().nullable(),
   logo_url: z.string().url().optional(),
+  base_currency: z.string().optional(),
   document_classification: z.boolean().optional(),
   revalidatePath: z.string().optional(),
 });
@@ -71,7 +72,6 @@ export const changeSpendingPeriodSchema = z.object({
   to: z.string().datetime(),
 });
 
-export const changeChartCurrencySchema = z.string();
 export const changeChartTypeSchema = z.enum(["profit", "revenue", "burn_rate"]);
 export const changeChartPeriodSchema = z.object({
   from: z.string().optional(),
@@ -136,6 +136,7 @@ export const connectBankAccountSchema = z.object({
     z.object({
       account_id: z.string(),
       bank_name: z.string(),
+      balance: z.number().optional(),
       currency: z.string(),
       name: z.string(),
       institution_id: z.string(),
@@ -326,7 +327,6 @@ export const createReportSchema = z.object({
   baseUrl: z.string().url(),
   from: z.string(),
   to: z.string(),
-  currency: z.string(),
   type: changeChartTypeSchema,
   expiresAt: z.string().datetime().optional(),
 });

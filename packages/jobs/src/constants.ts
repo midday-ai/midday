@@ -10,6 +10,10 @@ export const Jobs = {
   TRANSACTIONS_INITIAL_SYNC: "transactions-initial-sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions-manual-sync",
   TRANSACTIONS_IMPORT: "transactions-import",
+  UPDATE_CURRENCY: "update-base-currency",
+  BANK_CONNECTION_DISCONNECTED: "bank-connection-disconnected",
+  BANK_CONNECTION_EXPIRING: "bank-connection-expiring",
+  EXCHANGE_RATES_UPDATE: "exchange-rates-update",
 };
 
 export const Events = {
@@ -21,4 +25,5 @@ export const Events = {
   TRANSACTIONS_INITIAL_SYNC: "transactions.initial.sync",
   TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
   TRANSACTIONS_IMPORT: "transactions.import",
+  UPDATE_CURRENCY: "update.base.currency",
 };

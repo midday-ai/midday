@@ -72,7 +72,7 @@ client.defineJob({
         accountId: account.account_id,
         accountType: getClassification(account.type),
         accessToken: account.bank_connection?.access_token,
-        latest: true,
+        latest: "true",
       });
 
       const formattedTransactions = transactions.data?.map((transaction) => {

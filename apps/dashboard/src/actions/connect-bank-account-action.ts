@@ -1,7 +1,9 @@
 "use server";
 
+import { getMostFrequentCurrency } from "@/utils/currency";
 import { LogEvents } from "@midday/events/events";
 import { Events, client } from "@midday/jobs";
+import { getTeamSettings } from "@midday/supabase/cached-queries";
 import { createBankAccounts } from "@midday/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
@@ -28,6 +30,19 @@ export const connectBankAccountAction = authActionClient
       ctx: { supabase, user },
     }) => {
       const teamId = user.team_id;
+      const { data } = await getTeamSettings();
+
+      const selectedCurrency = getMostFrequentCurrency(accounts);
+
+      // Update team settings with base currency if not set
+      if (!data?.base_currency && selectedCurrency && teamId) {
+        await supabase
+          .from("teams")
+          .update({
+            base_currency: selectedCurrency,
+          })
+          .eq("id", teamId);
+      }
 
       await createBankAccounts(supabase, {
         accessToken,

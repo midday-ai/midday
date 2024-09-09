@@ -16,7 +16,7 @@ export function AnimatedNumber({ value, currency }: Props) {
       value={value}
       format={{
         style: "currency",
-        currency: currency,
+        currency: currency ?? "USD",
       }}
       locales={locale}
     />

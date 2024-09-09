@@ -8,6 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import Link from "next/link";
 import { AnimatedNumber } from "../animated-number";
 import { AreaChart } from "./area-chart";
 import { burnRateExamleData } from "./data";
@@ -15,28 +16,20 @@ import { burnRateExamleData } from "./data";
 type Props = {
   value: unknown;
   defaultValue: unknown;
-  currency: string;
   disabled?: boolean;
 };
 
-export async function BurnRateChart({
-  value,
-  defaultValue,
-  currency,
-  disabled,
-}: Props) {
-  const [{ data: burnRateData }, { data: runway }] = disabled
+export async function BurnRateChart({ value, defaultValue, disabled }: Props) {
+  const [{ data: burnRateData, currency }, { data: runway }] = disabled
     ? burnRateExamleData
     : await Promise.all([
         getBurnRate({
           ...defaultValue,
           ...value,
-          currency,
         }),
         getRunway({
           ...defaultValue,
           ...value,
-          currency,
         }),
       ]);
 
@@ -56,22 +49,43 @@ export async function BurnRateChart({
               ? `${runway} months runway`
               : "Average burn rate"}
           </span>
-          {typeof runway === "number" && runway > 0 && (
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Icons.Info className="h-4 w-4 mt-1" />
-                </TooltipTrigger>
-                <TooltipContent className="px-3 py-1.5 text-xs">
-                  Average burn rate / Total balance
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Icons.Info className="h-4 w-4 mt-1" />
+              </TooltipTrigger>
+              <TooltipContent
+                className="text-xs text-[#878787] max-w-[240px] p-4 space-y-2"
+                side="bottom"
+                sideOffset={10}
+              >
+                <h3 className="font-medium text-primary">
+                  The Burn Rate is your monthly expenses divided by your current
+                  balance, estimating how long your funds will last.
+                </h3>
+                <p>
+                  Explanation: This tracks how fast you’re spending. If it’s
+                  incorrect, internal transfers may be counted as income. You
+                  can change this manually in the transaction list.
+                </p>
+
+                <p>
+                  All amounts are converted into your{" "}
+                  <Link
+                    href="/settings/accounts"
+                    className="text-primary underline"
+                  >
+                    base currency
+                  </Link>
+                  .
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 
-      <AreaChart currency={currency} data={burnRateData} />
+      <AreaChart data={burnRateData} />
     </div>
   );
 }

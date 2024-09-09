@@ -12,6 +12,7 @@ type CreateBankAccountsPayload = {
     bank_name: string;
     currency: string;
     enabled: boolean;
+    balance: number;
     type: "depository" | "credit" | "other_asset" | "loan" | "other_liability";
   }[];
   balance: number;
@@ -85,6 +86,7 @@ export async function createBankAccounts(
           currency: account.currency,
           enabled: account.enabled,
           type: account.type,
+          balance: account.balance ?? 0,
         }),
         {
           onConflict: "account_id",

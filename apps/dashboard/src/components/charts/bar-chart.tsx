@@ -104,7 +104,7 @@ const ToolTipContent = ({ payload = {} }) => {
 };
 
 export function BarChart({ data, height = 290 }) {
-  const formattedData = data.result.map((item) => ({
+  const formattedData = data?.result?.map((item) => ({
     ...item,
     meta: data.meta,
     date: format(
@@ -164,9 +164,9 @@ export function BarChart({ data, height = 290 }) {
           <Tooltip content={ToolTipContent} cursor={false} />
 
           <Bar dataKey="previous.value" barSize={16}>
-            {data.result.map((entry, index) => (
+            {data?.result?.map((entry, index) => (
               <Cell
-                key={`cell-${index}`}
+                key={`cell-${index.toString()}`}
                 className={cn(
                   "fill-[#41191A]",
                   +entry.previous.value > 0 &&
@@ -177,9 +177,9 @@ export function BarChart({ data, height = 290 }) {
           </Bar>
 
           <Bar dataKey="current.value" barSize={16}>
-            {data.result.map((entry, index) => (
+            {data?.result?.map((entry, index) => (
               <Cell
-                key={`cell-${index}`}
+                key={`cell-${index.toString()}`}
                 className={cn(
                   "fill-[#FF3638]",
                   +entry.current.value > 0 &&

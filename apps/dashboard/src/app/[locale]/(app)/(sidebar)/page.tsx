@@ -4,10 +4,7 @@ import { EmptyState } from "@/components/charts/empty-state";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import {
-  getBankAccountsCurrencies,
-  getTeamBankAccounts,
-} from "@midday/supabase/cached-queries";
+import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
@@ -33,10 +30,6 @@ export default async function Overview({ searchParams }) {
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
-  const currency = cookies().has(Cookies.ChartCurrency)
-    ? cookies().get(Cookies.ChartCurrency)?.value
-    : (await getBankAccountsCurrencies())?.data?.at(0)?.currency || "USD";
-
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
     : {
@@ -57,7 +50,7 @@ export default async function Overview({ searchParams }) {
     <>
       <div>
         <div className="h-[530px] mb-4">
-          <ChartSelectors defaultValue={defaultValue} currency={currency} />
+          <ChartSelectors defaultValue={defaultValue} />
 
           <div className="mt-8 relative">
             {isEmpty && <EmptyState />}
@@ -67,7 +60,6 @@ export default async function Overview({ searchParams }) {
                 value={value}
                 defaultValue={defaultValue}
                 disabled={isEmpty}
-                currency={currency}
                 type={chartType}
               />
             </div>
