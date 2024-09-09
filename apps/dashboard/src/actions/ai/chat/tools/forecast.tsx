@@ -38,15 +38,6 @@ export function getForecastTool({ aiState, dateFrom, dateTo }: Args) {
         baseCurrency: currency,
       });
 
-      console.log(data);
-
-      console.log({
-        from: startOfMonth(new Date(startDate)).toISOString(),
-        to: new Date(endDate).toISOString(),
-        type,
-        baseCurrency: currency,
-      });
-
       const prev = data?.result?.map((d) => {
         return `${d.current.date}: ${Intl.NumberFormat("en", {
           style: "currency",
