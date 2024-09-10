@@ -24,9 +24,14 @@ import { useAction } from "next-safe-action/hooks";
 
 export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
   const { toast } = useToast();
-  const { transactionIds, canDelete } = useTransactionsStore();
+  const { setRowSelection, canDelete, rowSelection } = useTransactionsStore();
+
+  const transactionIds = Object.keys(rowSelection);
 
   const deleteTransactions = useAction(deleteTransactionsAction, {
+    onSuccess: () => {
+      setRowSelection({});
+    },
     onError: () => {
       toast({
         duration: 3500,

@@ -52,17 +52,17 @@ export function DataTable<TData, TValue>({
   initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {
   const { toast } = useToast();
-  const [rowSelection, setRowSelection] = useState({});
+  // const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
   const [hasNextPage, setHasNextPage] = useState(initialHasNextPage);
-  const { setColumns, setTransactionIds, setCanDelete } =
+  const { setColumns, setCanDelete, rowSelection, setRowSelection } =
     useTransactionsStore();
 
   const [transactionId, setTransactionId] = useQueryState("id");
-
   const selectedRows = Object.keys(rowSelection).length;
+
   const showBottomBar =
     (hasFilters && !selectedRows) || (query && !selectedRows);
 
@@ -211,8 +211,6 @@ export function DataTable<TData, TValue>({
         setCanDelete(false);
       }
     }
-
-    setTransactionIds(Object.keys(rowSelection));
   }, [rowSelection]);
 
   useEffect(() => {
@@ -309,7 +307,6 @@ export function DataTable<TData, TValue>({
       <ExportBar
         selected={selectedRows}
         deselectAll={() => table.toggleAllPageRowsSelected(false)}
-        transactionIds={Object.keys(rowSelection)}
       />
     </div>
   );

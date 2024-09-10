@@ -27,16 +27,16 @@ type Props = {
 export function BulkActions({ ids }: Props) {
   const { toast } = useToast();
 
-  const { setTransactionIds } = useTransactionsStore();
+  const { setRowSelection } = useTransactionsStore();
 
   const bulkUpdateTransactions = useAction(bulkUpdateTransactionsAction, {
     onExecute: ({ input }) => {
       if (input.type === "status") {
-        setTransactionIds(undefined);
+        setRowSelection({});
       }
     },
     onSuccess: ({ data }) => {
-      setTransactionIds(undefined);
+      setRowSelection({});
       toast({
         title: `Updated ${data?.length} transactions.`,
         variant: "success",

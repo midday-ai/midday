@@ -1,5 +1,6 @@
 import { exportTransactionsAction } from "@/actions/export-transactions-action";
 import { useExportStore } from "@/store/export";
+import { useTransactionsStore } from "@/store/transactions";
 import { Button } from "@midday/ui/button";
 import { useToast } from "@midday/ui/use-toast";
 import { AnimatePresence, motion } from "framer-motion";
@@ -10,10 +11,10 @@ import { useEffect, useState } from "react";
 type Props = {
   selected: boolean;
   deselectAll: () => void;
-  transactionIds: string[];
 };
 
-export function ExportBar({ selected, deselectAll, transactionIds }: Props) {
+export function ExportBar({ selected, deselectAll }: Props) {
+  const { transactionIds } = useTransactionsStore();
   const { toast } = useToast();
   const { setExportId } = useExportStore();
   const [isOpen, setOpen] = useState(false);
