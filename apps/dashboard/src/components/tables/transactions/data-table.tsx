@@ -52,7 +52,6 @@ export function DataTable<TData, TValue>({
   initialColumnVisibility,
 }: DataTableProps<TData, TValue>) {
   const { toast } = useToast();
-  // const [rowSelection, setRowSelection] = useState({});
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();

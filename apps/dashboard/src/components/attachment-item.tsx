@@ -34,6 +34,8 @@ export function AttachmentItem({ file, onDelete }: Props) {
                   preview
                   width={45}
                   height={100}
+                  // Wait for the sheet to open before loading the file
+                  delay={100}
                 />
               )}
             </div>

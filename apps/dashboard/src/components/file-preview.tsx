@@ -12,7 +12,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { FileType } from "@midday/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import React from "react";
 
 const Iframe = dynamic(() => import("./iframe").then((mod) => mod.Iframe), {
@@ -32,6 +32,7 @@ type Props = {
   onLoaded?: () => void;
   download?: boolean;
   isFullscreen?: boolean;
+  delay?: number;
 };
 
 const RenderComponent = ({
@@ -43,6 +44,7 @@ const RenderComponent = ({
   preview,
   onLoaded,
   setError,
+  delay,
 }: {
   type: FileType;
   src: string;
@@ -52,6 +54,7 @@ const RenderComponent = ({
   preview?: boolean;
   onLoaded: (loaded: boolean) => void;
   setError: (error: boolean) => void;
+  delay?: number;
 }) => {
   const handleOnLoaded = () => {
     onLoaded(true);
@@ -75,11 +78,13 @@ const RenderComponent = ({
     return (
       <Iframe
         src={src}
+        key={src}
         width={width}
         height={height}
         onLoaded={handleOnLoaded}
         setError={setError}
         preview={preview}
+        delay={delay}
       />
     );
   }
@@ -158,14 +163,11 @@ export function FilePreview({
   disableFullscreen,
   download = true,
   isFullscreen,
+  delay,
   onLoaded,
 }: Props) {
   const [isLoaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-
-  useEffect(() => {
-    setLoaded(false);
-  }, [src]);
 
   function handleLoaded() {
     setLoaded(true);
@@ -232,6 +234,7 @@ export function FilePreview({
               onLoaded={handleLoaded}
               setError={setError}
               preview={preview}
+              delay={delay}
             />
           )}
         </div>

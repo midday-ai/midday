@@ -13,6 +13,7 @@ interface TransactionsState {
 export const useTransactionsStore = create<TransactionsState>()((set) => ({
   columns: [],
   canDelete: false,
+  rowSelection: {},
   setCanDelete: (canDelete) => set({ canDelete }),
   setColumns: (columns) => set({ columns }),
   setRowSelection: (updater: Updater<RowSelectionState>) =>
@@ -22,5 +23,4 @@ export const useTransactionsStore = create<TransactionsState>()((set) => ({
           typeof updater === "function" ? updater(state.rowSelection) : updater,
       };
     }),
-  rowSelection: {},
 }));
