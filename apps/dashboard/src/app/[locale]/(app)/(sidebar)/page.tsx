@@ -61,6 +61,7 @@ export default async function Overview({ searchParams }) {
                 defaultValue={defaultValue}
                 disabled={isEmpty}
                 type={chartType}
+                currency={searchParams.currency}
               />
             </div>
           </div>

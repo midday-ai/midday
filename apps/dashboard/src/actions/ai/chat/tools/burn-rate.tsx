@@ -37,14 +37,14 @@ export function getBurnRateTool({ aiState, dateFrom, dateTo }: Args) {
 
       const [{ data: months }, { data: burnRateData }] = await Promise.all([
         getRunway({
-          baseCurrency: currency,
+          currency,
           from: startOfMonth(new Date(startDate)).toISOString(),
           to: endDate.toISOString(),
         }),
         getBurnRate({
           from: startDate.toISOString(),
           to: endDate.toISOString(),
-          baseCurrency: currency,
+          currency,
         }),
       ]);
 

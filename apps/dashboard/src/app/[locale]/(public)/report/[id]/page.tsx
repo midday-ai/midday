@@ -122,14 +122,14 @@ export default async function Report({ params }) {
             from: data.from,
             to: data.to,
             type: data.type,
-            baseCurrency: data.currency,
+            currency: data.currency,
           }),
           getRunwayQuery(supabase, {
             teamId: data.team_id,
             from: data.from,
             to: data.to,
             type: data.type,
-            baseCurrency: data.currency,
+            currency: data.currency,
           }),
         ]);
 

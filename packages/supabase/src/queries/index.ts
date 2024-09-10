@@ -137,7 +137,7 @@ export type GetSpendingParams = {
   from: string;
   to: string;
   teamId: string;
-  baseCurrency?: string;
+  currency?: string;
 };
 
 export async function getSpendingQuery(
@@ -148,7 +148,7 @@ export async function getSpendingQuery(
     team_id: params.teamId,
     date_from: params.from,
     date_to: params.to,
-    base_currency: params.baseCurrency,
+    base_currency: params.currency,
   });
 }
 
@@ -379,14 +379,14 @@ export type GetBurnRateQueryParams = {
   teamId: string;
   from: string;
   to: string;
-  baseCurrency?: string;
+  currency?: string;
 };
 
 export async function getBurnRateQuery(
   supabase: Client,
   params: GetBurnRateQueryParams,
 ) {
-  const { teamId, from, to, baseCurrency } = params;
+  const { teamId, from, to, currency } = params;
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
@@ -395,7 +395,7 @@ export async function getBurnRateQuery(
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
-    base_currency: baseCurrency,
+    base_currency: currency,
   });
 
   return {
@@ -408,14 +408,14 @@ export type GetRunwayQueryParams = {
   teamId: string;
   from: string;
   to: string;
-  baseCurrency?: string;
+  currency?: string;
 };
 
 export async function getRunwayQuery(
   supabase: Client,
   params: GetRunwayQueryParams,
 ) {
-  const { teamId, from, to, baseCurrency } = params;
+  const { teamId, from, to, currency } = params;
 
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
@@ -424,7 +424,7 @@ export async function getRunwayQuery(
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
-    base_currency: baseCurrency,
+    base_currency: currency,
   });
 }
 
@@ -432,7 +432,7 @@ export type GetMetricsParams = {
   teamId: string;
   from: string;
   to: string;
-  baseCurrency?: string;
+  currency?: string;
   type?: "revenue" | "profit";
 };
 
@@ -440,7 +440,7 @@ export async function getMetricsQuery(
   supabase: Client,
   params: GetMetricsParams,
 ) {
-  const { teamId, from, to, type = "profit", baseCurrency } = params;
+  const { teamId, from, to, type = "profit", currency } = params;
 
   const rpc = type === "profit" ? "get_profit_v2" : "get_revenue_v2";
 
@@ -452,13 +452,13 @@ export async function getMetricsQuery(
       team_id: teamId,
       date_from: subYears(startOfMonth(fromDate), 1).toDateString(),
       date_to: subYears(endOfMonth(toDate), 1).toDateString(),
-      base_currency: baseCurrency,
+      base_currency: currency,
     }),
     supabase.rpc(rpc, {
       team_id: teamId,
       date_from: startOfMonth(fromDate).toDateString(),
       date_to: endOfMonth(toDate).toDateString(),
-      base_currency: baseCurrency,
+      base_currency: currency,
     }),
   ]);
 
@@ -468,17 +468,17 @@ export async function getMetricsQuery(
     0,
   );
 
-  const currency = currentData?.at(0)?.currency;
+  const baseCurrency = currentData?.at(0)?.currency;
 
   return {
     summary: {
       currentTotal,
       prevTotal,
-      currency,
+      currency: baseCurrency,
     },
     meta: {
       type,
-      currency,
+      currency: baseCurrency,
     },
     result: currentData?.map((record, index) => {
       const prev = prevData?.at(index);

@@ -27,12 +27,17 @@ export function SpendingListSkeleton() {
 type Props = {
   initialPeriod: any;
   disabled: boolean;
+  currency?: string;
 };
 
-export async function SpendingList({ initialPeriod, disabled }: Props) {
+export async function SpendingList({
+  initialPeriod,
+  disabled,
+  currency,
+}: Props) {
   const spending = disabled
     ? spendingExampleData
-    : await getSpending(initialPeriod);
+    : await getSpending({ ...initialPeriod, currency });
 
   if (!spending?.data?.length) {
     return (

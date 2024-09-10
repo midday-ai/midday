@@ -27,6 +27,7 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
       disabled={disabled}
       initialPeriod={initialPeriod}
       key="spending"
+      currency={searchParams?.currency}
     />,
     <Tracker key="tracker" date={searchParams?.date} hideDaysIndicators />,
     <Transactions key="transactions" disabled={disabled} />,

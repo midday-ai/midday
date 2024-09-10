@@ -33,7 +33,7 @@ export function getSpendingTool({ aiState, dateFrom, dateTo }: Args) {
       const { data } = await getSpending({
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
-        baseCurrency: currency,
+        currency,
       });
 
       const found = data.find(

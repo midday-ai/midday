@@ -29,7 +29,7 @@ export function getRunwayTool({ aiState, dateFrom, dateTo }: Args) {
       const { currency, startDate, endDate } = args;
 
       const { data } = await getRunway({
-        baseCurrency: currency,
+        currency,
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: endDate.toISOString(),
       });

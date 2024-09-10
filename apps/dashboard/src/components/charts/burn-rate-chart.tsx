@@ -17,21 +17,30 @@ type Props = {
   value: unknown;
   defaultValue: unknown;
   disabled?: boolean;
+  currency?: string;
 };
 
-export async function BurnRateChart({ value, defaultValue, disabled }: Props) {
-  const [{ data: burnRateData, currency }, { data: runway }] = disabled
-    ? burnRateExamleData
-    : await Promise.all([
-        getBurnRate({
-          ...defaultValue,
-          ...value,
-        }),
-        getRunway({
-          ...defaultValue,
-          ...value,
-        }),
-      ]);
+export async function BurnRateChart({
+  value,
+  defaultValue,
+  disabled,
+  currency,
+}: Props) {
+  const [{ data: burnRateData, currency: baseCurrency }, { data: runway }] =
+    disabled
+      ? burnRateExamleData
+      : await Promise.all([
+          getBurnRate({
+            ...defaultValue,
+            ...value,
+            currency,
+          }),
+          getRunway({
+            ...defaultValue,
+            ...value,
+            currency,
+          }),
+        ]);
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
@@ -39,7 +48,7 @@ export async function BurnRateChart({ value, defaultValue, disabled }: Props) {
         <h1 className="text-4xl font-mono">
           <AnimatedNumber
             value={calculateAvgBurnRate(burnRateData)}
-            currency={currency}
+            currency={baseCurrency}
           />
         </h1>
 

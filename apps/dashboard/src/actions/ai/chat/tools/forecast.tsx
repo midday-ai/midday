@@ -35,7 +35,7 @@ export function getForecastTool({ aiState, dateFrom, dateTo }: Args) {
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         type,
-        baseCurrency: currency,
+        currency,
       });
 
       const prev = data?.result?.map((d) => {

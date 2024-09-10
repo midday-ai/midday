@@ -18,6 +18,7 @@ type Props = {
   defaultValue: any;
   type: string;
   disabled?: boolean;
+  currency?: string;
 };
 
 export async function ProfitRevenueChart({
@@ -25,10 +26,11 @@ export async function ProfitRevenueChart({
   defaultValue,
   type,
   disabled,
+  currency,
 }: Props) {
   const data = disabled
     ? chartExampleData
-    : await getMetrics({ ...defaultValue, ...value, type });
+    : await getMetrics({ ...defaultValue, ...value, type, currency });
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>

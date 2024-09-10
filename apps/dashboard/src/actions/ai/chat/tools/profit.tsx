@@ -32,7 +32,7 @@ export function getProfitTool({ aiState, dateFrom, dateTo }: Args) {
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         type: "profit",
-        baseCurrency: currency,
+        currency,
       });
 
       const toolCallId = nanoid();

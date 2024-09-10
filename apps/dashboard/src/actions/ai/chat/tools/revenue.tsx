@@ -32,7 +32,7 @@ export function getRevenueTool({ aiState, dateFrom, dateTo }: Args) {
         from: startOfMonth(new Date(startDate)).toISOString(),
         to: new Date(endDate).toISOString(),
         type: "revenue",
-        baseCurrency: currency,
+        currency,
       });
 
       const toolCallId = nanoid();
