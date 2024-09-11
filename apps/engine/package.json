@@ -9,18 +9,18 @@
     "check:types": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/swagger-ui": "^0.4.0",
-    "@hono/zod-openapi": "^0.15.1",
+    "@hono/swagger-ui": "^0.4.1",
+    "@hono/zod-openapi": "^0.16.0",
     "@hono/zod-validator": "^0.2.2",
-    "hono": "^4.5.3",
-    "plaid": "^26.0.0",
+    "hono": "^4.5.11",
+    "plaid": "^27.0.0",
     "typesense": "^1.8.2",
-    "xior": "^0.5.5",
+    "xior": "^0.6.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240729.0",
-    "@types/bun": "^1.1.6",
-    "wrangler": "^3.68.0"
+    "@cloudflare/workers-types": "^4.20240909.0",
+    "@types/bun": "^1.1.9",
+    "wrangler": "^3.76.0"
   }
 }

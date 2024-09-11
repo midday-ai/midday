@@ -6,7 +6,7 @@ import {
   TriggerEvents,
   triggerBulk,
 } from "@midday/notification";
-import { renderAsync } from "@react-email/components";
+import { render } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";
 import { client, supabase } from "../client";
@@ -113,7 +113,7 @@ client.defineJob({
     const emailPromises = usersData?.map(async ({ user, team_id, team }) => {
       const { t } = getI18n({ locale: user.locale });
 
-      const html = await renderAsync(
+      const html = await render(
         TransactionsEmail({
           fullName: user.full_name,
           transactions: sortedTransactions,
