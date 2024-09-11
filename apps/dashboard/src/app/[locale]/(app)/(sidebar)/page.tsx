@@ -41,7 +41,6 @@ export default async function Overview({ searchParams }) {
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
     ...(searchParams.to && { to: searchParams.to }),
-    period: searchParams.period,
   };
 
   const isEmpty = !accounts?.data?.length;
