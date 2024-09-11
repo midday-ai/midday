@@ -1,6 +1,17 @@
 compatibility_date = "2023-12-01"
 workers_dev = false
 logpush = true
+compatibility_flags = [ "nodejs_compat"]
+
+browser = { binding = "MYBROWSER" }
+
+[[durable_objects.bindings]]
+name = "BROWSER"
+class_name = "Browser"
+
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["Browser"]
 
 [env.production]
 name = "engine"

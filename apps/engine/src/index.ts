@@ -65,4 +65,6 @@ app.doc("/openapi", {
 
 app.route("/health", healthRoutes);
 
+export { Browser } from "./state/browser";
+
 export default app;
