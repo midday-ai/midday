@@ -135,7 +135,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
         >
           <div className="p-4 pb-0">
             <Select
-              defaultValue={params.period}
+              defaultValue={params.period ?? undefined}
               onValueChange={(value) =>
                 handleChangePeriod(
                   periods.find((p) => p.value === value)?.range,
