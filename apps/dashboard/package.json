@@ -65,7 +65,7 @@
     "recharts": "^2.12.7",
     "resend": "^3.5.0",
     "sharp": "^0.33.5",
-    "tus-js-client": "^4.2.1",
+    "tus-js-client": "4.1.0",
     "use-long-press": "^3.2.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.5"
