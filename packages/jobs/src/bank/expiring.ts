@@ -1,5 +1,5 @@
 import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
-import { renderAsync } from "@react-email/components";
+import { render } from "@react-email/components";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { addDays } from "date-fns";
 import { nanoid } from "nanoid";
@@ -48,7 +48,7 @@ client.defineJob({
     const emailPromises = users
       .flat()
       .map(async ({ user, bankName, teamName, expireAt }) => {
-        const html = await renderAsync(
+        const html = await render(
           ConnectionExpireEmail({
             fullName: user.full_name,
             locale: user.locale,

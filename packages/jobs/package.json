@@ -19,6 +19,7 @@
     "@trigger.dev/resend": "2.3.19",
     "@trigger.dev/sdk": "2.3.19",
     "@trigger.dev/supabase": "^2.3.19",
+    "@zip.js/zip.js": "2.7.52",
     "change-case": "^5.4.4",
     "nanoid": "^5.0.7"
   }

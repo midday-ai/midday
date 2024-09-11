@@ -1,5 +1,5 @@
 import ConnectionIssueEmail from "@midday/email/emails/connection-issue";
-import { renderAsync } from "@react-email/components";
+import { render } from "@react-email/components";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";
 import { client, resend, supabase } from "../client";
@@ -44,7 +44,7 @@ client.defineJob({
     const emailPromises = users
       ?.flat()
       .map(async ({ user, bankName, teamName }) => {
-        const html = await renderAsync(
+        const html = await render(
           ConnectionIssueEmail({
             fullName: user.full_name,
             locale: user.locale,

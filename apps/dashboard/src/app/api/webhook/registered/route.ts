@@ -4,7 +4,7 @@ import { logger } from "@/utils/logger";
 import WelcomeEmail from "@midday/email/emails/welcome";
 import { LogEvents } from "@midday/events/events";
 import { setupAnalytics } from "@midday/events/server";
-import { renderAsync } from "@react-email/render";
+import { render } from "@react-email/render";
 import { LoopsClient } from "loops";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       to: email,
       subject: "Welcome to Midday",
       from: "Pontus from Midday <pontus@midday.ai>",
-      html: await renderAsync(
+      html: await render(
         WelcomeEmail({
           fullName,
         }),

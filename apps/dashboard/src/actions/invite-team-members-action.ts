@@ -4,7 +4,7 @@ import { env } from "@/env.mjs";
 import InviteEmail from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
 import { LogEvents } from "@midday/events/events";
-import { renderAsync } from "@react-email/render";
+import { render } from "@react-email/render";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -54,7 +54,7 @@ export const inviteTeamMembersAction = authActionClient
           invitedByName: invites.user.full_name,
           teamName: invites.team.name,
         }),
-        html: await renderAsync(
+        html: await render(
           InviteEmail({
             invitedByEmail: invites.user.email,
             invitedByName: invites.user.full_name,
