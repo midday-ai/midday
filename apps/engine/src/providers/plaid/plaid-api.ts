@@ -59,7 +59,7 @@ export class PlaidApi {
         "https://status.plaid.com/api/v2/status.json",
       );
 
-      const data: GetStatusResponse = await response.json();
+      const data = (await response.json()) as GetStatusResponse;
 
       return (
         data.status.indicator === "none" ||

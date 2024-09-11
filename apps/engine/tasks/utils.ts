@@ -157,7 +157,7 @@ type TellerResponse = {
 export async function getTellerData() {
   const response = await fetch(TELLER_ENDPOINT);
 
-  const data: TellerResponse[] = await response.json();
+  const data = (await response.json()) as TellerResponse[];
 
   return data;
 }
