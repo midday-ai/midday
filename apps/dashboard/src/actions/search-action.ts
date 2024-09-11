@@ -14,7 +14,7 @@ export const searchAction = authActionClient
     const { data: documents } = await supabase
       .from("inbox")
       .select("*")
-      .textSearch("fts", `'${query}'`)
+      .textSearch("fts", `'${query}':*`)
       .limit(limit);
 
     return documents;
