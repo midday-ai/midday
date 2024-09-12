@@ -4,7 +4,22 @@
   "scripts": {
     "dev": "supabase start",
     "login": "supabase login",
-    "db:reset": ""
+    "db:reset": "",
+    "supabase:start": "bunx supabase start",
+    "supabase:stop": "bunx supabase stop",
+    "supabase:status": "bunx supabase status",
+    "supabase:restart": "npm run supabase:stop && npm run supabase:start",
+    "supabase:reset": "bunx supabase db reset",
+    "supabase:link": "bunx supabase link",
+    "supabase:push": "bunx supabase db push",
+    "supabase:pull": "bunx supabase db pull",
+    "supabase:new-migration": "bunx supabase migration new remote_schema",
+    "supabase:functions": "bunx supabase functions new",
+    "supabase:generate-seed": "bunx supabase db dump --data-only -f supabase/migrations/seed.sql",
+    "seed": "bunx supabase db reset && psql -h localhost -p 54322 -U postgres -d postgres -f supabase/migrations/seed.sql",
+    "supabase:dump-local": "bunx supabase db dump --data-only --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/migrations/seeds.sql",
+    "start": "npm run supabase:start && npm run seed",
+    "seed:local": "psql -h localhost -p 54322 -U postgres -d postgres -f supabase/migrations/seed.sql"
   },
   "dependencies": {
     "supabase": "^1.192.5"
