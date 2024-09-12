@@ -19,7 +19,7 @@ export default async function Page() {
       next: {
         revalidate: 3600,
       },
-    }
+    },
   )
     .then(async (res) => res.json())
     .then(({ data }) => data)

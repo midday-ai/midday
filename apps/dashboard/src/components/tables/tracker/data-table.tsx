@@ -49,7 +49,7 @@ export function DataTable({
 
   const [params, setParams] = useQueryStates({
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
     projectId: parseAsString,
     create: parseAsString,
@@ -57,7 +57,7 @@ export function DataTable({
   });
 
   const selectedProject = data.find(
-    (project) => project.id === params?.projectId
+    (project) => project.id === params?.projectId,
   );
 
   const loadMoreData = async () => {

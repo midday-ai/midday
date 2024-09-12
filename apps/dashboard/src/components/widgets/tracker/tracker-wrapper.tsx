@@ -21,7 +21,7 @@ export function TrackerWrapper({
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 

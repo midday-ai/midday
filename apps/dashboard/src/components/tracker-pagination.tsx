@@ -15,7 +15,7 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
     onChange(
       formatISO(startOfMonth(subMonths(startDate, numberOfMonths)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -23,7 +23,7 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
     onChange(
       formatISO(startOfMonth(addMonths(startDate, numberOfMonths)), {
         representation: "date",
-      })
+      }),
     );
   };
 

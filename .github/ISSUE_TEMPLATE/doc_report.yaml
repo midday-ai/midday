@@ -1,0 +1,24 @@
+name: "📚 Documentation request"
+description: Need to report a documentation issue? Please fill out the information below
+title: "[docs]"
+labels: ["Documentation", "Needs Approval"]
+body:
+  - type: dropdown
+    id: type-of-doc-issue
+    attributes:
+      label: Type of documentation issue
+      multiple: true
+      options:
+        - "Broken Link"
+        - "Incorrect Information"
+        - "Typo"
+        - "Missing Information"
+        - "Other"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the problem and the proposed solution
+      description: Please describe the change & need of change in as much detail possible.
+    validations:
+      required: false

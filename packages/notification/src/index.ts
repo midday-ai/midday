@@ -81,7 +81,7 @@ export async function triggerBulk(events: TriggerPayload[]) {
             },
           },
         },
-      }))
+      })),
     );
   } catch (error) {
     console.log(error);
@@ -104,7 +104,7 @@ export async function getSubscriberPreferences({
       headers: {
         Authorization: `ApiKey ${process.env.NOVU_API_KEY!}`,
       },
-    }
+    },
   );
 
   return response.json();
@@ -139,7 +139,7 @@ export async function updateSubscriberPreference({
           enabled,
         },
       }),
-    }
+    },
   );
 
   return response.json();

@@ -13,10 +13,10 @@ export function TrackerHeader({ date: initialDate, totalDuration }) {
       projectId: parseAsString,
       update: parseAsString,
       day: parseAsString.withDefault(
-        formatISO(new Date(), { representation: "date" })
+        formatISO(new Date(), { representation: "date" }),
       ),
     },
-    { shallow: false }
+    { shallow: false },
   );
 
   return (

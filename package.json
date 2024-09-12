@@ -1,9 +1,15 @@
 {
   "name": "midday",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "packages/email/*"
+  ],
   "lint-staged": {
-    "*": ["biome check --write"]
+    "*": [
+      "prettier --list-different"
+    ]
   },
   "config": {
     "commitizen": {
@@ -36,7 +42,8 @@
     "compile-tw-config": "tsc --noEmitOnError tooling/tailwind-config/index.ts --outDir  ./",
     "tailwind-config-viewer": " tailwind-config-viewer -c ./index.js -o -p 3333",
     "precommit": "bun run test && bun run build && bun run format",
-    "bump-versions": "bun changeset version && bun install"
+    "bump-versions": "bun changeset version && bun install",
+    "format:write": "prettier \"**/*\" --ignore-unknown --list-different --write"
   },
   "dependencies": {
     "@biomejs/biome": "1.8.3",

@@ -52,7 +52,10 @@ export async function setAssistantSettings({
 export async function clearChats({
   teamId,
   userId,
-}: { teamId: string; userId: string }) {
+}: {
+  teamId: string;
+  userId: string;
+}) {
   const chats: string[] = await RedisClient.zrange(
     `chat:${teamId}:user:${userId}`,
     0,

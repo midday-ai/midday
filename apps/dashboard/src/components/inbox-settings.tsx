@@ -90,7 +90,7 @@ export function InboxSettings({
                           field.onChange(
                             evt.target.value.length > 0
                               ? evt.target.value
-                              : null
+                              : null,
                           )
                         }
                         className="w-full"

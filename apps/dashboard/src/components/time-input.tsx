@@ -22,7 +22,7 @@ type Props = {
 
 export function TimeInput({ defaultValue, onChange, className }: Props) {
   const [value, setValue] = useState(
-    (defaultValue && toHHMMSS(defaultValue)) ?? "0:00:00"
+    (defaultValue && toHHMMSS(defaultValue)) ?? "0:00:00",
   );
 
   const handleOnChange = (evt) => {

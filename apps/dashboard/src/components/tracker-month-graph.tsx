@@ -35,7 +35,7 @@ export function TrackerMonthGraph({
       start: startOfMonth(currentDate),
       end: endOfMonth(currentDate),
     },
-    { weekStartsOn }
+    { weekStartsOn },
   );
 
   const days = eachDayOfInterval({
@@ -92,7 +92,7 @@ export function TrackerMonthGraph({
       <div
         className={cn(
           "grid gap-9 grid-cols-7",
-          hideDaysIndicators && "gap-7 2xl:gap-9"
+          hideDaysIndicators && "gap-7 2xl:gap-9",
         )}
       >
         {rows}
@@ -101,7 +101,7 @@ export function TrackerMonthGraph({
       <div
         className={cn(
           "gap-9 grid-cols-7 text-[#878787] text-sm mt-8 text-center grid",
-          hideDaysIndicators && "hidden 2xl:grid"
+          hideDaysIndicators && "hidden 2xl:grid",
         )}
       >
         {daysRows}

@@ -27,7 +27,6 @@ Midday is an all-in-one tool designed to help freelancers, contractors, consulta
 **Seamless Export**: Facilitates easy export of financial data, packaged neatly in CSV files for accountants.<br/>
 **Assistant**: Provides tailored insights into financial situations, helping users understand spending patterns, cut costs, and find documents.<br/>
 
-
 ## Recognition
 
 <a href="https://news.ycombinator.com/item?id=40737901">

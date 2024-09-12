@@ -7,7 +7,11 @@ export function transform({
   transaction,
   inverted,
   timezone,
-}: { transaction: Transaction; inverted: boolean; timezone: string }) {
+}: {
+  transaction: Transaction;
+  inverted: boolean;
+  timezone: string;
+}) {
   return {
     internal_id: `${transaction.teamId}_${uuidv4()}`,
     team_id: transaction.teamId,

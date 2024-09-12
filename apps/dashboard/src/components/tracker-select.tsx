@@ -19,7 +19,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(startOfMonth(subMonths(currentDate, 1)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -27,7 +27,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(startOfMonth(addMonths(currentDate, 1)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -39,7 +39,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(subDays(currentDate, 1), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -51,7 +51,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(addDays(currentDate, 1), {
         representation: "date",
-      })
+      }),
     );
   };
 

@@ -50,7 +50,10 @@ export function formatDate(date: string, timezone = "America/New_York") {
 export function formatAmountValue({
   amount,
   inverted,
-}: { amount: string; inverted?: boolean }) {
+}: {
+  amount: string;
+  inverted?: boolean;
+}) {
   let value: number;
 
   if (amount.includes(",")) {

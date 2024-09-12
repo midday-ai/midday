@@ -1,0 +1,57 @@
+name: Install Repo
+description: Install the toolchain and dependencies
+
+inputs:
+  go:
+    description: Whether to install Go and dependencies
+  ts:
+    description: Whether to install Node.js and dependencies
+
+runs:
+  using: "composite"
+
+  steps:
+    - name: Setup Go
+      if: ${{ inputs.go == 'true' }}
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ./apps/agent/go.mod
+        cache-dependency-path: ./apps/agent/go.sum
+
+    - run: go mod download
+      if: ${{ inputs.go == 'true' }}
+      shell: bash
+      working-directory: ./apps/agent
+
+    - name: Install tparse
+      run: go install github.com/mfridman/tparse@latest
+      if: ${{ inputs.go == 'true' }}
+      shell: bash
+      working-directory: ./apps/agent
+
+    - name: Install Task
+      uses: arduino/setup-task@v2
+      if: ${{ inputs.go == 'true' }}
+
+    - name: Setup Node
+      if: ${{ inputs.ts == 'true' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+
+    - uses: oven-sh/setup-bun@v1
+      if: ${{ inputs.ts == 'true' }}
+      with:
+        bun-version: latest
+
+    - name: Enable corepack
+      if: ${{ inputs.ts == 'true' }}
+      shell: bash
+      run: corepack enable
+
+    - name: Install dependencies
+      if: ${{ inputs.ts == 'true' }}
+      shell: bash
+      run: |
+        bun install --recursive
+        npm i -g wrangler

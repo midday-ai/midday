@@ -43,9 +43,7 @@ export function DataTable({ teamId }: { teamId: string }) {
       <DataTableHeader />
 
       <TableBody className="border-r-0 border-l-0">
-        {data?.map((row) => (
-          <DataTableRow key={row.name} data={row} />
-        ))}
+        {data?.map((row) => <DataTableRow key={row.name} data={row} />)}
       </TableBody>
     </Table>
   );

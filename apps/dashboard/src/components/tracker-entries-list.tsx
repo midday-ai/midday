@@ -15,7 +15,7 @@ export function TrackerEntriesList({
   const currentDate = date ? new Date(date) : new Date();
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
-    0
+    0,
   );
 
   return (

@@ -1,0 +1,93 @@
+name: "🐛 Bug Report"
+description: Report a bug for Solomon AI.
+labels:
+  - "Needs Approval"
+  - "Bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Welcome 👋🏻
+
+        Thank you for taking the time to report an issue with Solomon AI. Please fill out the information below to help us resolve your issue faster. If you have a question or need general help, please join our [Discord community](https://Solomon AI.com/discord).
+  - type: checkboxes
+    attributes:
+      label: Preliminary Checks
+      description: Please make sure that you verify each checkbox and follow the instructions for them.
+      options:
+        - label: |
+            I have reviewed the documentation: https://Solomon AI.com/docs
+          required: true
+        - label: |
+            I have searched for existing issues: https://github.com/Solomon AIed/Solomon AI/issues
+          required: true
+        - label: |
+            This issue is not a question, general help request, or anything other than a bug report directly related to Solomon AI. Please ask questions in our Discord community: https://Solomon AI.com/discord.
+          required: true
+  - type: input
+    id: reproduction-link
+    attributes:
+      label: Reproduction / Replay Link (Optional)
+      placeholder: "https://github.com/username/repository-name/"
+      description: |
+        Link to a minimal reproduction (GitHub repository, CodeSandbox, StackBlitz, etc.) or a [Replay recording](https://www.replay.io/).
+
+        **Do not link to your actual project**, but provide a minimal reproduction in a fresh project.
+
+        Instructions:
+        - [How to record a Replay](https://docs.replay.io/bug-reports/recording-a-replay)
+    validations:
+      required: false
+  - type: textarea
+    id: issue-summary
+    attributes:
+      label: Issue Summary
+      description: A summary of the issue. This needs to be a clear detailed-rich summary.
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      value: |
+        1. (for example) Went to ...
+        2. Clicked on...
+        3. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: other-information
+    attributes:
+      label: Other information
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain your problem.
+    validations:
+      required: false
+  - type: textarea
+    id: versions
+    attributes:
+      label: Version info
+      description: |
+        examples:
+        - **OS**: [e.g. iOS]
+        - **Browser**: [e.g. chrome, safari]
+        - **Version**: [e.g. 22]
+      value: |
+        - OS:
+        - Node:
+        - npm:
+      render: markdown
+    validations:
+      required: true
