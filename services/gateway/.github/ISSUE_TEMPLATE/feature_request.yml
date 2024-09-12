@@ -1,0 +1,25 @@
+name: Feature Request 
+description: Suggest a new provider to integrate, new features, or something more
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: feature
+    attributes:
+      label: What Would You Like to See with the Gateway?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context for your Request
+      description: Why you want this feature and how it beneits you.
+    validations:
+      required: false
+  - type: input
+    id: contact
+    attributes:
+      label: Your Twitter/LinkedIn
+      description: If we work on this request, we'd like to thank you publicly for suggesting it.
+    validations:
+      required: false

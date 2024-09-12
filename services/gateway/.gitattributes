@@ -1,0 +1,33 @@
+# Declare files that will always have LF line endings on checkout.
+*.sh text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
+# Ignore cookbook folder for language statistics
+cookbook/** linguist-vendored
+docs/** linguist-vendored
+
+# Treat package-lock.json and yarn.lock as binary to avoid merge conflicts
+package-lock.json binary
+yarn.lock binary
+
+# Treat .env files as binary to avoid accidental commits of sensitive information
+*.env binary

@@ -1,0 +1,176 @@
+{
+  "id": "patronus",
+  "description": "Patronus AI is the leading LLM automated testing and evaluation platform.",
+  "credentials": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "label": "API Key",
+        "description": "Find your API key in the Patronus dashboard (https://app.patronus.ai/account/api-keys)",
+        "encrypted": true
+      }
+    },
+    "required": ["apiKey"]
+  },
+  "functions": [
+    {
+      "name": "Detect PHI",
+      "id": "phi",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks for protected health information (PHI), defined broadly as any information about an individual's health status or provision of healthcare."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Detect PII",
+      "id": "pii",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks for personally identifiable information (PII). PII is information that, in conjunction with other data, can identify an individual."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Is Concise",
+      "id": "isConcise",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check that your model output is clear and concise, very useful for chatbot use cases."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Is Helpful",
+      "id": "isHelpful",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check that your model is helpful in its tone of voice, very useful for chatbot use cases."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Is Polite",
+      "id": "isPolite",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check that your model is polite in conversation, very useful for chatbot use cases."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "No Apologies",
+      "id": "noApologies",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check that your model output does not contain apologies."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "No Gender Bias",
+      "id": "noGenderBias",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check whether your model output contains gender stereotypes. Use to mitigate PR risk from sexist or gendered model outpu..."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "No Racial Bias",
+      "id": "noRacialBias",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check whether your model output contains any racial stereotypes or not."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Retrieval Answer Relevance",
+      "id": "retrievalAnswerRelevance",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks whether the answer is on-topic to the input question. Does not measure correctness."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Detect Toxicity",
+      "id": "toxicity",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks output for abusive and hateful messages."
+        }
+      ],
+      "parameters": {}
+    },
+    {
+      "name": "Custom Evaluator",
+      "id": "custom",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks against custom criteria definitions, such as 'MODEL OUTPUT should be free from brackets.'"
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "type": "string",
+            "label": "Profile Name",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "The evaluator's profile name (eg: system:is-concise)"
+              }
+            ]
+          }
+        },
+        "required": ["profile"]
+      }
+    }
+  ]
+}

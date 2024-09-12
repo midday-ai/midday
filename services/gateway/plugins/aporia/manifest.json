@@ -1,0 +1,46 @@
+{
+  "id": "aporia",
+  "description": "Aporia Guardrails mitigates LLM hallucinations, inappropriate responses, prompt injection attacks, and other unintended behaviors in real-time",
+  "credentials": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "label": "API Key",
+        "description": "Find your API key in the Aporia dashboard",
+        "encrypted": true
+      }
+    },
+    "required": ["apiKey"]
+  },
+  "functions": [
+    {
+      "name": "Validate - Project",
+      "id": "validateProject",
+      "supportedHooks": ["beforeRequestHook", "afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check all the policies within an Aporia project"
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "projectID": {
+            "type": "string",
+            "label": "Project ID",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the Aporia Project ID to validate"
+              }
+            ]
+          }
+        },
+        "required": ["projectID"]
+      }
+    }
+  ]
+}
