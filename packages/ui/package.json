@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "type": "module",
   "files": [
     "tailwind.config.ts",
     "postcss.config.js",
@@ -28,6 +27,13 @@
     "typescript": "^5.6.2"
   },
   "exports": {
+    "./assets": "./src/assets",
+    "./assistant-ui/model-picker": "./src/components/assistant/model-picker.tsx",
+    "./assistant-ui/assistant-sidebar": "./src/components/assistant/assistant-sidebar.tsx",
+    "./assistant-ui/assistant-standalone": "./src/components/assistant/assistant-standalone.tsx",
+    "./assistant-ui/assistant-thread": "./src/components/assistant/assistant-thread.tsx",
+    "./assistant-ui/assistant-modal-wrapper": "./src/components/assistant/assistant-modal-wrapper.tsx",
+    "./assistant-ui/assistant-chatgpt": "./src/components/assistant/assistant-chatgpt.tsx",
     "./assistant-modal": "./src/components/assistant-modal.tsx",
     "./assistant-sidebar": "./src/components/assistant-sidebar.tsx",
     "./markdown-text": "./src/components/assistant-ui/markdown-text.tsx",
@@ -103,6 +109,7 @@
   },
   "dependencies": {
     "@assistant-ui/react": "^0.5.51",
+    "@assistant-ui/react-ai-sdk": "^0.6.4",
     "@assistant-ui/react-markdown": "^0.2.12",
     "@mui/icons-material": "^6.0.2",
     "@radix-ui/react-accordion": "^1.2.0",
