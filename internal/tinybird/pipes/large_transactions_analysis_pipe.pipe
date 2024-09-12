@@ -1,0 +1,35 @@
+NODE expense_distribution_by_payment_channel
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        PaymentChannel,
+        sumState(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Month, PaymentChannel, UserId
+
+TYPE materialized
+DATASOURCE expense_distribution_by_payment_channel_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, PaymentChannel, UserId"
+
+DESCRIPTION >
+    This materialized view analyzes large transactions, focusing on expenses distributed by payment channel.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - PaymentChannel (String): The channel used for the payment
+    - TotalExpense (AggregateFunction(sum, Float64)): The total expense amount for the month and payment channel
+    - UserId (String): Unique identifier for the user
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        PaymentChannel,
+        sumMerge(TotalExpense) as TotalExpense,
+        UserId
+    FROM expense_distribution_by_payment_channel_mv
+    GROUP BY Month, PaymentChannel, UserId
+    ORDER BY Month, TotalExpense DESC

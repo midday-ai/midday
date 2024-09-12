@@ -1,0 +1,19 @@
+NODE income_trend_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        sum(Amount) as TotalIncome,
+        avg(Amount) as AvgIncome,
+        max(Amount) as MaxIncome,
+        min(Amount) as MinIncome,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_trend_analysis_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

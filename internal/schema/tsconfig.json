@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@midday/tsconfig/base.json",
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "outDir": "dist"
+  }
+}

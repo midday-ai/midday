@@ -1,0 +1,51 @@
+NODE multi_currency_balance_summary
+SQL >
+    WITH multi_currency_users AS (
+        SELECT Month, UserId
+        FROM (
+            SELECT toYYYYMM(Time) as Month, UserId, count(DISTINCT IsoCurrencyCode) as CurrencyCount
+            FROM account_balance_history_internal
+            GROUP BY Month, UserId
+        )
+        WHERE CurrencyCount > 1
+    )
+    SELECT
+        toYYYYMM(abh.Time) as Month,
+        abh.UserId,
+        abh.ProfileType,
+        abh.AccountId,
+        abh.IsoCurrencyCode,
+        sumState(abh.Balance) as SumBalance,
+        countState() as CountBalance
+    FROM account_balance_history_internal abh
+    INNER JOIN multi_currency_users mcu ON toYYYYMM(abh.Time) = mcu.Month AND abh.UserId = mcu.UserId
+    GROUP BY Month, abh.UserId, abh.ProfileType, abh.AccountId, abh.IsoCurrencyCode
+
+TYPE materialized
+DATASOURCE multi_currency_balance_summary_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId, ProfileType, AccountId, IsoCurrencyCode"
+
+DESCRIPTION >
+    This materialized view summarizes balance information for users with multiple currencies.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - SumBalance (AggregateFunction(sum, Float64)): Sum of balances for each account/currency
+    - CountBalance (AggregateFunction(count, UInt64)): Count of balance records for each account/currency
+    Usage:
+    To get the final results, including average balances, use the following query:
+    SELECT
+        Month,
+        UserId,
+        ProfileType,
+        groupArray(AccountId) as AccountIds,
+        groupArray(IsoCurrencyCode) as Currencies,
+        groupArray(sumMerge(SumBalance) / countMerge(CountBalance)) as AvgBalances
+    FROM multi_currency_balance_summary_mv
+    GROUP BY Month, UserId, ProfileType

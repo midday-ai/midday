@@ -1,0 +1,27 @@
+{
+  "name": "@internal/email",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "dev": "email dev -p 3003",
+    "build": "email build",
+    "start": "email start"
+  },
+  "dependencies": {
+    "@midday/ui": "workspace:*",
+    "@react-email/components": "0.0.22",
+    "@react-email/render": "^0.0.17",
+    "@react-email/tailwind": "0.0.19",
+    "date-fns": "^3.6.0",
+    "react-email": "2.1.4",
+    "responsive-react-email": "^0.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}

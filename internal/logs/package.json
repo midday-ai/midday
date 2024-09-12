@@ -1,0 +1,23 @@
+{
+  "name": "@internal/logs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "keywords": [],
+  "author": "Yoan Yomba",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "@tooling/typescript-config": "workspace:*",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@internal/metrics": "workspace:^",
+    "zod": "^3.23.5",
+    "vitest": "^1.6.0"
+  },
+  "scripts": {
+    "test": "vitest run -c ./vitest.config.ts"
+  }
+}

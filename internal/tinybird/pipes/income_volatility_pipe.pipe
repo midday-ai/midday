@@ -1,0 +1,41 @@
+NODE income_volatility
+SQL >
+    WITH daily_income AS (
+        SELECT
+            toDate(Time) as Date,
+            sum(Amount) as DailyIncome,
+            UserId
+        FROM transaction_internal
+        WHERE Amount > 0
+        GROUP BY Date, UserId
+    )
+    SELECT
+        toYYYYMM(Date) as Month,
+        stddevPopState(DailyIncome) as VolatilityNumerator,
+        avgState(DailyIncome) as VolatilityDenominator,
+        UserId
+    FROM daily_income
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_volatility_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"
+
+DESCRIPTION >
+    This materialized view calculates income volatility on a monthly basis for each user.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - VolatilityNumerator (AggregateFunction(stddevPop, Float64)): Standard deviation of daily income
+    - VolatilityDenominator (AggregateFunction(avg, Float64)): Average daily income
+    - UserId (String): Unique identifier for the user
+    Usage:
+    To get the final results, including the volatility calculation, use the following query:
+    SELECT
+        Month,
+        stddevPopMerge(VolatilityNumerator) / avgMerge(VolatilityDenominator) as Volatility,
+        UserId
+    FROM income_volatility_mv
+    GROUP BY Month, UserId

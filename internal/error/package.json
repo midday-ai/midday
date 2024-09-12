@@ -1,0 +1,30 @@
+{
+  "name": "@internal/error",
+  "version": "0.2.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.mjs",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "./dist/**"
+  ],
+  "description": "",
+  "keywords": [],
+  "scripts": {
+    "build": "tsup"
+  },
+  "author": "Andreas Thomas",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "tsup": "^8.0.2",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "zod": "^3.23.5"
+  }
+}

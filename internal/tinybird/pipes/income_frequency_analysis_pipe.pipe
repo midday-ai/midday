@@ -1,0 +1,30 @@
+NODE income_frequency_analysis
+SQL >
+    WITH transactions AS (
+        SELECT
+            toYYYYMM(Time) as Month,
+            MerchantName as Source,
+            Time,
+            UserId,
+            row_number() OVER (PARTITION BY UserId, MerchantName ORDER BY Time) as rn
+        FROM transaction_internal
+        WHERE Amount > 0
+    )
+    SELECT
+        t1.Month,
+        t1.Source,
+        avg(dateDiff('day', t1.Time, t2.Time)) as AvgDaysBetweenTransactions,
+        t1.UserId
+    FROM transactions t1
+    LEFT JOIN transactions t2
+    ON t1.UserId = t2.UserId
+    AND t1.Source = t2.Source
+    AND t1.rn + 1 = t2.rn
+    GROUP BY t1.Month, t1.Source, t1.UserId
+
+TYPE materialized
+DATASOURCE income_frequency_analysis_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, Source, UserId"

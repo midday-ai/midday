@@ -1,0 +1,29 @@
+NODE income_growth_rate
+SQL >
+    WITH monthly_income AS (
+        SELECT
+            toYYYYMM(Time) as Month,
+            sum(Amount) as TotalIncome,
+            UserId
+        FROM transaction_internal
+        WHERE Amount > 0
+        GROUP BY Month, UserId
+    )
+    SELECT
+        Month,
+        (TotalIncome - prev_income) / prev_income as GrowthRate,
+        UserId
+    FROM (
+        SELECT
+            *,
+            lagInFrame(TotalIncome) OVER (PARTITION BY UserId ORDER BY Month) as prev_income
+        FROM monthly_income
+    )
+    WHERE prev_income IS NOT NULL AND prev_income != 0
+
+TYPE materialized
+DATASOURCE income_growth_rate_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

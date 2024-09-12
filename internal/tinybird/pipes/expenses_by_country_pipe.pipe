@@ -1,0 +1,41 @@
+NODE expenses_by_country
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        LocationCountry as Country,
+        sum(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0 AND LocationCountry != ''
+    GROUP BY Month, Country, UserId
+
+TYPE materialized
+DATASOURCE expenses_by_country_mv
+ENGINE SummingMergeTree
+ENGINE_SORTING_KEY Month, Country, UserId
+
+DESCRIPTION >
+    This materialized view aggregates expenses by country on a monthly basis for each user.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - Country (String): The country where the expense occurred
+    - TotalExpense (Float64): The total amount of expenses for the month in the country
+    - TransactionCount (UInt32): The number of transactions in the country for the month
+    - UserId (String): Unique identifier for the user
+    Calculation Logic:
+    - Filters transactions where Amount is negative (expenses) and LocationCountry is not empty
+    - Converts negative amounts to positive for summing
+    - Aggregates the total expenses and transaction count for each month, country, and user
+    Usage:
+    This materialized view can be used for various analytical purposes, such as:
+    - Analyzing international spending patterns
+    - Identifying countries with the highest expenses for each user
+    - Comparing transaction frequency and total expenses across different countries
+    - Tracking changes in international spending habits over time
+    - Detecting potential fraud or unusual activity based on unexpected country expenses
+    Performance Considerations:
+    - The view uses a SummingMergeTree engine, which is optimized for summing up data over time
+    - The sorting key (Month, Country, UserId) allows for quick filtering and sorting on these columns
+    - Partitioning by month allows for efficient querying of specific time periods
+    - Consider adding appropriate indices for frequently filtered columns to improve query performance

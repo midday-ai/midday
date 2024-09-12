@@ -1,0 +1,52 @@
+NODE balance_trend_analysis 
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        minSimpleState(Balance) as MinBalance,
+        maxSimpleState(Balance) as MaxBalance,
+        sumState(Balance) as SumBalance,
+        countState() as CountBalance,
+        argMinState(Balance, Time) as StartBalance,
+        argMaxState(Balance, Time) as EndBalance,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE balance_trend_analysis_mv
+ENGINE AggregatingMergeTree
+ENGINE_SORTING_KEY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+ENGINE_PARTITION_KEY Month
+
+DESCRIPTION >
+    This materialized view analyzes the trend of account balances over time, providing monthly statistics for each account.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - MinBalance (AggregateFunction(min, Float64)): The minimum balance during the month
+    - MaxBalance (AggregateFunction(max, Float64)): The maximum balance during the month
+    - SumBalance (AggregateFunction(sum, Float64)): The sum of balances during the month
+    - CountBalance (AggregateFunction(count, UInt64)): The count of balance records during the month
+    - StartBalance (AggregateFunction(argMin, Float64, DateTime)): The balance at the start of the month
+    - EndBalance (AggregateFunction(argMax, Float64, DateTime)): The balance at the end of the month
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, including the average balance, use the following query:
+    SELECT
+        Month,
+        AccountId,
+        IsoCurrencyCode,
+        minSimpleMerge(MinBalance) as MinBalance,
+        maxSimpleMerge(MaxBalance) as MaxBalance,
+        sumMerge(SumBalance) / countMerge(CountBalance) as AvgBalance,
+        argMinMerge(StartBalance) as StartBalance,
+        argMaxMerge(EndBalance) as EndBalance,
+        UserId,
+        ProfileType
+    FROM balance_trend_analysis_mv
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType

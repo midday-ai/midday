@@ -1,0 +1,18 @@
+NODE expenses_by_region
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        LocationRegion as Region,
+        sum(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0 AND LocationRegion != ''
+    GROUP BY Month, Region, UserId
+
+TYPE materialized
+DATASOURCE expenses_by_region_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, Region, UserId"

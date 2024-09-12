@@ -1,0 +1,14 @@
+DATASOURCE AccountBalanceHistoryInternal
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(Time)"
+ENGINE_SORTING_KEY "Time, Id"
+
+SCHEMA >
+    `Time` DateTime,
+    `AccountId` LowCardinality(String),
+    `IsoCurrencyCode` LowCardinality(String),
+    `Balance` Float64,
+    `UserId` String,
+    `Sign` Int8,
+    `Id` String,
+    `ProfileType` String

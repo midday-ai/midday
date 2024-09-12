@@ -1,0 +1,15 @@
+NODE income_forecast
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        avg(Amount) OVER (PARTITION BY UserId ORDER BY toYYYYMM(Time) ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) as ForecastedIncome,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+
+TYPE materialized
+DATASOURCE income_forecast_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

@@ -1,0 +1,18 @@
+NODE income_by_payment_channel
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        PaymentChannel,
+        sum(Amount) as TotalIncome,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, PaymentChannel, UserId
+
+TYPE materialized
+DATASOURCE income_by_payment_channel_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, PaymentChannel, UserId"

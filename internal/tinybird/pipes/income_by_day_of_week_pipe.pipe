@@ -1,0 +1,17 @@
+NODE income_by_day_of_week
+SQL >
+    SELECT
+        toDayOfWeek(Time) as DayOfWeek,
+        sum(Amount) as TotalIncome,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY DayOfWeek, UserId
+
+TYPE materialized
+DATASOURCE income_by_day_of_week_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "UserId"
+ENGINE_SORTING_KEY "DayOfWeek, UserId"

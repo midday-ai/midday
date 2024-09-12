@@ -1,0 +1,31 @@
+NODE income_diversity_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        uniqState(MerchantName) as DistinctSources,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_diversity_analysis_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"
+
+DESCRIPTION >
+    This materialized view analyzes income diversity by counting distinct income sources for each user on a monthly basis.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - DistinctSources (AggregateFunction(uniq, String)): The number of distinct income sources (merchants)
+    - UserId (String): Unique identifier for the user
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        uniqMerge(DistinctSources) as DistinctSources,
+        UserId
+    FROM income_diversity_analysis_mv
+    GROUP BY Month, UserId

@@ -1,0 +1,44 @@
+NODE balance_percentile_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        quantileState(0.25)(Balance) as Q1Balance,
+        quantileState(0.5)(Balance) as MedianBalance,
+        quantileState(0.75)(Balance) as Q3Balance,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE balance_percentile_analysis_mv
+ENGINE AggregatingMergeTree
+ENGINE_SORTING_KEY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+ENGINE_PARTITION_KEY Month
+
+DESCRIPTION >
+    This materialized view calculates quarterly percentiles (Q1, Median, Q3) of account balances.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - Q1Balance (AggregateFunction(quantile(0.25), Float64)): The 25th percentile (first quartile) of the account balance
+    - MedianBalance (AggregateFunction(quantile(0.5), Float64)): The 50th percentile (median) of the account balance
+    - Q3Balance (AggregateFunction(quantile(0.75), Float64)): The 75th percentile (third quartile) of the account balance
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        AccountId,
+        IsoCurrencyCode,
+        quantileMerge(0.25)(Q1Balance) as Q1Balance,
+        quantileMerge(0.5)(MedianBalance) as MedianBalance,
+        quantileMerge(0.75)(Q3Balance) as Q3Balance,
+        UserId,
+        ProfileType
+    FROM balance_percentile_analysis_mv
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType

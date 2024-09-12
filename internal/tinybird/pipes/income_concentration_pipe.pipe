@@ -1,0 +1,24 @@
+NODE income_concentration
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        max(SourceIncome) / sum(SourceIncome) as ConcentrationRatio,
+        UserId
+    FROM (
+        SELECT
+            Time,
+            MerchantName as Source,
+            sum(Amount) as SourceIncome,
+            UserId
+        FROM transaction_internal
+        WHERE Amount > 0
+        GROUP BY Time, Source, UserId
+    )
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_concentration_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

@@ -1,0 +1,24 @@
+NODE weekly_expense_volatility
+SQL >
+    WITH weekly_expenses AS (
+        SELECT
+            toMonday(Time) as WeekStart,
+            sum(if(Amount < 0, -Amount, 0)) as WeeklyExpense,
+            UserId
+        FROM transaction_internal
+        WHERE Amount < 0
+        GROUP BY WeekStart, UserId
+    )
+    SELECT
+        toYYYYMM(WeekStart) as Month,
+        stddevPop(WeeklyExpense) as ExpenseVolatility,
+        UserId
+    FROM weekly_expenses
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE weekly_expense_volatility_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

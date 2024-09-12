@@ -1,0 +1,42 @@
+NODE balance_consistency_score 
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        stddevPopState(Balance) as BalanceStdDev,
+        maxState(Balance) as MaxBalance,
+        minState(Balance) as MinBalance,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE balance_consistency_score_mv
+ENGINE AggregatingMergeTree
+ENGINE_SORTING_KEY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+ENGINE_PARTITION_KEY Month
+
+DESCRIPTION >
+    This materialized view stores the necessary statistics to calculate a consistency score for account balances on a monthly basis.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - BalanceStdDev (AggregateFunction(stddevPop, Float64)): Standard deviation of the balance
+    - MaxBalance (AggregateFunction(max, Float64)): Maximum balance during the month
+    - MinBalance (AggregateFunction(min, Float64)): Minimum balance during the month
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results with the consistency score, use the following query:
+    SELECT
+        Month,
+        AccountId,
+        IsoCurrencyCode,
+        1 - (stddevPopMerge(BalanceStdDev) / (maxMerge(MaxBalance) - minMerge(MinBalance))) as ConsistencyScore,
+        UserId,
+        ProfileType
+    FROM balance_consistency_score_mv
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType

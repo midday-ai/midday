@@ -1,0 +1,29 @@
+{
+  "name": "@internal/app-config",
+  "version": "1.0.0",
+  "private": true,
+  "sideEffects": false,
+  "files": [
+    "tailwind.config.ts",
+    "postcss.config.js",
+    "globals.css"
+  ],
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "biome check .",
+    "format": "biome --write .",
+    "typecheck": "tsc --noEmit",
+    "dev": "storybook dev -p 6006"
+  },
+  "dependencies": {
+    "typescript": "^5.4.5"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@microsoft/api-extractor": "^7.44.1",
+    "@midday/tsconfig": "workspace:*",
+    "@types/node": "^20.12.12"
+  }
+}

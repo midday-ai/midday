@@ -1,0 +1,27 @@
+NODE expense_by_city_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        LocationCity as City,
+        sum(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0 AND LocationCity != ''
+    GROUP BY Month, City, UserId
+
+TYPE materialized
+DATASOURCE expense_by_city_analysis_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_SORTING_KEY "Month, City, UserId"
+ENGINE_PARTITION_KEY "Month"
+
+DESCRIPTION >
+    This materialized view aggregates expenses by city on a monthly basis for each user.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - City (String): The city where the expense occurred
+    - TotalExpense (Float64): The total amount of expenses for the month in the city
+    - TransactionCount (UInt32): The number of transactions in the city for the month
+    - UserId (String): Unique identifier for the user
