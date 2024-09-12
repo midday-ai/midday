@@ -1,0 +1,8 @@
+import { initialize{{pascalCase name}}
+} from '@packages/notification' export default function Home() { const
+notificationResult = initialize{{pascalCase name}}({}) return (
+<main>
+  <h1>Welcome to {{pascalCase name}}</h1>
+  <p>{notificationResult.version}</p>
+</main>
+) }
