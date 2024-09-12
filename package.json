@@ -32,7 +32,11 @@
     "release": "turbo run build lint typecheck && changeset version && changeset publish",
     "reset:changelog": "bun run rm -rf */**/CHANGELOG.md",
     "bootstrap": "turbo run bootstrap",
-    "bump-package-version": "bunx changeset"
+    "bump-package-version": "bunx changeset",
+    "compile-tw-config": "tsc --noEmitOnError tooling/tailwind-config/index.ts --outDir  ./",
+    "tailwind-config-viewer": " tailwind-config-viewer -c ./index.js -o -p 3333",
+    "precommit": "bun run test && bun run build && bun run format",
+    "bump-versions": "bun changeset version && bun install"
   },
   "dependencies": {
     "@biomejs/biome": "1.8.3",
