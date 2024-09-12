@@ -13,19 +13,19 @@ import { Portkey } from 'portkey-ai';
 
 const portkey = new Portkey({
   apiKey: 'xxxxxxxtrk',
-  virtualKey: 'ma5xfxxxxx4x'
+  virtualKey: 'ma5xfxxxxx4x',
 });
 
 const messages = [
   {
     role: 'user',
-    content: `What are the 7 wonders of the world?`
-  }
+    content: `What are the 7 wonders of the world?`,
+  },
 ];
 
 const response = await portkey.chat.completions.create({
   messages,
-  model: 'gpt-4'
+  model: 'gpt-4',
 });
 
 console.log(response.choices[0].message.content);
@@ -89,19 +89,19 @@ import { Portkey } from 'portkey-ai';
 const portkey = new Portkey({
   apiKey: 'xxxxxxrk',
   virtualKey: 'xxxxx',
-  config: 'pc-xxxxx-edx21x' // Gateway Configs
+  config: 'pc-xxxxx-edx21x', // Gateway Configs
 });
 
 const messages = [
   {
     role: 'user',
-    content: `What are the 7 wonders of the world?`
-  }
+    content: `What are the 7 wonders of the world?`,
+  },
 ];
 
 const response = await portkey.chat.completions.create({
   messages,
-  model: 'gpt-4'
+  model: 'gpt-4',
 });
 
 console.log(response.choices[0].message.content);
@@ -124,9 +124,9 @@ const response = await axios({
     Authorization: `Bearer ${OPENAI_API_KEY}`,
     'x-portkey-api-key': PORTKEY_API_KEY,
     'x-portkey-provider': 'openai',
-    'x-portkey-config': CONFIG_ID
+    'x-portkey-config': CONFIG_ID,
   },
-  data: data
+  data: data,
 });
 
 console.log(response.data);
@@ -148,8 +148,8 @@ const CONFIG_ID = 'pc-reques-edf21c';
 const messages = [
   {
     role: 'user',
-    content: `What are the 7 wonders of the world?`
-  }
+    content: `What are the 7 wonders of the world?`,
+  },
 ];
 
 const openai = new OpenAI({
@@ -159,13 +159,13 @@ const openai = new OpenAI({
     provider: 'openai',
     apiKey: PORTKEY_API_KEY,
     virtualKey: 'open-ai-key-04ba3e', // OpenAI virtual key
-    config: CONFIG_ID
-  })
+    config: CONFIG_ID,
+  }),
 });
 
 const chatCompletion = await openai.chat.completions.create({
   messages,
-  model: 'gpt-4'
+  model: 'gpt-4',
 });
 
 console.log(chatCompletion.choices[0].message.content);
@@ -188,21 +188,21 @@ const portkey = new Portkey({
   config: JSON.stringify({
     retry: {
       attempts: 3,
-      on_status_codes: [429]
-    }
-  })
+      on_status_codes: [429],
+    },
+  }),
 });
 
 const messages = [
   {
     role: 'user',
-    content: `What are the 7 wonders of the world?`
-  }
+    content: `What are the 7 wonders of the world?`,
+  },
 ];
 
 const response = await portkey.chat.completions.create({
   messages,
-  model: 'gpt-4'
+  model: 'gpt-4',
 });
 
 console.log(response.choices[0].message.content);
@@ -216,8 +216,8 @@ import axios from 'axios';
 const CONFIG_ID = {
   retry: {
     attempts: 3,
-    on_status_codes: [429]
-  }
+    on_status_codes: [429],
+  },
 };
 
 const PORTKEY_API_KEY = 'xxxxxxxx';
@@ -228,9 +228,9 @@ const data = {
   messages: [
     {
       role: 'user',
-      content: 'What are 7 wonders of the world?'
-    }
-  ]
+      content: 'What are 7 wonders of the world?',
+    },
+  ],
 };
 
 const { data: response } = await axios({
@@ -241,9 +241,9 @@ const { data: response } = await axios({
     Authorization: `Bearer ${OPENAI_API_KEY}`,
     'x-portkey-api-key': PORTKEY_API_KEY,
     'x-portkey-provider': 'openai',
-    'x-portkey-config': JSON.stringify(CONFIG_ID)
+    'x-portkey-config': JSON.stringify(CONFIG_ID),
   },
-  data: data
+  data: data,
 });
 
 console.log(response.choices[0].message.content);
@@ -261,8 +261,8 @@ const CONFIG_ID = 'pc-reques-edf21c';
 const messages = [
   {
     role: 'user',
-    content: `What are the 7 wonders of the world?`
-  }
+    content: `What are the 7 wonders of the world?`,
+  },
 ];
 
 const openai = new OpenAI({
@@ -275,15 +275,15 @@ const openai = new OpenAI({
     config: {
       retry: {
         attempts: 3,
-        on_status_codes: [429]
-      }
-    }
-  })
+        on_status_codes: [429],
+      },
+    },
+  }),
 });
 
 const chatCompletion = await openai.chat.completions.create({
   messages,
-  model: 'gpt-4'
+  model: 'gpt-4',
 });
 
 console.log(chatCompletion.choices[0].message.content);
@@ -297,10 +297,10 @@ In the cases where you want to specifically add a config for a specific request 
 const response = await portkey.chat.completions.create(
   {
     messages,
-    model: 'gpt-4'
+    model: 'gpt-4',
   },
   {
-    config: 'config_id' // or expanded Config Object
+    config: 'config_id', // or expanded Config Object
   }
 );
 ```

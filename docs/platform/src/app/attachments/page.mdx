@@ -1,0 +1,363 @@
+export const metadata = {
+  title: 'Attachments',
+  description:
+    'On this page, we’ll dive into the different attachment endpoints you can use to manage attachments programmatically.',
+}
+
+# Attachments
+
+Attachments are how you share things in Solomon-AI — they allow you to send all sorts of files to your contacts and groups. On this page, we'll dive into the different attachment endpoints you can use to manage attachments programmatically. We'll look at how to query, upload, update, and delete attachments. {{ className: 'lead' }}
+
+## The attachment model
+
+The attachment model contains all the information about the files you send to your contacts and groups, including the name, type, and size.
+
+### Properties
+
+<Properties>
+  <Property name="id" type="string">
+    Unique identifier for the attachment.
+  </Property>
+  <Property name="message_id" type="string">
+    Unique identifier for the message associated with the attachment.
+  </Property>
+  <Property name="filename" type="string">
+    The filename for the attachment.
+  </Property>
+  <Property name="file_url" type="string">
+    The URL for the attached file.
+  </Property>
+  <Property name="file_type" type="string">
+    The MIME type of the attached file.
+  </Property>
+  <Property name="file_size" type="integer">
+    The file size of the attachment in bytes.
+  </Property>
+  <Property name="created_at" type="timestamp">
+    Timestamp of when the attachment was created.
+  </Property>
+</Properties>
+
+---
+
+## List all attachments {{ tag: 'GET', label: '/v1/attachments' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to retrieve a paginated list of all your attachments (in a conversation if a conversation id is provided). By default, a maximum of ten attachments are shown per page.
+
+    ### Optional attributes
+
+    <Properties>
+      <Property name="conversation_id" type="string">
+        Limit to attachments from a given conversation.
+      </Property>
+      <Property name="limit" type="integer">
+        Limit the number of attachments returned.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="GET" label="/v1/attachments">
+
+    ```bash {{ title: 'cURL' }}
+    curl -G https://api.Solomon-AI.chat/v1/attachments \
+      -H "Authorization: Bearer {token}" \
+      -d conversation_id="xgQQXg3hrtjh7AvZ" \
+      -d limit=10
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.attachments.list()
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.attachments.list()
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->attachments->list();
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "has_more": false,
+      "data": [
+        {
+          "id": "Nc6yKKMpcxiiFxp6",
+          "message_id": "LoPsJaMcPBuFNjg1",
+          "filename": "Invoice_room_service__Plaza_Hotel.pdf",
+          "file_url": "https://assets.Solomon-AI.chat/attachments/Invoice_room_service__Plaza_Hotel.pdf",
+          "file_type": "application/pdf",
+          "file_size": 21352,
+          "created_at": 692233200
+        },
+        {
+          "id": "hSIhXBhNe8X1d8Et"
+          // ...
+        }
+      ]
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Create an attachment {{ tag: 'POST', label: '/v1/attachments' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to upload a new attachment to a conversation. See the code examples for how to send the file to the Solomon-AI API.
+
+    ### Required attributes
+
+    <Properties>
+      <Property name="file" type="string">
+        The file you want to add as an attachment.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="POST" label="/v1/attachments">
+
+    ```bash {{ title: 'cURL' }}
+    curl https://api.Solomon-AI.chat/v1/attachments \
+      -H "Authorization: Bearer {token}" \
+      -F file="../Invoice_room_service__Plaza_Hotel.pdf"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.attachments.create({ file })
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.attachments.create(file=file)
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->attachments->create([
+      'file' => $file,
+    ]);
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "id": "Nc6yKKMpcxiiFxp6",
+      "message_id": "LoPsJaMcPBuFNjg1",
+      "filename": "Invoice_room_service__Plaza_Hotel.pdf",
+      "file_url": "https://assets.Solomon-AI.chat/attachments/Invoice_room_service__Plaza_Hotel.pdf",
+      "file_type": "application/pdf",
+      "file_size": 21352,
+      "created_at": 692233200
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Retrieve an attachment {{ tag: 'GET', label: '/v1/attachments/:id' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to retrieve an attachment by providing the attachment id. Refer to [the list](#the-attachment-model) at the top of this page to see which properties are included with attachment objects.
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="GET" label="/v1/attachments/Nc6yKKMpcxiiFxp6">
+
+    ```bash {{ title: 'cURL' }}
+    curl https://api.Solomon-AI.chat/v1/attachments/Nc6yKKMpcxiiFxp6 \
+      -H "Authorization: Bearer {token}"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.attachments.get('Nc6yKKMpcxiiFxp6')
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.attachments.get("Nc6yKKMpcxiiFxp6")
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->attachments->get('Nc6yKKMpcxiiFxp6');
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "id": "Nc6yKKMpcxiiFxp6",
+      "message_id": "LoPsJaMcPBuFNjg1",
+      "filename": "Invoice_room_service__Plaza_Hotel.pdf",
+      "file_url": "https://assets.Solomon-AI.chat/attachments/Invoice_room_service__Plaza_Hotel.pdf",
+      "file_type": "application/pdf",
+      "file_size": 21352,
+      "created_at": 692233200
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Update an attachment {{ tag: 'PUT', label: '/v1/attachments/:id' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to perform an update on an attachment. Currently, the only supported type of update is changing the filename.
+
+    ### Optional attributes
+
+    <Properties>
+      <Property name="filename" type="string">
+        The new filename for the attachment.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="PUT" label="/v1/attachments/Nc6yKKMpcxiiFxp6">
+
+    ```bash {{ title: 'cURL' }}
+    curl -X PUT https://api.Solomon-AI.chat/v1/attachments/Nc6yKKMpcxiiFxp6 \
+      -H "Authorization: Bearer {token}" \
+      -d filename="Invoice_room_service__Plaza_Hotel_updated.pdf"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.attachments.update('Nc6yKKMpcxiiFxp6', {
+      filename: 'Invoice_room_service__Plaza_Hotel_updated.pdf',
+    })
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.attachments.update("Nc6yKKMpcxiiFxp6", filename="Invoice_room_service__Plaza_Hotel_updated.pdf")
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->attachments->update('Nc6yKKMpcxiiFxp6', [
+      'filename' => 'Invoice_room_service__Plaza_Hotel_updated.pdf',
+    ]);
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "id": "Nc6yKKMpcxiiFxp6",
+      "message_id": "LoPsJaMcPBuFNjg1",
+      "filename": "Invoice_room_service__Plaza_Hotel.pdf",
+      "file_url": "https://assets.Solomon-AI.chat/attachments/Invoice_room_service__Plaza_Hotel_updated.pdf",
+      "file_type": "application/pdf",
+      "file_size": 21352,
+      "created_at": 692233200
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Delete an attachment {{ tag: 'DELETE', label: '/v1/attachments/:id' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to delete attachments. Note: This will permanently delete the file.
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="DELETE" label="/v1/attachments/Nc6yKKMpcxiiFxp6">
+
+    ```bash {{ title: 'cURL' }}
+    curl -X DELETE https://api.Solomon-AI.chat/v1/attachments/Nc6yKKMpcxiiFxp6 \
+      -H "Authorization: Bearer {token}"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.attachments.delete('Nc6yKKMpcxiiFxp6')
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.attachments.delete("Nc6yKKMpcxiiFxp6")
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->attachments->delete('Nc6yKKMpcxiiFxp6');
+    ```
+
+    </CodeGroup>
+
+  </Col>
+</Row>

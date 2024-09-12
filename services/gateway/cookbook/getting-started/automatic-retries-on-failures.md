@@ -26,7 +26,7 @@ Import `Portkey` and instantiate it using the Portkey API Key
 ```js
 const portkey = new Portkey({
   apiKey: 'xxxxrk',
-  virtualKey: 'maixxx4d'
+  virtualKey: 'maixxx4d',
 });
 ```
 
@@ -64,17 +64,17 @@ let response = await portkey.chat.completions.create(
     messages: [
       {
         role: 'user',
-        content: 'What are 7 wonders of the world?'
-      }
-    ]
+        content: 'What are 7 wonders of the world?',
+      },
+    ],
   },
   {
     config: JSON.stringify({
       retry: {
         attempts: 3,
-        on_status_codes: [429]
-      }
-    })
+        on_status_codes: [429],
+      },
+    }),
   }
 );
 
@@ -104,7 +104,7 @@ import { Portkey } from 'portkey-ai';
 
 const portkey = new Portkey({
   apiKey: xxxx,
-  virtualKey: 'xaixxxxxxx2xx4d'
+  virtualKey: 'xaixxxxxxx2xx4d',
 });
 
 let response = await portkey.chat.completions.create(
@@ -113,16 +113,16 @@ let response = await portkey.chat.completions.create(
     messages: [
       {
         role: 'user',
-        content: 'What are 7 wonders of the world?'
-      }
-    ]
+        content: 'What are 7 wonders of the world?',
+      },
+    ],
   },
   {
     config: JSON.stringify({
       retry: {
-        attempts: 3
-      }
-    })
+        attempts: 3,
+      },
+    }),
   }
 );
 

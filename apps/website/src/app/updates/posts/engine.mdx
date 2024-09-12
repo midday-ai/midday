@@ -40,21 +40,20 @@ We provide an API that gives our services transformed transactions, accounts, an
 We use a lot of services in Cloudflare. Workers is the compute where our API is hosted, using Hono as our framework.
 
 <br />
-The API uses OpenAPI v3.0 and exposes endpoints for transactions, accounts,
-search, and balances.
+The API uses OpenAPI v3.0 and exposes endpoints for transactions, accounts, search,
+and balances.
 
 We use Cloudflare KV for session caching with GoCardless to avoid hitting any rate limits and for general caching purposes.
 
 <br />
-In the end, we have one interface for our customers to search for their
-institution. To support this, we retrieve all institutions from our providers,
-transform the information, and store it in Typesense. We use a simple Cron job
-in Cloudflare every 24 hours to ensure we have the most recent information.
+In the end, we have one interface for our customers to search for their institution.
+To support this, we retrieve all institutions from our providers, transform the information,
+and store it in Typesense. We use a simple Cron job in Cloudflare every 24 hours
+to ensure we have the most recent information.
 
 <br />
-To connect to Teller, you need to use mTLS to authenticate. Thanks to
-Cloudflare, we can just upload our certificate and configure our worker to use
-it when needed.
+To connect to Teller, you need to use mTLS to authenticate. Thanks to Cloudflare,
+we can just upload our certificate and configure our worker to use it when needed.
 
 <br />
 ### Hono
@@ -113,5 +112,4 @@ We are currently updating our engine. In the end, other companies will be able t
 If you are interested, feel free to sign up [here](https://midday.ai/engine) for more information.
 
 <br />
-Midday is fully open source. Feel free to check out our code
-[here](https://git.new/midday).
+Midday is fully open source. Feel free to check out our code [here](https://git.new/midday).

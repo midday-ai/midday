@@ -1,0 +1,41 @@
+export const metadata = {
+  title: 'Authentication',
+  description:
+    'In this guide, we’ll look at how authentication works. Solomon-AI offers two ways to authenticate your API requests: Basic authentication and OAuth2 with a token.',
+}
+
+# Authentication
+
+You'll need to authenticate your requests to access any of the endpoints in the Solomon-AI API. In this guide, we'll look at how authentication works. Solomon-AI offers two ways to authenticate your API requests: Basic authentication and OAuth2 with a token — OAuth2 is the recommended way. {{ className: 'lead' }}
+
+## Basic authentication
+
+With basic authentication, you use your username and password to authenticate your HTTP requests. Unless you have a very good reason, you probably shouldn't use basic auth. Here's how to authenticate using cURL:
+
+```bash {{ title: 'Example request with basic auth' }}
+curl https://api.Solomon-AI.chat/v1/conversations \
+  -u username:password
+```
+
+Please don't commit your Solomon-AI password to GitHub!
+
+## OAuth2 with bearer token
+
+The recommended way to authenticate with the Solomon-AI API is by using OAuth2. When establishing a connection using OAuth2, you will need your access token — you will find it in the [Solomon-AI dashboard](solomon-ai.io) under API settings. Here's how to add the token to the request header using cURL:
+
+```bash {{ title: 'Example request with bearer token' }}
+curl https://api.Solomon-AI.chat/v1/conversations \
+  -H "Authorization: Bearer {token}"
+```
+
+Always keep your token safe and reset it if you suspect it has been compromised.
+
+## Using an SDK
+
+If you use one of our official SDKs, you won't have to worry about any of the above — fetch your access token from the [Solomon-AI dashboard](solomon-ai.io) under API settings, and the client library will take care of the rest. All the client libraries use OAuth2 behind the scenes.
+
+<div className="not-prose">
+  <Button href="/sdks" variant="text" arrow="right">
+    <>Check out our list of first-party SDKs</>
+  </Button>
+</div>

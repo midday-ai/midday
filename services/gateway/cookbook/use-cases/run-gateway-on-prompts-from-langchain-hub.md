@@ -28,7 +28,7 @@ Since we expect to use Portkey to make API calls, let’s instantiate and authen
 ```js
 const portkey = new Portkey({
   apiKey: 'xxtrk',
-  virtualKey: 'main-xwxxxf4d'
+  virtualKey: 'main-xwxxxf4d',
 });
 ```
 
@@ -69,12 +69,12 @@ They should be in a similar format as your own instructions.`;
 const messages = [
   {
     role: 'system',
-    content: String(SYSTEM)
+    content: String(SYSTEM),
   },
   {
     role: 'user',
-    content: String(USER)
-  }
+    content: String(USER),
+  },
 ];
 ```
 
@@ -83,7 +83,7 @@ Pass `messages` to the chat completions call as an argument to the response.
 ```js
 const chatCompletion = await portkey.chat.completions.create({
   messages,
-  model: 'gpt-4'
+  model: 'gpt-4',
 });
 
 console.log(chatCompletion.choices[0].message.content);
@@ -114,7 +114,7 @@ import { Portkey } from 'portkey-ai';
 
 const portkey = new Portkey({
   apiKey: 'xxxxrk',
-  virtualKey: 'anthrxpic-xxxx32'
+  virtualKey: 'anthrxpic-xxxx32',
 });
 
 const response = await hub.pull('ohkgi/superb_system_instruction_prompt');
@@ -130,18 +130,18 @@ They should be in a similar format as your own instructions.
 const messages = [
   {
     role: 'system',
-    content: String(SYSTEM)
+    content: String(SYSTEM),
   },
   {
     role: 'user',
-    content: String(USER)
-  }
+    content: String(USER),
+  },
 ];
 
 const chatCompletion = await portkey.chat.completions.create({
   messages,
   model: 'claude-2.1',
-  max_tokens: 1000
+  max_tokens: 1000,
 });
 
 console.log(chatCompletion.choices[0].message.content);

@@ -1,7 +1,7 @@
-name: Feature Request 
+name: Feature Request
 description: Suggest a new provider to integrate, new features, or something more
-title: "[Feature] "
-labels: ["enhancement"]
+title: '[Feature] '
+labels: ['enhancement']
 body:
   - type: textarea
     id: feature

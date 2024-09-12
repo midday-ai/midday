@@ -16,7 +16,7 @@ Start by importing Portkey SDK into your NodeJS project using npm and authentica
 import { Portkey } from 'portkey-ai';
 
 const portkey = new Portkey({
-  apiKey: process.env.PORTKEYAI_API_KEY
+  apiKey: process.env.PORTKEYAI_API_KEY,
 });
 ```
 
@@ -128,17 +128,17 @@ const portkey = new Portkey({
   apiKey: PORTKEY_API_KEY,
   config: {
     strategy: {
-      mode: 'fallback'
+      mode: 'fallback',
     },
     targets: [
       {
-        prompt_id: 'task_to_subtasks_anthropic'
+        prompt_id: 'task_to_subtasks_anthropic',
       },
       {
-        prompt_id: 'task_to_subtasks_openai'
-      }
-    ]
-  }
+        prompt_id: 'task_to_subtasks_openai',
+      },
+    ],
+  },
 });
 ```
 
@@ -153,7 +153,7 @@ The prompt templates are prepared to be triggered while the Portkey client SDK w
 ```js
 const response = await portkey.prompts.completions.create({
   promptID: 'pp-test-811461',
-  variables: { goal: 'I want to acquire an AI engineering skills' }
+  variables: { goal: 'I want to acquire an AI engineering skills' },
 });
 
 console.log(response.choices[0].message.content); // success
@@ -188,19 +188,19 @@ const portkey = new Portkey({
   apiKey: PORTKEY_API_KEY,
   config: {
     strategy: {
-      mode: 'loadbalance'
+      mode: 'loadbalance',
     },
     targets: [
       {
         prompt_id: 'task_to_subtasks_anthropic',
-        weight: 0.1
+        weight: 0.1,
       },
       {
         prompt_id: 'task_to_subtasks_openai',
-        weight: 0.9
-      }
-    ]
-  }
+        weight: 0.9,
+      },
+    ],
+  },
 });
 ```
 
@@ -221,22 +221,22 @@ const portkey = new Portkey({
   apiKey: PORTKEY_API_KEY,
   config: {
     strategy: {
-      mode: 'fallback'
+      mode: 'fallback',
     },
     targets: [
       {
-        prompt_id: 'pp-task-to-su-72fbbb'
+        prompt_id: 'pp-task-to-su-72fbbb',
       },
       {
-        prompt_id: 'pp-task-to-su-051f65'
-      }
-    ]
-  }
+        prompt_id: 'pp-task-to-su-051f65',
+      },
+    ],
+  },
 });
 
 const response = await portkey.prompts.completions.create({
   promptID: 'pp-test-811461',
-  variables: { goal: 'I want to acquire an AI engineering skills' }
+  variables: { goal: 'I want to acquire an AI engineering skills' },
 });
 
 console.log(response.choices[0].message.content);

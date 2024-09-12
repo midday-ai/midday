@@ -1,0 +1,172 @@
+export const metadata = {
+  title: 'Webhooks',
+  description:
+    'In this guide, we will look at how to register and consume webhooks to integrate your app with Solomon-AI.',
+}
+
+# Webhooks
+
+In this guide, we will look at how to register and consume webhooks to integrate your app with Solomon-AI. With webhooks, your app can know when something happens in Solomon-AI, such as someone sending a message or adding a contact. {{ className: 'lead' }}
+
+## Registering webhooks
+
+To register a new webhook, you need to have a URL in your app that Solomon-AI can call. You can configure a new webhook from the Solomon-AI dashboard under [API settings](solomon-ai.io). Give your webhook a name, pick the [events](#event-types) you want to listen for, and add your URL.
+
+Now, whenever something of interest happens in your app, a webhook is fired off by Solomon-AI. In the next section, we'll look at how to consume webhooks.
+
+## Consuming webhooks
+
+When your app receives a webhook request from Solomon-AI, check the `type` attribute to see what event caused it. The first part of the event type will tell you the payload type, e.g., a conversation, message, etc.
+
+```json {{ title: 'Example webhook payload' }}
+{
+  "id": "a056V7R7NmNRjl70",
+  "type": "conversation.updated",
+  "payload": {
+    "id": "WAz8eIbvDR60rouK"
+    // ...
+  }
+}
+```
+
+In the example above, a conversation was `updated`, and the payload type is a `conversation`.
+
+<div className="not-prose">
+  <Button href="#event-types" variant="text" arrow="right">
+    <>See all event types</>
+  </Button>
+</div>
+
+---
+
+## Event types
+
+<Row>
+  <Col>
+
+    <Properties>
+      <Property name="contact.created">
+        A new contact was created.
+      </Property>
+      <Property name="contact.updated">
+        An existing contact was updated.
+      </Property>
+      <Property name="contact.deleted">
+        A contact was successfully deleted.
+      </Property>
+      <Property name="conversation.created">
+        A new conversation was created.
+      </Property>
+      <Property name="conversation.updated">
+        An existing conversation was updated.
+      </Property>
+      <Property name="conversation.deleted">
+        A conversation was successfully deleted.
+      </Property>
+      <Property name="message.created">
+        A new message was created.
+      </Property>
+      <Property name="message.updated">
+        An existing message was updated.
+      </Property>
+      <Property name="message.deleted">
+        A message was successfully deleted.
+      </Property>
+      <Property name="group.created">
+        A new group was created.
+      </Property>
+      <Property name="group.updated">
+        An existing group was updated.
+      </Property>
+      <Property name="group.deleted">
+        A group was successfully deleted.
+      </Property>
+      <Property name="attachment.created">
+        A new attachment was created.
+      </Property>
+      <Property name="attachment.updated">
+        An existing attachment was updated.
+      </Property>
+      <Property name="attachment.deleted">
+        An attachment was successfully deleted.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    ```json {{ 'title': 'Example payload' }}
+    {
+      "id": "a056V7R7NmNRjl70",
+      "type": "message.updated",
+      "payload": {
+        "id": "SIuAFUNKdSYHZF2w",
+        "conversation_id": "xgQQXg3hrtjh7AvZ",
+        "contact": {
+          "id": "WAz8eIbvDR60rouK",
+          "username": "KevinMcCallister",
+          "phone_number": "1-800-759-3000",
+          "avatar_url": "https://assets.Solomon-AI.chat/avatars/kevin.jpg",
+          "last_active_at": 705103200,
+          "created_at": 692233200
+        },
+        "message": "I’m traveling with my dad. He’s at a meeting. I hate meetings.",
+        "reactions": [],
+        "attachments": [],
+        "read_at": 705103200,
+        "created_at": 692233200,
+        "updated_at": 692233200
+      }
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Security
+
+To know for sure that a webhook was, in fact, sent by Solomon-AI instead of a malicious actor, you can verify the request signature. Each webhook request contains a header named `x-Solomon-AI-signature`, and you can verify this signature by using your secret webhook key. The signature is an HMAC hash of the request payload hashed using your secret key. Here is an example of how to verify the signature in your app:
+
+<CodeGroup title="Verifying a request">
+
+```js
+const signature = req.headers['x-Solomon-AI-signature']
+const hash = crypto.createHmac('sha256', secret).update(payload).digest('hex')
+
+if (hash === signature) {
+  // Request is verified
+} else {
+  // Request could not be verified
+}
+```
+
+```python
+from flask import request
+import hashlib
+import hmac
+
+signature = request.headers.get("x-Solomon-AI-signature")
+hash = hmac.new(bytes(secret, "ascii"), bytes(payload, "ascii"), hashlib.sha256)
+
+if hash.hexdigest() == signature:
+    # Request is verified
+else:
+    # Request could not be verified
+```
+
+```php
+$signature = $request['headers']['x-Solomon-AI-signature'];
+$hash = hash_hmac('sha256', $payload, $secret);
+
+if (hash_equals($hash, $signature)) {
+  // Request is verified
+} else {
+  // Request could not be verified
+}
+```
+
+</CodeGroup>
+
+If your generated signature matches the `x-Solomon-AI-signature` header, you can be sure that the request was truly coming from Solomon-AI. It's essential to keep your secret webhook key safe — otherwise, you can no longer be sure that a given webhook was sent by Solomon-AI. Don't commit your secret webhook key to GitHub!

@@ -1,0 +1,98 @@
+export const metadata = {
+  title: 'Quickstart',
+  description:
+    'This guide will get you all set up and ready to use the Solomon-AI API. We’ll cover how to get started an API client and how to make your first API request.',
+}
+
+# Quickstart
+
+This guide will get you all set up and ready to use the Solomon-AI API. We'll cover how to get started using one of our API clients and how to make your first API request. We'll also look at where to go next to find all the information you need to take full advantage of our powerful REST API. {{ className: 'lead' }}
+
+<Note>
+  Before you can make requests to the Solomon-AI API, you will need to grab your
+  API key from your dashboard. You find it under [Settings &raquo; API](#).
+</Note>
+
+## Choose your client
+
+Before making your first API request, you need to pick which API client you will use. In addition to good ol' cURL HTTP requests, Solomon-AI offers clients for JavaScript, Python, and PHP. In the following example, you can see how to install each client.
+
+<CodeGroup>
+
+```bash {{ title: 'cURL' }}
+# cURL is most likely already installed on your machine
+curl --version
+```
+
+```bash {{ language: 'js' }}
+# Install the Solomon-AI JavaScript SDK
+npm install @example/Solomon-AI-api --save
+```
+
+```bash {{ language: 'python' }}
+# Install the Solomon-AI Python SDK
+pip install Solomon-AI_api
+```
+
+```bash {{ language: 'php' }}
+# Install the Solomon-AI PHP SDK
+composer require Solomon-AI/sdk
+```
+
+</CodeGroup>
+
+<div className="not-prose">
+  <Button href="/sdks" variant="text" arrow="right">
+    <>Check out our list of first-party SDKs</>
+  </Button>
+</div>
+
+## Making your first API request
+
+After picking your preferred client, you are ready to make your first call to the Solomon-AI API. Below, you can see how to send a GET request to the Conversations endpoint to get a list of all your conversations. In the cURL example, results are limited to ten conversations, the default page length for each client.
+
+<CodeGroup tag="GET" label="/v1/conversations">
+
+```bash {{ title: 'cURL' }}
+curl -G https://api.Solomon-AI.chat/v1/conversations \
+  -H "Authorization: Bearer {token}" \
+  -d limit=10
+```
+
+```js
+import ApiClient from '@example/Solomon-AI-api'
+
+const client = new ApiClient(token)
+
+await client.conversations.list()
+```
+
+```python
+from Solomon-AI_api import ApiClient
+
+client = ApiClient(token)
+
+client.conversations.list()
+```
+
+```php
+$client = new \Solomon-AI\ApiClient($token);
+
+$client->conversations->list();
+```
+
+</CodeGroup>
+
+<div className="not-prose">
+  <Button href="/conversations" variant="text" arrow="right">
+    <>Read the docs for the Conversations endpoint</>
+  </Button>
+</div>
+
+## What's next?
+
+Great, you're now set up with an API client and have made your first request to the API. Here are a few links that might be handy as you venture further into the Solomon-AI API:
+
+- [Grab your API key from the Solomon-AI dashboard](solomon-ai.io)
+- [Check out the Conversations endpoint](/conversations)
+- [Learn about the different error messages in Solomon-AI](/errors)

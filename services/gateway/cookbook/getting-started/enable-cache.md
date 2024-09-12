@@ -36,7 +36,7 @@ Instantiate Portkey instance
 ```js
 const portkey = new Portkey({
   apiKey: 'xxxxrk',
-  virtualKey: 'maixxx4d'
+  virtualKey: 'maixxx4d',
 });
 ```
 
@@ -73,20 +73,23 @@ let simpleCacheResponse = await portkey.chat.completions.create(
     messages: [
       {
         role: 'user',
-        content: 'What are 7 wonders of the world?'
-      }
-    ]
+        content: 'What are 7 wonders of the world?',
+      },
+    ],
   },
   {
     config: JSON.stringify({
       cache: {
-        mode: 'simple'
-      }
-    })
+        mode: 'simple',
+      },
+    }),
   }
 );
 
-console.log('Simple Cached Response:\n', simpleCacheResponse.choices[0].message.content);
+console.log(
+  'Simple Cached Response:\n',
+  simpleCacheResponse.choices[0].message.content
+);
 ```
 
 Whereas for semantic caching,
@@ -98,20 +101,23 @@ let semanticCacheResponse = await portkey.chat.completions.create(
     messages: [
       {
         role: 'user',
-        content: 'List the 5 senses of Human beings?'
-      }
-    ]
+        content: 'List the 5 senses of Human beings?',
+      },
+    ],
   },
   {
     config: JSON.stringify({
       cache: {
-        mode: 'semantic'
-      }
-    })
+        mode: 'semantic',
+      },
+    }),
   }
 );
 
-console.log('\nSemantically Cached Response:\n', semanticCacheResponse.choices[0].message.content);
+console.log(
+  '\nSemantically Cached Response:\n',
+  semanticCacheResponse.choices[0].message.content
+);
 ```
 
 On the console:
@@ -170,7 +176,7 @@ import { Portkey } from 'portkey-ai';
 
 const portkey = new Portkey({
   apiKey: 'xxxxxk',
-  virtualKey: 'mxxxxxxxxd'
+  virtualKey: 'mxxxxxxxxd',
 });
 
 let simpleCacheResponse = await portkey.chat.completions.create(
@@ -179,20 +185,23 @@ let simpleCacheResponse = await portkey.chat.completions.create(
     messages: [
       {
         role: 'user',
-        content: 'What are 7 wonders of the world?'
-      }
-    ]
+        content: 'What are 7 wonders of the world?',
+      },
+    ],
   },
   {
     config: JSON.stringify({
       cache: {
-        mode: 'simple'
-      }
-    })
+        mode: 'simple',
+      },
+    }),
   }
 );
 
-console.log('Simple Cached Response:\n', simpleCacheResponse.choices[0].message.content);
+console.log(
+  'Simple Cached Response:\n',
+  simpleCacheResponse.choices[0].message.content
+);
 
 let semanticCacheResponse = await portkey.chat.completions.create(
   {
@@ -200,20 +209,23 @@ let semanticCacheResponse = await portkey.chat.completions.create(
     messages: [
       {
         role: 'user',
-        content: 'List the 5 senses of Human beings?'
-      }
-    ]
+        content: 'List the 5 senses of Human beings?',
+      },
+    ],
   },
   {
     config: JSON.stringify({
       cache: {
-        mode: 'semantic'
-      }
-    })
+        mode: 'semantic',
+      },
+    }),
   }
 );
 
-console.log('\nSemantically Cached Response:\n', semanticCacheResponse.choices[0].message.content);
+console.log(
+  '\nSemantically Cached Response:\n',
+  semanticCacheResponse.choices[0].message.content
+);
 ```
 
 </details>

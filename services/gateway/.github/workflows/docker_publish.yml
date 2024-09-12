@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
-      
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -23,7 +23,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-      
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -32,7 +32,7 @@ jobs:
           tags: |
             type=raw,value=latest
             type=pep440,pattern={{version}},value=${{ github.event.release.tag_name }}
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:

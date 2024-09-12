@@ -2,6 +2,6 @@ version: '3'
 services:
   web:
     ports:
-      - "8787:8787"
-    image: "portkeyai/gateway:latest"
+      - '8787:8787'
+    image: 'portkeyai/gateway:latest'
     restart: always

@@ -24,7 +24,7 @@ Once installed, you can import it and instantiate it with the API key to your Po
 import { Portkey } from 'portkey-ai';
 
 const portkey = new Portkey({
-  apiKey: process.env['PORTKEYAI_API_KEY']
+  apiKey: process.env['PORTKEYAI_API_KEY'],
 });
 ```
 
@@ -35,7 +35,7 @@ Portkey acts as AI gateway to all of your requests to LLMs. It follows the OpenA
 ```js
 const response = await portkey.chat.completions.create({
   messages,
-  model: 'gpt-3.5-turbo'
+  model: 'gpt-3.5-turbo',
 });
 ```
 
@@ -48,7 +48,7 @@ Lucky for us, all of this can implemented by passing a configs allowing us to ex
 ```js
 const config = {
   strategy: {
-    mode: 'loadbalance'
+    mode: 'loadbalance',
   },
   targets: [
     {
@@ -56,29 +56,29 @@ const config = {
       weight: 0.5,
       override_params: {
         max_tokens: 200,
-        model: 'claude-3-opus-20240229'
-      }
+        model: 'claude-3-opus-20240229',
+      },
     },
     {
       strategy: {
-        mode: 'fallback'
+        mode: 'fallback',
       },
       targets: [
         {
-          virtual_key: process.env['OPENAI_VIRTUAL_KEY']
+          virtual_key: process.env['OPENAI_VIRTUAL_KEY'],
         },
         {
-          virtual_key: process.env['AZURE_OPENAI_VIRTUAL_KEY']
-        }
+          virtual_key: process.env['AZURE_OPENAI_VIRTUAL_KEY'],
+        },
       ],
-      weight: 0.5
-    }
-  ]
+      weight: 0.5,
+    },
+  ],
 };
 
 const portkey = new Portkey({
   apiKey: process.env['PORTKEYAI_API_KEY'],
-  config // pass configs as argument
+  config, // pass configs as argument
 });
 ```
 
@@ -96,17 +96,17 @@ Now that the `config` ‘s are concrete and are passed as arguments when instant
 const messages = [
   {
     role: 'system',
-    content: 'You are a very helpful assistant.'
+    content: 'You are a very helpful assistant.',
   },
   {
     role: 'user',
-    content: 'What are 7 wonders in the world?'
-  }
+    content: 'What are 7 wonders in the world?',
+  },
 ];
 
 const response = await portkey.chat.completions.create({
   messages,
-  model: 'gpt-3.5-turbo'
+  model: 'gpt-3.5-turbo',
 });
 
 console.log(response.choices[0].message.content);
@@ -123,10 +123,10 @@ It can be challenging to identify particular requests from the thousands that ar
 const response = await portkey.chat.completions.create(
   {
     messages,
-    model: 'gpt-3.5-turbo'
+    model: 'gpt-3.5-turbo',
   },
   {
-    traceID: 'request-loadbalance-fallback'
+    traceID: 'request-loadbalance-fallback',
   }
 );
 ```
@@ -148,35 +148,35 @@ Consider this scenario: You have been using OpenAI as your LLM provider for a wh
 ```js
 const config = {
   strategy: {
-    mode: 'loadbalance'
+    mode: 'loadbalance',
   },
   targets: [
     {
       virtual_key: process.env['OPENAI_VIRTUAL_KEY'],
-      weight: 0.9
+      weight: 0.9,
     },
     {
       virtual_key: process.env['ANYSCALE_VIRTUAL_KEY'],
       weight: 0.1,
       override_params: {
-        model: 'meta-llama/Llama-2-70b-chat-hf'
-      }
-    }
-  ]
+        model: 'meta-llama/Llama-2-70b-chat-hf',
+      },
+    },
+  ],
 };
 
 const portkey = new Portkey({
   apiKey: process.env['PORTKEYAI_API_KEY'],
-  config
+  config,
 });
 
 const response = await portkey.chat.completions.create(
   {
     messages,
-    model: 'gpt-3.5-turbo'
+    model: 'gpt-3.5-turbo',
   },
   {
-    traceID: 'canary-testing'
+    traceID: 'canary-testing',
   }
 );
 
@@ -205,7 +205,7 @@ import { Portkey } from 'portkey-ai';
 
 const config = {
   strategy: {
-    mode: 'loadbalance'
+    mode: 'loadbalance',
   },
   targets: [
     {
@@ -213,49 +213,49 @@ const config = {
       weight: 0.5,
       override_params: {
         max_tokens: 200,
-        model: 'claude-2.1'
-      }
+        model: 'claude-2.1',
+      },
     },
     {
       strategy: {
-        mode: 'fallback'
+        mode: 'fallback',
       },
       targets: [
         {
-          virtual_key: process.env['OPENAI_VIRTUAL_KEY']
+          virtual_key: process.env['OPENAI_VIRTUAL_KEY'],
         },
         {
-          virtual_key: process.env['AZURE_OPENAI_VIRTUAL_KEY']
-        }
+          virtual_key: process.env['AZURE_OPENAI_VIRTUAL_KEY'],
+        },
       ],
-      weight: 0.5
-    }
-  ]
+      weight: 0.5,
+    },
+  ],
 };
 
 const portkey = new Portkey({
   apiKey: process.env['PORTKEYAI_API_KEY'],
-  config
+  config,
 });
 
 const messages = [
   {
     role: 'system',
-    content: 'You are a very helpful assistant.'
+    content: 'You are a very helpful assistant.',
   },
   {
     role: 'user',
-    content: 'What are 7 wonders in the world?'
-  }
+    content: 'What are 7 wonders in the world?',
+  },
 ];
 
 const response = await portkey.chat.completions.create(
   {
     messages,
-    model: 'gpt-3.5-turbo'
+    model: 'gpt-3.5-turbo',
   },
   {
-    traceID: 'request-loadbalance-fallback'
+    traceID: 'request-loadbalance-fallback',
   }
 );
 

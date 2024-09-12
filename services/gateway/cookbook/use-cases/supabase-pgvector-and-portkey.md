@@ -92,11 +92,14 @@ import fs from 'fs';
 
 const USER_QUERY = 'How to update my laptop?';
 
-const supabase = createClient('https://rbhjxxxxxxxxxkr.supabase.co', process.env['SUPABASE_PROJECT_API_KEY']);
+const supabase = createClient(
+  'https://rbhjxxxxxxxxxkr.supabase.co',
+  process.env['SUPABASE_PROJECT_API_KEY']
+);
 
 const portkey = new Portkey({
   apiKey: process.env['PORTKEY_API_KEY'],
-  virtualKey: process.env['OPENAI_VIRTUAL_KEY']
+  virtualKey: process.env['OPENAI_VIRTUAL_KEY'],
 });
 ```
 
@@ -130,7 +133,7 @@ We will use the `fs` library to read the `articles.txt` and convert every title 
 ```js
 const response = await portkey.embeddings.create({
   input: String(text),
-  model: 'text-embedding-ada-002'
+  model: 'text-embedding-ada-002',
 });
 return Array.from(response.data[0].embedding);
 ```
@@ -140,7 +143,7 @@ Similarly to store embeddings to Supabase:
 ```js
 await supabase.from('support_articles').insert({
   content,
-  embedding
+  embedding,
 });
 ```
 
@@ -150,7 +153,7 @@ To put everything together — reading from the file, generating embeddings, and
 async function convertToEmbeddings(text) {
   const response = await portkey.embeddings.create({
     input: String(text),
-    model: 'text-embedding-ada-002'
+    model: 'text-embedding-ada-002',
   });
   return Array.from(response.data[0].embedding);
 }
@@ -173,7 +176,7 @@ async function storeSupportArticles() {
 
     await supabase.from('support_articles').insert({
       content,
-      embedding
+      embedding,
     });
   });
 }
@@ -232,7 +235,7 @@ async function findNearestMatch(queryEmbedding) {
   const { data } = await supabase.rpc('match_documents', {
     query_embedding: queryEmbedding,
     match_threshold: 0.5,
-    match_count: 1
+    match_count: 1,
   });
   return data;
 }

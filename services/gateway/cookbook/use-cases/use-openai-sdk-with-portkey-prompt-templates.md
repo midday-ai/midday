@@ -52,15 +52,15 @@ const url = `https://api.portkey.ai/v1/prompts/${PROMPT_ID}/render`;
 
 const headers = {
   'Content-Type': 'application/json',
-  'x-portkey-api-key': PORTKEYAI_API_KEY
+  'x-portkey-api-key': PORTKEYAI_API_KEY,
 };
 
 const data = {
-  variables: { topic: 'Tom and Jerry' }
+  variables: { topic: 'Tom and Jerry' },
 };
 
 let {
-  data: { data: promptDetail }
+  data: { data: promptDetail },
 } = await axios.post(url, data, { headers });
 
 console.log(promptDetail);
@@ -103,8 +103,8 @@ const client = new OpenAI({
   defaultHeaders: createHeaders({
     provider: 'openai',
     apiKey: `${PORTKEYAI_API_KEY}`,
-    virtualKey: `${OPENAI_VIRTUAL_KEY}`
-  })
+    virtualKey: `${OPENAI_VIRTUAL_KEY}`,
+  }),
 });
 ```
 
@@ -118,11 +118,11 @@ console.log(TomAndJerryStory);
 
 async function generateStory(topic) {
   const data = {
-    variables: { topic: String(topic) }
+    variables: { topic: String(topic) },
   };
 
   let {
-    data: { data: promptDetail }
+    data: { data: promptDetail },
   } = await axios.post(url, data, { headers });
 
   const chatCompletion = await client.chat.completions.create(promptDetail);
@@ -145,8 +145,8 @@ The official Portkey Client SDK has a prompts completions method that is similar
 const promptCompletion = await portkey.prompts.completions.create({
   promptID: 'Your Prompt ID',
   variables: {
-    topic: 'Tom and Jerry'
-  }
+    topic: 'Tom and Jerry',
+  },
 });
 ```
 
@@ -174,7 +174,7 @@ const url = `https://api.portkey.ai/v1/prompts/${PROMPT_ID}/render`;
 
 const headers = {
   'Content-Type': 'application/json',
-  'x-portkey-api-key': PORTKEYAI_API_KEY
+  'x-portkey-api-key': PORTKEYAI_API_KEY,
 };
 
 const client = new OpenAI({
@@ -183,8 +183,8 @@ const client = new OpenAI({
   defaultHeaders: createHeaders({
     provider: 'openai',
     apiKey: `${PORTKEYAI_API_KEY}`,
-    virtualKey: `${OPENAI_VIRTUAL_KEY}`
-  })
+    virtualKey: `${OPENAI_VIRTUAL_KEY}`,
+  }),
 });
 
 let TomAndJerryStory = await generateStory('Tom and Jerry');
@@ -192,11 +192,11 @@ console.log(TomAndJerryStory);
 
 async function generateStory(topic) {
   const data = {
-    variables: { topic: String(topic) }
+    variables: { topic: String(topic) },
   };
 
   let {
-    data: { data: promptDetail }
+    data: { data: promptDetail },
   } = await axios.post(url, data, { headers });
 
   const chatCompletion = await client.chat.completions.create(promptDetail);

@@ -13,6 +13,7 @@
 [![Discord](https://img.shields.io/discord/1143393887742861333)](https://portkey.ai/community)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter/follow/portkeyai?style=social&label=Follow%20%40PortkeyAI)](https://twitter.com/portkeyai)
 [![npm version](https://badge.fury.io/js/%40portkey-ai%2Fgateway.svg)](https://www.npmjs.com/package/@portkey-ai/gateway)
+
 <!-- ![example workflow](https://github.com/github/docs/actions/workflows/main.yml/badge.svg) -->
 
 </div>
@@ -50,23 +51,21 @@ bashCopy codecurl '127.0.0.1:8787/v1/chat/completions' \
 
 <br>
 
-
 ## 支持的AI厂商
 
-|| AI厂商 | 支持 | 流式 | 支持的端点 |
-|---|---|---|---|--|
-| <img src="docs/images/openai.png" width=25 />| OpenAI | ✅  |✅  | `/completions`, `/chat/completions`,`/embeddings`, `/assistants`, `/threads`, `/runs` |
-| <img src="docs/images/azure.png" width=25>| Azure OpenAI | ✅  |✅  | `/completions`, `/chat/completions`,`/embeddings` |
-| <img src="docs/images/anyscale.png" width=25>| Anyscale | ✅   | ✅  | `/chat/completions` |
-| <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Google-favicon-2015.png" width=25>| Google Gemini & Palm | ✅  |✅  | `/generateMessage`, `/generateText`, `/embedText` |
-| <img src="docs/images/anthropic.png" width=25>| Anthropic  | ✅  |✅  | `/messages`, `/complete` |
-| <img src="docs/images/cohere.png" width=25>| Cohere  | ✅  |✅  | `/generate`, `/embed`, `/rerank` |
-| <img src="https://assets-global.website-files.com/64f6f2c0e3f4c5a91c1e823a/654693d569494912cfc0c0d4_favicon.svg" width=25>| Together AI  | ✅  |✅  | `/chat/completions`, `/completions`, `/inference` |
-| <img src="https://www.perplexity.ai/favicon.svg" width=25>| Perplexity  | ✅  |✅  | `/chat/completions` |
-| <img src="https://docs.mistral.ai/img/favicon.ico" width=25>| Mistral  | ✅  |✅  | `/chat/completions`, `/embeddings` |
+|                                                                                                                            | AI厂商               | 支持 | 流式 | 支持的端点                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---- | ---- | ------------------------------------------------------------------------------------- |
+| <img src="docs/images/openai.png" width=25 />                                                                              | OpenAI               | ✅   | ✅   | `/completions`, `/chat/completions`,`/embeddings`, `/assistants`, `/threads`, `/runs` |
+| <img src="docs/images/azure.png" width=25>                                                                                 | Azure OpenAI         | ✅   | ✅   | `/completions`, `/chat/completions`,`/embeddings`                                     |
+| <img src="docs/images/anyscale.png" width=25>                                                                              | Anyscale             | ✅   | ✅   | `/chat/completions`                                                                   |
+| <img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Google-favicon-2015.png" width=25>                           | Google Gemini & Palm | ✅   | ✅   | `/generateMessage`, `/generateText`, `/embedText`                                     |
+| <img src="docs/images/anthropic.png" width=25>                                                                             | Anthropic            | ✅   | ✅   | `/messages`, `/complete`                                                              |
+| <img src="docs/images/cohere.png" width=25>                                                                                | Cohere               | ✅   | ✅   | `/generate`, `/embed`, `/rerank`                                                      |
+| <img src="https://assets-global.website-files.com/64f6f2c0e3f4c5a91c1e823a/654693d569494912cfc0c0d4_favicon.svg" width=25> | Together AI          | ✅   | ✅   | `/chat/completions`, `/completions`, `/inference`                                     |
+| <img src="https://www.perplexity.ai/favicon.svg" width=25>                                                                 | Perplexity           | ✅   | ✅   | `/chat/completions`                                                                   |
+| <img src="https://docs.mistral.ai/img/favicon.ico" width=25>                                                               | Mistral              | ✅   | ✅   | `/chat/completions`, `/embeddings`                                                    |
 
-> [在这里查看支持的100多个模型的完整列表](https://portkey.ai/docs/welcome/what-is-portkey#ai-providers-supported)
-<br />
+> [在这里查看支持的100多个模型的完整列表](https://portkey.ai/docs/welcome/what-is-portkey#ai-providers-supported) > <br />
 
 ## 特点
 
@@ -115,18 +114,21 @@ bashCopy codecurl '127.0.0.1:8787/v1/chat/completions' \
 <br>
 
 ## 配置 AI 网关
+
 AI 网关支持[配置](https://portkey.ai/docs/api-reference/config-object)，以实现如**后备（fallbacks）**、**负载均衡（load balancing）**、**重试（retries）**等多样化的路由策略。
 <br><br>
 您可以在通过 `x-portkey-config` 头部进行 OpenAI 调用时使用这些配置
+
 ```js
 // 使用 OpenAI JS SDK
 const client = new OpenAI({
   baseURL: "http://127.0.0.1:8787", // 网关 URL
   defaultHeaders: {
-    'x-portkey-config': {.. 你的配置在这里 ..}, 
+    'x-portkey-config': {.. 你的配置在这里 ..},
   }
 });
 ```
+
 <br>
 <details><summary>这里有一个示例配置，在回退到 Gemini Pro 之前会重试 OpenAI 请求 5 次</summary>
 
@@ -144,6 +146,7 @@ const client = new OpenAI({
   }]
 }
 ```
+
 </details> <details> <summary>此配置将使得在 2 个 OpenAI 密钥之间实现等量的负载均衡</summary>
 
 ```js
@@ -161,24 +164,23 @@ const client = new OpenAI({
   ]
 }
 ```
+
 </details>
 了解更多关于配置对象。
 <br>
 
 ## 支持的SDKs
 
-| 语言 | 支持的SDKs |
-|---|---|
+| 语言              | 支持的SDKs                                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Node.js / JS / TS | [Portkey SDK](https://www.npmjs.com/package/portkey-ai) <br> [OpenAI SDK](https://www.npmjs.com/package/openai) <br> [LangchainJS](https://www.npmjs.com/package/langchain) <br> [LlamaIndex.TS](https://www.npmjs.com/package/llamaindex) |
-| Python | [Portkey SDK](https://pypi.org/project/portkey-ai/) <br> [OpenAI SDK](https://pypi.org/project/openai/) <br> [Langchain](https://pypi.org/project/langchain/) <br> [LlamaIndex](https://pypi.org/project/llama-index/) |
-| Go | [go-openai](https://github.com/sashabaranov/go-openai) |
-| Java | [openai-java](https://github.com/TheoKanning/openai-java) |
-| Rust | [async-openai](https://docs.rs/async-openai/latest/async_openai/) |
-| Ruby | [ruby-openai](https://github.com/alexrudall/ruby-openai) |
+| Python            | [Portkey SDK](https://pypi.org/project/portkey-ai/) <br> [OpenAI SDK](https://pypi.org/project/openai/) <br> [Langchain](https://pypi.org/project/langchain/) <br> [LlamaIndex](https://pypi.org/project/llama-index/)                     |
+| Go                | [go-openai](https://github.com/sashabaranov/go-openai)                                                                                                                                                                                     |
+| Java              | [openai-java](https://github.com/TheoKanning/openai-java)                                                                                                                                                                                  |
+| Rust              | [async-openai](https://docs.rs/async-openai/latest/async_openai/)                                                                                                                                                                          |
+| Ruby              | [ruby-openai](https://github.com/alexrudall/ruby-openai)                                                                                                                                                                                   |
 
 <br>
-
-
 
 ## 部署 AI 网关
 

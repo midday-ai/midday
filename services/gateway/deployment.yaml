@@ -27,13 +27,13 @@ spec:
         version: v1
     spec:
       containers:
-      - image: portkeyai/gateway
-        imagePullPolicy: IfNotPresent
-        name: portkeyai
-        ports:
-        - containerPort: 8787
-          protocol: TCP
-        resources: {}
+        - image: portkeyai/gateway
+          imagePullPolicy: IfNotPresent
+          name: portkeyai
+          ports:
+            - containerPort: 8787
+              protocol: TCP
+          resources: {}
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -46,13 +46,11 @@ metadata:
   namespace: portkeyai
 spec:
   ports:
-  - port: 8787
-    protocol: TCP
-    targetPort: 8787
+    - port: 8787
+      protocol: TCP
+      targetPort: 8787
   selector:
     app: portkeyai
     version: v1
   sessionAffinity: None
   type: NodePort
-
-
