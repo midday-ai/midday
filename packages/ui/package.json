@@ -28,6 +28,14 @@
   },
   "exports": {
     "./assets": "./src/assets",
+    "./types/menu": "./src/types/menu.tsx",
+    "./types/resource": "./src/types/resource.tsx",
+    "./types/merchant": "./src/types/merchant.tsx",
+    "./types/income": "./src/types/income.tsx",
+    "./types/expense": "./src/types/expense.tsx",
+    "./types/chart": "./src/types/chart.tsx",
+    "./types/appointment": "./src/types/appointment.tsx",
+    "./types/ai": "./src/types/ai.tsx",
     "./assistant-ui/model-picker": "./src/components/assistant/model-picker.tsx",
     "./assistant-ui/assistant-sidebar": "./src/components/assistant/assistant-sidebar.tsx",
     "./assistant-ui/assistant-standalone": "./src/components/assistant/assistant-standalone.tsx",
@@ -144,6 +152,7 @@
     "@storybook/addon-themes": "^8.2.9",
     "@storybook/manager-api": "^8.2.9",
     "class-variance-authority": "^0.7.0",
+    "client-typescript-sdk": "^1.6.0",
     "clsx": "^2.1.1",
     "cmdk": "0.2.1",
     "date-fns": "^3.6.0",
@@ -151,7 +160,7 @@
     "input-otp": "^1.2.4",
     "jsonfile": "^6.1.0",
     "katex": "^0.16.11",
-    "lucide-react": "^0.439.0",
+    "lucide-react": "^0.441.0",
     "next-themes": "^0.3.0",
     "postcss": "^8.4.45",
     "react-day-picker": "8.10.1",
@@ -167,6 +176,7 @@
     "tailwind-merge": "2.4.0",
     "tailwindcss": "^3.4.10",
     "tailwindcss-animate": "^1.0.7",
-    "vaul": "^0.9.2"
+    "vaul": "^0.9.2",
+    "zod": "^3.23.8"
   }
 }
