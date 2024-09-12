@@ -1,0 +1,86 @@
+name = "llmcache"
+compatibility_date = "2023-12-01"
+
+
+main = "src/worker.ts"
+
+
+# The rate limiting API is in open beta.
+[[unsafe.bindings]]
+name = "RL_FREE"
+type = "ratelimit"
+# An identifier you define, that is unique to your Cloudflare account.
+# Must be an integer.
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+
+
+[[vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "llmcache-workersai2"
+
+[ai]
+binding = "AI"
+
+[placement]
+mode = "smart"
+
+# necessary to use tiktoken in Cloudflare Workers 
+# https://www.npmjs.com/package/tiktoken#cloudflare-workers
+[[rules]]
+globs = ["**/*.wasm"]
+type = "CompiledWasm"
+fallthrough = true
+
+
+[vars]
+FALLBACK_SUBDOMAIN = "test"
+ENVIRONMENT = "development"
+
+
+[env.preview]
+name = "llmcache-preview"
+routes = [{ pattern = "*.llm-preview.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }]
+[env.preview.vars]
+APEX_DOMAIN = "llm-preview.solomon-ai-platform.com"
+ENVIRONMENT = "preview"
+
+# The rate limiting API is in open beta.
+[[env.preview.unsafe.bindings]]
+name = "RL_FREE"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+
+[[env.preview.vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "llmcache-preview"
+
+[env.preview.ai]
+binding = "AI"
+
+
+
+[env.production]
+name = "llmcache-production"
+logpush = true
+routes = [{ pattern = "*.llm.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }]
+[env.production.vars]
+APEX_DOMAIN = "llm.solomon-ai-platform.com"
+ENVIRONMENT = "production"
+
+# The rate limiting API is in open beta.
+[[env.production.unsafe.bindings]]
+name = "RL_FREE"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 60, period = 60 }
+
+[[env.production.vectorize]]
+binding = "VECTORIZE_INDEX"
+index_name = "llmcache-production"
+
+[env.production.ai]
+binding = "AI"
