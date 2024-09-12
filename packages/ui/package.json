@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
+  "type": "module",
   "files": [
     "tailwind.config.ts",
     "postcss.config.js",
@@ -27,6 +28,10 @@
     "typescript": "^5.6.2"
   },
   "exports": {
+    "./assistant-modal": "./src/components/assistant-modal.tsx",
+    "./assistant-sidebar": "./src/components/assistant-sidebar.tsx",
+    "./markdown-text": "./src/components/assistant-ui/markdown-text.tsx",
+    "./thread": "./src/components/assistant-ui/thread.tsx",
     "./date-input": "./src/components/date-input.tsx",
     "./time-picker": "./src/components/time-picker.tsx",
     "./time-picker-input": "./src/components/time-picker-input.tsx",
@@ -97,6 +102,8 @@
     "./intercom-script": "./src/components/intercom-script.tsx"
   },
   "dependencies": {
+    "@assistant-ui/react": "^0.5.51",
+    "@assistant-ui/react-markdown": "^0.2.12",
     "@mui/icons-material": "^6.0.2",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -136,6 +143,7 @@
     "embla-carousel-react": "^8.2.1",
     "input-otp": "^1.2.4",
     "jsonfile": "^6.1.0",
+    "katex": "^0.16.11",
     "lucide-react": "^0.439.0",
     "next-themes": "^0.3.0",
     "postcss": "^8.4.45",
@@ -144,6 +152,9 @@
     "react-number-format": "^5.4.2",
     "react-resizable-panels": "^2.1.2",
     "recharts": "^2.12.7",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.0",
+    "remark-math": "^6.0.0",
     "sonner": "^1.5.0",
     "storybook-dark-mode": "^4.0.2",
     "tailwind-merge": "2.4.0",
