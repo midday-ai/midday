@@ -8,7 +8,6 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
-import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import {
   Select,
@@ -100,7 +99,7 @@ export function InviteForm() {
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="min-w-[120px]">
                         <SelectValue placeholder="Select role" />
                       </SelectTrigger>
                     </FormControl>
@@ -118,11 +117,10 @@ export function InviteForm() {
         <Button
           variant="outline"
           type="button"
-          className="mt-4 space-x-1"
+          className="mt-4 border-none bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D]"
           onClick={() => append({ email: undefined, role: "member" })}
         >
-          <Icons.Add />
-          <span>Add more</span>
+          Add more
         </Button>
 
         <div className="border-t-[1px] pt-4 mt-8 items-center justify-between">
@@ -136,7 +134,10 @@ export function InviteForm() {
 
           <div className="flex items-center justify-between">
             <Link href="/">
-              <Button variant="ghost" className="p-0 hover:bg-transparent">
+              <Button
+                variant="ghost"
+                className="p-0 hover:bg-transparent font-normal"
+              >
                 Skip this step
               </Button>
             </Link>
@@ -148,7 +149,7 @@ export function InviteForm() {
               {inviteMembers.status === "executing" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                "Invite"
+                "Send invites"
               )}
             </Button>
           </div>

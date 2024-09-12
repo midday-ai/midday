@@ -13,6 +13,12 @@ export const updateUserAction = authActionClient
   .action(async ({ parsedInput: data, ctx: { user, supabase } }) => {
     await updateUser(supabase, data);
 
+    if (data.full_name) {
+      await supabase.auth.updateUser({
+        data: { full_name: data.full_name },
+      });
+    }
+
     revalidateTag(`user_${user.id}`);
 
     return user;

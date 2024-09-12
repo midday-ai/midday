@@ -13,7 +13,7 @@ type Props = {
 export function VoteButton({ count, id }: Props) {
   const { execute, optimisticState } = useOptimisticAction(voteAction, {
     currentState: count,
-    updateFn: (_, state) => {
+    updateFn: () => {
       return +count + 1;
     },
   });

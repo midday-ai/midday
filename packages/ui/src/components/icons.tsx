@@ -34,6 +34,7 @@ import {
   MdMenu,
   MdMoreHoriz,
   MdOutlineAccountBalance,
+  MdOutlineAccountCircle,
   MdOutlineArrowDownward,
   MdOutlineArrowForward,
   MdOutlineAttachFile,
@@ -596,4 +597,5 @@ export const Icons = {
   Accounts: MdOutlineAccountBalance,
   Categories: MdOutlineCategory,
   ArrowRightAlt: MdArrowRightAlt,
+  AccountCircle: MdOutlineAccountCircle,
 };

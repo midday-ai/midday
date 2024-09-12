@@ -1,6 +1,5 @@
 import { SetupForm } from "@/components/setup-form";
-import { getSession } from "@midday/supabase/cached-queries";
-import { createClient } from "@midday/supabase/server";
+import { getSession, getUser } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -11,24 +10,11 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const supabase = createClient();
+  const { data } = await getUser();
 
-  const {
-    data: { session },
-  } = await getSession();
-
-  const userId = session?.user.id;
-
-  if (!userId) {
+  if (!data?.id) {
     return redirect("/");
   }
-
-  const { data: noTeamData } = await supabase
-    .from("users")
-    .select("*")
-    .eq("id", userId)
-    .is("team_id", null)
-    .single();
 
   return (
     <div>
@@ -40,11 +26,16 @@ export default async function Page() {
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[380px] flex-col">
-          <div className="pb-4 bg-gradient-to-r from-primary dark:via-primary dark:to-[#848484] to-[#000] inline-block text-transparent bg-clip-text">
-            <h1 className="font-medium pb-1 text-3xl">Setup your account.</h1>
-          </div>
+          <h1 className="text-2xl font-medium pb-4">Update your account</h1>
+          <p className="text-sm text-[#878787] mb-8">
+            Add your name and an optional avatar.
+          </p>
 
-          <SetupForm showTeamName={noTeamData} />
+          <SetupForm
+            userId={data.id}
+            avatarUrl={data.avatar_url}
+            fullName={data.full_name}
+          />
         </div>
       </div>
     </div>

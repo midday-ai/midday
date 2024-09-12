@@ -18,9 +18,9 @@ export async function middleware(request: NextRequest) {
   const pathnameLocale = nextUrl.pathname.split("/", 2)?.[1];
 
   // Remove the locale from the pathname
-  const pathnameWithoutLocale = nextUrl.pathname.slice(
-    pathnameLocale.length + 1,
-  );
+  const pathnameWithoutLocale = pathnameLocale
+    ? nextUrl.pathname.slice(pathnameLocale.length + 1)
+    : nextUrl.pathname;
 
   // Create a new URL without the locale in the pathname
   const newUrl = new URL(pathnameWithoutLocale || "/", request.url);
@@ -51,6 +51,7 @@ export async function middleware(request: NextRequest) {
   // If authenticated but no full_name redirect to user setup page
   if (
     newUrl.pathname !== "/setup" &&
+    newUrl.pathname !== "/teams/create" &&
     session &&
     !session?.user?.user_metadata?.full_name
   ) {
