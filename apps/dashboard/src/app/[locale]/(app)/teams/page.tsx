@@ -1,10 +1,7 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { UserMenu } from "@/components/user-menu";
 import { getUser } from "@midday/supabase/cached-queries";
-import {
-  getTeamsByUserIdQuery,
-  // getUserInvitesQuery,
-} from "@midday/supabase/queries";
+import { getTeamsByUserIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
@@ -20,12 +17,9 @@ export default async function Teams() {
   const supabase = createClient();
   const user = await getUser();
 
-  const [teams, invites] = await Promise.all([
-    getTeamsByUserIdQuery(supabase, user?.data?.id),
-    // getUserInvitesQuery(supabase, user.data?.email),
-  ]);
+  const teams = await getTeamsByUserIdQuery(supabase, user?.data?.id);
 
-  if (!teams.data.length > 0) {
+  if (!teams?.data?.length) {
     redirect("/teams/create");
   }
 
@@ -48,15 +42,15 @@ export default async function Teams() {
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[480px] flex-col">
           <div>
-            <h1 className="text-2xl font-medium mb-8">Welcome back</h1>
+            <h1 className="text-2xl font-medium pb-4">Welcome back</h1>
+            <p className="text-sm text-[#878787] mb-8">
+              Select team or create a new one.
+            </p>
           </div>
 
-          <div className="mb-2">Teams</div>
-
           <SelectTeamTable data={teams.data} />
-          {/* TODO Pending invites */}
 
-          <div className="text-center mt-6">
+          <div className="text-center mt-8 border-t-[1px] border-border pt-6">
             <Link href="/teams/create" className="text-sm">
               Create team
             </Link>

@@ -49,6 +49,16 @@ export async function GET(req: NextRequest) {
         event: LogEvents.SignIn.name,
         channel: LogEvents.SignIn.channel,
       });
+
+      // If user have no teams, redirect to team creation
+      const { count } = await supabase
+        .from("users_on_team")
+        .select("*", { count: "exact" })
+        .eq("user_id", userId);
+
+      if (count === 0 && !returnTo?.startsWith("teams/invite/")) {
+        return NextResponse.redirect(`${requestUrl.origin}/teams/create`);
+      }
     }
   }
 

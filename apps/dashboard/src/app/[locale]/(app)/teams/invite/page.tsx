@@ -28,13 +28,11 @@ export default async function InviteMembers() {
 
       <div className="flex min-h-screen justify-center items-center overflow-hidden p-6 md:p-0">
         <div className="relative z-20 m-auto flex w-full max-w-[340px] flex-col">
-          <div>
-            <h1 className="text-2xl font-medium mb-8">Invite Team Members</h1>
-          </div>
-
-          <div className="mb-2">
-            <p className="text-sm">Invite new members by email address</p>
-          </div>
+          <h1 className="text-2xl font-medium pb-4">Invite team members</h1>
+          <p className="text-sm text-[#878787] mb-8">
+            Add the email addresses of the people you want on your team and send
+            them invites to join.
+          </p>
 
           <InviteForm />
         </div>
