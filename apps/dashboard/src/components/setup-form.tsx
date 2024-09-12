@@ -17,6 +17,7 @@ import { Input } from "@midday/ui/input";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -30,6 +31,7 @@ type Props = {
 
 export function SetupForm({ userId, avatarUrl, fullName }: Props) {
   const { toast } = useToast();
+  const router = useRouter();
   const uploadRef = useRef<HTMLInputElement>(null);
 
   const updateUser = useAction(updateUserAction, {
@@ -40,12 +42,15 @@ export function SetupForm({ userId, avatarUrl, fullName }: Props) {
         title: "Something went wrong please try again.",
       });
     },
+    onSuccess: () => {
+      router.replace("/");
+    },
   });
 
   const form = useForm<z.infer<typeof updateUserSchema>>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      full_name: "",
+      full_name: fullName ?? "",
     },
   });
 
