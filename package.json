@@ -9,6 +9,7 @@
   ],
   "lint-staged": {
     "*": [
+      "prettier --list-different"
     ]
   },
   "config": {
