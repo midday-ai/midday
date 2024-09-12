@@ -43,7 +43,8 @@
     "tailwind-config-viewer": " tailwind-config-viewer -c ./index.js -o -p 3333",
     "precommit": "bun run test && bun run build && bun run format",
     "bump-versions": "bun changeset version && bun install",
-    "format:write": "prettier \"**/*\" --ignore-unknown --list-different --write"
+    "format:write": "prettier \"**/*\" --ignore-unknown --list-different --write",
+    "format:check": "prettier \"**/*\" --ignore-unknown --list-different"
   },
   "dependencies": {
     "@biomejs/biome": "1.8.3",
