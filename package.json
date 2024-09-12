@@ -4,7 +4,8 @@
   "workspaces": [
     "packages/*",
     "apps/*",
-    "packages/email/*"
+    "packages/email/*",
+    "turbo/generators"
   ],
   "lint-staged": {
     "*": [
