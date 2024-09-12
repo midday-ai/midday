@@ -23,17 +23,19 @@
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
     "typecheck": "turbo typecheck",
-    "prepare": "husky"
+    "prepare": "husky",
+    "bump-package-version": "bunx changeset"
   },
   "dependencies": {
     "@biomejs/biome": "1.8.3",
-    "@manypkg/cli": "^0.21.4",
-    "turbo": "2.1.1",
-    "typescript": "^5.6.2",
+    "@changesets/cli": "^2.27.8",
     "@commitlint/cli": "^19.3.0",
     "@commitlint/config-conventional": "^19.2.2",
     "@commitlint/cz-commitlint": "^19.2.0",
-    "@commitlint/types": "^19.0.3"
+    "@commitlint/types": "^19.0.3",
+    "@manypkg/cli": "^0.21.4",
+    "turbo": "2.1.1",
+    "typescript": "^5.6.2"
   },
   "packageManager": "bun@1.1.16",
   "resolutions": {
