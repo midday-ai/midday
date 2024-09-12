@@ -5,7 +5,9 @@
     "packages/*",
     "apps/*",
     "packages/email/*",
-    "turbo/generators"
+    "turbo/*",
+    "internal/*",
+    "tooling/*"
   ],
   "lint-staged": {
     "*": [
