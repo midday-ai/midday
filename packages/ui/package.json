@@ -27,6 +27,10 @@
     "typescript": "^5.6.2"
   },
   "exports": {
+    "./date-input": "./src/components/date-input.tsx",
+    "./time-picker": "./src/components/time-picker.tsx",
+    "./time-picker-input": "./src/components/time-picker-input.tsx",
+    "./time-picker-utils": "./src/components/time-picker-utils.tsx",
     "./toggle-group": "./src/components/toggle-group.tsx",
     "./toggle": "./src/components/toggle.tsx",
     "./slider": "./src/components/slider.tsx",
