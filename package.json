@@ -29,6 +29,9 @@
     "lint": "turbo lint && manypkg check",
     "typecheck": "turbo typecheck",
     "prepare": "husky",
+    "release": "turbo run build lint typecheck && changeset version && changeset publish",
+    "reset:changelog": "bun run rm -rf */**/CHANGELOG.md",
+    "bootstrap": "turbo run bootstrap",
     "bump-package-version": "bunx changeset"
   },
   "dependencies": {
