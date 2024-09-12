@@ -1,6 +1,6 @@
 import superjson from "superjson";
 
-import { Err, Ok, type Result } from "@solomon-ai/error";
+import { Err, Ok, type Result } from "@internal/error";
 
 import { CacheError } from "../errors";
 import type { Entry, Store } from "./interface";

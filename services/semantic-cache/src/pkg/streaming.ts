@@ -2,7 +2,7 @@ import { sha256 } from "@internal/hash";
 import { streamSSE } from "hono/streaming";
 import type { OpenAI } from "openai";
 
-import type { CacheError } from "@solomon-ai/cache";
+import type { CacheError } from "@internal/cache";
 import { BaseError, Err, Ok, wrap, type Result } from "@internal/error";
 
 import type { Context } from "./hono/app";

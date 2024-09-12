@@ -1,6 +1,6 @@
 import type { Client } from "@libsql/client";
 
-import { Ok, type Result } from "@solomon-ai/error";
+import { Ok, type Result } from "@internal/error";
 
 import type { CacheError } from "../errors";
 import type { Entry, Store } from "./interface";

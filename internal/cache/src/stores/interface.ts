@@ -1,4 +1,4 @@
-import type { Result } from "@solomon-ai/error";
+import type { Result } from "@internal/error";
 
 import type { CacheError } from "../errors";
 

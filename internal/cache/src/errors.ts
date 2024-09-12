@@ -1,4 +1,4 @@
-import { BaseError } from "@solomon-ai/error";
+import { BaseError } from "@internal/error";
 
 export class CacheError extends BaseError {
   public readonly name = "CacheError";
