@@ -1,0 +1,54 @@
+name: "💡 Feature Request"
+description: Describe a new feature or capability you would like to see in Solomon AI's offering.
+labels:
+  - "Feature"
+  - "Needs Approval"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Welcome 👋🏻
+
+        Thank you for taking the time to write up a feature request. Please fill out the information below to be able to help you faster. If you have a question or need general help, please join our [Discord community](https://Solomon AI.com/discord).
+  - type: checkboxes
+    attributes:
+      label: Preliminary Checks
+      description: Please make sure that you verify each checkbox and follow the instructions for them.
+      options:
+        - label: |
+            I have reviewed https://Solomon AI.com/docs for existing features that would solve my problem
+          required: true
+        - label: |
+            I have searched for existing feature requests: https://github.com/Solomon AIed/Solomon AI/issues
+          required: true
+        - label: |
+            This issue is not a question, general help request, or anything other than a feature request directly related to Solomon AI. Please ask questions in our Discord community: https://Solomon AI.com/discord.
+          required: true
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+    validations:
+      required: true
+  - type: textarea
+    id: solution-description
+    attributes:
+      label: Describe the solution
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternate-solution-description
+    attributes:
+      label: Describe alternatives you have considered (if any)
+      description: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: false
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context or screenshots about the feature request here.
+    validations:
+      required: false

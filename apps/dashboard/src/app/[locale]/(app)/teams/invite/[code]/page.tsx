@@ -15,7 +15,9 @@ export const metadata: Metadata = {
 
 export default async function InviteCode({
   params,
-}: { params: { code: string } }) {
+}: {
+  params: { code: string };
+}) {
   const supabase = createClient();
   const { code } = params;
 

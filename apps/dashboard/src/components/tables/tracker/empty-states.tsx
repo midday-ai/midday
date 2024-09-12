@@ -13,7 +13,7 @@ export function EmptyState({ currencyCode, user }) {
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 
@@ -57,7 +57,7 @@ export function NoResults({ currencyCode, user }) {
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 

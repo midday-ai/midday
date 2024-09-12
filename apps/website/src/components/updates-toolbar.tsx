@@ -30,13 +30,13 @@ const popupCenter = ({ url, title, w, h }) => {
   const width = window.innerWidth
     ? window.innerWidth
     : document.documentElement.clientWidth
-    ? document.documentElement.clientWidth
-    : screen.width;
+      ? document.documentElement.clientWidth
+      : screen.width;
   const height = window.innerHeight
     ? window.innerHeight
     : document.documentElement.clientHeight
-    ? document.documentElement.clientHeight
-    : screen.height;
+      ? document.documentElement.clientHeight
+      : screen.height;
 
   const systemZoom = width / window.screen.availWidth;
   const left = (width - w) / 2 / systemZoom + dualScreenLeft;
@@ -50,7 +50,7 @@ const popupCenter = ({ url, title, w, h }) => {
       height=${h / systemZoom}, 
       top=${top}, 
       left=${left}
-      `
+      `,
   );
 
   return newWindow;
@@ -143,7 +143,7 @@ export function UpdatesToolbar({ posts }) {
                   <button
                     type="button"
                     className={cn(
-                      currentIndex === posts.length - 1 && "opacity-50"
+                      currentIndex === posts.length - 1 && "opacity-50",
                     )}
                     onClick={handleNext}
                   >

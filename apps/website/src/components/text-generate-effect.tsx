@@ -41,7 +41,7 @@ export const TextGenerateEffect = ({
           {
             duration: 1,
             delay: stagger(0.13),
-          }
+          },
         );
       }}
       className={cn("text-center font-medium", className)}

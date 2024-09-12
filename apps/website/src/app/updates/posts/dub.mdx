@@ -9,14 +9,14 @@ tag: "Engineering"
 Earlier this week [Dub.co](http://Dub.co) shared our [customer story](https://dub.co/customers/midday) on why we choose Dub as our link-sharing infrastructure.
 
 <br />
-In this blog post where gonna share a little more in details how we implemented this
-functionality.
+In this blog post where gonna share a little more in details how we implemented
+this functionality.
 
 <br />
-We have some features like Time Tracker, Reports and files from Vault that our users
-shares outside their company and with that we have an authorization layer on our
-side using Supabase, but these links are often really long because they include a
-unique token.
+We have some features like Time Tracker, Reports and files from Vault that our
+users shares outside their company and with that we have an authorization layer
+on our side using Supabase, but these links are often really long because they
+include a unique token.
 <br />
 Our solution was to implement Dub to generate unique short URLs.
 
@@ -27,10 +27,12 @@ Our solution was to implement Dub to generate unique short URLs.
 ![Midday - Overview](/images/overview.png)
 
 <br />
-If you look closely you can se our link looks like this: [https://go.midday.ai/5eYKrmV](https://go.midday.ai/5eYKrmV)
+If you look closely you can se our link looks like this:
+[https://go.midday.ai/5eYKrmV](https://go.midday.ai/5eYKrmV)
 
 <br />
-When the user clicks `Share` we execute a server action using the library `next-safe-action`
+When the user clicks `Share` we execute a server action using the library
+`next-safe-action`
 
 that looks like this:
 
@@ -76,7 +78,8 @@ The nice thing with next-safe-action is that you get callbacks on onError and on
 The action is pretty straightforward too, we first save the report based on the current parameters (from, to and type) depending on what kind of report we are creating.
 
 <br />
-We save it in Supabase and get a id back that we use to generate our sharable URL.
+We save it in Supabase and get a id back that we use to generate our sharable
+URL.
 
 ```typescript
 const dub = new Dub({ projectSlug: "midday" });
@@ -126,8 +129,9 @@ export const createReportAction = action(schema, async (params) => {
 ```
 
 <br />
-With the combination of server actions, Supabase and Dub we can create really beautiful
-URLs with analytics on top.
+With the combination of server actions, Supabase and Dub we can create really
+beautiful URLs with analytics on top.
 
 <br />
-You can find the source code for this in our repository [here](https://github.com/midday-ai/midday/tree/main/apps/dashboard/src/actions/report).
+You can find the source code for this in our repository
+[here](https://github.com/midday-ai/midday/tree/main/apps/dashboard/src/actions/report).

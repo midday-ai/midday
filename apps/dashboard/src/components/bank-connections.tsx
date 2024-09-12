@@ -55,7 +55,10 @@ interface BankConnectionProps {
 function ConnectionState({
   connection,
   isSyncing,
-}: { connection: BankConnectionProps["connection"]; isSyncing: boolean }) {
+}: {
+  connection: BankConnectionProps["connection"];
+  isSyncing: boolean;
+}) {
   const { show, expired } = connectionStatus(connection);
 
   if (isSyncing) {
@@ -293,7 +296,9 @@ export function BankConnection({ connection }: BankConnectionProps) {
 
 export function BankConnections({
   data,
-}: { data: BankConnectionProps["connection"][] }) {
+}: {
+  data: BankConnectionProps["connection"][];
+}) {
   const defaultValue = data.length === 1 ? ["connection-0"] : undefined;
 
   return (

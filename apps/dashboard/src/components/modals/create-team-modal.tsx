@@ -81,7 +81,11 @@ export function CreateTeamModal({ onOpenChange }: Props) {
             <div className="mt-6 mb-6">
               <DialogFooter>
                 <div className="space-x-4">
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                  >
                     Cancel
                   </Button>
                   <Button

@@ -48,7 +48,7 @@ export function TrackerGraph({
       start,
       end,
     },
-    { weekStartsOn }
+    { weekStartsOn },
   );
 
   const months = eachMonthOfInterval({

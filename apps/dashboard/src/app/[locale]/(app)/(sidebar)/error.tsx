@@ -8,7 +8,10 @@ import { useEffect } from "react";
 export default function ErrorPage({
   reset,
   error,
-}: { reset: () => void; error: Error & { digest?: string } }) {
+}: {
+  reset: () => void;
+  error: Error & { digest?: string };
+}) {
   useEffect(() => {
     Sentry.captureException(error);
   }, [error]);

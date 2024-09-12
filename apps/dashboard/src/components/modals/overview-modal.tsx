@@ -19,7 +19,9 @@ const images = [
 
 export function OverviewModal({
   defaultOpen = false,
-}: { defaultOpen?: boolean }) {
+}: {
+  defaultOpen?: boolean;
+}) {
   const [activeId, setActive] = useState(1);
   const [isOpen, setIsOpen] = useState(defaultOpen);
 

@@ -1,0 +1,22 @@
+// Main export file for @packages/{{kebabCase name}}
+
+import { {{pascalCase name}}Config, {{pascalCase name}}Result } from './types';
+import { DEFAULT_CONFIG, VERSION } from './constants';
+import { validate{{pascalCase name}}Config } from './utils';
+
+export function initialize{{pascalCase name}}(config: Partial<{{pascalCase name}}Config> = {}): {{pascalCase name}}Result {
+  const validatedConfig = validate{{pascalCase name}}Config(config);
+  
+  // Add initialization logic here
+  
+  return {
+    version: VERSION,
+    // Add other result properties here
+  };
+}
+
+export { {{pascalCase name}}Config, {{pascalCase name}}Result, DEFAULT_CONFIG, VERSION };
+
+export const hello = () => {
+  return "Hello from @packages/{{kebabCase name}}!";
+};

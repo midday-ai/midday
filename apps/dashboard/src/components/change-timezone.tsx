@@ -22,7 +22,10 @@ import { useAction } from "next-safe-action/hooks";
 export function ChangeTimezone({
   value,
   timezones,
-}: { value: string; timezones: any[] }) {
+}: {
+  value: string;
+  timezones: any[];
+}) {
   const action = useAction(updateUserAction);
   const t = useI18n();
 

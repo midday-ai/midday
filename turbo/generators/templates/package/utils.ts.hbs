@@ -1,0 +1,6 @@
+// Utility functions for @packages/{{kebabCase name}}
+
+export function validate{{pascalCase name}}Config(config: Partial<{{pascalCase name}}Config>): {{pascalCase name}}Config {
+  // Add configuration validation logic here
+  return { ...DEFAULT_CONFIG, ...config };
+}

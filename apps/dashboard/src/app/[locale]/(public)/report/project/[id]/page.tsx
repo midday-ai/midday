@@ -43,7 +43,7 @@ export default async function ProjectReport({ params, searchParams }) {
   const { data: reportData, error } = await supabase
     .from("tracker_reports")
     .select(
-      "*, project:project_id(id, name), user:created_by(week_starts_on_monday)"
+      "*, project:project_id(id, name), user:created_by(week_starts_on_monday)",
     )
     .eq("id", params.id)
     .single();
