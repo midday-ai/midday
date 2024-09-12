@@ -1,7 +1,7 @@
 "use client";
 
-import { setupUserSchema } from "@/actions/schema";
-import { setupUserAction } from "@/actions/setup-user-action";
+import { updateUserSchema } from "@/actions/schema";
+import { updateUserAction } from "@/actions/update-user-action";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -17,13 +17,22 @@ import { Input } from "@midday/ui/input";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
+import { AvatarUpload } from "./avatar-upload";
 
-export function SetupForm({ showTeamName }: { showTeamName: boolean }) {
+type Props = {
+  userId: string;
+  avatarUrl?: string;
+  fullName?: string;
+};
+
+export function SetupForm({ userId, avatarUrl, fullName }: Props) {
   const { toast } = useToast();
+  const uploadRef = useRef<HTMLInputElement>(null);
 
-  const setupUser = useAction(setupUserAction, {
+  const updateUser = useAction(updateUserAction, {
     onError: () => {
       toast({
         duration: 3500,
@@ -33,23 +42,39 @@ export function SetupForm({ showTeamName }: { showTeamName: boolean }) {
     },
   });
 
-  const form = useForm<z.infer<typeof setupUserSchema>>({
-    resolver: zodResolver(setupUserSchema),
+  const form = useForm<z.infer<typeof updateUserSchema>>({
+    resolver: zodResolver(updateUserSchema),
     defaultValues: {
       full_name: "",
-      team_name: showTeamName ? "" : undefined,
     },
   });
 
   const isSubmitting =
-    setupUser.status !== "idle" && setupUser.status !== "hasErrored";
+    updateUser.status !== "idle" && updateUser.status !== "hasErrored";
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(setupUser.execute)}
+        onSubmit={form.handleSubmit(updateUser.execute)}
         className="space-y-8"
       >
+        <div className="flex justify-between items-end gap-4">
+          <AvatarUpload
+            userId={userId}
+            avatarUrl={avatarUrl}
+            fullName={fullName}
+            size={80}
+            ref={uploadRef}
+          />
+          <Button
+            variant="outline"
+            type="button"
+            onClick={() => uploadRef.current?.click()}
+          >
+            Upload
+          </Button>
+        </div>
+
         <FormField
           control={form.control}
           name="full_name"
@@ -66,23 +91,6 @@ export function SetupForm({ showTeamName }: { showTeamName: boolean }) {
             </FormItem>
           )}
         />
-
-        {showTeamName && (
-          <FormField
-            control={form.control}
-            name="team_name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Team name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Team name" {...field} />
-                </FormControl>
-                <FormDescription>This is your team name.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (

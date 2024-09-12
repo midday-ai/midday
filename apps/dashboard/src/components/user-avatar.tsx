@@ -1,8 +1,5 @@
 "use client";
 
-import { updateUserAction } from "@/actions/update-user-action";
-import { useUpload } from "@/hooks/use-upload";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   Card,
   CardDescription,
@@ -10,33 +7,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
-import { stripSpecialCharacters } from "@midday/utils";
-import { Loader2 } from "lucide-react";
-import { useAction } from "next-safe-action/hooks";
-import { useRef } from "react";
+import { AvatarUpload } from "./avatar-upload";
 
-export function UserAvatar({ userId, avatarUrl, fullName }) {
-  const action = useAction(updateUserAction);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const { isLoading, uploadFile } = useUpload();
+type Props = {
+  userId: string;
+  avatarUrl: string;
+  fullName: string;
+};
 
-  const handleUpload = async (evt: React.ChangeEvent<HTMLInputElement>) => {
-    const { files } = evt.target;
-    const selectedFile = files as FileList;
-
-    const filename = stripSpecialCharacters(selectedFile[0]?.name);
-
-    const { url } = await uploadFile({
-      bucket: "avatars",
-      path: [userId, filename],
-      file: selectedFile[0] as File,
-    });
-
-    if (url) {
-      action.execute({ avatar_url: url });
-    }
-  };
-
+export function UserAvatar({ userId, avatarUrl, fullName }: Props) {
   return (
     <Card>
       <div className="flex justify-between items-center pr-6">
@@ -48,29 +27,11 @@ export function UserAvatar({ userId, avatarUrl, fullName }) {
           </CardDescription>
         </CardHeader>
 
-        <Avatar
-          className="rounded-full w-16 h-16 flex items-center justify-center bg-accent cursor-pointer"
-          onClick={() => inputRef?.current?.click()}
-        >
-          {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <>
-              <AvatarImage src={avatarUrl} />
-              <AvatarFallback>
-                <span className="text-md">{fullName?.charAt(0)}</span>
-              </AvatarFallback>
-            </>
-          )}
-
-          <input
-            ref={inputRef}
-            type="file"
-            style={{ display: "none" }}
-            multiple={false}
-            onChange={handleUpload}
-          />
-        </Avatar>
+        <AvatarUpload
+          userId={userId}
+          avatarUrl={avatarUrl}
+          fullName={fullName}
+        />
       </div>
       <CardFooter>An avatar is optional but strongly recommended.</CardFooter>
     </Card>
