@@ -1,0 +1,29 @@
+name: Bug Report
+description: Report any issue with the project
+labels: ['bug']
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What Happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: What Should Have Happened?
+    validations:
+      required: false
+  - type: textarea
+    id: code-snippet
+    attributes:
+      label: Relevant Code Snippet
+    validations:
+      required: false
+  - type: input
+    id: contact
+    attributes:
+      label: Your Twitter/LinkedIn
+      description: When the bug get fixed, we'd like to thank you publicly for reporting it.
+    validations:
+      required: false

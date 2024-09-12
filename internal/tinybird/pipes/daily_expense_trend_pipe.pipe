@@ -1,0 +1,36 @@
+NODE DailyExpenseTrendMV 
+SQL >
+    SELECT
+        toDate(Time) as Date,
+        sum(if(Amount < 0, -Amount, 0)) as DailyExpense,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Date, UserId
+
+TYPE materialized
+DATASOURCE DailyExpenseTrend_mv
+ENGINE SummingMergeTree
+ENGINE_SORTING_KEY Date, UserId
+
+DESCRIPTION >
+    This materialized view tracks daily expense trends for each user.
+    Columns:
+    - Date (Date): The date of the expenses
+    - DailyExpense (Float64): The total amount of expenses for the day
+    - UserId (String): Unique identifier for the user
+    Calculation Logic:
+    - Filters transactions where Amount is negative (expenses)
+    - Converts negative amounts to positive for summing
+    - Aggregates the total expenses for each day and user
+    Usage:
+    This materialized view can be used for various analytical purposes, such as:
+    - Tracking daily spending patterns for users
+    - Identifying days or periods with unusually high expenses
+    - Calculating average daily expenses over time
+    - Comparing spending habits across different users or time periods
+    Performance Considerations:
+    - The view uses a SummingMergeTree engine, which is optimized for summing up data over time
+    - The sorting key (Date, UserId) allows for quick filtering and sorting on these columns
+    - Partitioning by month (toYYYYMM(Date)) allows for efficient querying of specific time periods
+    - Consider adding appropriate indices for frequently filtered columns to improve query performance

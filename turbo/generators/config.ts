@@ -30,7 +30,6 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
       {
         type: "add",
         path: "packages/{{kebabCase name}}/src/index.ts",
-        templateFile: "templates/package/src/index.ts.hbs",
         templateFile: "templates/package/index.ts.hbs",
       },
       {

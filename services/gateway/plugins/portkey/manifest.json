@@ -1,0 +1,272 @@
+{
+  "id": "portkey",
+  "name": "Portkey",
+  "description": "Guardrails from your friendly neighbourhood AI gateway",
+  "credentials": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "label": "API Key",
+        "description": "API Key for the Portkey plugin.",
+        "encrypted": true
+      },
+      "baseURL": {
+        "type": "string",
+        "label": "Base URL (optional)",
+        "description": "Custom base URL for the advanced Portkey guardrails"
+      }
+    },
+    "required": ["apiKey"]
+  },
+  "functions": [
+    {
+      "name": "Moderate Content",
+      "id": "moderateContent",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequestHook"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the content passes the mentioned content moderation checks."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "label": "Moderation Checks",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the categories that should NOT be allowed in the content. (Checked via OpenAI moderation API)"
+              }
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "hate",
+                "hate/threatening",
+                "harassment",
+                "harassment/threatening",
+                "self-harm",
+                "self-harm/intent",
+                "self-harm/instructions",
+                "sexual",
+                "sexual/minors",
+                "violence",
+                "violence/graphic"
+              ],
+              "default": [
+                "hate/threatening",
+                "harassment/threatening",
+                "self-harm/intent",
+                "self-harm/instructions",
+                "sexual/minors",
+                "violence/graphic"
+              ]
+            }
+          }
+        },
+        "required": ["categories"]
+      }
+    },
+    {
+      "name": "Check Language",
+      "id": "language",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequestHook"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the response content is in the mentioned language."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "label": "Language",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the language that should be allowed in the content."
+              }
+            ],
+            "enum": [
+              "eng_Latn",
+              "zho_Hans",
+              "spa_Latn",
+              "ara_Arab",
+              "por_Latn",
+              "ind_Latn",
+              "fra_Latn",
+              "jpn_Jpan",
+              "rus_Cyrl",
+              "deu_Latn",
+              "kor_Hang",
+              "tur_Latn",
+              "ita_Latn",
+              "pes_Arab",
+              "pol_Latn",
+              "vie_Latn",
+              "nld_Latn",
+              "hin_Deva",
+              "tha_Thai",
+              "heb_Hebr",
+              "ben_Beng",
+              "swe_Latn",
+              "ces_Latn",
+              "ron_Latn",
+              "ell_Grek",
+              "ukr_Cyrl",
+              "dan_Latn",
+              "fin_Latn",
+              "nor_Latn",
+              "hun_Latn",
+              "cat_Latn",
+              "bul_Cyrl",
+              "msa_Latn",
+              "hrv_Latn",
+              "arb_Latn",
+              "slk_Latn",
+              "lit_Latn",
+              "lav_Latn",
+              "srp_Cyrl",
+              "slv_Latn",
+              "est_Latn",
+              "urd_Arab",
+              "fil_Latn",
+              "aze_Latn",
+              "tam_Taml",
+              "tel_Telu",
+              "mar_Deva",
+              "kan_Knda",
+              "fas_Arab",
+              "vie_Latn"
+            ],
+            "enumNames": [
+              "English",
+              "Chinese (Simplified)",
+              "Spanish",
+              "Modern Standard Arabic",
+              "Portuguese",
+              "Indonesian",
+              "French",
+              "Japanese",
+              "Russian",
+              "German",
+              "Korean",
+              "Turkish",
+              "Italian",
+              "Western Persian",
+              "Polish",
+              "Vietnamese",
+              "Dutch",
+              "Hindi",
+              "Thai",
+              "Hebrew",
+              "Bengali",
+              "Swedish",
+              "Czech",
+              "Romanian",
+              "Greek",
+              "Ukrainian",
+              "Danish",
+              "Finnish",
+              "Norwegian",
+              "Hungarian",
+              "Catalan",
+              "Bulgarian",
+              "Malay",
+              "Croatian",
+              "Modern Standard Arabic (Romanized)",
+              "Slovak",
+              "Lithuanian",
+              "Latvian",
+              "Serbian",
+              "Slovenian",
+              "Estonian",
+              "Urdu",
+              "Filipino",
+              "Azerbaijani",
+              "Tamil",
+              "Telugu",
+              "Marathi",
+              "Kannada",
+              "Persian",
+              "Vietnamese"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "name": "Detect PII",
+      "id": "pii",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequestHook", "afterRequestHook"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Detects Personally Identifiable Information (PII) in the content."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "label": "PII Categories",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the types of PII that should NOT be allowed in the content."
+              }
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "EMAIL_ADDRESS",
+                "PHONE_NUMBER",
+                "LOCATION_ADDRESS",
+                "NAME",
+                "IP_ADDRESS",
+                "CREDIT_CARD",
+                "SSN"
+              ],
+              "default": [
+                "EMAIL_ADDRESS",
+                "PHONE_NUMBER",
+                "LOCATION_ADDRESS",
+                "NAME",
+                "IP_ADDRESS",
+                "CREDIT_CARD",
+                "SSN"
+              ]
+            }
+          }
+        },
+        "required": ["categories"]
+      }
+    },
+    {
+      "name": "Detect Gibberish",
+      "id": "gibberish",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequestHook", "afterRequestHook"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Detects if the content is gibberish."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}

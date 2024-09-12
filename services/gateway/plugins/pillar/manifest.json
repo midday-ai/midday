@@ -1,0 +1,96 @@
+{
+  "id": "pillar",
+  "description": "Pillar security Plugin",
+  "credentials": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "label": "API Key",
+        "description": "Find your API key in the Pillar dashboard",
+        "encrypted": true
+      }
+    },
+    "required": ["apiKey"]
+  },
+  "functions": [
+    {
+      "name": "Scan Prompt",
+      "id": "scanPrompt",
+      "supportedHooks": ["beforeRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Analyze a prompt to an LLM."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "parameters": {
+          "scanners": {
+            "type": "array",
+            "label": "Scanners",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the scanners that should return false from Pillar"
+              }
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "prompt_injection",
+                "pii",
+                "secrets",
+                "toxic_language",
+                "invisible_characters"
+              ],
+              "default": [
+                "prompt_injection",
+                "pii",
+                "secrets",
+                "toxic_language",
+                "invisible_characters"
+              ]
+            }
+          }
+        },
+        "required": ["scanners"]
+      }
+    },
+    {
+      "name": "Scan Response",
+      "id": "scanResponse",
+      "supportedHooks": ["afterRequestHook"],
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Analyze a prompt to an LLM."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "parameters": {
+          "scanners": {
+            "type": "array",
+            "label": "Scanners",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the scanners that should return false from Pillar"
+              }
+            ],
+            "items": {
+              "type": "string",
+              "enum": ["pii", "secrets", "toxic_language"],
+              "default": ["pii", "secrets", "toxic_language"]
+            }
+          }
+        },
+        "required": ["scanners"]
+      }
+    }
+  ]
+}

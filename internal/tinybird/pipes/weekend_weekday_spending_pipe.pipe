@@ -1,0 +1,17 @@
+NODE weekend_weekday_spending
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        if(toDayOfWeek(Time) IN (6, 7), 'Weekend', 'Weekday') as DayType,
+        sum(if(Amount < 0, -Amount, 0)) as TotalSpend,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Month, DayType, UserId
+
+TYPE materialized
+DATASOURCE weekend_weekday_spending_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, DayType, UserId"

@@ -1,0 +1,38 @@
+NODE recurring_expense_detection
+SQL >
+    SELECT
+        MerchantName,
+        PersonalFinanceCategoryPrimary as Category,
+        sumState(if(Amount < 0, -Amount, 0)) as TotalAmount,
+        countState() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY MerchantName, Category, UserId
+
+TYPE materialized
+DATASOURCE recurring_expense_detection_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "UserId"
+ENGINE_SORTING_KEY "MerchantName, Category, UserId"
+
+DESCRIPTION >
+    This materialized view detects recurring expenses based on transaction frequency.
+    Columns:
+    - MerchantName (String): The name of the merchant
+    - Category (String): The primary personal finance category of the transaction
+    - TotalAmount (AggregateFunction(sum, Float64)): The total amount of the transactions
+    - TransactionCount (AggregateFunction(count, UInt64)): The number of transactions for this merchant and category
+    - UserId (String): Unique identifier for the user
+    Usage:
+    To get the final results, including filtering for recurring expenses, use the following query:
+    SELECT
+        MerchantName,
+        Category,
+        round(sumMerge(TotalAmount) / countMerge(TransactionCount), 2) as AvgAmount,
+        countMerge(TransactionCount) as TransactionCount,
+        UserId
+    FROM recurring_expense_detection_mv
+    GROUP BY MerchantName, Category, UserId
+    HAVING TransactionCount >= 3

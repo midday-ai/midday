@@ -1,0 +1,19 @@
+NODE income_by_location
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        LocationCity as City,
+        LocationRegion as Region,
+        LocationCountry as Country,
+        sum(Amount) as TotalIncome,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, City, Region, Country, UserId
+
+TYPE materialized
+DATASOURCE income_by_location_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, City, Region, Country, UserId"

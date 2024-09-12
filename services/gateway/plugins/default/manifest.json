@@ -1,0 +1,426 @@
+{
+  "id": "default",
+  "name": "Default",
+  "description": "The default set of guardrail functions available in the AI Gateway.",
+  "credentials": [],
+  "functions": [
+    {
+      "name": "Regex Match",
+      "id": "regexMatch",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequestHook", "afterRequestHook"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check if the request or response text matches a regex pattern."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "rule": {
+            "type": "string",
+            "label": "Regex Rule",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the regex pattern"
+              }
+            ]
+          }
+        },
+        "required": ["rule"]
+      }
+    },
+    {
+      "name": "Sentence Count",
+      "id": "sentenceCount",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequest", "afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the content contains a certain number of sentences. Ranges allowed."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "minSentences": {
+            "type": "number",
+            "label": "Minimum Sentence Count",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the minimum number of sentences to allow."
+              }
+            ],
+            "default": 0
+          },
+          "maxSentences": {
+            "type": "number",
+            "label": "Maximum Sentence Count",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the maximum number of sentences to allow."
+              }
+            ],
+            "default": 99999
+          }
+        }
+      }
+    },
+    {
+      "name": "Word Count",
+      "id": "wordCount",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequest", "afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the content contains a certain number of words. Ranges allowed."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "minWords": {
+            "type": "number",
+            "label": "Minimum Word Count",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the minimum number of words to allow."
+              }
+            ],
+            "default": 0
+          },
+          "maxWords": {
+            "type": "number",
+            "label": "Maximum Word Count",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the maximum number of words to allow."
+              }
+            ],
+            "default": 99999
+          }
+        }
+      }
+    },
+    {
+      "name": "Character Count",
+      "id": "characterCount",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequest", "afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the content contains a certain number of characters. Ranges allowed."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "minCharacters": {
+            "type": "number",
+            "label": "Minimum Character Count",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the minimum number of characters to allow."
+              }
+            ],
+            "default": 0
+          },
+          "maxCharacters": {
+            "type": "number",
+            "label": "Maximum Character Count",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the maximum number of characters to allow."
+              }
+            ],
+            "default": 9999999
+          }
+        }
+      }
+    },
+    {
+      "name": "JSON Schema",
+      "id": "jsonSchema",
+      "type": "guardrail",
+      "supportedHooks": ["afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check if the response JSON matches a JSON schema."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "json",
+            "label": "JSON Schema",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the JSON schema to validate against."
+              }
+            ]
+          }
+        },
+        "required": ["schema"]
+      }
+    },
+    {
+      "name": "JSON Keys",
+      "id": "jsonKeys",
+      "type": "guardrail",
+      "supportedHooks": ["afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Check if the response JSON contains any, all or none of the mentioned keys."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "array",
+            "label": "JSON Keys",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the keys to check for."
+              }
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "operator": {
+            "type": "string",
+            "label": "Operator",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the operator to use."
+              }
+            ],
+            "enum": ["any", "all", "none"],
+            "default": "any"
+          }
+        },
+        "required": ["keys", "operator"]
+      }
+    },
+    {
+      "name": "Contains",
+      "id": "contains",
+      "type": "guardrail",
+      "supportedHooks": ["afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the content contains any, all or none of the words or phrases"
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "words": {
+            "type": "array",
+            "label": "Words or Phrases",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the words or phrases to check for."
+              }
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "operator": {
+            "type": "string",
+            "label": "Operator",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the operator to use."
+              }
+            ],
+            "enum": ["any", "all", "none"],
+            "default": "any"
+          }
+        },
+        "required": ["words", "operator"]
+      }
+    },
+    {
+      "name": "Valid URLs",
+      "id": "validUrls",
+      "type": "guardrail",
+      "supportedHooks": ["afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if all the URLs mentioned in the content are valid"
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "onlyDNS": {
+            "type": "boolean",
+            "label": "Only DNS (10x faster)",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Only check if all URL domains resolve."
+              }
+            ],
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "Webhook",
+      "id": "webhook",
+      "type": "guardrail",
+      "supportedHooks": ["beforeRequest", "afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Makes a request to a webhook which returns the verdict and data"
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "webhookURL": {
+            "type": "string",
+            "label": "Webhook URL",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "eg: https://webhook.site/guardrail"
+              }
+            ]
+          },
+          "headers": {
+            "type": "json",
+            "label": "Headers",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the headers to send with the request."
+              }
+            ]
+          },
+          "required": ["webhookURL"]
+        }
+      }
+    },
+    {
+      "name": "Log",
+      "id": "log",
+      "type": "guardrail",
+      "supportedHooks": ["afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Makes a request to a log URL and always gives `true` as the verdict."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "logURL": {
+            "type": "string",
+            "label": "Log URL",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "eg: https://logging.site/collector"
+              }
+            ]
+          },
+          "headers": {
+            "type": "json",
+            "label": "Headers",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Enter the headers to send with the request."
+              }
+            ]
+          },
+          "required": ["logURL"]
+        }
+      }
+    },
+    {
+      "name": "Contains Code",
+      "id": "containsCode",
+      "type": "guardrail",
+      "supportedHooks": ["afterRequest"],
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Checks if the content contains code of format SQL, Python, TypeScript, etc."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "label": "Code Format",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "Select the code format to check for."
+              }
+            ],
+            "enum": [
+              "SQL",
+              "Python",
+              "TypeScript",
+              "JavaScript",
+              "Java",
+              "C#",
+              "C++",
+              "C",
+              "Ruby",
+              "PHP",
+              "Swift",
+              "Kotlin",
+              "Go",
+              "Rust",
+              "Scala",
+              "R",
+              "Perl",
+              "Shell",
+              "HTML",
+              "CSS",
+              "XML",
+              "JSON",
+              "YAML",
+              "Markdown",
+              "Dockerfile"
+            ]
+          }
+        },
+        "required": ["format"]
+      }
+    }
+  ]
+}

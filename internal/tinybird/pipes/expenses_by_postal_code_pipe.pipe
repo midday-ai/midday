@@ -1,0 +1,37 @@
+NODE expenses_by_postal_code
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        LocationPostalCode as PostalCode,
+        sumState(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        countState() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0 AND LocationPostalCode != ''
+    GROUP BY Month, PostalCode, UserId
+
+TYPE materialized
+DATASOURCE expenses_by_postal_code_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, PostalCode, UserId"
+
+DESCRIPTION >
+    This materialized view analyzes expenses by postal code on a monthly basis.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - PostalCode (String): The postal code where the transaction occurred
+    - TotalExpense (AggregateFunction(sum, Float64)): The total expense amount for the month and postal code
+    - TransactionCount (AggregateFunction(count, UInt64)): The number of transactions for the month and postal code
+    - UserId (String): Unique identifier for the user
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        PostalCode,
+        sumMerge(TotalExpense) as TotalExpense,
+        countMerge(TransactionCount) as TransactionCount,
+        UserId
+    FROM expenses_by_postal_code_mv
+    GROUP BY Month, PostalCode, UserId

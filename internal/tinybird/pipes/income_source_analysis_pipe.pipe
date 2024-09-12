@@ -1,0 +1,18 @@
+NODE income_source_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        MerchantName as Source,
+        sum(Amount) as TotalIncome,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, Source, UserId
+
+TYPE materialized
+DATASOURCE income_source_analysis_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, Source, UserId"

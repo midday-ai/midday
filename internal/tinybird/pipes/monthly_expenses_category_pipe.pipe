@@ -1,0 +1,17 @@
+NODE monthly_expenses_by_category
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        PersonalFinanceCategoryPrimary as Category,
+        sum(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Month, Category, UserId
+
+TYPE materialized
+DATASOURCE monthly_expenses_by_category_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, Category, UserId"

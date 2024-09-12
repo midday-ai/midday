@@ -1,0 +1,17 @@
+NODE income_by_time_of_day
+SQL >
+    SELECT
+        toHour(Time) as HourOfDay,
+        sum(Amount) as TotalIncome,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY HourOfDay, UserId
+
+TYPE materialized
+DATASOURCE income_by_time_of_day_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "UserId"
+ENGINE_SORTING_KEY "HourOfDay, UserId"

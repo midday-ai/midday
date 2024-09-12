@@ -1,0 +1,14 @@
+NODE avg_transaction_amount_by_category
+SQL >
+    SELECT
+        PersonalFinanceCategoryPrimary as Category,
+        avg(abs(Amount)) as AvgAmount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Category, UserId
+
+TYPE materialized
+DATASOURCE avg_transaction_amount_by_category_mv
+ENGINE AggregatingMergeTree
+ENGINE_SORTING_KEY Category, UserId

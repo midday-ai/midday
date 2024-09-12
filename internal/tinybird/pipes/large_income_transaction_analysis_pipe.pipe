@@ -1,0 +1,17 @@
+NODE large_income_transactions
+SQL >
+    SELECT
+        Time,
+        Amount,
+        MerchantName as Source,
+        PersonalFinanceCategoryPrimary as Category,
+        UserId
+    FROM transaction_internal
+    WHERE Amount >= 1000
+
+TYPE materialized
+DATASOURCE large_income_transactions_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "UserId"
+ENGINE_SORTING_KEY "Time, UserId"

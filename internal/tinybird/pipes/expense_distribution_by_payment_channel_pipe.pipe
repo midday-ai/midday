@@ -1,0 +1,39 @@
+NODE expense_distribution_by_payment_channel 
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        PaymentChannel,
+        sum(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Month, PaymentChannel, UserId
+
+TYPE materialized
+DATASOURCE expense_distribution_by_payment_channel_mv
+ENGINE SummingMergeTree
+ENGINE_SORTING_KEY Month, PaymentChannel, UserId
+
+
+DESCRIPTION >
+    This materialized view analyzes the distribution of expenses across different payment channels on a monthly basis for each user.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - PaymentChannel (String): The channel used for the payment (e.g., credit card, debit card, cash)
+    - TotalExpense (Float64): The total amount of expenses for the month through the specific payment channel
+    - UserId (String): Unique identifier for the user
+    Calculation Logic:
+    - Filters transactions where Amount is negative (expenses)
+    - Converts negative amounts to positive for summing
+    - Aggregates the total expenses for each month, payment channel, and user
+    Usage:
+    This materialized view can be used for various analytical purposes, such as:
+    - Analyzing preferred payment channels for expenses
+    - Tracking changes in payment channel usage over time
+    - Identifying trends in spending behavior across different payment methods
+    - Comparing payment channel preferences across different users
+    Performance Considerations:
+    - The view uses a SummingMergeTree engine, which is optimized for summing up data over time
+    - The sorting key (Month, PaymentChannel, UserId) allows for quick filtering and sorting on these columns
+    - Partitioning by month allows for efficient querying of specific time periods
+    - Consider adding appropriate indices for frequently filtered columns to improve query performance

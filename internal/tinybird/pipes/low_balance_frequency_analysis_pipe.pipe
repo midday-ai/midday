@@ -1,0 +1,43 @@
+NODE low_balance_frequency_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        countIfState(Balance < 100) as LowBalanceCount,
+        countState() as TotalBalanceRecords,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE LowBalanceFrequencyAnalysis_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, AccountId, IsoCurrencyCode, UserId, ProfileType"
+
+DESCRIPTION >
+    This materialized view analyzes the frequency of low balance occurrences for each account on a monthly basis.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - LowBalanceCount (AggregateFunction(countIf, UInt64)): The number of times the balance was below 100
+    - TotalBalanceRecords (AggregateFunction(count, UInt64)): The total number of balance records for the month
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        AccountId,
+        IsoCurrencyCode,
+        countIfMerge(LowBalanceCount) as LowBalanceCount,
+        countMerge(TotalBalanceRecords) as TotalBalanceRecords,
+        countIfMerge(LowBalanceCount) / countMerge(TotalBalanceRecords) as LowBalanceFrequency,
+        UserId,
+        ProfileType
+    FROM LowBalanceFrequencyAnalysis_mv
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType

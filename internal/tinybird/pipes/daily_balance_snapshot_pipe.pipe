@@ -1,0 +1,46 @@
+VERSION 5
+NODE daily_balance_snapshot 
+SQL >
+    SELECT
+        toDate(Time) as Date,
+        AccountId,
+        IsoCurrencyCode,
+        argMaxState(Balance, Time) as EndOfDayBalance,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Date, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE daily_balance_snapshot_mv
+ENGINE AggregatingMergeTree
+ENGINE_SORTING_KEY Date, AccountId, IsoCurrencyCode, UserId, ProfileType
+ENGINE_PARTITION_KEY toYYYYMM(Date)
+
+DESCRIPTION >
+    This materialized view provides a daily snapshot of account balances, capturing the end-of-day balance for each account.
+    Columns:
+    - Date (Date): The date of the snapshot
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - EndOfDayBalance (AggregateFunction(argMax, Float64, DateTime)): The balance at the end of the day
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Date,
+        AccountId,
+        IsoCurrencyCode,
+        argMaxMerge(EndOfDayBalance) as EndOfDayBalance,
+        UserId,
+        ProfileType
+    FROM daily_balance_snapshot_mv
+    GROUP BY Date, AccountId, IsoCurrencyCode, UserId, ProfileType
+    Calculation Logic:
+    - For each date, account, currency, and user combination, the view selects the last recorded balance of the day.
+    - The argMaxState function is used to select the balance corresponding to the latest time within each day.
+    Performance Considerations:
+    - The view uses an AggregatingMergeTree engine for efficient updates and querying of aggregate data.
+    - The sorting key includes all grouping columns for consistency and efficient querying.
+    - Partitioning by month (toYYYYMM(Date)) allows for efficient querying of specific time periods.

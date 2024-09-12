@@ -1,0 +1,16 @@
+NODE income_stability_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        stddevPop(Amount) / avg(Amount) as CoefficientOfVariation,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_stability_analysis_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

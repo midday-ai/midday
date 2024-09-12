@@ -1,0 +1,19 @@
+NODE geospatial_expense_heatmap
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        round(LocationLat, 2) as Latitude,
+        round(LocationLon, 2) as Longitude,
+        sum(if(Amount < 0, -Amount, 0)) as TotalExpense,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0 AND LocationLat != 0 AND LocationLon != 0
+    GROUP BY Month, Latitude, Longitude, UserId
+
+TYPE materialized
+DATASOURCE geospatial_expense_heatmap_mv
+
+ENGINE "SummingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, Latitude, Longitude, UserId"

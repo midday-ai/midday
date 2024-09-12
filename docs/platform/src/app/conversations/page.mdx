@@ -1,0 +1,407 @@
+export const metadata = {
+  title: 'Conversations',
+  description:
+    'On this page, we’ll dive into the different conversation endpoints you can use to manage conversations programmatically.',
+}
+
+# Conversations
+
+Conversations are an essential part of Solomon-AI — they are the containers for the messages between you, your contacts, and groups. On this page, we’ll dive into the different conversation endpoints you can use to manage conversations programmatically. We'll look at how to query, create, update, and delete conversations. {{ className: 'lead' }}
+
+## The conversation model
+
+The conversation model contains all the information about the conversations between you and your contacts. In addition, conversations can also be group-based with more than one contact, they can have a pinned message, and they can be muted.
+
+### Properties
+
+<Properties>
+  <Property name="id" type="string">
+    Unique identifier for the conversation.
+  </Property>
+  <Property name="contact_id" type="string">
+    Unique identifier for the other contact in the conversation.
+  </Property>
+  <Property name="group_id" type="string">
+    Unique identifier for the group that the conversation belongs to.
+  </Property>
+  <Property name="pinned_message_id" type="string">
+    Unique identifier for the pinned message.
+  </Property>
+  <Property name="is_pinned" type="boolean">
+    Whether or not the conversation has been pinned.
+  </Property>
+  <Property name="is_muted" type="boolean">
+    Whether or not the conversation has been muted.
+  </Property>
+  <Property name="last_active_at" type="timestamp">
+    Timestamp of when the conversation was last active.
+  </Property>
+  <Property name="last_opened_at" type="timestamp">
+    Timestamp of when the conversation was last opened by the authenticated
+    user.
+  </Property>
+  <Property name="created_at" type="timestamp">
+    Timestamp of when the conversation was created.
+  </Property>
+  <Property name="archived_at" type="timestamp">
+    Timestamp of when the conversation was archived.
+  </Property>
+</Properties>
+
+---
+
+## List all conversations {{ tag: 'GET', label: '/v1/conversations' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to retrieve a paginated list of all your conversations. By default, a maximum of ten conversations are shown per page.
+
+    ### Optional attributes
+
+    <Properties>
+      <Property name="limit" type="integer">
+        Limit the number of conversations returned.
+      </Property>
+      <Property name="muted" type="boolean">
+        Only show conversations that are muted when set to `true`.
+      </Property>
+      <Property name="archived" type="boolean">
+        Only show conversations that are archived when set to `true`.
+      </Property>
+      <Property name="pinned" type="boolean">
+        Only show conversations that are pinned when set to `true`.
+      </Property>
+      <Property name="group_id" type="string">
+        Only show conversations for the specified group.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="GET" label="/v1/conversations">
+
+    ```bash {{ title: 'cURL' }}
+    curl -G https://api.Solomon-AI.chat/v1/conversations \
+      -H "Authorization: Bearer {token}" \
+      -d limit=10
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.conversations.list()
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.conversations.list()
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->conversations->list();
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "has_more": false,
+      "data": [
+        {
+          "id": "xgQQXg3hrtjh7AvZ",
+          "contact_id": "WAz8eIbvDR60rouK",
+          "group_id": null,
+          "pinned_message_id": null,
+          "is_pinned": false,
+          "is_muted": false,
+          "last_active_at": 705103200,
+          "last_opened_at": 705103200,
+          "created_at": 692233200,
+          "archived_at": null
+        },
+        {
+          "id": "hSIhXBhNe8X1d8Et"
+          // ...
+        }
+      ]
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Create a conversation {{ tag: 'POST', label: '/v1/conversations' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to add a new conversation between you and a contact or group. A contact or group id is required to create a conversation.
+
+    ### Required attributes
+
+    <Properties>
+      <Property name="contact_id" type="string">
+        Unique identifier for the other contact in the conversation.
+      </Property>
+      <Property name="group_id" type="string">
+        Unique identifier for the group that the conversation belongs to.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="POST" label="/v1/conversations">
+
+    ```bash {{ title: 'cURL' }}
+    curl https://api.Solomon-AI.chat/v1/conversations \
+      -H "Authorization: Bearer {token}" \
+      -d 'contact_id'="WAz8eIbvDR60rouK"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.conversations.create({
+      contact_id: 'WAz8eIbvDR60rouK',
+    })
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.conversations.create(contact_id="WAz8eIbvDR60rouK")
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->conversations->create([
+      'contact_id' => 'WAz8eIbvDR60rouK',
+    ]);
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "id": "xgQQXg3hrtjh7AvZ",
+      "contact_id": "WAz8eIbvDR60rouK",
+      "group_id": null,
+      "pinned_message_id": null,
+      "is_pinned": false,
+      "is_muted": false,
+      "last_active_at": null,
+      "last_opened_at": null,
+      "created_at": 692233200,
+      "archived_at": null
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Retrieve a conversation {{ tag: 'GET', label: '/v1/conversations/:id' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to retrieve a conversation by providing the conversation id. Refer to [the list](#the-conversation-model) at the top of this page to see which properties are included with conversation objects.
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="GET" label="/v1/conversations/xgQQXg3hrtjh7AvZ">
+
+    ```bash {{ title: 'cURL' }}
+    curl https://api.Solomon-AI.chat/v1/conversations/xgQQXg3hrtjh7AvZ \
+      -H "Authorization: Bearer {token}"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.conversations.get('xgQQXg3hrtjh7AvZ')
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.conversations.get("xgQQXg3hrtjh7AvZ")
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->conversations->get('xgQQXg3hrtjh7AvZ');
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "id": "xgQQXg3hrtjh7AvZ",
+      "contact_id": "WAz8eIbvDR60rouK",
+      "group_id": null,
+      "pinned_message_id": null,
+      "is_pinned": false,
+      "is_muted": false,
+      "last_active_at": 705103200,
+      "last_opened_at": 705103200,
+      "created_at": 692233200,
+      "archived_at": null
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Update a conversation {{ tag: 'PUT', label: '/v1/conversations/:id' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to perform an update on a conversation. Examples of updates are pinning a message, muting or archiving the conversation, or pinning the conversation itself.
+
+    ### Optional attributes
+
+    <Properties>
+      <Property name="pinned_message_id" type="string">
+        Unique identifier for the pinned message.
+      </Property>
+      <Property name="is_pinned" type="boolean">
+        Whether or not the conversation has been pinned.
+      </Property>
+      <Property name="is_muted" type="boolean">
+        Whether or not the conversation has been muted.
+      </Property>
+      <Property name="archived_at" type="timestamp">
+        Timestamp of when the conversation was archived.
+      </Property>
+    </Properties>
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="PUT" label="/v1/conversations/xgQQXg3hrtjh7AvZ">
+
+    ```bash {{ title: 'cURL' }}
+    curl -X PUT https://api.Solomon-AI.chat/v1/conversations/xgQQXg3hrtjh7AvZ \
+      -H "Authorization: Bearer {token}" \
+      -d 'is_muted'=true
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.conversations.update('xgQQXg3hrtjh7AvZ', {
+        is_muted: true,
+    })
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.conversations.update("xgQQXg3hrtjh7AvZ", is_muted=True)
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->conversations->update('xgQQXg3hrtjh7AvZ', [
+      'is_muted' => true,
+    ]);
+    ```
+
+    </CodeGroup>
+
+    ```json {{ title: 'Response' }}
+    {
+      "id": "xgQQXg3hrtjh7AvZ",
+      "contact_id": "WAz8eIbvDR60rouK",
+      "group_id": null,
+      "pinned_message_id": null,
+      "is_pinned": false,
+      "is_muted": true,
+      "last_active_at": 705103200,
+      "last_opened_at": 705103200,
+      "created_at": 692233200,
+      "archived_at": null
+    }
+    ```
+
+  </Col>
+</Row>
+
+---
+
+## Delete a conversation {{ tag: 'DELETE', label: '/v1/conversations/:id' }}
+
+<Row>
+  <Col>
+
+    This endpoint allows you to delete your conversations in Solomon-AI. Note: This will permanently delete the conversation and all its messages — archive it instead if you want to be able to restore it later.
+
+  </Col>
+  <Col sticky>
+
+    <CodeGroup title="Request" tag="DELETE" label="/v1/conversations/xgQQXg3hrtjh7AvZ">
+
+    ```bash {{ title: 'cURL' }}
+    curl -X DELETE https://api.Solomon-AI.chat/v1/conversations/xgQQXg3hrtjh7AvZ \
+      -H "Authorization: Bearer {token}"
+    ```
+
+    ```js
+    import ApiClient from '@example/Solomon-AI-api'
+
+    const client = new ApiClient(token)
+
+    await client.conversations.delete('xgQQXg3hrtjh7AvZ')
+    ```
+
+    ```python
+    from Solomon-AI_api import ApiClient
+
+    client = ApiClient(token)
+
+    client.conversations.delete("xgQQXg3hrtjh7AvZ")
+    ```
+
+    ```php
+    $client = new \Solomon-AI\ApiClient($token);
+
+    $client->conversations->delete('xgQQXg3hrtjh7AvZ');
+    ```
+
+    </CodeGroup>
+
+  </Col>
+</Row>

@@ -1,0 +1,31 @@
+DATASOURCE ReOccuringTransactionInternal
+ENGINE "MergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(Time)"
+ENGINE_SORTING_KEY "Time, ID"
+
+SCHEMA >
+    `AccountId` String,
+    `AverageAmount` Float64,
+    `AverageAmountIsoCurrencyCode` LowCardinality(String),
+    `CategoryId` String,
+    `Description` String,
+    `FirstDate` DateTime,
+    `Flow` LowCardinality(String),
+    `Frequency` LowCardinality(String),
+    `ID` String,
+    `IsActive` Bool,
+    `LastAmount` Float64,
+    `LastAmountIsoCurrencyCode` LowCardinality(String),
+    `LastDate` DateTime,
+    `LinkId` UInt64,
+    `MerchantName` String,
+    `PersonalFinanceCategoryDetailed` LowCardinality(String),
+    `PersonalFinanceCategoryPrimary` LowCardinality(String),
+    `Sign` Int8,
+    `Status` LowCardinality(String),
+    `StreamId` String,
+    `Time` DateTime,
+    `TransactionIds` Array(String),
+    `UpdatedTime` DateTime,
+    `UserId` String,
+    `ProfileType` LowCardinality(String)

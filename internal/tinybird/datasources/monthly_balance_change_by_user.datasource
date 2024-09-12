@@ -1,0 +1,10 @@
+DATASOURCE MonthlyBalanceChangeByUser
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "toYYYYMM(Month)"
+ENGINE_SORTING_KEY "Month, UserId"
+
+SCHEMA >
+    `Month` DateTime,
+    `UserId` String,
+    `BalanceChange` AggregateFunction(sum, Float64),
+    `ProfileType` String

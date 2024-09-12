@@ -1,0 +1,76 @@
+{
+  "id": "sydelabs",
+  "description": "Sydelabs Plugin",
+  "credentials": {
+    "type": "object",
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "label": "API Key",
+        "description": "Find your API key in the Sydelabs dashboard",
+        "encrypted": true
+      }
+    },
+    "required": ["apiKey"]
+  },
+  "functions": [
+    {
+      "name": "SydeGuard",
+      "id": "sydeguard",
+      "type": "guardrail",
+      "description": [
+        {
+          "type": "subHeading",
+          "text": "Assess the risk of the input for prompt injections, toxicity and evasion."
+        }
+      ],
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "prompt_injection_threshold": {
+            "type": "number",
+            "label": "Prompt Injection Threshold",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "The threshold for the prompt injection risk score (0-1)."
+              }
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "multipleOf": 0.01,
+            "default": 0.5
+          },
+          "toxicity_threshold": {
+            "type": "number",
+            "label": "Toxicity Threshold",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "The threshold for the toxicity risk score (0-1)."
+              }
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "multipleOf": 0.01,
+            "default": 0.5
+          },
+          "evasion_threshold": {
+            "type": "number",
+            "label": "Evasion Threshold",
+            "description": [
+              {
+                "type": "subHeading",
+                "text": "The threshold for the evasion risk score (0-1)."
+              }
+            ],
+            "minimum": 0,
+            "maximum": 1,
+            "multipleOf": 0.01,
+            "default": 0.5
+          }
+        }
+      }
+    }
+  ]
+}

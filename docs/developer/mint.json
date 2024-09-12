@@ -1,0 +1,95 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Solomon AI Docs",
+  "logo": {
+    "dark": "/logos/logotype-dark.svg",
+    "light": "/logos/logotype.svg",
+    "href": "https://solomon-ai.app"
+  },
+  "favicon": "/logos/favicon.png",
+  "colors": {
+    "primary": "#1D1D1D",
+    "light": "#F2F1EF",
+    "dark": "#1D1D1D",
+    "background": {
+      "dark": "#121212",
+      "light": "#FFFFFF"
+    },
+    "anchors": {
+      "from": "#FF7F57",
+      "to": "#9563FF"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "Support",
+      "url": "mailto:engineering@solomon-ai.app"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Dashboard",
+    "url": "https://app-busines.solomon-ai.app"
+  },
+  "openapi": "https://engine.solomon-ai-platform.com/openapi",
+  "tabs": [
+    {
+      "name": "Engine API Reference",
+      "url": "api-reference/engine"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "Help Center",
+      "icon": "question",
+      "url": "https://solomon-ai.app/support"
+    },
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/SolomonAIEngineering/frontend-financial-platform"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Getting Started",
+      "pages": ["introduction"]
+    },
+    {
+      "group": "Resources",
+      "pages": ["integrations", "examples"]
+    },
+    {
+      "group": "Open source",
+      "pages": ["local-development", "self-hosting"]
+    },
+    {
+      "group": "Financial Engine API Reference",
+      "pages": ["api-reference/engine/introduction"]
+    },
+    {
+      "group": "Links",
+      "pages": [
+        "api-reference/engine/endpoint/get-transactions",
+        "api-reference/engine/endpoint/get-accounts",
+        "api-reference/engine/endpoint/get-account-balance",
+        "api-reference/engine/endpoint/search-institutions",
+        "api-reference/engine/endpoint/auth-link-gocardless",
+        "api-reference/engine/endpoint/exchange-token-gocardless",
+        "api-reference/engine/endpoint/auth-link-plaid",
+        "api-reference/engine/endpoint/exchange-token-plaid",
+        "api-reference/engine/endpoint/health"
+      ]
+    }
+  ],
+  "api": {
+    "maintainOrder": true
+  },
+  "feedback": {
+    "thumbsRating": true
+  },
+  "footerSocials": {
+    "twitter": "https://twitter.com/solomon-ai",
+    "github": "https://github.com/SolomonAIEngineering/frontend-financial-platform",
+    "website": "https://solomon-ai.app"
+  }
+}

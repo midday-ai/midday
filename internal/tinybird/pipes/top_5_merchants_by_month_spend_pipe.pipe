@@ -1,0 +1,37 @@
+NODE top_5_merchants_by_monthly_spend
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        MerchantName,
+        sumState(if(Amount < 0, -Amount, 0)) as TotalSpend,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Month, MerchantName, UserId
+
+TYPE materialized
+DATASOURCE top_5_merchants_by_monthly_spend_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId, MerchantName"
+
+DESCRIPTION >
+    This materialized view calculates the total spend for each merchant by month and user.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - MerchantName (String): The name of the merchant
+    - TotalSpend (AggregateFunction(sum, Float64)): The total amount spent at this merchant for the month
+    - UserId (String): Unique identifier for the user
+    Note: The actual top 5 merchants are determined at query time.
+    Usage:
+    To get the final results with top 5 merchants, use the following query:
+    SELECT
+        Month,
+        MerchantName,
+        sumMerge(TotalSpend) as TotalSpend,
+        UserId
+    FROM top_5_merchants_by_monthly_spend_mv
+    GROUP BY Month, MerchantName, UserId
+    ORDER BY Month, UserId, TotalSpend DESC
+    LIMIT 5 BY Month, UserId

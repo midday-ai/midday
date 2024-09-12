@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@tooling/typescript-config/base.json",
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "jsx": "react"
+  }
+}

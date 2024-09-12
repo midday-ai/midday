@@ -1,0 +1,30 @@
+name = "api-gateway"
+compatibility_date = "2023-01-01"
+main = "src/index.ts"
+node_compat = true
+
+[vars]
+ENVIRONMENT = 'dev'
+CUSTOM_HEADERS_TO_IGNORE = []
+
+#
+#Configuration for DEVELOPMENT environment
+#
+[env.staging]
+name = "api-gateway-staging"
+
+[env.staging.vars]
+ENVIRONMENT = 'staging'
+CUSTOM_HEADERS_TO_IGNORE = []
+
+
+#
+#Configuration for PRODUCTION environment
+#
+[env.production]
+name = "api-gateway"
+logpush=true
+
+[env.production.vars]
+ENVIRONMENT = 'production'
+CUSTOM_HEADERS_TO_IGNORE = []

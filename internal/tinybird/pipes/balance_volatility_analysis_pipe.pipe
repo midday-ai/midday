@@ -1,0 +1,42 @@
+VERSION 5
+
+NODE acct_balance_volatility_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        stddevPop(Balance) / avg(Balance) as BalanceVolatility,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE acct_balance_volatility_analysis_mv
+ENGINE ReplacingMergeTree
+ENGINE_SORTING_KEY Month, AccountId, UserId
+
+DESCRIPTION >
+    This materialized view calculates the volatility of account balances on a monthly basis.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - BalanceVolatility (Float64): The coefficient of variation of the account balance (standard deviation / mean)
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Calculation Logic:
+    - For each month, account, currency, and user combination, the view calculates the balance volatility.
+    - Volatility is measured as the coefficient of variation: standard deviation of balance divided by average balance.
+    - A higher value indicates more volatility, while a lower value suggests more stability.
+    Usage:
+    This materialized view can be used for various analytical purposes, such as:
+    - Identifying accounts with high balance volatility
+    - Comparing volatility across different account types or currencies
+    - Tracking changes in balance stability over time
+    - Risk assessment and management
+    Performance Considerations:
+    - The view uses a ReplacingMergeTree engine for efficient updates and querying.
+    - The sorting key (Month, AccountId, UserId) allows for quick filtering and sorting on these columns.
+    - Consider adding appropriate indices for frequently filtered columns to improve query performance.

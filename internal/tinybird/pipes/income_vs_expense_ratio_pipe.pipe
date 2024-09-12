@@ -1,0 +1,15 @@
+NODE income_expense_ratio
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        sum(if(Amount > 0, Amount, 0)) / abs(sum(if(Amount < 0, Amount, 0))) as IncomeExpenseRatio,
+        UserId
+    FROM transaction_internal
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_expense_ratio_mv
+
+ENGINE "ReplacingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"

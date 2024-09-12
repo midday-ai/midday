@@ -1,0 +1,42 @@
+NODE weekend_weekday_balance_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        avgState(if(toDayOfWeek(Time) IN (6, 7), Balance, NULL)) as AvgWeekendBalance,
+        avgState(if(toDayOfWeek(Time) NOT IN (6, 7), Balance, NULL)) as AvgWeekdayBalance,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE weekend_weekday_balance_analysis_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, AccountId, IsoCurrencyCode, UserId, ProfileType"
+
+DESCRIPTION >
+    This materialized view analyzes the difference between weekend and weekday account balances.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - AvgWeekendBalance (AggregateFunction(avg, Nullable(Float64))): Average balance during weekends
+    - AvgWeekdayBalance (AggregateFunction(avg, Nullable(Float64))): Average balance during weekdays
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        AccountId,
+        IsoCurrencyCode,
+        avgMerge(AvgWeekendBalance) as AvgWeekendBalance,
+        avgMerge(AvgWeekdayBalance) as AvgWeekdayBalance,
+        UserId,
+        ProfileType
+    FROM weekend_weekday_balance_analysis_mv
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType

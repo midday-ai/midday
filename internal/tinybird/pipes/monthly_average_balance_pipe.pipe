@@ -1,0 +1,39 @@
+NODE monthly_average_balance
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        AccountId,
+        IsoCurrencyCode,
+        avgState(Balance) as AverageBalance,
+        UserId,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE monthly_average_balance_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, AccountId, IsoCurrencyCode, UserId, ProfileType"
+
+DESCRIPTION >
+    This materialized view calculates the monthly average balance for each account.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - AccountId (String): Unique identifier for the account
+    - IsoCurrencyCode (String): The currency code for the account balance
+    - AverageBalance (AggregateFunction(avg, Float64)): The average balance for the month
+    - UserId (String): Unique identifier for the user
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        AccountId,
+        IsoCurrencyCode,
+        avgMerge(AverageBalance) as AverageBalance,
+        UserId,
+        ProfileType
+    FROM monthly_average_balance_mv
+    GROUP BY Month, AccountId, IsoCurrencyCode, UserId, ProfileType

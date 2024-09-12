@@ -1,0 +1,51 @@
+import { Guides } from '@/components/Guides'
+import { HeroPattern } from '@/components/HeroPattern'
+import { Resources } from '@/components/Resources'
+
+export const metadata = {
+  title: 'API Documentation',
+  description:
+    'Learn everything there is to know about the Solomon-AI API and integrate Solomon-AI into your product.',
+}
+
+export const sections = [
+  { title: 'Guides', id: 'guides' },
+  { title: 'Resources', id: 'resources' },
+]
+
+<HeroPattern />
+
+# API Documentation
+
+Solomon-AI's API offers a comprehensive financial management solution for businesses across all sectors, leveraging real-time bank account data to provide unprecedented visibility into operations.
+
+The system aggregates and categorizes financial transactions, analyzes revenue streams, and offers insights into labor costs, asset ROI, overhead expenses, and accounts receivable.
+
+It provides profitability analysis per product or service, cash flow forecasting, and benchmark comparisons with similar businesses in the industry.
+
+Through customizable reporting and real-time data access, the API enables organizations to make data-driven decisions, optimize costs, and improve financial performance while maintaining high-quality output.
+
+From payment processing to comprehensive cost analysis, Solomon-AI's API empowers businesses to navigate complex financial landscapes with agility and precision, ensuring they always have the most current financial information at their fingertips.
+
+<div className="not-prose mb-16 mt-6 flex gap-3">
+  <Button href="/quickstart" arrow="right">
+    <>Quickstart</>
+  </Button>
+  <Button href="/sdks" variant="outline">
+    <>Explore SDKs</>
+  </Button>
+</div>
+
+## Getting started {{ anchor: false }}
+
+To get started, create a new application in your [developer settings](solomon-ai.io), then read about how to make requests for the resources you need to access using our HTTP APIs or dedicated client SDKs. When your integration is ready to go live, publish it to our [integrations directory](solomon-ai.io) to reach the Solomon-AI community. {{ className: 'lead' }}
+
+<div className="not-prose">
+  <Button href="/sdks" variant="text" arrow="right">
+    <>Get your API key</>
+  </Button>
+</div>
+
+<Guides />
+
+<Resources />

@@ -1,0 +1,23 @@
+{
+  "name": "latency-benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "check:types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.4.1",
+    "@cloudflare/workers-types": "^4.20240603.0",
+    "typescript": "^5.5.3",
+    "vitest": "1.3.0",
+    "wrangler": "^3.62.0"
+  },
+  "dependencies": {
+    "@axiomhq/js": "1.0.0-rc.2",
+    "zod": "^3.23.5"
+  }
+}

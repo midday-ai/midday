@@ -1,0 +1,12 @@
+{
+  "extends": ["@midday/tsconfig/base.json"],
+  "compilerOptions": {
+    "jsx": "react",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "noImplicitAny": false
+  },
+  "include": ["**/*.ts", "**/*.js"]
+}

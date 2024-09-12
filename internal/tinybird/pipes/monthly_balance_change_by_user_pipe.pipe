@@ -1,0 +1,35 @@
+NODE monthly_balance_change_by_user_analysis
+SQL >
+    SELECT
+        toYYYYMM(Time) as Month,
+        UserId,
+        argMaxState(Balance, Time) as EndMonthBalance,
+        argMinState(Balance, Time) as StartMonthBalance,
+        ProfileType
+    FROM account_balance_history_internal
+    GROUP BY Month, UserId, ProfileType
+
+TYPE materialized
+DATASOURCE monthly_balance_change_by_user_analysis_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId, ProfileType"
+
+DESCRIPTION >
+    This materialized view calculates the monthly balance change for each user.
+    Columns:
+    - Month (UInt32): The month in YYYYMM format
+    - UserId (String): Unique identifier for the user
+    - EndMonthBalance (AggregateFunction(argMax, Float64, DateTime)): The balance at the end of the month
+    - StartMonthBalance (AggregateFunction(argMin, Float64, DateTime)): The balance at the start of the month
+    - ProfileType (String): The type of user profile
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        UserId,
+        argMaxMerge(EndMonthBalance) - argMinMerge(StartMonthBalance) as BalanceChange,
+        ProfileType
+    FROM monthly_balance_change_by_user_analysis
+    GROUP BY Month, UserId, ProfileType

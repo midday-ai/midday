@@ -1,0 +1,35 @@
+NODE expense_frequency_by_category 
+SQL >
+    SELECT
+        PersonalFinanceCategoryPrimary as Category,
+        count() as TransactionCount,
+        UserId
+    FROM transaction_internal
+    WHERE Amount < 0
+    GROUP BY Category, UserId
+
+TYPE materialized
+DATASOURCE expense_frequency_by_category_mv
+ENGINE SummingMergeTree
+ENGINE_SORTING_KEY Category, UserId
+
+DESCRIPTION >
+    This materialized view analyzes the frequency of expenses across different categories for each user.
+    Columns:
+    - Category (String): The primary personal finance category of the expense
+    - TransactionCount (UInt32): The number of transactions in the category
+    - UserId (String): Unique identifier for the user
+    Calculation Logic:
+    - Filters transactions where Amount is negative (expenses)
+    - Counts the number of transactions for each category and user
+    Usage:
+    This materialized view can be used for various analytical purposes, such as:
+    - Identifying the most frequent expense categories for each user
+    - Analyzing spending habits based on transaction frequency
+    - Comparing expense patterns across different users
+    - Detecting unusual spending behavior based on transaction frequency in certain categories
+    Performance Considerations:
+    - The view uses a SummingMergeTree engine, which is optimized for summing up data over time
+    - The sorting key (Category, UserId) allows for quick filtering and sorting on these columns
+    - Partitioning by UserId allows for efficient querying of specific users
+    - Consider adding appropriate indices for frequently filtered columns to improve query performance

@@ -1,0 +1,41 @@
+{
+  "name": "@tooling/eslint-config",
+  "version": "0.0.1",
+  "private": true,
+  "files": [
+    "./base.js",
+    "./nextjs.js",
+    "./react.js"
+  ],
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint .",
+    "format": "prettier --check '**/*.{js,json}' ",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next/eslint-plugin-next": "14.0.1",
+    "@types/eslint": "8.56.7",
+    "@typescript-eslint/eslint-plugin": "7.5.0",
+    "@typescript-eslint/parser": "7.5.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-config-turbo": "1.13.2",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jsx-a11y": "6.8.0",
+    "eslint-plugin-react": "7.34.1",
+    "eslint-plugin-react-hooks": "4.6.0"
+  },
+  "devDependencies": {
+    "@tooling/prettier-config": "workspace:*",
+    "@tooling/typescript-config": "workspace:*",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.3"
+  },
+  "eslintConfig": {
+    "root": true,
+    "extends": [
+      "./base.js"
+    ]
+  },
+  "prettier": "@tooling/prettier-config"
+}

@@ -1,0 +1,32 @@
+NODE income_seasonality_analysis
+SQL >
+    SELECT
+        toMonth(Time) as Month,
+        avgState(Amount) as AvgMonthlyIncome,
+        UserId
+    FROM transaction_internal
+    WHERE Amount > 0
+    GROUP BY Month, UserId
+
+TYPE materialized
+DATASOURCE income_seasonality_analysis_mv
+
+ENGINE "AggregatingMergeTree"
+ENGINE_PARTITION_KEY "Month"
+ENGINE_SORTING_KEY "Month, UserId"
+
+DESCRIPTION >
+    This materialized view analyzes income seasonality by calculating the average monthly income for each user.
+    Columns:
+    - Month (UInt8): The month (1-12)
+    - AvgMonthlyIncome (AggregateFunction(avg, Float64)): The average income for the month
+    - UserId (String): Unique identifier for the user
+    Usage:
+    To get the final results, use the following query:
+    SELECT
+        Month,
+        avgMerge(AvgMonthlyIncome) as AvgMonthlyIncome,
+        UserId
+    FROM income_seasonality_analysis_mv
+    GROUP BY Month, UserId
+    ORDER BY Month, UserId

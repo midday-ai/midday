@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: portkeyai
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portkeyai
+  namespace: portkeyai
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: portkeyai
+      version: v1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: portkeyai
+        version: v1
+    spec:
+      containers:
+        - image: portkeyai/gateway
+          imagePullPolicy: IfNotPresent
+          name: portkeyai
+          ports:
+            - containerPort: 8787
+              protocol: TCP
+          resources: {}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portkeyai
+  namespace: portkeyai
+spec:
+  ports:
+    - port: 8787
+      protocol: TCP
+      targetPort: 8787
+  selector:
+    app: portkeyai
+    version: v1
+  sessionAffinity: None
+  type: NodePort
