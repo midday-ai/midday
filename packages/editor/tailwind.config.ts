@@ -1,0 +1,22 @@
+import type { Config } from "tailwindcss";
+
+import baseConfig from "@midday/ui/tailwind.config";
+
+const defaultTheme = require("tailwindcss/defaultTheme");
+
+const config: Pick<Config, "content" | "presets"> & {
+  darkMode: "class";
+  safelist: string[];
+} = {
+  darkMode: "class",
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
+  safelist: ["ProseMirror"],
+  presets: [baseConfig],
+};
+
+export default config;

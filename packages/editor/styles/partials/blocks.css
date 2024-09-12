@@ -1,0 +1,47 @@
+.ProseMirror {
+  /* Image Block */
+  figure[data-type="imageBlock"] {
+    @apply m-0;
+
+    img {
+      @apply block w-full rounded;
+    }
+  }
+
+  /* Block Quote */
+  figure[data-type="blockquoteFigure"] {
+    @apply my-14 text-black dark:text-white;
+  }
+
+  & > blockquote,
+  [data-type="blockquoteFigure"] {
+    blockquote {
+      @apply m-0;
+
+      & > * {
+        @apply first:mt-0 last:mb-0;
+      }
+    }
+  }
+
+  /* Columns */
+  [data-type="columns"] {
+    @apply mb-12 mt-14 grid gap-4;
+
+    &.layout-sidebar-left {
+      grid-template-columns: 40fr 60fr;
+    }
+
+    &.layout-sidebar-right {
+      grid-template-columns: 60fr 40fr;
+    }
+
+    &.layout-two-column {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  [data-type="column"] {
+    @apply overflow-auto;
+  }
+}

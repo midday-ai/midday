@@ -26,10 +26,8 @@ npm install @internal/cache
 ```
 
 ```ts
-import {
-  createCache, DefaultStatefulContext } from "@internal/cache";
+import { createCache, DefaultStatefulContext } from "@internal/cache";
 import { MemoryStore, CloudflareStore } from "@internal/cache/stores";
-
 
 // Only required in stateful environments.
 // Cloudflare workers or Vercel provide an executionContext for you.

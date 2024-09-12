@@ -1,0 +1,18 @@
+import { useState, useEffect } from 'react'; import axios from 'axios';
+interface Data { // Define the structure of the data you expect } /** * A custom
+hook for fetching
+{{pascalCase name}}
+data from the server. * This hook encapsulates the loading state, fetched data,
+and any errors that may occur during the data fetching process. * * @return
+{object} An object containing the fetched data, loading status, and any error
+information. */ export function use{{pascalCase name}}Api(): Data { const [data,
+setData] = useState(null); // State to store the data const [loading,
+setLoading] = useState(false); // State to handle the loading status const
+[error, setError] = useState(null); // State to handle any errors useEffect(()
+=> { setLoading(true); // Begin loading axios.get('/api/{{kebabCase name}}') //
+Replace with the actual API endpoint .then(response => { setData(response.data);
+// Set data from response setLoading(false); // End loading }) .catch(err => {
+setError(err); // Handle errors setLoading(false); // End loading even if there
+is an error }); }, []); // Dependency array left empty to run only once on
+component mount return { data, // The fetched data loading, // The current
+loading status error, // Any occurred errors }; }

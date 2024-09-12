@@ -1,0 +1,27 @@
+import React from 'react'; import { renderHook, act } from
+'@testing-library/react-hooks'; import axios from 'axios'; import MockAdapter
+from 'axios-mock-adapter'; import { use{{pascalCase name}}Api } from './use{{pascalCase
+  name
+}}Api'; describe('use{{pascalCase name}}Api', () => { it('initially sets loading
+to true and data, error to null', async () => { const mock = new
+MockAdapter(axios); mock.onGet('/api/{{kebabCase name}}').reply(200, {}); const
+{ result, waitForNextUpdate } = renderHook(() => use{{pascalCase name}}Api());
+expect(result.current.data).toBeNull();
+expect(result.current.loading).toBeTrue();
+expect(result.current.error).toBeNull(); await act(async () => { await
+waitForNextUpdate(); }); }); it('sets loading to false and returns data on
+success', async () => { const mock = new MockAdapter(axios); const mockData = {
+name: 'Test Data' }; mock.onGet('/api/{{kebabCase name}}').reply(200, mockData);
+const { result, waitForNextUpdate } = renderHook(() => use{{pascalCase
+  name
+}}Api()); await act(async () => { await waitForNextUpdate(); });
+expect(result.current.data).toEqual(mockData);
+expect(result.current.loading).toBeFalse();
+expect(result.current.error).toBeNull(); }); it('sets loading to false and error
+on failure', async () => { const mock = new MockAdapter(axios);
+mock.onGet('/api/{{kebabCase name}}').networkError(); const { result,
+waitForNextUpdate } = renderHook(() => use{{pascalCase name}}Api()); await
+act(async () => { await waitForNextUpdate(); });
+expect(result.current.data).toBeNull();
+expect(result.current.loading).toBeFalse();
+expect(result.current.error).toBeDefined(); }); });

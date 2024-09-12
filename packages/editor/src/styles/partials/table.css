@@ -1,0 +1,132 @@
+.ProseMirror {
+  .tableWrapper {
+    @apply my-12;
+  }
+
+  table {
+    @apply box-border w-full border-collapse rounded border-black/10;
+    @apply dark:border-white/20;
+
+    td,
+    th {
+      @apply relative min-w-[100px] border border-black/10 p-2 text-left align-top;
+      @apply dark:border-white/20;
+
+      &:first-of-type:not(a) {
+        @apply mt-0;
+      }
+
+      p {
+        @apply m-0;
+
+        & + p {
+          @apply mt-3;
+        }
+      }
+    }
+
+    th {
+      @apply font-bold;
+    }
+
+    .column-resize-handle {
+      @apply pointer-events-none absolute -bottom-[2px] -right-1 top-0 flex w-2;
+
+      &::before {
+        @apply ml-2 h-full w-[1px] bg-black/20;
+        @apply dark:bg-white/20;
+        content: "";
+      }
+    }
+
+    .selectedCell {
+      @apply border-double border-black/20 bg-black/5;
+      @apply dark:border-white/20 dark:bg-white/10;
+    }
+
+    .grip-column,
+    .grip-row {
+      @apply absolute z-10 flex cursor-pointer items-center justify-center bg-black/5;
+      @apply dark:bg-white/10;
+    }
+
+    .grip-column {
+      @apply -top-3 left-0 -ml-[1px] h-3 w-[calc(100%+1px)] border-l border-black/20;
+      @apply dark:border-white/20;
+
+      &:hover,
+      &.selected {
+        &::before {
+          content: "";
+          @apply w-2.5;
+        }
+      }
+
+      &:hover {
+        @apply bg-black/10;
+        @apply dark:bg-white/20;
+
+        &::before {
+          @apply border-b-2 border-dotted border-black/60;
+          @apply dark:border-white/60;
+        }
+      }
+
+      &.first {
+        @apply rounded-tl-sm border-transparent;
+      }
+
+      &.last {
+        @apply rounded-tr-sm;
+      }
+
+      &.selected {
+        @apply border-black/30 bg-black/30 shadow-sm;
+        @apply dark:border-white/30 dark:bg-white/30;
+
+        &::before {
+          @apply border-b-2 border-dotted;
+        }
+      }
+    }
+
+    .grip-row {
+      @apply -left-3 top-0 -mt-[1px] h-[calc(100%+1px)] w-3 border-t border-black/20;
+      @apply dark:border-white/20;
+
+      &:hover,
+      &.selected {
+        &::before {
+          @apply h-2.5;
+          content: "";
+        }
+      }
+      &:hover {
+        @apply bg-black/10;
+        @apply dark:bg-white/20;
+
+        &::before {
+          @apply border-l-2 border-dotted border-black/60;
+          @apply dark:border-white/60;
+        }
+      }
+
+      &.first {
+        @apply rounded-tl-sm border-transparent;
+      }
+
+      &.last {
+        @apply rounded-bl-sm;
+      }
+
+      &.selected {
+        @apply border-black/30 bg-black/30 shadow-sm;
+        @apply dark:border-white/30 dark:bg-white/30;
+
+        &::before {
+          @apply border-l-2 border-dotted;
+        }
+      }
+    }
+  }
+}

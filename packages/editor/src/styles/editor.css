@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.ProseMirror {
+  .is-empty::before {
+    @apply text-neutral-500 dark:text-neutral-400;
+  }
+
+  & > *:first-child,
+  [data-type="column"] > * {
+    @apply first:mt-0 last:mb-0;
+  }
+
+  & > * + * {
+    margin-top: 0.75em;
+  }
+
+  .node-imageUpload {
+    @apply rounded border-2 border-dotted border-black border-opacity-10 p-2 dark:border-neutral-500;
+    transition: border 160ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
+
+    &:hover {
+      @apply border-opacity-30;
+    }
+
+    &:has(.is-active),
+    &.has-focus {
+      @apply border-opacity-40;
+    }
+  }
+
+  [data-type="columns"] {
+    &.has-focus [data-type="column"],
+    &:hover [data-type="column"] {
+      @apply border-neutral-300 dark:border-neutral-700;
+    }
+
+    [data-type="column"].has-focus {
+      @apply border-neutral-400 dark:border-neutral-600;
+    }
+  }
+
+  [data-type="column"] {
+    @apply rounded border-2 border-dotted border-transparent p-1;
+    transition: border 160ms cubic-bezier(0.45, 0.05, 0.55, 0.95);
+
+    &:hover {
+      @apply border-neutral-100 dark:border-neutral-900;
+    }
+
+    &:has(.is-active),
+    &.has-focus {
+      @apply border-neutral-100 dark:border-neutral-900;
+    }
+  }
+
+  .node-imageBlock {
+    & img {
+      @apply overflow-hidden rounded-xl border-2 border-transparent;
+    }
+
+    &:hover img {
+      @apply border-2 border-neutral-100 dark:border-neutral-900;
+    }
+
+    &:has(.is-active) img,
+    &.has-focus img {
+      @apply border-2 border-neutral-800 dark:border-neutral-200;
+    }
+  }
+
+  .node-aiWriter,
+  .node-aiImage,
+  .node-tableOfContentsNode {
+    &.has-focus [data-node-view-wrapper] > * {
+      @apply rounded-lg shadow-[0_0_0_2px] shadow-black/30 transition-all dark:shadow-white/30;
+    }
+  }
+
+  .ProseMirror-gapcursor + .node-imageBlock,
+  .ProseMirror-gapcursor + .node-imageUpload,
+  .ProseMirror-gapcursor + [data-type="blockquoteFigure"] {
+    @apply outline-neutral-700 hover:outline-neutral-600 dark:outline-neutral-300 dark:hover:outline-neutral-400;
+  }
+
+  [data-type="blockquoteFigure"] > div {
+    @apply rounded-lg rounded-bl-none rounded-tl-none border-l-4 border-l-neutral-700 bg-opacity-80 px-4 py-2;
+    @apply dark:border-l-neutral-300;
+  }
+
+  [data-type="blockquoteFigure"] > blockquote {
+    @apply text-lg text-black;
+    @apply dark:text-white;
+  }
+
+  [data-type="blockquoteFigure"] figcaption {
+    @apply mt-4 overflow-hidden text-sm text-neutral-500 transition-all;
+    @apply dark:text-neutral-400;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white text-neutral-900 dark:bg-black dark:text-white;
+    @apply antialiased;
+
+    font-size: 16px;
+  }
+}
+
+html,
+body {
+  @apply bg-white text-neutral-900 dark:bg-black dark:text-white;
+}
+
+input::placeholder,
+textarea::placeholder {
+  @apply text-black/50 dark:text-white/40;
+}
+
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+  @apply text-black/50 dark:text-white/40;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+  @apply text-black/40 dark:text-white/40;
+}
+
+.react-colorful {
+  width: 100% !important;
+}
+
+[data-reference-hidden] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+::-webkit-scrollbar {
+  @apply h-1 w-1 bg-neutral-500/20;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-neutral-500/50;
+}
+
+input[type="range"] {
+  @apply h-2.5 appearance-none rounded border-0 bg-neutral-200 transition-all active:bg-neutral-300;
+  @apply dark:bg-neutral-700 dark:active:bg-neutral-600;
+
+  &::-webkit-slider-thumb {
+    @apply h-5 w-3 appearance-none rounded-full bg-neutral-800 transition-all active:h-6 active:w-4 active:bg-neutral-900;
+    @apply dark:bg-neutral-100 dark:active:bg-white;
+  }
+}

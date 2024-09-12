@@ -1,0 +1,45 @@
+@import "./partials/animations.css";
+@import "./partials/blocks.css";
+@import "./partials/code.css";
+@import "./partials/collab.css";
+@import "./partials/lists.css";
+@import "./partials/placeholder.css";
+@import "./partials/table.css";
+@import "./partials/typography.css";
+
+.ProseMirror {
+  @apply z-0 py-16 pl-20 pr-8 caret-black outline-0 dark:caret-white lg:pl-8 lg:pr-8;
+
+  & > * {
+    @apply mx-auto max-w-2xl;
+  }
+
+  .selection {
+    @apply inline;
+  }
+
+  .selection,
+  *::selection {
+    @apply bg-black/10 dark:bg-white/20;
+  }
+
+  & > .react-renderer {
+    @apply my-12 first:mt-0 last:mb-0;
+  }
+
+  &.resize-cursor {
+    @apply cursor-col-resize;
+  }
+
+  .ProseMirror-gapcursor {
+    @apply relative mx-auto w-full max-w-2xl;
+
+    &:after {
+      @apply -top-[1.5em] left-0 right-0 mx-auto w-full max-w-2xl border-t-black/40 dark:border-t-white/40;
+    }
+  }
+}
+
+[data-theme="slash-command"] {
+  width: 1000vw;
+}

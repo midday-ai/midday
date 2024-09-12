@@ -1,0 +1,53 @@
+.ProseMirror {
+  ol {
+    @apply list-decimal;
+  }
+
+  ul {
+    @apply list-disc;
+  }
+
+  ul,
+  ol {
+    @apply my-6 px-8 py-0 first:mt-0 last:mb-0;
+
+    ul,
+    ol,
+    li {
+      @apply my-1;
+    }
+
+    p {
+      @apply mb-1 mt-0;
+    }
+  }
+
+  & > ul,
+  & > ol {
+    @apply my-8 first:mt-0 last:mb-0;
+  }
+
+  ul[data-type="taskList"] {
+    @apply list-none p-0;
+
+    p {
+      @apply m-0;
+    }
+
+    li {
+      @apply flex;
+
+      > label {
+        @apply mr-2 mt-1 flex-auto shrink-0 grow-0 select-none;
+      }
+
+      > div {
+        @apply flex-auto;
+      }
+
+      &[data-checked="true"] {
+        @apply line-through;
+      }
+    }
+  }
+}

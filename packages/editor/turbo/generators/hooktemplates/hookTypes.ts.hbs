@@ -1,0 +1,13 @@
+/** * Types and interfaces for the
+{{pascalCase name}}
+API hook. */ // Define the data structure expected from the API response. export
+interface
+{{pascalCase name}}Data { // Example fields - modify according to your actual
+data structure. id: number; name: string; description?: string; } // Define the
+structure for the API hook's return value. export interface Use{{pascalCase
+  name
+}}ApiOutput { data:
+{{pascalCase name}}Data | null; // The data fetched from the API, or null if not
+fetched or in case of an error. loading: boolean; // Indicates if the API call
+is currently in progress. error: Error | null; // Any error that occurred during
+the API call. }

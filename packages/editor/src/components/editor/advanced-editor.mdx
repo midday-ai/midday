@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as AdvancedEditor from "./advanced-editor.stories";
+
+<Meta of={AdvancedEditor} />
+
+# AdvancedEditor Component
+
+The `AdvancedEditor` is an advanced editor component that can be used to edit a piece of text with advanced tools.
+
+## Component Props
+
+<Canvas of={AdvancedEditor.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `AdvancedEditor`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <AdvancedEditor href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```

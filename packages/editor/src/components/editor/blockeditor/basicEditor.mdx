@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as BasicEditor from "./basicEditor.stories";
+
+<Meta of={BasicEditor} />
+
+# BasicEditor Component
+
+The `BasicEditor` is a basic editor component that can be used to edit text.
+
+## Component Props
+
+<Canvas of={BasicEditor.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `BasicEditor`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <BasicEditor href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```
