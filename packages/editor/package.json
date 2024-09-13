@@ -201,7 +201,7 @@
     "tailwindcss-animate": "1.0.7"
   },
   "devDependencies": {
-    "@solomon-ai/assets": "workspace:^",
+    "@midday/assets": "workspace:^",
     "@tooling/eslint-config": "workspace:*",
     "@midday/tsconfig": "workspace:^",
     "@midday/utils": "workspace:^",

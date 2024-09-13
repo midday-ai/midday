@@ -1,11 +1,9 @@
 {
-  "extends": "@midday/tsconfig/react-library.json",
+  "extends": ["@midday/tsconfig/base.json"],
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "noImplicitAny": false
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": ["**/*.ts", "**/*.js"]
 }
