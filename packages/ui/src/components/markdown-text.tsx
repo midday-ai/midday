@@ -1,7 +1,7 @@
 "use client";
 
 import { memo } from "react";
-import { cn } from "@midday/ui/cn";
+import { cn } from "../utils/cn";
 import { MarkdownTextPrimitive } from "@assistant-ui/react-markdown";
 import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
