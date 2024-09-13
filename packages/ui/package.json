@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
+  "files": [
+    "tailwind.config.ts",
+    "postcss.config.js",
+    "globals.css"
+  ],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -173,7 +177,17 @@
     "./wrapper/assistant-provider-wrapper": "./src/wrapper/assistant-provider-wrapper.tsx",
     "./postcss": "./postcss.config.js",
     "./globals.css": "./src/globals.css",
-    "./tailwind.config.ts": "./tailwind.config.ts"
+    "./tailwind.config.ts": "./tailwind.config.ts",
+    "./magic": "./src/components/magicui/index.tsx",
+    "./landing/call-to-action": "./src/components/landing/call-to-action-section.tsx",
+    "./landing/features": "./src/components/landing/features-section.tsx",
+    "./landing/hero": "./src/components/landing/hero-section.tsx",
+    "./landing/pricing": "./src/components/landing/pricing-section.tsx",
+    "./landing/client-section": "./src/components/landing/client-section.tsx",
+    "./landing/footer": "./src/components/landing/footer-section.tsx",
+    "./magicui/particles": "./src/components/magicui/particles.tsx",
+    "./magicui/sphere-mask": "./src/components/magicui/sphere-mask.tsx",
+    "./magicui/text-shimmer": "./src/components/magicui/text-shimmer.tsx"
   },
   "dependencies": {
     "@assistant-ui/react": "^0.5.51",
@@ -218,6 +232,7 @@
     "cmdk": "0.2.1",
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.2.1",
+    "framer-motion": "^11.5.4",
     "input-otp": "^1.2.4",
     "jsonfile": "^6.1.0",
     "katex": "^0.16.11",
@@ -234,8 +249,8 @@
     "remark-math": "^6.0.0",
     "sonner": "^1.5.0",
     "storybook-dark-mode": "^4.0.2",
-    "tailwind-merge": "2.4.0",
-    "tailwindcss": "^3.4.10",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss": "^3.4.11",
     "tailwindcss-animate": "^1.0.7",
     "ts-node": "^10.9.2",
     "vaul": "^0.9.2",
