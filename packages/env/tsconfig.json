@@ -1,0 +1,9 @@
+{
+  "extends": ["@midday/tsconfig/base.json"],
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "noImplicitAny": false
+  },
+  "include": ["**/*.ts", "**/*.js"]
+}
