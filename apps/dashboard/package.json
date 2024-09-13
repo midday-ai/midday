@@ -5,12 +5,14 @@
   "scripts": {
     "build": "NODE_ENV=production next build",
     "clean": "git clean -xdf .next .turbo node_modules",
-    "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=midday-G6Yq",
+    "jobs": "bunx @trigger.dev/cli@latest dev -p 3001 --client-id=solomon-ai-batch-jobs-background-22Wk",
     "dev": "next dev -p 3001",
     "lint": "next lint",
     "format": "biome format --write .",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "stripe:login": "stripe login",
+    "stripe:listen": "stripe listen --forward-to=localhost:3001/api/webhook/stripe"
   },
   "dependencies": {
     "@ai-sdk/openai": "^0.0.58",
@@ -79,5 +81,8 @@
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "typescript": "^5.6.2"
+  },
+    "trigger.dev": {
+    "endpointId": "solomon-ai-batch-jobs-background-22Wk"
   }
 }
