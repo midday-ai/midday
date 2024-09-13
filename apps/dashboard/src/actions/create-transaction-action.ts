@@ -35,7 +35,10 @@ export const createTransactionAction = authActionClient
       if (!accountData?.currency) {
         await supabase
           .from("bank_accounts")
-          .update({ currency: transaction.currency })
+          .update({
+            currency: transaction.currency,
+            base_currency: transaction.currency,
+          })
           .eq("id", transaction.bank_account_id);
       }
 

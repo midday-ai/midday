@@ -37,7 +37,7 @@ export function SelectCurrency({ defaultValue }: { defaultValue: string }) {
   });
 
   const handleChange = async (baseCurrency: string) => {
-    if (defaultValue && baseCurrency !== defaultValue) {
+    if (baseCurrency !== defaultValue) {
       toast({
         title: "Update base currency",
         description:
