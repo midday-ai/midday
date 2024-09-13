@@ -91,14 +91,14 @@ function ResourceIcon({ icon: Icon }: { icon: Resource['icon'] }) {
 }
 
 function ResourcePattern({
-  mouseX,
+  mousex,
   mouseY,
   ...gridProps
 }: Resource['pattern'] & {
-  mouseX: MotionValue<number>
+  mousex: MotionValue<number>
   mouseY: MotionValue<number>
 }) {
-  let maskImage = useMotionTemplate`radial-gradient(180px at ${mouseX}px ${mouseY}px, white, transparent)`
+  let maskImage = useMotionTemplate`radial-gradient(180px at ${mousex}px ${mouseY}px, white, transparent)`
   let style = { maskImage, WebkitMaskImage: maskImage }
 
   return (
@@ -133,7 +133,7 @@ function ResourcePattern({
 }
 
 function Resource({ resource }: { resource: Resource }) {
-  let mouseX = useMotionValue(0)
+  let mousex = useMotionValue(0)
   let mouseY = useMotionValue(0)
 
   function onMouseMove({
@@ -142,7 +142,7 @@ function Resource({ resource }: { resource: Resource }) {
     clientY,
   }: React.MouseEvent<HTMLDivElement>) {
     let { left, top } = currentTarget.getBoundingClientRect()
-    mouseX.set(clientX - left)
+    mousex.set(clientX - left)
     mouseY.set(clientY - top)
   }
 
@@ -152,7 +152,7 @@ function Resource({ resource }: { resource: Resource }) {
       onMouseMove={onMouseMove}
       className="dark:bg-white/2.5 group relative flex rounded-2xl bg-zinc-50 transition-shadow hover:shadow-md hover:shadow-zinc-900/5 dark:hover:shadow-black/5"
     >
-      <ResourcePattern {...resource.pattern} mouseX={mouseX} mouseY={mouseY} />
+      <ResourcePattern {...resource.pattern} mousex={mousex} mouseY={mouseY} />
       <div className="ring-zinc-900/7.5 absolute inset-0 rounded-2xl ring-1 ring-inset group-hover:ring-zinc-900/10 dark:ring-white/10 dark:group-hover:ring-white/20" />
       <div className="relative rounded-2xl px-4 pb-4 pt-16">
         <ResourceIcon icon={resource.icon} />
