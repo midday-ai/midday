@@ -1,0 +1,40 @@
+{
+  "name": "@solomon-ai/rbac",
+  "version": "0.3.1",
+  "main": "./dist/index.cjs",
+  "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
+  "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "unkey",
+    "rbac"
+  ],
+  "bugs": {
+    "url": "https://github.com/unkeyed/unkey/issues"
+  },
+  "homepage": "https://github.com/unkeyed/unkey#readme",
+  "files": [
+    "./dist/**"
+  ],
+  "author": "Andreas Thomas <andreas@chronark.com>",
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@midday/tsconfig": "workspace:*",
+    "tsup": "^8.0.2",
+    "typescript": "^5.5.3",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "@internal/error": "workspace:^",
+    "zod": "^3.23.5"
+  },
+  "type": "module"
+}
