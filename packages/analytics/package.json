@@ -13,8 +13,7 @@
     "lint": "biome check .",
     "format": "bunx @biomejs/biome format --write ./src",
     "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "build": "tsc"
+    "test": "jest"
   },
   "jest": {
     "preset": "ts-jest",
@@ -83,6 +82,7 @@
     "tailwindcss-animate": "^1.0.7",
     "ts-jest": "^29.1.5",
     "vaul": "^0.9.1",
+    "vite": "^5.4.5",
     "winston": "^3.13.0"
   }
 }
