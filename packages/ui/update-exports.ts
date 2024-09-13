@@ -33,7 +33,7 @@ function generateExports(
         ""
       );
       const exportValue = `./src/${relativePath}`;
-      exports[exportKey] = exportValue;
+      exports[`./${exportKey}`] = exportValue;
     }
   }
 
@@ -50,7 +50,7 @@ function updatePackageJson(newExports: Record<string, string>) {
   // Remove leading "./" from export keys
   const cleanedExports = Object.fromEntries(
     Object.entries(mergedExports).map(([key, value]) => [
-      key.startsWith("./") ? key.slice(2) : key,
+      key,
       value,
     ])
   );
