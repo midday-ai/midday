@@ -21,7 +21,7 @@ export function SelectCurrency({
   className,
 }: Props) {
   return (
-    <Select value={value} onValueChange={onChange}>
+    <Select value={value ?? undefined} onValueChange={onChange}>
       <SelectTrigger className={cn("w-[90px] font-medium", className)}>
         <SelectValue placeholder="Select currency" />
       </SelectTrigger>
