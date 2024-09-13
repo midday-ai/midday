@@ -1,0 +1,49 @@
+{
+  "name": "@solomon-ai/www",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "NODE_ENV=production next build",
+    "clean": "git clean -xdf .next .turbo node_modules",
+    "dev": "next dev -p 3000",
+    "format": "biome format --write .",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@calcom/embed-react": "^1.5.0",
+    "@internal/app-config": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@midday/ui": "workspace:*",
+    "@openpanel/nextjs": "^0.0.10-beta",
+    "@openstatus/react": "^0.0.3",
+    "@splinetool/react-spline": "2.2.6",
+    "@splinetool/runtime": "1.3.8",
+    "@team-plain/typescript-sdk": "4.2.3",
+    "@uidotdev/usehooks": "^2.4.1",
+    "@vercel/speed-insights": "^1.0.12",
+    "cobe": "^0.6.3",
+    "d3": "^7.9.0",
+    "date-fns": "^3.6.0",
+    "framer-motion": "^11.2.10",
+    "geist": "^1.3.0",
+    "next": "14.2.1",
+    "next-mdx-remote": "^5.0.0",
+    "next-safe-action": "^6.2.0",
+    "next-themes": "^0.3.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-hls-player": "^3.0.7",
+    "react-use-draggable-scroll": "^0.4.7",
+    "server-only": "^0.0.1",
+    "sharp": "^0.33.4",
+    "speed-insights": "vercel/speed-insights",
+    "sugar-high": "^0.6.1"
+  },
+  "devDependencies": {
+    "@midday/tsconfig": "workspace:*",
+    "@types/node": "^20.13.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
+  }
+}

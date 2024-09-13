@@ -1,0 +1,19 @@
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir=".next/static"
+name = "website"
+
+[vars]
+UPSTASH_REDIS_REST_TOKEN = "AapPAAIncDE1YjNhMjBhYmY4YWY0M2FhOWQyNWM2MzE3MjYyZGY5NHAxNDM1OTk"
+UPSTASH_REDIS_REST_URL = "https://moving-kitten-43599.upstash.io"
+NEXT_PUBLIC_LOGSNAG_TOKEN = "40d9f6500ad49876502047043f65a566"
+NEXT_PUBLIC_LOGSNAG_PROJECT = "solomon-ai"
+NEXT_PUBLIC_LOGSNAG_DISABLED = "false"
+PLAIN_API_KEY = "plainApiKey_UQ7HiIxbPKPkj4Q019v34na2WFlJMr9tgFkvZE1_ohA"
+NEXT_PUBLIC_SUPABASE_URL = "https://vhjskazwxmqjbnwyhxux.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoanNrYXp3eG1xamJud3loeHV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTc5MDY0NzksImV4cCI6MjAzMzQ4MjQ3OX0.xjpHnoRb3Kc_-4dCt7rrmXdwIw6jMx21q6omf4r9ozc"
+NEXT_PUBLIC_SUPABASE_ID = "vhjskazwxmqjbnwyhxux"
+SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZoanNrYXp3eG1xamJud3loeHV4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcxNzkwNjQ3OSwiZXhwIjoyMDMzNDgyNDc5fQ.2MPtuJsKjLmJF5cmM7T-xoVwn0VaXj1w8p3vQAWyb28"
+RESEND_API_KEY = "re_RuzXPwEw_C2P16H4ph1xEhQAhqk4qoMWo"
+LOOPS_ENDPOINT = "https://email-list.solomon-ai.io"
+LOOPS_API_KEY = "14f478e8bc04f90364d9d3218cf9e844"
+NEXT_PUBLIC_OPENPANEL_CLIENT_ID = "198e9cce-89d0-41d7-94cc-b56fa1224ed4"
