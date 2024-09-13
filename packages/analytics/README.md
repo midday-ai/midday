@@ -122,7 +122,3 @@ We welcome contributions to improve the Financial Analysis module. Please read o
 ## Support
 
 If you encounter any issues or have questions, please file an issue on the GitHub issue tracker.
-
----
-
-For more detailed information about each method and its implementation, please refer to the source code and inline documentation in `financial-analysis.ts`.
