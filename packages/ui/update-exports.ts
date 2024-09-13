@@ -47,6 +47,9 @@ function updatePackageJson(newExports: Record<string, string>) {
   // Merge current exports with new exports, giving priority to current exports
   const mergedExports = { ...newExports, ...currentExports };
 
+  // Add PostCSS config export
+  mergedExports["./postcss.config"] = "./postcss.config.js";
+
   // Remove leading "./" from export keys
   const cleanedExports = Object.fromEntries(
     Object.entries(mergedExports).map(([key, value]) => [

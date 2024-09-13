@@ -3,11 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "files": [
-    "tailwind.config.ts",
-    "postcss.config.js",
-    "globals.css"
-  ],
+  "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -175,7 +171,9 @@
     "./use-toast": "./src/components/use-toast.tsx",
     "./utils": "./src/utils/index.ts",
     "./wrapper/assistant-provider-wrapper": "./src/wrapper/assistant-provider-wrapper.tsx",
-    ".": "./src/index.ts"
+    "./postcss": "./postcss.config.js",
+    "./globals.css": "./src/globals.css",
+    "./tailwind.config.ts": "./tailwind.config.ts"
   },
   "dependencies": {
     "@assistant-ui/react": "^0.5.51",
