@@ -3,6 +3,7 @@ import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import TabbedCharts from "@/components/charts/tabbed-charts";
+import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
@@ -71,6 +72,7 @@ export default async function Overview({ searchParams }: { searchParams: Record<
         <div className="mt-8">
           <TabbedCharts currency={searchParams.currency ?? "USD"} />
         </div>
+
         <Widgets
           initialPeriod={initialPeriod}
           disabled={isEmpty}
