@@ -1,11 +1,11 @@
 "use client";
 
-import { CategoryDataConverter } from "../../../../lib/converters/category-converter";
 import {
   CategoryMonthlyExpenditure,
   CategoryMonthlyIncome
 } from "client-typescript-sdk";
 import React from "react";
+import { CategoryDataConverter } from "../../../../lib/converters/category-converter";
 
 import {
   Accordion,
@@ -39,6 +39,7 @@ export interface MonthlyFinancialByCategoryChartProps {
   locale?: string;
   enableAssistantMode?: boolean;
   enableDrillDown?: boolean;
+  disabled?: boolean;
 }
 
 // TODO: cluster by month (amount spent across months - totals)
@@ -53,7 +54,13 @@ export const MonthlyFinancialByCategoryChart: React.FC<
   locale,
   enableAssistantMode,
   enableDrillDown,
+  disabled,
 }) => {
+  // if disabled generate data
+  if (disabled) {
+    data = type === "income" ?  FinancialDataGenerator.generateUserCategoryMonthlyData(1000, 2024, "income"): FinancialDataGenerator.generateUserCategoryMonthlyData(1000, 2024, "expense"); 
+  }
+
     const getUniqueCategories = (
       data: Array<CategoryMonthlyExpenditure | CategoryMonthlyIncome>,
     ): string[] => {
