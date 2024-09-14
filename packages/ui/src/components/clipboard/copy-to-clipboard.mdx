@@ -1,0 +1,31 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as CopyToClipboard from "./copy-to-clipboard.stories";
+
+<Meta of={CopyToClipboard} />
+
+# CopyToClipboard Component
+
+The `CopyToClipboard` a component enabling users to copy text to their clipboard. It can be used to provide users with a quick and easy way to copy text, such as URLs, email addresses, or other important information.
+
+## Component Props
+
+<Canvas of={CopyToClipboard.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `CopyToClipboard`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <CopyToClipboard
+      href="https://example.com"
+      label="Click me"
+      active={true}
+    />
+  </Story>
+</Canvas>
+```

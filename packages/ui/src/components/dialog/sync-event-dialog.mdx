@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as DataSyncDialog from "./sync-event-dialog.stories";
+
+<Meta of={DataSyncDialog} />
+
+# DataSyncDialog Component
+
+The `DataSyncDialog` is a dialog component used to provide the status of a sync event
+
+## Component Props
+
+<Canvas of={DataSyncDialog.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `DataSyncDialog`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <DataSyncDialog href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```
