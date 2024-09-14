@@ -5,7 +5,7 @@ import { TrackerWidget, TrackerWidgetSkeleton } from "./tracker-widget";
 
 export function Tracker({ date, hideDaysIndicators }) {
   return (
-    <div className="border aspect-square overflow-hidden relative p-4 md:p-8">
+    <div className="border aspect-square overflow-hidden relative p-4 md:p-8 rounded-2xl">
       <ErrorBoundary errorComponent={ErrorFallback}>
         <Suspense fallback={<TrackerWidgetSkeleton key={date} />}>
           <TrackerWidget date={date} hideDaysIndicators={hideDaysIndicators} />

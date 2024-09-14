@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  formatAmount,
-  getYAxisWidth,
-  roundToNearestFactor,
-} from "../../../lib/chart-utils";
-import { RadialChartDataPoint } from "../../../types/chart";
 import { format } from "date-fns";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   RadarChart as BaseRadialChart,
   PolarAngleAxis,
@@ -21,6 +15,12 @@ import {
 import {
   Payload
 } from "recharts/types/component/DefaultTooltipContent";
+import {
+  formatAmount,
+  getYAxisWidth,
+  roundToNearestFactor,
+} from "../../../lib/chart-utils";
+import { RadialChartDataPoint } from "../../../types/chart";
 
 import { useWrapperState } from "./chart-wrapper";
 
@@ -87,41 +87,25 @@ export interface RadialChartProps {
  */
 export const RadialChart: React.FC<RadialChartProps> = ({
   currency,
-  data,
+  data: propData,
   height = 290,
   locale,
   enableAssistantMode,
   disabled = false,
 }) => {
-  // if disabled generate random data
-  if (disabled) {
-    data = [
-      {
-        label: "Math",
-        value: 120,
-      },
-      {
-        label: "Chinese",
-        value: 98,
-      },
-      {
-        label: "English",
-        value: 86,
-      },
-      {
-        label: "Geography",
-        value: 99,
-      },
-      {
-        label: "Physics",
-        value: 85,
-      },
-      {
-        label: "History",
-        value: 65,
-      },
-    ];
-  }
+  const data = useMemo(() => {
+    if (disabled) {
+      return [
+        { label: "Math", value: 120 },
+        { label: "Chinese", value: 98 },
+        { label: "English", value: 86 },
+        { label: "Geography", value: 99 },
+        { label: "Physics", value: 85 },
+        { label: "History", value: 65 },
+      ];
+    }
+    return propData;
+  }, [disabled, propData]);
 
   const [aiModalOpenState, setAiModalOpenState] =
     React.useState<boolean>(false);

@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  formatAmount
-} from "../../../lib/chart-utils";
-import { ScatterChartDataPoint } from "../../../types/chart";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ScatterChart as BaseScatterChart,
   CartesianGrid,
@@ -16,9 +12,13 @@ import {
 import {
   Payload
 } from "recharts/types/component/DefaultTooltipContent";
+import {
+  formatAmount
+} from "../../../lib/chart-utils";
+import { ScatterChartDataPoint } from "../../../types/chart";
 
-import { useWrapperState } from "./chart-wrapper";
 import { generateScatterChartData } from "../../../lib/random/generator";
+import { useWrapperState } from "./chart-wrapper";
 
 /**
  * Props for the ToolTipContent component.
@@ -51,7 +51,7 @@ export interface ScatterChartProps {
  */
 export const ScatterChart: React.FC<ScatterChartProps> = ({
   currency,
-  data,
+  data: propData,
   height = 290,
   locale,
   enableAssistantMode,
@@ -60,13 +60,16 @@ export const ScatterChart: React.FC<ScatterChartProps> = ({
   disabled = false,
 }) => {
   // if disabled generate random data
-  if (disabled) {
-    data = generateScatterChartData({
-      count: 50,
-      minValue: 0,
-      maxValue: 1000,
-    });
-  }
+  const data = useMemo(() => {
+    if (disabled) {
+      return generateScatterChartData({
+        count: 50,
+        minValue: 100,
+        maxValue: 500,
+      });
+    }
+    return propData;
+  }, [disabled, propData]);
 
   const disabledClassName = disabled ? "opacity-15" : "";
   const [aiModalOpenState, setAiModalOpenState] =

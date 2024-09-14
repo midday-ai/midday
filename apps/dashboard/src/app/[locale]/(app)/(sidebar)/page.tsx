@@ -1,11 +1,15 @@
+import CardWrapper from "@/components/card/card-wrapper";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
+import TabbedCharts from "@/components/charts/tabbed-charts";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
 import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import { AreaChart } from "@midday/ui/charts/base/area-chart";
 import { cn } from "@midday/ui/cn";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -24,14 +28,13 @@ const defaultValue = {
   period: "monthly",
 };
 
-export default async function Overview({ searchParams }) {
+export default async function Overview({ searchParams }: { searchParams: Record<string, string> }) {
   const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
-
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
-    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value)
+    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? '{}')
     : {
         id: "this_year",
         from: startOfYear(new Date()).toISOString(),
@@ -65,7 +68,9 @@ export default async function Overview({ searchParams }) {
             </div>
           </div>
         </div>
-
+        <div className="mt-8">
+          <TabbedCharts currency={searchParams.currency ?? "USD"} />
+        </div>
         <Widgets
           initialPeriod={initialPeriod}
           disabled={isEmpty}

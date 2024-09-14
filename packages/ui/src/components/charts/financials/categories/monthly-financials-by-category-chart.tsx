@@ -4,7 +4,7 @@ import {
   CategoryMonthlyExpenditure,
   CategoryMonthlyIncome
 } from "client-typescript-sdk";
-import React from "react";
+import React, { useMemo } from "react";
 import { CategoryDataConverter } from "../../../../lib/converters/category-converter";
 
 import {
@@ -27,6 +27,8 @@ import {
   SelectValue,
 } from "../../../select";
 
+import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
+import { cn } from "../../../../utils/cn";
 import { AreaChart } from "../../base/area-chart";
 import { RadialChart } from "../../base/radial-chart";
 import { ScatterChart } from "../../base/scatter-chart";
@@ -48,7 +50,7 @@ export const MonthlyFinancialByCategoryChart: React.FC<
   MonthlyFinancialByCategoryChartProps
 > = ({
   currency,
-  data,
+  data: propData,
   type,
   height = 290,
   locale,
@@ -56,10 +58,14 @@ export const MonthlyFinancialByCategoryChart: React.FC<
   enableDrillDown,
   disabled,
 }) => {
-  // if disabled generate data
-  if (disabled) {
-    data = type === "income" ?  FinancialDataGenerator.generateUserCategoryMonthlyData(1000, 2024, "income"): FinancialDataGenerator.generateUserCategoryMonthlyData(1000, 2024, "expense"); 
-  }
+  const data = useMemo(() => {
+    if (disabled) {
+      return type === "income"
+        ? FinancialDataGenerator.generateUserCategoryMonthlyData(1000, 2024, "income")
+        : FinancialDataGenerator.generateUserCategoryMonthlyData(1000, 2024, "expense");
+    }
+    return propData;
+  }, [disabled, type, propData]);
 
     const getUniqueCategories = (
       data: Array<CategoryMonthlyExpenditure | CategoryMonthlyIncome>,
@@ -161,13 +167,16 @@ export const MonthlyFinancialByCategoryChart: React.FC<
               ))}
             </SelectContent>
           </Select>
-          <div className="border-none text-white shadow-none">
+          <div className={cn( "border-none text-white shadow-none", {
+            "opacity-50": disabled,
+          })}>
             <AreaChart
               currency={currency}
               data={chartData}
               height={height}
               locale={locale}
               enableAssistantMode={enableAssistantMode}
+              disabled={disabled}
             />
 
             {enableDrillDown && scatterChartData.length > 0 && (

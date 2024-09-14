@@ -27,12 +27,22 @@ const icons = {
   "/vault": () => <Icons.Files size={22} />,
   "/settings": () => <Icons.Settings size={22} />,
   "/inbox": () => <Icons.Inbox2 size={22} />,
+  "/cash-flow": () => <Icons.Wallet size={22} />,
+  "/categories": () => <Icons.Categories size={22} />,
 };
 
 const defaultItems = [
   {
     path: "/",
     name: "Overview",
+  },
+  {
+    path: "/cash-flow",
+    name: "Cash Flow",
+  },
+  {
+    path: "/categories",
+    name: "Categories",
   },
   {
     path: "/inbox",
@@ -80,7 +90,7 @@ const Item = ({
   onSelect,
 }: ItemProps) => {
   const y = useMotionValue(0);
-  const Icon = icons[item.path];
+  const Icon = icons[item.path as keyof typeof icons];
 
   return (
     <TooltipProvider delayDuration={70}>

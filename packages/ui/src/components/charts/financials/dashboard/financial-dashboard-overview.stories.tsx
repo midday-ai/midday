@@ -1,10 +1,10 @@
-import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 import { useAssistant } from "@ai-sdk/react";
 import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useVercelUseAssistantRuntime } from "@assistant-ui/react-ai-sdk";
 import { Meta, StoryFn } from "@storybook/react";
 import React from "react";
 import { JSX } from "react/jsx-runtime";
+import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 
 import {
     MonthlySpendingChart,

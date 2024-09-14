@@ -3,7 +3,7 @@ import { InsightsWidget } from "./insights-widget";
 
 export function Insights() {
   return (
-    <div className="border aspect-square overflow-hidden relative flex flex-col p-4 md:p-8">
+    <div className="border aspect-square overflow-hidden relative flex flex-col p-4 md:p-8 rounded-2xl">
       <h2 className="text-lg">Assistant</h2>
 
       <Suspense>

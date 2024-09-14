@@ -9,7 +9,7 @@ import {
 
 export function Vault() {
   return (
-    <div className="border aspect-square overflow-hidden relative p-4 md:p-8">
+    <div className="border aspect-square overflow-hidden relative p-4 md:p-8 rounded-2xl">
       <VaultWidgetHeader />
 
       <ErrorBoundary errorComponent={ErrorFallback}>

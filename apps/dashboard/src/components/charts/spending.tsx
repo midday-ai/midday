@@ -14,7 +14,7 @@ export async function Spending({
   currency?: string;
 }) {
   return (
-    <div className="border aspect-square relative overflow-hidden">
+    <div className="border aspect-square relative overflow-hidden rounded-2xl">
       <div className="p-4 md:p-8 flex-col">
         <SpendingPeriod initialPeriod={initialPeriod} />
 
