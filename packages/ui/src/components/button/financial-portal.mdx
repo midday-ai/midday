@@ -1,0 +1,31 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as FinancialPortalButton from "./financial-portal-button.stories";
+
+<Meta of={FinancialPortalButton} />
+
+# FinancialPortalButton Component
+
+The `FinancialPortalButton` is a button component to access the financial portal.
+
+## Component Props
+
+<Canvas of={FinancialPortalButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `FinancialPortalButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <FinancialPortalButton
+      href="https://example.com"
+      label="Click me"
+      active={true}
+    />
+  </Story>
+</Canvas>
+```

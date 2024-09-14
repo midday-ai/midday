@@ -1,8 +1,10 @@
+import { cn } from "../utils/cn";
+
 const bars = Array(12).fill(0);
 
-export const Spinner = ({ size = 16 }) => {
+export const Spinner = ({ size = 16, className }: { size?: number; className?: string }) => {
   return (
-    <div className="loading-parent">
+    <div className={cn("loading-parent", className)}>
       <div
         className="loading-wrapper"
         data-visible

@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as DeleteButton from "./delete-user-button.stories";
+
+<Meta of={DeleteButton} />
+
+# DeleteButton Component
+
+The `DeleteButton` is a button used primarily to delete a user.
+
+## Component Props
+
+<Canvas of={DeleteButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `DeleteButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <DeleteButton href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```

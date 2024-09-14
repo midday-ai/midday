@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as LogInButton from "./login-button.stories";
+
+<Meta of={LogInButton} />
+
+# LogInButton Component
+
+The `LogInButton` is a button component sign up.
+
+## Component Props
+
+<Canvas of={LogInButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `LogInButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <LogInButton href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```

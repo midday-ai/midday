@@ -1,0 +1,48 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as NotificationBannerSimple from "./simple-notification-banner.stories";
+
+<Meta of={NotificationBannerSimple} />
+
+# NotificationBannerSimple Component
+
+The `NotificationBannerSimple` is a flexible component used to display a notification banner on the application. It supports customizable options like position, centered alignment, full screen mode, and optional margins.
+
+## Component Props
+
+<Canvas of={NotificationBannerSimple.Default} />
+
+<Controls />
+
+## Usage
+
+```tsx
+<Canvas>
+  <NotificationBannerSimple
+    position="top"
+    message="Consider upgrading your plan to continue using all features."
+    onSave={() => alert("Saved!")}
+    onReject={() => alert("Rejected!")}
+  />
+</Canvas>
+```
+
+## Detailed Description
+
+The `NotificationBannerSimple` component is designed to be minimally invasive yet clearly visible to the user. It can be positioned at the top or bottom of the viewport. The component also allows for various customizations such as:
+
+- **Centered Layout**: Whether the banner should be centered horizontally within the viewport.
+- **Full Screen**: Extends the banner to the full width of the screen, making it more prominent.
+- **Margin Left**: Optionally adds a margin to the left side of the banner, useful when it is not full screen and needs to be aligned differently.
+
+These features make the component versatile for various notification needs in a web application.
+
+## Examples
+
+### Top Position Banner
+
+<Canvas of={NotificationBannerSimple.TopPositionBanner} />
+
+### Bottom Position Banner
+
+<Canvas of={NotificationBannerSimple.BottomPositionBanner} />

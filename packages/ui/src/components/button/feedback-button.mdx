@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as FeedbackButton from "./feedback-button.stories";
+
+<Meta of={FeedbackButton} />
+
+# FeedbackButton Component
+
+The `FeedbackButton` is a button component providing access to the feedback page
+
+## Component Props
+
+<Canvas of={FeedbackButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `FeedbackButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <FeedbackButton href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```
