@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as FeedbackComponent from "./feedback.stories";
+
+<Meta of={FeedbackComponent} />
+
+# FeedbackComponent Component
+
+The `FeedbackComponent` is a component that displays feedback. This is used from canny.
+
+## Component Props
+
+<Canvas of={FeedbackComponent.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `FeedbackComponent`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <FeedbackComponent />
+  </Story>
+</Canvas>
+```

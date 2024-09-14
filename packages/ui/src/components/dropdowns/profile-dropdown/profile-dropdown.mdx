@@ -1,0 +1,32 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as ProfileDropdown from "./profile-dropdown.stories";
+
+<Meta of={ProfileDropdown} />
+
+# ProfileDropdown Component
+
+The `ProfileDropdown` is a profile dropdown component used to display a dropdown on the application. It supports customizable options like navigation, teams, user navigation, and user details.
+
+## Component Props
+
+<Canvas of={ProfileDropdown.Default} />
+
+<Controls />
+
+## Usage
+
+```tsx
+<Canvas>
+  <ProfileDropdown
+    navigation=[]
+    user={{}}
+  />
+</Canvas>
+```
+
+## Examples
+
+### Default Profile dropdown
+
+<Canvas of={ProfileDropdown.Default} />

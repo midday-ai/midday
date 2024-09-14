@@ -1,0 +1,31 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as FileUploadShell from "./file-upload-shell.stories";
+
+<Meta of={FileUploadShell} />
+
+# FileUploadShell Component
+
+The `FileUploadShell` is a shell component for file uploads.
+
+## Component Props
+
+<Canvas of={FileUploadShell.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `FileUploadShell`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <FileUploadShell
+      href="https://example.com"
+      label="Click me"
+      active={true}
+    />
+  </Story>
+</Canvas>
+```
