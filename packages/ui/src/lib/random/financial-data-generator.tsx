@@ -2381,6 +2381,7 @@ export class FinancialDataGenerator {
       newAccountsAvailable: false,
       updatedAt: new Date().toISOString(),
       linkType: "LINK_TYPE_PLAID",
+      institutionName: FinancialDataGenerator.getRandomString(8),
       plaidInstitutionId: FinancialDataGenerator.getRandomString(10),
       studentLoanAccounts:
         FinancialDataGenerator.generateRandomStudentLoanAccounts(5),

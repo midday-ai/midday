@@ -25,9 +25,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Overview of your company's profit performance"
               subtitle="Total Profit"
               subtitleDescription="Compared to previous year"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Cash Flow" 
@@ -35,9 +34,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Weekly cash flow trends"
               subtitle="Net Cash Flow"
               subtitleDescription="This week"
-              className="border-none"
           >
-            <AreaChart currency={currency} data={[]} height={300} />
+            <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Revenue Growth" 
@@ -45,9 +43,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Annual revenue growth rate"
               subtitle="Growth Rate"
               subtitleDescription="Compared to previous year"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Profit Margin" 
@@ -55,9 +52,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Monthly profit margin trends"
               subtitle="Average Margin"
               subtitleDescription="Last 6 months"
-              className="border-none"
           >
-            <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
         </div>
       </TabsContent>
@@ -69,9 +65,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Overview of monthly income trends"
               subtitle="Total Income"
               subtitleDescription="This month vs last month"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+                      <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Income by Category" 
@@ -79,9 +74,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Breakdown of income sources"
               subtitle="Top Category"
               subtitleDescription="Highest income source"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true}/>
           </CardWrapper>
           <CardWrapper 
               title="Income Growth Rate" 
@@ -89,9 +83,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Annual income growth trends"
               subtitle="Growth Rate"
               subtitleDescription="Compared to previous year"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Recurring Revenue" 
@@ -99,9 +92,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Stable income from recurring sources"
               subtitle="MRR"
               subtitleDescription="Monthly Recurring Revenue"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Income Seasonality" 
@@ -109,9 +101,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Seasonal patterns in income"
               subtitle="Peak Season"
               subtitleDescription="Highest income period"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Customer Segments" 
@@ -119,9 +110,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Income distribution across customer types"
               subtitle="Top Segment"
               subtitleDescription="Highest revenue segment"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Average Transaction Value" 
@@ -129,9 +119,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Changes in average transaction size"
               subtitle="ATV"
               subtitleDescription="This month vs last month"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Income Forecast" 
@@ -139,9 +128,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Projected income based on current trends"
               subtitle="Forecast Total"
               subtitleDescription="Estimated future income"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
         </div>
       </TabsContent>
@@ -153,9 +141,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Overview of monthly expense trends"
               subtitle="Total Expenses"
               subtitleDescription="This month vs last month"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Expenses by Category" 
@@ -163,9 +150,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Breakdown of expense categories"
               subtitle="Top Category"
               subtitleDescription="Highest expense category"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Fixed vs Variable Expenses" 
@@ -173,9 +159,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Ratio of fixed to variable costs"
               subtitle="Fixed Expenses"
               subtitleDescription="Percentage of total expenses"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Expense Growth Rate" 
@@ -183,9 +168,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Annual expense growth trends"
               subtitle="Growth Rate"
               subtitleDescription="Compared to previous year"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Operational Efficiency" 
@@ -193,9 +177,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Expense efficiency over time"
               subtitle="Efficiency Ratio"
               subtitleDescription="Current vs target ratio"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Expense Seasonality" 
@@ -203,9 +186,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Seasonal patterns in expenses"
               subtitle="Peak Season"
               subtitleDescription="Highest expense period"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Cost Savings" 
@@ -213,9 +195,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Realized savings from cost-cutting measures"
               subtitle="Total Savings"
               subtitleDescription="Compared to budget"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
           <CardWrapper 
               title="Expense Forecast" 
@@ -223,9 +204,8 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency }) => {
               description="Projected expenses based on current trends"
               subtitle="Forecast Total"
               subtitleDescription="Estimated future expenses"
-              className="border-none"
           >
-              <AreaChart currency={currency} data={[]} height={300} />
+              <AreaChart currency={currency} data={[]} height={300} disabled={true} />
           </CardWrapper>
         </div>
       </TabsContent>

@@ -1,6 +1,7 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { InboxListSkeleton } from "@/components/inbox-list-skeleton";
 import { Cookies } from "@/utils/constants";
+import { Card } from "@midday/ui/card";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
@@ -11,7 +12,7 @@ export async function Inbox({ disabled }) {
   const filter = cookies().get(Cookies.InboxFilter)?.value ?? "all";
 
   return (
-    <div className="border relative aspect-square overflow-hidden p-4 md:p-8 rounded-2xl">
+    <Card className="relative aspect-square overflow-hidden p-4 md:p-8 rounded-2xl">
       <InboxHeader filter={filter} disabled={disabled} />
 
       <ErrorBoundary errorComponent={ErrorFallback}>
@@ -22,6 +23,6 @@ export async function Inbox({ disabled }) {
           <InboxWidget disabled={disabled} filter={filter} />
         </Suspense>
       </ErrorBoundary>
-    </div>
+    </Card>
   );
 }

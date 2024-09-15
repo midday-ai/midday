@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { BsExclamation } from "react-icons/bs";
 import {
     CreditAccount,
@@ -8,6 +9,7 @@ import {
     MelodyFinancialContext,
     StudentLoanAccount,
 } from "solomon-ai-typescript-sdk";
+import { FinancialDataGenerator } from "../../lib/random/financial-data-generator";
 import {
     Card,
     CardContent,
@@ -70,36 +72,44 @@ const calculateOutstandingBalance = (
 };
 
 interface ConnectedAccountSummaryProps {
-    financialProfile: FinancialUserProfile;
-    financialContext: MelodyFinancialContext;
+    financialProfile?: FinancialUserProfile;
+    financialContext?: MelodyFinancialContext;
     className?: string;
     name: string;
+    demoMode?: boolean;
 }
 
 // Component to display connected account summary       
 export const ConnectedAccountSummary: React.FC<
     ConnectedAccountSummaryProps
-> = ({ financialProfile, financialContext, name }) => {
+> = ({ financialProfile, financialContext, name, demoMode = false }) => {
 
+    useMemo(() => {
+        if (demoMode || (!financialProfile || !financialContext)) {
+            financialProfile = FinancialDataGenerator.generateFinancialProfile();
+            financialContext = FinancialDataGenerator.generateFinancialContext();
+        }
+    }, [financialProfile, financialContext, demoMode]);
+    
     // Calculate balances and outstanding amounts
     const cashBalanceAcrossBankAccts = calculateCashBalance(
-        financialProfile.link,
+        financialProfile?.link,
         "bankAccounts",
     );
     const cashBalanceAcrossInvestmentAccts = calculateCashBalance(
-        financialProfile.link,
+        financialProfile?.link,
         "investmentAccounts",
     );
     const cashBalanceAcrossCreditAccts = calculateCashBalance(
-        financialProfile.link,
+        financialProfile?.link,
         "creditAccounts",
     );
     const outstandingBalanceAcrossMortgageAccts = calculateOutstandingBalance(
-        financialProfile.link,
+        financialProfile?.link,
         "mortgageAccounts",
     );
     const outstandingBalanceAcrossStudentLoanAccts = calculateOutstandingBalance(
-        financialProfile.link,
+        financialProfile?.link,
         "studentLoanAccounts",
     );
 
@@ -110,17 +120,17 @@ export const ConnectedAccountSummary: React.FC<
     const assets = cashBalanceAcrossBankAccts + cashBalanceAcrossInvestmentAccts;
 
     const expense =
-        financialContext.expenses?.[0]?.averageMonthlyDiscretionarySpending || 0;
-    const income = financialContext.income?.[0]?.incomeLastMonth || 0;
+        financialContext?.expenses?.[0]?.averageMonthlyDiscretionarySpending || 0;
+    const income = financialContext?.income?.[0]?.incomeLastMonth || 0;
     const topPaymentChannel =
-        financialContext.paymentChannels?.[0]?.paymentChannel || "None";
+        financialContext?.paymentChannels?.[0]?.paymentChannel || "None";
 
     const numberOfConnectedAccounts =
-        (financialContext.bankAccounts?.length ?? 0) +
-        (financialContext.creditAccounts?.length ?? 0) +
-        (financialContext.investmentAccounts?.length ?? 0) +
-        (financialContext.mortgageLoanAccounts?.length ?? 0) +
-        (financialContext.studentLoanAccounts?.length ?? 0);
+        (financialContext?.bankAccounts?.length ?? 0) +
+        (financialContext?.creditAccounts?.length ?? 0) +
+        (financialContext?.investmentAccounts?.length ?? 0) +
+        (financialContext?.mortgageLoanAccounts?.length ?? 0) +
+        (financialContext?.studentLoanAccounts?.length ?? 0);
 
     const stats = [
         {
@@ -144,7 +154,7 @@ export const ConnectedAccountSummary: React.FC<
     ];
 
     return (
-        <div className="rounded-2xl border-4 border-gray-50 bg-white shadow-lg w-full">
+        <div className="rounded-2xl border-4 border-gray-50 bg-background text-foreground shadow-lg w-full">
             <div className="mx-auto w-full p-6">
                 <div className="mx-auto max-w-7xl lg:mx-0">
                     <div className="flex flex-row justify-between">
@@ -228,11 +238,18 @@ export const ConnectedAccountSummary: React.FC<
 };
 
 interface ConnectedAccountsProps {
-    financialProfile: FinancialUserProfile;
-    financialContext: MelodyFinancialContext;
+    financialProfile?: FinancialUserProfile;
+    financialContext?: MelodyFinancialContext;
 }
 
 const ConnectedAccounts: React.FC<ConnectedAccountsProps> = ({ financialProfile, financialContext }) => {
+    useMemo(() => {
+        if (!financialProfile || !financialContext) {
+            financialProfile = FinancialDataGenerator.generateFinancialProfile();
+            financialContext = FinancialDataGenerator.generateFinancialContext();
+        }
+    }, [financialProfile, financialContext]);
+
     const linkedAccounts = financialProfile?.link;
     const hasLinkedAccounts = linkedAccounts && linkedAccounts.length > 0;
 
@@ -261,7 +278,7 @@ const ConnectedAccounts: React.FC<ConnectedAccountsProps> = ({ financialProfile,
     );
 
     return (
-        <div className="max-w-5xl scrollbar-hide overflow-hidden rounded-2xl bg-white p-5">
+        <div className="scrollbar-hide overflow-hidden rounded-2xl bg-white p-5">
             <Tabs defaultValue="bankaccounts">
                 <TabsList>
                     <TabsTrigger value="bankaccounts">Bank Accounts</TabsTrigger>
@@ -269,7 +286,7 @@ const ConnectedAccounts: React.FC<ConnectedAccountsProps> = ({ financialProfile,
                 </TabsList>
                 <TabsContent
                     value="creditaccounts"
-                    className="w-fit overflow-auto py-2"
+                    className="w-fit overflow-auto py-2 max-w-6xl"
                 >
                     <div className="grid md:flex md:flex-row md:gap-2">
                         {allCreditAccounts.length === 0 ? (
@@ -327,7 +344,8 @@ const ConnectedAccounts: React.FC<ConnectedAccountsProps> = ({ financialProfile,
                         )}
                     </div>
                 </TabsContent>
-                <TabsContent value="bankaccounts" className="overflow-auto py-2">
+                <TabsContent value="bankaccounts" 
+                    className="overflow-auto py-2 max-w-6xl">
                     <div className="grid md:flex md:flex-row md:gap-2">
                         {allBankAccounts.length === 0 ? (
                             <div className="flex flex-row gap-1 p-[3%]">

@@ -22,7 +22,7 @@ export function CashflowCharts({ currency, disabledCharts = [], disableAllCharts
                 description="Overview of your company's profit performance"
                 subtitle="Net Income"
                 subtitleDescription="Compared to previous year"
-                className={`border-none ${chartOpacity("netIncome")}`}
+                className={`${chartOpacity("netIncome")}`}
             >
                 <AreaChart currency={currency} data={[]} height={500} disabled={disableAllCharts || disabledCharts.includes("netIncome")}/>
             </CardWrapper>
@@ -32,7 +32,7 @@ export function CashflowCharts({ currency, disabledCharts = [], disableAllCharts
                 description="Monthly revenue trends"
                 subtitle="Revenue"
                 subtitleDescription="This month vs last month"
-                className={`border-none ${chartOpacity("revenue")}`}
+                className={`${chartOpacity("revenue")}`}
             >
                 <AreaChart currency={currency} data={[]} height={500} disabled={disableAllCharts || disabledCharts.includes("revenue")}/>
             </CardWrapper>
@@ -43,7 +43,7 @@ export function CashflowCharts({ currency, disabledCharts = [], disableAllCharts
                     description="Monthly expense breakdown"
                     subtitle="Expenses"
                     subtitleDescription="This month vs last month"
-                    className={`border-none ${chartOpacity("expenses")}`}
+                    className={`${chartOpacity("expenses")}`}
                 >
                     <AreaChart currency={currency} data={[]} height={500} disabled={disableAllCharts || disabledCharts.includes("expenses")}/>
                 </CardWrapper>
@@ -53,7 +53,7 @@ export function CashflowCharts({ currency, disabledCharts = [], disableAllCharts
                     description="Quarterly cash flow overview"
                     subtitle="Cash Flow"
                     subtitleDescription="This quarter vs last quarter"
-                    className={`border-none ${chartOpacity("cashFlow")}`}
+                    className={`${chartOpacity("cashFlow")}`}
                 >
                     <AreaChart currency={currency} data={[]} height={500} disabled={disableAllCharts || disabledCharts.includes("cashFlow")}/>
                 </CardWrapper>

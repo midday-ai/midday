@@ -1,14 +1,16 @@
 // import { SystemBanner } from "@/components/system-banner";
 import "@/styles/globals.css";
+import { Provider as Analytics } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
-import { Provider as Analytics } from "@midday/events/client";
 import { Toaster } from "@midday/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { Providers } from "./providers";
+import IntercomWidget from "@midday/ui/intercom-widget";
+import { IntercomScript } from "@midday/ui/intercom-script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.midday.ai"),
@@ -86,6 +88,12 @@ export default function Layout({
       >
         {/* <SystemBanner /> */}
         <Providers locale={locale}>{children}</Providers>
+        <IntercomWidget
+          appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
+        />
+        <IntercomScript
+          appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
+        />
         <Toaster />
         <Analytics />
       </body>

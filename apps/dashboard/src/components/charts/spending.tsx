@@ -1,3 +1,4 @@
+import { Card } from "@midday/ui/card";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 import { ErrorFallback } from "../error-fallback";
@@ -14,7 +15,7 @@ export async function Spending({
   currency?: string;
 }) {
   return (
-    <div className="border aspect-square relative overflow-hidden rounded-2xl">
+    <Card className="aspect-square relative overflow-hidden rounded-2xl">
       <div className="p-4 md:p-8 flex-col">
         <SpendingPeriod initialPeriod={initialPeriod} />
 
@@ -28,6 +29,6 @@ export async function Spending({
           </Suspense>
         </ErrorBoundary>
       </div>
-    </div>
+    </Card>
   );
 }

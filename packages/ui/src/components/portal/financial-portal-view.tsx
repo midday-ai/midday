@@ -1,97 +1,78 @@
 "use client";
 
 import { FinancialUserProfile, MelodyFinancialContext } from "client-typescript-sdk";
+import React, { useMemo } from "react";
+import { FinancialDataGenerator } from "../../lib/random/financial-data-generator";
 import { Card } from "../card";
 import { LinkedAccountCard } from "../cards/linked-account-card/linked-account-card";
 
 interface FinancialPortalOverviewProps {
-    financialProfile: FinancialUserProfile;
-    financialContext: MelodyFinancialContext;
+    financialProfile?: FinancialUserProfile;
+    financialContext?: MelodyFinancialContext;
+    demoMode?: boolean;
 }
 
-export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = ({ financialProfile, financialContext }) => {
+export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = ({ financialProfile, financialContext, demoMode = false }) => {
+    const {
+        linkedInstitutions,
+        linkedInstitutionNames,
+        bankAccounts,
+        creditAccounts,
+        investmentAccounts,
+        mortgageLoanAccounts,
+        studentLoanAccounts,
+        numConnectedAccounts,
+        stats
+    } = useMemo(() => {
+        if (demoMode || (!financialProfile || !financialContext)) {
+            financialProfile = FinancialDataGenerator.generateFinancialProfile();
+            financialContext = FinancialDataGenerator.generateFinancialContext();
+        }
 
-    const linkedInstitutions =
-        financialProfile.link !== undefined ? financialProfile.link : [];
+        const linkedInstitutions = financialProfile.link || [];
 
-    // get the linked institution names
-    const linkedInstitutionNames = linkedInstitutions.map((link) => {
-        return link.institutionName !== undefined
-            ? " " + link.institutionName.toLowerCase()
-            : "";
-    });
+        const linkedInstitutionNames = linkedInstitutions.map((link) =>
+            link.institutionName ? " " + link.institutionName.toLowerCase() : ""
+        );
 
-    // get all bank accounts from link
-    const bankAccounts = linkedInstitutions
-        ? linkedInstitutions
-            .filter((link) => link.bankAccounts !== undefined)
-            .map((link) => link.bankAccounts)
-            .flat()
-        : [];
+        const bankAccounts = linkedInstitutions.flatMap((link) => link.bankAccounts || []);
+        const creditAccounts = linkedInstitutions.flatMap((link) => link.creditAccounts || []);
+        const investmentAccounts = linkedInstitutions.flatMap((link) => link.investmentAccounts || []);
+        const mortgageLoanAccounts = linkedInstitutions.flatMap((link) => link.mortgageAccounts || []);
+        const studentLoanAccounts = linkedInstitutions.flatMap((link) => link.studentLoanAccounts || []);
 
-    // get all credit accounts from link
-    const creditAccounts = linkedInstitutions
-        ? linkedInstitutions
-            .filter((link) => link.creditAccounts !== undefined)
-            .map((link) => link.creditAccounts)
-            .flat()
-        : [];
+        const numConnectedAccounts =
+            bankAccounts.length +
+            creditAccounts.length +
+            investmentAccounts.length +
+            mortgageLoanAccounts.length +
+            studentLoanAccounts.length;
 
-    // get all investment accounts from link
-    const investmentAccounts = linkedInstitutions
-        ? linkedInstitutions
-            .filter((link) => link.investmentAccounts !== undefined)
-            .map((link) => link.investmentAccounts)
-            .flat()
-        : [];
+        const stats = [
+            { id: 1, name: "Connected Accounts", value: numConnectedAccounts },
+            { id: 2, name: "Number Of Linked Institutions", value: `${linkedInstitutions.length}` },
+            { id: 3, name: "Linked Institutions", value: `${linkedInstitutionNames}` },
+        ];
 
-    // get all mortgage accounts from link
-    const mortgageLoanAccounts = linkedInstitutions
-        ? linkedInstitutions
-            .filter((link) => link.mortgageAccounts !== undefined)
-            .map((link) => link.mortgageAccounts)
-            .flat()
-        : [];
-
-    // get all student loan accounts from link
-    const studentLoanAccounts = linkedInstitutions
-        ? linkedInstitutions
-            .filter((link) => link.studentLoanAccounts !== undefined)
-            .map((link) => link.studentLoanAccounts)
-            .flat()
-        : [];
-
-    const numConnectedAccounts =
-        bankAccounts.length +
-        creditAccounts.length +
-        investmentAccounts.length +
-        mortgageLoanAccounts.length +
-        studentLoanAccounts.length;
-
-    const stats = [
-        {
-            id: 1,
-            name: "Connected Accounts",
-            value: numConnectedAccounts,
-        },
-        {
-            id: 2,
-            name: "Number Of Linked Institutions",
-            value: `${linkedInstitutions.length}`,
-        },
-        {
-            id: 3,
-            name: "Linked Institutions",
-            value: `${linkedInstitutionNames}`,
-        },
-    ];
+        return {
+            linkedInstitutions,
+            linkedInstitutionNames,
+            bankAccounts,
+            creditAccounts,
+            investmentAccounts,
+            mortgageLoanAccounts,
+            studentLoanAccounts,
+            numConnectedAccounts,
+            stats
+        };
+    }, [financialProfile, financialContext, demoMode]);
 
     return (
         <div className="bg-background text-foreground">
-            <div className="w-full p-[3%]">
+            <div>
                 <div className="mx-auto w-full">
                     <div className="flex flex-row justify-between">
-                        <p className="text-base font-semibold leading-7 text-blue-600 md:pt-[10%]">
+                        <p className="text-base font-semibold leading-7 text-blue-600 md:pt-[5%]">
                             Solomon AI
                         </p>
                     </div>
@@ -117,7 +98,7 @@ export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = (
                                 {linkedInstitutions.length} Linked Accounts
                             </span>
                         </h2>
-                        <div className="grid grid-cols-1 gap-4 pt-3 md:grid-cols-2 lg:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 pt-3 md:grid-cols-3 lg:grid-cols-3">
                             {linkedInstitutions.map((link, idx) => (
                                 <LinkedAccountCard link={link} key={idx} />
                             ))}

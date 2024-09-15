@@ -27,7 +27,7 @@ export function CategoryCharts({ currency, disabledCharts = [], disableAllCharts
                         description="Overview of your company's profit performance"
                         subtitle="Expense Categories"
                         subtitleDescription="Compared to previous year"
-                        className={`border-none ${chartOpacity("categoryNetIncome")}`}
+                        className={`${chartOpacity("categoryNetIncome")}`}
                     >
                         <MonthlyFinancialByCategoryChart currency={currency} data={[]} height={400} type={"expense"} disabled={disableAllCharts || disabledCharts.includes("categoryNetIncome")}/>
                     </CardWrapper>
@@ -38,7 +38,7 @@ export function CategoryCharts({ currency, disabledCharts = [], disableAllCharts
                         description="Overview of your company's profit performance"
                         subtitle="Revenue"
                         subtitleDescription="This month vs last month"
-                        className={`border-none ${chartOpacity("categoryIncome")}`}
+                        className={`${chartOpacity("categoryIncome")}`}
                     >
                         <MonthlyFinancialByCategoryChart currency={currency} data={[]} height={400} type={"income"} disabled={disableAllCharts || disabledCharts.includes("categoryIncome")}/>
                     </CardWrapper>

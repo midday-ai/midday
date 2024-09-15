@@ -71,7 +71,7 @@ const CreditAccountsOverviewSummary: React.FC<CreditAccountPortalViewProps> = ({
                         defaultValue={validAccounts[0]?.name as string}
                         className="flex h-full"
                     >
-                        <TabsList className="flex-col items-start justify-start h-[50%] overflow-y-auto scrollbar-hide w-1/4 mr-4 border text-foreground rounded-xl">
+                        <TabsList className="flex-col items-start justify-start h-[50%] overflow-y-auto scrollbar-hide w-1/4 mr-4 border text-foreground rounded-2xl">
                             {validAccounts.map((account, idx) => (
                                 <TabsTrigger
                                     value={account.name as string}

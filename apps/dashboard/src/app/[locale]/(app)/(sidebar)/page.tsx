@@ -8,8 +8,10 @@ import { OverviewModal } from "@/components/modals/overview-modal";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
 import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import { Card } from "@midday/ui/card";
 import { AreaChart } from "@midday/ui/charts/base/area-chart";
 import { cn } from "@midday/ui/cn";
+import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
@@ -37,10 +39,10 @@ export default async function Overview({ searchParams }: { searchParams: Record<
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? '{}')
     : {
-        id: "this_year",
-        from: startOfYear(new Date()).toISOString(),
-        to: new Date().toISOString(),
-      };
+      id: "this_year",
+      from: startOfYear(new Date()).toISOString(),
+      to: new Date().toISOString(),
+    };
 
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
@@ -51,8 +53,13 @@ export default async function Overview({ searchParams }: { searchParams: Record<
 
   return (
     <>
+      <div className="w-full pt-[3%] mx-auto">
+        <Card className="p-[2%]">
+          <FinancialPortalOverview financialProfile={undefined} financialContext={undefined} />
+        </Card>
+      </div>
       <div>
-        <div className="h-[530px] mb-4">
+        <Card className="h-[530px] md:h-[700px] my-4 p-[2%]">
           <ChartSelectors defaultValue={defaultValue} />
 
           <div className="mt-8 relative">
@@ -68,7 +75,7 @@ export default async function Overview({ searchParams }: { searchParams: Record<
               />
             </div>
           </div>
-        </div>
+        </Card>
         <div className="mt-8">
           <TabbedCharts currency={searchParams.currency ?? "USD"} />
         </div>
