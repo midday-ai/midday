@@ -1,11 +1,12 @@
 "use client";
 
-import React, { createContext, ReactNode } from "react";
 import {
   AccountBalanceHistory,
   BankAccount,
   FinancialProfile,
+  FinancialUserProfile,
 } from "client-typescript-sdk";
+import React, { createContext, ReactNode } from "react";
 import { FinancialDataGenerator } from "../../../lib/random/financial-data-generator";
 import { cn } from "../../../utils/cn";
 
@@ -23,7 +24,7 @@ const AccountBalanceHistoryContext = createContext<AccountBalanceHistory[]>([]);
 
 export type BankAccountCardProps = {
   bankAccount: BankAccount;
-  financialProfile: FinancialProfile;
+  financialProfile: FinancialUserProfile;
   className?: string;
   contextQuestions?: string[];
   enableDemoMode?: boolean;
@@ -34,7 +35,7 @@ export type BankAccountCardProps = {
 /**
  * Bank Account Card Component that displays the bank account information
  *
- * @param {{ bankAccount: any; financialProfile: any; className: any; contextQuestions: any; enableDemoMode: any; children: any; historicalAccountBalance: any; }} param0
+ * @param {{ bankAccount: any; FinancialUserProfile: any; className: any; contextQuestions: any; enableDemoMode: any; children: any; historicalAccountBalance: any; }} param0
  * @param {*} param0.bankAccount
  * @param {*} param0.financialProfile
  * @param {*} param0.className

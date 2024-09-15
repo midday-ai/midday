@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { FinancialDataProcessor } from "../../../lib/financial-data-processor";
 
 import React from "react";
+import { Badge } from "../../badge";
 import { Button } from "../../button";
 import { CardHeader, CardTitle } from "../../card";
 import { Label } from "../../label";
@@ -68,7 +69,7 @@ const BankAccountCardHeader: React.FC = () => {
   return (
     <CardHeader className="grid grid-cols-[1fr_110px] items-start gap-4 space-y-0">
       <div className="space-y-1 text-left">
-        <CardTitle className="text-xs font-bold text-gray-900 dark:text-gray-200">
+        <CardTitle className="text-xs font-bold text-background dark:text-foreground">
           $
           {FinancialDataProcessor.formatNumber(
             bankAccount.balance,
@@ -85,15 +86,15 @@ const BankAccountCardHeader: React.FC = () => {
         </CardTitle>
         <div>
           <div className="flex flex-1 justify-start gap-2">
-            <Button
-              className="rounded-2xl border border-black bg-white px-2 font-bold text-background"
+            <Badge
+              className="rounded-2xl border border-black bg-background px-2 font-bold text-foreground"
               style={{
                 fontSize: "10px",
               }}
               variant={"outline"}
             >
               {bankAccount.subtype}
-            </Button>
+            </Badge>
           </div>
         </div>
         <div>
