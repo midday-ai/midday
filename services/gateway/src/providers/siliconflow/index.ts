@@ -1,17 +1,17 @@
-import { ProviderConfigs } from '../types';
+import { ProviderConfigs } from "../types";
 import {
   SiliconFlowEmbedConfig,
   SiliconFlowEmbedResponseTransform,
-} from './embed';
-import SiliconFlowAPIConfig from './api';
+} from "./embed";
+import SiliconFlowAPIConfig from "./api";
 import {
   SiliconFlowChatCompleteConfig,
   SiliconFlowChatCompleteResponseTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   SiliconFlowImageGenerateConfig,
   SiliconFlowImageGenerateResponseTransform,
-} from './imageGenerate';
+} from "./imageGenerate";
 
 const SiliconFlowConfig: ProviderConfigs = {
   embed: SiliconFlowEmbedConfig,

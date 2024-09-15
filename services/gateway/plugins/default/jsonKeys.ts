@@ -3,13 +3,13 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
+} from "../types";
+import { getText } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -36,19 +36,19 @@ export const handler: PluginHandler = async (
 
         // Check if the JSON contains any, all or none of the keys
         switch (operator) {
-          case 'any':
+          case "any":
             verdict = keys.some((key: string) =>
-              responseJson.hasOwnProperty(key)
+              responseJson.hasOwnProperty(key),
             );
             break;
-          case 'all':
+          case "all":
             verdict = keys.every((key: string) =>
-              responseJson.hasOwnProperty(key)
+              responseJson.hasOwnProperty(key),
             );
             break;
-          case 'none':
+          case "none":
             verdict = keys.every(
-              (key: string) => !responseJson.hasOwnProperty(key)
+              (key: string) => !responseJson.hasOwnProperty(key),
             );
             break;
         }

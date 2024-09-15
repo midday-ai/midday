@@ -5,13 +5,7 @@ import { Menu } from "./menu";
 
 import * as React from "react";
 import { Button } from "../button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "../sheet";
-
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "../sheet";
 
 interface SheetMenuProps {
   menu: Group<string>[];

@@ -3,21 +3,21 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
-import { postPillar } from './globals';
+} from "../types";
+import { getText } from "../utils";
+import { postPillar } from "./globals";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
   let data = null;
 
   if (parameters.scanners.length === 0) {
-    return { error: { message: 'No scanners specified' }, verdict: true, data };
+    return { error: { message: "No scanners specified" }, verdict: true, data };
   }
 
   let scannerObject: any = {};
@@ -32,9 +32,9 @@ export const handler: PluginHandler = async (
     };
 
     const result: any = await postPillar(
-      'scanPrompt',
+      "scanPrompt",
       parameters.credentials,
-      scanPromptObject
+      scanPromptObject,
     );
 
     // result is an object with the following structure:
@@ -54,11 +54,11 @@ export const handler: PluginHandler = async (
         result[key] !== null &&
         result[key] !== false &&
         [
-          'pii',
-          'prompt_injection',
-          'secrets',
-          'toxic_language',
-          'invisible_characters',
+          "pii",
+          "prompt_injection",
+          "secrets",
+          "toxic_language",
+          "invisible_characters",
         ].includes(key)
       ) {
         verdict = false;

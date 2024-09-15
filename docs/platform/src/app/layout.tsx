@@ -1,33 +1,33 @@
-import glob from 'fast-glob'
-import { type Metadata } from 'next'
+import glob from "fast-glob";
+import { type Metadata } from "next";
 
-import { Providers } from '@/app/providers'
-import { Layout } from '@/components/Layout'
-import { type Section } from '@/components/SectionProvider'
-import '@midday/ui/globals.css'
-import { IntercomScript } from '@midday/ui/intercom-script'
-import IntercomWidget from '@midday/ui/intercom-widget'
+import { Providers } from "@/app/providers";
+import { Layout } from "@/components/Layout";
+import { type Section } from "@/components/SectionProvider";
+import "@midday/ui/globals.css";
+import { IntercomScript } from "@midday/ui/intercom-script";
+import IntercomWidget from "@midday/ui/intercom-widget";
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - Solomon-AI API Reference',
-    default: 'Solomon-AI API Reference',
+    template: "%s - Solomon-AI API Reference",
+    default: "Solomon-AI API Reference",
   },
-}
+};
 
 export default async function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  let pages = await glob('**/*.mdx', { cwd: 'src/app' })
+  let pages = await glob("**/*.mdx", { cwd: "src/app" });
   let allSectionsEntries = (await Promise.all(
     pages.map(async (filename) => [
-      '/' + filename.replace(/(^|\/)page\.mdx$/, ''),
+      "/" + filename.replace(/(^|\/)page\.mdx$/, ""),
       (await import(`./${filename}`)).sections,
     ]),
-  )) as Array<[string, Array<Section>]>
-  let allSections = Object.fromEntries(allSectionsEntries)
+  )) as Array<[string, Array<Section>]>;
+  let allSections = Object.fromEntries(allSectionsEntries);
 
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
@@ -37,15 +37,15 @@ export default async function RootLayout({
             <Layout allSections={allSections}>
               {children}
               <IntercomWidget
-                appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? 'pezs7zbq'}
+                appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
               />
               <IntercomScript
-                appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? 'pezs7zbq'}
+                appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
               />
             </Layout>
           </div>
         </Providers>
       </body>
     </html>
-  )
+  );
 }

@@ -6,5 +6,5 @@ export {
   FileUploader,
   FileUploaderContent,
   FileUploaderItem,
-  FileUploaderTrigger
+  FileUploaderTrigger,
 } from "./file-uploader-primitive";

@@ -1,10 +1,10 @@
 export const createDefaultHeaders = (
   provider: string,
-  authorization: string
+  authorization: string,
 ) => {
   return {
-    'x-portkey-provider': provider,
+    "x-portkey-provider": provider,
     Authorization: authorization,
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 };

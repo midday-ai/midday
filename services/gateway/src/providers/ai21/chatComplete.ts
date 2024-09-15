@@ -1,25 +1,25 @@
-import { AI21 } from '../../globals';
-import { Params } from '../../types/requestBody';
+import { AI21 } from "../../globals";
+import { Params } from "../../types/requestBody";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
-import { AI21ErrorResponse } from './complete';
+} from "../utils";
+import { AI21ErrorResponse } from "./complete";
 
 export const AI21ChatCompleteConfig: ProviderConfig = {
   messages: [
     {
-      param: 'messages',
+      param: "messages",
       required: true,
       transform: (params: Params) => {
         let inputMessages: any = [];
 
-        if (params.messages?.[0]?.role === 'system') {
+        if (params.messages?.[0]?.role === "system") {
           inputMessages = params.messages.slice(1);
         } else if (params.messages) {
           inputMessages = params.messages;
@@ -32,46 +32,46 @@ export const AI21ChatCompleteConfig: ProviderConfig = {
       },
     },
     {
-      param: 'system',
+      param: "system",
       required: false,
       transform: (params: Params) => {
-        if (params.messages?.[0].role === 'system') {
+        if (params.messages?.[0].role === "system") {
           return params.messages?.[0].content;
         }
       },
     },
   ],
   n: {
-    param: 'numResults',
+    param: "numResults",
     default: 1,
   },
   max_tokens: {
-    param: 'maxTokens',
+    param: "maxTokens",
     default: 16,
   },
   minTokens: {
-    param: 'minTokens',
+    param: "minTokens",
     default: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.7,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'topP',
+    param: "topP",
     default: 1,
   },
   top_k: {
-    param: 'topKReturn',
+    param: "topKReturn",
     default: 0,
   },
   stop: {
-    param: 'stopSequences',
+    param: "stopSequences",
   },
   presence_penalty: {
-    param: 'presencePenalty',
+    param: "presencePenalty",
     transform: (params: Params) => {
       return {
         scale: params.presence_penalty,
@@ -79,7 +79,7 @@ export const AI21ChatCompleteConfig: ProviderConfig = {
     },
   },
   frequency_penalty: {
-    param: 'frequencyPenalty',
+    param: "frequencyPenalty",
     transform: (params: Params) => {
       return {
         scale: params.frequency_penalty,
@@ -87,13 +87,13 @@ export const AI21ChatCompleteConfig: ProviderConfig = {
     },
   },
   countPenalty: {
-    param: 'countPenalty',
+    param: "countPenalty",
   },
   frequencyPenalty: {
-    param: 'frequencyPenalty',
+    param: "frequencyPenalty",
   },
   presencePenalty: {
-    param: 'presencePenalty',
+    param: "presencePenalty",
   },
 };
 
@@ -111,12 +111,12 @@ interface AI21ChatCompleteResponse {
 }
 
 export const AI21ErrorResponseTransform: (
-  response: AI21ErrorResponse
+  response: AI21ErrorResponse,
 ) => ErrorResponse | undefined = (response) => {
-  if ('detail' in response) {
+  if ("detail" in response) {
     return generateErrorResponse(
       { message: response.detail, type: null, param: null, code: null },
-      AI21
+      AI21,
     );
   }
 
@@ -125,25 +125,25 @@ export const AI21ErrorResponseTransform: (
 
 export const AI21ChatCompleteResponseTransform: (
   response: AI21ChatCompleteResponse | AI21ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = AI21ErrorResponseTransform(
-      response as AI21ErrorResponse
+      response as AI21ErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('outputs' in response) {
+  if ("outputs" in response) {
     return {
       id: response.id,
-      object: 'chat_completion',
+      object: "chat_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: AI21,
       choices: response.outputs.map((o, index) => ({
         message: {
-          role: 'assistant',
+          role: "assistant",
           content: o.text,
         },
         index: index,

@@ -22,7 +22,7 @@ export async function handleStreamingRequest(
   request: OpenAI.Chat.Completions.ChatCompletionCreateParamsStreaming & {
     noCache?: boolean;
   },
-  openai: OpenAI
+  openai: OpenAI,
 ): Promise<Response> {
   c.header("Connection", "keep-alive");
   c.header("Cache-Control", "no-cache, must-revalidate");
@@ -68,7 +68,7 @@ export async function handleStreamingRequest(
       ...requestOptions,
       stream_options: { include_usage: true },
     }),
-    (err) => new OpenAiError({ message: err.message })
+    (err) => new OpenAiError({ message: err.message }),
   );
   if (chatCompletion.err) {
     return c.text(chatCompletion.err.message, { status: 400 });
@@ -105,7 +105,7 @@ export async function handleStreamingRequest(
       resolveResponse(response);
       resolveTokens(tokens);
       c.executionCtx.waitUntil(
-        updateCache(c, embeddings.val, response, tokens)
+        updateCache(c, embeddings.val, response, tokens),
       );
     }
   });
@@ -114,7 +114,7 @@ export async function handleStreamingRequest(
 export async function handleNonStreamingRequest(
   c: Context,
   request: OpenAI.Chat.Completions.ChatCompletionCreateParamsNonStreaming,
-  openai: OpenAI
+  openai: OpenAI,
 ): Promise<Response> {
   const { logger } = c.get("services");
   const query = parseMessagesToString(request.messages);
@@ -142,7 +142,7 @@ export async function handleNonStreamingRequest(
   const inferenceStart = performance.now();
   const chatCompletion = await wrap(
     openai.chat.completions.create(request),
-    (err) => new OpenAiError({ message: err.message })
+    (err) => new OpenAiError({ message: err.message }),
   );
   if (chatCompletion.err) {
     return c.text(chatCompletion.err.message, { status: 400 });
@@ -156,7 +156,7 @@ export async function handleNonStreamingRequest(
     c,
     embeddings.val,
     response,
-    tokens
+    tokens,
   );
   if (updateCacheError) {
     logger.error("unable to update cache", {
@@ -170,14 +170,14 @@ export async function handleNonStreamingRequest(
 
 async function createEmbeddings(
   c: Context,
-  text: string
+  text: string,
 ): Promise<Result<AiTextEmbeddingsOutput, CloudflareAiError>> {
   const startEmbeddings = performance.now();
   const embeddings = await wrap(
     c.env.AI.run("@cf/baai/bge-small-en-v1.5", {
       text,
     }),
-    (err) => new CloudflareAiError({ message: err.message })
+    (err) => new CloudflareAiError({ message: err.message }),
   );
   c.set("embeddingsLatency", performance.now() - startEmbeddings);
 
@@ -200,7 +200,7 @@ export class CloudflareVectorizeError extends BaseError {
 
 async function loadCache(
   c: Context,
-  embeddings: AiTextEmbeddingsOutput
+  embeddings: AiTextEmbeddingsOutput,
 ): Promise<
   Result<
     string | undefined,
@@ -215,7 +215,7 @@ async function loadCache(
       topK: 1,
       returnMetadata: true,
     }),
-    (err) => new CloudflareVectorizeError({ message: err.message })
+    (err) => new CloudflareVectorizeError({ message: err.message }),
   );
   c.set("vectorizeLatency", performance.now() - startVectorize);
   if (query.err) {
@@ -238,7 +238,7 @@ async function loadCache(
   c.set("response", Promise.resolve(response as string));
   c.set(
     "tokens",
-    Promise.resolve(query.val.matches[0]!.metadata?.tokens as number)
+    Promise.resolve(query.val.matches[0]!.metadata?.tokens as number),
   );
 
   c.set("cacheHit", true);
@@ -251,7 +251,7 @@ async function updateCache(
   c: Context,
   embeddings: AiTextEmbeddingsOutput,
   response: string,
-  tokens: number
+  tokens: number,
 ): Promise<Result<void, CloudflareVectorizeError>> {
   const id = await sha256(response);
   const vector = embeddings.data[0];
@@ -260,7 +260,7 @@ async function updateCache(
     c.env.VECTORIZE_INDEX.insert([
       { id, values: vector as number[], metadata: { response, tokens } },
     ]),
-    (err) => new CloudflareVectorizeError({ message: err.message })
+    (err) => new CloudflareVectorizeError({ message: err.message }),
   );
   if (vectorizeRes.err) {
     return Err(vectorizeRes.err);

@@ -5,11 +5,7 @@ import * as React from "react";
 import { composeEventHandlers } from "../../lib/file-upload-utils";
 
 import { cn } from "../../utils/cn";
-import {
-  Button,
-  ButtonProps,
-  buttonVariants,
-} from "../button";
+import { Button, ButtonProps, buttonVariants } from "../button";
 
 interface FileUploadLoadingButtonProps extends ButtonProps {
   action: "create" | "update" | "delete";

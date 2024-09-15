@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { Transition } from '@headlessui/react'
-import { forwardRef, useState } from 'react'
+import { Transition } from "@headlessui/react";
+import { forwardRef, useState } from "react";
 
-function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+function CheckIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <circle cx="10" cy="10" r="10" strokeWidth="0" />
@@ -15,11 +15,11 @@ function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="m6.75 10.813 2.438 2.437c1.218-4.469 4.062-6.5 4.062-6.5"
       />
     </svg>
-  )
+  );
 }
 
 function FeedbackButton(
-  props: Omit<React.ComponentPropsWithoutRef<'button'>, 'type' | 'className'>,
+  props: Omit<React.ComponentPropsWithoutRef<"button">, "type" | "className">,
 ) {
   return (
     <button
@@ -27,12 +27,12 @@ function FeedbackButton(
       className="hover:bg-zinc-900/2.5 px-3 text-sm font-medium text-zinc-600 transition hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-white/5 dark:hover:text-white"
       {...props}
     />
-  )
+  );
 }
 
 const FeedbackForm = forwardRef<
-  React.ElementRef<'form'>,
-  Pick<React.ComponentPropsWithoutRef<'form'>, 'onSubmit'>
+  React.ElementRef<"form">,
+  Pick<React.ComponentPropsWithoutRef<"form">, "onSubmit">
 >(function FeedbackForm({ onSubmit }, ref) {
   return (
     <form
@@ -49,10 +49,10 @@ const FeedbackForm = forwardRef<
         <FeedbackButton data-response="no">No</FeedbackButton>
       </div>
     </form>
-  )
-})
+  );
+});
 
-const FeedbackThanks = forwardRef<React.ElementRef<'div'>>(
+const FeedbackThanks = forwardRef<React.ElementRef<"div">>(
   function FeedbackThanks(_props, ref) {
     return (
       <div
@@ -64,20 +64,20 @@ const FeedbackThanks = forwardRef<React.ElementRef<'div'>>(
           Thanks for your feedback!
         </div>
       </div>
-    )
+    );
   },
-)
+);
 
 export function Feedback() {
-  let [submitted, setSubmitted] = useState(false)
+  let [submitted, setSubmitted] = useState(false);
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+    event.preventDefault();
 
     // event.nativeEvent.submitter.dataset.response
     // => "yes" or "no"
 
-    setSubmitted(true)
+    setSubmitted(true);
   }
 
   return (
@@ -99,5 +99,5 @@ export function Feedback() {
         <FeedbackThanks />
       </Transition>
     </div>
-  )
+  );
 }

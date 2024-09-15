@@ -7,9 +7,7 @@ import { AssistantRuntimeProvider } from "@assistant-ui/react";
 import { useVercelUseAssistantRuntime } from "@assistant-ui/react-ai-sdk";
 import { Meta, StoryFn } from "@storybook/react";
 
-import {
-  LocationSeasonalTrendsChart
-} from "./location-seasonal-trends-chart";
+import { LocationSeasonalTrendsChart } from "./location-seasonal-trends-chart";
 import {
   RankedLocationsBySpendingChart,
   RankedLocationsBySpendingChartProps,

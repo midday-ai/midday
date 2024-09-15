@@ -1,6 +1,6 @@
-import { ProviderConfigs } from '../types';
-import NomicAPIConfig from './api';
-import { NomicEmbedConfig, NomicEmbedResponseTransform } from './embed';
+import { ProviderConfigs } from "../types";
+import NomicAPIConfig from "./api";
+import { NomicEmbedConfig, NomicEmbedResponseTransform } from "./embed";
 
 const NomicConfig: ProviderConfigs = {
   embed: NomicEmbedConfig,

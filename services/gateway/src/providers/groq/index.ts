@@ -1,17 +1,17 @@
-import { ProviderConfigs } from '../types';
-import GroqAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import GroqAPIConfig from "./api";
 import {
   GroqChatCompleteConfig,
   GroqChatCompleteResponseTransform,
   GroqChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const GroqConfig: ProviderConfigs = {
   chatComplete: GroqChatCompleteConfig,
   api: GroqAPIConfig,
   responseTransforms: {
     chatComplete: GroqChatCompleteResponseTransform,
-    'stream-chatComplete': GroqChatCompleteStreamChunkTransform,
+    "stream-chatComplete": GroqChatCompleteStreamChunkTransform,
   },
 };
 

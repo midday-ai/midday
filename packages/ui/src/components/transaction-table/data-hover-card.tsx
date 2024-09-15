@@ -16,7 +16,7 @@ export const DataHoverCard: React.FC<DataHoverCardProps> = ({
   title,
   items,
   avatarSrc,
-  avatarFallbackText = 'Default',
+  avatarFallbackText = "Default",
 }) => {
   return (
     <HoverCard>
@@ -26,7 +26,7 @@ export const DataHoverCard: React.FC<DataHoverCardProps> = ({
       <HoverCardContent className="w-80">
         <div className="flex justify-between space-x-4">
           <Avatar>
-            <AvatarImage src={avatarSrc || 'default_avatar_url.png'} />
+            <AvatarImage src={avatarSrc || "default_avatar_url.png"} />
             <AvatarFallback>{avatarFallbackText}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-2 p-2 space-y-1 border-l">

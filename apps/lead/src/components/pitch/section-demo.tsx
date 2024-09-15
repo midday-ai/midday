@@ -27,7 +27,7 @@ export function SectionDemo({ playVideo }: Props) {
     () => {
       togglePlay();
     },
-    []
+    [],
   );
 
   useHotkeys(
@@ -35,7 +35,7 @@ export function SectionDemo({ playVideo }: Props) {
     () => {
       handleRestart();
     },
-    [playerRef]
+    [playerRef],
   );
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function SectionDemo({ playVideo }: Props) {
     }
   }, [playVideo, isDesktop]);
   const handleRestart = () => {
-    if (playerRef.current && 'currentTime' in playerRef.current) {
+    if (playerRef.current && "currentTime" in playerRef.current) {
       (playerRef.current as HTMLVideoElement).currentTime = 0;
     }
   };
@@ -98,7 +98,9 @@ export function SectionDemo({ playVideo }: Props) {
             src="https://customer-oh6t55xltlgrfayh.cloudflarestream.com/3c8ebd39be71d2451dee78d497b89a23/manifest/video.m3u8"
             autoPlay={false}
             controls={!isDesktop}
-            playerRef={playerRef as unknown as React.RefObject<HTMLVideoElement>}
+            playerRef={
+              playerRef as unknown as React.RefObject<HTMLVideoElement>
+            }
             className="w-full max-h-[90%] lg:max-h-full mt-8 bg-[#121212] max-w-[1280px] m-auto"
             loop
           />

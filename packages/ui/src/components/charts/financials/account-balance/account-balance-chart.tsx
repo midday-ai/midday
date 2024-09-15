@@ -1,7 +1,5 @@
 import { AccountBalanceConverter } from "../../../../lib/converters/account-balancer-converter";
-import {
-  AccountBalanceHistory
-} from "client-typescript-sdk";
+import { AccountBalanceHistory } from "client-typescript-sdk";
 
 import {
   CardContent,

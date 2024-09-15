@@ -3,13 +3,13 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
+} from "../types";
+import { getText } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -25,7 +25,7 @@ export const handler: PluginHandler = async (
       const match = textToMatch.match(regex);
       verdict = match ? true : false;
     } else {
-      error = new Error('Missing regex or text');
+      error = new Error("Missing regex or text");
     }
   } catch (e) {
     error = e as Error;

@@ -2,11 +2,7 @@
   "name": "@tooling/eslint-config",
   "version": "0.0.1",
   "private": true,
-  "files": [
-    "./base.js",
-    "./nextjs.js",
-    "./react.js"
-  ],
+  "files": ["./base.js", "./nextjs.js", "./react.js"],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint .",
@@ -33,9 +29,7 @@
   },
   "eslintConfig": {
     "root": true,
-    "extends": [
-      "./base.js"
-    ]
+    "extends": ["./base.js"]
   },
   "prettier": "@tooling/prettier-config"
 }

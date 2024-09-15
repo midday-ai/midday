@@ -1,9 +1,9 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { DashboardSkeleton } from './dashboard-skeleton';
+import type { Meta, StoryObj } from "@storybook/react";
+import { DashboardSkeleton } from "./dashboard-skeleton";
 
 const meta: Meta<typeof DashboardSkeleton> = {
   component: DashboardSkeleton,
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 };
 
 export default meta;
@@ -13,7 +13,7 @@ export const Default: Story = {};
 
 export const CustomHeight: Story = {
   render: () => (
-    <div style={{ height: '800px' }}>
+    <div style={{ height: "800px" }}>
       <DashboardSkeleton />
     </div>
   ),

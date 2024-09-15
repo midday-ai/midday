@@ -1,5 +1,5 @@
 import * as React from "react";
-  
+
 type FooterProps = {
   description: string;
 };

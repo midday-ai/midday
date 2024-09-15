@@ -88,8 +88,9 @@ export const ChartWrapper: React.FC<ChartWrapperProps> = ({
       </Button>
       {/* Wrapper for the revealing content */}
       <div
-        className={`mt-2 overflow-hidden transition-all ease-in-out ${isOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-          }`}
+        className={`mt-2 overflow-hidden transition-all ease-in-out ${
+          isOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+        }`}
         style={{ transitionDuration: `${animationDuration}ms` }}
       >
         {children}

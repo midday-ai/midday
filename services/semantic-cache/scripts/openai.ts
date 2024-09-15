@@ -34,7 +34,7 @@ async function main() {
   } catch (error) {
     console.error(
       "An error occurred:",
-      error instanceof Error ? error.message : String(error)
+      error instanceof Error ? error.message : String(error),
     );
   }
 }

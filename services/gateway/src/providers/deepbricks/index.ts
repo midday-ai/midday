@@ -1,13 +1,13 @@
-import { ProviderConfigs } from '../types';
-import DeepbricksAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import DeepbricksAPIConfig from "./api";
 import {
   DeepbricksChatCompleteConfig,
   DeepbricksChatCompleteResponseTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   DeepbricksImageGenerateConfig,
   DeepbricksImageGenerateResponseTransform,
-} from './imageGenerate';
+} from "./imageGenerate";
 
 const DeepbricksConfig: ProviderConfigs = {
   api: DeepbricksAPIConfig,

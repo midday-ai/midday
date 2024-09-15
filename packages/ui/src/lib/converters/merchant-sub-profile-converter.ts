@@ -1,8 +1,6 @@
 import { ChartDataPoint } from "../../types/chart";
 import { SpendingPeriod } from "../../types/merchant";
-import {
-  MerchantMetricsFinancialSubProfile
-} from "client-typescript-sdk";
+import { MerchantMetricsFinancialSubProfile } from "client-typescript-sdk";
 
 export class MerchantFinancialMetricsConverter {
   /**

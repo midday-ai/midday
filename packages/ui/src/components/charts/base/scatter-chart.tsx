@@ -6,15 +6,12 @@ import {
   CartesianGrid,
   ResponsiveContainer,
   Scatter,
-  Tooltip, XAxis,
-  YAxis
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
-import {
-  formatAmount
-} from "../../../lib/chart-utils";
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
+import { formatAmount } from "../../../lib/chart-utils";
 import { ScatterChartDataPoint } from "../../../types/chart";
 
 import { generateScatterChartData } from "../../../lib/random/generator";

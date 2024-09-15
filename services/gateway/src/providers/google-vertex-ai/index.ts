@@ -1,5 +1,5 @@
-import { ProviderConfigs } from '../types';
-import VertexApiConfig, { GoogleApiConfig } from './api';
+import { ProviderConfigs } from "../types";
+import VertexApiConfig, { GoogleApiConfig } from "./api";
 import {
   GoogleChatCompleteResponseTransform,
   GoogleChatCompleteStreamChunkTransform,
@@ -10,8 +10,8 @@ import {
   VertexLlamaChatCompleteConfig,
   VertexLlamaChatCompleteResponseTransform,
   VertexLlamaChatCompleteStreamChunkTransform,
-} from './chatComplete';
-import { getModelAndProvider } from './utils';
+} from "./chatComplete";
+import { getModelAndProvider } from "./utils";
 
 const VertexConfig: ProviderConfigs = {
   api: VertexApiConfig,
@@ -20,32 +20,32 @@ const VertexConfig: ProviderConfigs = {
     const { provider } = getModelAndProvider(providerModel as string);
 
     switch (provider) {
-      case 'google':
+      case "google":
         return {
           chatComplete: VertexGoogleChatCompleteConfig,
           api: GoogleApiConfig,
           responseTransforms: {
-            'stream-chatComplete': GoogleChatCompleteStreamChunkTransform,
+            "stream-chatComplete": GoogleChatCompleteStreamChunkTransform,
             chatComplete: GoogleChatCompleteResponseTransform,
           },
         };
-      case 'anthropic':
+      case "anthropic":
         return {
           chatComplete: VertexAnthropicChatCompleteConfig,
           api: GoogleApiConfig,
           responseTransforms: {
-            'stream-chatComplete':
+            "stream-chatComplete":
               VertexAnthropicChatCompleteStreamChunkTransform,
             chatComplete: VertexAnthropicChatCompleteResponseTransform,
           },
         };
-      case 'meta':
+      case "meta":
         return {
           chatComplete: VertexLlamaChatCompleteConfig,
           api: GoogleApiConfig,
           responseTransforms: {
             chatComplete: VertexLlamaChatCompleteResponseTransform,
-            'stream-chatComplete': VertexLlamaChatCompleteStreamChunkTransform,
+            "stream-chatComplete": VertexLlamaChatCompleteStreamChunkTransform,
           },
         };
     }

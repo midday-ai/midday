@@ -2,11 +2,7 @@ import React from "react";
 import { useCalendar } from "../../contexts/planner-context";
 import { cn } from "../../utils/cn";
 
-import {
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../table";
+import { TableHead, TableHeader, TableRow } from "../table";
 
 export const Timeline: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
   className,

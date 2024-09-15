@@ -81,7 +81,8 @@ export function SectionSubscription() {
               <h2>Custom domain</h2>
               <p className="text-[#878787] text-sm text-center">
                 If the user want a custom inbox email, for example
-                acme.inbox@solomon-ai.co, we can provide this for an additional fee.
+                acme.inbox@solomon-ai.co, we can provide this for an additional
+                fee.
               </p>
             </Card>
           </div>

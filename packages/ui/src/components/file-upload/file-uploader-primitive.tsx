@@ -409,5 +409,5 @@ export {
   FileUploader,
   FileUploaderContent,
   FileUploaderItem,
-  FileUploaderTrigger
+  FileUploaderTrigger,
 };

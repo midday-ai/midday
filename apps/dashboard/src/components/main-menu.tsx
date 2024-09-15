@@ -30,7 +30,7 @@ const icons = {
   "/inbox": () => <Icons.Inbox2 size={22} />,
   "/cash-flow": () => <Icons.Wallet size={22} />,
   "/categories": () => <Icons.Categories size={22} />,
-  "/financial-accounts": () => <Icons.Accounts size={22} />
+  "/financial-accounts": () => <Icons.Accounts size={22} />,
 };
 
 const defaultItems = [
@@ -77,7 +77,7 @@ const analyticsItems = [
   {
     path: "/financial-accounts",
     name: "Financial Accounts",
-  }
+  },
 ];
 
 interface ItemProps {
@@ -133,9 +133,9 @@ const Item = ({
                 "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
                 "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                 isActive &&
-                "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
                 isCustomizing &&
-                "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
+                  "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
               )}
             >
               <motion.div
@@ -159,10 +159,14 @@ const Item = ({
                   className={cn(
                     "flex space-x-3 p-0 items-center pl-2 md:pl-0",
                     isCustomizing &&
-                    "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
+                      "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
                   )}
                 >
-                  {IconComponent ? <IconComponent /> : <div className="w-[22px] h-[22px]" />}
+                  {IconComponent ? (
+                    <IconComponent />
+                  ) : (
+                    <div className="w-[22px] h-[22px]" />
+                  )}
                   <span className="flex md:hidden">{item.name}</span>
                 </div>
               </motion.div>
@@ -202,20 +206,22 @@ type Props = {
 };
 
 export function MainMenu({ initialItems, onSelect }: Props) {
-  const enabledItemSet = featureFlags.isAnalyticsV2Enabled === true ? [...analyticsItems, ...defaultItems] : defaultItems;
+  const enabledItemSet =
+    featureFlags.isAnalyticsV2Enabled === true
+      ? [defaultItems[0], ...analyticsItems, ...defaultItems.slice(1)]
+      : defaultItems;
 
   const [items, setItems] = useState(initialItems ?? enabledItemSet);
   const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
   const part = pathname?.split("/")[1];
   const updateMenu = useAction(updateMenuAction);
-
   const hiddenItems = defaultItems.filter(
-    (item) => !items.some((i) => i.path === item.path),
+    (item) => !items.some((i) => i?.path === item.path),
   );
 
-  const onReorder = (items) => {
-    setItems(items);
+  const onReorder = (newItems: { path: string; name: string }[]) => {
+    setItems(newItems);
   };
 
   const onDragEnd = () => {

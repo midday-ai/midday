@@ -8,7 +8,7 @@ import { cn } from "../../utils/cn";
 import { DateRangePicker } from "../date-range-picker";
 import AddAppointmentDialog from "./add-appointment-dialog";
 
-interface CalendarToolbarProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface CalendarToolbarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   className,

@@ -7,8 +7,8 @@ import { JSX } from "react/jsx-runtime";
 import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 
 import {
-    MonthlySpendingChart,
-    MonthlySpendingChartProps,
+  MonthlySpendingChart,
+  MonthlySpendingChartProps,
 } from "./financial-dashboard-overview";
 
 /**
@@ -17,65 +17,65 @@ import {
  * @component
  */
 const AssistantProviderWrapper: React.FC<{ children: React.ReactNode }> = ({
-    children,
+  children,
 }) => {
-    const assistant = useAssistant({
-        api: "/api/assistant", // Adjust this if your API endpoint is different
-    });
+  const assistant = useAssistant({
+    api: "/api/assistant", // Adjust this if your API endpoint is different
+  });
 
-    const runtime = useVercelUseAssistantRuntime(assistant);
+  const runtime = useVercelUseAssistantRuntime(assistant);
 
-    return (
-        <AssistantRuntimeProvider runtime={runtime}>
-            {children}
-        </AssistantRuntimeProvider>
-    );
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      {children}
+    </AssistantRuntimeProvider>
+  );
 };
 
 export default {
-    component: MonthlySpendingChart,
-    parameters: {
-        layout: "centered",
+  component: MonthlySpendingChart,
+  parameters: {
+    layout: "centered",
+  },
+  argTypes: {
+    currency: {
+      control: "select",
+      options: ["USD", "EUR", "GBP", "JPY"],
     },
-    argTypes: {
-        currency: {
-            control: "select",
-            options: ["USD", "EUR", "GBP", "JPY"],
-        },
-        height: {
-            control: { type: "range", min: 200, max: 600, step: 10 },
-        },
+    height: {
+      control: { type: "range", min: 200, max: 600, step: 10 },
     },
-    decorators: [
-        (Story) => (
-            <AssistantProviderWrapper>
-                <Story />
-            </AssistantProviderWrapper>
-        ),
-    ],
+  },
+  decorators: [
+    (Story) => (
+      <AssistantProviderWrapper>
+        <Story />
+      </AssistantProviderWrapper>
+    ),
+  ],
 } as Meta;
 
 const incomeMetricsData = FinancialDataGenerator.generateIncomeMetrics(
-    30,
-    2022,
+  30,
+  2022,
 );
 const expenseMetricsData = FinancialDataGenerator.generateRandomExpenseMetrics(
-    30,
-    2022,
+  30,
+  2022,
 );
 const transactions = FinancialDataGenerator.generateRandomTransactions(5);
 
 const Template: StoryFn<MonthlySpendingChartProps> = (
-    args: JSX.IntrinsicAttributes & MonthlySpendingChartProps,
+  args: JSX.IntrinsicAttributes & MonthlySpendingChartProps,
 ) => (
-    <div className="w-[900px]">
-        <MonthlySpendingChart {...args} />
-    </div>
+  <div className="w-[900px]">
+    <MonthlySpendingChart {...args} />
+  </div>
 );
 
 export const Default = Template.bind({});
 Default.args = {
-    transactions: transactions,
-    expenseMetrics: expenseMetricsData,
-    incomeMetrics: incomeMetricsData,
+  transactions: transactions,
+  expenseMetrics: expenseMetricsData,
+  incomeMetrics: incomeMetricsData,
 };

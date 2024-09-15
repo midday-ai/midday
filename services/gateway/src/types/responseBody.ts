@@ -16,7 +16,7 @@ interface PalmMessage {
 }
 
 interface ContentFilter {
-  reason: 'BLOCKED_REASON_UNSPECIFIED' | 'SAFETY' | 'OTHER';
+  reason: "BLOCKED_REASON_UNSPECIFIED" | "SAFETY" | "OTHER";
   message: string;
 }
 
@@ -34,17 +34,17 @@ interface PalmTextOutput {
 
 interface safetyRatings {
   category:
-    | 'HARM_CATEGORY_DEROGATORY'
-    | 'HARM_CATEGORY_TOXICITY'
-    | 'HARM_CATEGORY_VIOLENCE'
-    | 'HARM_CATEGORY_SEXUAL'
-    | 'HARM_CATEGORY_MEDICAL'
-    | 'HARM_CATEGORY_DANGEROUS';
-  probability: 'NEGLIGIBLE' | 'LOW' | 'HIGH';
+    | "HARM_CATEGORY_DEROGATORY"
+    | "HARM_CATEGORY_TOXICITY"
+    | "HARM_CATEGORY_VIOLENCE"
+    | "HARM_CATEGORY_SEXUAL"
+    | "HARM_CATEGORY_MEDICAL"
+    | "HARM_CATEGORY_DANGEROUS";
+  probability: "NEGLIGIBLE" | "LOW" | "HIGH";
 }
 
 interface PalmFilter {
-  reason: 'OTHER';
+  reason: "OTHER";
 }
 
 interface PalmError {

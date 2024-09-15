@@ -14,14 +14,14 @@ export interface HookOnSuccessObject {
 // Interface for Hook that will be contain a name for the hook and parameters for it which would be an object
 // this can be extended for specific hook types later on
 export interface HookObject {
-  type: 'guardrail';
+  type: "guardrail";
   id: string;
   checks?: Check[];
   async?: boolean;
   onFail?: HookOnFailObject;
   onSuccess?: HookOnSuccessObject;
   deny?: boolean;
-  eventType: 'beforeRequestHook' | 'afterRequestHook';
+  eventType: "beforeRequestHook" | "afterRequestHook";
 }
 
 export interface HookSpanContextRequest {
@@ -77,11 +77,11 @@ export interface GuardrailResult {
   deny: boolean;
   execution_time: number;
   skipped: boolean;
-  type: 'guardrail';
+  type: "guardrail";
   created_at: Date;
 }
 
 // HookResult can be of type GuardrailResult or any other type of result
 export type HookResult = GuardrailResult;
 
-export type EventType = 'beforeRequestHook' | 'afterRequestHook';
+export type EventType = "beforeRequestHook" | "afterRequestHook";

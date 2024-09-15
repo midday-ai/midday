@@ -1,4 +1,4 @@
-import { HookEventType, PluginContext } from './types';
+import { HookEventType, PluginContext } from "./types";
 
 interface PostOptions extends RequestInit {
   headers?: Record<string, string>;
@@ -15,7 +15,7 @@ class HttpError extends Error {
 
   constructor(message: string, response: ErrorResponse) {
     super(message);
-    this.name = 'HttpError';
+    this.name = "HttpError";
     this.response = response;
   }
 }
@@ -27,7 +27,7 @@ class TimeoutError extends Error {
 
   constructor(message: string, url: string, timeout: number, method: string) {
     super(message);
-    this.name = 'TimeoutError';
+    this.name = "TimeoutError";
     this.url = url;
     this.timeout = timeout;
     this.method = method;
@@ -36,15 +36,15 @@ class TimeoutError extends Error {
 
 export const getText = (
   context: PluginContext,
-  eventType: HookEventType
+  eventType: HookEventType,
 ): string => {
   switch (eventType) {
-    case 'beforeRequestHook':
+    case "beforeRequestHook":
       return context.request?.text;
-    case 'afterRequestHook':
+    case "afterRequestHook":
       return context.response?.text;
     default:
-      throw new Error('Invalid hook type');
+      throw new Error("Invalid hook type");
   }
 };
 
@@ -62,12 +62,12 @@ export async function post<T = any>(
   url: string,
   data: any,
   options: PostOptions = {},
-  timeout: number = 5000
+  timeout: number = 5000,
 ): Promise<T> {
   const defaultOptions: PostOptions = {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   };
@@ -97,7 +97,7 @@ export async function post<T = any>(
       try {
         errorBody = await response.text();
       } catch (e) {
-        errorBody = 'Unable to retrieve response body';
+        errorBody = "Unable to retrieve response body";
       }
 
       const errorResponse: ErrorResponse = {
@@ -108,7 +108,7 @@ export async function post<T = any>(
 
       throw new HttpError(
         `HTTP error! status: ${response.status}`,
-        errorResponse
+        errorResponse,
       );
     }
 
@@ -117,12 +117,12 @@ export async function post<T = any>(
     if (error instanceof HttpError) {
       throw error;
     }
-    if (error.name === 'AbortError') {
+    if (error.name === "AbortError") {
       throw new TimeoutError(
         `Request timed out after ${timeout}ms`,
         url,
         timeout,
-        mergedOptions.method || 'POST'
+        mergedOptions.method || "POST",
       );
     }
     // console.error('Error in post request:', error);

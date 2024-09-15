@@ -12,7 +12,7 @@ import { TransactionsPeriod } from "./transactions-period";
 
 export async function Transactions({
   disabled,
-  disableRelative = false
+  disableRelative = false,
 }: {
   disabled: boolean;
   disableRelative?: boolean;
@@ -20,8 +20,13 @@ export async function Transactions({
   const type = cookies().get("transactions-period")?.value ?? "all";
 
   return (
-    <Card className={`aspect-square overflow-hidden p-4 md:p-8 rounded-2xl${disableRelative ? '' : ' relative'}`}>
-      <TransactionsPeriod type={type as "expense" | "income" | "all"} disabled={disabled} />
+    <Card
+      className={`aspect-square overflow-hidden p-4 md:p-8 rounded-2xl${disableRelative ? "" : " relative"}`}
+    >
+      <TransactionsPeriod
+        type={type as "expense" | "income" | "all"}
+        disabled={disabled}
+      />
 
       <div className="mt-4">
         <TransactionsListHeader />

@@ -4,11 +4,7 @@ import type { FC } from "react";
 import { MarkdownText } from "./markdown-text";
 import { Avatar, AvatarFallback } from "./avatar";
 import { Button, type ButtonProps } from "./button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { cn } from "../utils/cn";
 import {
   ActionBarPrimitive,

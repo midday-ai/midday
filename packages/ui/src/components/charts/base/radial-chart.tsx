@@ -12,9 +12,7 @@ import {
   Tooltip,
   TooltipProps,
 } from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
 import {
   formatAmount,
   getYAxisWidth,

@@ -1,83 +1,83 @@
-import { FIREWORKS_AI } from '../../globals';
-import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+import { FIREWORKS_AI } from "../../globals";
+import { CompletionResponse, ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 import {
   FireworksAIErrorResponse,
   FireworksAIErrorResponseTransform,
   FireworksAIStreamChunk,
   FireworksAIValidationErrorResponse,
-} from './chatComplete';
+} from "./chatComplete";
 
 export const FireworksAICompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
   },
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 16,
     min: 0,
   },
   logprobs: {
-    param: 'logprobs',
+    param: "logprobs",
     min: 0,
     max: 5,
   },
   echo: {
-    param: 'echo',
+    param: "echo",
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
     min: 1,
     max: 128,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     min: -2,
     max: 2,
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     min: -2,
     max: 2,
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
     min: 1,
     max: 128,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   response_format: {
-    param: 'response_format',
+    param: "response_format",
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   context_length_exceeded_behavior: {
-    param: 'context_length_exceeded_behavior',
+    param: "context_length_exceeded_behavior",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
 };
 
@@ -98,15 +98,15 @@ export const FireworksAICompleteResponseTransform: (
     | FireworksAICompleteResponse
     | FireworksAIValidationErrorResponse
     | FireworksAIErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     return FireworksAIErrorResponseTransform(
-      response as FireworksAIValidationErrorResponse | FireworksAIErrorResponse
+      response as FireworksAIValidationErrorResponse | FireworksAIErrorResponse,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -148,12 +148,12 @@ export interface FireworksAICompleteStreamChunk {
 }
 
 export const FireworksAICompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: FireworksAICompleteStreamChunk = JSON.parse(chunk);
@@ -173,6 +173,6 @@ export const FireworksAICompleteStreamChunkTransform: (
         },
       ],
       ...(parsedChunk.usage ? { usage: parsedChunk.usage } : {}),
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

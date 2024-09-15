@@ -1,36 +1,36 @@
-import { AZURE_OPEN_AI } from '../../globals';
-import { OpenAIErrorResponseTransform } from '../openai/utils';
-import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from '../types';
+import { AZURE_OPEN_AI } from "../../globals";
+import { OpenAIErrorResponseTransform } from "../openai/utils";
+import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from "../types";
 
 export const AzureOpenAIImageGenerateConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'dall-e-3',
+    default: "dall-e-3",
   },
   n: {
-    param: 'n',
+    param: "n",
     min: 1,
     max: 10,
   },
   quality: {
-    param: 'quality',
+    param: "quality",
   },
   response_format: {
-    param: 'response_format',
+    param: "response_format",
   },
   size: {
-    param: 'size',
+    param: "size",
   },
   style: {
-    param: 'style',
+    param: "style",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
 };
 
@@ -46,9 +46,9 @@ interface AzureOpenAIImageGenerateResponse extends ImageGenerateResponse {
 
 export const AzureOpenAIImageGenerateResponseTransform: (
   response: AzureOpenAIImageGenerateResponse | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ImageGenerateResponse | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return OpenAIErrorResponseTransform(response, AZURE_OPEN_AI);
   }
 

@@ -1,24 +1,24 @@
-import { handler as jsonSchemaHandler } from './jsonSchema';
-import { handler as jsonKeysHandler } from './jsonKeys';
-import { handler as containsHandler } from './contains';
-import { handler as validUrlsHandler } from './validUrls';
-import { handler as containsCodeHandler } from './containsCode';
-import { handler as wordCountHandler } from './wordCount';
-import { handler as sentenceCountHandler } from './sentenceCount';
-import { handler as webhookHandler } from './webhook';
-import { handler as logHandler } from './log';
+import { handler as jsonSchemaHandler } from "./jsonSchema";
+import { handler as jsonKeysHandler } from "./jsonKeys";
+import { handler as containsHandler } from "./contains";
+import { handler as validUrlsHandler } from "./validUrls";
+import { handler as containsCodeHandler } from "./containsCode";
+import { handler as wordCountHandler } from "./wordCount";
+import { handler as sentenceCountHandler } from "./sentenceCount";
+import { handler as webhookHandler } from "./webhook";
+import { handler as logHandler } from "./log";
 
-import { z } from 'zod';
-import { PluginContext, PluginParameters } from '../types';
+import { z } from "zod";
+import { PluginContext, PluginParameters } from "../types";
 
-describe('jsonSchema handler', () => {
-  it('should validate JSON in response text', async () => {
+describe("jsonSchema handler", () => {
+  it("should validate JSON in response text", async () => {
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
     const parameters: PluginParameters = {
       schema: z.object({ key: z.string() }),
     };
@@ -27,16 +27,16 @@ describe('jsonSchema handler', () => {
 
     expect(result.error).toBe(null);
     expect(result.verdict).toBe(true);
-    expect(result.data).toEqual({ key: 'value' });
+    expect(result.data).toEqual({ key: "value" });
   });
 
-  it('should return a false verdict for invalid JSON in response text', async () => {
+  it("should return a false verdict for invalid JSON in response text", async () => {
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value`,
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
     const parameters: PluginParameters = {
       schema: z.object({ key: z.string() }),
     };
@@ -49,38 +49,38 @@ describe('jsonSchema handler', () => {
   });
 });
 
-describe('jsonKeys handler', () => {
-  it('should return true verdict for any key in JSON', async () => {
+describe("jsonKeys handler", () => {
+  it("should return true verdict for any key in JSON", async () => {
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      keys: ['key1'],
-      operator: 'any',
+      keys: ["key1"],
+      operator: "any",
     };
 
     const result = await jsonKeysHandler(context, parameters, eventType);
 
     expect(result.error).toBe(null);
     expect(result.verdict).toBe(true);
-    expect(result.data).toEqual({ key1: 'value' });
+    expect(result.data).toEqual({ key1: "value" });
   });
 
-  it('should return false verdict for all keys in JSON', async () => {
+  it("should return false verdict for all keys in JSON", async () => {
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      keys: ['key1', 'key2'],
-      operator: 'all',
+      keys: ["key1", "key2"],
+      operator: "all",
     };
 
     const result = await jsonKeysHandler(context, parameters, eventType);
@@ -91,41 +91,41 @@ describe('jsonKeys handler', () => {
     // console.log(result);
   });
 
-  it('should return true verdict for none of the keys in JSON', async () => {
+  it("should return true verdict for none of the keys in JSON", async () => {
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      keys: ['key2'],
-      operator: 'none',
+      keys: ["key2"],
+      operator: "none",
     };
 
     const result = await jsonKeysHandler(context, parameters, eventType);
 
     expect(result.error).toBe(null);
     expect(result.verdict).toBe(true);
-    expect(result.data).toEqual({ key1: 'value' });
+    expect(result.data).toEqual({ key1: "value" });
 
     // console.log(result);
   });
 });
 
-describe('contains handler', () => {
-  it('should return true verdict for any word in response text', async () => {
+describe("contains handler", () => {
+  it("should return true verdict for any word in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this word1 and adding some text after',
+        text: "adding some text before this word1 and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      words: ['word1'],
-      operator: 'any',
+      words: ["word1"],
+      operator: "any",
     };
 
     const result = await containsHandler(context, parameters, eventType);
@@ -134,17 +134,17 @@ describe('contains handler', () => {
     expect(result.verdict).toBe(true);
   });
 
-  it('should return false verdict for all words in response text', async () => {
+  it("should return false verdict for all words in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this word1 and adding some text after',
+        text: "adding some text before this word1 and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      words: ['word1', 'word2'],
-      operator: 'all',
+      words: ["word1", "word2"],
+      operator: "all",
     };
 
     const result = await containsHandler(context, parameters, eventType);
@@ -153,17 +153,17 @@ describe('contains handler', () => {
     expect(result.verdict).toBe(false);
   });
 
-  it('should return true verdict for none of the words in response text', async () => {
+  it("should return true verdict for none of the words in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this word1 and adding some text after',
+        text: "adding some text before this word1 and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      words: ['word2'],
-      operator: 'none',
+      words: ["word2"],
+      operator: "none",
     };
 
     const result = await containsHandler(context, parameters, eventType);
@@ -173,14 +173,14 @@ describe('contains handler', () => {
   });
 });
 
-describe('validUrls handler', () => {
-  it('should return true verdict for valid URLs in response text', async () => {
+describe("validUrls handler", () => {
+  it("should return true verdict for valid URLs in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this https://example.com and adding some text after',
+        text: "adding some text before this https://example.com and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       onlyDNS: false,
@@ -192,13 +192,13 @@ describe('validUrls handler', () => {
     expect(result.verdict).toBe(true);
   });
 
-  it('should return false verdict for invalid URLs in response text', async () => {
+  it("should return false verdict for invalid URLs in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this https://invalidurl.cm and adding some text after',
+        text: "adding some text before this https://invalidurl.cm and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       onlyDNS: false,
@@ -210,13 +210,13 @@ describe('validUrls handler', () => {
     expect(result.verdict).toBe(false);
   });
 
-  it('should return true verdict for URLs with valid DNS in response text', async () => {
+  it("should return true verdict for URLs with valid DNS in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this https://portkey.ai and adding some text after',
+        text: "adding some text before this https://portkey.ai and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       onlyDNS: true,
@@ -228,13 +228,13 @@ describe('validUrls handler', () => {
     expect(result.verdict).toBe(true);
   });
 
-  it('should return false verdict for URLs with invalid DNS in response text', async () => {
+  it("should return false verdict for URLs with invalid DNS in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this https://invalidurl.com and adding some text after',
+        text: "adding some text before this https://invalidurl.com and adding some text after",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       onlyDNS: true,
@@ -246,13 +246,13 @@ describe('validUrls handler', () => {
     expect(result.verdict).toBe(false);
   });
 
-  it('should return true verdict for URLs with valid DNS and invalid URL in response text', async () => {
+  it("should return true verdict for URLs with valid DNS and invalid URL in response text", async () => {
     const context: PluginContext = {
       response: {
-        text: 'adding some text before this https://example.com and adding some text after https://invalidurl.com',
+        text: "adding some text before this https://example.com and adding some text after https://invalidurl.com",
       },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       onlyDNS: true,
@@ -265,12 +265,12 @@ describe('validUrls handler', () => {
   });
 });
 
-describe('sentenceCount handler', () => {
-  it('should return true verdict for sentence count within range in response text', async () => {
+describe("sentenceCount handler", () => {
+  it("should return true verdict for sentence count within range in response text", async () => {
     const context: PluginContext = {
-      response: { text: 'This is a sentence. This is another sentence.' },
+      response: { text: "This is a sentence. This is another sentence." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       minSentences: 0,
@@ -283,11 +283,11 @@ describe('sentenceCount handler', () => {
     expect(result.verdict).toBe(true);
   });
 
-  it('should return false verdict for sentence count outside range in response text', async () => {
+  it("should return false verdict for sentence count outside range in response text", async () => {
     const context: PluginContext = {
-      response: { text: 'This is a sentence. This is another sentence.' },
+      response: { text: "This is a sentence. This is another sentence." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       minSentences: 3,
@@ -300,32 +300,32 @@ describe('sentenceCount handler', () => {
     expect(result.verdict).toBe(false);
   });
 
-  it('should return error for missing sentence count range in parameters', async () => {
+  it("should return error for missing sentence count range in parameters", async () => {
     const context: PluginContext = {
-      response: { text: 'This is a sentence. This is another sentence.' },
+      response: { text: "This is a sentence. This is another sentence." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {};
 
     const result = await sentenceCountHandler(context, parameters, eventType);
 
     expect(result.error).toBeInstanceOf(Error);
-    expect(result.error?.message).toBe('Missing sentence count range or text');
+    expect(result.error?.message).toBe("Missing sentence count range or text");
     expect(result.verdict).toBe(false);
     expect(result.data).toBe(null);
   });
 });
 
-describe('containsCode handler', () => {
-  it('should return true verdict for format in code block in response text', async () => {
+describe("containsCode handler", () => {
+  it("should return true verdict for format in code block in response text", async () => {
     const context: PluginContext = {
       response: { text: '```js\nconsole.log("Hello, World!");\n```' },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      format: 'JavaScript',
+      format: "JavaScript",
     };
 
     const result = await containsCodeHandler(context, parameters, eventType);
@@ -334,14 +334,14 @@ describe('containsCode handler', () => {
     expect(result.verdict).toBe(true);
   });
 
-  it('should return false verdict for format not in code block in response text', async () => {
+  it("should return false verdict for format not in code block in response text", async () => {
     const context: PluginContext = {
       response: { text: '```py\nprint("Hello, World!")\n```' },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      format: 'JavaScript',
+      format: "JavaScript",
     };
 
     const result = await containsCodeHandler(context, parameters, eventType);
@@ -350,14 +350,14 @@ describe('containsCode handler', () => {
     expect(result.verdict).toBe(false);
   });
 
-  it('should return data for no code block in response text', async () => {
+  it("should return data for no code block in response text", async () => {
     const context: PluginContext = {
-      response: { text: 'No code block found in the response text.' },
+      response: { text: "No code block found in the response text." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
-      format: 'JavaScript',
+      format: "JavaScript",
     };
 
     const result = await containsCodeHandler(context, parameters, eventType);
@@ -365,17 +365,17 @@ describe('containsCode handler', () => {
     expect(result.error).toBe(null);
     expect(result.verdict).toBe(false);
     expect(result.data).toEqual({
-      message: 'No code block found in the response text.',
+      message: "No code block found in the response text.",
     });
   });
 });
 
-describe('wordCount handler', () => {
-  it('should return true verdict for word count within range in response text', async () => {
+describe("wordCount handler", () => {
+  it("should return true verdict for word count within range in response text", async () => {
     const context: PluginContext = {
-      response: { text: 'This is a sentence with 6 words.' },
+      response: { text: "This is a sentence with 6 words." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       minWords: 6,
@@ -388,11 +388,11 @@ describe('wordCount handler', () => {
     expect(result.verdict).toBe(true);
   });
 
-  it('should return false verdict for word count outside range in response text', async () => {
+  it("should return false verdict for word count outside range in response text", async () => {
     const context: PluginContext = {
-      response: { text: 'This is a sentence with 6 words.' },
+      response: { text: "This is a sentence with 6 words." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {
       minWords: 1,
@@ -405,33 +405,33 @@ describe('wordCount handler', () => {
     expect(result.verdict).toBe(false);
   });
 
-  it('should return error for missing word count range in parameters', async () => {
+  it("should return error for missing word count range in parameters", async () => {
     const context: PluginContext = {
-      response: { text: 'This is a sentence with 6 words.' },
+      response: { text: "This is a sentence with 6 words." },
     };
-    const eventType = 'afterRequestHook';
+    const eventType = "afterRequestHook";
 
     const parameters: PluginParameters = {};
 
     const result = await wordCountHandler(context, parameters, eventType);
 
     expect(result.error).toBeInstanceOf(Error);
-    expect(result.error?.message).toBe('Missing word count range or text');
+    expect(result.error?.message).toBe("Missing word count range or text");
     expect(result.verdict).toBe(false);
     expect(result.data).toBe(null);
   });
 });
 
-describe('webhook handler', () => {
-  it('should handle a postive result from a webhook', async () => {
-    const eventType = 'afterRequestHook';
+describe("webhook handler", () => {
+  it("should handle a postive result from a webhook", async () => {
+    const eventType = "afterRequestHook";
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
       },
     };
     const parameters: PluginParameters = {
-      webhookURL: 'https://roh26it-blackplanarian.web.val.run/true',
+      webhookURL: "https://roh26it-blackplanarian.web.val.run/true",
     };
 
     const result = await webhookHandler(context, parameters, eventType);
@@ -441,15 +441,15 @@ describe('webhook handler', () => {
     expect(result.data).toEqual(context);
   });
 
-  it('should handle a negative result from a webhook', async () => {
-    const eventType = 'afterRequestHook';
+  it("should handle a negative result from a webhook", async () => {
+    const eventType = "afterRequestHook";
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
       },
     };
     const parameters: PluginParameters = {
-      webhookURL: 'https://roh26it-blackplanarian.web.val.run/false',
+      webhookURL: "https://roh26it-blackplanarian.web.val.run/false",
     };
 
     const result = await webhookHandler(context, parameters, eventType);
@@ -459,8 +459,8 @@ describe('webhook handler', () => {
     expect(result.data).toEqual(context);
   });
 
-  it('should handle an error from a webhook', async () => {
-    const eventType = 'afterRequestHook';
+  it("should handle an error from a webhook", async () => {
+    const eventType = "afterRequestHook";
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
@@ -468,7 +468,7 @@ describe('webhook handler', () => {
     };
 
     const parameters: PluginParameters = {
-      webhookURL: 'https://roh26it-blackplanarian.web.val.run/error',
+      webhookURL: "https://roh26it-blackplanarian.web.val.run/error",
     };
 
     const result = await webhookHandler(context, parameters, eventType);
@@ -478,8 +478,8 @@ describe('webhook handler', () => {
     expect(result.data).toBe(null);
   });
 
-  it('should handle a timeout from a webhook', async () => {
-    const eventType = 'afterRequestHook';
+  it("should handle a timeout from a webhook", async () => {
+    const eventType = "afterRequestHook";
     const context: PluginContext = {
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
@@ -487,7 +487,7 @@ describe('webhook handler', () => {
     };
 
     const parameters: PluginParameters = {
-      webhookURL: 'https://roh26it-blackplanarian.web.val.run/timeout',
+      webhookURL: "https://roh26it-blackplanarian.web.val.run/timeout",
     };
 
     const result = await webhookHandler(context, parameters, eventType);
@@ -498,21 +498,21 @@ describe('webhook handler', () => {
   });
 });
 
-describe('log handler', () => {
-  it('should log details to a URL', async () => {
-    const eventType = 'afterRequestHook';
+describe("log handler", () => {
+  it("should log details to a URL", async () => {
+    const eventType = "afterRequestHook";
     const context: PluginContext = {
       request: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
-        json: { key: 'value' },
+        json: { key: "value" },
       },
       response: {
         text: `adding some text before this \`\`\`json\n{"key1": "value"}\n\`\`\`\n and adding some text after {"key":"value"}`,
-        json: { key: 'value' },
+        json: { key: "value" },
       },
     };
     const parameters: PluginParameters = {
-      logURL: 'https://roh26it-upsetharlequinfrog.web.val.run',
+      logURL: "https://roh26it-upsetharlequinfrog.web.val.run",
       headers: '{"Authorization": "this is some secret"}',
     };
 

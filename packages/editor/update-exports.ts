@@ -6,7 +6,7 @@ const packageJsonPath = path.join(__dirname, "package.json");
 
 function generateExports(
   dir: string,
-  baseDir: string = ""
+  baseDir: string = "",
 ): Record<string, string> {
   const exports: Record<string, string> = {};
   const files = fs.readdirSync(dir);
@@ -30,7 +30,7 @@ function generateExports(
         .replace(/\/index$/, "");
       exportKey = exportKey.replace(
         /^(components|utils|hooks|types|assets|config|context)\//,
-        ""
+        "",
       );
       const exportValue = `./src/${relativePath}`;
       exports[exportKey] = exportValue;
@@ -52,12 +52,12 @@ function updatePackageJson(newExports: Record<string, string>) {
     Object.entries(mergedExports).map(([key, value]) => [
       key.startsWith("./") ? key.slice(2) : key,
       value,
-    ])
+    ]),
   );
 
   // Sort exports alphabetically
   const sortedExports = Object.fromEntries(
-    Object.entries(cleanedExports).sort(([a], [b]) => a.localeCompare(b))
+    Object.entries(cleanedExports).sort(([a], [b]) => a.localeCompare(b)),
   );
 
   // Add main export

@@ -22,11 +22,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "../popover";
+import { Popover, PopoverContent, PopoverTrigger } from "../popover";
 import { TimePicker } from "../time-picker";
 
 import { Badge } from "../badge";

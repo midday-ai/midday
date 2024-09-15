@@ -1,19 +1,19 @@
-import { ProviderConfigs } from '../types';
-import TogetherAIApiConfig from './api';
+import { ProviderConfigs } from "../types";
+import TogetherAIApiConfig from "./api";
 import {
   TogetherAIChatCompleteConfig,
   TogetherAIChatCompleteResponseTransform,
   TogetherAIChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   TogetherAICompleteConfig,
   TogetherAICompleteResponseTransform,
   TogetherAICompleteStreamChunkTransform,
-} from './complete';
+} from "./complete";
 import {
   TogetherAIEmbedConfig,
   TogetherAIEmbedResponseTransform,
-} from './embed';
+} from "./embed";
 
 const TogetherAIConfig: ProviderConfigs = {
   complete: TogetherAICompleteConfig,
@@ -21,10 +21,10 @@ const TogetherAIConfig: ProviderConfigs = {
   embed: TogetherAIEmbedConfig,
   api: TogetherAIApiConfig,
   responseTransforms: {
-    'stream-complete': TogetherAICompleteStreamChunkTransform,
+    "stream-complete": TogetherAICompleteStreamChunkTransform,
     complete: TogetherAICompleteResponseTransform,
     chatComplete: TogetherAIChatCompleteResponseTransform,
-    'stream-chatComplete': TogetherAIChatCompleteStreamChunkTransform,
+    "stream-chatComplete": TogetherAIChatCompleteStreamChunkTransform,
     embed: TogetherAIEmbedResponseTransform,
   },
 };

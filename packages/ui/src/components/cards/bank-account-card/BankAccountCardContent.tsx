@@ -29,12 +29,7 @@ import {
   CommandSeparator,
 } from "../../command";
 import { Label } from "../../label";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../tabs";
 
 import { BankAccountContext } from "./BankAccountCard";
 

@@ -43,7 +43,9 @@ export function generatePayloadArray(
   });
 }
 
-export function generateScatterChartData(options: PayloadGeneratorOptions): ScatterChartDataPoint[] {
+export function generateScatterChartData(
+  options: PayloadGeneratorOptions,
+): ScatterChartDataPoint[] {
   const { count = 5, minValue = 0, maxValue = 1000 } = options;
 
   return Array.from({ length: count }, (): ScatterChartDataPoint => {

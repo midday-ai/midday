@@ -3,8 +3,8 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
+} from "../types";
+import { getText } from "../utils";
 
 function countWords(text: string): number {
   return text.split(/\s+/).length;
@@ -13,7 +13,7 @@ function countWords(text: string): number {
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -32,7 +32,7 @@ export const handler: PluginHandler = async (
       let count = countWords(text);
       verdict = count >= minCount && count <= maxCount;
     } else {
-      error = error || new Error('Missing word count range or text');
+      error = error || new Error("Missing word count range or text");
     }
   } catch (e) {
     error = e as Error;

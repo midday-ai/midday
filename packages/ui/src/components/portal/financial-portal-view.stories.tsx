@@ -39,7 +39,9 @@ export const WithMultipleLinkedAccounts: Story = {
   args: {
     financialProfile: {
       ...FinancialDataGenerator.generateFinancialProfile(),
-      link: Array(3).fill(null).map(() => FinancialDataGenerator.generateRandomLink()),
+      link: Array(3)
+        .fill(null)
+        .map(() => FinancialDataGenerator.generateRandomLink()),
     },
     financialContext: FinancialDataGenerator.generateFinancialContext(),
   },

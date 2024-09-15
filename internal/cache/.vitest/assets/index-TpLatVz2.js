@@ -3813,7 +3813,6 @@ const bS = Symbol.for("v-scx"),
           ;
           e.insertBefore(s.cloneNode(!0), r),
             !(s === c || !(s = s.nextSibling));
-
         );
       else {
         Bg.innerHTML = o ? `<svg>${t}</svg>` : t;
@@ -4944,7 +4943,6 @@ function Ek(t, e) {
       y < r.length &&
       _k(v, r[y]) >= 0 &&
       (v.record.path !== r[y].record.path || !U0(v, r[y]));
-
     )
       y++;
     r.splice(y, 0, v), v.record.name && !fv(v) && o.set(v.record.name, v);
@@ -13546,7 +13544,6 @@ function Uy(t) {
     for (
       var h = f;
       h < e.length - 1 && e[h].charCodeAt(1) + 1 === e[h + 1].charCodeAt(1);
-
     )
       h += 1;
     var d = 1 + h - f;
@@ -15565,7 +15562,6 @@ var Ylt = bl(Gl, 9, 1),
             for (
               var ht = yf(rt), G = (1 << ht) - 1, z = bl(rt, ht, 1), dt = 0;
               dt < Y;
-
             ) {
               var k = z[rr(t, y, G)];
               y += k & 15;
@@ -15581,7 +15577,6 @@ var Ylt = bl(Gl, 9, 1),
                       ? ((B = 3 + rr(t, y, 7)), (y += 3))
                       : $ == 18 && ((B = 11 + rr(t, y, 127)), (y += 7));
                   B--;
-
                 )
                   nt[dt++] = I;
               }
@@ -17142,7 +17137,6 @@ b`.split(/\n/).length != 3
         for (
           var n = this.pos;
           /[\s\u00a0]/.test(this.string.charAt(this.pos));
-
         )
           ++this.pos;
         return this.pos > n;
@@ -18144,7 +18138,6 @@ b`.split(/\n/).length != 3
       for (
         var b = u.length, x = 0, S = 1, P = "", D, W, q = 0, Z, ot, vt, bt, Ct;
         ;
-
       ) {
         if (q == x) {
           (Z = ot = vt = W = ""), (Ct = null), (bt = null), (q = 1 / 0);
@@ -18656,7 +18649,6 @@ b`.split(/\n/).length != 3
             for (
               ;
               S < n.length - 3 && n[S + 3] == n[S + 4] && !n[S + 5].insertLeft;
-
             )
               (l = n[(S += 3) + 2]), (m = "right");
           break;
@@ -18692,7 +18684,6 @@ b`.split(/\n/).length != 3
             ;
             u.coverStart + b < u.coverEnd &&
             se(i.line.text.charAt(u.coverStart + b));
-
           )
             ++b;
           if (
@@ -20865,7 +20856,6 @@ b`.split(/\n/).length != 3
             m = { changes: [qu(n, i)], generation: u.generation },
             u.done.push(m);
           u.done.length > u.undoDepth;
-
         )
           u.done.shift(), u.done[0].ranges || u.done.shift();
       }
@@ -21475,7 +21465,6 @@ b`.split(/\n/).length != 3
               for (
                 var m = (u.lines.length % 25) + 25, b = m;
                 b < u.lines.length;
-
               ) {
                 var x = new Ws(u.lines.slice(b, (b += 25)));
                 (u.height -= x.height),
@@ -24626,7 +24615,6 @@ b`.split(/\n/).length != 3
                         return !/\s/.test(D) && !re(D);
                       };
               m > 0 && P(p.charAt(m - 1));
-
             )
               --m;
             for (; b < p.length && P(p.charAt(b)); ) ++b;
@@ -25169,7 +25157,6 @@ b`.split(/\n/).length != 3
           var D = n.doc.splitLines(ux(n, b, P, m, S)),
             W = $r(n.doc, X(m, 0), X(S, Pt(n.doc, S).text.length));
           D.length > 1 && W.length > 1;
-
         )
           if (ut(D) == ut(W)) D.pop(), W.pop(), S--;
           else if (D[0] == W[0]) D.shift(), W.shift(), m++;
@@ -25181,7 +25168,6 @@ b`.split(/\n/).length != 3
             vt = W[0],
             bt = Math.min(ot.length, vt.length);
           q < bt && ot.charCodeAt(q) == vt.charCodeAt(q);
-
         )
           ++q;
         for (
@@ -25193,7 +25179,6 @@ b`.split(/\n/).length != 3
             );
           Z < Lt &&
           Ct.charCodeAt(Ct.length - Z - 1) == wt.charCodeAt(wt.length - Z - 1);
-
         )
           ++Z;
         if (D.length == 1 && W.length == 1 && m == l.line)
@@ -25203,7 +25188,6 @@ b`.split(/\n/).length != 3
             q > l.ch &&
             Ct.charCodeAt(Ct.length - Z - 1) ==
               wt.charCodeAt(wt.length - Z - 1);
-
           )
             q--, Z++;
         (D[D.length - 1] = Ct.slice(0, Ct.length - Z).replace(/^\u200b+/, "")),
@@ -25363,7 +25347,6 @@ b`.split(/\n/).length != 3
         i.firstChild.nodeType == 3 &&
         ((m = i.firstChild), a && (a = m.nodeValue.length));
         b.parentNode != l;
-
       )
         b = b.parentNode;
       var x = n.measure,
@@ -25601,7 +25584,6 @@ b`.split(/\n/).length != 3
         for (
           var m = 0, b = Math.min(l.length, u.length);
           m < b && l.charCodeAt(m) == u.charCodeAt(m);
-
         )
           ++m;
         return (
@@ -26107,7 +26089,6 @@ var Uat = { exports: {} };
             G.style = O,
             C.lexical.hasOwnProperty("align") || (C.lexical.align = !0);
           ;
-
         ) {
           var ce = _t.length ? _t.pop() : d ? Et : at;
           if (ce(et, gt)) {
@@ -26801,7 +26782,6 @@ var Uat = { exports: {} };
               ((X = C.cc[C.cc.length - 1]) &&
                 (X == lt || X == ft) &&
                 !/^[,\.=+\-*:?[\(]/.test(O)));
-
           )
             gt = gt.prev;
           f && gt.type == ")" && gt.prev.type == "stat" && (gt = gt.prev);
@@ -30114,7 +30094,6 @@ function Nft(t, e, r) {
         y = -1,
         w = s.length;
       ++y < w;
-
     )
       s[y].call(t, v);
     r.state === hh && (r.on.call("end", t, t.__data__, r.index, r.group), d());
@@ -31361,7 +31340,6 @@ function jht(t, e) {
     for (
       var f = s - r || 1, h = this._root, d, g;
       r > t || t >= s || o > e || e >= c;
-
     )
       switch (
         ((g = ((e < o) << 1) | (t < r)),
@@ -31432,7 +31410,6 @@ function Kht(t, e, r) {
         ? (r = 1 / 0)
         : ((s = t - r), (c = e - r), (v = t + r), (y = e + r), (r *= r));
     (N = w.pop());
-
   )
     if (
       !(
@@ -31549,7 +31526,6 @@ function Jht(t) {
   for (
     o && e.push(new gn(o, this._x0, this._y0, this._x1, this._y1));
     (r = e.pop());
-
   )
     if (
       !t((o = r.node), (c = r.x0), (f = r.y0), (h = r.x1), (d = r.y1)) &&
@@ -31572,7 +31548,6 @@ function tdt(t) {
     this._root &&
     e.push(new gn(this._root, this._x0, this._y0, this._x1, this._y1));
     (o = e.pop());
-
   ) {
     var s = o.node;
     if (s.length) {

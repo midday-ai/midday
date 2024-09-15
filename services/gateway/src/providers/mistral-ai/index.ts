@@ -1,11 +1,11 @@
-import { ProviderConfigs } from '../types';
-import MistralAIAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import MistralAIAPIConfig from "./api";
 import {
   MistralAIChatCompleteConfig,
   MistralAIChatCompleteResponseTransform,
   MistralAIChatCompleteStreamChunkTransform,
-} from './chatComplete';
-import { MistralAIEmbedConfig, MistralAIEmbedResponseTransform } from './embed';
+} from "./chatComplete";
+import { MistralAIEmbedConfig, MistralAIEmbedResponseTransform } from "./embed";
 
 const MistralAIConfig: ProviderConfigs = {
   chatComplete: MistralAIChatCompleteConfig,
@@ -13,7 +13,7 @@ const MistralAIConfig: ProviderConfigs = {
   api: MistralAIAPIConfig,
   responseTransforms: {
     chatComplete: MistralAIChatCompleteResponseTransform,
-    'stream-chatComplete': MistralAIChatCompleteStreamChunkTransform,
+    "stream-chatComplete": MistralAIChatCompleteStreamChunkTransform,
     embed: MistralAIEmbedResponseTransform,
   },
 };

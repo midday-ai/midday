@@ -5,19 +5,12 @@
   "types": "./dist/index.d.ts",
   "license": "AGPL-3.0-only",
   "private": true,
-  "keywords": [
-    "unkey",
-    "semantic",
-    "cache",
-    "ai"
-  ],
+  "keywords": ["unkey", "semantic", "cache", "ai"],
   "bugs": {
     "url": "https://github.com/unkeyed/unkey/issues"
   },
   "homepage": "https://github.com/unkeyed/unkey#readme",
-  "files": [
-    "./dist/**"
-  ],
+  "files": ["./dist/**"],
   "author": "Dominic Eccleston domeccleston@gmail.com",
   "scripts": {
     "build": "tsc",

@@ -1,17 +1,17 @@
-import { ProviderConfigs } from '../types';
-import MoonshotAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import MoonshotAPIConfig from "./api";
 import {
   MoonshotChatCompleteConfig,
   MoonshotChatCompleteResponseTransform,
   MoonshotChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const MoonshotConfig: ProviderConfigs = {
   chatComplete: MoonshotChatCompleteConfig,
   api: MoonshotAPIConfig,
   responseTransforms: {
     chatComplete: MoonshotChatCompleteResponseTransform,
-    'stream-chatComplete': MoonshotChatCompleteStreamChunkTransform,
+    "stream-chatComplete": MoonshotChatCompleteStreamChunkTransform,
   },
 };
 

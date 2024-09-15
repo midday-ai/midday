@@ -3,10 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "main": "index.ts",
-  "files": [
-    "index.ts",
-    "postcss.js"
-  ],
+  "files": ["index.ts", "postcss.js"],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "eslint ",
@@ -28,9 +25,7 @@
   },
   "eslintConfig": {
     "root": true,
-    "extends": [
-      "@tooling/eslint-config/base"
-    ]
+    "extends": ["@tooling/eslint-config/base"]
   },
   "prettier": "@tooling/prettier-config"
 }

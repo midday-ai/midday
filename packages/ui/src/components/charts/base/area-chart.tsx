@@ -5,14 +5,13 @@ import React, { useMemo } from "react";
 import {
   Area,
   AreaChart as BaseAreaChart,
-  CartesianGrid, Tooltip,
+  CartesianGrid,
+  Tooltip,
   TooltipProps,
   XAxis,
-  YAxis
+  YAxis,
 } from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
 import {
   formatAmount,
   getYAxisWidth,

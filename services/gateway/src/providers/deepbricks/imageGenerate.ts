@@ -1,36 +1,36 @@
-import { DEEPBRICKS } from '../../globals';
-import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from '../types';
-import { DeepbricksErrorResponseTransform } from './chatComplete';
+import { DEEPBRICKS } from "../../globals";
+import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from "../types";
+import { DeepbricksErrorResponseTransform } from "./chatComplete";
 
 export const DeepbricksImageGenerateConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'dall-e-2',
+    default: "dall-e-2",
   },
   n: {
-    param: 'n',
+    param: "n",
     min: 1,
     max: 10,
   },
   quality: {
-    param: 'quality',
+    param: "quality",
   },
   response_format: {
-    param: 'response_format',
+    param: "response_format",
   },
   size: {
-    param: 'size',
+    param: "size",
   },
   style: {
-    param: 'style',
+    param: "style",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
 };
 
@@ -46,9 +46,9 @@ interface DeepbricksImageGenerateResponse extends ImageGenerateResponse {
 
 export const DeepbricksImageGenerateResponseTransform: (
   response: DeepbricksImageGenerateResponse | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ImageGenerateResponse | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return DeepbricksErrorResponseTransform(response, DEEPBRICKS);
   }
 

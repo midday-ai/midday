@@ -1,37 +1,37 @@
-import { BEDROCK } from '../../globals';
-import { Params } from '../../types/requestBody';
-import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
-import { BedrockErrorResponseTransform } from './chatComplete';
-import { BedrockErrorResponse } from './embed';
+import { BEDROCK } from "../../globals";
+import { Params } from "../../types/requestBody";
+import { CompletionResponse, ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
+import { BedrockErrorResponseTransform } from "./chatComplete";
+import { BedrockErrorResponse } from "./embed";
 
 export const BedrockAnthropicCompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     transform: (params: Params) => `\n\nHuman: ${params.prompt}\n\nAssistant:`,
     required: true,
   },
   max_tokens: {
-    param: 'max_tokens_to_sample',
+    param: "max_tokens_to_sample",
     required: true,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: -1,
     min: -1,
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
     default: -1,
   },
   stop: {
-    param: 'stop_sequences',
+    param: "stop_sequences",
     transform: (params: Params) => {
       if (params.stop === null) {
         return [];
@@ -40,85 +40,85 @@ export const BedrockAnthropicCompleteConfig: ProviderConfig = {
     },
   },
   user: {
-    param: 'metadata.user_id',
+    param: "metadata.user_id",
   },
 };
 
 export const BedrockCohereCompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 20,
     min: 1,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.75,
     min: 0,
     max: 5,
   },
   top_p: {
-    param: 'p',
+    param: "p",
     default: 0.75,
     min: 0,
     max: 1,
   },
   top_k: {
-    param: 'k',
+    param: "k",
     default: 0,
     max: 500,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     default: 0,
     min: 0,
     max: 1,
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     default: 0,
     min: 0,
     max: 1,
   },
   logit_bias: {
-    param: 'logit_bias',
+    param: "logit_bias",
   },
   n: {
-    param: 'num_generations',
+    param: "num_generations",
     default: 1,
     min: 1,
     max: 5,
   },
   stop: {
-    param: 'end_sequences',
+    param: "end_sequences",
   },
   stream: {
-    param: 'stream',
+    param: "stream",
   },
 };
 
 export const BedrockLLamaCompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   max_tokens: {
-    param: 'max_gen_len',
+    param: "max_gen_len",
     default: 512,
     min: 1,
     max: 2048,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.5,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 0.9,
     min: 0,
     max: 1,
@@ -127,95 +127,95 @@ export const BedrockLLamaCompleteConfig: ProviderConfig = {
 
 export const BedrockMistralCompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 20,
     min: 1,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.75,
     min: 0,
     max: 5,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 0.75,
     min: 0,
     max: 1,
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
     default: 0,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
 };
 
 const transformTitanGenerationConfig = (params: Params) => {
   const generationConfig: Record<string, any> = {};
-  if (params['temperature']) {
-    generationConfig['temperature'] = params['temperature'];
+  if (params["temperature"]) {
+    generationConfig["temperature"] = params["temperature"];
   }
-  if (params['top_p']) {
-    generationConfig['topP'] = params['top_p'];
+  if (params["top_p"]) {
+    generationConfig["topP"] = params["top_p"];
   }
-  if (params['max_tokens']) {
-    generationConfig['maxTokenCount'] = params['max_tokens'];
+  if (params["max_tokens"]) {
+    generationConfig["maxTokenCount"] = params["max_tokens"];
   }
-  if (params['stop']) {
-    generationConfig['stopSequences'] = params['stop'];
+  if (params["stop"]) {
+    generationConfig["stopSequences"] = params["stop"];
   }
   return generationConfig;
 };
 
 export const BedrockTitanCompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'inputText',
+    param: "inputText",
     required: true,
   },
   temperature: {
-    param: 'textGenerationConfig',
+    param: "textGenerationConfig",
     transform: (params: Params) => transformTitanGenerationConfig(params),
   },
   max_tokens: {
-    param: 'textGenerationConfig',
+    param: "textGenerationConfig",
     transform: (params: Params) => transformTitanGenerationConfig(params),
   },
   top_p: {
-    param: 'textGenerationConfig',
+    param: "textGenerationConfig",
     transform: (params: Params) => transformTitanGenerationConfig(params),
   },
 };
 
 export const BedrockAI21CompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   max_tokens: {
-    param: 'maxTokens',
+    param: "maxTokens",
     default: 200,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.7,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'topP',
+    param: "topP",
     default: 1,
   },
   stop: {
-    param: 'stopSequences',
+    param: "stopSequences",
   },
   presence_penalty: {
-    param: 'presencePenalty',
+    param: "presencePenalty",
     transform: (params: Params) => {
       return {
         scale: params.presence_penalty,
@@ -223,7 +223,7 @@ export const BedrockAI21CompleteConfig: ProviderConfig = {
     },
   },
   frequency_penalty: {
-    param: 'frequencyPenalty',
+    param: "frequencyPenalty",
     transform: (params: Params) => {
       return {
         scale: params.frequency_penalty,
@@ -231,13 +231,13 @@ export const BedrockAI21CompleteConfig: ProviderConfig = {
     },
   },
   countPenalty: {
-    param: 'countPenalty',
+    param: "countPenalty",
   },
   frequencyPenalty: {
-    param: 'frequencyPenalty',
+    param: "frequencyPenalty",
   },
   presencePenalty: {
-    param: 'presencePenalty',
+    param: "presencePenalty",
   },
 };
 
@@ -250,21 +250,21 @@ export interface BedrockLlamaCompleteResponse {
 
 export const BedrockLlamaCompleteResponseTransform: (
   response: BedrockLlamaCompleteResponse | BedrockErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('generation' in response) {
+  if ("generation" in response) {
     return {
       id: Date.now().toString(),
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: [
         {
@@ -291,7 +291,7 @@ export interface BedrockLlamaStreamChunk {
   prompt_token_count: number;
   generation_token_count: number;
   stop_reason: string | null;
-  'amazon-bedrock-invocationMetrics': {
+  "amazon-bedrock-invocationMetrics": {
     inputTokenCount: number;
     outputTokenCount: number;
     invocationLatency: number;
@@ -301,7 +301,7 @@ export interface BedrockLlamaStreamChunk {
 
 export const BedrockLlamaCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string | string[] = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
   chunk = chunk.trim();
@@ -311,13 +311,13 @@ export const BedrockLlamaCompleteStreamChunkTransform: (
     return [
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'text_completion',
+        object: "text_completion",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: BEDROCK,
         choices: [
           {
-            text: '',
+            text: "",
             index: 0,
             logprobs: null,
             finish_reason: parsedChunk.stop_reason,
@@ -325,12 +325,12 @@ export const BedrockLlamaCompleteStreamChunkTransform: (
         ],
         usage: {
           prompt_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount,
           completion_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
           total_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount +
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount +
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
         },
       })}\n\n`,
       `data: [DONE]\n\n`,
@@ -339,9 +339,9 @@ export const BedrockLlamaCompleteStreamChunkTransform: (
 
   return `data: ${JSON.stringify({
     id: fallbackId,
-    object: 'text_completion',
+    object: "text_completion",
     created: Math.floor(Date.now() / 1000),
-    model: '',
+    model: "",
     provider: BEDROCK,
     choices: [
       {
@@ -365,24 +365,24 @@ export interface BedrockTitanCompleteResponse {
 
 export const BedrockTitanCompleteResponseTransform: (
   response: BedrockTitanCompleteResponse | BedrockErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('results' in response) {
+  if ("results" in response) {
     const completionTokens = response.results
       .map((r) => r.tokenCount)
       .reduce((partialSum, a) => partialSum + a, 0);
     return {
       id: Date.now().toString(),
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: response.results.map((generation, index) => ({
         text: generation.outputText,
@@ -406,7 +406,7 @@ export interface BedrockTitanStreamChunk {
   index: number;
   totalOutputTextTokenCount: number;
   completionReason: string | null;
-  'amazon-bedrock-invocationMetrics': {
+  "amazon-bedrock-invocationMetrics": {
     inputTokenCount: number;
     outputTokenCount: number;
     invocationLatency: number;
@@ -416,7 +416,7 @@ export interface BedrockTitanStreamChunk {
 
 export const BedrockTitanCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string | string[] = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
   chunk = chunk.trim();
@@ -425,9 +425,9 @@ export const BedrockTitanCompleteStreamChunkTransform: (
   return [
     `data: ${JSON.stringify({
       id: fallbackId,
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: [
         {
@@ -440,13 +440,13 @@ export const BedrockTitanCompleteStreamChunkTransform: (
     })}\n\n`,
     `data: ${JSON.stringify({
       id: fallbackId,
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: [
         {
-          text: '',
+          text: "",
           index: 0,
           logprobs: null,
           finish_reason: parsedChunk.completionReason,
@@ -454,12 +454,12 @@ export const BedrockTitanCompleteStreamChunkTransform: (
       ],
       usage: {
         prompt_tokens:
-          parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount,
+          parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount,
         completion_tokens:
-          parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+          parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
         total_tokens:
-          parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount +
-          parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+          parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount +
+          parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
       },
     })}\n\n`,
     `data: [DONE]\n\n`,
@@ -489,29 +489,29 @@ export interface BedrockAI21CompleteResponse {
 export const BedrockAI21CompleteResponseTransform: (
   response: BedrockAI21CompleteResponse | BedrockErrorResponse,
   responseStatus: number,
-  responseHeaders: Headers
+  responseHeaders: Headers,
 ) => CompletionResponse | ErrorResponse = (
   response,
   responseStatus,
-  responseHeaders
+  responseHeaders,
 ) => {
   if (responseStatus !== 200) {
     const errorResposne = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('completions' in response) {
+  if ("completions" in response) {
     const prompt_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Input-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Input-Token-Count")) || 0;
     const completion_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Output-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Output-Token-Count")) || 0;
     return {
       id: response.id.toString(),
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: response.completions.map((completion, index) => ({
         text: completion.data.text,
@@ -539,29 +539,29 @@ export interface BedrockAnthropicCompleteResponse {
 export const BedrockAnthropicCompleteResponseTransform: (
   response: BedrockAnthropicCompleteResponse | BedrockErrorResponse,
   responseStatus: number,
-  responseHeaders: Headers
+  responseHeaders: Headers,
 ) => CompletionResponse | ErrorResponse = (
   response,
   responseStatus,
-  responseHeaders
+  responseHeaders,
 ) => {
   if (responseStatus !== 200) {
     const errorResposne = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('completion' in response) {
+  if ("completion" in response) {
     const prompt_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Input-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Input-Token-Count")) || 0;
     const completion_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Output-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Output-Token-Count")) || 0;
     return {
       id: Date.now().toString(),
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: [
         {
@@ -586,7 +586,7 @@ export interface BedrockAnthropicStreamChunk {
   completion: string;
   stop_reason: string | null;
   stop: string | null;
-  'amazon-bedrock-invocationMetrics': {
+  "amazon-bedrock-invocationMetrics": {
     inputTokenCount: number;
     outputTokenCount: number;
     invocationLatency: number;
@@ -596,7 +596,7 @@ export interface BedrockAnthropicStreamChunk {
 
 export const BedrockAnthropicCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string | string[] = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
 
@@ -605,9 +605,9 @@ export const BedrockAnthropicCompleteStreamChunkTransform: (
     return [
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'text_completion',
+        object: "text_completion",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: BEDROCK,
         choices: [
           {
@@ -620,13 +620,13 @@ export const BedrockAnthropicCompleteStreamChunkTransform: (
       })}\n\n`,
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'text_completion',
+        object: "text_completion",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: BEDROCK,
         choices: [
           {
-            text: '',
+            text: "",
             index: 0,
             logprobs: null,
             finish_reason: parsedChunk.stop_reason,
@@ -634,12 +634,12 @@ export const BedrockAnthropicCompleteStreamChunkTransform: (
         ],
         usage: {
           prompt_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount,
           completion_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
           total_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount +
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount +
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
         },
       })}\n\n`,
       `data: [DONE]\n\n`,
@@ -647,9 +647,9 @@ export const BedrockAnthropicCompleteStreamChunkTransform: (
   }
   return `data: ${JSON.stringify({
     id: fallbackId,
-    object: 'text_completion',
+    object: "text_completion",
     created: Math.floor(Date.now() / 1000),
-    model: '',
+    model: "",
     provider: BEDROCK,
     choices: [
       {
@@ -675,29 +675,29 @@ export interface BedrockCohereCompleteResponse {
 export const BedrockCohereCompleteResponseTransform: (
   response: BedrockCohereCompleteResponse | BedrockErrorResponse,
   responseStatus: number,
-  responseHeaders: Headers
+  responseHeaders: Headers,
 ) => CompletionResponse | ErrorResponse = (
   response,
   responseStatus,
-  responseHeaders
+  responseHeaders,
 ) => {
   if (responseStatus !== 200) {
     const errorResposne = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('generations' in response) {
+  if ("generations" in response) {
     const prompt_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Input-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Input-Token-Count")) || 0;
     const completion_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Output-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Output-Token-Count")) || 0;
     return {
       id: response.id,
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: response.generations.map((generation, index) => ({
         text: generation.text,
@@ -721,7 +721,7 @@ export interface BedrockCohereStreamChunk {
   is_finished: boolean;
   index?: number;
   finish_reason?: string;
-  'amazon-bedrock-invocationMetrics': {
+  "amazon-bedrock-invocationMetrics": {
     inputTokenCount: number;
     outputTokenCount: number;
     invocationLatency: number;
@@ -731,10 +731,10 @@ export interface BedrockCohereStreamChunk {
 
 export const BedrockCohereCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string | string[] = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
   const parsedChunk: BedrockCohereStreamChunk = JSON.parse(chunk);
 
@@ -743,13 +743,13 @@ export const BedrockCohereCompleteStreamChunkTransform: (
     return [
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'text_completion',
+        object: "text_completion",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: BEDROCK,
         choices: [
           {
-            text: '',
+            text: "",
             index: 0,
             logprobs: null,
             finish_reason: parsedChunk.finish_reason,
@@ -757,12 +757,12 @@ export const BedrockCohereCompleteStreamChunkTransform: (
         ],
         usage: {
           prompt_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount,
           completion_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
           total_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount +
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount +
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
         },
       })}\n\n`,
       `data: [DONE]\n\n`,
@@ -771,9 +771,9 @@ export const BedrockCohereCompleteStreamChunkTransform: (
 
   return `data: ${JSON.stringify({
     id: fallbackId,
-    object: 'text_completion',
+    object: "text_completion",
     created: Math.floor(Date.now() / 1000),
-    model: '',
+    model: "",
     provider: BEDROCK,
     choices: [
       {
@@ -791,7 +791,7 @@ export interface BedrocMistralStreamChunk {
     text: string;
     stop_reason: string | null;
   }[];
-  'amazon-bedrock-invocationMetrics': {
+  "amazon-bedrock-invocationMetrics": {
     inputTokenCount: number;
     outputTokenCount: number;
     invocationLatency: number;
@@ -801,7 +801,7 @@ export interface BedrocMistralStreamChunk {
 
 export const BedrockMistralCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string | string[] = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
   chunk = chunk.trim();
@@ -811,9 +811,9 @@ export const BedrockMistralCompleteStreamChunkTransform: (
     return [
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'text_completion',
+        object: "text_completion",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: BEDROCK,
         choices: [
           {
@@ -825,12 +825,12 @@ export const BedrockMistralCompleteStreamChunkTransform: (
         ],
         usage: {
           prompt_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount,
           completion_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
           total_tokens:
-            parsedChunk['amazon-bedrock-invocationMetrics'].inputTokenCount +
-            parsedChunk['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            parsedChunk["amazon-bedrock-invocationMetrics"].inputTokenCount +
+            parsedChunk["amazon-bedrock-invocationMetrics"].outputTokenCount,
         },
       })}\n\n`,
       `data: [DONE]\n\n`,
@@ -839,9 +839,9 @@ export const BedrockMistralCompleteStreamChunkTransform: (
 
   return `data: ${JSON.stringify({
     id: fallbackId,
-    object: 'text_completion',
+    object: "text_completion",
     created: Math.floor(Date.now() / 1000),
-    model: '',
+    model: "",
     provider: BEDROCK,
     choices: [
       {
@@ -864,29 +864,29 @@ export interface BedrockMistralCompleteResponse {
 export const BedrockMistralCompleteResponseTransform: (
   response: BedrockMistralCompleteResponse | BedrockErrorResponse,
   responseStatus: number,
-  responseHeaders: Headers
+  responseHeaders: Headers,
 ) => CompletionResponse | ErrorResponse = (
   response,
   responseStatus,
-  responseHeaders
+  responseHeaders,
 ) => {
   if (responseStatus !== 200) {
     const errorResponse = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResponse) return errorResponse;
   }
 
-  if ('outputs' in response) {
+  if ("outputs" in response) {
     const prompt_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Input-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Input-Token-Count")) || 0;
     const completion_tokens =
-      Number(responseHeaders.get('X-Amzn-Bedrock-Output-Token-Count')) || 0;
+      Number(responseHeaders.get("X-Amzn-Bedrock-Output-Token-Count")) || 0;
     return {
       id: Date.now().toString(),
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: BEDROCK,
       choices: [
         {

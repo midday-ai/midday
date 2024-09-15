@@ -1,10 +1,10 @@
-import { Options } from '../../types/requestBody';
-import { ProviderAPIConfig } from '../types';
-import { getModelAndProvider, getAccessToken } from './utils';
+import { Options } from "../../types/requestBody";
+import { ProviderAPIConfig } from "../types";
+import { getModelAndProvider, getAccessToken } from "./utils";
 
 const getProjectRoute = (
   providerOptions: Options,
-  inputModel: string
+  inputModel: string,
 ): string => {
   const {
     vertexProjectId: inputProjectId,
@@ -17,7 +17,7 @@ const getProjectRoute = (
   }
 
   const { provider } = getModelAndProvider(inputModel as string);
-  const routeVersion = provider === 'meta' ? 'v1beta1' : 'v1';
+  const routeVersion = provider === "meta" ? "v1beta1" : "v1";
   return `/${routeVersion}/projects/${projectId}/locations/${vertexRegion}`;
 };
 
@@ -37,7 +37,7 @@ export const GoogleApiConfig: ProviderAPIConfig = {
     }
 
     return {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${authToken}`,
     };
   },
@@ -52,23 +52,23 @@ export const GoogleApiConfig: ProviderAPIConfig = {
     const projectRoute = getProjectRoute(providerOptions, inputModel as string);
 
     switch (provider) {
-      case 'google': {
-        if (mappedFn === 'chatComplete') {
+      case "google": {
+        if (mappedFn === "chatComplete") {
           return `${projectRoute}/publishers/${provider}/models/${model}:generateContent`;
-        } else if (mappedFn === 'stream-chatComplete') {
+        } else if (mappedFn === "stream-chatComplete") {
           return `${projectRoute}/publishers/${provider}/models/${model}:streamGenerateContent?alt=sse`;
         }
       }
 
-      case 'anthropic': {
-        if (mappedFn === 'chatComplete') {
+      case "anthropic": {
+        if (mappedFn === "chatComplete") {
           return `${projectRoute}/publishers/${provider}/models/${model}:rawPredict`;
-        } else if (mappedFn === 'stream-chatComplete') {
+        } else if (mappedFn === "stream-chatComplete") {
           return `${projectRoute}/publishers/${provider}/models/${model}:streamRawPredict`;
         }
       }
 
-      case 'meta': {
+      case "meta": {
         return `${projectRoute}/endpoints/openapi/chat/completions`;
       }
 

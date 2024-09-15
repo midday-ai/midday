@@ -1,9 +1,9 @@
-import { ProviderConfigs } from '../types';
-import MonsterAPIApiConfig from './api';
+import { ProviderConfigs } from "../types";
+import MonsterAPIApiConfig from "./api";
 import {
   MonsterAPIChatCompleteConfig,
   MonsterAPIChatCompleteResponseTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const MonsterAPIConfig: ProviderConfigs = {
   api: MonsterAPIApiConfig,

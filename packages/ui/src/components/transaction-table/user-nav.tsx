@@ -1,9 +1,5 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../avatar"
-import { Button } from "../button"
+import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
+import { Button } from "../button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "../dropdown-menu"
+} from "../dropdown-menu";
 
 export function UserNav() {
   return (
@@ -58,5 +54,5 @@ export function UserNav() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -1,7 +1,5 @@
 import { ChartDataPoint } from "../../types/chart";
-import {
-  LocationFinancialSubProfile
-} from "client-typescript-sdk";
+import { LocationFinancialSubProfile } from "client-typescript-sdk";
 
 type SpendingPeriod =
   | "spentLastWeek"

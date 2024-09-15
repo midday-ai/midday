@@ -1,16 +1,16 @@
-import { post } from '../utils';
+import { post } from "../utils";
 
-export const BASE_URL = 'https://api.patronus.ai/v1/evaluate';
+export const BASE_URL = "https://api.patronus.ai/v1/evaluate";
 
 export const postPatronus = async (
   evaluator: string,
   credentials: any,
   data: any,
-  profile: string | null = null
+  profile: string | null = null,
 ) => {
   const options = {
     headers: {
-      'x-api-key': `${credentials.apiKey}`,
+      "x-api-key": `${credentials.apiKey}`,
     },
   };
 
@@ -18,7 +18,7 @@ export const postPatronus = async (
     evaluators: [
       {
         evaluator: evaluator,
-        explain_strategy: 'always',
+        explain_strategy: "always",
         ...(profile && { profile_name: profile }),
       },
     ],

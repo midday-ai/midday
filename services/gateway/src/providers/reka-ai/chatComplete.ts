@@ -1,39 +1,39 @@
-import { REKA_AI } from '../../globals';
-import { Params } from '../../types/requestBody';
+import { REKA_AI } from "../../globals";
+import { Params } from "../../types/requestBody";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 interface RekaMessageItem {
   text: string;
   media_url?: string;
-  type: 'human' | 'model';
+  type: "human" | "model";
 }
 
 export const RekaAIChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model_name',
+    param: "model_name",
     required: true,
-    default: 'reka-flash',
+    default: "reka-flash",
   },
   messages: {
-    param: 'conversation_history',
+    param: "conversation_history",
     transform: (params: Params) => {
       const messages: RekaMessageItem[] = [];
-      let lastType: 'human' | 'model' | undefined;
+      let lastType: "human" | "model" | undefined;
 
       const addMessage = ({
         type,
         text,
         media_url,
       }: {
-        type: 'human' | 'model';
+        type: "human" | "model";
         text: string;
         media_url?: string;
       }) => {
@@ -46,8 +46,8 @@ export const RekaAIChatCompleteConfig: ProviderConfig = {
 
         if (lastType === type) {
           const placeholder: RekaMessageItem = {
-            type: type === 'human' ? 'model' : 'human',
-            text: 'Placeholder for alternation',
+            type: type === "human" ? "model" : "human",
+            text: "Placeholder for alternation",
           };
           media_url
             ? messages.unshift(placeholder)
@@ -60,42 +60,42 @@ export const RekaAIChatCompleteConfig: ProviderConfig = {
       };
 
       params.messages?.forEach((message) => {
-        const currentType: 'human' | 'model' =
-          message.role === 'user' ? 'human' : 'model';
+        const currentType: "human" | "model" =
+          message.role === "user" ? "human" : "model";
 
         if (!Array.isArray(message.content)) {
-          addMessage({ type: currentType, text: message.content || '' });
+          addMessage({ type: currentType, text: message.content || "" });
         } else {
           message.content.forEach((item) => {
             addMessage({
               type: currentType,
-              text: item.text || '',
+              text: item.text || "",
               media_url: item.image_url?.url,
             });
           });
         }
       });
 
-      if (messages[0].type !== 'human') {
+      if (messages[0].type !== "human") {
         messages.unshift({
-          type: 'human',
-          text: 'Placeholder for alternation',
+          type: "human",
+          text: "Placeholder for alternation",
         });
       }
       return messages;
     },
   },
   max_tokens: {
-    param: 'request_output_len',
+    param: "request_output_len",
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
   },
   top_p: {
-    param: 'runtime_top_p',
+    param: "runtime_top_p",
   },
   stop: {
-    param: 'stop_words',
+    param: "stop_words",
     transform: (params: Params) => {
       if (params.stop && !Array.isArray(params.stop)) {
         return [params.stop];
@@ -105,26 +105,26 @@ export const RekaAIChatCompleteConfig: ProviderConfig = {
     },
   },
   seed: {
-    param: 'random_seed',
+    param: "random_seed",
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
   },
   // the following are reka specific
   top_k: {
-    param: 'runtime_top_k',
+    param: "runtime_top_k",
   },
   length_penalty: {
-    param: 'length_penalty',
+    param: "length_penalty",
   },
   retrieval_dataset: {
-    param: 'retrieval_dataset',
+    param: "retrieval_dataset",
   },
   use_search_engine: {
-    param: 'use_search_engine',
+    param: "use_search_engine",
   },
 };
 
@@ -144,9 +144,9 @@ export interface RekaAIErrorResponse {
 
 export const RekaAIChatCompleteResponseTransform: (
   response: RekaAIChatCompleteResponse | RekaAIErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response) => {
-  if ('detail' in response) {
+  if ("detail" in response) {
     return generateErrorResponse(
       {
         message: JSON.stringify(response.detail),
@@ -154,21 +154,21 @@ export const RekaAIChatCompleteResponseTransform: (
         param: null,
         code: null,
       },
-      REKA_AI
+      REKA_AI,
     );
   }
 
-  if ('text' in response) {
+  if ("text" in response) {
     return {
       id: crypto.randomUUID(),
-      object: 'chat_completion',
+      object: "chat_completion",
       created: Math.floor(Date.now() / 1000),
-      model: 'Unknown',
+      model: "Unknown",
       provider: REKA_AI,
       choices: [
         {
           message: {
-            role: 'assistant',
+            role: "assistant",
             content: response.text,
           },
           index: 0,

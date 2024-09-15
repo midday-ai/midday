@@ -1,4 +1,4 @@
-export function UserIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function UserIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -20,5 +20,5 @@ export function UserIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="M4.402 17.677C5.534 15.177 7.617 13.5 10 13.5s4.466 1.677 5.598 4.177M10 5.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"
       />
     </svg>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import { ProviderConfigs } from '../types';
-import WorkersAiAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import WorkersAiAPIConfig from "./api";
 import {
   WorkersAiChatCompleteConfig,
   WorkersAiChatCompleteResponseTransform,
   WorkersAiChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   WorkersAiCompleteConfig,
   WorkersAiCompleteResponseTransform,
   WorkersAiCompleteStreamChunkTransform,
-} from './complete';
-import { WorkersAiEmbedConfig, WorkersAiEmbedResponseTransform } from './embed';
+} from "./complete";
+import { WorkersAiEmbedConfig, WorkersAiEmbedResponseTransform } from "./embed";
 
 const WorkersAiConfig: ProviderConfigs = {
   complete: WorkersAiCompleteConfig,
@@ -18,10 +18,10 @@ const WorkersAiConfig: ProviderConfigs = {
   api: WorkersAiAPIConfig,
   embed: WorkersAiEmbedConfig,
   responseTransforms: {
-    'stream-complete': WorkersAiCompleteStreamChunkTransform,
+    "stream-complete": WorkersAiCompleteStreamChunkTransform,
     complete: WorkersAiCompleteResponseTransform,
     chatComplete: WorkersAiChatCompleteResponseTransform,
-    'stream-chatComplete': WorkersAiChatCompleteStreamChunkTransform,
+    "stream-chatComplete": WorkersAiChatCompleteStreamChunkTransform,
     embed: WorkersAiEmbedResponseTransform,
   },
 };

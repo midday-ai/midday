@@ -1,84 +1,84 @@
-import { FIREWORKS_AI } from '../../globals';
+import { FIREWORKS_AI } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const FireworksAIChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
   },
   messages: {
-    param: 'messages',
+    param: "messages",
     required: true,
     default: [],
   },
   tools: {
-    param: 'tools',
+    param: "tools",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 200,
     min: 1,
   },
   prompt_truncate_len: {
-    param: 'prompt_truncate_len',
+    param: "prompt_truncate_len",
     default: 1500,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
     min: 1,
     max: 128,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     min: -2,
     max: 2,
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     min: -2,
     max: 2,
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
     min: 1,
     max: 128,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   response_format: {
-    param: 'response_format',
+    param: "response_format",
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   context_length_exceeded_behavior: {
-    param: 'context_length_exceeded_behavior',
+    param: "context_length_exceeded_behavior",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
 };
 
@@ -126,9 +126,9 @@ export interface FireworksAIStreamChunk {
 }
 
 export const FireworksAIErrorResponseTransform: (
-  response: FireworksAIValidationErrorResponse | FireworksAIErrorResponse
+  response: FireworksAIValidationErrorResponse | FireworksAIErrorResponse,
 ) => ErrorResponse = (response) => {
-  if ('fault' in response) {
+  if ("fault" in response) {
     return generateErrorResponse(
       {
         message: response.fault.faultstring,
@@ -136,9 +136,9 @@ export const FireworksAIErrorResponseTransform: (
         param: null,
         code: response.fault.detail.errorcode,
       },
-      FIREWORKS_AI
+      FIREWORKS_AI,
     );
-  } else if ('detail' in response) {
+  } else if ("detail" in response) {
     return generateErrorResponse(
       {
         message: response.detail as string,
@@ -146,7 +146,7 @@ export const FireworksAIErrorResponseTransform: (
         param: null,
         code: null,
       },
-      FIREWORKS_AI
+      FIREWORKS_AI,
     );
   }
   return generateErrorResponse(response.error, FIREWORKS_AI);
@@ -157,15 +157,15 @@ export const FireworksAIChatCompleteResponseTransform: (
     | FireworksAIChatCompleteResponse
     | FireworksAIValidationErrorResponse
     | FireworksAIErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     return FireworksAIErrorResponseTransform(
-      response as FireworksAIValidationErrorResponse | FireworksAIErrorResponse
+      response as FireworksAIValidationErrorResponse | FireworksAIErrorResponse,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -192,12 +192,12 @@ export const FireworksAIChatCompleteResponseTransform: (
 };
 
 export const FireworksAIChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: FireworksAIStreamChunk = JSON.parse(chunk);
@@ -216,6 +216,6 @@ export const FireworksAIChatCompleteStreamChunkTransform: (
         },
       ],
       ...(parsedChunk.usage ? { usage: parsedChunk.usage } : {}),
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

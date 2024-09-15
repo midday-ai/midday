@@ -1,4 +1,4 @@
-import { GOOGLE } from '../../globals';
+import { GOOGLE } from "../../globals";
 import {
   ContentType,
   Message,
@@ -6,49 +6,49 @@ import {
   Params,
   ToolCall,
   ToolChoice,
-} from '../../types/requestBody';
-import { getMimeType } from '../google-vertex-ai/utils';
+} from "../../types/requestBody";
+import { getMimeType } from "../google-vertex-ai/utils";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 const transformGenerationConfig = (params: Params) => {
   const generationConfig: Record<string, any> = {};
-  if (params['temperature']) {
-    generationConfig['temperature'] = params['temperature'];
+  if (params["temperature"]) {
+    generationConfig["temperature"] = params["temperature"];
   }
-  if (params['top_p']) {
-    generationConfig['topP'] = params['top_p'];
+  if (params["top_p"]) {
+    generationConfig["topP"] = params["top_p"];
   }
-  if (params['top_k']) {
-    generationConfig['topK'] = params['top_k'];
+  if (params["top_k"]) {
+    generationConfig["topK"] = params["top_k"];
   }
-  if (params['max_tokens']) {
-    generationConfig['maxOutputTokens'] = params['max_tokens'];
+  if (params["max_tokens"]) {
+    generationConfig["maxOutputTokens"] = params["max_tokens"];
   }
-  if (params['stop']) {
-    generationConfig['stopSequences'] = params['stop'];
+  if (params["stop"]) {
+    generationConfig["stopSequences"] = params["stop"];
   }
   return generationConfig;
 };
 
 // models for which systemInstruction is not supported
 export const SYSTEM_INSTRUCTION_DISABLED_MODELS = [
-  'gemini-1.0-pro',
-  'gemini-1.0-pro-001',
-  'gemini-1.0-pro-latest',
-  'gemini-1.0-pro-vision-latest',
-  'gemini-pro',
-  'gemini-pro-vision',
+  "gemini-1.0-pro",
+  "gemini-1.0-pro-001",
+  "gemini-1.0-pro-latest",
+  "gemini-1.0-pro-vision-latest",
+  "gemini-pro",
+  "gemini-pro-vision",
 ];
 
-export type GoogleMessageRole = 'user' | 'model' | 'system' | 'function';
+export type GoogleMessageRole = "user" | "model" | "system" | "function";
 
 interface GoogleFunctionCallMessagePart {
   functionCall: GoogleGenerateFunctionCall;
@@ -82,33 +82,33 @@ export interface GoogleToolConfig {
 }
 
 export const transformOpenAIRoleToGoogleRole = (
-  role: OpenAIMessageRole
+  role: OpenAIMessageRole,
 ): GoogleMessageRole => {
   switch (role) {
-    case 'assistant':
-      return 'model';
-    case 'tool':
-      return 'function';
+    case "assistant":
+      return "model";
+    case "tool":
+      return "function";
     default:
       return role;
   }
 };
 
-type GoogleToolChoiceType = 'AUTO' | 'ANY' | 'NONE';
+type GoogleToolChoiceType = "AUTO" | "ANY" | "NONE";
 
 export const transformToolChoiceForGemini = (
-  tool_choice: ToolChoice
+  tool_choice: ToolChoice,
 ): GoogleToolChoiceType | undefined => {
-  if (typeof tool_choice === 'object' && tool_choice.type === 'function')
-    return 'ANY';
-  if (typeof tool_choice === 'string') {
+  if (typeof tool_choice === "object" && tool_choice.type === "function")
+    return "ANY";
+  if (typeof tool_choice === "string") {
     switch (tool_choice) {
-      case 'auto':
-        return 'AUTO';
-      case 'none':
-        return 'NONE';
-      case 'required':
-        return 'ANY';
+      case "auto":
+        return "AUTO";
+      case "none":
+        return "NONE";
+      case "required":
+        return "ANY";
     }
   }
   return undefined;
@@ -118,14 +118,14 @@ export const transformToolChoiceForGemini = (
 
 export const GoogleChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'gemini-pro',
+    default: "gemini-pro",
   },
   messages: [
     {
-      param: 'contents',
-      default: '',
+      param: "contents",
+      default: "",
       transform: (params: Params) => {
         let lastRole: GoogleMessageRole | undefined;
         const messages: GoogleMessage[] = [];
@@ -134,7 +134,7 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
           // From gemini-1.5 onwards, systemInstruction is supported
           // Skipping system message and sending it in systemInstruction for gemini 1.5 models
           if (
-            message.role === 'system' &&
+            message.role === "system" &&
             !SYSTEM_INSTRUCTION_DISABLED_MODELS.includes(params.model as string)
           )
             return;
@@ -142,7 +142,7 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
           const role = transformOpenAIRoleToGoogleRole(message.role);
           let parts = [];
 
-          if (message.role === 'assistant' && message.tool_calls) {
+          if (message.role === "assistant" && message.tool_calls) {
             message.tool_calls.forEach((tool_call: ToolCall) => {
               parts.push({
                 functionCall: {
@@ -152,32 +152,32 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
               });
             });
           } else if (
-            message.role === 'tool' &&
-            typeof message.content === 'string'
+            message.role === "tool" &&
+            typeof message.content === "string"
           ) {
             parts.push({
               functionResponse: {
-                name: message.name ?? 'gateway-tool-filler-name',
+                name: message.name ?? "gateway-tool-filler-name",
                 response: {
                   content: message.content,
                 },
               },
             });
-          } else if (message.content && typeof message.content === 'object') {
+          } else if (message.content && typeof message.content === "object") {
             message.content.forEach((c: ContentType) => {
-              if (c.type === 'text') {
+              if (c.type === "text") {
                 parts.push({
                   text: c.text,
                 });
               }
-              if (c.type === 'image_url') {
+              if (c.type === "image_url") {
                 const { url } = c.image_url || {};
                 if (!url) return;
 
-                if (url.startsWith('data:')) {
+                if (url.startsWith("data:")) {
                   const [mimeTypeWithPrefix, base64Image] =
-                    url.split(';base64,');
-                  const mimeType = mimeTypeWithPrefix.split(':')[1];
+                    url.split(";base64,");
+                  const mimeType = mimeTypeWithPrefix.split(":")[1];
 
                   parts.push({
                     inlineData: {
@@ -185,7 +185,7 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
                       data: base64Image,
                     },
                   });
-                } else if (url.startsWith('gs://')) {
+                } else if (url.startsWith("gs://")) {
                   parts.push({
                     fileData: {
                       mimeType: getMimeType(url),
@@ -197,14 +197,14 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
                   // Earlier we were assuming that all images will be base64 with image/jpeg mimeType
                   parts.push({
                     inlineData: {
-                      mimeType: 'image/jpeg',
+                      mimeType: "image/jpeg",
                       data: c.image_url?.url,
                     },
                   });
                 }
               }
             });
-          } else if (typeof message.content === 'string') {
+          } else if (typeof message.content === "string") {
             parts.push({
               text: message.content,
             });
@@ -213,7 +213,7 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
           // @NOTE: This takes care of the "Please ensure that multiturn requests alternate between user and model."
           // error that occurs when we have multiple user messages in a row.
           const shouldCombineMessages =
-            lastRole === role && !params.model?.includes('vision');
+            lastRole === role && !params.model?.includes("vision");
 
           if (shouldCombineMessages) {
             messages[messages.length - 1].parts.push(...parts);
@@ -227,8 +227,8 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
       },
     },
     {
-      param: 'systemInstruction',
-      default: '',
+      param: "systemInstruction",
+      default: "",
       transform: (params: Params) => {
         // systemInstruction is only supported from gemini 1.5 models
         if (SYSTEM_INSTRUCTION_DISABLED_MODELS.includes(params.model as string))
@@ -239,8 +239,8 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
         if (!firstMessage) return;
 
         if (
-          firstMessage.role === 'system' &&
-          typeof firstMessage.content === 'string'
+          firstMessage.role === "system" &&
+          typeof firstMessage.content === "string"
         ) {
           return {
             parts: [
@@ -248,13 +248,13 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
                 text: firstMessage.content,
               },
             ],
-            role: 'system',
+            role: "system",
           };
         }
 
         if (
-          firstMessage.role === 'system' &&
-          typeof firstMessage.content === 'object' &&
+          firstMessage.role === "system" &&
+          typeof firstMessage.content === "object" &&
           firstMessage.content?.[0]?.text
         ) {
           return {
@@ -263,7 +263,7 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
                 text: firstMessage.content?.[0].text,
               },
             ],
-            role: 'system',
+            role: "system",
           };
         }
 
@@ -272,32 +272,32 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
     },
   ],
   temperature: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   top_p: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   top_k: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   max_tokens: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   stop: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   tools: {
-    param: 'tools',
-    default: '',
+    param: "tools",
+    default: "",
     transform: (params: Params) => {
       const functionDeclarations: any = [];
       params.tools?.forEach((tool) => {
-        if (tool.type === 'function') {
+        if (tool.type === "function") {
           functionDeclarations.push(tool.function);
         }
       });
@@ -305,14 +305,14 @@ export const GoogleChatCompleteConfig: ProviderConfig = {
     },
   },
   tool_choice: {
-    param: 'tool_config',
-    default: '',
+    param: "tool_config",
+    default: "",
     transform: (params: Params) => {
       if (params.tool_choice) {
         const allowedFunctionNames: string[] = [];
         if (
-          typeof params.tool_choice === 'object' &&
-          params.tool_choice.type === 'function'
+          typeof params.tool_choice === "object" &&
+          params.tool_choice.type === "function"
         ) {
           allowedFunctionNames.push(params.tool_choice.function.name);
         }
@@ -375,17 +375,17 @@ interface GoogleGenerateContentResponse {
 
 export const GoogleErrorResponseTransform: (
   response: GoogleErrorResponse,
-  provider?: string
+  provider?: string,
 ) => ErrorResponse | undefined = (response, provider = GOOGLE) => {
-  if ('error' in response) {
+  if ("error" in response) {
     return generateErrorResponse(
       {
-        message: response.error.message ?? '',
+        message: response.error.message ?? "",
         type: response.error.status ?? null,
         param: null,
         code: response.error.status ?? null,
       },
-      provider
+      provider,
     );
   }
 
@@ -394,38 +394,38 @@ export const GoogleErrorResponseTransform: (
 
 export const GoogleChatCompleteResponseTransform: (
   response: GoogleGenerateContentResponse | GoogleErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = GoogleErrorResponseTransform(
-      response as GoogleErrorResponse
+      response as GoogleErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('candidates' in response) {
+  if ("candidates" in response) {
     return {
-      id: 'portkey-' + crypto.randomUUID(),
-      object: 'chat_completion',
+      id: "portkey-" + crypto.randomUUID(),
+      object: "chat_completion",
       created: Math.floor(Date.now() / 1000),
-      model: 'Unknown',
-      provider: 'google',
+      model: "Unknown",
+      provider: "google",
       choices:
         response.candidates?.map((generation) => {
-          let message: Message = { role: 'assistant', content: '' };
+          let message: Message = { role: "assistant", content: "" };
           if (generation.content?.parts[0]?.text) {
             message = {
-              role: 'assistant',
+              role: "assistant",
               content: generation.content.parts[0]?.text,
             };
           } else if (generation.content?.parts[0]?.functionCall) {
             message = {
-              role: 'assistant',
+              role: "assistant",
               tool_calls: generation.content.parts.map((part) => {
                 if (part.functionCall) {
                   return {
-                    id: 'portkey-' + crypto.randomUUID(),
-                    type: 'function',
+                    id: "portkey-" + crypto.randomUUID(),
+                    type: "function",
                     function: {
                       name: part.functionCall.name,
                       arguments: JSON.stringify(part.functionCall.args),
@@ -454,22 +454,22 @@ export const GoogleChatCompleteResponseTransform: (
 
 export const GoogleChatCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
-  if (chunk.startsWith('[')) {
+  if (chunk.startsWith("[")) {
     chunk = chunk.slice(1);
   }
 
-  if (chunk.endsWith(',')) {
+  if (chunk.endsWith(",")) {
     chunk = chunk.slice(0, chunk.length - 1);
   }
-  if (chunk.endsWith(']')) {
+  if (chunk.endsWith("]")) {
     chunk = chunk.slice(0, chunk.length - 2);
   }
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
 
@@ -478,27 +478,27 @@ export const GoogleChatCompleteStreamChunkTransform: (
   return (
     `data: ${JSON.stringify({
       id: fallbackId,
-      object: 'chat.completion.chunk',
+      object: "chat.completion.chunk",
       created: Math.floor(Date.now() / 1000),
-      model: '',
-      provider: 'google',
+      model: "",
+      provider: "google",
       choices:
         parsedChunk.candidates?.map((generation) => {
-          let message: Message = { role: 'assistant', content: '' };
+          let message: Message = { role: "assistant", content: "" };
           if (generation.content.parts[0]?.text) {
             message = {
-              role: 'assistant',
+              role: "assistant",
               content: generation.content.parts[0]?.text,
             };
           } else if (generation.content.parts[0]?.functionCall) {
             message = {
-              role: 'assistant',
+              role: "assistant",
               tool_calls: generation.content.parts.map((part, idx) => {
                 if (part.functionCall) {
                   return {
                     index: idx,
-                    id: 'portkey-' + crypto.randomUUID(),
-                    type: 'function',
+                    id: "portkey-" + crypto.randomUUID(),
+                    type: "function",
                     function: {
                       name: part.functionCall.name,
                       arguments: JSON.stringify(part.functionCall.args),
@@ -519,6 +519,6 @@ export const GoogleChatCompleteStreamChunkTransform: (
         completion_tokens: parsedChunk.usageMetadata.candidatesTokenCount,
         total_tokens: parsedChunk.usageMetadata.totalTokenCount,
       },
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

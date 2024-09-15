@@ -86,7 +86,9 @@ const DataSyncContent: React.FC<DataSyncContentProps> = ({
         {status && (
           <Badge className="rounded-2xl bg-white px-3 py-2">{status}</Badge>
         )}
-        <h1 className="text-3xl font-bold text-foreground md:text-7xl">{title}</h1>
+        <h1 className="text-3xl font-bold text-foreground md:text-7xl">
+          {title}
+        </h1>
         <div className="flex max-w-3xl flex-col items-center justify-center gap-4">
           <h2 className="text-xl font-bold text-foreground md:text-3xl">
             ☕ {description}

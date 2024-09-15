@@ -1,4 +1,4 @@
-export function ListIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function ListIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -13,5 +13,5 @@ export function ListIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="M6.5 6.5h7M6.5 13.5h7M6.5 10h7"
       />
     </svg>
-  )
+  );
 }

@@ -13,24 +13,29 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-    title: "Cash Flow | Midday",
+  title: "Cash Flow | Midday",
 };
 
 type Props = {
-    searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export default async function CashFlowPage({ searchParams }: Props) {
-    const user = await getUser();
+  const user = await getUser();
 
-    return (
-        <Suspense fallback={<InboxViewSkeleton ascending />}>
-            <ConnectAccountServerWrapper>
-                <div className="py-[2%]">
-                    <ConnectedAccountSummary name={user?.data?.full_name ?? "Solomon AI User"} />
-                </div>
-                <CashflowCharts currency={searchParams.currency as string ?? "USD"} disableAllCharts={true} />
-            </ConnectAccountServerWrapper>
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={<InboxViewSkeleton ascending />}>
+      <ConnectAccountServerWrapper>
+        <div className="py-[2%]">
+          <ConnectedAccountSummary
+            name={user?.data?.full_name ?? "Solomon AI User"}
+          />
+        </div>
+        <CashflowCharts
+          currency={(searchParams.currency as string) ?? "USD"}
+          disableAllCharts={true}
+        />
+      </ConnectAccountServerWrapper>
+    </Suspense>
+  );
 }

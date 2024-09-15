@@ -7,7 +7,10 @@ import { z } from "zod";
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "test", "production"]).optional(),
-    VERCEL_URL: z.string().optional().transform((v) => (v ? `https://${v}` : undefined)),
+    VERCEL_URL: z
+      .string()
+      .optional()
+      .transform((v) => (v ? `https://${v}` : undefined)),
     PORT: z.coerce.number().default(3000),
   },
   server: {
@@ -45,7 +48,8 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_SUPABASE_ID: process.env.NEXT_PUBLIC_SUPABASE_ID,
-    NEXT_PUBLIC_OPENPANEL_CLIENT_ID: process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
+    NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
+      process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
     // Feature flags
     NEXT_PUBLIC_ENABLE_DARK_MODE: process.env.NEXT_PUBLIC_ENABLE_DARK_MODE,
     NEXT_PUBLIC_ENABLE_NEWSLETTER: process.env.NEXT_PUBLIC_ENABLE_NEWSLETTER,

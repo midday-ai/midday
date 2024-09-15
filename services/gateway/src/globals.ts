@@ -1,6 +1,6 @@
-import { endpointStrings } from './providers/types';
+import { endpointStrings } from "./providers/types";
 
-export const POWERED_BY: string = 'portkey';
+export const POWERED_BY: string = "portkey";
 
 export const HEADER_KEYS: Record<string, string> = {
   MODE: `x-${POWERED_BY}-mode`,
@@ -28,45 +28,45 @@ export const MAX_RETRIES = 5;
 export const REQUEST_TIMEOUT_STATUS_CODE = 408;
 export const PRECONDITION_CHECK_FAILED_STATUS_CODE = 412;
 
-export const OPEN_AI: string = 'openai';
-export const COHERE: string = 'cohere';
-export const AZURE_OPEN_AI: string = 'azure-openai';
-export const AZURE_AI_INFERENCE: string = 'azure-ai';
-export const ANTHROPIC: string = 'anthropic';
-export const ANYSCALE: string = 'anyscale';
-export const PALM: string = 'palm';
-export const TOGETHER_AI: string = 'together-ai';
-export const GOOGLE: string = 'google';
-export const GOOGLE_VERTEX_AI: string = 'vertex-ai';
-export const HUGGING_FACE: string = 'huggingface';
-export const PERPLEXITY_AI: string = 'perplexity-ai';
-export const REKA_AI: string = 'reka-ai';
-export const MISTRAL_AI: string = 'mistral-ai';
-export const DEEPINFRA: string = 'deepinfra';
-export const STABILITY_AI: string = 'stability-ai';
-export const NOMIC: string = 'nomic';
-export const OLLAMA: string = 'ollama';
-export const AI21: string = 'ai21';
-export const BEDROCK: string = 'bedrock';
-export const GROQ: string = 'groq';
-export const SEGMIND: string = 'segmind';
-export const JINA: string = 'jina';
-export const FIREWORKS_AI: string = 'fireworks-ai';
-export const WORKERS_AI: string = 'workers-ai';
-export const MOONSHOT: string = 'moonshot';
-export const OPENROUTER: string = 'openrouter';
-export const LINGYI: string = 'lingyi';
-export const ZHIPU: string = 'zhipu';
-export const NOVITA_AI: string = 'novita-ai';
-export const MONSTERAPI: string = 'monsterapi';
-export const DEEPSEEK: string = 'deepseek';
-export const PREDIBASE: string = 'predibase';
-export const TRITON: string = 'triton';
-export const VOYAGE: string = 'voyage';
-export const GITHUB: string = 'github';
-export const DEEPBRICKS: string = 'deepbricks';
-export const SILICONFLOW: string = 'siliconflow';
-export const CEREBRAS: string = 'cerebras';
+export const OPEN_AI: string = "openai";
+export const COHERE: string = "cohere";
+export const AZURE_OPEN_AI: string = "azure-openai";
+export const AZURE_AI_INFERENCE: string = "azure-ai";
+export const ANTHROPIC: string = "anthropic";
+export const ANYSCALE: string = "anyscale";
+export const PALM: string = "palm";
+export const TOGETHER_AI: string = "together-ai";
+export const GOOGLE: string = "google";
+export const GOOGLE_VERTEX_AI: string = "vertex-ai";
+export const HUGGING_FACE: string = "huggingface";
+export const PERPLEXITY_AI: string = "perplexity-ai";
+export const REKA_AI: string = "reka-ai";
+export const MISTRAL_AI: string = "mistral-ai";
+export const DEEPINFRA: string = "deepinfra";
+export const STABILITY_AI: string = "stability-ai";
+export const NOMIC: string = "nomic";
+export const OLLAMA: string = "ollama";
+export const AI21: string = "ai21";
+export const BEDROCK: string = "bedrock";
+export const GROQ: string = "groq";
+export const SEGMIND: string = "segmind";
+export const JINA: string = "jina";
+export const FIREWORKS_AI: string = "fireworks-ai";
+export const WORKERS_AI: string = "workers-ai";
+export const MOONSHOT: string = "moonshot";
+export const OPENROUTER: string = "openrouter";
+export const LINGYI: string = "lingyi";
+export const ZHIPU: string = "zhipu";
+export const NOVITA_AI: string = "novita-ai";
+export const MONSTERAPI: string = "monsterapi";
+export const DEEPSEEK: string = "deepseek";
+export const PREDIBASE: string = "predibase";
+export const TRITON: string = "triton";
+export const VOYAGE: string = "voyage";
+export const GITHUB: string = "github";
+export const DEEPBRICKS: string = "deepbricks";
+export const SILICONFLOW: string = "siliconflow";
+export const CEREBRAS: string = "cerebras";
 
 export const VALID_PROVIDERS = [
   ANTHROPIC,
@@ -111,18 +111,18 @@ export const VALID_PROVIDERS = [
 ];
 
 export const CONTENT_TYPES = {
-  APPLICATION_JSON: 'application/json',
-  MULTIPART_FORM_DATA: 'multipart/form-data',
-  EVENT_STREAM: 'text/event-stream',
-  AUDIO_MPEG: 'audio/mpeg',
-  APPLICATION_OCTET_STREAM: 'application/octet-stream',
-  GENERIC_AUDIO_PATTERN: 'audio',
-  PLAIN_TEXT: 'text/plain',
-  HTML: 'text/html',
-  GENERIC_IMAGE_PATTERN: 'image/',
+  APPLICATION_JSON: "application/json",
+  MULTIPART_FORM_DATA: "multipart/form-data",
+  EVENT_STREAM: "text/event-stream",
+  AUDIO_MPEG: "audio/mpeg",
+  APPLICATION_OCTET_STREAM: "application/octet-stream",
+  GENERIC_AUDIO_PATTERN: "audio",
+  PLAIN_TEXT: "text/plain",
+  HTML: "text/html",
+  GENERIC_IMAGE_PATTERN: "image/",
 };
 
 export const MULTIPART_FORM_DATA_ENDPOINTS: endpointStrings[] = [
-  'createTranscription',
-  'createTranslation',
+  "createTranscription",
+  "createTranslation",
 ];

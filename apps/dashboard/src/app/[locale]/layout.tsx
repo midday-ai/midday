@@ -3,14 +3,14 @@ import "@/styles/globals.css";
 import { Provider as Analytics } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
+import { IntercomScript } from "@midday/ui/intercom-script";
+import IntercomWidget from "@midday/ui/intercom-widget";
 import { Toaster } from "@midday/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { Providers } from "./providers";
-import IntercomWidget from "@midday/ui/intercom-widget";
-import { IntercomScript } from "@midday/ui/intercom-script";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://app.midday.ai"),
@@ -83,7 +83,7 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "whitespace-pre-line overscroll-none",
+          "whitespace-pre-line overscroll-none scrollbar-hide",
         )}
       >
         {/* <SystemBanner /> */}

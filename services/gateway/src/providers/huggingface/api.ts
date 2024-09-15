@@ -1,10 +1,10 @@
-import { ProviderAPIConfig } from '../types';
+import { ProviderAPIConfig } from "../types";
 
 const HuggingfaceAPIConfig: ProviderAPIConfig = {
   getBaseURL: ({ providerOptions }) => {
     return (
       providerOptions.huggingfaceBaseUrl ||
-      'https://api-inference.huggingface.co'
+      "https://api-inference.huggingface.co"
     );
   },
   headers: ({ providerOptions }) => ({
@@ -13,15 +13,15 @@ const HuggingfaceAPIConfig: ProviderAPIConfig = {
   getEndpoint: ({ fn, gatewayRequestBody, providerOptions }) => {
     const { model } = gatewayRequestBody;
     const modelPath = providerOptions.huggingfaceBaseUrl
-      ? ''
+      ? ""
       : `/models/${model}`;
     switch (fn) {
-      case 'chatComplete':
+      case "chatComplete":
         return `${modelPath}/v1/chat/completions`;
-      case 'complete':
+      case "complete":
         return `${modelPath}/v1/completions`;
       default:
-        return '';
+        return "";
     }
   },
 };

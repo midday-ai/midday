@@ -1,17 +1,17 @@
-import { ProviderConfigs } from '../types';
-import OpenrouterAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import OpenrouterAPIConfig from "./api";
 import {
   OpenrouterChatCompleteConfig,
   OpenrouterChatCompleteResponseTransform,
   OpenrouterChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const OpenrouterConfig: ProviderConfigs = {
   chatComplete: OpenrouterChatCompleteConfig,
   api: OpenrouterAPIConfig,
   responseTransforms: {
     chatComplete: OpenrouterChatCompleteResponseTransform,
-    'stream-chatComplete': OpenrouterChatCompleteStreamChunkTransform,
+    "stream-chatComplete": OpenrouterChatCompleteStreamChunkTransform,
   },
 };
 

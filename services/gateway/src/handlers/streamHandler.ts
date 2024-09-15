@@ -7,11 +7,11 @@ import {
   REQUEST_TIMEOUT_STATUS_CODE,
   PRECONDITION_CHECK_FAILED_STATUS_CODE,
   GOOGLE_VERTEX_AI,
-} from '../globals';
-import { VertexLlamaChatCompleteStreamChunkTransform } from '../providers/google-vertex-ai/chatComplete';
-import { OpenAIChatCompleteResponse } from '../providers/openai/chatComplete';
-import { OpenAICompleteResponse } from '../providers/openai/complete';
-import { getStreamModeSplitPattern, type SplitPatternType } from '../utils';
+} from "../globals";
+import { VertexLlamaChatCompleteStreamChunkTransform } from "../providers/google-vertex-ai/chatComplete";
+import { OpenAIChatCompleteResponse } from "../providers/openai/chatComplete";
+import { OpenAICompleteResponse } from "../providers/openai/complete";
+import { getStreamModeSplitPattern, type SplitPatternType } from "../utils";
 
 function readUInt32BE(buffer: Uint8Array, offset: number) {
   return (
@@ -46,7 +46,7 @@ function concatenateUint8Arrays(a: Uint8Array, b: Uint8Array): Uint8Array {
 export async function* readAWSStream(
   reader: ReadableStreamDefaultReader,
   transformFunction: Function | undefined,
-  fallbackChunkId: string
+  fallbackChunkId: string,
 ) {
   let buffer = new Uint8Array();
   let expectedLength = 0;
@@ -62,13 +62,13 @@ export async function* readAWSStream(
           expectedLength = readUInt32BE(buffer, 0);
           const payload = Buffer.from(
             JSON.parse(getPayloadFromAWSChunk(data)).bytes,
-            'base64'
+            "base64",
           ).toString();
           if (transformFunction) {
             const transformedChunk = transformFunction(
               payload,
               fallbackChunkId,
-              streamState
+              streamState,
             );
             if (Array.isArray(transformedChunk)) {
               for (var item of transformedChunk) {
@@ -98,14 +98,14 @@ export async function* readAWSStream(
       expectedLength = readUInt32BE(buffer, 0);
       const payload = Buffer.from(
         JSON.parse(getPayloadFromAWSChunk(data)).bytes,
-        'base64'
+        "base64",
       ).toString();
 
       if (transformFunction) {
         const transformedChunk = transformFunction(
           payload,
           fallbackChunkId,
-          streamState
+          streamState,
         );
         if (Array.isArray(transformedChunk)) {
           for (var item of transformedChunk) {
@@ -127,9 +127,9 @@ export async function* readStream(
   transformFunction: Function | undefined,
   isSleepTimeRequired: boolean,
   fallbackChunkId: string,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ) {
-  let buffer = '';
+  let buffer = "";
   let decoder = new TextDecoder();
   let isFirstChunk = true;
   const streamState = {};
@@ -143,7 +143,7 @@ export async function* readStream(
             buffer,
             fallbackChunkId,
             streamState,
-            strictOpenAiCompliance
+            strictOpenAiCompliance,
           );
         } else {
           yield buffer;
@@ -157,7 +157,7 @@ export async function* readStream(
 
     while (buffer.split(splitPattern).length > 1) {
       let parts = buffer.split(splitPattern);
-      let lastPart = parts.pop() ?? ''; // remove the last part from the array and keep it in buffer
+      let lastPart = parts.pop() ?? ""; // remove the last part from the array and keep it in buffer
       for (let part of parts) {
         // Some providers send ping event which can be ignored during parsing
 
@@ -174,7 +174,7 @@ export async function* readStream(
               part,
               fallbackChunkId,
               streamState,
-              strictOpenAiCompliance
+              strictOpenAiCompliance,
             );
             if (transformedChunk !== undefined) {
               yield transformedChunk;
@@ -192,21 +192,21 @@ export async function* readStream(
 
 export async function handleTextResponse(
   response: Response,
-  responseTransformer: Function | undefined
+  responseTransformer: Function | undefined,
 ) {
   const text = await response.text();
 
   if (responseTransformer) {
     const transformedText = responseTransformer(
-      { 'html-message': text },
-      response.status
+      { "html-message": text },
+      response.status,
     );
     return new Response(JSON.stringify(transformedText), {
       ...response,
       status: response.status,
       headers: new Headers({
         ...Object.fromEntries(response.headers),
-        'content-type': 'application/json',
+        "content-type": "application/json",
       }),
     });
   }
@@ -217,7 +217,7 @@ export async function handleTextResponse(
 export async function handleNonStreamingMode(
   response: Response,
   responseTransformer: Function | undefined,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ) {
   // 408 is thrown whenever a request takes more than request_timeout to respond.
   // In that case, response thrown by gateway is already in OpenAI format.
@@ -237,7 +237,7 @@ export async function handleNonStreamingMode(
       responseBodyJson,
       response.status,
       response.headers,
-      strictOpenAiCompliance
+      strictOpenAiCompliance,
     );
   }
 
@@ -264,7 +264,7 @@ export function handleStreamingMode(
   proxyProvider: string,
   responseTransformer: Function | undefined,
   requestURL: string,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ): Response {
   const splitPattern = getStreamModeSplitPattern(proxyProvider, requestURL);
   // If the provider doesn't supply completion id,
@@ -272,7 +272,7 @@ export function handleStreamingMode(
   const fallbackChunkId = `${proxyProvider}-${Date.now().toString()}`;
 
   if (!response.body) {
-    throw new Error('Response format is invalid. Body not found');
+    throw new Error("Response format is invalid. Body not found");
   }
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
@@ -285,7 +285,7 @@ export function handleStreamingMode(
       for await (const chunk of readAWSStream(
         reader,
         responseTransformer,
-        fallbackChunkId
+        fallbackChunkId,
       )) {
         await writer.write(encoder.encode(chunk));
       }
@@ -299,7 +299,7 @@ export function handleStreamingMode(
         responseTransformer,
         isSleepTimeRequired,
         fallbackChunkId,
-        strictOpenAiCompliance
+        strictOpenAiCompliance,
       )) {
         await writer.write(encoder.encode(chunk));
       }
@@ -309,7 +309,7 @@ export function handleStreamingMode(
 
   // Convert GEMINI/COHERE json stream to text/event-stream for non-proxy calls
   const isGoogleCohereOrBedrock = [GOOGLE, COHERE, BEDROCK].includes(
-    proxyProvider
+    proxyProvider,
   );
   const isVertexLlama =
     proxyProvider === GOOGLE_VERTEX_AI &&
@@ -321,7 +321,7 @@ export function handleStreamingMode(
       ...response,
       headers: new Headers({
         ...Object.fromEntries(response.headers),
-        'content-type': 'text/event-stream',
+        "content-type": "text/event-stream",
       }),
     });
   }
@@ -332,7 +332,7 @@ export function handleStreamingMode(
 export async function handleJSONToStreamResponse(
   response: Response,
   provider: string,
-  responseTransformerFunction: Function
+  responseTransformerFunction: Function,
 ): Promise<Response> {
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
@@ -351,7 +351,7 @@ export async function handleJSONToStreamResponse(
   return new Response(readable, {
     headers: new Headers({
       ...Object.fromEntries(response.headers),
-      'content-type': CONTENT_TYPES.EVENT_STREAM,
+      "content-type": CONTENT_TYPES.EVENT_STREAM,
     }),
   });
 }

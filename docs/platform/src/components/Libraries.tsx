@@ -1,50 +1,50 @@
-import Image from 'next/image'
+import Image from "next/image";
 
-import { Button } from '@/components/Button'
-import { Heading } from '@/components/Heading'
-import logoGo from '@/images/logos/go.svg'
-import logoNode from '@/images/logos/node.svg'
-import logoPhp from '@/images/logos/php.svg'
-import logoPython from '@/images/logos/python.svg'
-import logoRuby from '@/images/logos/ruby.svg'
+import { Button } from "@/components/Button";
+import { Heading } from "@/components/Heading";
+import logoGo from "@/images/logos/go.svg";
+import logoNode from "@/images/logos/node.svg";
+import logoPhp from "@/images/logos/php.svg";
+import logoPython from "@/images/logos/python.svg";
+import logoRuby from "@/images/logos/ruby.svg";
 
 const libraries = [
   {
-    href: '#',
-    name: 'PHP',
+    href: "#",
+    name: "PHP",
     description:
-      'A popular general-purpose scripting language that is especially suited to web development.',
+      "A popular general-purpose scripting language that is especially suited to web development.",
     logo: logoPhp,
   },
   {
-    href: '#',
-    name: 'Ruby',
+    href: "#",
+    name: "Ruby",
     description:
-      'A dynamic, open source programming language with a focus on simplicity and productivity.',
+      "A dynamic, open source programming language with a focus on simplicity and productivity.",
     logo: logoRuby,
   },
   {
-    href: '#',
-    name: 'Node.js',
+    href: "#",
+    name: "Node.js",
     description:
-      'Node.js® is an open-source, cross-platform JavaScript runtime environment.',
+      "Node.js® is an open-source, cross-platform JavaScript runtime environment.",
     logo: logoNode,
   },
   {
-    href: '#',
-    name: 'Python',
+    href: "#",
+    name: "Python",
     description:
-      'Python is a programming language that lets you work quickly and integrate systems more effectively.',
+      "Python is a programming language that lets you work quickly and integrate systems more effectively.",
     logo: logoPython,
   },
   {
-    href: '#',
-    name: 'Go',
+    href: "#",
+    name: "Go",
     description:
-      'An open-source programming language supported by Google with built-in concurrency.',
+      "An open-source programming language supported by Google with built-in concurrency.",
     logo: logoGo,
   },
-]
+];
 
 export function Libraries() {
   return (
@@ -78,5 +78,5 @@ export function Libraries() {
         ))}
       </div>
     </div>
-  )
+  );
 }

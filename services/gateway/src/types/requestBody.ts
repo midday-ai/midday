@@ -1,4 +1,4 @@
-import { HookObject } from '../middlewares/hooks/types';
+import { HookObject } from "../middlewares/hooks/types";
 
 /**
  * Settings for retrying requests.
@@ -17,10 +17,10 @@ interface CacheSettings {
 }
 
 export enum StrategyModes {
-  LOADBALANCE = 'loadbalance',
-  FALLBACK = 'fallback',
-  SINGLE = 'single',
-  CONDITIONAL = 'conditional',
+  LOADBALANCE = "loadbalance",
+  FALLBACK = "fallback",
+  SINGLE = "single",
+  CONDITIONAL = "conditional",
 }
 
 interface Strategy {
@@ -94,7 +94,7 @@ export interface Options {
   /** Azure Inference Specific */
   azureRegion?: string;
   azureDeploymentName?: string;
-  azureDeploymentType?: 'managed' | 'serverless';
+  azureDeploymentType?: "managed" | "serverless";
   azureEndpointName?: string;
   azureApiVersion?: string;
 
@@ -144,7 +144,7 @@ export interface Targets {
  */
 export interface Config {
   /** The mode for handling the request. It can be "single", "fallback", "loadbalance", or "scientist". */
-  mode: 'single' | 'fallback' | 'loadbalance' | 'scientist';
+  mode: "single" | "fallback" | "loadbalance" | "scientist";
   /** The configuration for the provider(s). */
   options: Options[];
   targets?: Targets[];
@@ -177,11 +177,11 @@ export interface ToolCall {
 }
 
 export type OpenAIMessageRole =
-  | 'system'
-  | 'user'
-  | 'assistant'
-  | 'function'
-  | 'tool';
+  | "system"
+  | "user"
+  | "assistant"
+  | "function"
+  | "tool";
 
 /**
  * A message in the conversation.
@@ -202,7 +202,7 @@ export interface Message {
 }
 
 export interface AnthropicPromptCache {
-  cache_control?: { type: 'ephemeral' };
+  cache_control?: { type: "ephemeral" };
 }
 
 export interface CitationMetadata {
@@ -245,7 +245,7 @@ export interface ToolChoiceObject {
   };
 }
 
-export type ToolChoice = ToolChoiceObject | 'none' | 'auto' | 'required';
+export type ToolChoice = ToolChoiceObject | "none" | "auto" | "required";
 
 /**
  * A tool in the conversation.
@@ -270,7 +270,7 @@ export interface Params {
   prompt?: string | string[];
   messages?: Message[];
   functions?: Function[];
-  function_call?: 'none' | 'auto' | { name: string };
+  function_call?: "none" | "auto" | { name: string };
   max_tokens?: number;
   temperature?: number;
   top_p?: number;
@@ -289,7 +289,7 @@ export interface Params {
   top_k?: number;
   tools?: Tool[];
   tool_choice?: ToolChoice;
-  response_format?: { type: 'json_object' | 'text' };
+  response_format?: { type: "json_object" | "text" };
   // Google Vertex AI specific
   safety_settings?: any;
 }

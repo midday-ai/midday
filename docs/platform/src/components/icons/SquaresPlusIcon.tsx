@@ -1,4 +1,4 @@
-export function SquaresPlusIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function SquaresPlusIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -13,5 +13,5 @@ export function SquaresPlusIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="M14.5 11.5v6M17.5 14.5h-6"
       />
     </svg>
-  )
+  );
 }

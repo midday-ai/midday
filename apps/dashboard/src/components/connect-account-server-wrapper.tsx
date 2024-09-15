@@ -21,7 +21,9 @@ interface Props {
  * @param {Props} props - The component props.
  * @returns {Promise<JSX.Element>} The rendered component.
  */
-export default async function ConnectAccountServerWrapper({ children }: Props): Promise<JSX.Element> {
+export default async function ConnectAccountServerWrapper({
+  children,
+}: Props): Promise<JSX.Element> {
   const user = await getUser();
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;

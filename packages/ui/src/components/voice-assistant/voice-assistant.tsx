@@ -221,7 +221,7 @@ export const VoiceAssistantForm: React.FC<VoiceAssistantFormProps> = ({
   );
 };
 
-interface AProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> { }
+interface AProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {}
 
 function A(props: AProps) {
   return (

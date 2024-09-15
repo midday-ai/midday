@@ -1,4 +1,4 @@
-export function PackageIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function PackageIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -12,5 +12,5 @@ export function PackageIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="m2.5 5.5 7.5 4m-7.5-4v9l7.5 4m-7.5-13 7.5-4 7.5 4m-7.5 4v9m0-9 7.5-4m-7.5 13 7.5-4v-9m-11 6 .028-3.852L13.5 3.5"
       />
     </svg>
-  )
+  );
 }

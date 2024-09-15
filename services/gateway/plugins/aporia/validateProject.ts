@@ -3,19 +3,19 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { post } from '../utils';
+} from "../types";
+import { post } from "../utils";
 
-export const APORIA_BASE_URL = 'https://gr-prd.aporia.com';
+export const APORIA_BASE_URL = "https://gr-prd.aporia.com";
 
 export const validate = async (
   projectID: string,
   credentials: any,
-  data: any
+  data: any,
 ) => {
   const options = {
     headers: {
-      'X-APORIA-API-KEY': `${credentials.apiKey}`,
+      "X-APORIA-API-KEY": `${credentials.apiKey}`,
     },
   };
   let baseURL = APORIA_BASE_URL;
@@ -30,7 +30,7 @@ export const validate = async (
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -42,18 +42,18 @@ export const handler: PluginHandler = async (
       explain: true,
     };
 
-    if (eventType === 'beforeRequestHook') {
-      aporiaObject.validation_target = 'prompt';
+    if (eventType === "beforeRequestHook") {
+      aporiaObject.validation_target = "prompt";
     } else {
       aporiaObject.response = context.response?.text;
-      aporiaObject.validation_target = 'response';
+      aporiaObject.validation_target = "response";
     }
 
     // Run the aporia checks
     const result: any = await validate(
       parameters.projectID,
       parameters.credentials,
-      aporiaObject
+      aporiaObject,
     );
 
     // Result example:
@@ -86,7 +86,7 @@ export const handler: PluginHandler = async (
     //   }
     // }
 
-    if (result.action == 'passthrough') {
+    if (result.action == "passthrough") {
       verdict = true;
     } else {
       verdict = false;

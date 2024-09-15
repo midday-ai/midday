@@ -1,76 +1,76 @@
-import { ANYSCALE } from '../../globals';
-import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+import { ANYSCALE } from "../../globals";
+import { CompletionResponse, ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 import {
   AnyscaleErrorResponse,
   AnyscaleErrorResponseTransform,
   AnyscaleValidationErrorResponse,
-} from './chatComplete';
+} from "./chatComplete";
 
 export const AnyscaleCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'Meta-Llama/Llama-Guard-7b',
+    default: "Meta-Llama/Llama-Guard-7b",
   },
   prompt: {
-    param: 'prompt',
-    default: '',
+    param: "prompt",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   logprobs: {
-    param: 'logprobs',
+    param: "logprobs",
     max: 5,
   },
   echo: {
-    param: 'echo',
+    param: "echo",
     default: false,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     min: -2,
     max: 2,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     min: -2,
     max: 2,
   },
   best_of: {
-    param: 'best_of',
+    param: "best_of",
   },
   logit_bias: {
-    param: 'logit_bias',
+    param: "logit_bias",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
 };
 
@@ -93,16 +93,16 @@ export const AnyscaleCompleteResponseTransform: (
     | AnyscaleCompleteResponse
     | AnyscaleErrorResponse
     | AnyscaleValidationErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = AnyscaleErrorResponseTransform(
-      response as AnyscaleErrorResponse | AnyscaleValidationErrorResponse
+      response as AnyscaleErrorResponse | AnyscaleValidationErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -118,12 +118,12 @@ export const AnyscaleCompleteResponseTransform: (
 };
 
 export const AnyscaleCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: AnyscaleCompleteStreamChunk = JSON.parse(chunk);
@@ -135,6 +135,6 @@ export const AnyscaleCompleteStreamChunkTransform: (
       model: parsedChunk.model,
       provider: ANYSCALE,
       choices: parsedChunk.choices,
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

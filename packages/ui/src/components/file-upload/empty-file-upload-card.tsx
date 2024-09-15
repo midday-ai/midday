@@ -3,11 +3,7 @@ import { IconProps } from "@radix-ui/react-icons/dist/types";
 
 import React from "react";
 import { cn } from "../../utils/cn";
-import {
-  Card,
-  CardDescription,
-  CardTitle,
-} from "../card";
+import { Card, CardDescription, CardTitle } from "../card";
 
 interface EmptyFileUploadCardProps
   extends React.ComponentPropsWithoutRef<typeof Card> {

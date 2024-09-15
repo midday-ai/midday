@@ -1,7 +1,7 @@
-import { ProviderAPIConfig } from '../types';
+import { ProviderAPIConfig } from "../types";
 
 const AI21APIConfig: ProviderAPIConfig = {
-  getBaseURL: () => 'https://api.ai21.com/studio/v1',
+  getBaseURL: () => "https://api.ai21.com/studio/v1",
   headers: ({ providerOptions }) => {
     const headers: Record<string, string> = {
       Authorization: `Bearer ${providerOptions.apiKey}`,
@@ -11,17 +11,17 @@ const AI21APIConfig: ProviderAPIConfig = {
   getEndpoint: ({ fn, gatewayRequestBody }) => {
     const { model } = gatewayRequestBody;
     switch (fn) {
-      case 'complete': {
+      case "complete": {
         return `/${model}/complete`;
       }
-      case 'chatComplete': {
+      case "chatComplete": {
         return `/${model}/chat`;
       }
-      case 'embed': {
+      case "embed": {
         return `/embed`;
       }
       default:
-        return '';
+        return "";
     }
   },
 };

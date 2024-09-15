@@ -31,12 +31,7 @@ import {
   HoverCardTrigger,
 } from "../../hover-card";
 import { Label } from "../../label";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../tabs";
 
 import { FinancialDataProcessor } from "../../../lib/financial-data-processor";
 
@@ -87,141 +82,141 @@ export const CreditAccountCard: React.FC<
   children,
   historicalAccountBalance,
 }) => {
-    creditAccount = enableDemoMode
-      ? FinancialDataGenerator.generateRandomCreditAccount()
-      : creditAccount;
+  creditAccount = enableDemoMode
+    ? FinancialDataGenerator.generateRandomCreditAccount()
+    : creditAccount;
 
-    return (
-      <CreditAccountCardContext.Provider value={creditAccount}>
-        <FinancialProfileContext.Provider value={financialProfile}>
-          <div className={cn("p-2", className)}>
-            <CardHeader className="flex items-start gap-x-5 space-y-0">
-              <div className="space-y-1">
-                <CardTitle className="text-xs font-bold text-gray-600 dark:text-gray-200">
-                  $
-                  {FinancialDataProcessor.formatNumber(
-                    creditAccount.currentFunds ?? 0,
-                    2,
-                  )}
-                </CardTitle>
-                <CardTitle
-                  className="text-xs font-bold"
-                  style={{
-                    fontSize: "11px",
-                  }}
-                >
-                  <HoverCard>
-                    <HoverCardTrigger>
-                      {" "}
-                      {institutionName} Credit Card
-                    </HoverCardTrigger>
-                    <HoverCardContent className="rounded-2xl">
-                      <CreditAccountMiniCard
-                        creditAccount={creditAccount}
-                        institutionName={institutionName}
-                        className="border-0 shadow-none"
-                      />
-                    </HoverCardContent>
-                  </HoverCard>
-                </CardTitle>
-                <div>
-                  <div className="flex flex-1 justify-start gap-2">
-                    <Badge
-                      className="border border-black bg-white font-bold text-background"
-                      style={{
-                        fontSize: "8px",
-                      }}
-                    >
-                      {creditAccount.type}
-                    </Badge>
-                    <Badge
-                      className="border border-black bg-white text-background"
-                      style={{
-                        fontSize: "8px",
-                      }}
-                    >
-                      Overdue: {creditAccount.isOverdue === false ? "No" : "Yes"}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <div className="flex gap-1">
-                    <span className="text-xs text-gray-600 dark:text-gray-200">
-                      Account Number:{" "}
-                    </span>
-                    <span className="text-xs font-bold">
-                      {creditAccount.number}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Label className="text-2xl font-bold">
-                    Currently owe: $
-                    {FinancialDataProcessor.formatNumber(
-                      creditAccount.balance ?? 0,
-                      2,
-                    )}
-                  </Label>
-                  <p
+  return (
+    <CreditAccountCardContext.Provider value={creditAccount}>
+      <FinancialProfileContext.Provider value={financialProfile}>
+        <div className={cn("p-2", className)}>
+          <CardHeader className="flex items-start gap-x-5 space-y-0">
+            <div className="space-y-1">
+              <CardTitle className="text-xs font-bold text-gray-600 dark:text-gray-200">
+                $
+                {FinancialDataProcessor.formatNumber(
+                  creditAccount.currentFunds ?? 0,
+                  2,
+                )}
+              </CardTitle>
+              <CardTitle
+                className="text-xs font-bold"
+                style={{
+                  fontSize: "11px",
+                }}
+              >
+                <HoverCard>
+                  <HoverCardTrigger>
+                    {" "}
+                    {institutionName} Credit Card
+                  </HoverCardTrigger>
+                  <HoverCardContent className="rounded-2xl">
+                    <CreditAccountMiniCard
+                      creditAccount={creditAccount}
+                      institutionName={institutionName}
+                      className="border-0 shadow-none"
+                    />
+                  </HoverCardContent>
+                </HoverCard>
+              </CardTitle>
+              <div>
+                <div className="flex flex-1 justify-start gap-2">
+                  <Badge
+                    className="border border-black bg-white font-bold text-background"
                     style={{
-                      fontSize: "10px",
+                      fontSize: "8px",
                     }}
-                    className="font-bold"
                   >
-                    Card balance limit ${creditAccount.balanceLimit}
-                  </p>
-                  <p
+                    {creditAccount.type}
+                  </Badge>
+                  <Badge
+                    className="border border-black bg-white text-background"
                     style={{
-                      fontSize: "10px",
+                      fontSize: "8px",
                     }}
-                    className="font-bold"
                   >
-                    $
-                    {FinancialDataProcessor.formatNumber(
-                      creditAccount.minimumPaymentAmount ?? 0,
-                      2,
-                    )}{" "}
-                    due on{" "}
-                    {FinancialDataProcessor.formatDate(
-                      creditAccount.nextPaymentDueDate ?? 0,
-                    )}
-                  </p>
+                    Overdue: {creditAccount.isOverdue === false ? "No" : "Yes"}
+                  </Badge>
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="details" className="min-w-[400px]">
-                <TabsList className="py-2 font-bold">
-                  <TabsTrigger value="details">Details</TabsTrigger>
-                  {creditAccount.aprs && creditAccount.aprs.length > 0 && (
-                    <TabsTrigger value="apr">Apr</TabsTrigger>
+              <div>
+                <div className="flex gap-1">
+                  <span className="text-xs text-gray-600 dark:text-gray-200">
+                    Account Number:{" "}
+                  </span>
+                  <span className="text-xs font-bold">
+                    {creditAccount.number}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
+                <Label className="text-2xl font-bold">
+                  Currently owe: $
+                  {FinancialDataProcessor.formatNumber(
+                    creditAccount.balance ?? 0,
+                    2,
                   )}
-                </TabsList>
-                <TabsContent value="details">
-                  <CreditCardCollapsibleDetails
-                    creditAccount={creditAccount}
-                    className="py-2"
-                  />
-                </TabsContent>
+                </Label>
+                <p
+                  style={{
+                    fontSize: "10px",
+                  }}
+                  className="font-bold"
+                >
+                  Card balance limit ${creditAccount.balanceLimit}
+                </p>
+                <p
+                  style={{
+                    fontSize: "10px",
+                  }}
+                  className="font-bold"
+                >
+                  $
+                  {FinancialDataProcessor.formatNumber(
+                    creditAccount.minimumPaymentAmount ?? 0,
+                    2,
+                  )}{" "}
+                  due on{" "}
+                  {FinancialDataProcessor.formatDate(
+                    creditAccount.nextPaymentDueDate ?? 0,
+                  )}
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="details" className="min-w-[400px]">
+              <TabsList className="py-2 font-bold">
+                <TabsTrigger value="details">Details</TabsTrigger>
                 {creditAccount.aprs && creditAccount.aprs.length > 0 && (
-                  <TabsContent value="apr">
-                    <CreditAccountApr aprs={creditAccount.aprs} />
-                  </TabsContent>
+                  <TabsTrigger value="apr">Apr</TabsTrigger>
                 )}
-              </Tabs>
-            </CardContent>
-            <CardFooter>
-              <AccountBalanceChart
-                data={historicalAccountBalance ?? []}
-                currency="USD"
-              />
-            </CardFooter>
-            {children}
-          </div>
-        </FinancialProfileContext.Provider>
-      </CreditAccountCardContext.Provider>
-    );
-  };
+              </TabsList>
+              <TabsContent value="details">
+                <CreditCardCollapsibleDetails
+                  creditAccount={creditAccount}
+                  className="py-2"
+                />
+              </TabsContent>
+              {creditAccount.aprs && creditAccount.aprs.length > 0 && (
+                <TabsContent value="apr">
+                  <CreditAccountApr aprs={creditAccount.aprs} />
+                </TabsContent>
+              )}
+            </Tabs>
+          </CardContent>
+          <CardFooter>
+            <AccountBalanceChart
+              data={historicalAccountBalance ?? []}
+              currency="USD"
+            />
+          </CardFooter>
+          {children}
+        </div>
+      </FinancialProfileContext.Provider>
+    </CreditAccountCardContext.Provider>
+  );
+};
 
 /*
  * Credit Account Apr Props

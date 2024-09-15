@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { DotsHorizontalIcon } from "@radix-ui/react-icons"
-import { Row } from "@tanstack/react-table"
+import { DotsHorizontalIcon } from "@radix-ui/react-icons";
+import { Row } from "@tanstack/react-table";
 
-import { Transaction } from "client-typescript-sdk"
-import { Button } from "../button"
+import { Transaction } from "client-typescript-sdk";
+import { Button } from "../button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,12 +17,11 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "../dropdown-menu"
-import { labels } from "./data/data"
-
+} from "../dropdown-menu";
+import { labels } from "./data/data";
 
 interface DataTableRowActionsProps<TData> {
-  row: Row<TData>
+  row: Row<TData>;
 }
 
 export function DataTableRowActions<TData>({
@@ -65,5 +64,5 @@ export function DataTableRowActions<TData>({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import { Context } from 'hono';
+import { Context } from "hono";
 import {
   AZURE_OPEN_AI,
   BEDROCK,
@@ -14,10 +14,10 @@ import {
   MULTIPART_FORM_DATA_ENDPOINTS,
   CONTENT_TYPES,
   HUGGING_FACE,
-} from '../globals';
-import Providers from '../providers';
-import { ProviderAPIConfig, endpointStrings } from '../providers/types';
-import transformToProviderRequest from '../services/transformToProviderRequest';
+} from "../globals";
+import Providers from "../providers";
+import { ProviderAPIConfig, endpointStrings } from "../providers/types";
+import transformToProviderRequest from "../services/transformToProviderRequest";
 import {
   Config,
   Options,
@@ -25,14 +25,14 @@ import {
   ShortConfig,
   StrategyModes,
   Targets,
-} from '../types/requestBody';
-import { convertKeysToCamelCase } from '../utils';
-import { retryRequest } from './retryHandler';
-import { env, getRuntimeKey } from 'hono/adapter';
-import { afterRequestHookHandler, responseHandler } from './responseHandlers';
-import { HookSpan, HooksManager } from '../middlewares/hooks';
-import { ConditionalRouter } from '../services/conditionalRouter';
-import { RouterError } from '../errors/RouterError';
+} from "../types/requestBody";
+import { convertKeysToCamelCase } from "../utils";
+import { retryRequest } from "./retryHandler";
+import { env, getRuntimeKey } from "hono/adapter";
+import { afterRequestHookHandler, responseHandler } from "./responseHandlers";
+import { HookSpan, HooksManager } from "../middlewares/hooks";
+import { ConditionalRouter } from "../services/conditionalRouter";
+import { RouterError } from "../errors/RouterError";
 
 /**
  * Constructs the request options for the API call.
@@ -47,10 +47,10 @@ export function constructRequest(
   provider: string,
   method: string,
   forwardHeaders: string[],
-  requestHeaders: Record<string, string>
+  requestHeaders: Record<string, string>,
 ) {
   let baseHeaders: any = {
-    'content-type': 'application/json',
+    "content-type": "application/json",
   };
 
   let headers: Record<string, string> = {};
@@ -75,15 +75,15 @@ export function constructRequest(
     method,
     headers,
   };
-  const contentType = headers['content-type'];
-  const isGetMethod = method === 'GET';
+  const contentType = headers["content-type"];
+  const isGetMethod = method === "GET";
   const isMultipartFormData = contentType === CONTENT_TYPES.MULTIPART_FORM_DATA;
   const shouldDeleteContentTypeHeader =
     (isGetMethod || isMultipartFormData) && fetchOptions.headers;
 
   if (shouldDeleteContentTypeHeader) {
     let headers = fetchOptions.headers as Record<string, unknown>;
-    delete headers['content-type'];
+    delete headers["content-type"];
   }
 
   return fetchOptions;
@@ -108,7 +108,7 @@ export function selectProviderByWeight(providers: Options[]): Options {
   // Compute the total weight
   let totalWeight = providers.reduce(
     (sum: number, provider: any) => sum + provider.weight,
-    0
+    0,
   );
 
   // Select a random weight between 0 and totalWeight
@@ -124,7 +124,7 @@ export function selectProviderByWeight(providers: Options[]): Options {
     randomWeight -= provider.weight;
   }
 
-  throw new Error('No provider selected, please check the weights');
+  throw new Error("No provider selected, please check the weights");
 }
 
 /**
@@ -139,7 +139,7 @@ export function selectProviderByWeight(providers: Options[]): Options {
  */
 export function getProviderOptionsByMode(
   mode: string,
-  config: any
+  config: any,
 ): Options[] | null {
   if (config.targets) {
     config.options = config.targets;
@@ -158,11 +158,11 @@ export function getProviderOptionsByMode(
   }
 
   switch (mode) {
-    case 'single':
+    case "single":
       return [config.options[0]];
-    case 'loadbalance':
+    case "loadbalance":
       return [selectProviderByWeight(config.options)];
-    case 'fallback':
+    case "fallback":
       return config.options;
     default:
       return null;
@@ -173,17 +173,17 @@ export function getProviderOptionsByMode(
  * @deprecated
  */
 export const fetchProviderOptionsFromConfig = (
-  config: Config | ShortConfig
+  config: Config | ShortConfig,
 ): Options[] | null => {
   let providerOptions: Options[] | null = null;
   let mode: string;
   const camelCaseConfig = convertKeysToCamelCase(config, [
-    'override_params',
-    'params',
-    'metadata',
+    "override_params",
+    "params",
+    "metadata",
   ]) as Config | ShortConfig;
 
-  if ('provider' in camelCaseConfig) {
+  if ("provider" in camelCaseConfig) {
     providerOptions = [
       {
         provider: camelCaseConfig.provider,
@@ -209,7 +209,7 @@ export const fetchProviderOptionsFromConfig = (
     if (camelCaseConfig.workersAiAccountId)
       providerOptions[0].workersAiAccountId =
         camelCaseConfig.workersAiAccountId;
-    mode = 'single';
+    mode = "single";
   } else {
     if (camelCaseConfig.strategy && camelCaseConfig.strategy.mode) {
       mode = camelCaseConfig.strategy.mode;
@@ -241,20 +241,20 @@ export async function tryPostProxy(
   requestHeaders: Record<string, string>,
   fn: endpointStrings,
   currentIndex: number,
-  method: string = 'POST'
+  method: string = "POST",
 ): Promise<Response> {
   const overrideParams = providerOption?.overrideParams || {};
   const params: Params = { ...inputParams, ...overrideParams };
   const isStreamingMode = params.stream ? true : false;
 
-  const provider: string = providerOption.provider ?? '';
+  const provider: string = providerOption.provider ?? "";
 
   // Mapping providers to corresponding URLs
   const apiConfig: ProviderAPIConfig = Providers[provider].api;
 
   const forwardHeaders: string[] = [];
   const customHost =
-    requestHeaders[HEADER_KEYS.CUSTOM_HOST] || providerOption.customHost || '';
+    requestHeaders[HEADER_KEYS.CUSTOM_HOST] || providerOption.customHost || "";
   const baseUrl =
     customHost || apiConfig.getBaseURL({ providerOptions: providerOption });
   const endpoint = apiConfig.getEndpoint({
@@ -279,22 +279,22 @@ export async function tryPostProxy(
     provider,
     method,
     forwardHeaders,
-    requestHeaders
+    requestHeaders,
   );
 
-  if (method === 'POST') {
+  if (method === "POST") {
     fetchOptions.body = JSON.stringify(params);
   }
 
   let response: Response;
   let retryCount: number | undefined;
 
-  if (providerOption.retry && typeof providerOption.retry === 'object') {
+  if (providerOption.retry && typeof providerOption.retry === "object") {
     providerOption.retry = {
       attempts: providerOption.retry?.attempts ?? 0,
       onStatusCodes: providerOption.retry?.onStatusCodes ?? RETRY_STATUS_CODES,
     };
-  } else if (typeof providerOption.retry === 'number') {
+  } else if (typeof providerOption.retry === "number") {
     providerOption.retry = {
       attempts: providerOption.retry,
       onStatusCodes: RETRY_STATUS_CODES,
@@ -306,25 +306,25 @@ export async function tryPostProxy(
     };
   }
 
-  const getFromCacheFunction = c.get('getFromCache');
-  const cacheIdentifier = c.get('cacheIdentifier');
-  const requestOptions = c.get('requestOptions') ?? [];
+  const getFromCacheFunction = c.get("getFromCache");
+  const cacheIdentifier = c.get("cacheIdentifier");
+  const requestOptions = c.get("requestOptions") ?? [];
 
   let cacheResponse, cacheKey, cacheMode, cacheMaxAge;
-  let cacheStatus = 'DISABLED';
+  let cacheStatus = "DISABLED";
 
   if (requestHeaders[HEADER_KEYS.CACHE]) {
     cacheMode = requestHeaders[HEADER_KEYS.CACHE];
   } else if (
     providerOption?.cache &&
-    typeof providerOption.cache === 'object' &&
+    typeof providerOption.cache === "object" &&
     providerOption.cache.mode
   ) {
     cacheMode = providerOption.cache.mode;
     cacheMaxAge = providerOption.cache.maxAge;
   } else if (
     providerOption?.cache &&
-    typeof providerOption.cache === 'string'
+    typeof providerOption.cache === "string"
   ) {
     cacheMode = providerOption.cache;
   }
@@ -337,13 +337,13 @@ export async function tryPostProxy(
       url,
       cacheIdentifier,
       cacheMode,
-      cacheMaxAge
+      cacheMaxAge,
     );
     if (cacheResponse) {
       ({ response } = await responseHandler(
         new Response(cacheResponse, {
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
         }),
         false,
@@ -352,10 +352,10 @@ export async function tryPostProxy(
         url,
         false,
         params,
-        false
+        false,
       ));
 
-      c.set('requestOptions', [
+      c.set("requestOptions", [
         ...requestOptions,
         {
           providerOptions: {
@@ -378,7 +378,7 @@ export async function tryPostProxy(
         params,
         cacheStatus,
         0,
-        requestHeaders[HEADER_KEYS.TRACE_ID] ?? ''
+        requestHeaders[HEADER_KEYS.TRACE_ID] ?? "",
       );
       return response;
     }
@@ -389,7 +389,7 @@ export async function tryPostProxy(
     fetchOptions,
     providerOption.retry.attempts,
     providerOption.retry.onStatusCodes,
-    null
+    null,
   );
   const mappedResponse = await responseHandler(
     response,
@@ -399,7 +399,7 @@ export async function tryPostProxy(
     url,
     false,
     params,
-    false
+    false,
   );
   updateResponseHeaders(
     mappedResponse.response,
@@ -407,10 +407,10 @@ export async function tryPostProxy(
     params,
     cacheStatus,
     retryCount ?? 0,
-    requestHeaders[HEADER_KEYS.TRACE_ID] ?? ''
+    requestHeaders[HEADER_KEYS.TRACE_ID] ?? "",
   );
 
-  c.set('requestOptions', [
+  c.set("requestOptions", [
     ...requestOptions,
     {
       providerOptions: {
@@ -454,22 +454,22 @@ export async function tryPost(
   inputParams: Params | FormData,
   requestHeaders: Record<string, string>,
   fn: endpointStrings,
-  currentIndex: number | string
+  currentIndex: number | string,
 ): Promise<Response> {
   const overrideParams = providerOption?.overrideParams || {};
   const params: Params = { ...inputParams, ...overrideParams };
   const isStreamingMode = params.stream ? true : false;
   let strictOpenAiCompliance = true;
 
-  if (requestHeaders[HEADER_KEYS.STRICT_OPEN_AI_COMPLIANCE] === 'false') {
+  if (requestHeaders[HEADER_KEYS.STRICT_OPEN_AI_COMPLIANCE] === "false") {
     strictOpenAiCompliance = false;
   } else if (providerOption.strictOpenAiCompliance === false) {
     strictOpenAiCompliance = false;
   }
 
-  const provider: string = providerOption.provider ?? '';
+  const provider: string = providerOption.provider ?? "";
 
-  const hooksManager = c.get('hooksManager');
+  const hooksManager = c.get("hooksManager");
   const hookSpan = hooksManager.createSpan(
     params,
     provider,
@@ -477,7 +477,7 @@ export async function tryPost(
     providerOption.beforeRequestHooks || [],
     providerOption.afterRequestHooks || [],
     null,
-    fn
+    fn,
   );
 
   // Mapping providers to corresponding URLs
@@ -487,18 +487,18 @@ export async function tryPost(
     provider,
     params,
     inputParams,
-    fn
+    fn,
   );
 
   const forwardHeaders =
     requestHeaders[HEADER_KEYS.FORWARD_HEADERS]
-      ?.split(',')
+      ?.split(",")
       .map((h) => h.trim()) ||
     providerOption.forwardHeaders ||
     [];
 
   const customHost =
-    requestHeaders[HEADER_KEYS.CUSTOM_HOST] || providerOption.customHost || '';
+    requestHeaders[HEADER_KEYS.CUSTOM_HOST] || providerOption.customHost || "";
 
   const baseUrl =
     customHost || apiConfig.getBaseURL({ providerOptions: providerOption });
@@ -521,9 +521,9 @@ export async function tryPost(
   const fetchOptions = constructRequest(
     headers,
     provider,
-    'POST',
+    "POST",
     forwardHeaders,
-    requestHeaders
+    requestHeaders,
   );
 
   fetchOptions.body = MULTIPART_FORM_DATA_ENDPOINTS.includes(fn)
@@ -535,13 +535,13 @@ export async function tryPost(
     onStatusCodes: providerOption.retry?.onStatusCodes ?? RETRY_STATUS_CODES,
   };
 
-  const requestOptions = c.get('requestOptions') ?? [];
+  const requestOptions = c.get("requestOptions") ?? [];
 
   let mappedResponse: Response, retryCount: number | undefined;
 
   let cacheKey: string | undefined;
   let { cacheMode, cacheMaxAge, cacheStatus } = getCacheOptions(
-    providerOption.cache
+    providerOption.cache,
   );
   let cacheResponse: Response | undefined;
 
@@ -551,7 +551,7 @@ export async function tryPost(
     response: Response,
     responseTransformer: string | undefined,
     isCacheHit: boolean,
-    isResponseAlreadyMapped: boolean = false
+    isResponseAlreadyMapped: boolean = false,
   ) {
     if (!isResponseAlreadyMapped) {
       ({ response: mappedResponse } = await responseHandler(
@@ -562,7 +562,7 @@ export async function tryPost(
         url,
         isCacheHit,
         params,
-        strictOpenAiCompliance
+        strictOpenAiCompliance,
       ));
     }
 
@@ -572,10 +572,10 @@ export async function tryPost(
       params,
       cacheStatus,
       retryCount ?? 0,
-      requestHeaders[HEADER_KEYS.TRACE_ID] ?? ''
+      requestHeaders[HEADER_KEYS.TRACE_ID] ?? "",
     );
 
-    c.set('requestOptions', [
+    c.set("requestOptions", [
       ...requestOptions,
       {
         providerOptions: {
@@ -621,14 +621,14 @@ export async function tryPost(
     fetchOptions,
     transformedRequestBody,
     hookSpan.id,
-    fn
+    fn,
   ));
   if (!!cacheResponse) {
     return createResponse(cacheResponse, fn, true);
   }
 
   // Prerequest validator (For virtual key budgets)
-  const preRequestValidator = c.get('preRequestValidator');
+  const preRequestValidator = c.get("preRequestValidator");
   let preRequestValidatorResponse = preRequestValidator
     ? await preRequestValidator(env(c), providerOption, requestHeaders)
     : undefined;
@@ -648,7 +648,7 @@ export async function tryPost(
     fn,
     requestHeaders,
     hookSpan.id,
-    strictOpenAiCompliance
+    strictOpenAiCompliance,
   );
 
   return createResponse(mappedResponse, undefined, false, true);
@@ -673,7 +673,7 @@ export async function tryProvidersInSequence(
   params: Params,
   requestHeaders: Record<string, string>,
   fn: endpointStrings,
-  method: string = 'POST'
+  method: string = "POST",
 ): Promise<Response> {
   let errors: any[] = [];
   for (let [index, providerOption] of providers.entries()) {
@@ -681,7 +681,7 @@ export async function tryProvidersInSequence(
       const loadbalanceIndex = !isNaN(Number(providerOption.index))
         ? Number(providerOption.index)
         : null;
-      if (fn === 'proxy') {
+      if (fn === "proxy") {
         return await tryPostProxy(
           c,
           providerOption,
@@ -689,7 +689,7 @@ export async function tryProvidersInSequence(
           requestHeaders,
           fn,
           loadbalanceIndex ?? index,
-          method
+          method,
         );
       }
       return await tryPost(
@@ -698,7 +698,7 @@ export async function tryProvidersInSequence(
         params,
         requestHeaders,
         fn,
-        loadbalanceIndex ?? index
+        loadbalanceIndex ?? index,
       );
     } catch (error: any) {
       // Log and store the error
@@ -721,7 +721,7 @@ export async function tryTargetsRecursively(
   fn: endpointStrings,
   method: string,
   jsonPath: string,
-  inheritedConfig: Record<string, any> = {}
+  inheritedConfig: Record<string, any> = {},
 ): Promise<Response> {
   let currentTarget: any = { ...targetGroup };
   let currentJsonPath = jsonPath;
@@ -742,10 +742,10 @@ export async function tryTargetsRecursively(
     requestTimeout: null,
   };
 
-  if (typeof currentTarget.strictOpenAiCompliance === 'boolean') {
+  if (typeof currentTarget.strictOpenAiCompliance === "boolean") {
     currentInheritedConfig.strictOpenAiCompliance =
       currentTarget.strictOpenAiCompliance;
-  } else if (typeof inheritedConfig.strictOpenAiCompliance === 'boolean') {
+  } else if (typeof inheritedConfig.strictOpenAiCompliance === "boolean") {
     currentInheritedConfig.strictOpenAiCompliance =
       inheritedConfig.strictOpenAiCompliance;
   }
@@ -819,7 +819,7 @@ export async function tryTargetsRecursively(
           fn,
           method,
           `${currentJsonPath}.targets[${index}]`,
-          currentInheritedConfig
+          currentInheritedConfig,
         );
         if (
           response?.ok &&
@@ -838,7 +838,7 @@ export async function tryTargetsRecursively(
       });
       let totalWeight = currentTarget.targets.reduce(
         (sum: number, provider: any) => sum + provider.weight,
-        0
+        0,
       );
 
       let randomWeight = Math.random() * totalWeight;
@@ -853,7 +853,7 @@ export async function tryTargetsRecursively(
             fn,
             method,
             currentJsonPath,
-            currentInheritedConfig
+            currentInheritedConfig,
           );
           break;
         }
@@ -885,7 +885,7 @@ export async function tryTargetsRecursively(
         fn,
         method,
         `${currentJsonPath}.targets[${finalTarget.index}]`,
-        currentInheritedConfig
+        currentInheritedConfig,
       );
       break;
 
@@ -898,7 +898,7 @@ export async function tryTargetsRecursively(
         fn,
         method,
         `${currentJsonPath}.targets[0]`,
-        currentInheritedConfig
+        currentInheritedConfig,
       );
       break;
 
@@ -910,7 +910,7 @@ export async function tryTargetsRecursively(
           request,
           requestHeaders,
           fn,
-          currentJsonPath
+          currentJsonPath,
         );
       } catch (error: any) {
         response = error.response;
@@ -936,11 +936,11 @@ export function updateResponseHeaders(
   params: Record<string, any>,
   cacheStatus: string | undefined,
   retryAttempt: number,
-  traceId: string
+  traceId: string,
 ) {
   response.headers.append(
     RESPONSE_HEADER_KEYS.LAST_USED_OPTION_INDEX,
-    currentIndex.toString()
+    currentIndex.toString(),
   );
 
   if (cacheStatus) {
@@ -949,25 +949,25 @@ export function updateResponseHeaders(
   response.headers.append(RESPONSE_HEADER_KEYS.TRACE_ID, traceId);
   response.headers.append(
     RESPONSE_HEADER_KEYS.RETRY_ATTEMPT_COUNT,
-    retryAttempt.toString()
+    retryAttempt.toString(),
   );
 
-  const contentEncodingHeader = response.headers.get('content-encoding');
-  if (contentEncodingHeader && contentEncodingHeader.indexOf('br') > -1) {
+  const contentEncodingHeader = response.headers.get("content-encoding");
+  if (contentEncodingHeader && contentEncodingHeader.indexOf("br") > -1) {
     // Brotli compression causes errors at runtime, removing the header in that case
-    response.headers.delete('content-encoding');
+    response.headers.delete("content-encoding");
   }
-  if (getRuntimeKey() == 'node') {
-    response.headers.delete('content-encoding');
+  if (getRuntimeKey() == "node") {
+    response.headers.delete("content-encoding");
   }
 
   // Delete content-length header to avoid conflicts with hono compress middleware
   // workerd environment handles this authomatically
-  response.headers.delete('content-length');
+  response.headers.delete("content-length");
 }
 
 export function constructConfigFromRequestHeaders(
-  requestHeaders: Record<string, any>
+  requestHeaders: Record<string, any>,
 ): Options | Targets {
   const azureConfig = {
     resourceName: requestHeaders[`x-${POWERED_BY}-azure-resource-name`],
@@ -1021,7 +1021,7 @@ export function constructConfigFromRequestHeaders(
   if (vertexServiceAccountJson) {
     try {
       vertexConfig.vertexServiceAccountJson = JSON.parse(
-        vertexServiceAccountJson
+        vertexServiceAccountJson,
       );
     } catch (e) {
       vertexConfig.vertexServiceAccountJson = null;
@@ -1033,9 +1033,9 @@ export function constructConfigFromRequestHeaders(
 
     if (!parsedConfigJson.provider && !parsedConfigJson.targets) {
       parsedConfigJson.provider = requestHeaders[`x-${POWERED_BY}-provider`];
-      parsedConfigJson.api_key = requestHeaders['authorization']?.replace(
-        'Bearer ',
-        ''
+      parsedConfigJson.api_key = requestHeaders["authorization"]?.replace(
+        "Bearer ",
+        "",
       );
 
       if (parsedConfigJson.provider === AZURE_OPEN_AI) {
@@ -1094,17 +1094,17 @@ export function constructConfigFromRequestHeaders(
       }
     }
     return convertKeysToCamelCase(parsedConfigJson, [
-      'override_params',
-      'params',
-      'checks',
-      'vertex_service_account_json',
-      'conditions',
+      "override_params",
+      "params",
+      "checks",
+      "vertex_service_account_json",
+      "conditions",
     ]) as any;
   }
 
   return {
     provider: requestHeaders[`x-${POWERED_BY}-provider`],
-    apiKey: requestHeaders['authorization']?.replace('Bearer ', ''),
+    apiKey: requestHeaders["authorization"]?.replace("Bearer ", ""),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === AZURE_OPEN_AI &&
       azureConfig),
     ...(requestHeaders[`x-${POWERED_BY}-provider`] === BEDROCK &&
@@ -1134,7 +1134,7 @@ export async function recursiveAfterRequestHookHandler(
   fn: any,
   requestHeaders: Record<string, string>,
   hookSpanId: string,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ): Promise<[Response, number]> {
   let response, retryCount;
   const requestTimeout =
@@ -1149,7 +1149,7 @@ export async function recursiveAfterRequestHookHandler(
     options,
     retry?.attempts || 0,
     retry?.onStatusCodes || [],
-    requestTimeout || null
+    requestTimeout || null,
   );
 
   const { response: mappedResponse, responseJson: mappedResponseJson } =
@@ -1161,7 +1161,7 @@ export async function recursiveAfterRequestHookHandler(
       url,
       false,
       gatewayParams,
-      strictOpenAiCompliance
+      strictOpenAiCompliance,
     );
 
   const arhResponse = await afterRequestHookHandler(
@@ -1169,7 +1169,7 @@ export async function recursiveAfterRequestHookHandler(
     mappedResponse,
     mappedResponseJson,
     hookSpanId,
-    retryAttemptsMade
+    retryAttemptsMade,
   );
 
   const remainingRetryCount =
@@ -1190,7 +1190,7 @@ export async function recursiveAfterRequestHookHandler(
       fn,
       requestHeaders,
       hookSpanId,
-      strictOpenAiCompliance
+      strictOpenAiCompliance,
     );
   }
 
@@ -1205,13 +1205,13 @@ export async function recursiveAfterRequestHookHandler(
 function getCacheOptions(cacheConfig: any) {
   // providerOption.cache needs to be sent here
   let cacheMode: string | undefined;
-  let cacheMaxAge: string | number = '';
-  let cacheStatus = 'DISABLED';
+  let cacheMaxAge: string | number = "";
+  let cacheStatus = "DISABLED";
 
-  if (typeof cacheConfig === 'object' && cacheConfig?.mode) {
+  if (typeof cacheConfig === "object" && cacheConfig?.mode) {
     cacheMode = cacheConfig.mode;
     cacheMaxAge = cacheConfig.maxAge;
-  } else if (typeof cacheConfig === 'string') {
+  } else if (typeof cacheConfig === "string") {
     cacheMode = cacheConfig;
   }
   return { cacheMode, cacheMaxAge, cacheStatus };
@@ -1224,11 +1224,11 @@ async function cacheHandler(
   fetchOptions: any,
   transformedRequestBody: any,
   hookSpanId: string,
-  fn: endpointStrings
+  fn: endpointStrings,
 ) {
   const [getFromCacheFunction, cacheIdentifier] = [
-    c.get('getFromCache'),
-    c.get('cacheIdentifier'),
+    c.get("getFromCache"),
+    c.get("cacheIdentifier"),
   ];
 
   let cacheResponse, cacheKey;
@@ -1236,7 +1236,7 @@ async function cacheHandler(
     cacheMaxAge: string | number | undefined,
     cacheStatus: string;
   ({ cacheMode, cacheMaxAge, cacheStatus } = getCacheOptions(
-    providerOption.cache
+    providerOption.cache,
   ));
 
   if (getFromCacheFunction && cacheMode) {
@@ -1247,15 +1247,15 @@ async function cacheHandler(
       fn,
       cacheIdentifier,
       cacheMode,
-      cacheMaxAge
+      cacheMaxAge,
     );
   }
 
-  const hooksManager = c.get('hooksManager') as HooksManager;
+  const hooksManager = c.get("hooksManager") as HooksManager;
   const span = hooksManager.getSpan(hookSpanId) as HookSpan;
   const results = span.getHooksResult();
   const failedBeforeRequestHooks = results.beforeRequestHooksResult?.filter(
-    (h) => !h.verdict
+    (h) => !h.verdict,
   );
 
   let responseBody = cacheResponse;
@@ -1275,7 +1275,7 @@ async function cacheHandler(
   return {
     cacheResponse: !!cacheResponse
       ? new Response(responseBody, {
-          headers: { 'content-type': 'application/json' },
+          headers: { "content-type": "application/json" },
           status: responseStatus,
         })
       : undefined,
@@ -1286,12 +1286,12 @@ async function cacheHandler(
 
 export async function beforeRequestHookHandler(
   c: Context,
-  hookSpanId: string
+  hookSpanId: string,
 ): Promise<any> {
   try {
-    const hooksManager = c.get('hooksManager');
+    const hooksManager = c.get("hooksManager");
     const hooksResult = await hooksManager.executeHooks(hookSpanId, [
-      'syncBeforeRequestHook',
+      "syncBeforeRequestHook",
     ]);
 
     if (hooksResult.shouldDeny) {
@@ -1299,8 +1299,8 @@ export async function beforeRequestHookHandler(
         JSON.stringify({
           error: {
             message:
-              'The guardrail checks defined in the config failed. You can find more information in the `hook_results` object.',
-            type: 'hooks_failed',
+              "The guardrail checks defined in the config failed. You can find more information in the `hook_results` object.",
+            type: "hooks_failed",
             param: null,
             code: null,
           },
@@ -1311,8 +1311,8 @@ export async function beforeRequestHookHandler(
         }),
         {
           status: 446,
-          headers: { 'content-type': 'application/json' },
-        }
+          headers: { "content-type": "application/json" },
+        },
       );
     }
   } catch (err) {

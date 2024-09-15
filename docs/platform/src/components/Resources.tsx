@@ -1,37 +1,37 @@
-'use client'
+"use client";
 
 import {
   type MotionValue,
   motion,
   useMotionTemplate,
   useMotionValue,
-} from 'framer-motion'
-import Link from 'next/link'
+} from "framer-motion";
+import Link from "next/link";
 
-import { GridPattern } from '@/components/GridPattern'
-import { Heading } from '@/components/Heading'
-import { ChatBubbleIcon } from '@/components/icons/ChatBubbleIcon'
-import { EnvelopeIcon } from '@/components/icons/EnvelopeIcon'
-import { UserIcon } from '@/components/icons/UserIcon'
-import { UsersIcon } from '@/components/icons/UsersIcon'
+import { GridPattern } from "@/components/GridPattern";
+import { Heading } from "@/components/Heading";
+import { ChatBubbleIcon } from "@/components/icons/ChatBubbleIcon";
+import { EnvelopeIcon } from "@/components/icons/EnvelopeIcon";
+import { UserIcon } from "@/components/icons/UserIcon";
+import { UsersIcon } from "@/components/icons/UsersIcon";
 
 interface Resource {
-  href: string
-  name: string
-  description: string
-  icon: React.ComponentType<{ className?: string }>
+  href: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
   pattern: Omit<
     React.ComponentPropsWithoutRef<typeof GridPattern>,
-    'width' | 'height' | 'x'
-  >
+    "width" | "height" | "x"
+  >;
 }
 
 const resources: Array<Resource> = [
   {
-    href: '/contacts',
-    name: 'Contacts',
+    href: "/contacts",
+    name: "Contacts",
     description:
-      'Learn about the contact model and how to create, retrieve, update, delete, and list contacts.',
+      "Learn about the contact model and how to create, retrieve, update, delete, and list contacts.",
     icon: UserIcon,
     pattern: {
       y: 16,
@@ -42,10 +42,10 @@ const resources: Array<Resource> = [
     },
   },
   {
-    href: '/conversations',
-    name: 'Conversations',
+    href: "/conversations",
+    name: "Conversations",
     description:
-      'Learn about the conversation model and how to create, retrieve, update, delete, and list conversations.',
+      "Learn about the conversation model and how to create, retrieve, update, delete, and list conversations.",
     icon: ChatBubbleIcon,
     pattern: {
       y: -6,
@@ -56,10 +56,10 @@ const resources: Array<Resource> = [
     },
   },
   {
-    href: '/messages',
-    name: 'Messages',
+    href: "/messages",
+    name: "Messages",
     description:
-      'Learn about the message model and how to create, retrieve, update, delete, and list messages.',
+      "Learn about the message model and how to create, retrieve, update, delete, and list messages.",
     icon: EnvelopeIcon,
     pattern: {
       y: 32,
@@ -70,36 +70,36 @@ const resources: Array<Resource> = [
     },
   },
   {
-    href: '/groups',
-    name: 'Groups',
+    href: "/groups",
+    name: "Groups",
     description:
-      'Learn about the group model and how to create, retrieve, update, delete, and list groups.',
+      "Learn about the group model and how to create, retrieve, update, delete, and list groups.",
     icon: UsersIcon,
     pattern: {
       y: 22,
       squares: [[0, 1]],
     },
   },
-]
+];
 
-function ResourceIcon({ icon: Icon }: { icon: Resource['icon'] }) {
+function ResourceIcon({ icon: Icon }: { icon: Resource["icon"] }) {
   return (
     <div className="dark:bg-white/7.5 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-900/5 ring-1 ring-zinc-900/25 backdrop-blur-[2px] transition duration-300 group-hover:bg-white/50 group-hover:ring-zinc-900/25 dark:ring-white/15 dark:group-hover:bg-blue-300/10 dark:group-hover:ring-blue-400">
       <Icon className="h-5 w-5 fill-zinc-700/10 stroke-zinc-700 transition-colors duration-300 group-hover:stroke-zinc-900 dark:fill-white/10 dark:stroke-zinc-400 dark:group-hover:fill-blue-300/10 dark:group-hover:stroke-blue-400" />
     </div>
-  )
+  );
 }
 
 function ResourcePattern({
   mousex,
   mouseY,
   ...gridProps
-}: Resource['pattern'] & {
-  mousex: MotionValue<number>
-  mouseY: MotionValue<number>
+}: Resource["pattern"] & {
+  mousex: MotionValue<number>;
+  mouseY: MotionValue<number>;
 }) {
-  let maskImage = useMotionTemplate`radial-gradient(180px at ${mousex}px ${mouseY}px, white, transparent)`
-  let style = { maskImage, WebkitMaskImage: maskImage }
+  let maskImage = useMotionTemplate`radial-gradient(180px at ${mousex}px ${mouseY}px, white, transparent)`;
+  let style = { maskImage, WebkitMaskImage: maskImage };
 
   return (
     <div className="pointer-events-none">
@@ -129,21 +129,21 @@ function ResourcePattern({
         />
       </motion.div>
     </div>
-  )
+  );
 }
 
 function Resource({ resource }: { resource: Resource }) {
-  let mousex = useMotionValue(0)
-  let mouseY = useMotionValue(0)
+  let mousex = useMotionValue(0);
+  let mouseY = useMotionValue(0);
 
   function onMouseMove({
     currentTarget,
     clientX,
     clientY,
   }: React.MouseEvent<HTMLDivElement>) {
-    let { left, top } = currentTarget.getBoundingClientRect()
-    mousex.set(clientX - left)
-    mouseY.set(clientY - top)
+    let { left, top } = currentTarget.getBoundingClientRect();
+    mousex.set(clientX - left);
+    mouseY.set(clientY - top);
   }
 
   return (
@@ -167,7 +167,7 @@ function Resource({ resource }: { resource: Resource }) {
         </p>
       </div>
     </div>
-  )
+  );
 }
 
 export function Resources() {
@@ -182,5 +182,5 @@ export function Resources() {
         ))}
       </div>
     </div>
-  )
+  );
 }

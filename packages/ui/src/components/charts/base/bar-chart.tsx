@@ -6,14 +6,13 @@ import {
   Bar,
   BarChart as BaseBarChart,
   CartesianGrid,
-  Cell, Tooltip,
+  Cell,
+  Tooltip,
   TooltipProps,
   XAxis,
-  YAxis
+  YAxis,
 } from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
 import {
   computeChartDataDifferenceOverTime,
   formatAmount,
@@ -286,7 +285,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                     className={cn(
                       "fill-[#41191A]",
                       +entry.previous.value > 0 &&
-                      "fill-[#C6C6C6] dark:fill-[#323232]",
+                        "fill-[#C6C6C6] dark:fill-[#323232]",
                     )}
                   />
                 ))}
@@ -299,7 +298,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                     className={cn(
                       "fill-[#FF3638]",
                       +entry.current.value > 0 &&
-                      "fill-[#121212] dark:fill-[#F5F5F3]",
+                        "fill-[#121212] dark:fill-[#F5F5F3]",
                     )}
                   />
                 ))}

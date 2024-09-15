@@ -4,29 +4,29 @@
  * @module index
  */
 
-import { Hono } from 'hono';
-import { prettyJSON } from 'hono/pretty-json';
-import { HTTPException } from 'hono/http-exception';
+import { Hono } from "hono";
+import { prettyJSON } from "hono/pretty-json";
+import { HTTPException } from "hono/http-exception";
 // import { env } from 'hono/adapter' // Have to set this up for multi-environment deployment
 
-import { completeHandler } from './handlers/completeHandler';
-import { chatCompleteHandler } from './handlers/chatCompleteHandler';
-import { embedHandler } from './handlers/embedHandler';
-import { proxyHandler } from './handlers/proxyHandler';
-import { proxyGetHandler } from './handlers/proxyGetHandler';
-import { chatCompletionsHandler } from './handlers/chatCompletionsHandler';
-import { completionsHandler } from './handlers/completionsHandler';
-import { embeddingsHandler } from './handlers/embeddingsHandler';
-import { requestValidator } from './middlewares/requestValidator';
-import { hooks } from './middlewares/hooks';
-import { compress } from 'hono/compress';
-import { getRuntimeKey } from 'hono/adapter';
-import { imageGenerationsHandler } from './handlers/imageGenerationsHandler';
-import { memoryCache } from './middlewares/cache';
-import { createSpeechHandler } from './handlers/createSpeechHandler';
-import conf from '../conf.json';
-import { createTranscriptionHandler } from './handlers/createTranscriptionHandler';
-import { createTranslationHandler } from './handlers/createTranslationHandler';
+import { completeHandler } from "./handlers/completeHandler";
+import { chatCompleteHandler } from "./handlers/chatCompleteHandler";
+import { embedHandler } from "./handlers/embedHandler";
+import { proxyHandler } from "./handlers/proxyHandler";
+import { proxyGetHandler } from "./handlers/proxyGetHandler";
+import { chatCompletionsHandler } from "./handlers/chatCompletionsHandler";
+import { completionsHandler } from "./handlers/completionsHandler";
+import { embeddingsHandler } from "./handlers/embeddingsHandler";
+import { requestValidator } from "./middlewares/requestValidator";
+import { hooks } from "./middlewares/hooks";
+import { compress } from "hono/compress";
+import { getRuntimeKey } from "hono/adapter";
+import { imageGenerationsHandler } from "./handlers/imageGenerationsHandler";
+import { memoryCache } from "./middlewares/cache";
+import { createSpeechHandler } from "./handlers/createSpeechHandler";
+import conf from "../conf.json";
+import { createTranscriptionHandler } from "./handlers/createTranscriptionHandler";
+import { createTranslationHandler } from "./handlers/createTranslationHandler";
 
 // Create a new Hono server instance
 const app = new Hono();
@@ -37,9 +37,9 @@ const app = new Hono();
  * This check if its not any of the 2 and then applies the compress middleware to avoid double compression.
  */
 
-app.use('*', (c, next) => {
+app.use("*", (c, next) => {
   const runtime = getRuntimeKey();
-  if (runtime !== 'lagon' && runtime !== 'workerd' && runtime !== 'node') {
+  if (runtime !== "lagon" && runtime !== "workerd" && runtime !== "node") {
     return compress()(c, next);
   }
   return next();
@@ -49,23 +49,23 @@ app.use('*', (c, next) => {
  * GET route for the root path.
  * Returns a greeting message.
  */
-app.get('/', (c) => c.text('AI Gateway says hey!'));
+app.get("/", (c) => c.text("AI Gateway says hey!"));
 
 // Use prettyJSON middleware for all routes
-app.use('*', prettyJSON());
+app.use("*", prettyJSON());
 
 // Use hooks middleware for all routes
-app.use('*', hooks);
+app.use("*", hooks);
 
 if (conf.cache === true) {
-  app.use('*', memoryCache());
+  app.use("*", memoryCache());
 }
 
 /**
  * Default route when no other route matches.
  * Returns a JSON response with a message and status code 404.
  */
-app.notFound((c) => c.json({ message: 'Not Found', ok: false }, 404));
+app.notFound((c) => c.json({ message: "Not Found", ok: false }, 404));
 
 /**
  * Global error handler.
@@ -77,7 +77,7 @@ app.onError((err, c) => {
     return err.getResponse();
   }
   c.status(500);
-  return c.json({ status: 'failure', message: err.message });
+  return c.json({ status: "failure", message: err.message });
 });
 
 /**
@@ -85,82 +85,82 @@ app.onError((err, c) => {
  * POST route for '/v1/complete'.
  * Handles requests by passing them to the completeHandler.
  */
-app.post('/v1/complete', completeHandler);
+app.post("/v1/complete", completeHandler);
 
 /**
  * @deprecated
  * POST route for '/v1/chatComplete'.
  * Handles requests by passing them to the chatCompleteHandler.
  */
-app.post('/v1/chatComplete', chatCompleteHandler);
+app.post("/v1/chatComplete", chatCompleteHandler);
 
 /**
  * @deprecated
  * POST route for '/v1/embed'.
  * Handles requests by passing them to the embedHandler.
  */
-app.post('/v1/embed', embedHandler);
+app.post("/v1/embed", embedHandler);
 
 /**
  * POST route for '/v1/chat/completions'.
  * Handles requests by passing them to the chatCompletionsHandler.
  */
-app.post('/v1/chat/completions', requestValidator, chatCompletionsHandler);
+app.post("/v1/chat/completions", requestValidator, chatCompletionsHandler);
 
 /**
  * POST route for '/v1/completions'.
  * Handles requests by passing them to the completionsHandler.
  */
-app.post('/v1/completions', requestValidator, completionsHandler);
+app.post("/v1/completions", requestValidator, completionsHandler);
 
 /**
  * POST route for '/v1/embeddings'.
  * Handles requests by passing them to the embeddingsHandler.
  */
-app.post('/v1/embeddings', requestValidator, embeddingsHandler);
+app.post("/v1/embeddings", requestValidator, embeddingsHandler);
 
 /**
  * POST route for '/v1/images/generations'.
  * Handles requests by passing them to the imageGenerations handler.
  */
-app.post('/v1/images/generations', requestValidator, imageGenerationsHandler);
+app.post("/v1/images/generations", requestValidator, imageGenerationsHandler);
 
 /**
  * POST route for '/v1/audio/speech'.
  * Handles requests by passing them to the createSpeechHandler.
  */
-app.post('/v1/audio/speech', requestValidator, createSpeechHandler);
+app.post("/v1/audio/speech", requestValidator, createSpeechHandler);
 
 /**
  * POST route for '/v1/audio/transcriptions'.
  * Handles requests by passing them to the createTranscriptionHandler.
  */
 app.post(
-  '/v1/audio/transcriptions',
+  "/v1/audio/transcriptions",
   requestValidator,
-  createTranscriptionHandler
+  createTranscriptionHandler,
 );
 
 /**
  * POST route for '/v1/audio/translations'.
  * Handles requests by passing them to the createTranslationHandler.
  */
-app.post('/v1/audio/translations', requestValidator, createTranslationHandler);
+app.post("/v1/audio/translations", requestValidator, createTranslationHandler);
 
 /**
  * POST route for '/v1/prompts/:id/completions'.
  * Handles portkey prompt completions route
  */
-app.post('/v1/prompts/*', requestValidator, (c) => {
-  if (c.req.url.endsWith('/v1/chat/completions')) {
+app.post("/v1/prompts/*", requestValidator, (c) => {
+  if (c.req.url.endsWith("/v1/chat/completions")) {
     return chatCompletionsHandler(c);
-  } else if (c.req.url.endsWith('/v1/completions')) {
+  } else if (c.req.url.endsWith("/v1/completions")) {
     return completionsHandler(c);
   }
   c.status(500);
   return c.json({
-    status: 'failure',
-    message: 'prompt completions error: Something went wrong',
+    status: "failure",
+    message: "prompt completions error: Something went wrong",
   });
 });
 
@@ -168,15 +168,15 @@ app.post('/v1/prompts/*', requestValidator, (c) => {
  * @deprecated
  * Support the /v1 proxy endpoint
  */
-app.post('/v1/proxy/*', proxyHandler);
+app.post("/v1/proxy/*", proxyHandler);
 
 // Support the /v1 proxy endpoint after all defined endpoints so this does not interfere.
-app.post('/v1/*', requestValidator, proxyHandler);
+app.post("/v1/*", requestValidator, proxyHandler);
 
 // Support the /v1 proxy endpoint after all defined endpoints so this does not interfere.
-app.get('/v1/*', requestValidator, proxyGetHandler);
+app.get("/v1/*", requestValidator, proxyGetHandler);
 
-app.delete('/v1/*', requestValidator, proxyGetHandler);
+app.delete("/v1/*", requestValidator, proxyGetHandler);
 
 // Export the app
 export default app;

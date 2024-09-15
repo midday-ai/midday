@@ -8,9 +8,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "./dist/**"
-  ],
+  "files": ["./dist/**"],
   "description": "",
   "keywords": [],
   "scripts": {

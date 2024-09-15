@@ -5,12 +5,7 @@ import { FinancialDataProcessor } from "../../../lib/financial-data-processor";
 
 import { Button } from "../../button";
 import { Card } from "../../card";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "../../sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTrigger } from "../../sheet";
 
 export interface TransactionCardProps {
   transaction: Transaction;

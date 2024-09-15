@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId } from "react";
 
 export function GridPattern({
   width,
@@ -7,14 +7,14 @@ export function GridPattern({
   y,
   squares,
   ...props
-}: React.ComponentPropsWithoutRef<'svg'> & {
-  width: number
-  height: number
-  x: string | number
-  y: string | number
-  squares: Array<[x: number, y: number]>
+}: React.ComponentPropsWithoutRef<"svg"> & {
+  width: number;
+  height: number;
+  x: string | number;
+  y: string | number;
+  squares: Array<[x: number, y: number]>;
 }) {
-  let patternId = useId()
+  let patternId = useId();
 
   return (
     <svg aria-hidden="true" {...props}>
@@ -51,5 +51,5 @@ export function GridPattern({
         </svg>
       )}
     </svg>
-  )
+  );
 }

@@ -7,7 +7,7 @@ export async function fetchGithubStars() {
       next: {
         revalidate: 300,
       },
-    }
+    },
   );
 
   return response.json();

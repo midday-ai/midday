@@ -68,8 +68,8 @@ const forecastFeaturesEnum = z.enum(["revenue", "expenses", "cash_flow"]);
  * }
  */
 const booleanParser = (value: unknown) => {
-  if (typeof value === 'string') {
-    return value.toLowerCase() === 'true';
+  if (typeof value === "string") {
+    return value.toLowerCase() === "true";
   }
   return Boolean(value);
 };
@@ -132,13 +132,13 @@ export const dashboardEnvironment = createEnv({
     NEXT_PUBLIC_AUTH_PROVIDERS: z
       .preprocess(
         (val) => (typeof val === "string" ? val.split(",") : val),
-        z.array(authProviderEnum)
+        z.array(authProviderEnum),
       )
       .default(["google", "slack", "github", "otp"]),
     NEXT_PUBLIC_FINANCIAL_PROVIDERS: z
       .preprocess(
         (val) => (typeof val === "string" ? val.split(",") : val),
-        z.array(financialProviderEnum)
+        z.array(financialProviderEnum),
       )
       .default(["plaid", "teller", "gocardless"]),
     NEXT_PUBLIC_ENABLE_PRICING: z
@@ -151,7 +151,7 @@ export const dashboardEnvironment = createEnv({
     NEXT_PUBLIC_ANALYTICS_MODULES: z
       .preprocess(
         (val) => (typeof val === "string" ? val.split(",") : val),
-        z.array(analyticsModulesEnum)
+        z.array(analyticsModulesEnum),
       )
       .default(["merchant", "location", "realtime"]),
     NEXT_PUBLIC_ENABLE_DARK_MODE: z.coerce.boolean().default(true),
@@ -167,21 +167,21 @@ export const dashboardEnvironment = createEnv({
     NEXT_PUBLIC_SMART_GOAL_FEATURES: z
       .preprocess(
         (val) => (typeof val === "string" ? val.split(",") : val),
-        z.array(smartGoalFeaturesEnum)
+        z.array(smartGoalFeaturesEnum),
       )
       .default(["milestones", "forecasts", "notes", "progress_tracking"]),
     NEXT_PUBLIC_ENABLE_MILESTONES: z.coerce.boolean().default(true),
     NEXT_PUBLIC_MILESTONE_FEATURES: z
       .preprocess(
         (val) => (typeof val === "string" ? val.split(",") : val),
-        z.array(milestoneFeaturesEnum)
+        z.array(milestoneFeaturesEnum),
       )
       .default(["completion_tracking", "budget_integration"]),
     NEXT_PUBLIC_ENABLE_FORECASTS: z.coerce.boolean().default(true),
     NEXT_PUBLIC_FORECAST_FEATURES: z
       .preprocess(
         (val) => (typeof val === "string" ? val.split(",") : val),
-        z.array(forecastFeaturesEnum)
+        z.array(forecastFeaturesEnum),
       )
       .default(["revenue", "expenses", "cash_flow"]),
     NEXT_PUBLIC_ENABLE_BETA_FEATURES: z
@@ -228,7 +228,8 @@ export const dashboardEnvironment = createEnv({
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env["NEXT_PUBLIC_TRIGGER_API_KEY"],
     NEXT_PUBLIC_TELLER_APPLICATION_ID:
       process.env["NEXT_PUBLIC_TELLER_APPLICATION_ID"],
-    NEXT_PUBLIC_TELLER_ENVIRONMENT: process.env["NEXT_PUBLIC_TELLER_ENVIRONMENT"],
+    NEXT_PUBLIC_TELLER_ENVIRONMENT:
+      process.env["NEXT_PUBLIC_TELLER_ENVIRONMENT"],
     NEXT_PUBLIC_PLAID_ENVIRONMENT: process.env["NEXT_PUBLIC_PLAID_ENVIRONMENT"],
     NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
       process.env["NEXT_PUBLIC_OPENPANEL_CLIENT_ID"],
@@ -253,15 +254,15 @@ export const dashboardEnvironment = createEnv({
       process.env["NEXT_PUBLIC_ENABLE_LAZY_LOADING"],
     NEXT_PUBLIC_ENABLE_SERVICE_WORKER:
       process.env["NEXT_PUBLIC_ENABLE_SERVICE_WORKER"],
-    NEXT_PUBLIC_ENABLE_SMART_GOALS: process.env["NEXT_PUBLIC_ENABLE_SMART_GOALS"],
+    NEXT_PUBLIC_ENABLE_SMART_GOALS:
+      process.env["NEXT_PUBLIC_ENABLE_SMART_GOALS"],
     NEXT_PUBLIC_SMART_GOAL_FEATURES:
       process.env["NEXT_PUBLIC_SMART_GOAL_FEATURES"],
     NEXT_PUBLIC_ENABLE_MILESTONES: process.env["NEXT_PUBLIC_ENABLE_MILESTONES"],
     NEXT_PUBLIC_MILESTONE_FEATURES:
       process.env["NEXT_PUBLIC_MILESTONE_FEATURES"],
     NEXT_PUBLIC_ENABLE_FORECASTS: process.env["NEXT_PUBLIC_ENABLE_FORECASTS"],
-    NEXT_PUBLIC_FORECAST_FEATURES:
-      process.env["NEXT_PUBLIC_FORECAST_FEATURES"],
+    NEXT_PUBLIC_FORECAST_FEATURES: process.env["NEXT_PUBLIC_FORECAST_FEATURES"],
     NEXT_PUBLIC_ENABLE_BETA_FEATURES:
       process.env["NEXT_PUBLIC_ENABLE_BETA_FEATURES"],
     NEXT_PUBLIC_NEW_UI_VERSION: process.env["NEXT_PUBLIC_NEW_UI_VERSION"],
@@ -328,5 +329,3 @@ export const featureFlags = {
   isPaymentsEnabled: dashboardEnvironment.NEXT_PUBLIC_PAYMENTS_ENABLED,
   isAnalyticsV2Enabled: dashboardEnvironment.NEXT_PUBLIC_ENABLE_ANALYTICS_V2,
 };
-
-

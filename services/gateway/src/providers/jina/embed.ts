@@ -1,23 +1,23 @@
-import { JINA } from '../../globals';
-import { EmbedResponse } from '../../types/embedRequestBody';
-import { ErrorResponse, ProviderConfig } from '../types';
+import { JINA } from "../../globals";
+import { EmbedResponse } from "../../types/embedRequestBody";
+import { ErrorResponse, ProviderConfig } from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const JinaEmbedConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'jina-embeddings-v2-base-en',
+    default: "jina-embeddings-v2-base-en",
   },
   input: {
-    param: 'input',
-    default: '',
+    param: "input",
+    default: "",
   },
   encoding_format: {
-    param: 'encoding_format',
+    param: "encoding_format",
   },
 };
 
@@ -29,9 +29,9 @@ interface JinaErrorResponse {
 
 export const JinaEmbedResponseTransform: (
   response: JinaEmbedResponse | JinaErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'detail' in response) {
+  if (responseStatus !== 200 && "detail" in response) {
     return generateErrorResponse(
       {
         message: response.detail,
@@ -39,11 +39,11 @@ export const JinaEmbedResponseTransform: (
         param: null,
         code: null,
       },
-      JINA
+      JINA,
     );
   }
 
-  if ('data' in response) {
+  if ("data" in response) {
     return {
       object: response.object,
       data: response.data.map((d) => ({

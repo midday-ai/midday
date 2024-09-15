@@ -1,20 +1,20 @@
-import { TOGETHER_AI } from '../../globals';
-import { EmbedParams, EmbedResponse } from '../../types/embedRequestBody';
-import { ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+import { TOGETHER_AI } from "../../globals";
+import { EmbedParams, EmbedResponse } from "../../types/embedRequestBody";
+import { ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 import {
   TogetherAIErrorResponse,
   TogetherAIErrorResponseTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 export const TogetherAIEmbedConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'mistral-embed',
+    default: "mistral-embed",
   },
   input: {
-    param: 'input',
+    param: "input",
     required: true,
     transform: (params: EmbedParams) => {
       if (Array.isArray(params.input)) {
@@ -30,16 +30,16 @@ interface TogetherAIEmbedResponse extends EmbedResponse {}
 
 export const TogetherAIEmbedResponseTransform: (
   response: TogetherAIEmbedResponse | TogetherAIErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResponse = TogetherAIErrorResponseTransform(
-      response as TogetherAIErrorResponse
+      response as TogetherAIErrorResponse,
     );
     if (errorResponse) return errorResponse;
   }
 
-  if ('data' in response) {
+  if ("data" in response) {
     return {
       object: response.object,
       data: response.data.map((d) => ({

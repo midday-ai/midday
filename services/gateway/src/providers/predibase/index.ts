@@ -1,17 +1,17 @@
-import { ProviderConfigs } from '../types';
-import PredibaseAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import PredibaseAPIConfig from "./api";
 import {
   PredibaseChatCompleteConfig,
   PredibaseChatCompleteResponseTransform,
   PredibaseChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const PredibaseConfig: ProviderConfigs = {
   chatComplete: PredibaseChatCompleteConfig,
   api: PredibaseAPIConfig,
   responseTransforms: {
     chatComplete: PredibaseChatCompleteResponseTransform,
-    'stream-chatComplete': PredibaseChatCompleteStreamChunkTransform,
+    "stream-chatComplete": PredibaseChatCompleteStreamChunkTransform,
   },
 };
 

@@ -4,11 +4,7 @@ import { LayoutGrid, LogOut, User } from "lucide-react";
 import Link from "next/link";
 
 import * as React from "react";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "../avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../avatar";
 import { Button } from "../button";
 import {
   DropdownMenu,

@@ -8,10 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "../card";
-import {
-  ScrollArea,
-  ScrollBar,
-} from "../scroll-area";
+import { ScrollArea, ScrollBar } from "../scroll-area";
 
 import { EmptyFileUploadCard } from "./empty-file-upload-card";
 

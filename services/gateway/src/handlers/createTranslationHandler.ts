@@ -1,8 +1,8 @@
 import {
   constructConfigFromRequestHeaders,
   tryTargetsRecursively,
-} from './handlerUtils';
-import { Context } from 'hono';
+} from "./handlerUtils";
+import { Context } from "hono";
 
 /**
  * Handles the '/audio/translations' API request by selecting the appropriate provider(s) and making the request to them.
@@ -22,25 +22,25 @@ export async function createTranslationHandler(c: Context): Promise<Response> {
       camelCaseConfig ?? {},
       request,
       requestHeaders,
-      'createTranslation',
-      'POST',
-      'config'
+      "createTranslation",
+      "POST",
+      "config",
     );
 
     return tryTargetsResponse;
   } catch (err: any) {
-    console.log('createTranslation error', err.message);
+    console.log("createTranslation error", err.message);
     return new Response(
       JSON.stringify({
-        status: 'failure',
-        message: 'Something went wrong',
+        status: "failure",
+        message: "Something went wrong",
       }),
       {
         status: 500,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 }

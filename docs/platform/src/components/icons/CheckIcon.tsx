@@ -1,4 +1,4 @@
-export function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function CheckIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -13,5 +13,5 @@ export function CheckIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="m7.5 10.5 2 2c1-3.5 3-5 3-5"
       />
     </svg>
-  )
+  );
 }

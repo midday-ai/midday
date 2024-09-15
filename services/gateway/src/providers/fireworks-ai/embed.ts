@@ -1,20 +1,20 @@
-import { FIREWORKS_AI } from '../../globals';
-import { EmbedParams, EmbedResponse } from '../../types/embedRequestBody';
-import { ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+import { FIREWORKS_AI } from "../../globals";
+import { EmbedParams, EmbedResponse } from "../../types/embedRequestBody";
+import { ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 import {
   FireworksAIValidationErrorResponse,
   FireworksAIErrorResponseTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 export const FireworksAIEmbedConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'nomic-ai/nomic-embed-text-v1.5',
+    default: "nomic-ai/nomic-embed-text-v1.5",
   },
   input: {
-    param: 'input',
+    param: "input",
     required: true,
     transform: (params: EmbedParams) => {
       if (Array.isArray(params.input)) {
@@ -25,7 +25,7 @@ export const FireworksAIEmbedConfig: ProviderConfig = {
     },
   },
   dimensions: {
-    param: 'dimensions',
+    param: "dimensions",
   },
 };
 
@@ -33,13 +33,13 @@ interface FireworksAIEmbedResponse extends EmbedResponse {}
 
 export const FireworksAIEmbedResponseTransform: (
   response: FireworksAIEmbedResponse | FireworksAIValidationErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
-  if ('fault' in response && responseStatus !== 200) {
+  if ("fault" in response && responseStatus !== 200) {
     return FireworksAIErrorResponseTransform(response);
   }
 
-  if ('data' in response) {
+  if ("data" in response) {
     return {
       object: response.object,
       data: response.data.map((d) => ({

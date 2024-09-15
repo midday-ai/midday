@@ -1,9 +1,9 @@
-import { Context } from 'hono';
+import { Context } from "hono";
 import {
   fetchProviderOptionsFromConfig,
   tryProvidersInSequence,
-} from './handlerUtils';
-import { Targets } from '../types/requestBody';
+} from "./handlerUtils";
+import { Targets } from "../types/requestBody";
 
 /**
  * @deprecated
@@ -18,16 +18,16 @@ export async function embedHandler(c: Context): Promise<Response> {
     ) {
       return new Response(
         JSON.stringify({
-          status: 'failure',
+          status: "failure",
           message:
-            'Please use the latest routes or SDK to use this version of config.',
+            "Please use the latest routes or SDK to use this version of config.",
         }),
         {
           status: 400,
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -35,15 +35,15 @@ export async function embedHandler(c: Context): Promise<Response> {
     if (!providerOptions) {
       return new Response(
         JSON.stringify({
-          status: 'failure',
-          message: 'Could not find a provider option.',
+          status: "failure",
+          message: "Could not find a provider option.",
         }),
         {
           status: 400,
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -53,7 +53,7 @@ export async function embedHandler(c: Context): Promise<Response> {
         providerOptions,
         request.params,
         requestHeaders,
-        'embed'
+        "embed",
       );
     } catch (error: any) {
       console.error(`embed error: ${error.message}`);
@@ -61,22 +61,22 @@ export async function embedHandler(c: Context): Promise<Response> {
       return new Response(errorArray[errorArray.length - 1].errorObj, {
         status: errorArray[errorArray.length - 1].status,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
       });
     }
   } catch (err: any) {
     return new Response(
       JSON.stringify({
-        status: 'failure',
-        message: 'Something went wrong',
+        status: "failure",
+        message: "Something went wrong",
       }),
       {
         status: 500,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 }

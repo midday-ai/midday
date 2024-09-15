@@ -2,16 +2,16 @@
   "folders": [
     {
       "name": "project-root",
-      "path": "./",
+      "path": "./"
     },
     {
       "name": "supabase-functions",
-      "path": "packages/supabase/functions",
-    },
+      "path": "packages/supabase/functions"
+    }
   ],
   "settings": {
     "files.exclude": {
-      "packages/supabase/functions/": true,
-    },
-  },
+      "packages/supabase/functions/": true
+    }
+  }
 }

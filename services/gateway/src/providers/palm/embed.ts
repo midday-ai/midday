@@ -1,20 +1,20 @@
-import { PALM } from '../../globals';
-import { EmbedResponse } from '../../types/embedRequestBody';
+import { PALM } from "../../globals";
+import { EmbedResponse } from "../../types/embedRequestBody";
 import {
   GoogleErrorResponse,
   GoogleErrorResponseTransform,
-} from '../google/chatComplete';
-import { ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+} from "../google/chatComplete";
+import { ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 
 export const PalmEmbedConfig: ProviderConfig = {
   input: {
-    param: 'text',
+    param: "text",
     required: true,
   },
   model: {
-    param: 'model',
-    default: 'models/embedding-gecko-001',
+    param: "model",
+    default: "models/embedding-gecko-001",
   },
 };
 
@@ -28,27 +28,27 @@ interface PalmEmbedResponse {
 
 export const PalmEmbedResponseTransform: (
   response: PalmEmbedResponse | GoogleErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResponse = GoogleErrorResponseTransform(
       response as GoogleErrorResponse,
-      PALM
+      PALM,
     );
     if (errorResponse) return errorResponse;
   }
 
-  if ('embedding' in response) {
+  if ("embedding" in response) {
     return {
-      object: 'list',
+      object: "list",
       data: [
         {
-          object: 'embedding',
+          object: "embedding",
           embedding: response.embedding.value,
           index: 0,
         },
       ],
-      model: '',
+      model: "",
       usage: {
         prompt_tokens: -1,
         total_tokens: -1,

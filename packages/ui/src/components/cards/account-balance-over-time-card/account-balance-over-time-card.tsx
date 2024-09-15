@@ -1,11 +1,7 @@
 import * as React from "react";
 import { AccountBalanceHistory } from "client-typescript-sdk";
 import { cn } from "../../../utils/cn";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from "../../card";
+import { Card, CardHeader, CardTitle } from "../../card";
 import { AccountBalanceChart } from "../../charts/financials/account-balance";
 
 export interface AccountBalanceOverTimeCardProps

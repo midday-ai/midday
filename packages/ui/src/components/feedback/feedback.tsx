@@ -2,12 +2,7 @@ import React from "react";
 import { CannyFeedback, CannyProvider } from "react-canny";
 import { z } from "zod";
 
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../tabs";
 
 const UserSchema = z.object({
   userId: z.string().min(1),

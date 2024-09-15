@@ -1,28 +1,28 @@
-import { WORKERS_AI } from '../../globals';
+import { WORKERS_AI } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const WorkersAiChatCompleteConfig: ProviderConfig = {
   messages: {
-    param: 'messages',
-    default: '',
+    param: "messages",
+    default: "",
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   raw: {
-    param: 'raw',
+    param: "raw",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
   },
 };
 
@@ -51,19 +51,19 @@ interface WorkersAiChatCompleteStreamResponse {
 }
 
 export const WorkersAiErrorResponseTransform: (
-  response: WorkersAiErrorResponse
+  response: WorkersAiErrorResponse,
 ) => ErrorResponse | undefined = (response) => {
-  if ('errors' in response) {
+  if ("errors" in response) {
     return generateErrorResponse(
       {
         message: response.errors
           ?.map((error) => `Error ${error.code}:${error.message}`)
-          .join(', '),
+          .join(", "),
         type: null,
         param: null,
         code: null,
       },
-      WORKERS_AI
+      WORKERS_AI,
     );
   }
 
@@ -73,28 +73,28 @@ export const WorkersAiErrorResponseTransform: (
 // TODO: cloudflare do not return the usage
 export const WorkersAiChatCompleteResponseTransform: (
   response: WorkersAiChatCompleteResponse | WorkersAiErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResponse = WorkersAiErrorResponseTransform(
-      response as WorkersAiErrorResponse
+      response as WorkersAiErrorResponse,
     );
     if (errorResponse) return errorResponse;
   }
 
-  if ('result' in response) {
+  if ("result" in response) {
     return {
       id: Date.now().toString(),
-      object: 'chat_completion',
+      object: "chat_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '', // TODO: find a way to send the cohere embedding model name back
+      model: "", // TODO: find a way to send the cohere embedding model name back
       provider: WORKERS_AI,
       choices: [
         {
-          message: { role: 'assistant', content: response.result.response },
+          message: { role: "assistant", content: response.result.response },
           index: 0,
           logprobs: null,
-          finish_reason: '',
+          finish_reason: "",
         },
       ],
     };
@@ -105,24 +105,24 @@ export const WorkersAiChatCompleteResponseTransform: (
 
 export const WorkersAiChatCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string | undefined = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
 
-  if (chunk.startsWith('data: [DONE]')) {
-    return 'data: [DONE]\n\n';
+  if (chunk.startsWith("data: [DONE]")) {
+    return "data: [DONE]\n\n";
   }
 
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
 
   const parsedChunk: WorkersAiChatCompleteStreamResponse = JSON.parse(chunk);
   return (
     `data: ${JSON.stringify({
       id: fallbackId,
-      object: 'chat.completion.chunk',
+      object: "chat.completion.chunk",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: WORKERS_AI,
       choices: [
         {
@@ -134,6 +134,6 @@ export const WorkersAiChatCompleteStreamChunkTransform: (
           finish_reason: null,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

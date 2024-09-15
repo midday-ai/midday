@@ -39,9 +39,7 @@
     "url": "https://github.com/unkeyed/unkey/issues"
   },
   "homepage": "https://github.com/unkeyed/unkey#readme",
-  "files": [
-    "./dist/**"
-  ],
+  "files": ["./dist/**"],
   "author": "Andreas Thomas <andreas@unkey.dev>",
   "scripts": {
     "build": "tsup",

@@ -1,9 +1,9 @@
-import { Context } from 'hono';
-import { CONTENT_TYPES } from '../globals';
-import Providers from '../providers';
-import { OpenAIChatCompleteJSONToStreamResponseTransform } from '../providers/openai/chatComplete';
-import { OpenAICompleteJSONToStreamResponseTransform } from '../providers/openai/complete';
-import { Options, Params } from '../types/requestBody';
+import { Context } from "hono";
+import { CONTENT_TYPES } from "../globals";
+import Providers from "../providers";
+import { OpenAIChatCompleteJSONToStreamResponseTransform } from "../providers/openai/chatComplete";
+import { OpenAICompleteJSONToStreamResponseTransform } from "../providers/openai/complete";
+import { Options, Params } from "../types/requestBody";
 
 import {
   handleAudioResponse,
@@ -13,8 +13,8 @@ import {
   handleOctetStreamResponse,
   handleStreamingMode,
   handleTextResponse,
-} from './streamHandler';
-import { HookSpan } from '../middlewares/hooks';
+} from "./streamHandler";
+import { HookSpan } from "../middlewares/hooks";
 
 /**
  * Handles various types of responses based on the specified parameters
@@ -39,15 +39,15 @@ export async function responseHandler(
   requestURL: string,
   isCacheHit: boolean = false,
   gatewayRequest: Params,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ): Promise<{ response: Response; responseJson: any }> {
   let responseTransformerFunction: Function | undefined;
   let providerOption: Options | undefined;
-  const responseContentType = response.headers?.get('content-type');
+  const responseContentType = response.headers?.get("content-type");
 
-  if (typeof provider == 'object') {
+  if (typeof provider == "object") {
     providerOption = { ...provider };
-    provider = provider.provider || '';
+    provider = provider.provider || "";
   }
 
   const providerConfig = Providers[provider];
@@ -70,7 +70,7 @@ export async function responseHandler(
   // Set the transformer to OpenAI json to stream convertor function in that case.
   if (responseTransformer && streamingMode && isCacheHit) {
     responseTransformerFunction =
-      responseTransformer === 'chatComplete'
+      responseTransformer === "chatComplete"
         ? OpenAIChatCompleteJSONToStreamResponseTransform
         : OpenAICompleteJSONToStreamResponseTransform;
   } else if (responseTransformer && !streamingMode && isCacheHit) {
@@ -86,7 +86,7 @@ export async function responseHandler(
     const streamingResponse = await handleJSONToStreamResponse(
       response,
       provider,
-      responseTransformerFunction
+      responseTransformerFunction,
     );
     return { response: streamingResponse, responseJson: null };
   }
@@ -98,7 +98,7 @@ export async function responseHandler(
         provider,
         responseTransformerFunction,
         requestURL,
-        strictOpenAiCompliance
+        strictOpenAiCompliance,
       ),
       responseJson: null,
     };
@@ -125,7 +125,7 @@ export async function responseHandler(
   ) {
     const textResponse = await handleTextResponse(
       response,
-      responseTransformerFunction
+      responseTransformerFunction,
     );
     return { response: textResponse, responseJson: null };
   }
@@ -133,7 +133,7 @@ export async function responseHandler(
   const nonStreamingResponse = await handleNonStreamingMode(
     response,
     responseTransformerFunction,
-    strictOpenAiCompliance
+    strictOpenAiCompliance,
   );
 
   return {
@@ -147,23 +147,23 @@ export async function afterRequestHookHandler(
   response: any,
   responseJSON: any,
   hookSpanId: string,
-  retryAttemptsMade: number
+  retryAttemptsMade: number,
 ): Promise<Response> {
   try {
-    const hooksManager = c.get('hooksManager');
+    const hooksManager = c.get("hooksManager");
 
     hooksManager.setSpanContextResponse(
       hookSpanId,
       responseJSON,
-      response.status
+      response.status,
     );
 
     if (retryAttemptsMade > 0) {
-      hooksManager.getSpan(hookSpanId).resetHookResult('afterRequestHook');
+      hooksManager.getSpan(hookSpanId).resetHookResult("afterRequestHook");
     }
 
     let { shouldDeny, results } = await hooksManager.executeHooks(hookSpanId, [
-      'syncAfterRequestHook',
+      "syncAfterRequestHook",
     ]);
 
     if (!responseJSON) {
@@ -178,8 +178,8 @@ export async function afterRequestHookHandler(
         JSON.stringify({
           error: {
             message:
-              'The guardrail checks defined in the config failed. You can find more information in the `hook_results` object.',
-            type: 'hooks_failed',
+              "The guardrail checks defined in the config failed. You can find more information in the `hook_results` object.",
+            type: "hooks_failed",
             param: null,
             code: null,
           },
@@ -193,15 +193,15 @@ export async function afterRequestHookHandler(
         }),
         {
           status: 446,
-          headers: { 'content-type': 'application/json' },
-        }
+          headers: { "content-type": "application/json" },
+        },
       );
     }
 
     const failedBeforeRequestHooks =
       hooksResult.beforeRequestHooksResult.filter((h) => !h.verdict);
     const failedAfterRequestHooks = hooksResult.afterRequestHooksResult.filter(
-      (h) => !h.verdict
+      (h) => !h.verdict,
     );
 
     if (failedBeforeRequestHooks.length || failedAfterRequestHooks.length) {
@@ -209,9 +209,9 @@ export async function afterRequestHookHandler(
         JSON.stringify({ ...responseJSON, hook_results: hooksResult }),
         {
           status: 246,
-          statusText: 'Hooks failed',
+          statusText: "Hooks failed",
           headers: response.headers,
-        }
+        },
       );
     }
 
@@ -230,7 +230,7 @@ export async function afterRequestHookHandler(
         status: response.status,
         statusText: response.statusText,
         headers: response.headers,
-      }
+      },
     );
   } catch (err) {
     console.error(err);

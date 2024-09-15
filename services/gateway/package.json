@@ -6,22 +6,10 @@
     "type": "git",
     "url": "git+https://github.com/Portkey-AI/gateway.git"
   },
-  "keywords": [
-    "AI gateway",
-    "Portkey",
-    "Portkey AI",
-    "LLM",
-    "OpenAI"
-  ],
+  "keywords": ["AI gateway", "Portkey", "Portkey AI", "LLM", "OpenAI"],
   "author": "portkey-ai <support@portkey.ai>",
   "license": "MIT",
-  "files": [
-    "build",
-    "README.md",
-    "SECURITY.md",
-    "LICENSE",
-    "docs"
-  ],
+  "files": ["build", "README.md", "SECURITY.md", "LICENSE", "docs"],
   "scripts": {
     "dev": "wrangler dev src/index.ts",
     "dev:node": "tsx src/start-server.ts",

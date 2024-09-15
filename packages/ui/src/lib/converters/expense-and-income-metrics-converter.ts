@@ -82,14 +82,14 @@ export class FinancialExpenseAndIncomeMetricsConverter {
    * @returns An array of unique category names, sorted alphabetically.
    */
   public static getUniqueCategories<T extends ExpenseMetrics | IncomeMetrics>(
-    data: T[]
+    data: T[],
   ): string[] {
     return Array.from(
       new Set(
         data
           .map((item) => item.personalFinanceCategoryPrimary)
-          .filter((category): category is string => category !== undefined)
-      )
+          .filter((category): category is string => category !== undefined),
+      ),
     ).sort();
   }
 
@@ -106,14 +106,14 @@ export class FinancialExpenseAndIncomeMetricsConverter {
   >(
     data: T[],
     category: string,
-    type: "expense" | "income"
+    type: "expense" | "income",
   ): {
     highest: { month: string; value: number };
     lowest: { month: string; value: number };
     average: number;
   } {
     const filteredData = data.filter(
-      (item) => item.personalFinanceCategoryPrimary === category
+      (item) => item.personalFinanceCategoryPrimary === category,
     );
     const valueKey = type === "expense" ? "totalExpenses" : "totalIncome";
 
@@ -309,7 +309,7 @@ export class FinancialExpenseAndIncomeMetricsConverter {
    * @returns An array of objects containing month, year, and total income, sorted by date
    */
   public static computeMonthlyIncome(
-    data: IncomeMetrics[]
+    data: IncomeMetrics[],
   ): { month: string; year: number; totalIncome: number }[] {
     const monthlyIncome: {
       [key: string]: { year: number; totalIncome: number };
@@ -332,7 +332,7 @@ export class FinancialExpenseAndIncomeMetricsConverter {
       .map(([key, value]) => ({
         month: new Date(
           value.year,
-          parseInt(key.split("-")[1] ?? "0") - 1
+          parseInt(key.split("-")[1] ?? "0") - 1,
         ).toLocaleString("default", { month: "long" }),
         year: value.year,
         totalIncome: value.totalIncome,
@@ -352,7 +352,7 @@ export class FinancialExpenseAndIncomeMetricsConverter {
    * @returns An array of objects containing month, year, and total expenses, sorted by date
    */
   public static computeMonthlyExpense(
-    data: ExpenseMetrics[]
+    data: ExpenseMetrics[],
   ): { month: string; year: number; totalExpense: number }[] {
     const monthlyExpense: {
       [key: string]: { year: number; totalExpense: number };
@@ -374,7 +374,7 @@ export class FinancialExpenseAndIncomeMetricsConverter {
       .map(([key, value]) => ({
         month: new Date(
           value.year,
-          parseInt(key.split("-")[1] ?? "0") - 1
+          parseInt(key.split("-")[1] ?? "0") - 1,
         ).toLocaleString("default", { month: "long" }),
         year: value.year,
         totalExpense: value.totalExpense,
@@ -394,7 +394,7 @@ export class FinancialExpenseAndIncomeMetricsConverter {
    * @returns An array of objects with category and spent properties, sorted by spent amount in descending order
    */
   public static computeExpenseByCategory(
-    expenseMetrics: ExpenseMetrics[]
+    expenseMetrics: ExpenseMetrics[],
   ): Array<{ category: string; value: number }> {
     const categoryTotals: Record<string, number> = {};
 
@@ -425,7 +425,7 @@ export class FinancialExpenseAndIncomeMetricsConverter {
    * @memberOf FinancialExpenseAndIncomeMetricsConverter
    * */
   public static computeIncomeByCategory(
-    incomeMetrics: IncomeMetrics[]
+    incomeMetrics: IncomeMetrics[],
   ): Array<{ category: string; value: number }> {
     const categoryTotals: Record<string, number> = {};
 
@@ -469,7 +469,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static txnCountVsMonth(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     return data
       .map((item) => {
@@ -496,7 +496,7 @@ export class FinancialMetricsScatterPlotConverter {
 
   public static txnCountVsMonthChartDataPoint(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ChartDataPoint[] {
     return data
       .map((item) => {
@@ -528,7 +528,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static txnCountVsTotalAmount(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     const amountKey = type === "income" ? "totalIncome" : "totalExpenses";
     return data
@@ -548,7 +548,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static totalAmountVsMonth(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     const amountKey = type === "income" ? "totalIncome" : "totalExpenses";
     return data
@@ -576,7 +576,7 @@ export class FinancialMetricsScatterPlotConverter {
 
   public static totalAmountVsMonthChartDataPoint(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ChartDataPoint[] {
     const amountKey = type === "income" ? "totalIncome" : "totalExpenses";
     return data
@@ -609,7 +609,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static totalAmountVsCategory(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     const amountKey = type === "income" ? "totalIncome" : "totalExpenses";
     return data.map((item) => ({
@@ -627,7 +627,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static txnCountVsCategory(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     return data.map((item) => ({
       x: item.personalFinanceCategoryPrimary || "Unknown",
@@ -642,7 +642,7 @@ export class FinancialMetricsScatterPlotConverter {
    * @returns Array of aggregated ScatterChartDataPoint
    */
   private static aggregateByCategory(
-    data: ScatterChartDataPoint[]
+    data: ScatterChartDataPoint[],
   ): ScatterChartDataPoint[] {
     const aggregatedData: { [key: string]: { total: number; count: number } } =
       {};
@@ -663,7 +663,7 @@ export class FinancialMetricsScatterPlotConverter {
         x: category,
         y: total / count, // average
         category: category,
-      })
+      }),
     );
   }
 
@@ -675,7 +675,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static aggregatedTotalAmountVsCategory(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     const scatterData = this.totalAmountVsCategory(data, type);
     return this.aggregateByCategory(scatterData);
@@ -689,7 +689,7 @@ export class FinancialMetricsScatterPlotConverter {
    */
   public static aggregatedTxnCountVsCategory(
     data: FinancialMetrics[],
-    type: "income" | "expense"
+    type: "income" | "expense",
   ): ScatterChartDataPoint[] {
     const scatterData = this.txnCountVsCategory(data, type);
     return this.aggregateByCategory(scatterData);

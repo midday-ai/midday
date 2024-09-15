@@ -1,9 +1,9 @@
-import { PluginContext, PluginHandler, PluginParameters } from '../types';
-import { post } from '../utils';
+import { PluginContext, PluginHandler, PluginParameters } from "../types";
+import { post } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
-  parameters: PluginParameters
+  parameters: PluginParameters,
 ) => {
   let error = null;
   let verdict = false;

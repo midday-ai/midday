@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { LocationFinancialMetricsConverter } from "../../../../lib/converters/location-sub-profile-converter";
 import { ChartDataPoint } from "../../../../types/chart";
-  import { SpendingPeriod } from "../../../../types/merchant";
+import { SpendingPeriod } from "../../../../types/merchant";
 import {
   Select,
   SelectContent,

@@ -84,6 +84,5 @@ export {
   AccountBalanceHistoryContext,
   BankAccountCard,
   BankAccountContext,
-  FinancialProfileContext
+  FinancialProfileContext,
 };
-

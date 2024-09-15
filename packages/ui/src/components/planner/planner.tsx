@@ -9,11 +9,7 @@ import { calculateNewDates, filterAppointments } from "../../lib/utils";
 import { Appointment as AppointmentType } from "../../types/appointment";
 import { Resource } from "../../types/resource";
 
-import {
-  Table,
-  TableBody,
-  TableRow,
-} from "../table";
+import { Table, TableBody, TableRow } from "../table";
 
 import Appointment from "./appointment";
 import DropTableCell from "./drop-table-cell";
@@ -44,7 +40,7 @@ const Planner: React.FC<PlannerProps> = ({
 };
 
 export interface PlannerMainComponentProps
-  extends React.HTMLAttributes<HTMLDivElement> { }
+  extends React.HTMLAttributes<HTMLDivElement> {}
 
 const PlannerMainComponent: FC<PlannerMainComponentProps> = ({ ...props }) => {
   return (
@@ -55,7 +51,7 @@ const PlannerMainComponent: FC<PlannerMainComponentProps> = ({ ...props }) => {
   );
 };
 
-interface CalendarContentProps extends React.HTMLAttributes<HTMLDivElement> { }
+interface CalendarContentProps extends React.HTMLAttributes<HTMLDivElement> {}
 const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
   const { viewMode, dateRange, timeLabels } = useCalendar();
   const { resources, appointments, updateAppointment } = useData();

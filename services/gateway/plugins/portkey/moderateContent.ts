@@ -3,14 +3,14 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
-import { PORTKEY_ENDPOINTS, fetchPortkey } from './globals';
+} from "../types";
+import { getText } from "../utils";
+import { PORTKEY_ENDPOINTS, fetchPortkey } from "./globals";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -25,17 +25,17 @@ export const handler: PluginHandler = async (
     const result: any = await fetchPortkey(
       PORTKEY_ENDPOINTS.MODERATIONS,
       parameters.credentials,
-      { input: text }
+      { input: text },
     );
 
     // Check if the text is flagged and parameters.categories matches any of the categories set to true in the result
     const categoriesFlagged = Object.keys(result.results[0].categories).filter(
-      (category) => result.results[0].categories[category]
+      (category) => result.results[0].categories[category],
     );
 
     // Find the intersection of the categoriesFlagged and the categories to check
     const intersection = categoriesFlagged.filter((category) =>
-      categories.includes(category)
+      categories.includes(category),
     );
 
     if (intersection.length > 0) {

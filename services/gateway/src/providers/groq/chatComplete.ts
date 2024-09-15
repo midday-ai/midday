@@ -1,50 +1,50 @@
-import { GROQ } from '../../globals';
+import { GROQ } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const GroqChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'mixtral-8x7b-32768',
+    default: "mixtral-8x7b-32768",
   },
   messages: {
-    param: 'messages',
-    default: '',
+    param: "messages",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
     max: 1,
     min: 1,
@@ -83,9 +83,9 @@ export interface GroqStreamChunk {
 
 export const GroqChatCompleteResponseTransform: (
   response: GroqChatCompleteResponse | GroqErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if ('error' in response && responseStatus !== 200) {
+  if ("error" in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
         message: response.error.message,
@@ -93,11 +93,11 @@ export const GroqChatCompleteResponseTransform: (
         param: null,
         code: response.error.code?.toString() || null,
       },
-      GROQ
+      GROQ,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -122,17 +122,17 @@ export const GroqChatCompleteResponseTransform: (
 };
 
 export const GroqChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
 
   const parsedChunk: GroqStreamChunk = JSON.parse(chunk);
-  if (parsedChunk['x_groq'] && parsedChunk['x_groq'].usage) {
+  if (parsedChunk["x_groq"] && parsedChunk["x_groq"].usage) {
     return `data: ${JSON.stringify({
       id: parsedChunk.id,
       object: parsedChunk.object,
@@ -148,9 +148,9 @@ export const GroqChatCompleteStreamChunkTransform: (
         },
       ],
       usage: {
-        prompt_tokens: parsedChunk['x_groq'].usage.prompt_tokens || 0,
-        completion_tokens: parsedChunk['x_groq'].usage.completion_tokens || 0,
-        total_tokens: parsedChunk['x_groq'].usage.total_tokens || 0,
+        prompt_tokens: parsedChunk["x_groq"].usage.prompt_tokens || 0,
+        completion_tokens: parsedChunk["x_groq"].usage.completion_tokens || 0,
+        total_tokens: parsedChunk["x_groq"].usage.total_tokens || 0,
       },
     })}\n\n`;
   }
@@ -164,7 +164,7 @@ export const GroqChatCompleteStreamChunkTransform: (
       {
         index: parsedChunk.choices[0].index || 0,
         delta: {
-          role: 'assistant',
+          role: "assistant",
           content: parsedChunk.choices[0].delta.content,
         },
         logprobs: null,

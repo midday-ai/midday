@@ -1,5 +1,5 @@
-import conf from '../conf.json';
-import fs from 'fs';
+import conf from "../conf.json";
+import fs from "fs";
 
 const pluginsEnabled = conf.plugins_enabled;
 
@@ -14,7 +14,7 @@ for (const plugin of pluginsEnabled) {
     ...importStrings,
     ...functions.map(
       (func: any) =>
-        `import { handler as ${manifest.id}${func} } from "./${plugin}/${func}"`
+        `import { handler as ${manifest.id}${func} } from "./${plugin}/${func}"`,
     ),
   ];
 
@@ -29,15 +29,15 @@ for (const plugin of pluginsEnabled) {
   }
 }
 
-const indexFilePath = './plugins/index.ts';
+const indexFilePath = "./plugins/index.ts";
 
 let finalFuncStrings: any = [];
 for (let key in funcStrings) {
   finalFuncStrings.push(
-    `\n  "${key}": {\n    ${funcStrings[key].join(',\n    ')}\n  }`
+    `\n  "${key}": {\n    ${funcStrings[key].join(",\n    ")}\n  }`,
   );
 }
 
-const content = `${importStrings.join('\n')}\n\nexport const plugins = {${finalFuncStrings}\n};\n`;
+const content = `${importStrings.join("\n")}\n\nexport const plugins = {${finalFuncStrings}\n};\n`;
 
 fs.writeFileSync(indexFilePath, content);

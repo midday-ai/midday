@@ -1,34 +1,34 @@
-import { ProviderAPIConfig } from '../types';
+import { ProviderAPIConfig } from "../types";
 
 const OllamaAPIConfig: ProviderAPIConfig = {
   headers: () => {
     return {};
   },
   getBaseURL: ({ providerOptions }) => {
-    return providerOptions.customHost ?? '';
+    return providerOptions.customHost ?? "";
   },
   getEndpoint: ({ fn, providerOptions }) => {
     let mappedFn = fn;
     const { urlToFetch } = providerOptions;
-    if (fn === 'proxy' && urlToFetch && urlToFetch?.indexOf('/api/chat') > -1) {
-      mappedFn = 'chatComplete';
+    if (fn === "proxy" && urlToFetch && urlToFetch?.indexOf("/api/chat") > -1) {
+      mappedFn = "chatComplete";
     } else if (
-      fn === 'proxy' &&
+      fn === "proxy" &&
       urlToFetch &&
-      urlToFetch?.indexOf('/embeddings') > -1
+      urlToFetch?.indexOf("/embeddings") > -1
     ) {
-      mappedFn = 'embed';
+      mappedFn = "embed";
     }
 
     switch (mappedFn) {
-      case 'chatComplete': {
+      case "chatComplete": {
         return `/v1/chat/completions`;
       }
-      case 'embed': {
+      case "embed": {
         return `/api/embeddings`;
       }
       default:
-        return '';
+        return "";
     }
   },
 };

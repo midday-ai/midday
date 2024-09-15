@@ -1,12 +1,12 @@
-import { BEDROCK } from '../../globals';
-import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
-import { BedrockErrorResponseTransform } from './chatComplete';
-import { BedrockErrorResponse } from './embed';
+import { BEDROCK } from "../../globals";
+import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
+import { BedrockErrorResponseTransform } from "./chatComplete";
+import { BedrockErrorResponse } from "./embed";
 
 export const BedrockStabilityAIImageGenerateConfig: ProviderConfig = {
   prompt: {
-    param: 'text_prompts',
+    param: "text_prompts",
     required: true,
     transform: (params: any) => {
       return [
@@ -18,32 +18,32 @@ export const BedrockStabilityAIImageGenerateConfig: ProviderConfig = {
     },
   },
   n: {
-    param: 'samples',
+    param: "samples",
     min: 1,
     max: 10,
   },
   size: [
     {
-      param: 'height',
+      param: "height",
       transform: (params: any) =>
-        parseInt(params.size.toLowerCase().split('x')[1]),
+        parseInt(params.size.toLowerCase().split("x")[1]),
       min: 320,
     },
     {
-      param: 'width',
+      param: "width",
       transform: (params: any) =>
-        parseInt(params.size.toLowerCase().split('x')[0]),
+        parseInt(params.size.toLowerCase().split("x")[0]),
       min: 320,
     },
   ],
   style: {
-    param: 'style_preset',
+    param: "style_preset",
   },
 };
 
 interface ImageArtifact {
   base64: string;
-  finishReason: 'CONTENT_FILTERED' | 'ERROR' | 'SUCCESS';
+  finishReason: "CONTENT_FILTERED" | "ERROR" | "SUCCESS";
   seed: number;
 }
 
@@ -54,16 +54,16 @@ interface BedrockStabilityAIImageGenerateResponse {
 
 export const BedrockStabilityAIImageGenerateResponseTransform: (
   response: BedrockStabilityAIImageGenerateResponse | BedrockErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ImageGenerateResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = BedrockErrorResponseTransform(
-      response as BedrockErrorResponse
+      response as BedrockErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('artifacts' in response) {
+  if ("artifacts" in response) {
     return {
       created: `${new Date().getTime()}`,
       data: response.artifacts.map((art) => ({ b64_json: art.base64 })),

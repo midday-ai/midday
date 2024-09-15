@@ -1,4 +1,4 @@
-import { ProviderAPIConfig } from '../types';
+import { ProviderAPIConfig } from "../types";
 
 const WorkersAiAPIConfig: ProviderAPIConfig = {
   getBaseURL: ({ providerOptions }) => {
@@ -12,16 +12,16 @@ const WorkersAiAPIConfig: ProviderAPIConfig = {
   getEndpoint: ({ fn, gatewayRequestBody: params }) => {
     const { model } = params;
     switch (fn) {
-      case 'complete': {
+      case "complete": {
         return `/${model}`;
       }
-      case 'chatComplete': {
+      case "chatComplete": {
         return `/${model}`;
       }
-      case 'embed':
+      case "embed":
         return `/${model}`;
       default:
-        return '';
+        return "";
     }
   },
 };

@@ -1,11 +1,11 @@
-import { ErrorResponse, ProviderConfig } from '../types';
-import { EmbedParams, EmbedResponse } from '../../types/embedRequestBody';
-import { generateErrorResponse } from '../utils';
-import { COHERE } from '../../globals';
+import { ErrorResponse, ProviderConfig } from "../types";
+import { EmbedParams, EmbedResponse } from "../../types/embedRequestBody";
+import { generateErrorResponse } from "../utils";
+import { COHERE } from "../../globals";
 
 export const CohereEmbedConfig: ProviderConfig = {
   input: {
-    param: 'texts',
+    param: "texts",
     required: true,
     transform: (params: EmbedParams): string[] => {
       if (Array.isArray(params.input)) {
@@ -16,8 +16,8 @@ export const CohereEmbedConfig: ProviderConfig = {
     },
   },
   model: {
-    param: 'model',
-    default: 'embed-english-light-v2.0',
+    param: "model",
+    default: "embed-english-light-v2.0",
   },
 };
 
@@ -61,28 +61,28 @@ export interface CohereEmbedResponse {
 
 export const CohereEmbedResponseTransform: (
   response: CohereEmbedResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     return generateErrorResponse(
       {
-        message: response.message || '',
+        message: response.message || "",
         type: null,
         param: null,
         code: null,
       },
-      COHERE
+      COHERE,
     );
   }
 
   return {
-    object: 'list',
+    object: "list",
     data: response.embeddings.map((embedding, index) => ({
-      object: 'embedding',
+      object: "embedding",
       embedding: embedding,
       index: index,
     })),
-    model: '', // Todo: find a way to send the cohere embedding model name back
+    model: "", // Todo: find a way to send the cohere embedding model name back
     usage: {
       prompt_tokens: -1,
       total_tokens: -1,

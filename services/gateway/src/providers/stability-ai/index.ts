@@ -1,9 +1,9 @@
-import { ProviderConfigs } from '../types';
-import StabilityAIAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import StabilityAIAPIConfig from "./api";
 import {
   StabilityAIImageGenerateConfig,
   StabilityAIImageGenerateResponseTransform,
-} from './imageGenerate';
+} from "./imageGenerate";
 
 const StabilityAIConfig: ProviderConfigs = {
   api: StabilityAIAPIConfig,

@@ -1,7 +1,7 @@
 import { getCalApi } from "@calcom/embed-react";
 import { buttonVariants } from "@midday/ui/button";
 import { PhoneIcon } from "lucide-react";
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 
 const CalButton: React.FC<{
   className?: string;
@@ -10,15 +10,15 @@ const CalButton: React.FC<{
 }> = ({ className, text, enableIcon = true }) => {
   useEffect(() => {
     (async function () {
-      const cal = await getCalApi({ "namespace": "15min" });
+      const cal = await getCalApi({ namespace: "15min" });
       cal("ui", {
-        "styles": {
-          "branding": {
-            "brandColor": "#000000"
-          }
+        styles: {
+          branding: {
+            brandColor: "#000000",
+          },
         },
-        "hideEventTypeDetails": false,
-        "layout": "month_view"
+        hideEventTypeDetails: false,
+        layout: "month_view",
       });
     })();
   }, []);
@@ -28,7 +28,10 @@ const CalButton: React.FC<{
       data-cal-namespace="15min"
       data-cal-link="solomonai/15min"
       data-cal-config='{"layout":"month_view"}'
-        className={buttonVariants({ variant: "default", className: "h-12 rounded-2xl border border-primary px-6" })}
+      className={buttonVariants({
+        variant: "default",
+        className: "h-12 rounded-2xl border border-primary px-6",
+      })}
     >
       {enableIcon && <PhoneIcon className="mr-2 h-4 w-4" />}
       {text || "Book a call"}

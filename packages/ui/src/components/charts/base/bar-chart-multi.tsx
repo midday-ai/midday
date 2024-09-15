@@ -5,19 +5,15 @@ import React, { useMemo } from "react";
 import {
   Bar,
   BarChart as BaseBarChartMulti,
-  CartesianGrid, Tooltip,
+  CartesianGrid,
+  Tooltip,
   TooltipProps,
   XAxis,
-  YAxis
+  YAxis,
 } from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
-import {
-  formatAmount
-} from "../../../lib/chart-utils";
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
+import { formatAmount } from "../../../lib/chart-utils";
 import { BarChartMultiDataPoint, ChartDataPoint } from "../../../types/chart";
-
 
 import { generatePayloadArray } from "../../../lib/random/generator";
 import { ChartContainer } from "./chart-container";
@@ -112,7 +108,8 @@ export const BarChartMulti: React.FC<BarChartMultiProps> = ({
     return propData;
   }, [disabled, propData]);
 
-  const [aiModalOpenState, setAiModalOpenState] = React.useState<boolean>(false);
+  const [aiModalOpenState, setAiModalOpenState] =
+    React.useState<boolean>(false);
   const { isOpen, toggleOpen } = useWrapperState(aiModalOpenState);
   const [dataSet, setDataSet] = React.useState<
     Array<ChartDataPoint> | Array<BarChartMultiDataPoint>

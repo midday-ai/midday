@@ -17,17 +17,19 @@ import { TimePicker } from "../time-picker";
 
 import {
   Dialog,
-  DialogContent, DialogFooter,
+  DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
 } from "../dialog";
 import {
   Form,
-  FormControl, FormField,
+  FormControl,
+  FormField,
   FormItem,
   FormLabel,
-  FormMessage
+  FormMessage,
 } from "../form";
 import { Input } from "../input";
 import {
@@ -214,8 +216,8 @@ const AddAppointmentDialog: React.FC = () => {
                         <SelectValue>
                           {field.value
                             ? resources.find(
-                              (resource) => resource.id === field.value,
-                            )?.name
+                                (resource) => resource.id === field.value,
+                              )?.name
                             : "Select a resource"}
                         </SelectValue>
                       </SelectTrigger>

@@ -33,7 +33,7 @@ export async function fetchStats() {
     {
       revalidate: 800,
       tags: ["stats"],
-    }
+    },
   )();
 
   return {

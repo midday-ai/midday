@@ -4,34 +4,33 @@ import { FinancialDataGenerator } from "../../../lib/random/financial-data-gener
 import { LinkedAccountCard } from "./linked-account-card";
 
 const meta: Meta<typeof LinkedAccountCard> = {
-    component: LinkedAccountCard,
-    parameters: {
-        layout: "centered",
+  component: LinkedAccountCard,
+  parameters: {
+    layout: "centered",
+  },
+  tags: ["autodocs"],
+  argTypes: {
+    link: {
+      control: {
+        type: "object",
+      },
+      defaultValue: FinancialDataGenerator.generateRandomLink(),
     },
-    tags: ["autodocs"],
-    argTypes: {
-        link: {
-            control: {
-                type: "object",
-            },
-            defaultValue: FinancialDataGenerator.generateRandomLink(),
-        },
-       
-    },
-    decorators: [(Story) => <Story />],
+  },
+  decorators: [(Story) => <Story />],
 } satisfies Meta<typeof LinkedAccountCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const CreditAccountCardDefault: Story = {
-    args: {
-        link: FinancialDataGenerator.generateRandomLink(),
-    },
+  args: {
+    link: FinancialDataGenerator.generateRandomLink(),
+  },
 };
 
 export const CreditAccountCardAccountBalanceHistory: Story = {
-    args: {
-        link: FinancialDataGenerator.generateRandomLink(),
-    },
+  args: {
+    link: FinancialDataGenerator.generateRandomLink(),
+  },
 };

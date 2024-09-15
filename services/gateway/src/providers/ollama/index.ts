@@ -1,11 +1,11 @@
-import { ProviderConfigs } from '../types';
-import { OllamaEmbedConfig, OllamaEmbedResponseTransform } from './embed';
-import OllamaAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import { OllamaEmbedConfig, OllamaEmbedResponseTransform } from "./embed";
+import OllamaAPIConfig from "./api";
 import {
   OllamaChatCompleteConfig,
   OllamaChatCompleteResponseTransform,
   OllamaChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const OllamaConfig: ProviderConfigs = {
   embed: OllamaEmbedConfig,
@@ -13,7 +13,7 @@ const OllamaConfig: ProviderConfigs = {
   chatComplete: OllamaChatCompleteConfig,
   responseTransforms: {
     chatComplete: OllamaChatCompleteResponseTransform,
-    'stream-chatComplete': OllamaChatCompleteStreamChunkTransform,
+    "stream-chatComplete": OllamaChatCompleteStreamChunkTransform,
     embed: OllamaEmbedResponseTransform,
   },
 };

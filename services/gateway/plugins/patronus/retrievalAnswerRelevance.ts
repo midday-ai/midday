@@ -3,24 +3,24 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { postPatronus } from './globals';
+} from "../types";
+import { postPatronus } from "./globals";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
   let data = null;
 
-  const evaluator = 'retrieval-answer-relevance';
+  const evaluator = "retrieval-answer-relevance";
 
-  if (eventType !== 'afterRequestHook') {
+  if (eventType !== "afterRequestHook") {
     return {
       error: {
-        message: 'Patronus guardrails only support after_request_hooks.',
+        message: "Patronus guardrails only support after_request_hooks.",
       },
       verdict: true,
       data,
@@ -37,7 +37,7 @@ export const handler: PluginHandler = async (
     const result: any = await postPatronus(
       evaluator,
       parameters.credentials,
-      evaluationBody
+      evaluationBody,
     );
 
     const evalResult = result.results[0];

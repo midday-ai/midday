@@ -30,7 +30,7 @@ export const calculateNewDates = (
   viewMode: string,
   index: number,
   currentIndex: number,
-  dateRange: DateRange
+  dateRange: DateRange,
 ) => {
   let start = new Date(dateRange.from as Date);
   let end = new Date(dateRange.to as Date);
@@ -62,7 +62,7 @@ export const filterAppointments = (
   appt: Appointment,
   index: number,
   dateRange: DateRange,
-  viewMode: string
+  viewMode: string,
 ): boolean => {
   const apptDate = new Date(appt.start);
   if (
@@ -79,7 +79,7 @@ const isAppointmentInSlot = (
   apptDate: Date,
   index: number,
   viewMode: string,
-  dateRange: DateRange
+  dateRange: DateRange,
 ): boolean => {
   if (!dateRange.from) return false;
 
@@ -94,7 +94,7 @@ const isAppointmentInSlot = (
           (6 -
             differenceInDays(
               new Date(dateRange.to!),
-              new Date(dateRange.from)
+              new Date(dateRange.from),
             )) ===
           index && isSameWeek(apptDate, dateRange.from)
       );
@@ -112,7 +112,7 @@ const isAppointmentInSlot = (
 
 export const getLabelsForView = (
   viewMode: "day" | "week" | "month" | "year",
-  dateRange: { start: Date; end: Date }
+  dateRange: { start: Date; end: Date },
 ): string[] => {
   switch (viewMode) {
     case "day":
@@ -151,7 +151,7 @@ export const getLabelsForView = (
  */
 export function removeUnderScores(input: string): string {
   // Replace all underscores with spaces and convert to lowercase
-  const formatted = input.replace(/_/g, ' ').toLowerCase();
+  const formatted = input.replace(/_/g, " ").toLowerCase();
 
   // Capitalize the first letter and concatenate it with the rest of the string
   return formatted.charAt(0).toUpperCase() + formatted.slice(1);
