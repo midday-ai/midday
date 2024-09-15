@@ -3,6 +3,7 @@
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { CreditAccount, FinancialUserProfile, MelodyFinancialContext, Transaction } from "client-typescript-sdk";
 import { useState } from "react";
+import { FinancialDataGenerator } from "../../lib/random/financial-data-generator";
 import { cn } from "../../utils/cn";
 import { Button } from "../button";
 import { Card, CardContent, CardHeader } from "../card";
@@ -12,10 +13,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../tabs";
 import { columns, DataTable } from "../transaction-table";
 
 interface CreditAccountPortalViewProps {
-    financialProfile: FinancialUserProfile;
-    financialContext: MelodyFinancialContext;
+    financialProfile?: FinancialUserProfile;
+    financialContext?: MelodyFinancialContext;
     className?: string;
     transactions?: Transaction[];
+    demoMode?: boolean;
 }
 
 /**
@@ -25,7 +27,13 @@ interface CreditAccountPortalViewProps {
  * @param props - The props for the component.
  * @returns A React functional component.
  */
-const CreditAccountsOverviewSummary: React.FC<CreditAccountPortalViewProps> = ({ financialProfile, financialContext, className, transactions }) => {
+const CreditAccountsOverviewSummary: React.FC<CreditAccountPortalViewProps> = ({ financialProfile, financialContext, className, transactions, demoMode = false }) => {
+    if (!financialProfile || !financialContext || demoMode) {
+        financialProfile = FinancialDataGenerator.generateFinancialProfile();
+        financialContext = FinancialDataGenerator.generateFinancialContext();
+        transactions = FinancialDataGenerator.generateRandomTransactions(50);
+    };
+    
     // get the current financial profile
     const linkedInstitutions =
         financialProfile.link !== undefined ? financialProfile.link : [];
@@ -64,18 +72,18 @@ const CreditAccountsOverviewSummary: React.FC<CreditAccountPortalViewProps> = ({
 
     return (
         <div className={cn("h-screen w-full bg-background text-foreground", className)}>
-            <div className="p-4 h-full flex flex-col">
+            <Card className="p-[2%] h-full flex flex-col">
                 <h3 className="text-3xl font-bold mb-4">Credit Accounts</h3>
                 <div className="flex-grow overflow-hidden">
                     <Tabs
                         defaultValue={validAccounts[0]?.name as string}
                         className="flex h-full"
                     >
-                        <TabsList className="flex-col items-start justify-start h-[50%] overflow-y-auto scrollbar-hide w-1/4 mr-4 border text-foreground rounded-2xl">
+                        <TabsList className="p-[1%] flex-col items-start justify-start h-[40%] overflow-y-auto scrollbar-hide w-fit mr-4 bg-black text-white rounded-2xl">
                             {validAccounts.map((account, idx) => (
                                 <TabsTrigger
                                     value={account.name as string}
-                                    className="text-xs font-bold text-foreground text-left mb-2 w-full"
+                                    className="text-xs font-bold text-white text-left mb-2 w-full"
                                     key={idx}
                                     onClick={() => setSelectedAccount(account)}
                                 >
@@ -88,7 +96,7 @@ const CreditAccountsOverviewSummary: React.FC<CreditAccountPortalViewProps> = ({
                                 </TabsTrigger>
                             ))}
                         </TabsList>
-                        <div className="w-3/4 overflow-y-auto scrollbar-hide">
+                        <Card className="overflow-y-auto scrollbar-hide w-full">
                             {validAccounts.map((account, idx) => (
                                 <TabsContent
                                     value={account.name as string}
@@ -130,10 +138,10 @@ const CreditAccountsOverviewSummary: React.FC<CreditAccountPortalViewProps> = ({
                                     </Dialog>
                                 </TabsContent>
                             ))}
-                        </div>
+                        </Card>
                     </Tabs>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };

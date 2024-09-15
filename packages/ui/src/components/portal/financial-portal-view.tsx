@@ -13,6 +13,7 @@ interface FinancialPortalOverviewProps {
 }
 
 export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = ({ financialProfile, financialContext, demoMode = false }) => {
+    
     const {
         linkedInstitutions,
         linkedInstitutionNames,

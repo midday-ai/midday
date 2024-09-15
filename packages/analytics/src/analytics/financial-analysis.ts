@@ -54,7 +54,7 @@ export class FinancialAnalysis {
       Object.entries(segmentARR).map(([segment, value]) => [
         segment,
         value * 12,
-      ]),
+      ])
     );
   }
 
@@ -76,7 +76,7 @@ export class FinancialAnalysis {
       Object.entries(paymentChannelARR).map(([channel, value]) => [
         channel,
         value * 12,
-      ]),
+      ])
     );
   }
 
@@ -98,7 +98,7 @@ export class FinancialAnalysis {
       Object.entries(transactionTypeARR).map(([type, value]) => [
         type,
         value * 12,
-      ]),
+      ])
     );
   }
 
@@ -124,7 +124,7 @@ export class FinancialAnalysis {
     return Object.fromEntries(
       Object.entries(segmentARR)
         .sort(([, a], [, b]) => b - a)
-        .slice(0, limit),
+        .slice(0, limit)
     );
   }
 
@@ -138,7 +138,7 @@ export class FinancialAnalysis {
     return Object.fromEntries(
       Object.entries(paymentChannelARR)
         .sort(([, a], [, b]) => b - a)
-        .slice(0, limit),
+        .slice(0, limit)
     );
   }
 
@@ -152,7 +152,7 @@ export class FinancialAnalysis {
     return Object.fromEntries(
       Object.entries(transactionTypeARR)
         .sort(([, a], [, b]) => b - a)
-        .slice(0, limit),
+        .slice(0, limit)
     );
   }
 

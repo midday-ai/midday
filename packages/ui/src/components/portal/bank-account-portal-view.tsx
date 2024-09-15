@@ -4,6 +4,7 @@ import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { FinancialUserProfile, MelodyFinancialContext, Transaction } from "client-typescript-sdk";
 import { useState } from "react";
 import { BankAccount } from "solomon-ai-typescript-sdk";
+import { FinancialDataGenerator } from "../../lib/random/financial-data-generator";
 import { cn } from "../../utils/cn";
 import { Button } from "../button";
 import { Card, CardContent, CardHeader } from "../card";
@@ -13,10 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../tabs";
 import { columns, DataTable } from "../transaction-table";
 
 interface BankAccountPortalViewProps {
-    financialProfile: FinancialUserProfile;
-    financialContext: MelodyFinancialContext;
+    financialProfile?: FinancialUserProfile;
+    financialContext?: MelodyFinancialContext;
     className?: string;
     transactions?: Transaction[];
+    demoMode?: boolean;
 }
 
 /**
@@ -26,7 +28,13 @@ interface BankAccountPortalViewProps {
  * @param props - The props for the component.
  * @returns A React functional component.
  */
-const BankAccountsOverviewSummary: React.FC<BankAccountPortalViewProps> = ({ financialProfile, financialContext, className, transactions }) => {
+const BankAccountsOverviewSummary: React.FC<BankAccountPortalViewProps> = ({ financialProfile, financialContext, className, transactions, demoMode = false }) => {
+    if (!financialProfile || !financialContext || demoMode) {
+        financialProfile = FinancialDataGenerator.generateFinancialProfile();
+        financialContext = FinancialDataGenerator.generateFinancialContext();
+        transactions = FinancialDataGenerator.generateRandomTransactions(50);
+    };
+    
     // get the current financial profile
     const linkedInstitutions =
         financialProfile.link !== undefined ? financialProfile.link : [];
@@ -65,23 +73,22 @@ const BankAccountsOverviewSummary: React.FC<BankAccountPortalViewProps> = ({ fin
 
     return (
         <div className={cn("h-screen w-full bg-background text-foreground", className)}>
-            <div className="p-4 h-full flex flex-col">
+            <Card className="p-[2%] h-full flex flex-col">
                 <h3 className="text-3xl font-bold mb-4">Bank Accounts</h3>
                 <div className="flex-grow overflow-hidden">
                     <Tabs
                         defaultValue={validAccounts[0]?.name as string}
                         className="flex h-full"
                     >
-                        <TabsList className="flex-col items-start justify-start h-[50%] overflow-y-auto scrollbar-hide w-1/4 mr-4 border text-foreground rounded-xl">
+                        <TabsList className="p-[1%] flex-col items-start justify-start h-[40%] overflow-y-auto scrollbar-hide w-fit mr-4 bg-black text-white rounded-2xl">
                             {validAccounts.map((account, idx) => (
                                 <TabsTrigger
                                     value={account.name as string}
-                                    className="text-xs font-bold text-foreground text-left mb-2 w-full"
                                     key={idx}
                                     onClick={() => setSelectedAccount(account)}
                                 >
                                     <div className="flex flex-col items-start justify-start gap-1">
-                                        <p>Account #{account.number}</p>
+                                        <p className="text-xs font-bold text-white text-left w-full">{account.name}</p>
                                         <span style={{ fontSize: "0.5rem" }}>
                                             {account.name}
                                         </span>
@@ -89,7 +96,7 @@ const BankAccountsOverviewSummary: React.FC<BankAccountPortalViewProps> = ({ fin
                                 </TabsTrigger>
                             ))}
                         </TabsList>
-                        <div className="w-3/4 overflow-y-auto scrollbar-hide">
+                        <Card className="overflow-y-auto scrollbar-hide w-full">
                             {validAccounts.map((account, idx) => (
                                 <TabsContent
                                     value={account.name as string}
@@ -100,6 +107,7 @@ const BankAccountsOverviewSummary: React.FC<BankAccountPortalViewProps> = ({ fin
                                         bankAccount={account}
                                         className="border-none bg-white shadow-none"
                                         financialProfile={financialProfile}
+                                        enableDemoMode={demoMode}
                                     />
                                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                                         <DialogTrigger asChild>
@@ -130,10 +138,10 @@ const BankAccountsOverviewSummary: React.FC<BankAccountPortalViewProps> = ({ fin
                                     </Dialog>
                                 </TabsContent>
                             ))}
-                        </div>
+                        </Card>
                     </Tabs>
                 </div>
-            </div>
+            </Card>
         </div>
     );
 };

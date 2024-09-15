@@ -115,9 +115,9 @@ export default async function Transactions({
       <TransactionsModal defaultOpen={isEmpty && !hideConnectFlow} />
       <CreateTransactionSheet
         categories={categoriesData?.data}
-        userId={userData?.data?.id}
-        accountId={accountsData?.data?.at(0)?.id}
-        currency={accountsData?.data?.at(0)?.currency}
+        userId={userData?.data?.id ?? ""}
+        accountId={accountsData?.data?.at(0)?.id ?? ""}
+        currency={accountsData?.data?.at(0)?.currency ?? ""}
       />
     </>
   );
