@@ -27,6 +27,7 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
+    "@internal/env": "workspace:*",
     "@novu/headless": "^2.0.0",
     "@sentry/nextjs": "^8",
     "@supabase/sentry-js-integration": "^0.3.0",
