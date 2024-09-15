@@ -14,7 +14,7 @@ export function ChatList({ messages, className }: Props) {
   }
 
   return (
-    <div className={cn("flex flex-col", className)}>
+    <div className={cn("flex flex-col select-text", className)}>
       {messages
         .filter((tool) => tool.display !== undefined)
         .map((message, index) => (

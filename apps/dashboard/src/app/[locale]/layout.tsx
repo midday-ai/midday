@@ -1,4 +1,3 @@
-// import { SystemBanner } from "@/components/system-banner";
 import "@/styles/globals.css";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
@@ -84,7 +83,6 @@ export default function Layout({
           "whitespace-pre-line overscroll-none",
         )}
       >
-        {/* <SystemBanner /> */}
         <Providers locale={locale}>{children}</Providers>
         <Toaster />
         <Analytics />

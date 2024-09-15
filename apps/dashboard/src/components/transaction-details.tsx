@@ -173,13 +173,13 @@ export function TransactionDetails({
                   className="text-[#606060] text-xs"
                 />
               )}
-              <span className="text-[#606060] text-xs">
+              <span className="text-[#606060] text-xs select-text">
                 {data?.date && format(new Date(data.date), "MMM d, y")}
               </span>
             </div>
           )}
 
-          <h2 className="mt-6 mb-3">
+          <h2 className="mt-6 mb-3 select-text">
             {isLoading ? (
               <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
             ) : (
@@ -193,7 +193,7 @@ export function TransactionDetails({
               ) : (
                 <span
                   className={cn(
-                    "text-4xl font-mono",
+                    "text-4xl font-mono select-text",
                     data?.category?.slug === "income" && "text-[#00C969]",
                   )}
                 >
@@ -205,7 +205,7 @@ export function TransactionDetails({
               )}
               <div className="h-3">
                 {data?.vat > 0 && (
-                  <span className="text-[#606060] text-xs">
+                  <span className="text-[#606060] text-xs select-text">
                     VAT{" "}
                     <FormatAmount amount={data.vat} currency={data.currency} />
                   </span>
@@ -217,7 +217,7 @@ export function TransactionDetails({
       </div>
 
       {data?.description && (
-        <div className="rounded-lg border dark:bg-[#1A1A1A]/95 px-4 py-3 text-sm text-popover-foreground">
+        <div className="rounded-lg border dark:bg-[#1A1A1A]/95 px-4 py-3 text-sm text-popover-foreground select-text">
           {data.description}
         </div>
       )}
@@ -256,7 +256,7 @@ export function TransactionDetails({
       <Accordion type="multiple" defaultValue={defaultValue}>
         <AccordionItem value="attachment">
           <AccordionTrigger>Attachment</AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="select-text">
             <Attachments
               prefix={data?.id}
               data={data?.attachments}
@@ -276,7 +276,7 @@ export function TransactionDetails({
 
         <AccordionItem value="note">
           <AccordionTrigger>Note</AccordionTrigger>
-          <AccordionContent>
+          <AccordionContent className="select-text">
             <Note
               id={data?.id}
               defaultValue={data?.note}

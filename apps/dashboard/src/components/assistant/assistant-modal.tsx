@@ -15,7 +15,7 @@ export function AssistantModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent
-        className="overflow-hidden p-0 max-w-full w-full h-full md:max-w-[740px] md:h-[480px] m-0"
+        className="overflow-hidden p-0 max-w-full w-full h-full md:max-w-[740px] md:h-[480px] m-0 select-text"
         hideClose
       >
         <Assistant />

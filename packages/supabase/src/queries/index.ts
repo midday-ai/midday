@@ -354,6 +354,7 @@ export async function getSimilarTransactions(
 ) {
   const { name, teamId } = params;
 
+  // TODO: Use fuzzy matching for the name
   return supabase
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
