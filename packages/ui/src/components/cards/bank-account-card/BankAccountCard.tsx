@@ -5,7 +5,7 @@ import {
   AccountBalanceHistory,
   BankAccount,
   FinancialProfile,
-} from "solomon-ai-typescript-sdk";
+} from "client-typescript-sdk";
 import { FinancialDataGenerator } from "../../../lib/random/financial-data-generator";
 import { cn } from "../../../utils/cn";
 

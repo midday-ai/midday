@@ -1,6 +1,6 @@
+import { Meta, StoryFn } from "@storybook/react";
 import { FinancialDataGenerator } from "../../../../lib/random/financial-data-generator";
 import AssistantProviderWrapper from "../../../../wrapper/assistant-provider-wrapper";
-import { Meta, StoryFn } from "@storybook/react";
 import { TransactionsToReview, TransactionsToReviewProps } from "./transactions-to-review";
 
 const transactions = FinancialDataGenerator.generateRandomTransactions(100);

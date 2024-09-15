@@ -21,7 +21,7 @@ import {
   PlaidAccountTransaction,
   SmartGoal,
   Transaction,
-} from "solomon-ai-typescript-sdk";
+} from "client-typescript-sdk";
 
 export class FinancialDataProcessor {
   static formatBytes(

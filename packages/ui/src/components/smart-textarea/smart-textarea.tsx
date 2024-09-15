@@ -1,5 +1,5 @@
 import React from "react";
-import { MelodyFinancialContext, UserAccount } from "solomon-ai-typescript-sdk";
+import { MelodyFinancialContext, UserAccount } from "client-typescript-sdk";
 import { OpenAIModel } from "../../types/ai";
 
 import { cn } from "../../utils/cn";

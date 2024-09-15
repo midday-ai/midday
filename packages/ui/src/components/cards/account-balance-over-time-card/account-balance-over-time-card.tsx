@@ -1,5 +1,5 @@
 import * as React from "react";
-import { AccountBalanceHistory } from "solomon-ai-typescript-sdk";
+import { AccountBalanceHistory } from "client-typescript-sdk";
 import { cn } from "../../../utils/cn";
 import {
   Card,

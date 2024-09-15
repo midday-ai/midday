@@ -7,7 +7,7 @@ import {
   SmartGoal as ISmartGoal,
   Milestone,
   SmartGoal,
-} from "solomon-ai-typescript-sdk";
+} from "client-typescript-sdk";
 import { FinancialDataProcessor } from "../../../lib/financial-data-processor";
 import { cn } from "../../../utils/cn";
 

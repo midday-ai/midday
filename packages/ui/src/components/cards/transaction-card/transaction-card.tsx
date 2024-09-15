@@ -1,6 +1,6 @@
 import { ArrowLeftEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import React, { useState } from "react";
-import { Transaction } from "solomon-ai-typescript-sdk";
+import { Transaction } from "client-typescript-sdk";
 import { FinancialDataProcessor } from "../../../lib/financial-data-processor";
 
 import { Button } from "../../button";

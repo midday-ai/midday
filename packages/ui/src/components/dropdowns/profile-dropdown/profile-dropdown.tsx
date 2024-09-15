@@ -1,7 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import React, { Fragment } from "react";
-import { UserAccount } from "solomon-ai-typescript-sdk";
+import { UserAccount } from "client-typescript-sdk";
 
 import { cn } from "../../../utils/cn";
 

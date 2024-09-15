@@ -1,4 +1,3 @@
-import { Appointment } from "../types/appointment";
 import { clsx, type ClassValue } from "clsx";
 import {
   differenceInDays,
@@ -21,6 +20,7 @@ import {
 } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { twMerge } from "tailwind-merge";
+import { Appointment } from "../types/appointment";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -143,3 +143,16 @@ export const getLabelsForView = (
       return [];
   }
 };
+
+/**
+ * Replaces all underscores in a string with spaces and convert the string to lower case.
+ * @param input - The string to format.
+ * @returns The formatted string.
+ */
+export function removeUnderScores(input: string): string {
+  // Replace all underscores with spaces and convert to lowercase
+  const formatted = input.replace(/_/g, ' ').toLowerCase();
+
+  // Capitalize the first letter and concatenate it with the rest of the string
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}

@@ -1,5 +1,5 @@
 import { Meta, StoryObj } from "@storybook/react";
-import { UserAccount } from "solomon-ai-typescript-sdk";
+import { UserAccount } from "client-typescript-sdk";
 
 import { ProfileDropdown } from "./profile-dropdown";
 

@@ -7,7 +7,7 @@ import {
   PlaidLinkOptionsWithLinkToken,
   usePlaidLink,
 } from "react-plaid-link";
-import { FinancialUserProfileType } from "solomon-ai-typescript-sdk";
+import { FinancialUserProfileType } from "client-typescript-sdk";
 import { z } from "zod";
 
 import { Button } from "../button";

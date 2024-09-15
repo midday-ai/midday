@@ -1,4 +1,4 @@
-import { FileMetadata } from "solomon-ai-typescript-sdk";
+import { FileMetadata } from "client-typescript-sdk";
 
 import React from "react";
 import {
