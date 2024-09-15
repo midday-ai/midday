@@ -2,6 +2,7 @@
 
 import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
+import { featureFlags } from "@internal/env/dashboard";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -29,6 +30,7 @@ const icons = {
   "/inbox": () => <Icons.Inbox2 size={22} />,
   "/cash-flow": () => <Icons.Wallet size={22} />,
   "/categories": () => <Icons.Categories size={22} />,
+  "/financial-accounts": () => <Icons.Accounts size={22} />
 };
 
 const defaultItems = [
@@ -36,14 +38,7 @@ const defaultItems = [
     path: "/",
     name: "Overview",
   },
-  {
-    path: "/cash-flow",
-    name: "Cash Flow",
-  },
-  {
-    path: "/categories",
-    name: "Categories",
-  },
+
   {
     path: "/inbox",
     name: "Inbox",
@@ -70,6 +65,21 @@ const defaultItems = [
   },
 ];
 
+const analyticsItems = [
+  {
+    path: "/cash-flow",
+    name: "Cash Flow",
+  },
+  {
+    path: "/categories",
+    name: "Categories",
+  },
+  {
+    path: "/financial-accounts",
+    name: "Financial Accounts",
+  }
+];
+
 interface ItemProps {
   item: { path: string; name: string };
   isActive: boolean;
@@ -90,7 +100,7 @@ const Item = ({
   onSelect,
 }: ItemProps) => {
   const y = useMotionValue(0);
-  const Icon = icons[item.path as keyof typeof icons];
+  const IconComponent = icons[item.path as keyof typeof icons];
 
   return (
     <TooltipProvider delayDuration={70}>
@@ -123,9 +133,9 @@ const Item = ({
                 "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
                 "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                 isActive &&
-                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+                "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
                 isCustomizing &&
-                  "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
+                "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
               )}
             >
               <motion.div
@@ -149,10 +159,10 @@ const Item = ({
                   className={cn(
                     "flex space-x-3 p-0 items-center pl-2 md:pl-0",
                     isCustomizing &&
-                      "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
+                    "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
                   )}
                 >
-                  <Icon />
+                  {IconComponent ? <IconComponent /> : <div className="w-[22px] h-[22px]" />}
                   <span className="flex md:hidden">{item.name}</span>
                 </div>
               </motion.div>
@@ -192,7 +202,9 @@ type Props = {
 };
 
 export function MainMenu({ initialItems, onSelect }: Props) {
-  const [items, setItems] = useState(initialItems ?? defaultItems);
+  const enabledItemSet = featureFlags.isAnalyticsV2Enabled === true ? [...analyticsItems, ...defaultItems] : defaultItems;
+
+  const [items, setItems] = useState(initialItems ?? enabledItemSet);
   const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
   const part = pathname?.split("/")[1];
@@ -233,6 +245,8 @@ export function MainMenu({ initialItems, onSelect }: Props) {
   const ref = useClickAway(() => {
     setCustomizing(false);
   });
+
+  console.log("items", items);
 
   return (
     <div className="mt-6" {...bind()} ref={ref}>

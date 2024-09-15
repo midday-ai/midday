@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/charts/empty-state";
 import TabbedCharts from "@/components/charts/tabbed-charts";
 import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
 import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
@@ -53,11 +54,9 @@ export default async function Overview({ searchParams }: { searchParams: Record<
 
   return (
     <>
-      <div className="w-full pt-[3%] mx-auto">
-        <Card className="p-[2%]">
-          <FinancialPortalOverview financialProfile={undefined} financialContext={undefined} />
-        </Card>
-      </div>
+      {/** financial portal view */}
+      <FinancialPortalView />
+
       <div>
         <Card className="h-[530px] md:h-[700px] my-4 p-[2%]">
           <ChartSelectors defaultValue={defaultValue} />
@@ -76,9 +75,9 @@ export default async function Overview({ searchParams }: { searchParams: Record<
             </div>
           </div>
         </Card>
-        <div className="mt-8">
-          <TabbedCharts currency={searchParams.currency ?? "USD"} />
-        </div>
+
+        {/** tabbed charts with income and expense charts */}
+        <TabbedCharts currency={searchParams.currency ?? "USD"} className="mt-8" />
 
         <Widgets
           initialPeriod={initialPeriod}
