@@ -1,0 +1,31 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as FileUploadLoadingButton from "./file-upload-loading-button.stories";
+
+<Meta of={FileUploadLoadingButton} />
+
+# FileUploadLoadingButton Component
+
+The `FileUploadLoadingButton` is a card component for empty file uploads.
+
+## Component Props
+
+<Canvas of={FileUploadLoadingButton.LoadingButtonWithCreateActionAndPending} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `FileUploadLoadingButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <FileUploadLoadingButton
+      href="https://example.com"
+      label="Click me"
+      active={true}
+    />
+  </Story>
+</Canvas>
+```

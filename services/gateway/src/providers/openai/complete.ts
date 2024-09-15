@@ -1,79 +1,79 @@
-import { OPEN_AI } from '../../globals';
-import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
-import { OpenAIErrorResponseTransform } from './utils';
+import { OPEN_AI } from "../../globals";
+import { CompletionResponse, ErrorResponse, ProviderConfig } from "../types";
+import { OpenAIErrorResponseTransform } from "./utils";
 
 // TODOS: this configuration does not enforce the maximum token limit for the input parameter. If you want to enforce this, you might need to add a custom validation function or a max property to the ParameterConfig interface, and then use it in the input configuration. However, this might be complex because the token count is not a simple length check, but depends on the specific tokenization method used by the model.
 
 export const OpenAICompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'text-davinci-003',
+    default: "text-davinci-003",
   },
   prompt: {
-    param: 'prompt',
-    default: '',
+    param: "prompt",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   logprobs: {
-    param: 'logprobs',
+    param: "logprobs",
     max: 5,
   },
   echo: {
-    param: 'echo',
+    param: "echo",
     default: false,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     min: -2,
     max: 2,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     min: -2,
     max: 2,
   },
   best_of: {
-    param: 'best_of',
+    param: "best_of",
   },
   logit_bias: {
-    param: 'logit_bias',
+    param: "logit_bias",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
   seed: {
-    param: 'seed',
+    param: "seed",
   },
   suffix: {
-    param: 'suffix',
+    param: "suffix",
   },
 };
 
@@ -83,9 +83,9 @@ export interface OpenAICompleteResponse extends CompletionResponse {
 
 export const OpenAICompleteResponseTransform: (
   response: OpenAICompleteResponse | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return OpenAIErrorResponseTransform(response, OPEN_AI);
   }
 
@@ -101,7 +101,7 @@ export const OpenAICompleteResponseTransform: (
  */
 export const OpenAICompleteJSONToStreamResponseTransform: (
   response: OpenAICompleteResponse,
-  provider: string
+  provider: string,
 ) => Array<string> = (response, provider) => {
   const streamChunkArray: Array<string> = [];
   const { id, model, choices } = response;
@@ -113,9 +113,9 @@ export const OpenAICompleteJSONToStreamResponseTransform: (
 
   const streamChunkTemplate = {
     id: id,
-    object: 'text_completion',
+    object: "text_completion",
     created: Date.now(),
-    model: model ?? '',
+    model: model ?? "",
     provider,
     usage: {
       ...(completion_tokens && { completion_tokens }),
@@ -140,7 +140,7 @@ export const OpenAICompleteJSONToStreamResponseTransform: (
                 text: word,
               },
             ],
-          })}\n\n`
+          })}\n\n`,
         );
       });
     }
@@ -151,11 +151,11 @@ export const OpenAICompleteJSONToStreamResponseTransform: (
         choices: [
           {
             index: index,
-            text: '',
+            text: "",
             finish_reason: choice.finish_reason,
           },
         ],
-      })}\n\n`
+      })}\n\n`,
     );
   }
 

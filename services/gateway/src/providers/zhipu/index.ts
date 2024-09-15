@@ -1,11 +1,11 @@
-import { ProviderConfigs } from '../types';
-import ZhipuAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import ZhipuAPIConfig from "./api";
 import {
   ZhipuChatCompleteConfig,
   ZhipuChatCompleteResponseTransform,
   ZhipuChatCompleteStreamChunkTransform,
-} from './chatComplete';
-import { ZhipuEmbedConfig, ZhipuEmbedResponseTransform } from './embed';
+} from "./chatComplete";
+import { ZhipuEmbedConfig, ZhipuEmbedResponseTransform } from "./embed";
 
 const ZhipuConfig: ProviderConfigs = {
   chatComplete: ZhipuChatCompleteConfig,
@@ -13,7 +13,7 @@ const ZhipuConfig: ProviderConfigs = {
   api: ZhipuAPIConfig,
   responseTransforms: {
     chatComplete: ZhipuChatCompleteResponseTransform,
-    'stream-chatComplete': ZhipuChatCompleteStreamChunkTransform,
+    "stream-chatComplete": ZhipuChatCompleteStreamChunkTransform,
     embed: ZhipuEmbedResponseTransform,
   },
 };

@@ -1,7 +1,7 @@
-import { ProviderAPIConfig } from '../types';
+import { ProviderAPIConfig } from "../types";
 
 const StabilityAIAPIConfig: ProviderAPIConfig = {
-  getBaseURL: () => 'https://api.stability.ai/v1',
+  getBaseURL: () => "https://api.stability.ai/v1",
   headers: ({ providerOptions }) => {
     return { Authorization: `Bearer ${providerOptions.apiKey}` };
   },
@@ -9,19 +9,19 @@ const StabilityAIAPIConfig: ProviderAPIConfig = {
     let mappedFn = fn;
     const { urlToFetch } = providerOptions;
     if (
-      fn === 'proxy' &&
+      fn === "proxy" &&
       urlToFetch &&
-      urlToFetch?.indexOf('text-to-image') > -1
+      urlToFetch?.indexOf("text-to-image") > -1
     ) {
-      mappedFn = 'imageGenerate';
+      mappedFn = "imageGenerate";
     }
 
     switch (mappedFn) {
-      case 'imageGenerate': {
+      case "imageGenerate": {
         return `/generation/${gatewayRequestBody.model}/text-to-image`;
       }
       default:
-        return '';
+        return "";
     }
   },
 };

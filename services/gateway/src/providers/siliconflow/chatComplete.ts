@@ -1,56 +1,56 @@
-import { SILICONFLOW } from '../../globals';
+import { SILICONFLOW } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
-import { generateErrorResponse } from '../utils';
+} from "../types";
+import { generateErrorResponse } from "../utils";
 
 export const SiliconFlowChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'deepseek-ai/DeepSeek-V2-Chat',
+    default: "deepseek-ai/DeepSeek-V2-Chat",
   },
   messages: {
-    param: 'messages',
-    default: '',
+    param: "messages",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     min: -2,
     max: 2,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     min: -2,
     max: 2,
   },
@@ -58,21 +58,21 @@ export const SiliconFlowChatCompleteConfig: ProviderConfig = {
 
 export const SiliconFlowErrorResponseTransform: (
   response: ErrorResponse,
-  provider: string
+  provider: string,
 ) => ErrorResponse = (response, provider) => {
   return generateErrorResponse(
     {
       ...response.error,
     },
-    provider
+    provider,
   );
 };
 
 export const SiliconFlowChatCompleteResponseTransform: (
   response: ChatCompletionResponse | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return SiliconFlowErrorResponseTransform(response, SILICONFLOW);
   }
 
@@ -87,7 +87,7 @@ export const SiliconFlowChatCompleteResponseTransform: (
  */
 export const SiliconFlowChatCompleteJSONToStreamResponseTransform: (
   response: ChatCompletionResponse,
-  provider: string
+  provider: string,
 ) => Array<string> = (response, provider) => {
   const streamChunkArray: Array<string> = [];
   const { id, model, choices } = response;
@@ -100,9 +100,9 @@ export const SiliconFlowChatCompleteJSONToStreamResponseTransform: (
 
   const streamChunkTemplate: Record<string, any> = {
     id,
-    object: 'chat.completion.chunk',
+    object: "chat.completion.chunk",
     created: Date.now(),
-    model: model || '',
+    model: model || "",
     provider,
     usage: {
       ...(completion_tokens && { completion_tokens }),
@@ -115,7 +115,7 @@ export const SiliconFlowChatCompleteJSONToStreamResponseTransform: (
     if (
       choice.message &&
       choice.message.content &&
-      typeof choice.message.content === 'string'
+      typeof choice.message.content === "string"
     ) {
       const inidividualWords: Array<string> = [];
       for (let i = 0; i < choice.message.content.length; i += 4) {
@@ -129,12 +129,12 @@ export const SiliconFlowChatCompleteJSONToStreamResponseTransform: (
               {
                 index: index,
                 delta: {
-                  role: 'assistant',
+                  role: "assistant",
                   content: word,
                 },
               },
             ],
-          })}\n\n`
+          })}\n\n`,
         );
       });
     }
@@ -149,7 +149,7 @@ export const SiliconFlowChatCompleteJSONToStreamResponseTransform: (
             finish_reason: choice.finish_reason,
           },
         ],
-      })}\n\n`
+      })}\n\n`,
     );
   }
 

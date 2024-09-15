@@ -8,4 +8,3 @@ export * from "./location/index";
 export * from "./merchant/index";
 export * from "./net-income/index";
 export * from "./transactions/index";
-

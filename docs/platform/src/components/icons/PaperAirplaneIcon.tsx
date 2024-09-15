@@ -1,5 +1,5 @@
 export function PaperAirplaneIcon(
-  props: React.ComponentPropsWithoutRef<'svg'>,
+  props: React.ComponentPropsWithoutRef<"svg">,
 ) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
@@ -15,5 +15,5 @@ export function PaperAirplaneIcon(
         d="M11 19L8 12L17 3L11 19Z"
       />
     </svg>
-  )
+  );
 }

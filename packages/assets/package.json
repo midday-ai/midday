@@ -5,7 +5,5 @@
   "description": "Solomon's assets package",
   "license": "MIT",
   "author": "Solomon",
-  "files": [
-    "**/*"
-  ]
+  "files": ["**/*"]
 }

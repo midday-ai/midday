@@ -1,18 +1,18 @@
-import { ProviderConfigs } from '../types';
+import { ProviderConfigs } from "../types";
 import {
   AzureAIInferenceCompleteConfig,
   AzureAIInferenceCompleteResponseTransform,
-} from './complete';
+} from "./complete";
 import {
   AzureAIInferenceEmbedConfig,
   AzureAIInferenceEmbedResponseTransform,
-} from './embed';
-import AzureAIInferenceAPI from './api';
+} from "./embed";
+import AzureAIInferenceAPI from "./api";
 import {
   AzureAIInferenceChatCompleteConfig,
   AzureAIInferenceChatCompleteResponseTransform,
-} from './chatComplete';
-import { AZURE_AI_INFERENCE, GITHUB } from '../../globals';
+} from "./chatComplete";
+import { AZURE_AI_INFERENCE, GITHUB } from "../../globals";
 
 const AzureAIInferenceAPIConfig: ProviderConfigs = {
   complete: AzureAIInferenceCompleteConfig,

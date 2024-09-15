@@ -3,14 +3,14 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { z, ZodSchema } from 'zod';
-import { getText } from '../utils';
+} from "../types";
+import { z, ZodSchema } from "zod";
+import { getText } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;

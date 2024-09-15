@@ -1,18 +1,18 @@
 // Docs for REST API
 // https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/send-multimodal-prompts#gemini-send-multimodal-samples-drest
 
-import { GOOGLE_VERTEX_AI } from '../../globals';
+import { GOOGLE_VERTEX_AI } from "../../globals";
 import {
   ContentType,
   Message,
   Params,
   ToolCall,
-} from '../../types/requestBody';
+} from "../../types/requestBody";
 import {
   AnthropicChatCompleteResponse,
   AnthropicChatCompleteStreamResponse,
   AnthropicErrorResponse,
-} from '../anthropic/chatComplete';
+} from "../anthropic/chatComplete";
 import {
   GoogleMessage,
   GoogleMessageRole,
@@ -20,36 +20,36 @@ import {
   SYSTEM_INSTRUCTION_DISABLED_MODELS,
   transformOpenAIRoleToGoogleRole,
   transformToolChoiceForGemini,
-} from '../google/chatComplete';
+} from "../google/chatComplete";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
-import { transformGenerationConfig } from './transformGenerationConfig';
+} from "../utils";
+import { transformGenerationConfig } from "./transformGenerationConfig";
 import type {
   GoogleErrorResponse,
   GoogleGenerateContentResponse,
   VertexLlamaChatCompleteStreamChunk,
   VertexLLamaChatCompleteResponse,
-} from './types';
-import { getMimeType } from './utils';
+} from "./types";
+import { getMimeType } from "./utils";
 
 export const VertexGoogleChatCompleteConfig: ProviderConfig = {
   // https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versioning#gemini-model-versions
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'gemini-1.0-pro',
+    default: "gemini-1.0-pro",
   },
   messages: [
     {
-      param: 'contents',
-      default: '',
+      param: "contents",
+      default: "",
       transform: (params: Params) => {
         let lastRole: GoogleMessageRole | undefined;
         const messages: GoogleMessage[] = [];
@@ -58,7 +58,7 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
           // From gemini-1.5 onwards, systemInstruction is supported
           // Skipping system message and sending it in systemInstruction for gemini 1.5 models
           if (
-            message.role === 'system' &&
+            message.role === "system" &&
             !SYSTEM_INSTRUCTION_DISABLED_MODELS.includes(params.model as string)
           )
             return;
@@ -66,7 +66,7 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
           const role = transformOpenAIRoleToGoogleRole(message.role);
           let parts = [];
 
-          if (message.role === 'assistant' && message.tool_calls) {
+          if (message.role === "assistant" && message.tool_calls) {
             message.tool_calls.forEach((tool_call: ToolCall) => {
               parts.push({
                 functionCall: {
@@ -76,25 +76,25 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
               });
             });
           } else if (
-            message.role === 'tool' &&
-            typeof message.content === 'string'
+            message.role === "tool" &&
+            typeof message.content === "string"
           ) {
             parts.push({
               functionResponse: {
-                name: message.name ?? 'gateway-tool-filler-name',
+                name: message.name ?? "gateway-tool-filler-name",
                 response: {
                   content: message.content,
                 },
               },
             });
-          } else if (message.content && typeof message.content === 'object') {
+          } else if (message.content && typeof message.content === "object") {
             message.content.forEach((c: ContentType) => {
-              if (c.type === 'text') {
+              if (c.type === "text") {
                 parts.push({
                   text: c.text,
                 });
               }
-              if (c.type === 'image_url') {
+              if (c.type === "image_url") {
                 const { url } = c.image_url || {};
 
                 if (!url) {
@@ -103,10 +103,10 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
                 }
 
                 // Example: data:image/png;base64,abcdefg...
-                if (url.startsWith('data:')) {
+                if (url.startsWith("data:")) {
                   const [mimeTypeWithPrefix, base64Image] =
-                    url.split(';base64,');
-                  const mimeType = mimeTypeWithPrefix.split(':')[1];
+                    url.split(";base64,");
+                  const mimeType = mimeTypeWithPrefix.split(":")[1];
 
                   parts.push({
                     inlineData: {
@@ -131,7 +131,7 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
                 });
               }
             });
-          } else if (typeof message.content === 'string') {
+          } else if (typeof message.content === "string") {
             parts.push({
               text: message.content,
             });
@@ -140,7 +140,7 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
           // @NOTE: This takes care of the "Please ensure that multiturn requests alternate between user and model."
           // error that occurs when we have multiple user messages in a row.
           const shouldCombineMessages =
-            lastRole === role && !params.model?.includes('vision');
+            lastRole === role && !params.model?.includes("vision");
 
           if (shouldCombineMessages) {
             messages[messages.length - 1].parts.push(...parts);
@@ -155,8 +155,8 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
       },
     },
     {
-      param: 'systemInstruction',
-      default: '',
+      param: "systemInstruction",
+      default: "",
       transform: (params: Params) => {
         // systemInstruction is only supported from gemini 1.5 models
         if (SYSTEM_INSTRUCTION_DISABLED_MODELS.includes(params.model as string))
@@ -165,8 +165,8 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
         if (!firstMessage) return;
 
         if (
-          firstMessage.role === 'system' &&
-          typeof firstMessage.content === 'string'
+          firstMessage.role === "system" &&
+          typeof firstMessage.content === "string"
         ) {
           return {
             parts: [
@@ -174,13 +174,13 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
                 text: firstMessage.content,
               },
             ],
-            role: 'system',
+            role: "system",
           };
         }
 
         if (
-          firstMessage.role === 'system' &&
-          typeof firstMessage.content === 'object' &&
+          firstMessage.role === "system" &&
+          typeof firstMessage.content === "object" &&
           firstMessage.content?.[0]?.text
         ) {
           return {
@@ -189,7 +189,7 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
                 text: firstMessage.content?.[0].text,
               },
             ],
-            role: 'system',
+            role: "system",
           };
         }
 
@@ -198,27 +198,27 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
     },
   ],
   temperature: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   top_p: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   top_k: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   max_tokens: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   stop: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   response_format: {
-    param: 'generationConfig',
+    param: "generationConfig",
     transform: (params: Params) => transformGenerationConfig(params),
   },
   // https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/configure-safety-attributes
@@ -234,15 +234,15 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
   //     }
   // ]
   safety_settings: {
-    param: 'safety_settings',
+    param: "safety_settings",
   },
   tools: {
-    param: 'tools',
-    default: '',
+    param: "tools",
+    default: "",
     transform: (params: Params) => {
       const functionDeclarations: any = [];
       params.tools?.forEach((tool) => {
-        if (tool.type === 'function') {
+        if (tool.type === "function") {
           functionDeclarations.push(tool.function);
         }
       });
@@ -250,14 +250,14 @@ export const VertexGoogleChatCompleteConfig: ProviderConfig = {
     },
   },
   tool_choice: {
-    param: 'tool_config',
-    default: '',
+    param: "tool_config",
+    default: "",
     transform: (params: Params) => {
       if (params.tool_choice) {
         const allowedFunctionNames: string[] = [];
         if (
-          typeof params.tool_choice === 'object' &&
-          params.tool_choice.type === 'function'
+          typeof params.tool_choice === "object" &&
+          params.tool_choice.type === "function"
         ) {
           allowedFunctionNames.push(params.tool_choice.function.name);
         }
@@ -293,7 +293,7 @@ interface AnthropicTool {
 }
 
 interface AnthropicToolResultContentItem {
-  type: 'tool_result';
+  type: "tool_result";
   tool_use_id: string;
   content?: string;
 }
@@ -305,12 +305,12 @@ interface AnthropicMessage extends Message {
 }
 
 interface AnthorpicTextContentItem {
-  type: 'text';
+  type: "text";
   text: string;
 }
 
 interface AnthropicToolContentItem {
-  type: 'tool_use';
+  type: "tool_use";
   name: string;
   id: string;
   input: Record<string, any>;
@@ -319,24 +319,24 @@ interface AnthropicToolContentItem {
 type AnthropicContentItem = AnthorpicTextContentItem | AnthropicToolContentItem;
 
 const transformAssistantMessageForAnthropic = (
-  msg: Message
+  msg: Message,
 ): AnthropicMessage => {
   let content: AnthropicContentItem[] = [];
   const containsToolCalls = msg.tool_calls && msg.tool_calls.length;
 
-  if (msg.content && typeof msg.content === 'string') {
+  if (msg.content && typeof msg.content === "string") {
     content.push({
-      type: 'text',
+      type: "text",
       text: msg.content,
     });
   } else if (
     msg.content &&
-    typeof msg.content === 'object' &&
+    typeof msg.content === "object" &&
     msg.content.length
   ) {
     if (msg.content[0].text) {
       content.push({
-        type: 'text',
+        type: "text",
         text: msg.content[0].text,
       });
     }
@@ -344,7 +344,7 @@ const transformAssistantMessageForAnthropic = (
   if (containsToolCalls) {
     msg.tool_calls.forEach((toolCall: any) => {
       content.push({
-        type: 'tool_use',
+        type: "tool_use",
         name: toolCall.function.name,
         id: toolCall.id,
         input: JSON.parse(toolCall.function.arguments),
@@ -359,10 +359,10 @@ const transformAssistantMessageForAnthropic = (
 
 const transformToolMessageForAnthropic = (msg: Message): AnthropicMessage => {
   return {
-    role: 'user',
+    role: "user",
     content: [
       {
-        type: 'tool_result',
+        type: "tool_result",
         tool_use_id: msg.tool_call_id,
         content: msg.content as string,
       },
@@ -373,20 +373,20 @@ const transformToolMessageForAnthropic = (msg: Message): AnthropicMessage => {
 export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
   messages: [
     {
-      param: 'messages',
+      param: "messages",
       required: true,
       transform: (params: Params) => {
         let messages: AnthropicMessage[] = [];
         // Transform the chat messages into a simple prompt
         if (!!params.messages) {
           params.messages.forEach((msg) => {
-            if (msg.role === 'system') return;
+            if (msg.role === "system") return;
 
-            if (msg.role === 'assistant') {
+            if (msg.role === "assistant") {
               messages.push(transformAssistantMessageForAnthropic(msg));
             } else if (
               msg.content &&
-              typeof msg.content === 'object' &&
+              typeof msg.content === "object" &&
               msg.content.length
             ) {
               const transformedMessage: Record<string, any> = {
@@ -394,27 +394,27 @@ export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
                 content: [],
               };
               msg.content.forEach((item) => {
-                if (item.type === 'text') {
+                if (item.type === "text") {
                   transformedMessage.content.push({
                     type: item.type,
                     text: item.text,
                   });
                 } else if (
-                  item.type === 'image_url' &&
+                  item.type === "image_url" &&
                   item.image_url &&
                   item.image_url.url
                 ) {
-                  const parts = item.image_url.url.split(';');
+                  const parts = item.image_url.url.split(";");
                   if (parts.length === 2) {
-                    const base64ImageParts = parts[1].split(',');
+                    const base64ImageParts = parts[1].split(",");
                     const base64Image = base64ImageParts[1];
-                    const mediaTypeParts = parts[0].split(':');
+                    const mediaTypeParts = parts[0].split(":");
                     if (mediaTypeParts.length === 2 && base64Image) {
                       const mediaType = mediaTypeParts[1];
                       transformedMessage.content.push({
-                        type: 'image',
+                        type: "image",
                         source: {
-                          type: 'base64',
+                          type: "base64",
                           media_type: mediaType,
                           data: base64Image,
                         },
@@ -424,7 +424,7 @@ export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
                 }
               });
               messages.push(transformedMessage as Message);
-            } else if (msg.role === 'tool') {
+            } else if (msg.role === "tool") {
               // even though anthropic supports images in tool results, openai doesn't support it yet
               messages.push(transformToolMessageForAnthropic(msg));
             } else {
@@ -440,23 +440,23 @@ export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
       },
     },
     {
-      param: 'system',
+      param: "system",
       required: false,
       transform: (params: Params) => {
-        let systemMessage: string = '';
+        let systemMessage: string = "";
         // Transform the chat messages into a simple prompt
         if (!!params.messages) {
           params.messages.forEach((msg) => {
             if (
-              msg.role === 'system' &&
+              msg.role === "system" &&
               msg.content &&
-              typeof msg.content === 'object' &&
+              typeof msg.content === "object" &&
               msg.content[0].text
             ) {
               systemMessage = msg.content[0].text;
             } else if (
-              msg.role === 'system' &&
-              typeof msg.content === 'string'
+              msg.role === "system" &&
+              typeof msg.content === "string"
             ) {
               systemMessage = msg.content;
             }
@@ -467,7 +467,7 @@ export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
     },
   ],
   tools: {
-    param: 'tools',
+    param: "tools",
     required: false,
     transform: (params: Params) => {
       let tools: AnthropicTool[] = [];
@@ -476,9 +476,9 @@ export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
           if (tool.function) {
             tools.push({
               name: tool.function.name,
-              description: tool.function?.description || '',
+              description: tool.function?.description || "",
               input_schema: {
-                type: tool.function.parameters?.type || 'object',
+                type: tool.function.parameters?.type || "object",
                 properties: tool.function.parameters?.properties || {},
                 required: tool.function.parameters?.required || [],
               },
@@ -491,53 +491,53 @@ export const VertexAnthropicChatCompleteConfig: ProviderConfig = {
   },
   // None is not supported by Anthropic, defaults to auto
   tool_choice: {
-    param: 'tool_choice',
+    param: "tool_choice",
     required: false,
     transform: (params: Params) => {
       if (params.tool_choice) {
-        if (typeof params.tool_choice === 'string') {
-          if (params.tool_choice === 'required') return { type: 'any' };
-          else if (params.tool_choice === 'auto') return { type: 'auto' };
-        } else if (typeof params.tool_choice === 'object') {
-          return { type: 'tool', name: params.tool_choice.function.name };
+        if (typeof params.tool_choice === "string") {
+          if (params.tool_choice === "required") return { type: "any" };
+          else if (params.tool_choice === "auto") return { type: "auto" };
+        } else if (typeof params.tool_choice === "object") {
+          return { type: "tool", name: params.tool_choice.function.name };
         }
       }
       return null;
     },
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     required: true,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: -1,
     min: -1,
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
     default: -1,
   },
   stop: {
-    param: 'stop_sequences',
+    param: "stop_sequences",
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   user: {
-    param: 'metadata.user_id',
+    param: "metadata.user_id",
   },
   anthropic_version: {
-    param: 'anthropic_version',
+    param: "anthropic_version",
     required: true,
-    default: 'vertex-2023-10-16',
+    default: "vertex-2023-10-16",
   },
 };
 
@@ -548,19 +548,19 @@ export const GoogleChatCompleteResponseTransform: (
     | GoogleErrorResponse[],
   responseStatus: number,
   responseHeaders: Headers,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ) => ChatCompletionResponse | ErrorResponse = (
   response,
   responseStatus,
   _responseHeaders,
-  strictOpenAiCompliance
+  strictOpenAiCompliance,
 ) => {
   // when error occurs on streaming request, the response is an array of errors.
   if (
     responseStatus !== 200 &&
     Array.isArray(response) &&
     response.length > 0 &&
-    'error' in response[0]
+    "error" in response[0]
   ) {
     const { error } = response[0];
 
@@ -571,11 +571,11 @@ export const GoogleChatCompleteResponseTransform: (
         param: null,
         code: String(error.code),
       },
-      GOOGLE_VERTEX_AI
+      GOOGLE_VERTEX_AI,
     );
   }
 
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     const { error } = response;
     return generateErrorResponse(
       {
@@ -584,11 +584,11 @@ export const GoogleChatCompleteResponseTransform: (
         param: null,
         code: String(error.code),
       },
-      GOOGLE_VERTEX_AI
+      GOOGLE_VERTEX_AI,
     );
   }
 
-  if ('candidates' in response) {
+  if ("candidates" in response) {
     const {
       promptTokenCount = 0,
       candidatesTokenCount = 0,
@@ -596,27 +596,27 @@ export const GoogleChatCompleteResponseTransform: (
     } = response.usageMetadata;
 
     return {
-      id: 'portkey-' + crypto.randomUUID(),
-      object: 'chat_completion',
+      id: "portkey-" + crypto.randomUUID(),
+      object: "chat_completion",
       created: Math.floor(Date.now() / 1000),
-      model: 'Unknown',
+      model: "Unknown",
       provider: GOOGLE_VERTEX_AI,
       choices:
         response.candidates?.map((generation, index) => {
-          let message: Message = { role: 'assistant', content: '' };
+          let message: Message = { role: "assistant", content: "" };
           if (generation.content?.parts[0]?.text) {
             message = {
-              role: 'assistant',
+              role: "assistant",
               content: generation.content.parts[0]?.text,
             };
           } else if (generation.content?.parts[0]?.functionCall) {
             message = {
-              role: 'assistant',
+              role: "assistant",
               tool_calls: generation.content.parts.map((part) => {
                 if (part.functionCall) {
                   return {
-                    id: 'portkey-' + crypto.randomUUID(),
-                    type: 'function',
+                    id: "portkey-" + crypto.randomUUID(),
+                    type: "function",
                     function: {
                       name: part.functionCall.name,
                       arguments: JSON.stringify(part.functionCall.args),
@@ -648,41 +648,41 @@ export const GoogleChatCompleteResponseTransform: (
 
 export const VertexLlamaChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'meta/llama3-405b-instruct-maas',
+    default: "meta/llama3-405b-instruct-maas",
   },
   messages: {
-    param: 'messages',
+    param: "messages",
     required: true,
     default: [],
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 512,
     min: 1,
     max: 2048,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.5,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 0.9,
     min: 0,
     max: 1,
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
     default: 0,
     min: 0,
     max: 2048,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
 };
@@ -691,19 +691,19 @@ export const GoogleChatCompleteStreamChunkTransform: (
   response: string,
   fallbackId: string,
   streamState: any,
-  strictOpenAiCompliance: boolean
+  strictOpenAiCompliance: boolean,
 ) => string = (
   responseChunk,
   fallbackId,
   _streamState,
-  strictOpenAiCompliance
+  strictOpenAiCompliance,
 ) => {
   const chunk = responseChunk
     .trim()
-    .replace(/^data: /, '')
+    .replace(/^data: /, "")
     .trim();
 
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
 
@@ -720,27 +720,27 @@ export const GoogleChatCompleteStreamChunkTransform: (
 
   const dataChunk = {
     id: fallbackId,
-    object: 'chat.completion.chunk',
+    object: "chat.completion.chunk",
     created: Math.floor(Date.now() / 1000),
-    model: '',
+    model: "",
     provider: GOOGLE_VERTEX_AI,
     choices:
       parsedChunk.candidates?.map((generation, index) => {
-        let message: Message = { role: 'assistant', content: '' };
+        let message: Message = { role: "assistant", content: "" };
         if (generation.content?.parts[0]?.text) {
           message = {
-            role: 'assistant',
+            role: "assistant",
             content: generation.content.parts[0]?.text,
           };
         } else if (generation.content?.parts[0]?.functionCall) {
           message = {
-            role: 'assistant',
+            role: "assistant",
             tool_calls: generation.content.parts.map((part, idx) => {
               if (part.functionCall) {
                 return {
                   index: idx,
-                  id: 'portkey-' + crypto.randomUUID(),
-                  type: 'function',
+                  id: "portkey-" + crypto.randomUUID(),
+                  type: "function",
                   function: {
                     name: part.functionCall.name,
                     arguments: JSON.stringify(part.functionCall.args),
@@ -766,9 +766,9 @@ export const GoogleChatCompleteStreamChunkTransform: (
 };
 
 export const AnthropicErrorResponseTransform: (
-  response: AnthropicErrorResponse
+  response: AnthropicErrorResponse,
 ) => ErrorResponse | undefined = (response) => {
-  if ('error' in response) {
+  if ("error" in response) {
     return generateErrorResponse(
       {
         message: response.error?.message,
@@ -776,7 +776,7 @@ export const AnthropicErrorResponseTransform: (
         param: null,
         code: null,
       },
-      GOOGLE_VERTEX_AI
+      GOOGLE_VERTEX_AI,
     );
   }
 
@@ -785,29 +785,29 @@ export const AnthropicErrorResponseTransform: (
 
 export const VertexAnthropicChatCompleteResponseTransform: (
   response: AnthropicChatCompleteResponse | AnthropicErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = AnthropicErrorResponseTransform(
-      response as AnthropicErrorResponse
+      response as AnthropicErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('content' in response) {
+  if ("content" in response) {
     const { input_tokens = 0, output_tokens = 0 } = response?.usage;
 
-    let content = '';
-    if (response.content.length && response.content[0].type === 'text') {
+    let content = "";
+    if (response.content.length && response.content[0].type === "text") {
       content = response.content[0].text;
     }
 
     let toolCalls: any = [];
     response.content.forEach((item) => {
-      if (item.type === 'tool_use') {
+      if (item.type === "tool_use") {
         toolCalls.push({
           id: item.id,
-          type: 'function',
+          type: "function",
           function: {
             name: item.name,
             arguments: JSON.stringify(item.input),
@@ -818,14 +818,14 @@ export const VertexAnthropicChatCompleteResponseTransform: (
 
     return {
       id: response.id,
-      object: 'chat_completion',
+      object: "chat_completion",
       created: Math.floor(Date.now() / 1000),
       model: response.model,
       provider: GOOGLE_VERTEX_AI,
       choices: [
         {
           message: {
-            role: 'assistant',
+            role: "assistant",
             content,
             tool_calls: toolCalls.length ? toolCalls : undefined,
           },
@@ -848,51 +848,51 @@ export const VertexAnthropicChatCompleteResponseTransform: (
 export const VertexAnthropicChatCompleteStreamChunkTransform: (
   response: string,
   fallbackId: string,
-  streamState: Record<string, boolean>
+  streamState: Record<string, boolean>,
 ) => string | undefined = (responseChunk, fallbackId, streamState) => {
   let chunk = responseChunk.trim();
 
   if (
-    chunk.startsWith('event: ping') ||
-    chunk.startsWith('event: content_block_stop') ||
-    chunk.startsWith('event: vertex_event')
+    chunk.startsWith("event: ping") ||
+    chunk.startsWith("event: content_block_stop") ||
+    chunk.startsWith("event: vertex_event")
   ) {
     return;
   }
 
-  if (chunk.startsWith('event: message_stop')) {
-    return 'data: [DONE]\n\n';
+  if (chunk.startsWith("event: message_stop")) {
+    return "data: [DONE]\n\n";
   }
 
-  chunk = chunk.replace(/^event: content_block_delta[\r\n]*/, '');
-  chunk = chunk.replace(/^event: content_block_start[\r\n]*/, '');
-  chunk = chunk.replace(/^event: message_delta[\r\n]*/, '');
-  chunk = chunk.replace(/^event: message_start[\r\n]*/, '');
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^event: content_block_delta[\r\n]*/, "");
+  chunk = chunk.replace(/^event: content_block_start[\r\n]*/, "");
+  chunk = chunk.replace(/^event: message_delta[\r\n]*/, "");
+  chunk = chunk.replace(/^event: message_start[\r\n]*/, "");
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
 
   const parsedChunk: AnthropicChatCompleteStreamResponse = JSON.parse(chunk);
 
   if (
-    parsedChunk.type === 'content_block_start' &&
-    parsedChunk.content_block?.type === 'text'
+    parsedChunk.type === "content_block_start" &&
+    parsedChunk.content_block?.type === "text"
   ) {
     streamState.containsChainOfThoughtMessage = true;
     return;
   }
 
-  if (parsedChunk.type === 'message_start' && parsedChunk.message?.usage) {
+  if (parsedChunk.type === "message_start" && parsedChunk.message?.usage) {
     return (
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'chat.completion.chunk',
+        object: "chat.completion.chunk",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: GOOGLE_VERTEX_AI,
         choices: [
           {
             delta: {
-              content: '',
+              content: "",
             },
             index: 0,
             logprobs: null,
@@ -902,17 +902,17 @@ export const VertexAnthropicChatCompleteStreamChunkTransform: (
         usage: {
           prompt_tokens: parsedChunk.message?.usage?.input_tokens,
         },
-      })}` + '\n\n'
+      })}` + "\n\n"
     );
   }
 
-  if (parsedChunk.type === 'message_delta' && parsedChunk.usage) {
+  if (parsedChunk.type === "message_delta" && parsedChunk.usage) {
     return (
       `data: ${JSON.stringify({
         id: fallbackId,
-        object: 'chat.completion.chunk',
+        object: "chat.completion.chunk",
         created: Math.floor(Date.now() / 1000),
-        model: '',
+        model: "",
         provider: GOOGLE_VERTEX_AI,
         choices: [
           {
@@ -924,16 +924,16 @@ export const VertexAnthropicChatCompleteStreamChunkTransform: (
         usage: {
           completion_tokens: parsedChunk.usage?.output_tokens,
         },
-      })}` + '\n\n'
+      })}` + "\n\n"
     );
   }
 
   const toolCalls = [];
   const isToolBlockStart: boolean =
-    parsedChunk.type === 'content_block_start' &&
+    parsedChunk.type === "content_block_start" &&
     !!parsedChunk.content_block?.id;
   const isToolBlockDelta: boolean =
-    parsedChunk.type === 'content_block_delta' &&
+    parsedChunk.type === "content_block_delta" &&
     !!parsedChunk.delta.partial_json;
   const toolIndex: number = streamState.containsChainOfThoughtMessage
     ? parsedChunk.index - 1
@@ -943,10 +943,10 @@ export const VertexAnthropicChatCompleteStreamChunkTransform: (
     toolCalls.push({
       index: toolIndex,
       id: parsedChunk.content_block.id,
-      type: 'function',
+      type: "function",
       function: {
         name: parsedChunk.content_block.name,
-        arguments: '',
+        arguments: "",
       },
     });
   } else if (isToolBlockDelta) {
@@ -961,9 +961,9 @@ export const VertexAnthropicChatCompleteStreamChunkTransform: (
   return (
     `data: ${JSON.stringify({
       id: fallbackId,
-      object: 'chat.completion.chunk',
+      object: "chat.completion.chunk",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: GOOGLE_VERTEX_AI,
       choices: [
         {
@@ -976,19 +976,19 @@ export const VertexAnthropicChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.delta?.stop_reason ?? null,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };
 
 export const VertexLlamaChatCompleteResponseTransform: (
   response: VertexLLamaChatCompleteResponse | GoogleErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (
     responseStatus !== 200 &&
     Array.isArray(response) &&
     response.length > 0 &&
-    'error' in response[0]
+    "error" in response[0]
   ) {
     const { error } = response[0];
 
@@ -999,10 +999,10 @@ export const VertexLlamaChatCompleteResponseTransform: (
         param: null,
         code: String(error.code),
       },
-      GOOGLE_VERTEX_AI
+      GOOGLE_VERTEX_AI,
     );
   }
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: crypto.randomUUID(),
       created: Math.floor(Date.now() / 1000),
@@ -1015,14 +1015,14 @@ export const VertexLlamaChatCompleteResponseTransform: (
 
 export const VertexLlamaChatCompleteStreamChunkTransform: (
   response: string,
-  fallbackId: string
+  fallbackId: string,
 ) => string = (responseChunk, fallbackId) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
   const parsedChunk: VertexLlamaChatCompleteStreamChunk = JSON.parse(chunk);
   parsedChunk.id = fallbackId;
   parsedChunk.created = Math.floor(Date.now() / 1000);
   parsedChunk.provider = GOOGLE_VERTEX_AI;
-  return `data: ${JSON.stringify(parsedChunk)}` + '\n\n';
+  return `data: ${JSON.stringify(parsedChunk)}` + "\n\n";
 };

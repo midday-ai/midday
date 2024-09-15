@@ -1,29 +1,29 @@
-import { OPEN_AI } from '../../globals';
-import { ErrorResponse, ProviderConfig } from '../types';
-import { OpenAIErrorResponseTransform } from './utils';
+import { OPEN_AI } from "../../globals";
+import { ErrorResponse, ProviderConfig } from "../types";
+import { OpenAIErrorResponseTransform } from "./utils";
 
 export const OpenAICreateSpeechConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'tts-1',
+    default: "tts-1",
   },
   input: {
-    param: 'input',
+    param: "input",
     required: true,
   },
   voice: {
-    param: 'voice',
+    param: "voice",
     required: true,
-    default: 'alloy',
+    default: "alloy",
   },
   response_format: {
-    param: 'response_format',
+    param: "response_format",
     required: false,
-    default: 'mp3',
+    default: "mp3",
   },
   speed: {
-    param: 'speed',
+    param: "speed",
     required: false,
     default: 1,
   },
@@ -31,9 +31,9 @@ export const OpenAICreateSpeechConfig: ProviderConfig = {
 
 export const OpenAICreateSpeechResponseTransform: (
   response: Response | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => Response | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return OpenAIErrorResponseTransform(response, OPEN_AI);
   }
 

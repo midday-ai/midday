@@ -1,9 +1,9 @@
-import { ProviderConfigs } from '../types';
-import TritonAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import TritonAPIConfig from "./api";
 import {
   TritonCompleteConfig,
   TritonCompleteResponseTransform,
-} from './complete';
+} from "./complete";
 
 const TritonConfig: ProviderConfigs = {
   api: TritonAPIConfig,

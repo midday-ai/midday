@@ -51,14 +51,14 @@ export function extractWord(chunk: string): string {
 }
 
 export function parseMessagesToString(
-  messages: Array<ChatCompletionMessageParam>
+  messages: Array<ChatCompletionMessageParam>,
 ) {
   return (messages.at(-1)?.content || "") as string;
 }
 
 export async function getEmbeddings(
   c: Context,
-  messages: string
+  messages: string,
 ): Promise<number[]> {
   const embeddings = await c.env.AI.run("@cf/baai/bge-small-en-v1.5", {
     text: messages,

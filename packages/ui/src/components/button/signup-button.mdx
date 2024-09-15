@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as SignUpButton from "./signup-button.stories";
+
+<Meta of={SignUpButton} />
+
+# SignUpButton Component
+
+The `SignUpButton` is a button component sign up.
+
+## Component Props
+
+<Canvas of={SignUpButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `SignUpButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <SignUpButton href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```

@@ -1,0 +1,32 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as ViewNotificationDropdown from "./notification-dropdown.stories";
+
+<Meta of={ViewNotificationDropdown} />
+
+# ViewNotificationDropdown Component
+
+The `ViewNotificationDropdown` is a notification dropdown component used to display a dropdown on the application. It supports customizable options like navigation, teams, user navigation, and user details.
+
+## Component Props
+
+<Canvas of={ViewNotificationDropdown.Default} />
+
+<Controls />
+
+## Usage
+
+```tsx
+<Canvas>
+  <ViewNotificationDropdown
+    navigation=[]
+    user={{}}
+  />
+</Canvas>
+```
+
+## Examples
+
+### Default Notification dropdown
+
+<Canvas of={ViewNotificationDropdown.Default} />

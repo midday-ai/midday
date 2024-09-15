@@ -1,5 +1,5 @@
-import { Context } from 'hono';
-import { env } from 'hono/adapter';
+import { Context } from "hono";
+import { env } from "hono/adapter";
 import {
   ANTHROPIC,
   AZURE_OPEN_AI,
@@ -10,20 +10,20 @@ import {
   POWERED_BY,
   RETRY_STATUS_CODES,
   TRITON,
-} from '../globals';
-import Providers from '../providers';
-import { Config, ShortConfig } from '../types/requestBody';
-import { convertKeysToCamelCase, getStreamingMode } from '../utils';
+} from "../globals";
+import Providers from "../providers";
+import { Config, ShortConfig } from "../types/requestBody";
+import { convertKeysToCamelCase, getStreamingMode } from "../utils";
 import {
   fetchProviderOptionsFromConfig,
   tryProvidersInSequence,
   updateResponseHeaders,
-} from './handlerUtils';
-import { retryRequest } from './retryHandler';
-import { responseHandler } from './responseHandlers';
+} from "./handlerUtils";
+import { retryRequest } from "./retryHandler";
+import { responseHandler } from "./responseHandlers";
 // Find the proxy provider
 function proxyProvider(proxyModeHeader: string, providerHeader: string) {
-  const proxyProvider = proxyModeHeader?.split(' ')[1] ?? providerHeader;
+  const proxyProvider = proxyModeHeader?.split(" ")[1] ?? providerHeader;
   return proxyProvider;
 }
 
@@ -31,12 +31,12 @@ function getProxyPath(
   requestURL: string,
   proxyProvider: string,
   proxyEndpointPath: string,
-  customHost: string
+  customHost: string,
 ) {
   let reqURL = new URL(requestURL);
   let reqPath = reqURL.pathname;
   const reqQuery = reqURL.search;
-  reqPath = reqPath.replace(proxyEndpointPath, '');
+  reqPath = reqPath.replace(proxyEndpointPath, "");
 
   if (customHost) {
     return `${customHost}${reqPath}${reqQuery}`;
@@ -56,7 +56,7 @@ function getProxyPath(
 
   // Fix specific for Anthropic SDK calls. Is this needed? - Yes
   if (proxyProvider === ANTHROPIC) {
-    proxyPath = proxyPath.replace('/v1/v1/', '/v1/');
+    proxyPath = proxyPath.replace("/v1/v1/", "/v1/");
   }
 
   return proxyPath;
@@ -65,11 +65,11 @@ function getProxyPath(
 async function getRequestData(request: Request, contentType: string) {
   let requestJSON: Record<string, any> = {};
   let requestFormData;
-  let requestBody = '';
+  let requestBody = "";
   let requestBinary: ArrayBuffer = new ArrayBuffer(0);
 
   if (contentType == CONTENT_TYPES.APPLICATION_JSON) {
-    if (['GET', 'DELETE'].includes(request.method)) {
+    if (["GET", "DELETE"].includes(request.method)) {
       return { requestJSON, requestFormData };
     }
     requestBody = await request.text();
@@ -88,22 +88,22 @@ async function getRequestData(request: Request, contentType: string) {
 
 function headersToSend(
   headersObj: Record<string, string>,
-  customHeadersToIgnore: Array<string>
+  customHeadersToIgnore: Array<string>,
 ): Record<string, string> {
   let final: Record<string, string> = {};
   const poweredByHeadersPattern = `x-${POWERED_BY}-`;
-  const headersToAvoidForCloudflare = ['expect'];
+  const headersToAvoidForCloudflare = ["expect"];
   const headersToAvoid = [
     ...customHeadersToIgnore,
     ...headersToAvoidForCloudflare,
   ];
   if (
-    headersObj['content-type']?.split(';')[0] ===
+    headersObj["content-type"]?.split(";")[0] ===
     CONTENT_TYPES.MULTIPART_FORM_DATA
   ) {
-    headersToAvoid.push('content-type');
+    headersToAvoid.push("content-type");
   }
-  headersToAvoid.push('content-length');
+  headersToAvoid.push("content-length");
   Object.keys(headersObj).forEach((key: string) => {
     if (
       !headersToAvoid.includes(key) &&
@@ -114,8 +114,8 @@ function headersToSend(
   });
 
   // Remove brotli from accept-encoding because cloudflare has problems with it
-  if (final['accept-encoding']?.includes('br'))
-    final['accept-encoding'] = final['accept-encoding']?.replace('br', '');
+  if (final["accept-encoding"]?.includes("br"))
+    final["accept-encoding"] = final["accept-encoding"]?.replace("br", "");
 
   return final;
 }
@@ -123,24 +123,24 @@ function headersToSend(
 export async function proxyHandler(c: Context): Promise<Response> {
   try {
     const requestHeaders = Object.fromEntries(c.req.raw.headers);
-    const requestContentType = requestHeaders['content-type']?.split(';')[0];
+    const requestContentType = requestHeaders["content-type"]?.split(";")[0];
     const { requestJSON, requestFormData, requestBinary } =
       await getRequestData(c.req.raw, requestContentType);
     const store: Record<string, any> = {
       proxyProvider: proxyProvider(
         requestHeaders[HEADER_KEYS.MODE],
-        requestHeaders[`x-${POWERED_BY}-provider`]
+        requestHeaders[`x-${POWERED_BY}-provider`],
       ),
       reqBody: requestJSON,
       requestFormData: requestFormData,
       customHeadersToAvoid: env(c).CUSTOM_HEADERS_TO_IGNORE ?? [],
-      proxyPath: c.req.url.indexOf('/v1/proxy') > -1 ? '/v1/proxy' : '/v1',
+      proxyPath: c.req.url.indexOf("/v1/proxy") > -1 ? "/v1/proxy" : "/v1",
     };
 
     let requestConfig: Config | ShortConfig | null = null;
     if (requestHeaders[`x-${POWERED_BY}-config`]) {
       requestConfig = JSON.parse(requestHeaders[`x-${POWERED_BY}-config`]);
-      if (requestConfig && 'provider' in requestConfig) {
+      if (requestConfig && "provider" in requestConfig) {
         store.proxyProvider = requestConfig.provider;
       }
     }
@@ -148,39 +148,39 @@ export async function proxyHandler(c: Context): Promise<Response> {
     const customHost =
       requestHeaders[HEADER_KEYS.CUSTOM_HOST] ||
       requestConfig?.customHost ||
-      '';
+      "";
     let urlToFetch = getProxyPath(
       c.req.url,
       store.proxyProvider,
       store.proxyPath,
-      customHost
+      customHost,
     );
     store.isStreamingMode = getStreamingMode(
       store.reqBody,
       store.proxyProvider,
-      urlToFetch
+      urlToFetch,
     );
 
     if (
       requestConfig &&
-      (('options' in requestConfig && requestConfig.options) ||
-        ('targets' in requestConfig && requestConfig.targets) ||
-        ('provider' in requestConfig && requestConfig.provider))
+      (("options" in requestConfig && requestConfig.options) ||
+        ("targets" in requestConfig && requestConfig.targets) ||
+        ("provider" in requestConfig && requestConfig.provider))
     ) {
       let providerOptions = fetchProviderOptionsFromConfig(requestConfig);
 
       if (!providerOptions) {
         return new Response(
           JSON.stringify({
-            status: 'failure',
-            message: 'Could not find a provider option.',
+            status: "failure",
+            message: "Could not find a provider option.",
           }),
           {
             status: 400,
             headers: {
-              'content-type': 'application/json',
+              "content-type": "application/json",
             },
-          }
+          },
         );
       }
 
@@ -195,14 +195,14 @@ export async function proxyHandler(c: Context): Promise<Response> {
           providerOptions,
           store.reqBody,
           requestHeaders,
-          'proxy'
+          "proxy",
         );
       } catch (error: any) {
         const errorArray = JSON.parse(error.message);
         return new Response(errorArray[errorArray.length - 1].errorObj, {
           status: errorArray[errorArray.length - 1].status,
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
         });
       }
@@ -211,7 +211,7 @@ export async function proxyHandler(c: Context): Promise<Response> {
     if (requestConfig) {
       requestConfig = convertKeysToCamelCase(
         requestConfig as Record<string, any>,
-        ['override_params', 'params', 'metadata']
+        ["override_params", "params", "metadata"],
       ) as Config | ShortConfig;
     }
 
@@ -236,7 +236,7 @@ export async function proxyHandler(c: Context): Promise<Response> {
       retryCount = parseInt(requestHeaders[HEADER_KEYS.RETRIES]);
     } else if (
       requestConfig?.retry &&
-      typeof requestConfig.retry === 'object'
+      typeof requestConfig.retry === "object"
     ) {
       (retryCount = requestConfig.retry?.attempts ?? 1),
         (retryStatusCodes =
@@ -245,23 +245,23 @@ export async function proxyHandler(c: Context): Promise<Response> {
 
     retryCount = Math.min(retryCount, MAX_RETRIES);
 
-    const getFromCacheFunction = c.get('getFromCache');
-    const cacheIdentifier = c.get('cacheIdentifier');
+    const getFromCacheFunction = c.get("getFromCache");
+    const cacheIdentifier = c.get("cacheIdentifier");
 
     let cacheResponse, cacheKey, cacheMaxAge;
-    let cacheStatus = 'DISABLED';
+    let cacheStatus = "DISABLED";
     let cacheMode = requestHeaders[HEADER_KEYS.CACHE];
 
     if (
       requestConfig?.cache &&
-      typeof requestConfig.cache === 'object' &&
+      typeof requestConfig.cache === "object" &&
       requestConfig.cache.mode
     ) {
       cacheMode = requestConfig.cache.mode;
       cacheMaxAge = requestConfig.cache.maxAge;
     } else if (
       requestConfig?.cache &&
-      typeof requestConfig.cache === 'string'
+      typeof requestConfig.cache === "string"
     ) {
       cacheMode = requestConfig.cache;
     }
@@ -273,13 +273,13 @@ export async function proxyHandler(c: Context): Promise<Response> {
         store.reqBody,
         urlToFetch,
         cacheIdentifier,
-        cacheMode
+        cacheMode,
       );
       if (cacheResponse) {
         const { response: cacheMappedResponse } = await responseHandler(
           new Response(cacheResponse, {
             headers: {
-              'content-type': 'application/json',
+              "content-type": "application/json",
             },
           }),
           false,
@@ -288,15 +288,15 @@ export async function proxyHandler(c: Context): Promise<Response> {
           urlToFetch,
           false,
           store.reqBody,
-          false
+          false,
         );
-        c.set('requestOptions', [
+        c.set("requestOptions", [
           {
             providerOptions: {
               ...store.reqBody,
               provider: store.proxyProvider,
               requestURL: urlToFetch,
-              rubeusURL: 'proxy',
+              rubeusURL: "proxy",
             },
             requestParams: store.reqBody,
             response: cacheMappedResponse.clone(),
@@ -312,7 +312,7 @@ export async function proxyHandler(c: Context): Promise<Response> {
           store.reqBody,
           cacheStatus,
           0,
-          requestHeaders[HEADER_KEYS.TRACE_ID] ?? ''
+          requestHeaders[HEADER_KEYS.TRACE_ID] ?? "",
         );
         return cacheMappedResponse;
       }
@@ -324,7 +324,7 @@ export async function proxyHandler(c: Context): Promise<Response> {
       fetchOptions,
       retryCount,
       retryStatusCodes,
-      null
+      null,
     );
     const { response: mappedResponse } = await responseHandler(
       lastResponse,
@@ -334,7 +334,7 @@ export async function proxyHandler(c: Context): Promise<Response> {
       urlToFetch,
       false,
       store.reqBody,
-      false
+      false,
     );
     updateResponseHeaders(
       mappedResponse,
@@ -342,16 +342,16 @@ export async function proxyHandler(c: Context): Promise<Response> {
       store.reqBody,
       cacheStatus,
       lastAttempt ?? 0,
-      requestHeaders[HEADER_KEYS.TRACE_ID] ?? ''
+      requestHeaders[HEADER_KEYS.TRACE_ID] ?? "",
     );
 
-    c.set('requestOptions', [
+    c.set("requestOptions", [
       {
         providerOptions: {
           ...store.reqBody,
           provider: store.proxyProvider,
           requestURL: urlToFetch,
-          rubeusURL: 'proxy',
+          rubeusURL: "proxy",
         },
         requestParams: store.reqBody,
         response: mappedResponse.clone(),
@@ -364,18 +364,18 @@ export async function proxyHandler(c: Context): Promise<Response> {
 
     return mappedResponse;
   } catch (err: any) {
-    console.log('proxy error', err.message);
+    console.log("proxy error", err.message);
     return new Response(
       JSON.stringify({
-        status: 'failure',
-        message: 'Something went wrong',
+        status: "failure",
+        message: "Something went wrong",
       }),
       {
         status: 500,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 }

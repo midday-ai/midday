@@ -1,68 +1,68 @@
-import { DEEPSEEK } from '../../globals';
+import { DEEPSEEK } from "../../globals";
 
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const DeepSeekChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'deepseek-chat',
+    default: "deepseek-chat",
   },
   messages: {
-    param: 'messages',
-    default: '',
+    param: "messages",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     default: 0,
     min: -2,
     max: 2,
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     default: 0,
     min: -2,
     max: 2,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
     default: null,
   },
   logprobs: {
-    param: 'logprobs',
+    param: "logprobs",
     default: false,
   },
   top_logprobs: {
-    param: 'top_logprobs',
+    param: "top_logprobs",
     default: 0,
     min: 0,
     max: 20,
@@ -73,7 +73,7 @@ interface DeepSeekChatCompleteResponse extends ChatCompletionResponse {
   id: string;
   object: string;
   created: number;
-  model: 'deepseek-chat' | 'deepseek-coder';
+  model: "deepseek-chat" | "deepseek-coder";
   usage: {
     prompt_tokens: number;
     completion_tokens: number;
@@ -106,9 +106,9 @@ interface DeepSeekStreamChunk {
 
 export const DeepSeekChatCompleteResponseTransform: (
   response: DeepSeekChatCompleteResponse | DeepSeekErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if ('message' in response && responseStatus !== 200) {
+  if ("message" in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
         message: response.message,
@@ -116,11 +116,11 @@ export const DeepSeekChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      DEEPSEEK
+      DEEPSEEK,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -147,12 +147,12 @@ export const DeepSeekChatCompleteResponseTransform: (
 };
 
 export const DeepSeekChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: DeepSeekStreamChunk = JSON.parse(chunk);
@@ -170,6 +170,6 @@ export const DeepSeekChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.choices[0].finish_reason,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

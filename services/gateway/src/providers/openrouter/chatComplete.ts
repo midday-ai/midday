@@ -1,43 +1,43 @@
-import { OPENROUTER } from '../../globals';
+import { OPENROUTER } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const OpenrouterChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'openrouter/auto',
+    default: "openrouter/auto",
   },
   messages: {
-    param: 'messages',
-    default: '',
+    param: "messages",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
 };
@@ -79,9 +79,9 @@ interface OpenrouterStreamChunk {
 
 export const OpenrouterChatCompleteResponseTransform: (
   response: OpenrouterChatCompleteResponse | OpenrouterErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if ('message' in response && responseStatus !== 200) {
+  if ("message" in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
         message: response.message,
@@ -89,11 +89,11 @@ export const OpenrouterChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      OPENROUTER
+      OPENROUTER,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -120,24 +120,24 @@ export const OpenrouterChatCompleteResponseTransform: (
 };
 
 export const OpenrouterChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
-  if (chunk.includes('OPENROUTER PROCESSING')) {
+  if (chunk.includes("OPENROUTER PROCESSING")) {
     chunk = JSON.stringify({
       id: `${Date.now()}`,
-      model: '',
-      object: 'chat.completion.chunk',
+      model: "",
+      object: "chat.completion.chunk",
       created: Date.now(),
       choices: [
         {
           index: 0,
-          delta: { role: 'assistant', content: '' },
+          delta: { role: "assistant", content: "" },
           finish_reason: null,
         },
       ],
@@ -158,6 +158,6 @@ export const OpenrouterChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.choices[0].finish_reason,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

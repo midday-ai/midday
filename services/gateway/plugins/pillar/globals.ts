@@ -1,11 +1,11 @@
-import { post } from '../utils';
+import { post } from "../utils";
 
-export const PILLAR_BASE_URL = 'https://api.pillarseclabs.com/api/v1';
+export const PILLAR_BASE_URL = "https://api.pillarseclabs.com/api/v1";
 
 export const postPillar = async (
   endpoint: string,
   credentials: any,
-  data: any
+  data: any,
 ) => {
   const options = {
     headers: {
@@ -14,9 +14,9 @@ export const postPillar = async (
   };
 
   switch (endpoint) {
-    case 'scanPrompt':
+    case "scanPrompt":
       return post(`${PILLAR_BASE_URL}/scan/prompt`, data, options);
-    case 'scanResponse':
+    case "scanResponse":
       return post(`${PILLAR_BASE_URL}/scan/response`, data, options);
     default:
       throw new Error(`Unknown Pillar endpoint: ${endpoint}`);

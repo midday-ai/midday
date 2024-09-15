@@ -1,0 +1,40 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as ConnectPlaidAccountButton from "./connect-plaid-account-button.stories";
+
+<Meta of={ConnectPlaidAccountButton} />
+
+# ConnectPlaidAccountButton Component
+
+The `ConnectPlaidAccountButton` is designed to facilitate the connection of a user's financial accounts via Plaid. This button triggers a Plaid Link flow that guides users through the process of securely connecting their financial accounts.
+
+## Component Props
+
+<Canvas of={ConnectPlaidAccountButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `ConnectPlaidAccountButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <ConnectPlaidAccountButton.Default
+      token="your_plaid_link_token_here"
+      title="Connect Your Bank Account"
+      onSuccess={(publicToken, metadata) =>
+        console.log("Plaid link success:", publicToken, metadata)
+      }
+      onEvent={(eventName, metadata) =>
+        console.log("Plaid event:", eventName, metadata)
+      }
+      onExit={(err, metadata) => {
+        if (err) console.log("Plaid link error:", err);
+        console.log("Plaid link exit:", metadata);
+      }}
+    />
+  </Story>
+</Canvas>
+```

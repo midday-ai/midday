@@ -1,5 +1,18 @@
 "use client";
 
+import { format } from "date-fns";
+import React, { useMemo } from "react";
+import {
+  Bar,
+  BarChart as BaseBarChart,
+  CartesianGrid,
+  Cell,
+  Tooltip,
+  TooltipProps,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
 import {
   computeChartDataDifferenceOverTime,
   formatAmount,
@@ -7,23 +20,9 @@ import {
   roundToNearestFactor,
 } from "../../../lib/chart-utils";
 import { BarChartMultiDataPoint, ChartDataPoint } from "../../../types/chart";
-import { format } from "date-fns";
-import React from "react";
-import {
-  Bar,
-  BarChart as BaseBarChart,
-  CartesianGrid,
-  Cell, Tooltip,
-  TooltipProps,
-  XAxis,
-  YAxis
-} from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
 
-import { Button } from "../../button";
 import { cn } from "../../../utils/cn";
+import { Button } from "../../button";
 
 import { generatePayloadArray } from "../../../lib/random/generator";
 import { ChartContainer } from "./chart-container";
@@ -93,20 +92,23 @@ export interface BarChartProps {
  */
 export const BarChart: React.FC<BarChartProps> = ({
   currency,
-  data,
+  data: propData,
   height = 290,
   locale,
   enableAssistantMode,
   disabled = false,
 }) => {
   // if disabled generate random data
-  if (disabled) {
-    data = generatePayloadArray({
-      count: 50,
-      minValue: 100,
-      maxValue: 500,
-    });
-  }
+  const data = useMemo(() => {
+    if (disabled) {
+      return generatePayloadArray({
+        count: 50,
+        minValue: 100,
+        maxValue: 500,
+      });
+    }
+    return propData;
+  }, [disabled, propData]);
 
   const [enableCompare, setEnableCompare] = React.useState<boolean>(false);
   const { isOpen, toggleOpen } = useWrapperState(false);
@@ -283,7 +285,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                     className={cn(
                       "fill-[#41191A]",
                       +entry.previous.value > 0 &&
-                      "fill-[#C6C6C6] dark:fill-[#323232]",
+                        "fill-[#C6C6C6] dark:fill-[#323232]",
                     )}
                   />
                 ))}
@@ -296,7 +298,7 @@ export const BarChart: React.FC<BarChartProps> = ({
                     className={cn(
                       "fill-[#FF3638]",
                       +entry.current.value > 0 &&
-                      "fill-[#121212] dark:fill-[#F5F5F3]",
+                        "fill-[#121212] dark:fill-[#F5F5F3]",
                     )}
                   />
                 ))}

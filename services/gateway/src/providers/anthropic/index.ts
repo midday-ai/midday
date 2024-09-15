@@ -1,25 +1,25 @@
-import { ProviderConfigs } from '../types';
-import AnthropicAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import AnthropicAPIConfig from "./api";
 import {
   AnthropicChatCompleteConfig,
   AnthropicChatCompleteResponseTransform,
   AnthropicChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   AnthropicCompleteConfig,
   AnthropicCompleteResponseTransform,
   AnthropicCompleteStreamChunkTransform,
-} from './complete';
+} from "./complete";
 
 const AnthropicConfig: ProviderConfigs = {
   complete: AnthropicCompleteConfig,
   chatComplete: AnthropicChatCompleteConfig,
   api: AnthropicAPIConfig,
   responseTransforms: {
-    'stream-complete': AnthropicCompleteStreamChunkTransform,
+    "stream-complete": AnthropicCompleteStreamChunkTransform,
     complete: AnthropicCompleteResponseTransform,
     chatComplete: AnthropicChatCompleteResponseTransform,
-    'stream-chatComplete': AnthropicChatCompleteStreamChunkTransform,
+    "stream-chatComplete": AnthropicChatCompleteStreamChunkTransform,
   },
 };
 

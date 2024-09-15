@@ -1,14 +1,14 @@
-import { Context } from 'hono';
+import { Context } from "hono";
 
 const inMemoryCache: any = {};
 
 const CACHE_STATUS = {
-  HIT: 'HIT',
-  SEMANTIC_HIT: 'SEMANTIC HIT',
-  MISS: 'MISS',
-  SEMANTIC_MISS: 'SEMANTIC MISS',
-  REFRESH: 'REFRESH',
-  DISABLED: 'DISABLED',
+  HIT: "HIT",
+  SEMANTIC_HIT: "SEMANTIC HIT",
+  MISS: "MISS",
+  SEMANTIC_MISS: "SEMANTIC MISS",
+  REFRESH: "REFRESH",
+  DISABLED: "DISABLED",
 };
 
 // Cache Handling
@@ -19,9 +19,9 @@ export const getFromCache = async (
   url: string,
   organisationId: string,
   cacheMode: string,
-  cacheMaxAge: number | null
+  cacheMaxAge: number | null,
 ) => {
-  if ('x-portkey-cache-force-refresh' in requestHeaders) {
+  if ("x-portkey-cache-force-refresh" in requestHeaders) {
     return [null, CACHE_STATUS.REFRESH, null];
   }
   try {
@@ -30,15 +30,15 @@ export const getFromCache = async (
 
     let cacheDigest = await crypto.subtle.digest(
       {
-        name: 'SHA-256',
+        name: "SHA-256",
       },
-      myText
+      myText,
     );
 
     // Convert arraybuffer to hex
     let cacheKey = Array.from(new Uint8Array(cacheDigest))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
 
     // console.log("Get from cache", cacheKey, cacheKey in inMemoryCache, stringToHash);
 
@@ -62,7 +62,7 @@ export const putInCache = async (
   url: string,
   organisationId: string,
   cacheMode: string | null,
-  cacheMaxAge: number | null
+  cacheMaxAge: number | null,
 ) => {
   if (requestBody.stream) {
     // Does not support caching of streams
@@ -73,15 +73,15 @@ export const putInCache = async (
 
   let cacheDigest = await crypto.subtle.digest(
     {
-      name: 'SHA-256',
+      name: "SHA-256",
     },
-    myText
+    myText,
   );
 
   // Convert arraybuffer to hex
   let cacheKey = Array.from(new Uint8Array(cacheDigest))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
   // console.log("Put in cache", cacheKey, stringToHash);
   inMemoryCache[cacheKey] = JSON.stringify(responseBody);
 };
@@ -89,11 +89,11 @@ export const putInCache = async (
 export const memoryCache = () => {
   return async (c: Context, next: any) => {
     // console.log("Cache Init")
-    c.set('getFromCache', getFromCache);
+    c.set("getFromCache", getFromCache);
 
     await next();
 
-    let requestOptions = c.get('requestOptions');
+    let requestOptions = c.get("requestOptions");
 
     if (
       requestOptions &&
@@ -101,16 +101,16 @@ export const memoryCache = () => {
       requestOptions.length > 0
     ) {
       requestOptions = requestOptions[0];
-      if (requestOptions.cacheMode === 'simple') {
+      if (requestOptions.cacheMode === "simple") {
         await putInCache(
           null,
           null,
           requestOptions.requestParams,
           await requestOptions.response.json(),
           requestOptions.providerOptions.rubeusURL,
-          '',
+          "",
           null,
-          null
+          null,
         );
       }
     }

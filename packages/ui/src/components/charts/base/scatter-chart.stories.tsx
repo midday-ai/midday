@@ -70,7 +70,7 @@ const Template: StoryFn<ScatterChartProps> = (
 export const Default = Template.bind({});
 Default.args = {
   currency: "USD",
-  data: payloads.map(point => ({ x: point.x.toString(), y: point.y })),
+  data: payloads.map((point) => ({ x: point.x.toString(), y: point.y })),
   height: 290,
   locale: "en-US",
   enableAssistantMode: true,
@@ -87,7 +87,7 @@ EuroChart.args = {
 export const LargeDataset = Template.bind({});
 LargeDataset.args = {
   ...Default.args,
-  data: payloads.map(point => ({ x: point.x.toString(), y: point.y })),
+  data: payloads.map((point) => ({ x: point.x.toString(), y: point.y })),
 };
 
 export const SmallHeight = Template.bind({});
@@ -105,13 +105,13 @@ LargeHeight.args = {
 export const VolatileData = Template.bind({});
 VolatileData.args = {
   ...Default.args,
-  data: payloads.map(point => ({ x: point.x.toString(), y: point.y })),
+  data: payloads.map((point) => ({ x: point.x.toString(), y: point.y })),
 };
 
 export const SingleDataPoint = Template.bind({});
 SingleDataPoint.args = {
   ...Default.args,
-  data: payloads.map(point => ({ x: point.x.toString(), y: point.y })),
+  data: payloads.map((point) => ({ x: point.x.toString(), y: point.y })),
 };
 
 export const EmptyDataset = Template.bind({});

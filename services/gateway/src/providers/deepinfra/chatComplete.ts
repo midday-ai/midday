@@ -1,69 +1,69 @@
-import { DEEPINFRA } from '../../globals';
+import { DEEPINFRA } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 // TODOS: this configuration does not enforce the maximum token limit for the input parameter. If you want to enforce this, you might need to add a custom validation function or a max property to the ParameterConfig interface, and then use it in the input configuration. However, this might be complex because the token count is not a simple length check, but depends on the specific tokenization method used by the model.
 // TODOS: this configuration might have to check on the max value of n
 
 export const DeepInfraChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'deepinfra/airoboros-70b',
+    default: "deepinfra/airoboros-70b",
   },
   messages: {
-    param: 'messages',
+    param: "messages",
     required: true,
     default: [],
   },
   frequency_penalty: {
-    param: 'frequency_penalty',
+    param: "frequency_penalty",
     default: 0,
     min: -2,
     max: 2,
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 1,
   },
   n: {
-    param: 'n',
+    param: "n",
     default: 1,
     min: 1,
     max: 1,
   },
   presence_penalty: {
-    param: 'presence_penalty',
+    param: "presence_penalty",
     min: -2,
     max: 2,
     default: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
     default: null,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
 };
@@ -105,10 +105,10 @@ interface DeepInfraStreamChunk {
 
 export const DeepInfraChatCompleteResponseTransform: (
   response: DeepInfraChatCompleteResponse | DeepInfraErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (
-    'detail' in response &&
+    "detail" in response &&
     responseStatus !== 200 &&
     response.detail.length
   ) {
@@ -119,7 +119,7 @@ export const DeepInfraChatCompleteResponseTransform: (
 
     if (Array.isArray(response.detail)) {
       [firstError] = response.detail;
-      errorField = firstError?.loc?.join('.') ?? '';
+      errorField = firstError?.loc?.join(".") ?? "";
       errorMessage = firstError.msg;
       errorType = firstError.type;
     } else {
@@ -128,16 +128,16 @@ export const DeepInfraChatCompleteResponseTransform: (
 
     return generateErrorResponse(
       {
-        message: `${errorField ? `${errorField}: ` : ''}${errorMessage}`,
+        message: `${errorField ? `${errorField}: ` : ""}${errorMessage}`,
         type: errorType,
         param: null,
         code: null,
       },
-      DEEPINFRA
+      DEEPINFRA,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -164,12 +164,12 @@ export const DeepInfraChatCompleteResponseTransform: (
 };
 
 export const DeepInfraChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: DeepInfraStreamChunk = JSON.parse(chunk);
@@ -187,6 +187,6 @@ export const DeepInfraChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.choices[0].finish_reason,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

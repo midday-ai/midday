@@ -1,8 +1,6 @@
 import { MerchantFinancialMetricsConverter } from "../../../../lib/converters/merchant-sub-profile-converter";
 import { SpendingPeriod } from "../../../../types/merchant";
-import {
-  MerchantMetricsFinancialSubProfile
-} from "client-typescript-sdk";
+import { MerchantMetricsFinancialSubProfile } from "client-typescript-sdk";
 import React, { useMemo, useState } from "react";
 
 import {

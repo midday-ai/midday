@@ -121,7 +121,7 @@ export function SectionTraction() {
                 <span className="mt-auto font-mono text-[80px] md:text-[122px]">
                   {transactions &&
                     Intl.NumberFormat("en", { notation: "compact" }).format(
-                      transactions
+                      transactions,
                     )}
                 </span>
               </div>

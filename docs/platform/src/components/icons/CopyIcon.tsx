@@ -1,4 +1,4 @@
-export function CopyIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function CopyIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -13,5 +13,5 @@ export function CopyIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="M5.5 7.5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2v-8Z"
       />
     </svg>
-  )
+  );
 }

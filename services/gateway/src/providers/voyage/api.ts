@@ -1,16 +1,16 @@
-import { ProviderAPIConfig } from '../types';
+import { ProviderAPIConfig } from "../types";
 
 const VoyageAPIConfig: ProviderAPIConfig = {
-  getBaseURL: () => 'https://api.voyageai.com/v1',
+  getBaseURL: () => "https://api.voyageai.com/v1",
   headers: ({ providerOptions }) => {
     return { Authorization: `Bearer ${providerOptions.apiKey}` };
   },
   getEndpoint: ({ fn }) => {
     switch (fn) {
-      case 'embed':
-        return '/embeddings';
+      case "embed":
+        return "/embeddings";
       default:
-        return '';
+        return "";
     }
   },
 };

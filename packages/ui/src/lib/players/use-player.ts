@@ -35,7 +35,7 @@ export function usePlayer() {
       const audioBuffer = audioContext.current.createBuffer(
         1,
         buffer.length,
-        audioContext.current.sampleRate
+        audioContext.current.sampleRate,
       );
       audioBuffer.copyToChannel(buffer, 0);
 

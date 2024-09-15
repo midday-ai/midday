@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as CsvPreview from "./csv-preview.stories";
+
+<Meta of={CsvPreview} />
+
+# CsvPreview Component
+
+The `CsvPreview` is a component that displays a preview of a CSV file.
+
+## Component Props
+
+<Canvas of={CsvPreview.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `CsvPreview`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <CsvPreview fileUrl={"http://example.com"} />
+  </Story>
+</Canvas>
+```

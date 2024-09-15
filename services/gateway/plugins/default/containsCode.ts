@@ -3,44 +3,44 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
+} from "../types";
+import { getText } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
   let data = null;
 
   const languageMap: { [key: string]: string } = {
-    sql: 'SQL',
-    py: 'Python',
-    ts: 'TypeScript',
-    js: 'JavaScript',
-    java: 'Java',
-    cs: 'C#',
-    cpp: 'C++',
-    c: 'C',
-    rb: 'Ruby',
-    php: 'PHP',
-    swift: 'Swift',
-    kt: 'Kotlin',
-    go: 'Go',
-    rs: 'Rust',
-    scala: 'Scala',
-    r: 'R',
-    pl: 'Perl',
-    sh: 'Shell',
-    html: 'HTML',
-    css: 'CSS',
-    xml: 'XML',
-    json: 'JSON',
-    yml: 'YAML',
-    md: 'Markdown',
-    dockerfile: 'Dockerfile',
+    sql: "SQL",
+    py: "Python",
+    ts: "TypeScript",
+    js: "JavaScript",
+    java: "Java",
+    cs: "C#",
+    cpp: "C++",
+    c: "C",
+    rb: "Ruby",
+    php: "PHP",
+    swift: "Swift",
+    kt: "Kotlin",
+    go: "Go",
+    rs: "Rust",
+    scala: "Scala",
+    r: "R",
+    pl: "Perl",
+    sh: "Shell",
+    html: "HTML",
+    css: "CSS",
+    xml: "XML",
+    json: "JSON",
+    yml: "YAML",
+    md: "Markdown",
+    dockerfile: "Dockerfile",
     // Add more mappings as needed
   };
 
@@ -60,7 +60,7 @@ export const handler: PluginHandler = async (
     }
 
     if (match === null) {
-      data = { message: 'No code block found in the response text.' };
+      data = { message: "No code block found in the response text." };
     }
   } catch (e) {
     error = e as Error;

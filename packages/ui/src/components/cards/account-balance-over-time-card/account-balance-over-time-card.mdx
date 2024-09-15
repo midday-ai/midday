@@ -1,0 +1,46 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as AccountBalanceOverTimeCard from "./account-balance-over-time-card.stories";
+
+<Meta of={AccountBalanceOverTimeCard} />
+
+# AccountBalanceOverTimeCard Component
+
+The `AccountBalanceOverTimeCard` is a flexible card component used to display the account balance history
+
+## Component Props
+
+<Canvas of={AccountBalanceOverTimeCard.Default} />
+
+<Controls />
+
+## Usage
+
+```tsx
+<Canvas>
+  <AccountBalanceOverTimeCard
+    accountBalanceHistory=[]
+  />
+</Canvas>
+```
+
+## Detailed Description
+
+The `AccountBalanceOverTimeCard` component is designed to display the account balance history in a card format. It can be used to show the account balance over time, and can be customized with various options such as:
+
+- **Account Balance History**: An array of objects representing the account balance history.
+- **className**: Custom class name to be applied to the component.
+
+## Examples
+
+### Account Balance History With Basic Histories
+
+<Canvas
+  of={AccountBalanceOverTimeCard.AccountBalanceHistoryCardWithBasicHistories}
+/>
+
+### Account Balance History With Custom Class Name
+
+<Canvas
+  of={AccountBalanceOverTimeCard.AccountBalanceHistoryCardWithCustomClassName}
+/>

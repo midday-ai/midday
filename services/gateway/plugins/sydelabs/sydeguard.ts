@@ -3,16 +3,16 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText, post } from '../utils';
+} from "../types";
+import { getText, post } from "../utils";
 
 export const SYDEGUARD_URL =
-  'https://guard.sydelabs.ai/api/v1/guard/generate-score';
+  "https://guard.sydelabs.ai/api/v1/guard/generate-score";
 
 export const fetchSydeGuard = async (credentials: any, data: any) => {
   const options = {
     headers: {
-      'x-api-key': credentials.apiKey,
+      "x-api-key": credentials.apiKey,
     },
   };
   return post(SYDEGUARD_URL, data, options);
@@ -21,7 +21,7 @@ export const fetchSydeGuard = async (credentials: any, data: any) => {
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -65,7 +65,7 @@ export const handler: PluginHandler = async (
     // }
 
     if (!result?.category_scores) {
-      error = new Error('No category scores found in the result');
+      error = new Error("No category scores found in the result");
     } else {
       // convert the category scores array into an object and category as key and score as value
       let scores: { [key: string]: number } = {}; // Initialize scores as an empty object
@@ -74,9 +74,9 @@ export const handler: PluginHandler = async (
       });
 
       if (
-        scores['PROMPT_INJECT'] > parameters.prompt_injection_threshold ||
-        scores['TOXIC'] > parameters.toxicity_threshold ||
-        scores['EVASION'] > parameters.evasion_threshold
+        scores["PROMPT_INJECT"] > parameters.prompt_injection_threshold ||
+        scores["TOXIC"] > parameters.toxicity_threshold ||
+        scores["EVASION"] > parameters.evasion_threshold
       ) {
         verdict = false;
       } else {

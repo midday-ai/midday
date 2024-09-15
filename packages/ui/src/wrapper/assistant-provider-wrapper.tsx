@@ -9,19 +9,19 @@ import React from "react";
  * @component
  */
 const AssistantProviderWrapper: React.FC<{ children: React.ReactNode }> = ({
-    children,
+  children,
 }) => {
-    const assistant = useAssistant({
-        api: "/api/assistant", // Adjust this if your API endpoint is different
-    });
+  const assistant = useAssistant({
+    api: "/api/assistant", // Adjust this if your API endpoint is different
+  });
 
-    const runtime = useVercelUseAssistantRuntime(assistant);
+  const runtime = useVercelUseAssistantRuntime(assistant);
 
-    return (
-        <AssistantRuntimeProvider runtime={runtime}>
-            {children}
-        </AssistantRuntimeProvider>
-    );
+  return (
+    <AssistantRuntimeProvider runtime={runtime}>
+      {children}
+    </AssistantRuntimeProvider>
+  );
 };
 
 export default AssistantProviderWrapper;

@@ -1,4 +1,4 @@
-import { Message, Options, Params } from '../types/requestBody';
+import { Message, Options, Params } from "../types/requestBody";
 
 /**
  * Configuration for a parameter.
@@ -51,18 +51,18 @@ export interface ProviderAPIConfig {
 }
 
 export type endpointStrings =
-  | 'complete'
-  | 'chatComplete'
-  | 'embed'
-  | 'rerank'
-  | 'moderate'
-  | 'stream-complete'
-  | 'stream-chatComplete'
-  | 'proxy'
-  | 'imageGenerate'
-  | 'createSpeech'
-  | 'createTranscription'
-  | 'createTranslation';
+  | "complete"
+  | "chatComplete"
+  | "embed"
+  | "rerank"
+  | "moderate"
+  | "stream-complete"
+  | "stream-chatComplete"
+  | "proxy"
+  | "imageGenerate"
+  | "createSpeech"
+  | "createTranscription"
+  | "createTranslation";
 
 /**
  * A collection of API configurations for multiple AI providers.

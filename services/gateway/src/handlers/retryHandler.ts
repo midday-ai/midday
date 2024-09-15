@@ -1,9 +1,9 @@
-import retry from 'async-retry';
+import retry from "async-retry";
 
 async function fetchWithTimeout(
   url: string,
   options: RequestInit,
-  timeout: number
+  timeout: number,
 ) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -18,22 +18,22 @@ async function fetchWithTimeout(
     response = await fetch(url, timeoutRequestOptions);
     clearTimeout(timeoutId);
   } catch (err: any) {
-    if (err.name === 'AbortError') {
+    if (err.name === "AbortError") {
       response = new Response(
         JSON.stringify({
           error: {
             message: `Request exceeded the timeout sent in the request: ${timeout}ms`,
-            type: 'timeout_error',
+            type: "timeout_error",
             param: null,
             code: null,
           },
         }),
         {
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
           status: 408,
-        }
+        },
       );
     } else {
       throw err;
@@ -61,7 +61,7 @@ export const retryRequest = async (
   options: RequestInit,
   retryCount: number,
   statusCodesToRetry: number[],
-  timeout: number | null
+  timeout: number | null,
 ): Promise<[Response, number | undefined]> => {
   let lastError: any | undefined;
   let lastResponse: Response | undefined;
@@ -109,15 +109,15 @@ export const retryRequest = async (
           console.warn(`Failed in Retry attempt ${attempt}. Error: ${error}`);
         },
         randomize: false,
-      }
+      },
     );
   } catch (error: any) {
     if (
       error instanceof TypeError &&
       error.cause instanceof Error &&
-      error.cause?.name === 'ConnectTimeoutError'
+      error.cause?.name === "ConnectTimeoutError"
     ) {
-      console.error('ConnectTimeoutError: ', error.cause);
+      console.error("ConnectTimeoutError: ", error.cause);
       // This error comes in case the host address is unreachable. Empty status code used to get returned
       // from here hence no retry logic used to get called.
       lastResponse = new Response(error.message, {
@@ -130,7 +130,7 @@ export const retryRequest = async (
       });
     }
     console.warn(
-      `Tried ${lastAttempt ?? 1} time(s) but failed. Error: ${JSON.stringify(error)}`
+      `Tried ${lastAttempt ?? 1} time(s) but failed. Error: ${JSON.stringify(error)}`,
     );
   }
   return [lastResponse as Response, lastAttempt];

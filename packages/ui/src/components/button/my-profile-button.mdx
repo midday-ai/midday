@@ -1,0 +1,31 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as MyProfileButton from "./my-profile-button.stories";
+
+<Meta of={MyProfileButton} />
+
+# MyProfileButton Component
+
+The `MyProfileButton` is a button component styled to stand out and attract users to interact with it. It can be used for important call-to-action buttons, such as asking queries or initiating AI-based solutions.
+
+## Component Props
+
+<Canvas of={MyProfileButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `MyProfileButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <MyProfileButton
+      href="https://example.com"
+      label="Click me"
+      active={true}
+    />
+  </Story>
+</Canvas>
+```

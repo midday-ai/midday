@@ -1,13 +1,13 @@
-import { ErrorResponse } from './types';
+import { ErrorResponse } from "./types";
 
 export const generateInvalidProviderResponseError: (
   response: Record<string, any>,
-  provider: string
+  provider: string,
 ) => ErrorResponse = (response, provider) => {
   return {
     error: {
       message: `Invalid response received from ${provider}: ${JSON.stringify(
-        response
+        response,
       )}`,
       type: null,
       param: null,
@@ -24,7 +24,7 @@ export const generateErrorResponse: (
     param: string | null;
     code: string | null;
   },
-  provider: string
+  provider: string,
 ) => ErrorResponse = ({ message, type, param, code }, provider) => {
   return {
     error: {
@@ -48,7 +48,7 @@ export function splitString(input: string, separator: string): SplitResult {
   if (sepIndex === -1) {
     return {
       before: input,
-      after: '',
+      after: "",
     };
   }
 

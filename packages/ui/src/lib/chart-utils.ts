@@ -6,7 +6,7 @@ export function formatSize(bytes: number): string {
 
   const unitIndex = Math.max(
     0,
-    Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1)
+    Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1),
   );
 
   return Intl.NumberFormat("en-US", {
@@ -137,7 +137,7 @@ export function roundToNearestFactor(numbers: number[]): number {
 export function generateTickValues(
   min: number,
   max: number,
-  desiredTickCount: number = 5
+  desiredTickCount: number = 5,
 ): number[] {
   if (min >= max) {
     throw new Error("Invalid input: min must be less than max");
@@ -195,7 +195,7 @@ export function generateTickValues(
  */
 export function computeChartDataDifferenceOverTime(
   inputData: ChartDataPoint[],
-  period: "weekly" | "monthly"
+  period: "weekly" | "monthly",
 ): ChartDatePointWithDifference {
   return {
     result: inputData.map((point, index) => {

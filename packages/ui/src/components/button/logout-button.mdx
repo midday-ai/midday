@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as LogOutButton from "./logout-button.stories";
+
+<Meta of={LogOutButton} />
+
+# LogOutButton Component
+
+The `LogOutButton` is a button component used to enable users to log out of our application.
+
+## Component Props
+
+<Canvas of={LogOutButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `LogOutButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <LogOutButton href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```

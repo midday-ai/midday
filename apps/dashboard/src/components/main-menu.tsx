@@ -2,6 +2,7 @@
 
 import { updateMenuAction } from "@/actions/update-menu-action";
 import { useMenuStore } from "@/store/menu";
+import { featureFlags } from "@internal/env/dashboard";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -27,6 +28,9 @@ const icons = {
   "/vault": () => <Icons.Files size={22} />,
   "/settings": () => <Icons.Settings size={22} />,
   "/inbox": () => <Icons.Inbox2 size={22} />,
+  "/cash-flow": () => <Icons.Wallet size={22} />,
+  "/categories": () => <Icons.Categories size={22} />,
+  "/financial-accounts": () => <Icons.Accounts size={22} />,
 };
 
 const defaultItems = [
@@ -34,6 +38,7 @@ const defaultItems = [
     path: "/",
     name: "Overview",
   },
+
   {
     path: "/inbox",
     name: "Inbox",
@@ -60,6 +65,21 @@ const defaultItems = [
   },
 ];
 
+const analyticsItems = [
+  {
+    path: "/cash-flow",
+    name: "Cash Flow",
+  },
+  {
+    path: "/categories",
+    name: "Categories",
+  },
+  {
+    path: "/financial-accounts",
+    name: "Financial Accounts",
+  },
+];
+
 interface ItemProps {
   item: { path: string; name: string };
   isActive: boolean;
@@ -80,7 +100,7 @@ const Item = ({
   onSelect,
 }: ItemProps) => {
   const y = useMotionValue(0);
-  const Icon = icons[item.path];
+  const IconComponent = icons[item.path as keyof typeof icons];
 
   return (
     <TooltipProvider delayDuration={70}>
@@ -142,7 +162,11 @@ const Item = ({
                       "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
                   )}
                 >
-                  <Icon />
+                  {IconComponent ? (
+                    <IconComponent />
+                  ) : (
+                    <div className="w-[22px] h-[22px]" />
+                  )}
                   <span className="flex md:hidden">{item.name}</span>
                 </div>
               </motion.div>
@@ -182,18 +206,22 @@ type Props = {
 };
 
 export function MainMenu({ initialItems, onSelect }: Props) {
-  const [items, setItems] = useState(initialItems ?? defaultItems);
+  const enabledItemSet =
+    featureFlags.isAnalyticsV2Enabled === true
+      ? [defaultItems[0], ...analyticsItems, ...defaultItems.slice(1)]
+      : defaultItems;
+
+  const [items, setItems] = useState(initialItems ?? enabledItemSet);
   const { isCustomizing, setCustomizing } = useMenuStore();
   const pathname = usePathname();
   const part = pathname?.split("/")[1];
   const updateMenu = useAction(updateMenuAction);
-
   const hiddenItems = defaultItems.filter(
-    (item) => !items.some((i) => i.path === item.path),
+    (item) => !items.some((i) => i?.path === item.path),
   );
 
-  const onReorder = (items) => {
-    setItems(items);
+  const onReorder = (newItems: { path: string; name: string }[]) => {
+    setItems(newItems);
   };
 
   const onDragEnd = () => {
@@ -223,6 +251,8 @@ export function MainMenu({ initialItems, onSelect }: Props) {
   const ref = useClickAway(() => {
     setCustomizing(false);
   });
+
+  console.log("items", items);
 
   return (
     <div className="mt-6" {...bind()} ref={ref}>

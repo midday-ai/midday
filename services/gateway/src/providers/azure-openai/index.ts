@@ -1,27 +1,27 @@
-import { ProviderConfigs } from '../types';
+import { ProviderConfigs } from "../types";
 import {
   AzureOpenAICompleteConfig,
   AzureOpenAICompleteResponseTransform,
-} from './complete';
+} from "./complete";
 import {
   AzureOpenAIEmbedConfig,
   AzureOpenAIEmbedResponseTransform,
-} from './embed';
-import AzureOpenAIAPIConfig from './api';
+} from "./embed";
+import AzureOpenAIAPIConfig from "./api";
 import {
   AzureOpenAIChatCompleteConfig,
   AzureOpenAIChatCompleteResponseTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   AzureOpenAIImageGenerateConfig,
   AzureOpenAIImageGenerateResponseTransform,
-} from './imageGenerate';
+} from "./imageGenerate";
 import {
   AzureOpenAICreateSpeechConfig,
   AzureOpenAICreateSpeechResponseTransform,
-} from './createSpeech';
-import { AzureOpenAICreateTranscriptionResponseTransform } from './createTranscription';
-import { AzureOpenAICreateTranslationResponseTransform } from './createTranslation';
+} from "./createSpeech";
+import { AzureOpenAICreateTranscriptionResponseTransform } from "./createTranscription";
+import { AzureOpenAICreateTranslationResponseTransform } from "./createTranslation";
 
 const AzureOpenAIConfig: ProviderConfigs = {
   complete: AzureOpenAICompleteConfig,

@@ -1,7 +1,7 @@
-import { AI21, ANTHROPIC, COHERE } from '../../globals';
-import { Params } from '../../types/requestBody';
-import { ProviderConfigs } from '../types';
-import BedrockAPIConfig from './api';
+import { AI21, ANTHROPIC, COHERE } from "../../globals";
+import { Params } from "../../types/requestBody";
+import { ProviderConfigs } from "../types";
+import BedrockAPIConfig from "./api";
 import {
   BedrockAI21ChatCompleteConfig,
   BedrockAI21ChatCompleteResponseTransform,
@@ -20,7 +20,7 @@ import {
   BedrockMistralChatCompleteConfig,
   BedrockMistralChatCompleteResponseTransform,
   BedrockMistralChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   BedrockAI21CompleteConfig,
   BedrockAI21CompleteResponseTransform,
@@ -39,23 +39,23 @@ import {
   BedrockTitanCompleteConfig,
   BedrockTitanCompleteResponseTransform,
   BedrockTitanCompleteStreamChunkTransform,
-} from './complete';
+} from "./complete";
 import {
   BedrockCohereEmbedConfig,
   BedrockCohereEmbedResponseTransform,
   BedrockTitanEmbedConfig,
   BedrockTitanEmbedResponseTransform,
-} from './embed';
+} from "./embed";
 import {
   BedrockStabilityAIImageGenerateConfig,
   BedrockStabilityAIImageGenerateResponseTransform,
-} from './imageGenerate';
+} from "./imageGenerate";
 
 const BedrockConfig: ProviderConfigs = {
   api: BedrockAPIConfig,
   getConfig: (params: Params) => {
     const providerModel = params.model;
-    const provider = providerModel?.split('.')[0];
+    const provider = providerModel?.split(".")[0];
     switch (provider) {
       case ANTHROPIC:
         return {
@@ -63,9 +63,9 @@ const BedrockConfig: ProviderConfigs = {
           chatComplete: BedrockAnthropicChatCompleteConfig,
           api: BedrockAPIConfig,
           responseTransforms: {
-            'stream-complete': BedrockAnthropicCompleteStreamChunkTransform,
+            "stream-complete": BedrockAnthropicCompleteStreamChunkTransform,
             complete: BedrockAnthropicCompleteResponseTransform,
-            'stream-chatComplete':
+            "stream-chatComplete":
               BedrockAnthropicChatCompleteStreamChunkTransform,
             chatComplete: BedrockAnthropicChatCompleteResponseTransform,
           },
@@ -77,49 +77,49 @@ const BedrockConfig: ProviderConfigs = {
           embed: BedrockCohereEmbedConfig,
           api: BedrockAPIConfig,
           responseTransforms: {
-            'stream-complete': BedrockCohereCompleteStreamChunkTransform,
+            "stream-complete": BedrockCohereCompleteStreamChunkTransform,
             complete: BedrockCohereCompleteResponseTransform,
-            'stream-chatComplete':
+            "stream-chatComplete":
               BedrockCohereChatCompleteStreamChunkTransform,
             chatComplete: BedrockCohereChatCompleteResponseTransform,
             embed: BedrockCohereEmbedResponseTransform,
           },
         };
-      case 'meta':
+      case "meta":
         return {
           complete: BedrockLLamaCompleteConfig,
           chatComplete: BedrockLLamaChatCompleteConfig,
           api: BedrockAPIConfig,
           responseTransforms: {
-            'stream-complete': BedrockLlamaCompleteStreamChunkTransform,
+            "stream-complete": BedrockLlamaCompleteStreamChunkTransform,
             complete: BedrockLlamaCompleteResponseTransform,
-            'stream-chatComplete': BedrockLlamaChatCompleteStreamChunkTransform,
+            "stream-chatComplete": BedrockLlamaChatCompleteStreamChunkTransform,
             chatComplete: BedrockLlamaChatCompleteResponseTransform,
           },
         };
-      case 'mistral':
+      case "mistral":
         return {
           complete: BedrockMistralCompleteConfig,
           chatComplete: BedrockMistralChatCompleteConfig,
           api: BedrockAPIConfig,
           responseTransforms: {
-            'stream-complete': BedrockMistralCompleteStreamChunkTransform,
+            "stream-complete": BedrockMistralCompleteStreamChunkTransform,
             complete: BedrockMistralCompleteResponseTransform,
-            'stream-chatComplete':
+            "stream-chatComplete":
               BedrockMistralChatCompleteStreamChunkTransform,
             chatComplete: BedrockMistralChatCompleteResponseTransform,
           },
         };
-      case 'amazon':
+      case "amazon":
         return {
           complete: BedrockTitanCompleteConfig,
           chatComplete: BedrockTitanChatompleteConfig,
           embed: BedrockTitanEmbedConfig,
           api: BedrockAPIConfig,
           responseTransforms: {
-            'stream-complete': BedrockTitanCompleteStreamChunkTransform,
+            "stream-complete": BedrockTitanCompleteStreamChunkTransform,
             complete: BedrockTitanCompleteResponseTransform,
-            'stream-chatComplete': BedrockTitanChatCompleteStreamChunkTransform,
+            "stream-chatComplete": BedrockTitanChatCompleteStreamChunkTransform,
             chatComplete: BedrockTitanChatCompleteResponseTransform,
             embed: BedrockTitanEmbedResponseTransform,
           },
@@ -134,7 +134,7 @@ const BedrockConfig: ProviderConfigs = {
             chatComplete: BedrockAI21ChatCompleteResponseTransform,
           },
         };
-      case 'stability':
+      case "stability":
         return {
           imageGenerate: BedrockStabilityAIImageGenerateConfig,
           api: BedrockAPIConfig,

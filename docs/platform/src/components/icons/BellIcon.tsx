@@ -1,4 +1,4 @@
-export function BellIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function BellIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -13,5 +13,5 @@ export function BellIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="M7.5 15.5v0a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v0"
       />
     </svg>
-  )
+  );
 }

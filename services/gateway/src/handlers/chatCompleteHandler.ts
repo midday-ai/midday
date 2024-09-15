@@ -1,9 +1,9 @@
-import { Targets } from '../types/requestBody';
+import { Targets } from "../types/requestBody";
 import {
   fetchProviderOptionsFromConfig,
   tryProvidersInSequence,
-} from './handlerUtils';
-import { Context } from 'hono';
+} from "./handlerUtils";
+import { Context } from "hono";
 
 /**
  * @deprecated
@@ -36,16 +36,16 @@ export async function chatCompleteHandler(c: Context): Promise<Response> {
     ) {
       return new Response(
         JSON.stringify({
-          status: 'failure',
+          status: "failure",
           message:
-            'Please use the latest routes or SDK to use this version of config.',
+            "Please use the latest routes or SDK to use this version of config.",
         }),
         {
           status: 400,
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -54,15 +54,15 @@ export async function chatCompleteHandler(c: Context): Promise<Response> {
     if (!providerOptions) {
       return new Response(
         JSON.stringify({
-          status: 'failure',
-          message: 'Could not find a provider option.',
+          status: "failure",
+          message: "Could not find a provider option.",
         }),
         {
           status: 400,
           headers: {
-            'content-type': 'application/json',
+            "content-type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -72,30 +72,30 @@ export async function chatCompleteHandler(c: Context): Promise<Response> {
         providerOptions,
         request.params,
         requestHeaders,
-        'chatComplete'
+        "chatComplete",
       );
     } catch (error: any) {
       const errorArray = JSON.parse(error.message);
       return new Response(errorArray[errorArray.length - 1].errorObj, {
         status: errorArray[errorArray.length - 1].status,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
       });
     }
   } catch (err: any) {
-    console.log('chatComplete error', err.message);
+    console.log("chatComplete error", err.message);
     return new Response(
       JSON.stringify({
-        status: 'failure',
-        message: 'Something went wrong',
+        status: "failure",
+        message: "Something went wrong",
       }),
       {
         status: 500,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 }

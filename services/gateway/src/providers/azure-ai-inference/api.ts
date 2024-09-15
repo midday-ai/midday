@@ -1,5 +1,5 @@
-import { GITHUB } from '../../globals';
-import { ProviderAPIConfig } from '../types';
+import { GITHUB } from "../../globals";
+import { ProviderAPIConfig } from "../types";
 
 const AzureAIInferenceAPI: ProviderAPIConfig = {
   getBaseURL: ({ providerOptions }) => {
@@ -11,9 +11,9 @@ const AzureAIInferenceAPI: ProviderAPIConfig = {
       azureEndpointName,
     } = providerOptions;
     if (provider === GITHUB) {
-      return 'https://models.inference.ai.azure.com';
+      return "https://models.inference.ai.azure.com";
     }
-    if (azureDeploymentType === 'serverless') {
+    if (azureDeploymentType === "serverless") {
       return `https://${azureDeploymentName?.toLowerCase()}.${azureRegion}.models.ai.azure.com`;
     }
 
@@ -24,10 +24,10 @@ const AzureAIInferenceAPI: ProviderAPIConfig = {
       providerOptions;
     const headers: Record<string, string> = {
       Authorization: `Bearer ${apiKey}`,
-      'extra-parameters': 'ignore',
+      "extra-parameters": "ignore",
     };
-    if (azureDeploymentType === 'managed' && azureDeploymentName) {
-      headers['azureml-model-deployment'] = azureDeploymentName;
+    if (azureDeploymentType === "managed" && azureDeploymentName) {
+      headers["azureml-model-deployment"] = azureDeploymentName;
     }
     return headers;
   },
@@ -36,41 +36,41 @@ const AzureAIInferenceAPI: ProviderAPIConfig = {
     let mappedFn = fn;
 
     const ENDPOINT_MAPPING: Record<string, string> = {
-      complete: '/completions',
-      chatComplete: '/chat/completions',
-      embed: '/embeddings',
+      complete: "/completions",
+      chatComplete: "/chat/completions",
+      embed: "/embeddings",
     };
 
     const isGithub = providerOptions.provider === GITHUB;
 
-    if (fn === 'proxy' && urlToFetch) {
-      if (urlToFetch?.indexOf('/chat/completions') > -1) {
-        mappedFn = 'chatComplete';
-      } else if (urlToFetch?.indexOf('/completions') > -1) {
-        mappedFn = 'complete';
-      } else if (urlToFetch?.indexOf('/embeddings') > -1) {
-        mappedFn = 'embed';
+    if (fn === "proxy" && urlToFetch) {
+      if (urlToFetch?.indexOf("/chat/completions") > -1) {
+        mappedFn = "chatComplete";
+      } else if (urlToFetch?.indexOf("/completions") > -1) {
+        mappedFn = "complete";
+      } else if (urlToFetch?.indexOf("/embeddings") > -1) {
+        mappedFn = "embed";
       }
     }
 
     switch (mappedFn) {
-      case 'complete': {
+      case "complete": {
         return isGithub
           ? ENDPOINT_MAPPING[mappedFn]
           : `${ENDPOINT_MAPPING[mappedFn]}?api-version=${azureApiVersion}`;
       }
-      case 'chatComplete': {
+      case "chatComplete": {
         return isGithub
           ? ENDPOINT_MAPPING[mappedFn]
           : `${ENDPOINT_MAPPING[mappedFn]}?api-version=${azureApiVersion}`;
       }
-      case 'embed': {
+      case "embed": {
         return isGithub
           ? ENDPOINT_MAPPING[mappedFn]
           : `${ENDPOINT_MAPPING[mappedFn]}?api-version=${azureApiVersion}`;
       }
       default:
-        return '';
+        return "";
     }
   },
 };

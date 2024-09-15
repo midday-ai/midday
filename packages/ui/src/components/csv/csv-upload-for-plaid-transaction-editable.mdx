@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as EditableCsvUploaderForPlaidTransactions from "./csv-upload-for-plaid-transaction-editable.stories";
+
+<Meta of={EditableCsvUploaderForPlaidTransactions} />
+
+# EditableCsvUploaderForPlaidTransactions Component
+
+The `EditableCsvUploaderForPlaidTransactions` is a component to upload csv date
+
+## Component Props
+
+<Canvas of={EditableCsvUploaderForPlaidTransactions.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `EditableCsvUploaderForPlaidTransactions`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <EditableCsvUploaderForPlaidTransactions />
+  </Story>
+</Canvas>
+```

@@ -82,6 +82,7 @@ import {
   MdOutlineVisibility,
   MdOutlineVolumeOff,
   MdOutlineVolumeUp,
+  MdOutlineWallet,
   MdPause,
   MdPauseCircle,
   MdPeople,
@@ -473,6 +474,7 @@ c-35 156 -46 212 -42 217 4 4 43 -79 90 -194 40 -95 63 -133 86 -140 33 -11
   Settings: MdOutlineSettings,
   Inbox: ArchiveIcon,
   Inbox2: MdOutlineInbox,
+  Wallet: MdOutlineWallet,
   Check: (props: any) => (
     <svg
       xmlns="http://www.w3.org/2000/svg"

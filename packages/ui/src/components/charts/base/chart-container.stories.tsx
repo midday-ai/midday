@@ -71,11 +71,11 @@ export const Default = Template.bind({});
 Default.args = {
   data: payloads,
   dataSet: payloads,
-  setDataSet: () => { },
+  setDataSet: () => {},
   height: 290,
   earliestDate: new Date("2023-01-01"),
   latestDate: new Date("2023-12-31"),
-  filterDataByDateRange: () => { },
+  filterDataByDateRange: () => {},
   enableAssistantMode: true,
 };
 

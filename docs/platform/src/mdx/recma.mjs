@@ -1,3 +1,3 @@
-import { mdxAnnotations } from 'mdx-annotations'
+import { mdxAnnotations } from "mdx-annotations";
 
-export const recmaPlugins = [mdxAnnotations.recma]
+export const recmaPlugins = [mdxAnnotations.recma];

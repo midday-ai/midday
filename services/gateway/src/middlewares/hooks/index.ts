@@ -8,10 +8,10 @@ import {
   HookOnFailObject,
   HookOnSuccessObject,
   HookResult,
-} from './types';
-import { plugins } from '../../../plugins';
-import { Context } from 'hono';
-import { HOOKS_EVENT_TYPE_PRESETS } from './globals';
+} from "./types";
+import { plugins } from "../../../plugins";
+import { Context } from "hono";
+import { HOOKS_EVENT_TYPE_PRESETS } from "./globals";
 
 export class HookSpan {
   private context: HookSpanContext;
@@ -31,21 +31,21 @@ export class HookSpan {
     beforeRequestHooks: HookObject[],
     afterRequestHooks: HookObject[],
     parentHookSpanId: string | null,
-    requestType: string
+    requestType: string,
   ) {
     this.context = this.createContext(
       requestParams,
       provider,
       isStreamingRequest,
-      requestType
+      requestType,
     );
     this.beforeRequestHooks = this.initializeHooks(
       beforeRequestHooks,
-      'beforeRequestHook'
+      "beforeRequestHook",
     );
     this.afterRequestHooks = this.initializeHooks(
       afterRequestHooks,
-      'afterRequestHook'
+      "afterRequestHook",
     );
     this.parentHookSpanId = parentHookSpanId;
     this.hooksResult = {
@@ -59,7 +59,7 @@ export class HookSpan {
     requestParams: Record<string, any>,
     provider: string,
     isStreamingRequest: boolean,
-    requestType: string
+    requestType: string,
   ): HookSpanContext {
     const requestText = this.extractRequestText(requestParams);
     return {
@@ -70,7 +70,7 @@ export class HookSpan {
       },
       response: {
         json: {},
-        text: '',
+        text: "",
         statusCode: null,
       },
       provider,
@@ -87,23 +87,23 @@ export class HookSpan {
       const concatenatedText = Array.isArray(lastMessage.content)
         ? lastMessage.content
             .map((contentPart: any) => contentPart.text)
-            .join('\n')
-        : '';
+            .join("\n")
+        : "";
       return concatenatedText || lastMessage.content;
     }
-    return '';
+    return "";
   }
 
   private initializeHooks(
     hooks: HookObject[],
-    eventType: EventType
+    eventType: EventType,
   ): HookObject[] {
     return hooks.map((hook) => ({ ...hook, eventType }));
   }
 
   public setContextResponse(
     responseJSON: Record<string, any>,
-    responseStatus: number
+    responseStatus: number,
   ): void {
     const responseText = this.extractResponseText(responseJSON);
     this.context.response = {
@@ -122,21 +122,21 @@ export class HookSpan {
         return choice.message.content.text || choice.message.content;
       }
     }
-    return '';
+    return "";
   }
 
   public addHookResult(eventType: EventType, result: HookResult): void {
-    if (eventType === 'beforeRequestHook') {
+    if (eventType === "beforeRequestHook") {
       this.hooksResult.beforeRequestHooksResult.push(result);
-    } else if (eventType === 'afterRequestHook') {
+    } else if (eventType === "afterRequestHook") {
       this.hooksResult.afterRequestHooksResult.push(result);
     }
   }
 
   public resetHookResult(eventType: EventType): void {
-    if (eventType === 'beforeRequestHook') {
+    if (eventType === "beforeRequestHook") {
       this.hooksResult.beforeRequestHooksResult = [];
-    } else if (eventType === 'afterRequestHook') {
+    } else if (eventType === "afterRequestHook") {
       this.hooksResult.afterRequestHooksResult = [];
     }
   }
@@ -180,7 +180,7 @@ export class HooksManager {
     beforeRequestHooks: HookObject[],
     afterRequestHooks: HookObject[],
     parentHookSpanId: string | null,
-    requestType: string
+    requestType: string,
   ): HookSpan {
     const span = new HookSpan(
       requestParams,
@@ -189,7 +189,7 @@ export class HooksManager {
       beforeRequestHooks,
       afterRequestHooks,
       parentHookSpanId,
-      requestType
+      requestType,
     );
 
     this.spans[span.id] = span;
@@ -199,7 +199,7 @@ export class HooksManager {
   public setSpanContextResponse(
     spanId: string,
     responseJson: Record<string, any>,
-    responseStatusCode: number
+    responseStatusCode: number,
   ): void {
     const span = this.getSpan(spanId);
     span.setContextResponse(responseJson, responseStatusCode);
@@ -207,7 +207,7 @@ export class HooksManager {
 
   public async executeHooks(
     spanId: string,
-    eventTypePresets: string[]
+    eventTypePresets: string[],
   ): Promise<{ results: HookResult[]; shouldDeny: boolean }> {
     const span = this.getSpan(spanId);
 
@@ -219,11 +219,11 @@ export class HooksManager {
 
     try {
       const results = await Promise.all(
-        hooksToExecute.map((hook) => this.executeEachHook(spanId, hook))
+        hooksToExecute.map((hook) => this.executeEachHook(spanId, hook)),
       );
       const shouldDeny = results.some(
         (result, index) =>
-          !result.verdict && hooksToExecute[index].deny && !result.skipped
+          !result.verdict && hooksToExecute[index].deny && !result.skipped,
       );
 
       return { results, shouldDeny };
@@ -241,15 +241,15 @@ export class HooksManager {
   private async executeFunction(
     context: HookSpanContext,
     check: Check,
-    eventType: EventType
+    eventType: EventType,
   ): Promise<GuardrailCheckResult> {
-    const [source, fn] = check.id.split('.');
+    const [source, fn] = check.id.split(".");
     const createdAt = new Date();
     try {
       const result = await this.plugins[source][fn](
         context,
         check.parameters,
-        eventType
+        eventType,
       );
       return {
         ...result,
@@ -264,8 +264,8 @@ export class HooksManager {
       console.error(`Error executing check "${check.id}":`, err);
       return {
         error: {
-          name: 'Check error',
-          message: 'Error executing check',
+          name: "Check error",
+          message: "Error executing check",
         },
         verdict: false,
         data: null,
@@ -278,7 +278,7 @@ export class HooksManager {
 
   private async executeEachHook(
     spanId: string,
-    hook: HookObject
+    hook: HookObject,
   ): Promise<HookResult> {
     const span = this.getSpan(spanId);
     let hookResult: HookResult = { id: hook.id } as HookResult;
@@ -288,11 +288,11 @@ export class HooksManager {
       return { ...hookResult, skipped: true };
     }
 
-    if (hook.type === 'guardrail' && hook.checks) {
+    if (hook.type === "guardrail" && hook.checks) {
       const checkResults = await Promise.all(
         hook.checks.map((check: Check) =>
-          this.executeFunction(span.getContext(), check, hook.eventType)
-        )
+          this.executeFunction(span.getContext(), check, hook.eventType),
+        ),
       );
 
       hookResult = {
@@ -302,7 +302,7 @@ export class HooksManager {
         feedback: this.createFeedbackObject(
           checkResults,
           hook.onFail,
-          hook.onSuccess
+          hook.onSuccess,
         ),
         execution_time: new Date().getTime() - createdAt.getTime(),
         async: hook.async || false,
@@ -324,13 +324,13 @@ export class HooksManager {
   private shouldSkipHook(span: HookSpan, hook: HookObject): boolean {
     const context = span.getContext();
     return (
-      !['chatComplete', 'complete'].includes(context.requestType) ||
-      (hook.eventType === 'afterRequestHook' &&
+      !["chatComplete", "complete"].includes(context.requestType) ||
+      (hook.eventType === "afterRequestHook" &&
         context.response.statusCode !== 200) ||
-      (hook.eventType === 'afterRequestHook' &&
+      (hook.eventType === "afterRequestHook" &&
         context.request.isStreamingRequest &&
         !context.response.text) ||
-      (hook.eventType === 'beforeRequestHook' &&
+      (hook.eventType === "beforeRequestHook" &&
         span.getParentHookSpanId() !== null)
     );
   }
@@ -338,7 +338,7 @@ export class HooksManager {
   private createFeedbackObject(
     results: GuardrailCheckResult[],
     onFail?: HookOnFailObject,
-    onSuccess?: HookOnSuccessObject
+    onSuccess?: HookOnSuccessObject,
   ): GuardrailFeedback | null {
     const verdict = results.every((result) => result.verdict || result.error);
     const feedbackConfig = verdict ? onSuccess?.feedback : onFail?.feedback;
@@ -362,58 +362,58 @@ export class HooksManager {
   private getCheckIds(
     results: GuardrailCheckResult[],
     successful: boolean,
-    errored: boolean = false
+    errored: boolean = false,
   ): string {
     return results
       .filter((result) =>
         successful
           ? result.verdict === true
-          : result.verdict === false && errored === !!result.error
+          : result.verdict === false && errored === !!result.error,
       )
       .map((result) => result.id)
-      .join(', ');
+      .join(", ");
   }
 
   private getHooksToExecute(
     span: HookSpan,
-    eventTypePresets: string[]
+    eventTypePresets: string[],
   ): HookObject[] {
     const hooksToExecute: HookObject[] = [];
 
     if (
       eventTypePresets.includes(
-        HOOKS_EVENT_TYPE_PRESETS.ASYNC_BEFORE_REQUEST_HOOK
+        HOOKS_EVENT_TYPE_PRESETS.ASYNC_BEFORE_REQUEST_HOOK,
       )
     ) {
       hooksToExecute.push(
-        ...span.getBeforeRequestHooks().filter((h) => h.async)
+        ...span.getBeforeRequestHooks().filter((h) => h.async),
       );
     }
     if (
       eventTypePresets.includes(
-        HOOKS_EVENT_TYPE_PRESETS.SYNC_BEFORE_REQUEST_HOOK
+        HOOKS_EVENT_TYPE_PRESETS.SYNC_BEFORE_REQUEST_HOOK,
       )
     ) {
       hooksToExecute.push(
-        ...span.getBeforeRequestHooks().filter((h) => !h.async)
+        ...span.getBeforeRequestHooks().filter((h) => !h.async),
       );
     }
     if (
       eventTypePresets.includes(
-        HOOKS_EVENT_TYPE_PRESETS.ASYNC_AFTER_REQUEST_HOOK
+        HOOKS_EVENT_TYPE_PRESETS.ASYNC_AFTER_REQUEST_HOOK,
       )
     ) {
       hooksToExecute.push(
-        ...span.getAfterRequestHooks().filter((h) => h.async)
+        ...span.getAfterRequestHooks().filter((h) => h.async),
       );
     }
     if (
       eventTypePresets.includes(
-        HOOKS_EVENT_TYPE_PRESETS.SYNC_AFTER_REQUEST_HOOK
+        HOOKS_EVENT_TYPE_PRESETS.SYNC_AFTER_REQUEST_HOOK,
       )
     ) {
       hooksToExecute.push(
-        ...span.getAfterRequestHooks().filter((h) => !h.async)
+        ...span.getAfterRequestHooks().filter((h) => !h.async),
       );
     }
 
@@ -423,7 +423,7 @@ export class HooksManager {
 
 export const hooks = (c: Context, next: any) => {
   const hooksManager = new HooksManager();
-  c.set('hooksManager', hooksManager);
-  c.set('executeHooks', hooksManager.executeHooks.bind(hooksManager));
+  c.set("hooksManager", hooksManager);
+  c.set("executeHooks", hooksManager.executeHooks.bind(hooksManager));
   return next();
 };

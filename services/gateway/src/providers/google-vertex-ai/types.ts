@@ -1,4 +1,4 @@
-import { ChatCompletionResponse } from '../types';
+import { ChatCompletionResponse } from "../types";
 
 export interface GoogleErrorResponse {
   error: {
@@ -46,7 +46,7 @@ export interface GoogleGenerateContentResponse {
 }
 
 export interface VertexLLamaChatCompleteResponse
-  extends Omit<ChatCompletionResponse, 'id' | 'created'> {}
+  extends Omit<ChatCompletionResponse, "id" | "created"> {}
 
 export interface VertexLlamaChatCompleteStreamChunk {
   choices: {

@@ -30,11 +30,11 @@ type Props = {
   views: number;
 };
 
-const popupCenter = ({ 
+const popupCenter = ({
   url,
   title,
   w,
-  h
+  h,
 }: {
   url: string;
   title: string;
@@ -49,13 +49,13 @@ const popupCenter = ({
   const width = window.innerWidth
     ? window.innerWidth
     : document.documentElement.clientWidth
-    ? document.documentElement.clientWidth
-    : screen.width;
+      ? document.documentElement.clientWidth
+      : screen.width;
   const height = window.innerHeight
     ? window.innerHeight
     : document.documentElement.clientHeight
-    ? document.documentElement.clientHeight
-    : screen.height;
+      ? document.documentElement.clientHeight
+      : screen.height;
 
   const systemZoom = width / window.screen.availWidth;
   const left = (width - w) / 2 / systemZoom + dualScreenLeft;
@@ -69,7 +69,7 @@ const popupCenter = ({
     height=${h / systemZoom}, 
     top=${top}, 
     left=${left}
-    `
+    `,
   );
 
   return newWindow;
@@ -80,11 +80,11 @@ export function CarouselToolbar({ views }: Props) {
 
   useEffect(() => {
     (async function () {
-      const cal = await getCalApi({"namespace":"30min"});
+      const cal = await getCalApi({ namespace: "30min" });
       cal("ui", {
-        "styles":{"branding":{"brandColor":"#000000"}},
-        "hideEventTypeDetails":false,
-        "layout":"month_view"
+        styles: { branding: { brandColor: "#000000" } },
+        hideEventTypeDetails: false,
+        layout: "month_view",
       });
     })();
   }, []);

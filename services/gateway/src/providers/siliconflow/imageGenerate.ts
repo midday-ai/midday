@@ -1,26 +1,26 @@
-import { SILICONFLOW } from '../../globals';
-import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from '../types';
-import { SiliconFlowErrorResponseTransform } from './chatComplete';
+import { SILICONFLOW } from "../../globals";
+import { ErrorResponse, ImageGenerateResponse, ProviderConfig } from "../types";
+import { SiliconFlowErrorResponseTransform } from "./chatComplete";
 
 export const SiliconFlowImageGenerateConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   size: {
-    param: 'image_size',
-    default: '',
+    param: "image_size",
+    default: "",
   },
   num_inference_steps: {
-    param: 'num_inference_steps',
+    param: "num_inference_steps",
     default: 20,
   },
   batch_size: {
-    param: 'batch_size',
+    param: "batch_size",
     default: 1,
   },
   guidance_scale: {
-    param: 'guidance_scale',
+    param: "guidance_scale",
     default: 7.5,
   },
 };
@@ -37,9 +37,9 @@ interface SiliconFlowImageGenerateResponse extends ImageGenerateResponse {
 
 export const SiliconFlowImageGenerateResponseTransform: (
   response: SiliconFlowImageGenerateResponse | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ImageGenerateResponse | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return SiliconFlowErrorResponseTransform(response, SILICONFLOW);
   }
 

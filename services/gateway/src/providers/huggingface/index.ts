@@ -1,15 +1,15 @@
-import { ProviderConfigs } from '../types';
+import { ProviderConfigs } from "../types";
 import {
   HuggingfaceCompleteConfig,
   HuggingfaceCompleteResponseTransform,
   HuggingfaceCompleteStreamChunkTransform,
-} from './complete';
-import HuggingfaceAPIConfig from './api';
+} from "./complete";
+import HuggingfaceAPIConfig from "./api";
 import {
   HuggingfaceChatCompleteConfig,
   HuggingfaceChatCompleteResponseTransform,
   HuggingfaceChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const HuggingfaceConfig: ProviderConfigs = {
   complete: HuggingfaceCompleteConfig,
@@ -17,9 +17,9 @@ const HuggingfaceConfig: ProviderConfigs = {
   chatComplete: HuggingfaceChatCompleteConfig,
   responseTransforms: {
     complete: HuggingfaceCompleteResponseTransform,
-    'stream-complete': HuggingfaceCompleteStreamChunkTransform,
+    "stream-complete": HuggingfaceCompleteStreamChunkTransform,
     chatComplete: HuggingfaceChatCompleteResponseTransform,
-    'stream-chatComplete': HuggingfaceChatCompleteStreamChunkTransform,
+    "stream-chatComplete": HuggingfaceChatCompleteStreamChunkTransform,
   },
 };
 

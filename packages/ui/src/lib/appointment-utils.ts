@@ -15,7 +15,7 @@ export class AppointmentService {
 
   updateAppointment(updatedAppointment: Appointment) {
     const index = this.appointments.findIndex(
-      (a) => a.id === updatedAppointment.id
+      (a) => a.id === updatedAppointment.id,
     );
     if (index !== -1) {
       this.appointments[index] = {

@@ -3,7 +3,6 @@ import { MerchantFinancialMetricsConverter } from "../../../../lib/converters/me
 import { SpendingPeriod } from "../../../../types/merchant";
 import { MerchantMetricsFinancialSubProfile } from "client-typescript-sdk";
 
-
 import { ScatterChart, ScatterChartProps } from "../../base/scatter-chart";
 
 export interface RankedMerchantsBySpendingChartProps

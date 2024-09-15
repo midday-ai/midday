@@ -1,50 +1,50 @@
-import { TOGETHER_AI } from '../../globals';
-import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+import { TOGETHER_AI } from "../../globals";
+import { CompletionResponse, ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 import {
   TogetherAIErrorResponse,
   TogetherAIErrorResponseTransform,
   TogetherAIOpenAICompatibleErrorResponse,
-} from './chatComplete';
+} from "./chatComplete";
 
 export const TogetherAICompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'togethercomputer/RedPajama-INCITE-7B-Instruct',
+    default: "togethercomputer/RedPajama-INCITE-7B-Instruct",
   },
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
-    default: '',
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     required: true,
     default: 128,
     min: 1,
   },
   stop: {
-    param: 'stop',
+    param: "stop",
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
   },
   top_k: {
-    param: 'top_k',
+    param: "top_k",
   },
   frequency_penalty: {
-    param: 'repetition_penalty',
+    param: "repetition_penalty",
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   logprobs: {
-    param: 'logprobs',
+    param: "logprobs",
   },
 };
 
@@ -69,16 +69,16 @@ export const TogetherAICompleteResponseTransform: (
     | TogetherAICompleteResponse
     | TogetherAIErrorResponse
     | TogetherAIOpenAICompatibleErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResponse = TogetherAIErrorResponseTransform(
-      response as TogetherAIErrorResponse
+      response as TogetherAIErrorResponse,
     );
     if (errorResponse) return errorResponse;
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -103,29 +103,29 @@ export const TogetherAICompleteResponseTransform: (
 };
 
 export const TogetherAICompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: TogetherAICompletionStreamChunk = JSON.parse(chunk);
   return (
     `data: ${JSON.stringify({
       id: parsedChunk.id,
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: TOGETHER_AI,
       choices: [
         {
           text: parsedChunk.choices[0]?.text,
           index: 0,
-          finish_reason: '',
+          finish_reason: "",
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

@@ -3,14 +3,14 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import dns from 'dns';
-import { getText } from '../utils';
+} from "../types";
+import dns from "dns";
+import { getText } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -25,11 +25,11 @@ export const handler: PluginHandler = async (
 
     if (onlyDNS) {
       verdict = (await Promise.all(urls.map(checkDNS))).every(
-        (result) => result
+        (result) => result,
       );
     } else {
       verdict = (await Promise.all(urls.map(checkUrl))).every(
-        (result) => result
+        (result) => result,
       );
     }
 
@@ -52,7 +52,7 @@ async function checkUrl(target: string): Promise<boolean> {
       controller.abort();
     }, 3000);
 
-    const response = await fetch(target, { method: 'GET', signal });
+    const response = await fetch(target, { method: "GET", signal });
     clearTimeout(timeoutId); // Clear the timeout upon successful fetch
     controller.abort(); // Ensure the request is aborted after the fetch
     return response.ok;

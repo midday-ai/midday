@@ -1,25 +1,25 @@
-import { ProviderConfigs } from '../types';
-import NovitaAIApiConfig from './api';
+import { ProviderConfigs } from "../types";
+import NovitaAIApiConfig from "./api";
 import {
   NovitaAIChatCompleteConfig,
   NovitaAIChatCompleteResponseTransform,
   NovitaAIChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   NovitaAICompleteConfig,
   NovitaAICompleteResponseTransform,
   NovitaAICompleteStreamChunkTransform,
-} from './complete';
+} from "./complete";
 
 const NovitaAIConfig: ProviderConfigs = {
   complete: NovitaAICompleteConfig,
   chatComplete: NovitaAIChatCompleteConfig,
   api: NovitaAIApiConfig,
   responseTransforms: {
-    'stream-complete': NovitaAICompleteStreamChunkTransform,
+    "stream-complete": NovitaAICompleteStreamChunkTransform,
     complete: NovitaAICompleteResponseTransform,
     chatComplete: NovitaAIChatCompleteResponseTransform,
-    'stream-chatComplete': NovitaAIChatCompleteStreamChunkTransform,
+    "stream-chatComplete": NovitaAIChatCompleteStreamChunkTransform,
   },
 };
 

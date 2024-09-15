@@ -4,7 +4,15 @@ import { z } from "zod";
 /**
  * Enum for supported authentication providers
  */
-const authProviderEnum = z.enum(["apple", "slack", "github", "google", "magic_link", "otp", "email"]);
+const authProviderEnum = z.enum([
+  "apple",
+  "slack",
+  "github",
+  "google",
+  "magic_link",
+  "otp",
+  "email",
+]);
 
 /**
  * Enum for supported financial providers
@@ -19,12 +27,20 @@ const analyticsModulesEnum = z.enum(["merchant", "location", "realtime"]);
 /**
  * Enum for smart goal features
  */
-const smartGoalFeaturesEnum = z.enum(["milestones", "forecasts", "notes", "progress_tracking"]);
+const smartGoalFeaturesEnum = z.enum([
+  "milestones",
+  "forecasts",
+  "notes",
+  "progress_tracking",
+]);
 
 /**
  * Enum for milestone features
  */
-const milestoneFeaturesEnum = z.enum(["completion_tracking", "budget_integration"]);
+const milestoneFeaturesEnum = z.enum([
+  "completion_tracking",
+  "budget_integration",
+]);
 
 /**
  * Enum for forecast features
@@ -37,7 +53,10 @@ const forecastFeaturesEnum = z.enum(["revenue", "expenses", "cash_flow"]);
 export const env = createEnv({
   shared: {
     NODE_ENV: z.enum(["development", "test", "production"]).optional(),
-    VERCEL_URL: z.string().optional().transform((v) => (v ? `https://${v}` : undefined)),
+    VERCEL_URL: z
+      .string()
+      .optional()
+      .transform((v) => (v ? `https://${v}` : undefined)),
     PORT: z.coerce.number().default(3000),
   },
   server: {
@@ -77,41 +96,57 @@ export const env = createEnv({
 
     // Feature flags
     NEXT_PUBLIC_ENABLE_AUTH: z.coerce.boolean().default(true),
-    NEXT_PUBLIC_AUTH_PROVIDERS: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(authProviderEnum)
-    ).default(["google", "slack", "github", "otp"]),
-    NEXT_PUBLIC_FINANCIAL_PROVIDERS: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(financialProviderEnum)
-    ).default(["plaid", "teller", "gocardless"]),
+    NEXT_PUBLIC_AUTH_PROVIDERS: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.split(",") : val),
+        z.array(authProviderEnum),
+      )
+      .default(["google", "slack", "github", "otp"]),
+    NEXT_PUBLIC_FINANCIAL_PROVIDERS: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.split(",") : val),
+        z.array(financialProviderEnum),
+      )
+      .default(["plaid", "teller", "gocardless"]),
     NEXT_PUBLIC_ENABLE_PRICING: z.coerce.boolean().default(false),
-    NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT: z.coerce.boolean().default(false),
+    NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT: z.coerce
+      .boolean()
+      .default(false),
     NEXT_PUBLIC_ENABLE_ANALYTICS: z.coerce.boolean().default(true),
-    NEXT_PUBLIC_ANALYTICS_MODULES: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(analyticsModulesEnum)
-    ).default(["merchant", "location", "realtime"]),
+    NEXT_PUBLIC_ANALYTICS_MODULES: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.split(",") : val),
+        z.array(analyticsModulesEnum),
+      )
+      .default(["merchant", "location", "realtime"]),
     NEXT_PUBLIC_ENABLE_DARK_MODE: z.coerce.boolean().default(true),
-    NEXT_PUBLIC_ENABLE_CUSTOMIZABLE_DASHBOARD: z.coerce.boolean().default(false),
+    NEXT_PUBLIC_ENABLE_CUSTOMIZABLE_DASHBOARD: z.coerce
+      .boolean()
+      .default(false),
     NEXT_PUBLIC_ENABLE_GUIDED_ONBOARDING: z.coerce.boolean().default(true),
     NEXT_PUBLIC_ENABLE_LAZY_LOADING: z.coerce.boolean().default(true),
     NEXT_PUBLIC_ENABLE_SERVICE_WORKER: z.coerce.boolean().default(false),
     NEXT_PUBLIC_ENABLE_SMART_GOALS: z.coerce.boolean().default(true),
-    NEXT_PUBLIC_SMART_GOAL_FEATURES: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(smartGoalFeaturesEnum)
-    ).default(["milestones", "forecasts", "notes", "progress_tracking"]),
+    NEXT_PUBLIC_SMART_GOAL_FEATURES: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.split(",") : val),
+        z.array(smartGoalFeaturesEnum),
+      )
+      .default(["milestones", "forecasts", "notes", "progress_tracking"]),
     NEXT_PUBLIC_ENABLE_MILESTONES: z.coerce.boolean().default(true),
-    NEXT_PUBLIC_MILESTONE_FEATURES: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(milestoneFeaturesEnum)
-    ).default(["completion_tracking", "budget_integration"]),
+    NEXT_PUBLIC_MILESTONE_FEATURES: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.split(",") : val),
+        z.array(milestoneFeaturesEnum),
+      )
+      .default(["completion_tracking", "budget_integration"]),
     NEXT_PUBLIC_ENABLE_FORECASTS: z.coerce.boolean().default(true),
-    NEXT_PUBLIC_FORECAST_FEATURES: z.preprocess(
-      (val) => (typeof val === "string" ? val.split(",") : val),
-      z.array(forecastFeaturesEnum)
-    ).default(["revenue", "expenses", "cash_flow"]),
+    NEXT_PUBLIC_FORECAST_FEATURES: z
+      .preprocess(
+        (val) => (typeof val === "string" ? val.split(",") : val),
+        z.array(forecastFeaturesEnum),
+      )
+      .default(["revenue", "expenses", "cash_flow"]),
     NEXT_PUBLIC_ENABLE_BETA_FEATURES: z.coerce.boolean().default(false),
     NEXT_PUBLIC_NEW_UI_VERSION: z.string().default("v1"),
     NEXT_PUBLIC_PAYMENTS_ENABLED: z.coerce.boolean().default(false),
@@ -142,30 +177,41 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_ID: process.env.NEXT_PUBLIC_SUPABASE_ID,
     NEXT_PUBLIC_LOGSNAG_TOKEN: process.env.NEXT_PUBLIC_LOGSNAG_TOKEN,
     NEXT_PUBLIC_LOGSNAG_PROJECT: process.env.NEXT_PUBLIC_LOGSNAG_PROJECT,
-    NEXT_PUBLIC_OPENPANEL_CLIENT_ID: process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
-    NEXT_PUBLIC_SOLOMON_AI_BACKEND_PLATFORM_API_URL: process.env.NEXT_PUBLIC_SOLOMON_AI_BACKEND_PLATFORM_API_URL,
-    NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER: process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
+    NEXT_PUBLIC_OPENPANEL_CLIENT_ID:
+      process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID,
+    NEXT_PUBLIC_SOLOMON_AI_BACKEND_PLATFORM_API_URL:
+      process.env.NEXT_PUBLIC_SOLOMON_AI_BACKEND_PLATFORM_API_URL,
+    NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER:
+      process.env.NEXT_PUBLIC_NOVU_APPLICATION_IDENTIFIER,
     NEXT_PUBLIC_TRIGGER_API_KEY: process.env.NEXT_PUBLIC_TRIGGER_API_KEY,
     // Map all feature flags here
     NEXT_PUBLIC_ENABLE_AUTH: process.env.NEXT_PUBLIC_ENABLE_AUTH,
     NEXT_PUBLIC_AUTH_PROVIDERS: process.env.NEXT_PUBLIC_AUTH_PROVIDERS,
-    NEXT_PUBLIC_FINANCIAL_PROVIDERS: process.env.NEXT_PUBLIC_FINANCIAL_PROVIDERS,
+    NEXT_PUBLIC_FINANCIAL_PROVIDERS:
+      process.env.NEXT_PUBLIC_FINANCIAL_PROVIDERS,
     NEXT_PUBLIC_ENABLE_PRICING: process.env.NEXT_PUBLIC_ENABLE_PRICING,
-    NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT: process.env.NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT,
+    NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT:
+      process.env.NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT,
     NEXT_PUBLIC_ENABLE_ANALYTICS: process.env.NEXT_PUBLIC_ENABLE_ANALYTICS,
     NEXT_PUBLIC_ANALYTICS_MODULES: process.env.NEXT_PUBLIC_ANALYTICS_MODULES,
     NEXT_PUBLIC_ENABLE_DARK_MODE: process.env.NEXT_PUBLIC_ENABLE_DARK_MODE,
-    NEXT_PUBLIC_ENABLE_CUSTOMIZABLE_DASHBOARD: process.env.NEXT_PUBLIC_ENABLE_CUSTOMIZABLE_DASHBOARD,
-    NEXT_PUBLIC_ENABLE_GUIDED_ONBOARDING: process.env.NEXT_PUBLIC_ENABLE_GUIDED_ONBOARDING,
-    NEXT_PUBLIC_ENABLE_LAZY_LOADING: process.env.NEXT_PUBLIC_ENABLE_LAZY_LOADING,
-    NEXT_PUBLIC_ENABLE_SERVICE_WORKER: process.env.NEXT_PUBLIC_ENABLE_SERVICE_WORKER,
+    NEXT_PUBLIC_ENABLE_CUSTOMIZABLE_DASHBOARD:
+      process.env.NEXT_PUBLIC_ENABLE_CUSTOMIZABLE_DASHBOARD,
+    NEXT_PUBLIC_ENABLE_GUIDED_ONBOARDING:
+      process.env.NEXT_PUBLIC_ENABLE_GUIDED_ONBOARDING,
+    NEXT_PUBLIC_ENABLE_LAZY_LOADING:
+      process.env.NEXT_PUBLIC_ENABLE_LAZY_LOADING,
+    NEXT_PUBLIC_ENABLE_SERVICE_WORKER:
+      process.env.NEXT_PUBLIC_ENABLE_SERVICE_WORKER,
     NEXT_PUBLIC_ENABLE_SMART_GOALS: process.env.NEXT_PUBLIC_ENABLE_SMART_GOALS,
-    NEXT_PUBLIC_SMART_GOAL_FEATURES: process.env.NEXT_PUBLIC_SMART_GOAL_FEATURES,
+    NEXT_PUBLIC_SMART_GOAL_FEATURES:
+      process.env.NEXT_PUBLIC_SMART_GOAL_FEATURES,
     NEXT_PUBLIC_ENABLE_MILESTONES: process.env.NEXT_PUBLIC_ENABLE_MILESTONES,
     NEXT_PUBLIC_MILESTONE_FEATURES: process.env.NEXT_PUBLIC_MILESTONE_FEATURES,
     NEXT_PUBLIC_ENABLE_FORECASTS: process.env.NEXT_PUBLIC_ENABLE_FORECASTS,
     NEXT_PUBLIC_FORECAST_FEATURES: process.env.NEXT_PUBLIC_FORECAST_FEATURES,
-    NEXT_PUBLIC_ENABLE_BETA_FEATURES: process.env.NEXT_PUBLIC_ENABLE_BETA_FEATURES,
+    NEXT_PUBLIC_ENABLE_BETA_FEATURES:
+      process.env.NEXT_PUBLIC_ENABLE_BETA_FEATURES,
     NEXT_PUBLIC_NEW_UI_VERSION: process.env.NEXT_PUBLIC_NEW_UI_VERSION,
     NEXT_PUBLIC_PAYMENTS_ENABLED: process.env.NEXT_PUBLIC_PAYMENTS_ENABLED,
     ENABLE_NEW_BACKEND_API: process.env.ENABLE_NEW_BACKEND_API,
@@ -173,7 +219,7 @@ export const env = createEnv({
     MAX_CONCURRENT_REQUESTS: process.env.MAX_CONCURRENT_REQUESTS,
     ENABLE_RATE_LIMITING: process.env.ENABLE_RATE_LIMITING,
     LOG_LEVEL: process.env.LOG_LEVEL,
-    USE_LEGACY_DATABASE: process.env.USE_LEGACY_DATABASE
+    USE_LEGACY_DATABASE: process.env.USE_LEGACY_DATABASE,
   },
   skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });
@@ -191,7 +237,8 @@ export const featureFlags = {
   authProviders: env.NEXT_PUBLIC_AUTH_PROVIDERS,
   financialProviders: env.NEXT_PUBLIC_FINANCIAL_PROVIDERS,
   isPricingEnabled: env.NEXT_PUBLIC_ENABLE_PRICING,
-  isSubscriptionManagementEnabled: env.NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT,
+  isSubscriptionManagementEnabled:
+    env.NEXT_PUBLIC_ENABLE_SUBSCRIPTION_MANAGEMENT,
   isAnalyticsEnabled: env.NEXT_PUBLIC_ENABLE_ANALYTICS,
   analyticsModules: env.NEXT_PUBLIC_ANALYTICS_MODULES,
   isDarkModeEnabled: env.NEXT_PUBLIC_ENABLE_DARK_MODE,

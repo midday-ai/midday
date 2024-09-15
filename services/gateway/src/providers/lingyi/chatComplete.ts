@@ -1,43 +1,43 @@
-import { LINGYI } from '../../globals';
+import { LINGYI } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const LingyiChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'yi-34b-chat-0205',
+    default: "yi-34b-chat-0205",
   },
   messages: {
-    param: 'messages',
-    default: '',
+    param: "messages",
+    default: "",
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: 100,
     min: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 1,
     min: 0,
     max: 2,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
 };
@@ -79,9 +79,9 @@ interface LingyiStreamChunk {
 
 export const LingyiChatCompleteResponseTransform: (
   response: LingyiChatCompleteResponse | LingyiErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if ('message' in response && responseStatus !== 200) {
+  if ("message" in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
         message: response.message,
@@ -89,11 +89,11 @@ export const LingyiChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      LINGYI
+      LINGYI,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -120,12 +120,12 @@ export const LingyiChatCompleteResponseTransform: (
 };
 
 export const LingyiChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: LingyiStreamChunk = JSON.parse(chunk);
@@ -143,6 +143,6 @@ export const LingyiChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.choices[0].finish_reason,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

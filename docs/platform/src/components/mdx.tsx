@@ -1,13 +1,13 @@
-import clsx from 'clsx'
-import Link from 'next/link'
+import clsx from "clsx";
+import Link from "next/link";
 
-import { Feedback } from '@/components/Feedback'
-import { Heading } from '@/components/Heading'
-import { Prose } from '@/components/Prose'
+import { Feedback } from "@/components/Feedback";
+import { Heading } from "@/components/Heading";
+import { Prose } from "@/components/Prose";
 
-export const a = Link
-export { Button } from '@/components/Button'
-export { Code as code, CodeGroup, Pre as pre } from '@/components/Code'
+export const a = Link;
+export { Button } from "@/components/Button";
+export { Code as code, CodeGroup, Pre as pre } from "@/components/Code";
 
 export function wrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -17,16 +17,16 @@ export function wrapper({ children }: { children: React.ReactNode }) {
         <Feedback />
       </footer>
     </article>
-  )
+  );
 }
 
 export const h2 = function H2(
-  props: Omit<React.ComponentPropsWithoutRef<typeof Heading>, 'level'>,
+  props: Omit<React.ComponentPropsWithoutRef<typeof Heading>, "level">,
 ) {
-  return <Heading level={2} {...props} />
-}
+  return <Heading level={2} {...props} />;
+};
 
-function InfoIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+function InfoIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 16 16" aria-hidden="true" {...props}>
       <circle cx="8" cy="8" r="8" strokeWidth="0" />
@@ -39,7 +39,7 @@ function InfoIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
       />
       <circle cx="8" cy="4" r=".5" fill="none" />
     </svg>
-  )
+  );
 }
 
 export function Note({ children }: { children: React.ReactNode }) {
@@ -50,7 +50,7 @@ export function Note({ children }: { children: React.ReactNode }) {
         {children}
       </div>
     </div>
-  )
+  );
 }
 
 export function Row({ children }: { children: React.ReactNode }) {
@@ -58,26 +58,26 @@ export function Row({ children }: { children: React.ReactNode }) {
     <div className="grid grid-cols-1 items-start gap-x-16 gap-y-10 xl:max-w-none xl:grid-cols-2">
       {children}
     </div>
-  )
+  );
 }
 
 export function Col({
   children,
   sticky = false,
 }: {
-  children: React.ReactNode
-  sticky?: boolean
+  children: React.ReactNode;
+  sticky?: boolean;
 }) {
   return (
     <div
       className={clsx(
-        '[&>:first-child]:mt-0 [&>:last-child]:mb-0',
-        sticky && 'xl:sticky xl:top-24',
+        "[&>:first-child]:mt-0 [&>:last-child]:mb-0",
+        sticky && "xl:sticky xl:top-24",
       )}
     >
       {children}
     </div>
-  )
+  );
 }
 
 export function Properties({ children }: { children: React.ReactNode }) {
@@ -90,7 +90,7 @@ export function Properties({ children }: { children: React.ReactNode }) {
         {children}
       </ul>
     </div>
-  )
+  );
 }
 
 export function Property({
@@ -98,9 +98,9 @@ export function Property({
   children,
   type,
 }: {
-  name: string
-  children: React.ReactNode
-  type?: string
+  name: string;
+  children: React.ReactNode;
+  type?: string;
 }) {
   return (
     <li className="m-0 px-0 py-4 first:pt-0 last:pb-0">
@@ -123,5 +123,5 @@ export function Property({
         </dd>
       </dl>
     </li>
-  )
+  );
 }

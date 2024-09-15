@@ -1,45 +1,45 @@
-import { AI21 } from '../../globals';
-import { Params } from '../../types/requestBody';
-import { CompletionResponse, ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
-import { AI21ErrorResponseTransform } from './chatComplete';
+import { AI21 } from "../../globals";
+import { Params } from "../../types/requestBody";
+import { CompletionResponse, ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
+import { AI21ErrorResponseTransform } from "./chatComplete";
 
 export const AI21CompleteConfig: ProviderConfig = {
   prompt: {
-    param: 'prompt',
+    param: "prompt",
     required: true,
   },
   n: {
-    param: 'numResults',
+    param: "numResults",
     default: 1,
   },
   max_tokens: {
-    param: 'maxTokens',
+    param: "maxTokens",
     default: 16,
   },
   minTokens: {
-    param: 'minTokens',
+    param: "minTokens",
     default: 0,
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.7,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'topP',
+    param: "topP",
     default: 1,
   },
   top_k: {
-    param: 'topKReturn',
+    param: "topKReturn",
     default: 0,
   },
   stop: {
-    param: 'stopSequences',
+    param: "stopSequences",
   },
   presence_penalty: {
-    param: 'presencePenalty',
+    param: "presencePenalty",
     transform: (params: Params) => {
       return {
         scale: params.presence_penalty,
@@ -47,7 +47,7 @@ export const AI21CompleteConfig: ProviderConfig = {
     },
   },
   frequency_penalty: {
-    param: 'frequencyPenalty',
+    param: "frequencyPenalty",
     transform: (params: Params) => {
       return {
         scale: params.frequency_penalty,
@@ -55,13 +55,13 @@ export const AI21CompleteConfig: ProviderConfig = {
     },
   },
   countPenalty: {
-    param: 'countPenalty',
+    param: "countPenalty",
   },
   frequencyPenalty: {
-    param: 'frequencyPenalty',
+    param: "frequencyPenalty",
   },
   presencePenalty: {
-    param: 'presencePenalty',
+    param: "presencePenalty",
   },
 };
 
@@ -91,16 +91,16 @@ export interface AI21ErrorResponse {
 
 export const AI21CompleteResponseTransform: (
   response: AI21CompleteResponse | AI21ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => CompletionResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = AI21ErrorResponseTransform(
-      response as AI21ErrorResponse
+      response as AI21ErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('completions' in response) {
+  if ("completions" in response) {
     const inputTokens = response.prompt.tokens?.length || 0;
     const outputTokens = response.completions
       .map((c) => c.data?.tokens?.length || 0)
@@ -108,9 +108,9 @@ export const AI21CompleteResponseTransform: (
 
     return {
       id: response.id,
-      object: 'text_completion',
+      object: "text_completion",
       created: Math.floor(Date.now() / 1000),
-      model: '',
+      model: "",
       provider: AI21,
       choices: response.completions.map((completion, index) => ({
         text: completion.data.text,

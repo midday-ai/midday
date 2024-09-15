@@ -1,0 +1,31 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as EmptyFileUploadCard from "./empty-file-upload-card.stories";
+
+<Meta of={EmptyFileUploadCard} />
+
+# EmptyFileUploadCard Component
+
+The `EmptyFileUploadCard` is a card component for empty file uploads.
+
+## Component Props
+
+<Canvas of={EmptyFileUploadCard.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `EmptyFileUploadCard`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <EmptyFileUploadCard
+      href="https://example.com"
+      label="Click me"
+      active={true}
+    />
+  </Story>
+</Canvas>
+```

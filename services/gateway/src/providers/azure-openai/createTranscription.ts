@@ -1,12 +1,12 @@
-import { OPEN_AI } from '../../globals';
-import { ErrorResponse } from '../types';
-import { OpenAIErrorResponseTransform } from '../openai/utils';
+import { OPEN_AI } from "../../globals";
+import { ErrorResponse } from "../types";
+import { OpenAIErrorResponseTransform } from "../openai/utils";
 
 export const AzureOpenAICreateTranscriptionResponseTransform: (
   response: Response | ErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => Response | ErrorResponse = (response, responseStatus) => {
-  if (responseStatus !== 200 && 'error' in response) {
+  if (responseStatus !== 200 && "error" in response) {
     return OpenAIErrorResponseTransform(response, OPEN_AI);
   }
 

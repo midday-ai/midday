@@ -121,14 +121,15 @@ export function SectionSolution() {
               <h2 className="text-2xl">User friendly & AI</h2>
 
               <p className="text-[#878787] text-sm text-center">
-                We&apos;re focusing on building the platform with our community to
-                ensure it&apos;s as user-friendly as possible and covers all the
-                features needed to assist as many business owners as possible.
-                We&apos;ve all witnessed the rise of AI, and we&apos;ve already integrated
-                various AI aspects into our platform. For instance, we&apos;ve
-                implemented features such as matching receipts to transactions,
-                category automation, and engaging with your financials through
-                Midday AI, allowing users to ask for any insights they may need.
+                We&apos;re focusing on building the platform with our community
+                to ensure it&apos;s as user-friendly as possible and covers all
+                the features needed to assist as many business owners as
+                possible. We&apos;ve all witnessed the rise of AI, and
+                we&apos;ve already integrated various AI aspects into our
+                platform. For instance, we&apos;ve implemented features such as
+                matching receipts to transactions, category automation, and
+                engaging with your financials through Midday AI, allowing users
+                to ask for any insights they may need.
               </p>
             </Card>
           </div>

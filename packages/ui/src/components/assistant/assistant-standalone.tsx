@@ -13,11 +13,7 @@ import {
   ShareIcon,
 } from "lucide-react";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "../sheet";
+import { Sheet, SheetContent, SheetTrigger } from "../sheet";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 import { ModelPicker } from "./model-picker";

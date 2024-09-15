@@ -1,23 +1,23 @@
-import { ProviderConfigs } from '../types';
-import FireworksAIAPIConfig from './api';
+import { ProviderConfigs } from "../types";
+import FireworksAIAPIConfig from "./api";
 import {
   FireworksAIChatCompleteConfig,
   FireworksAIChatCompleteResponseTransform,
   FireworksAIChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 import {
   FireworksAICompleteConfig,
   FireworksAICompleteResponseTransform,
   FireworksAICompleteStreamChunkTransform,
-} from './complete';
+} from "./complete";
 import {
   FireworksAIEmbedConfig,
   FireworksAIEmbedResponseTransform,
-} from './embed';
+} from "./embed";
 import {
   FireworksAIImageGenerateConfig,
   FireworksAIImageGenerateResponseTransform,
-} from './imageGenerate';
+} from "./imageGenerate";
 
 const FireworksAIConfig: ProviderConfigs = {
   complete: FireworksAICompleteConfig,
@@ -27,9 +27,9 @@ const FireworksAIConfig: ProviderConfigs = {
   api: FireworksAIAPIConfig,
   responseTransforms: {
     complete: FireworksAICompleteResponseTransform,
-    'stream-complete': FireworksAICompleteStreamChunkTransform,
+    "stream-complete": FireworksAICompleteStreamChunkTransform,
     chatComplete: FireworksAIChatCompleteResponseTransform,
-    'stream-chatComplete': FireworksAIChatCompleteStreamChunkTransform,
+    "stream-chatComplete": FireworksAIChatCompleteStreamChunkTransform,
     embed: FireworksAIEmbedResponseTransform,
     imageGenerate: FireworksAIImageGenerateResponseTransform,
   },

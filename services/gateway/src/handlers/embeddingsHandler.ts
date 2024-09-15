@@ -1,9 +1,9 @@
-import { RouterError } from '../errors/RouterError';
+import { RouterError } from "../errors/RouterError";
 import {
   constructConfigFromRequestHeaders,
   tryTargetsRecursively,
-} from './handlerUtils';
-import { Context } from 'hono';
+} from "./handlerUtils";
+import { Context } from "hono";
 
 /**
  * Handles the '/embeddings' API request by selecting the appropriate provider(s) and making the request to them.
@@ -24,16 +24,16 @@ export async function embeddingsHandler(c: Context): Promise<Response> {
       camelCaseConfig,
       request,
       requestHeaders,
-      'embed',
-      'POST',
-      'config'
+      "embed",
+      "POST",
+      "config",
     );
 
     return tryTargetsResponse;
   } catch (err: any) {
-    console.log('embeddings error', err.message);
+    console.log("embeddings error", err.message);
     let statusCode = 500;
-    let errorMessage = 'Something went wrong';
+    let errorMessage = "Something went wrong";
 
     if (err instanceof RouterError) {
       statusCode = 400;
@@ -42,15 +42,15 @@ export async function embeddingsHandler(c: Context): Promise<Response> {
 
     return new Response(
       JSON.stringify({
-        status: 'failure',
-        message: 'Something went wrong',
+        status: "failure",
+        message: "Something went wrong",
       }),
       {
         status: 500,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 }

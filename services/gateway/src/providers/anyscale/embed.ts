@@ -1,25 +1,25 @@
-import { ANYSCALE } from '../../globals';
-import { EmbedResponse } from '../../types/embedRequestBody';
-import { ErrorResponse, ProviderConfig } from '../types';
-import { generateInvalidProviderResponseError } from '../utils';
+import { ANYSCALE } from "../../globals";
+import { EmbedResponse } from "../../types/embedRequestBody";
+import { ErrorResponse, ProviderConfig } from "../types";
+import { generateInvalidProviderResponseError } from "../utils";
 import {
   AnyscaleErrorResponse,
   AnyscaleErrorResponseTransform,
   AnyscaleValidationErrorResponse,
-} from './chatComplete';
+} from "./chatComplete";
 
 export const AnyscaleEmbedConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'thenlper/gte-large',
+    default: "thenlper/gte-large",
   },
   input: {
-    param: 'input',
-    default: '',
+    param: "input",
+    default: "",
   },
   user: {
-    param: 'user',
+    param: "user",
   },
 };
 
@@ -30,16 +30,16 @@ export const AnyscaleEmbedResponseTransform: (
     | AnyscaleEmbedResponse
     | AnyscaleErrorResponse
     | AnyscaleValidationErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
   if (responseStatus !== 200) {
     const errorResposne = AnyscaleErrorResponseTransform(
-      response as AnyscaleErrorResponse | AnyscaleValidationErrorResponse
+      response as AnyscaleErrorResponse | AnyscaleValidationErrorResponse,
     );
     if (errorResposne) return errorResposne;
   }
 
-  if ('data' in response) {
+  if ("data" in response) {
     return {
       object: response.object,
       data: response.data,

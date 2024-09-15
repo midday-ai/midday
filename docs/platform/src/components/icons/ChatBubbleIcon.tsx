@@ -1,4 +1,4 @@
-export function ChatBubbleIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
+export function ChatBubbleIcon(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true" {...props}>
       <path
@@ -13,5 +13,5 @@ export function ChatBubbleIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
         d="M7.5 8.5h5M8.5 11.5h3"
       />
     </svg>
-  )
+  );
 }

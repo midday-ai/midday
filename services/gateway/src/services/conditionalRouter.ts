@@ -1,4 +1,4 @@
-import { StrategyModes, Targets } from '../types/requestBody';
+import { StrategyModes, Targets } from "../types/requestBody";
 
 type Query = {
   [key: string]: any;
@@ -10,19 +10,19 @@ interface RouterContext {
 
 enum Operator {
   // Comparison Operators
-  Equal = '$eq',
-  NotEqual = '$ne',
-  GreaterThan = '$gt',
-  GreaterThanOrEqual = '$gte',
-  LessThan = '$lt',
-  LessThanOrEqual = '$lte',
-  In = '$in',
-  NotIn = '$nin',
-  Regex = '$regex',
+  Equal = "$eq",
+  NotEqual = "$ne",
+  GreaterThan = "$gt",
+  GreaterThanOrEqual = "$gte",
+  LessThan = "$lt",
+  LessThanOrEqual = "$lte",
+  In = "$in",
+  NotIn = "$nin",
+  Regex = "$regex",
 
   // Logical Operators
-  And = '$and',
-  Or = '$or',
+  And = "$and",
+  Or = "$or",
 }
 
 export class ConditionalRouter {
@@ -33,13 +33,13 @@ export class ConditionalRouter {
     this.config = config;
     this.context = context;
     if (this.config.strategy?.mode !== StrategyModes.CONDITIONAL) {
-      throw new Error('Unsupported strategy mode');
+      throw new Error("Unsupported strategy mode");
     }
   }
 
   resolveTarget(): Targets {
     if (!this.config.strategy?.conditions) {
-      throw new Error('No conditions passed in the query router');
+      throw new Error("No conditions passed in the query router");
     }
 
     for (const condition of this.config.strategy.conditions) {
@@ -54,26 +54,26 @@ export class ConditionalRouter {
       return this.findTarget(this.config.strategy.default);
     }
 
-    throw new Error('Query router did not resolve to any valid target');
+    throw new Error("Query router did not resolve to any valid target");
   }
 
   private evaluateQuery(query: Query): boolean {
     for (const [key, value] of Object.entries(query)) {
       if (key === Operator.Or && Array.isArray(value)) {
         return value.some((subCondition: Query) =>
-          this.evaluateQuery(subCondition)
+          this.evaluateQuery(subCondition),
         );
       }
 
       if (key === Operator.And && Array.isArray(value)) {
         return value.every((subCondition: Query) =>
-          this.evaluateQuery(subCondition)
+          this.evaluateQuery(subCondition),
         );
       }
 
       const metadataValue = this.getContextValue(key);
 
-      if (typeof value === 'object' && value !== null) {
+      if (typeof value === "object" && value !== null) {
         if (!this.evaluateOperator(value, metadataValue)) {
           return false;
         }
@@ -123,7 +123,7 @@ export class ConditionalRouter {
           }
         default:
           throw new Error(
-            `Unsupported operator used in the query router: ${op}`
+            `Unsupported operator used in the query router: ${op}`,
           );
       }
     }
@@ -144,7 +144,7 @@ export class ConditionalRouter {
   }
 
   private getContextValue(key: string): any {
-    const parts = key.split('.');
+    const parts = key.split(".");
     let value: any = this.context;
     value = value[parts[0]]?.[parts[1]];
     return value;

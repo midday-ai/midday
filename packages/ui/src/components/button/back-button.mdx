@@ -1,0 +1,27 @@
+import { Canvas, Controls, Meta, Source } from "@storybook/blocks";
+
+import * as BackButton from "./back-button.stories";
+
+<Meta of={BackButton} />
+
+# BackButton Component
+
+The `BackButton` is a button component styled to stand out and attract users to interact with it. It can be used for important call-to-action buttons, such as asking queries or initiating AI-based solutions.
+
+## Component Props
+
+<Canvas of={BackButton.Default} />
+
+<Controls />
+
+## Usage Example
+
+Here's a basic usage example of the `BackButton`:
+
+```tsx
+<Canvas>
+  <Story name="Default">
+    <BackButton href="https://example.com" label="Click me" active={true} />
+  </Story>
+</Canvas>
+```

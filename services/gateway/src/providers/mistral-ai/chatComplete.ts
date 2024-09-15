@@ -1,56 +1,56 @@
-import { MISTRAL_AI } from '../../globals';
+import { MISTRAL_AI } from "../../globals";
 import {
   ChatCompletionResponse,
   ErrorResponse,
   ProviderConfig,
-} from '../types';
+} from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const MistralAIChatCompleteConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'mistral-tiny',
+    default: "mistral-tiny",
   },
   messages: {
-    param: 'messages',
+    param: "messages",
     default: [],
   },
   temperature: {
-    param: 'temperature',
+    param: "temperature",
     default: 0.7,
     min: 0,
     max: 1,
   },
   top_p: {
-    param: 'top_p',
+    param: "top_p",
     default: 1,
     min: 0,
     max: 1,
   },
   max_tokens: {
-    param: 'max_tokens',
+    param: "max_tokens",
     default: null,
     min: 1,
   },
   stream: {
-    param: 'stream',
+    param: "stream",
     default: false,
   },
   seed: {
-    param: 'random_seed',
+    param: "random_seed",
     default: null,
   },
   safe_prompt: {
-    param: 'safe_prompt',
+    param: "safe_prompt",
     default: false,
   },
   // TODO: deprecate this and move to safe_prompt in next release
   safe_mode: {
-    param: 'safe_prompt',
+    param: "safe_prompt",
     default: false,
   },
 };
@@ -92,9 +92,9 @@ interface MistralAIStreamChunk {
 
 export const MistralAIChatCompleteResponseTransform: (
   response: MistralAIChatCompleteResponse | MistralAIErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => ChatCompletionResponse | ErrorResponse = (response, responseStatus) => {
-  if ('message' in response && responseStatus !== 200) {
+  if ("message" in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
         message: response.message,
@@ -102,11 +102,11 @@ export const MistralAIChatCompleteResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      MISTRAL_AI
+      MISTRAL_AI,
     );
   }
 
-  if ('choices' in response) {
+  if ("choices" in response) {
     return {
       id: response.id,
       object: response.object,
@@ -133,12 +133,12 @@ export const MistralAIChatCompleteResponseTransform: (
 };
 
 export const MistralAIChatCompleteStreamChunkTransform: (
-  response: string
+  response: string,
 ) => string = (responseChunk) => {
   let chunk = responseChunk.trim();
-  chunk = chunk.replace(/^data: /, '');
+  chunk = chunk.replace(/^data: /, "");
   chunk = chunk.trim();
-  if (chunk === '[DONE]') {
+  if (chunk === "[DONE]") {
     return `data: ${chunk}\n\n`;
   }
   const parsedChunk: MistralAIStreamChunk = JSON.parse(chunk);
@@ -156,6 +156,6 @@ export const MistralAIChatCompleteStreamChunkTransform: (
           finish_reason: parsedChunk.choices[0].finish_reason,
         },
       ],
-    })}` + '\n\n'
+    })}` + "\n\n"
   );
 };

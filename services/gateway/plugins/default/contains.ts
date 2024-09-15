@@ -3,13 +3,13 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
+} from "../types";
+import { getText } from "../utils";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -22,13 +22,13 @@ export const handler: PluginHandler = async (
     let responseText = getText(context, eventType);
 
     switch (operator) {
-      case 'any':
+      case "any":
         verdict = words.some((word: string) => responseText.includes(word));
         break;
-      case 'all':
+      case "all":
         verdict = words.every((word: string) => responseText.includes(word));
         break;
-      case 'none':
+      case "none":
         verdict = words.every((word: string) => !responseText.includes(word));
         break;
     }

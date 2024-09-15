@@ -3,11 +3,7 @@
 import { forwardRef, type FC } from "react";
 import { Thread } from "./thread";
 import { Button } from "./button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "./tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
 import { cn } from "../utils/cn";
 import { AssistantModalPrimitive } from "@assistant-ui/react";
 import { TooltipProvider } from "@radix-ui/react-tooltip";

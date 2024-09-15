@@ -3,14 +3,14 @@ import {
   PluginContext,
   PluginHandler,
   PluginParameters,
-} from '../types';
-import { getText } from '../utils';
-import { PORTKEY_ENDPOINTS, fetchPortkey } from './globals';
+} from "../types";
+import { getText } from "../utils";
+import { PORTKEY_ENDPOINTS, fetchPortkey } from "./globals";
 
 export const handler: PluginHandler = async (
   context: PluginContext,
   parameters: PluginParameters,
-  eventType: HookEventType
+  eventType: HookEventType,
 ) => {
   let error = null;
   let verdict = false;
@@ -25,7 +25,7 @@ export const handler: PluginHandler = async (
     const result: any = await fetchPortkey(
       PORTKEY_ENDPOINTS.LANGUAGE,
       parameters.credentials,
-      { input: text }
+      { input: text },
     );
     const predictedLanguage = result[0][0].label;
 

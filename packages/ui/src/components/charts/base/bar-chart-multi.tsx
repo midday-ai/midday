@@ -1,23 +1,19 @@
 "use client";
 
-import {
-  formatAmount
-} from "../../../lib/chart-utils";
-import { BarChartMultiDataPoint, ChartDataPoint } from "../../../types/chart";
 import { format } from "date-fns";
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Bar,
   BarChart as BaseBarChartMulti,
-  CartesianGrid, Tooltip,
+  CartesianGrid,
+  Tooltip,
   TooltipProps,
   XAxis,
-  YAxis
+  YAxis,
 } from "recharts";
-import {
-  Payload
-} from "recharts/types/component/DefaultTooltipContent";
-
+import { Payload } from "recharts/types/component/DefaultTooltipContent";
+import { formatAmount } from "../../../lib/chart-utils";
+import { BarChartMultiDataPoint, ChartDataPoint } from "../../../types/chart";
 
 import { generatePayloadArray } from "../../../lib/random/generator";
 import { ChartContainer } from "./chart-container";
@@ -75,9 +71,8 @@ export interface BarChartMultiProps {
   height?: number;
   locale?: string;
   enableAssistantMode?: boolean;
-  enableComparison?: boolean;
-  chartType: "stack" | "group";
   disabled?: boolean;
+  chartType?: "stack" | "group";
 }
 
 /**
@@ -88,34 +83,34 @@ export interface BarChartMultiProps {
  */
 export const BarChartMulti: React.FC<BarChartMultiProps> = ({
   currency,
-  data,
+  data: propData,
   height = 290,
   locale,
   enableAssistantMode,
-  chartType,
   disabled = false,
+  chartType = "stack",
 }) => {
-  // if disabled generate random data
-  if (disabled) {
-    data = generatePayloadArray({
-      count: 50,
-      minValue: 100,
-      maxValue: 500,
-    }).map((value, index) => {
-      // create a hashma
+  const data = useMemo(() => {
+    if (disabled) {
+      return generatePayloadArray({
+        count: 50,
+        minValue: 100,
+        maxValue: 500,
+      }).map((value, index) => {
+        const dataPoint: BarChartMultiDataPoint = {
+          date: value.date,
+          current: value.value,
+          previous: index * 100,
+        };
+        return dataPoint;
+      });
+    }
+    return propData;
+  }, [disabled, propData]);
 
-      const dataPoint: BarChartMultiDataPoint = {
-        date: value.date,
-        current: value.value,
-        previous: index * 100,
-      };
-
-      return dataPoint;
-    });
-  }
-
-  const [enableCompare, setEnableCompare] = React.useState<boolean>(false);
-  const { isOpen, toggleOpen } = useWrapperState(false);
+  const [aiModalOpenState, setAiModalOpenState] =
+    React.useState<boolean>(false);
+  const { isOpen, toggleOpen } = useWrapperState(aiModalOpenState);
   const [dataSet, setDataSet] = React.useState<
     Array<ChartDataPoint> | Array<BarChartMultiDataPoint>
   >(data.length > 0 ? data : []);

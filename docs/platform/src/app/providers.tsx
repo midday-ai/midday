@@ -1,30 +1,30 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { ThemeProvider, useTheme } from 'next-themes'
+import { useEffect } from "react";
+import { ThemeProvider, useTheme } from "next-themes";
 
 function ThemeWatcher() {
-  let { resolvedTheme, setTheme } = useTheme()
+  let { resolvedTheme, setTheme } = useTheme();
 
   useEffect(() => {
-    let media = window.matchMedia('(prefers-color-scheme: dark)')
+    let media = window.matchMedia("(prefers-color-scheme: dark)");
 
     function onMediaChange() {
-      let systemTheme = media.matches ? 'dark' : 'light'
+      let systemTheme = media.matches ? "dark" : "light";
       if (resolvedTheme === systemTheme) {
-        setTheme('system')
+        setTheme("system");
       }
     }
 
-    onMediaChange()
-    media.addEventListener('change', onMediaChange)
+    onMediaChange();
+    media.addEventListener("change", onMediaChange);
 
     return () => {
-      media.removeEventListener('change', onMediaChange)
-    }
-  }, [resolvedTheme, setTheme])
+      media.removeEventListener("change", onMediaChange);
+    };
+  }, [resolvedTheme, setTheme]);
 
-  return null
+  return null;
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -33,5 +33,5 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ThemeWatcher />
       {children}
     </ThemeProvider>
-  )
+  );
 }

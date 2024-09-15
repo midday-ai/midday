@@ -1,6 +1,6 @@
-import { ProviderConfigs } from '../types';
-import VoyageAPIConfig from './api';
-import { VoyageEmbedConfig, VoyageEmbedResponseTransform } from './embed';
+import { ProviderConfigs } from "../types";
+import VoyageAPIConfig from "./api";
+import { VoyageEmbedConfig, VoyageEmbedResponseTransform } from "./embed";
 
 const VoyageConfig: ProviderConfigs = {
   embed: VoyageEmbedConfig,

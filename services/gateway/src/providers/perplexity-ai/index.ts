@@ -1,17 +1,17 @@
-import { ProviderConfigs } from '../types';
-import PerplexityAIApiConfig from './api';
+import { ProviderConfigs } from "../types";
+import PerplexityAIApiConfig from "./api";
 import {
   PerplexityAIChatCompleteConfig,
   PerplexityAIChatCompleteResponseTransform,
   PerplexityAIChatCompleteStreamChunkTransform,
-} from './chatComplete';
+} from "./chatComplete";
 
 const PerplexityAIConfig: ProviderConfigs = {
   chatComplete: PerplexityAIChatCompleteConfig,
   api: PerplexityAIApiConfig,
   responseTransforms: {
     chatComplete: PerplexityAIChatCompleteResponseTransform,
-    'stream-chatComplete': PerplexityAIChatCompleteStreamChunkTransform,
+    "stream-chatComplete": PerplexityAIChatCompleteStreamChunkTransform,
   },
 };
 

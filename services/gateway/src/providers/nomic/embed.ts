@@ -1,19 +1,19 @@
-import { NOMIC } from '../../globals';
-import { EmbedParams, EmbedResponse } from '../../types/embedRequestBody';
-import { ErrorResponse, ProviderConfig } from '../types';
+import { NOMIC } from "../../globals";
+import { EmbedParams, EmbedResponse } from "../../types/embedRequestBody";
+import { ErrorResponse, ProviderConfig } from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
+} from "../utils";
 
 export const NomicEmbedConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'nomic-embed-text-v1',
+    default: "nomic-embed-text-v1",
   },
   input: {
-    param: 'texts',
+    param: "texts",
     required: true,
     transform: (params: EmbedParams) => {
       if (Array.isArray(params.input)) {
@@ -24,7 +24,7 @@ export const NomicEmbedConfig: ProviderConfig = {
     },
   },
   task_type: {
-    param: 'task_type',
+    param: "task_type",
   },
 };
 
@@ -50,7 +50,7 @@ export interface NomicErrorResponse {
 }
 
 export const NomicErrorResponseTransform: (
-  response: NomicValidationErrorResponse | NomicErrorResponse
+  response: NomicValidationErrorResponse | NomicErrorResponse,
 ) => ErrorResponse = (response) => {
   let firstError: Record<string, any> | undefined;
   let errorField: string | null = null;
@@ -59,7 +59,7 @@ export const NomicErrorResponseTransform: (
 
   if (Array.isArray(response.detail)) {
     [firstError] = response.detail;
-    errorField = firstError?.loc?.join('.') ?? '';
+    errorField = firstError?.loc?.join(".") ?? "";
     errorMessage = firstError.msg;
     errorType = firstError.type;
   } else {
@@ -68,12 +68,12 @@ export const NomicErrorResponseTransform: (
 
   return generateErrorResponse(
     {
-      message: `${errorField ? `${errorField}: ` : ''}${errorMessage}`,
+      message: `${errorField ? `${errorField}: ` : ""}${errorMessage}`,
       type: errorType,
       param: null,
       code: null,
     },
-    NOMIC
+    NOMIC,
   );
 };
 
@@ -82,21 +82,21 @@ export const NomicEmbedResponseTransform: (
     | NomicEmbedResponse
     | NomicValidationErrorResponse
     | NomicErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
   if (
-    'detail' in response &&
+    "detail" in response &&
     responseStatus !== 200 &&
     response.detail.length
   ) {
     return NomicErrorResponseTransform(response);
   }
 
-  if ('embeddings' in response) {
+  if ("embeddings" in response) {
     return {
-      object: 'list',
+      object: "list",
       data: response.embeddings.map((d, index) => ({
-        object: 'embedding',
+        object: "embedding",
         embedding: d,
         index: index,
       })),

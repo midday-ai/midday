@@ -20,15 +20,8 @@ import {
 import type { FC } from "react";
 
 import { cn } from "@midday/ui/cn";
-import {
-  Button,
-  type ButtonProps,
-} from "../button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "../tooltip";
+import { Button, type ButtonProps } from "../button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../tooltip";
 
 export const AssistantChatGPT: FC = () => {
   return (
@@ -39,7 +32,9 @@ export const AssistantChatGPT: FC = () => {
             <Avatar.Root className="flex h-12 w-12 items-center justify-center rounded-[24px] border border-white/15 shadow">
               <Avatar.AvatarFallback>C</Avatar.AvatarFallback>
             </Avatar.Root>
-            <p className="mt-4 text-xl text-foreground">How can I help you today?</p>
+            <p className="mt-4 text-xl text-foreground">
+              How can I help you today?
+            </p>
           </div>
         </ThreadPrimitive.Empty>
 

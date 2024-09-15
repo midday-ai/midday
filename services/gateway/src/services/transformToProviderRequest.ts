@@ -1,7 +1,7 @@
-import { MULTIPART_FORM_DATA_ENDPOINTS } from '../globals';
-import ProviderConfigs from '../providers';
-import { endpointStrings } from '../providers/types';
-import { Params } from '../types/requestBody';
+import { MULTIPART_FORM_DATA_ENDPOINTS } from "../globals";
+import ProviderConfigs from "../providers";
+import { endpointStrings } from "../providers/types";
+import { Params } from "../types/requestBody";
 
 /**
  * Helper function to set a nested property in an object.
@@ -11,7 +11,7 @@ import { Params } from '../types/requestBody';
  * @param value - The value to set the property to.
  */
 function setNestedProperty(obj: any, path: string, value: any) {
-  const parts = path.split('.');
+  const parts = path.split(".");
   let current = obj;
   for (let i = 0; i < parts.length - 1; i++) {
     if (!current[parts[i]]) {
@@ -39,7 +39,7 @@ function setNestedProperty(obj: any, path: string, value: any) {
 const transformToProviderRequestJSON = (
   provider: string,
   params: Params,
-  fn: string
+  fn: string,
 ): { [key: string]: any } => {
   // Get the configuration for the specified provider
   let providerConfig = ProviderConfigs[provider];
@@ -51,7 +51,7 @@ const transformToProviderRequestJSON = (
 
   // If the provider is not supported, throw an error
   if (!providerConfig) {
-    throw new Error('Unsupported provider');
+    throw new Error("Unsupported provider");
   }
 
   const transformedRequest: { [key: string]: any } = {};
@@ -76,7 +76,7 @@ const transformToProviderRequestJSON = (
         }
 
         if (
-          value === 'portkey-default' &&
+          value === "portkey-default" &&
           paramConfig &&
           paramConfig.default !== undefined
         ) {
@@ -87,7 +87,7 @@ const transformToProviderRequestJSON = (
         // If a minimum is defined for this parameter and the value is less than this, set the value to the minimum
         // Also, we should only do this comparison if value is of type 'number'
         if (
-          typeof value === 'number' &&
+          typeof value === "number" &&
           paramConfig &&
           paramConfig.min !== undefined &&
           value < paramConfig.min
@@ -98,7 +98,7 @@ const transformToProviderRequestJSON = (
         // If a maximum is defined for this parameter and the value is more than this, set the value to the maximum
         // Also, we should only do this comparison if value is of type 'number'
         else if (
-          typeof value === 'number' &&
+          typeof value === "number" &&
           paramConfig &&
           paramConfig.max !== undefined &&
           value > paramConfig.max
@@ -110,7 +110,7 @@ const transformToProviderRequestJSON = (
         setNestedProperty(
           transformedRequest,
           paramConfig?.param as string,
-          value
+          value,
         );
       }
       // If the parameter is not present in the incoming request body but is required, set it to the default value
@@ -123,7 +123,7 @@ const transformToProviderRequestJSON = (
         setNestedProperty(
           transformedRequest,
           paramConfig.param,
-          paramConfig.default
+          paramConfig.default,
         );
       }
     }
@@ -145,7 +145,7 @@ export const transformToProviderRequest = (
   provider: string,
   params: Params,
   inputParams: Params | FormData,
-  fn: endpointStrings
+  fn: endpointStrings,
 ) => {
   return MULTIPART_FORM_DATA_ENDPOINTS.includes(fn)
     ? inputParams

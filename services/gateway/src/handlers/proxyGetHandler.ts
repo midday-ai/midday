@@ -1,6 +1,6 @@
-import { Context } from 'hono';
-import { retryRequest } from './retryHandler';
-import Providers from '../providers';
+import { Context } from "hono";
+import { retryRequest } from "./retryHandler";
+import Providers from "../providers";
 import {
   ANTHROPIC,
   MAX_RETRIES,
@@ -8,13 +8,13 @@ import {
   RETRY_STATUS_CODES,
   POWERED_BY,
   AZURE_OPEN_AI,
-} from '../globals';
-import { updateResponseHeaders } from './handlerUtils';
-import { env } from 'hono/adapter';
-import { responseHandler } from './responseHandlers';
+} from "../globals";
+import { updateResponseHeaders } from "./handlerUtils";
+import { env } from "hono/adapter";
+import { responseHandler } from "./responseHandlers";
 // Find the proxy provider
 function proxyProvider(proxyModeHeader: string, providerHeader: string) {
-  const proxyProvider = proxyModeHeader?.split(' ')[1] ?? providerHeader;
+  const proxyProvider = proxyModeHeader?.split(" ")[1] ?? providerHeader;
   return proxyProvider;
 }
 
@@ -22,12 +22,12 @@ function getProxyPath(
   requestURL: string,
   proxyProvider: string,
   proxyEndpointPath: string,
-  customHost: string
+  customHost: string,
 ) {
   let reqURL = new URL(requestURL);
   let reqPath = reqURL.pathname;
   const reqQuery = reqURL.search;
-  reqPath = reqPath.replace(proxyEndpointPath, '');
+  reqPath = reqPath.replace(proxyEndpointPath, "");
 
   if (customHost) {
     return `${customHost}${reqPath}${reqQuery}`;
@@ -43,7 +43,7 @@ function getProxyPath(
 
   // Fix specific for Anthropic SDK calls. Is this needed? - Yes
   if (proxyProvider === ANTHROPIC) {
-    proxyPath = proxyPath.replace('/v1/v1/', '/v1/');
+    proxyPath = proxyPath.replace("/v1/v1/", "/v1/");
   }
 
   return proxyPath;
@@ -51,12 +51,12 @@ function getProxyPath(
 
 function headersToSend(
   headersObj: Record<string, string>,
-  customHeadersToIgnore: Array<string>
+  customHeadersToIgnore: Array<string>,
 ): Record<string, string> {
   let final: Record<string, string> = {};
   const poweredByHeadersPattern = `x-${POWERED_BY}-`;
   const headersToAvoid = [...customHeadersToIgnore];
-  headersToAvoid.push('content-length');
+  headersToAvoid.push("content-length");
   Object.keys(headersObj).forEach((key: string) => {
     if (
       !headersToAvoid.includes(key) &&
@@ -65,31 +65,31 @@ function headersToSend(
       final[key] = headersObj[key];
     }
   });
-  final['accept-encoding'] = 'gzip, deflate';
+  final["accept-encoding"] = "gzip, deflate";
   return final;
 }
 
 export async function proxyGetHandler(c: Context): Promise<Response> {
   try {
     const requestHeaders = Object.fromEntries(c.req.raw.headers);
-    delete requestHeaders['content-type'];
+    delete requestHeaders["content-type"];
     const store: Record<string, any> = {
       proxyProvider: proxyProvider(
         requestHeaders[HEADER_KEYS.MODE],
-        requestHeaders[HEADER_KEYS.PROVIDER]
+        requestHeaders[HEADER_KEYS.PROVIDER],
       ),
       customHeadersToAvoid: env(c).CUSTOM_HEADERS_TO_IGNORE ?? [],
       reqBody: {},
-      proxyPath: c.req.url.indexOf('/v1/proxy') > -1 ? '/v1/proxy' : '/v1',
+      proxyPath: c.req.url.indexOf("/v1/proxy") > -1 ? "/v1/proxy" : "/v1",
     };
 
-    const customHost = requestHeaders[HEADER_KEYS.CUSTOM_HOST] || '';
+    const customHost = requestHeaders[HEADER_KEYS.CUSTOM_HOST] || "";
 
     let urlToFetch = getProxyPath(
       c.req.url,
       store.proxyProvider,
       store.proxyPath,
-      customHost
+      customHost,
     );
 
     let fetchOptions = {
@@ -99,7 +99,7 @@ export async function proxyGetHandler(c: Context): Promise<Response> {
 
     let retryCount = Math.min(
       parseInt(requestHeaders[HEADER_KEYS.RETRIES]) || 1,
-      MAX_RETRIES
+      MAX_RETRIES,
     );
 
     let [lastResponse, lastAttempt] = await retryRequest(
@@ -107,7 +107,7 @@ export async function proxyGetHandler(c: Context): Promise<Response> {
       fetchOptions,
       retryCount,
       RETRY_STATUS_CODES,
-      null
+      null,
     );
 
     const { response: mappedResponse } = await responseHandler(
@@ -118,46 +118,46 @@ export async function proxyGetHandler(c: Context): Promise<Response> {
       urlToFetch,
       false,
       store.reqBody,
-      false
+      false,
     );
     updateResponseHeaders(
       mappedResponse,
       0,
       store.reqBody,
-      'DISABLED',
+      "DISABLED",
       lastAttempt ?? 0,
-      requestHeaders[HEADER_KEYS.TRACE_ID] ?? ''
+      requestHeaders[HEADER_KEYS.TRACE_ID] ?? "",
     );
 
-    c.set('requestOptions', [
+    c.set("requestOptions", [
       {
         providerOptions: {
           ...store.reqBody,
           provider: store.proxyProvider,
           requestURL: urlToFetch,
-          rubeusURL: 'proxy',
+          rubeusURL: "proxy",
         },
         requestParams: store.reqBody,
         response: mappedResponse.clone(),
-        cacheStatus: 'DISABLED',
+        cacheStatus: "DISABLED",
         cacheKey: undefined,
       },
     ]);
 
     return mappedResponse;
   } catch (err: any) {
-    console.log('proxyGet error', err.message);
+    console.log("proxyGet error", err.message);
     return new Response(
       JSON.stringify({
-        status: 'failure',
-        message: 'Something went wrong',
+        status: "failure",
+        message: "Something went wrong",
       }),
       {
         status: 500,
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json",
         },
-      }
+      },
     );
   }
 }

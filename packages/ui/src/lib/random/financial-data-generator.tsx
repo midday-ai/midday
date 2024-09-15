@@ -1409,13 +1409,22 @@ export class FinancialDataGenerator {
    * @param endYear The ending year for the generated data
    * @returns An array of IncomeMetrics
    */
-  public static generateIncomeMetricsAcrossManyYears(startYear: number, endYear: number): IncomeMetrics[] {
+  public static generateIncomeMetricsAcrossManyYears(
+    startYear: number,
+    endYear: number,
+  ): IncomeMetrics[] {
     const sampleData: IncomeMetrics[] = [];
-    const categories = ["Salary", "Investments", "Freelance", "Rental Income", "Other"];
+    const categories = [
+      "Salary",
+      "Investments",
+      "Freelance",
+      "Rental Income",
+      "Other",
+    ];
 
     for (let year = startYear; year <= endYear; year++) {
       for (let month = 1; month <= 12; month++) {
-        categories.forEach(category => {
+        categories.forEach((category) => {
           const baseIncome = Math.random() * 10000 + 1000; // Random income between 1000 and 11000
           const variance = (Math.random() - 0.5) * 2000; // Random variance between -1000 and 1000
 
@@ -1433,18 +1442,27 @@ export class FinancialDataGenerator {
   }
 
   /**
-  * Generates sample expense metrics spanning multiple years.
-  * @param startYear The starting year for the generated data
-  * @param endYear The ending year for the generated data
-  * @returns An array of IncomeMetrics
-  */
-  public static generateExpenseMetricsAcrossManyYears(startYear: number, endYear: number): ExpenseMetrics[] {
+   * Generates sample expense metrics spanning multiple years.
+   * @param startYear The starting year for the generated data
+   * @param endYear The ending year for the generated data
+   * @returns An array of IncomeMetrics
+   */
+  public static generateExpenseMetricsAcrossManyYears(
+    startYear: number,
+    endYear: number,
+  ): ExpenseMetrics[] {
     const sampleData: ExpenseMetrics[] = [];
-    const categories = ["Salary", "Investments", "Freelance", "Rental Income", "Other"];
+    const categories = [
+      "Salary",
+      "Investments",
+      "Freelance",
+      "Rental Income",
+      "Other",
+    ];
 
     for (let year = startYear; year <= endYear; year++) {
       for (let month = 1; month <= 12; month++) {
-        categories.forEach(category => {
+        categories.forEach((category) => {
           const baseIncome = Math.random() * 10000 + 1000; // Random income between 1000 and 11000
           const variance = (Math.random() - 0.5) * 2000; // Random variance between -1000 and 1000
 
@@ -2381,6 +2399,7 @@ export class FinancialDataGenerator {
       newAccountsAvailable: false,
       updatedAt: new Date().toISOString(),
       linkType: "LINK_TYPE_PLAID",
+      institutionName: FinancialDataGenerator.getRandomString(8),
       plaidInstitutionId: FinancialDataGenerator.getRandomString(10),
       studentLoanAccounts:
         FinancialDataGenerator.generateRandomStudentLoanAccounts(5),

@@ -1,8 +1,10 @@
 // import { SystemBanner } from "@/components/system-banner";
 import "@/styles/globals.css";
+import { Provider as Analytics } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
-import { Provider as Analytics } from "@midday/events/client";
+import { IntercomScript } from "@midday/ui/intercom-script";
+import IntercomWidget from "@midday/ui/intercom-widget";
 import { Toaster } from "@midday/ui/toaster";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
@@ -81,11 +83,17 @@ export default function Layout({
       <body
         className={cn(
           `${GeistSans.variable} ${GeistMono.variable}`,
-          "whitespace-pre-line overscroll-none",
+          "whitespace-pre-line overscroll-none scrollbar-hide",
         )}
       >
         {/* <SystemBanner /> */}
         <Providers locale={locale}>{children}</Providers>
+        <IntercomWidget
+          appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
+        />
+        <IntercomScript
+          appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
+        />
         <Toaster />
         <Analytics />
       </body>

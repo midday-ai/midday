@@ -1,20 +1,20 @@
-import { MISTRAL_AI } from '../../globals';
-import { EmbedParams, EmbedResponse } from '../../types/embedRequestBody';
-import { ErrorResponse, ProviderConfig } from '../types';
+import { MISTRAL_AI } from "../../globals";
+import { EmbedParams, EmbedResponse } from "../../types/embedRequestBody";
+import { ErrorResponse, ProviderConfig } from "../types";
 import {
   generateErrorResponse,
   generateInvalidProviderResponseError,
-} from '../utils';
-import { MistralAIErrorResponse } from './chatComplete';
+} from "../utils";
+import { MistralAIErrorResponse } from "./chatComplete";
 
 export const MistralAIEmbedConfig: ProviderConfig = {
   model: {
-    param: 'model',
+    param: "model",
     required: true,
-    default: 'mistral-embed',
+    default: "mistral-embed",
   },
   input: {
-    param: 'input',
+    param: "input",
     required: true,
     transform: (params: EmbedParams) => {
       if (Array.isArray(params.input)) {
@@ -30,9 +30,9 @@ interface MistralAIEmbedResponse extends EmbedResponse {}
 
 export const MistralAIEmbedResponseTransform: (
   response: MistralAIEmbedResponse | MistralAIErrorResponse,
-  responseStatus: number
+  responseStatus: number,
 ) => EmbedResponse | ErrorResponse = (response, responseStatus) => {
-  if ('message' in response && responseStatus !== 200) {
+  if ("message" in response && responseStatus !== 200) {
     return generateErrorResponse(
       {
         message: response.message,
@@ -40,11 +40,11 @@ export const MistralAIEmbedResponseTransform: (
         param: response.param,
         code: response.code,
       },
-      MISTRAL_AI
+      MISTRAL_AI,
     );
   }
 
-  if ('data' in response) {
+  if ("data" in response) {
     return {
       object: response.object,
       data: response.data.map((d) => ({

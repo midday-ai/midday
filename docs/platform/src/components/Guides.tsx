@@ -1,36 +1,36 @@
-import { Button } from '@/components/Button'
-import { Heading } from '@/components/Heading'
+import { Button } from "@/components/Button";
+import { Heading } from "@/components/Heading";
 
 const guides = [
   {
-    href: '/authentication',
-    name: 'Authentication',
-    description: 'Learn how to authenticate your API requests.',
+    href: "/authentication",
+    name: "Authentication",
+    description: "Learn how to authenticate your API requests.",
   },
   {
-    href: '/pagination',
-    name: 'Pagination',
-    description: 'Understand how to work with paginated responses.',
+    href: "/pagination",
+    name: "Pagination",
+    description: "Understand how to work with paginated responses.",
   },
   {
-    href: '/errors',
-    name: 'Errors',
+    href: "/errors",
+    name: "Errors",
     description:
-      'Read about the different types of errors returned by the API.',
+      "Read about the different types of errors returned by the API.",
   },
   {
-    href: '/webhooks',
-    name: 'Webhooks',
+    href: "/webhooks",
+    name: "Webhooks",
     description:
-      'Learn how to programmatically configure webhooks for your app.',
+      "Learn how to programmatically configure webhooks for your app.",
   },
   {
-    href: '/use-cases/medical-practices',
-    name: 'Guide - Medical Practices',
+    href: "/use-cases/medical-practices",
+    name: "Guide - Medical Practices",
     description:
-      'Learn about the different tools we provide medical practices available in the API.',
+      "Learn about the different tools we provide medical practices available in the API.",
   },
-]
+];
 
 export function Guides() {
   return (
@@ -56,5 +56,5 @@ export function Guides() {
         ))}
       </div>
     </div>
-  )
+  );
 }
