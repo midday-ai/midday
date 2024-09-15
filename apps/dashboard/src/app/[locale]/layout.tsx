@@ -1,5 +1,4 @@
 // import { SystemBanner } from "@/components/system-banner";
-import ChatAccessibilityButton from "@/components/chat-accessibility-button";
 import "@/styles/globals.css";
 import { Provider as Analytics } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
@@ -96,7 +95,6 @@ export default function Layout({
         <IntercomScript
           appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
         />
-        <ChatAccessibilityButton />
         <Toaster />
         <Analytics />
       </body>

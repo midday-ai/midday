@@ -20,7 +20,7 @@ const ChatAccessibilityButton = () => {
     const { setOpen } = useAssistantStore();
 
     return (
-        <div className="fixed bottom-0 right-12 m-4 hidden sm:block">
+        <div className="fixed bottom-0 m-4 hidden sm:block">
             <button 
                 className="inline-flex items-center justify-center rounded-full bg-primary p-4 text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2" 
                 onClick={() => setOpen()}
