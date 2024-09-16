@@ -13,6 +13,7 @@ const VALID_FILTERS = [
   "end",
   "accounts",
   "assignees",
+  "recurring",
 ];
 
 export async function generateTransactionsFilters(

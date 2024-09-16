@@ -62,6 +62,7 @@ const defaultSearch = {
   accounts: null,
   assignees: null,
   statuses: null,
+  recurring: null,
 };
 
 const statusFilters = [
@@ -73,6 +74,13 @@ const statusFilters = [
 const attachmentsFilters = [
   { id: "include", name: "Has attachments" },
   { id: "exclude", name: "No attachments" },
+];
+
+const recurringFilters = [
+  { id: "all", name: "All recurring" },
+  { id: "weekly", name: "Weekly recurring" },
+  { id: "monthly", name: "Monthly recurring" },
+  { id: "annually", name: "Annually recurring" },
 ];
 
 const PLACEHOLDERS = [
@@ -107,6 +115,9 @@ export function TransactionsSearchFilter({
       categories: parseAsArrayOf(parseAsString),
       accounts: parseAsArrayOf(parseAsString),
       assignees: parseAsArrayOf(parseAsString),
+      recurring: parseAsArrayOf(
+        parseAsStringLiteral(["all", "weekly", "monthly", "annually"] as const),
+      ),
       statuses: parseAsArrayOf(
         parseAsStringLiteral([
           "fullfilled",
@@ -181,6 +192,7 @@ export function TransactionsSearchFilter({
               partialObject?.tags?.map(
                 (name: string) => tags?.find((tag) => tag.name === name)?.slug,
               ) ?? null,
+            recurring: partialObject?.recurring ?? null,
             q: partialObject?.name ?? null,
           };
         }
@@ -250,6 +262,7 @@ export function TransactionsSearchFilter({
           statusFilters={statusFilters}
           attachmentsFilters={attachmentsFilters}
           tags={tags}
+          recurringFilters={recurringFilters}
         />
       </div>
 
@@ -278,18 +291,22 @@ export function TransactionsSearchFilter({
                   today={filters.start ? new Date(filters.start) : new Date()}
                   toDate={new Date()}
                   selected={{
-                    from: filters.start ? new Date(filters.start) : undefined,
-                    to: filters.end ? new Date(filters.end) : undefined,
+                    from: filters.start && new Date(filters.start),
+                    to: filters.end && new Date(filters.end),
                   }}
-                  onSelect={({ from, to }) => {
-                    setFilters({
-                      start: from
-                        ? formatISO(from, { representation: "date" })
-                        : null,
-                      end: to
-                        ? formatISO(to, { representation: "date" })
-                        : null,
-                    });
+                  onSelect={(range) => {
+                    if (!range) return;
+
+                    const newRange = {
+                      start: range.from
+                        ? formatISO(range.from, { representation: "date" })
+                        : filters.start,
+                      end: range.to
+                        ? formatISO(range.to, { representation: "date" })
+                        : filters.end,
+                    };
+
+                    setFilters(newRange);
                   }}
                 />
               </DropdownMenuSubContent>
@@ -423,6 +440,40 @@ export function TransactionsSearchFilter({
                       name: account.name,
                       currency: account.currency,
                     })}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Repeat className="mr-2 h-4 w-4" />
+              <span>Recurring</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                {recurringFilters.map(({ id, name }) => (
+                  <DropdownMenuCheckboxItem
+                    key={id}
+                    checked={filters?.statuses?.includes(id)}
+                    onCheckedChange={() => {
+                      setFilters({
+                        recurring: filters?.recurring?.includes(id)
+                          ? filters.recurring.filter((s) => s !== id).length > 0
+                            ? filters.recurring.filter((s) => s !== id)
+                            : null
+                          : [...(filters?.recurring ?? []), id],
+                      });
+                    }}
+                  >
+                    {name}
                   </DropdownMenuCheckboxItem>
                 ))}
               </DropdownMenuSubContent>

@@ -12,7 +12,11 @@ type Props = {
 
 export function TransactionStatus({ fullfilled }: Props) {
   if (fullfilled) {
-    return <Icons.Check />;
+    return (
+      <div className="flex justify-end">
+        <Icons.Check />
+      </div>
+    );
   }
 
   return (

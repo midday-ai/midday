@@ -72,6 +72,7 @@ import {
   MdOutlinePause,
   MdOutlinePlayArrow,
   MdOutlineQuestionAnswer,
+  MdOutlineRepeat,
   MdOutlineSettings,
   MdOutlineStyle,
   MdOutlineSubject,
@@ -598,4 +599,5 @@ export const Icons = {
   Categories: MdOutlineCategory,
   ArrowRightAlt: MdArrowRightAlt,
   AccountCircle: MdOutlineAccountCircle,
+  Repeat: MdOutlineRepeat,
 };

@@ -1,6 +1,7 @@
 import { createAttachmentsAction } from "@/actions/create-attachments-action";
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { updateSimilarTransactionsAction } from "@/actions/update-similar-transactions-action";
+import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
+import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
 import { createClient } from "@midday/supabase/client";
 import { getTransactionQuery } from "@midday/supabase/queries";
 import {
@@ -15,7 +16,16 @@ import {
 } from "@midday/ui/accordion";
 import { cn } from "@midday/ui/cn";
 import { Label } from "@midday/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@midday/ui/select";
 import { Skeleton } from "@midday/ui/skeleton";
+import { Switch } from "@midday/ui/switch";
 import { ToastAction } from "@midday/ui/toast";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
@@ -49,7 +59,12 @@ export function TransactionDetails({
   const { toast } = useToast();
   const supabase = createClient();
   const [isLoading, setLoading] = useState(true);
-  const updateSimilarTransactions = useAction(updateSimilarTransactionsAction);
+  const updateSimilarTransactionsCategory = useAction(
+    updateSimilarTransactionsCategoryAction,
+  );
+  const updateSimilarTransactionsRecurring = useAction(
+    updateSimilarTransactionsRecurringAction,
+  );
   const createAttachments = useAction(createAttachmentsAction);
 
   useHotkeys("esc", () => setTransactionId(null));
@@ -118,6 +133,7 @@ export function TransactionDetails({
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
       teamId: user?.data?.team_id,
+      categorySlug: category.slug,
     });
 
     if (transactions?.data && transactions.data.length > 1) {
@@ -134,7 +150,7 @@ export function TransactionDetails({
             <ToastAction
               altText="Yes"
               onClick={() => {
-                updateSimilarTransactions.execute({ id: data?.id });
+                updateSimilarTransactionsCategory.execute({ id: data?.id });
               }}
               className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
             >
@@ -146,7 +162,45 @@ export function TransactionDetails({
     }
   };
 
-  const defaultValue = ["attachment"];
+  const handleOnChangeRecurring = async (value: boolean) => {
+    updateTransaction(
+      { id: data?.id, recurring: value, frequency: value ? "monthly" : null },
+      { recurring: value, frequency: value ? "monthly" : null },
+    );
+
+    const user = await getCurrentUserTeamQuery(supabase);
+    const transactions = await getSimilarTransactions(supabase, {
+      name: data?.name,
+      teamId: user?.data?.team_id,
+    });
+
+    if (transactions?.data && transactions.data.length > 1) {
+      toast({
+        duration: 6000,
+        variant: "ai",
+        title: "Midday AI",
+        description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${value ? "Recurring" : "Non Recurring"} too?`,
+        footer: (
+          <div className="flex space-x-2 mt-4">
+            <ToastAction altText="Cancel" className="pl-5 pr-5">
+              Cancel
+            </ToastAction>
+            <ToastAction
+              altText="Yes"
+              onClick={() => {
+                updateSimilarTransactionsRecurring.execute({ id: data?.id });
+              }}
+              className="pl-5 pr-5 bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Yes
+            </ToastAction>
+          </div>
+        ),
+      });
+    }
+  };
+
+  const defaultValue = ["attachment", "recurring"];
 
   if (data?.note) {
     defaultValue.push("note");
@@ -217,7 +271,7 @@ export function TransactionDetails({
       </div>
 
       {data?.description && (
-        <div className="rounded-lg border dark:bg-[#1A1A1A]/95 px-4 py-3 text-sm text-popover-foreground select-text">
+        <div className="border dark:bg-[#1A1A1A]/95 px-4 py-3 text-sm text-popover-foreground select-text">
           {data.description}
         </div>
       )}
@@ -271,6 +325,55 @@ export function TransactionDetails({
                 }
               }}
             />
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="recurring">
+          <AccordionTrigger>Recurring</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-row items-center justify-between">
+              <div className="space-y-0.5">
+                <p className="text-xs text-muted-foreground">
+                  Mark as recurring. Similar future transactions will be
+                  automatically categorized and flagged as recurring.
+                </p>
+              </div>
+              <Switch
+                checked={data?.recurring}
+                onCheckedChange={handleOnChangeRecurring}
+              />
+            </div>
+
+            {data?.recurring && (
+              <Select
+                value={data?.frequency}
+                onValueChange={(value) => {
+                  updateTransaction(
+                    { id: data?.id, frequency: value },
+                    { frequency: value },
+                  );
+
+                  updateSimilarTransactionsRecurring.execute({ id: data?.id });
+                }}
+              >
+                <SelectTrigger className="w-full mt-4">
+                  <SelectValue placeholder="Select frequency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {[
+                      { id: "weekly", name: "Weekly" },
+                      { id: "monthly", name: "Monthly" },
+                      { id: "annually", name: "Annually" },
+                    ].map(({ id, name }) => (
+                      <SelectItem key={id} value={id}>
+                        {name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
           </AccordionContent>
         </AccordionItem>
 
