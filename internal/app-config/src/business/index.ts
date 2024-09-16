@@ -79,7 +79,7 @@ const pricingPlans = [
   },
 ];
 
-export const B: SiteConfig = {
+export const BusinessConfig: SiteConfig = {
   platformHost: "app-consumer.solomon-ai.app",
   company: "Solomon AI",
   name: "Solomon AI | Personal Finance",

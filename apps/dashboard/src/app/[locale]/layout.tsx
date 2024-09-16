@@ -88,7 +88,7 @@ export default function Layout({
       >
         {/* <SystemBanner /> */}
         <Providers locale={locale}>{children}</Providers>
-        
+
         <IntercomWidget
           appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
         />

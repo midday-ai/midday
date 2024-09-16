@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useRef } from "react";
 import { ArrowRightIcon } from "@radix-ui/react-icons";
 import { useInView } from "framer-motion";
+import React, { useRef } from "react";
 
+import { cn } from "../../utils/cn";
 import { Button } from "../button";
 import { BorderBeam } from "../magicui/border-beam";
 import TextShimmer from "../magicui/text-shimmer";
@@ -25,6 +26,7 @@ interface HeroSectionProps {
   lightImageSrc: string;
   children?: React.ReactNode;
   announcement?: string;
+  className?: string;
 }
 
 /**
@@ -51,6 +53,7 @@ export default function HeroSection({
   lightImageSrc,
   children,
   announcement,
+  className,
 }: HeroSectionProps): JSX.Element {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -58,7 +61,10 @@ export default function HeroSection({
   return (
     <section
       id="hero"
-      className="relative mx-auto mt-32 max-w-[80rem] px-6 text-center md:px-8"
+      className={cn(
+        "relative mx-auto mt-32 max-w-[80rem] px-6 text-center md:px-8",
+        className,
+      )}
     >
       {announcement && <AnnouncementBanner text={announcement} />}
       <Title>{title}</Title>

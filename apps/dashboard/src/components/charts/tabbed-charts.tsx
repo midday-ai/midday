@@ -14,20 +14,31 @@ interface TabbedChartsProps extends React.HTMLAttributes<HTMLDivElement> {
   disabled?: boolean;
 }
 
-const TabbedCharts: React.FC<TabbedChartsProps> = ({ currency, className, disabled }) => {
+const TabbedCharts: React.FC<TabbedChartsProps> = ({
+  currency,
+  className,
+  disabled,
+}) => {
   if (!featureFlags.isAnalyticsV2Enabled) return null;
 
   return (
     <div className={cn(disabled && "mt-8 relative")}>
       {disabled && <EmptyState />}
 
-      <Tabs defaultValue="overview" className={cn("w-full py-[2.5%]", className, disabled && "blur-[8px] opacity-20")}>
+      <Tabs
+        defaultValue="overview"
+        className={cn(
+          "w-full py-[2.5%]",
+          className,
+          disabled && "blur-[8px] opacity-20",
+        )}
+      >
         <TabsList className="flex justify-start space-x-2 rounded-2xl p-2 mb-6 w-fit mr-auto">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="income">Income</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
         </TabsList>
-        <TabsContent value="overview" >
+        <TabsContent value="overview">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <CardWrapper
               title="Profit"

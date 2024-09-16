@@ -1,10 +1,14 @@
 import { InviteForm } from "@/components/forms/invite-form";
 import { UserMenu } from "@/components/user-menu";
-import {
-  ArrowRightIcon,
-} from "@heroicons/react/24/outline";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@midday/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -58,8 +62,8 @@ export default async function InviteMembers() {
                       <CardHeader>
                         <CardTitle>Invite new members</CardTitle>
                         <CardDescription>
-                          Add the email addresses of the people you want on your team
-                          and send them invites to join.
+                          Add the email addresses of the people you want on your
+                          team and send them invites to join.
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
