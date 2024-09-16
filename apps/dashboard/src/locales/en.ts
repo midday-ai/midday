@@ -38,9 +38,9 @@ export default {
     expense: "Expense",
   },
   transaction_frequency: {
-    weekly: "Weekly",
-    monthly: "Monthly",
-    annually: "Annually",
+    weekly: "Weekly recurring",
+    monthly: "Monthly recurring",
+    annually: "Annually recurring",
   },
   inbox_filter: {
     all: "All",
@@ -50,6 +50,7 @@ export default {
   chart_type: {
     profit: "Profit",
     revenue: "Revenue",
+    expense: "Expenses",
     burn_rate: "Burn rate",
   },
   folders: {

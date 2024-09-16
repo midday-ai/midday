@@ -133,6 +133,7 @@ client.defineJob({
     revalidateTag(`insights_${teamId}`);
     revalidateTag(`runway_${teamId}`);
     revalidateTag(`burn_rate_${teamId}`);
+    revalidateTag(`expenses_${teamId}`);
 
     return;
   },

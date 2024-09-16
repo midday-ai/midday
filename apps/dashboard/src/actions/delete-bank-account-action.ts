@@ -27,4 +27,5 @@ export const deleteBankAccountAction = authActionClient
     revalidateTag(`burn_rate_${user.team_id}`);
     revalidateTag(`spending_${user.team_id}`);
     revalidateTag(`insights_${user.team_id}`);
+    revalidateTag(`expenses_${user.team_id}`);
   });
