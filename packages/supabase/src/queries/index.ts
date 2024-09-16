@@ -170,6 +170,7 @@ export type GetTransactionsParams = {
     type?: "income" | "expense";
     start?: string;
     end?: string;
+    recurring?: string[];
   };
 };
 
@@ -187,6 +188,7 @@ export async function getTransactionsQuery(
     start,
     end,
     assignees,
+    recurring,
   } = filter || {};
 
   const columns = [
@@ -198,6 +200,8 @@ export async function getTransactionsQuery(
     "status",
     "note",
     "manual",
+    "recurring",
+    "frequency",
     "name",
     "description",
     "assigned:assigned_id(*)",
@@ -242,7 +246,7 @@ export async function getTransactionsQuery(
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
       query.like("amount_text", `%${searchQuery}%`);
     } else {
-      query.ilike("name", `%${searchQuery}%`);
+      query.textSearch("fts_vector", `'${searchQuery}'`);
     }
   }
 
@@ -273,6 +277,14 @@ export async function getTransactionsQuery(
     query.or(matchCategory);
   }
 
+  if (recurring) {
+    if (recurring.includes("all")) {
+      query.eq("recurring", true);
+    } else {
+      query.in("frequency", recurring);
+    }
+  }
+
   if (type === "expense") {
     query.lt("amount", 0);
     query.neq("category_slug", "transfer");
@@ -293,7 +305,6 @@ export async function getTransactionsQuery(
   const { data, count } = await query.range(from, to);
 
   const totalAmount = data
-    ?.filter((transaction) => transaction?.category?.slug !== "transfer")
     ?.reduce((acc, { amount, currency }) => {
       const existingCurrency = acc.find((item) => item.currency === currency);
 
@@ -321,8 +332,6 @@ export async function getTransactionsQuery(
 export async function getTransactionQuery(supabase: Client, id: string) {
   const columns = [
     "*",
-    "name",
-    "description",
     "assigned:assigned_id(*)",
     "category:category_slug(id, name, vat)",
     "attachments:transaction_attachments(*)",
@@ -346,19 +355,21 @@ export async function getTransactionQuery(supabase: Client, id: string) {
 type GetSimilarTransactionsParams = {
   name: string;
   teamId: string;
+  categorySlug?: string;
 };
 
 export async function getSimilarTransactions(
   supabase: Client,
   params: GetSimilarTransactionsParams,
 ) {
-  const { name, teamId } = params;
+  const { name, teamId, categorySlug } = params;
 
   return supabase
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
-    .eq("name", name)
     .eq("team_id", teamId)
+    .neq("category_slug", categorySlug)
+    .textSearch("fts_vector", `'${name}'`)
     .throwOnError();
 }
 

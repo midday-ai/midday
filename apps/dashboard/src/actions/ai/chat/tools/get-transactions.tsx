@@ -18,6 +18,10 @@ export function getTransactionsTool({ aiState }: Args) {
         .describe("The categories of the transactions")
         .optional(),
       amount: z.string().describe("The amount of the transactions").optional(),
+      recurring: z
+        .array(z.enum(["all", "weekly", "monthly", "annually"]))
+        .describe("Filter for recurring transactions")
+        .optional(),
       attachments: z
         .enum(["include", "exclude"])
         .describe(
@@ -34,7 +38,15 @@ export function getTransactionsTool({ aiState }: Args) {
         .optional(),
     }),
     generate: async (args) => {
-      const { name, categories, amount, fromDate, toDate, attachments } = args;
+      const {
+        name,
+        categories,
+        amount,
+        fromDate,
+        toDate,
+        attachments,
+        recurring,
+      } = args;
 
       const toolCallId = nanoid();
 
@@ -45,6 +57,7 @@ export function getTransactionsTool({ aiState }: Args) {
         end: toDate,
         categories,
         attachments,
+        recurring,
       };
 
       const { data, meta } = await getTransactions({

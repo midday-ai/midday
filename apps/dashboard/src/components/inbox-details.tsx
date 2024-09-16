@@ -171,7 +171,7 @@ export function InboxDetails({
                 </Avatar>
               )}
 
-              <div className="grid gap-1">
+              <div className="grid gap-1 select-text">
                 <div className="font-semibold">
                   {isProcessing ? (
                     <Skeleton className="h-3 w-[120px] rounded-sm mb-1" />
@@ -193,7 +193,7 @@ export function InboxDetails({
               </div>
             </div>
             <div className="grid gap-1 ml-auto text-right">
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground select-text">
                 {isProcessing && !item.date && (
                   <Skeleton className="h-3 w-[50px] rounded-sm" />
                 )}

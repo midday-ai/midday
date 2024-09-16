@@ -6,6 +6,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
+import { useI18n } from "@/locales/client";
 import { formatTransactionDate } from "@/utils/format";
 import {
   AlertDialog,
@@ -42,6 +43,8 @@ export type Transaction = {
   id: string;
   amount: number;
   status: "posted" | "excluded" | "included" | "pending" | "completed";
+  frequency?: string;
+  recurring?: boolean;
   manual?: boolean;
   date: string;
   category?: {
@@ -95,39 +98,64 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => {
-      return (
-        <TooltipProvider delayDuration={20}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className={cn(
-                  row.original?.category?.slug === "income" && "text-[#00C969]"
-                )}
-              >
-                <div className="flex space-x-2 items-center">
-                  <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
-                    {row.original.name}
-                  </span>
+      const t = useI18n();
 
-                  {row.original.status === "pending" && (
-                    <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
-                      <span>Pending</span>
-                    </div>
+      return (
+        <div className="flex items-center space-x-2">
+          <TooltipProvider delayDuration={20}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className={cn(
+                    row.original?.category?.slug === "income" &&
+                      "text-[#00C969]",
                   )}
-                </div>
-              </span>
-            </TooltipTrigger>
-            {row.original?.description && (
-              <TooltipContent
-                className="px-3 py-1.5 text-xs max-w-[380px]"
-                side="left"
-                sideOffset={10}
-              >
-                {row.original.description}
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+                >
+                  <div className="flex space-x-2 items-center">
+                    <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
+                      {row.original.name}
+                    </span>
+
+                    {row.original.status === "pending" && (
+                      <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
+                        <span>Pending</span>
+                      </div>
+                    )}
+                  </div>
+                </span>
+              </TooltipTrigger>
+
+              {row.original?.description && (
+                <TooltipContent
+                  className="px-3 py-1.5 text-xs max-w-[380px]"
+                  side="left"
+                  sideOffset={10}
+                >
+                  {row.original.description}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+
+          {row.original.recurring && (
+            <TooltipProvider delayDuration={20}>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Icons.Repeat className="text-[#878787]" />
+                </TooltipTrigger>
+                <TooltipContent
+                  className="px-3 py-1.5 text-xs"
+                  side="right"
+                  sideOffset={10}
+                >
+                  <span>
+                    {t(`transaction_frequency.${row.original.frequency}`)}
+                  </span>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+        </div>
       );
     },
   },
@@ -139,7 +167,7 @@ export const columns: ColumnDef<Transaction>[] = [
         <span
           className={cn(
             "text-sm",
-            row.original?.category?.slug === "income" && "text-[#00C969]"
+            row.original?.category?.slug === "income" && "text-[#00C969]",
           )}
         >
           <FormatAmount
@@ -199,7 +227,6 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
     cell: ({ row }) => {
       const fullfilled =
         row.original?.status === "completed" ||

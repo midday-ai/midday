@@ -26,7 +26,7 @@ export function InboxItem({ item }) {
       <div className="flex w-full flex-col gap-1">
         <div className="flex items-center mb-1">
           <div className="flex items-center gap-2">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 select-text">
               <div className="font-semibold">
                 {isProcessing ? (
                   <Skeleton className="h-3 w-[120px] rounded-sm mb-1" />
@@ -38,7 +38,7 @@ export function InboxItem({ item }) {
           </div>
           <div
             className={cn(
-              "ml-auto text-xs",
+              "ml-auto text-xs select-text",
               isSelected ? "text-foreground" : "text-muted-foreground",
             )}
           >
@@ -48,7 +48,7 @@ export function InboxItem({ item }) {
         </div>
 
         <div className="flex">
-          <div className="text-xs font-medium">
+          <div className="text-xs font-medium select-text">
             {isProcessing && <Skeleton className="h-3 w-[50px] rounded-sm" />}
             {!isProcessing && item?.currency && item?.amount && (
               <FormatAmount amount={item.amount} currency={item.currency} />
