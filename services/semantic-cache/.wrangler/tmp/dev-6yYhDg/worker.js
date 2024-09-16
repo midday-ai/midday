@@ -856,7 +856,8 @@ var require_get_intrinsic = __commonJS({
           (first === '"' ||
             first === "'" ||
             first === "`" ||
-            last === '"' || last === "'" ||
+            last === '"' ||
+            last === "'" ||
             last === "`") &&
           first !== last
         ) {

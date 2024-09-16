@@ -50,10 +50,10 @@ export default async function Overview({
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
-      id: "this_year",
-      from: startOfYear(new Date()).toISOString(),
-      to: new Date().toISOString(),
-    };
+        id: "this_year",
+        from: startOfYear(new Date()).toISOString(),
+        to: new Date().toISOString(),
+      };
 
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
@@ -87,7 +87,7 @@ export default async function Overview({
         </Card>
 
         <Card className="mt-8 min-h-[530px] overflow-y-auto scrollbar-hide">
-            {isEmpty && <EmptyState />}
+          {isEmpty && <EmptyState />}
           <div className={`${isEmpty && "blur-[8px] opacity-20 relative"}`}>
             <CardHeader>
               <CardTitle className="text-2xl">Recent Transactions </CardTitle>

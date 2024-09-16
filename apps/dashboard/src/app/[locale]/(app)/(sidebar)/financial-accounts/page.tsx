@@ -40,7 +40,10 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
         {/** we display the connected accounts here */}
         <div className={cn(isEmpty && "mt-8 relative")}>
           {isEmpty && <EmptyState />}
-          <Tabs defaultValue="bank-accounts" className={cn(isEmpty && "blur-[8px] opacity-20")}>
+          <Tabs
+            defaultValue="bank-accounts"
+            className={cn(isEmpty && "blur-[8px] opacity-20")}
+          >
             <TabsList>
               <TabsTrigger value="bank-accounts">Bank Accounts</TabsTrigger>
               <TabsTrigger value="credit-cards">Credit Cards</TabsTrigger>

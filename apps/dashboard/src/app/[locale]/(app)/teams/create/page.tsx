@@ -1,6 +1,12 @@
 import { CreateTeamForm } from "@/components/forms/create-team-form";
 import { UserMenu } from "@/components/user-menu";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
 import Link from "next/link";

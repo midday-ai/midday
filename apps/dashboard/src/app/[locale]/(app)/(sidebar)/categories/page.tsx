@@ -6,23 +6,26 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-    title: "Categories | Midday",
+  title: "Categories | Midday",
 };
 
 type Props = {
-    searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export default async function InboxPage({ searchParams }: Props) {
-    const user = await getUser();
-    const accounts = await getTeamBankAccounts();
-    const isEmpty = !accounts?.data?.length;
+  const user = await getUser();
+  const accounts = await getTeamBankAccounts();
+  const isEmpty = !accounts?.data?.length;
 
-    return (
-        <Suspense fallback={<InboxViewSkeleton ascending />}>
-            <ConnectAccountServerWrapper>
-                <CategoryCharts currency={searchParams.currency as string ?? "USD"} disableAllCharts={isEmpty} />
-            </ConnectAccountServerWrapper>
-        </Suspense>
-    );
+  return (
+    <Suspense fallback={<InboxViewSkeleton ascending />}>
+      <ConnectAccountServerWrapper>
+        <CategoryCharts
+          currency={(searchParams.currency as string) ?? "USD"}
+          disableAllCharts={isEmpty}
+        />
+      </ConnectAccountServerWrapper>
+    </Suspense>
+  );
 }
