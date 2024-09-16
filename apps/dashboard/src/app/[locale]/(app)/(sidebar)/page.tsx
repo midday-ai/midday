@@ -50,10 +50,10 @@ export default async function Overview({
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
-        id: "this_year",
-        from: startOfYear(new Date()).toISOString(),
-        to: new Date().toISOString(),
-      };
+      id: "this_year",
+      from: startOfYear(new Date()).toISOString(),
+      to: new Date().toISOString(),
+    };
 
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
@@ -65,7 +65,7 @@ export default async function Overview({
   return (
     <>
       {/** financial portal view */}
-      <FinancialPortalView />
+      <FinancialPortalView disabled={isEmpty} />
 
       <div>
         <Card className="h-[530px] md:h-[700px] my-4 p-[2%]">
@@ -87,29 +87,33 @@ export default async function Overview({
         </Card>
 
         <Card className="mt-8 min-h-[530px] overflow-y-auto scrollbar-hide">
-          <CardHeader>
-            <CardTitle className="text-2xl">Recent Transactions </CardTitle>
-            <CardDescription className="text-md">
-              View all recent transactions
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-[2%]">
-            <Table
-              filter={{
-                start: subMonths(new Date(), 1).toISOString(),
-                end: new Date().toISOString(),
-              }}
-              page={0}
-              sort={["date", "desc"]}
-              query={null}
-            />
-          </CardContent>
+            {isEmpty && <EmptyState />}
+          <div className={`${isEmpty && "blur-[8px] opacity-20 relative"}`}>
+            <CardHeader>
+              <CardTitle className="text-2xl">Recent Transactions </CardTitle>
+              <CardDescription className="text-md">
+                View all recent transactions
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-[2%]">
+              <Table
+                filter={{
+                  start: subMonths(new Date(), 1).toISOString(),
+                  end: new Date().toISOString(),
+                }}
+                page={0}
+                sort={["date", "desc"]}
+                query={null}
+              />
+            </CardContent>
+          </div>
         </Card>
 
         {/** tabbed charts with income and expense charts */}
         <TabbedCharts
           currency={searchParams.currency ?? "USD"}
           className="mt-8"
+          disabled={isEmpty}
         />
 
         <Widgets
