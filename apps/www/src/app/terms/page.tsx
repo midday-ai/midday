@@ -13,17 +13,18 @@ export default function Page() {
         </h1>
 
         <div className="text-component line-height-lg v-space-md">
-          <p className="mt-8 leading-7">Last updated: October 26, 2023</p>
+          <p className="mt-8 leading-7">Last updated: September 15, 2024</p>
 
           <p className="mt-8 leading-7">
-            These Terms and Conditions ("Terms", "Terms and Conditions") govern
-            your relationship with Solomon AI application (the "Service")
-            operated by Solomon AI ("us", "we", or "our").
+            These Terms and Conditions (&quot;Terms&quot;, &quot;Terms and
+            Conditions&quot;) govern your relationship with Solomon AI
+            Products (the &quot;Service&quot;) operated by Solomon AI
+            (&quot;us&quot;, &quot;we&quot;, or &quot;our&quot;).
           </p>
 
           <p className="mt-8 leading-7">
-            Please read these Terms and Conditions carefully before using our
-            Solomon AI application (the "Service").
+            Please read these Terms and Conditions carefully before using any
+            Solomon AI Products (the &quot;Service&quot;).
           </p>
 
           <p className="mt-8 leading-7">
@@ -38,13 +39,15 @@ export default function Page() {
             access the Service.
           </p>
 
-          <h2>Subscriptions</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Subscriptions
+          </h2>
 
           <p className="mt-8 leading-7">
             Some parts of the Service are billed on a subscription basis
-            ("Subscription(s)"). You will be billed in advance on a recurring
-            and periodic basis ("Billing Cycle"). Billing cycles are set on a
-            monthly basis.
+            (&quot;Subscription(s)&quot;). You will be billed in advance on a
+            recurring and periodic basis (&quot;Billing Cycle&quot;). Billing
+            cycles are set on a monthly basis.
           </p>
 
           <p className="mt-8 leading-7">
@@ -57,8 +60,8 @@ export default function Page() {
 
           <p className="mt-8 leading-7">
             A valid payment method, including credit card, is required to
-            process the payment for your Subscription. You shall provide Acre
-            Labs Ab with accurate and complete billing information including
+            process the payment for your Subscription. You shall provide
+            Solomon AI with accurate and complete billing information including
             full name, address, state, zip code, telephone number, and a valid
             payment method information. By submitting such payment information,
             you automatically authorize Solomon AI to charge all Subscription
@@ -67,13 +70,15 @@ export default function Page() {
 
           <p className="mt-8 leading-7">
             Should automatic billing fail to occur for any reason, Solomon AI
-            Labs AB will issue an electronic invoice indicating that you must
+            will issue an electronic invoice indicating that you must
             proceed manually, within a certain deadline date, with the full
             payment corresponding to the billing period as indicated on the
             invoice.
           </p>
 
-          <h2>Fee Changes</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Fee Changes
+          </h2>
 
           <p className="mt-8 leading-7">
             Solomon AI, in its sole discretion and at any time, may modify the
@@ -93,22 +98,26 @@ export default function Page() {
             Subscription fee amount.
           </p>
 
-          <h2>Refunds</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Refunds
+          </h2>
 
           <p className="mt-8 leading-7">
-            Certain refund requests for Subscriptions may be considered by Acre
-            Labs AB on a case-by-case basis and granted in sole discretion of
-            Solomon AI.
+            Certain refund requests for Subscriptions may be considered by
+            Solomon AI on a case-by-case basis and granted in sole
+            discretion of Solomon AI.
           </p>
 
-          <h2>Content</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Content
+          </h2>
 
           <p className="mt-8 leading-7">
             Our Service allows you to post, link, store, share and otherwise
             make available certain information, text, graphics, videos, or other
-            material ("Content"). You are responsible for the Content that you
-            post to the Service, including its legality, reliability, and
-            appropriateness.
+            material (&quot;Content&quot;). You are responsible for the Content
+            that you post to the Service, including its legality, reliability,
+            and appropriateness.
           </p>
 
           <p className="mt-8 leading-7">
@@ -131,7 +140,8 @@ export default function Page() {
             rights of any person.
           </p>
 
-          <h2>Accounts</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Accounts</h2>
 
           <p className="mt-8 leading-7">
             When you create an account with us, you must provide us information
@@ -161,13 +171,14 @@ export default function Page() {
             offensive, vulgar or obscene.
           </p>
 
-          <h2>Copyright Policy</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Copyright Policy</h2>
 
           <p className="mt-8 leading-7">
             We respect the intellectual property rights of others. It is our
             policy to respond to any claim that Content posted on the Service
             infringes the copyright or other intellectual property infringement
-            ("Infringement") of any person.
+            (&quot;Infringement&quot;) of any person.
           </p>
 
           <p className="mt-8 leading-7">
@@ -175,29 +186,32 @@ export default function Page() {
             you believe that the copyrighted work has been copied in a way that
             constitutes copyright infringement that is taking place through the
             Service, you must submit your notice in writing to the attention of
-            "Copyright Infringement" of dmca@solomon-ai.app and include in your
-            notice a detailed description of the alleged Infringement.
+            &quot;Copyright Infringement&quot; of dmca@solomon-ai.app and
+            include in your notice a detailed description of the alleged
+            Infringement.
           </p>
 
           <p className="mt-8 leading-7">
             You may be held accountable for damages (including costs and
-            attorneys' fees) for misrepresenting that any Content is infringing
-            your copyright.
+            attorneys&apos; fees) for misrepresenting that any Content is
+            infringing your copyright.
           </p>
 
-          <h2>Intellectual Property</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Intellectual Property</h2>
 
           <p className="mt-8 leading-7">
             The Service and its original content (excluding Content provided by
             users), features and functionality are and will remain the exclusive
             property of Solomon AI and its licensors. The Service is protected
-            by copyright, trademark, and other laws of both the Sweden and
+            by copyright, trademark, and other laws of both the United States Of America and
             foreign countries. Our trademarks and trade dress may not be used in
             connection with any product or service without the prior written
             consent of Solomon AI.
           </p>
 
-          <h2>Links To Other Web Sites</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Links To Other Web Sites</h2>
 
           <p className="mt-8 leading-7">
             Our Service may contain links to third-party web sites or services
@@ -207,8 +221,8 @@ export default function Page() {
           <p className="mt-8 leading-7">
             Solomon AI has no control over, and assumes no responsibility for,
             the content, privacy policies, or practices of any third party web
-            sites or services. You further acknowledge and agree that Acre Labs
-            Ab shall not be responsible or liable, directly or indirectly, for
+            sites or services. You further acknowledge and agree that Solomon AI
+            shall not be responsible or liable, directly or indirectly, for
             any damage or loss caused or alleged to be caused by or in
             connection with use of or reliance on any such content, goods or
             services available on or through any such web sites or services.
@@ -219,7 +233,8 @@ export default function Page() {
             policies of any third-party web sites or services that you visit.
           </p>
 
-          <h2>Termination</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Termination</h2>
 
           <p className="mt-8 leading-7">
             We may terminate or suspend your account immediately, without prior
@@ -233,7 +248,8 @@ export default function Page() {
             discontinue using the Service.
           </p>
 
-          <h2>Limitation Of Liability</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Limitation Of Liability</h2>
 
           <p className="mt-8 leading-7">
             In no event shall Solomon AI, nor its directors, employees,
@@ -251,13 +267,15 @@ export default function Page() {
             failed of its essential purpose.
           </p>
 
-          <h2>Disclaimer</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Disclaimer</h2>
 
           <p className="mt-8 leading-7">
             Your use of the Service is at your sole risk. The Service is
-            provided on an "AS IS" and "AS AVAILABLE" basis. The Service is
-            provided without warranties of any kind, whether express or implied,
-            including, but not limited to, implied warranties of
+            provided on an &quot;AS IS&quot; and &quot;AS AVAILABLE&quot; basis.
+            The Service is provided without warranties of any kind, whether
+            express or implied, including, but not limited to, implied
+            warranties of merchantability, fitness for a particular purpose,
             merchantability, fitness for a particular purpose, non-infringement
             or course of performance.
           </p>
@@ -267,15 +285,16 @@ export default function Page() {
             warrant that a) the Service will function uninterrupted, secure or
             available at any particular time or location; b) any errors or
             defects will be corrected; c) the Service is free of viruses or
-            other harmful components; or d) the results of using the Service
-            will meet your requirements.
+            other harmful components; or d) the results of using the Service will
+            meet your requirements.
           </p>
 
-          <h2>Governing Law</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Governing Law</h2>
 
           <p className="mt-8 leading-7">
             These Terms shall be governed and construed in accordance with the
-            laws of Sweden, without regard to its conflict of law provisions.
+            laws of United States Of America, without regard to its conflict of law provisions.
           </p>
 
           <p className="mt-8 leading-7">
@@ -288,7 +307,8 @@ export default function Page() {
             have between us regarding the Service.
           </p>
 
-          <h2>Changes</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Changes</h2>
 
           <p className="mt-8 leading-7">
             We reserve the right, at our sole discretion, to modify or replace
@@ -304,10 +324,25 @@ export default function Page() {
             do not agree to the new terms, please stop using the Service.
           </p>
 
-          <h2>Contact Us</h2>
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            User Responsibilities</h2>
 
           <p className="mt-8 leading-7">
-            If you have any questions about these Terms, please contact us.
+            You are responsible for ensuring that your use of the Service complies with all applicable laws and regulations. You agree not to use the Service for any unlawful purpose or in any way that could damage, disable, overburden, or impair our servers or networks.
+          </p>
+
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Privacy Policy</h2>
+
+          <p className="mt-8 leading-7">
+            Please review our Privacy Policy, which also governs your use of the Service, to understand our practices regarding the collection, use, and disclosure of your personal information.
+          </p>
+
+          <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
+            Contact Us</h2>
+
+          <p className="mt-8 leading-7">
+            If you have any questions about these Terms, please contact us at yoanyomba@solomon-ai.co.
           </p>
         </div>
       </div>
