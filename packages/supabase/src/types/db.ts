@@ -14,13 +14,12 @@ export type Database = {
           account_id: string;
           balance: number | null;
           bank_connection_id: string | null;
-          base_balance: number | null;
-          base_currency: string | null;
           created_at: string;
           created_by: string;
           currency: string | null;
           enabled: boolean;
           id: string;
+          last_accessed: string | null;
           manual: boolean | null;
           name: string | null;
           team_id: string;
@@ -30,13 +29,12 @@ export type Database = {
           account_id: string;
           balance?: number | null;
           bank_connection_id?: string | null;
-          base_balance?: number | null;
-          base_currency?: string | null;
           created_at?: string;
           created_by: string;
           currency?: string | null;
           enabled?: boolean;
           id?: string;
+          last_accessed?: string | null;
           manual?: boolean | null;
           name?: string | null;
           team_id: string;
@@ -46,13 +44,12 @@ export type Database = {
           account_id?: string;
           balance?: number | null;
           bank_connection_id?: string | null;
-          base_balance?: number | null;
-          base_currency?: string | null;
           created_at?: string;
           created_by?: string;
           currency?: string | null;
           enabled?: boolean;
           id?: string;
+          last_accessed?: string | null;
           manual?: boolean | null;
           name?: string | null;
           team_id?: string;
@@ -87,48 +84,36 @@ export type Database = {
           access_token: string | null;
           created_at: string;
           enrollment_id: string | null;
-          error_details: string | null;
           expires_at: string | null;
           id: string;
           institution_id: string;
-          last_accessed: string | null;
           logo_url: string | null;
           name: string;
           provider: Database["public"]["Enums"]["bank_providers"] | null;
-          reference_id: string | null;
-          status: Database["public"]["Enums"]["connection_status"] | null;
           team_id: string;
         };
         Insert: {
           access_token?: string | null;
           created_at?: string;
           enrollment_id?: string | null;
-          error_details?: string | null;
           expires_at?: string | null;
           id?: string;
           institution_id: string;
-          last_accessed?: string | null;
           logo_url?: string | null;
           name: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
-          reference_id?: string | null;
-          status?: Database["public"]["Enums"]["connection_status"] | null;
           team_id: string;
         };
         Update: {
           access_token?: string | null;
           created_at?: string;
           enrollment_id?: string | null;
-          error_details?: string | null;
           expires_at?: string | null;
           id?: string;
           institution_id?: string;
-          last_accessed?: string | null;
           logo_url?: string | null;
           name?: string;
           provider?: Database["public"]["Enums"]["bank_providers"] | null;
-          reference_id?: string | null;
-          status?: Database["public"]["Enums"]["connection_status"] | null;
           team_id?: string;
         };
         Relationships: [
@@ -141,105 +126,38 @@ export type Database = {
           },
         ];
       };
-      documents: {
+      customers: {
         Row: {
-          body: string | null;
-          created_at: string | null;
-          fts: unknown | null;
           id: string;
-          metadata: Json | null;
-          name: string | null;
-          object_id: string | null;
-          owner_id: string | null;
-          parent_id: string | null;
-          path_tokens: string[] | null;
-          tag: string | null;
-          team_id: string | null;
-          title: string | null;
+          stripe_customer_id: string | null;
         };
         Insert: {
-          body?: string | null;
-          created_at?: string | null;
-          fts?: unknown | null;
-          id?: string;
-          metadata?: Json | null;
-          name?: string | null;
-          object_id?: string | null;
-          owner_id?: string | null;
-          parent_id?: string | null;
-          path_tokens?: string[] | null;
-          tag?: string | null;
-          team_id?: string | null;
-          title?: string | null;
+          id: string;
+          stripe_customer_id?: string | null;
         };
         Update: {
-          body?: string | null;
-          created_at?: string | null;
-          fts?: unknown | null;
           id?: string;
-          metadata?: Json | null;
-          name?: string | null;
-          object_id?: string | null;
-          owner_id?: string | null;
-          parent_id?: string | null;
-          path_tokens?: string[] | null;
-          tag?: string | null;
-          team_id?: string | null;
-          title?: string | null;
+          stripe_customer_id?: string | null;
         };
         Relationships: [
           {
-            foreignKeyName: "documents_created_by_fkey";
-            columns: ["owner_id"];
-            isOneToOne: false;
+            foreignKeyName: "customers_id_fkey";
+            columns: ["id"];
+            isOneToOne: true;
             referencedRelation: "users";
             referencedColumns: ["id"];
           },
-          {
-            foreignKeyName: "storage_team_id_fkey";
-            columns: ["team_id"];
-            isOneToOne: false;
-            referencedRelation: "teams";
-            referencedColumns: ["id"];
-          },
         ];
-      };
-      exchange_rates: {
-        Row: {
-          base: string | null;
-          id: string;
-          rate: number | null;
-          target: string | null;
-          updated_at: string | null;
-        };
-        Insert: {
-          base?: string | null;
-          id?: string;
-          rate?: number | null;
-          target?: string | null;
-          updated_at?: string | null;
-        };
-        Update: {
-          base?: string | null;
-          id?: string;
-          rate?: number | null;
-          target?: string | null;
-          updated_at?: string | null;
-        };
-        Relationships: [];
       };
       inbox: {
         Row: {
           amount: number | null;
           attachment_id: string | null;
-          base_amount: number | null;
-          base_currency: string | null;
           content_type: string | null;
           created_at: string;
           currency: string | null;
-          date: string | null;
-          description: string | null;
           display_name: string | null;
+          due_date: string | null;
           file_name: string | null;
           file_path: string[] | null;
           forwarded_to: string | null;
@@ -251,21 +169,17 @@ export type Database = {
           status: Database["public"]["Enums"]["inbox_status"] | null;
           team_id: string | null;
           transaction_id: string | null;
-          type: Database["public"]["Enums"]["inbox_type"] | null;
           website: string | null;
           inbox_amount_text: string | null;
         };
         Insert: {
           amount?: number | null;
           attachment_id?: string | null;
-          base_amount?: number | null;
-          base_currency?: string | null;
           content_type?: string | null;
           created_at?: string;
           currency?: string | null;
-          date?: string | null;
-          description?: string | null;
           display_name?: string | null;
+          due_date?: string | null;
           file_name?: string | null;
           file_path?: string[] | null;
           forwarded_to?: string | null;
@@ -277,20 +191,16 @@ export type Database = {
           status?: Database["public"]["Enums"]["inbox_status"] | null;
           team_id?: string | null;
           transaction_id?: string | null;
-          type?: Database["public"]["Enums"]["inbox_type"] | null;
           website?: string | null;
         };
         Update: {
           amount?: number | null;
           attachment_id?: string | null;
-          base_amount?: number | null;
-          base_currency?: string | null;
           content_type?: string | null;
           created_at?: string;
           currency?: string | null;
-          date?: string | null;
-          description?: string | null;
           display_name?: string | null;
+          due_date?: string | null;
           file_name?: string | null;
           file_path?: string[] | null;
           forwarded_to?: string | null;
@@ -302,7 +212,6 @@ export type Database = {
           status?: Database["public"]["Enums"]["inbox_status"] | null;
           team_id?: string | null;
           transaction_id?: string | null;
-          type?: Database["public"]["Enums"]["inbox_type"] | null;
           website?: string | null;
         };
         Relationships: [
@@ -328,6 +237,87 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      prices: {
+        Row: {
+          active: boolean | null;
+          currency: string | null;
+          description: string | null;
+          id: string;
+          interval: Database["public"]["Enums"]["pricing_plan_interval"] | null;
+          interval_count: number | null;
+          metadata: Json | null;
+          product_id: string | null;
+          trial_period_days: number | null;
+          type: Database["public"]["Enums"]["pricing_type"] | null;
+          unit_amount: number | null;
+        };
+        Insert: {
+          active?: boolean | null;
+          currency?: string | null;
+          description?: string | null;
+          id: string;
+          interval?:
+            | Database["public"]["Enums"]["pricing_plan_interval"]
+            | null;
+          interval_count?: number | null;
+          metadata?: Json | null;
+          product_id?: string | null;
+          trial_period_days?: number | null;
+          type?: Database["public"]["Enums"]["pricing_type"] | null;
+          unit_amount?: number | null;
+        };
+        Update: {
+          active?: boolean | null;
+          currency?: string | null;
+          description?: string | null;
+          id?: string;
+          interval?:
+            | Database["public"]["Enums"]["pricing_plan_interval"]
+            | null;
+          interval_count?: number | null;
+          metadata?: Json | null;
+          product_id?: string | null;
+          trial_period_days?: number | null;
+          type?: Database["public"]["Enums"]["pricing_type"] | null;
+          unit_amount?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prices_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      products: {
+        Row: {
+          active: boolean | null;
+          description: string | null;
+          id: string;
+          image: string | null;
+          metadata: Json | null;
+          name: string | null;
+        };
+        Insert: {
+          active?: boolean | null;
+          description?: string | null;
+          id: string;
+          image?: string | null;
+          metadata?: Json | null;
+          name?: string | null;
+        };
+        Update: {
+          active?: boolean | null;
+          description?: string | null;
+          id?: string;
+          image?: string | null;
+          metadata?: Json | null;
+          name?: string | null;
+        };
+        Relationships: [];
       };
       reports: {
         Row: {
@@ -386,11 +376,78 @@ export type Database = {
           },
         ];
       };
+      subscriptions: {
+        Row: {
+          cancel_at: string | null;
+          cancel_at_period_end: boolean | null;
+          canceled_at: string | null;
+          created: string;
+          current_period_end: string;
+          current_period_start: string;
+          ended_at: string | null;
+          id: string;
+          metadata: Json | null;
+          price_id: string | null;
+          quantity: number | null;
+          status: Database["public"]["Enums"]["subscription_status"] | null;
+          trial_end: string | null;
+          trial_start: string | null;
+          user_id: string;
+        };
+        Insert: {
+          cancel_at?: string | null;
+          cancel_at_period_end?: boolean | null;
+          canceled_at?: string | null;
+          created?: string;
+          current_period_end?: string;
+          current_period_start?: string;
+          ended_at?: string | null;
+          id: string;
+          metadata?: Json | null;
+          price_id?: string | null;
+          quantity?: number | null;
+          status?: Database["public"]["Enums"]["subscription_status"] | null;
+          trial_end?: string | null;
+          trial_start?: string | null;
+          user_id: string;
+        };
+        Update: {
+          cancel_at?: string | null;
+          cancel_at_period_end?: boolean | null;
+          canceled_at?: string | null;
+          created?: string;
+          current_period_end?: string;
+          current_period_start?: string;
+          ended_at?: string | null;
+          id?: string;
+          metadata?: Json | null;
+          price_id?: string | null;
+          quantity?: number | null;
+          status?: Database["public"]["Enums"]["subscription_status"] | null;
+          trial_end?: string | null;
+          trial_start?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_price_id_fkey";
+            columns: ["price_id"];
+            isOneToOne: false;
+            referencedRelation: "prices";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       teams: {
         Row: {
-          base_currency: string | null;
           created_at: string;
-          document_classification: boolean | null;
           email: string | null;
           id: string;
           inbox_email: string | null;
@@ -400,9 +457,7 @@ export type Database = {
           name: string | null;
         };
         Insert: {
-          base_currency?: string | null;
           created_at?: string;
-          document_classification?: boolean | null;
           email?: string | null;
           id?: string;
           inbox_email?: string | null;
@@ -412,9 +467,7 @@ export type Database = {
           name?: string | null;
         };
         Update: {
-          base_currency?: string | null;
           created_at?: string;
-          document_classification?: boolean | null;
           email?: string | null;
           id?: string;
           inbox_email?: string | null;
@@ -422,6 +475,18 @@ export type Database = {
           inbox_id?: string | null;
           logo_url?: string | null;
           name?: string | null;
+        };
+        Relationships: [];
+      };
+      total_amount: {
+        Row: {
+          sum: number | null;
+        };
+        Insert: {
+          sum?: number | null;
+        };
+        Update: {
+          sum?: number | null;
         };
         Relationships: [];
       };
@@ -736,80 +801,197 @@ export type Database = {
       };
       transactions: {
         Row: {
+          account_id: string;
+          account_owner: string | null;
           amount: number;
           assigned_id: string | null;
+          authorized_date: string | null;
+          authorized_datetime: string | null;
           balance: number | null;
           bank_account_id: string | null;
-          base_amount: number | null;
-          base_currency: string | null;
           category: Database["public"]["Enums"]["transactionCategories"] | null;
+          category_id: string | null;
           category_slug: string | null;
+          check_number: string | null;
           created_at: string;
           currency: string;
+          currency_rate: number | null;
+          currency_source: string | null;
           date: string;
+          datetime: string | null;
           description: string | null;
           id: string;
+          inserted_at: string | null;
           internal_id: string;
+          iso_currency_code: string | null;
+          location_address: string | null;
+          location_city: string | null;
+          location_country: string | null;
+          location_lat: number | null;
+          location_lon: number | null;
+          location_postal_code: string | null;
+          location_region: string | null;
+          location_store_number: string | null;
+          logo_url: string | null;
           manual: boolean | null;
+          merchant_entity_id: string | null;
+          merchant_name: string | null;
           method: Database["public"]["Enums"]["transactionMethods"];
           name: string;
           note: string | null;
+          payment_channel: string | null;
+          payment_meta_by_order_of: string | null;
+          payment_meta_payee: string | null;
+          payment_meta_payer: string | null;
+          payment_meta_payment_method: string | null;
+          payment_meta_payment_processor: string | null;
+          payment_meta_ppd_id: string | null;
+          payment_meta_reason: string | null;
+          payment_meta_reference_number: string | null;
+          pending: boolean | null;
+          pending_transaction_id: string | null;
+          personal_finance_category_confidence_level: string | null;
+          personal_finance_category_detailed: string | null;
+          personal_finance_category_icon_url: string | null;
+          personal_finance_category_primary: string | null;
           status: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string;
-          updated_at: string | null;
+          transaction_code: string | null;
+          transaction_id: string | null;
+          transaction_type: string | null;
+          unofficial_currency_code: string | null;
+          website: string | null;
           amount_text: string | null;
           calculated_vat: number | null;
           is_fulfilled: boolean | null;
         };
         Insert: {
+          account_id: string;
+          account_owner?: string | null;
           amount: number;
           assigned_id?: string | null;
+          authorized_date?: string | null;
+          authorized_datetime?: string | null;
           balance?: number | null;
           bank_account_id?: string | null;
-          base_amount?: number | null;
-          base_currency?: string | null;
           category?:
             | Database["public"]["Enums"]["transactionCategories"]
             | null;
+          category_id?: string | null;
           category_slug?: string | null;
+          check_number?: string | null;
           created_at?: string;
           currency: string;
+          currency_rate?: number | null;
+          currency_source?: string | null;
           date: string;
+          datetime?: string | null;
           description?: string | null;
           id?: string;
+          inserted_at?: string | null;
           internal_id: string;
+          iso_currency_code?: string | null;
+          location_address?: string | null;
+          location_city?: string | null;
+          location_country?: string | null;
+          location_lat?: number | null;
+          location_lon?: number | null;
+          location_postal_code?: string | null;
+          location_region?: string | null;
+          location_store_number?: string | null;
+          logo_url?: string | null;
           manual?: boolean | null;
+          merchant_entity_id?: string | null;
+          merchant_name?: string | null;
           method: Database["public"]["Enums"]["transactionMethods"];
           name: string;
           note?: string | null;
+          payment_channel?: string | null;
+          payment_meta_by_order_of?: string | null;
+          payment_meta_payee?: string | null;
+          payment_meta_payer?: string | null;
+          payment_meta_payment_method?: string | null;
+          payment_meta_payment_processor?: string | null;
+          payment_meta_ppd_id?: string | null;
+          payment_meta_reason?: string | null;
+          payment_meta_reference_number?: string | null;
+          pending?: boolean | null;
+          pending_transaction_id?: string | null;
+          personal_finance_category_confidence_level?: string | null;
+          personal_finance_category_detailed?: string | null;
+          personal_finance_category_icon_url?: string | null;
+          personal_finance_category_primary?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id: string;
-          updated_at?: string | null;
+          transaction_code?: string | null;
+          transaction_id?: string | null;
+          transaction_type?: string | null;
+          unofficial_currency_code?: string | null;
+          website?: string | null;
         };
         Update: {
+          account_id?: string;
+          account_owner?: string | null;
           amount?: number;
           assigned_id?: string | null;
+          authorized_date?: string | null;
+          authorized_datetime?: string | null;
           balance?: number | null;
           bank_account_id?: string | null;
-          base_amount?: number | null;
-          base_currency?: string | null;
           category?:
             | Database["public"]["Enums"]["transactionCategories"]
             | null;
+          category_id?: string | null;
           category_slug?: string | null;
+          check_number?: string | null;
           created_at?: string;
           currency?: string;
+          currency_rate?: number | null;
+          currency_source?: string | null;
           date?: string;
+          datetime?: string | null;
           description?: string | null;
           id?: string;
+          inserted_at?: string | null;
           internal_id?: string;
+          iso_currency_code?: string | null;
+          location_address?: string | null;
+          location_city?: string | null;
+          location_country?: string | null;
+          location_lat?: number | null;
+          location_lon?: number | null;
+          location_postal_code?: string | null;
+          location_region?: string | null;
+          location_store_number?: string | null;
+          logo_url?: string | null;
           manual?: boolean | null;
+          merchant_entity_id?: string | null;
+          merchant_name?: string | null;
           method?: Database["public"]["Enums"]["transactionMethods"];
           name?: string;
           note?: string | null;
+          payment_channel?: string | null;
+          payment_meta_by_order_of?: string | null;
+          payment_meta_payee?: string | null;
+          payment_meta_payer?: string | null;
+          payment_meta_payment_method?: string | null;
+          payment_meta_payment_processor?: string | null;
+          payment_meta_ppd_id?: string | null;
+          payment_meta_reason?: string | null;
+          payment_meta_reference_number?: string | null;
+          pending?: boolean | null;
+          pending_transaction_id?: string | null;
+          personal_finance_category_confidence_level?: string | null;
+          personal_finance_category_detailed?: string | null;
+          personal_finance_category_icon_url?: string | null;
+          personal_finance_category_primary?: string | null;
           status?: Database["public"]["Enums"]["transactionStatus"] | null;
           team_id?: string;
-          updated_at?: string | null;
+          transaction_code?: string | null;
+          transaction_id?: string | null;
+          transaction_type?: string | null;
+          unofficial_currency_code?: string | null;
+          website?: string | null;
         };
         Relationships: [
           {
@@ -890,35 +1072,38 @@ export type Database = {
       users: {
         Row: {
           avatar_url: string | null;
+          billing_address: Json | null;
           created_at: string | null;
           email: string | null;
           full_name: string | null;
           id: string;
           locale: string | null;
+          payment_method: Json | null;
           team_id: string | null;
-          timezone: string | null;
           week_starts_on_monday: boolean | null;
         };
         Insert: {
           avatar_url?: string | null;
+          billing_address?: Json | null;
           created_at?: string | null;
           email?: string | null;
           full_name?: string | null;
           id: string;
           locale?: string | null;
+          payment_method?: Json | null;
           team_id?: string | null;
-          timezone?: string | null;
           week_starts_on_monday?: boolean | null;
         };
         Update: {
           avatar_url?: string | null;
+          billing_address?: Json | null;
           created_at?: string | null;
           email?: string | null;
           full_name?: string | null;
           id?: string;
           locale?: string | null;
+          payment_method?: Json | null;
           team_id?: string | null;
-          timezone?: string | null;
           week_starts_on_monday?: boolean | null;
         };
         Relationships: [
@@ -988,12 +1173,6 @@ export type Database = {
         };
         Returns: string;
       };
-      calculate_total_sum: {
-        Args: {
-          target_currency: string;
-        };
-        Returns: number;
-      };
       calculated_vat: {
         Args: {
           "": unknown;
@@ -1055,34 +1234,6 @@ export type Database = {
             };
             Returns: unknown;
           };
-      get_all_transactions_by_account: {
-        Args: {
-          account_id: string;
-        };
-        Returns: {
-          amount: number;
-          assigned_id: string | null;
-          balance: number | null;
-          bank_account_id: string | null;
-          base_amount: number | null;
-          base_currency: string | null;
-          category: Database["public"]["Enums"]["transactionCategories"] | null;
-          category_slug: string | null;
-          created_at: string;
-          currency: string;
-          date: string;
-          description: string | null;
-          id: string;
-          internal_id: string;
-          manual: boolean | null;
-          method: Database["public"]["Enums"]["transactionMethods"];
-          name: string;
-          note: string | null;
-          status: Database["public"]["Enums"]["transactionStatus"] | null;
-          team_id: string;
-          updated_at: string | null;
-        }[];
-      };
       get_bank_account_currencies: {
         Args: {
           team_id: string;
@@ -1103,58 +1254,12 @@ export type Database = {
           value: number;
         }[];
       };
-      get_burn_rate_v2: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          date: string;
-          value: number;
-          currency: string;
-        }[];
-      };
-      get_burn_rate_v3: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          date: string;
-          value: number;
-          currency: string;
-        }[];
-      };
       get_current_burn_rate: {
         Args: {
           team_id: string;
           currency: string;
         };
         Returns: number;
-      };
-      get_current_burn_rate_v2: {
-        Args: {
-          team_id: string;
-          base_currency?: string;
-        };
-        Returns: {
-          currency: string;
-          value: number;
-        }[];
-      };
-      get_current_burn_rate_v3: {
-        Args: {
-          team_id: string;
-          base_currency?: string;
-        };
-        Returns: {
-          currency: string;
-          value: number;
-        }[];
       };
       get_current_user_team_id: {
         Args: Record<PropertyKey, never>;
@@ -1172,32 +1277,6 @@ export type Database = {
           value: number;
         }[];
       };
-      get_profit_v2: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          date: string;
-          value: number;
-          currency: string;
-        }[];
-      };
-      get_profit_v3: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          date: string;
-          value: number;
-          currency: string;
-        }[];
-      };
       get_revenue: {
         Args: {
           team_id: string;
@@ -1210,56 +1289,12 @@ export type Database = {
           value: number;
         }[];
       };
-      get_revenue_v2: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          date: string;
-          value: number;
-          currency: string;
-        }[];
-      };
-      get_revenue_v3: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          date: string;
-          value: number;
-          currency: string;
-        }[];
-      };
       get_runway: {
         Args: {
           team_id: string;
           date_from: string;
           date_to: string;
           currency: string;
-        };
-        Returns: number;
-      };
-      get_runway_v2: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: number;
-      };
-      get_runway_v3: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
         };
         Returns: number;
       };
@@ -1279,53 +1314,7 @@ export type Database = {
           percentage: number;
         }[];
       };
-      get_spending_v2: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          name: string;
-          slug: string;
-          amount: number;
-          currency: string;
-          color: string;
-          percentage: number;
-        }[];
-      };
-      get_spending_v3: {
-        Args: {
-          team_id: string;
-          date_from: string;
-          date_to: string;
-          base_currency?: string;
-        };
-        Returns: {
-          name: string;
-          slug: string;
-          amount: number;
-          currency: string;
-          color: string;
-          percentage: number;
-        }[];
-      };
       get_total_balance: {
-        Args: {
-          team_id: string;
-          currency: string;
-        };
-        Returns: number;
-      };
-      get_total_balance_v2: {
-        Args: {
-          team_id: string;
-          currency: string;
-        };
-        Returns: number;
-      };
-      get_total_balance_v3: {
         Args: {
           team_id: string;
           currency: string;
@@ -1462,10 +1451,19 @@ export type Database = {
         | "other_liability";
       bank_providers: "gocardless" | "plaid" | "teller";
       bankProviders: "gocardless" | "plaid" | "teller";
-      connection_status: "disconnected" | "connected" | "unknown";
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted";
-      inbox_type: "invoice" | "expense";
+      pricing_plan_interval: "day" | "week" | "month" | "year";
+      pricing_type: "one_time" | "recurring";
       reportTypes: "profit" | "revenue" | "burn_rate";
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "canceled"
+        | "incomplete"
+        | "incomplete_expired"
+        | "past_due"
+        | "unpaid"
+        | "paused";
       teamRoles: "owner" | "member";
       trackerStatus: "in_progress" | "completed";
       transactionCategories:
