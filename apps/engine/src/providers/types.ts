@@ -29,6 +29,8 @@ export type Transaction = {
   currency_rate: number | null;
   currency_source: string | null;
   // Add suite of new fields
+  internal_id: string;
+  bank_account_id: string;
   assigned_id?: string | null;
   category_slug?: string | null;
   manual?: boolean | null;
