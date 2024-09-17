@@ -49,7 +49,7 @@ const schema = {
 
 /**
  * The main function that orchestrates the process of importing institutions into Typesense.
- * 
+ *
  * This function performs the following steps:
  * 1. Retrieves institution data using the getInstitutions function.
  * 2. Checks if the 'institutions' collection already exists in Typesense.
@@ -57,7 +57,7 @@ const schema = {
  * 4. Creates a new 'institutions' collection with the defined schema.
  * 5. Imports the institution documents into the newly created collection.
  * 6. Logs the results of the import process.
- * 
+ *
  * @async
  * @function main
  * @throws {Error} If there's an issue with retrieving institutions, managing the Typesense collection, or importing documents.
@@ -102,11 +102,11 @@ async function main() {
 
 /**
  * Initializes and executes the main function, handling any unhandled errors.
- * 
+ *
  * This immediately invoked async function serves as the entry point for the script.
  * It calls the main function and catches any unhandled errors that might occur during execution.
  * If an unhandled error occurs, it logs the error and exits the process with a non-zero status code.
- * 
+ *
  * @async
  * @function
  * @throws {Error} Logs any unhandled error and exits the process.

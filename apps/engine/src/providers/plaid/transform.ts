@@ -216,7 +216,7 @@ export const transformTransaction = ({
       ? new Date(transaction.authorized_date)
       : null,
     check_number: transaction.check_number,
-    balance: parseFloat(transaction.amount.toFixed(2)),
+    balance: Number.parseFloat(transaction.amount.toFixed(2)),
   };
 };
 

@@ -3,7 +3,7 @@ import { ErrorSchema } from "@/common/schema";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { createErrorResponse } from "@/utils/error";
-import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
+import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   GoCardLessAgreementBodySchema,
