@@ -53,53 +53,27 @@ export async function ExpenseChart({
                 side="bottom"
                 sideOffset={10}
               >
-                {type === "profit" ? (
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-primary">
-                      Profit is calculated as your income minus expenses.
-                    </h3>
-                    <p>
-                      Explanation: This shows how much you’re making after
-                      costs. If the profit seems off, it may be due to internal
-                      transfers labeled as income. You can adjust this manually
-                      in the transaction list.
-                    </p>
-
-                    <p>
-                      All amounts are converted into your{" "}
-                      <Link
-                        href="/settings/accounts"
-                        className="text-primary underline"
-                      >
-                        base currency
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <h3 className="font-medium text-primary">
-                      Revenue represents your total income from all sources.
-                    </h3>
-                    <p>
-                      Explanation: This is your gross income before expenses. If
-                      the revenue appears too high, internal transfers may have
-                      been marked as income. You can fix this manually in the
-                      transaction list.
-                    </p>
-
-                    <p>
-                      All amounts are converted into your{" "}
-                      <Link
-                        href="/settings/accounts"
-                        className="text-primary underline"
-                      >
-                        base currency
-                      </Link>
-                      .
-                    </p>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <h3 className="font-medium text-primary">
+                    Expenses Overview
+                  </h3>
+                  <p>
+                    Expenses include all outgoing transactions, including
+                    recurring ones. The chart shows total expenses and recurring
+                    costs, helping you identify spending patterns and fixed
+                    costs.
+                  </p>
+                  <p>
+                    All amounts are converted into your{" "}
+                    <Link
+                      href="/settings/accounts"
+                      className="text-primary underline"
+                    >
+                      base currency
+                    </Link>
+                    .
+                  </p>
+                </div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
