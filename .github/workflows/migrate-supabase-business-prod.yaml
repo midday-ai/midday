@@ -1,0 +1,48 @@
+name: Migrations | Business Prod
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/api/supabase/migrations/**
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        directory:
+          - apps/api/supabase
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.PRODUCTION_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID_BUSINESS_PRODUCTION }}
+      SUPABASE_AUTH_GITHUB_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_GITHUB_CLIENT_ID }}
+      SUPABASE_AUTH_GITHUB_CLIENT_SECRET: ${{ secrets.SUPABASE_AUTH_GITHUB_CLIENT_SECRET }}
+      SUPABASE_AUTH_GOOGLE_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_GOOGLE_CLIENT_ID }}
+      SUPABASE_AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.SUPABASE_AUTH_GOOGLE_CLIENT_SECRET }}
+      SUPABASE_AUTH_APPLE_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_APPLE_CLIENT_ID }}
+      SUPABASE_AUTH_APPLE_SECRET: ${{ secrets.SUPABASE_AUTH_APPLE_SECRET }}
+      SUPABASE_AUTH_SLACK_CLIENT_ID: ${{ secrets.SUPABASE_AUTH_SLACK_CLIENT_ID }}
+      SUPABASE_AUTH_SLACK_SECRET: ${{ secrets.SUPABASE_AUTH_SLACK_SECRET }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - name: Debug working directory
+        run: |
+          echo "Current working directory: $(pwd)"
+          ls -la
+        working-directory: ${{ matrix.directory }}
+      - name: Link Supabase project
+        run: |
+          echo "Linking project with project-ref: $SUPABASE_PROJECT_ID"
+          supabase link --project-ref $SUPABASE_PROJECT_ID --workdir ${{ matrix.directory }}
+      - name: Deploy migrations
+        run: |
+          echo "Deploying migrations from directory: ${{ matrix.directory }}"
+          supabase db push --workdir ${{ matrix.directory }}
