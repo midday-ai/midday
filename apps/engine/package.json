@@ -6,7 +6,8 @@
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
     "format": "biome format --write .",
-    "check:types": "tsc --noEmit"
+    "check:types": "tsc --noEmit",
+    "import-institutions": "node scripts/importer.js"
   },
   "dependencies": {
     "@hono/swagger-ui": "^0.4.1",
