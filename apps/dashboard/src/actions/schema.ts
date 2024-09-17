@@ -185,7 +185,7 @@ export const deleteCategoriesSchema = z.object({
 });
 
 export const bulkUpdateTransactionsSchema = z.object({
-  type: z.enum(["category", "note", "assigned", "status"]),
+  type: z.enum(["category", "note", "assigned", "status", "recurring"]),
   data: z.array(updateTransactionSchema),
 });
 

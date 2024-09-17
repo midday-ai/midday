@@ -1,7 +1,10 @@
 "use client";
 
+import type { UpdateTransactionValues } from "@/actions/schema";
+import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { cn } from "@midday/ui/cn";
+import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { FormatAmount } from "../format-amount";
 import { TransactionStatus } from "../transaction-status";
@@ -13,6 +16,11 @@ type Props = {
 
 export function TransactionListItem({ transaction, disabled }: Props) {
   const [isOpen, setOpen] = useState(false);
+  const updateTransaction = useAction(updateTransactionAction);
+
+  const handleUpdateTransaction = (values: UpdateTransactionValues) => {
+    updateTransaction.execute(values);
+  };
 
   const fullfilled =
     transaction?.status === "completed" || transaction?.attachments?.length > 0;
@@ -53,7 +61,12 @@ export function TransactionListItem({ transaction, disabled }: Props) {
         </div>
       </div>
 
-      <TransactionSheet isOpen={isOpen} setOpen={setOpen} data={transaction} />
+      <TransactionSheet
+        isOpen={isOpen}
+        setOpen={setOpen}
+        data={transaction}
+        updateTransaction={handleUpdateTransaction}
+      />
     </>
   );
 }

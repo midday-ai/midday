@@ -193,6 +193,53 @@ export function BulkActions({ ids }: Props) {
             </DropdownMenuPortal>
           </DropdownMenuSub>
         </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Repeat className="mr-2 h-4 w-4" />
+              <span>Recurring</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent sideOffset={14}>
+                {[
+                  {
+                    label: "None",
+                    value: null,
+                  },
+                  {
+                    label: "Weekly",
+                    value: "weekly",
+                  },
+                  {
+                    label: "Monthly",
+                    value: "monthly",
+                  },
+                  {
+                    label: "Annually",
+                    value: "annually",
+                  },
+                ].map((item) => (
+                  <DropdownMenuCheckboxItem
+                    key={item.value}
+                    onCheckedChange={() => {
+                      bulkUpdateTransactions.execute({
+                        type: "recurring",
+                        data: ids.map((transaction) => ({
+                          id: transaction,
+                          frequency: item.value,
+                          recurring: item.value !== null,
+                        })),
+                      });
+                    }}
+                  >
+                    {item.label}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
   );

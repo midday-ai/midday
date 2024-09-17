@@ -23,6 +23,7 @@ type Props = {
   onChange: (selected: Selected) => void;
   headless?: boolean;
   hideLoading?: boolean;
+  uncategorized?: boolean;
 };
 
 function transformCategory(category) {
@@ -39,6 +40,7 @@ export function SelectCategory({
   onChange,
   headless,
   hideLoading,
+  uncategorized,
 }: Props) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,12 +59,16 @@ export function SelectCategory({
         if (response.data) {
           setData([
             ...response.data.map(transformCategory),
-            {
-              id: "uncategorized",
-              label: "Uncategorized",
-              color: "#606060",
-              slug: "uncategorized",
-            },
+            ...(uncategorized
+              ? [
+                  {
+                    id: "uncategorized",
+                    label: "Uncategorized",
+                    color: "#606060",
+                    slug: "uncategorized",
+                  },
+                ]
+              : []),
           ]);
         }
       }
