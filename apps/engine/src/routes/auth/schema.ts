@@ -42,6 +42,9 @@ export const PlaidExchangeSchema = z
       access_token: z.string().openapi({
         example: "access_9293961c",
       }),
+      item_id: z.string().openapi({
+        example: "item_9293961c",
+      }),
     }),
   })
   .openapi("PlaidExchangeSchema");
