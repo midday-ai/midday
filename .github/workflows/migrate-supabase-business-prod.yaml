@@ -1,5 +1,6 @@
 name: Migrations | Business Prod
-
+env:
+  TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
 on:
   push:
     branches:
