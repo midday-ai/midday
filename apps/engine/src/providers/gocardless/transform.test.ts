@@ -20,7 +20,7 @@ test("Transform income transaction", () => {
       additionalInformation: "LÖN         160434262327",
       proprietaryBankTransactionCode: "Transfer",
       internalTransactionId: "86b1bc36e6a6d2a5dee8ff7138920255",
-    }),
+    }, "123"),
   ).toMatchSnapshot();
 });
 

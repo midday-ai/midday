@@ -2,10 +2,10 @@
 
 exports[`Transform income transaction 1`] = `
 {
-  "account_id": undefined,
+  "account_id": "123",
   "amount": -38000,
   "balance": null,
-  "bank_account_id": undefined,
+  "bank_account_id": "123",
   "category": "transfer",
   "currency": "SEK",
   "currency_rate": null,
