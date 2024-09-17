@@ -136,6 +136,9 @@ export const transformTransaction = ({
     category: mapTransactionCategory({ transaction, amount }),
     balance: transaction?.running_balance ? +transaction.running_balance : null,
     status: transaction?.status === "posted" ? "posted" : "pending",
+    bank_account_id: transaction.account_id,
+    internal_id: transaction.id,
+    account_id: transaction.account_id,
   };
 };
 
