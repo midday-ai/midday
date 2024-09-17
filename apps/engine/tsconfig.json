@@ -1,20 +1,14 @@
 {
   "compilerOptions": {
-    "moduleResolution": "Bundler",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
+    "target": "ES2020",
+    "module": "commonjs",
     "strict": true,
-    "types": ["@cloudflare/workers-types", "bun-types"],
-    "jsx": "react-jsx",
-    "jsxImportSource": "hono/jsx",
-    "lib": ["ESNext"],
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleDetection": "force",
-    "allowJs": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true
-  }
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": "."
+  },
+  "include": ["scripts/**/*", "types/**/*"],
+  "exclude": ["node_modules"]
 }

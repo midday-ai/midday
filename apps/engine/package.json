@@ -1,5 +1,6 @@
 {
   "name": "@midday/engine",
+  "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development wrangler dev src/index.ts --port 3002",
     "deploy": "wrangler deploy --minify src/index.ts",

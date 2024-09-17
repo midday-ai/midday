@@ -51,8 +51,22 @@ async function main() {
   try {
     const documents = await getInstitutions();
     console.log(`Importing ${documents.length} institutions...`);
-    await typesense.collections("institutions").delete();
 
+    // Check if the collection exists
+    let collectionExists = false;
+    try {
+      await typesense.collections("institutions").retrieve();
+      collectionExists = true;
+    } catch (error) {
+      if (error.httpStatus !== 404) {
+        throw error;
+      }
+    }
+
+    // Delete the collection if it exists, otherwise create it
+    if (collectionExists) {
+      await typesense.collections("institutions").delete();
+    }
     await typesense.collections().create(schema);
 
     const result = await typesense
