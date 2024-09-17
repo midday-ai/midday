@@ -34,7 +34,7 @@ export async function ProfitRevenueChart({
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
-      <div className="space-y-2 mb-14 inline-block">
+      <div className="space-y-2 mb-14 inline-block select-text">
         <h1 className="text-4xl font-mono">
           <AnimatedNumber
             value={data?.summary?.currentTotal ?? 0}

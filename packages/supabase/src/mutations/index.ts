@@ -276,14 +276,14 @@ export async function updateBankAccount(
     .single();
 }
 
-type UpdateSimilarTransactionsParams = {
+type UpdateSimilarTransactionsCategoryParams = {
   id: string;
   team_id: string;
 };
 
-export async function updateSimilarTransactions(
+export async function updateSimilarTransactionsCategory(
   supabase: Client,
-  params: UpdateSimilarTransactionsParams,
+  params: UpdateSimilarTransactionsCategoryParams,
 ) {
   const { id, team_id } = params;
 
@@ -300,7 +300,35 @@ export async function updateSimilarTransactions(
   return supabase
     .from("transactions")
     .update({ category_slug: transaction.data.category_slug })
-    .eq("name", transaction.data.name)
+    .textSearch("fts_vector", `'${transaction.data.name}'`)
+    .eq("team_id", team_id)
+    .select("id, team_id");
+}
+
+type UpdateSimilarTransactionsRecurringParams = {
+  id: string;
+  team_id: string;
+};
+
+export async function updateSimilarTransactionsRecurring(
+  supabase: Client,
+  params: UpdateSimilarTransactionsRecurringParams,
+) {
+  const { id, team_id } = params;
+
+  const transaction = await supabase
+    .from("transactions")
+    .select("name, recurring, frequency")
+    .eq("id", id)
+    .single();
+
+  return supabase
+    .from("transactions")
+    .update({
+      recurring: transaction.data?.recurring,
+      frequency: transaction.data?.frequency,
+    })
+    .textSearch("fts_vector", `'${transaction.data.name}'`)
     .eq("team_id", team_id)
     .select("id, team_id");
 }

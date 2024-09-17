@@ -3,7 +3,9 @@
 import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
+import { useI18n } from "@/locales/client";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import {
   Table,
   TableBody,
@@ -12,6 +14,12 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { ShowAllButton } from "./show-all-button";
 
 type Props = {
@@ -22,6 +30,8 @@ type Props = {
 };
 
 export function TransactionsUI({ meta, data, q, filter }: Props) {
+  const t = useI18n();
+
   if (!meta.count) {
     return (
       <BotCard>
@@ -35,7 +45,9 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
     <BotCard className="space-y-4">
       {meta.totalAmount.length === 1 && (
         <p>
-          We found {meta.count} transactions with a total amount of{" "}
+          We found {meta.count}{" "}
+          {filter.recurring ? "recurring transactions" : "transactions"} with a
+          total amount of{" "}
           <FormatAmount
             amount={meta.totalAmount.at(0).amount}
             currency={meta.totalAmount.at(0).currency}
@@ -51,7 +63,7 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
         <Table className="text-xs font-sans">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[240px] h-10">Description</TableHead>
+              <TableHead className="w-[45%] h-10">Description</TableHead>
               <TableHead className="h-10">Amount</TableHead>
               <TableHead className="h-10 text-right w-[50px]">Status</TableHead>
             </TableRow>
@@ -66,12 +78,32 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
                 <TableRow key={transaction.id} className="h-[34px]">
                   <TableCell
                     className={cn(
-                      "font-normal line-clamp-1",
+                      "font-normal flex items-center space-x-2",
                       transaction.category?.slug === "income" &&
                         "text-[#00C969]",
                     )}
                   >
-                    {transaction.name}
+                    <span className="line-clamp-1">{transaction.name}</span>
+                    {transaction.recurring && (
+                      <TooltipProvider delayDuration={20}>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Icons.Repeat className="text-[#878787]" />
+                          </TooltipTrigger>
+                          <TooltipContent
+                            className="px-3 py-1.5 text-xs"
+                            side="right"
+                            sideOffset={10}
+                          >
+                            <span>
+                              {t(
+                                `transaction_frequency.${transaction.frequency}`,
+                              )}
+                            </span>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
                   </TableCell>
                   <TableCell
                     className={cn(

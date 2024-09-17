@@ -44,7 +44,7 @@ export async function BurnRateChart({
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
-      <div className="space-y-2 mb-14">
+      <div className="space-y-2 mb-14 select-text">
         <h1 className="text-4xl font-mono">
           <AnimatedNumber
             value={calculateAvgBurnRate(burnRateData)}

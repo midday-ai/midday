@@ -16,7 +16,6 @@ import { useEffect, useState } from "react";
 import { InboxEmpty } from "./inbox-empty";
 import { InboxHeader } from "./inbox-header";
 import { InboxStructure } from "./inbox-structure";
-import { InboxToolbar } from "./inbox-toolbar";
 
 type Props = {
   items: any[];
@@ -307,28 +306,17 @@ export function InboxView({
           ascending={ascending}
         />
       }
-      leftComponent={
-        <>
-          {TAB_ITEMS.map((value) => (
-            <TabsContent key={value} value={value} className="m-0 h-full">
-              <InboxList
-                items={currentItems}
-                hasQuery={Boolean(params.q)}
-                onClear={() =>
-                  setParams({ q: null, inboxId: currentItems?.id ?? null })
-                }
-              />
-            </TabsContent>
-          ))}
-
-          <InboxToolbar
-            onAction={handleOnDelete}
-            isFirst={currentIndex === 0}
-            isLast={currentIndex === currentItems?.length - 1}
-            onKeyPress={handleOnPaginate}
+      leftComponent={TAB_ITEMS.map((value) => (
+        <TabsContent key={value} value={value} className="m-0 h-full">
+          <InboxList
+            items={currentItems}
+            hasQuery={Boolean(params.q)}
+            onClear={() =>
+              setParams({ q: null, inboxId: currentItems?.id ?? null })
+            }
           />
-        </>
-      }
+        </TabsContent>
+      ))}
       rightComponent={
         <InboxDetails
           item={selectedItems}

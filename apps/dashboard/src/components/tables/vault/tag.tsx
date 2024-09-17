@@ -26,7 +26,7 @@ export function Tag({
   return (
     <div
       className={cn(
-        "p-1 text-[#878787] bg-[#F2F1EF] text-[11px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full cursor-default font-mono inline-flex max-w-full",
+        "p-1 text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full cursor-default font-mono inline-flex max-w-full",
         className,
       )}
     >
