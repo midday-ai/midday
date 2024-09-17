@@ -11,4 +11,5 @@ export const chatExamples = [
   "Forecast profit",
   "Forecast revenue",
   "Find a document",
+  "Recurring transactions",
 ];

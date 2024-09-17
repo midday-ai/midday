@@ -518,6 +518,52 @@ export async function getMetricsQuery(
   };
 }
 
+export type GetExpensesQueryParams = {
+  teamId: string;
+  from: string;
+  to: string;
+  currency?: string;
+};
+
+export async function getExpensesQuery(
+  supabase: Client,
+  params: GetExpensesQueryParams,
+) {
+  const { teamId, from, to, currency } = params;
+
+  const fromDate = new UTCDate(from);
+  const toDate = new UTCDate(to);
+
+  const { data } = await supabase.rpc("get_expenses", {
+    team_id: teamId,
+    date_from: startOfMonth(fromDate).toDateString(),
+    date_to: endOfMonth(toDate).toDateString(),
+    base_currency: currency,
+  });
+
+  const averageExpense =
+    data && data.length > 0
+      ? data.reduce((sum, item) => sum + (item.value || 0), 0) / data.length
+      : 0;
+
+  return {
+    summary: {
+      averageExpense,
+      currency: data?.at(0)?.currency,
+    },
+    meta: {
+      type: "expense",
+      currency: data?.at(0)?.currency,
+    },
+    result: data.map((item) => ({
+      ...item,
+      value: item.value,
+      recurring: item.recurring_value,
+      total: item.value + item.recurring_value,
+    })),
+  };
+}
+
 export type GetVaultParams = {
   teamId: string;
   parentId?: string;

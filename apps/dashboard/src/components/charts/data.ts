@@ -366,6 +366,152 @@ export const transactionExampleData = {
   ],
 };
 
+export const expenseChartExampleData = {
+  summary: {
+    currency: "USD",
+    averageExpense: 800000,
+  },
+  meta: {
+    type: "expense",
+    period: "monthly",
+    currency: "USD",
+  },
+  result: [
+    {
+      date: "2023-01-01",
+      total: {
+        value: 20300,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-02-01",
+      total: {
+        value: 14000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-03-01",
+      total: {
+        value: 18000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-04-01",
+      total: {
+        value: 10000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-05-01",
+      total: {
+        value: 12000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-06-01",
+      total: {
+        value: 2800,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-07-01",
+      total: {
+        value: 1000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-08-01",
+      total: {
+        value: 1000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-09-01",
+      total: {
+        value: 3000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-10-01",
+      total: {
+        value: 20000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-11-01",
+      total: {
+        value: 20000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+    {
+      date: "2023-12-01",
+      total: {
+        value: 15000,
+        currency: "USD",
+      },
+      recurring: {
+        value: 1000,
+        currency: "USD",
+      },
+    },
+  ],
+};
+
 export const burnRateExamleData = [
   {
     data: [

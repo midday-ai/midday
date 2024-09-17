@@ -26,6 +26,7 @@ export const bulkUpdateTransactionsAction = authActionClient
     revalidateTag(`metrics_${user.team_id}`);
     revalidateTag(`current_burn_rate_${user.team_id}`);
     revalidateTag(`burn_rate_${user.team_id}`);
+    revalidateTag(`expenses_${user.team_id}`);
 
     return data;
   });

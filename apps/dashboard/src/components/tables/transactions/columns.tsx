@@ -6,7 +6,6 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
-import { useI18n } from "@/locales/client";
 import { formatTransactionDate } from "@/utils/format";
 import {
   AlertDialog,
@@ -98,8 +97,6 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => {
-      const t = useI18n();
-
       return (
         <div className="flex items-center space-x-2">
           <TooltipProvider delayDuration={20}>
@@ -136,25 +133,6 @@ export const columns: ColumnDef<Transaction>[] = [
               )}
             </Tooltip>
           </TooltipProvider>
-
-          {row.original.recurring && (
-            <TooltipProvider delayDuration={20}>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Icons.Repeat className="text-[#878787]" />
-                </TooltipTrigger>
-                <TooltipContent
-                  className="px-3 py-1.5 text-xs"
-                  side="right"
-                  sideOffset={10}
-                >
-                  <span>
-                    {t(`transaction_frequency.${row.original.frequency}`)}
-                  </span>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
       );
     },
