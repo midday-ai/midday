@@ -1,6 +1,6 @@
 name: Preview Deployment - Engine
 env:
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
   TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
         uses: cloudflare/wrangler-action@v3
         with:
           packageManager: bun
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          apiToken: ${{ secrets.CF_API_TOKEN }}
           workingDirectory: "apps/engine"
           wranglerVersion: "3.76.0"
           command: deploy --minify src/index.ts --env staging

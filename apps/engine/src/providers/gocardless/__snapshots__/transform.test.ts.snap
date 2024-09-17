@@ -2,8 +2,10 @@
 
 exports[`Transform income transaction 1`] = `
 {
+  "account_id": "123",
   "amount": -38000,
   "balance": null,
+  "bank_account_id": "123",
   "category": "transfer",
   "currency": "SEK",
   "currency_rate": null,
@@ -11,6 +13,7 @@ exports[`Transform income transaction 1`] = `
   "date": "2024-02-23",
   "description": null,
   "id": "86b1bc36e6a6d2a5dee8ff7138920255",
+  "internal_id": "86b1bc36e6a6d2a5dee8ff7138920255",
   "method": "transfer",
   "name": "Lön 160434262327",
   "status": "posted",
