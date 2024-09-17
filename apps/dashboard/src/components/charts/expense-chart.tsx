@@ -15,7 +15,6 @@ import { StackedBarChart } from "./stacked-bar-chart";
 type Props = {
   value: any;
   defaultValue: any;
-  type: string;
   disabled?: boolean;
   currency?: string;
 };
@@ -23,13 +22,12 @@ type Props = {
 export async function ExpenseChart({
   value,
   defaultValue,
-  type,
   disabled,
   currency,
 }: Props) {
   const data = disabled
     ? expenseChartExampleData
-    : await getExpenses({ ...defaultValue, ...value, type, currency });
+    : await getExpenses({ ...defaultValue, ...value, currency });
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>

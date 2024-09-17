@@ -2,6 +2,7 @@
 
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
+import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import {
   Bar,
@@ -47,7 +48,7 @@ const ToolTipContent = ({ payload = [] }) => {
 
         <div className="flex justify-between">
           <div className="flex items-center justify-center space-x-2">
-            <div className="w-[8px] h-[8px] rounded-full raster-background" />
+            <Icons.DotRaster />
             <p className="font-medium text-[13px]">
               {formatAmount({
                 amount: current.recurring,
@@ -84,7 +85,7 @@ export function StackedBarChart({ data, height = 290 }) {
           <span className="text-sm text-[#606060]">Total expenses</span>
         </div>
         <div className="flex space-x-2 items-center">
-          <span className="w-2 h-2 rounded-full raster-background" />
+          <Icons.DotRaster />
           <span className="text-sm text-[#606060]">Recurring</span>
         </div>
       </div>
