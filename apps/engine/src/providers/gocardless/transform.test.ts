@@ -7,20 +7,23 @@ import {
 
 test("Transform income transaction", () => {
   expect(
-    transformTransaction({
-      transactionId:
-        "8wwecA0PsWWCLPLazQzht2oOcxSIQ5UlWPHaNBpC3tjYtc002faJcjWzRpyO4sjz66kRpb7_5rA",
-      entryReference: "5490990006",
-      bookingDate: "2024-02-23",
-      valueDate: "2024-02-23",
-      transactionAmount: {
-        amount: "-38000.00",
-        currency: "SEK",
+    transformTransaction(
+      {
+        transactionId:
+          "8wwecA0PsWWCLPLazQzht2oOcxSIQ5UlWPHaNBpC3tjYtc002faJcjWzRpyO4sjz66kRpb7_5rA",
+        entryReference: "5490990006",
+        bookingDate: "2024-02-23",
+        valueDate: "2024-02-23",
+        transactionAmount: {
+          amount: "-38000.00",
+          currency: "SEK",
+        },
+        additionalInformation: "LÖN         160434262327",
+        proprietaryBankTransactionCode: "Transfer",
+        internalTransactionId: "86b1bc36e6a6d2a5dee8ff7138920255",
       },
-      additionalInformation: "LÖN         160434262327",
-      proprietaryBankTransactionCode: "Transfer",
-      internalTransactionId: "86b1bc36e6a6d2a5dee8ff7138920255",
-    }, "123"),
+      "123",
+    ),
   ).toMatchSnapshot();
 });
 

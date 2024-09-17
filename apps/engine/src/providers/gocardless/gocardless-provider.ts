@@ -32,7 +32,9 @@ export class GoCardLessProvider implements Provider {
       accountId,
     });
 
-    return (response ?? []).map((transaction) => transformTransaction(transaction, accountId));
+    return (response ?? []).map((transaction) =>
+      transformTransaction(transaction, accountId),
+    );
   }
 
   async getAccounts({ id }: GetAccountsRequest) {
