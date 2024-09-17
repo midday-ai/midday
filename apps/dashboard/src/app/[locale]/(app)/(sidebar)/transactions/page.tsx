@@ -37,6 +37,7 @@ export default async function Transactions({
     categories,
     assignees,
     statuses,
+    recurring,
   } = searchParamsCache.parse(searchParams);
 
   // Move this in a suspense
@@ -55,6 +56,7 @@ export default async function Transactions({
     categories,
     assignees,
     statuses,
+    recurring,
   };
 
   const sort = searchParams?.sort?.split(":");

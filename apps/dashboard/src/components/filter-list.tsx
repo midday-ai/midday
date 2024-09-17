@@ -32,6 +32,7 @@ type Props = {
   members?: { id: string; name: string }[];
   statusFilters: { id: string; name: string }[];
   attachmentsFilters: { id: string; name: string }[];
+  recurringFilters: { id: string; name: string }[];
   tags?: { id: string; name: string; slug: string }[];
 };
 
@@ -45,6 +46,7 @@ export function FilterList({
   tags,
   statusFilters,
   attachmentsFilters,
+  recurringFilters,
 }: Props) {
   const renderFilter = ({ key, value }) => {
     switch (key) {
@@ -62,6 +64,15 @@ export function FilterList({
 
       case "attachments": {
         return attachmentsFilters?.find((filter) => filter.id === value)?.name;
+      }
+
+      case "recurring": {
+        return value
+          ?.map(
+            (slug) =>
+              recurringFilters?.find((filter) => filter.id === slug)?.name,
+          )
+          .join(", ");
       }
 
       case "statuses": {

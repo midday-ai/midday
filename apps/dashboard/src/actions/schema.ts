@@ -162,6 +162,8 @@ export const updateTransactionSchema = z.object({
   note: z.string().optional().nullable(),
   category_slug: z.string().optional(),
   assigned_id: z.string().uuid().optional(),
+  recurring: z.boolean().optional().nullable(),
+  frequency: z.enum(["weekly", "monthly", "annually"]).optional().nullable(),
   status: z.enum(["deleted", "excluded", "posted", "completed"]).optional(),
 });
 
@@ -181,7 +183,11 @@ export const bulkUpdateTransactionsSchema = z.object({
   data: z.array(updateTransactionSchema),
 });
 
-export const updateSimilarTransactionsSchema = z.object({
+export const updateSimilarTransactionsCategorySchema = z.object({
+  id: z.string(),
+});
+
+export const updateSimilarTransactionsRecurringSchema = z.object({
   id: z.string(),
 });
 
@@ -441,6 +447,10 @@ export const filterTransactionsSchema = z.object({
     .array(z.string())
     .optional()
     .describe("The categories to filter by"),
+  recurring: z
+    .array(z.enum(["all", "weekly", "monthly", "annually"]))
+    .optional()
+    .describe("The recurring to filter by"),
 });
 
 export const filterVaultSchema = z.object({

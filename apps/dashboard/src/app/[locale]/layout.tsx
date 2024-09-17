@@ -1,4 +1,3 @@
-// import { SystemBanner } from "@/components/system-banner";
 import "@/styles/globals.css";
 import { Provider as Analytics } from "@midday/events/client";
 import { cn } from "@midday/ui/cn";
@@ -86,7 +85,6 @@ export default function Layout({
           "whitespace-pre-line overscroll-none scrollbar-hide",
         )}
       >
-        {/* <SystemBanner /> */}
         <Providers locale={locale}>{children}</Providers>
 
         <IntercomWidget

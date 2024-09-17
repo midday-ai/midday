@@ -6,6 +6,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
+import { useI18n } from "@/locales/client";
 import { formatTransactionDate } from "@/utils/format";
 import {
   AlertDialog,
@@ -42,6 +43,8 @@ export type Transaction = {
   id: string;
   amount: number;
   status: "posted" | "excluded" | "included" | "pending" | "completed";
+  frequency?: string;
+  recurring?: boolean;
   manual?: boolean;
   date: string;
   category?: {
@@ -95,6 +98,8 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => {
+      const t = useI18n();
+
       return (
         <TooltipProvider delayDuration={20}>
           <Tooltip>
@@ -316,7 +321,7 @@ export const columns: ColumnDef<Transaction>[] = [
                 }}
               >
                 {table.options.meta?.deleteTransactions?.status ===
-                "executing" ? (
+                  "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Confirm"

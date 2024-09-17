@@ -37,6 +37,11 @@ export default {
     income: "Income",
     expense: "Expense",
   },
+  transaction_frequency: {
+    weekly: "Weekly",
+    monthly: "Monthly",
+    annually: "Annually",
+  },
   inbox_filter: {
     all: "All",
     todo: "Todo",

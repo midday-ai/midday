@@ -72,6 +72,7 @@ import {
   MdOutlinePause,
   MdOutlinePlayArrow,
   MdOutlineQuestionAnswer,
+  MdOutlineRepeat,
   MdOutlineSettings,
   MdOutlineStyle,
   MdOutlineSubject,
@@ -844,4 +845,5 @@ c-35 156 -46 212 -42 217 4 4 43 -79 90 -194 40 -95 63 -133 86 -140 33 -11
   Categories: MdOutlineCategory,
   ArrowRightAlt: MdArrowRightAlt,
   AccountCircle: MdOutlineAccountCircle,
+  Repeat: MdOutlineRepeat,
 };
