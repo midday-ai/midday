@@ -14,9 +14,9 @@ type Props = {
 };
 
 export function ExportBar({ selected, deselectAll }: Props) {
-  const { transactionIds } = useTransactionsStore();
   const { toast } = useToast();
   const { setExportId } = useExportStore();
+  const { rowSelection } = useTransactionsStore();
   const [isOpen, setOpen] = useState(false);
 
   const { execute, status } = useAction(exportTransactionsAction, {
@@ -57,7 +57,7 @@ export function ExportBar({ selected, deselectAll }: Props) {
             </button>
             <Button
               className="h-8 text-sm"
-              onClick={() => execute(transactionIds)}
+              onClick={() => execute(Object.keys(rowSelection))}
               disabled={status === "executing"}
             >
               {status === "executing" ? (
