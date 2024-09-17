@@ -50,31 +50,13 @@ export default function Page() {
             cycles are set on a monthly basis.
           </p>
 
-          <p className="mt-8 leading-7">
-            At the end of each Billing Cycle, your Subscription will
-            automatically renew under the exact same conditions unless you
-            cancel it or Solomon AI cancels it. You may cancel your Subscription
-            renewal either through your online account management page or by
-            contacting Solomon AI customer support team.
-          </p>
-
-          <p className="mt-8 leading-7">
-            A valid payment method, including credit card, is required to
-            process the payment for your Subscription. You shall provide
-            Solomon AI with accurate and complete billing information including
-            full name, address, state, zip code, telephone number, and a valid
-            payment method information. By submitting such payment information,
-            you automatically authorize Solomon AI to charge all Subscription
-            fees incurred through your account to any such payment instruments.
-          </p>
-
-          <p className="mt-8 leading-7">
-            Should automatic billing fail to occur for any reason, Solomon AI
-            will issue an electronic invoice indicating that you must
-            proceed manually, within a certain deadline date, with the full
-            payment corresponding to the billing period as indicated on the
-            invoice.
-          </p>
+          <ul className="mt-4 list-disc pl-6">
+            <li>Subscriptions automatically renew unless cancelled</li>
+            <li>You may cancel through your online account or by contacting customer support</li>
+            <li>A valid payment method is required for processing subscription fees</li>
+            <li>You must provide accurate and complete billing information</li>
+            <li>Automatic billing failure may result in manual payment requirements</li>
+          </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
             Fee Changes
@@ -132,13 +114,13 @@ export default function Page() {
           </p>
 
           <p className="mt-8 leading-7">
-            You represent and warrant that: (i) the Content is yours (you own
-            it) or you have the right to use it and grant us the rights and
-            license as provided in these Terms, and (ii) the posting of your
-            Content on or through the Service does not violate the privacy
-            rights, publicity rights, copyrights, contract rights or any other
-            rights of any person.
+            You represent and warrant that:
           </p>
+
+          <ul className="mt-4 list-disc pl-6">
+            <li>The Content is yours (you own it) or you have the right to use it and grant us the rights and license as provided in these Terms</li>
+            <li>The posting of your Content on or through the Service does not violate the privacy rights, publicity rights, copyrights, contract rights or any other rights of any person</li>
+          </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
             Accounts</h2>
@@ -328,8 +310,16 @@ export default function Page() {
             User Responsibilities</h2>
 
           <p className="mt-8 leading-7">
-            You are responsible for ensuring that your use of the Service complies with all applicable laws and regulations. You agree not to use the Service for any unlawful purpose or in any way that could damage, disable, overburden, or impair our servers or networks.
+            You are responsible for ensuring that your use of the Service complies with all applicable laws and regulations. You agree not to:
           </p>
+
+          <ul className="mt-4 list-disc pl-6">
+            <li>Use the Service for any unlawful purpose</li>
+            <li>Use the Service in any way that could damage, disable, overburden, or impair our servers or networks</li>
+            <li>Attempt to gain unauthorized access to any parts of the Service</li>
+            <li>Use the Service to transmit any viruses, worms, or other malicious code</li>
+            <li>Interfere with or disrupt the integrity or performance of the Service</li>
+          </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
             Privacy Policy</h2>

@@ -130,8 +130,9 @@ export default function Page() {
             may include, but is not limited to:
           </p>
 
-          <ul>
-            <li>Email address</li> <li>First name and last name</li>{" "}
+          <ul className="mt-4 list-disc pl-6">
+            <li>Email address</li>
+            <li>First name and last name</li>
             <li>Cookies and Usage Data</li>
           </ul>
 
@@ -192,26 +193,15 @@ export default function Page() {
           <p className="mt-8 leading-7">
             Solomon AI uses the collected data for various purposes:
           </p>
-          <ul>
+          <ul className="mt-4 list-disc pl-6">
             <li>To provide and maintain our Service</li>
             <li>To notify you about changes to our Service</li>
-            <li>
-              To allow you to participate in interactive features of our Service
-              when you choose to do so
-            </li>
+            <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
             <li>To provide customer support</li>
-            <li>
-              To gather analysis or valuable information so that we can improve
-              our Service
-            </li>
+            <li>To gather analysis or valuable information so that we can improve our Service</li>
             <li>To monitor the usage of our Service</li>
             <li>To detect, prevent and address technical issues</li>
-            <li>
-              To provide you with news, special offers and general information
-              about other goods, services and events which we offer that are
-              similar to those that you have already purchased or enquired about
-              unless you have opted not to receive such information
-            </li>
+            <li>To provide you with news, special offers and general information about other goods, services and events which we offer that are similar to those that you have already purchased or enquired about unless you have opted not to receive such information</li>
           </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
@@ -228,14 +218,11 @@ export default function Page() {
           <p className="mt-8 leading-7">
             Solomon AI may process your Personal Data because:
           </p>
-          <ul>
+          <ul className="mt-4 list-disc pl-6">
             <li>We need to perform a contract with you</li>
             <li>You have given us permission to do so</li>
-            <li>
-              The processing is in our legitimate interests and it is not
-              overridden by your rights
-            </li>
-            <li>For payment processing purposes</li>{" "}
+            <li>The processing is in our legitimate interests and it is not overridden by your rights</li>
+            <li>For payment processing purposes</li>
             <li>To comply with the law</li>
           </ul>
 
@@ -306,17 +293,11 @@ export default function Page() {
             Solomon AI may disclose your Personal Data in the good faith belief
             that such action is necessary to:
           </p>
-          <ul>
+          <ul className="mt-4 list-disc pl-6">
             <li>To comply with a legal obligation</li>
             <li>To protect and defend the rights or property of Solomon AI</li>
-            <li>
-              To prevent or investigate possible wrongdoing in connection with
-              the Service
-            </li>
-            <li>
-              To protect the personal safety of users of the Service or the
-              public
-            </li>
+            <li>To prevent or investigate possible wrongdoing in connection with the Service</li>
+            <li>To protect the personal safety of users of the Service or the public</li>
             <li>To protect against legal liability</li>
           </ul>
           <br />
