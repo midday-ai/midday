@@ -108,6 +108,7 @@ const transformDescription = ({
 
 export const transformTransaction = (
   transaction: TransformTransaction,
+  accountId: string,
 ): BaseTransaction => {
   const method = mapTransactionMethod(
     transaction?.proprietaryBankTransactionCode,
@@ -151,6 +152,9 @@ export const transformTransaction = (
     balance,
     description,
     status: "posted",
+    account_id: accountId,
+    internal_id: transaction.internalTransactionId,
+    bank_account_id: accountId,
   };
 };
 
