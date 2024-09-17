@@ -5,6 +5,12 @@ import {
   Products,
 } from "plaid";
 
+/**
+ * Matches an institution ID to a specific logo URL.
+ * 
+ * @param {string} id - The institution ID to match.
+ * @returns {string|null} The URL of the matched logo, or null if no match is found.
+ */
 function matchLogoURL(id) {
   switch (id) {
     case "ins_56":
@@ -94,6 +100,12 @@ const PRIORITY_INSTITUTIONS = [
   "ins_21", // Huntington Bank
 ];
 
+/**
+ * Calculates the popularity score for a given institution ID.
+ * 
+ * @param {string} id - The institution ID to check for popularity.
+ * @returns {number} A popularity score between 0 and 100, where 100 is the highest priority.
+ */
 export function getPopularity(id) {
   if (PRIORITY_INSTITUTIONS.includes(id)) {
     return 100 - PRIORITY_INSTITUTIONS.indexOf(id);
@@ -102,10 +114,27 @@ export function getPopularity(id) {
   return 0;
 }
 
+/**
+ * Generates a logo URL for a given institution ID.
+ * 
+ * @param {string} id - The institution ID or name to use in the URL.
+ * @param {string} [ext='jpg'] - The file extension for the logo image.
+ * @returns {string} The complete URL for the institution's logo.
+ */
 function getLogoURL(id, ext) {
   return `https://cdn-engine.midday.ai/${id}.${ext || "jpg"}`;
 }
 
+/**
+ * Fetches all Plaid institutions and formats them for use in the application.
+ * 
+ * This function uses the Plaid API to retrieve institution data in batches.
+ * It processes each institution, adding custom fields like logo URL and popularity.
+ * 
+ * @async
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of formatted institution objects.
+ * @throws {Error} If there's an issue with the Plaid API or data processing.
+ */
 async function getPlaidInstitutions() {
   const configuration = new Configuration({
     basePath: PlaidEnvironments["production"],
@@ -154,9 +183,17 @@ async function getPlaidInstitutions() {
   return allInstitutions;
 }
 
+/**
+ * Retrieves and combines institution data from multiple sources.
+ * 
+ * Currently, this function only fetches data from Plaid, but it's designed
+ * to be extensible for adding more data sources in the future.
+ * 
+ * @async
+ * @returns {Promise<Array<Object>>} A promise that resolves to a flattened array of institution objects from all sources.
+ * @throws {Error} If there's an issue fetching or processing institution data from any source.
+ */
 export async function getInstitutions() {
-  // Implement your logic here
-  // Return an array of institution documents
   const data = await Promise.all([getPlaidInstitutions()]);
 
   return data.flat();
