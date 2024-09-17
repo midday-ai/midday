@@ -1,7 +1,7 @@
-name: Production Deployment - Email
+name: Production Deployment - Platform Docs
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_EMAIL }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_PLATFORM_DOCS }}
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
   TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
@@ -11,7 +11,7 @@ on:
     branches:
       - main
     paths:
-      - packages/email/**
+      - apps/docs/platform/**
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
@@ -23,9 +23,9 @@ jobs:
       - name: Install dependencies
         run: bun install
       # - name: 🔦 Run linter
-      #   run: bun run lint --filter=@midday/email
+      #   run: bun run lint --filter=@midday/ui
       # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck --filter=@midday/email
+      #   run: bun run typecheck --filter=@midday/ui
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information
@@ -35,4 +35,4 @@ jobs:
       - name: Deploy Project Artifacts to Vercel
         run: |
           bunx vercel deploy --prebuilt --prod --archive=tgz --token=${{ secrets.VERCEL_TOKEN }} > domain.txt
-          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` email.midday.ai
+          bunx vercel alias --scope=${{ secrets.VERCEL_ORG_ID }} --token=${{ secrets.VERCEL_TOKEN }} set `cat domain.txt` engineering-docs.solomon-ai.app

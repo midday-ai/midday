@@ -1,0 +1,40 @@
+name: Production Deployment - latency benchmark
+env:
+  CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+  TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - services/latency-benchmarks/**
+  workflow_dispatch:
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+      - name: Install dependencies
+        run: bun install
+      # - name: 🔦 Run linter
+      #   run: bun run lint
+      #   working-directory: ./solomon-ai/engine
+      - name: 🪐 Check TypeScript
+        run: bun run check:types
+        working-directory: ./services/latency-benchmarks
+      # - name: 🧪 Run unit tests
+      #   run: bun test
+      #   working-directory: ./solomon-ai/latency-b
+      - name: Deploy Project Artifacts to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          packageManager: bun
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          workingDirectory: "services/latency-benchmarks"
+          wranglerVersion: "3.67.1"
+          command: deploy --minify src/index.ts --env production
