@@ -12,5 +12,6 @@ export default async function Security() {
       <MfaSettingsList />
       <AddNewDeviceModal />
     </div>
+    
   );
 }

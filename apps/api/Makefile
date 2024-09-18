@@ -55,8 +55,34 @@ precondition: ## Load environment variables
 
 local: precondition supabase-restart supabase-migrate ## Run local development setup
 
-setup:
+setup: clean-supabase
+	@echo "Starting Supabase and seeding data..."
 	bun run supabase:start 
 	bun run supabase:reset
 	bun run seed:local
 	supabase status
+
+clean-supabase: ## Stop Supabase and clean volumes if running, started, or in an unhealthy state
+	@echo "Checking Supabase status..."
+	@supabase status
+	@echo "Supabase status check complete."
+	@echo "Evaluating condition..."
+	@if supabase status | grep -q . ; then \
+		echo "Condition is TRUE"; \
+		echo "Detected Supabase running or in problematic state."; \
+		echo "Stopping Supabase and cleaning volumes..."; \
+		supabase stop --no-backup || true; \
+		echo "Stopping any remaining Supabase containers..."; \
+		docker volume rm $$(docker volume ls -q --filter label=com.supabase.cli.project=trnlccdjeihaaxmcaddm) || true; \
+		echo "Supabase stopped and volumes cleaned."; \
+	else \
+		echo "Condition is FALSE"; \
+		echo "Supabase is not detected as running or in a problematic state. No action needed."; \
+	fi
+
+debug-supabase-status:
+	@echo "Supabase Status Output:"
+	@supabase status | tee /dev/tty | wc -l
+	@echo "Grep test results:"
+	@supabase status | grep -E "running|started|unhealthy|container is not ready" || echo "No match found"
+	@supabase status | grep "supabase local development setup is running" || echo "No match found"
