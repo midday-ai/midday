@@ -391,6 +391,7 @@ export function TransactionsSearchFilter({
                 className="p-0 w-[250px] h-[270px]"
               >
                 <SelectCategory
+                  uncategorized
                   onChange={(selected) => {
                     setFilters({
                       categories: filters?.categories?.includes(selected.slug)

@@ -1,9 +1,13 @@
+import { AnimatedNumber } from "@/components/animated-number";
 import { AreaChart } from "@/components/charts/area-chart";
 import { BarChart } from "@/components/charts/bar-chart";
+import { ExpenseChart } from "@/components/charts/expense-chart";
+import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { FormatAmount } from "@/components/format-amount";
 import { calculateAvgBurnRate } from "@/utils/format";
 import {
   getBurnRateQuery,
+  getExpensesQuery,
   getMetricsQuery,
   getRunwayQuery,
 } from "@midday/supabase/queries";
@@ -41,6 +45,12 @@ function getReportMeta(data) {
         title: `Burn rate for ${data.team.name} (${period})`,
         description: `Burn rate for ${data.team.name} based on the period ${period}`,
         shortTitle: "Burn rate",
+      };
+    case "expense":
+      return {
+        title: `Expense report for ${data.team.name} (${period})`,
+        description: `Expense report for ${data.team.name} based on the period ${period}`,
+        shortTitle: "Expense report",
       };
 
     default:
@@ -83,7 +93,7 @@ export default async function Report({ params }) {
   }
 
   async function getContent() {
-    switch (data.type) {
+    switch (data?.type) {
       case "profit":
       case "revenue": {
         const metricsData = await getMetricsQuery(supabase, {
@@ -153,6 +163,32 @@ export default async function Report({ params }) {
               </div>
             </div>
             <AreaChart currency={data.currency} data={burnRateData} />
+          </>
+        );
+      }
+      case "expense": {
+        const expenseData = await getExpensesQuery(supabase, {
+          teamId: data.team_id,
+          from: data.from,
+          to: data.to,
+          currency: data.currency,
+        });
+
+        return (
+          <>
+            <div className="space-y-2 mb-14 inline-block select-text">
+              <h1 className="text-4xl font-mono">
+                <AnimatedNumber
+                  value={expenseData?.summary?.averageExpense ?? 0}
+                  currency={expenseData?.summary?.currency ?? "USD"}
+                />
+              </h1>
+
+              <div className="text-sm text-[#606060] flex items-center space-x-2">
+                <p className="text-sm text-[#606060]">Average expenses</p>
+              </div>
+            </div>
+            <StackedBarChart data={expenseData} />
           </>
         );
       }

@@ -51,18 +51,12 @@
     "gen": "turbo gen --config 'turbo/generators/config.ts'"
   },
   "dependencies": {
-    "@biomejs/biome": "1.8.3",
-    "@changesets/cli": "^2.27.8",
-    "@commitlint/cli": "^19.3.0",
-    "@commitlint/config-conventional": "^19.2.2",
-    "@commitlint/cz-commitlint": "^19.2.0",
-    "@commitlint/types": "^19.0.3",
+    "@biomejs/biome": "1.9.1",
     "@manypkg/cli": "^0.21.4",
-    "@turbo/gen": "^2.1.1",
-    "turbo": "2.1.1",
+    "turbo": "2.1.2",
     "typescript": "^5.6.2"
   },
-  "packageManager": "bun@1.1.16",
+  "packageManager": "bun@1.1.27",
   "resolutions": {
     "jackspeak": "2.1.1"
   },

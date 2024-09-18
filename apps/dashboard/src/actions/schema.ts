@@ -72,7 +72,13 @@ export const changeSpendingPeriodSchema = z.object({
   to: z.string().datetime(),
 });
 
-export const changeChartTypeSchema = z.enum(["profit", "revenue", "burn_rate"]);
+export const changeChartTypeSchema = z.enum([
+  "profit",
+  "revenue",
+  "expense",
+  "burn_rate",
+]);
+
 export const changeChartPeriodSchema = z.object({
   from: z.string().optional(),
   to: z.string().optional(),
@@ -179,7 +185,7 @@ export const deleteCategoriesSchema = z.object({
 });
 
 export const bulkUpdateTransactionsSchema = z.object({
-  type: z.enum(["category", "note", "assigned", "status"]),
+  type: z.enum(["category", "note", "assigned", "status", "recurring"]),
   data: z.array(updateTransactionSchema),
 });
 

@@ -105,7 +105,7 @@ export function DataTableHeader({ table, loading }: Props) {
         )}
 
         {isVisible("category") && (
-          <TableHead className="md:w-[240px] hidden md:table-cell px-3 md:px-4 py-2">
+          <TableHead className="md:w-[260px] hidden md:table-cell px-3 md:px-4 py-2">
             <Button
               className="p-0 hover:bg-transparent space-x-2"
               variant="ghost"

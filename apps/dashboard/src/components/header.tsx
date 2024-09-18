@@ -22,7 +22,7 @@ export function Header() {
 
       <AssistantButton />
 
-      <div className="flex space-x-2 no-drag ml-auto">
+      <div className="flex space-x-2 ml-auto">
         {isDesktopApp() && <DesktopAssistantButton />}
 
         <FeedbackForm />

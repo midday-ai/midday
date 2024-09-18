@@ -89,6 +89,9 @@ export default async function Layout({
           <ChatAccessibilityButton />
         </div>
 
+        {/* This is used to make the header draggable on macOS */}
+        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
+
         <AssistantModal />
         <ConnectTransactionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />

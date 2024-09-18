@@ -142,6 +142,7 @@ client.defineJob({
     revalidateTag(`metrics_${teamId}`);
     revalidateTag(`bank_accounts_${teamId}`);
     revalidateTag(`insights_${teamId}`);
+    revalidateTag(`expenses_${teamId}`);
 
     await settingUpAccount.update("setting-up-account-completed", {
       data: {

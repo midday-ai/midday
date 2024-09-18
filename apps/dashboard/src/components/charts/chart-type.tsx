@@ -2,7 +2,6 @@
 
 import { changeChartTypeAction } from "@/actions/change-chart-type-action";
 import { useI18n } from "@/locales/client";
-import { Icons } from "@midday/ui/icons";
 import {
   Select,
   SelectContent,
@@ -12,7 +11,7 @@ import {
 } from "@midday/ui/select";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
-const options = ["profit", "revenue", "burn_rate"];
+const options = ["profit", "revenue", "expense", "burn_rate"];
 
 type Props = {
   initialValue: string;

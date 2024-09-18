@@ -6,6 +6,7 @@ import { createClient } from "../client/server";
 import {
   type GetBurnRateQueryParams,
   type GetCategoriesParams,
+  type GetExpensesQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
   type GetSpendingParams,
@@ -17,6 +18,7 @@ import {
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
+  getExpensesQuery,
   getMetricsQuery,
   getRunwayQuery,
   getSpendingQuery,
@@ -236,6 +238,27 @@ export const getMetrics = async (params: Omit<GetMetricsParams, "teamId">) => {
     ["metrics", teamId],
     {
       tags: [`metrics_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
+};
+
+export const getExpenses = async (params: GetExpensesQueryParams) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpensesQuery(supabase, { ...params, teamId });
+    },
+    ["expenses", teamId],
+    {
+      tags: [`expenses_${teamId}`],
       revalidate: 3600,
     },
   )(params);
