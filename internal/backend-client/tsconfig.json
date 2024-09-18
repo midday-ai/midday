@@ -3,7 +3,8 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "jsx": "react-jsx"
   },
   "include": ["**/*.ts", "**/*.js"]
 }
