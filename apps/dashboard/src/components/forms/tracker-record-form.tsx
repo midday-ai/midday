@@ -19,7 +19,13 @@ const formSchema = z.object({
   description: z.string().optional(),
 });
 
-export function CreateRecordForm({ userId, onCreate, projectId }) {
+type Props = {
+  userId: string;
+  onCreate: (values: z.infer<typeof formSchema>) => void;
+  projectId: string;
+};
+
+export function TrackerRecordForm({ userId, onCreate, projectId }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

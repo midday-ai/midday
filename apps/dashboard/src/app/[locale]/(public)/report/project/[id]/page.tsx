@@ -1,4 +1,3 @@
-import { TrackerGraph } from "@/components/tracker-graph/tracker-graph";
 import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { Button } from "@midday/ui/button";
@@ -43,7 +42,7 @@ export default async function ProjectReport({ params, searchParams }) {
   const { data: reportData, error } = await supabase
     .from("tracker_reports")
     .select(
-      "*, project:project_id(id, name), user:created_by(week_starts_on_monday)"
+      "*, project:project_id(id, name), user:created_by(week_starts_on_monday)",
     )
     .eq("id", params.id)
     .single();
@@ -77,18 +76,7 @@ export default async function ProjectReport({ params, searchParams }) {
       </div>
 
       <div className="justify-center w-full flex px-8 h-full mt-6">
-        <div className="max-w-[1400px]">
-          <TrackerGraph
-            data={data}
-            meta={meta}
-            date={currentDate}
-            start={start}
-            end={end}
-            numberOfMonths={numberOfMonths}
-            projectId={reportData.project.id}
-            weekStartsOn={reportData?.user?.week_starts_on_monday && 1}
-          />
-        </div>
+        <div className="max-w-[1400px]">TODO</div>
       </div>
 
       <footer className="flex items-center justify-center w-full mt-auto h-[80px]">

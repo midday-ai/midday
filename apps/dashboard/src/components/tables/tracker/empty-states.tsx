@@ -1,19 +1,17 @@
 "use client";
 
-import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
-import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { Button } from "@midday/ui/button";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
 
-export function EmptyState({ currencyCode, user }) {
+export function EmptyState() {
   const [params, setParams] = useQueryStates({
     create: parseAsString,
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 
@@ -32,24 +30,11 @@ export function EmptyState({ currencyCode, user }) {
           Create project
         </Button>
       </div>
-
-      <TrackerCreateSheet
-        setParams={setParams}
-        currencyCode={currencyCode}
-        isOpen={Boolean(params.create)}
-      />
-
-      <TrackerSheet
-        isOpen={Boolean(params.projectId) && !params.update}
-        params={params}
-        setParams={setParams}
-        user={user}
-      />
     </div>
   );
 }
 
-export function NoResults({ currencyCode, user }) {
+export function NoResults() {
   const router = useRouter();
 
   const [params, setParams] = useQueryStates({
@@ -57,7 +42,7 @@ export function NoResults({ currencyCode, user }) {
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 
@@ -74,19 +59,6 @@ export function NoResults({ currencyCode, user }) {
         <Button variant="outline" onClick={() => router.push("/tracker")}>
           Clear filters
         </Button>
-
-        <TrackerCreateSheet
-          setParams={setParams}
-          currencyCode={currencyCode}
-          isOpen={Boolean(params.create)}
-        />
-
-        <TrackerSheet
-          isOpen={Boolean(params.projectId) && !params.update}
-          params={params}
-          setParams={setParams}
-          user={user}
-        />
       </div>
     </div>
   );

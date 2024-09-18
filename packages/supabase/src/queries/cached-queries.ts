@@ -346,7 +346,7 @@ export const getTrackerProjects = async (
 };
 
 export const getTrackerRecordsByRange = async (
-  params: GetTrackerRecordsByRangeParams,
+  params: Omit<GetTrackerRecordsByRangeParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();

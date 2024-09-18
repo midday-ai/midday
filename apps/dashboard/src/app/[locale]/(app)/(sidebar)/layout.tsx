@@ -61,6 +61,14 @@ const ConnectTransactionsModal = dynamic(
   },
 );
 
+const GlobalSheets = dynamic(
+  () =>
+    import("@/components/sheets/global-sheets").then((mod) => mod.GlobalSheets),
+  {
+    ssr: false,
+  },
+);
+
 export default async function Layout({
   children,
 }: {
@@ -99,6 +107,7 @@ export default async function Layout({
         />
         <ExportStatus />
         <HotKeys />
+        <GlobalSheets defaultCurrency={currencies[countryCode]} />
       </AI>
     </div>
   );

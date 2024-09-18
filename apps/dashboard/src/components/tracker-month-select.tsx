@@ -12,14 +12,28 @@ import {
 } from "date-fns";
 import { useHotkeys } from "react-hotkeys-hook";
 
-export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
+type Props = {
+  date: string;
+  className?: string;
+  onSelect: (date: string) => void;
+  disableKeyboard?: boolean;
+  dateFormat?: string;
+};
+
+export function TrackerMonthSelect({
+  date,
+  className,
+  onSelect,
+  disableKeyboard,
+  dateFormat = "MMM",
+}: Props) {
   const currentDate = date ? new Date(date) : new Date();
 
   const selectPrevMonth = () => {
     onSelect(
       formatISO(startOfMonth(subMonths(currentDate, 1)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -27,7 +41,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(startOfMonth(addMonths(currentDate, 1)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -39,7 +53,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(subDays(currentDate, 1), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -51,7 +65,7 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
     onSelect(
       formatISO(addDays(currentDate, 1), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -68,7 +82,9 @@ export function TrackerSelect({ date, className, onSelect, disableKeyboard }) {
       >
         <Icons.ChevronLeft className="w-6 h-6" />
       </Button>
-      <span className="w-full text-center">{format(currentDate, "MMMM")}</span>
+      <span className="w-full text-center">
+        {format(currentDate, dateFormat)}
+      </span>
       <Button
         variant="ghost"
         size="icon"

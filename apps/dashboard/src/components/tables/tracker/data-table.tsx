@@ -1,8 +1,5 @@
 "use client";
 
-import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
-import { TrackerSheet } from "@/components/sheets/tracker-sheet";
-import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
@@ -26,11 +23,9 @@ type ItemsProps = {
 
 export function DataTable({
   data: initialData,
-  currencyCode,
   pageSize,
   meta,
   loadMore,
-  user,
 }: ItemsProps) {
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
@@ -49,7 +44,7 @@ export function DataTable({
 
   const [params, setParams] = useQueryStates({
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
     projectId: parseAsString,
     create: parseAsString,
@@ -57,7 +52,7 @@ export function DataTable({
   });
 
   const selectedProject = data.find(
-    (project) => project.id === params?.projectId
+    (project) => project.id === params?.projectId,
   );
 
   const loadMoreData = async () => {
@@ -89,28 +84,6 @@ export function DataTable({
           ))}
         </TableBody>
       </Table>
-
-      <TrackerSheet
-        isOpen={Boolean(params.projectId) && !params.update}
-        params={params}
-        setParams={setParams}
-        project={selectedProject}
-        user={user}
-      />
-
-      <TrackerCreateSheet
-        currencyCode={currencyCode}
-        setParams={setParams}
-        isOpen={Boolean(params.create)}
-      />
-
-      <TrackerUpdateSheet
-        currencyCode={currencyCode}
-        setParams={setParams}
-        isOpen={Boolean(params.update)}
-        data={selectedProject}
-        key={selectedProject?.id}
-      />
 
       {hasNextPage && (
         <div className="flex items-center justify-center mt-6" ref={ref}>

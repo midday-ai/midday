@@ -4,6 +4,7 @@ import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
 import { updateProjectSchema } from "@/actions/schema";
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertDialog,
@@ -33,9 +34,20 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
+type Props = {
+  currencyCode: string;
+};
+
+export function TrackerUpdateSheet({ currencyCode }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { setParams, update, projectId } = useTrackerParams();
+
+  const isOpen = update !== null;
+
+  // TODO get project data (projectId)
+
+  const data = {};
 
   const form = useForm<z.infer<typeof updateProjectSchema>>({
     resolver: zodResolver(updateProjectSchema),
@@ -65,7 +77,9 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
   });
 
   const updateAction = useAction(updateProjectAction, {
-    onSuccess: () => setParams({ update: null, projectId: null }),
+    onSuccess: () => {
+      setParams({ update: null, projectId: null });
+    },
     onError: () => {
       toast({
         duration: 3500,
@@ -110,9 +124,7 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
                   sideOffset={10}
                   align="end"
                 >
-                  <DropdownMenuItem
-                  // onClick={() => handleShareURL(data.id)}
-                  >
+                  <DropdownMenuItem onClick={() => handleShareURL(data.id)}>
                     Share Report
                   </DropdownMenuItem>
 
