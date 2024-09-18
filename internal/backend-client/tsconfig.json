@@ -3,7 +3,9 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "jsx": "preserve",
+    "moduleResolution": "Bundler"
   },
   "include": ["**/*.ts", "**/*.js"]
 }

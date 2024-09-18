@@ -124,4 +124,8 @@ grant update on table "public"."total_amount" to "service_role";
 
 CREATE TRIGGER enrich_transaction AFTER INSERT ON public.transactions FOR EACH ROW EXECUTE FUNCTION update_enrich_transaction();
 
+-- Trigger to call the function after a new user is created in auth.users
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
