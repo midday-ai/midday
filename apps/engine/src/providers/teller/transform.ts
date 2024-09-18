@@ -62,11 +62,13 @@ export const mapTransactionCategory = ({
   const description = transaction.description?.toLowerCase();
 
   // Helper function to check if any keyword is in the description
-  const hasKeyword = (keywords: string[]) => 
-    keywords.some(keyword => description?.includes(keyword));
+  const hasKeyword = (keywords: string[]) =>
+    keywords.some((keyword) => description?.includes(keyword));
 
   switch (true) {
-    case ["bar", "dining", "groceries", "restaurant", "food"].includes(category):
+    case ["bar", "dining", "groceries", "restaurant", "food"].includes(
+      category,
+    ):
     case hasKeyword(["restaurant", "cafe", "coffee", "burger", "pizza"]):
       return "meals";
 
@@ -85,7 +87,8 @@ export const mapTransactionCategory = ({
     case hasKeyword(["phone", "mobile", "internet", "cable", "utility"]):
       return "internet-and-telephone";
 
-    case category === "software" || hasKeyword(["software", "app", "subscription"]):
+    case category === "software" ||
+      hasKeyword(["software", "app", "subscription"]):
       return "software";
 
     case ["entertainment", "sport", "recreation"].includes(category):

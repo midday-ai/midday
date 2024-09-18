@@ -47,7 +47,9 @@ export const mapTransactionCategory = ({
 
   // Helper function to check if a string includes any of the given keywords
   const includesAny = (str: string, keywords: string[]): boolean =>
-    keywords.some(keyword => str?.toLowerCase().includes(keyword.toLowerCase()));
+    keywords.some((keyword) =>
+      str?.toLowerCase().includes(keyword.toLowerCase()),
+    );
 
   // Income
   if (pfc?.primary === "INCOME" || amount > 0) {
@@ -68,7 +70,14 @@ export const mapTransactionCategory = ({
   if (
     transaction_code === "bank charge" ||
     pfc?.primary === "BANK_FEES" ||
-    includesAny(pfc?.detailed || "", ["OVERDRAFT", "ATM", "LATE_PAYMENT", "FOREIGN_TRANSACTION", "WIRE_TRANSFER", "INSUFFICIENT_FUNDS"])
+    includesAny(pfc?.detailed || "", [
+      "OVERDRAFT",
+      "ATM",
+      "LATE_PAYMENT",
+      "FOREIGN_TRANSACTION",
+      "WIRE_TRANSFER",
+      "INSUFFICIENT_FUNDS",
+    ])
   ) {
     return "fees";
   }
@@ -88,10 +97,14 @@ export const mapTransactionCategory = ({
     if (pfc?.detailed === "GENERAL_SERVICES_OTHER_GENERAL_SERVICES") {
       return "software";
     }
-    if (includesAny(pfc?.detailed || "", ["ADVERTISING", "MARKETING", "BUSINESS"])) {
+    if (
+      includesAny(pfc?.detailed || "", ["ADVERTISING", "MARKETING", "BUSINESS"])
+    ) {
       return "business-services";
     }
-    if (includesAny(pfc?.detailed || "", ["LEGAL", "ACCOUNTING", "FINANCIAL"])) {
+    if (
+      includesAny(pfc?.detailed || "", ["LEGAL", "ACCOUNTING", "FINANCIAL"])
+    ) {
       return "professional-services";
     }
     return "services";
@@ -172,7 +185,13 @@ export const mapTransactionCategory = ({
   }
 
   // Auto
-  if (includesAny(pfc?.detailed || "", ["AUTOMOTIVE", "CAR_SERVICE", "AUTO_INSURANCE"])) {
+  if (
+    includesAny(pfc?.detailed || "", [
+      "AUTOMOTIVE",
+      "CAR_SERVICE",
+      "AUTO_INSURANCE",
+    ])
+  ) {
     return "auto";
   }
 
@@ -192,7 +211,13 @@ export const mapTransactionCategory = ({
   }
 
   // Government and Non-Profit
-  if (includesAny(pfc?.detailed || "", ["GOVERNMENT", "COMMUNITY", "ORGANIZATIONS"])) {
+  if (
+    includesAny(pfc?.detailed || "", [
+      "GOVERNMENT",
+      "COMMUNITY",
+      "ORGANIZATIONS",
+    ])
+  ) {
     return "government-and-non-profit";
   }
 
