@@ -45,6 +45,10 @@ port = 54323
 enabled = true
 client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_SECRET)"
+# Add these lines:
+authorization_endpoint = "https://accounts.google.com/o/oauth2/v2/auth"
+token_endpoint = "https://oauth2.googleapis.com/token"
+userinfo_endpoint = "https://openidconnect.googleapis.com/v1/userinfo"
 redirect_uri = "http://localhost:54321/auth/v1/callback"
 
 [analytics]
