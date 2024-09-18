@@ -484,7 +484,7 @@ $$;
  * @param forecast_date DATE - The date for which to forecast expenses
  * @param currency TEXT - The currency to filter transactions by
  * @param lookback_months INTEGER - The number of months to look back for calculating the forecast (default: 3)
- * @return TABLE (forecast_date DATE, forecasted_expense NUMERIC) - A table containing the forecasted expense
+ * @return TABLE (forecasted_date DATE, forecasted_expense NUMERIC) - A table containing the forecasted expense
  */
 CREATE OR REPLACE FUNCTION public.get_expense_forecast(
     team_id UUID,
@@ -493,7 +493,7 @@ CREATE OR REPLACE FUNCTION public.get_expense_forecast(
     lookback_months INTEGER DEFAULT 3
 )
 RETURNS TABLE (
-    forecast_date DATE,
+    forecasted_date DATE,
     forecasted_expense NUMERIC
 )
 LANGUAGE plpgsql
@@ -520,7 +520,7 @@ BEGIN
     -- Return the forecasted expense
     RETURN QUERY
     SELECT
-        get_expense_forecast.forecast_date,
+        get_expense_forecast.forecast_date AS forecasted_date,
         COALESCE(avg_monthly_expense, 0) AS forecasted_expense;
 END;
 $$;

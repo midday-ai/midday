@@ -16,7 +16,7 @@ const baseQueryParamsSchema = z.object({
   teamId: z.string(),
   from: z.string(),
   to: z.string(),
-  currency: z.string().optional(),
+  currency: z.string().optional().default("USD"),
 });
 
 // Schema for getMonthlyExpensesQuery
@@ -266,7 +266,7 @@ export async function getExpenseGrowthRateQuery(
 const getExpenseForecastQueryParamsSchema = z.object({
   teamId: z.string(),
   forecastDate: z.string(),
-  currency: z.string().optional(),
+  currency: z.string().optional().default("USD"),
   lookbackMonths: z.number().optional().default(3),
 });
 
@@ -344,7 +344,7 @@ const getExpenseComparisonQueryParamsSchema = z.object({
   teamId: z.string(),
   currentFrom: z.string(),
   currentTo: z.string(),
-  currency: z.string().optional(),
+  currency: z.string().optional().default("USD"),
 });
 
 /**
@@ -577,18 +577,25 @@ export async function getShippingLogisticsAnalysisQuery(
 }
 
 /**
- * Parameters for the getExpenseBreakdownByLocationQuery function.
+ * Zod schema for the parameters of the getExpenseBreakdownByLocationQuery function.
  */
-export type GetExpenseBreakdownByLocationQueryParams = {
+export const GetExpenseBreakdownByLocationQueryParamsSchema = z.object({
   /** The unique identifier of the team. */
-  teamId: string;
+  teamId: z.string().uuid(),
   /** The start date of the query period in string format. */
-  from: string;
+  from: z.string().datetime(),
   /** The end date of the query period in string format. */
-  to: string;
+  to: z.string().datetime(),
   /** The currency to use for the expense calculations (optional). */
-  currency?: string;
-};
+  currency: z.string().optional().default("USD"),
+});
+
+/**
+ * Type inference from the Zod schema for the getExpenseBreakdownByLocationQuery function parameters.
+ */
+export type GetExpenseBreakdownByLocationQueryParams = z.infer<
+  typeof GetExpenseBreakdownByLocationQueryParamsSchema
+>;
 
 /**
  * Retrieves expense breakdown by location for a specified team and date range.
@@ -600,7 +607,8 @@ export async function getExpenseBreakdownByLocationQuery(
   supabase: Client,
   params: GetExpenseBreakdownByLocationQueryParams
 ) {
-  const { teamId, from, to, currency } = params;
+  const { teamId, from, to, currency } =
+    GetExpenseBreakdownByLocationQueryParamsSchema.parse(params);
   return supabase.rpc("get_expense_breakdown_by_location", {
     team_id: teamId,
     start_date: toUTCDate(from).toDateString(),
