@@ -52,42 +52,61 @@ export const mapTransactionCategory = ({
   transaction,
   amount,
 }: MapTransactionCategory) => {
-  if (transaction.type === "transfer") {
-    return "transfer";
-  }
+  // Priority checks
+  if (transaction.type === "transfer") return "transfer";
+  if (transaction.type === "fee") return "fees";
+  if (amount > 0) return "income";
 
-  if (transaction.type === "fee") {
-    return "fees";
-  }
+  // Detailed category mapping
+  const category = transaction?.details?.category?.toLowerCase() || "other";
+  const description = transaction.description?.toLowerCase();
 
-  if (amount > 0) {
-    return "income";
-  }
+  // Helper function to check if any keyword is in the description
+  const hasKeyword = (keywords: string[]) => 
+    keywords.some(keyword => description?.includes(keyword));
 
-  switch (transaction?.details.category) {
-    case "bar":
-    case "dining":
-    case "groceries":
+  switch (true) {
+    case ["bar", "dining", "groceries", "restaurant", "food"].includes(category):
+    case hasKeyword(["restaurant", "cafe", "coffee", "burger", "pizza"]):
       return "meals";
-    case "transport":
-    case "transportation":
+
+    case ["transport", "transportation", "travel"].includes(category):
+    case hasKeyword(["airline", "hotel", "uber", "lyft", "taxi", "train"]):
       return "travel";
-    case "tax":
+
+    case category === "tax" || hasKeyword(["tax", "irs"]):
       return "taxes";
-    case "office":
+
+    case ["office", "supplies"].includes(category):
+    case hasKeyword(["office", "staples", "paper", "printer"]):
       return "office-supplies";
-    case "phone":
+
+    case ["phone", "internet", "utilities"].includes(category):
+    case hasKeyword(["phone", "mobile", "internet", "cable", "utility"]):
       return "internet-and-telephone";
-    case "software":
+
+    case category === "software" || hasKeyword(["software", "app", "subscription"]):
       return "software";
-    case "entertainment":
-    case "sport":
+
+    case ["entertainment", "sport", "recreation"].includes(category):
+    case hasKeyword(["movie", "theatre", "concert", "gym", "fitness"]):
       return "activity";
-    case "utilities":
-    case "electronics":
+
+    case ["utilities", "electronics", "hardware"].includes(category):
+    case hasKeyword(["electric", "water", "gas", "computer", "phone"]):
       return "equipment";
+
+    case hasKeyword(["health", "doctor", "hospital", "pharmacy"]):
+      return "healthcare";
+
+    case hasKeyword(["education", "school", "college", "university", "course"]):
+      return "education";
+
+    case hasKeyword(["charity", "donation"]):
+      return "donations";
+
     default:
-      return null;
+      return "other";
   }
 };
 
