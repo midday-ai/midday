@@ -4,7 +4,8 @@
     "incremental": true,
     "tsBuildInfoFile": ".tsbuildinfo",
     "noImplicitAny": false,
-    "jsx": "react-jsx"
+    "jsx": "preserve",
+    "moduleResolution": "Bundler"
   },
   "include": ["**/*.ts", "**/*.js"]
 }
