@@ -14,6 +14,13 @@ export const Jobs = {
   BANK_CONNECTION_DISCONNECTED: "bank-connection-disconnected",
   BANK_CONNECTION_EXPIRING: "bank-connection-expiring",
   EXCHANGE_RATES_UPDATE: "exchange-rates-update",
+  TRANSACTIONS_EXPORT_PDF: "transactions-export-pdf",
+  IDENTIFY_UNUSUAL_TRANSACTIONS: "identify-unusual-transactions",
+  GENERATE_TRANSACTION_SUMMARY: "generate-transaction-summary",
+  REMOVE_OLD_TRANSACTIONS: "remove-old-transactions",
+  GENERATE_TAX_SUMMARY: "generate-tax-summary",
+  MANUALLY_SCHEDULE_TRANSACTION_SYNC: "manually-schedule-transaction-sync",
+  TRANSACTION_SYNC_ALL_TEAMS: "transaction-sync-all-teams",
 };
 
 export const Events = {
@@ -26,4 +33,11 @@ export const Events = {
   TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
   TRANSACTIONS_IMPORT: "transactions.import",
   UPDATE_CURRENCY: "update.base.currency",
+  TRANSACTIONS_EXPORT_PDF: "transactions.export.pdf",
+  IDENTIFY_UNUSUAL_TRANSACTIONS: "transactions.identify.unusual",
+  GENERATE_TRANSACTION_SUMMARY: "transactions.generate.summary",
+  REMOVE_OLD_TRANSACTIONS: "transactions.remove.old",
+  GENERATE_TAX_SUMMARY: "transactions.generate.tax.summary",
+  MANUALLY_SCHEDULE_TRANSACTION_SYNC: "manually.schedule.transaction.sync",
+  TRANSACTION_SYNC_ALL_TEAMS: "transaction.sync.all.teams",
 };

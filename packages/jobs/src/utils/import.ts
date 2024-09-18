@@ -1,4 +1,6 @@
 import type { Transaction } from "@midday/import/src/types";
+import { Database } from "@midday/supabase/types";
+import { Supabase } from "@trigger.dev/supabase";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { processBatch } from "./process";
@@ -24,17 +26,22 @@ export const processTransactions = async ({
   io,
   supabase,
   teamId,
+}: {
+  transactions: Transaction[];
+  io: { logger: { error: (message: string, data: any) => Promise<void> } };
+  supabase: any;
+  teamId: string;
 }) => {
   const processedTransactions = transactions.map((transaction) =>
-    createTransactionSchema.safeParse(transaction),
+    createTransactionSchema.safeParse(transaction)
   );
 
   const validTransactions = processedTransactions.filter(
-    (transaction) => transaction.success,
+    (transaction) => transaction.success
   );
 
   const invalidTransactions = processedTransactions.filter(
-    (transaction) => !transaction.success,
+    (transaction) => !transaction.success
   );
 
   if (invalidTransactions.length > 0) {
@@ -50,11 +57,11 @@ export const processTransactions = async ({
       validTransactions.map(({ data }) => data),
       BATCH_LIMIT,
       async (batch) => {
-        await supabase.from("transactions").upsert(batch, {
+        return await supabase.from("transactions").upsert(batch, {
           onConflict: "internal_id",
           ignoreDuplicates: true,
         });
-      },
+      }
     );
 
     revalidateTag(`bank_connections_${teamId}`);
@@ -71,13 +78,13 @@ export const mapTransactions = (
   mappings: Record<string, string>,
   currency: string,
   teamId: string,
-  bankAccountId: string,
+  bankAccountId: string
 ): Transaction[] => {
   return data.map((row) => ({
     ...(Object.fromEntries(
       Object.entries(mappings)
         .filter(([_, value]) => value !== "")
-        .map(([key, value]) => [key, row[value]]),
+        .map(([key, value]) => [key, row[value]])
     ) as Transaction),
     currency,
     teamId,
