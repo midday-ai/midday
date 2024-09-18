@@ -753,6 +753,32 @@ c-35 156 -46 212 -42 217 4 4 43 -79 90 -194 40 -95 63 -133 86 -140 33 -11
       <path d="M160-120v-720h640v400H240v80h200v80H240v80h200v80H160Zm456 0L504-232l56-56 56 56 142-142 56 56-198 198ZM240-520h200v-80H240v80Zm280 0h200v-80H520v80ZM240-680h200v-80H240v80Zm280 0h200v-80H520v80Z" />
     </svg>
   ),
+  DotRaster: (props: any) => (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={8}
+      height={8}
+      fill="none"
+      {...props}
+    >
+      <mask
+        id="a"
+        width={8}
+        height={8}
+        x={0}
+        y={0}
+        maskUnits="userSpaceOnUse"
+        style={{
+          maskType: "alpha",
+        }}
+      >
+        <circle cx={4} cy={4} r={4} fill="#D9D9D9" />
+      </mask>
+      <g fill="currentColor" mask="url(#a)">
+        <path d="m4.58-1.398.717.698-6.28 6.447-.717-.698zM7.27-.072l.716.698L.45 8.363l-.716-.698zM9.962 1.255l.717.698-8.045 8.258-.717-.698z" />
+      </g>
+    </svg>
+  ),
   Fence: MdFence,
   Refresh: MdRefresh,
   Currency: MdAttachMoney,

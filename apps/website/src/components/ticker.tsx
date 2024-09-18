@@ -44,7 +44,7 @@ export async function Ticker() {
         {Intl.NumberFormat("en-US", {
           style: "currency",
           currency: currency,
-          maximumFractionDigits: 2,
+          maximumFractionDigits: 0,
         }).format(totalSum ?? 0)}
       </span>
       <span className="text-[#878787]">

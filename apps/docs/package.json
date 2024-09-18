@@ -5,6 +5,6 @@
     "generate:engine": "bunx @mintlify/scraping@latest openapi-file http://localhost:3002/openapi -o api-reference/engine/endpoint"
   },
   "devDependencies": {
-    "mintlify": "^4.0.219"
+    "mintlify": "^4.0.222"
   }
 }

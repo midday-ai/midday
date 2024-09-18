@@ -200,10 +200,14 @@ export function TransactionDetails({
     }
   };
 
-  const defaultValue = ["attachment", "recurring"];
+  const defaultValue = ["attachment"];
 
   if (data?.note) {
     defaultValue.push("note");
+  }
+
+  if (data?.recurring) {
+    defaultValue.push("recurring");
   }
 
   return (

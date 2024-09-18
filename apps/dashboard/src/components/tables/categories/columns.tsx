@@ -34,7 +34,7 @@ export const columns: ColumnDef<Category>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2 items-center">
         <div
-          className="size-3 transition-colors rounded-[2px]"
+          className="size-3"
           style={{ backgroundColor: row.original.color }}
         />
         <TooltipProvider delayDuration={0}>

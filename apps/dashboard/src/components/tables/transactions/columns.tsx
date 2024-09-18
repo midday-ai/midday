@@ -6,7 +6,6 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
-import { useI18n } from "@/locales/client";
 import { formatTransactionDate } from "@/utils/format";
 import {
   AlertDialog,
@@ -98,41 +97,43 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "description",
     header: "Description",
     cell: ({ row }) => {
-      const t = useI18n();
-
       return (
-        <TooltipProvider delayDuration={20}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className={cn(
-                  row.original?.category?.slug === "income" && "text-[#00C969]",
-                )}
-              >
-                <div className="flex space-x-2 items-center">
-                  <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
-                    {row.original.name}
-                  </span>
-
-                  {row.original.status === "pending" && (
-                    <div className="flex space-x-1 items-center border rounded-md text-xs py-1 px-2 h-[22px] text-[#878787]">
-                      <span>Pending</span>
-                    </div>
+        <div className="flex items-center space-x-2">
+          <TooltipProvider delayDuration={20}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className={cn(
+                    row.original?.category?.slug === "income" &&
+                    "text-[#00C969]",
                   )}
-                </div>
-              </span>
-            </TooltipTrigger>
-            {row.original?.description && (
-              <TooltipContent
-                className="px-3 py-1.5 text-xs max-w-[380px]"
-                side="left"
-                sideOffset={10}
-              >
-                {row.original.description}
-              </TooltipContent>
-            )}
-          </Tooltip>
-        </TooltipProvider>
+                >
+                  <div className="flex space-x-2 items-center">
+                    <span className="line-clamp-1 text-ellipsis max-w-[100px] md:max-w-none">
+                      {row.original.name}
+                    </span>
+
+                    {row.original.status === "pending" && (
+                      <div className="flex space-x-1 items-center border rounded-md text-[10px] py-1 px-2 h-[22px] text-[#878787]">
+                        <span>Pending</span>
+                      </div>
+                    )}
+                  </div>
+                </span>
+              </TooltipTrigger>
+
+              {row.original?.description && (
+                <TooltipContent
+                  className="px-3 py-1.5 text-xs max-w-[380px]"
+                  side="left"
+                  sideOffset={10}
+                >
+                  {row.original.description}
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        </div>
       );
     },
   },

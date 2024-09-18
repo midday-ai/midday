@@ -128,6 +128,7 @@ client.defineJob({
           revalidateTag(`transactions_${teamId}`);
           revalidateTag(`spending_${teamId}`);
           revalidateTag(`metrics_${teamId}`);
+          revalidateTag(`expenses_${teamId}`);
         }
 
         revalidateTag(`bank_accounts_${teamId}`);

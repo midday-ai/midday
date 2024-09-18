@@ -98,14 +98,6 @@ html.todesktop {
   -webkit-user-select: none;
 }
 
-html.todesktop header {
-  -webkit-app-region: drag;
-}
-
-html.todesktop header .no-drag {
-  -webkit-app-region: no-drag;
-}
-
 html.todesktop,
 html.todesktop div {
   cursor: default !important;
@@ -228,5 +220,5 @@ html.todesktop-panel body {
 }
 
 .remove-arrow {
-  appearance: textfield;
+    appearance: textfield;
 }

@@ -33,7 +33,7 @@ export function createReport({
         .describe("The end date of the report, in ISO-8601 format")
         .default(new Date(dateTo)),
       type: z
-        .enum(["profit", "revenue", "burn_rate"])
+        .enum(["profit", "revenue", "burn_rate", "expense"])
         .describe("The report type"),
       currency: z.string().describe("The currency for the report").optional(),
     }),

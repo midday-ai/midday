@@ -5,7 +5,6 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
 import { useI18n } from "@/locales/client";
 import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 import {
   Table,
   TableBody,
@@ -14,12 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from "@midday/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@midday/ui/tooltip";
 import { ShowAllButton } from "./show-all-button";
 
 type Props = {
@@ -78,32 +71,12 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
                 <TableRow key={transaction.id} className="h-[34px]">
                   <TableCell
                     className={cn(
-                      "font-normal flex items-center space-x-2",
+                      "font-normal",
                       transaction.category?.slug === "income" &&
                         "text-[#00C969]",
                     )}
                   >
                     <span className="line-clamp-1">{transaction.name}</span>
-                    {transaction.recurring && (
-                      <TooltipProvider delayDuration={20}>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Icons.Repeat className="text-[#878787]" />
-                          </TooltipTrigger>
-                          <TooltipContent
-                            className="px-3 py-1.5 text-xs"
-                            side="right"
-                            sideOffset={10}
-                          >
-                            <span>
-                              {t(
-                                `transaction_frequency.${transaction.frequency}`,
-                              )}
-                            </span>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    )}
                   </TableCell>
                   <TableCell
                     className={cn(
