@@ -4,7 +4,7 @@ import { TriggerClient } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
 
 export const client = new TriggerClient({
-  id: "midday-G6Yq",
+  id: "solomon-ai-batch-jobs-background-22Wk",
   apiKey: process.env.TRIGGER_API_KEY,
   apiUrl: process.env.TRIGGER_API_URL,
 });
@@ -20,7 +20,7 @@ const supabaseManagement = new SupabaseManagement({
 });
 
 export const db = supabaseManagement.db(
-  `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co`,
+  `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co`
 );
 
 export const resend = new Resend({

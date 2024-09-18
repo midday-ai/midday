@@ -17,6 +17,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.58",
     "@hookform/resolvers": "^3.9.0",
+    "@internal/env": "workspace:*",
     "@midday-ai/engine": "^0.1.0-alpha.22",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
@@ -27,9 +28,9 @@
     "@midday/supabase": "workspace:*",
     "@midday/ui": "workspace:*",
     "@midday/utils": "workspace:*",
-    "@internal/env": "workspace:*",
     "@novu/headless": "^2.0.0",
     "@sentry/nextjs": "^8",
+    "@solomon-ai/financial-engine-sdk": "^0.0.1-alpha.1",
     "@supabase/sentry-js-integration": "^0.3.0",
     "@tanstack/react-table": "^8.20.5",
     "@team-plain/typescript-sdk": "4.7.0",

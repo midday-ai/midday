@@ -71,7 +71,7 @@ clean-supabase: ## Stop Supabase and clean volumes if running, started, or in an
 		echo "Condition is TRUE"; \
 		echo "Detected Supabase running or in problematic state."; \
 		echo "Stopping Supabase and cleaning volumes..."; \
-		supabase stop --no-backup || true; \
+		supabase stop || true; \
 		echo "Stopping any remaining Supabase containers..."; \
 		docker volume rm $$(docker volume ls -q --filter label=com.supabase.cli.project=trnlccdjeihaaxmcaddm) || true; \
 		echo "Supabase stopped and volumes cleaned."; \
