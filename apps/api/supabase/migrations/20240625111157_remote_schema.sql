@@ -4,7 +4,6 @@ create or replace view "private"."current_user_teams" as  SELECT ( SELECT auth.u
   WHERE (t.user_id = ( SELECT auth.uid() AS uid));
 
 
-
 drop policy "Enable read access for all users" on "public"."users_on_team";
 
 set check_function_bodies = off;
