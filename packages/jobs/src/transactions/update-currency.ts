@@ -101,16 +101,19 @@ client.defineJob({
         },
       );
 
-      const formattedTransactions = transactions?.map((transaction) => ({
-        ...transaction,
-        base_amount: getTransactionAmount({
-          amount: transaction.amount,
-          currency: transaction.currency,
-          baseCurrency,
-          rate: exchangeRate?.rate,
+      const formattedTransactions = transactions?.map(
+        // Exclude fts_vector from the transaction object because it's a generated column
+        ({ fts_vector, ...transaction }) => ({
+          ...transaction,
+          base_amount: getTransactionAmount({
+            amount: transaction.amount,
+            currency: transaction.currency,
+            baseCurrency,
+            rate: exchangeRate?.rate,
+          }),
+          base_currency: baseCurrency,
         }),
-        base_currency: baseCurrency,
-      }));
+      );
 
       await processBatch(
         formattedTransactions ?? [],
