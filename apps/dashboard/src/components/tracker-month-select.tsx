@@ -1,3 +1,4 @@
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -13,60 +14,43 @@ import {
 import { useHotkeys } from "react-hotkeys-hook";
 
 type Props = {
-  date: string;
   className?: string;
-  onSelect: (date: string) => void;
-  disableKeyboard?: boolean;
-  dateFormat?: string;
 };
 
-export function TrackerMonthSelect({
-  date,
-  className,
-  onSelect,
-  disableKeyboard,
-  dateFormat = "MMM",
-}: Props) {
+export function TrackerMonthSelect({ className }: Props) {
+  const { date, setParams } = useTrackerParams();
   const currentDate = date ? new Date(date) : new Date();
 
   const selectPrevMonth = () => {
-    onSelect(
-      formatISO(startOfMonth(subMonths(currentDate, 1)), {
+    setParams({
+      date: formatISO(startOfMonth(addMonths(currentDate, -1)), {
         representation: "date",
       }),
-    );
+    });
   };
 
   const selectNextMonth = () => {
-    onSelect(
-      formatISO(startOfMonth(addMonths(currentDate, 1)), {
+    setParams({
+      date: formatISO(startOfMonth(addMonths(currentDate, 1)), {
         representation: "date",
       }),
-    );
+    });
   };
 
   const selectPrevDay = () => {
-    if (disableKeyboard) {
-      return null;
-    }
-
-    onSelect(
-      formatISO(subDays(currentDate, 1), {
+    setParams({
+      date: formatISO(subDays(currentDate, 1), {
         representation: "date",
       }),
-    );
+    });
   };
 
   const selectNextDay = () => {
-    if (disableKeyboard) {
-      return null;
-    }
-
-    onSelect(
-      formatISO(addDays(currentDate, 1), {
+    setParams({
+      date: formatISO(addDays(currentDate, 1), {
         representation: "date",
       }),
-    );
+    });
   };
 
   useHotkeys("arrowLeft", selectPrevDay);
@@ -82,9 +66,7 @@ export function TrackerMonthSelect({
       >
         <Icons.ChevronLeft className="w-6 h-6" />
       </Button>
-      <span className="w-full text-center">
-        {format(currentDate, dateFormat)}
-      </span>
+      <span className="w-full text-center">{format(currentDate, "MMM")}</span>
       <Button
         variant="ghost"
         size="icon"

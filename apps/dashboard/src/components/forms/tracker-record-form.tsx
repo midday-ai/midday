@@ -40,15 +40,13 @@ export function TrackerRecordForm({ userId, onCreate, projectId }: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="mb-12 mt-6">
-        <span>Add time</span>
-
         <div className="flex space-x-4 mb-4 mt-2">
           <FormField
             control={form.control}
             name="duration"
             render={({ field }) => (
               <FormItem className="w-full">
-                <FormLabel className="text-xs">Time</FormLabel>
+                <FormLabel className="text-xs">From</FormLabel>
                 <FormControl>
                   <TimeInput
                     onChange={(seconds) => {
@@ -61,6 +59,23 @@ export function TrackerRecordForm({ userId, onCreate, projectId }: Props) {
           />
 
           <FormField
+            control={form.control}
+            name="duration"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="text-xs">To</FormLabel>
+                <FormControl>
+                  <TimeInput
+                    onChange={(seconds) => {
+                      field.onChange(+seconds);
+                    }}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          {/* <FormField
             control={form.control}
             name="assigned_id"
             render={({ field }) => (
@@ -78,7 +93,7 @@ export function TrackerRecordForm({ userId, onCreate, projectId }: Props) {
                 </FormControl>
               </FormItem>
             )}
-          />
+          /> */}
         </div>
 
         <FormField

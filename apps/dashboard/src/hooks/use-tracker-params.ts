@@ -1,5 +1,10 @@
 import { formatISO } from "date-fns";
-import { parseAsString, useQueryStates } from "nuqs";
+import {
+  parseAsArrayOf,
+  parseAsBoolean,
+  parseAsString,
+  useQueryStates,
+} from "nuqs";
 
 export function useTrackerParams(initialDate?: string) {
   const [params, setParams] = useQueryStates(
@@ -9,8 +14,9 @@ export function useTrackerParams(initialDate?: string) {
       ),
       create: parseAsString,
       projectId: parseAsString,
-      update: parseAsString,
-      day: parseAsString,
+      update: parseAsBoolean,
+      selectedDate: parseAsString,
+      range: parseAsArrayOf(parseAsString),
     },
     { shallow: false },
   );

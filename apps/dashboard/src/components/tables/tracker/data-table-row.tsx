@@ -5,6 +5,7 @@ import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
 import { CopyInput } from "@/components/copy-input";
 import { TrackerStatus } from "@/components/tracker-status";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import {
   AlertDialog,
@@ -29,12 +30,23 @@ import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
+import type { TrackerProject } from "./data-table";
 
-export function DataTableCell({ children, className }) {
+type DataTableCellProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+export function DataTableCell({ children, className }: DataTableCellProps) {
   return <TableCell className={className}>{children}</TableCell>;
 }
 
-export function Row({ onClick, children }) {
+type RowProps = {
+  onClick: () => void;
+  children: React.ReactNode;
+};
+
+export function Row({ onClick, children }: RowProps) {
   return (
     <TableRow className="h-[45px]" onClick={onClick}>
       {children}
@@ -42,8 +54,13 @@ export function Row({ onClick, children }) {
   );
 }
 
-export function DataTableRow({ row, setParams }) {
+type DataTableRowProps = {
+  row: TrackerProject;
+};
+
+export function DataTableRow({ row }: DataTableRowProps) {
   const { toast, dismiss } = useToast();
+  const { setParams } = useTrackerParams();
 
   const createReport = useAction(createProjectReport, {
     onError: () => {
@@ -61,11 +78,11 @@ export function DataTableRow({ row, setParams }) {
         footer: (
           <div className="mt-4 space-x-2 flex w-full">
             <CopyInput
-              value={data.short_link}
+              value={data?.short_link ?? ""}
               className="border-[#2C2C2C] w-full"
             />
 
-            <Link href={data.short_link} onClick={() => dismiss(id)}>
+            <Link href={data?.short_link ?? ""} onClick={() => dismiss(id)}>
               <Button>View</Button>
             </Link>
           </div>

@@ -9,15 +9,17 @@ import { TrackerSchedule } from "../tracker-schedule";
 
 export function TrackerScheduleSheet() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { setParams, projectId, day } = useTrackerParams();
+  const { setParams, projectId, range, selectedDate } = useTrackerParams();
 
-  const isOpen = Boolean(projectId || day);
+  const isOpen = Boolean(projectId || range?.length === 2 || selectedDate);
 
   if (isDesktop) {
     return (
       <Sheet
         open={isOpen}
-        onOpenChange={() => setParams({ projectId: null, day: null })}
+        onOpenChange={() =>
+          setParams({ projectId: null, range: null, selectedDate: null })
+        }
       >
         <SheetContent>
           <TrackerSchedule />
@@ -31,7 +33,7 @@ export function TrackerScheduleSheet() {
       open={isOpen}
       onOpenChange={(open: boolean) => {
         if (!open) {
-          setParams({ projectId: null, day: null });
+          setParams({ projectId: null, range: null, selectedDate: null });
         }
       }}
     >

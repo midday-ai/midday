@@ -1,19 +1,12 @@
 "use client";
 
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Button } from "@midday/ui/button";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
-import { parseAsString, useQueryStates } from "nuqs";
 
 export function EmptyState() {
-  const [params, setParams] = useQueryStates({
-    create: parseAsString,
-    projectId: parseAsString,
-    update: parseAsString,
-    day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" }),
-    ),
-  });
+  const { setParams } = useTrackerParams();
 
   return (
     <div className="flex items-center justify-center ">
@@ -26,7 +19,15 @@ export function EmptyState() {
           </p>
         </div>
 
-        <Button variant="outline" onClick={() => setParams({ create: "true" })}>
+        <Button
+          variant="outline"
+          onClick={() =>
+            setParams({
+              create: "true",
+              selectedDate: formatISO(new Date(), { representation: "date" }),
+            })
+          }
+        >
           Create project
         </Button>
       </div>
@@ -36,15 +37,6 @@ export function EmptyState() {
 
 export function NoResults() {
   const router = useRouter();
-
-  const [params, setParams] = useQueryStates({
-    create: parseAsString,
-    projectId: parseAsString,
-    update: parseAsString,
-    day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" }),
-    ),
-  });
 
   return (
     <div className="flex items-center justify-center ">

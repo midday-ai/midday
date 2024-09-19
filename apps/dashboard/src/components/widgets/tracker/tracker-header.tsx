@@ -1,31 +1,26 @@
 "use client";
 
 import { TrackerMonthSelect } from "@/components/tracker-month-select";
-import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { secondsToHoursAndMinutes } from "@/utils/format";
+import { Icons } from "@midday/ui/icons";
+import MotionNumber from "motion-number";
 
 type Props = {
-  date?: string;
   totalDuration?: number;
 };
 
-export function TrackerHeader({ date: initialDate, totalDuration }: Props) {
-  const { date, setParams } = useTrackerParams(initialDate);
-
+export function TrackerHeader({ totalDuration }: Props) {
   return (
     <div className="flex justify-between">
       <div>
         <h2 className="text-lg">Tracker</h2>
         <span className="text-[#878787]">
-          {secondsToHoursAndMinutes(totalDuration ?? 0)}
+          <MotionNumber value={totalDuration ? totalDuration / 3600 : 0} />h
         </span>
+
+        <Icons.MoreHoriz />
       </div>
 
-      <TrackerMonthSelect
-        date={date}
-        onSelect={(date: string) => setParams({ date })}
-        disableKeyboard
-      />
+      <TrackerMonthSelect />
     </div>
   );
 }
