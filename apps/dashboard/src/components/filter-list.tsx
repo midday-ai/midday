@@ -1,7 +1,7 @@
 import { formatAccountName } from "@/utils/format";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
+import { Skeleton } from "@absplatform/ui/skeleton";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { formatDateRange } from "little-date";

@@ -1,5 +1,5 @@
 import { PendingInvitesTable } from "@/components/tables/pending-invites";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@absplatform/ui/tabs";
 import { Suspense } from "react";
 import { MembersTable } from "./tables/members";
 import { PendingInvitesSkeleton } from "./tables/pending-invites/table";

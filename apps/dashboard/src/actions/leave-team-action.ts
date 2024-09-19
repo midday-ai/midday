@@ -1,8 +1,8 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { getTeamMembers } from "@midday/supabase/cached-queries";
-import { leaveTeam } from "@midday/supabase/mutations";
+import { LogEvents } from "@absplatform/events/events";
+import { getTeamMembers } from "@absplatform/supabase/cached-queries";
+import { leaveTeam } from "@absplatform/supabase/mutations";
 import {
   revalidatePath as revalidatePathFunc,
   revalidateTag,

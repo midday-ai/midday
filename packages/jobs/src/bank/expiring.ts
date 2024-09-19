@@ -1,4 +1,4 @@
-import ConnectionExpireEmail from "@midday/email/emails/connection-expire";
+import ConnectionExpireEmail from "@absplatform/email/emails/connection-expire";
 import { render } from "@react-email/components";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { addDays } from "date-fns";

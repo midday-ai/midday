@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 
 type CategoryIconProps = {
   color?: string;

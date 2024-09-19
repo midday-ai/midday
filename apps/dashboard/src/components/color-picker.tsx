@@ -1,5 +1,9 @@
-import { cn } from "@midday/ui/cn";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { cn } from "@absplatform/ui/cn";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@absplatform/ui/popover";
 import { useClickAway } from "@uidotdev/usehooks";
 import { useState } from "react";
 import { HexColorPicker } from "react-colorful";

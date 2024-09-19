@@ -7,16 +7,16 @@ import { SelectAccount } from "@/components/select-account";
 import { SelectCategory } from "@/components/select-category";
 import { SelectCurrency } from "@/components/select-currency";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
+import { uniqueCurrencies } from "@absplatform/location/src/currencies";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { Button } from "@midday/ui/button";
-import { Calendar } from "@midday/ui/calendar";
-import { CurrencyInput } from "@midday/ui/currency-input";
+} from "@absplatform/ui/accordion";
+import { Button } from "@absplatform/ui/button";
+import { Calendar } from "@absplatform/ui/calendar";
+import { CurrencyInput } from "@absplatform/ui/currency-input";
 import {
   Form,
   FormControl,
@@ -24,13 +24,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
-import { Select } from "@midday/ui/select";
-import { SubmitButton } from "@midday/ui/submit-button";
-import { Textarea } from "@midday/ui/textarea";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/form";
+import { Input } from "@absplatform/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@absplatform/ui/popover";
+import { Select } from "@absplatform/ui/select";
+import { SubmitButton } from "@absplatform/ui/submit-button";
+import { Textarea } from "@absplatform/ui/textarea";
+import { useToast } from "@absplatform/ui/use-toast";
 import { readStreamableValue } from "ai/rsc";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";

@@ -1,7 +1,7 @@
 "use client";
 
-import { Separator } from "@midday/ui/separator";
-import { Skeleton } from "@midday/ui/skeleton";
+import { Separator } from "@absplatform/ui/separator";
+import { Skeleton } from "@absplatform/ui/skeleton";
 
 export function InboxDetailsSkeleton() {
   return (

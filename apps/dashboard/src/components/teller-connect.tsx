@@ -1,6 +1,6 @@
 import { useConnectParams } from "@/hooks/use-connect-params";
-import { track } from "@midday/events/client";
-import { LogEvents } from "@midday/events/events";
+import { track } from "@absplatform/events/client";
+import { LogEvents } from "@absplatform/events/events";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 import { BankConnectButton } from "./bank-connect-button";

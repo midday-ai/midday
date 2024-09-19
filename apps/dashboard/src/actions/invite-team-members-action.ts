@@ -1,9 +1,9 @@
 "use server";
 
 import { env } from "@/env.mjs";
-import InviteEmail from "@midday/email/emails/invite";
-import { getI18n } from "@midday/email/locales";
-import { LogEvents } from "@midday/events/events";
+import InviteEmail from "@absplatform/email/emails/invite";
+import { getI18n } from "@absplatform/email/locales";
+import { LogEvents } from "@absplatform/events/events";
 import { render } from "@react-email/render";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { headers } from "next/headers";

@@ -3,7 +3,7 @@
 import { sendSupportSchema } from "@/actions/schema";
 import { sendSupportAction } from "@/actions/send-support-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import {
   Form,
   FormControl,
@@ -11,17 +11,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
+} from "@absplatform/ui/form";
+import { Input } from "@absplatform/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Textarea } from "@midday/ui/textarea";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/select";
+import { Textarea } from "@absplatform/ui/textarea";
+import { useToast } from "@absplatform/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";

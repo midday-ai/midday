@@ -1,6 +1,6 @@
 "use server";
 
-import { client } from "@midday/kv";
+import { client } from "@absplatform/kv";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { z } from "zod";

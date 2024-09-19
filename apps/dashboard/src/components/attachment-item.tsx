@@ -1,12 +1,12 @@
 import { formatSize } from "@/utils/format";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { Skeleton } from "@midday/ui/skeleton";
-import { isSupportedFilePreview } from "@midday/utils";
+} from "@absplatform/ui/hover-card";
+import { Skeleton } from "@absplatform/ui/skeleton";
+import { isSupportedFilePreview } from "@absplatform/utils";
 import { X } from "lucide-react";
 import { FilePreview } from "./file-preview";
 

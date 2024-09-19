@@ -2,9 +2,9 @@
 
 import { updateCurrencyAction } from "@/actions/transactions/update-currency-action";
 import { SelectCurrency as SelectCurrencyBase } from "@/components/select-currency";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
-import { Button } from "@midday/ui/button";
-import { useToast } from "@midday/ui/use-toast";
+import { uniqueCurrencies } from "@absplatform/location/src/currencies";
+import { Button } from "@absplatform/ui/button";
+import { useToast } from "@absplatform/ui/use-toast";
 import { useEventDetails } from "@trigger.dev/react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";

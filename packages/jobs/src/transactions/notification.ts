@@ -1,11 +1,11 @@
-import TransactionsEmail from "@midday/email/emails/transactions";
-import { getI18n } from "@midday/email/locales";
-import { getInboxEmail } from "@midday/inbox";
+import TransactionsEmail from "@absplatform/email/emails/transactions";
+import { getI18n } from "@absplatform/email/locales";
+import { getInboxEmail } from "@absplatform/inbox";
 import {
   NotificationTypes,
   TriggerEvents,
   triggerBulk,
-} from "@midday/notification";
+} from "@absplatform/notification";
 import { render } from "@react-email/components";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { z } from "zod";

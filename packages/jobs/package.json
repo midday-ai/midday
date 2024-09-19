@@ -1,5 +1,5 @@
 {
-  "name": "@midday/jobs",
+  "name": "@absplatform/jobs",
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",
@@ -13,8 +13,8 @@
   "dependencies": {
     "@fast-csv/format": "5.0.0",
     "@midday-ai/engine": "^0.1.0-alpha.22",
-    "@midday/documents": "workspace:*",
-    "@midday/import": "workspace:*",
+    "@absplatform/documents": "workspace:*",
+    "@absplatform/import": "workspace:*",
     "@trigger.dev/react": "2.3.19",
     "@trigger.dev/resend": "2.3.19",
     "@trigger.dev/sdk": "2.3.19",

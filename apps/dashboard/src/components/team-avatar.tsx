@@ -2,15 +2,15 @@
 
 import { updateTeamAction } from "@/actions/update-team-action";
 import { useUpload } from "@/hooks/use-upload";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@absplatform/ui/avatar";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
-import { stripSpecialCharacters } from "@midday/utils";
+} from "@absplatform/ui/card";
+import { stripSpecialCharacters } from "@absplatform/utils";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRef } from "react";

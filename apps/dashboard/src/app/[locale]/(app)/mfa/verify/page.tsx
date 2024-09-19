@@ -1,7 +1,7 @@
 "use client";
 
 import { VerifyMfa } from "@/components/verify-mfa";
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@absplatform/ui/icons";
 import Link from "next/link";
 
 export default function Verify() {

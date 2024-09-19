@@ -7,11 +7,11 @@ import { updateTransactionAction } from "@/actions/update-transaction-action";
 import { TransactionSheet } from "@/components/sheets/transaction-sheet";
 import { useTransactionsStore } from "@/store/transactions";
 import { Cookies } from "@/utils/constants";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Spinner } from "@midday/ui/spinner";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
+import { Spinner } from "@absplatform/ui/spinner";
+import { Table, TableBody, TableCell, TableRow } from "@absplatform/ui/table";
+import { useToast } from "@absplatform/ui/use-toast";
 import {
   type ColumnDef,
   type VisibilityState,

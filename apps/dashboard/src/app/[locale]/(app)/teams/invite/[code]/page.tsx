@@ -1,8 +1,8 @@
 import { UserMenu } from "@/components/user-menu";
-import { joinTeamByInviteCode } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { joinTeamByInviteCode } from "@absplatform/supabase/mutations";
+import { createClient } from "@absplatform/supabase/server";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import type { Metadata } from "next";
 import { revalidateTag } from "next/cache";
 import Link from "next/link";

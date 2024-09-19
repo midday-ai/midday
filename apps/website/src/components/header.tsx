@@ -5,15 +5,15 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { cn } from "@midday/ui/cn";
+} from "@absplatform/ui/accordion";
+import { cn } from "@absplatform/ui/cn";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
-} from "@midday/ui/context-menu";
-import { Icons } from "@midday/ui/icons";
+} from "@absplatform/ui/context-menu";
+import { Icons } from "@absplatform/ui/icons";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";

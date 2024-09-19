@@ -1,8 +1,8 @@
 "use client";
 
 import { useAssistantStore } from "@/store/assistant";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 
 export function DesktopAssistantButton() {
   const { setOpen } = useAssistantStore();

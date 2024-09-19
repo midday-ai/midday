@@ -2,7 +2,7 @@
 
 import { chatExamples } from "@/components/chat/examples";
 import { useAssistantStore } from "@/store/assistant";
-import { shuffle } from "@midday/utils";
+import { shuffle } from "@absplatform/utils";
 import { useEffect, useState } from "react";
 
 export function InsightList() {

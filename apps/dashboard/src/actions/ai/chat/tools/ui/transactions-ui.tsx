@@ -4,7 +4,7 @@ import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
 import { useI18n } from "@/locales/client";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@midday/ui/table";
+} from "@absplatform/ui/table";
 import { ShowAllButton } from "./show-all-button";
 
 type Props = {

@@ -6,7 +6,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
+} from "@absplatform/ui/card";
 import { AvatarUpload } from "./avatar-upload";
 
 type Props = {

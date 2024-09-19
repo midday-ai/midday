@@ -2,7 +2,7 @@
 
 import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { TrackerSheet } from "@/components/sheets/tracker-sheet";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import { formatISO } from "date-fns";
 import { useRouter } from "next/navigation";
 import { parseAsString, useQueryStates } from "nuqs";
@@ -13,7 +13,7 @@ export function EmptyState({ currencyCode, user }) {
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 
@@ -57,7 +57,7 @@ export function NoResults({ currencyCode, user }) {
     projectId: parseAsString,
     update: parseAsString,
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
   });
 

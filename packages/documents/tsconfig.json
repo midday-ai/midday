@@ -1,5 +1,5 @@
 {
-    "extends": "@midday/tsconfig/nextjs.json",
-    "include": ["src"],
-    "exclude": ["node_modules"]
-  }
+  "extends": "@absplatform/tsconfig/nextjs.json",
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

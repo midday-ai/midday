@@ -1,10 +1,10 @@
-import { getI18n } from "@midday/email/locales";
+import { getI18n } from "@absplatform/email/locales";
 import {
   NotificationTypes,
   TriggerEvents,
   triggerBulk,
-} from "@midday/notification";
-import { updateInboxById } from "@midday/supabase/mutations";
+} from "@absplatform/notification";
+import { updateInboxById } from "@absplatform/supabase/mutations";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { subDays } from "date-fns";
 import { revalidateTag } from "next/cache";
@@ -69,7 +69,7 @@ client.defineJob({
           attachment_id: attachmentData.id,
           transaction_id: transaction?.id,
           teamId: payload.teamId,
-        }
+        },
       );
 
       if (!updatedInboxData) {
@@ -81,7 +81,7 @@ client.defineJob({
       const { data: usersData } = await io.supabase.client
         .from("users_on_team")
         .select(
-          "id, team_id, user:users(id, full_name, avatar_url, email, locale, team_id)"
+          "id, team_id, user:users(id, full_name, avatar_url, email, locale, team_id)",
         )
         .eq("team_id", inboxData.team_id);
 

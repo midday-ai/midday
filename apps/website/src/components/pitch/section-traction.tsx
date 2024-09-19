@@ -2,7 +2,7 @@
 
 import { fetchGithubStars } from "@/lib/fetch-github-stars";
 import { fetchStats } from "@/lib/fetch-stats";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";

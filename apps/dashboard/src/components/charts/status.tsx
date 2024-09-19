@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
+import { cn } from "@absplatform/ui/cn";
+import { Icons } from "@absplatform/ui/icons";
 
 type Props = {
   value: string;
@@ -13,7 +13,7 @@ export function Status({ value, variant }: Props) {
     <div
       className={cn(
         "flex space-x-1 text-[#FF3638] items-center",
-        variant === "positive" && "text-[#00C969]"
+        variant === "positive" && "text-[#00C969]",
       )}
     >
       {variant === "positive" ? (

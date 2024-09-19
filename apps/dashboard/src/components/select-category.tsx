@@ -1,12 +1,12 @@
 import { createCategoriesAction } from "@/actions/create-categories-action";
 import { getColorFromName } from "@/utils/categories";
-import { createClient } from "@midday/supabase/client";
+import { createClient } from "@absplatform/supabase/client";
 import {
   getCategoriesQuery,
   getCurrentUserTeamQuery,
-} from "@midday/supabase/queries";
-import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
-import { Spinner } from "@midday/ui/spinner";
+} from "@absplatform/supabase/queries";
+import { ComboboxDropdown } from "@absplatform/ui/combobox-dropdown";
+import { Spinner } from "@absplatform/ui/spinner";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { CategoryColor } from "./category";

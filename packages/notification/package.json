@@ -1,5 +1,5 @@
 {
-  "name": "@midday/notification",
+  "name": "@absplatform/notification",
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",

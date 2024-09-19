@@ -1,8 +1,8 @@
 "use client";
 
-import { createClient } from "@midday/supabase/client";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { createClient } from "@absplatform/supabase/client";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";

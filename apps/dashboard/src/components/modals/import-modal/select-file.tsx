@@ -1,10 +1,10 @@
 import { getTransactionsFromLayout } from "@/actions/transactions/get-transactions-from-layout";
 import { useUpload } from "@/hooks/use-upload";
-import { createClient } from "@midday/supabase/client";
-import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
-import { cn } from "@midday/ui/cn";
-import { Spinner } from "@midday/ui/spinner";
-import { stripSpecialCharacters } from "@midday/utils";
+import { createClient } from "@absplatform/supabase/client";
+import { getCurrentUserTeamQuery } from "@absplatform/supabase/queries";
+import { cn } from "@absplatform/ui/cn";
+import { Spinner } from "@absplatform/ui/spinner";
+import { stripSpecialCharacters } from "@absplatform/utils";
 import { useAction } from "next-safe-action/hooks";
 import Papa from "papaparse";
 import { useEffect, useState } from "react";

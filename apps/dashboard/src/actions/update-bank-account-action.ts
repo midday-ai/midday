@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { updateBankAccount } from "@midday/supabase/mutations";
+import { LogEvents } from "@absplatform/events/events";
+import { updateBankAccount } from "@absplatform/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { updateBankAccountSchema } from "./schema";

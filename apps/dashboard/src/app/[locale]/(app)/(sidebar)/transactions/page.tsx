@@ -12,7 +12,7 @@ import {
   getTeamBankAccounts,
   getTeamMembers,
   getUser,
-} from "@midday/supabase/cached-queries";
+} from "@absplatform/supabase/cached-queries";
 import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";

@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { Events, client } from "@midday/jobs";
+import { LogEvents } from "@absplatform/events/events";
+import { Events, client } from "@absplatform/jobs";
 import { authActionClient } from "./safe-action";
 import { exportTransactionsSchema } from "./schema";
 

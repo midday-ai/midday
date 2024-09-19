@@ -2,8 +2,8 @@
 
 import { updateSubscriberPreferenceAction } from "@/actions/update-subscriber-preference-action";
 import { useI18n } from "@/locales/client";
-import { Label } from "@midday/ui/label";
-import { Switch } from "@midday/ui/switch";
+import { Label } from "@absplatform/ui/label";
+import { Switch } from "@absplatform/ui/switch";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 type Props = {

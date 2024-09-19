@@ -4,7 +4,7 @@
 
 import React, { useEffect, useState } from "react";
 
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import { AnimatePresence, motion, useMotionValue } from "framer-motion";
 
 export const FollowerPointerCard = ({

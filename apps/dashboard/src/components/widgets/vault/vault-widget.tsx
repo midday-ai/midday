@@ -1,6 +1,6 @@
-import { getUser } from "@midday/supabase/cached-queries";
-import { getVaultActivityQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getUser } from "@absplatform/supabase/cached-queries";
+import { getVaultActivityQuery } from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
 import { Vault } from "./vault";
 
 export function VaultWidgetSkeleton() {

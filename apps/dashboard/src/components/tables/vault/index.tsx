@@ -1,7 +1,7 @@
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { VaultSettingsModal } from "@/components/modals/vault-settings-modal";
 import { VaultSearchFilter } from "@/components/vault-search-filter";
-import { getTeamMembers, getUser } from "@midday/supabase/cached-queries";
+import { getTeamMembers, getUser } from "@absplatform/supabase/cached-queries";
 import { Suspense } from "react";
 import { Loading } from "./data-table.loading";
 import { DataTableServer } from "./data-table.server";

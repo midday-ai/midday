@@ -1,4 +1,4 @@
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Link from "next/link";
 import { Suspense } from "react";

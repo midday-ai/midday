@@ -2,7 +2,7 @@ import { ChangeTheme } from "@/components/change-theme";
 import { DeleteAccount } from "@/components/delete-account";
 import { DisplayName } from "@/components/display-name";
 import { UserAvatar } from "@/components/user-avatar";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getUser } from "@absplatform/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

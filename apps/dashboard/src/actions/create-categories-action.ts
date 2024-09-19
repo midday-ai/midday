@@ -1,6 +1,6 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
+import { LogEvents } from "@absplatform/events/events";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { createCategoriesSchema } from "./schema";

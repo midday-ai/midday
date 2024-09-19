@@ -1,5 +1,5 @@
-import { getInboxEmail } from "@midday/inbox";
-import { Icons } from "@midday/ui/icons";
+import { getInboxEmail } from "@absplatform/inbox";
+import { Icons } from "@absplatform/ui/icons";
 import { CopyInput } from "./copy-input";
 
 type Props = {

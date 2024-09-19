@@ -1,6 +1,6 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { openai } from "@ai-sdk/openai";
-import { getMetrics } from "@midday/supabase/cached-queries";
+import { getMetrics } from "@absplatform/supabase/cached-queries";
 import { generateText } from "ai";
 import { startOfMonth } from "date-fns";
 import { nanoid } from "nanoid";

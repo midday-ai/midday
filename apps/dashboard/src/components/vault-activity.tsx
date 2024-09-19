@@ -1,7 +1,7 @@
-import { getUser } from "@midday/supabase/cached-queries";
-import { getVaultActivityQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { Icons } from "@midday/ui/icons";
+import { getUser } from "@absplatform/supabase/cached-queries";
+import { getVaultActivityQuery } from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
+import { Icons } from "@absplatform/ui/icons";
 import Link from "next/link";
 import { VaultPreview } from "./vault-preview";
 

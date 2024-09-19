@@ -1,15 +1,15 @@
 "use client";
 
 import { ShareReport } from "@/components/share-report";
-import { Button } from "@midday/ui/button";
-import { Dialog } from "@midday/ui/dialog";
+import { Button } from "@absplatform/ui/button";
+import { Dialog } from "@absplatform/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
+} from "@absplatform/ui/dropdown-menu";
+import { Icons } from "@absplatform/ui/icons";
 import { useState } from "react";
 
 type Props = {

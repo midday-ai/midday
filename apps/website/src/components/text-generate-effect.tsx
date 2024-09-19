@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import { motion, stagger, useAnimate } from "framer-motion";
 
 export const TextGenerateEffect = ({
@@ -41,7 +41,7 @@ export const TextGenerateEffect = ({
           {
             duration: 1,
             delay: stagger(0.13),
-          }
+          },
         );
       }}
       className={cn("text-center font-medium", className)}

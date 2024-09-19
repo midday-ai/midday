@@ -1,6 +1,6 @@
 "use server";
 
-import { getCountryCode } from "@midday/location";
+import { getCountryCode } from "@absplatform/location";
 
 export async function subscribeAction(formData: FormData, userGroup: string) {
   const email = formData.get("email") as string;

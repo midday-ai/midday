@@ -1,5 +1,5 @@
 import { writeToString } from "@fast-csv/format";
-import { download } from "@midday/supabase/storage";
+import { download } from "@absplatform/supabase/storage";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { BlobReader, BlobWriter, TextReader, ZipWriter } from "@zip.js/zip.js";
 import { revalidateTag } from "next/cache";

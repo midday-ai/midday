@@ -1,6 +1,6 @@
 "use server";
 
-import { updateUser } from "@midday/supabase/mutations";
+import { updateUser } from "@absplatform/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { updateUserSchema } from "./schema";

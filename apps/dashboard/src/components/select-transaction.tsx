@@ -1,6 +1,6 @@
-import { createClient } from "@midday/supabase/client";
-import { getTransactionsQuery } from "@midday/supabase/queries";
-import { Combobox } from "@midday/ui/combobox";
+import { createClient } from "@absplatform/supabase/client";
+import { getTransactionsQuery } from "@absplatform/supabase/queries";
+import { Combobox } from "@absplatform/ui/combobox";
 import { format } from "date-fns";
 import { useState } from "react";
 import { FormatAmount } from "./format-amount";

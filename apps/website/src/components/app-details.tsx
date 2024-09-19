@@ -1,5 +1,5 @@
 import { Vote } from "@/components/vote";
-import { Skeleton } from "@midday/ui/skeleton";
+import { Skeleton } from "@absplatform/ui/skeleton";
 import { Suspense } from "react";
 
 export function AppDetails({ id, name, description, logo, active }) {

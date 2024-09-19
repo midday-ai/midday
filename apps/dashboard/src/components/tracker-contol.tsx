@@ -1,8 +1,8 @@
 "use client";
 
 import { useTrackerStore } from "@/store/tracker";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 

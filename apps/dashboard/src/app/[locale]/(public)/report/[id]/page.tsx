@@ -10,9 +10,9 @@ import {
   getExpensesQuery,
   getMetricsQuery,
   getRunwayQuery,
-} from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { Button } from "@midday/ui/button";
+} from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
+import { Button } from "@absplatform/ui/button";
 import { format } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";

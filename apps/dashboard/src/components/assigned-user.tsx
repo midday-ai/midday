@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarImage } from "@absplatform/ui/avatar";
 
 type Props = {
   avatarUrl?: string | null;

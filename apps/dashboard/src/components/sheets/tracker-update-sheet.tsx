@@ -15,19 +15,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
+} from "@absplatform/ui/alert-dialog";
+import { Drawer, DrawerContent, DrawerHeader } from "@absplatform/ui/drawer";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { useMediaQuery } from "@midday/ui/hooks";
-import { Icons } from "@midday/ui/icons";
-import { ScrollArea } from "@midday/ui/scroll-area";
-import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/dropdown-menu";
+import { useMediaQuery } from "@absplatform/ui/hooks";
+import { Icons } from "@absplatform/ui/icons";
+import { ScrollArea } from "@absplatform/ui/scroll-area";
+import { Sheet, SheetContent, SheetHeader } from "@absplatform/ui/sheet";
+import { useToast } from "@absplatform/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import React from "react";
 import { useForm } from "react-hook-form";

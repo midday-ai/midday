@@ -4,8 +4,8 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { Progress } from "@midday/ui/progress";
+} from "@absplatform/ui/hover-card";
+import { Progress } from "@absplatform/ui/progress";
 import Link from "next/link";
 import { Category } from "../category";
 import { SpendingCategoryItem } from "./spending-category-item";

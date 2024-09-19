@@ -1,6 +1,6 @@
 import { CopyInput } from "@/components/copy-input";
 import { Keyboard } from "@/components/keyboard";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import type { Metadata } from "next";
 import Image from "next/image";
 import appIcon from "public/app-icon.png";

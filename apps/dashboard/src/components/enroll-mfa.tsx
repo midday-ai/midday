@@ -1,11 +1,15 @@
-import { createClient } from "@midday/supabase/client";
-import { Button } from "@midday/ui/button";
+import { createClient } from "@absplatform/supabase/client";
+import { Button } from "@absplatform/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@midday/ui/collapsible";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
+} from "@absplatform/ui/collapsible";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@absplatform/ui/input-otp";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
 import { useRouter } from "next/navigation";

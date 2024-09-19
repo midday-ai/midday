@@ -1,4 +1,4 @@
-import { DocumentClient } from "@midday/documents";
+import { DocumentClient } from "@absplatform/documents";
 import { client, db, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 

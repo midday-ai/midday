@@ -1,4 +1,4 @@
-import { getCategories } from "@midday/supabase/cached-queries";
+import { getCategories } from "@absplatform/supabase/cached-queries";
 import { DataTable } from "./table";
 
 export async function CategoriesTable() {

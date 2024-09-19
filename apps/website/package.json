@@ -1,5 +1,5 @@
 {
-  "name": "@midday/website",
+  "name": "@absplatform/website",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@calcom/embed-react": "^1.5.0",
-    "@midday/supabase": "workspace:*",
-    "@midday/ui": "workspace:*",
+    "@absplatform/supabase": "workspace:*",
+    "@absplatform/ui": "workspace:*",
     "@openpanel/nextjs": "^1.0.3",
     "@openstatus/react": "^0.0.3",
     "@splinetool/react-spline": "^4.0.0",
@@ -38,7 +38,7 @@
     "sugar-high": "^0.7.0"
   },
   "devDependencies": {
-    "@midday/tsconfig": "workspace:*",
+    "@absplatform/tsconfig": "workspace:*",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.7",
     "@types/react-dom": "^18.3.0"

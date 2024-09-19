@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
+} from "@absplatform/ui/select";
 import { useQueryState } from "nuqs";
 
 export function TrackerChangeStatus() {

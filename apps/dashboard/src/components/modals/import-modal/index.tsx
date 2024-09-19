@@ -3,20 +3,20 @@
 import { importTransactionsAction } from "@/actions/transactions/import-transactions";
 import { useUpload } from "@/hooks/use-upload";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "@midday/supabase/client";
-import { getCurrentUserTeamQuery } from "@midday/supabase/queries";
-import { AnimatedSizeContainer } from "@midday/ui/animated-size-container";
-import { Button } from "@midday/ui/button";
+import { createClient } from "@absplatform/supabase/client";
+import { getCurrentUserTeamQuery } from "@absplatform/supabase/queries";
+import { AnimatedSizeContainer } from "@absplatform/ui/animated-size-container";
+import { Button } from "@absplatform/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
-import { useToast } from "@midday/ui/use-toast";
-import { stripSpecialCharacters } from "@midday/utils";
+} from "@absplatform/ui/dialog";
+import { Icons } from "@absplatform/ui/icons";
+import { useToast } from "@absplatform/ui/use-toast";
+import { stripSpecialCharacters } from "@absplatform/utils";
 import { useEventDetails } from "@trigger.dev/react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";

@@ -4,9 +4,9 @@ import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
 import { formatAmount } from "@/utils/format";
-import { formatAmountValue, formatDate } from "@midday/import";
-import { Icons } from "@midday/ui/icons";
-import { Label } from "@midday/ui/label";
+import { formatAmountValue, formatDate } from "@absplatform/import";
+import { Icons } from "@absplatform/ui/icons";
+import { Label } from "@absplatform/ui/label";
 import {
   Select,
   SelectContent,
@@ -15,15 +15,15 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Spinner } from "@midday/ui/spinner";
-import { Switch } from "@midday/ui/switch";
+} from "@absplatform/ui/select";
+import { Spinner } from "@absplatform/ui/spinner";
+import { Switch } from "@absplatform/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@absplatform/ui/tooltip";
 import { readStreamableValue } from "ai/rsc";
 import { capitalCase } from "change-case";
 import { useEffect, useState } from "react";

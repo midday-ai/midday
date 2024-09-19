@@ -1,15 +1,15 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
 import {
   Dialog,
   DialogContentFrameless,
   DialogTrigger,
-} from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
-import { Skeleton } from "@midday/ui/skeleton";
-import { FileType } from "@midday/utils";
+} from "@absplatform/ui/dialog";
+import { Icons } from "@absplatform/ui/icons";
+import { Skeleton } from "@absplatform/ui/skeleton";
+import { FileType } from "@absplatform/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { useState } from "react";

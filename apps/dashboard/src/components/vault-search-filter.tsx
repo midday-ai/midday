@@ -2,8 +2,8 @@
 
 import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filters";
 import { useI18n } from "@/locales/client";
-import { Calendar } from "@midday/ui/calendar";
-import { cn } from "@midday/ui/cn";
+import { Calendar } from "@absplatform/ui/calendar";
+import { cn } from "@absplatform/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -14,9 +14,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
+} from "@absplatform/ui/dropdown-menu";
+import { Icons } from "@absplatform/ui/icons";
+import { Input } from "@absplatform/ui/input";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";

@@ -2,8 +2,8 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { createProjectSchema } from "@/actions/schema";
-import { LogEvents } from "@midday/events/events";
-import { createProject } from "@midday/supabase/mutations";
+import { LogEvents } from "@absplatform/events/events";
+import { createProject } from "@absplatform/supabase/mutations";
 import { revalidateTag } from "next/cache";
 
 export const createProjectAction = authActionClient

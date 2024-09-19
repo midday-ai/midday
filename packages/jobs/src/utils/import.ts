@@ -1,4 +1,4 @@
-import type { Transaction } from "@midday/import/src/types";
+import type { Transaction } from "@absplatform/import/src/types";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { processBatch } from "./process";

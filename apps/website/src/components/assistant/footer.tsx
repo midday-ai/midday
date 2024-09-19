@@ -1,5 +1,9 @@
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { Icons } from "@absplatform/ui/icons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@absplatform/ui/popover";
 import { useRouter } from "next/navigation";
 
 type Props = {

@@ -1,6 +1,6 @@
-import { getSession } from "@midday/supabase/cached-queries";
-import { updateBankConnection } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
+import { getSession } from "@absplatform/supabase/cached-queries";
+import { updateBankConnection } from "@absplatform/supabase/mutations";
+import { createClient } from "@absplatform/supabase/server";
 import { revalidateTag } from "next/cache";
 import { type NextRequest, NextResponse } from "next/server";
 

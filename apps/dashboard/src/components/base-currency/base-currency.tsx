@@ -4,7 +4,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
+} from "@absplatform/ui/card";
 import { Suspense } from "react";
 import { Loading } from "./base-currency.loading";
 import { BaseCurrencyServer } from "./base-currency.server";

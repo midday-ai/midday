@@ -1,5 +1,5 @@
-import { cn } from "@midday/ui/cn";
-import { Skeleton } from "@midday/ui/skeleton";
+import { cn } from "@absplatform/ui/cn";
+import { Skeleton } from "@absplatform/ui/skeleton";
 
 type InboxSkeletonProps = {
   numberOfItems: number;

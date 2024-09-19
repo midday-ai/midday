@@ -1,9 +1,9 @@
 import { type UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { getInboxEmail } from "@midday/inbox";
-import { Button } from "@midday/ui/button";
-import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
+import { getInboxEmail } from "@absplatform/inbox";
+import { Button } from "@absplatform/ui/button";
+import { Collapsible, CollapsibleContent } from "@absplatform/ui/collapsible";
 import {
   Form,
   FormControl,
@@ -12,10 +12,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
-import { Label } from "@midday/ui/label";
-import { Switch } from "@midday/ui/switch";
+} from "@absplatform/ui/form";
+import { Input } from "@absplatform/ui/input";
+import { Label } from "@absplatform/ui/label";
+import { Switch } from "@absplatform/ui/switch";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
@@ -90,7 +90,7 @@ export function InboxSettings({
                           field.onChange(
                             evt.target.value.length > 0
                               ? evt.target.value
-                              : null
+                              : null,
                           )
                         }
                         className="w-full"

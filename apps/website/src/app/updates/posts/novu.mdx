@@ -30,7 +30,7 @@ you get 30K events/month for free.
 <br />
 ### Implementation and SDKs
 
-We started with created our own package `@midday/notifications` where
+We started with created our own package `@absplatform/notifications` where
 we installed `@novu/node` dependency, where we register our notification
 types for convenience:
 
@@ -56,7 +56,7 @@ export enum Events {
 And using our [New Transactions email](https://email.midday.ai/preview/transactions) as an example, which is sent from a background job using Trigger.dev when you have new transactions.
 
 ```typescript
-import { Notifications, Types, Events } from "@midday/notifications";
+import { Notifications, Types, Events } from "@absplatform/notifications";
 
 // Generate html from react-email
 const html = await renderAsync(
@@ -94,7 +94,7 @@ And to send In App Notifications it's just a matter of changing the `Events` and
 `Types`.
 
 ```typescript
-import { Notifications, Types, Events } from "@midday/notifications";
+import { Notifications, Types, Events } from "@absplatform/notifications";
 
 await Notifications.trigger({
   name: Events.TransactionNewInApp,

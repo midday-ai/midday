@@ -2,9 +2,9 @@
 
 import { updateUserAction } from "@/actions/update-user-action";
 import { useUpload } from "@/hooks/use-upload";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Icons } from "@midday/ui/icons";
-import { stripSpecialCharacters } from "@midday/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@absplatform/ui/avatar";
+import { Icons } from "@absplatform/ui/icons";
+import { stripSpecialCharacters } from "@absplatform/utils";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useRef, useState } from "react";

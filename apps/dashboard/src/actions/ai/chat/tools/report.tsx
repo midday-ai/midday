@@ -1,6 +1,6 @@
 import type { MutableAIState } from "@/actions/ai/types";
 import { dub } from "@/utils/dub";
-import { createClient } from "@midday/supabase/server";
+import { createClient } from "@absplatform/supabase/server";
 import { startOfMonth } from "date-fns";
 import { nanoid } from "nanoid";
 import { z } from "zod";

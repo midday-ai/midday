@@ -1,7 +1,7 @@
 "use client";
 
 import { signOutAction } from "@/actions/sign-out-action";
-import { DropdownMenuItem } from "@midday/ui/dropdown-menu";
+import { DropdownMenuItem } from "@absplatform/ui/dropdown-menu";
 import { useState } from "react";
 
 export function SignOut() {

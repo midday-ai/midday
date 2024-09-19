@@ -1,5 +1,5 @@
 {
-  "name": "@midday/documents",
+  "name": "@absplatform/documents",
   "version": "1.0.0",
   "private": true,
   "main": "src/index.ts",
@@ -13,7 +13,7 @@
   "dependencies": {
     "@ai-sdk/openai": "^0.0.60",
     "@azure-rest/ai-document-intelligence": "^1.0.0-beta.3",
-    "@midday/utils": "workspace:*",
+    "@absplatform/utils": "workspace:*",
     "ai": "3.3.40",
     "base64-arraybuffer": "^1.0.2",
     "change-case": "^5.4.4",

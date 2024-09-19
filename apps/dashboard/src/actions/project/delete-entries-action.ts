@@ -2,7 +2,7 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { deleteEntriesSchema } from "@/actions/schema";
-import { LogEvents } from "@midday/events/events";
+import { LogEvents } from "@absplatform/events/events";
 import { revalidateTag } from "next/cache";
 
 export const deleteEntriesAction = authActionClient

@@ -16,21 +16,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Dialog, DialogTrigger } from "@midday/ui/dialog";
+} from "@absplatform/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@absplatform/ui/avatar";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
+import { Dialog, DialogTrigger } from "@absplatform/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Input } from "@midday/ui/input";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/dropdown-menu";
+import { Input } from "@absplatform/ui/input";
+import { Skeleton } from "@absplatform/ui/skeleton";
+import { Table, TableBody, TableCell, TableRow } from "@absplatform/ui/table";
+import { useToast } from "@absplatform/ui/use-toast";
 import {
   type ColumnDef,
   flexRender,

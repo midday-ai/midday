@@ -1,8 +1,8 @@
 "use client";
 
 import { AddAccountButton } from "@/components/add-account-button";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import { useRouter } from "next/navigation";
 
 type Props = {

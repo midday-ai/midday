@@ -1,9 +1,9 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { formatAmountValue } from "@midday/import";
-import { Events, client } from "@midday/jobs";
-import { getTimezone } from "@midday/location";
+import { LogEvents } from "@absplatform/events/events";
+import { formatAmountValue } from "@absplatform/import";
+import { Events, client } from "@absplatform/jobs";
+import { getTimezone } from "@absplatform/location";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 

@@ -21,9 +21,9 @@ jobs:
       - name: Install dependencies
         run: bun install
       # - name: 🔦 Run linter
-      #   run: bun run lint --filter=@midday/email
+      #   run: bun run lint --filter=@absplatform/email
       # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck --filter=@midday/email
+      #   run: bun run typecheck --filter=@absplatform/email
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel env pull .env --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
       - name: 📤 Pull Vercel Environment Information

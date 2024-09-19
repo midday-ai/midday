@@ -1,10 +1,10 @@
 "use client";
 
 import { useCurrentLocale } from "@/locales/client";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
-import { Button } from "@midday/ui/button";
-import { Collapsible, CollapsibleContent } from "@midday/ui/collapsible";
-import { CurrencyInput } from "@midday/ui/currency-input";
+import { uniqueCurrencies } from "@absplatform/location/src/currencies";
+import { Button } from "@absplatform/ui/button";
+import { Collapsible, CollapsibleContent } from "@absplatform/ui/collapsible";
+import { CurrencyInput } from "@absplatform/ui/currency-input";
 import {
   Form,
   FormControl,
@@ -13,17 +13,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
+} from "@absplatform/ui/form";
+import { Input } from "@absplatform/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
-import { Switch } from "@midday/ui/switch";
-import { Textarea } from "@midday/ui/textarea";
+} from "@absplatform/ui/select";
+import { Switch } from "@absplatform/ui/switch";
+import { Textarea } from "@absplatform/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 

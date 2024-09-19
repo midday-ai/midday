@@ -1,6 +1,6 @@
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { Cookies } from "@/utils/constants";
-import { getTransactions } from "@midday/supabase/cached-queries";
+import { getTransactions } from "@absplatform/supabase/cached-queries";
 import { cookies } from "next/headers";
 import { columns } from "./columns";
 import { NoResults } from "./empty-states";

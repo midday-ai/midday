@@ -1,11 +1,11 @@
 import { createBankAccountAction } from "@/actions/create-bank-account-action";
 import { formatAccountName } from "@/utils/format";
-import { createClient } from "@midday/supabase/client";
+import { createClient } from "@absplatform/supabase/client";
 import {
   getCurrentUserTeamQuery,
   getTeamBankAccountsQuery,
-} from "@midday/supabase/queries";
-import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
+} from "@absplatform/supabase/queries";
+import { ComboboxDropdown } from "@absplatform/ui/combobox-dropdown";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useState } from "react";
 import { TransactionBankAccount } from "./transaction-bank-account";

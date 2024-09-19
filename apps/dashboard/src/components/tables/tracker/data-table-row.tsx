@@ -16,17 +16,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Button } from "@midday/ui/button";
+} from "@absplatform/ui/alert-dialog";
+import { Button } from "@absplatform/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/dropdown-menu";
+import { Icons } from "@absplatform/ui/icons";
+import { TableCell, TableRow } from "@absplatform/ui/table";
+import { useToast } from "@absplatform/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 

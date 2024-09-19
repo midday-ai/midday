@@ -1,8 +1,8 @@
 "use client";
 
 import { EnrollMFA } from "@/components/enroll-mfa";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import Link from "next/link";
 import { useState } from "react";
 

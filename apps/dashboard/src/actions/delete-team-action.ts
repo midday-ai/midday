@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { deleteTeam } from "@midday/supabase/mutations";
+import { LogEvents } from "@absplatform/events/events";
+import { deleteTeam } from "@absplatform/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { deleteTeamSchema } from "./schema";

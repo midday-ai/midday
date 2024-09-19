@@ -1,7 +1,7 @@
 import type { UpdateTransactionValues } from "@/actions/schema";
-import { Drawer, DrawerContent } from "@midday/ui/drawer";
-import { useMediaQuery } from "@midday/ui/hooks";
-import { Sheet, SheetContent } from "@midday/ui/sheet";
+import { Drawer, DrawerContent } from "@absplatform/ui/drawer";
+import { useMediaQuery } from "@absplatform/ui/hooks";
+import { Sheet, SheetContent } from "@absplatform/ui/sheet";
 import React from "react";
 import { TransactionDetails } from "../transaction-details";
 

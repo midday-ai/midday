@@ -1,11 +1,11 @@
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 
 export function Card({ children, className }) {
   return (
     <div
       className={cn(
         "flex border flex-col items-center justify-center border-border bg-[#121212] px-6 pt-8 pb-6 space-y-4",
-        className
+        className,
       )}
     >
       {children}

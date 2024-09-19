@@ -1,6 +1,6 @@
 "use server";
 
-import { updateSimilarTransactionsRecurring } from "@midday/supabase/mutations";
+import { updateSimilarTransactionsRecurring } from "@absplatform/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { updateSimilarTransactionsRecurringSchema } from "./schema";

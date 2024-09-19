@@ -1,5 +1,5 @@
-import { getTransactions } from "@midday/supabase/cached-queries";
-import { Skeleton } from "@midday/ui/skeleton";
+import { getTransactions } from "@absplatform/supabase/cached-queries";
+import { Skeleton } from "@absplatform/ui/skeleton";
 import { transactionExampleData } from "./data";
 import { TransactionsItemList } from "./transactions-item-list";
 

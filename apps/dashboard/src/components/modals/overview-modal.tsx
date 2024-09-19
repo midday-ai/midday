@@ -2,8 +2,8 @@
 
 import { hideConnectFlowAction } from "@/actions/hide-connect-flow-action";
 import { AddAccountButton } from "@/components/add-account-button";
-import { cn } from "@midday/ui/cn";
-import { Dialog, DialogContent } from "@midday/ui/dialog";
+import { cn } from "@absplatform/ui/cn";
+import { Dialog, DialogContent } from "@absplatform/ui/dialog";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import OverViewScreenOneLight from "public/assets/overview-1-light.png";

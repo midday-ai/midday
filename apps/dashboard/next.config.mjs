@@ -19,7 +19,11 @@ const config = {
       },
     ],
   },
-  transpilePackages: ["@midday/ui", "@midday/jobs", "@midday/tailwind"],
+  transpilePackages: [
+    "@absplatform/ui",
+    "@absplatform/jobs",
+    "@absplatform/tailwind",
+  ],
   eslint: {
     ignoreDuringBuilds: true,
   },

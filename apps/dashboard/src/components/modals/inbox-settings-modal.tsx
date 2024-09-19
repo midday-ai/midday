@@ -1,14 +1,14 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import {
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@midday/ui/dialog";
-import { Dialog } from "@midday/ui/dialog";
-import { Icons } from "@midday/ui/icons";
+} from "@absplatform/ui/dialog";
+import { Dialog } from "@absplatform/ui/dialog";
+import { Icons } from "@absplatform/ui/icons";
 import { useState } from "react";
 import { InboxSettings } from "../inbox-settings";
 

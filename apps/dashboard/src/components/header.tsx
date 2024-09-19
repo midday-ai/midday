@@ -5,7 +5,7 @@ import { NotificationCenter } from "@/components/notification-center";
 import { TrackerControl } from "@/components/tracker-contol";
 import { UserMenu } from "@/components/user-menu";
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
-import { Skeleton } from "@midday/ui/skeleton";
+import { Skeleton } from "@absplatform/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Suspense } from "react";
 import { DesktopTrafficLight } from "./desktop-traffic-light";

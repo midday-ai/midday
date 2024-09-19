@@ -1,9 +1,9 @@
 import * as crypto from "node:crypto";
 import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
-import WelcomeEmail from "@midday/email/emails/welcome";
-import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
+import WelcomeEmail from "@absplatform/email/emails/welcome";
+import { LogEvents } from "@absplatform/events/events";
+import { setupAnalytics } from "@absplatform/events/server";
 import { render } from "@react-email/render";
 import { LoopsClient } from "loops";
 import { nanoid } from "nanoid";

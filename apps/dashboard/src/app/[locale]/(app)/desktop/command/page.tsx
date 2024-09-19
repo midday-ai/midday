@@ -1,6 +1,6 @@
 import { AI } from "@/actions/ai/chat";
 import { Assistant } from "@/components/assistant";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getUser } from "@absplatform/supabase/cached-queries";
 import { nanoid } from "nanoid";
 
 export default async function Page() {

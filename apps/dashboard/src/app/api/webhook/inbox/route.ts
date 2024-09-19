@@ -1,12 +1,15 @@
 import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
-import { getAllowedAttachments, prepareDocument } from "@midday/documents";
-import { LogEvents } from "@midday/events/events";
-import { setupAnalytics } from "@midday/events/server";
-import { getInboxIdFromEmail, inboxWebhookPostSchema } from "@midday/inbox";
-import { client as BackgroundClient, Events } from "@midday/jobs";
-import { client as RedisClient } from "@midday/kv";
-import { createClient } from "@midday/supabase/server";
+import { getAllowedAttachments, prepareDocument } from "@absplatform/documents";
+import { LogEvents } from "@absplatform/events/events";
+import { setupAnalytics } from "@absplatform/events/server";
+import {
+  getInboxIdFromEmail,
+  inboxWebhookPostSchema,
+} from "@absplatform/inbox";
+import { client as BackgroundClient, Events } from "@absplatform/jobs";
+import { client as RedisClient } from "@absplatform/kv";
+import { createClient } from "@absplatform/supabase/server";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";

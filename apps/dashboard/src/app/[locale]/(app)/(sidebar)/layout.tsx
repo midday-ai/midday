@@ -1,10 +1,13 @@
 import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
-import { setupAnalytics } from "@midday/events/server";
-import { getCountryCode } from "@midday/location";
-import { currencies, uniqueCurrencies } from "@midday/location/src/currencies";
-import { getUser } from "@midday/supabase/cached-queries";
+import { setupAnalytics } from "@absplatform/events/server";
+import { getCountryCode } from "@absplatform/location";
+import {
+  currencies,
+  uniqueCurrencies,
+} from "@absplatform/location/src/currencies";
+import { getUser } from "@absplatform/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";

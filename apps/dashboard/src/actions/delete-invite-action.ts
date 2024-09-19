@@ -1,6 +1,6 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
+import { LogEvents } from "@absplatform/events/events";
 import { revalidatePath as revalidatePathFunc } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { deleteInviteSchema } from "./schema";

@@ -1,10 +1,14 @@
 "use client";
 
 import { changeChartPeriodAction } from "@/actions/change-chart-period-action";
-import { Button } from "@midday/ui/button";
-import { Calendar } from "@midday/ui/calendar";
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { Button } from "@absplatform/ui/button";
+import { Calendar } from "@absplatform/ui/calendar";
+import { Icons } from "@absplatform/ui/icons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@absplatform/ui/popover";
 import {
   Select,
   SelectContent,
@@ -12,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
+} from "@absplatform/ui/select";
 import { formatISO } from "date-fns";
 import { startOfMonth, startOfYear, subMonths, subWeeks } from "date-fns";
 import { formatDateRange } from "little-date";

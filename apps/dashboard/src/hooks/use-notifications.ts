@@ -1,5 +1,5 @@
-import { createClient } from "@midday/supabase/client";
-import { getUserQuery } from "@midday/supabase/queries";
+import { createClient } from "@absplatform/supabase/client";
+import { getUserQuery } from "@absplatform/supabase/queries";
 import { HeadlessService } from "@novu/headless";
 import { useCallback, useEffect, useRef, useState } from "react";
 

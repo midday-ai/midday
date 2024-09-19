@@ -1,7 +1,7 @@
 import { TrackerGraph } from "@/components/tracker-graph/tracker-graph";
-import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { Button } from "@midday/ui/button";
+import { getTrackerRecordsByRangeQuery } from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
+import { Button } from "@absplatform/ui/button";
 import { endOfMonth, formatISO, startOfMonth, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -43,7 +43,7 @@ export default async function ProjectReport({ params, searchParams }) {
   const { data: reportData, error } = await supabase
     .from("tracker_reports")
     .select(
-      "*, project:project_id(id, name), user:created_by(week_starts_on_monday)"
+      "*, project:project_id(id, name), user:created_by(week_starts_on_monday)",
     )
     .eq("id", params.id)
     .single();

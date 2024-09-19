@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
+} from "@absplatform/ui/alert-dialog";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -31,7 +31,7 @@ import {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuTrigger,
-} from "@midday/ui/context-menu";
+} from "@absplatform/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,17 +41,17 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
+} from "@absplatform/ui/dropdown-menu";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
-import { TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
-import { isSupportedFilePreview } from "@midday/utils";
+} from "@absplatform/ui/hover-card";
+import { Icons } from "@absplatform/ui/icons";
+import { Input } from "@absplatform/ui/input";
+import { TableCell, TableRow } from "@absplatform/ui/table";
+import { useToast } from "@absplatform/ui/use-toast";
+import { isSupportedFilePreview } from "@absplatform/utils";
 import { format } from "date-fns";
 import ms from "ms";
 import { useAction } from "next-safe-action/hooks";

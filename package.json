@@ -1,22 +1,28 @@
 {
-  "name": "midday",
+  "name": "absplatform",
   "private": true,
-  "workspaces": ["packages/*", "apps/*", "packages/email/*"],
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "packages/email/*"
+  ],
   "scripts": {
+    "prepare": "husky",
+    "commit": "cz",
     "build": "turbo build",
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "dev": "turbo dev --parallel",
     "test": "turbo test --parallel",
-    "start:dashboard": "turbo start --filter=@midday/dashboard",
-    "start:website": "turbo start --filter=@midday/website",
-    "dev:api": "turbo dev --filter=@midday/api",
-    "dev:dashboard": "turbo dev --filter=@midday/dashboard",
-    "build:dashboard": "turbo build --filter=@midday/dashboard",
-    "dev:engine": "turbo dev --filter=@midday/engine",
-    "dev:website": "turbo dev --filter=@midday/website ",
-    "dev:desktop": "turbo dev --filter=@midday/desktop",
-    "jobs:dashboard": "turbo jobs --filter=@midday/dashboard",
+    "start:dashboard": "turbo start --filter=@absplatform/dashboard",
+    "start:website": "turbo start --filter=@absplatform/website",
+    "dev:api": "turbo dev --filter=@absplatform/api",
+    "dev:dashboard": "turbo dev --filter=@absplatform/dashboard",
+    "build:dashboard": "turbo build --filter=@absplatform/dashboard",
+    "dev:engine": "turbo dev --filter=@absplatform/engine",
+    "dev:website": "turbo dev --filter=@absplatform/website ",
+    "dev:desktop": "turbo dev --filter=@absplatform/desktop",
+    "jobs:dashboard": "turbo jobs --filter=@absplatform/dashboard",
     "format": "biome format --write .",
     "lint": "turbo lint && manypkg check",
     "typecheck": "turbo typecheck"
@@ -30,5 +36,17 @@
   "packageManager": "bun@1.1.27",
   "resolutions": {
     "jackspeak": "2.1.1"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^9.1.6"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }

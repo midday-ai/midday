@@ -15,8 +15,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@midday/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
+} from "@absplatform/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@absplatform/ui/tabs";
 
 import type { Metadata } from "next";
 

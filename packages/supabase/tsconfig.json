@@ -1,5 +1,5 @@
 {
-  "extends": "@midday/tsconfig/base.json",
+  "extends": "@absplatform/tsconfig/base.json",
   "include": ["src", "."],
   "exclude": ["node_modules"]
 }

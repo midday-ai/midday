@@ -2,7 +2,7 @@
 
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import { format } from "date-fns";
 import {
   Bar,

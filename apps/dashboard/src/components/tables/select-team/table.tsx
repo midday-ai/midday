@@ -1,9 +1,9 @@
 "use client";
 
 import { changeTeamAction } from "@/actions/change-team-action";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { Avatar, AvatarFallback, AvatarImage } from "@absplatform/ui/avatar";
+import { Button } from "@absplatform/ui/button";
+import { Table, TableBody, TableCell, TableRow } from "@absplatform/ui/table";
 import { useAction } from "next-safe-action/hooks";
 
 export function SelectTeamTable({ data }) {

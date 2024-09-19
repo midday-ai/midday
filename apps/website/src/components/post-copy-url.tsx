@@ -1,6 +1,6 @@
 "use client";
 
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@absplatform/ui/icons";
 import { motion } from "framer-motion";
 import { useState } from "react";
 

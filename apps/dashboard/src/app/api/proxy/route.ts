@@ -1,4 +1,4 @@
-import { getSession } from "@midday/supabase/cached-queries";
+import { getSession } from "@absplatform/supabase/cached-queries";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {

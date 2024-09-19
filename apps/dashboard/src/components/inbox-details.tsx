@@ -1,16 +1,23 @@
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
+import { Avatar, AvatarFallback } from "@absplatform/ui/avatar";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
 import {
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@midday/ui/dropdown-menu";
-import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
-import { Icons } from "@midday/ui/icons";
-import { Separator } from "@midday/ui/separator";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+} from "@absplatform/ui/dropdown-menu";
+import { Icons } from "@absplatform/ui/icons";
+import { Separator } from "@absplatform/ui/separator";
+import { Skeleton } from "@absplatform/ui/skeleton";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@absplatform/ui/tooltip";
+import { useToast } from "@absplatform/ui/use-toast";
 import { format } from "date-fns";
 import { MoreVertical, Trash2 } from "lucide-react";
 import Image from "next/image";

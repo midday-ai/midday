@@ -1,5 +1,5 @@
-import { updateSession } from "@midday/supabase/middleware";
-import { createClient } from "@midday/supabase/server";
+import { updateSession } from "@absplatform/supabase/middleware";
+import { createClient } from "@absplatform/supabase/server";
 import { createI18nMiddleware } from "next-international/middleware";
 import { type NextRequest, NextResponse } from "next/server";
 

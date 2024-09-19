@@ -1,14 +1,14 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { reconnectGoCardLessLinkAction } from "@/actions/institutions/reconnect-gocardless-link";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/tooltip";
+import { useToast } from "@absplatform/ui/use-toast";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useScript } from "@uidotdev/usehooks";
 import { Loader2 } from "lucide-react";

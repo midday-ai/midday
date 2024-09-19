@@ -11,9 +11,9 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@midday/ui/alert-dialog";
-import { cn } from "@midday/ui/cn";
-import { Dialog } from "@midday/ui/dialog";
+} from "@absplatform/ui/alert-dialog";
+import { cn } from "@absplatform/ui/cn";
+import { Dialog } from "@absplatform/ui/dialog";
 import {
   Table,
   TableBody,
@@ -21,8 +21,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/table";
+import { useToast } from "@absplatform/ui/use-toast";
 import {
   flexRender,
   getCoreRowModel,
@@ -80,7 +80,7 @@ export function DataTable({ data }: Props) {
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );

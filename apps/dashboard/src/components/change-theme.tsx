@@ -5,7 +5,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@midday/ui/card";
+} from "@absplatform/ui/card";
 
 export function ChangeTheme() {
   return (

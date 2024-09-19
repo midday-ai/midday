@@ -1,6 +1,6 @@
-import { getTeamUser } from "@midday/supabase/cached-queries";
-import { getTeamInvitesQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getTeamUser } from "@absplatform/supabase/cached-queries";
+import { getTeamInvitesQuery } from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
 import { DataTable } from "./table";
 
 export async function PendingInvitesTable() {

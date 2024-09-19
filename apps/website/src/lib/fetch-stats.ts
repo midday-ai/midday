@@ -1,6 +1,6 @@
 "use server";
 
-import type { Database } from "@midday/supabase/types";
+import type { Database } from "@absplatform/supabase/types";
 import { createServerClient } from "@supabase/ssr";
 import { unstable_cache } from "next/cache";
 

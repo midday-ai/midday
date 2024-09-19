@@ -1,8 +1,8 @@
 "use client";
 
 import { trackingConsentAction } from "@/actions/tracking-consent-action";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 

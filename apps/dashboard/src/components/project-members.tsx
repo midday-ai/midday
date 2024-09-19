@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@absplatform/ui/avatar";
 
 interface Member {
   id: string;

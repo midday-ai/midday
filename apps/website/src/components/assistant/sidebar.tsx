@@ -1,4 +1,4 @@
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import { useClickAway } from "@uidotdev/usehooks";
 import { SidebarItems } from "./sidebar-items";
 import { Toolbar } from "./toolbar";
@@ -26,7 +26,7 @@ export function Sidebar({
         ref={ref}
         className={cn(
           "w-[220px] h-full md:h-[422px] bg-background dark:bg-[#131313] absolute -left-[220px] top-0 bottom-[1px] duration-200 ease-out transition-all border-border border-r-[1px] z-20 invisible",
-          isExpanded && "visible translate-x-full"
+          isExpanded && "visible translate-x-full",
         )}
       >
         <Toolbar onNewChat={onNewChat} />
@@ -37,7 +37,7 @@ export function Sidebar({
       <div
         className={cn(
           "duration-200 ease-out transition-all z-10 absolute left-[1px] right-[1px] top-[1px] bottom-[1px] invisible opacity-0 bg-background",
-          isExpanded && "visible opacity-80"
+          isExpanded && "visible opacity-80",
         )}
       />
     </div>

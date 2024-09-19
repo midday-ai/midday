@@ -3,9 +3,9 @@
 import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
 import { TrackerSheet } from "@/components/sheets/tracker-sheet";
 import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
-import { Button } from "@midday/ui/button";
-import { Spinner } from "@midday/ui/spinner";
-import { Table, TableBody } from "@midday/ui/table";
+import { Button } from "@absplatform/ui/button";
+import { Spinner } from "@absplatform/ui/spinner";
+import { Table, TableBody } from "@absplatform/ui/table";
 import { formatISO } from "date-fns";
 import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
@@ -49,7 +49,7 @@ export function DataTable({
 
   const [params, setParams] = useQueryStates({
     day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
+      formatISO(new Date(), { representation: "date" }),
     ),
     projectId: parseAsString,
     create: parseAsString,
@@ -57,7 +57,7 @@ export function DataTable({
   });
 
   const selectedProject = data.find(
-    (project) => project.id === params?.projectId
+    (project) => project.id === params?.projectId,
   );
 
   const loadMoreData = async () => {

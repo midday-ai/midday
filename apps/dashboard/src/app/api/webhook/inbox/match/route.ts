@@ -1,12 +1,12 @@
 import * as crypto from "node:crypto";
-import { getI18n } from "@midday/email/locales";
+import { getI18n } from "@absplatform/email/locales";
 import {
   NotificationTypes,
   TriggerEvents,
   triggerBulk,
-} from "@midday/notification";
-import { updateInboxById } from "@midday/supabase/mutations";
-import { createClient } from "@midday/supabase/server";
+} from "@absplatform/notification";
+import { updateInboxById } from "@absplatform/supabase/mutations";
+import { createClient } from "@absplatform/supabase/server";
 import { subDays } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { headers } from "next/headers";

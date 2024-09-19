@@ -1,5 +1,5 @@
 {
-  "extends": "@midday/tsconfig/nextjs.json",
+  "extends": "@absplatform/tsconfig/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {

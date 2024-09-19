@@ -1,4 +1,4 @@
-import type { Database } from "@midday/supabase/src/types";
+import type { Database } from "@absplatform/supabase/src/types";
 import { Resend } from "@trigger.dev/resend";
 import { TriggerClient } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";

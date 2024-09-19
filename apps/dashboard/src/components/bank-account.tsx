@@ -14,17 +14,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@midday/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import { cn } from "@midday/ui/cn";
+} from "@absplatform/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@absplatform/ui/avatar";
+import { cn } from "@absplatform/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Switch } from "@midday/ui/switch";
+} from "@absplatform/ui/dropdown-menu";
+import { Switch } from "@absplatform/ui/switch";
 import { MoreHorizontal } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";

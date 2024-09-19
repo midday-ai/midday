@@ -2,13 +2,13 @@
 
 import { useCurrentLocale, useI18n } from "@/locales/client";
 import { formatAmount } from "@/utils/format";
-import { Icons } from "@midday/ui/icons";
+import { Icons } from "@absplatform/ui/icons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@absplatform/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 
 type Props = {

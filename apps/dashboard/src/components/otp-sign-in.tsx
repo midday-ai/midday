@@ -2,12 +2,16 @@
 
 import { verifyOtpAction } from "@/actions/verify-otp-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createClient } from "@midday/supabase/client";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
-import { Input } from "@midday/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@midday/ui/input-otp";
+import { createClient } from "@absplatform/supabase/client";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
+import { Form, FormControl, FormField, FormItem } from "@absplatform/ui/form";
+import { Input } from "@absplatform/ui/input";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@absplatform/ui/input-otp";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";

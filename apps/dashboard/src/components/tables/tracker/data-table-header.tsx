@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { TableHead, TableHeader, TableRow } from "@midday/ui/table";
+import { Button } from "@absplatform/ui/button";
+import { TableHead, TableHeader, TableRow } from "@absplatform/ui/table";
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -30,7 +30,7 @@ export function DataTableHeader() {
 
       router.replace(`${pathname}?${params.toString()}`);
     },
-    [searchParams, router, pathname]
+    [searchParams, router, pathname],
   );
 
   return (

@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { createTeam, updateUser } from "@midday/supabase/mutations";
+import { LogEvents } from "@absplatform/events/events";
+import { createTeam, updateUser } from "@absplatform/supabase/mutations";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { authActionClient } from "./safe-action";

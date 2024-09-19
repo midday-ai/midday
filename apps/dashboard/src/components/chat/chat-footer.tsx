@@ -1,6 +1,10 @@
 import { useAssistantStore } from "@/store/assistant";
-import { Icons } from "@midday/ui/icons";
-import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
+import { Icons } from "@absplatform/ui/icons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@absplatform/ui/popover";
 import { app, platform } from "@todesktop/client-core";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { useRouter } from "next/navigation";

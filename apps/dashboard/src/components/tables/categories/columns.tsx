@@ -1,20 +1,20 @@
 "use client";
 
 import { EditCategoryModal } from "@/components/modals/edit-category-modal";
-import { Button } from "@midday/ui/button";
-import { Checkbox } from "@midday/ui/checkbox";
+import { Button } from "@absplatform/ui/button";
+import { Checkbox } from "@absplatform/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
+} from "@absplatform/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@midday/ui/tooltip";
+} from "@absplatform/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
 import * as React from "react";

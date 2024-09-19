@@ -1,7 +1,7 @@
 "use client";
 
 import { useAssistantStore } from "@/store/assistant";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 
 export function AssistantButton() {
   const { setOpen } = useAssistantStore();

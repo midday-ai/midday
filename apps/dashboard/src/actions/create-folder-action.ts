@@ -1,7 +1,7 @@
 "use server";
 
-import { LogEvents } from "@midday/events/events";
-import { createFolder } from "@midday/supabase/storage";
+import { LogEvents } from "@absplatform/events/events";
+import { createFolder } from "@absplatform/supabase/storage";
 import { revalidatePath } from "next/cache";
 import { authActionClient } from "./safe-action";
 import { createFolderSchema } from "./schema";

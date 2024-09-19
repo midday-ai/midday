@@ -4,7 +4,7 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@midday/ui/carousel";
+} from "@absplatform/ui/carousel";
 import * as React from "react";
 import { Spending } from "./charts/spending";
 import { Transactions } from "./charts/transactions";

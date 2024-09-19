@@ -1,8 +1,8 @@
 import { ChangeLanguage } from "@/components/change-language";
 import { ChangeTimezone } from "@/components/change-timezone";
 import { WeekSettings } from "@/components/week-settings";
-import { getTimezone, getTimezones } from "@midday/location";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getTimezone, getTimezones } from "@absplatform/location";
+import { getUser } from "@absplatform/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

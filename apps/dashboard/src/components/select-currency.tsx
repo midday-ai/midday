@@ -1,11 +1,11 @@
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@midday/ui/select";
+} from "@absplatform/ui/select";
 
 type Props = {
   value?: string;

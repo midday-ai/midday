@@ -1,10 +1,10 @@
 "use client";
 
 import { createProjectAction } from "@/actions/project/create-project-action";
-import { createClient } from "@midday/supabase/client";
-import { getTrackerProjectsQuery } from "@midday/supabase/queries";
-import { Combobox } from "@midday/ui/combobox";
-import { useToast } from "@midday/ui/use-toast";
+import { createClient } from "@absplatform/supabase/client";
+import { getTrackerProjectsQuery } from "@absplatform/supabase/queries";
+import { Combobox } from "@absplatform/ui/combobox";
+import { useToast } from "@absplatform/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 

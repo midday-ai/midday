@@ -1,5 +1,5 @@
-import { Button } from "@midday/ui/button";
-import { TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { Button } from "@absplatform/ui/button";
+import { TabsList, TabsTrigger } from "@absplatform/ui/tabs";
 import { parseAsString, useQueryStates } from "nuqs";
 import { startTransition } from "react";
 import { InboxOrdering } from "./inbox-ordering";

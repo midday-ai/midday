@@ -1,7 +1,7 @@
 "use server";
 
 import { Cookies } from "@/utils/constants";
-import { createClient } from "@midday/supabase/server";
+import { createClient } from "@absplatform/supabase/server";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";

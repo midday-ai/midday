@@ -3,8 +3,8 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@midday/ui/accordion";
-import { Button } from "@midday/ui/button";
+} from "@absplatform/ui/accordion";
+import { Button } from "@absplatform/ui/button";
 import Link from "next/link";
 import {
   MdDataArray,

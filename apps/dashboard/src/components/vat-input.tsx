@@ -1,4 +1,4 @@
-import { Input } from "@midday/ui/input";
+import { Input } from "@absplatform/ui/input";
 import { type ChangeEventHandler, useState } from "react";
 import { VatAssistant } from "./vat-assistant";
 

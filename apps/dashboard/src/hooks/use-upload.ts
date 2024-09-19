@@ -1,5 +1,5 @@
-import { createClient } from "@midday/supabase/client";
-import { upload } from "@midday/supabase/storage";
+import { createClient } from "@absplatform/supabase/client";
+import { upload } from "@absplatform/supabase/storage";
 import { useState } from "react";
 
 export function useUpload() {

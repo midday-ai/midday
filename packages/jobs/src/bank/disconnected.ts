@@ -1,4 +1,4 @@
-import ConnectionIssueEmail from "@midday/email/emails/connection-issue";
+import ConnectionIssueEmail from "@absplatform/email/emails/connection-issue";
 import { render } from "@react-email/components";
 import { cronTrigger } from "@trigger.dev/sdk";
 import { nanoid } from "nanoid";

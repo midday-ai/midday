@@ -1,6 +1,6 @@
 "use client";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
+import { Skeleton } from "@absplatform/ui/skeleton";
+import { Table, TableBody, TableCell, TableRow } from "@absplatform/ui/table";
 import { DataTableHeader } from "./data-table-header";
 
 const data = [...Array(10)].map((_, i) => ({ id: i.toString() }));

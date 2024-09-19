@@ -4,8 +4,8 @@ import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
-import { isSupportedFilePreview } from "@midday/utils";
+} from "@absplatform/ui/hover-card";
+import { isSupportedFilePreview } from "@absplatform/utils";
 
 type Props = {
   files: {

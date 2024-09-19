@@ -1,7 +1,7 @@
 "use client";
 
 import { useAssistantStore } from "@/store/assistant";
-import { Dialog, DialogContent } from "@midday/ui/dialog";
+import { Dialog, DialogContent } from "@absplatform/ui/dialog";
 import { useHotkeys } from "react-hotkeys-hook";
 import { Assistant } from ".";
 

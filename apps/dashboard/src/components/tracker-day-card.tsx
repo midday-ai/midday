@@ -1,11 +1,11 @@
 import { secondsToHoursAndMinutes } from "@/utils/format";
-import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { cn } from "@midday/ui/cn";
+import { Avatar, AvatarFallback, AvatarImage } from "@absplatform/ui/avatar";
+import { cn } from "@absplatform/ui/cn";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@midday/ui/hover-card";
+} from "@absplatform/ui/hover-card";
 import { format, isSameDay } from "date-fns";
 
 export function TrackerDayCard({
@@ -21,7 +21,7 @@ export function TrackerDayCard({
 }) {
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
-    0
+    0,
   );
 
   const hoverEnabled = !disableHover && data;
@@ -51,7 +51,7 @@ export function TrackerDayCard({
               isSameDay(new Date(), date) && "border-[#878787]/30",
               isSameDay(new Date(), date) &&
                 data &&
-                "border-[#121212] dark:border-white"
+                "border-[#121212] dark:border-white",
             )}
           >
             <time
@@ -66,13 +66,13 @@ export function TrackerDayCard({
                   isTracking && "!bg-[#00C969]",
                   isSameDay(new Date(), date) &&
                     "bg-[#121212]/30 dark:bg-[#878787]/30",
-                  data && "bg-[#121212] dark:bg-white"
+                  data && "bg-[#121212] dark:bg-white",
                 )}
               >
                 <span
                   className={cn(
                     "text-[11px] absolute top-7 invisible group-hover:visible w-[50px] text-center -ml-[25px]",
-                    isActive && "visible"
+                    isActive && "visible",
                   )}
                 >
                   {format(new Date(date), "EEEEEE d")}

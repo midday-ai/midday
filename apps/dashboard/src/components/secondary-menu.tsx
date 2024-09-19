@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -18,7 +18,7 @@ export function SecondaryMenu({ items }) {
             className={cn(
               "text-[#606060]",
               pathname === item.path &&
-                "text-primary font-medium underline underline-offset-8"
+                "text-primary font-medium underline underline-offset-8",
             )}
           >
             <span>{item.label}</span>

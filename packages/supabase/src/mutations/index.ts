@@ -1,4 +1,4 @@
-import { getAccessValidForDays } from "@midday/engine/src/providers/gocardless/utils";
+import { getAccessValidForDays } from "@absplatform/engine/src/providers/gocardless/utils";
 import { addDays } from "date-fns";
 import { getCurrentUserTeamQuery, getUserInviteQuery } from "../queries";
 import type { Client } from "../types";

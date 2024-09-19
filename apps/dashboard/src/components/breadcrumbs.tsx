@@ -8,8 +8,8 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@midday/ui/breadcrumb";
-import { cn } from "@midday/ui/cn";
+} from "@absplatform/ui/breadcrumb";
+import { cn } from "@absplatform/ui/cn";
 import Link from "next/link";
 import { translatedFolderName } from "./tables/vault/data-table-row";
 

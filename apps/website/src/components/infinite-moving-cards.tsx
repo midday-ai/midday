@@ -2,7 +2,7 @@
 
 "use client";
 
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
@@ -51,12 +51,12 @@ export const InfiniteMovingCards = ({
       if (direction === "left") {
         containerRef.current.style.setProperty(
           "--animation-direction",
-          "forwards"
+          "forwards",
         );
       } else {
         containerRef.current.style.setProperty(
           "--animation-direction",
-          "reverse"
+          "reverse",
         );
       }
     }
@@ -78,7 +78,7 @@ export const InfiniteMovingCards = ({
       ref={containerRef}
       className={cn(
         "scroller relative z-20 overflow-hidden -ml-4 md:-ml-[1200px] w-screen md:w-[calc(100vw+1400px)]",
-        className
+        className,
       )}
     >
       <ul
@@ -86,7 +86,7 @@ export const InfiniteMovingCards = ({
         className={cn(
           "flex min-w-full shrink-0 gap-8 py-4 w-max flex-nowrap items-start",
           start && "animate-scroll",
-          pauseOnHover && "hover:[animation-play-state:paused]"
+          pauseOnHover && "hover:[animation-play-state:paused]",
         )}
       >
         {items.map((item, idx) => (

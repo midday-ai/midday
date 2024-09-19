@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import { Sheet, SheetContent, SheetTrigger } from "@midday/ui/sheet";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
+import { Sheet, SheetContent, SheetTrigger } from "@absplatform/ui/sheet";
 import { useState } from "react";
 import { MainMenu } from "./main-menu";
 

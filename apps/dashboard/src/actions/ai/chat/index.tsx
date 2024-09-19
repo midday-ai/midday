@@ -2,8 +2,8 @@
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
 import { openai } from "@ai-sdk/openai";
-import { client as RedisClient } from "@midday/kv";
-import { getUser } from "@midday/supabase/cached-queries";
+import { client as RedisClient } from "@absplatform/kv";
+import { getUser } from "@absplatform/supabase/cached-queries";
 import { Ratelimit } from "@upstash/ratelimit";
 import {
   createAI,

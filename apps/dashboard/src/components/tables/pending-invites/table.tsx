@@ -3,20 +3,20 @@
 import { deleteInviteAction } from "@/actions/delete-invite-action";
 import { InviteTeamMembersModal } from "@/components/modals/invite-team-members-modal";
 import { useI18n } from "@/locales/client";
-import { Avatar, AvatarFallback } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
-import { Dialog } from "@midday/ui/dialog";
+import { Avatar, AvatarFallback } from "@absplatform/ui/avatar";
+import { Button } from "@absplatform/ui/button";
+import { cn } from "@absplatform/ui/cn";
+import { Dialog } from "@absplatform/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@midday/ui/dropdown-menu";
-import { Input } from "@midday/ui/input";
-import { Skeleton } from "@midday/ui/skeleton";
-import { Table, TableBody, TableCell, TableRow } from "@midday/ui/table";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/dropdown-menu";
+import { Input } from "@absplatform/ui/input";
+import { Skeleton } from "@absplatform/ui/skeleton";
+import { Table, TableBody, TableCell, TableRow } from "@absplatform/ui/table";
+import { useToast } from "@absplatform/ui/use-toast";
 import {
   type ColumnDef,
   flexRender,

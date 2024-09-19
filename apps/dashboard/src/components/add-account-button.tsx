@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import { useQueryState } from "nuqs";
 
 export function AddAccountButton({ onClick }: { onClick?: () => void }) {

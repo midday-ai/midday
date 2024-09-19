@@ -1,4 +1,4 @@
-import { stripSpecialCharacters } from "@midday/utils";
+import { stripSpecialCharacters } from "@absplatform/utils";
 import { decode } from "base64-arraybuffer";
 import convert from "heic-convert";
 import sharp from "sharp";

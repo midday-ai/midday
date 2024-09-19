@@ -1,5 +1,5 @@
 import { useI18n } from "@/locales/client";
-import { ComboboxDropdown } from "@midday/ui/combobox-dropdown";
+import { ComboboxDropdown } from "@absplatform/ui/combobox-dropdown";
 import { TAGS } from "./tables/vault/contants";
 
 export function SelectTag({

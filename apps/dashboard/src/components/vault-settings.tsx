@@ -8,9 +8,9 @@ import {
   FormField,
   FormItem,
   FormLabel,
-} from "@midday/ui/form";
-import { SubmitButton } from "@midday/ui/submit-button";
-import { Switch } from "@midday/ui/switch";
+} from "@absplatform/ui/form";
+import { SubmitButton } from "@absplatform/ui/submit-button";
+import { Switch } from "@absplatform/ui/switch";
 import { useAction } from "next-safe-action/hooks";
 import { useForm } from "react-hook-form";
 

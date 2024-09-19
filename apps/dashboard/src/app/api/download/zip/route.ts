@@ -1,7 +1,7 @@
-import { getUser } from "@midday/supabase/cached-queries";
-import { getVaultRecursiveQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
-import { download } from "@midday/supabase/storage";
+import { getUser } from "@absplatform/supabase/cached-queries";
+import { getVaultRecursiveQuery } from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
+import { download } from "@absplatform/supabase/storage";
 import { BlobReader, BlobWriter, ZipWriter } from "@zip.js/zip.js";
 import type { NextRequest, NextResponse } from "next/server";
 

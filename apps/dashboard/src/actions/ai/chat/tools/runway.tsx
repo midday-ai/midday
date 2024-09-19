@@ -1,5 +1,5 @@
 import type { MutableAIState } from "@/actions/ai/types";
-import { getRunway } from "@midday/supabase/cached-queries";
+import { getRunway } from "@absplatform/supabase/cached-queries";
 import { startOfMonth } from "date-fns";
 import { nanoid } from "nanoid";
 import { z } from "zod";

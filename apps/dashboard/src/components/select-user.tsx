@@ -1,11 +1,11 @@
 "use client";
 
-import { createClient } from "@midday/supabase/client";
+import { createClient } from "@absplatform/supabase/client";
 import {
   getCurrentUserTeamQuery,
   getTeamMembersQuery,
-} from "@midday/supabase/queries";
-import { Spinner } from "@midday/ui/spinner";
+} from "@absplatform/supabase/queries";
+import { Spinner } from "@absplatform/ui/spinner";
 import { useEffect, useState } from "react";
 import { AssignedUser } from "./assigned-user";
 

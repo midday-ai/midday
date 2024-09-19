@@ -1,5 +1,5 @@
 import { SupportForm } from "@/components/support-form";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getUser } from "@absplatform/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

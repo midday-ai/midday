@@ -5,18 +5,18 @@ import {
 } from "@/actions/schema";
 import { InputColor } from "@/components/input-color";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
+import { Button } from "@absplatform/ui/button";
 import {
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@midday/ui/dialog";
-import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
-import { Icons } from "@midday/ui/icons";
-import { Input } from "@midday/ui/input";
-import { useToast } from "@midday/ui/use-toast";
+} from "@absplatform/ui/dialog";
+import { Form, FormControl, FormField, FormItem } from "@absplatform/ui/form";
+import { Icons } from "@absplatform/ui/icons";
+import { Input } from "@absplatform/ui/input";
+import { useToast } from "@absplatform/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";

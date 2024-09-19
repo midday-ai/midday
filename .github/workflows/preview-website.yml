@@ -22,9 +22,9 @@ jobs:
       - name: Install dependencies
         run: bun install
       # - name: 🔦 Run linter
-      #   run: bun run lint --filter=@midday/website
+      #   run: bun run lint --filter=@absplatform/website
       # - name: 🪐 Check TypeScript
-      #   run: bun run typecheck --filter=@midday/website
+      #   run: bun run typecheck --filter=@absplatform/website
       - name: 📤 Pull Vercel Environment Information
         run: bunx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
       - name: 🏗 Build Project Artifacts

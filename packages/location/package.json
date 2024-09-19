@@ -1,5 +1,5 @@
 {
-    "name": "@midday/location",
+    "name": "@absplatform/location",
     "version": "1.0.0",
     "main": "src/index.ts",
     "private": true,

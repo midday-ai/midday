@@ -1,6 +1,6 @@
-import { getSubscriberPreferences } from "@midday/notification";
-import { getUser } from "@midday/supabase/cached-queries";
-import { Skeleton } from "@midday/ui/skeleton";
+import { getSubscriberPreferences } from "@absplatform/notification";
+import { getUser } from "@absplatform/supabase/cached-queries";
+import { Skeleton } from "@absplatform/ui/skeleton";
 import { NotificationSetting } from "./notification-setting";
 
 export function NotificationSettingsSkeleton() {

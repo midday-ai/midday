@@ -1,8 +1,8 @@
 import { CopyInput } from "@/components/copy-input";
-import { getInboxEmail } from "@midday/inbox";
-import { getUser } from "@midday/supabase/cached-queries";
-import { getInboxQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getInboxEmail } from "@absplatform/inbox";
+import { getUser } from "@absplatform/supabase/cached-queries";
+import { getInboxQuery } from "@absplatform/supabase/queries";
+import { createClient } from "@absplatform/supabase/server";
 import { inboxData } from "./data";
 import { InboxList } from "./inbox-list";
 

@@ -8,7 +8,7 @@ import {
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from "@midday/ui/select";
+} from "@absplatform/ui/select";
 import { useOptimisticAction } from "next-safe-action/hooks";
 
 const options = ["profit", "revenue", "expense", "burn_rate"];

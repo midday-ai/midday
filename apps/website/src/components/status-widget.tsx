@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchStatus } from "@/actions/fetch-status";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import { useEffect, useState } from "react";
 
 export function StatusWidget() {
@@ -82,13 +82,13 @@ export function StatusWidget() {
         <span
           className={cn(
             "animate-ping absolute inline-flex h-full w-full rounded-full opacity-75",
-            level.color2
+            level.color2,
           )}
         />
         <span
           className={cn(
             "relative inline-flex rounded-full h-1.5 w-1.5",
-            level.color
+            level.color,
           )}
         />
       </span>

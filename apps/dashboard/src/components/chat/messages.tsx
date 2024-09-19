@@ -1,7 +1,7 @@
 "use client";
 
 import { useStreamableText } from "@/hooks/use-streamable-text";
-import { cn } from "@midday/ui/cn";
+import { cn } from "@absplatform/ui/cn";
 import type { StreamableValue } from "ai/rsc";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { ErrorFallback } from "../error-fallback";

@@ -1,7 +1,7 @@
 "use client";
 
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
+import { Button } from "@absplatform/ui/button";
+import { Icons } from "@absplatform/ui/icons";
 import {
   addMonths,
   format,
@@ -15,7 +15,7 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
     onChange(
       formatISO(startOfMonth(subMonths(startDate, numberOfMonths)), {
         representation: "date",
-      })
+      }),
     );
   };
 
@@ -23,7 +23,7 @@ export function TrackerPagination({ numberOfMonths, onChange, startDate }) {
     onChange(
       formatISO(startOfMonth(addMonths(startDate, numberOfMonths)), {
         representation: "date",
-      })
+      }),
     );
   };
 
