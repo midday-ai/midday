@@ -2,7 +2,9 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { sortDates } from "@/utils/tracker";
+import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
+import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   eachDayOfInterval,
@@ -15,8 +17,7 @@ import {
   startOfWeek,
 } from "date-fns";
 import { isHotkeyPressed } from "react-hotkeys-hook";
-import { TrackerHeader } from "./tracker-header";
-import { TrackerIndicator } from "./tracker-indicator";
+import { TrackerMonthSelect } from "./tracker-month-select";
 
 type TrackerMeta = {
   totalDuration?: number;
@@ -34,7 +35,7 @@ type Props = {
   data?: Record<string, TrackerRecord[]>;
 };
 
-export function TrackerWidget({ date: initialDate, meta, data }: Props) {
+export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
   const {
     date: currentDate,
     range,
@@ -84,9 +85,15 @@ export function TrackerWidget({ date: initialDate, meta, data }: Props) {
 
   return (
     <div ref={ref}>
-      <TrackerHeader totalDuration={meta?.totalDuration} />
-
       <div className="mt-8">
+        <div className="flex items-center justify-between mb-6">
+          <Button variant="outline" size="icon">
+            <Icons.Tune size={16} />
+          </Button>
+
+          <TrackerMonthSelect />
+        </div>
+
         <div className="grid grid-cols-7 gap-px border border-border bg-border">
           {firstWeek.map((day) => (
             <div
@@ -106,7 +113,7 @@ export function TrackerWidget({ date: initialDate, meta, data }: Props) {
                 onClick={() => handleOnSelect(date)}
                 key={index.toString()}
                 className={cn(
-                  "pt-2 pb-5 px-3 font-mono text-sm relative transition-all duration-100 text-left",
+                  "pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left",
                   isCurrentMonth && isToday(date)
                     ? "bg-[#202020"
                     : "bg-background",
@@ -131,7 +138,6 @@ export function TrackerWidget({ date: initialDate, meta, data }: Props) {
                 )}
               >
                 <div>{format(date, "d")}</div>
-                <TrackerIndicator count={getEventCount(date)} />
               </button>
             );
           })}

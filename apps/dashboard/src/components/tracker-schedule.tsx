@@ -3,6 +3,7 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
+import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { format } from "date-fns";
 import MotionNumber from "motion-number";
@@ -93,6 +94,7 @@ export function TrackerSchedule() {
           />
           h
         </h2>
+        <Icons.MoreHoriz />
       </div>
       <TrackerDaySelect />
       {/* <button onClick={toggleTimeFormat} className="mb-2" type="button">

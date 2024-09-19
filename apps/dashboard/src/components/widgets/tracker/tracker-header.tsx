@@ -1,7 +1,6 @@
 "use client";
 
 import { TrackerMonthSelect } from "@/components/tracker-month-select";
-import { Icons } from "@midday/ui/icons";
 import MotionNumber from "motion-number";
 
 type Props = {
@@ -16,8 +15,6 @@ export function TrackerHeader({ totalDuration }: Props) {
         <span className="text-[#878787]">
           <MotionNumber value={totalDuration ? totalDuration / 3600 : 0} />h
         </span>
-
-        <Icons.MoreHoriz />
       </div>
 
       <TrackerMonthSelect />

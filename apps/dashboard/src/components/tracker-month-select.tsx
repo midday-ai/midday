@@ -2,16 +2,7 @@ import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
-import {
-  addDays,
-  addMonths,
-  format,
-  formatISO,
-  startOfMonth,
-  subDays,
-  subMonths,
-} from "date-fns";
-import { useHotkeys } from "react-hotkeys-hook";
+import { addMonths, format, formatISO, startOfMonth } from "date-fns";
 
 type Props = {
   className?: string;
@@ -22,39 +13,26 @@ export function TrackerMonthSelect({ className }: Props) {
   const currentDate = date ? new Date(date) : new Date();
 
   const selectPrevMonth = () => {
-    setParams({
-      date: formatISO(startOfMonth(addMonths(currentDate, -1)), {
-        representation: "date",
-      }),
-    });
+    setParams(
+      {
+        date: formatISO(startOfMonth(addMonths(currentDate, -1)), {
+          representation: "date",
+        }),
+      },
+      { shallow: false },
+    );
   };
 
   const selectNextMonth = () => {
-    setParams({
-      date: formatISO(startOfMonth(addMonths(currentDate, 1)), {
-        representation: "date",
-      }),
-    });
+    setParams(
+      {
+        date: formatISO(startOfMonth(addMonths(currentDate, 1)), {
+          representation: "date",
+        }),
+      },
+      { shallow: false },
+    );
   };
-
-  const selectPrevDay = () => {
-    setParams({
-      date: formatISO(subDays(currentDate, 1), {
-        representation: "date",
-      }),
-    });
-  };
-
-  const selectNextDay = () => {
-    setParams({
-      date: formatISO(addDays(currentDate, 1), {
-        representation: "date",
-      }),
-    });
-  };
-
-  useHotkeys("arrowLeft", selectPrevDay);
-  useHotkeys("arrowRight", selectNextDay);
 
   return (
     <div className={cn("flex items-center border h-9", className)}>
