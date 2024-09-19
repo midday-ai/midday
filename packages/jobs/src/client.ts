@@ -1,4 +1,4 @@
-import type { Database } from "@midday/supabase/src/types";
+import type { Database } from "@midday/supabase/types";
 import { Resend } from "@trigger.dev/resend";
 import { TriggerClient } from "@trigger.dev/sdk";
 import { Supabase, SupabaseManagement } from "@trigger.dev/supabase";
@@ -11,7 +11,7 @@ export const client = new TriggerClient({
 
 export const supabase = new Supabase<Database>({
   id: "supabase",
-  projectId: process.env.NEXT_PUBLIC_SUPABASE_ID!,
+  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL!,
   supabaseKey: process.env.SUPABASE_SERVICE_KEY!,
 });
 

@@ -1,4 +1,4 @@
-import Midday from "@midday-ai/engine";
+import Midday from "@solomon-ai/financial-engine-sdk";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
 import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
+import { sleep } from "../utils/sleep";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
@@ -66,12 +67,27 @@ client.defineJob({
         `Processing account: ${account.id} for team: ${teamId}`
       );
       try {
-        const transactions = await engine.transactions.list({
-          provider: account.bank_connection.provider,
-          accountId: account.account_id,
-          accountType: getClassification(account.type),
-          accessToken: account.bank_connection?.access_token,
-        });
+        const getTransactions = async (retries = 0): Promise<Midday.TransactionsSchema> => {
+          try {
+            return await engine.transactions.list({
+              provider: account.bank_connection.provider,
+              accountId: account.account_id,
+              accountType: getClassification(account.type),
+              accessToken: account.bank_connection?.access_token,
+            });
+          } catch (error) {
+            if ((error instanceof Midday.APIError && error.status === 429 && retries < 5) || (error instanceof Midday.APIError && error.message.includes("rate limit") && retries < 5)) {
+              const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+              await io.logger.warn(`Rate limited, retrying in ${delay}ms`, { retries });
+              await sleep(delay);
+              return getTransactions(retries + 1);
+            }
+            throw error;
+          }
+        };
+
+        const transactions = await getTransactions();
+        
         await io.logger.info(
           `Retrieved ${transactions.data?.length} transactions for account: ${account.id}`
         );
@@ -94,11 +110,17 @@ client.defineJob({
             await io.logger.debug(
               `Upserting batch of ${batch.length} transactions for account: ${account.id}`
             );
-            await supabase.from("transactions").upsert(batch, {
+            const { data, error } = await supabase.from("transactions").upsert(batch, {
               onConflict: "internal_id",
               ignoreDuplicates: true,
             });
-            await io.logger.debug(`Upserted batch for account: ${account.id}`);
+           
+            if (error) {
+              await io.logger.error(`Error upserting transactions for account: ${account.id}`, { error });
+            }
+           
+            await io.logger.debug(`Upserted batch ${data} for account: ${account.id}`);
+            return batch;
           }
         );
       } catch (error) {

@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.0",
-    "@midday-ai/engine": "^0.1.0-alpha.22",
+    "@solomon-ai/financial-engine-sdk": "^0.0.1-alpha.1",
     "@midday/documents": "workspace:*",
+    "@midday/supabase": "workspace:*",
+    "@midday/engine": "workspace:*",
     "@midday/import": "workspace:*",
     "@trigger.dev/react": "2.3.19",
     "@trigger.dev/resend": "2.3.19",

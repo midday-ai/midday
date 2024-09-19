@@ -1,4 +1,4 @@
-import Midday from "@midday-ai/engine";
+import Midday from "@solomon-ai/financial-engine-sdk";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
