@@ -6,9 +6,10 @@ import { addMonths, format, formatISO, startOfMonth } from "date-fns";
 
 type Props = {
   className?: string;
+  dateFormat?: string;
 };
 
-export function TrackerMonthSelect({ className }: Props) {
+export function TrackerMonthSelect({ className, dateFormat = "MMM" }: Props) {
   const { date, setParams } = useTrackerParams();
   const currentDate = date ? new Date(date) : new Date();
 
@@ -44,7 +45,9 @@ export function TrackerMonthSelect({ className }: Props) {
       >
         <Icons.ChevronLeft className="w-6 h-6" />
       </Button>
-      <span className="w-full text-center">{format(currentDate, "MMM")}</span>
+      <span className="w-full text-center">
+        {format(currentDate, dateFormat)}
+      </span>
       <Button
         variant="ghost"
         size="icon"

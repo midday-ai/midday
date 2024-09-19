@@ -1,9 +1,8 @@
-import { OpenTracker } from "@/components/open-tracker";
-import { SearchField } from "@/components/search-field";
+import { OpenTrackerSheet } from "@/components/open-tracker-sheet";
 import { Table } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
-import { TrackerChangeStatus } from "@/components/tracker-change-status";
+import { TrackerSearchFilter } from "@/components/tracker-search-filter";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -28,10 +27,11 @@ export default async function Tracker({ searchParams }: Props) {
       <TrackerCalendar />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
-        <SearchField placeholder="Search projects" />
+        <h2 className="text-md font-medium">Projects</h2>
+
         <div className="flex space-x-2">
-          <TrackerChangeStatus />
-          <OpenTracker />
+          <TrackerSearchFilter />
+          <OpenTrackerSheet />
         </div>
       </div>
 

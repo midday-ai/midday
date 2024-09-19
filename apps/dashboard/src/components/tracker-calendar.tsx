@@ -7,6 +7,7 @@ import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
+  addMonths,
   eachDayOfInterval,
   endOfMonth,
   endOfWeek,
@@ -15,8 +16,9 @@ import {
   isToday,
   startOfMonth,
   startOfWeek,
+  subMonths,
 } from "date-fns";
-import { isHotkeyPressed } from "react-hotkeys-hook";
+import { isHotkeyPressed, useHotkeys } from "react-hotkeys-hook";
 import { TrackerMonthSelect } from "./tracker-month-select";
 
 type TrackerMeta = {
@@ -54,6 +56,22 @@ export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
 
   const sortedDates = sortDates(range ?? []);
 
+  useHotkeys("arrowLeft", () => {
+    setParams({
+      date: formatISO(subMonths(new Date(currentDate), 1), {
+        representation: "date",
+      }),
+    });
+  });
+
+  useHotkeys("arrowRight", () => {
+    setParams({
+      date: formatISO(addMonths(new Date(currentDate), 1), {
+        representation: "date",
+      }),
+    });
+  });
+
   const firstWeek = eachDayOfInterval({
     start: calendarStart,
     end: endOfWeek(calendarStart, { weekStartsOn: 1 }),
@@ -87,11 +105,11 @@ export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
     <div ref={ref}>
       <div className="mt-8">
         <div className="flex items-center justify-between mb-6">
+          <TrackerMonthSelect dateFormat="MMMM" />
+
           <Button variant="outline" size="icon">
             <Icons.Tune size={16} />
           </Button>
-
-          <TrackerMonthSelect />
         </div>
 
         <div className="grid grid-cols-7 gap-px border border-border bg-border">
