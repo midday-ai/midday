@@ -5,7 +5,14 @@ import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
 import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@midday/import";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@midday/ui/accordion";
 import { Icons } from "@midday/ui/icons";
+import { Input } from "@midday/ui/input";
 import { Label } from "@midday/ui/label";
 import {
   Select,
@@ -78,85 +85,132 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
         )}
       </div>
 
-      <div className="mt-6 pt-6 border-t-[1px] border-border">
-        <h2 className="mb-6 font-medium">Settings</h2>
+      <Accordion
+        defaultValue={undefined}
+        collapsible
+        type="single"
+        className="w-full mt-6 border-t-[1px] border-border"
+      >
+        <AccordionItem value="settings">
+          <AccordionTrigger className="text-sm">Settings</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex flex-col gap-4">
+              <Controller
+                control={control}
+                name="inverted"
+                render={({ field: { onChange, value } }) => (
+                  <div className="space-y-1">
+                    <Label htmlFor="inverted">Inverted amount</Label>
+                    <p className="text-sm text-[#606060]">
+                      If the transactions are from credit account, you can
+                      invert the amount.
+                    </p>
+                    <div className="flex justify-end">
+                      <Switch
+                        id="inverted"
+                        checked={value}
+                        onCheckedChange={onChange}
+                      />
+                    </div>
+                  </div>
+                )}
+              />
 
+              <Controller
+                control={control}
+                name="date_adjustment"
+                render={({ field: { onChange, value } }) => (
+                  <div className="space-y-1">
+                    <Label htmlFor="date_adjustment">Date adjustment</Label>
+
+                    <p className="text-sm text-[#606060]">
+                      Transactions may be exported in different timezones,
+                      causing them to appear off by one day. If you notice this,
+                      you can adjust the date by adding or subtracting a day to
+                      correct this.
+                    </p>
+
+                    <div className="flex justify-end">
+                      <Select
+                        value={value?.toString() ?? "0"}
+                        onValueChange={(value) => {
+                          onChange(+value);
+                        }}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Default" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectGroup>
+                            <SelectItem value="0">Default</SelectItem>
+                            <SelectItem value="1">+ 1 day</SelectItem>
+                            <SelectItem value="-1">- 1 day</SelectItem>
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              />
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+
+      <div className="mt-6">
+        <Label className="mb-2 block">Account</Label>
         <Controller
           control={control}
-          name="inverted"
-          render={({ field: { onChange, value } }) => (
-            <div className="space-y-1">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="inverted">Inverted amount</Label>
-                <Switch
-                  id="inverted"
-                  checked={value}
-                  onCheckedChange={onChange}
-                />
-              </div>
-              <p className="text-sm text-[#606060]">
-                If the transactions are from credit account, you can invert the
-                amount.
-              </p>
-            </div>
+          name="bank_account_id"
+          render={({ field: { value, onChange } }) => (
+            <SelectAccount
+              className="w-full"
+              placeholder="Select account"
+              value={value}
+              onChange={(account) => {
+                onChange(account.id);
+
+                if (account.type === "credit") {
+                  setValue("inverted", true, {
+                    shouldValidate: true,
+                  });
+                }
+
+                if (account?.currency) {
+                  setValue("currency", account.currency, {
+                    shouldValidate: true,
+                  });
+
+                  setShowCurrency(false);
+                } else {
+                  // Show currency select if account has no currency
+                  setShowCurrency(!account.currency);
+                }
+              }}
+            />
           )}
         />
+      </div>
 
-        <div className="mt-6">
-          <Label className="mb-2 block">Account</Label>
+      {showCurrency && (
+        <>
+          <Label className="mb-2 mt-4 block">Currency</Label>
           <Controller
             control={control}
-            name="bank_account_id"
-            render={({ field: { value, onChange } }) => (
-              <SelectAccount
-                className="w-full"
-                placeholder="Select account"
+            name="currency"
+            render={({ field: { onChange, value } }) => (
+              <SelectCurrency
+                className="w-full mt-4"
                 value={value}
-                onChange={(account) => {
-                  onChange(account.id);
-
-                  if (account.type === "credit") {
-                    setValue("inverted", true, {
-                      shouldValidate: true,
-                    });
-                  }
-
-                  if (account?.currency) {
-                    setValue("currency", account.currency, {
-                      shouldValidate: true,
-                    });
-
-                    setShowCurrency(false);
-                  } else {
-                    // Show currency select if account has no currency
-                    setShowCurrency(!account.currency);
-                  }
-                }}
+                onChange={onChange}
+                currencies={Object.values(currencies)?.map(
+                  (currency) => currency,
+                )}
               />
             )}
           />
-        </div>
-
-        {showCurrency && (
-          <>
-            <Label className="mb-2 mt-4 block">Currency</Label>
-            <Controller
-              control={control}
-              name="currency"
-              render={({ field: { onChange, value } }) => (
-                <SelectCurrency
-                  className="w-full mt-4"
-                  value={value}
-                  onChange={onChange}
-                  currencies={Object.values(currencies)?.map(
-                    (currency) => currency,
-                  )}
-                />
-              )}
-            />
-          </>
-        )}
-      </div>
+        </>
+      )}
     </div>
   );
 }

@@ -7,13 +7,19 @@ export function transform({
   transaction,
   inverted,
   timezone,
-}: { transaction: Transaction; inverted: boolean; timezone: string }) {
+  dateAdjustment,
+}: {
+  transaction: Transaction;
+  inverted: boolean;
+  timezone: string;
+  dateAdjustment?: number;
+}) {
   return {
     internal_id: `${transaction.teamId}_${uuidv4()}`,
     team_id: transaction.teamId,
     status: "posted",
     method: "other",
-    date: formatDate(transaction.date, timezone),
+    date: formatDate(transaction.date, timezone, dateAdjustment),
     amount: formatAmountValue({ amount: transaction.amount, inverted }),
     name: transaction?.description && capitalCase(transaction.description),
     manual: true,
