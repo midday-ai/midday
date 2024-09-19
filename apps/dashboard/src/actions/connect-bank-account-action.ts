@@ -77,9 +77,6 @@ export const connectBankAccountAction = authActionClient
 
       console.log("Bank accounts created successfully", { createdCount: createdBankAccounts?.length ?? 0 });
 
-      console.log("Pausing for 3 seconds before syncing transactions");
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-
       console.log("Sending event to sync transactions", { teamId });
       const event = await client.sendEvent({
         name: Events.TRANSACTIONS_INITIAL_SYNC,

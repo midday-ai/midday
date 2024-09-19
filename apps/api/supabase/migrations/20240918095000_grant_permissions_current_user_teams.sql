@@ -43,3 +43,9 @@ GRANT SELECT ON private.current_user_teams TO authenticator, anon, authenticated
 
 -- Double-check permissions on the underlying table
 GRANT SELECT ON public.users_on_team TO authenticator, anon, authenticated;
+
+-- Add currency_rate and currency_source column to transactions table
+ALTER TABLE "public"."transactions"
+    ADD COLUMN IF NOT EXISTS "currency_rate" numeric,
+    ADD COLUMN IF NOT EXISTS "currency_source" "text";
+   
