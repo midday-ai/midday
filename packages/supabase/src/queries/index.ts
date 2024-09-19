@@ -223,11 +223,11 @@ export async function getTransactionsQuery(
     if (column === "attachment") {
       query.order("is_fulfilled", { ascending });
     } else if (column === "assigned") {
-      query.order("assigned_id", { ascending });
+      query.order("assigned(full_name)", { ascending });
     } else if (column === "bank_account") {
-      query.order("bank_account_id", { ascending });
+      query.order("bank_account(name)", { ascending });
     } else if (column === "category") {
-      query.order("category_slug", { ascending });
+      query.order("category(name)", { ascending });
     } else {
       query.order(column, { ascending });
     }
