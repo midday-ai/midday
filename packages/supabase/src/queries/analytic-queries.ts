@@ -80,12 +80,14 @@ export async function getDailyExpensesQuery(
 ) {
   const { teamId, from, to, currency } =
     getDailyExpensesQueryParamsSchema.parse(params);
-  return supabase.rpc("get_daily_expenses", {
+  const dailyExpenses = await supabase.rpc("get_daily_expenses", {
     team_id: teamId,
     start_date: toUTCDate(from).toDateString(),
     end_date: toUTCDate(to).toDateString(),
     currency: currency,
   });
+
+  return dailyExpenses;
 }
 
 // Schema for getTopExpenseCategoriesQuery
