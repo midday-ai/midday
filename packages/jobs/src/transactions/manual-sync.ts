@@ -1,4 +1,4 @@
-import Midday from "@midday-ai/engine";
+import Midday from "@solomon-ai/financial-engine-sdk";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
@@ -43,7 +43,7 @@ client.defineJob({
         accountId: account.account_id,
         accountType: getClassification(account.type),
         accessToken: account.bank_connection?.access_token,
-        latest: true,
+        latest: "true",
       });
 
       const formattedTransactions = transactions.data?.map((transaction) => {
@@ -77,6 +77,8 @@ client.defineJob({
           onConflict: "internal_id",
           ignoreDuplicates: true,
         });
+
+        return batch;
       });
     });
 

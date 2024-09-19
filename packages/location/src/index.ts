@@ -5,7 +5,7 @@ import { EU_COUNTRY_CODES } from "./eu-countries";
 import timezones from "./timezones.json";
 
 export function getCountryCode() {
-  return headers().get("x-vercel-ip-country") || "SE";
+  return headers().get("x-vercel-ip-country") || "US";
 }
 
 export function getTimezone() {

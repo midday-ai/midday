@@ -86,6 +86,22 @@ export default async function Overview({
           </div>
         </Card>
 
+
+
+        {/** tabbed charts with income and expense charts */}
+        <TabbedCharts
+          currency={searchParams.currency ?? "USD"}
+          className="mt-8"
+          disabled={isEmpty}
+        />
+
+        <Widgets
+          initialPeriod={initialPeriod}
+          disabled={isEmpty}
+          searchParams={searchParams}
+        />
+
+        {/** recent transactions */}
         <Card className="mt-8 min-h-[530px] overflow-y-auto scrollbar-hide">
           {isEmpty && <EmptyState />}
           <div className={`${isEmpty && "blur-[8px] opacity-20 relative"}`}>
@@ -108,19 +124,6 @@ export default async function Overview({
             </CardContent>
           </div>
         </Card>
-
-        {/** tabbed charts with income and expense charts */}
-        <TabbedCharts
-          currency={searchParams.currency ?? "USD"}
-          className="mt-8"
-          disabled={isEmpty}
-        />
-
-        <Widgets
-          initialPeriod={initialPeriod}
-          disabled={isEmpty}
-          searchParams={searchParams}
-        />
       </div>
 
       <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />

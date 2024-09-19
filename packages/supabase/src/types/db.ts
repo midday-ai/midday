@@ -921,6 +921,8 @@ export type Database = {
           check_number: string | null
           created_at: string
           currency: string
+          currency_rate: number | null
+          currency_source: string | null
           date: string
           datetime: string | null
           description: string | null
@@ -990,6 +992,8 @@ export type Database = {
           check_number?: string | null
           created_at?: string
           currency: string
+          currency_rate?: number | null
+          currency_source?: string | null
           date: string
           datetime?: string | null
           description?: string | null
@@ -1058,6 +1062,8 @@ export type Database = {
           check_number?: string | null
           created_at?: string
           currency?: string
+          currency_rate?: number | null
+          currency_source?: string | null
           date?: string
           datetime?: string | null
           description?: string | null
@@ -1502,6 +1508,8 @@ export type Database = {
           check_number: string | null
           created_at: string
           currency: string
+          currency_rate: number | null
+          currency_source: string | null
           date: string
           datetime: string | null
           description: string | null

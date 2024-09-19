@@ -19,7 +19,7 @@
     "seed": "bunx supabase db reset && psql -h localhost -p 54322 -U postgres -d postgres -f supabase/migrations/seed.sql",
     "supabase:dump-local": "bunx supabase db dump --data-only --db-url postgresql://postgres:postgres@127.0.0.1:54322/postgres -f supabase/migrations/seeds.sql",
     "start": "npm run supabase:start && npm run seed",
-    "seed:local": "psql -h localhost -p 54322 -U postgres -d postgres -f supabase/migrations/seed.sql",
+    "seed:local": "psql -h localhost -p 54322 -U postgres -d postgres -f supabase/migrations/seeds.sql",
     "clean-volumes": "docker volume rm $(docker volume ls -q --filter label=com.supabase.cli.project=trnlccdjeihaaxmcaddm)"
   },
   "dependencies": {
