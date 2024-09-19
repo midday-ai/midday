@@ -3,6 +3,7 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
+import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { format } from "date-fns";
@@ -94,14 +95,17 @@ export function TrackerSchedule() {
           />
           h
         </h2>
-        <Icons.MoreHoriz />
+
+        <Button variant="outline" size="icon">
+          <Icons.Tune size={16} />
+        </Button>
       </div>
       <TrackerDaySelect />
       {/* <button onClick={toggleTimeFormat} className="mb-2" type="button">
         Toggle {is24HourFormat ? "12-hour" : "24-hour"} format
       </button> */}
 
-      <ScrollArea ref={scrollRef} className="h-[calc(100vh-430px)] mt-8">
+      <ScrollArea ref={scrollRef} className="h-[calc(100vh-440px)] mt-8">
         <div className="flex text-[#878787] text-xs">
           <div className="w-20 flex-shrink-0">
             {hours.map((hour) => (
