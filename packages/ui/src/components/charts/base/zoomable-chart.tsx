@@ -18,16 +18,30 @@ import {
     ChartTooltipContent,
 } from "../../chart"
 
+/**
+ * Represents a single data point in the chart.
+ */
 type DataPoint = {
+    /** ISO 8601 formatted date string */
     date: string;
+    /** Number of events for this data point */
     events: number;
 };
 
+/**
+ * Props for the ZoomableChart component.
+ */
 export type ZoomableChartProps = {
+    /** Array of data points to be displayed in the chart */
     data?: DataPoint[];
+    /** Optional description of the chart */
     description?: string;
+    /** Optional title for the chart */
     title?: string;
+    /** Key to use for the data name (defaults to "events") */
     dataNameKey?: string;
+    /** Height of the chart in pixels (defaults to 400) */
+    height?: number;
 };
 
 const chartConfig = {
@@ -42,6 +56,13 @@ const seedRandom = (seed: number) => {
     return x - Math.floor(x);
 };
 
+/**
+ * Simulates data for the ZoomableChart.
+ * 
+ * @param start - Start date for the simulated data (default: '2024-01-01T00:00:00Z')
+ * @param end - End date for the simulated data (default: '2024-01-02T00:00:00Z')
+ * @returns An array of DataPoint objects representing simulated event data
+ */
 export function simulateData(start = '2024-01-01T00:00:00Z', end = '2024-01-02T00:00:00Z'): DataPoint[] {
     const simulatedData = [];
     let baseValue = 50;
@@ -63,7 +84,20 @@ export function simulateData(start = '2024-01-01T00:00:00Z', end = '2024-01-02T0
     return simulatedData;
 }
 
-export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events" }: ZoomableChartProps) {
+/**
+ * A zoomable and interactive chart component that displays event data over time.
+ * 
+ * This component renders a chart with the following features:
+ * - Zooming functionality using mouse wheel or touch pinch gestures
+ * - Click and drag to select a specific time range
+ * - Responsive design that adapts to different screen sizes
+ * - Customizable title, description, and data key
+ * - Interactive tooltip showing detailed information for each data point
+ * 
+ * @param props - The props for the ZoomableChart component
+ * @returns A React component rendering the zoomable chart
+ */
+export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events", height = 400 }: ZoomableChartProps) {
     const [data, setData] = useState<DataPoint[]>(initialData || []);
     const [refAreaLeft, setRefAreaLeft] = useState<string | null>(null);
     const [refAreaRight, setRefAreaRight] = useState<string | null>(null);
@@ -73,6 +107,9 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
     const [isSelecting, setIsSelecting] = useState(false);
     const chartRef = useRef<HTMLDivElement>(null);
 
+    /**
+     * Initializes the chart data and time range when initialData changes.
+     */
     useEffect(() => {
         if (initialData?.length) {
             setData(initialData);
@@ -82,6 +119,9 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
         }
     }, [initialData]);
 
+    /**
+     * Calculates the data to be displayed based on the current zoom level.
+     */
     const zoomedData = useMemo(() => {
         if (!startTime || !endTime) {
             return data;
@@ -95,11 +135,17 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
         return dataPointsInRange.length > 1 ? dataPointsInRange : originalData.slice(0, 2);
     }, [startTime, endTime, originalData, data]);
 
+    /**
+     * Calculates the total number of events in the currently displayed data range.
+     */
     const total = useMemo(
         () => zoomedData.reduce((acc, curr) => acc + curr.events, 0),
         [zoomedData]
     )
 
+    /**
+     * Handles the start of a selection drag operation.
+     */
     const handleMouseDown = (e: any) => {
         if (e.activeLabel) {
             setRefAreaLeft(e.activeLabel);
@@ -107,12 +153,18 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
         }
     };
 
+    /**
+     * Updates the selection area during a drag operation.
+     */
     const handleMouseMove = (e: any) => {
         if (isSelecting && e.activeLabel) {
             setRefAreaRight(e.activeLabel);
         }
     };
 
+    /**
+     * Finalizes the selection area and updates the chart's time range.
+     */
     const handleMouseUp = () => {
         if (refAreaLeft && refAreaRight) {
             const [left, right] = [refAreaLeft, refAreaRight].sort();
@@ -124,11 +176,17 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
         setIsSelecting(false);
     };
 
+    /**
+     * Resets the chart to its original time range.
+     */
     const handleReset = () => {
         setStartTime(originalData[0].date);
         setEndTime(originalData[originalData.length - 1].date);
     };
 
+    /**
+     * Handles zooming functionality for both mouse wheel and touch events.
+     */
     const handleZoom = (e: React.WheelEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
         e.preventDefault();
         if (!originalData.length || !chartRef.current) return;
@@ -176,11 +234,17 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
         setEndTime(newEndTime.toISOString());
     };
 
+    /**
+     * Formats the X-axis ticks to display time in a readable format.
+     */
     const formatXAxis = (tickItem: string) => {
         const date = new Date(tickItem);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    /**
+     * Capitalizes the first letter of a string.
+     */
     const capitalizeFirstLetter = (string: string) => {
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
@@ -227,7 +291,7 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
                                 Reset
                             </Button>
                         </div>
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height={400}>
                             <ComposedChart
                                 data={zoomedData}
                                 margin={{
@@ -273,7 +337,7 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
                                         />
                                     }
                                 />
-                                <ChartLegend content={<ChartLegendContent />} />
+                                <ChartLegend content={<ChartLegendContent nameKey={dataNameKey} hideIcon={false} hidden={false} />} />
                                 <Area
                                     type="monotone"
                                     dataKey="events"
