@@ -88,11 +88,7 @@ client.defineJob({
                 bankAccountId
               );
               const transactions = mappedTransactions.map((transaction) =>
-<<<<<<< HEAD
-                transform({ transaction, inverted, timezone })
-=======
                 transform({ transaction, inverted, timezone, dateAdjustment }),
->>>>>>> upstream/main
               );
 
               await processTransactions({ transactions, io, supabase, teamId });
@@ -118,11 +114,7 @@ client.defineJob({
         );
 
         const transactions = mappedTransactions.map((transaction) =>
-<<<<<<< HEAD
-          transform({ transaction, inverted, timezone })
-=======
           transform({ transaction, inverted, timezone, dateAdjustment }),
->>>>>>> upstream/main
         );
 
         await processTransactions({ transactions, io, supabase, teamId });

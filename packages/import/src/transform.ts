@@ -7,18 +7,12 @@ export function transform({
   transaction,
   inverted,
   timezone,
-<<<<<<< HEAD
-=======
   dateAdjustment,
->>>>>>> upstream/main
 }: {
   transaction: Transaction;
   inverted: boolean;
   timezone: string;
-<<<<<<< HEAD
-=======
   dateAdjustment?: number;
->>>>>>> upstream/main
 }) {
   return {
     internal_id: `${transaction.teamId}_${uuidv4()}`,
