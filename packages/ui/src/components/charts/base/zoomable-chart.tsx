@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Area, CartesianGrid, ComposedChart, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Area, Bar, CartesianGrid, ComposedChart, Line, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { Button } from "../../button"
 import {
     Card,
@@ -45,6 +45,8 @@ export type ZoomableChartProps = {
     height?: number;
     /** Optional description for the chart footer */
     footerDescription?: string;
+    /** Chart type: 'area' or 'bar' or 'line' (defaults to 'area') */
+    chartType?: 'area' | 'bar' | 'line';
 };
 
 const chartConfig = {
@@ -100,7 +102,7 @@ export function simulateData(start = '2024-01-01T00:00:00Z', end = '2024-01-02T0
  * @param props - The props for the ZoomableChart component
  * @returns A React component rendering the zoomable chart
  */
-export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events", height = 400, footerDescription }: ZoomableChartProps) {
+export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events", height = 400, footerDescription, chartType = 'area' }: ZoomableChartProps) {
     const [data, setData] = useState<DataPoint[]>(initialData || []);
     const [refAreaLeft, setRefAreaLeft] = useState<string | null>(null);
     const [refAreaRight, setRefAreaRight] = useState<string | null>(null);
@@ -252,6 +254,40 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
         return string.charAt(0).toUpperCase() + string.slice(1);
     };
 
+    const renderChart = () => {
+        if (chartType === 'bar') {
+            return (
+                <Bar
+                    type="monotone"
+                    dataKey="events"
+                    stroke={chartConfig.events.color}
+                    fill={chartConfig.events.color}
+                    isAnimationActive={false}
+                />
+            );
+        } else if (chartType === 'area') {
+            return (
+                <Area
+                    type="monotone"
+                    dataKey="events"
+                    stroke={chartConfig.events.color}
+                    fillOpacity={1}
+                    fill="url(#colorEvents)"
+                    isAnimationActive={false}
+                />
+            );
+        } else {
+            return (
+                <Line
+                    type="monotone"
+                    dataKey="events"
+                    stroke={chartConfig.events.color}
+                    isAnimationActive={false}
+                />
+            );
+        }
+    };
+
     console.log("details", {
         data,
         zoomedData,
@@ -341,14 +377,7 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
                                     }
                                 />
                                 <ChartLegend content={<ChartLegendContent nameKey={dataNameKey} hideIcon={false} hidden={false} />} />
-                                <Area
-                                    type="monotone"
-                                    dataKey="events"
-                                    stroke={chartConfig.events.color}
-                                    fillOpacity={1}
-                                    fill="url(#colorEvents)"
-                                    isAnimationActive={false}
-                                />
+                                {renderChart()}
                                 {refAreaLeft && refAreaRight && (
                                     <ReferenceArea
                                         x1={refAreaLeft}

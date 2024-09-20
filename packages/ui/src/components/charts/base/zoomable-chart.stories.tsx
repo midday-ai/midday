@@ -82,3 +82,25 @@ EuroChart.args = {
     description: "Events over time",
     footerDescription: "This is a footer description",
 };
+
+export const LineChart = Template.bind({});
+LineChart.args = {
+    ...Default.args,
+    title: "Events",
+    dataNameKey: "events",
+    description: "Events over time",
+    footerDescription: "This is a footer description",
+    chartType: "line",
+};
+
+export const BarChart = Template.bind({});
+BarChart.args = {
+    ...Default.args,
+    title: "Events",
+    dataNameKey: "events",
+    description: "Events over time",
+    footerDescription: "This is a footer description",
+    chartType: "bar",
+};
+
+
