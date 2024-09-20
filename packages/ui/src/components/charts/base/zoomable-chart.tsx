@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Area, Bar, CartesianGrid, ComposedChart, Line, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Area, Bar, CartesianGrid, ComposedChart, Line, Radar, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { Button } from "../../button"
 import {
     Card,
@@ -45,7 +45,7 @@ export type ZoomableChartProps = {
     height?: number;
     /** Optional description for the chart footer */
     footerDescription?: string;
-    /** Chart type: 'area' or 'bar' or 'line' (defaults to 'area') */
+    /** Chart type: 'area' or 'bar' or 'line' or 'pie' (defaults to 'area') */
     chartType?: 'area' | 'bar' | 'line';
 };
 
@@ -276,7 +276,7 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
                     isAnimationActive={false}
                 />
             );
-        } else {
+        }  else {
             return (
                 <Line
                     type="monotone"

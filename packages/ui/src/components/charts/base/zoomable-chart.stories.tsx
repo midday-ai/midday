@@ -102,5 +102,3 @@ BarChart.args = {
     footerDescription: "This is a footer description",
     chartType: "bar",
 };
-
-
