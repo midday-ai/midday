@@ -156,10 +156,7 @@ export type GetTransactionsParams = {
   teamId: string;
   to: number;
   from: number;
-  sort?: {
-    column: string;
-    value: "asc" | "desc";
-  };
+  sort?: string[];
   searchQuery?: string;
   filter?: {
     statuses?: string[];
@@ -179,6 +176,7 @@ export async function getTransactionsQuery(
   params: GetTransactionsParams,
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
+
   const {
     statuses,
     attachments,
@@ -223,11 +221,11 @@ export async function getTransactionsQuery(
     if (column === "attachment") {
       query.order("is_fulfilled", { ascending });
     } else if (column === "assigned") {
-      query.order("assigned_id", { ascending });
+      query.order("assigned(full_name)", { ascending });
     } else if (column === "bank_account") {
-      query.order("bank_account_id", { ascending });
+      query.order("bank_account(name)", { ascending });
     } else if (column === "category") {
-      query.order("category_slug", { ascending });
+      query.order("category(name)", { ascending });
     } else {
       query.order(column, { ascending });
     }
@@ -238,8 +236,11 @@ export async function getTransactionsQuery(
   }
 
   if (start && end) {
-    query.gte("date", start);
-    query.lte("date", end);
+    const fromDate = new UTCDate(start);
+    const toDate = new UTCDate(end);
+
+    query.gte("date", fromDate.toISOString());
+    query.lte("date", toDate.toISOString());
   }
 
   if (searchQuery) {

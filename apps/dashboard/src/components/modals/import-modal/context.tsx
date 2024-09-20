@@ -30,6 +30,7 @@ export const importSchema = z.object({
   date: z.string(),
   description: z.string(),
   inverted: z.boolean(),
+  date_adjustment: z.number().optional(),
   table: z.array(z.record(z.string(), z.string())).optional(),
   import_type: z.enum(["csv", "image"]),
 });
@@ -39,6 +40,7 @@ export type ImportCsvFormData = {
   currency: string;
   bank_account_id: string;
   inverted: boolean;
+  date_adjustment: number | null;
   table: Record<string, string>[] | null;
   import_type: "csv" | "image";
 } & Record<keyof typeof mappableFields, string>;

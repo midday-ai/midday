@@ -15,6 +15,7 @@ client.defineJob({
     schema: z.object({
       importType: z.enum(["csv", "image"]),
       inverted: z.boolean(),
+      dateAdjustment: z.number().optional(),
       filePath: z.array(z.string()).optional(),
       bankAccountId: z.string(),
       currency: z.string(),
@@ -40,6 +41,7 @@ client.defineJob({
       currency,
       mappings,
       inverted,
+      dateAdjustment,
       table,
       timezone,
     } = payload;
@@ -86,7 +88,11 @@ client.defineJob({
                 bankAccountId
               );
               const transactions = mappedTransactions.map((transaction) =>
+<<<<<<< HEAD
                 transform({ transaction, inverted, timezone })
+=======
+                transform({ transaction, inverted, timezone, dateAdjustment }),
+>>>>>>> upstream/main
               );
 
               await processTransactions({ transactions, io, supabase, teamId });
@@ -112,7 +118,11 @@ client.defineJob({
         );
 
         const transactions = mappedTransactions.map((transaction) =>
+<<<<<<< HEAD
           transform({ transaction, inverted, timezone })
+=======
+          transform({ transaction, inverted, timezone, dateAdjustment }),
+>>>>>>> upstream/main
         );
 
         await processTransactions({ transactions, io, supabase, teamId });

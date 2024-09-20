@@ -1,7 +1,21 @@
-import { isValid, parse } from "date-fns";
+import { addDays, isValid, parse, subDays } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 
-export function formatDate(date: string, timezone = "America/New_York") {
+function getAdjustedDate(date: string, dateAdjustment?: number) {
+  const adjustedDate = dateAdjustment
+    ? dateAdjustment > 0
+      ? addDays(date, Math.abs(dateAdjustment)).toISOString()
+      : subDays(date, Math.abs(dateAdjustment)).toISOString()
+    : date;
+
+  return adjustedDate;
+}
+
+export function formatDate(
+  date: string,
+  timezone = "America/New_York",
+  dateAdjustment?: number,
+) {
   const formats = [
     "dd/MM/yyyy",
     "yyyy-MM-dd",
@@ -28,7 +42,9 @@ export function formatDate(date: string, timezone = "America/New_York") {
   for (const format of formats) {
     const parsedDate = parse(date, format, new Date());
     if (isValid(parsedDate)) {
-      return formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd");
+      const date = formatInTimeZone(parsedDate, timezone, "yyyy-MM-dd");
+
+      return getAdjustedDate(date, dateAdjustment);
     }
   }
 
@@ -40,7 +56,9 @@ export function formatDate(date: string, timezone = "America/New_York") {
   const value = date.includes("T") ? date : date.replace(/[^0-9-\.\/]/g, "");
 
   if (isValid(new Date(value))) {
-    return formatInTimeZone(new Date(value), timezone, "yyyy-MM-dd");
+    const date = formatInTimeZone(new Date(value), timezone, "yyyy-MM-dd");
+
+    return getAdjustedDate(date, dateAdjustment);
   }
 
   // If all parsing attempts fail, return undefined
