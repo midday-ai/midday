@@ -994,7 +994,7 @@ export async function getTrackerRecordsByRangeQuery(
   }, {});
 
   const totalDuration = data?.reduce(
-    (duration, item) => item.duration ?? 0 + duration,
+    (duration, item) => item.duration + duration,
     0,
   );
 

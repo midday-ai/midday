@@ -90,7 +90,7 @@ export function TrackerSchedule() {
         <h2 className="text-xl text-[#878787]">
           <MotionNumber
             value={
-              data.meta?.totalDuration ? data.meta.totalDuration / 3600 : 0
+              data?.meta?.totalDuration ? data.meta.totalDuration / 3600 : 0
             }
           />
           h

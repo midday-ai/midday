@@ -2,6 +2,8 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { sortDates } from "@/utils/tracker";
+import { createClient } from "@midday/supabase/client";
+import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -18,7 +20,10 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
+import MotionNumber from "motion-number";
+import { useEffect, useState } from "react";
 import { isHotkeyPressed, useHotkeys } from "react-hotkeys-hook";
+import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
 
 type TrackerMeta = {
@@ -31,20 +36,17 @@ type TrackerRecord = {
   date: string;
 };
 
-type Props = {
-  date?: string;
-  meta?: TrackerMeta;
-  data?: Record<string, TrackerRecord[]>;
-};
-
-export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
+export function TrackerCalendar() {
   const {
     date: currentDate,
     range,
     setParams,
     selectedDate,
-  } = useTrackerParams(initialDate);
+  } = useTrackerParams();
 
+  const supabase = createClient();
+  const [data, setData] = useState();
+  const [meta, setMeta] = useState();
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
@@ -53,6 +55,28 @@ export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
     start: calendarStart,
     end: calendarEnd,
   });
+
+  const start = startOfMonth(currentDate);
+  const end = endOfMonth(currentDate);
+
+  useEffect(() => {
+    async function fetchData() {
+      const trackerData = await getTrackerRecordsByRangeQuery(supabase, {
+        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+        from: formatISO(start, {
+          representation: "date",
+        }),
+        to: formatISO(end, {
+          representation: "date",
+        }),
+      });
+
+      setData(trackerData?.data);
+      setMeta(trackerData?.meta);
+    }
+
+    fetchData();
+  }, [currentDate]);
 
   const sortedDates = sortDates(range ?? []);
 
@@ -105,11 +129,25 @@ export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
     <div ref={ref}>
       <div className="mt-8">
         <div className="flex items-center justify-between mb-6">
-          <TrackerMonthSelect dateFormat="MMMM" />
+          <div>
+            <h2 className="font-medium text-[#707070] dark:text-[#878787] text-xl mb-2">
+              Total hours
+            </h2>
+            <div className="text-[#121212] dark:text-[#F5F5F3] text-4xl">
+              <MotionNumber
+                value={meta?.totalDuration ? meta.totalDuration / 3600 : 0}
+              />
+              h
+            </div>
+          </div>
 
-          <Button variant="outline" size="icon">
-            <Icons.Tune size={16} />
-          </Button>
+          <div className="flex space-x-2">
+            <TrackerMonthSelect dateFormat="MMMM" />
+
+            <Button variant="outline" size="icon">
+              <Icons.Tune size={16} />
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-7 gap-px border border-border bg-border">
@@ -126,12 +164,11 @@ export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
               new Date(date).getMonth() === new Date(currentDate).getMonth();
 
             return (
-              <button
-                type="button"
-                onClick={() => handleOnSelect(date)}
+              <div
+                // onClick={() => handleOnSelect(date)}
                 key={index.toString()}
                 className={cn(
-                  "pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left",
+                  "pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left flex space-x-2",
                   isCurrentMonth && isToday(date)
                     ? "bg-[#202020"
                     : "bg-background",
@@ -156,7 +193,10 @@ export function TrackerCalendar({ date: initialDate, meta, data }: Props) {
                 )}
               >
                 <div>{format(date, "d")}</div>
-              </button>
+                <TrackerEvents
+                  data={data?.[formatISO(date, { representation: "date" })]}
+                />
+              </div>
             );
           })}
         </div>
