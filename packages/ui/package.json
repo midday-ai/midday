@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
-  "files": ["tailwind.config.ts", "postcss.config.js", "globals.css"],
+  "files": [
+    "tailwind.config.ts",
+    "postcss.config.js",
+    "globals.css"
+  ],
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
     "lint": "biome check .",
@@ -79,7 +83,8 @@
     "./cards/linked-account-card/linked-account-card": "./src/components/cards/linked-account-card/linked-account-card.tsx",
     "./cards/transaction-card/transaction-card": "./src/components/cards/transaction-card/transaction-card.tsx",
     "./carousel": "./src/components/carousel.tsx",
-    "./chart": "./src/types/chart.tsx",
+    "./chart": "./src/components/chart.tsx",
+    "./charts/base/analytics-chart": "./src/components/charts/base/analytics-chart.tsx",
     "./charts/base/area-chart": "./src/components/charts/base/area-chart.tsx",
     "./charts/base/bar-chart": "./src/components/charts/base/bar-chart.tsx",
     "./charts/base/bar-chart-multi": "./src/components/charts/base/bar-chart-multi.tsx",
@@ -87,6 +92,7 @@
     "./charts/base/chart-wrapper": "./src/components/charts/base/chart-wrapper.tsx",
     "./charts/base/radial-chart": "./src/components/charts/base/radial-chart.tsx",
     "./charts/base/scatter-chart": "./src/components/charts/base/scatter-chart.tsx",
+    "./charts/base/zoomable-chart": "./src/components/charts/base/zoomable-chart.tsx",
     "./charts/financials": "./src/components/charts/financials/index.tsx",
     "./charts/financials/account-balance": "./src/components/charts/financials/account-balance/index.tsx",
     "./charts/financials/account-balance/account-balance-chart": "./src/components/charts/financials/account-balance/account-balance-chart.tsx",
@@ -283,6 +289,7 @@
     "./transaction-table/user-nav": "./src/components/transaction-table/user-nav.tsx",
     "./truncate": "./src/utils/truncate.ts",
     "./types": "./src/types/index.tsx",
+    "./types/chart": "./src/types/chart.tsx",
     "./use-debounce": "./src/hooks/use-debounce.ts",
     "./use-enter-submit": "./src/hooks/use-enter-submit.ts",
     "./use-media-query": "./src/hooks/use-media-query.ts",
