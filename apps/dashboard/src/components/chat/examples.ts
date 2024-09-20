@@ -12,4 +12,5 @@ export const chatExamples = [
   "Forecast revenue",
   "Find a document",
   "Recurring transactions",
+  "Top expenses this month",
 ];
