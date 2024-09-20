@@ -26,7 +26,7 @@ import Link from "next/link";
 import { userAgent } from "next/server";
 import React from "react";
 
-import { featureFlags } from "@solomon-ai/env/dashboard";
+import { featureFlags } from "@internal/env/dashboard";
 
 export const metadata: Metadata = {
   title: `Login | ${config.company}`,
