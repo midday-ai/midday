@@ -97,7 +97,7 @@ client.defineJob({
             };
           },
         );
-      })
+      }),
     );
 
     await generateExport.update("generate-export-attachments-end", {
