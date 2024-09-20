@@ -95,7 +95,7 @@ client.defineJob({
               name,
               blob: data,
             };
-          }
+          },
         );
       })
     );
