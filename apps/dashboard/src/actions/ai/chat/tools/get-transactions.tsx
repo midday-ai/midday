@@ -10,7 +10,7 @@ type Args = {
 
 export function getTransactionsTool({ aiState }: Args) {
   return {
-    description: "Find transactions",
+    description: "Find transactions or show expenses",
     parameters: z.object({
       name: z.string().describe("The name of the transactions").optional(),
       categories: z
@@ -18,6 +18,10 @@ export function getTransactionsTool({ aiState }: Args) {
         .describe("The categories of the transactions")
         .optional(),
       amount: z.string().describe("The amount of the transactions").optional(),
+      expense: z
+        .boolean()
+        .describe("Filter for expense transactions")
+        .optional(),
       recurring: z
         .array(z.enum(["all", "weekly", "monthly", "annually"]))
         .describe("Filter for recurring transactions")
@@ -28,6 +32,7 @@ export function getTransactionsTool({ aiState }: Args) {
           "Filter transactions if they are completed or not, if they have reciepts or attachments",
         )
         .optional(),
+      limit: z.number().describe("Limit the number of transactions").optional(),
       fromDate: z.coerce
         .date()
         .describe("Filter transactions from this date, in ISO-8601 format")
@@ -42,6 +47,8 @@ export function getTransactionsTool({ aiState }: Args) {
         name,
         categories,
         amount,
+        expense,
+        limit = 4,
         fromDate,
         toDate,
         attachments,
@@ -60,11 +67,14 @@ export function getTransactionsTool({ aiState }: Args) {
         recurring,
       };
 
+      const sort = expense ? ["amount", "asc"] : undefined;
+
       const { data, meta } = await getTransactions({
         searchQuery,
         from: 0,
-        to: 4,
+        to: limit,
         filter,
+        sort,
       });
 
       const props = {
@@ -72,6 +82,7 @@ export function getTransactionsTool({ aiState }: Args) {
         meta,
         q: searchQuery,
         filter,
+        sort,
       };
 
       aiState.done({

@@ -43,7 +43,9 @@ export async function UserMenu({ onlySignOut }) {
             <DropdownMenuLabel>
               <div className="flex justify-between items-center">
                 <div className="flex flex-col">
-                  <span className="truncate">{userData.full_name}</span>
+                  <span className="truncate line-clamp-1 max-w-[155px] block">
+                    {userData?.full_name}
+                  </span>
                   <span className="truncate text-xs text-[#606060] font-normal">
                     {userData.email}
                   </span>

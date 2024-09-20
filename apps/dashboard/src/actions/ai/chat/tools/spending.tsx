@@ -13,7 +13,7 @@ type Args = {
 
 export function getSpendingTool({ aiState, dateFrom, dateTo }: Args) {
   return {
-    description: "Get spending from transactions",
+    description: "Get spending from category",
     parameters: z.object({
       currency: z.string().describe("The currency for spending").optional(),
       category: z.string().describe("The category for spending"),

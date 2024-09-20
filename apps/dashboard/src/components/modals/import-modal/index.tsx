@@ -235,6 +235,7 @@ export function ImportModal({ currencies, defaultCurrency }: Props) {
                         bankAccountId: data.bank_account_id,
                         currentBalance: data.balance,
                         inverted: data.inverted,
+                        dateAdjustment: data.date_adjustment,
                         table: data.table,
                         importType: data.import_type,
                         mappings: {
