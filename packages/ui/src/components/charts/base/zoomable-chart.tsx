@@ -6,6 +6,7 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "../../card"
@@ -42,6 +43,8 @@ export type ZoomableChartProps = {
     dataNameKey?: string;
     /** Height of the chart in pixels (defaults to 400) */
     height?: number;
+    /** Optional description for the chart footer */
+    footerDescription?: string;
 };
 
 const chartConfig = {
@@ -97,7 +100,7 @@ export function simulateData(start = '2024-01-01T00:00:00Z', end = '2024-01-02T0
  * @param props - The props for the ZoomableChart component
  * @returns A React component rendering the zoomable chart
  */
-export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events", height = 400 }: ZoomableChartProps) {
+export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events", height = 400, footerDescription }: ZoomableChartProps) {
     const [data, setData] = useState<DataPoint[]>(initialData || []);
     const [refAreaLeft, setRefAreaLeft] = useState<string | null>(null);
     const [refAreaRight, setRefAreaRight] = useState<string | null>(null);
@@ -360,6 +363,11 @@ export function ZoomableChart({ data: initialData, description, title, dataNameK
                     </div>
                 </ChartContainer>
             </CardContent>
+            {footerDescription && (
+                <CardFooter className="text-sm text-muted-foreground p-[3%] border-t">
+                    {footerDescription}
+                </CardFooter>
+            )}
         </Card>
     )
 }

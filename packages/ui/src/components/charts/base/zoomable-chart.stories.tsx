@@ -80,4 +80,5 @@ EuroChart.args = {
     title: "Events",
     dataNameKey: "events",
     description: "Events over time",
+    footerDescription: "This is a footer description",
 };
