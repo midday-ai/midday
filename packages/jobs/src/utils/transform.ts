@@ -1,5 +1,6 @@
 import type { Transaction as EngineTransaction } from "@midday/engine/src/providers/types.js";
 import type { Database } from "@midday/supabase/types";
+import type { Transactions } from "@solomon-ai/financial-engine-sdk/resources/transactions";
 
 
 type TransformTransactionData = {
@@ -33,7 +34,7 @@ export function transformTransaction({
 }
 
 export function getClassification(
-  type: Database["public"]["Enums"]["account_type"],
+  type: Database["public"]["Enums"]["account_type"]
 ) {
   switch (type) {
     case "credit":

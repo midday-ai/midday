@@ -57,7 +57,7 @@ client.defineJob({
         const content = await fileData?.text();
 
         await new Promise((resolve, reject) => {
-          Papa.parse(content, {
+          Papa.parse(content as string, {
             header: true,
             skipEmptyLines: true,
             worker: false,
@@ -68,7 +68,7 @@ client.defineJob({
                 data?: Record<string, string>[];
                 errors: { message: string }[];
               },
-              parser: any,
+              parser: any
             ) => {
               parser.pause();
 
@@ -83,11 +83,10 @@ client.defineJob({
                 mappings,
                 currency,
                 teamId,
-                bankAccountId,
+                bankAccountId
               );
-
               const transactions = mappedTransactions.map((transaction) =>
-                transform({ transaction, inverted }),
+                transform({ transaction, inverted, timezone })
               );
 
               await processTransactions({ transactions, io, supabase, teamId });
@@ -109,11 +108,11 @@ client.defineJob({
           mappings,
           currency,
           teamId,
-          bankAccountId,
+          bankAccountId
         );
 
         const transactions = mappedTransactions.map((transaction) =>
-          transform({ transaction, inverted, timezone }),
+          transform({ transaction, inverted, timezone })
         );
 
         await processTransactions({ transactions, io, supabase, teamId });

@@ -12,17 +12,19 @@
   },
   "dependencies": {
     "@fast-csv/format": "5.0.0",
-    "@solomon-ai/financial-engine-sdk": "^0.0.1-alpha.1",
     "@midday/documents": "workspace:*",
     "@midday/supabase": "workspace:*",
     "@midday/engine": "workspace:*",
     "@midday/import": "workspace:*",
+    "@solomon-ai/financial-engine-sdk": "^0.0.1-alpha.1",
     "@trigger.dev/react": "2.3.19",
     "@trigger.dev/resend": "2.3.19",
     "@trigger.dev/sdk": "2.3.19",
     "@trigger.dev/supabase": "^2.3.19",
     "@zip.js/zip.js": "2.7.52",
     "change-case": "^5.4.4",
-    "nanoid": "^5.0.7"
+    "date-fns": "^2.30.0",
+    "nanoid": "^5.0.7",
+    "pdf-lib": "^1.17.1"
   }
 }
