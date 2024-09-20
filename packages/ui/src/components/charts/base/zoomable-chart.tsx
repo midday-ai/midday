@@ -1,13 +1,14 @@
 'use client'
-import { Button } from "@midday/ui/button"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { Area, CartesianGrid, ComposedChart, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Button } from "../../button"
 import {
     Card,
     CardContent,
+    CardDescription,
     CardHeader,
     CardTitle,
-} from "@midday/ui/card"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Area, CartesianGrid, ComposedChart, ReferenceArea, ResponsiveContainer, XAxis, YAxis } from "recharts"
+} from "../../card"
 import {
     ChartConfig,
     ChartContainer,
@@ -22,8 +23,11 @@ type DataPoint = {
     events: number;
 };
 
-type ZoomableChartProps = {
+export type ZoomableChartProps = {
     data?: DataPoint[];
+    description?: string;
+    title?: string;
+    dataNameKey?: string;
 };
 
 const chartConfig = {
@@ -59,7 +63,7 @@ export function simulateData(start = '2024-01-01T00:00:00Z', end = '2024-01-02T0
     return simulatedData;
 }
 
-export function ZoomableChart({ data: initialData }: ZoomableChartProps) {
+export function ZoomableChart({ data: initialData, description, title, dataNameKey = "events" }: ZoomableChartProps) {
     const [data, setData] = useState<DataPoint[]>(initialData || []);
     const [refAreaLeft, setRefAreaLeft] = useState<string | null>(null);
     const [refAreaRight, setRefAreaRight] = useState<string | null>(null);
@@ -73,8 +77,8 @@ export function ZoomableChart({ data: initialData }: ZoomableChartProps) {
         if (initialData?.length) {
             setData(initialData);
             setOriginalData(initialData);
-            setStartTime(initialData[0]?.date ?? null);
-            setEndTime(initialData[initialData.length - 1]?.date ?? null);
+            setStartTime(initialData[0].date);
+            setEndTime(initialData[initialData.length - 1].date);
         }
     }, [initialData]);
 
@@ -121,8 +125,8 @@ export function ZoomableChart({ data: initialData }: ZoomableChartProps) {
     };
 
     const handleReset = () => {
-        setStartTime(originalData[0]?.date ?? null);
-        setEndTime(originalData[originalData.length - 1]?.date ?? null);
+        setStartTime(originalData[0].date);
+        setEndTime(originalData[originalData.length - 1].date);
     };
 
     const handleZoom = (e: React.WheelEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
@@ -177,18 +181,34 @@ export function ZoomableChart({ data: initialData }: ZoomableChartProps) {
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const capitalizeFirstLetter = (string: string) => {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+
+    console.log("details", {
+        data,
+        zoomedData,
+        startTime,
+        endTime,
+        originalData,
+        total,
+    })
+
     return (
         <Card className="w-full h-full">
             <CardHeader className="flex-col items-stretch space-y-0 border-b p-0 sm:flex-row hidden sm:flex">
                 <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-                    <CardTitle>Zoomable Chart Demo</CardTitle>
+                    {title && <CardTitle>{title}</CardTitle>}
+                    {description && (
+                        <CardDescription className="text-sm text-muted-foreground">{description}</CardDescription>
+                    )}
                 </div>
                 <div className="flex">
                     <div
                         className="relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l bg-muted/10 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                     >
                         <span className="text-xs text-muted-foreground">
-                            Events
+                            {capitalizeFirstLetter(dataNameKey)}
                         </span>
                         <span className="text-lg font-bold leading-none sm:text-3xl">
                             {total.toLocaleString()}
@@ -248,7 +268,7 @@ export function ZoomableChart({ data: initialData }: ZoomableChartProps) {
                                     content={
                                         <ChartTooltipContent
                                             className="w-[150px] sm:w-[200px] font-mono text-xs sm:text-sm"
-                                            nameKey="events"
+                                            nameKey={dataNameKey}
                                             labelFormatter={(value) => new Date(value).toLocaleString()}
                                         />
                                     }
