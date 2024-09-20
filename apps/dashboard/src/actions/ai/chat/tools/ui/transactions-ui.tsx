@@ -20,9 +20,10 @@ type Props = {
   data: any;
   q: string;
   filter: Record<string, string>;
+  sort?: Record<string, string>;
 };
 
-export function TransactionsUI({ meta, data, q, filter }: Props) {
+export function TransactionsUI({ meta, data, q, filter, sort }: Props) {
   const t = useI18n();
 
   if (!meta.count) {
@@ -100,7 +101,7 @@ export function TransactionsUI({ meta, data, q, filter }: Props) {
         </Table>
       )}
 
-      {meta.count > 5 && <ShowAllButton filter={filter} q={q} />}
+      {meta.count > 5 && <ShowAllButton filter={filter} q={q} sort={sort} />}
     </BotCard>
   );
 }
