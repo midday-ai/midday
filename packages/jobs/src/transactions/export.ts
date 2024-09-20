@@ -54,7 +54,7 @@ client.defineJob({
         category:transaction_categories(id, name, description),
         bank_account:bank_accounts(id, name)
       `,
-        { count: "exact" }
+        { count: "exact" },
       )
       .in("id", transactionIds)
       .eq("team_id", teamId);
@@ -179,7 +179,7 @@ client.defineJob({
       if (attachment?.value?.blob) {
         zipWriter.add(
           attachment.value.name,
-          new BlobReader(attachment.value.blob)
+          new BlobReader(attachment.value.blob),
         );
       }
     });
