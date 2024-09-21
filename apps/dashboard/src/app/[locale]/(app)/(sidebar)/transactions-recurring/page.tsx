@@ -17,7 +17,7 @@ import type { Metadata } from "next";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
-import { searchParamsCache } from "./search-params";
+import { searchParamsCacheRecurring } from "./search-params";
 
 export const metadata: Metadata = {
   title: "Transactions | Midday",
@@ -39,11 +39,7 @@ export default async function Transactions({
     statuses,
     recurring,
     accounts,
-  } = searchParamsCache.parse(searchParams);
-
-  console.log("the txn query is", {
-    query
-  })
+  } = searchParamsCacheRecurring.parse(searchParams);
 
   // Move this in a suspense
   const [accountsData, categoriesData, teamMembersData, userData] =
@@ -89,10 +85,10 @@ export default async function Transactions({
             </div>
 
             <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-              Transactions
+              Recurring Transactions
             </h2>
             <p className="mt-6 text-lg leading-8 text-foreground/3">
-              Detected transactions across your accounts
+              Detected recurring transactions across your accounts
             </p>
             <div>
               <h2 className="py-5 text-2xl font-bold tracking-tight">
@@ -128,6 +124,7 @@ export default async function Transactions({
             id: member?.user?.id,
             name: member.user?.full_name,
           }))}
+          hideRecurring={true}
         />
         <TransactionsActions isEmpty={isEmpty} />
       </div>
