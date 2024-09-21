@@ -20,7 +20,7 @@ import { Suspense } from "react";
 import { searchParamsCacheRecurring } from "./search-params";
 
 export const metadata: Metadata = {
-  title: "Transactions | Midday",
+  title: "Recurring Transactions | Midday",
 };
 
 export default async function Transactions({
