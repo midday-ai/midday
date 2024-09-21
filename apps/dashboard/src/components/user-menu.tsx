@@ -14,6 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
+import ChangelogWidget from "./widgets/feature-base/admin-product-widget";
 
 export async function UserMenu({ onlySignOut }) {
   const { data: userData } = await getUser();
@@ -76,6 +77,18 @@ export async function UserMenu({ onlySignOut }) {
                   <DropdownMenuShortcut>⌘E</DropdownMenuShortcut>
                 </DropdownMenuItem>
               </Link>
+
+              {/* <DropdownMenuItem>
+                <ChangelogWidget
+                  organization="solomonai"
+                  theme="light"
+                  fullscreenPopup={true}
+                  locale="en"
+                  usersName={userData?.full_name}
+                />
+                <DropdownMenuShortcut>⌘C</DropdownMenuShortcut>
+              </DropdownMenuItem> */}
+              
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />
