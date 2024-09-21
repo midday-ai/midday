@@ -105,7 +105,7 @@ export const columns: ColumnDef<Transaction>[] = [
                 <span
                   className={cn(
                     row.original?.category?.slug === "income" &&
-                    "text-[#00C969]",
+                      "text-[#00C969]",
                   )}
                 >
                   <div className="flex space-x-2 items-center">
@@ -322,7 +322,7 @@ export const columns: ColumnDef<Transaction>[] = [
                 }}
               >
                 {table.options.meta?.deleteTransactions?.status ===
-                  "executing" ? (
+                "executing" ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   "Confirm"

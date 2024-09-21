@@ -87,7 +87,12 @@ export default async function Layout({
         <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
           <Header />
           {children}
-          <AccessibilityWidget email={user.data.email as string} name={user.data.full_name as string} id={user.data.id as string} profilePicture={user.data.avatar_url as string} />
+          <AccessibilityWidget
+            email={user.data.email as string}
+            name={user.data.full_name as string}
+            id={user.data.id as string}
+            profilePicture={user.data.avatar_url as string}
+          />
         </div>
 
         {/* This is used to make the header draggable on macOS */}
@@ -98,7 +103,9 @@ export default async function Layout({
         <SelectBankAccountsModal />
         <ImportModal
           currencies={uniqueCurrencies}
-          defaultCurrency={currencies[countryCode as keyof typeof currencies] || "USD"}
+          defaultCurrency={
+            currencies[countryCode as keyof typeof currencies] || "USD"
+          }
         />
         <ExportStatus />
         <HotKeys />

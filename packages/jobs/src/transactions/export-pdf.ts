@@ -22,7 +22,7 @@ async function generateTransactionsPDF(
   transactions: Transaction[],
   teamName: string,
   dateRange: { start: string; end: string },
-  merchant?: string
+  merchant?: string,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
@@ -46,7 +46,7 @@ async function generateTransactionsPDF(
       y: height - 80,
       size: fontSize,
       color: rgb(0.4, 0.4, 0.4),
-    }
+    },
   );
 
   if (merchant) {
@@ -213,7 +213,7 @@ client.defineJob({
       transactions,
       teamData.name as string,
       { start: startDate, end: endDate },
-      merchantName ?? undefined
+      merchantName ?? undefined,
     );
 
     // Upload PDF to Supabase storage

@@ -42,8 +42,8 @@ export default async function Transactions({
   } = searchParamsCache.parse(searchParams);
 
   console.log("the txn query is", {
-    query
-  })
+    query,
+  });
 
   // Move this in a suspense
   const [accountsData, categoriesData, teamMembersData, userData] =

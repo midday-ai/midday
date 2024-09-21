@@ -398,10 +398,10 @@ export function TransactionsSearchFilter({
                     setFilters({
                       categories: filters?.categories?.includes(selected.slug)
                         ? filters.categories.filter((s) => s !== selected.slug)
-                          .length > 0
+                            .length > 0
                           ? filters.categories.filter(
-                            (s) => s !== selected.slug,
-                          )
+                              (s) => s !== selected.slug,
+                            )
                           : null
                         : [...(filters?.categories ?? []), selected.slug],
                     });
@@ -432,7 +432,7 @@ export function TransactionsSearchFilter({
                       setFilters({
                         accounts: filters?.accounts?.includes(account.id)
                           ? filters.accounts.filter((s) => s !== account.id)
-                            .length > 0
+                              .length > 0
                             ? filters.accounts.filter((s) => s !== account.id)
                             : null
                           : [...(filters?.accounts ?? []), account.id],
@@ -470,7 +470,8 @@ export function TransactionsSearchFilter({
                       onCheckedChange={() => {
                         setFilters({
                           recurring: filters?.recurring?.includes(id)
-                            ? filters.recurring.filter((s) => s !== id).length > 0
+                            ? filters.recurring.filter((s) => s !== id).length >
+                              0
                               ? filters.recurring.filter((s) => s !== id)
                               : null
                             : [...(filters?.recurring ?? []), id],

@@ -16,8 +16,9 @@ export default function Page() {
           <p className="mt-8 leading-7">Last updated: September 15, 2024</p>
 
           <p className="mt-8 leading-7">
-            Solomon AI (&quot;us&quot;, &quot;we&quot;, or &quot;our&quot;) operates the Solomon AI
-            products (hereinafter referred to as the &quot;Service&quot;).
+            Solomon AI (&quot;us&quot;, &quot;we&quot;, or &quot;our&quot;)
+            operates the Solomon AI products (hereinafter referred to as the
+            &quot;Service&quot;).
           </p>
 
           <p className="mt-8 leading-7">
@@ -35,14 +36,16 @@ export default function Page() {
           </p>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Definitions</h2>
+            Definitions
+          </h2>
           <ul>
             <li>
               <p className="mt-8 leading-7">
                 <strong>Service | Products</strong>
               </p>
               <p className="mt-8 leading-7">
-                Service or Products refer to the Solomon AI applications, websites, and any other offerings operated by Solomon AI
+                Service or Products refer to the Solomon AI applications,
+                websites, and any other offerings operated by Solomon AI
               </p>
             </li>
             <li>
@@ -114,20 +117,25 @@ export default function Page() {
           </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Information Collection and Use</h2>
+            Information Collection and Use
+          </h2>
           <p className="mt-8 leading-7">
             We collect several different types of information for various
             purposes to provide and improve our Service to you.
           </p>
 
-          <h3 className="mt-4 scroll-m-20 text-lg font-semibold tracking-tight">Types of Data Collected</h3>
+          <h3 className="mt-4 scroll-m-20 text-lg font-semibold tracking-tight">
+            Types of Data Collected
+          </h3>
 
-          <h4 className="mt-2 scroll-m-20 text-md font-medium tracking-tight">Personal Data</h4>
+          <h4 className="mt-2 scroll-m-20 text-md font-medium tracking-tight">
+            Personal Data
+          </h4>
           <p className="mt-8 leading-7">
             While using our Service, we may ask you to provide us with certain
             personally identifiable information that can be used to contact or
-            identify you (&ldquo;Personal Data&rdquo;). Personally identifiable information
-            may include, but is not limited to:
+            identify you (&ldquo;Personal Data&rdquo;). Personally identifiable
+            information may include, but is not limited to:
           </p>
 
           <ul className="mt-4 list-disc pl-6">
@@ -144,7 +152,9 @@ export default function Page() {
             the instructions provided in any email we send.
           </p>
 
-          <h4 className="mt-2 scroll-m-20 text-md font-medium tracking-tight">Usage Data</h4>
+          <h4 className="mt-2 scroll-m-20 text-md font-medium tracking-tight">
+            Usage Data
+          </h4>
 
           <p className="mt-8 leading-7">
             When you access the Service with a mobile device, we may collect
@@ -155,7 +165,9 @@ export default function Page() {
             and other diagnostic data (&ldquo;Usage Data&rdquo;).
           </p>
 
-          <h4 className="mt-2 scroll-m-20 text-md font-medium tracking-tight">Tracking & Cookies Data</h4>
+          <h4 className="mt-2 scroll-m-20 text-md font-medium tracking-tight">
+            Tracking & Cookies Data
+          </h4>
           <p className="mt-8 leading-7">
             We use cookies and similar tracking technologies to track the
             activity on our Service and we hold certain information.
@@ -189,23 +201,34 @@ export default function Page() {
           </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Use of Data</h2>
+            Use of Data
+          </h2>
           <p className="mt-8 leading-7">
             Solomon AI uses the collected data for various purposes:
           </p>
           <ul className="mt-4 list-disc pl-6">
             <li>To provide and maintain our Service</li>
             <li>To notify you about changes to our Service</li>
-            <li>To allow you to participate in interactive features of our Service when you choose to do so</li>
+            <li>
+              To allow you to participate in interactive features of our Service
+              when you choose to do so
+            </li>
             <li>To provide customer support</li>
-            <li>To gather analysis or valuable information so that we can improve our Service</li>
+            <li>
+              To gather analysis or valuable information so that we can improve
+              our Service
+            </li>
             <li>To monitor the usage of our Service</li>
             <li>To detect, prevent and address technical issues</li>
-            <li>To provide you with news, special offers and general information about other goods, services and events which we offer that are similar to those that you have already purchased or enquired about unless you have opted not to receive such information</li>
+            <li>
+              To provide you with news, special offers and general information
+              about other goods, services and events which we offer that are
+              similar to those that you have already purchased or enquired about
+              unless you have opted not to receive such information
+            </li>
           </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-
             Legal Basis for Processing Personal Data under the General Data
             Protection Regulation (GDPR)
           </h2>
@@ -221,13 +244,17 @@ export default function Page() {
           <ul className="mt-4 list-disc pl-6">
             <li>We need to perform a contract with you</li>
             <li>You have given us permission to do so</li>
-            <li>The processing is in our legitimate interests and it is not overridden by your rights</li>
+            <li>
+              The processing is in our legitimate interests and it is not
+              overridden by your rights
+            </li>
             <li>For payment processing purposes</li>
             <li>To comply with the law</li>
           </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Retention of Data</h2>
+            Retention of Data
+          </h2>
           <p className="mt-8 leading-7">
             Solomon AI will retain your Personal Data only for as long as is
             necessary for the purposes set out in this Privacy Policy. We will
@@ -245,7 +272,8 @@ export default function Page() {
           </p>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Transfer of Data</h2>
+            Transfer of Data
+          </h2>
           <p className="mt-8 leading-7">
             Your information, including Personal Data, may be transferred to -
             and maintained on - computers located outside of your state,
@@ -253,9 +281,10 @@ export default function Page() {
             protection laws may differ from those of your jurisdiction.
           </p>
           <p className="mt-8 leading-7">
-            If you are located outside United States Of America and choose to provide information
-            to us, please note that we transfer the data, including Personal
-            Data, to United States Of America and process it there.
+            If you are located outside United States Of America and choose to
+            provide information to us, please note that we transfer the data,
+            including Personal Data, to United States Of America and process it
+            there.
           </p>
           <p className="mt-8 leading-7">
             Your consent to this Privacy Policy followed by your submission of
@@ -271,7 +300,8 @@ export default function Page() {
           </p>
           <br />
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Disclosure of Data</h2>
+            Disclosure of Data
+          </h2>
           <h3 className="mt-4">Business Transaction</h3>
           <p className="mt-8 leading-7">
             If Solomon AI is involved in a merger, acquisition or asset sale,
@@ -296,13 +326,20 @@ export default function Page() {
           <ul className="mt-4 list-disc pl-6">
             <li>To comply with a legal obligation</li>
             <li>To protect and defend the rights or property of Solomon AI</li>
-            <li>To prevent or investigate possible wrongdoing in connection with the Service</li>
-            <li>To protect the personal safety of users of the Service or the public</li>
+            <li>
+              To prevent or investigate possible wrongdoing in connection with
+              the Service
+            </li>
+            <li>
+              To protect the personal safety of users of the Service or the
+              public
+            </li>
             <li>To protect against legal liability</li>
           </ul>
           <br />
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Security of Data</h2>
+            Security of Data
+          </h2>
           <p className="mt-8 leading-7">
             The security of your data is important to us but remember that no
             method of transmission over the Internet or method of electronic
@@ -312,13 +349,13 @@ export default function Page() {
           </p>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Our Policy on &ldquo;Do Not Track&rdquo; Signals under the California Online
-            Protection Act (CalOPPA)
+            Our Policy on &ldquo;Do Not Track&rdquo; Signals under the
+            California Online Protection Act (CalOPPA)
           </h2>
           <p className="mt-8 leading-7">
-            We do not support Do Not Track (&ldquo;DNT&rdquo;). Do Not Track is a preference
-            you can set in your web browser to inform websites that you do not
-            want to be tracked.
+            We do not support Do Not Track (&ldquo;DNT&rdquo;). Do Not Track is
+            a preference you can set in your web browser to inform websites that
+            you do not want to be tracked.
           </p>
           <p className="mt-8 leading-7">
             You can enable or disable Do Not Track by visiting the Preferences
@@ -326,7 +363,6 @@ export default function Page() {
           </p>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-
             Your Data Protection Rights under the General Data Protection
             Regulation (GDPR)
           </h2>
@@ -406,12 +442,13 @@ export default function Page() {
           </p>
           <br />
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Service Providers</h2>
+            Service Providers
+          </h2>
           <p className="mt-8 leading-7">
             We may employ third party companies and individuals to facilitate
-            our Service (&quot;Service Providers&quot;), provide the Service on our
-            behalf, perform Service-related services or assist us in analysing
-            how our Service is used.
+            our Service (&quot;Service Providers&quot;), provide the Service on
+            our behalf, perform Service-related services or assist us in
+            analysing how our Service is used.
           </p>
           <p className="mt-8 leading-7">
             These third parties have access to your Personal Data only to
@@ -524,12 +561,13 @@ export default function Page() {
           </ul>
 
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Links to Other Sites</h2>
+            Links to Other Sites
+          </h2>
           <p className="mt-8 leading-7">
             Our Service may contain links to other sites that are not operated
             by us. If you click a third party link, you will be directed to that
-            third party&apos;s site. We strongly advise you to review the Privacy
-            Policy of every site you visit.
+            third party&apos;s site. We strongly advise you to review the
+            Privacy Policy of every site you visit.
           </p>
           <p className="mt-8 leading-7">
             We have no control over and assume no responsibility for the
@@ -553,7 +591,8 @@ export default function Page() {
           </p>
           <br />
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Changes to This Privacy Policy</h2>
+            Changes to This Privacy Policy
+          </h2>
           <p className="mt-8 leading-7">
             We may update our Privacy Policy from time to time. We will notify
             you of any changes by posting the new Privacy Policy on this page.
@@ -570,7 +609,8 @@ export default function Page() {
           </p>
           <br />
           <h2 className="mt-8 scroll-m-20 text-xl font-bold tracking-tight lg:text-2xl">
-            Contact Us</h2>
+            Contact Us
+          </h2>
           <p className="mt-8 leading-7">
             If you have any questions about this Privacy Policy, please contact
             us:

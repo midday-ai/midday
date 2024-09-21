@@ -86,8 +86,6 @@ export default async function Overview({
           </div>
         </Card>
 
-
-
         {/** tabbed charts with income and expense charts */}
         <TabbedCharts
           currency={searchParams.currency ?? "USD"}

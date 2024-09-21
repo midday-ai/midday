@@ -9,7 +9,12 @@ import {
 export const searchParamsCacheRecurring = createSearchParamsCache({
   q: parseAsString,
   page: parseAsInteger.withDefault(0),
-  recurring: parseAsStringLiteral(["all", "weekly", "monthly", "annually"]as const).withDefault("all"),
+  recurring: parseAsStringLiteral([
+    "all",
+    "weekly",
+    "monthly",
+    "annually",
+  ] as const).withDefault("all"),
   attachments: parseAsStringLiteral(["exclude", "include"] as const),
   start: parseAsString,
   end: parseAsString,

@@ -75,7 +75,7 @@ client.defineJob({
       const { teamId } = payload;
 
       await io.logger.info(
-        `Starting manual transaction sync schedule for team: ${teamId}`
+        `Starting manual transaction sync schedule for team: ${teamId}`,
       );
 
       // Register a new scheduler
@@ -87,7 +87,7 @@ client.defineJob({
       });
 
       await io.logger.info(
-        `Successfully registered new scheduler for team: ${teamId}`
+        `Successfully registered new scheduler for team: ${teamId}`,
       );
 
       return {
@@ -96,7 +96,7 @@ client.defineJob({
       };
     } catch (error) {
       await io.logger.error(
-        `Error in manual transaction sync schedule job: ${error instanceof Error ? error.message : "Unknown error"}`
+        `Error in manual transaction sync schedule job: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       return {
         success: false,

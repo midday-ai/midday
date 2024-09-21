@@ -33,15 +33,15 @@ export const processTransactions = async ({
   teamId: string;
 }) => {
   const processedTransactions = transactions.map((transaction) =>
-    createTransactionSchema.safeParse(transaction)
+    createTransactionSchema.safeParse(transaction),
   );
 
   const validTransactions = processedTransactions.filter(
-    (transaction) => transaction.success
+    (transaction) => transaction.success,
   );
 
   const invalidTransactions = processedTransactions.filter(
-    (transaction) => !transaction.success
+    (transaction) => !transaction.success,
   );
 
   if (invalidTransactions.length > 0) {
@@ -61,7 +61,7 @@ export const processTransactions = async ({
           onConflict: "internal_id",
           ignoreDuplicates: true,
         });
-      }
+      },
     );
 
     revalidateTag(`bank_connections_${teamId}`);
@@ -78,13 +78,13 @@ export const mapTransactions = (
   mappings: Record<string, string>,
   currency: string,
   teamId: string,
-  bankAccountId: string
+  bankAccountId: string,
 ): Transaction[] => {
   return data.map((row) => ({
     ...(Object.fromEntries(
       Object.entries(mappings)
         .filter(([_, value]) => value !== "")
-        .map(([key, value]) => [key, row[value]])
+        .map(([key, value]) => [key, row[value]]),
     ) as Transaction),
     currency,
     teamId,

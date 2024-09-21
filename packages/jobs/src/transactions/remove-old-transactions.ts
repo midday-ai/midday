@@ -21,7 +21,7 @@ const TEAMS_PAGE_SIZE = 100; // Number of teams to fetch per page
 async function removeOldTransactions(
   io: any,
   teamId: string,
-  cutoffDate: Date
+  cutoffDate: Date,
 ): Promise<number> {
   let totalRemoved = 0;
   let hasMore = true;
@@ -74,7 +74,7 @@ async function removeOldTransactions(
  * @yields An array of teams for each page.
  */
 async function* fetchTeamsBatches(
-  io: any
+  io: any,
 ): AsyncGenerator<Team[], void, unknown> {
   let lastId: string | null = null;
   let hasMore = true;
@@ -156,7 +156,7 @@ client.defineJob({
         const removedCount = await removeOldTransactions(
           io,
           team.id,
-          cutoffDate
+          cutoffDate,
         );
         results[team.id] = removedCount;
         totalRemoved += removedCount;
@@ -165,7 +165,7 @@ client.defineJob({
         // Log progress every 100 teams
         if (processedTeams % 100 === 0) {
           io.logger.info(
-            `Processed ${processedTeams} teams. Total removed: ${totalRemoved}`
+            `Processed ${processedTeams} teams. Total removed: ${totalRemoved}`,
           );
         }
       }

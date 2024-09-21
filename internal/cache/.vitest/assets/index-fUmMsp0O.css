@@ -180,10 +180,7 @@ html.dark .unhandled-errors[data-v-09d153f7] {
   cursor: pointer;
   stroke: none;
   stroke-width: 2px;
-  transition:
-    filter 0.25s ease,
-    stroke 0.25s ease,
-    stroke-dasharray 0.25s ease;
+  transition: filter 0.25s ease, stroke 0.25s ease, stroke-dasharray 0.25s ease;
 }
 .node:hover:not(.focused) {
   filter: brightness(80%);
@@ -376,15 +373,8 @@ code,
 kbd,
 samp,
 pre {
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    Liberation Mono,
-    Courier New,
-    monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation
+    Mono, Courier New, monospace;
   font-size: 1em;
 }
 small {
@@ -1059,9 +1049,7 @@ span.CodeMirror-selectedtext {
 html,
 body {
   height: 100%;
-  font-family:
-    Readex Pro,
-    sans-serif;
+  font-family: Readex Pro, sans-serif;
   scroll-behavior: smooth;
 }
 :root {
@@ -1277,9 +1265,7 @@ html.dark {
 .v-popper__popper.v-popper__popper--hidden {
   visibility: hidden;
   opacity: 0;
-  transition:
-    opacity 0.15s,
-    visibility 0.15s;
+  transition: opacity 0.15s, visibility 0.15s;
   pointer-events: none;
 }
 .v-popper__popper.v-popper__popper--shown {
@@ -2568,15 +2554,8 @@ html.dark {
 }
 .font-mono,
 [font-mono=""] {
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    Liberation Mono,
-    Courier New,
-    monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation
+    Mono, Courier New, monospace;
 }
 .capitalize,
 [capitalize=""] {

@@ -76,7 +76,9 @@ export default async function Transactions({
   };
 
   // Parse sort parameter
-  const sort = Array.isArray(sortParam) ? sortParam[0]?.split(":") : sortParam?.split(":");
+  const sort = Array.isArray(sortParam)
+    ? sortParam[0]?.split(":")
+    : sortParam?.split(":");
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
 
   const isEmpty = !accountsData?.data?.length;
@@ -180,11 +182,16 @@ function EmptyState(): JSX.Element {
  * @param {any} categoriesData - The raw categories data from the API.
  * @returns {Array<{slug: string, name: string} | {id: string, name: string, slug: string}>} An array of category objects for the filter.
  */
-function getCategoriesForFilter(categoriesData: any): Array<{slug: string, name: string} | {id: string, name: string, slug: string}> {
-  const categories = categoriesData?.data?.map((category: any) => ({
-    slug: category.slug,
-    name: category.name,
-  })) ?? [];
+function getCategoriesForFilter(
+  categoriesData: any,
+): Array<
+  { slug: string; name: string } | { id: string; name: string; slug: string }
+> {
+  const categories =
+    categoriesData?.data?.map((category: any) => ({
+      slug: category.slug,
+      name: category.name,
+    })) ?? [];
 
   return [
     ...categories,
@@ -202,12 +209,16 @@ function getCategoriesForFilter(categoriesData: any): Array<{slug: string, name:
  * @param {any} accountsData - The raw accounts data from the API.
  * @returns {Array<{id: string, name: string, currency: string}>} An array of account objects for the filter.
  */
-function getAccountsForFilter(accountsData: any): Array<{id: string, name: string, currency: string}> {
-  return accountsData?.data?.map((account: any) => ({
-    id: account.id,
-    name: account.name ?? "",
-    currency: account.currency ?? "",
-  })) ?? [];
+function getAccountsForFilter(
+  accountsData: any,
+): Array<{ id: string; name: string; currency: string }> {
+  return (
+    accountsData?.data?.map((account: any) => ({
+      id: account.id,
+      name: account.name ?? "",
+      currency: account.currency ?? "",
+    })) ?? []
+  );
 }
 
 /**
@@ -216,9 +227,13 @@ function getAccountsForFilter(accountsData: any): Array<{id: string, name: strin
  * @param {any} teamMembersData - The raw team members data from the API.
  * @returns {Array<{id: string, name: string}>} An array of team member objects for the filter.
  */
-function getMembersForFilter(teamMembersData: any): Array<{id: string, name: string}> {
-  return teamMembersData?.data?.map((member: any) => ({
-    id: member?.user?.id ?? "",
-    name: member.user?.full_name ?? "",
-  })) ?? [];
+function getMembersForFilter(
+  teamMembersData: any,
+): Array<{ id: string; name: string }> {
+  return (
+    teamMembersData?.data?.map((member: any) => ({
+      id: member?.user?.id ?? "",
+      name: member.user?.full_name ?? "",
+    })) ?? []
+  );
 }

@@ -88,7 +88,6 @@ export async function UserMenu({ onlySignOut }) {
                 />
                 <DropdownMenuShortcut>⌘C</DropdownMenuShortcut>
               </DropdownMenuItem> */}
-              
             </DropdownMenuGroup>
 
             <DropdownMenuSeparator />

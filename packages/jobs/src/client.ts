@@ -20,7 +20,7 @@ const supabaseManagement = new SupabaseManagement({
 });
 
 export const db = supabaseManagement.db(
-  `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co`
+  `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co`,
 );
 
 export const resend = new Resend({

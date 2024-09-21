@@ -39,7 +39,7 @@ export async function uniqueLog(
   }>,
   level: "info" | "warn" | "error",
   message: string,
-  data: Record<string, any> = {}
+  data: Record<string, any> = {},
 ): Promise<void> {
   const uniqueId = generateUniqueId(6);
   await io.logger[level](`${message} [${uniqueId}]`, data);
