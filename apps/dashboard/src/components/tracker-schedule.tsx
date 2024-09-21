@@ -1,30 +1,23 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { format } from "date-fns";
-import MotionNumber from "motion-number";
-import React, { useEffect, useRef } from "react";
-import { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { TrackerRecordForm } from "./forms/tracker-record-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
-type Event = {
-  name: string;
-  start: number;
-  duration: number;
-};
-
-type TrackerRecord = {};
-
-const events: Event[] = [
-  { name: "Migo", start: 9, duration: 6 },
-  { name: "Playfair", start: 16, duration: 3 },
-];
+interface TrackerRecord {
+  meta?: {
+    totalDuration?: number;
+  };
+}
 
 const ROW_HEIGHT = 36;
 
@@ -34,18 +27,21 @@ export function TrackerSchedule() {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [is24HourFormat, setIs24HourFormat] = useState(true);
   const [data, setData] = useState<TrackerRecord[]>([]);
-
-  console.log(data);
+  const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartSlot, setDragStartSlot] = useState<number | null>(null);
+  const [totalDuration, setTotalDuration] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       const supabase = createClient();
       const trackerData = await getTrackerRecordsByDateQuery(supabase, {
         teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
-        date: selectedDate,
+        date: selectedDate ?? "",
       });
 
-      setData(trackerData);
+      setData(trackerData?.data ?? []);
+      setTotalDuration(trackerData?.data?.meta?.totalDuration ?? 0);
     };
 
     if (selectedDate) {
@@ -68,32 +64,47 @@ export function TrackerSchedule() {
     }
   }, []);
 
-  const getEventStyle = (event: Event) => {
-    const top = `${event.start * ROW_HEIGHT}px`;
-    const height = `${event.duration * ROW_HEIGHT}px`;
-    return { top, height };
-  };
-
   const formatHour = (hour: number) => {
     const date = new Date();
     date.setHours(hour, 0, 0, 0);
     return format(date, is24HourFormat ? "HH:mm" : "hh:mm a");
   };
 
-  const toggleTimeFormat = () => {
-    setIs24HourFormat(!is24HourFormat);
+  const handleMouseDown = (slot: number) => {
+    setIsDragging(true);
+    setDragStartSlot(slot);
+    setSelectedSlots([slot]);
   };
+
+  const handleMouseEnter = (slot: number) => {
+    if (isDragging && dragStartSlot !== null) {
+      const start = Math.min(dragStartSlot, slot);
+      const end = Math.max(dragStartSlot, slot);
+      const newSelectedSlots = [];
+      for (let i = start; i <= end; i++) {
+        newSelectedSlots.push(i);
+      }
+      setSelectedSlots(newSelectedSlots);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    setDragStartSlot(null);
+    const totalSeconds = selectedSlots.length * 15 * 60; // Each slot represents 15 minutes (900 seconds)
+    setTotalDuration((prev) => prev + totalSeconds);
+  };
+
+  useEffect(() => {
+    window.addEventListener("mouseup", handleMouseUp);
+    return () => window.removeEventListener("mouseup", handleMouseUp);
+  }, [selectedSlots]);
 
   return (
     <div className="w-full">
       <div className="space-y-2 text-center sm:text-left mb-8 flex justify-between items-center flex-row">
         <h2 className="text-xl text-[#878787]">
-          <MotionNumber
-            value={
-              data?.meta?.totalDuration ? data.meta.totalDuration / 3600 : 0
-            }
-          />
-          h
+          {secondsToHoursAndMinutes(totalDuration)}
         </h2>
 
         <Button variant="outline" size="icon">
@@ -101,45 +112,54 @@ export function TrackerSchedule() {
         </Button>
       </div>
       <TrackerDaySelect />
-      {/* <button onClick={toggleTimeFormat} className="mb-2" type="button">
-        Toggle {is24HourFormat ? "12-hour" : "24-hour"} format
-      </button> */}
 
-      <ScrollArea ref={scrollRef} className="h-[calc(100vh-440px)] mt-8">
+      <ScrollArea ref={scrollRef} className="h-[calc(100vh-200px)] mt-8">
         <div className="flex text-[#878787] text-xs">
           <div className="w-20 flex-shrink-0">
             {hours.map((hour) => (
-              <div key={hour} className="h-9 pr-4 flex font-mono flex-col">
+              <div
+                key={hour}
+                className="pr-4 flex font-mono flex-col"
+                style={{ height: `${ROW_HEIGHT}px` }}
+              >
                 {formatHour(hour)}
               </div>
             ))}
           </div>
-          <div className="relative flex-grow border border-border">
-            {hours.map((hour, index) => (
-              <div
-                key={hour}
-                className="absolute w-full h-9"
-                style={{ top: `${hour * ROW_HEIGHT}px` }}
-              >
-                {index !== 0 && <div className="border-t border-border" />}
-              </div>
-            ))}
-            {events.map((event, index) => (
-              <div
-                key={index.toString()}
-                className="absolute left-0 right-0 bg-[#1D1D1D]/[0.92] border-t border-border px-4 py-2"
-                style={getEventStyle(event)}
-              >
-                <div className="text-white">
-                  {event.name} ({event.duration}h)
-                </div>
-              </div>
+          <div className="relative flex-grow border border-border border-t-0">
+            {hours.map((hour) => (
+              <React.Fragment key={hour}>
+                <div
+                  className="absolute w-full border-t border-border"
+                  style={{ top: `${hour * ROW_HEIGHT}px` }}
+                />
+                {[0, 1, 2, 3].map((quarter) => {
+                  const slot = hour * 4 + quarter;
+
+                  return (
+                    <div
+                      key={slot}
+                      className={cn(
+                        "absolute w-full cursor-pointer z-5",
+                        selectedSlots.includes(slot)
+                          ? "h-[9px] bg-[#1D1D1D]/[0.9]"
+                          : "h-9",
+                      )}
+                      style={{
+                        top: `${slot * 9}px`,
+                      }}
+                      onMouseDown={() => handleMouseDown(slot)}
+                      onMouseEnter={() => handleMouseEnter(slot)}
+                    />
+                  );
+                })}
+              </React.Fragment>
             ))}
           </div>
         </div>
       </ScrollArea>
 
-      <TrackerRecordForm onCreate={() => {}} projectId="1" userId="1" />
+      {/* <TrackerRecordForm onCreate={() => {}} projectId="1" userId="1" /> */}
     </div>
   );
 }

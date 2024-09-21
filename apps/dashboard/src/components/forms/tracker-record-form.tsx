@@ -8,6 +8,7 @@ import {
   FormLabel,
 } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { TimeRangeInput } from "@midday/ui/time-range-input";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AssignUser } from "../assign-user";
@@ -41,7 +42,13 @@ export function TrackerRecordForm({ userId, onCreate, projectId }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="mb-12 mt-6">
         <div className="flex space-x-4 mb-4 mt-2">
-          <FormField
+          {/* <TimeRangeInput
+            value={{ start: "06:45", end: "08:30" }}
+            onChange={(value) => {
+              console.log(value);
+            }}
+          /> */}
+          {/* <FormField
             control={form.control}
             name="duration"
             render={({ field }) => (
@@ -73,7 +80,7 @@ export function TrackerRecordForm({ userId, onCreate, projectId }: Props) {
                 </FormControl>
               </FormItem>
             )}
-          />
+          /> */}
 
           {/* <FormField
             control={form.control}

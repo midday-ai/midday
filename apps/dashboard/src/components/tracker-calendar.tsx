@@ -7,6 +7,12 @@ import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@midday/ui/tooltip";
 import { useClickAway } from "@uidotdev/usehooks";
 import {
   addMonths,
@@ -25,16 +31,6 @@ import { useEffect, useState } from "react";
 import { isHotkeyPressed, useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
-
-type TrackerMeta = {
-  totalDuration?: number;
-};
-
-type TrackerRecord = {
-  id: string;
-  duration: number;
-  date: string;
-};
 
 export function TrackerCalendar() {
   const {
@@ -129,15 +125,55 @@ export function TrackerCalendar() {
     <div ref={ref}>
       <div className="mt-8">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="font-medium text-[#707070] dark:text-[#878787] text-xl mb-2">
-              Total hours
-            </h2>
-            <div className="text-[#121212] dark:text-[#F5F5F3] text-4xl">
+          <div className="space-y-2 select-text">
+            <h1 className="text-4xl font-mono">
               <MotionNumber
                 value={meta?.totalDuration ? meta.totalDuration / 3600 : 0}
               />
               h
+            </h1>
+
+            <div className="text-sm text-[#606060] flex items-center space-x-2">
+              <p className="text-sm text-[#606060]">Total hours</p>
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Icons.Info className="h-4 w-4 mt-1" />
+                  </TooltipTrigger>
+                  <TooltipContent
+                    className="text-xs text-[#878787] w-[190px] p-0 dark:bg-background"
+                    side="bottom"
+                    sideOffset={10}
+                  >
+                    <div>
+                      <div className="text-primary pb-2 border-b border-border px-4 pt-2">
+                        Breakdown
+                      </div>
+
+                      <ul className="space-y-2 flex flex-col p-4">
+                        <li className="flex justify-between">
+                          <span>Midday v1</span>
+                          <span className="font-medium text-primary text-xs">
+                            102h
+                          </span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span>Migo</span>
+                          <span className="font-medium text-primary text-xs">
+                            34h
+                          </span>
+                        </li>
+                        <li className="flex justify-between">
+                          <span>Playfair</span>
+                          <span className="font-medium text-primary text-xs">
+                            42h
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
 
@@ -165,7 +201,7 @@ export function TrackerCalendar() {
 
             return (
               <div
-                // onClick={() => handleOnSelect(date)}
+                onClick={() => handleOnSelect(date)}
                 key={index.toString()}
                 className={cn(
                   "pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left flex space-x-2",

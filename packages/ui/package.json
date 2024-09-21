@@ -72,6 +72,7 @@
     "./toast": "./src/components/toast.tsx",
     "./toaster": "./src/components/toaster.tsx",
     "./tooltip": "./src/components/tooltip.tsx",
+    "./time-range-input": "./src/components/time-range-input.tsx",
     "./use-toast": "./src/components/use-toast.tsx",
     "./cn": "./src/utils/cn.ts",
     "./truncate": "./src/utils/truncate.ts",

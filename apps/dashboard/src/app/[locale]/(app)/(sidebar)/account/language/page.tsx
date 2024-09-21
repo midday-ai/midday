@@ -1,5 +1,6 @@
 import { ChangeLanguage } from "@/components/change-language";
 import { ChangeTimezone } from "@/components/change-timezone";
+import { TimeFormatSettings } from "@/components/time-fromat-settings";
 import { WeekSettings } from "@/components/week-settings";
 import { getTimezone, getTimezones } from "@midday/location";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
 
 export default async function Language() {
   const { data: userData } = await getUser();
+
   const timezone = userData?.timezone || getTimezone();
   const timezones = getTimezones();
 
@@ -18,7 +20,7 @@ export default async function Language() {
     <div className="space-y-12">
       <ChangeLanguage />
       <ChangeTimezone value={timezone} timezones={timezones} />
-
+      <TimeFormatSettings timeFormat={userData?.time_format} />
       <WeekSettings weekStartsOnMonday={userData?.week_starts_on_monday} />
     </div>
   );
