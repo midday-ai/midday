@@ -23,6 +23,7 @@ import { useLongPress } from "use-long-press";
 const icons = {
   "/": () => <Icons.Overview size={22} />,
   "/transactions": () => <Icons.Transactions size={22} />,
+  "/transactions-recurring": () => <Icons.Repeat size={22} />,
   "/invoices": () => <Icons.Invoice size={22} />,
   "/tracker": () => <Icons.Tracker size={22} />,
   "/vault": () => <Icons.Files size={22} />,
@@ -46,6 +47,10 @@ const defaultItems = [
   {
     path: "/transactions",
     name: "Transactions",
+  },
+  {
+    path: "/transactions-recurring",
+    name: "Recurring Transactions",
   },
   {
     path: "/invoices",

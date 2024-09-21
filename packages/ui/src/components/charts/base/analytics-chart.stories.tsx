@@ -1,17 +1,12 @@
 import { Meta, StoryFn } from "@storybook/react";
 import { AnalyticsChart, FinancialData } from "./analytics-chart";
 
-
 export default {
   component: AnalyticsChart,
   parameters: {
     layout: "centered",
   },
-  decorators: [
-    (Story) => (
-        <Story />
-    ),
-  ],
+  decorators: [(Story) => <Story />],
 } as Meta<typeof AnalyticsChart>;
 
 const Template: StoryFn<typeof AnalyticsChart> = (args) => (
@@ -31,7 +26,7 @@ const generateSampleData = (days: number): FinancialData[] => {
     date.setDate(date.getDate() + i);
     const basePrice = 100 + Math.random() * 50;
     data.push({
-      date: date.toISOString().split('T')[0] || '',
+      date: date.toISOString().split("T")[0] || "",
       expense: basePrice,
       revenue: basePrice + Math.random() * 5,
       profit: basePrice - Math.random() * 5,

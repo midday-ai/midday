@@ -66,13 +66,13 @@ function generateSummary(transactions: Transaction[]): TransactionSummary {
   const topCategories = Object.fromEntries(
     Object.entries(categories)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
+      .slice(0, 5),
   );
 
   const topMerchants = Object.fromEntries(
     Object.entries(merchants)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 5)
+      .slice(0, 5),
   );
 
   return {
@@ -98,7 +98,7 @@ async function generateSummaryForPeriod(
   io: any,
   teamId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
 ): Promise<TransactionSummary> {
   const { data: transactions, error } = await io.supabase.client
     .from("transactions")
@@ -127,7 +127,7 @@ async function generateSummaryPDF(
   summary: TransactionSummary,
   teamName: string,
   period: "weekly" | "monthly",
-  dateRange: { start: string; end: string }
+  dateRange: { start: string; end: string },
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
@@ -143,7 +143,7 @@ async function generateSummaryPDF(
       y: height - 50,
       size: 18,
       color: rgb(0, 0, 0),
-    }
+    },
   );
 
   // Add date range
@@ -169,7 +169,7 @@ async function generateSummaryPDF(
   drawText(`Total Amount: $${summary.totalAmount.toFixed(2)}`);
   drawText(`Transaction Count: ${summary.transactionCount}`);
   drawText(
-    `Average Transaction Amount: $${summary.averageTransactionAmount.toFixed(2)}`
+    `Average Transaction Amount: $${summary.averageTransactionAmount.toFixed(2)}`,
   );
 
   drawText("Top Categories:", lineHeight);
@@ -185,7 +185,7 @@ async function generateSummaryPDF(
   if (summary.largestTransaction) {
     drawText("Largest Transaction:", lineHeight);
     drawText(
-      `  Amount: $${Math.abs(summary.largestTransaction.amount).toFixed(2)}`
+      `  Amount: $${Math.abs(summary.largestTransaction.amount).toFixed(2)}`,
     );
     drawText(`  Date: ${summary.largestTransaction.date}`);
     drawText(`  Description: ${summary.largestTransaction.name}`);
@@ -265,7 +265,7 @@ client.defineJob({
       io,
       teamId,
       startDate,
-      endDate
+      endDate,
     );
 
     // Fetch team name
@@ -287,7 +287,7 @@ client.defineJob({
       {
         start: format(startDate, "yyyy-MM-dd"),
         end: format(endDate, "yyyy-MM-dd"),
-      }
+      },
     );
 
     // Upload PDF to Supabase storage

@@ -70,7 +70,7 @@ client.defineJob({
                 data?: Record<string, string>[];
                 errors: { message: string }[];
               },
-              parser: any
+              parser: any,
             ) => {
               parser.pause();
 
@@ -85,7 +85,7 @@ client.defineJob({
                 mappings,
                 currency,
                 teamId,
-                bankAccountId
+                bankAccountId,
               );
               const transactions = mappedTransactions.map((transaction) =>
                 transform({ transaction, inverted, timezone, dateAdjustment }),
@@ -110,7 +110,7 @@ client.defineJob({
           mappings,
           currency,
           teamId,
-          bankAccountId
+          bankAccountId,
         );
 
         const transactions = mappedTransactions.map((transaction) =>

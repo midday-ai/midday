@@ -9228,7 +9228,7 @@ var getPlatformProperties = () => {
       "X-Stainless-Runtime-Version":
         typeof Deno.version === "string"
           ? Deno.version
-          : Deno.version?.deno ?? "unknown",
+          : (Deno.version?.deno ?? "unknown"),
     };
   }
   if (typeof EdgeRuntime !== "undefined") {
@@ -15160,7 +15160,7 @@ var Hono = class {
     const strict = options.strict ?? true;
     delete options.strict;
     Object.assign(this, options);
-    this.getPath = strict ? options.getPath ?? getPath : getPathNoStrict;
+    this.getPath = strict ? (options.getPath ?? getPath) : getPathNoStrict;
   }
   clone() {
     const clone = new Hono({
@@ -15295,7 +15295,7 @@ var Hono = class {
                 resolved || (c.finalized ? c.res : this.notFoundHandler(c)),
             )
             .catch((err) => this.handleError(err, c))
-        : res ?? this.notFoundHandler(c);
+        : (res ?? this.notFoundHandler(c));
     }
     const composed = compose(
       matchResult[0],
@@ -15909,7 +15909,7 @@ var Node2 = class {
           handlerSet.params[key] =
             params[key] && !processed
               ? params[key]
-              : nodeParams[key] ?? params[key];
+              : (nodeParams[key] ?? params[key]);
           processedSet[handlerSet.name] = true;
         });
         handlerSets.push(handlerSet);

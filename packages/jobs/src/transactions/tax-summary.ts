@@ -90,7 +90,7 @@ function categorizeTransaction(transaction: Transaction): string {
   // Helper function to check if any keyword matches
   const matchesKeywords = (keywords: string[]) =>
     keywords.some(
-      (keyword) => description.includes(keyword) || merchant.includes(keyword)
+      (keyword) => description.includes(keyword) || merchant.includes(keyword),
     );
 
   // Income categorization
@@ -146,7 +146,7 @@ function categorizeTransaction(transaction: Transaction): string {
 async function generateTaxSummary(
   io: any,
   teamId: string,
-  year: number
+  year: number,
 ): Promise<TaxSummary> {
   const startDate = startOfYear(new Date(year, 0, 1));
   const endDate = endOfYear(new Date(year, 0, 1));
@@ -169,7 +169,7 @@ async function generateTaxSummary(
         acc[category] = { total: 0, transactions: [] };
         return acc;
       },
-      {} as TaxSummary["categories"]
+      {} as TaxSummary["categories"],
     ),
   };
 
@@ -195,7 +195,7 @@ async function generateTaxSummary(
  */
 async function generateTaxSummaryPDF(
   summary: TaxSummary,
-  teamNameOrTeamID: string
+  teamNameOrTeamID: string,
 ): Promise<Uint8Array> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
@@ -217,17 +217,17 @@ async function generateTaxSummaryPDF(
     const category = TAX_CATEGORIES[categoryKey];
     drawText(
       `${category?.name || "Unknown Category"}: $${categoryData.total.toFixed(2)}`,
-      14
+      14,
     );
     drawText(
       `  ${category?.description || "Unknown Description"}`,
       10,
-      rgb(0.4, 0.4, 0.4)
+      rgb(0.4, 0.4, 0.4),
     );
     drawText(
       `  Number of transactions: ${categoryData.transactions.length}`,
       10,
-      rgb(0.4, 0.4, 0.4)
+      rgb(0.4, 0.4, 0.4),
     );
     yPosition -= lineHeight / 2;
   });

@@ -41,6 +41,10 @@ export default async function Transactions({
     accounts,
   } = searchParamsCache.parse(searchParams);
 
+  console.log("the txn query is", {
+    query,
+  });
+
   // Move this in a suspense
   const [accountsData, categoriesData, teamMembersData, userData] =
     await Promise.all([
@@ -76,6 +80,31 @@ export default async function Transactions({
   return (
     <>
       <div className="flex justify-between py-6">
+        <div className="p-[2%] md:p-[4%]">
+          <div className="mx-auto w-full">
+            <div className="flex flex-row justify-between">
+              <p className="text-base font-semibold leading-7 text-blue-600 md:pt-[5%]">
+                Solomon AI
+              </p>
+            </div>
+
+            <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
+              Transactions
+            </h2>
+            <p className="mt-6 text-lg leading-8 text-foreground/3">
+              Detected transactions across your accounts
+            </p>
+            <div>
+              <h2 className="py-5 text-2xl font-bold tracking-tight">
+                Overview{" "}
+                <span className="ml-1 text-xs">
+                  {" "}
+                  {accountsData?.data?.length} Linked Accounts
+                </span>
+              </h2>
+            </div>
+          </div>
+        </div>
         <TransactionsSearchFilter
           placeholder="Search or type filter"
           categories={[

@@ -19,9 +19,7 @@ body {
   border: 0.1px solid rgba(255, 255, 255, 0.4);
   -webkit-animation: rainbow 3s infinite linear;
   border-radius: 0.5em;
-  box-shadow:
-    0 0 0.3em 0.05em #2c116e,
-    inset 0.03em 0 0.1em 0.02em #de66e4;
+  box-shadow: 0 0 0.3em 0.05em #2c116e, inset 0.03em 0 0.1em 0.02em #de66e4;
   transform-style: preserve-3d;
   perspective: 1em;
   /* background-color: rgba(0, 0, 0, 1); */
@@ -29,33 +27,23 @@ body {
 @keyframes rainbow {
   0% {
     transform: rotate(0deg) translateZ(0);
-    box-shadow:
-      0 0 0.3em 0.05em #2c116e,
-      inset 0.03em 0 0.1em 0.02em #de66e4;
+    box-shadow: 0 0 0.3em 0.05em #2c116e, inset 0.03em 0 0.1em 0.02em #de66e4;
   }
   25% {
     transform: rotate(90deg) translateZ(0);
-    box-shadow:
-      0 0 0.3em 0.05em #28126a,
-      inset 0.03em 0 0.1em 0.02em #34ceaa;
+    box-shadow: 0 0 0.3em 0.05em #28126a, inset 0.03em 0 0.1em 0.02em #34ceaa;
   }
   50% {
     transform: rotate(180deg) translateZ(0);
-    box-shadow:
-      0 0 0.3em 0.05em #28126a,
-      inset 0.03em 0 0.1em 0.02em #19b3f5;
+    box-shadow: 0 0 0.3em 0.05em #28126a, inset 0.03em 0 0.1em 0.02em #19b3f5;
   }
   75% {
     transform: rotate(270deg) translateZ(0);
-    box-shadow:
-      0 0 0.3em 0.05em #28126a,
-      inset 0.03em 0 0.1em 0.02em #3d52ac;
+    box-shadow: 0 0 0.3em 0.05em #28126a, inset 0.03em 0 0.1em 0.02em #3d52ac;
   }
   100% {
     transform: rotate(360deg) translateZ(0);
-    box-shadow:
-      0 0 0.3em 0.05em #28126a,
-      inset 0.03em 0 0.1em 0.02em #de66e4;
+    box-shadow: 0 0 0.3em 0.05em #28126a, inset 0.03em 0 0.1em 0.02em #de66e4;
   }
 }
 .rainbow-container {

@@ -474,7 +474,7 @@ export const getTeamSettings = async () => {
 };
 
 export const getMonthlyExpenses = async (
-  params: Omit<GetMonthlyExpensesQueryParams, "teamId">
+  params: Omit<GetMonthlyExpensesQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -492,12 +492,12 @@ export const getMonthlyExpenses = async (
     {
       tags: [`monthly_expenses_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpensesByCategory = async (
-  params: Omit<GetExpensesByCategoryQueryParams, "teamId">
+  params: Omit<GetExpensesByCategoryQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -515,12 +515,12 @@ export const getExpensesByCategory = async (
     {
       tags: [`expenses_by_category_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getDailyExpenses = async (
-  params: Omit<GetDailyExpensesQueryParams, "teamId">
+  params: Omit<GetDailyExpensesQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -538,12 +538,12 @@ export const getDailyExpenses = async (
     {
       tags: [`daily_expenses_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getTopExpenseCategories = async (
-  params: Omit<GetTopExpenseCategoriesQueryParams, "teamId">
+  params: Omit<GetTopExpenseCategoriesQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -561,12 +561,12 @@ export const getTopExpenseCategories = async (
     {
       tags: [`top_expense_categories_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpensesByMerchant = async (
-  params: Omit<GetExpensesByMerchantQueryParams, "teamId">
+  params: Omit<GetExpensesByMerchantQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -584,12 +584,12 @@ export const getExpensesByMerchant = async (
     {
       tags: [`expenses_by_merchant_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getWeeklyExpenseTrends = async (
-  params: Omit<GetWeeklyExpenseTrendsQueryParams, "teamId">
+  params: Omit<GetWeeklyExpenseTrendsQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -607,12 +607,12 @@ export const getWeeklyExpenseTrends = async (
     {
       tags: [`weekly_expense_trends_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpensesByPaymentChannel = async (
-  params: Omit<GetExpensesByPaymentChannelQueryParams, "teamId">
+  params: Omit<GetExpensesByPaymentChannelQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -630,12 +630,12 @@ export const getExpensesByPaymentChannel = async (
     {
       tags: [`expenses_by_payment_channel_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getRecurringExpenses = async (
-  params: Omit<GetRecurringExpensesQueryParams, "teamId">
+  params: Omit<GetRecurringExpensesQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -653,12 +653,12 @@ export const getRecurringExpenses = async (
     {
       tags: [`recurring_expenses_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpenseDistributionByDayOfWeek = async (
-  params: Omit<GetExpenseDistributionByDayOfWeekQueryParams, "teamId">
+  params: Omit<GetExpenseDistributionByDayOfWeekQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -670,18 +670,21 @@ export const getExpenseDistributionByDayOfWeek = async (
 
   return unstable_cache(
     async () => {
-      return getExpenseDistributionByDayOfWeekQuery(supabase, { ...params, teamId });
+      return getExpenseDistributionByDayOfWeekQuery(supabase, {
+        ...params,
+        teamId,
+      });
     },
     ["expense_distribution_by_day_of_week", teamId],
     {
       tags: [`expense_distribution_by_day_of_week_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpenseGrowthRate = async (
-  params: Omit<GetExpenseGrowthRateQueryParams, "teamId">
+  params: Omit<GetExpenseGrowthRateQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -699,12 +702,12 @@ export const getExpenseGrowthRate = async (
     {
       tags: [`expense_growth_rate_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpenseForecast = async (
-  params: Omit<GetExpenseForecastQueryParams, "teamId">
+  params: Omit<GetExpenseForecastQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -722,12 +725,12 @@ export const getExpenseForecast = async (
     {
       tags: [`expense_forecast_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpenseAnomalies = async (
-  params: Omit<GetExpenseAnomaliesQueryParams, "teamId">
+  params: Omit<GetExpenseAnomaliesQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -745,12 +748,12 @@ export const getExpenseAnomalies = async (
     {
       tags: [`expense_anomalies_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpenseTrendsByTimeOfDay = async (
-  params: Omit<GetExpenseTrendsByTimeOfDayQueryParams, "teamId">
+  params: Omit<GetExpenseTrendsByTimeOfDayQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -768,12 +771,12 @@ export const getExpenseTrendsByTimeOfDay = async (
     {
       tags: [`expense_trends_by_time_of_day_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };
 
 export const getExpenseComparison = async (
-  params: Omit<GetExpenseComparisonQueryParams, "teamId">
+  params: Omit<GetExpenseComparisonQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -791,6 +794,6 @@ export const getExpenseComparison = async (
     {
       tags: [`expense_comparison_${teamId}`],
       revalidate: 3600,
-    }
+    },
   )(params);
 };

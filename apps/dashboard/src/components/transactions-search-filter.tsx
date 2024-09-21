@@ -51,6 +51,7 @@ type Props = {
     slug: string;
     name: string;
   }[];
+  hideRecurring?: boolean;
 };
 
 const defaultSearch = {
@@ -100,6 +101,7 @@ export function TransactionsSearchFilter({
   accounts,
   members,
   tags,
+  hideRecurring = false,
 }: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
@@ -448,39 +450,42 @@ export function TransactionsSearchFilter({
           </DropdownMenuSub>
         </DropdownMenuGroup>
 
-        <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Icons.Repeat className="mr-2 h-4 w-4" />
-              <span>Recurring</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent
-                sideOffset={14}
-                alignOffset={-4}
-                className="p-0"
-              >
-                {recurringFilters.map(({ id, name }) => (
-                  <DropdownMenuCheckboxItem
-                    key={id}
-                    checked={filters?.statuses?.includes(id)}
-                    onCheckedChange={() => {
-                      setFilters({
-                        recurring: filters?.recurring?.includes(id)
-                          ? filters.recurring.filter((s) => s !== id).length > 0
-                            ? filters.recurring.filter((s) => s !== id)
-                            : null
-                          : [...(filters?.recurring ?? []), id],
-                      });
-                    }}
-                  >
-                    {name}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
-        </DropdownMenuGroup>
+        {!hideRecurring && (
+          <DropdownMenuGroup>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Icons.Repeat className="mr-2 h-4 w-4" />
+                <span>Recurring</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent
+                  sideOffset={14}
+                  alignOffset={-4}
+                  className="p-0"
+                >
+                  {recurringFilters.map(({ id, name }) => (
+                    <DropdownMenuCheckboxItem
+                      key={id}
+                      checked={filters?.statuses?.includes(id)}
+                      onCheckedChange={() => {
+                        setFilters({
+                          recurring: filters?.recurring?.includes(id)
+                            ? filters.recurring.filter((s) => s !== id).length >
+                              0
+                              ? filters.recurring.filter((s) => s !== id)
+                              : null
+                            : [...(filters?.recurring ?? []), id],
+                        });
+                      }}
+                    >
+                      {name}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          </DropdownMenuGroup>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
