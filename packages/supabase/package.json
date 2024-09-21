@@ -1,6 +1,6 @@
 {
   "name": "@midday/supabase",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "clean": "rm -rf .turbo node_modules",
