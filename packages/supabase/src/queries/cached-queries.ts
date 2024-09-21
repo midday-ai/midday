@@ -4,16 +4,6 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { createClient } from "../client/server";
 import {
-  type GetBurnRateQueryParams,
-  type GetCategoriesParams,
-  type GetExpensesQueryParams,
-  type GetMetricsParams,
-  type GetRunwayQueryParams,
-  type GetSpendingParams,
-  type GetTeamBankAccountsParams,
-  type GetTrackerProjectsQueryParams,
-  type GetTrackerRecordsByRangeParams,
-  type GetTransactionsParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
@@ -33,7 +23,48 @@ import {
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
+  type GetBurnRateQueryParams,
+  type GetCategoriesParams,
+  type GetExpensesQueryParams,
+  type GetMetricsParams,
+  type GetRunwayQueryParams,
+  type GetSpendingParams,
+  type GetTeamBankAccountsParams,
+  type GetTrackerProjectsQueryParams,
+  type GetTrackerRecordsByRangeParams,
+  type GetTransactionsParams,
 } from "../queries";
+
+import {
+  getDailyExpensesQuery,
+  getExpenseAnomaliesQuery,
+  getExpenseComparisonQuery,
+  getExpenseDistributionByDayOfWeekQuery,
+  getExpenseForecastQuery,
+  getExpenseGrowthRateQuery,
+  getExpenseTrendsByTimeOfDayQuery,
+  getExpensesByCategoryQuery,
+  getExpensesByMerchantQuery,
+  getExpensesByPaymentChannelQuery,
+  getMonthlyExpensesQuery,
+  getRecurringExpensesQuery,
+  getTopExpenseCategoriesQuery,
+  getWeeklyExpenseTrendsQuery,
+  type GetDailyExpensesQueryParams,
+  type GetExpenseAnomaliesQueryParams,
+  type GetExpenseComparisonQueryParams,
+  type GetExpenseDistributionByDayOfWeekQueryParams,
+  type GetExpenseForecastQueryParams,
+  type GetExpenseGrowthRateQueryParams,
+  type GetExpenseTrendsByTimeOfDayQueryParams,
+  type GetExpensesByCategoryQueryParams,
+  type GetExpensesByMerchantQueryParams,
+  type GetExpensesByPaymentChannelQueryParams,
+  type GetMonthlyExpensesQueryParams,
+  type GetRecurringExpensesQueryParams,
+  type GetTopExpenseCategoriesQueryParams,
+  type GetWeeklyExpenseTrendsQueryParams,
+} from "./analytic-queries";
 
 export const getTransactions = async (
   params: Omit<GetTransactionsParams, "teamId">,
@@ -440,4 +471,326 @@ export const getTeamSettings = async () => {
       revalidate: 3600,
     },
   )();
+};
+
+export const getMonthlyExpenses = async (
+  params: Omit<GetMonthlyExpensesQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getMonthlyExpensesQuery(supabase, { ...params, teamId });
+    },
+    ["monthly_expenses", teamId],
+    {
+      tags: [`monthly_expenses_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpensesByCategory = async (
+  params: Omit<GetExpensesByCategoryQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpensesByCategoryQuery(supabase, { ...params, teamId });
+    },
+    ["expenses_by_category", teamId],
+    {
+      tags: [`expenses_by_category_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getDailyExpenses = async (
+  params: Omit<GetDailyExpensesQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getDailyExpensesQuery(supabase, { ...params, teamId });
+    },
+    ["daily_expenses", teamId],
+    {
+      tags: [`daily_expenses_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getTopExpenseCategories = async (
+  params: Omit<GetTopExpenseCategoriesQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTopExpenseCategoriesQuery(supabase, { ...params, teamId });
+    },
+    ["top_expense_categories", teamId],
+    {
+      tags: [`top_expense_categories_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpensesByMerchant = async (
+  params: Omit<GetExpensesByMerchantQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpensesByMerchantQuery(supabase, { ...params, teamId });
+    },
+    ["expenses_by_merchant", teamId],
+    {
+      tags: [`expenses_by_merchant_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getWeeklyExpenseTrends = async (
+  params: Omit<GetWeeklyExpenseTrendsQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getWeeklyExpenseTrendsQuery(supabase, { ...params, teamId });
+    },
+    ["weekly_expense_trends", teamId],
+    {
+      tags: [`weekly_expense_trends_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpensesByPaymentChannel = async (
+  params: Omit<GetExpensesByPaymentChannelQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpensesByPaymentChannelQuery(supabase, { ...params, teamId });
+    },
+    ["expenses_by_payment_channel", teamId],
+    {
+      tags: [`expenses_by_payment_channel_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getRecurringExpenses = async (
+  params: Omit<GetRecurringExpensesQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getRecurringExpensesQuery(supabase, { ...params, teamId });
+    },
+    ["recurring_expenses", teamId],
+    {
+      tags: [`recurring_expenses_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpenseDistributionByDayOfWeek = async (
+  params: Omit<GetExpenseDistributionByDayOfWeekQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseDistributionByDayOfWeekQuery(supabase, { ...params, teamId });
+    },
+    ["expense_distribution_by_day_of_week", teamId],
+    {
+      tags: [`expense_distribution_by_day_of_week_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpenseGrowthRate = async (
+  params: Omit<GetExpenseGrowthRateQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseGrowthRateQuery(supabase, { ...params, teamId });
+    },
+    ["expense_growth_rate", teamId],
+    {
+      tags: [`expense_growth_rate_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpenseForecast = async (
+  params: Omit<GetExpenseForecastQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseForecastQuery(supabase, { ...params, teamId });
+    },
+    ["expense_forecast", teamId],
+    {
+      tags: [`expense_forecast_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpenseAnomalies = async (
+  params: Omit<GetExpenseAnomaliesQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseAnomaliesQuery(supabase, { ...params, teamId });
+    },
+    ["expense_anomalies", teamId],
+    {
+      tags: [`expense_anomalies_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpenseTrendsByTimeOfDay = async (
+  params: Omit<GetExpenseTrendsByTimeOfDayQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseTrendsByTimeOfDayQuery(supabase, { ...params, teamId });
+    },
+    ["expense_trends_by_time_of_day", teamId],
+    {
+      tags: [`expense_trends_by_time_of_day_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
+};
+
+export const getExpenseComparison = async (
+  params: Omit<GetExpenseComparisonQueryParams, "teamId">
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseComparisonQuery(supabase, { ...params, teamId });
+    },
+    ["expense_comparison", teamId],
+    {
+      tags: [`expense_comparison_${teamId}`],
+      revalidate: 3600,
+    }
+  )(params);
 };

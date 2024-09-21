@@ -19,8 +19,9 @@ const baseQueryParamsSchema = z.object({
   currency: z.string().optional().default("USD"),
 });
 
-// Schema for getMonthlyExpensesQuery
+// Schema and type for getMonthlyExpensesQuery
 const getMonthlyExpensesQueryParamsSchema = baseQueryParamsSchema;
+export type GetMonthlyExpensesQueryParams = z.infer<typeof getMonthlyExpensesQueryParamsSchema>;
 
 /**
  * Retrieves monthly expenses for a specified team and date range.
@@ -30,7 +31,7 @@ const getMonthlyExpensesQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getMonthlyExpensesQuery(
   supabase: Client,
-  params: z.infer<typeof getMonthlyExpensesQueryParamsSchema>
+  params: GetMonthlyExpensesQueryParams
 ) {
   const { teamId, from, to, currency } =
     getMonthlyExpensesQueryParamsSchema.parse(params);
@@ -42,8 +43,9 @@ export async function getMonthlyExpensesQuery(
   });
 }
 
-// Schema for getExpensesByCategoryQuery
+// Schema and type for getExpensesByCategoryQuery
 const getExpensesByCategoryQueryParamsSchema = baseQueryParamsSchema;
+export type GetExpensesByCategoryQueryParams = z.infer<typeof getExpensesByCategoryQueryParamsSchema>;
 
 /**
  * Retrieves expenses by category for a specified team and date range.
@@ -53,7 +55,7 @@ const getExpensesByCategoryQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getExpensesByCategoryQuery(
   supabase: Client,
-  params: z.infer<typeof getExpensesByCategoryQueryParamsSchema>
+  params: GetExpensesByCategoryQueryParams
 ) {
   const { teamId, from, to, currency } =
     getExpensesByCategoryQueryParamsSchema.parse(params);
@@ -65,8 +67,9 @@ export async function getExpensesByCategoryQuery(
   });
 }
 
-// Schema for getDailyExpensesQuery
+// Schema and type for getDailyExpensesQuery
 const getDailyExpensesQueryParamsSchema = baseQueryParamsSchema;
+export type GetDailyExpensesQueryParams = z.infer<typeof getDailyExpensesQueryParamsSchema>;
 
 /**
  * Retrieves daily expenses for a specified team and date range.
@@ -76,7 +79,7 @@ const getDailyExpensesQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getDailyExpensesQuery(
   supabase: Client,
-  params: z.infer<typeof getDailyExpensesQueryParamsSchema>
+  params: GetDailyExpensesQueryParams
 ) {
   const { teamId, from, to, currency } =
     getDailyExpensesQueryParamsSchema.parse(params);
@@ -90,10 +93,11 @@ export async function getDailyExpensesQuery(
   return dailyExpenses;
 }
 
-// Schema for getTopExpenseCategoriesQuery
+// Schema and type for getTopExpenseCategoriesQuery
 const getTopExpenseCategoriesQueryParamsSchema = baseQueryParamsSchema.extend({
   limit: z.number().optional().default(5),
 });
+export type GetTopExpenseCategoriesQueryParams = z.infer<typeof getTopExpenseCategoriesQueryParamsSchema>;
 
 /**
  * Retrieves the top expense categories for a specified team and date range.
@@ -103,7 +107,7 @@ const getTopExpenseCategoriesQueryParamsSchema = baseQueryParamsSchema.extend({
  */
 export async function getTopExpenseCategoriesQuery(
   supabase: Client,
-  params: z.infer<typeof getTopExpenseCategoriesQueryParamsSchema>
+  params: GetTopExpenseCategoriesQueryParams
 ) {
   const { teamId, from, to, currency, limit } =
     getTopExpenseCategoriesQueryParamsSchema.parse(params);
@@ -116,10 +120,11 @@ export async function getTopExpenseCategoriesQuery(
   });
 }
 
-// Schema for getExpensesByMerchantQuery
+// Schema and type for getExpensesByMerchantQuery
 const getExpensesByMerchantQueryParamsSchema = baseQueryParamsSchema.extend({
   limit: z.number().optional().default(10),
 });
+export type GetExpensesByMerchantQueryParams = z.infer<typeof getExpensesByMerchantQueryParamsSchema>;
 
 /**
  * Retrieves expenses by merchant for a specified team and date range.
@@ -129,7 +134,7 @@ const getExpensesByMerchantQueryParamsSchema = baseQueryParamsSchema.extend({
  */
 export async function getExpensesByMerchantQuery(
   supabase: Client,
-  params: z.infer<typeof getExpensesByMerchantQueryParamsSchema>
+  params: GetExpensesByMerchantQueryParams
 ) {
   const { teamId, from, to, currency, limit } =
     getExpensesByMerchantQueryParamsSchema.parse(params);
@@ -142,8 +147,9 @@ export async function getExpensesByMerchantQuery(
   });
 }
 
-// Schema for getWeeklyExpenseTrendsQuery
+// Schema and type for getWeeklyExpenseTrendsQuery
 const getWeeklyExpenseTrendsQueryParamsSchema = baseQueryParamsSchema;
+export type GetWeeklyExpenseTrendsQueryParams = z.infer<typeof getWeeklyExpenseTrendsQueryParamsSchema>;
 
 /**
  * Retrieves weekly expense trends for a specified team and date range.
@@ -153,7 +159,7 @@ const getWeeklyExpenseTrendsQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getWeeklyExpenseTrendsQuery(
   supabase: Client,
-  params: z.infer<typeof getWeeklyExpenseTrendsQueryParamsSchema>
+  params: GetWeeklyExpenseTrendsQueryParams
 ) {
   const { teamId, from, to, currency } =
     getWeeklyExpenseTrendsQueryParamsSchema.parse(params);
@@ -165,8 +171,9 @@ export async function getWeeklyExpenseTrendsQuery(
   });
 }
 
-// Schema for getExpensesByPaymentChannelQuery
+// Schema and type for getExpensesByPaymentChannelQuery
 const getExpensesByPaymentChannelQueryParamsSchema = baseQueryParamsSchema;
+export type GetExpensesByPaymentChannelQueryParams = z.infer<typeof getExpensesByPaymentChannelQueryParamsSchema>;
 
 /**
  * Retrieves expenses by payment channel for a specified team and date range.
@@ -176,7 +183,7 @@ const getExpensesByPaymentChannelQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getExpensesByPaymentChannelQuery(
   supabase: Client,
-  params: z.infer<typeof getExpensesByPaymentChannelQueryParamsSchema>
+  params: GetExpensesByPaymentChannelQueryParams
 ) {
   const { teamId, from, to, currency } =
     getExpensesByPaymentChannelQueryParamsSchema.parse(params);
@@ -188,10 +195,11 @@ export async function getExpensesByPaymentChannelQuery(
   });
 }
 
-// Schema for getRecurringExpensesQuery
+// Schema and type for getRecurringExpensesQuery
 const getRecurringExpensesQueryParamsSchema = baseQueryParamsSchema.extend({
   minOccurrences: z.number().optional().default(3),
 });
+export type GetRecurringExpensesQueryParams = z.infer<typeof getRecurringExpensesQueryParamsSchema>;
 
 /**
  * Retrieves recurring expenses for a specified team and date range.
@@ -201,7 +209,7 @@ const getRecurringExpensesQueryParamsSchema = baseQueryParamsSchema.extend({
  */
 export async function getRecurringExpensesQuery(
   supabase: Client,
-  params: z.infer<typeof getRecurringExpensesQueryParamsSchema>
+  params: GetRecurringExpensesQueryParams
 ) {
   const { teamId, from, to, currency, minOccurrences } =
     getRecurringExpensesQueryParamsSchema.parse(params);
@@ -214,9 +222,9 @@ export async function getRecurringExpensesQuery(
   });
 }
 
-// Schema for getExpenseDistributionByDayOfWeekQuery
-const getExpenseDistributionByDayOfWeekQueryParamsSchema =
-  baseQueryParamsSchema;
+// Schema and type for getExpenseDistributionByDayOfWeekQuery
+const getExpenseDistributionByDayOfWeekQueryParamsSchema = baseQueryParamsSchema;
+export type GetExpenseDistributionByDayOfWeekQueryParams = z.infer<typeof getExpenseDistributionByDayOfWeekQueryParamsSchema>;
 
 /**
  * Retrieves expense distribution by day of week for a specified team and date range.
@@ -226,7 +234,7 @@ const getExpenseDistributionByDayOfWeekQueryParamsSchema =
  */
 export async function getExpenseDistributionByDayOfWeekQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseDistributionByDayOfWeekQueryParamsSchema>
+  params: GetExpenseDistributionByDayOfWeekQueryParams
 ) {
   const { teamId, from, to, currency } =
     getExpenseDistributionByDayOfWeekQueryParamsSchema.parse(params);
@@ -238,10 +246,11 @@ export async function getExpenseDistributionByDayOfWeekQuery(
   });
 }
 
-// Schema for getExpenseGrowthRateQuery
+// Schema and type for getExpenseGrowthRateQuery
 const getExpenseGrowthRateQueryParamsSchema = baseQueryParamsSchema.extend({
   intervalType: z.string().optional().default("month"),
 });
+export type GetExpenseGrowthRateQueryParams = z.infer<typeof getExpenseGrowthRateQueryParamsSchema>;
 
 /**
  * Retrieves expense growth rate for a specified team and date range.
@@ -251,7 +260,7 @@ const getExpenseGrowthRateQueryParamsSchema = baseQueryParamsSchema.extend({
  */
 export async function getExpenseGrowthRateQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseGrowthRateQueryParamsSchema>
+  params: GetExpenseGrowthRateQueryParams
 ) {
   const { teamId, from, to, currency, intervalType } =
     getExpenseGrowthRateQueryParamsSchema.parse(params);
@@ -264,13 +273,14 @@ export async function getExpenseGrowthRateQuery(
   });
 }
 
-// Schema for getExpenseForecastQuery
+// Schema and type for getExpenseForecastQuery
 const getExpenseForecastQueryParamsSchema = z.object({
   teamId: z.string(),
   forecastDate: z.string(),
   currency: z.string().optional().default("USD"),
   lookbackMonths: z.number().optional().default(3),
 });
+export type GetExpenseForecastQueryParams = z.infer<typeof getExpenseForecastQueryParamsSchema>;
 
 /**
  * Retrieves expense forecast for a specified team and forecast date.
@@ -280,7 +290,7 @@ const getExpenseForecastQueryParamsSchema = z.object({
  */
 export async function getExpenseForecastQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseForecastQueryParamsSchema>
+  params: GetExpenseForecastQueryParams
 ) {
   const { teamId, forecastDate, currency, lookbackMonths } =
     getExpenseForecastQueryParamsSchema.parse(params);
@@ -292,10 +302,11 @@ export async function getExpenseForecastQuery(
   });
 }
 
-// Schema for getExpenseAnomaliesQuery
+// Schema and type for getExpenseAnomaliesQuery
 const getExpenseAnomaliesQueryParamsSchema = baseQueryParamsSchema.extend({
   thresholdPercentage: z.number().optional().default(50),
 });
+export type GetExpenseAnomaliesQueryParams = z.infer<typeof getExpenseAnomaliesQueryParamsSchema>;
 
 /**
  * Retrieves expense anomalies for a specified team and date range.
@@ -305,7 +316,7 @@ const getExpenseAnomaliesQueryParamsSchema = baseQueryParamsSchema.extend({
  */
 export async function getExpenseAnomaliesQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseAnomaliesQueryParamsSchema>
+  params: GetExpenseAnomaliesQueryParams
 ) {
   const { teamId, from, to, currency, thresholdPercentage } =
     getExpenseAnomaliesQueryParamsSchema.parse(params);
@@ -318,8 +329,9 @@ export async function getExpenseAnomaliesQuery(
   });
 }
 
-// Schema for getExpenseTrendsByTimeOfDayQuery
+// Schema and type for getExpenseTrendsByTimeOfDayQuery
 const getExpenseTrendsByTimeOfDayQueryParamsSchema = baseQueryParamsSchema;
+export type GetExpenseTrendsByTimeOfDayQueryParams = z.infer<typeof getExpenseTrendsByTimeOfDayQueryParamsSchema>;
 
 /**
  * Retrieves expense trends by time of day for a specified team and date range.
@@ -329,7 +341,7 @@ const getExpenseTrendsByTimeOfDayQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getExpenseTrendsByTimeOfDayQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseTrendsByTimeOfDayQueryParamsSchema>
+  params: GetExpenseTrendsByTimeOfDayQueryParams
 ) {
   const { teamId, from, to, currency } =
     getExpenseTrendsByTimeOfDayQueryParamsSchema.parse(params);
@@ -341,13 +353,14 @@ export async function getExpenseTrendsByTimeOfDayQuery(
   });
 }
 
-// Schema for getExpenseComparisonQuery
+// Schema and type for getExpenseComparisonQuery
 const getExpenseComparisonQueryParamsSchema = z.object({
   teamId: z.string(),
   currentFrom: z.string(),
   currentTo: z.string(),
   currency: z.string().optional().default("USD"),
 });
+export type GetExpenseComparisonQueryParams = z.infer<typeof getExpenseComparisonQueryParamsSchema>;
 
 /**
  * Retrieves expense comparison data for a specified team and date range.
@@ -357,7 +370,7 @@ const getExpenseComparisonQueryParamsSchema = z.object({
  */
 export async function getExpenseComparisonQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseComparisonQueryParamsSchema>
+  params: GetExpenseComparisonQueryParams
 ) {
   const { teamId, currentFrom, currentTo, currency } =
     getExpenseComparisonQueryParamsSchema.parse(params);
@@ -369,9 +382,9 @@ export async function getExpenseComparisonQuery(
   });
 }
 
-// Schema for getExpenseByPersonalFinanceCategoryQuery
-const getExpenseByPersonalFinanceCategoryQueryParamsSchema =
-  baseQueryParamsSchema;
+// Schema and type for getExpenseByPersonalFinanceCategoryQuery
+const getExpenseByPersonalFinanceCategoryQueryParamsSchema = baseQueryParamsSchema;
+export type GetExpenseByPersonalFinanceCategoryQueryParams = z.infer<typeof getExpenseByPersonalFinanceCategoryQueryParamsSchema>;
 
 /**
  * Retrieves expenses by personal finance category for a specified team and date range.
@@ -381,7 +394,7 @@ const getExpenseByPersonalFinanceCategoryQueryParamsSchema =
  */
 export async function getExpenseByPersonalFinanceCategoryQuery(
   supabase: Client,
-  params: z.infer<typeof getExpenseByPersonalFinanceCategoryQueryParamsSchema>
+  params: GetExpenseByPersonalFinanceCategoryQueryParams
 ) {
   const { teamId, from, to, currency } =
     getExpenseByPersonalFinanceCategoryQueryParamsSchema.parse(params);
@@ -393,8 +406,9 @@ export async function getExpenseByPersonalFinanceCategoryQuery(
   });
 }
 
-// Schema for getInventoryCostAnalysisQuery
+// Schema and type for getInventoryCostAnalysisQuery
 const getInventoryCostAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetInventoryCostAnalysisQueryParams = z.infer<typeof getInventoryCostAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves inventory cost analysis data for a specified team and date range.
@@ -404,7 +418,7 @@ const getInventoryCostAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getInventoryCostAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getInventoryCostAnalysisQueryParamsSchema>
+  params: GetInventoryCostAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getInventoryCostAnalysisQueryParamsSchema.parse(params);
@@ -416,8 +430,9 @@ export async function getInventoryCostAnalysisQuery(
   });
 }
 
-// Schema for getRentAndUtilitiesAnalysisQuery
+// Schema and type for getRentAndUtilitiesAnalysisQuery
 const getRentAndUtilitiesAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetRentAndUtilitiesAnalysisQueryParams = z.infer<typeof getRentAndUtilitiesAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves rent and utilities analysis data for a specified team and date range.
@@ -427,7 +442,7 @@ const getRentAndUtilitiesAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getRentAndUtilitiesAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getRentAndUtilitiesAnalysisQueryParamsSchema>
+  params: GetRentAndUtilitiesAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getRentAndUtilitiesAnalysisQueryParamsSchema.parse(params);
@@ -439,8 +454,9 @@ export async function getRentAndUtilitiesAnalysisQuery(
   });
 }
 
-// Schema for getSalariesAndWagesAnalysisQuery
+// Schema and type for getSalariesAndWagesAnalysisQuery
 const getSalariesAndWagesAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetSalariesAndWagesAnalysisQueryParams = z.infer<typeof getSalariesAndWagesAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves salaries and wages analysis data for a specified team and date range.
@@ -450,7 +466,7 @@ const getSalariesAndWagesAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getSalariesAndWagesAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getSalariesAndWagesAnalysisQueryParamsSchema>
+  params: GetSalariesAndWagesAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getSalariesAndWagesAnalysisQueryParamsSchema.parse(params);
@@ -462,9 +478,9 @@ export async function getSalariesAndWagesAnalysisQuery(
   });
 }
 
-// Schema for getEquipmentAndMaintenanceAnalysisQuery
-const getEquipmentAndMaintenanceAnalysisQueryParamsSchema =
-  baseQueryParamsSchema;
+// Schema and type for getEquipmentAndMaintenanceAnalysisQuery
+const getEquipmentAndMaintenanceAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetEquipmentAndMaintenanceAnalysisQueryParams = z.infer<typeof getEquipmentAndMaintenanceAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves equipment and maintenance analysis data for a specified team and date range.
@@ -474,7 +490,7 @@ const getEquipmentAndMaintenanceAnalysisQueryParamsSchema =
  */
 export async function getEquipmentAndMaintenanceAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getEquipmentAndMaintenanceAnalysisQueryParamsSchema>
+  params: GetEquipmentAndMaintenanceAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getEquipmentAndMaintenanceAnalysisQueryParamsSchema.parse(params);
@@ -486,8 +502,9 @@ export async function getEquipmentAndMaintenanceAnalysisQuery(
   });
 }
 
-// Schema for getProfessionalServicesAnalysisQuery
+// Schema and type for getProfessionalServicesAnalysisQuery
 const getProfessionalServicesAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetProfessionalServicesAnalysisQueryParams = z.infer<typeof getProfessionalServicesAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves professional services analysis data for a specified team and date range.
@@ -497,7 +514,7 @@ const getProfessionalServicesAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getProfessionalServicesAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getProfessionalServicesAnalysisQueryParamsSchema>
+  params: GetProfessionalServicesAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getProfessionalServicesAnalysisQueryParamsSchema.parse(params);
@@ -509,8 +526,9 @@ export async function getProfessionalServicesAnalysisQuery(
   });
 }
 
-// Schema for getSoftwareSubscriptionAnalysisQuery
+// Schema and type for getSoftwareSubscriptionAnalysisQuery
 const getSoftwareSubscriptionAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetSoftwareSubscriptionAnalysisQueryParams = z.infer<typeof getSoftwareSubscriptionAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves software subscription analysis data for a specified team and date range.
@@ -520,7 +538,7 @@ const getSoftwareSubscriptionAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getSoftwareSubscriptionAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getSoftwareSubscriptionAnalysisQueryParamsSchema>
+  params: GetSoftwareSubscriptionAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getSoftwareSubscriptionAnalysisQueryParamsSchema.parse(params);
@@ -532,8 +550,9 @@ export async function getSoftwareSubscriptionAnalysisQuery(
   });
 }
 
-// Schema for getSupplierExpenseAnalysisQuery
+// Schema and type for getSupplierExpenseAnalysisQuery
 const getSupplierExpenseAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetSupplierExpenseAnalysisQueryParams = z.infer<typeof getSupplierExpenseAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves supplier expense analysis data for a specified team and date range.
@@ -543,7 +562,7 @@ const getSupplierExpenseAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getSupplierExpenseAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getSupplierExpenseAnalysisQueryParamsSchema>
+  params: GetSupplierExpenseAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getSupplierExpenseAnalysisQueryParamsSchema.parse(params);
@@ -555,8 +574,9 @@ export async function getSupplierExpenseAnalysisQuery(
   });
 }
 
-// Schema for getShippingLogisticsAnalysisQuery
+// Schema and type for getShippingLogisticsAnalysisQuery
 const getShippingLogisticsAnalysisQueryParamsSchema = baseQueryParamsSchema;
+export type GetShippingLogisticsAnalysisQueryParams = z.infer<typeof getShippingLogisticsAnalysisQueryParamsSchema>;
 
 /**
  * Retrieves shipping and logistics analysis data for a specified team and date range.
@@ -566,7 +586,7 @@ const getShippingLogisticsAnalysisQueryParamsSchema = baseQueryParamsSchema;
  */
 export async function getShippingLogisticsAnalysisQuery(
   supabase: Client,
-  params: z.infer<typeof getShippingLogisticsAnalysisQueryParamsSchema>
+  params: GetShippingLogisticsAnalysisQueryParams
 ) {
   const { teamId, from, to, currency } =
     getShippingLogisticsAnalysisQueryParamsSchema.parse(params);
