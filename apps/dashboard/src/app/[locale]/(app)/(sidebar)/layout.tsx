@@ -1,4 +1,5 @@
 import { AI } from "@/actions/ai/chat";
+import { AccessibilityWidget } from "@/components/accessibility-helper-widget";
 import ChatAccessibilityButton from "@/components/chat-accessibility-button";
 import { Header } from "@/components/header";
 import { Sidebar } from "@/components/sidebar";
@@ -86,7 +87,7 @@ export default async function Layout({
         <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
           <Header />
           {children}
-          <ChatAccessibilityButton />
+          <AccessibilityWidget />
         </div>
 
         {/* This is used to make the header draggable on macOS */}
