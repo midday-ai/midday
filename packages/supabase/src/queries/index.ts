@@ -24,15 +24,15 @@ export enum RecurringTransactionFrequency {
 export function recurringFrequencyToString(frequency: RecurringTransactionFrequency): string {
   switch (frequency) {
     case RecurringTransactionFrequency.ALL:
-      return "All";
+      return "all";
     case RecurringTransactionFrequency.WEEKLY:
-      return "Weekly";
+      return "weekly";
     case RecurringTransactionFrequency.MONTHLY:
-      return "Monthly";
+      return "monthly";
     case RecurringTransactionFrequency.YEARLY:
-      return "Yearly";
+      return "yearly";
     default:
-      return "Unknown";
+      return "all";
   }
 }
 

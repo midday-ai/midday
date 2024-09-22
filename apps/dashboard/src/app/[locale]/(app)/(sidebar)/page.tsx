@@ -6,10 +6,12 @@ import TabbedCharts from "@/components/charts/tabbed-charts";
 import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
+import RecentTransactions from "@/components/recent-transactions";
 import { Table } from "@/components/tables/transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import { getTeamBankAccounts, getTeamUser, getUser } from "@midday/supabase/cached-queries";
+import { RecurringTransactionFrequency } from "@midday/supabase/queries";
 import {
   Card,
   CardContent,
@@ -50,10 +52,10 @@ export default async function Overview({
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
-        id: "this_year",
-        from: startOfYear(new Date()).toISOString(),
-        to: new Date().toISOString(),
-      };
+      id: "this_year",
+      from: startOfYear(new Date()).toISOString(),
+      to: new Date().toISOString(),
+    };
 
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
@@ -86,6 +88,20 @@ export default async function Overview({
           </div>
         </Card>
 
+        {/** display recent transactions */}
+        <Tabs defaultValue="transactions">
+          <TabsList>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="recurring">Recurring</TabsTrigger>
+          </TabsList>
+          <TabsContent value="transactions">
+            <RecentTransactions title="Recent Transactions" description="Most Recent Transactions Of Interest" />
+          </TabsContent>
+          <TabsContent value="recurring">
+            <RecentTransactions title="Subscriptions" description="Most Recent Detected recurring transactions across your accounts" recurringTransactionFrequency={RecurringTransactionFrequency.MONTHLY} />
+          </TabsContent>
+        </Tabs>
+
         {/** tabbed charts with income and expense charts */}
         <TabbedCharts
           currency={searchParams.currency ?? "USD"}
@@ -99,7 +115,7 @@ export default async function Overview({
           searchParams={searchParams}
         />
 
-        {/** recent transactions */}
+        {/* * recent transactions
         <Card className="mt-8 min-h-[530px] overflow-y-auto scrollbar-hide">
           {isEmpty && <EmptyState />}
           <div className={`${isEmpty && "blur-[8px] opacity-20 relative"}`}>
@@ -121,7 +137,7 @@ export default async function Overview({
               />
             </CardContent>
           </div>
-        </Card>
+        </Card> */}
       </div>
 
       <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
