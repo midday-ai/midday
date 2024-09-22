@@ -3,6 +3,7 @@ import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { TimeRangeInput } from "@midday/ui/time-range-input";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AssignUser } from "../assign-user";
@@ -13,6 +14,8 @@ const formSchema = z.object({
   project_id: z.string(),
   assigned_id: z.string().optional(),
   description: z.string().optional(),
+  start: z.string(),
+  end: z.string(),
 });
 
 type Props = {
@@ -20,6 +23,8 @@ type Props = {
   teamId: string;
   onCreate: (values: z.infer<typeof formSchema>) => void;
   projectId?: string;
+  start?: string;
+  end?: string;
 };
 
 export function TrackerRecordForm({
@@ -27,14 +32,23 @@ export function TrackerRecordForm({
   teamId,
   onCreate,
   projectId,
+  start,
+  end,
 }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       assigned_id: userId,
       project_id: projectId,
+      start: start || "06:45",
+      end: end || "08:30",
     },
   });
+
+  useEffect(() => {
+    form.setValue("start", start || "06:45");
+    form.setValue("end", end || "08:30");
+  }, [start, end]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onCreate(values);
@@ -47,9 +61,10 @@ export function TrackerRecordForm({
         className="mb-12 mt-6 space-y-4"
       >
         <TimeRangeInput
-          value={{ start: "06:45", end: "08:30" }}
+          value={{ start: form.watch("start"), end: form.watch("end") }}
           onChange={(value) => {
-            console.log(value);
+            form.setValue("start", value.start);
+            form.setValue("end", value.end);
           }}
         />
 

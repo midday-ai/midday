@@ -15,6 +15,11 @@ export function TimeRangeInput({
   const [duration, setDuration] = useState("");
 
   useEffect(() => {
+    setStartTime(value.start);
+    setEndTime(value.end);
+  }, [value]);
+
+  useEffect(() => {
     const start = new Date(`2000-01-01T${startTime}:00`);
     const end = new Date(`2000-01-01T${endTime}:00`);
     const diff = end.getTime() - start.getTime();
@@ -24,10 +29,9 @@ export function TimeRangeInput({
   }, [startTime, endTime]);
 
   return (
-    <div className="flex items-center space-x-3 w-full border border-border px-4 py-2 justify-between">
-      <div className="flex items-center space-x-2">
+    <div className="flex items-center w-full border border-border px-4 py-2">
+      <div className="flex items-center space-x-2 flex-1">
         <Icons.Time className="w-5 h-5 text-[#878787]" />
-
         <input
           type="time"
           value={startTime}
@@ -38,8 +42,10 @@ export function TimeRangeInput({
           className="bg-transparent focus:outline-none text-sm"
         />
       </div>
-      <Icons.ArrowRightAlt className="w-5 h-5 text-[#878787]" />
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-center flex-shrink-0 mx-4">
+        <Icons.ArrowRightAlt className="w-5 h-5 text-[#878787]" />
+      </div>
+      <div className="flex items-center space-x-2 flex-1 justify-end">
         <input
           type="time"
           value={endTime}

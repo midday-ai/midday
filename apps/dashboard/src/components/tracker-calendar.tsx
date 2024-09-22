@@ -35,9 +35,14 @@ import { TrackerMonthSelect } from "./tracker-month-select";
 type Props = {
   teamId: string;
   userId: string;
+  weekStartsOnMonday?: boolean;
 };
 
-export function TrackerCalendar({ teamId, userId }: Props) {
+export function TrackerCalendar({
+  teamId,
+  userId,
+  weekStartsOnMonday = false,
+}: Props) {
   const {
     date: currentDate,
     range,
@@ -46,12 +51,16 @@ export function TrackerCalendar({ teamId, userId }: Props) {
   } = useTrackerParams();
 
   const supabase = createClient();
-  const [data, setData] = useState();
-  const [meta, setMeta] = useState();
+  const [data, setData] = useState<Record<string, any>>({});
+  const [meta, setMeta] = useState<{ totalDuration?: number }>({});
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const calendarStart = startOfWeek(monthStart, {
+    weekStartsOn: weekStartsOnMonday ? 1 : 0,
+  });
+  const calendarEnd = endOfWeek(monthEnd, {
+    weekStartsOn: weekStartsOnMonday ? 1 : 0,
+  });
   const calendarDays = eachDayOfInterval({
     start: calendarStart,
     end: calendarEnd,
@@ -72,12 +81,12 @@ export function TrackerCalendar({ teamId, userId }: Props) {
         }),
       });
 
-      setData(trackerData?.data);
-      setMeta(trackerData?.meta);
+      setData(trackerData?.data || {});
+      setMeta(trackerData?.meta || {});
     }
 
     fetchData();
-  }, [currentDate]);
+  }, [currentDate, supabase, teamId, start, end]);
 
   const sortedDates = sortDates(range ?? []);
 
@@ -99,7 +108,7 @@ export function TrackerCalendar({ teamId, userId }: Props) {
 
   const firstWeek = eachDayOfInterval({
     start: calendarStart,
-    end: endOfWeek(calendarStart, { weekStartsOn: 1 }),
+    end: endOfWeek(calendarStart, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
   });
 
   const ref = useClickAway(() => {
@@ -109,7 +118,7 @@ export function TrackerCalendar({ teamId, userId }: Props) {
   });
 
   const getEventCount = (date: Date) => {
-    return data?.[formatISO(date, { representation: "date" })]?.length ?? 0;
+    return data[formatISO(date, { representation: "date" })]?.length ?? 0;
   };
 
   const handleOnSelect = (date: Date) => {
@@ -235,7 +244,7 @@ export function TrackerCalendar({ teamId, userId }: Props) {
               >
                 <div>{format(date, "d")}</div>
                 <TrackerEvents
-                  data={data?.[formatISO(date, { representation: "date" })]}
+                  data={data[formatISO(date, { representation: "date" })]}
                 />
               </div>
             );

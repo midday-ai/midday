@@ -32,9 +32,15 @@ type Props = {
   date?: string;
   meta?: TrackerMeta;
   data?: Record<string, TrackerRecord[]>;
+  weekStartsOnMonday?: boolean;
 };
 
-export function TrackerWidget({ date: initialDate, meta, data }: Props) {
+export function TrackerWidget({
+  date: initialDate,
+  meta,
+  data,
+  weekStartsOnMonday = false,
+}: Props) {
   const {
     date: currentDate,
     range,
@@ -44,8 +50,12 @@ export function TrackerWidget({ date: initialDate, meta, data }: Props) {
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+  const calendarStart = startOfWeek(monthStart, {
+    weekStartsOn: weekStartsOnMonday ? 1 : 0,
+  });
+  const calendarEnd = endOfWeek(monthEnd, {
+    weekStartsOn: weekStartsOnMonday ? 1 : 0,
+  });
   const calendarDays = eachDayOfInterval({
     start: calendarStart,
     end: calendarEnd,
@@ -55,7 +65,7 @@ export function TrackerWidget({ date: initialDate, meta, data }: Props) {
 
   const firstWeek = eachDayOfInterval({
     start: calendarStart,
-    end: endOfWeek(calendarStart, { weekStartsOn: 1 }),
+    end: endOfWeek(calendarStart, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
   });
 
   const ref = useClickAway(() => {

@@ -26,7 +26,11 @@ export default async function Tracker({ searchParams }: Props) {
 
   return (
     <div>
-      <TrackerCalendar teamId={userData?.team_id} userId={userData?.id} />
+      <TrackerCalendar
+        teamId={userData?.team_id}
+        userId={userData?.id}
+        weekStartsOnMonday={userData?.week_starts_on_monday}
+      />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Projects</h2>

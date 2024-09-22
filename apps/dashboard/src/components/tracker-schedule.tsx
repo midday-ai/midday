@@ -29,13 +29,13 @@ const SLOTS_PER_HOUR = 4;
 type Props = {
   teamId: string;
   userId: string;
+  timeFormat: number;
 };
 
-export function TrackerSchedule({ teamId, userId }: Props) {
+export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { selectedDate } = useTrackerParams();
   const hours = Array.from({ length: 24 }, (_, i) => i);
-  const [is24HourFormat, setIs24HourFormat] = useState(true);
   const [data, setData] = useState<TrackerRecord[]>([]);
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -81,7 +81,7 @@ export function TrackerSchedule({ teamId, userId }: Props) {
   const formatHour = (hour: number) => {
     const date = new Date();
     date.setHours(hour, 0, 0, 0);
-    return format(date, is24HourFormat ? "HH:mm" : "hh:mm a");
+    return format(date, timeFormat === 12 ? "hh:mm a" : "HH:mm");
   };
 
   const handleMouseDown = (slot: number) => {
@@ -151,6 +151,21 @@ export function TrackerSchedule({ teamId, userId }: Props) {
   const handleEditEvent = (event: TrackerRecord) => {
     // Implement edit event logic
   };
+
+  const getTimeFromSlot = (slot: number) => {
+    const hour = Math.floor(slot / 4);
+    const minute = (slot % 4) * 15;
+    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+  };
+
+  const selectedStart =
+    selectedSlots.length > 0
+      ? getTimeFromSlot(Math.min(...selectedSlots))
+      : undefined;
+  const selectedEnd =
+    selectedSlots.length > 0
+      ? getTimeFromSlot(Math.max(...selectedSlots) + 1)
+      : undefined;
 
   return (
     <div className="w-full">
@@ -248,6 +263,8 @@ export function TrackerSchedule({ teamId, userId }: Props) {
         userId={userId}
         teamId={teamId}
         projectId="4210f672-b50d-4a7d-a345-4cca12110ce9"
+        start={selectedStart}
+        end={selectedEnd}
       />
     </div>
   );

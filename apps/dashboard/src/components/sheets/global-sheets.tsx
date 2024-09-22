@@ -22,7 +22,11 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
         teamId={userData?.team_id}
         userId={userData?.id}
       />
-      <TrackerScheduleSheet teamId={userData?.team_id} userId={userData?.id} />
+      <TrackerScheduleSheet
+        teamId={userData?.team_id}
+        userId={userData?.id}
+        timeFormat={userData?.time_format}
+      />
     </>
   );
 }
