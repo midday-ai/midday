@@ -7,7 +7,12 @@ import { Sheet, SheetContent } from "@midday/ui/sheet";
 import React from "react";
 import { TrackerSchedule } from "../tracker-schedule";
 
-export function TrackerScheduleSheet() {
+type Props = {
+  teamId: string;
+  userId: string;
+};
+
+export function TrackerScheduleSheet({ teamId, userId }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { setParams, projectId, range, selectedDate } = useTrackerParams();
 
@@ -22,7 +27,7 @@ export function TrackerScheduleSheet() {
         }
       >
         <SheetContent>
-          <TrackerSchedule />
+          <TrackerSchedule teamId={teamId} userId={userId} />
         </SheetContent>
       </Sheet>
     );
@@ -38,7 +43,7 @@ export function TrackerScheduleSheet() {
       }}
     >
       <DrawerContent>
-        <TrackerSchedule />
+        <TrackerSchedule teamId={teamId} userId={userId} />
       </DrawerContent>
     </Drawer>
   );

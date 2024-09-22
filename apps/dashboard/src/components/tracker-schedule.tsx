@@ -14,14 +14,24 @@ import { TrackerRecordForm } from "./forms/tracker-record-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
 interface TrackerRecord {
-  meta?: {
-    totalDuration?: number;
+  id: string;
+  start: number;
+  duration: number;
+  project: {
+    name: string;
   };
 }
 
 const ROW_HEIGHT = 36;
+const SLOT_HEIGHT = 9;
+const SLOTS_PER_HOUR = 4;
 
-export function TrackerSchedule() {
+type Props = {
+  teamId: string;
+  userId: string;
+};
+
+export function TrackerSchedule({ teamId, userId }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { selectedDate } = useTrackerParams();
   const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -31,23 +41,27 @@ export function TrackerSchedule() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartSlot, setDragStartSlot] = useState<number | null>(null);
   const [totalDuration, setTotalDuration] = useState(0);
+  const [resizingEvent, setResizingEvent] = useState<TrackerRecord | null>(
+    null,
+  );
+  const [resizeStartY, setResizeStartY] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
       const supabase = createClient();
       const trackerData = await getTrackerRecordsByDateQuery(supabase, {
-        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+        teamId,
         date: selectedDate ?? "",
       });
 
-      setData(trackerData?.data ?? []);
-      setTotalDuration(trackerData?.data?.meta?.totalDuration ?? 0);
+      setData((trackerData?.data as TrackerRecord[]) ?? []);
+      setTotalDuration(trackerData?.meta?.totalDuration ?? 0);
     };
 
     if (selectedDate) {
       fetchData();
     }
-  }, [selectedDate]);
+  }, [selectedDate, teamId]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -91,14 +105,52 @@ export function TrackerSchedule() {
   const handleMouseUp = () => {
     setIsDragging(false);
     setDragStartSlot(null);
-    const totalSeconds = selectedSlots.length * 15 * 60; // Each slot represents 15 minutes (900 seconds)
-    setTotalDuration((prev) => prev + totalSeconds);
+    setResizingEvent(null);
   };
 
   useEffect(() => {
     window.addEventListener("mouseup", handleMouseUp);
     return () => window.removeEventListener("mouseup", handleMouseUp);
-  }, [selectedSlots]);
+  }, []);
+
+  const handleEventResizeStart = (
+    e: React.MouseEvent,
+    event: TrackerRecord,
+  ) => {
+    setResizingEvent(event);
+    setResizeStartY(e.clientY);
+  };
+
+  const handleEventResize = (e: React.MouseEvent) => {
+    if (resizingEvent && scrollRef.current) {
+      const deltaY = e.clientY - resizeStartY;
+      const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
+      const newDuration =
+        Math.max(
+          1,
+          Math.ceil(resizingEvent.duration / (15 * 60)) + deltaSlots,
+        ) *
+        15 *
+        60;
+
+      setData((prevData) =>
+        prevData.map((item) =>
+          item.id === resizingEvent.id
+            ? { ...item, duration: newDuration }
+            : item,
+        ),
+      );
+    }
+  };
+
+  const handleEventResizeEnd = () => {
+    setResizingEvent(null);
+    // Here you would typically update the backend with the new event duration
+  };
+
+  const handleEditEvent = (event: TrackerRecord) => {
+    // Implement edit event logic
+  };
 
   return (
     <div className="w-full">
@@ -126,40 +178,72 @@ export function TrackerSchedule() {
               </div>
             ))}
           </div>
-          <div className="relative flex-grow border border-border border-t-0">
+          <div
+            className="relative flex-grow border border-border border-t-0"
+            onMouseMove={handleEventResize}
+          >
             {hours.map((hour) => (
               <React.Fragment key={hour}>
                 <div
-                  className="absolute w-full border-t border-border"
+                  className="absolute w-full border-t border-border user-select-none"
                   style={{ top: `${hour * ROW_HEIGHT}px` }}
                 />
-                {[0, 1, 2, 3].map((quarter) => {
-                  const slot = hour * 4 + quarter;
-
-                  return (
-                    <div
-                      key={slot}
-                      className={cn(
-                        "absolute w-full cursor-pointer z-5",
-                        selectedSlots.includes(slot)
-                          ? "h-[9px] bg-[#1D1D1D]/[0.9]"
-                          : "h-9",
-                      )}
-                      style={{
-                        top: `${slot * 9}px`,
-                      }}
-                      onMouseDown={() => handleMouseDown(slot)}
-                      onMouseEnter={() => handleMouseEnter(slot)}
-                    />
-                  );
-                })}
               </React.Fragment>
             ))}
+            {data?.map((event) => {
+              const startSlot = event.start ?? 9 * SLOTS_PER_HOUR; // Set to 09:00 if null
+              const endSlot = startSlot + Math.ceil(event.duration / (15 * 60));
+              const height = (endSlot - startSlot) * SLOT_HEIGHT;
+
+              return (
+                <div
+                  key={event.id}
+                  className="absolute w-full cursor-move z-10 bg-[#1D1D1D]"
+                  style={{
+                    top: `${startSlot * SLOT_HEIGHT}px`,
+                    height: `${height}px`,
+                  }}
+                >
+                  <div className="text-xs text-white p-4 flex justify-between items-center">
+                    <span>
+                      {event.project.name} (
+                      {secondsToHoursAndMinutes(event.duration)})
+                    </span>
+                  </div>
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                    onMouseDown={(e) => handleEventResizeStart(e, event)}
+                    onMouseUp={handleEventResizeEnd}
+                  />
+                </div>
+              );
+            })}
+            {hours.map((hour) =>
+              [0, 1, 2, 3].map((quarter) => {
+                const slot = hour * 4 + quarter;
+                return (
+                  <div
+                    key={slot}
+                    className={cn(
+                      "absolute w-full cursor-pointer",
+                      selectedSlots.includes(slot)
+                        ? "h-[9px] bg-[#1D1D1D]/[0.9]"
+                        : "h-9",
+                    )}
+                    style={{
+                      top: `${slot * SLOT_HEIGHT}px`,
+                    }}
+                    onMouseDown={() => handleMouseDown(slot)}
+                    onMouseEnter={() => handleMouseEnter(slot)}
+                  />
+                );
+              }),
+            )}
           </div>
         </div>
       </ScrollArea>
 
-      {/* <TrackerRecordForm onCreate={() => {}} projectId="1" userId="1" /> */}
+      {/* <TrackerRecordForm onCreate={() => {}} projectId="1"    /> */}
     </div>
   );
 }

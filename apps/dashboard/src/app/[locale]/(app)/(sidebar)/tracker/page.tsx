@@ -3,6 +3,7 @@ import { Table } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
 import { TrackerSearchFilter } from "@/components/tracker-search-filter";
+import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -21,10 +22,11 @@ type Props = {
 export default async function Tracker({ searchParams }: Props) {
   const status = searchParams?.status;
   const sort = searchParams?.sort?.split(":");
+  const { data: userData } = await getUser();
 
   return (
     <div>
-      <TrackerCalendar />
+      <TrackerCalendar teamId={userData?.team_id} userId={userData?.id} />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">
         <h2 className="text-md font-medium">Projects</h2>

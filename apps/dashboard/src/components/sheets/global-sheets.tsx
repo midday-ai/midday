@@ -1,3 +1,4 @@
+import { getUser } from "@midday/supabase/cached-queries";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
@@ -6,12 +7,22 @@ type Props = {
   defaultCurrency: string;
 };
 
-export function GlobalSheets({ defaultCurrency }: Props) {
+export async function GlobalSheets({ defaultCurrency }: Props) {
+  const { data: userData } = await getUser();
+
   return (
     <>
-      <TrackerUpdateSheet currencyCode={defaultCurrency} />
-      <TrackerCreateSheet currencyCode={defaultCurrency} />
-      <TrackerScheduleSheet />
+      <TrackerUpdateSheet
+        currencyCode={defaultCurrency}
+        teamId={userData?.team_id}
+        userId={userData?.id}
+      />
+      <TrackerCreateSheet
+        currencyCode={defaultCurrency}
+        teamId={userData?.team_id}
+        userId={userData?.id}
+      />
+      <TrackerScheduleSheet teamId={userData?.team_id} userId={userData?.id} />
     </>
   );
 }

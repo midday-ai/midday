@@ -32,7 +32,12 @@ import { isHotkeyPressed, useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
 
-export function TrackerCalendar() {
+type Props = {
+  teamId: string;
+  userId: string;
+};
+
+export function TrackerCalendar({ teamId, userId }: Props) {
   const {
     date: currentDate,
     range,
@@ -58,7 +63,7 @@ export function TrackerCalendar() {
   useEffect(() => {
     async function fetchData() {
       const trackerData = await getTrackerRecordsByRangeQuery(supabase, {
-        teamId: "dd6a039e-d071-423a-9a4d-9ba71325d890",
+        teamId,
         from: formatISO(start, {
           representation: "date",
         }),
@@ -134,7 +139,7 @@ export function TrackerCalendar() {
             </h1>
 
             <div className="text-sm text-[#606060] flex items-center space-x-2">
-              <p className="text-sm text-[#606060]">Total hours</p>
+              <p className="text-sm text-[#606060]">Total this month</p>
               <TooltipProvider delayDuration={100}>
                 <Tooltip>
                   <TooltipTrigger>
