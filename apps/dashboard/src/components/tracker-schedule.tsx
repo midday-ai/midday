@@ -165,7 +165,7 @@ export function TrackerSchedule({ teamId, userId }: Props) {
       </div>
       <TrackerDaySelect />
 
-      <ScrollArea ref={scrollRef} className="h-[calc(100vh-200px)] mt-8">
+      <ScrollArea ref={scrollRef} className="h-[calc(100vh-485px)] mt-8">
         <div className="flex text-[#878787] text-xs">
           <div className="w-20 flex-shrink-0">
             {hours.map((hour) => (
@@ -243,7 +243,12 @@ export function TrackerSchedule({ teamId, userId }: Props) {
         </div>
       </ScrollArea>
 
-      {/* <TrackerRecordForm onCreate={() => {}} projectId="1"    /> */}
+      <TrackerRecordForm
+        onCreate={() => {}}
+        userId={userId}
+        teamId={teamId}
+        projectId="4210f672-b50d-4a7d-a345-4cca12110ce9"
+      />
     </div>
   );
 }

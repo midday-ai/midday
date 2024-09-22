@@ -858,7 +858,7 @@ export async function getInboxQuery(
 
 export type GetTrackerProjectsQueryParams = {
   teamId: string;
-  to: number;
+  to?: number;
   from?: number;
   sort?: {
     column: string;

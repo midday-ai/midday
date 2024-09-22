@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Icons } from "./icons";
 
 export function TimeRangeInput({
   value,
@@ -24,18 +24,10 @@ export function TimeRangeInput({
   }, [startTime, endTime]);
 
   return (
-    <div className="bg-gray-800 text-white p-3 rounded-lg shadow-lg flex items-center space-x-3 w-fit">
+    <div className="flex items-center space-x-3 w-full border border-border px-4 py-2 justify-between">
       <div className="flex items-center space-x-2">
-        <svg
-          viewBox="0 0 24 24"
-          className="w-5 h-5 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 6v6l4 2" />
-        </svg>
+        <Icons.Time className="w-5 h-5 text-[#878787]" />
+
         <input
           type="time"
           value={startTime}
@@ -43,20 +35,22 @@ export function TimeRangeInput({
             setStartTime(e.target.value);
             onChange({ ...value, start: e.target.value });
           }}
-          className="bg-transparent text-lg font-semibold focus:outline-none"
+          className="bg-transparent focus:outline-none text-sm"
         />
       </div>
-      <ChevronRight className="w-5 h-5 text-gray-400" />
-      <input
-        type="time"
-        value={endTime}
-        onChange={(e) => {
-          setEndTime(e.target.value);
-          onChange({ ...value, end: e.target.value });
-        }}
-        className="bg-transparent text-lg font-semibold focus:outline-none"
-      />
-      <span className="text-gray-400 text-sm">{duration}</span>
+      <Icons.ArrowRightAlt className="w-5 h-5 text-[#878787]" />
+      <div className="flex items-center space-x-2">
+        <input
+          type="time"
+          value={endTime}
+          onChange={(e) => {
+            setEndTime(e.target.value);
+            onChange({ ...value, end: e.target.value });
+          }}
+          className="bg-transparent focus:outline-none text-sm"
+        />
+        <span className="text-[#878787] text-sm">{duration}</span>
+      </div>
     </div>
   );
 }

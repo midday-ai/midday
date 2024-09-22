@@ -8,16 +8,21 @@ import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 
-export function TrackerSelectProject({ setParams, teamId }) {
+type Props = {
+  teamId: string;
+  selectedId?: string;
+};
+
+export function TrackerSelectProject({ teamId, selectedId }: Props) {
   const { toast } = useToast();
   const supabase = createClient();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(selectedId);
   const [data, setData] = useState([]);
   const [isLoading, setLoading] = useState(false);
 
   const action = useAction(createProjectAction, {
     onSuccess: ({ data: project }) => {
-      setParams({ projectId: project?.id || null });
+      // setParams({ projectId: project?.id || null });
     },
     onError: () => {
       toast({
@@ -34,7 +39,6 @@ export function TrackerSelectProject({ setParams, teamId }) {
 
     const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
       teamId,
-      query,
       search: {
         query: value,
         fuzzy: true,
@@ -46,7 +50,7 @@ export function TrackerSelectProject({ setParams, teamId }) {
   };
 
   const onSelect = (project) => {
-    setParams({ projectId: project.id });
+    // setParams({ projectId: project.id });
   };
 
   return (
