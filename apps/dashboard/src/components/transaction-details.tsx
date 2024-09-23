@@ -3,10 +3,9 @@ import type { UpdateTransactionValues } from "@/actions/schema";
 import { updateSimilarTransactionsCategoryAction } from "@/actions/update-similar-transactions-action";
 import { updateSimilarTransactionsRecurringAction } from "@/actions/update-similar-transactions-recurring";
 import { createClient } from "@midday/supabase/client";
-import { getTransactionQuery } from "@midday/supabase/queries";
 import {
   getCurrentUserTeamQuery,
-  getSimilarTransactions,
+  getSimilarTransactions, getSimilarTransactionsDetailedQuery, getTransactionQuery
 } from "@midday/supabase/queries";
 import {
   Accordion,
@@ -31,13 +30,15 @@ import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import { useQueryState } from "nuqs";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import useDebounce from '../hooks/useDebounce';
 import { AssignUser } from "./assign-user";
 import { Attachments } from "./attachments";
 import { FormatAmount } from "./format-amount";
 import { Note } from "./note";
 import { SelectCategory } from "./select-category";
+import SimilarTransactions from "./similar-transactions";
 import { TransactionBankAccount } from "./transaction-bank-account";
 
 type Props = {
@@ -49,12 +50,43 @@ type Props = {
   ) => void;
 };
 
+/**
+ * TransactionDetails Component
+ * 
+ * This component displays detailed information about a transaction and manages
+ * the fetching and display of similar transactions.
+ * 
+ * Key features and implementation rationale:
+ * 1. Debounced data updates: We use a debounce mechanism to prevent excessive
+ *    API calls when the transaction data changes rapidly. This optimizes
+ *    performance and reduces server load.
+ * 
+ * 2. Similar transactions: The component fetches and displays similar transactions
+ *    based on the current transaction's details. This provides context and
+ *    allows for bulk updates of related transactions.
+ * 
+ * 3. Hotkeys: The component implements hotkey navigation (up/down arrows) for
+ *    easy browsing through multiple transactions. This enhances user experience
+ *    and efficiency.
+ * 
+ * 4. Optimistic updates: The component uses optimistic updates when changing
+ *    transaction details, providing immediate feedback to the user while
+ *    the server request is in progress.
+ * 
+ * 5. Toast notifications: The component uses toast notifications to prompt
+ *    users for bulk updates of similar transactions, improving UX for
+ *    repetitive tasks.
+ * 
+ * @param {Props} props - The component props
+ * @returns {React.ReactElement} The rendered TransactionDetails component
+ */
 export function TransactionDetails({
   data: initialData,
   ids,
   updateTransaction,
 }: Props) {
   const [data, setData] = useState(initialData);
+  const [similarTransactions, setSimilarTransactions] = useState<any[]>([]);
   const [transactionId, setTransactionId] = useQueryState("id");
   const { toast } = useToast();
   const supabase = createClient();
@@ -67,6 +99,10 @@ export function TransactionDetails({
   );
   const createAttachments = useAction(createAttachmentsAction);
 
+  // Debounce data changes to prevent excessive API calls
+  const debouncedData = useDebounce(data, 500); // 500ms debounce
+
+  // Keep existing hotkeys
   useHotkeys("esc", () => setTransactionId(null));
 
   const enabled = Boolean(ids?.length);
@@ -76,7 +112,7 @@ export function TransactionDetails({
     ({ key }) => {
       if (key === "ArrowUp") {
         const currentIndex = ids?.indexOf(data?.id) ?? 0;
-        const prevId = ids[currentIndex - 1];
+        const prevId = ids?.[currentIndex - 1];
 
         if (prevId) {
           setTransactionId(prevId);
@@ -85,7 +121,7 @@ export function TransactionDetails({
 
       if (key === "ArrowDown") {
         const currentIndex = ids?.indexOf(data?.id) ?? 0;
-        const nextId = ids[currentIndex + 1];
+        const nextId = ids?.[currentIndex + 1];
 
         if (nextId) {
           setTransactionId(nextId);
@@ -95,20 +131,60 @@ export function TransactionDetails({
     { enabled },
   );
 
+  /**
+   * Fetches similar transactions based on the current transaction's details.
+   * This function is memoized to prevent unnecessary re-creation and is
+   * triggered when the debounced data changes.
+   */
+  const fetchSimilarTransactions = useCallback(async () => {
+    if (!debouncedData?.name || !debouncedData?.category?.slug) return;
+
+    try {
+      const user = await getCurrentUserTeamQuery(supabase);
+      if (!user?.data?.team_id) {
+        console.error('User team not found');
+        return;
+      }
+
+      console.log('Fetching similar transactions for:', debouncedData.name);
+      const transactions = await getSimilarTransactionsDetailedQuery(supabase, {
+        name: debouncedData.name,
+        teamId: user.data.team_id,
+        categorySlug: debouncedData.category.slug,
+      });
+
+      console.log('Similar transactions fetched:', transactions?.data);
+      setSimilarTransactions(transactions?.data || []);
+    } catch (error) {
+      console.error('Error fetching similar transactions:', error);
+    }
+  }, [debouncedData, supabase]);
+
+  // Effect to initialize data and trigger initial fetch of similar transactions
   useEffect(() => {
     if (initialData) {
+      console.log('Initial data set:', initialData);
       setData(initialData);
       setLoading(false);
     }
   }, [initialData]);
 
+  // Effect to fetch similar transactions when debounced data changes
+  useEffect(() => {
+    console.log('Debounced data changed, fetching similar transactions');
+    fetchSimilarTransactions();
+  }, [fetchSimilarTransactions]);
+
   useEffect(() => {
     async function fetchData() {
       try {
+        console.log('Fetching transaction data for ID:', data?.id);
         const transaction = await getTransactionQuery(supabase, data?.id);
+        console.log('Transaction data fetched:', transaction);
         setData(transaction);
         setLoading(false);
-      } catch {
+      } catch (error) {
+        console.error('Error fetching transaction data:', error);
         setLoading(false);
       }
     }
@@ -116,7 +192,7 @@ export function TransactionDetails({
     if (!data) {
       fetchData();
     }
-  }, [data]);
+  }, [data, supabase]);
 
   const handleOnChangeCategory = async (category: {
     id: string;
@@ -124,11 +200,14 @@ export function TransactionDetails({
     slug: string;
     color: string;
   }) => {
+    console.log('Category changed to:', category);
+    // Optimistic update
     updateTransaction(
       { id: data?.id, category_slug: category.slug },
       { category },
     );
 
+    // Fetch similar transactions and prompt for bulk update
     const user = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
@@ -136,11 +215,13 @@ export function TransactionDetails({
       categorySlug: category.slug,
     });
 
+    console.log('Similar transactions after category change:', transactions?.data);
     if (transactions?.data && transactions.data.length > 1) {
+      // Show toast for bulk update option
       toast({
         duration: 6000,
         variant: "ai",
-        title: "Midday AI",
+        title: "Solomon AI",
         description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${category.name} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
@@ -162,12 +243,19 @@ export function TransactionDetails({
     }
   };
 
+  /**
+   * Handles recurring status changes for the current transaction.
+   * It updates the transaction, fetches similar transactions,
+   * and prompts the user for bulk updates if applicable.
+   */
   const handleOnChangeRecurring = async (value: boolean) => {
+    // Optimistic update
     updateTransaction(
       { id: data?.id, recurring: value, frequency: value ? "monthly" : null },
       { recurring: value, frequency: value ? "monthly" : null },
     );
 
+    // Fetch similar transactions and prompt for bulk update
     const user = await getCurrentUserTeamQuery(supabase);
     const transactions = await getSimilarTransactions(supabase, {
       name: data?.name,
@@ -175,10 +263,11 @@ export function TransactionDetails({
     });
 
     if (transactions?.data && transactions.data.length > 1) {
+      // Show toast for bulk update option
       toast({
         duration: 6000,
         variant: "ai",
-        title: "Midday AI",
+        title: "Solomon AI",
         description: `Do you want to mark ${transactions?.data?.length} similar transactions from ${data?.name} as ${value ? "Recurring" : "Non Recurring"} too?`,
         footer: (
           <div className="flex space-x-2 mt-4">
@@ -211,7 +300,7 @@ export function TransactionDetails({
   }
 
   return (
-    <div>
+    <div className="overflow-y-auto scrollbar-hide">
       <div className="flex justify-between mb-8">
         <div className="flex-1 flex-col">
           {isLoading ? (
@@ -392,6 +481,19 @@ export function TransactionDetails({
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+
+      {similarTransactions.length > 0 && (
+        <Accordion type="multiple" defaultValue={defaultValue}>
+          <AccordionItem value="similar-transactions">
+            <AccordionTrigger>Similar Transactions</AccordionTrigger>
+            <AccordionContent className="select-text">
+              <div className="mt-6">
+                <SimilarTransactions similarTransactions={similarTransactions} title="Transactions" />
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      )}
     </div>
   );
 }

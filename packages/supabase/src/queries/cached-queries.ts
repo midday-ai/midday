@@ -4,12 +4,14 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { createClient } from "../client/server";
 import {
+  GetRecentTransactionsParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
   getExpensesQuery,
   getMetricsQuery,
+  getRecentTransactionsQuery,
   getRunwayQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
@@ -85,6 +87,63 @@ export const getTransactions = async (
     {
       revalidate: 180,
       tags: [`transactions_${teamId}`],
+    },
+  )(params);
+};
+
+/**
+ * Fetches recent transactions for a team, with caching.
+ *
+ * @async
+ * @function getRecentTransactions
+ * @param {Omit<GetRecentTransactionsParams, "teamId">} params - Parameters for the query, excluding teamId.
+ * @returns {Promise<RecentTransactionsResult | null>} A promise that resolves to the recent transactions or null if no team is found.
+ *
+ * @description
+ * This function retrieves recent transactions for the current user's team. It uses Next.js's
+ * unstable_cache for performance optimization. The function performs the following steps:
+ * 1. Creates a Supabase client.
+ * 2. Fetches the current user and extracts the team ID.
+ * 3. If no team ID is found, it returns null.
+ * 4. Otherwise, it calls the getRecentTransactionsQuery with caching applied.
+ *
+ * @example
+ * ```typescript
+ * const recentTransactions = await getRecentTransactions({ limit: 10, accountId: "sdlhsadghlads" });
+ * if (recentTransactions) {
+ *   console.log(recentTransactions);
+ * } else {
+ *   console.log("No team found or error occurred");
+ * }
+ * ```
+ *
+ * @throws Will throw an error if the database query fails.
+ *
+ * @see {@link GetRecentTransactionsParams} for the full list of accepted parameters.
+ * @see {@link getRecentTransactionsQuery} for the underlying query function.
+ */
+export const getRecentTransactions = async (
+  params: Omit<GetRecentTransactionsParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  // we convert the params to a string to make the cache key unique
+  const paramsString = JSON.stringify(params);
+
+  return unstable_cache(
+    async () => {
+      return getRecentTransactionsQuery(supabase, { ...params, teamId });
+    },
+    ["recent_transactions", teamId],
+    {
+      revalidate: 180,
+      tags: [`recent_transactions_${teamId}_${paramsString}`],
     },
   )(params);
 };

@@ -8,7 +8,124 @@ import {
 } from "date-fns";
 import type { Client } from "../types";
 
-function transactionCategory(transaction) {
+export enum RecurringTransactionFrequency {
+  ALL = "all",
+  WEEKLY = "weekly",
+  MONTHLY = "monthly",
+  YEARLY = "yearly",
+}
+
+/**
+ * Converts a RecurringTransactionFrequency enum value to its string representation.
+ * 
+ * @param frequency - The RecurringTransactionFrequency enum value to convert.
+ * @returns The string representation of the frequency.
+ */
+export function recurringFrequencyToString(frequency: RecurringTransactionFrequency): string {
+  switch (frequency) {
+    case RecurringTransactionFrequency.ALL:
+      return "all";
+    case RecurringTransactionFrequency.WEEKLY:
+      return "weekly";
+    case RecurringTransactionFrequency.MONTHLY:
+      return "monthly";
+    case RecurringTransactionFrequency.YEARLY:
+      return "yearly";
+    default:
+      return "all";
+  }
+}
+
+/**
+ * Parameters for the getRecentTransactionsQuery function.
+ */
+export type GetRecentTransactionsParams = {
+  /** The ID of the team to fetch transactions for. */
+  teamId: string;
+  /** The number of transactions to fetch. Defaults to 15. */
+  limit?: number;
+  /** Optional account ID to filter transactions. */
+  accountId?: string;
+  /** Optional flag to filter recurring transactions. */
+  recurring?: RecurringTransactionFrequency;
+};
+
+/**
+ * Fetches the most recent transactions for a given team, optionally filtered by account and recurring status.
+ * 
+ * @param supabase - The Supabase client instance.
+ * @param params - The parameters for the query.
+ * @returns A promise that resolves to an object containing the recent transactions data.
+ */
+export async function getRecentTransactionsQuery(
+  supabase: Client,
+  params: GetRecentTransactionsParams
+) {
+  const { teamId, limit = 15, accountId, recurring } = params;
+
+  /**
+   * The columns to select from the transactions table.
+   */
+  const columns = [
+    "id",
+    "date",
+    "amount",
+    "currency",
+    "method",
+    "status",
+    "note",
+    "name",
+    "description",
+    "recurring",
+    "category:transaction_categories(id, name, color, slug)",
+    "bank_account:bank_accounts(id, name, currency, bank_connection:bank_connections(id, logo_url))",
+  ];
+
+  /**
+   * Builds and executes the Supabase query.
+   */
+  const query = supabase
+    .from("transactions")
+    .select(columns.join(","))
+    .eq("team_id", teamId)
+    .order("date", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  // Add account filter if accountId is provided
+  if (accountId) {
+    query.eq("bank_account_id", accountId);
+  }
+
+  // Add recurring filter if recurring is provided
+  if (recurring) {
+    if (recurring.includes(RecurringTransactionFrequency.ALL)) {
+      query.eq("recurring", true);
+    } else {
+      query.in("frequency", [recurringFrequencyToString(recurring)]);
+    }
+  }
+
+  const { data, error } = await query.throwOnError();
+
+  /**
+   * Processes the retrieved data.
+   */
+  return {
+    data: data?.map((transaction: any) => ({
+      ...transaction,
+      category: transactionCategory(transaction),
+    })),
+  };
+}
+
+/**
+ * Determines the category for a transaction.
+ * 
+ * @param transaction - The transaction object.
+ * @returns The category object for the transaction.
+ */
+function transactionCategory(transaction: any) {
   return (
     transaction?.category ?? {
       id: "uncategorized",
@@ -368,6 +485,19 @@ export async function getSimilarTransactions(
   return supabase
     .from("transactions")
     .select("id, amount, team_id", { count: "exact" })
+    .eq("team_id", teamId)
+    .neq("category_slug", categorySlug)
+    .textSearch("fts_vector", `'${name}'`)
+    .throwOnError();
+}
+
+// gets all the similar transactions with detailed information
+export async function getSimilarTransactionsDetailedQuery(supabase: Client, params: GetSimilarTransactionsParams) {
+  const { name, teamId, categorySlug } = params;
+
+  return supabase
+    .from("transactions")
+    .select("*", { count: "exact" })
     .eq("team_id", teamId)
     .neq("category_slug", categorySlug)
     .textSearch("fts_vector", `'${name}'`)
