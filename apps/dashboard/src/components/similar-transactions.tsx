@@ -36,7 +36,7 @@ export const TransactionsFilterHelper: React.FC<{ transactions: Array<Transactio
     const filteredTransactions = useMemo(() => {
         return transactions
             .filter((transaction) => transaction.merchant_name?.toLowerCase().includes(search.toLowerCase()))
-            .filter((transaction) => (filterCategory ? transaction.category === filterCategory : true))
+            .filter((transaction) => (filterCategory ? transaction.category_slug === filterCategory : true))
             .sort((a, b) => {
                 if (sortBy === "date") {
                     return sortDirection === "asc" ? new Date(a.date).getTime() - new Date(b.date).getTime() : new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -63,7 +63,7 @@ export const TransactionsFilterHelper: React.FC<{ transactions: Array<Transactio
         setFilterCategory(category)
     }
     const categories = useMemo(() => {
-        return Array.from(new Set(transactions.map(t => t.category))).filter(Boolean);
+        return Array.from(new Set(transactions.map(t => t.category_slug))).filter(Boolean);
     }, [transactions]);
 
     return (
