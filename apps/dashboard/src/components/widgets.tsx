@@ -8,6 +8,7 @@ import {
 import * as React from "react";
 import { Spending } from "./charts/spending";
 import { Transactions } from "./charts/transactions";
+import { WidgetsNavigation } from "./widgets-navigation";
 import { AccountBalance } from "./widgets/account-balance";
 import { Inbox } from "./widgets/inbox";
 import { Insights } from "./widgets/insights";
@@ -43,6 +44,7 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
         align: "start",
       }}
     >
+      <WidgetsNavigation />
       <div className="ml-auto hidden md:flex">
         <CarouselPrevious className="static p-0 border-none hover:bg-transparent" />
         <CarouselNext className="static p-0 border-none hover:bg-transparent" />

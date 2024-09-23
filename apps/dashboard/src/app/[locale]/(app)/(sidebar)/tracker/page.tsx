@@ -32,6 +32,7 @@ export default async function Tracker({ searchParams }: Props) {
         teamId={userData?.team_id}
         userId={userData?.id}
         weekStartsOnMonday={userData?.week_starts_on_monday}
+        timeFormat={userData?.time_format}
       />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">

@@ -93,6 +93,7 @@ export function TrackerUpdateSheet({ teamId }: Props) {
   const deleteAction = useAction(deleteProjectAction, {
     onSuccess: () => {
       setParams({ update: null, projectId: null });
+      form.reset();
     },
     onError: () => {
       toast({
@@ -106,6 +107,7 @@ export function TrackerUpdateSheet({ teamId }: Props) {
   const updateAction = useAction(updateProjectAction, {
     onSuccess: () => {
       setParams({ update: null, projectId: null });
+      form.reset();
     },
     onError: () => {
       toast({

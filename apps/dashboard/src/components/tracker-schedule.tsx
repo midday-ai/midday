@@ -4,9 +4,7 @@ import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
-import { Icons } from "@midday/ui/icons";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { format } from "date-fns";
 import React, { useEffect, useRef, useState } from "react";
@@ -169,15 +167,12 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
 
   return (
     <div className="w-full">
-      <div className="space-y-2 text-center sm:text-left mb-8 flex justify-between items-center flex-row">
+      <div className="text-left mb-8">
         <h2 className="text-xl text-[#878787]">
           {secondsToHoursAndMinutes(totalDuration)}
         </h2>
-
-        <Button variant="outline" size="icon">
-          <Icons.Tune size={16} />
-        </Button>
       </div>
+
       <TrackerDaySelect />
 
       <ScrollArea ref={scrollRef} className="h-[calc(100vh-485px)] mt-8">

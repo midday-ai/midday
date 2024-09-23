@@ -3,7 +3,6 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
-import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -30,17 +29,20 @@ import { useCallback, useEffect, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
+import { TrackerSettings } from "./tracker-settings";
 
 type Props = {
   teamId: string;
   userId: string;
   weekStartsOnMonday?: boolean;
+  timeFormat: number;
 };
 
 export function TrackerCalendar({
   teamId,
   userId,
   weekStartsOnMonday = false,
+  timeFormat,
 }: Props) {
   const {
     date: currentDate,
@@ -57,20 +59,22 @@ export function TrackerCalendar({
   ]);
   const [isDragging, setIsDragging] = useState(false);
 
-  const {
-    monthStart,
-    monthEnd,
-
-    calendarDays,
-    firstWeek,
-  } = useCalendarDates(currentDate, weekStartsOnMonday);
+  const { monthStart, monthEnd, calendarDays, firstWeek } = useCalendarDates(
+    currentDate,
+    weekStartsOnMonday,
+  );
 
   useEffect(() => {
     fetchTrackerData(supabase, teamId, monthStart, monthEnd, setData, setMeta);
   }, [currentDate]);
 
-  useHotkeys("arrowLeft", () => handleMonthChange(-1, currentDate, setParams));
-  useHotkeys("arrowRight", () => handleMonthChange(1, currentDate, setParams));
+  useHotkeys("arrowLeft", () => handleMonthChange(-1, currentDate, setParams), {
+    enabled: !selectedDate,
+  });
+
+  useHotkeys("arrowRight", () => handleMonthChange(1, currentDate, setParams), {
+    enabled: !selectedDate,
+  });
 
   const ref = useClickAway<HTMLDivElement>(() => {
     if (range?.length === 1) setParams({ range: null });
@@ -107,7 +111,12 @@ export function TrackerCalendar({
   return (
     <div ref={ref}>
       <div className="mt-8">
-        <CalendarHeader meta={meta} data={data} />
+        <CalendarHeader
+          meta={meta}
+          data={data}
+          timeFormat={timeFormat}
+          weekStartsOnMonday={weekStartsOnMonday}
+        />
         <CalendarGrid
           firstWeek={firstWeek}
           calendarDays={calendarDays}
@@ -190,11 +199,18 @@ function handleMonthChange(
 type CalendarHeaderProps = {
   meta: { totalDuration?: number };
   data: Record<string, TrackerEvent[]>;
+  timeFormat: number;
+  weekStartsOnMonday: boolean;
 };
 
-function CalendarHeader({ meta, data }: CalendarHeaderProps) {
+function CalendarHeader({
+  meta,
+  data,
+  timeFormat,
+  weekStartsOnMonday,
+}: CalendarHeaderProps) {
   const projectTotals = Object.entries(data).reduce(
-    (acc, [date, events]) => {
+    (acc, [_, events]) => {
       for (const event of events) {
         if (event.project) {
           acc[event.project.name] =
@@ -236,6 +252,9 @@ function CalendarHeader({ meta, data }: CalendarHeaderProps) {
                     Breakdown
                   </div>
                   <ul className="space-y-2 flex flex-col p-4">
+                    {!Object.keys(projectTotals).length && (
+                      <span>No tracked time.</span>
+                    )}
                     {sortedProjects.map((project) => (
                       <li key={project.name} className="flex justify-between">
                         <span>{project.name}</span>
@@ -253,9 +272,10 @@ function CalendarHeader({ meta, data }: CalendarHeaderProps) {
       </div>
       <div className="flex space-x-2">
         <TrackerMonthSelect dateFormat="MMMM" />
-        <Button variant="outline" size="icon">
-          <Icons.Tune size={16} />
-        </Button>
+        <TrackerSettings
+          timeFormat={timeFormat}
+          weekStartsOnMonday={weekStartsOnMonday}
+        />
       </div>
     </div>
   );

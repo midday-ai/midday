@@ -37,6 +37,7 @@ export function TrackerCreateSheet({ currencyCode }: Props) {
   const action = useAction(createProjectAction, {
     onSuccess: () => {
       setParams({ create: null });
+      form.reset();
     },
     onError: () => {
       toast({
