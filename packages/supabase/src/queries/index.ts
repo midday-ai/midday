@@ -491,6 +491,19 @@ export async function getSimilarTransactions(
     .throwOnError();
 }
 
+// gets all the similar transactions with detailed information
+export async function getSimilarTransactionsDetailedQuery(supabase: Client, params: GetSimilarTransactionsParams) {
+  const { name, teamId, categorySlug } = params;
+
+  return supabase
+    .from("transactions")
+    .select("*", { count: "exact" })
+    .eq("team_id", teamId)
+    .neq("category_slug", categorySlug)
+    .textSearch("fts_vector", `'${name}'`)
+    .throwOnError();
+}
+
 type GetBankAccountsCurrenciesParams = {
   teamId: string;
 };

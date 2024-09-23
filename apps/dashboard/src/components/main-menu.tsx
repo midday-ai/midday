@@ -257,8 +257,6 @@ export function MainMenu({ initialItems, onSelect }: Props) {
     setCustomizing(false);
   });
 
-  console.log("items", items);
-
   return (
     <div className="mt-6" {...bind()} ref={ref}>
       <nav>
