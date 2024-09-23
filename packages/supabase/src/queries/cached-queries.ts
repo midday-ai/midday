@@ -5,6 +5,7 @@ import { cache } from "react";
 import { createClient } from "../client/server";
 import {
   GetRecentTransactionsParams,
+  GetTransactionsByBankAccountQueryParams,
   getBankAccountsCurrenciesQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
@@ -22,6 +23,7 @@ import {
   getTeamsByUserIdQuery,
   getTrackerProjectsQuery,
   getTrackerRecordsByRangeQuery,
+  getTransactionsByBankAccountQuery,
   getTransactionsQuery,
   getUserInvitesQuery,
   getUserQuery,
@@ -852,6 +854,38 @@ export const getExpenseComparison = async (
     ["expense_comparison", teamId],
     {
       tags: [`expense_comparison_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
+};
+
+
+
+/**
+ * Cached query to get transactions by bank account ID
+ * @param supabase - Supabase client
+ * @param bankAccountId - Bank account ID
+ * @param limit - Number of transactions to fetch (default: 5)
+ * @returns Promise resolving to an array of transactions
+ */
+export const getCachedTransactionsByBankAccountId = async (
+  params: GetTransactionsByBankAccountQueryParams,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getTransactionsByBankAccountQuery(supabase, params);
+    },
+    ["transactions_by_bank_account", teamId],
+    {
+      tags: [`transactions_by_bank_account_${teamId}`],
       revalidate: 3600,
     },
   )(params);

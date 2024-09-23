@@ -6,6 +6,7 @@ import {
   startOfMonth,
   subYears,
 } from "date-fns";
+import { z } from "zod";
 import type { Client } from "../types";
 
 export enum RecurringTransactionFrequency {
@@ -1153,3 +1154,35 @@ export async function getInboxSearchQuery(
 export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }
+
+// Schema and type for getTransactionsByBankAccountQuery
+const getTransactionsByBankAccountQueryParamsSchema = z.object({
+  bankAccountId: z.string(),
+  limit: z.number().optional().default(5),
+});
+export type GetTransactionsByBankAccountQueryParams = z.infer<
+  typeof getTransactionsByBankAccountQueryParamsSchema
+>;
+
+
+export const getTransactionsByBankAccountQuery = async (
+  supabase: Client,
+  params: GetTransactionsByBankAccountQueryParams,
+) => {
+  const { bankAccountId, limit } =
+    getTransactionsByBankAccountQueryParamsSchema.parse(params);
+
+  const { data, error } = await supabase
+    .from('transactions')
+    .select('*')
+    .eq('bank_account_id', bankAccountId)
+    .order('date', { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error('Error fetching transactions:', error);
+    return null;
+  }
+
+  return data;
+};
