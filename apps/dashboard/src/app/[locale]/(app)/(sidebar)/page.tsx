@@ -63,6 +63,8 @@ export default async function Overview({
       <FinancialPortalView
         disabled={isEmpty}
         tier={tier}
+        bankAccounts={accounts?.data ?? []}
+        userName={user?.data?.full_name}
       />
 
       <div>
