@@ -3,7 +3,9 @@ import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import TabbedCharts from "@/components/charts/tabbed-charts";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import { CategorySpendingPortalView } from "@/components/portal-views/category-spending-portal-view";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
+import { RecentFilesPortalView } from "@/components/portal-views/recent-files-portal-view";
 import RecentTransactions from "@/components/recent-transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
@@ -40,7 +42,7 @@ export default async function Overview({
     getTeamBankAccounts(),
     getBankConnectionsByTeamId(),
   ]);
-  
+
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
@@ -90,6 +92,19 @@ export default async function Overview({
             </div>
           </div>
         </Card>
+        <Card className="my-4 p-[2%]">
+          <div className="mt-8">
+            {isEmpty && <EmptyState />}
+
+            <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
+              <CategorySpendingPortalView
+                disabled={isEmpty}
+                period={initialPeriod}
+                currency={searchParams.currency ?? "USD"}
+              />
+            </div>
+          </div>
+        </Card>
 
         {/** display recent transactions */}
         <Tabs defaultValue="transactions">
@@ -105,6 +120,8 @@ export default async function Overview({
           </TabsContent>
         </Tabs>
 
+        <RecentFilesPortalView disabled={isEmpty} />
+
         {/** tabbed charts with income and expense charts */}
         <TabbedCharts
           currency={searchParams.currency ?? "USD"}
@@ -112,12 +129,12 @@ export default async function Overview({
           disabled={isEmpty}
           tier={tier}
         />
-
+        {/* 
         <Widgets
           initialPeriod={initialPeriod}
           disabled={isEmpty}
           searchParams={searchParams}
-        />
+        /> */}
 
         {/* * recent transactions
         <Card className="mt-8 min-h-[530px] overflow-y-auto scrollbar-hide">
