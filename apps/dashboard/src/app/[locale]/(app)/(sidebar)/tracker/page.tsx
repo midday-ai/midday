@@ -13,14 +13,16 @@ export const metadata: Metadata = {
 
 type Props = {
   searchParams: {
-    status: string;
+    statuses: string;
     sort: string;
     q: string;
+    start?: string;
+    end?: string;
   };
 };
 
 export default async function Tracker({ searchParams }: Props) {
-  const status = searchParams?.status;
+  const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":");
   const { data: userData } = await getUser();
 
@@ -42,7 +44,13 @@ export default async function Tracker({ searchParams }: Props) {
       </div>
 
       <Suspense key={status} fallback={<Loading />}>
-        <Table status={status} sort={sort} query={searchParams?.q} />
+        <Table
+          status={status}
+          sort={sort}
+          q={searchParams?.q}
+          start={searchParams?.start}
+          end={searchParams?.end}
+        />
       </Suspense>
     </div>
   );

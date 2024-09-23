@@ -12,15 +12,10 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
 
   return (
     <>
-      <TrackerUpdateSheet
-        currencyCode={defaultCurrency}
-        teamId={userData?.team_id}
-        userId={userData?.id}
-      />
+      <TrackerUpdateSheet teamId={userData?.team_id} userId={userData?.id} />
       <TrackerCreateSheet
         currencyCode={defaultCurrency}
         teamId={userData?.team_id}
-        userId={userData?.id}
       />
       <TrackerScheduleSheet
         teamId={userData?.team_id}

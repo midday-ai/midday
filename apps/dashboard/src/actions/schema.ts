@@ -474,6 +474,22 @@ export const filterVaultSchema = z.object({
   owners: z.array(z.string()).optional().describe("The owners to filter by"),
 });
 
+export const filterTrackerSchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  start: parseDateSchema
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: parseDateSchema
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  status: z
+    .enum(["in_progress", "completed"])
+    .optional()
+    .describe("The status to filter by"),
+});
+
 export const createTransactionSchema = z.object({
   name: z.string(),
   amount: z.number(),

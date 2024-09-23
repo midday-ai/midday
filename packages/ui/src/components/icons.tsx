@@ -16,6 +16,7 @@ import {
   MdChevronRight,
   MdClose,
   MdDescription,
+  MdDownloading,
   MdDriveFileMove,
   MdEditCalendar,
   MdErrorOutline,
@@ -628,4 +629,5 @@ export const Icons = {
   ArrowRightAlt: MdArrowRightAlt,
   AccountCircle: MdOutlineAccountCircle,
   Repeat: MdOutlineRepeat,
+  ProjectStatus: MdDownloading,
 };

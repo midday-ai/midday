@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.60",
+    "@ai-sdk/openai": "^0.0.61",
     "@hookform/resolvers": "^3.9.0",
     "@midday-ai/engine": "^0.1.0-alpha.22",
     "@midday/events": "workspace:*",
@@ -37,7 +37,7 @@
     "@trigger.dev/nextjs": "^2.3.19",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.3",
-    "ai": "3.3.41",
+    "ai": "3.4.0",
     "change-case": "^5.4.4",
     "dub": "^0.38.1",
     "framer-motion": "^11.5.4",

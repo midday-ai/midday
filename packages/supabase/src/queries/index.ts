@@ -856,10 +856,29 @@ export async function getInboxQuery(
   };
 }
 
+type GetTrackerProjectQueryParams = {
+  teamId: string;
+  projectId: string;
+};
+
+export async function getTrackerProjectQuery(
+  supabase: Client,
+  params: GetTrackerProjectQueryParams,
+) {
+  return supabase
+    .from("tracker_projects")
+    .select("*")
+    .eq("id", params.projectId)
+    .eq("team_id", params.teamId)
+    .single();
+}
+
 export type GetTrackerProjectsQueryParams = {
   teamId: string;
   to?: number;
   from?: number;
+  start?: string;
+  end?: string;
   sort?: {
     column: string;
     value: "asc" | "desc";
@@ -877,7 +896,16 @@ export async function getTrackerProjectsQuery(
   supabase: Client,
   params: GetTrackerProjectsQueryParams,
 ) {
-  const { from = 0, to = 10, filter, sort, teamId, search } = params;
+  const {
+    from = 0,
+    to = 10,
+    filter,
+    sort,
+    teamId,
+    search,
+    start,
+    end,
+  } = params;
   const { status } = filter || {};
 
   const query = supabase
@@ -887,6 +915,11 @@ export async function getTrackerProjectsQuery(
 
   if (status) {
     query.eq("status", status);
+  }
+
+  if (start && end) {
+    query.gte("created_at", start);
+    query.lte("created_at", end);
   }
 
   if (search?.query && search?.fuzzy) {

@@ -1,5 +1,6 @@
 "use client";
 
+import { generateTrackerFilters } from "@/actions/ai/filters/generate-tracker-filters";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
@@ -58,13 +59,8 @@ export function TrackerSearchFilter({ members }: Props) {
       q: parseAsString,
       start: parseAsString,
       end: parseAsString,
-      assignees: parseAsArrayOf(parseAsString),
       statuses: parseAsArrayOf(
-        parseAsStringLiteral([
-          "fullfilled",
-          "unfulfilled",
-          "excluded",
-        ] as const),
+        parseAsStringLiteral(["in_progress", "completed"]),
       ),
     },
     {
@@ -110,29 +106,22 @@ export function TrackerSearchFilter({ members }: Props) {
     if (prompt.split(" ").length > 1) {
       setStreaming(true);
 
-      //   const { object } = await generateTransactionsFilters(prompt);
+      const { object } = await generateTrackerFilters(prompt);
 
-      const finalObject = {};
+      let finalObject = {};
 
-      //   for await (const partialObject of readStreamableValue(object)) {
-      //     if (partialObject) {
-      //       finalObject = {
-      //         ...finalObject,
-      //         ...partialObject,
-      //         categories:
-      //           partialObject?.categories?.map(
-      //             (name: string) =>
-      //               categories?.find((category) => category.name === name)?.slug,
-      //           ) ?? null,
-      //         tags:
-      //           partialObject?.tags?.map(
-      //             (name: string) => tags?.find((tag) => tag.name === name)?.slug,
-      //           ) ?? null,
-      //         recurring: partialObject?.recurring ?? null,
-      //         q: partialObject?.name ?? null,
-      //       };
-      //     }
-      //   }
+      for await (const partialObject of readStreamableValue(object)) {
+        if (partialObject) {
+          finalObject = {
+            ...finalObject,
+            ...partialObject,
+            statuses: partialObject?.status ? [partialObject.status] : null,
+            start: partialObject?.start ?? null,
+            end: partialObject?.end ?? null,
+            q: partialObject?.name ?? null,
+          };
+        }
+      }
 
       setFilters({
         q: null,
@@ -248,7 +237,7 @@ export function TrackerSearchFilter({ members }: Props) {
         <DropdownMenuGroup>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
-              <Icons.Status className="mr-2 h-4 w-4" />
+              <Icons.ProjectStatus className="mr-2 h-4 w-4 rotate-180" />
               <span>Status</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
@@ -263,11 +252,7 @@ export function TrackerSearchFilter({ members }: Props) {
                     checked={filters?.statuses?.includes(id)}
                     onCheckedChange={() => {
                       setFilters({
-                        statuses: filters?.statuses?.includes(id)
-                          ? filters.statuses.filter((s) => s !== id).length > 0
-                            ? filters.statuses.filter((s) => s !== id)
-                            : null
-                          : [...(filters?.statuses ?? []), id],
+                        statuses: id ? [id] : null,
                       });
                     }}
                   >

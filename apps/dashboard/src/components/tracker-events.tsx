@@ -8,7 +8,7 @@ export function TrackerEvents({ data }) {
       {data?.map((event) => (
         <button
           type="button"
-          className="text-xs bg-[#1D1D1D] block p-1 w-full text-left"
+          className="text-xs bg-[#1D1D1D] text-[#878787] block p-1 w-full text-left"
           key={event.id}
         >
           {event.project.name} ({secondsToHoursAndMinutes(event.duration)})

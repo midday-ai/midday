@@ -182,7 +182,7 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
 
       <ScrollArea ref={scrollRef} className="h-[calc(100vh-485px)] mt-8">
         <div className="flex text-[#878787] text-xs">
-          <div className="w-20 flex-shrink-0">
+          <div className="w-20 flex-shrink-0 select-none">
             {hours.map((hour) => (
               <div
                 key={hour}

@@ -327,7 +327,7 @@ export const getUserInvites = async () => {
 };
 
 export const getTrackerProjects = async (
-  params: GetTrackerProjectsQueryParams,
+  params: Omit<GetTrackerProjectsQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();

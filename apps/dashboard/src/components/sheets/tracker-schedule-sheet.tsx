@@ -15,9 +15,13 @@ type Props = {
 
 export function TrackerScheduleSheet({ teamId, userId, timeFormat }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const { setParams, projectId, range, selectedDate } = useTrackerParams();
+  const { setParams, projectId, range, selectedDate, update, create } =
+    useTrackerParams();
 
-  const isOpen = Boolean(projectId || range?.length === 2 || selectedDate);
+  const isOpen =
+    !update &&
+    !create &&
+    (Boolean(projectId) || range?.length === 2 || Boolean(selectedDate));
 
   if (isDesktop) {
     return (

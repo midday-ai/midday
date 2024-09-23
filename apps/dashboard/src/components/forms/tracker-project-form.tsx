@@ -25,11 +25,21 @@ import {
 import { Switch } from "@midday/ui/switch";
 import { Textarea } from "@midday/ui/textarea";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export function TrackerProjectForm({ onSubmit, isSaving, form }) {
+type Props = {
+  onSubmit: (data: any) => void;
+  isSaving: boolean;
+  form: any;
+};
+
+export function TrackerProjectForm({ onSubmit, isSaving, form }: Props) {
   const locale = useCurrentLocale();
-  const [isOpen, setIsOpen] = useState(Boolean(form.getValues("billable")));
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setIsOpen(Boolean(form.getValues("billable")));
+  }, [form.getValues()]);
 
   return (
     <Form {...form}>

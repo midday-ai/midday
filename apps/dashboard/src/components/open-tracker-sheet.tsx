@@ -12,7 +12,7 @@ export function OpenTrackerSheet() {
       <Button
         variant="outline"
         size="icon"
-        onClick={() => setParams({ create: "project" })}
+        onClick={() => setParams({ create: true })}
       >
         <Icons.Add />
       </Button>

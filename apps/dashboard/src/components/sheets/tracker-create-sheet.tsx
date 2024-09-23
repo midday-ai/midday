@@ -24,7 +24,7 @@ export function TrackerCreateSheet({ currencyCode }: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { setParams, create } = useTrackerParams();
 
-  const isOpen = create !== null;
+  const isOpen = create;
 
   const form = useForm<z.infer<typeof createProjectSchema>>({
     resolver: zodResolver(createProjectSchema),
