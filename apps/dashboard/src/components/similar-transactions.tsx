@@ -22,12 +22,12 @@ interface SimilarTransactionsProps {
 const SimilarTransactions: React.FC<SimilarTransactionsProps> = ({ similarTransactions, title }) => {
   return (
     <div className="bg-background rounded-lg shadow-md overflow-y-auto scrollbar-hide">
-        <SimilarTransactionsFilterHelper transactions={similarTransactions} title={title} />
+          <TransactionsFilterHelper transactions={similarTransactions} title={title} />
     </div>
   );
 };
 
-const SimilarTransactionsFilterHelper: React.FC<{ transactions: Array<Transaction>, title: string }> = ({ transactions, title }) => {
+export const TransactionsFilterHelper: React.FC<{ transactions: Array<Transaction>, title: string }> = ({ transactions, title }) => {
     const [search, setSearch] = useState("")
     const [sortBy, setSortBy] = useState("date")
     const [sortDirection, setSortDirection] = useState("asc")
@@ -35,7 +35,7 @@ const SimilarTransactionsFilterHelper: React.FC<{ transactions: Array<Transactio
    
     const filteredTransactions = useMemo(() => {
         return transactions
-            .filter((transaction) => transaction.name?.toLowerCase().includes(search.toLowerCase()))
+            .filter((transaction) => transaction.merchant_name?.toLowerCase().includes(search.toLowerCase()))
             .filter((transaction) => (filterCategory ? transaction.category === filterCategory : true))
             .sort((a, b) => {
                 if (sortBy === "date") {
@@ -161,7 +161,7 @@ const SimilarTransactionsFilterHelper: React.FC<{ transactions: Array<Transactio
                         {filteredTransactions.map((transaction) => (
                             <TableRow key={transaction.id} className="border-none">
                                 <TableCell>{formatDate(transaction.date)}</TableCell>
-                                <TableCell>{transaction.name}</TableCell>
+                                <TableCell>{transaction.merchant_name}</TableCell>
                                 <TableCell className="text-right">{transaction.amount.toFixed(2)}</TableCell>
                                 <TableCell>
                                     <Badge variant={transaction.category_slug === "meals" ? "secondary" : "default"}>

@@ -7,7 +7,7 @@ import { FinancialPortalView } from "@/components/portal-views/financial-portal-
 import RecentTransactions from "@/components/recent-transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
+import { getBankConnectionsByTeamId, getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { RecurringTransactionFrequency } from "@midday/supabase/queries";
 import {
   Card
@@ -35,8 +35,12 @@ const defaultValue = {
 export default async function Overview({
   searchParams,
 }: { searchParams: Record<string, string> }) {
-  const user = await getUser();
-  const accounts = await getTeamBankAccounts();
+  const [user, accounts, bankConnections] = await Promise.all([
+    getUser(),
+    getTeamBankAccounts(),
+    getBankConnectionsByTeamId(),
+  ]);
+  
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
@@ -64,7 +68,8 @@ export default async function Overview({
         disabled={isEmpty}
         tier={tier}
         bankAccounts={accounts?.data ?? []}
-        userName={user?.data?.full_name}
+        bankConnections={bankConnections?.data ?? []}
+        userName={user?.data?.full_name ?? ""}
       />
 
       <div>

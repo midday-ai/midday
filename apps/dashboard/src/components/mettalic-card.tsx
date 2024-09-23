@@ -4,6 +4,7 @@
  * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
  */
 
+import { BankAccountSchema } from "@midday/supabase/types";
 import Image from "next/image";
 
 /**
@@ -17,8 +18,7 @@ interface MettalicCardProps {
   cardHolderName: string;
   /** The card number, typically 16 digits (spaces allowed for formatting) */
   cardNumber: string;
-  /** The source URL for the card issuer's logo image */
-  logoSrc: string;
+  bankAccount?: BankAccountSchema;
 }
 
 /**
@@ -35,17 +35,13 @@ export function MettalicCard({
   cardIssuer,
   cardHolderName,
   cardNumber,
-  logoSrc,
+
 }: MettalicCardProps): JSX.Element {
   return (
     <div className="w-[400px] h-[250px] rounded-2xl bg-gradient-to-r from-[#C0C0C0] to-[#9D9D9D] p-6 shadow-lg relative overflow-hidden">
       <div className="absolute top-4 left-4">
-        <Image
-          src={logoSrc}
-          alt={`${cardIssuer} Logo`}
-          width={40}
-          height={40}
-          className="w-10 h-10 object-cover"
+        <div
+          className="w-10 h-10 object-cover rounded-xl bg-gradient-to-r from-foreground to-[#d1d1d1]"
         />
         <div className="text-white text-lg font-semibold tracking-wide">
           {cardIssuer}
@@ -56,7 +52,7 @@ export function MettalicCard({
           {cardHolderName}
         </div>
       </div>
-      <div className="absolute bottom-6 right-6 text-white font-mono text-xl tracking-widest">
+      <div className="absolute bottom-6 right-6 text-white font-mono text-lg tracking-widest">
         {cardNumber}
       </div>
       <div className="absolute inset-0 bg-gradient-to-r from-[#FFFFFF22] to-[#FFFFFF11] rounded-2xl" />
