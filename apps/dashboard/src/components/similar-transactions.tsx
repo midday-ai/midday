@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@midday/ui/card';
 import { cn } from '@midday/ui/cn';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@midday/ui/dropdown-menu';
 import { Input } from '@midday/ui/input';
+import { formatDate } from '@midday/ui/lib/converters/date-formater';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@midday/ui/table';
 import { FilterIcon, ListOrderedIcon, SearchIcon } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
@@ -21,9 +22,7 @@ interface SimilarTransactionsProps {
 const SimilarTransactions: React.FC<SimilarTransactionsProps> = ({ similarTransactions, title }) => {
   return (
     <div className="bg-background rounded-lg shadow-md overflow-y-auto scrollbar-hide">
-      <CardContent>
         <SimilarTransactionsFilterHelper transactions={similarTransactions} title={title} />
-      </CardContent>
     </div>
   );
 };
@@ -161,7 +160,7 @@ const SimilarTransactionsFilterHelper: React.FC<{ transactions: Array<Transactio
                     <TableBody className="overflow-y-auto scrollbar-hide border-none">
                         {filteredTransactions.map((transaction) => (
                             <TableRow key={transaction.id} className="border-none">
-                                <TableCell>{transaction.date}</TableCell>
+                                <TableCell>{formatDate(transaction.date)}</TableCell>
                                 <TableCell>{transaction.name}</TableCell>
                                 <TableCell className="text-right">{transaction.amount.toFixed(2)}</TableCell>
                                 <TableCell>
