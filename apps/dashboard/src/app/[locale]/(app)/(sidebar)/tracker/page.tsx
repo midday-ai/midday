@@ -51,6 +51,7 @@ export default async function Tracker({ searchParams }: Props) {
           q={searchParams?.q}
           start={searchParams?.start}
           end={searchParams?.end}
+          userId={userData?.id}
         />
       </Suspense>
     </div>

@@ -26,8 +26,6 @@ type Props = {
 export function TrackerSettings({ timeFormat, weekStartsOnMonday }: Props) {
   const updateUser = useAction(updateUserAction);
 
-  console.log(timeFormat);
-
   const handleUpdateUser = (data: UpdateUserFormValues) => {
     updateUser.execute({ ...data, revalidatePath: "/tracker" });
   };

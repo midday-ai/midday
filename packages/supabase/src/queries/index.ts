@@ -951,13 +951,14 @@ type GetTrackerRecordsByDateParams = {
   teamId: string;
   date: string;
   projectId?: string;
+  userId?: string;
 };
 
 export async function getTrackerRecordsByDateQuery(
   supabase: Client,
   params: GetTrackerRecordsByDateParams,
 ) {
-  const { teamId, projectId, date } = params;
+  const { teamId, projectId, date, userId } = params;
 
   const query = supabase
     .from("tracker_entries")
@@ -969,6 +970,10 @@ export async function getTrackerRecordsByDateQuery(
 
   if (projectId) {
     query.eq("project_id", projectId);
+  }
+
+  if (userId) {
+    query.eq("assigned_id", userId);
   }
 
   const { data } = await query;
@@ -991,6 +996,7 @@ export type GetTrackerRecordsByRangeParams = {
   from: string;
   to: string;
   projectId?: string;
+  userId?: string;
 };
 
 export async function getTrackerRecordsByRangeQuery(
@@ -1010,6 +1016,10 @@ export async function getTrackerRecordsByRangeQuery(
     .gte("date", params.from)
     .lte("date", params.to)
     .order("created_at");
+
+  if (params.userId) {
+    query.eq("assigned_id", params.userId);
+  }
 
   if (params.projectId) {
     query.eq("project_id", params.projectId);

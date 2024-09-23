@@ -65,7 +65,15 @@ export function TrackerCalendar({
   );
 
   useEffect(() => {
-    fetchTrackerData(supabase, teamId, monthStart, monthEnd, setData, setMeta);
+    fetchTrackerData(
+      supabase,
+      teamId,
+      userId,
+      monthStart,
+      monthEnd,
+      setData,
+      setMeta,
+    );
   }, [currentDate]);
 
   useHotkeys("arrowLeft", () => handleMonthChange(-1, currentDate, setParams), {
@@ -167,6 +175,7 @@ function useCalendarDates(currentDate: Date, weekStartsOnMonday: boolean) {
 async function fetchTrackerData(
   supabase: any,
   teamId: string,
+  userId: string,
   start: Date,
   end: Date,
   setData: React.Dispatch<React.SetStateAction<Record<string, TrackerEvent[]>>>,
@@ -174,6 +183,7 @@ async function fetchTrackerData(
 ) {
   const trackerData = await getTrackerRecordsByRangeQuery(supabase, {
     teamId,
+    userId,
     from: formatISO(start, { representation: "date" }),
     to: formatISO(end, { representation: "date" }),
   });

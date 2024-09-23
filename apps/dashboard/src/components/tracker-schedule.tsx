@@ -49,6 +49,7 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
       const supabase = createClient();
       const trackerData = await getTrackerRecordsByDateQuery(supabase, {
         teamId,
+        userId,
         date: selectedDate ?? "",
       });
 

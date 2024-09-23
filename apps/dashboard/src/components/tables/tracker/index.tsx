@@ -10,9 +10,10 @@ type Props = {
   q?: string;
   start?: string;
   end?: string;
+  userId: string;
 };
 
-export async function Table({ status, sort, q, start, end }: Props) {
+export async function Table({ status, sort, q, start, end, userId }: Props) {
   const hasFilters = Boolean(status || q);
 
   const { data, meta } = await getTrackerProjects({
@@ -59,6 +60,7 @@ export async function Table({ status, sort, q, start, end }: Props) {
       pageSize={pageSize}
       loadMore={loadMore}
       meta={meta}
+      userId={userId}
     />
   );
 }

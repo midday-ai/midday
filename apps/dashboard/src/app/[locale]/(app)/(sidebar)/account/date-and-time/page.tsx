@@ -1,4 +1,3 @@
-import { ChangeLanguage } from "@/components/change-language";
 import { ChangeTimezone } from "@/components/change-timezone";
 import { TimeFormatSettings } from "@/components/time-fromat-settings";
 import { WeekSettings } from "@/components/week-settings";
@@ -7,10 +6,10 @@ import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Language & region | Midday",
+  title: "Date & Time | Midday",
 };
 
-export default async function Language() {
+export default async function Page() {
   const { data: userData } = await getUser();
 
   const timezone = userData?.timezone || getTimezone();
@@ -18,7 +17,6 @@ export default async function Language() {
 
   return (
     <div className="space-y-12">
-      <ChangeLanguage />
       <ChangeTimezone value={timezone} timezones={timezones} />
       <TimeFormatSettings timeFormat={userData?.time_format} />
       <WeekSettings weekStartsOnMonday={userData?.week_starts_on_monday} />

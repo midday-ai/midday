@@ -4,6 +4,7 @@ import { createProjectReport } from "@/actions/project/create-project-report";
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
 import { CopyInput } from "@/components/copy-input";
+import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
@@ -56,9 +57,10 @@ export function Row({ onClick, children }: RowProps) {
 
 type DataTableRowProps = {
   row: TrackerProject;
+  userId: string;
 };
 
-export function DataTableRow({ row }: DataTableRowProps) {
+export function DataTableRow({ row, userId }: DataTableRowProps) {
   const { toast, dismiss } = useToast();
   const { setParams } = useTrackerParams();
 
@@ -156,6 +158,17 @@ export function DataTableRow({ row }: DataTableRowProps) {
           >
             Edit
           </DropdownMenuItem>
+
+          <TrackerExportCSV
+            name={row.name}
+            projectId={row.id}
+            currency={row.currency}
+            billable={row.billable}
+            rate={row.rate}
+            teamId={row.team_id}
+            userId={userId}
+          />
+
           {row.status !== "completed" && (
             <DropdownMenuItem
               onClick={() =>

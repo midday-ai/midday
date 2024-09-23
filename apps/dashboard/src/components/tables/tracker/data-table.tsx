@@ -19,6 +19,7 @@ export type TrackerProject = {
 type DataTableProps = {
   data: TrackerProject[];
   pageSize: number;
+  userId: string;
   meta: {
     count: number;
   };
@@ -27,11 +28,13 @@ type DataTableProps = {
     meta: { count: number };
   }>;
 };
+
 export function DataTable({
   data: initialData,
   pageSize,
   meta,
   loadMore,
+  userId,
 }: DataTableProps) {
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
@@ -73,7 +76,7 @@ export function DataTable({
 
         <TableBody>
           {data.map((row) => (
-            <DataTableRow row={row} key={row.id} />
+            <DataTableRow row={row} key={row.id} userId={userId} />
           ))}
         </TableBody>
       </Table>

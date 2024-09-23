@@ -173,6 +173,7 @@ export function TrackerProjectForm({ onSubmit, isSaving, form }: Props) {
                     <FormLabel>Hourly Rate</FormLabel>
                     <FormControl>
                       <CurrencyInput
+                        min={0}
                         value={field.value}
                         onValueChange={(values) => {
                           field.onChange(values.floatValue);
