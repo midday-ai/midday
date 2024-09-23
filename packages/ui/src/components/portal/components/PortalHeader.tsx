@@ -18,7 +18,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
     <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
       Financial Portal
       <span className="font-base ml-4 text-sm">
-        {linkedInstitutionsCount} Linked Accounts
+        {linkedInstitutionsCount} Linked {linkedInstitutionsCount === 1 ? "Account" : "Accounts"}
       </span>
     </h2>
     <p className="mt-6 text-lg leading-8 text-foreground/3">
@@ -28,7 +28,7 @@ export const PortalHeader: React.FC<PortalHeaderProps> = ({
       <h2 className="py-5 text-2xl font-bold tracking-tight">
         Overview{" "}
         <span className="ml-1 text-xs">
-          {numConnectedAccounts} Linked Accounts
+          {numConnectedAccounts} {numConnectedAccounts === 1 ? "Account" : "Accounts"}
         </span>
       </h2>
     </div>
