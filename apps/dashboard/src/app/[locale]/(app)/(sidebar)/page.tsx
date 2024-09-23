@@ -7,7 +7,7 @@ import { FinancialPortalView } from "@/components/portal-views/financial-portal-
 import RecentTransactions from "@/components/recent-transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
+import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { RecurringTransactionFrequency } from "@midday/supabase/queries";
 import {
   Card
@@ -35,6 +35,7 @@ const defaultValue = {
 export default async function Overview({
   searchParams,
 }: { searchParams: Record<string, string> }) {
+  const user = await getUser();
   const accounts = await getTeamBankAccounts();
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
@@ -54,16 +55,14 @@ export default async function Overview({
 
   const isEmpty = !accounts?.data?.length;
 
-  // TODO: get the tier from the user record
-  // const tier = getUser()?.tier;
-  const tier = "free";
+  const tier = user?.data?.tier ?? "free";
 
   return (
     <>
       {/** financial portal view */}
       <FinancialPortalView
         disabled={isEmpty}
-        tier={tier}   // TODO: get the tier from the user record
+        tier={tier}
       />
 
       <div>
@@ -104,7 +103,7 @@ export default async function Overview({
           currency={searchParams.currency ?? "USD"}
           className="mt-8"
           disabled={isEmpty}
-          tier={tier} // TODO: get the tier from the user record
+          tier={tier}
         />
 
         <Widgets

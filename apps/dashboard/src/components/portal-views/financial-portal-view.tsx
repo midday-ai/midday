@@ -1,7 +1,7 @@
 "use client";
 
 import features from "@/config/enabled-features";
-import Tier from "@/config/tier";
+import Tier, { isFreeТier } from "@/config/tier";
 import { Card } from "@midday/ui/card";
 import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { HTMLAttributes } from "react";
@@ -30,15 +30,15 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   if (!features.isAnalyticsV2Enabled) return null;
 
   // based on the tier we disclose a different amount of information
-  const isFreeTier = tier === "free";
+  const isCurrentUserTierFree = isFreeТier(tier);
 
   return (
     <div className="w-full pt-[3%] mx-auto">
       <Card className="p-[2%]">
         <div className={`mt-8 relative`}>
           {disabled && <EmptyState />}
-          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
-          <div className={`${(disabled || isFreeTier) && "blur-[8px] opacity-20"}`}>
+          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+          <div className={`${(disabled || isCurrentUserTierFree) && "blur-[8px] opacity-20"}`}>
             <FinancialPortalOverview
               financialProfile={undefined}
               financialContext={undefined}

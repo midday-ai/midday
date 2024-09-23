@@ -28,8 +28,7 @@ export default async function CashFlowPage({ searchParams }: Props) {
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;
 
-  // TODO: get the tier from the user record
-  const tier: Tier = "free";
+  const tier: Tier = user?.data?.tier ?? "free";
 
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>

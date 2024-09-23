@@ -2,7 +2,7 @@ import { EmptyState } from "@/components/charts/empty-state";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { UpgradeTier } from "@/components/upgrade-tier";
-import Tier from "@/config/tier";
+import Tier, { isFreeТier } from "@/config/tier";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { BankAccountsOverviewSummary } from "@midday/ui/portal/bank-account-portal-view";
@@ -26,18 +26,18 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
   const isEmpty = !accounts?.data?.length;
 
   // TODO: get the tier from the user record
-  const tier: Tier = "free";
+  const tier: Tier = user?.data?.tier ?? "free";
   // based on the tier we disclose a different amount of information
-  const isFreeTier = tier === "free";
+  const isCurrentUserTierFree = isFreeТier(tier);
 
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ConnectAccountServerWrapper>
-        <div className={cn((isEmpty || isFreeTier) && "mt-8 relative")}>
+        <div className={cn((isEmpty || isCurrentUserTierFree) && "mt-8 relative")}>
           {isEmpty && <EmptyState />}
-          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
 
-          <div className={cn("py-[2%]", (isEmpty || isFreeTier) && "blur-[8px] opacity-20")}>
+          <div className={cn("py-[2%]", (isEmpty || isCurrentUserTierFree) && "blur-[8px] opacity-20")}>
             <ConnectedAccountSummary
               name={user?.data?.full_name ?? "Solomon AI User"}
             />
@@ -45,13 +45,13 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
         </div>
 
         {/** we display the connected accounts here */}
-        <div className={cn((isEmpty || isFreeTier) && "mt-8 relative")}>
+        <div className={cn((isEmpty || isCurrentUserTierFree) && "mt-8 relative")}>
           {isEmpty && <EmptyState />}
-          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
 
           <Tabs
             defaultValue="bank-accounts"
-            className={cn((isEmpty || isFreeTier) && "blur-[8px] opacity-20")}
+            className={cn((isEmpty || isCurrentUserTierFree) && "blur-[8px] opacity-20")}
           >
             <TabsList>
               <TabsTrigger value="bank-accounts">Bank Accounts</TabsTrigger>

@@ -1,7 +1,7 @@
 "use client";
 
 import CardWrapper from "@/components/card/card-wrapper";
-import Tier from "@/config/tier";
+import Tier, { isFreeТier } from "@/config/tier";
 import { featureFlags } from "@internal/env/dashboard";
 import { Card } from "@midday/ui/card";
 import { AreaChart } from "@midday/ui/charts/base/area-chart";
@@ -27,15 +27,15 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({
   if (!featureFlags.isAnalyticsV2Enabled) return null;
 
   // based on the tier we disclose a different amount of information
-  const isFreeTier = tier === "free";
+  const isCurrentUserTierFree = isFreeТier(tier);
 
-  const disableView = isFreeTier || disabled;
+  const disableView = isCurrentUserTierFree || disabled;
 
   return (
     <Card className="p-[2%] md:mt-4">
       <div className={`mt-8 relative`}>
         {disabled && <EmptyState />}
-        {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+        {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
 
         <Tabs
           defaultValue="overview"

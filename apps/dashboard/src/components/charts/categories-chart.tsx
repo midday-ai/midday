@@ -1,4 +1,4 @@
-import Tier from "@/config/tier";
+import Tier, { isFreeТier } from "@/config/tier";
 import { MonthlyFinancialByCategoryChart } from "@midday/ui/charts/financials/categories";
 import { MonthlySpendingChart } from "@midday/ui/charts/financials/dashboard/financial-dashboard-overview";
 import { cn } from "@midday/ui/cn";
@@ -26,9 +26,9 @@ export function CategoryCharts({
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 
-  const isFreeTier = tier === "free";
+  const isCurrentUserTierFree = isFreeТier(tier);
 
-  const disableAll = isFreeTier || disableAllCharts;
+  const disableAll = isCurrentUserTierFree || disableAllCharts;
 
   return (
     <div className={cn("flex h-full")}>
@@ -40,7 +40,7 @@ export function CategoryCharts({
         )}
       >
         {disableAllCharts && <EmptyState />}
-        {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+        {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
 
         <div
           className={cn(
@@ -99,7 +99,7 @@ export function CategoryCharts({
         )}
       >
         {disableAllCharts && <EmptyState />}
-        {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+        {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
 
         <div className={cn("p-4", disableAll && "blur-[8px] opacity-20")}>
           <MonthlySpendingChart

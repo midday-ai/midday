@@ -1,4 +1,4 @@
-import Tier from "@/config/tier";
+import { Tier, isFreeТier } from "@/config/tier";
 import { AreaChart } from "@midday/ui/charts/base/area-chart";
 import { cn } from "@midday/ui/cn";
 import { HTMLAttributes } from "react";
@@ -23,9 +23,8 @@ export function CashflowCharts({
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 
-
   // based on the tier we disclose a different amount of information
-  const isFreeTier = tier === "free";
+  const isCurrentUserTierFree = isFreeТier(tier);
 
   return (
     <div
@@ -33,7 +32,7 @@ export function CashflowCharts({
         "grid grid-cols-1 gap-4 mx-auto py-[2%]",
       )}
     >
-      <div className={cn(isFreeTier && "relative")}>
+      <div className={cn(isCurrentUserTierFree && "relative")}>
         <CardWrapper
           title="Net Income"
           titleDescription="Year-to-date"
@@ -42,7 +41,7 @@ export function CashflowCharts({
           subtitleDescription="Compared to previous year"
           className={`${chartOpacity("netIncome")}`}
         >
-          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
           <AreaChart
             currency={currency}
             data={[]}
@@ -51,7 +50,7 @@ export function CashflowCharts({
           />
         </CardWrapper>
       </div>
-      <div className={cn(isFreeTier && "relative")}>
+      <div className={cn(isCurrentUserTierFree && "relative")}>
 
         <CardWrapper
           title="Income"
@@ -61,7 +60,7 @@ export function CashflowCharts({
           subtitleDescription="This month vs last month"
           className={`${chartOpacity("revenue")}`}
         >
-          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
           <AreaChart
             currency={currency}
             data={[]}
@@ -72,7 +71,7 @@ export function CashflowCharts({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className={cn(isFreeTier && "relative")}>
+        <div className={cn(isCurrentUserTierFree && "relative")}>
           <CardWrapper
             title="Expenses"
             titleDescription="Monthly"
@@ -81,7 +80,7 @@ export function CashflowCharts({
             subtitleDescription="This month vs last month"
             className={`${chartOpacity("expenses")}`}
           >
-            {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+            {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
             <AreaChart
               currency={currency}
               data={[]}
@@ -90,7 +89,7 @@ export function CashflowCharts({
             />
           </CardWrapper>
         </div>
-        <div className={cn(isFreeTier && "relative")}>
+        <div className={cn(isCurrentUserTierFree && "relative")}>
           <CardWrapper
             title="Cash Flow"
             titleDescription="Quarterly"
@@ -99,7 +98,7 @@ export function CashflowCharts({
             subtitleDescription="This quarter vs last quarter"
             className={`${chartOpacity("cashFlow")}`}
           >
-            {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+            {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
             <AreaChart
               currency={currency}
               data={[]}

@@ -18,7 +18,7 @@ export default async function InboxPage({ searchParams }: Props) {
   const user = await getUser();
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;
-  const tier: Tier = "free";
+  const tier: Tier = user?.data?.tier ?? "free"
 
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>

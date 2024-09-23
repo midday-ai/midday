@@ -237,6 +237,24 @@ export function formatPrice(tier: Tier): string {
 }
 
 /**
+ * Determines whether a given tier is the free tier.
+ * @param tier - The tier to check.
+ * @returns True if the tier is free, false otherwise.
+ */
+export function isFreeТier(tier: Tier): boolean {
+    return tier === "free";
+}
+
+
+export function isProTier(tier: Tier): boolean {
+    return tier === "pro";
+}
+
+export function isEnterpriseTier(tier: Tier): boolean {
+    return tier === "enterprise";
+}
+
+/**
  * Demonstrates the usage of various utility functions for tier management.
  */
 export function exampleUsage() {
