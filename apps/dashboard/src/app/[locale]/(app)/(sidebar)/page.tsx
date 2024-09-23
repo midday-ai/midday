@@ -1,29 +1,19 @@
-import CardWrapper from "@/components/card/card-wrapper";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import TabbedCharts from "@/components/charts/tabbed-charts";
-import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import RecentTransactions from "@/components/recent-transactions";
-import { Table } from "@/components/tables/transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts, getTeamUser, getUser } from "@midday/supabase/cached-queries";
+import { getTeamBankAccounts } from "@midday/supabase/cached-queries";
 import { RecurringTransactionFrequency } from "@midday/supabase/queries";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  Card
 } from "@midday/ui/card";
-import { AreaChart } from "@midday/ui/charts/base/area-chart";
 import { cn } from "@midday/ui/cn";
-import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { columns, DataTable } from "@midday/ui/transaction-table";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -64,10 +54,17 @@ export default async function Overview({
 
   const isEmpty = !accounts?.data?.length;
 
+  // TODO: get the tier from the user record
+  // const tier = getUser()?.tier;
+  const tier = "free";
+
   return (
     <>
       {/** financial portal view */}
-      <FinancialPortalView disabled={isEmpty} />
+      <FinancialPortalView
+        disabled={isEmpty}
+        tier={tier}   // TODO: get the tier from the user record
+      />
 
       <div>
         <Card className="h-[530px] md:h-[700px] my-4 p-[2%]">
@@ -107,6 +104,7 @@ export default async function Overview({
           currency={searchParams.currency ?? "USD"}
           className="mt-8"
           disabled={isEmpty}
+          tier={tier} // TODO: get the tier from the user record
         />
 
         <Widgets

@@ -1,6 +1,7 @@
 import { CategoryCharts } from "@/components/charts/categories-chart";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import Tier from "@/config/tier";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -17,6 +18,7 @@ export default async function InboxPage({ searchParams }: Props) {
   const user = await getUser();
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;
+  const tier: Tier = "free";
 
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>
@@ -24,6 +26,7 @@ export default async function InboxPage({ searchParams }: Props) {
         <CategoryCharts
           currency={(searchParams.currency as string) ?? "USD"}
           disableAllCharts={isEmpty}
+          tier={tier}
         />
       </ConnectAccountServerWrapper>
     </Suspense>

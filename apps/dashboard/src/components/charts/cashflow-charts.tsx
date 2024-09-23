@@ -1,7 +1,9 @@
+import Tier from "@/config/tier";
 import { AreaChart } from "@midday/ui/charts/base/area-chart";
 import { cn } from "@midday/ui/cn";
 import { HTMLAttributes } from "react";
 import CardWrapper from "../card/card-wrapper";
+import { UpgradeTier } from "../upgrade-tier";
 
 type ChartType = "netIncome" | "revenue" | "expenses" | "cashFlow";
 
@@ -9,84 +11,103 @@ interface CashflowChartsProps extends HTMLAttributes<HTMLDivElement> {
   currency: string;
   disabledCharts?: ChartType[];
   disableAllCharts?: boolean;
+  tier: Tier;
 }
 
 export function CashflowCharts({
   currency,
+  tier,
   disabledCharts = [],
   disableAllCharts = false,
 }: CashflowChartsProps) {
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 
+
+  // based on the tier we disclose a different amount of information
+  const isFreeTier = tier === "free";
+
   return (
     <div
       className={cn(
         "grid grid-cols-1 gap-4 mx-auto py-[2%]",
-        disableAllCharts ? "opacity-50" : "",
       )}
     >
-      <CardWrapper
-        title="Net Income"
-        titleDescription="Year-to-date"
-        description="Overview of your company's profit performance"
-        subtitle="Net Income"
-        subtitleDescription="Compared to previous year"
-        className={`${chartOpacity("netIncome")}`}
-      >
-        <AreaChart
-          currency={currency}
-          data={[]}
-          height={500}
-          disabled={disableAllCharts || disabledCharts.includes("netIncome")}
-        />
-      </CardWrapper>
-      <CardWrapper
-        title="Income"
-        titleDescription="Monthly"
-        description="Monthly revenue trends"
-        subtitle="Revenue"
-        subtitleDescription="This month vs last month"
-        className={`${chartOpacity("revenue")}`}
-      >
-        <AreaChart
-          currency={currency}
-          data={[]}
-          height={500}
-          disabled={disableAllCharts || disabledCharts.includes("revenue")}
-        />
-      </CardWrapper>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className={cn(isFreeTier && "relative")}>
         <CardWrapper
-          title="Expenses"
+          title="Net Income"
+          titleDescription="Year-to-date"
+          description="Overview of your company's profit performance"
+          subtitle="Net Income"
+          subtitleDescription="Compared to previous year"
+          className={`${chartOpacity("netIncome")}`}
+        >
+          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+          <AreaChart
+            currency={currency}
+            data={[]}
+            height={500}
+            disabled={disableAllCharts || disabledCharts.includes("netIncome")}
+          />
+        </CardWrapper>
+      </div>
+      <div className={cn(isFreeTier && "relative")}>
+
+        <CardWrapper
+          title="Income"
           titleDescription="Monthly"
-          description="Monthly expense breakdown"
-          subtitle="Expenses"
+          description="Monthly revenue trends"
+          subtitle="Revenue"
           subtitleDescription="This month vs last month"
-          className={`${chartOpacity("expenses")}`}
+          className={`${chartOpacity("revenue")}`}
         >
+          {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
           <AreaChart
             currency={currency}
             data={[]}
             height={500}
-            disabled={disableAllCharts || disabledCharts.includes("expenses")}
+            disabled={disableAllCharts || disabledCharts.includes("revenue")}
           />
         </CardWrapper>
-        <CardWrapper
-          title="Cash Flow"
-          titleDescription="Quarterly"
-          description="Quarterly cash flow overview"
-          subtitle="Cash Flow"
-          subtitleDescription="This quarter vs last quarter"
-          className={`${chartOpacity("cashFlow")}`}
-        >
-          <AreaChart
-            currency={currency}
-            data={[]}
-            height={500}
-            disabled={disableAllCharts || disabledCharts.includes("cashFlow")}
-          />
-        </CardWrapper>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={cn(isFreeTier && "relative")}>
+          <CardWrapper
+            title="Expenses"
+            titleDescription="Monthly"
+            description="Monthly expense breakdown"
+            subtitle="Expenses"
+            subtitleDescription="This month vs last month"
+            className={`${chartOpacity("expenses")}`}
+          >
+            {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+            <AreaChart
+              currency={currency}
+              data={[]}
+              height={500}
+              disabled={disableAllCharts || disabledCharts.includes("expenses")}
+            />
+          </CardWrapper>
+        </div>
+        <div className={cn(isFreeTier && "relative")}>
+          <CardWrapper
+            title="Cash Flow"
+            titleDescription="Quarterly"
+            description="Quarterly cash flow overview"
+            subtitle="Cash Flow"
+            subtitleDescription="This quarter vs last quarter"
+            className={`${chartOpacity("cashFlow")}`}
+          >
+            {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+            <AreaChart
+              currency={currency}
+              data={[]}
+                height={500}
+                disabled={disableAllCharts || disabledCharts.includes("cashFlow")}
+              />
+          </CardWrapper>
+        </div>
       </div>
     </div>
   );

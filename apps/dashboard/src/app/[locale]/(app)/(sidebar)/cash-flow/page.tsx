@@ -4,6 +4,7 @@ import ConnectAccountServerWrapper from "@/components/connect-account-server-wra
 import { Inbox } from "@/components/inbox";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import Tier from "@/config/tier";
 import { Cookies } from "@/utils/constants";
 import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
@@ -27,6 +28,9 @@ export default async function CashFlowPage({ searchParams }: Props) {
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;
 
+  // TODO: get the tier from the user record
+  const tier: Tier = "free";
+
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ConnectAccountServerWrapper>
@@ -45,6 +49,7 @@ export default async function CashFlowPage({ searchParams }: Props) {
               <CashflowCharts
                 currency={(searchParams.currency as string) ?? "USD"}
                 disableAllCharts={true}
+                tier={tier}
               />
             </div>
           </div>

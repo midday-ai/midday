@@ -1,26 +1,34 @@
+import Tier from "@/config/tier";
 import { MonthlyFinancialByCategoryChart } from "@midday/ui/charts/financials/categories";
 import { MonthlySpendingChart } from "@midday/ui/charts/financials/dashboard/financial-dashboard-overview";
 import { cn } from "@midday/ui/cn";
 import { HTMLAttributes } from "react";
 import CardWrapper from "../card/card-wrapper";
 import { Divider } from "../divider";
+import { UpgradeTier } from "../upgrade-tier";
 import { EmptyState } from "./empty-state";
 
 type ChartType = "categoryNetIncome" | "categoryIncome";
 
 interface CategoryChartsProps extends HTMLAttributes<HTMLDivElement> {
   currency: string;
+  tier: Tier;
   disabledCharts?: ChartType[];
   disableAllCharts?: boolean;
 }
 
 export function CategoryCharts({
   currency,
+  tier,
   disabledCharts = [],
   disableAllCharts = false,
 }: CategoryChartsProps) {
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
+
+  const isFreeTier = tier === "free";
+
+  const disableAll = isFreeTier || disableAllCharts;
 
   return (
     <div className={cn("flex h-full")}>
@@ -28,14 +36,16 @@ export function CategoryCharts({
       <div
         className={cn(
           "w-1/2 overflow-y-auto scrollbar-hide",
-          disableAllCharts && "mt-8 relative",
+          disableAll && "mt-8 relative",
         )}
       >
         {disableAllCharts && <EmptyState />}
+        {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+
         <div
           className={cn(
             "grid grid-cols-1 gap-4 mx-auto py-[2%]",
-            disableAllCharts && "blur-[8px] opacity-20",
+            disableAll && "blur-[8px] opacity-20",
           )}
         >
           <CardWrapper
@@ -52,7 +62,7 @@ export function CategoryCharts({
               height={400}
               type={"expense"}
               disabled={
-                disableAllCharts || disabledCharts.includes("categoryNetIncome")
+                disableAll || disabledCharts.includes("categoryNetIncome")
               }
             />
           </CardWrapper>
@@ -71,7 +81,7 @@ export function CategoryCharts({
               height={400}
               type={"income"}
               disabled={
-                disableAllCharts || disabledCharts.includes("categoryIncome")
+                disableAll || disabledCharts.includes("categoryIncome")
               }
             />
           </CardWrapper>
@@ -85,16 +95,18 @@ export function CategoryCharts({
       <div
         className={cn(
           "w-1/2 overflow-y-auto scrollbar-hide",
-          disableAllCharts && "mt-8 relative",
+          disableAll && "mt-8 relative",
         )}
       >
         {disableAllCharts && <EmptyState />}
-        <div className={cn("p-4", disableAllCharts && "blur-[8px] opacity-20")}>
+        {isFreeTier && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+
+        <div className={cn("p-4", disableAll && "blur-[8px] opacity-20")}>
           <MonthlySpendingChart
             transactions={[]}
             expenseMetrics={[]}
             incomeMetrics={[]}
-            disabled={disableAllCharts}
+            disabled={disableAll}
           />
         </div>
       </div>
