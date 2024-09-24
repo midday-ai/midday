@@ -22,7 +22,7 @@ interface ToolTipContentProps {
   payload?: Array<{
     payload: {
       date: string;
-      expense: number;
+      income: number;
       growthRate: number;
       currency: string;
     };
@@ -30,7 +30,7 @@ interface ToolTipContentProps {
 }
 
 /**
- * ToolTipContent component for the ExpenseGrowthRateBarChart
+ * ToolTipContent component for the IncomeGrowthRateBarChart
  * @param payload - The data for the current tooltip
  */
 const ToolTipContent: React.FC<ToolTipContentProps> = ({ payload = [] }) => {
@@ -43,24 +43,24 @@ const ToolTipContent: React.FC<ToolTipContentProps> = ({ payload = [] }) => {
   return (
     <div className="w-[240px] border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
-              <p className="text-sm">{current.date}</p>
+        <p className="text-sm">{current.date}</p>
       </div>
 
       <div className="p-4">
         <div className="flex justify-between mb-2">
           <div className="flex items-center justify-center space-x-2">
-            <div className="w-[8px] h-[8px] rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
+            <div className="w-[8px] h-[8px] rounded-full bg-[#4CAF50] dark:bg-[#81C784]" />
             <p className="font-medium text-[13px]">
               {formatAmount({
                 maximumFractionDigits: 0,
                 minimumFractionDigits: 0,
                 currency: current.currency,
-                amount: current.expense,
+                amount: current.income,
                 locale,
               })}
             </p>
           </div>
-          <p className="text-xs text-[#606060] text-right">{t("expense")}</p>
+          <p className="text-xs text-[#606060] text-right">{t("income")}</p>
         </div>
 
         <div className="flex justify-between">
@@ -78,15 +78,14 @@ const ToolTipContent: React.FC<ToolTipContentProps> = ({ payload = [] }) => {
 };
 
 /**
- * Props for the ExpenseGrowthRateBarChart component
+ * Props for the IncomeGrowthRateBarChart component
  */
-interface ExpenseGrowthRateBarChartProps {
+interface IncomeGrowthRateBarChartProps {
   /** The data to be displayed in the chart */
   data: {
     result: Array<{
       date: string;
-      expense: number;
-      growthRate: number;
+      income: number;
     }>;
     meta: {
       currency: string;
@@ -97,27 +96,44 @@ interface ExpenseGrowthRateBarChartProps {
 }
 
 /**
- * ExpenseGrowthRateBarChart component
+ * Calculates the growth rate between two values
+ * @param currentValue - The current value
+ * @param previousValue - The previous value
+ * @returns The growth rate as a decimal
+ */
+function calculateGrowthRate(currentValue: number, previousValue: number): number {
+  if (previousValue === 0) return 0;
+  return (currentValue - previousValue) / previousValue;
+}
+
+/**
+ * IncomeGrowthRateBarChart component
  * 
- * This component renders a bar chart showing expenses and their growth rate over time.
- * It uses recharts to create a composed chart with bars for expenses and a line for growth rate.
+ * This component renders a bar chart showing income and its growth rate over time.
+ * It uses recharts to create a composed chart with bars for income and a line for growth rate.
  * 
  * @param data - The data to be displayed in the chart
  * @param height - The height of the chart (default: 290)
  */
-export function ExpenseGrowthRateBarChart({ data, height = 290 }: ExpenseGrowthRateBarChartProps) {
-  const formattedData = data.result.map((item) => ({
-    ...item,
-    date: format(new Date(item.date), "MMM"),
-    currency: data.meta.currency,
-  }));
+export function IncomeGrowthRateBarChart({ data, height = 290 }: IncomeGrowthRateBarChartProps) {
+  const formattedData = data.result.map((item, index, array) => {
+    const previousIncome = index > 0 ? array[index - 1]?.income : item.income;
+    const growthRate = calculateGrowthRate(item.income, previousIncome ?? 0);
+    
+    return {
+      ...item,
+      date: format(new Date(item.date), "MMM"),
+      currency: data.meta.currency,
+      growthRate: growthRate,
+    };
+  });
 
   return (
     <div className="relative h-full w-full">
       <div className="space-x-4 absolute right-0 -top-10 hidden md:flex">
         <div className="flex space-x-2 items-center">
-          <span className="w-2 h-2 rounded-full bg-[#C6C6C6] dark:bg-[#606060]" />
-          <span className="text-sm text-[#606060]">Expenses</span>
+          <span className="w-2 h-2 rounded-full bg-[#4CAF50] dark:bg-[#81C784]" />
+          <span className="text-sm text-[#606060]">Income</span>
         </div>
         <div className="flex space-x-2 items-center">
           <Icons.TrendingUp className="w-4 h-4 text-[#606060]" />
@@ -181,8 +197,8 @@ export function ExpenseGrowthRateBarChart({ data, height = 290 }: ExpenseGrowthR
           <Bar
             yAxisId="left"
             barSize={16}
-            dataKey="expense"
-            className="dark:fill-[#323232] fill-[#C6C6C6]"
+            dataKey="income"
+            className="fill-[#4CAF50] dark:fill-[#81C784]"
           />
 
           <Line

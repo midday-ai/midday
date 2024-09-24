@@ -103,6 +103,8 @@ export default async function CashFlowPage({ searchParams }: Props) {
                 <TabsList>
                   <TabsTrigger value="income">Income</TabsTrigger>
                   <TabsTrigger value="profit">Net Income</TabsTrigger>
+                  <TabsTrigger value="growthRate">Growth Rate</TabsTrigger>
+
                 </TabsList>
                 <TabsContent value="income">
                   <IncomeSection
@@ -130,6 +132,21 @@ export default async function CashFlowPage({ searchParams }: Props) {
                     Effective income management is the lifeblood of any evolving business venture, serving as a critical determinant of profitability and financial resilience. In today's dynamic market landscape, astute entrepreneurs recognize that meticulous oversight and strategic adjustment of income streams are not merely beneficial—they are imperative.
                   `}
                     type="profit"
+                  />
+                </TabsContent>
+                <TabsContent value="growthRate">
+                  <IncomeSection
+                    isEmpty={isEmpty}
+                    accounts={accounts}
+                    user={user}
+                    tier={tier}
+                    value={value}
+                    defaultValue={defaultValue}
+                    description={`
+                    Effective income management is the lifeblood of any evolving business venture, serving as a critical determinant of profitability and financial resilience. In today's dynamic market landscape, astute entrepreneurs recognize that meticulous oversight and strategic adjustment of income streams are not merely beneficial—they are imperative.
+                  `}
+                    type="income"
+                    enableGrowthRate={true}
                   />
                 </TabsContent>
               </Tabs>

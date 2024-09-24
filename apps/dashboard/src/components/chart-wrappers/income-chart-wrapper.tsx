@@ -14,6 +14,7 @@ type IncomeChartWrapperProps = {
         period: string;
     };
     type: "income" | "profit";
+    enableGrowthRate?: boolean;
 };
 
 const defaultValue = {
@@ -22,9 +23,9 @@ const defaultValue = {
     period: "monthly",
 };
 
-export async function IncomeChartWrapper({ tier, teamId, currency, userId, value, type }: IncomeChartWrapperProps) {
+    export async function IncomeChartWrapper({ tier, teamId, currency, userId, value, type, enableGrowthRate }: IncomeChartWrapperProps) {
     if (tier === "free") {
-        return <ProfitRevenueChart value={value} defaultValue={defaultValue} type={type} />;
+        return <ProfitRevenueChart value={value} defaultValue={defaultValue} type={type} enableGrowthRate={enableGrowthRate} />;
     }
 
     return null;

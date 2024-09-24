@@ -14,9 +14,10 @@ type IncomeSectionProps = {
     defaultValue: any;
     description: string;
     type: "income" | "profit";
+    enableGrowthRate?: boolean;
 };
 
-export function IncomeSection({ isEmpty, accounts, user, tier, value, defaultValue, description, type }: IncomeSectionProps) {
+export function IncomeSection({ isEmpty, accounts, user, tier, value, defaultValue, description, type, enableGrowthRate }: IncomeSectionProps) {
     return (
         <>
             {isEmpty && <EmptyState />}
@@ -44,6 +45,7 @@ export function IncomeSection({ isEmpty, accounts, user, tier, value, defaultVal
                                     period: defaultValue.period
                                 }}
                                 type={type}
+                                enableGrowthRate={enableGrowthRate}
                             />
                         </CardContent>
                     </Card>
