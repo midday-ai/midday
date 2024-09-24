@@ -9,6 +9,7 @@ import {
     TooltipTrigger,
 } from "@midday/ui/tooltip";
 import Link from "next/link";
+import { ExpenseGrowthRateBarChart } from "./expense-growth-rate-bar-chart";
 
 type Props = {
     value: any;
@@ -44,12 +45,20 @@ export async function ExpenseGrowthRateChart({
         currency: currency,
     };
 
-    const areaChartData = result?.data?.map((item: any) => ({
+    const growthRateBarChartData = result?.data?.map((item: any) => ({
         date: item.period ?? "",
-        // expense: item.total_expense ?? 0,
+        expense: item.total_expense ?? 0,
         growth_rate: item.growth_rate ?? 0,
     })) || [];
 
+    const meta = {
+        currency: currency,
+    };
+
+    const growthRateBarChartProps = {
+        data: growthRateBarChartData,
+        meta: meta,
+    };
 
     return (
         <div className={cn(disabled && "pointer-events-none select-none")}>
@@ -98,7 +107,17 @@ export async function ExpenseGrowthRateChart({
                     </TooltipProvider>
                 </div>
             </div>
-            <BarChartMulti data={areaChartData} currency={currency ?? "USD"} height={400} chartType="group" />
+            {/* <BarChartMulti data={areaChartData} currency={currency ?? "USD"} height={400} chartType="group" /> */}
+            <ExpenseGrowthRateBarChart data={{
+                result: growthRateBarChartProps.data.map(item => ({
+                    date: item.date,
+                    expense: item.expense,
+                    growthRate: item.growth_rate
+                })),
+                meta: {
+                    currency: growthRateBarChartProps.meta.currency || 'USD'
+                }
+            }} height={400} />
         </div>
     );
 }
