@@ -103,6 +103,15 @@ export default async function CashFlowPage({ searchParams }: Props) {
                 disabled={isEmpty}
                 period={initialPeriod}
                 currency={(searchParams.currency as string) ?? "USD"}
+                spendingType="category"
+              />
+              <CategorySpendingPortalView
+                disabled={isEmpty}
+                period={initialPeriod}
+                currency={(searchParams.currency as string) ?? "USD"}
+                spendingType="merchant"
+                title="Merchant Spending"
+                description="See how you're spending at your favorite merchants."
               />
             </div>
             <CashflowCharts

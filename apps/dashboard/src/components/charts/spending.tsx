@@ -2,6 +2,7 @@ import { Card } from "@midday/ui/card";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
 import { ErrorFallback } from "../error-fallback";
+import { MerchantSpendingList } from "./merchant-spending-list";
 import { SpendingList, SpendingListSkeleton } from "./spending-list";
 import { SpendingPeriod } from "./spending-period";
 
@@ -9,10 +10,12 @@ export async function Spending({
   disabled,
   initialPeriod,
   currency,
+  spendingType = "category",
 }: {
   disabled: boolean;
   initialPeriod: any;
   currency?: string;
+  spendingType?: "category" | "merchant";
 }) {
   return (
     <Card className="aspect-square relative overflow-hidden rounded-2xl">
@@ -21,11 +24,19 @@ export async function Spending({
 
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<SpendingListSkeleton />} key={initialPeriod}>
-            <SpendingList
-              initialPeriod={initialPeriod}
+            {spendingType === "category" ? (
+              <SpendingList
+                initialPeriod={initialPeriod}
               disabled={disabled}
-              currency={currency}
-            />
+                currency={currency}
+              />
+            ) : (
+              <MerchantSpendingList
+                initialPeriod={initialPeriod}
+                disabled={disabled}
+                currency={currency}
+              />
+            )}
           </Suspense>
         </ErrorBoundary>
       </div>

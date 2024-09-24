@@ -7,14 +7,17 @@ interface SpendingPortalViewProps {
     disabled: boolean;
     period: Date | string;
     currency: string;
+    spendingType?: "category" | "merchant";
+    title?: string;
+    description?: string;
 }
 
 
-export const CategorySpendingPortalView: React.FC<SpendingPortalViewProps> = ({ disabled, period, currency }) => {
+export const CategorySpendingPortalView: React.FC<SpendingPortalViewProps> = ({ disabled, period, currency, spendingType = "category", title = "Spending Across Your Accounts", description = "See how you're spending across your accounts and categories." }) => {
     return (
         <PortalViewWrapper
-            title="Spending Across Your Accounts"
-            description="See how you're spending across your accounts and categories."
+            title={title}
+            description={description}
             subtitle={``}
             disabled={disabled}
         >
@@ -23,6 +26,7 @@ export const CategorySpendingPortalView: React.FC<SpendingPortalViewProps> = ({ 
                 initialPeriod={period}
                 key="spending"
                 currency={currency}
+                spendingType={spendingType}
             />
         </PortalViewWrapper>
     );
