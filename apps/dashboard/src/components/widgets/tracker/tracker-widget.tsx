@@ -96,7 +96,7 @@ export function TrackerWidget({
     <div ref={ref}>
       <TrackerHeader totalDuration={meta?.totalDuration} />
 
-      <div className="mt-8">
+      <div className="mt-4">
         <div className="grid grid-cols-7 gap-px border border-border bg-border">
           {firstWeek.map((day) => (
             <div
@@ -118,13 +118,13 @@ export function TrackerWidget({
                 className={cn(
                   "pt-2 pb-5 px-3 font-mono text-sm relative transition-all duration-100 text-left",
                   isCurrentMonth && isToday(date)
-                    ? "bg-[#202020"
+                    ? "bg-[#f0f0f0] dark:bg-[#202020]"
                     : "bg-background",
                   !isCurrentMonth &&
-                    "bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
+                    "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
                   selectedDate ===
                     formatISO(date, { representation: "date" }) &&
-                    "ring-1 ring-white",
+                    "ring-1 ring-primary",
                   (range?.includes(
                     formatISO(date, { representation: "date" }),
                   ) ||
@@ -137,7 +137,7 @@ export function TrackerWidget({
                         (sortedDates[1]
                           ? new Date(sortedDates[1])
                           : new Date()))) &&
-                    "ring-1 ring-white",
+                    "ring-1 ring-primary",
                 )}
               >
                 <div>{format(date, "d")}</div>

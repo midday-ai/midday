@@ -209,13 +209,13 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
               return (
                 <div
                   key={event.id}
-                  className="absolute w-full cursor-move z-10 bg-[#1D1D1D]"
+                  className="absolute w-full cursor-move z-10 bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border"
                   style={{
                     top: `${startSlot * SLOT_HEIGHT}px`,
                     height: `${height}px`,
                   }}
                 >
-                  <div className="text-xs text-white p-4 flex justify-between items-center">
+                  <div className="text-xs p-4 flex justify-between items-center">
                     <span>
                       {event.project.name} (
                       {secondsToHoursAndMinutes(event.duration)})
@@ -238,7 +238,7 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
                     className={cn(
                       "absolute w-full cursor-pointer",
                       selectedSlots.includes(slot)
-                        ? "h-[9px] bg-[#1D1D1D]/[0.9]"
+                        ? "h-[9px] bg-[#F0F0F0]/[0.9] dark:bg-[#1D1D1D]/[0.9] text-[#606060] dark:text-[#878787]"
                         : "h-9",
                     )}
                     style={{

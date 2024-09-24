@@ -354,7 +354,11 @@ export const getTrackerRecordsByRange = async (
 
   return unstable_cache(
     async () => {
-      return getTrackerRecordsByRangeQuery(supabase, { ...params, teamId });
+      return getTrackerRecordsByRangeQuery(supabase, {
+        ...params,
+        teamId,
+        userId: user?.data?.id,
+      });
     },
     ["tracker_entries", teamId],
     {

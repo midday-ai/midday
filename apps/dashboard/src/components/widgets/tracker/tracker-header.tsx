@@ -1,7 +1,7 @@
 "use client";
 
 import { TrackerMonthSelect } from "@/components/tracker-month-select";
-import MotionNumber from "motion-number";
+import { secondsToHoursAndMinutes } from "@/utils/format";
 
 type Props = {
   totalDuration?: number;
@@ -12,8 +12,8 @@ export function TrackerHeader({ totalDuration }: Props) {
     <div className="flex justify-between">
       <div>
         <h2 className="text-lg">Tracker</h2>
-        <span className="text-[#878787]">
-          <MotionNumber value={totalDuration ? totalDuration / 3600 : 0} />h
+        <span className="text-[#878787] text-sm">
+          {totalDuration ? secondsToHoursAndMinutes(totalDuration) : "0h"}
         </span>
       </div>
 

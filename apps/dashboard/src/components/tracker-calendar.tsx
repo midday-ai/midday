@@ -440,13 +440,15 @@ function CalendarDay({
       onMouseUp={handleMouseUp}
       className={cn(
         "pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left flex space-x-2 select-none",
-        isCurrentMonth && isToday(date) ? "bg-[#202020]" : "bg-background",
+        isCurrentMonth && isToday(date)
+          ? "bg-[#f0f0f0] dark:bg-[#202020]"
+          : "bg-background",
         !isCurrentMonth &&
-          "bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
-        selectedDate === formattedDate && "ring-1 ring-white",
-        isInRange(date) && "ring-1 ring-white bg-opacity-50",
-        isFirstSelectedDate(date) && "ring-1 ring-white bg-opacity-50",
-        isLastSelectedDate(date) && "ring-1 ring-white bg-opacity-50",
+          "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
+        selectedDate === formattedDate && "ring-1 ring-primary",
+        isInRange(date) && "ring-1 ring-primary bg-opacity-50",
+        isFirstSelectedDate(date) && "ring-1 ring-primary bg-opacity-50",
+        isLastSelectedDate(date) && "ring-1 ring-primary bg-opacity-50",
       )}
     >
       <div>{format(date, "d")}</div>
