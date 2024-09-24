@@ -1,6 +1,7 @@
 import { AccountSummarySection } from "@/components/cash-flow/account-summary-section";
 import { ExpenseSection } from "@/components/cash-flow/expense-section";
 import { IncomeSection } from "@/components/cash-flow/income-section";
+import { InventoryCostSection } from "@/components/cash-flow/inventory-cost-section";
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
@@ -57,14 +58,33 @@ export default async function CashFlowPage({ searchParams }: Props) {
           <AccountSummarySection user={user} isEmpty={isEmpty} tier={tier} name={user?.data?.full_name ?? "Solomon AI User"} />
           <div className={cn("mt-4", isEmpty && "relative")}>
             <div className="flex flex-col gap-4">
-              <ExpenseSection
-                isEmpty={isEmpty}
-                accounts={accounts}
-                user={user}
-                tier={tier}
-                value={value}
-                defaultValue={defaultValue}
-              />
+              <Tabs defaultValue="expense">
+                <TabsList className="w-fit flex flex-1 gap-2 rounded-2xl">
+                  <TabsTrigger value="expense">Expense</TabsTrigger>
+                  <TabsTrigger value="inventory">Inventory Cost</TabsTrigger>
+                </TabsList>
+                <TabsContent value="expense">
+                  <ExpenseSection
+                    isEmpty={isEmpty}
+                    accounts={accounts}
+                    user={user}
+                    tier={tier}
+                    value={value}
+                    defaultValue={defaultValue}
+                  />
+                </TabsContent>
+                <TabsContent value="inventory">
+                  <InventoryCostSection
+                    isEmpty={isEmpty}
+                    accounts={accounts}
+                    user={user}
+                    tier={tier}
+                    value={value}
+                    defaultValue={defaultValue}
+                  />
+                </TabsContent>
+              </Tabs>
+             
               <Tabs defaultValue="income">
                 <TabsList>
                   <TabsTrigger value="income">Income</TabsTrigger>
