@@ -40,8 +40,11 @@ import {
 } from "../queries";
 
 import {
+  GetExpenseBreakdownByLocationQueryParams,
+  GetInventoryCostAnalysisQueryParams,
   getDailyExpensesQuery,
   getExpenseAnomaliesQuery,
+  getExpenseBreakdownByLocationQuery,
   getExpenseComparisonQuery,
   getExpenseDistributionByDayOfWeekQuery,
   getExpenseForecastQuery,
@@ -50,6 +53,7 @@ import {
   getExpensesByCategoryQuery,
   getExpensesByMerchantQuery,
   getExpensesByPaymentChannelQuery,
+  getInventoryCostAnalysisQuery,
   getMonthlyExpensesQuery,
   getRecurringExpensesQuery,
   getTopExpenseCategoriesQuery,
@@ -580,6 +584,29 @@ export const getExpensesByCategory = async (
   )(params);
 };
 
+export const getExpensesByLocation = async (
+  params: Omit<GetExpenseBreakdownByLocationQueryParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseBreakdownByLocationQuery(supabase, { ...params, teamId });
+    },
+    ["expenses_by_location", teamId],
+    {
+      tags: [`expenses_by_location_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
+}
+
 export const getDailyExpenses = async (
   params: Omit<GetDailyExpensesQueryParams, "teamId">,
 ) => {
@@ -690,6 +717,29 @@ export const getExpensesByPaymentChannel = async (
     ["expenses_by_payment_channel", teamId],
     {
       tags: [`expenses_by_payment_channel_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
+};
+
+export const getExpenseComparison = async (
+  params: Omit<GetExpenseComparisonQueryParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getExpenseComparisonQuery(supabase, { ...params, teamId });
+    },
+    ["expense_anomalies", teamId],
+    {
+      tags: [`expense_comparison_${teamId}`],
       revalidate: 3600,
     },
   )(params);
@@ -836,8 +886,8 @@ export const getExpenseTrendsByTimeOfDay = async (
   )(params);
 };
 
-export const getExpenseComparison = async (
-  params: Omit<GetExpenseComparisonQueryParams, "teamId">,
+export const getInventoryCostAnalysis = async (
+  params: Omit<GetInventoryCostAnalysisQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -849,11 +899,11 @@ export const getExpenseComparison = async (
 
   return unstable_cache(
     async () => {
-      return getExpenseComparisonQuery(supabase, { ...params, teamId });
+      return getInventoryCostAnalysisQuery(supabase, { ...params, teamId });
     },
-    ["expense_comparison", teamId],
+    ["inventory_cost_analysis", teamId],
     {
-      tags: [`expense_comparison_${teamId}`],
+      tags: [`inventory_cost_analysis_${teamId}`],
       revalidate: 3600,
     },
   )(params);
