@@ -43,7 +43,7 @@ const ToolTipContent: React.FC<ToolTipContentProps> = ({ payload = [] }) => {
   return (
     <div className="w-[240px] border shadow-sm bg-background">
       <div className="border-b-[1px] px-4 py-2 flex justify-between items-center">
-              <p className="text-sm">{current.date}</p>
+        <p className="text-sm">{current.date}</p>
       </div>
 
       <div className="p-4">
@@ -86,7 +86,6 @@ interface ExpenseGrowthRateBarChartProps {
     result: Array<{
       date: string;
       expense: number;
-      growthRate: number;
     }>;
     meta: {
       currency: string;
@@ -94,6 +93,17 @@ interface ExpenseGrowthRateBarChartProps {
   };
   /** The height of the chart (default: 290) */
   height?: number;
+}
+
+/**
+ * Calculates the growth rate between two values
+ * @param currentValue - The current value
+ * @param previousValue - The previous value
+ * @returns The growth rate as a decimal
+ */
+function calculateGrowthRate(currentValue: number, previousValue: number): number {
+  if (previousValue === 0) return 0;
+  return (currentValue - previousValue) / previousValue;
 }
 
 /**
@@ -106,11 +116,17 @@ interface ExpenseGrowthRateBarChartProps {
  * @param height - The height of the chart (default: 290)
  */
 export function ExpenseGrowthRateBarChart({ data, height = 290 }: ExpenseGrowthRateBarChartProps) {
-  const formattedData = data.result.map((item) => ({
-    ...item,
-    date: format(new Date(item.date), "MMM"),
-    currency: data.meta.currency,
-  }));
+  const formattedData = data.result.map((item, index, array) => {
+    const previousExpense = index > 0 ? array[index - 1]?.expense : item.expense;
+    const growthRate = calculateGrowthRate(item.expense, previousExpense ?? 0);
+    
+    return {
+      ...item,
+      date: format(new Date(item.date), "MMM"),
+      currency: data.meta.currency,
+      growthRate: growthRate,
+    };
+  });
 
   return (
     <div className="relative h-full w-full">
