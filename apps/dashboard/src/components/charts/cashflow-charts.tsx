@@ -34,7 +34,7 @@ export function CashflowCharts({
     >
       <div className={cn(isCurrentUserTierFree && "relative")}>
         <CardWrapper
-          title="Net Income"
+          title="Advanced Net Income Analytics"
           titleDescription="Year-to-date"
           description="Overview of your company's profit performance"
           subtitle="Net Income"
@@ -53,7 +53,7 @@ export function CashflowCharts({
       <div className={cn(isCurrentUserTierFree && "relative")}>
 
         <CardWrapper
-          title="Income"
+          title="Advanced Income Analytics"
           titleDescription="Monthly"
           description="Monthly revenue trends"
           subtitle="Revenue"
@@ -73,7 +73,7 @@ export function CashflowCharts({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className={cn(isCurrentUserTierFree && "relative")}>
           <CardWrapper
-            title="Expenses"
+            title="Advanced Expenses Analytics"
             titleDescription="Monthly"
             description="Monthly expense breakdown"
             subtitle="Expenses"
@@ -91,7 +91,7 @@ export function CashflowCharts({
         </div>
         <div className={cn(isCurrentUserTierFree && "relative")}>
           <CardWrapper
-            title="Cash Flow"
+            title="Advanced Cash Flow Analytics"
             titleDescription="Quarterly"
             description="Quarterly cash flow overview"
             subtitle="Cash Flow"

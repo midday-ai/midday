@@ -1,7 +1,9 @@
+import { UserTier } from "@midday/supabase/types";
+
 /**
  * Represents the available subscription tiers.
  */
-export type Tier = "free" | "pro" | "enterprise";
+export type Tier = UserTier;
 
 /**
  * Types of basic reports available across tiers.

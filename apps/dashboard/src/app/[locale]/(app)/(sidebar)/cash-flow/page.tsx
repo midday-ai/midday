@@ -4,12 +4,15 @@ import { IncomeSection } from "@/components/cash-flow/income-section";
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { CategorySpendingPortalView } from "@/components/portal-views/category-spending-portal-view";
 import Tier from "@/config/tier";
+import { Cookies } from "@/utils/constants";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { startOfMonth, subMonths } from "date-fns";
+import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
@@ -31,6 +34,14 @@ export default async function CashFlowPage({ searchParams }: Props) {
   const user = await getUser();
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;
+  const initialPeriod = cookies().has(Cookies.SpendingPeriod)
+    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
+    : {
+      id: "this_year",
+      from: startOfYear(new Date()).toISOString(),
+      to: new Date().toISOString(),
+    };
+
 
   const tier: Tier = user?.data?.tier ?? "free";
 
@@ -43,7 +54,7 @@ export default async function CashFlowPage({ searchParams }: Props) {
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ConnectAccountServerWrapper>
         <div className="mt-8">
-          <AccountSummarySection user={user} isEmpty={isEmpty} />
+          <AccountSummarySection user={user} isEmpty={isEmpty} tier={tier} name={user?.data?.full_name ?? "Solomon AI User"} />
           <div className={cn("mt-4", isEmpty && "relative")}>
             <div className="flex flex-col gap-4">
               <ExpenseSection
@@ -88,6 +99,11 @@ export default async function CashFlowPage({ searchParams }: Props) {
                   />
                 </TabsContent>
               </Tabs>
+              <CategorySpendingPortalView
+                disabled={isEmpty}
+                period={initialPeriod}
+                currency={(searchParams.currency as string) ?? "USD"}
+              />
             </div>
             <CashflowCharts
               currency={(searchParams.currency as string) ?? "USD"}

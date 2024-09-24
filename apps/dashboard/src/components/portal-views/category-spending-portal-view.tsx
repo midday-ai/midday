@@ -15,7 +15,7 @@ export const CategorySpendingPortalView: React.FC<SpendingPortalViewProps> = ({ 
         <PortalViewWrapper
             title="Spending Across Your Accounts"
             description="See how you're spending across your accounts and categories."
-            subtitle={`Spending ${formatDate(period.toString())}`}
+            subtitle={``}
             disabled={disabled}
         >
             <Spending
