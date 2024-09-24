@@ -25,7 +25,7 @@ export const UpgradeTier: React.FC<UpgradeTierProps> = ({
         <DialogTrigger asChild>
           <Button variant="default">Upgrade Now</Button>
         </DialogTrigger>
-        <DialogContent className="md:min-w-[30%] p-[3%]">
+        <DialogContent className="md:min-w-[30%] p-[5%]">
           <DialogHeader>
             <DialogTitle className="text-3xl font-bold">Business Tier Coming Soon</DialogTitle>
             <DialogDescription className="text-lg font-semibold">
