@@ -64,11 +64,6 @@ export async function MonthlyExpenseChart({
         value: item.total_expense,
     }));
 
-    const dp: DataPoint[] = result.data.map((item: ExpenseData) => ({
-        date: item.month,
-        events: item.total_expense,
-    }));
-
     const stats = computeExpenseStatistics(result.data, currency);
 
     return (
@@ -88,13 +83,7 @@ export async function MonthlyExpenseChart({
             </CardHeader>
             <CardContent className="space-y-2 p-[1%]">
                 <ExpenseSummary stats={stats} />
-                <ZoomableChart
-                    data={dp}
-                    description="Monthly Expense Breakdown"
-                    title="Monthly Expense Breakdown"
-                    footerDescription="All amounts are converted into your base currency."
-                    dataNameKey='expenses'
-                />
+                <BarChart data={dataPoints} currency={currency} />
             </CardContent>
         </div>
     );

@@ -34,7 +34,7 @@ export function DrilldownMonthlyExpenseChartModal({
                     <ArrowRightIcon className="w-4 h-4 ml-2" />
                 </Button>
             </DialogTrigger>
-            <DialogContent className="min-w-[85%] min-h-[85%] max-w-[95%] max-h-[95%] md:p-[5%] overflow-y-auto scrollbar-hide">
+            <DialogContent className="min-w-[85%] min-h-[85%] max-w-[95%] max-h-[95%] p-[5%] overflow-y-auto scrollbar-hide">
                 <MonthlyExpenseChart
                     value={value}
                     defaultValue={defaultValue}
