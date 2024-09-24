@@ -14,6 +14,11 @@ export type TrackerProject = {
   description: string;
   status: "active" | "completed";
   total_duration: number;
+  users: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
+  }[];
 };
 
 type DataTableProps = {

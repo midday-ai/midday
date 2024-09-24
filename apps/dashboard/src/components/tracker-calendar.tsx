@@ -1,6 +1,7 @@
 "use client";
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
@@ -222,19 +223,37 @@ function CalendarHeader({
   const projectTotals = Object.entries(data).reduce(
     (acc, [_, events]) => {
       for (const event of events) {
-        if (event.project) {
-          acc[event.project.name] =
-            (acc[event.project.name] || 0) + event.duration;
+        const projectName = event.project?.name;
+        if (projectName) {
+          if (!acc[projectName]) {
+            acc[projectName] = {
+              duration: 0,
+              amount: 0,
+              currency: event.currency,
+              rate: event.project.rate,
+            };
+          }
+          const project = acc[projectName];
+          project.duration += event.duration;
+          project.amount = (project.duration / 3600) * project.rate;
         }
       }
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<
+      string,
+      { duration: number; amount: number; currency: string; rate: number }
+    >,
   );
 
   const sortedProjects = Object.entries(projectTotals)
-    .sort(([, a], [, b]) => b - a)
-    .map(([name, duration]) => ({ name, duration: duration / 3600 }));
+    .sort(([, a], [, b]) => b.duration - a.duration)
+    .map(([name, { duration, amount, currency }]) => ({
+      name,
+      duration,
+      amount,
+      currency,
+    }));
 
   return (
     <div className="flex items-center justify-between mb-6">
@@ -246,14 +265,23 @@ function CalendarHeader({
           h
         </h1>
         <div className="text-sm text-[#606060] flex items-center space-x-2">
-          <p className="text-sm text-[#606060]">Total this month</p>
+          <p className="text-sm text-[#606060]">
+            {meta?.totalAmount &&
+              formatAmount({
+                currency: "SEK",
+                amount: meta?.totalAmount,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}{" "}
+            this month
+          </p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger>
                 <Icons.Info className="h-4 w-4 mt-1" />
               </TooltipTrigger>
               <TooltipContent
-                className="text-xs text-[#878787] w-[190px] p-0 dark:bg-background"
+                className="text-xs text-[#878787] w-[250px] p-0 dark:bg-background"
                 side="bottom"
                 sideOffset={10}
               >
@@ -268,9 +296,20 @@ function CalendarHeader({
                     {sortedProjects.map((project) => (
                       <li key={project.name} className="flex justify-between">
                         <span>{project.name}</span>
-                        <span className="font-medium text-primary text-xs">
-                          {project.duration}h
-                        </span>
+
+                        <div className="flex space-x-2 items-center">
+                          <span className="text-primary text-xs">
+                            {secondsToHoursAndMinutes(project.duration)}
+                          </span>
+                          <span className="text-primary text-xs">
+                            {formatAmount({
+                              currency: project.currency,
+                              amount: project.amount,
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        </div>
                       </li>
                     ))}
                   </ul>

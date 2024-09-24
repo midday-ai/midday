@@ -57,6 +57,17 @@ export function DataTableHeader() {
             {"time" === column && value === "desc" && <ArrowUp size={16} />}
           </Button>
         </TableHead>
+        <TableHead className="w-[160px]">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("amount")}
+          >
+            <span>Total Amount</span>
+            {"amount" === column && value === "asc" && <ArrowDown size={16} />}
+            {"amount" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </TableHead>
         <TableHead className="w-[430px]">
           <Button
             className="p-0 hover:bg-transparent space-x-2"
@@ -72,9 +83,22 @@ export function DataTableHeader() {
             )}
           </Button>
         </TableHead>
+        <TableHead className="w-[140px]">
+          <Button
+            className="p-0 hover:bg-transparent space-x-2"
+            variant="ghost"
+            onClick={() => createSortQuery("assigned")}
+          >
+            <span>Assigned</span>
+            {"assigned" === column && value === "asc" && (
+              <ArrowDown size={16} />
+            )}
+            {"assigned" === column && value === "desc" && <ArrowUp size={16} />}
+          </Button>
+        </TableHead>
         <TableHead>
           <Button
-            className="p-0 hover:bg-transparent space-x-2 min-w-[150px]"
+            className="p-0 hover:bg-transparent space-x-2"
             variant="ghost"
             onClick={() => createSortQuery("status")}
           >

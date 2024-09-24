@@ -7,7 +7,7 @@ import { CopyInput } from "@/components/copy-input";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
-import { secondsToHoursAndMinutes } from "@/utils/format";
+import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,6 +19,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -123,8 +124,27 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               {secondsToHoursAndMinutes(row?.total_duration)}
             </span>
           </DataTableCell>
+          <DataTableCell>
+            <span className="text-sm">
+              {formatAmount({
+                currency: row.currency,
+                amount: row.total_amount,
+              })}
+            </span>
+          </DataTableCell>
           <DataTableCell>{row.description}</DataTableCell>
-
+          <DataTableCell>
+            <div className="flex items-center space-x-2">
+              {row.users?.map((user) => (
+                <Avatar key={user.id} className="size-4">
+                  <AvatarImage src={user.avatar_url} />
+                  <AvatarFallback>
+                    {user.full_name?.slice(0, 2)?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          </DataTableCell>
           <DataTableCell>
             <div className="flex justify-between items-center">
               <TrackerStatus status={row.status} />

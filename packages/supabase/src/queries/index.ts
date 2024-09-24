@@ -910,7 +910,12 @@ export async function getTrackerProjectsQuery(
 
   const query = supabase
     .from("tracker_projects")
-    .select("*, total_duration", { count: "exact" })
+    .select(
+      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount",
+      {
+        count: "exact",
+      },
+    )
     .eq("team_id", teamId);
 
   if (status) {
@@ -930,6 +935,10 @@ export async function getTrackerProjectsQuery(
     const [column, value] = sort;
     if (column === "time") {
       query.order("total_duration", { ascending: value === "asc" });
+    } else if (column === "amount") {
+      // query.order("total_amount", { ascending: value === "asc" });
+    } else if (column === "assigned") {
+      // query.order("assigned_id", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }
@@ -963,7 +972,7 @@ export async function getTrackerRecordsByDateQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     )
     .eq("team_id", teamId)
     .eq("date", date);
@@ -1010,7 +1019,7 @@ export async function getTrackerRecordsByRangeQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate)",
     )
     .eq("team_id", params.teamId)
     .gte("date", params.from)
@@ -1037,13 +1046,20 @@ export async function getTrackerRecordsByRangeQuery(
   }, {});
 
   const totalDuration = data?.reduce(
-    (duration, item) => item.duration + duration,
+    (duration, item) => (item?.duration ?? 0) + duration,
+    0,
+  );
+
+  const totalAmount = data?.reduce(
+    (amount, { project, duration = 0 }) =>
+      amount + (project?.rate ?? 0) * (duration / 3600),
     0,
   );
 
   return {
     meta: {
       totalDuration,
+      totalAmount,
       from: params.from,
       to: params.to,
     },
