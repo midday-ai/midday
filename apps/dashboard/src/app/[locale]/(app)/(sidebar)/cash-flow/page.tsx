@@ -1,8 +1,11 @@
 import { AccountSummarySection } from "@/components/cash-flow/account-summary-section";
+import { ExpenseGrowthRateSection } from "@/components/cash-flow/expense-growth-rate-section";
 import { ExpenseSection } from "@/components/cash-flow/expense-section";
 import { IncomeSection } from "@/components/cash-flow/income-section";
 import { InventoryCostSection } from "@/components/cash-flow/inventory-cost-section";
+import { ExpenseGrowthRateChartWrapper } from "@/components/chart-wrappers/expense-growth-rate-wrapper";
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
+import { ExpenseGrowthRateChart } from "@/components/charts/expense-growth-rate-chart";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { CategorySpendingPortalView } from "@/components/portal-views/category-spending-portal-view";
@@ -62,6 +65,7 @@ export default async function CashFlowPage({ searchParams }: Props) {
                 <TabsList className="w-fit flex flex-1 gap-2 rounded-2xl">
                   <TabsTrigger value="expense">Expense</TabsTrigger>
                   <TabsTrigger value="inventory">Inventory Cost</TabsTrigger>
+                  <TabsTrigger value="growthRate">Expense Growth Rate</TabsTrigger>
                 </TabsList>
                 <TabsContent value="expense">
                   <ExpenseSection
@@ -75,6 +79,16 @@ export default async function CashFlowPage({ searchParams }: Props) {
                 </TabsContent>
                 <TabsContent value="inventory">
                   <InventoryCostSection
+                    isEmpty={isEmpty}
+                    accounts={accounts}
+                    user={user}
+                    tier={tier}
+                    value={value}
+                    defaultValue={defaultValue}
+                  />
+                </TabsContent>
+                <TabsContent value="growthRate">
+                  <ExpenseGrowthRateSection
                     isEmpty={isEmpty}
                     accounts={accounts}
                     user={user}
