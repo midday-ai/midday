@@ -9,7 +9,7 @@ else
     DETECTED_OS := $(shell uname -s)
 endif
 
-start: setup start_stripe_listener start_dev_instance
+start: setup start_stripe_listener start_jobs start_dev_instance
 
 setup: start_docker
 	@echo "Running setup..."
@@ -54,6 +54,21 @@ start_stripe_listener:
 					echo "Unable to open a new terminal automatically. Please open a new terminal and run 'bun run stripe:listen' manually."; \
 				fi ;; \
 		*) echo "Unsupported OS. Please open a new terminal and run 'bun run stripe:listen' manually." ;; \
+	esac
+
+start_jobs:
+	@echo "Opening new terminal for jobs..."
+	@case "$(DETECTED_OS)" in \
+		"Darwin") osascript -e 'tell app "Terminal" to do script "cd $(PWD) && bun run jobs"' ;; \
+		"Windows") start cmd /c "cd $(PWD) && bun run jobs" ;; \
+		"Linux") if command -v gnome-terminal > /dev/null; then \
+					gnome-terminal -- bash -c "cd $(PWD) && bun run jobs; exec bash"; \
+				elif command -v xterm > /dev/null; then \
+					xterm -e "cd $(PWD) && bun run jobs" & \
+				else \
+					echo "Unable to open a new terminal automatically. Please open a new terminal and run 'bun run jobs' manually."; \
+				fi ;; \
+		*) echo "Unsupported OS. Please open a new terminal and run 'bun run jobs' manually." ;; \
 	esac
 
 start_dev_instance:

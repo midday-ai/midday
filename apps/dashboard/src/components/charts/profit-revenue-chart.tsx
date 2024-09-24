@@ -115,7 +115,7 @@ export async function ProfitRevenueChart({
           </TooltipProvider>
         </div>
       </div>
-      <BarChart data={data} disabled={disabled} />
+      <BarChart data={data} />
     </div>
   );
 }
