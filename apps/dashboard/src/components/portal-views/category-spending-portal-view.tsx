@@ -7,7 +7,7 @@ interface SpendingPortalViewProps {
     disabled: boolean;
     period: Date | string;
     currency: string;
-    spendingType?: "category" | "merchant";
+    spendingType?: "category" | "merchant" | "location" | "payment_channel";
     title?: string;
     description?: string;
 }
