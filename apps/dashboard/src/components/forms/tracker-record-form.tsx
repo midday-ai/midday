@@ -40,14 +40,14 @@ export function TrackerRecordForm({
     defaultValues: {
       assigned_id: userId,
       project_id: projectId,
-      start: start || "06:45",
-      end: end || "08:30",
+      start: start || "09:00",
+      end: end || "17:00",
     },
   });
 
   useEffect(() => {
-    form.setValue("start", start || "06:45");
-    form.setValue("end", end || "08:30");
+    form.setValue("start", start || "09:00");
+    form.setValue("end", end || "17:00");
   }, [start, end]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {

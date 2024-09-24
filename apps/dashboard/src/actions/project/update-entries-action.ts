@@ -2,8 +2,11 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { updateEntriesSchema } from "@/actions/schema";
+import { Cookies } from "@/utils/constants";
 import { LogEvents } from "@midday/events/events";
+import { addYears } from "date-fns";
 import { revalidateTag } from "next/cache";
+import { cookies } from "next/headers";
 
 export const updateEntriesAction = authActionClient
   .schema(updateEntriesSchema)
@@ -39,6 +42,14 @@ export const updateEntriesAction = authActionClient
 
     if (error) {
       throw Error("Something went wrong.");
+    }
+
+    if (payload.project_id) {
+      cookies().set({
+        name: Cookies.LastProject,
+        value: payload.project_id,
+        expires: addYears(new Date(), 1),
+      });
     }
 
     revalidateTag(`tracker_projects_${user.team_id}`);

@@ -6,7 +6,7 @@ import { getTrackerProjectsQuery } from "@midday/supabase/queries";
 import { Combobox } from "@midday/ui/combobox";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Props = {
   teamId: string;
@@ -33,7 +33,7 @@ export function TrackerSelectProject({ teamId, selectedId }: Props) {
     },
   });
 
-  const onChangeValue = async (query: string) => {
+  const fetchProjects = async (query?: string) => {
     setValue(query);
     setLoading(true);
 
@@ -47,6 +47,16 @@ export function TrackerSelectProject({ teamId, selectedId }: Props) {
 
     setLoading(false);
     setData(projectsData);
+  };
+
+  useEffect(() => {
+    if (selectedId && !data.length) {
+      fetchProjects();
+    }
+  }, [selectedId, data]);
+
+  const onChangeValue = async (query: string) => {
+    fetchProjects(query);
   };
 
   const onSelect = (project) => {
