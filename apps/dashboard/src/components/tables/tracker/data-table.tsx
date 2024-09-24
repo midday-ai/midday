@@ -14,6 +14,9 @@ export type TrackerProject = {
   description: string;
   status: "active" | "completed";
   total_duration: number;
+  estimate?: number;
+  rate?: number;
+  currency?: string;
   users: {
     id: string;
     full_name: string;

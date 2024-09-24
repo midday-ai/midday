@@ -121,7 +121,9 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           <DataTableCell>{row.name}</DataTableCell>
           <DataTableCell>
             <span className="text-sm">
-              {secondsToHoursAndMinutes(row?.total_duration)}
+              {row.estimate
+                ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
+                : secondsToHoursAndMinutes(row?.total_duration)}
             </span>
           </DataTableCell>
           <DataTableCell>
