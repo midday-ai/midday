@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { CircleIcon, XIcon } from "lucide-react";
 import React, { useCallback, useState } from "react";
-import ChatAccessibilityButton from "./chat-accessibility-button";
+import ChatAccessibilityButton from "./accessibility-button/chat-accessibility-button";
+import IncomeViewAccessibilityButton from "./accessibility-button/income-view-accessibility-button";
 import AdminProductWidget from "./widgets/feature-base/admin-product-widget";
 import ChangelogProductWidget from "./widgets/feature-base/changelog-product-widget";
 import FeedbackProductWidget from "./widgets/feature-base/feedback-product-widget";
@@ -94,6 +95,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
         <div className="flex flex-col md:max-h-96 scrollbar-hide overflow-y-auto my-[2.5%] md:min-h-64">
           <div className="flex flex-col gap-4 items-start">
             {renderChatButton()}
+            {renderIncomeButton()}
             {renderProductUpdatesButton()}
             {renderFeedbackButton()}
             {renderChangelogButton()}
@@ -112,6 +114,18 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
     <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
       <ChatAccessibilityButton className="m-3" />
       <span className="text-lg">Ask Solomon</span>
+    </Button>
+  );
+
+  /**
+   * Renders the income view accessibility button.
+   *
+   * @returns {React.ReactElement} The rendered income view button.
+   */ 
+  const renderIncomeButton = () => (
+    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
+      <IncomeViewAccessibilityButton className="m-3" />
+      <span className="text-lg">Income</span>
     </Button>
   );
 

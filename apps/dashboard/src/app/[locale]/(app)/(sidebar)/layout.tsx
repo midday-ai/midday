@@ -1,7 +1,8 @@
 import { AI } from "@/actions/ai/chat";
+import ChatAccessibilityButton from "@/components/accessibility-button/chat-accessibility-button";
 import { AccessibilityWidget } from "@/components/accessibility-helper-widget";
-import ChatAccessibilityButton from "@/components/chat-accessibility-button";
 import { Header } from "@/components/header";
+import { IncomeViewModal } from "@/components/modals/income/income-view-modal";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
@@ -99,6 +100,7 @@ export default async function Layout({
         <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
 
         <AssistantModal />
+        <IncomeViewModal />
         <ConnectTransactionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />
         <ImportModal
