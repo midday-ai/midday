@@ -1,7 +1,7 @@
+import Tier from "@/config/tier";
 import { BankAccountSchema, UserSchema } from "@midday/supabase/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { IncomeSection } from "./income-section";
-import Tier from "@/config/tier";
 
 interface IncomeTabsSectionProps {
   isEmpty: boolean;
