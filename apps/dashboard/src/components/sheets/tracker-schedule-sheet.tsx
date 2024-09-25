@@ -11,9 +11,15 @@ type Props = {
   teamId: string;
   userId: string;
   timeFormat: number;
+  lastProjectId?: string;
 };
 
-export function TrackerScheduleSheet({ teamId, userId, timeFormat }: Props) {
+export function TrackerScheduleSheet({
+  teamId,
+  userId,
+  timeFormat,
+  lastProjectId,
+}: Props) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { setParams, projectId, range, selectedDate, update, create } =
     useTrackerParams();
@@ -36,6 +42,7 @@ export function TrackerScheduleSheet({ teamId, userId, timeFormat }: Props) {
             teamId={teamId}
             userId={userId}
             timeFormat={timeFormat}
+            projectId={lastProjectId}
           />
         </SheetContent>
       </Sheet>
@@ -56,6 +63,7 @@ export function TrackerScheduleSheet({ teamId, userId, timeFormat }: Props) {
           teamId={teamId}
           userId={userId}
           timeFormat={timeFormat}
+          projectId={lastProjectId}
         />
       </DrawerContent>
     </Drawer>

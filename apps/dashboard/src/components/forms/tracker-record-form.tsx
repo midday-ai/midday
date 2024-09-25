@@ -19,6 +19,7 @@ const formSchema = z.object({
 });
 
 type Props = {
+  eventId?: string;
   userId: string;
   teamId: string;
   onCreate: (values: z.infer<typeof formSchema>) => void;
@@ -28,6 +29,7 @@ type Props = {
 };
 
 export function TrackerRecordForm({
+  eventId,
   userId,
   teamId,
   onCreate,
@@ -35,20 +37,29 @@ export function TrackerRecordForm({
   start,
   end,
 }: Props) {
+  const isUpdate = !!eventId;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       assigned_id: userId,
       project_id: projectId,
-      start: start || "09:00",
-      end: end || "17:00",
+      start,
+      end,
     },
   });
 
   useEffect(() => {
-    form.setValue("start", start || "09:00");
-    form.setValue("end", end || "17:00");
-  }, [start, end]);
+    if (start) {
+      form.setValue("start", start);
+    }
+    if (end) {
+      form.setValue("end", end);
+    }
+    if (projectId) {
+      form.setValue("project_id", projectId);
+    }
+  }, [start, end, projectId]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     onCreate(values);
@@ -120,7 +131,7 @@ export function TrackerRecordForm({
         />
 
         <div className="flex mt-6 justify-between">
-          <Button className="w-full">Add</Button>
+          <Button className="w-full">{isUpdate ? "Update" : "Add"}</Button>
         </div>
       </form>
     </Form>

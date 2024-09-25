@@ -13,12 +13,25 @@ type Props = {
   selectedId?: string;
 };
 
+type Option = {
+  id: string;
+  name: string;
+};
+
 export function TrackerSelectProject({ teamId, selectedId }: Props) {
   const { toast } = useToast();
   const supabase = createClient();
-  const [value, setValue] = useState(selectedId);
   const [data, setData] = useState([]);
   const [isLoading, setLoading] = useState(false);
+  const [value, setValue] = useState<Option | undefined>();
+
+  useEffect(() => {
+    const foundProject = data?.find((project) => project?.id === selectedId);
+
+    if (foundProject) {
+      setValue({ id: foundProject.id, name: foundProject.name });
+    }
+  }, [selectedId]);
 
   const action = useAction(createProjectAction, {
     onSuccess: ({ data: project }) => {
@@ -33,45 +46,41 @@ export function TrackerSelectProject({ teamId, selectedId }: Props) {
     },
   });
 
-  const fetchProjects = async (query?: string) => {
-    setValue(query);
+  const fetchProjects = async () => {
     setLoading(true);
 
     const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
       teamId,
-      search: {
-        query: value,
-        fuzzy: true,
-      },
+      sort: ["status", "asc"],
     });
 
     setLoading(false);
     setData(projectsData);
+
+    const foundProject = projectsData.find(
+      (project) => project?.id === selectedId,
+    );
+
+    if (foundProject) {
+      setValue({ id: foundProject.id, name: foundProject.name });
+    }
   };
 
   useEffect(() => {
-    if (selectedId && !data.length) {
+    if (!data.length) {
       fetchProjects();
     }
-  }, [selectedId, data]);
-
-  const onChangeValue = async (query: string) => {
-    fetchProjects(query);
-  };
-
-  const onSelect = (project) => {
-    // setParams({ projectId: project.id });
-  };
+  }, [data]);
 
   return (
     <Combobox
+      key={value?.id}
       placeholder="Search or create project"
       classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
       className="w-full bg-transparent px-12 border py-3"
-      value={value}
-      onValueChange={onChangeValue}
-      onSelect={onSelect}
+      onSelect={setValue}
       options={data}
+      value={value}
       isLoading={isLoading}
       onCreate={(name) => action.execute({ name })}
     />

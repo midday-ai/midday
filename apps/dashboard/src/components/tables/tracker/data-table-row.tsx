@@ -1,9 +1,7 @@
 "use client";
 
-import { createProjectReport } from "@/actions/project/create-project-report";
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
-import { CopyInput } from "@/components/copy-input";
 import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
@@ -31,7 +29,6 @@ import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import Link from "next/link";
 import type { TrackerProject } from "./data-table";
 
 type DataTableCellProps = {
@@ -62,37 +59,8 @@ type DataTableRowProps = {
 };
 
 export function DataTableRow({ row, userId }: DataTableRowProps) {
-  const { toast, dismiss } = useToast();
+  const { toast } = useToast();
   const { setParams } = useTrackerParams();
-
-  const createReport = useAction(createProjectReport, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: ({ data }) => {
-      const { id } = toast({
-        title: "Time Report Published",
-        description: "Your report is ready to share.",
-        variant: "success",
-        footer: (
-          <div className="mt-4 space-x-2 flex w-full">
-            <CopyInput
-              value={data?.short_link ?? ""}
-              className="border-[#2C2C2C] w-full"
-            />
-
-            <Link href={data?.short_link ?? ""} onClick={() => dismiss(id)}>
-              <Button>View</Button>
-            </Link>
-          </div>
-        ),
-      });
-    },
-  });
 
   const deleteAction = useAction(deleteProjectAction, {
     onError: () => {
@@ -140,8 +108,8 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               {row.users?.map((user) => (
                 <Avatar key={user.id} className="size-4">
                   <AvatarImage src={user.avatar_url} />
-                  <AvatarFallback>
-                    {user.full_name?.slice(0, 2)?.toUpperCase()}
+                  <AvatarFallback className="text-[10px]">
+                    {user.full_name?.slice(0, 1)?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               ))}
@@ -203,16 +171,6 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               Mark as complete
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem
-            onClick={() =>
-              createReport.execute({
-                projectId: row.id,
-                baseUrl: window.location.origin,
-              })
-            }
-          >
-            Share Report
-          </DropdownMenuItem>
 
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-destructive">

@@ -156,7 +156,7 @@ export type GetTransactionsParams = {
   teamId: string;
   to: number;
   from: number;
-  sort?: string[];
+  sort?: [string, "asc" | "desc"];
   searchQuery?: string;
   filter?: {
     statuses?: string[];
@@ -879,10 +879,7 @@ export type GetTrackerProjectsQueryParams = {
   from?: number;
   start?: string;
   end?: string;
-  sort?: {
-    column: string;
-    value: "asc" | "desc";
-  };
+  sort?: [string, "asc" | "desc"];
   search?: {
     query?: string;
     fuzzy?: boolean;

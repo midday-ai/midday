@@ -28,11 +28,20 @@ type Props = {
   teamId: string;
   userId: string;
   timeFormat: number;
+  projectId?: string;
 };
 
-export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
+export function TrackerSchedule({
+  teamId,
+  userId,
+  timeFormat,
+  projectId,
+}: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { selectedDate } = useTrackerParams();
+  const [selectedEvent, setSelectedEvent] = useState<TrackerRecord | null>(
+    null,
+  );
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [data, setData] = useState<TrackerRecord[]>([]);
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
@@ -208,8 +217,12 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
 
               return (
                 <div
+                  onClick={() => setSelectedEvent(event)}
                   key={event.id}
-                  className="absolute w-full cursor-move z-10 bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border"
+                  className={cn(
+                    "absolute w-full z-10 bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                    selectedEvent?.id === event.id && "!text-primary",
+                  )}
                   style={{
                     top: `${startSlot * SLOT_HEIGHT}px`,
                     height: `${height}px`,
@@ -255,12 +268,13 @@ export function TrackerSchedule({ teamId, userId, timeFormat }: Props) {
       </ScrollArea>
 
       <TrackerRecordForm
+        eventId={selectedEvent?.id}
         onCreate={() => {}}
         userId={userId}
         teamId={teamId}
-        projectId="4210f672-b50d-4a7d-a345-4cca12110ce9"
-        start={selectedStart}
-        end={selectedEnd}
+        projectId={selectedEvent?.project_id ?? projectId}
+        start={selectedEvent?.start ?? selectedStart}
+        end={selectedEvent?.end ?? selectedEnd}
       />
     </div>
   );

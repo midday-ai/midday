@@ -23,7 +23,7 @@ type Props = {
 
 export default async function Tracker({ searchParams }: Props) {
   const status = searchParams?.statuses;
-  const sort = searchParams?.sort?.split(":");
+  const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
   const { data: userData } = await getUser();
 
   return (

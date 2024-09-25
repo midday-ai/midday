@@ -118,20 +118,6 @@ export function TrackerUpdateSheet({ teamId }: Props) {
     },
   });
 
-  const handleShareURL = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/tracker?projectId=${id}`,
-      );
-
-      toast({
-        duration: 4000,
-        title: "Copied URL to clipboard.",
-        variant: "success",
-      });
-    } catch {}
-  };
-
   if (isDesktop) {
     return (
       <AlertDialog>
@@ -153,10 +139,6 @@ export function TrackerUpdateSheet({ teamId }: Props) {
                   sideOffset={10}
                   align="end"
                 >
-                  <DropdownMenuItem onClick={handleShareURL}>
-                    Share Report
-                  </DropdownMenuItem>
-
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem className="text-destructive">
                       Delete

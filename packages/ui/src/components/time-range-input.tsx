@@ -23,8 +23,8 @@ export function TimeRangeInput({
     const start = new Date(`2000-01-01T${startTime}:00`);
     const end = new Date(`2000-01-01T${endTime}:00`);
     const diff = end.getTime() - start.getTime();
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
+    const hours = diff ? Math.floor(diff / 3600000) : 0;
+    const minutes = diff ? Math.floor((diff % 3600000) / 60000) : 0;
     setDuration(`${hours}h ${minutes}min`);
   }, [startTime, endTime]);
 
