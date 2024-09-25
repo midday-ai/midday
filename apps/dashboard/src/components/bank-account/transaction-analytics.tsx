@@ -2,6 +2,7 @@ import { formatCurrency } from "@/utils/currency";
 import { Tables } from "@midday/supabase/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import React, { useMemo } from 'react';
+import TransactionCategoryChart from "../charts/transaction-category-chart";
 
 type Transaction = Tables<"transactions">;
 
