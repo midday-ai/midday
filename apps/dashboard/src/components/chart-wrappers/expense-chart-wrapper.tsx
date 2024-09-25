@@ -1,6 +1,5 @@
 import { ExpenseChart } from "@/components/charts/expense-chart";
 import { Tier } from "@/config/tier";
-import { getExpenses } from "@midday/supabase/cached-queries";
 import { startOfMonth, subMonths } from "date-fns";
 
 type ExpenseChartWrapperProps = {

@@ -5,6 +5,7 @@ import { SpendingTabsSection } from "@/components/cash-flow/spending-tabs-sectio
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { getDefaultDateRange } from "@/config/chart-date-range-default-picker";
 import Tier from "@/config/tier";
 import { Cookies } from "@/utils/constants";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
@@ -21,12 +22,7 @@ type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-const defaultValue = {
-  from: subMonths(startOfMonth(new Date()), 12).toISOString(),
-  to: new Date().toISOString(),
-  period: "monthly",
-  type: "expense"
-};
+const defaultValue = getDefaultDateRange("monthly", "expense");
 
 export default async function CashFlowPage({ searchParams }: Props) {
   const user = await getUser();
@@ -67,7 +63,7 @@ export default async function CashFlowPage({ searchParams }: Props) {
               user={user as any}
               tier={tier}
               value={value as any}
-              defaultValue={defaultValue}
+              defaultValue={getDefaultDateRange("monthly", "income")}
             />
             <SpendingTabsSection
               isEmpty={isEmpty}

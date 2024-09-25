@@ -1,9 +1,14 @@
 "use client";
 
+import ExpenseTabs from "@/components/cash-flow/expense-tabs";
+import { ExpenseChart } from "@/components/charts/expense-chart";
 import { FeatureInDevelopment } from "@/components/feature-in-development";
+import { getDefaultDateRange } from "@/config/chart-date-range-default-picker";
 import { useExpenseViewStore } from "@/store/expense-view";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { useHotkeys } from "react-hotkeys-hook";
+
+const defaultValue = getDefaultDateRange("monthly", "expense");
 
 export function ExpenseViewModal() {
     const { isOpen, setOpen } = useExpenseViewStore();
@@ -11,6 +16,11 @@ export function ExpenseViewModal() {
     useHotkeys("meta+e", () => setOpen(true), {
         enableOnFormTags: true,
     });
+
+    const value = {
+        ...(defaultValue.from && { from: defaultValue.from }),
+        ...(defaultValue.to && { to: defaultValue.to }),
+    };
 
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
