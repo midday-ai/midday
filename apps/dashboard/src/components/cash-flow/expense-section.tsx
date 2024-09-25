@@ -1,7 +1,7 @@
 import { ExpenseChartWrapper } from "@/components/chart-wrappers/expense-chart-wrapper";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { EmptyState } from "@/components/charts/empty-state";
-import Tier from "@/config/tier";
+import { UserTier } from "@midday/supabase/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { DrilldownMonthlyExpenseChartModal } from "../modals/charts/drilldown-monthly-expense-chart-modal";
@@ -10,7 +10,7 @@ type ExpenseSectionProps = {
   isEmpty: boolean;
   accounts: any;
   user: any;
-  tier: Tier;
+  tier: UserTier;
   value: any;
   defaultValue: any;
 };
