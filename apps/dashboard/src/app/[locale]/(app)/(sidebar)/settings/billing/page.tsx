@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Billing | Midday",
+  title: "Billing | Solomon AI",
 };
 
 export default async function Billing() {

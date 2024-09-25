@@ -27,7 +27,7 @@ import { Suspense } from "react";
  * @type {Metadata}
  */
 export const metadata: Metadata = {
-  title: "Financial Accounts | Midday",
+  title: "Financial Accounts | Solomon AI",
 };
 
 /**

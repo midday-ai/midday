@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Teams | Midday",
+  title: "Teams | Solomon AI",
 };
 
 export default function Teams() {

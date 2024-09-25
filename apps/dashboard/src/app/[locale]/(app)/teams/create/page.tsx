@@ -13,7 +13,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Create Team | Midday",
+  title: "Create Team | Solomon AI",
 };
 
 export default async function CreateTeam() {

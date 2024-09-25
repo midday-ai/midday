@@ -15,7 +15,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Cash Flow | Midday",
+  title: "Cash Flow | Solomon AI",
 };
 
 type Props = {
