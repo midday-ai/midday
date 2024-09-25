@@ -20,6 +20,7 @@ import IncomeViewAccessibilityButton from "./accessibility-button/income-view-ac
 import OverviewViewAccessibilityButton from "./accessibility-button/overview-view-accessibility-button";
 import SubscriptionViewAccessibilityButton from "./accessibility-button/subscription-view-accessibility-button";
 import TransactionViewAccessibilityButton from "./accessibility-button/transaction-view-accessibility-button";
+import { ProTierDock } from "./dock/dock";
 import AdminProductWidget from "./widgets/feature-base/admin-product-widget";
 import ChangelogProductWidget from "./widgets/feature-base/changelog-product-widget";
 import FeedbackProductWidget from "./widgets/feature-base/feedback-product-widget";
@@ -119,10 +120,15 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
               <div className="text-sm text-muted-foreground">
                 You are in the private beta of Pro Tier.
               </div>
+              {/* Add ProTierDock at the bottom center */}
+              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2">
+                <ProTierDock />
+              </div>
             </div>
           </TabsContent>
         </Tabs>
       </Card>
+     
     </div>
   );
 
