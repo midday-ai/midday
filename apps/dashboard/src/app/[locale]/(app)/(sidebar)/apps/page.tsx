@@ -1,4 +1,5 @@
 import { Apps } from "@/components/apps";
+import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -6,5 +7,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  return <Apps />;
+  const { data } = await getUser();
+
+  return <Apps user={data} />;
 }

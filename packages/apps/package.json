@@ -10,8 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@slack/bolt": "^3.21.4",
-    "@slack/oauth": "^3.0.1"
+    "@slack/bolt": "^3.21.4"
   },
   "devDependencies": {
     "@types/node": "^22.7.0",
@@ -19,6 +18,7 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./slack": "./src/slack/index.ts"
+    "./slack": "./src/slack/index.ts",
+    "./db": "./src/db/index.ts"
   }
 }

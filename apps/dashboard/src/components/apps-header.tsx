@@ -5,7 +5,7 @@ export function AppsHeader() {
   return (
     <div className="flex space-x-4">
       <AppsTabs />
-      <SearchField placeholder="Search integrations" />
+      <SearchField placeholder="Search apps" />
     </div>
   );
 }
