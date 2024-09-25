@@ -23,7 +23,10 @@ export async function resumableUpload(
 
   return new Promise((resolve, reject) => {
     const upload = new tus.Upload(file, {
-      endpoint: `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co/storage/v1/upload/resumable`,
+      endpoint:
+        process.env.NODE_ENV === "production"
+          ? `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co/storage/v1/upload/resumable`
+          : "http://127.0.0.1:54321/storage/v1/upload/resumable",
       retryDelays: [0, 3000, 5000, 10000],
       headers: {
         authorization: `Bearer ${session?.access_token}`,
