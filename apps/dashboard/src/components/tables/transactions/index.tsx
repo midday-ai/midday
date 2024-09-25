@@ -1,3 +1,4 @@
+import { TransactionAnalytics } from "@/components/bank-account/transaction-analytics";
 import { DataTable } from "@/components/tables/transactions/data-table";
 import { Cookies } from "@/utils/constants";
 import { getTransactions } from "@midday/supabase/cached-queries";
@@ -13,9 +14,10 @@ type Props = {
   page: number;
   sort: any;
   query: string | null;
+  enableAnalytics?: boolean;
 };
 
-export async function Table({ filter, page, sort, query }: Props) {
+export async function Table({ filter, page, sort, query, enableAnalytics }: Props) {
   const hasFilters = Object.values(filter).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
     cookies().get(Cookies.TransactionsColumns)?.value || "[]",
@@ -58,17 +60,22 @@ export async function Table({ filter, page, sort, query }: Props) {
   );
 
   return (
-    <DataTable
-      initialColumnVisibility={initialColumnVisibility}
-      columns={columns}
-      data={data}
-      pageSize={pageSize}
-      loadMore={loadMore}
-      hasNextPage={hasNextPage}
-      meta={meta}
-      hasFilters={hasFilters}
-      page={page}
-      query={query}
-    />
+    <>
+      <div className="flex justify-end mb-4">
+        {enableAnalytics && <TransactionAnalytics transactions={data} />}
+      </div>
+      <DataTable
+        initialColumnVisibility={initialColumnVisibility}
+        columns={columns}
+        data={data}
+        pageSize={pageSize}
+        loadMore={loadMore}
+        hasNextPage={hasNextPage}
+        meta={meta}
+        hasFilters={hasFilters}
+        page={page}
+        query={query}
+      />
+    </>
   );
 }

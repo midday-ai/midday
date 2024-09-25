@@ -1,6 +1,9 @@
 import { formatCurrency } from "@/utils/currency";
 import { Tables } from "@midday/supabase/types";
+import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@midday/ui/sheet";
+import { GitGraphIcon, TrendingUpDown } from "lucide-react";
 import React, { useMemo } from 'react';
 import TransactionCategoryChart from "../charts/transaction-category-chart";
 
@@ -99,85 +102,57 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
     transactions,
     currency = 'USD'
 }) => {
-    const analytics = useMemo(() => {
-        const computedAnalytics = computeAnalytics(transactions);
-
-        // Calculate average balance
-        computedAnalytics.averageBalance = computedAnalytics.transactionCount > 0
-            ? computedAnalytics.averageBalance / computedAnalytics.transactionCount
-            : 0;
-
-        return computedAnalytics;
-    }, [transactions]);
-
+    const analytics = useMemo(() => computeAnalytics(transactions), [transactions]);
     const formatMoney = (amount: number) => formatCurrency(amount, currency);
-
     const averageAmount = analytics.transactionCount > 0
         ? analytics.averageTransactionAmount / analytics.transactionCount
         : 0;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <AnalyticsCard
-                title="Total Income"
-                value={formatMoney(analytics.totalIncome)}
-            />
-            <AnalyticsCard
-                title="Total Expenses"
-                value={formatMoney(analytics.totalExpenses)}
-            />
-            <AnalyticsCard
-                title="Net Cash Flow"
-                value={formatMoney(analytics.netCashFlow)}
-                valueClassName={analytics.netCashFlow >= 0 ? 'text-green-500' : 'text-red-500'}
-            />
-            <AnalyticsCard
-                title="Largest Transaction"
-                value={analytics.largestTransaction
-                    ? formatMoney(Math.abs(analytics.largestTransaction.amount))
-                    : 'N/A'
-                }
-                subtext={analytics.largestTransaction?.description ?? 'No transactions available'}
-            />
-            <AnalyticsCard
-                title="Transaction Count"
-                value={analytics.transactionCount.toString()}
-                subtext={`Income: ${analytics.incomeTransactionCount}, Expenses: ${analytics.expenseTransactionCount}`}
-            />
-            <AnalyticsCard
-                title="Average Transaction"
-                value={formatMoney(averageAmount)}
-            />
-            <AnalyticsCard
-                title="Recurring Transactions"
-                value={analytics.recurringTransactionsCount.toString()}
-                subtext={`${((analytics.recurringTransactionsCount / analytics.transactionCount) * 100).toFixed(2)}% of total`}
-            />
-            <AnalyticsCard
-                title="Manual Transactions"
-                value={analytics.manualTransactionsCount.toString()}
-                subtext={`${((analytics.manualTransactionsCount / analytics.transactionCount) * 100).toFixed(2)}% of total`}
-            />
-            <AnalyticsCard
-                title="Average Balance"
-                value={formatMoney(analytics.averageBalance)}
-            />
-            <AnalyticsCard
-                title="Most Used Payment Method"
-                value={Object.entries(analytics.methodCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0]}
-                subtext={`Used in ${Math.max(...Object.values(analytics.methodCounts))} transactions`}
-            />
-            <AnalyticsCard
-                title="Most Frequent Merchant"
-                value={analytics.mostFrequentMerchant?.name ?? 'N/A'}
-                subtext={analytics.mostFrequentMerchant ? `${analytics.mostFrequentMerchant.count} transactions` : 'No merchant data'}
-            />
-            <AnalyticsCard
-                title="Currencies Used"
-                value={Object.keys(analytics.currencyCounts).length.toString()}
-                subtext={`Most common: ${Object.entries(analytics.currencyCounts).reduce((a, b) => a[1] > b[1] ? a : b)[0]}`}
-            />
-        </div>
+        <Sheet>
+            <SheetTrigger asChild>
+                <Button variant="outline">
+                    <TrendingUpDown className="w-4 h-4 mr-2" />
+                </Button>
+            </SheetTrigger>
+            <SheetContent className="w-[400px] sm:min-w-[540px]">
+                <SheetHeader className="p-[2%]">
+                    <SheetTitle className="text-3xl font-bold">Transaction Analytics</SheetTitle>
+                    <SheetDescription className="text-md">
+                        Detailed analysis of your transactions
+                    </SheetDescription>
+                </SheetHeader>
+                <div className="grid gap-2 py-2">
+                    <AnalyticsCard
+                        title="Income and Expenses"
+                        value={`Income: ${formatMoney(analytics.totalIncome)}`}
+                        subtext={`Expenses: ${formatMoney(analytics.totalExpenses)}`}
+                    />
+                    <AnalyticsCard
+                        title="Net Cash Flow"
+                        value={formatMoney(analytics.netCashFlow)}
+                        valueClassName={analytics.netCashFlow >= 0 ? 'text-green-500' : 'text-red-500'}
+                    />
+                    <AnalyticsCard
+                        title="Largest Transaction"
+                        value={analytics.largestTransaction
+                            ? formatMoney(Math.abs(analytics.largestTransaction.amount))
+                            : 'N/A'
+                        }
+                        subtext={analytics.largestTransaction?.description ?? 'No transactions available'}
+                    />
+                    <AnalyticsCard
+                        title="Transaction Count"
+                        value={analytics.transactionCount.toString()}
+                        subtext={`Income: ${analytics.incomeTransactionCount}, Expenses: ${analytics.expenseTransactionCount}`}
+                    />
+                    <AnalyticsCard
+                        title="Average Transaction"
+                        value={formatMoney(averageAmount)}
+                    />
+                </div>
+            </SheetContent>
+        </Sheet>
     );
 };
 
@@ -194,7 +169,7 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({
     subtext,
     valueClassName = ''
 }) => (
-    <Card>
+    <div className="border-none shadow-none">
         <CardHeader>
             <CardTitle>{title}</CardTitle>
             {subtext && <CardDescription className="text-sm mt-1">{subtext}</CardDescription>}
@@ -202,5 +177,5 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({
         <CardContent>
             <p className={`text-2xl font-bold ${valueClassName}`}>{value}</p>
         </CardContent>
-    </Card>
+    </div>
 );

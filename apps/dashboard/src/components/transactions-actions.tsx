@@ -21,6 +21,7 @@ import { Icons } from "@midday/ui/icons";
 import { useToast } from "@midday/ui/use-toast";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { TransactionAnalytics } from "./bank-account/transaction-analytics";
 
 export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
   const { toast } = useToast();
