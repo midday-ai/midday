@@ -35,14 +35,11 @@ export function MettalicCard({
   cardIssuer,
   cardHolderName,
   cardNumber,
-
 }: MettalicCardProps): JSX.Element {
   return (
     <div className="w-[400px] h-[250px] rounded-2xl bg-gradient-to-r from-[#C0C0C0] to-[#9D9D9D] p-6 shadow-lg relative overflow-hidden">
       <div className="absolute top-4 left-4">
-        <div
-          className="w-10 h-10 object-cover rounded-xl bg-gradient-to-r from-foreground to-[#d1d1d1]"
-        />
+        <div className="w-10 h-10 object-cover rounded-xl bg-gradient-to-r from-foreground to-[#d1d1d1]" />
         <div className="text-white text-lg font-semibold tracking-wide">
           {cardIssuer}
         </div>

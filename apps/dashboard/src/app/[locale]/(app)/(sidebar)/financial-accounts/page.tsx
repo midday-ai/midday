@@ -1,9 +1,9 @@
 /**
  * @fileoverview Financial Accounts Page Component
- * 
+ *
  * This file contains the FinancialAccountsPage component, which renders the financial accounts
  * overview for a user in the Midday application.
- * 
+ *
  * @module FinancialAccountsPage
  */
 
@@ -13,7 +13,11 @@ import ConnectAccountServerWrapper from "@/components/connect-account-server-wra
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import Tier, { isFreeТier } from "@/config/tier";
-import { getBankConnectionsByTeamId, getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
+import {
+  getBankConnectionsByTeamId,
+  getTeamBankAccounts,
+  getUser,
+} from "@midday/supabase/cached-queries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -37,10 +41,10 @@ type Props = {
 
 /**
  * FinancialAccountsPage Component
- * 
+ *
  * This component displays an overview of a user's financial accounts, including bank accounts
  * and credit cards. It handles different states based on the user's tier and account status.
- * 
+ *
  * @async
  * @function FinancialAccountsPage
  * @param {Props} props - Component props
@@ -76,7 +80,9 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
           <Tabs defaultValue={accounts?.data?.[0]?.id}>
             <TabsList>
               {accounts?.data?.map((account) => (
-                <TabsTrigger key={account.id} value={account.id}>{account.name}</TabsTrigger>
+                <TabsTrigger key={account.id} value={account.id}>
+                  {account.name}
+                </TabsTrigger>
               ))}
             </TabsList>
             {accounts?.data?.map((account) => (
@@ -90,7 +96,7 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
             ))}
           </Tabs>
         </div>
-       
+
         {/** bank account single view */}
         <BankAccountOverviewProTier
           user={user}

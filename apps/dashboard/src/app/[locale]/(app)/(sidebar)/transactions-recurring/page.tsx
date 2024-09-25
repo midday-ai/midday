@@ -110,7 +110,13 @@ export default async function Transactions({
       ) : (
         <ErrorBoundary errorComponent={ErrorFallback}>
           <Suspense fallback={<Loading />} key={loadingKey}>
-            <Table filter={filter} page={page} sort={sort} query={query} enableAnalytics={true}/>
+            <Table
+              filter={filter}
+              page={page}
+              sort={sort}
+              query={query}
+              enableAnalytics={true}
+            />
           </Suspense>
         </ErrorBoundary>
       )}

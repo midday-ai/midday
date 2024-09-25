@@ -5,14 +5,14 @@ import { formatAmount, formatPercentage } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import {
-    Bar,
-    CartesianGrid,
-    ComposedChart,
-    Line,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 /**
@@ -70,7 +70,9 @@ const ToolTipContent: React.FC<ToolTipContentProps> = ({ payload = [] }) => {
               {formatPercentage(current.growthRate, locale)}
             </p>
           </div>
-          <p className="text-xs text-[#606060] text-right">{t("growth_rate")}</p>
+          <p className="text-xs text-[#606060] text-right">
+            {t("growth_rate")}
+          </p>
         </div>
       </div>
     </div>
@@ -101,25 +103,32 @@ interface ExpenseGrowthRateBarChartProps {
  * @param previousValue - The previous value
  * @returns The growth rate as a decimal
  */
-function calculateGrowthRate(currentValue: number, previousValue: number): number {
+function calculateGrowthRate(
+  currentValue: number,
+  previousValue: number,
+): number {
   if (previousValue === 0) return 0;
   return (currentValue - previousValue) / previousValue;
 }
 
 /**
  * ExpenseGrowthRateBarChart component
- * 
+ *
  * This component renders a bar chart showing expenses and their growth rate over time.
  * It uses recharts to create a composed chart with bars for expenses and a line for growth rate.
- * 
+ *
  * @param data - The data to be displayed in the chart
  * @param height - The height of the chart (default: 290)
  */
-export function ExpenseGrowthRateBarChart({ data, height = 290 }: ExpenseGrowthRateBarChartProps) {
+export function ExpenseGrowthRateBarChart({
+  data,
+  height = 290,
+}: ExpenseGrowthRateBarChartProps) {
   const formattedData = data.result.map((item, index, array) => {
-    const previousExpense = index > 0 ? array[index - 1]?.expense : item.expense;
+    const previousExpense =
+      index > 0 ? array[index - 1]?.expense : item.expense;
     const growthRate = calculateGrowthRate(item.expense, previousExpense ?? 0);
-    
+
     return {
       ...item,
       date: format(new Date(item.date), "MMM"),

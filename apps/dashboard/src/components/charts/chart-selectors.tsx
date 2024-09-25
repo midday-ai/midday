@@ -14,14 +14,22 @@ export type DateRange = {
 
 export interface ChartSelectorsProps {
   defaultValue: DateRange;
-  disableTypeSelector?: boolean
+  disableTypeSelector?: boolean;
 }
 
-export async function ChartSelectors({ defaultValue, disableTypeSelector }: ChartSelectorsProps) {
+export async function ChartSelectors({
+  defaultValue,
+  disableTypeSelector,
+}: ChartSelectorsProps) {
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   return (
-    <div className={cn("flex justify-between mt-6 space-x-2", disableTypeSelector && "justify-end")}>
+    <div
+      className={cn(
+        "flex justify-between mt-6 space-x-2",
+        disableTypeSelector && "justify-end",
+      )}
+    >
       {!disableTypeSelector && (
         <div className="flex space-x-2">
           <ChartType initialValue={chartType} />
@@ -30,7 +38,10 @@ export async function ChartSelectors({ defaultValue, disableTypeSelector }: Char
       <div className={cn("flex space-x-2")}>
         <ChartPeriod defaultValue={defaultValue} />
         <ChartFiltersServer />
-        <ChartMore defaultValue={defaultValue} type={chartType as "profit" | "revenue"} />
+        <ChartMore
+          defaultValue={defaultValue}
+          type={chartType as "profit" | "revenue"}
+        />
       </div>
     </div>
   );

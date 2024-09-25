@@ -650,7 +650,8 @@ export async function getShippingLogisticsAnalysisQuery(
 /**
  * Zod schema for the parameters of the getExpenseBreakdownByLocationQuery function.
  */
-export const getExpenseBreakdownByLocationQueryParamsSchema = baseQueryParamsSchema
+export const getExpenseBreakdownByLocationQueryParamsSchema =
+  baseQueryParamsSchema;
 
 /**
  * Type inference from the Zod schema for the getExpenseBreakdownByLocationQuery function parameters.

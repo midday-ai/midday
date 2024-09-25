@@ -18,11 +18,13 @@ export enum RecurringTransactionFrequency {
 
 /**
  * Converts a RecurringTransactionFrequency enum value to its string representation.
- * 
+ *
  * @param frequency - The RecurringTransactionFrequency enum value to convert.
  * @returns The string representation of the frequency.
  */
-export function recurringFrequencyToString(frequency: RecurringTransactionFrequency): string {
+export function recurringFrequencyToString(
+  frequency: RecurringTransactionFrequency,
+): string {
   switch (frequency) {
     case RecurringTransactionFrequency.ALL:
       return "all";
@@ -53,14 +55,14 @@ export type GetRecentTransactionsParams = {
 
 /**
  * Fetches the most recent transactions for a given team, optionally filtered by account and recurring status.
- * 
+ *
  * @param supabase - The Supabase client instance.
  * @param params - The parameters for the query.
  * @returns A promise that resolves to an object containing the recent transactions data.
  */
 export async function getRecentTransactionsQuery(
   supabase: Client,
-  params: GetRecentTransactionsParams
+  params: GetRecentTransactionsParams,
 ) {
   const { teamId, limit = 15, accountId, recurring } = params;
 
@@ -122,7 +124,7 @@ export async function getRecentTransactionsQuery(
 
 /**
  * Determines the category for a transaction.
- * 
+ *
  * @param transaction - The transaction object.
  * @returns The category object for the transaction.
  */
@@ -493,7 +495,10 @@ export async function getSimilarTransactions(
 }
 
 // gets all the similar transactions with detailed information
-export async function getSimilarTransactionsDetailedQuery(supabase: Client, params: GetSimilarTransactionsParams) {
+export async function getSimilarTransactionsDetailedQuery(
+  supabase: Client,
+  params: GetSimilarTransactionsParams,
+) {
   const { name, teamId, categorySlug } = params;
 
   return supabase
@@ -1164,7 +1169,6 @@ export type GetTransactionsByBankAccountQueryParams = z.infer<
   typeof getTransactionsByBankAccountQueryParamsSchema
 >;
 
-
 export const getTransactionsByBankAccountQuery = async (
   supabase: Client,
   params: GetTransactionsByBankAccountQueryParams,
@@ -1173,14 +1177,14 @@ export const getTransactionsByBankAccountQuery = async (
     getTransactionsByBankAccountQueryParamsSchema.parse(params);
 
   const { data, error } = await supabase
-    .from('transactions')
-    .select('*')
-    .eq('bank_account_id', bankAccountId)
-    .order('date', { ascending: false })
+    .from("transactions")
+    .select("*")
+    .eq("bank_account_id", bankAccountId)
+    .order("date", { ascending: false })
     .limit(limit);
 
   if (error) {
-    console.error('Error fetching transactions:', error);
+    console.error("Error fetching transactions:", error);
     return null;
   }
 

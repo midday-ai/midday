@@ -35,7 +35,9 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({
     <Card className="p-[2%] md:mt-4">
       <div className={`mt-8 relative`}>
         {disabled && <EmptyState />}
-        {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+        {isCurrentUserTierFree && (
+          <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
+        )}
 
         <Tabs
           defaultValue="overview"

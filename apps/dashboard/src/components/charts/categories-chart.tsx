@@ -40,7 +40,9 @@ export function CategoryCharts({
         )}
       >
         {disableAllCharts && <EmptyState />}
-        {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+        {isCurrentUserTierFree && (
+          <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
+        )}
 
         <div
           className={cn(
@@ -80,9 +82,7 @@ export function CategoryCharts({
               data={[]}
               height={400}
               type={"income"}
-              disabled={
-                disableAll || disabledCharts.includes("categoryIncome")
-              }
+              disabled={disableAll || disabledCharts.includes("categoryIncome")}
             />
           </CardWrapper>
         </div>
@@ -99,7 +99,9 @@ export function CategoryCharts({
         )}
       >
         {disableAllCharts && <EmptyState />}
-        {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
+        {isCurrentUserTierFree && (
+          <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
+        )}
 
         <div className={cn("p-4", disableAll && "blur-[8px] opacity-20")}>
           <MonthlySpendingChart

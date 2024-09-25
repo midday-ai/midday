@@ -9,11 +9,13 @@ import { RecentFilesPortalView } from "@/components/portal-views/recent-files-po
 import RecentTransactions from "@/components/recent-transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getBankConnectionsByTeamId, getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
-import { RecurringTransactionFrequency } from "@midday/supabase/queries";
 import {
-  Card
-} from "@midday/ui/card";
+  getBankConnectionsByTeamId,
+  getTeamBankAccounts,
+  getUser,
+} from "@midday/supabase/cached-queries";
+import { RecurringTransactionFrequency } from "@midday/supabase/queries";
+import { Card } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
@@ -49,10 +51,10 @@ export default async function Overview({
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
-      id: "this_year",
-      from: startOfYear(new Date()).toISOString(),
-      to: new Date().toISOString(),
-    };
+        id: "this_year",
+        from: startOfYear(new Date()).toISOString(),
+        to: new Date().toISOString(),
+      };
 
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
@@ -113,10 +115,19 @@ export default async function Overview({
             <TabsTrigger value="recurring">Recurring</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions">
-            <RecentTransactions title="Recent Transactions" description="Most Recent Transactions Of Interest" />
+            <RecentTransactions
+              title="Recent Transactions"
+              description="Most Recent Transactions Of Interest"
+            />
           </TabsContent>
           <TabsContent value="recurring">
-            <RecentTransactions title="Subscriptions" description="Most Recent Detected recurring transactions across your accounts" recurringTransactionFrequency={RecurringTransactionFrequency.MONTHLY} />
+            <RecentTransactions
+              title="Subscriptions"
+              description="Most Recent Detected recurring transactions across your accounts"
+              recurringTransactionFrequency={
+                RecurringTransactionFrequency.MONTHLY
+              }
+            />
           </TabsContent>
         </Tabs>
 

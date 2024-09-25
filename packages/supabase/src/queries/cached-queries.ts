@@ -597,7 +597,10 @@ export const getExpensesByLocation = async (
 
   return unstable_cache(
     async () => {
-      return getExpenseBreakdownByLocationQuery(supabase, { ...params, teamId });
+      return getExpenseBreakdownByLocationQuery(supabase, {
+        ...params,
+        teamId,
+      });
     },
     ["expenses_by_location", teamId],
     {
@@ -605,7 +608,7 @@ export const getExpensesByLocation = async (
       revalidate: 3600,
     },
   )(params);
-}
+};
 
 export const getDailyExpenses = async (
   params: Omit<GetDailyExpensesQueryParams, "teamId">,
@@ -908,8 +911,6 @@ export const getInventoryCostAnalysis = async (
     },
   )(params);
 };
-
-
 
 /**
  * Cached query to get transactions by bank account ID

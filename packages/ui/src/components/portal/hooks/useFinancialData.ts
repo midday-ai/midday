@@ -1,11 +1,14 @@
 import { useMemo } from "react";
-import { FinancialUserProfile, MelodyFinancialContext } from "client-typescript-sdk";
+import {
+  FinancialUserProfile,
+  MelodyFinancialContext,
+} from "client-typescript-sdk";
 import { FinancialDataGenerator } from "../../../lib/random/financial-data-generator";
 
 export const useFinancialData = (
   financialProfile?: FinancialUserProfile,
   financialContext?: MelodyFinancialContext,
-  demoMode = false
+  demoMode = false,
 ) => {
   return useMemo(() => {
     if (demoMode || !financialProfile || !financialContext) {
@@ -15,7 +18,7 @@ export const useFinancialData = (
 
     const linkedInstitutions = financialProfile.link || [];
     const linkedInstitutionNames = linkedInstitutions.map((link) =>
-      link.institutionName ? " " + link.institutionName.toLowerCase() : ""
+      link.institutionName ? " " + link.institutionName.toLowerCase() : "",
     );
 
     const allAccounts = [
@@ -30,8 +33,16 @@ export const useFinancialData = (
 
     const stats = [
       { id: 1, name: "Connected Accounts", value: numConnectedAccounts },
-      { id: 2, name: "Number Of Linked Institutions", value: `${linkedInstitutions.length}` },
-      { id: 3, name: "Linked Institutions", value: `${linkedInstitutionNames}` },
+      {
+        id: 2,
+        name: "Number Of Linked Institutions",
+        value: `${linkedInstitutions.length}`,
+      },
+      {
+        id: 3,
+        name: "Linked Institutions",
+        value: `${linkedInstitutionNames}`,
+      },
     ];
 
     return {

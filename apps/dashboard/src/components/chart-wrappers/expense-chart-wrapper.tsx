@@ -20,7 +20,13 @@ const defaultValue = {
   period: "monthly",
 };
 
-export async function ExpenseChartWrapper({ tier, teamId, currency, userId, value }: ExpenseChartWrapperProps) {
+export async function ExpenseChartWrapper({
+  tier,
+  teamId,
+  currency,
+  userId,
+  value,
+}: ExpenseChartWrapperProps) {
   if (tier === "free") {
     return <ExpenseChart value={value} defaultValue={defaultValue} />;
   }

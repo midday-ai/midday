@@ -14,7 +14,7 @@ const SubscriptionViewAccessibilityButton: React.FC<{
     <div
       className={cn(
         isWidget && "fixed bottom-0 m-4 hidden sm:block",
-        className
+        className,
       )}
     >
       <button

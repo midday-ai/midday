@@ -20,7 +20,14 @@ interface IncomeTabsSectionProps {
   };
 }
 
-export function IncomeTabsSection({ isEmpty, accounts, user, tier, value, defaultValue }: IncomeTabsSectionProps) {
+export function IncomeTabsSection({
+  isEmpty,
+  accounts,
+  user,
+  tier,
+  value,
+  defaultValue,
+}: IncomeTabsSectionProps) {
   const description = `
     Effective income management is the lifeblood of any evolving business venture, serving as a critical determinant of profitability and financial resilience. In today's dynamic market landscape, astute entrepreneurs recognize that meticulous oversight and strategic adjustment of income streams are not merely beneficial—they are imperative.
   `;

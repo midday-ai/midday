@@ -29,7 +29,7 @@ export async function Spending({
             {spendingType === "category" ? (
               <SpendingList
                 initialPeriod={initialPeriod}
-              disabled={disabled}
+                disabled={disabled}
                 currency={currency}
               />
             ) : spendingType === "merchant" ? (

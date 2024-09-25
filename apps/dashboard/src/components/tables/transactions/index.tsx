@@ -17,7 +17,13 @@ type Props = {
   enableAnalytics?: boolean;
 };
 
-export async function Table({ filter, page, sort, query, enableAnalytics }: Props) {
+export async function Table({
+  filter,
+  page,
+  sort,
+  query,
+  enableAnalytics,
+}: Props) {
   const hasFilters = Object.values(filter).some((value) => value !== null);
   const initialColumnVisibility = JSON.parse(
     cookies().get(Cookies.TransactionsColumns)?.value || "[]",

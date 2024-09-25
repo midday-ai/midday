@@ -35,7 +35,6 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   description,
   ...props
 }): JSX.Element | null => {
-
   // Return null if analytics v2 is not enabled
   if (!features.isAnalyticsV2Enabled) return null;
 
@@ -46,17 +45,25 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
 
   // Create a hash map of bank connection id to bank connection
   const bankConnectionMap = useMemo(() => {
-    return (bankConnections || []).reduce((acc, connection) => {
-      acc[connection.id] = connection;
-      return acc;
-    }, {} as Record<string, BankConnection>);
+    return (bankConnections || []).reduce(
+      (acc, connection) => {
+        acc[connection.id] = connection;
+        return acc;
+      },
+      {} as Record<string, BankConnection>,
+    );
   }, [bankConnections]);
 
   if (isCurrentUserTierFree && hasBankAccounts) {
     return (
       <div className="w-full pt-[3%] mx-auto">
         <Card className="p-[2%]">
-          <FinancialPortalOverview baseTierNumberOfConnectedAccounts={bankConnections?.length ?? 0} isFreeTier={true} title={title} description={description} />
+          <FinancialPortalOverview
+            baseTierNumberOfConnectedAccounts={bankConnections?.length ?? 0}
+            isFreeTier={true}
+            title={title}
+            description={description}
+          />
           <BankAccountOverview
             bankAccounts={bankAccounts}
             bankConnectionMap={bankConnectionMap}
@@ -64,7 +71,7 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
           />
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -72,8 +79,12 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
       <Card className="p-[2%]">
         <div className={`mt-8 relative`}>
           {disabled && <EmptyState />}
-          {(isCurrentUserTierFree || !hasBankAccounts) && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
-          <div className={`${(disabled || isCurrentUserTierFree) && "blur-[8px] opacity-20"}`}>
+          {(isCurrentUserTierFree || !hasBankAccounts) && (
+            <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
+          )}
+          <div
+            className={`${(disabled || isCurrentUserTierFree) && "blur-[8px] opacity-20"}`}
+          >
             <FinancialPortalOverview
               financialProfile={undefined}
               financialContext={undefined}

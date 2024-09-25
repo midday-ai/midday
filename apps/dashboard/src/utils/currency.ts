@@ -28,9 +28,13 @@ export function getMostFrequentCurrency(
  * @param locale - The locale to use for formatting (default: 'en-US')
  * @returns A formatted currency string
  */
-export function formatCurrency(amount: number, currency: string = 'USD', locale: string = 'en-US'): string {
+export function formatCurrency(
+  amount: number,
+  currency: string = "USD",
+  locale: string = "en-US",
+): string {
   return new Intl.NumberFormat(locale, {
-    style: 'currency',
+    style: "currency",
     currency: currency,
   }).format(amount);
 }

@@ -1,6 +1,9 @@
 "use client";
 
-import { FinancialUserProfile, MelodyFinancialContext } from "client-typescript-sdk";
+import {
+  FinancialUserProfile,
+  MelodyFinancialContext,
+} from "client-typescript-sdk";
 import React from "react";
 import { FreeTierView } from "./components/FreeTierView";
 import { LinkedAccountsOverview } from "./components/LinkedAccountsOverview";
@@ -18,24 +21,30 @@ interface FinancialPortalOverviewProps {
   description?: string;
 }
 
-export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = ({
+export const FinancialPortalOverview: React.FC<
+  FinancialPortalOverviewProps
+> = ({
   financialProfile,
   financialContext,
   demoMode = false,
   baseTierNumberOfConnectedAccounts = 0,
   isFreeTier = false,
   title,
-  description
+  description,
 }) => {
   const {
     linkedInstitutions,
     linkedInstitutionNames,
     numConnectedAccounts,
-    stats
+    stats,
   } = useFinancialData(financialProfile, financialContext, demoMode);
 
   if (isFreeTier && baseTierNumberOfConnectedAccounts > 0) {
-    return <FreeTierView baseTierNumberOfConnectedAccounts={baseTierNumberOfConnectedAccounts} />;
+    return (
+      <FreeTierView
+        baseTierNumberOfConnectedAccounts={baseTierNumberOfConnectedAccounts}
+      />
+    );
   }
 
   return (

@@ -8,17 +8,26 @@ export type Tier = UserTier;
 /**
  * Types of basic reports available across tiers.
  */
-type BasicReportType = "transactionSummary" | "monthlyOverview" | "categoryBreakdown";
+type BasicReportType =
+  | "transactionSummary"
+  | "monthlyOverview"
+  | "categoryBreakdown";
 
 /**
  * Types of advanced reports available in higher tiers.
  */
-type AdvancedReportType = "cashFlowAnalysis" | "budgetPerformance" | "forecastingTrends";
+type AdvancedReportType =
+  | "cashFlowAnalysis"
+  | "budgetPerformance"
+  | "forecastingTrends";
 
 /**
  * Types of enterprise-level reports.
  */
-type EnterpriseReportType = "customReports" | "aiDrivenInsights" | "riskAnalysis";
+type EnterpriseReportType =
+  | "customReports"
+  | "aiDrivenInsights"
+  | "riskAnalysis";
 
 /**
  * Structure defining the reporting features available for each tier.
@@ -32,17 +41,22 @@ interface ReportingFeatures {
 /**
  * Types of analytics features available across tiers.
  */
-type AnalyticsFeature = "realTimeData" | "historicalTrends" | "predictiveAnalytics" | "benchmarking" | "anomalyDetection";
+type AnalyticsFeature =
+  | "realTimeData"
+  | "historicalTrends"
+  | "predictiveAnalytics"
+  | "benchmarking"
+  | "anomalyDetection";
 
 /**
  * General features available across different tiers.
  */
-type Feature = 
-  | "apiAccess" 
-  | "customIntegrations" 
-  | "prioritySupport" 
-  | "dataExport" 
-  | "auditLogs" 
+type Feature =
+  | "apiAccess"
+  | "customIntegrations"
+  | "prioritySupport"
+  | "dataExport"
+  | "auditLogs"
   | "ssoIntegration"
   | "multiCurrency"
   | "automatedReconciliation";
@@ -109,7 +123,12 @@ const tierConfigurations: Record<Tier, TierDetails> = {
   pro: {
     name: "pro",
     displayName: "Pro",
-    features: ["apiAccess", "dataExport", "multiCurrency", "automatedReconciliation"],
+    features: [
+      "apiAccess",
+      "dataExport",
+      "multiCurrency",
+      "automatedReconciliation",
+    ],
     reportingFeatures: {
       basic: ["transactionSummary", "monthlyOverview", "categoryBreakdown"],
       advanced: ["cashFlowAnalysis", "budgetPerformance"],
@@ -128,13 +147,28 @@ const tierConfigurations: Record<Tier, TierDetails> = {
   enterprise: {
     name: "enterprise",
     displayName: "Enterprise",
-    features: ["apiAccess", "customIntegrations", "prioritySupport", "dataExport", "auditLogs", "ssoIntegration", "multiCurrency", "automatedReconciliation"],
+    features: [
+      "apiAccess",
+      "customIntegrations",
+      "prioritySupport",
+      "dataExport",
+      "auditLogs",
+      "ssoIntegration",
+      "multiCurrency",
+      "automatedReconciliation",
+    ],
     reportingFeatures: {
       basic: ["transactionSummary", "monthlyOverview", "categoryBreakdown"],
       advanced: ["cashFlowAnalysis", "budgetPerformance", "forecastingTrends"],
       enterprise: ["customReports", "aiDrivenInsights", "riskAnalysis"],
     },
-    analyticsFeatures: ["realTimeData", "historicalTrends", "predictiveAnalytics", "benchmarking", "anomalyDetection"],
+    analyticsFeatures: [
+      "realTimeData",
+      "historicalTrends",
+      "predictiveAnalytics",
+      "benchmarking",
+      "anomalyDetection",
+    ],
     limits: {
       maxUsers: 100,
       maxTransactions: 100000,
@@ -173,7 +207,10 @@ export function hasFeature(tier: Tier, feature: Feature): boolean {
  * @param reportType - The type of report to look for.
  * @returns True if the reporting feature is available in the tier, false otherwise.
  */
-export function hasReportingFeature(tier: Tier, reportType: BasicReportType | AdvancedReportType | EnterpriseReportType): boolean {
+export function hasReportingFeature(
+  tier: Tier,
+  reportType: BasicReportType | AdvancedReportType | EnterpriseReportType,
+): boolean {
   const { reportingFeatures } = tierConfigurations[tier];
   return (
     reportingFeatures.basic.includes(reportType as BasicReportType) ||
@@ -188,7 +225,10 @@ export function hasReportingFeature(tier: Tier, reportType: BasicReportType | Ad
  * @param analyticsFeature - The analytics feature to look for.
  * @returns True if the analytics feature is available in the tier, false otherwise.
  */
-export function hasAnalyticsFeature(tier: Tier, analyticsFeature: AnalyticsFeature): boolean {
+export function hasAnalyticsFeature(
+  tier: Tier,
+  analyticsFeature: AnalyticsFeature,
+): boolean {
   return tierConfigurations[tier].analyticsFeatures.includes(analyticsFeature);
 }
 
@@ -199,9 +239,13 @@ export function hasAnalyticsFeature(tier: Tier, analyticsFeature: AnalyticsFeatu
  * @param value - The value to compare against the limit.
  * @returns True if the value is within the tier's limit, false otherwise.
  */
-export function isWithinLimits(tier: Tier, metric: keyof TierLimits, value: number): boolean {
+export function isWithinLimits(
+  tier: Tier,
+  metric: keyof TierLimits,
+  value: number,
+): boolean {
   const limit = tierConfigurations[tier].limits[metric];
-  return typeof limit === 'number' ? value <= limit : true;
+  return typeof limit === "number" ? value <= limit : true;
 }
 
 /**
@@ -212,7 +256,9 @@ export function isWithinLimits(tier: Tier, metric: keyof TierLimits, value: numb
 export function getUpgradePath(currentTier: Tier): Tier | null {
   const tiers: Tier[] = ["free", "pro", "enterprise"];
   const currentIndex = tiers.indexOf(currentTier);
-  return (currentIndex < tiers.length - 1 ? tiers[currentIndex + 1] : null) as Tier | null;
+  return (
+    currentIndex < tiers.length - 1 ? tiers[currentIndex + 1] : null
+  ) as Tier | null;
 }
 
 /**
@@ -244,16 +290,15 @@ export function formatPrice(tier: Tier): string {
  * @returns True if the tier is free, false otherwise.
  */
 export function isFreeТier(tier: Tier): boolean {
-    return tier === "free";
+  return tier === "free";
 }
 
-
 export function isProTier(tier: Tier): boolean {
-    return tier === "pro";
+  return tier === "pro";
 }
 
 export function isEnterpriseTier(tier: Tier): boolean {
-    return tier === "enterprise";
+  return tier === "enterprise";
 }
 
 /**
@@ -261,15 +306,23 @@ export function isEnterpriseTier(tier: Tier): boolean {
  */
 export function exampleUsage() {
   const userTier: Tier = "pro";
-  
+
   console.log(`User is on ${getTierDetails(userTier).displayName} tier`);
   console.log(`Has API access: ${hasFeature(userTier, "apiAccess")}`);
-  console.log(`Can generate cash flow analysis: ${hasReportingFeature(userTier, "cashFlowAnalysis")}`);
-  console.log(`Has access to predictive analytics: ${hasAnalyticsFeature(userTier, "predictiveAnalytics")}`);
+  console.log(
+    `Can generate cash flow analysis: ${hasReportingFeature(userTier, "cashFlowAnalysis")}`,
+  );
+  console.log(
+    `Has access to predictive analytics: ${hasAnalyticsFeature(userTier, "predictiveAnalytics")}`,
+  );
   console.log(`Can add 15 users: ${isWithinLimits(userTier, "maxUsers", 15)}`);
-  console.log(`Reporting frequency: ${getTierDetails(userTier).limits.reportingFrequency}`);
+  console.log(
+    `Reporting frequency: ${getTierDetails(userTier).limits.reportingFrequency}`,
+  );
   console.log(`Upgrade path: ${getUpgradePath(userTier)}`);
-  console.log(`Pro tier is higher than Free tier: ${compareTiers("pro", "free") > 0}`);
+  console.log(
+    `Pro tier is higher than Free tier: ${compareTiers("pro", "free") > 0}`,
+  );
   console.log(`Price: ${formatPrice(userTier)} per month`);
 }
 

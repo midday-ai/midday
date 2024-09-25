@@ -98,7 +98,10 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
             <span className="sr-only">Close</span>
           </Button>
         </div>
-        <Tabs defaultValue="quick-access" className="w-full flex flex-col gap-4">
+        <Tabs
+          defaultValue="quick-access"
+          className="w-full flex flex-col gap-4"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="quick-access">Quick Access</TabsTrigger>
             <TabsTrigger value="product">Product</TabsTrigger>
@@ -128,7 +131,6 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           </TabsContent>
         </Tabs>
       </Card>
-     
     </div>
   );
 
@@ -139,12 +141,30 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    */
   const renderQuickAccessButtons = () => (
     <>
-      {renderAccessButton("Ask Solomon", <ChatAccessibilityButton className="m-3" />)}
-      {renderAccessButton("Income", <IncomeViewAccessibilityButton className="m-3" />)}
-      {renderAccessButton("Expenses", <ExpenseViewAccessibilityButton className="m-3" />)}
-      {renderAccessButton("Subscriptions", <SubscriptionViewAccessibilityButton className="m-3" />)}
-      {renderAccessButton("Transactions", <TransactionViewAccessibilityButton className="m-3" />)}
-      {renderAccessButton("Overview", <OverviewViewAccessibilityButton className="m-3" />)}
+      {renderAccessButton(
+        "Ask Solomon",
+        <ChatAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Income",
+        <IncomeViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Expenses",
+        <ExpenseViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Subscriptions",
+        <SubscriptionViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Transactions",
+        <TransactionViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Overview",
+        <OverviewViewAccessibilityButton className="m-3" />,
+      )}
     </>
   );
 
@@ -155,7 +175,8 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    */
   const renderProductButtons = () => (
     <>
-      {renderProductButton("Product Updates", 
+      {renderProductButton(
+        "Product Updates",
         <AdminProductWidget
           organization="solomonai"
           theme="light"
@@ -168,9 +189,10 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           name={name}
           id={id}
           profilePicture={profilePicture}
-        />
+        />,
       )}
-      {renderProductButton("Feedback", 
+      {renderProductButton(
+        "Feedback",
         <FeedbackProductWidget
           organization="solomonai"
           theme="light"
@@ -182,9 +204,10 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           name={name}
           id={id}
           profilePicture={profilePicture}
-        />
+        />,
       )}
-      {renderProductButton("Changelog", 
+      {renderProductButton(
+        "Changelog",
         <ChangelogProductWidget
           organization="solomonai"
           theme="light"
@@ -196,7 +219,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           id={id}
           profilePicture={profilePicture}
           fullscreenPopup={true}
-        />
+        />,
       )}
     </>
   );
@@ -209,7 +232,10 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    * @returns {React.ReactElement} The rendered access button.
    */
   const renderAccessButton = (label: string, icon: React.ReactNode) => (
-    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0 w-full justify-start">
+    <Button
+      variant="ghost"
+      className="flex flex-1 items-center gap-2 border-0 w-full justify-start"
+    >
       {icon}
       <span className="text-lg">{label}</span>
     </Button>
@@ -223,7 +249,10 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    * @returns {React.ReactElement} The rendered product button.
    */
   const renderProductButton = (label: string, widget: React.ReactNode) => (
-    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0 w-full justify-start">
+    <Button
+      variant="ghost"
+      className="flex flex-1 items-center gap-2 border-0 w-full justify-start"
+    >
       {widget}
       <span className="text-lg">{label}</span>
     </Button>

@@ -35,12 +35,12 @@ export async function ProfitRevenueChart({
     ? chartExampleData
     : await getMetrics({ ...defaultValue, ...value, type, currency });
 
-
-  const growthRateBarChartData = data?.result?.map((item: any) => ({
-    date: item.date ?? "",
-    income: item.current?.value ?? 0,
-    growth_rate: item.percentage?.value ?? 0,
-  })) || [];
+  const growthRateBarChartData =
+    data?.result?.map((item: any) => ({
+      date: item.date ?? "",
+      income: item.current?.value ?? 0,
+      growth_rate: item.percentage?.value ?? 0,
+    })) || [];
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
@@ -126,16 +126,23 @@ export async function ProfitRevenueChart({
         </div>
       </div>
       {enableGrowthRate ? (
-        <IncomeGrowthRateBarChart data={{
-          result: data?.result?.map((item): { date: string; income: number; growthRate: number } => ({
-            date: item.date,
-            income: Number(item.current?.value) ?? 0,
-            growthRate: Number(item.precentage?.value) ?? 0
-          })) ?? [],
-          meta: {
-            currency: currency ?? "USD"
-          }
-        }} />
+        <IncomeGrowthRateBarChart
+          data={{
+            result:
+              data?.result?.map(
+                (
+                  item,
+                ): { date: string; income: number; growthRate: number } => ({
+                  date: item.date,
+                  income: Number(item.current?.value) ?? 0,
+                  growthRate: Number(item.precentage?.value) ?? 0,
+                }),
+              ) ?? [],
+            meta: {
+              currency: currency ?? "USD",
+            },
+          }}
+        />
       ) : (
         <BarChart data={data} />
       )}

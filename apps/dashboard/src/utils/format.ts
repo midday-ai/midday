@@ -115,10 +115,10 @@ export function formatAccountName({
 export function formatPercentage(
   value: number,
   locale: string,
-  options: Intl.NumberFormatOptions = {}
+  options: Intl.NumberFormatOptions = {},
 ): string {
   return new Intl.NumberFormat(locale, {
-    style: 'percent',
+    style: "percent",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
     ...options,

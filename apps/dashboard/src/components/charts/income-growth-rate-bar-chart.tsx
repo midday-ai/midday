@@ -5,14 +5,14 @@ import { formatAmount, formatPercentage } from "@/utils/format";
 import { Icons } from "@midday/ui/icons";
 import { format } from "date-fns";
 import {
-    Bar,
-    CartesianGrid,
-    ComposedChart,
-    Line,
-    ResponsiveContainer,
-    Tooltip,
-    XAxis,
-    YAxis,
+  Bar,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 
 /**
@@ -70,7 +70,9 @@ const ToolTipContent: React.FC<ToolTipContentProps> = ({ payload = [] }) => {
               {formatPercentage(current.growthRate, locale)}
             </p>
           </div>
-          <p className="text-xs text-[#606060] text-right">{t("growth_rate")}</p>
+          <p className="text-xs text-[#606060] text-right">
+            {t("growth_rate")}
+          </p>
         </div>
       </div>
     </div>
@@ -101,25 +103,31 @@ interface IncomeGrowthRateBarChartProps {
  * @param previousValue - The previous value
  * @returns The growth rate as a decimal
  */
-function calculateGrowthRate(currentValue: number, previousValue: number): number {
+function calculateGrowthRate(
+  currentValue: number,
+  previousValue: number,
+): number {
   if (previousValue === 0) return 0;
   return (currentValue - previousValue) / previousValue;
 }
 
 /**
  * IncomeGrowthRateBarChart component
- * 
+ *
  * This component renders a bar chart showing income and its growth rate over time.
  * It uses recharts to create a composed chart with bars for income and a line for growth rate.
- * 
+ *
  * @param data - The data to be displayed in the chart
  * @param height - The height of the chart (default: 290)
  */
-export function IncomeGrowthRateBarChart({ data, height = 290 }: IncomeGrowthRateBarChartProps) {
+export function IncomeGrowthRateBarChart({
+  data,
+  height = 290,
+}: IncomeGrowthRateBarChartProps) {
   const formattedData = data.result.map((item, index, array) => {
     const previousIncome = index > 0 ? array[index - 1]?.income : item.income;
     const growthRate = calculateGrowthRate(item.income, previousIncome ?? 0);
-    
+
     return {
       ...item,
       date: format(new Date(item.date), "MMM"),

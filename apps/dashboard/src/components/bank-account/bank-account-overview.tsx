@@ -38,11 +38,11 @@ interface BankAccountOverviewProps {
 
 /**
  * BankAccountOverview component
- * 
+ *
  * This component provides an overview of multiple bank accounts, including:
  * - A grid of metallic cards representing each bank account
  * - A detailed sheet view for the selected bank account
- * 
+ *
  * @param {BankAccountOverviewProps} props - The props for the component
  * @returns {JSX.Element} The rendered component
  */
@@ -55,7 +55,8 @@ export const BankAccountOverview: React.FC<BankAccountOverviewProps> = ({
    * State for the currently selected bank account
    * @type {BankAccount | null}
    */
-  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount | null>(null);
+  const [selectedBankAccount, setSelectedBankAccount] =
+    useState<BankAccount | null>(null);
 
   /**
    * State for controlling the visibility of the bank account sheet
@@ -67,7 +68,8 @@ export const BankAccountOverview: React.FC<BankAccountOverviewProps> = ({
     <>
       <div className="flex flex-1 flex-wrap gap-3 p-[2%]">
         {bankAccounts.map((bankAccount) => {
-          const bankConnection = bankConnectionMap[bankAccount.bank_connection_id!];
+          const bankConnection =
+            bankConnectionMap[bankAccount.bank_connection_id!];
           return (
             <div
               key={bankAccount.id}
@@ -76,10 +78,10 @@ export const BankAccountOverview: React.FC<BankAccountOverviewProps> = ({
                 setIsSheetOpen(true);
               }}
             >
-              <MettalicCard 
-                cardIssuer={bankConnection?.name ?? "Bank Account"} 
-                cardHolderName={userName ?? "User Name"} 
-                cardNumber={bankAccount.name ?? "xxxx"} 
+              <MettalicCard
+                cardIssuer={bankConnection?.name ?? "Bank Account"}
+                cardHolderName={userName ?? "User Name"}
+                cardNumber={bankAccount.name ?? "xxxx"}
               />
             </div>
           );
@@ -90,7 +92,9 @@ export const BankAccountOverview: React.FC<BankAccountOverviewProps> = ({
           isOpen={isSheetOpen}
           setOpen={setIsSheetOpen}
           bankAccount={selectedBankAccount}
-          bankConnection={bankConnectionMap[selectedBankAccount.bank_connection_id!]}
+          bankConnection={
+            bankConnectionMap[selectedBankAccount.bank_connection_id!]
+          }
           userName={userName}
         />
       )}
