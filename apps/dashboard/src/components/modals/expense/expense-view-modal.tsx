@@ -79,6 +79,8 @@ export const ExpenseViewModal = React.memo(function ExpenseViewModal() {
     }), []);
 
     const fetchExpenseData = useCallback(async () => {
+        if (isLoading || expenseData) return;
+        
         setIsLoading(true);
         try {
             const {
@@ -103,23 +105,30 @@ export const ExpenseViewModal = React.memo(function ExpenseViewModal() {
         } finally {
             setIsLoading(false);
         }
-    }, [supabase, value]);
+    }, [supabase, value, isLoading, expenseData]);
 
     useEffect(() => {
-        if (isOpen && !expenseData) {
+        if (isOpen) {
             fetchExpenseData();
         }
-    }, [isOpen, fetchExpenseData, expenseData]);
+    }, [isOpen, fetchExpenseData]);
 
+    const handleOpenChange = useCallback((open: boolean) => {
+        setOpen(open);
+        if (!open) {
+            // Reset data when closing the modal
+            setExpenseData(null);
+            setIsLoading(false);
+        }
+    }, [setOpen]);
 
     return (
-        <Dialog open={isOpen} onOpenChange={setOpen}>
+        <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent
                 className="overflow-hidden p-0 max-w-full w-full h-full md:min-h-[60%] md:max-h-[75%] md:min-w-[60%] md:max-w-[75%] m-0 rounded-2xl"
                 hideClose
             >
                 <ModalContent data={expenseData} isLoading={isLoading} />
-
             </DialogContent>
         </Dialog>
     );
