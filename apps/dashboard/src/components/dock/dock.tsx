@@ -34,9 +34,9 @@ const DATA = {
 
 export function ProTierDock() {
   return (
-    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden bg-background md:shadow-xl">
+    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden md:shadow-xl">
       <TooltipProvider>
-        <Dock direction="middle">
+        <Dock direction="middle" className="bg-background">
           {DATA.features.map((item) => (
             <DockIcon key={item.label}>
               <Tooltip>
