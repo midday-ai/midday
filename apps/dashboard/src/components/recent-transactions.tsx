@@ -118,16 +118,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = async ({
         </div>
       </div>
       <div className="p-[2%]">
-        <Accordion type="single" collapsible>
-          <AccordionItem value="analytics">
-            <AccordionTrigger className="text-3xl font-bold mb-4">
-              Transaction Details
-            </AccordionTrigger>
-            <AccordionContent>
-              <TransactionAnalytics transactions={data ?? []} />
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <TransactionAnalytics transactions={data ?? []} />
       </div>
       <DataTable
         data={data ?? []}
