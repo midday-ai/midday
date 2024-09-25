@@ -1,31 +1,60 @@
-import { EmptyState } from "@/components/charts/empty-state";
+/**
+ * @fileoverview Financial Accounts Page Component
+ * 
+ * This file contains the FinancialAccountsPage component, which renders the financial accounts
+ * overview for a user in the Midday application.
+ * 
+ * @module FinancialAccountsPage
+ */
+
+import BankAccountSingleView from "@/components/bank-account/bank-account-single-view";
+import { BankAccountOverviewProTier } from "@/components/bank-account/bank-account-summary-details";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
-import { UpgradeTier } from "@/components/upgrade-tier";
+import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import Tier, { isFreeТier } from "@/config/tier";
-import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
-import { cn } from "@midday/ui/cn";
-import { BankAccountsOverviewSummary } from "@midday/ui/portal/bank-account-portal-view";
-import { ConnectedAccountSummary } from "@midday/ui/portal/connected-account-view";
-import { CreditAccountsOverviewSummary } from "@midday/ui/portal/credit-account-portal-view";
+import { getBankConnectionsByTeamId, getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+/**
+ * Metadata for the Financial Accounts page
+ * @type {Metadata}
+ */
 export const metadata: Metadata = {
   title: "Financial Accounts | Midday",
 };
 
+/**
+ * Props for the FinancialAccountsPage component
+ * @typedef {Object} Props
+ * @property {Object} searchParams - URL search parameters
+ */
 type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
+/**
+ * FinancialAccountsPage Component
+ * 
+ * This component displays an overview of a user's financial accounts, including bank accounts
+ * and credit cards. It handles different states based on the user's tier and account status.
+ * 
+ * @async
+ * @function FinancialAccountsPage
+ * @param {Props} props - Component props
+ * @returns {Promise<JSX.Element>} Rendered component
+ */
 export default async function FinancialAccountsPage({ searchParams }: Props) {
-  const user = await getUser();
-  const accounts = await getTeamBankAccounts();
+  const [user, accounts, bankConnections] = await Promise.all([
+    getUser(),
+    getTeamBankAccounts(),
+    getBankConnectionsByTeamId(),
+  ]);
+
   const isEmpty = !accounts?.data?.length;
 
-  // TODO: get the tier from the user record
   const tier: Tier = user?.data?.tier ?? "free";
   // based on the tier we disclose a different amount of information
   const isCurrentUserTierFree = isFreeТier(tier);
@@ -33,46 +62,42 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ConnectAccountServerWrapper>
-        <div className={cn((isEmpty || isCurrentUserTierFree) && "mt-8 relative")}>
-          {isEmpty && <EmptyState />}
-          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
-
-          <div className={cn("py-[2%]", (isEmpty || isCurrentUserTierFree) && "blur-[8px] opacity-20")}>
-            <ConnectedAccountSummary
-              name={user?.data?.full_name ?? "Solomon AI User"}
-            />
-          </div>
-        </div>
-
-        {/** we display the connected accounts here */}
-        <div className={cn((isEmpty || isCurrentUserTierFree) && "mt-8 relative")}>
-          {isEmpty && <EmptyState />}
-          {isCurrentUserTierFree && <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />}
-
-          <Tabs
-            defaultValue="bank-accounts"
-            className={cn((isEmpty || isCurrentUserTierFree) && "blur-[8px] opacity-20")}
-          >
+        <FinancialPortalView
+          disabled={isEmpty}
+          tier={tier}
+          bankAccounts={accounts?.data ?? []}
+          bankConnections={bankConnections?.data ?? []}
+          userName={user?.data?.full_name ?? ""}
+          title="Connected Bank Accounts"
+          description="View your connected bank accounts and manage them."
+        />
+        {/** place a selector here to switch between bank accounts */}
+        <div className="py-[2%]">
+          <Tabs defaultValue={accounts?.data?.[0]?.id}>
             <TabsList>
-              <TabsTrigger value="bank-accounts">Bank Accounts</TabsTrigger>
-              <TabsTrigger value="credit-cards">Credit Cards</TabsTrigger>
+              {accounts?.data?.map((account) => (
+                <TabsTrigger key={account.id} value={account.id}>{account.name}</TabsTrigger>
+              ))}
             </TabsList>
-            <TabsContent value="bank-accounts">
-              <BankAccountsOverviewSummary
-                financialProfile={undefined}
-                financialContext={undefined}
-                demoMode={true}
-              />
-            </TabsContent>
-            <TabsContent value="credit-cards">
-              <CreditAccountsOverviewSummary
-                financialProfile={undefined}
-                financialContext={undefined}
-                demoMode={true}
-              />
-            </TabsContent>
+            {accounts?.data?.map((account) => (
+              <TabsContent key={account.id} value={account.id}>
+                <BankAccountSingleView
+                  bankAccount={account}
+                  bankConnections={bankConnections?.data ?? []}
+                  userName={user?.data?.full_name ?? ""}
+                />
+              </TabsContent>
+            ))}
           </Tabs>
         </div>
+       
+        {/** bank account single view */}
+        <BankAccountOverviewProTier
+          user={user}
+          isEmpty={isEmpty}
+          isCurrentUserTierFree={isCurrentUserTierFree}
+          tier={tier}
+        />
       </ConnectAccountServerWrapper>
     </Suspense>
   );

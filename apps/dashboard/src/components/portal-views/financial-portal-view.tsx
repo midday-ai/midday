@@ -6,10 +6,11 @@ import { Tables } from "@midday/supabase/types";
 import { Card } from "@midday/ui/card";
 import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { HTMLAttributes, useMemo, useState } from "react";
+import { BankAccountOverview } from "../bank-account/bank-account-overview";
 import { EmptyState } from "../charts/empty-state";
 import { MettalicCard } from "../mettalic-card";
-import { UpgradeTier } from "../upgrade-tier";
 import { BankAccountSheet } from "../sheets/bank-account-sheet";
+import { UpgradeTier } from "../upgrade-tier";
 
 type BankAccount = Tables<"bank_accounts">;
 type BankConnection = Tables<"bank_connections">;
@@ -20,6 +21,8 @@ interface FinancialPortalViewProps extends HTMLAttributes<HTMLDivElement> {
   bankAccounts?: Array<BankAccount>;
   bankConnections?: Array<BankConnection>;
   userName: string;
+  title?: string;
+  description?: string;
 }
 
 export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
@@ -28,10 +31,10 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   bankAccounts,
   bankConnections,
   userName,
+  title,
+  description,
   ...props
 }): JSX.Element | null => {
-  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // Return null if analytics v2 is not enabled
   if (!features.isAnalyticsV2Enabled) return null;
@@ -53,37 +56,13 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
     return (
       <div className="w-full pt-[3%] mx-auto">
         <Card className="p-[2%]">
-          <FinancialPortalOverview baseTierNumberOfConnectedAccounts={bankConnections?.length ?? 0} isFreeTier={true} />
-          <div className="flex flex-1 flex-wrap gap-3 p-[2%]">
-          {bankAccounts.map((bankAccount) => {
-            const bankConnection = bankConnectionMap[bankAccount.bank_connection_id!];
-            return (
-              <div
-                key={bankAccount.id}
-                onClick={() => {
-                  setSelectedBankAccount(bankAccount);
-                  setIsSheetOpen(true);
-                }}
-              >
-                <MettalicCard 
-                  cardIssuer={bankConnection?.name ?? "Bank Account"} 
-                  cardHolderName={userName ?? "User Name"} 
-                  cardNumber={bankAccount.name ?? "xxxx"} 
-                />
-              </div>
-            );
-          })}
-          </div>
-        </Card>
-        {selectedBankAccount && (
-          <BankAccountSheet
-            isOpen={isSheetOpen}
-            setOpen={setIsSheetOpen}
-            bankAccount={selectedBankAccount}
-            bankConnection={bankConnectionMap[selectedBankAccount.bank_connection_id!]}
+          <FinancialPortalOverview baseTierNumberOfConnectedAccounts={bankConnections?.length ?? 0} isFreeTier={true} title={title} description={description} />
+          <BankAccountOverview
+            bankAccounts={bankAccounts}
+            bankConnectionMap={bankConnectionMap}
             userName={userName}
           />
-        )}
+        </Card>
       </div>
     )
   }

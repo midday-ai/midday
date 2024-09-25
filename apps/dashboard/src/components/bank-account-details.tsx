@@ -18,7 +18,7 @@ interface BankAccountDetailsProps {
     bankConnection?: BankConnectionSchema;
     userName: string;
     isLoading?: boolean;
-    transactions: TransactionSchema[];
+    transactions?: TransactionSchema[];
     transactionsLoading: boolean;
 }
 
@@ -99,20 +99,20 @@ export function BankAccountDetails({
                     </AccordionItem>
                 )}
 
-                <AccordionItem value="transactions" className="h-[calc(100vh-400px)]">
-                    <AccordionTrigger>Recent Transactions</AccordionTrigger>
-                    <AccordionContent className="h-full">
-                        {transactionsLoading ? (
-                            <Skeleton className="w-full h-[100px]" />
-                        ) : transactions.length > 0 ? (
-                            <div className="h-full">
-                                <TransactionsFilterHelper transactions={transactions} title={`${bankAccount.name}`} />
-                            </div>
-                        ) : (
-                            <p>No recent transactions found.</p>
-                        )}
-                    </AccordionContent>
-                </AccordionItem>
+                {transactions && transactions.length > 0 && (
+                    <AccordionItem value="transactions" className="h-[calc(100vh-400px)]">
+                        <AccordionTrigger>Recent Transactions</AccordionTrigger>
+                        <AccordionContent className="h-full">
+                            {transactionsLoading ? (
+                                <Skeleton className="w-full h-[100px]" />
+                            ) : (
+                                <div className="h-full">
+                                    <TransactionsFilterHelper transactions={transactions} title={`${bankAccount.name}`} />
+                                </div>
+                            )}
+                        </AccordionContent>
+                    </AccordionItem>
+                )}
             </Accordion>
         </div>
     );

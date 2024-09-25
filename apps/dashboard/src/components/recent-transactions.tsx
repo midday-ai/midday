@@ -4,9 +4,12 @@ import { NoResults } from "@/components/tables/transactions/empty-states";
 import { Cookies } from "@/utils/constants";
 import { getRecentTransactions } from "@midday/supabase/cached-queries";
 import { GetRecentTransactionsParams, RecurringTransactionFrequency } from "@midday/supabase/queries";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@midday/ui/accordion";
 import { Card, CardFooter } from "@midday/ui/card";
+import { cn } from "@midday/ui/cn";
 import { format } from 'date-fns';
 import { cookies } from "next/headers";
+import { TransactionAnalytics } from "./bank-account/transaction-analytics";
 
 /**
  * Props for the RecentTransactions component.
@@ -22,6 +25,7 @@ interface RecentTransactionsProps extends React.HTMLAttributes<HTMLDivElement> {
     recurringTransactionFrequency?: RecurringTransactionFrequency;
     title: string;
     description: string;
+    className?: string;
 }
 
 /**
@@ -40,6 +44,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = async ({
     recurringTransactionFrequency,
     title,
     description,
+    className
 }) => {
     // Retrieve the initial column visibility settings from cookies
     const initialColumnVisibility = JSON.parse(
@@ -88,7 +93,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = async ({
 
     // Render the DataTable component with the fetched transactions
     return (
-        <Card className="min-h-[530px] overflow-y-auto scrollbar-hide">
+        <Card className={cn("min-h-[530px] overflow-y-auto scrollbar-hide", className)}>
             <div className="p-[2%]">
                 <div className="mx-auto w-full">
                     <h2 className="mt-2 text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
@@ -101,6 +106,16 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = async ({
                        {description}
                     </p>
                 </div>
+            </div>
+            <div className="p-[2%]">
+                <Accordion type="single" collapsible>
+                    <AccordionItem value="analytics">
+                        <AccordionTrigger className="text-3xl font-bold mb-4">Transaction Details</AccordionTrigger>
+                        <AccordionContent>
+                            <TransactionAnalytics transactions={data ?? []} />
+                        </AccordionContent>
+                    </AccordionItem>
+                </Accordion>
             </div>
             <DataTable 
                 data={data ?? []} 
