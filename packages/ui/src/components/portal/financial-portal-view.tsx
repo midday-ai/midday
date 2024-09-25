@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
 import { FinancialUserProfile, MelodyFinancialContext } from "client-typescript-sdk";
-import { useFinancialData } from "./hooks/useFinancialData";
-import { PortalHeader } from "./components/PortalHeader";
-import { LinkedAccountsOverview } from "./components/LinkedAccountsOverview";
-import { StatsOverview } from "./components/StatsOverview";
+import React from "react";
 import { FreeTierView } from "./components/FreeTierView";
+import { LinkedAccountsOverview } from "./components/LinkedAccountsOverview";
+import { PortalHeader } from "./components/PortalHeader";
+import { StatsOverview } from "./components/StatsOverview";
+import { useFinancialData } from "./hooks/useFinancialData";
 
 interface FinancialPortalOverviewProps {
   financialProfile?: FinancialUserProfile;
@@ -14,6 +14,8 @@ interface FinancialPortalOverviewProps {
   demoMode?: boolean;
   baseTierNumberOfConnectedAccounts?: number;
   isFreeTier?: boolean;
+  title?: string;
+  description?: string;
 }
 
 export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = ({
@@ -21,7 +23,9 @@ export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = (
   financialContext,
   demoMode = false,
   baseTierNumberOfConnectedAccounts = 0,
-  isFreeTier = false
+  isFreeTier = false,
+  title,
+  description
 }) => {
   const {
     linkedInstitutions,
@@ -40,6 +44,8 @@ export const FinancialPortalOverview: React.FC<FinancialPortalOverviewProps> = (
         <PortalHeader
           linkedInstitutionsCount={linkedInstitutions.length}
           numConnectedAccounts={numConnectedAccounts}
+          title={title}
+          description={description}
         />
         <LinkedAccountsOverview linkedInstitutions={linkedInstitutions} />
         <StatsOverview stats={stats} />
