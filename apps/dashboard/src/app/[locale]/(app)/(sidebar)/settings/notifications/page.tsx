@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Notifications | Midday",
+  title: "Notifications | Solomon AI",
 };
 
 export default async function Notifications() {

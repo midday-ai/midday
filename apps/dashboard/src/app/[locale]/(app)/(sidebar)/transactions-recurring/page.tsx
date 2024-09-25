@@ -23,7 +23,7 @@ import { searchParamsCacheRecurring } from "./search-params";
  * Metadata for the Recurring Transactions page.
  */
 export const metadata: Metadata = {
-  title: "Recurring Transactions | Midday",
+  title: "Recurring Transactions | Solomon AI",
 };
 
 /**

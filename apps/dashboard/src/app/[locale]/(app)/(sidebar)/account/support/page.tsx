@@ -3,7 +3,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Support | Midday",
+  title: "Support | Solomon AI",
 };
 
 export default async function Support() {

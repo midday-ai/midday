@@ -3,7 +3,7 @@ import { AssistantHistory } from "@/components/assistant-history";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Assistant | Midday",
+  title: "Assistant | Solomon AI",
 };
 
 export default async function Page() {

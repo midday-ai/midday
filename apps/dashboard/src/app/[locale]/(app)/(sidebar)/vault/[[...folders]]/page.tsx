@@ -3,7 +3,7 @@ import { searchParamsCache } from "@/components/tables/vault/search-params";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Vault | Midday",
+  title: "Vault | Solomon AI",
 };
 
 type Props = {

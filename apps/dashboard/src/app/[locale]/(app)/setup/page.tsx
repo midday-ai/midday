@@ -6,7 +6,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Setup account | Midday",
+  title: "Setup account | Solomon AI",
 };
 
 export default async function Page() {

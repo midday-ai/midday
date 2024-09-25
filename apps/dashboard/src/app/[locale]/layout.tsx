@@ -12,45 +12,45 @@ import type { ReactElement } from "react";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | Run your business smarter",
+  metadataBase: new URL("https://solomon-ai.app"),
+  title: "Solomon AI | A better way to act on your finances",
   description:
-    "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    "We extract unknown relationships from your finances and help you act on them.",
   twitter: {
-    title: "Midday | Run your business smarter",
+    title: "Solomon AI | A better way to act on your finances",
     description:
-      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    images: [
-      {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
-        width: 1800,
-        height: 1600,
-      },
-    ],
+      "We extract unknown relationships from your finances and help you act on them.",
+    // images: [
+    //   {
+    //     url: "https://cdn.midday.ai/opengraph-image.jpg",
+    //     width: 800,
+    //     height: 600,
+    //   },
+    //   {
+    //     url: "https://cdn.midday.ai/opengraph-image.jpg",
+    //     width: 1800,
+    //     height: 1600,
+    //   },
+    // ],
   },
   openGraph: {
-    title: "Midday | Run your business smarter",
+    title: "Solomon AI | A better way to act on your finances",
     description:
-      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.midday.ai",
-    siteName: "Midday",
-    images: [
-      {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "https://cdn.midday.ai/opengraph-image.jpg",
-        width: 1800,
-        height: 1600,
-      },
-    ],
+      "We extract unknown relationships from your finances and help you act on them.",
+    url: "https://solomon-ai.app",
+    siteName: "Solomon AI",
+    // images: [
+    //   {
+    //     url: "https://cdn.midday.ai/opengraph-image.jpg",
+    //     width: 800,
+    //     height: 600,
+    //   },
+    //   {
+    //     url: "https://cdn.midday.ai/opengraph-image.jpg",
+    //     width: 1800,
+    //     height: 1600,
+    //   },
+    // ],
     locale: "en_US",
     type: "website",
   },

@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 
 export const metadata: Metadata = {
-  title: "Invoices | Midday",
+  title: "Invoices | Solomon AI",
 };
 
 export default function Invoices() {
