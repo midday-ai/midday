@@ -60,7 +60,7 @@ export function Hero() {
         <p className="text-xs text-[#707070] mt-8 font-mono">
           Used by over{" "}
           <Link href="/open-startup" prefetch>
-            <span className="underline">7,900+</span>
+            <span className="underline">8,000+</span>
           </Link>{" "}
           businesses.
         </p>
