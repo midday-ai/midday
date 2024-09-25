@@ -2,7 +2,11 @@ import { AI } from "@/actions/ai/chat";
 import ChatAccessibilityButton from "@/components/accessibility-button/chat-accessibility-button";
 import { AccessibilityWidget } from "@/components/accessibility-helper-widget";
 import { Header } from "@/components/header";
+import { ExpenseViewModal } from "@/components/modals/expense/expense-view-modal";
 import { IncomeViewModal } from "@/components/modals/income/income-view-modal";
+import { OverviewViewModal } from "@/components/modals/overview/overview-view-modal";
+import { SubscriptionViewModal } from "@/components/modals/subscription/subscription-view-modal";
+import { TransactionViewModal } from "@/components/modals/transaction/transaction-view-modal";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
@@ -101,6 +105,10 @@ export default async function Layout({
 
         <AssistantModal />
         <IncomeViewModal />
+        <ExpenseViewModal />
+        <SubscriptionViewModal />
+        <TransactionViewModal />
+        <OverviewViewModal />
         <ConnectTransactionsModal countryCode={countryCode} />
         <SelectBankAccountsModal />
         <ImportModal

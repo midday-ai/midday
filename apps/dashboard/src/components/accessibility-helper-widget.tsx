@@ -18,6 +18,10 @@ import IncomeViewAccessibilityButton from "./accessibility-button/income-view-ac
 import AdminProductWidget from "./widgets/feature-base/admin-product-widget";
 import ChangelogProductWidget from "./widgets/feature-base/changelog-product-widget";
 import FeedbackProductWidget from "./widgets/feature-base/feedback-product-widget";
+import ExpenseViewAccessibilityButton from "./accessibility-button/expense-view-accessibility-button";
+import SubscriptionViewAccessibilityButton from "./accessibility-button/subscription-view-accessibility-button";
+import TransactionViewAccessibilityButton from "./accessibility-button/transaction-view-accessibility-button";
+import OverviewViewAccessibilityButton from "./accessibility-button/overview-view-accessibility-button";
 
 /**
  * Props for the AccessibilityWidget component.
@@ -96,6 +100,10 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           <div className="flex flex-col gap-4 items-start">
             {renderChatButton()}
             {renderIncomeButton()}
+            {renderExpenseButton()}
+            {renderSubscriptionButton()}
+            {renderTransactionButton()}
+            {renderOverviewButton()}
             {renderProductUpdatesButton()}
             {renderFeedbackButton()}
             {renderChangelogButton()}
@@ -126,6 +134,54 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
     <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
       <IncomeViewAccessibilityButton className="m-3" />
       <span className="text-lg">Income</span>
+    </Button>
+  );
+
+  /**
+   * Renders the expense view accessibility button.
+   *
+   * @returns {React.ReactElement} The rendered expense view button.
+   */
+  const renderExpenseButton = () => (
+    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
+      <ExpenseViewAccessibilityButton className="m-3" />
+      <span className="text-lg">Expenses</span>
+    </Button>
+  );
+
+  /**
+   * Renders the subscription view accessibility button.
+   *
+   * @returns {React.ReactElement} The rendered subscription view button.
+   */
+  const renderSubscriptionButton = () => (
+    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
+      <SubscriptionViewAccessibilityButton className="m-3" />
+      <span className="text-lg">Subscriptions</span>
+    </Button>
+  );
+
+  /**
+   * Renders the transaction view accessibility button.
+   *
+   * @returns {React.ReactElement} The rendered transaction view button.
+   */
+  const renderTransactionButton = () => (
+    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
+      <TransactionViewAccessibilityButton className="m-3" />
+      <span className="text-lg">Transactions</span>
+    </Button>
+  );
+
+  /**
+   * Renders the overview view accessibility button.
+   *
+   * @returns {React.ReactElement} The rendered overview view button.
+   */
+  const renderOverviewButton = () => (
+    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
+      <OverviewViewAccessibilityButton className="m-3" />
+      <span className="text-lg">Overview</span>
     </Button>
   );
 
