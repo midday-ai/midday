@@ -650,22 +650,14 @@ export async function getShippingLogisticsAnalysisQuery(
 /**
  * Zod schema for the parameters of the getExpenseBreakdownByLocationQuery function.
  */
-export const GetExpenseBreakdownByLocationQueryParamsSchema = z.object({
-  /** The unique identifier of the team. */
-  teamId: z.string().uuid(),
-  /** The start date of the query period in string format. */
-  from: z.string().datetime(),
-  /** The end date of the query period in string format. */
-  to: z.string().datetime(),
-  /** The currency to use for the expense calculations (optional). */
-  currency: z.string().optional().default("USD"),
-});
+export const getExpenseBreakdownByLocationQueryParamsSchema =
+  baseQueryParamsSchema;
 
 /**
  * Type inference from the Zod schema for the getExpenseBreakdownByLocationQuery function parameters.
  */
 export type GetExpenseBreakdownByLocationQueryParams = z.infer<
-  typeof GetExpenseBreakdownByLocationQueryParamsSchema
+  typeof getExpenseBreakdownByLocationQueryParamsSchema
 >;
 
 /**
@@ -679,7 +671,7 @@ export async function getExpenseBreakdownByLocationQuery(
   params: GetExpenseBreakdownByLocationQueryParams,
 ) {
   const { teamId, from, to, currency } =
-    GetExpenseBreakdownByLocationQueryParamsSchema.parse(params);
+    getExpenseBreakdownByLocationQueryParamsSchema.parse(params);
   return supabase.rpc("get_expense_breakdown_by_location", {
     team_id: teamId,
     start_date: toUTCDate(from).toDateString(),

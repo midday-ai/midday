@@ -1,15 +1,15 @@
+import { AccountSummarySection } from "@/components/cash-flow/account-summary-section";
+import { ExpenseTabsSection } from "@/components/cash-flow/expense-tabs-section";
+import { IncomeTabsSection } from "@/components/cash-flow/income-tabs-section";
+import { SpendingTabsSection } from "@/components/cash-flow/spending-tabs-section";
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
-import { EmptyState } from "@/components/charts/empty-state";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
-import { Inbox } from "@/components/inbox";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
-import { OverviewModal } from "@/components/modals/overview-modal";
+import { getDefaultDateRange } from "@/config/chart-date-range-default-picker";
+import Tier from "@/config/tier";
 import { Cookies } from "@/utils/constants";
-import { uniqueCurrencies } from "@midday/location/src/currencies";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
-import { Card } from "@midday/ui/card";
-import { cn } from "@midday/ui/cn";
-import { ConnectedAccountSummary } from "@midday/ui/portal/connected-account-view";
+import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
@@ -22,32 +22,65 @@ type Props = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
+const defaultValue = getDefaultDateRange("monthly", "expense");
+
 export default async function CashFlowPage({ searchParams }: Props) {
   const user = await getUser();
   const accounts = await getTeamBankAccounts();
   const isEmpty = !accounts?.data?.length;
+  const initialPeriod = cookies().has(Cookies.SpendingPeriod)
+    ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
+    : {
+        id: "this_year",
+        from: startOfYear(new Date()).toISOString(),
+        to: new Date().toISOString(),
+      };
+
+  const tier: Tier = user?.data?.tier ?? "free";
+
+  const value = {
+    ...(searchParams.from && { from: searchParams.from }),
+    ...(searchParams.to && { to: searchParams.to }),
+  };
 
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ConnectAccountServerWrapper>
         <div className="mt-8">
-          <div className={cn(isEmpty && "relative")}>
-            {isEmpty && <EmptyState />}
-            <div className={cn("py-[2%]", isEmpty && "blur-[8px] opacity-20")}>
-              <ConnectedAccountSummary
-                name={user?.data?.full_name ?? "Solomon AI User"}
-              />
-            </div>
+          <AccountSummarySection
+            user={user}
+            isEmpty={isEmpty}
+            tier={tier}
+            name={user?.data?.full_name ?? "Solomon AI User"}
+          />
+          <div className="mt-4 flex flex-col gap-4">
+            <ExpenseTabsSection
+              isEmpty={isEmpty}
+              accounts={accounts as any}
+              user={user as any}
+              tier={tier}
+              value={value as any}
+              defaultValue={defaultValue}
+            />
+            <IncomeTabsSection
+              isEmpty={isEmpty}
+              accounts={accounts as any}
+              user={user as any}
+              tier={tier}
+              value={value as any}
+              defaultValue={getDefaultDateRange("monthly", "income")}
+            />
+            <SpendingTabsSection
+              isEmpty={isEmpty}
+              initialPeriod={initialPeriod}
+              currency={(searchParams.currency as string) ?? "USD"}
+            />
           </div>
-          <div className={cn("mt-4", isEmpty && "relative")}>
-            {isEmpty && <EmptyState />}
-            <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
-              <CashflowCharts
-                currency={(searchParams.currency as string) ?? "USD"}
-                disableAllCharts={true}
-              />
-            </div>
-          </div>
+          <CashflowCharts
+            currency={(searchParams.currency as string) ?? "USD"}
+            disableAllCharts={true}
+            tier={tier}
+          />
         </div>
       </ConnectAccountServerWrapper>
     </Suspense>

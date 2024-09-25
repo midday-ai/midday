@@ -33,7 +33,7 @@ import {
 /**
  * Represents a single data point in the chart.
  */
-type DataPoint = {
+export type DataPoint = {
   /** ISO 8601 formatted date string */
   date: string;
   /** Number of events for this data point */
@@ -335,15 +335,6 @@ export function ZoomableChart({
       );
     }
   };
-
-  console.log("details", {
-    data,
-    zoomedData,
-    startTime,
-    endTime,
-    originalData,
-    total,
-  });
 
   return (
     <Card className="w-full h-full">

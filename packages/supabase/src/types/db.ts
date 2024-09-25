@@ -1212,6 +1212,7 @@ export type Database = {
           locale: string | null;
           payment_method: Json | null;
           team_id: string | null;
+          tier: Database["public"]["Enums"]["user_tier"];
           timezone: string | null;
           week_starts_on_monday: boolean | null;
         };
@@ -1225,6 +1226,7 @@ export type Database = {
           locale?: string | null;
           payment_method?: Json | null;
           team_id?: string | null;
+          tier?: Database["public"]["Enums"]["user_tier"];
           timezone?: string | null;
           week_starts_on_monday?: boolean | null;
         };
@@ -1238,6 +1240,7 @@ export type Database = {
           locale?: string | null;
           payment_method?: Json | null;
           team_id?: string | null;
+          tier?: Database["public"]["Enums"]["user_tier"];
           timezone?: string | null;
           week_starts_on_monday?: boolean | null;
         };
@@ -2395,6 +2398,7 @@ export type Database = {
         | "wire"
         | "fee";
       transactionStatus: "posted" | "pending" | "excluded" | "completed";
+      user_tier: "free" | "pro" | "enterprise";
     };
     CompositeTypes: {
       metrics_record: {

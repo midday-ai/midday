@@ -11,9 +11,16 @@
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { CircleIcon, XIcon } from "lucide-react";
 import React, { useCallback, useState } from "react";
-import ChatAccessibilityButton from "./chat-accessibility-button";
+import ChatAccessibilityButton from "./accessibility-button/chat-accessibility-button";
+import ExpenseViewAccessibilityButton from "./accessibility-button/expense-view-accessibility-button";
+import IncomeViewAccessibilityButton from "./accessibility-button/income-view-accessibility-button";
+import OverviewViewAccessibilityButton from "./accessibility-button/overview-view-accessibility-button";
+import SubscriptionViewAccessibilityButton from "./accessibility-button/subscription-view-accessibility-button";
+import TransactionViewAccessibilityButton from "./accessibility-button/transaction-view-accessibility-button";
+import { ProTierDock } from "./dock/dock";
 import AdminProductWidget from "./widgets/feature-base/admin-product-widget";
 import ChangelogProductWidget from "./widgets/feature-base/changelog-product-widget";
 import FeedbackProductWidget from "./widgets/feature-base/feedback-product-widget";
@@ -84,104 +91,170 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    */
   const renderWidgetContent = () => (
     <div className="fixed inset-0 z-50 backdrop-blur-sm">
-      <Card className="fixed bottom-20 left-20 p-6 shadow-lg md:min-w-[200px]">
+      <Card className="fixed bottom-20 left-20 p-6 shadow-lg md:min-w-[300px]">
         <div className="flex justify-between items-center mb-4">
           <Button variant="ghost" size="icon" onClick={toggleWidget}>
             <XIcon className="h-6 w-6" />
             <span className="sr-only">Close</span>
           </Button>
         </div>
-        <div className="flex flex-col md:max-h-96 scrollbar-hide overflow-y-auto my-[2.5%] md:min-h-64">
-          <div className="flex flex-col gap-4 items-start">
-            {renderChatButton()}
-            {renderProductUpdatesButton()}
-            {renderFeedbackButton()}
-            {renderChangelogButton()}
-          </div>
-        </div>
+        <Tabs
+          defaultValue="quick-access"
+          className="w-full flex flex-col gap-4"
+        >
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="quick-access">Quick Access</TabsTrigger>
+            <TabsTrigger value="product">Product</TabsTrigger>
+            <TabsTrigger value="pro-tier">Pro Tier</TabsTrigger>
+          </TabsList>
+          <TabsContent value="quick-access">
+            <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
+              {renderQuickAccessButtons()}
+            </div>
+          </TabsContent>
+          <TabsContent value="product">
+            <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
+              {renderProductButtons()}
+            </div>
+          </TabsContent>
+          <TabsContent value="pro-tier">
+            <div className="flex flex-col items-center justify-center gap-4 md:h-[400px] overflow-y-auto scrollbar-hide">
+              <div className="text-lg font-bold">Private Beta</div>
+              <div className="text-sm text-muted-foreground">
+                You are in the private beta of Pro Tier.
+              </div>
+              {/* Add ProTierDock at the bottom center */}
+              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2">
+                <ProTierDock />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );
 
   /**
-   * Renders the chat accessibility button.
+   * Renders the quick access buttons.
    *
-   * @returns {React.ReactElement} The rendered chat button.
+   * @returns {React.ReactElement} The rendered quick access buttons.
    */
-  const renderChatButton = () => (
-    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
-      <ChatAccessibilityButton className="m-3" />
-      <span className="text-lg">Ask Solomon</span>
+  const renderQuickAccessButtons = () => (
+    <>
+      {renderAccessButton(
+        "Ask Solomon",
+        <ChatAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Income",
+        <IncomeViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Expenses",
+        <ExpenseViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Subscriptions",
+        <SubscriptionViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Transactions",
+        <TransactionViewAccessibilityButton className="m-3" />,
+      )}
+      {renderAccessButton(
+        "Overview",
+        <OverviewViewAccessibilityButton className="m-3" />,
+      )}
+    </>
+  );
+
+  /**
+   * Renders the product buttons.
+   *
+   * @returns {React.ReactElement} The rendered product buttons.
+   */
+  const renderProductButtons = () => (
+    <>
+      {renderProductButton(
+        "Product Updates",
+        <AdminProductWidget
+          organization="solomonai"
+          theme="light"
+          fullscreenPopup={false}
+          locale="en"
+          usersName="Solomon"
+          className="m-3"
+          placement="right"
+          email={email}
+          name={name}
+          id={id}
+          profilePicture={profilePicture}
+        />,
+      )}
+      {renderProductButton(
+        "Feedback",
+        <FeedbackProductWidget
+          organization="solomonai"
+          theme="light"
+          locale="en"
+          usersName="Solomon"
+          className="m-3"
+          placement="right"
+          email={email}
+          name={name}
+          id={id}
+          profilePicture={profilePicture}
+        />,
+      )}
+      {renderProductButton(
+        "Changelog",
+        <ChangelogProductWidget
+          organization="solomonai"
+          theme="light"
+          locale="en"
+          usersName="Solomon"
+          className="m-3"
+          email={email}
+          name={name}
+          id={id}
+          profilePicture={profilePicture}
+          fullscreenPopup={true}
+        />,
+      )}
+    </>
+  );
+
+  /**
+   * Renders an access button.
+   *
+   * @param {string} label - The label for the button.
+   * @param {React.ReactNode} icon - The icon for the button.
+   * @returns {React.ReactElement} The rendered access button.
+   */
+  const renderAccessButton = (label: string, icon: React.ReactNode) => (
+    <Button
+      variant="ghost"
+      className="flex flex-1 items-center gap-2 border-0 w-full justify-start"
+    >
+      {icon}
+      <span className="text-lg">{label}</span>
     </Button>
   );
 
   /**
-   * Renders the product updates button.
+   * Renders a product button.
    *
-   * @returns {React.ReactElement} The rendered product updates button.
+   * @param {string} label - The label for the button.
+   * @param {React.ReactNode} widget - The widget for the button.
+   * @returns {React.ReactElement} The rendered product button.
    */
-  const renderProductUpdatesButton = () => (
-    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
-      <AdminProductWidget
-        organization="solomonai"
-        theme="light"
-        fullscreenPopup={false}
-        locale="en"
-        usersName="Solomon"
-        className="m-3"
-        placement="right"
-        email={email}
-        name={name}
-        id={id}
-        profilePicture={profilePicture}
-      />
-      <span className="text-lg">Product Updates</span>
-    </Button>
-  );
-
-  /**
-   * Renders the feedback button.
-   *
-   * @returns {React.ReactElement} The rendered feedback button.
-   */
-  const renderFeedbackButton = () => (
-    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
-      <FeedbackProductWidget
-        organization="solomonai"
-        theme="light"
-        locale="en"
-        usersName="Solomon"
-        className="m-3"
-        placement="right"
-        email={email}
-        name={name}
-        id={id}
-        profilePicture={profilePicture}
-      />
-      <span className="text-lg">Feedback</span>
-    </Button>
-  );
-
-  /**
-   * Renders the changelog button.
-   *
-   * @returns {React.ReactElement} The rendered changelog button.
-   */
-  const renderChangelogButton = () => (
-    <Button variant="ghost" className="flex flex-1 items-center gap-2 border-0">
-      <ChangelogProductWidget
-        organization="solomonai"
-        theme="light"
-        locale="en"
-        usersName="Solomon"
-        className="m-3"
-        email={email}
-        name={name}
-        id={id}
-        profilePicture={profilePicture}
-        fullscreenPopup={true}
-      />
-      <span className="text-lg">Changelog</span>
+  const renderProductButton = (label: string, widget: React.ReactNode) => (
+    <Button
+      variant="ghost"
+      className="flex flex-1 items-center gap-2 border-0 w-full justify-start"
+    >
+      {widget}
+      <span className="text-lg">{label}</span>
     </Button>
   );
 

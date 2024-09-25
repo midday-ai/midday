@@ -214,6 +214,7 @@
     "./magicui/particles": "./src/components/magicui/particles.tsx",
     "./magicui/sphere-mask": "./src/components/magicui/sphere-mask.tsx",
     "./magicui/text-shimmer": "./src/components/magicui/text-shimmer.tsx",
+    "./magicui/dock": "./src/components/magicui/dock.tsx",
     "./markdown-text": "./src/components/markdown-text.tsx",
     "./menu": "./src/types/menu.tsx",
     "./menubar": "./src/components/menubar.tsx",

@@ -12,6 +12,7 @@ import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
 import { BarChart } from "./bar-chart";
 import { chartExampleData } from "./data";
+import { IncomeGrowthRateBarChart } from "./income-growth-rate-bar-chart";
 
 type Props = {
   value: any;
@@ -19,6 +20,7 @@ type Props = {
   type: string;
   disabled?: boolean;
   currency?: string;
+  enableGrowthRate?: boolean;
 };
 
 export async function ProfitRevenueChart({
@@ -27,10 +29,18 @@ export async function ProfitRevenueChart({
   type,
   disabled,
   currency,
+  enableGrowthRate,
 }: Props) {
   const data = disabled
     ? chartExampleData
     : await getMetrics({ ...defaultValue, ...value, type, currency });
+
+  const growthRateBarChartData =
+    data?.result?.map((item: any) => ({
+      date: item.date ?? "",
+      income: item.current?.value ?? 0,
+      growth_rate: item.percentage?.value ?? 0,
+    })) || [];
 
   return (
     <div className={cn(disabled && "pointer-events-none select-none")}>
@@ -115,7 +125,27 @@ export async function ProfitRevenueChart({
           </TooltipProvider>
         </div>
       </div>
-      <BarChart data={data} disabled={disabled} />
+      {enableGrowthRate ? (
+        <IncomeGrowthRateBarChart
+          data={{
+            result:
+              data?.result?.map(
+                (
+                  item,
+                ): { date: string; income: number; growthRate: number } => ({
+                  date: item.date,
+                  income: Number(item.current?.value) ?? 0,
+                  growthRate: Number(item.precentage?.value) ?? 0,
+                }),
+              ) ?? [],
+            meta: {
+              currency: currency ?? "USD",
+            },
+          }}
+        />
+      ) : (
+        <BarChart data={data} />
+      )}
     </div>
   );
 }

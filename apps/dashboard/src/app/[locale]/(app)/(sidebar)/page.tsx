@@ -1,29 +1,23 @@
-import CardWrapper from "@/components/card/card-wrapper";
 import { ChartSelectors } from "@/components/charts/chart-selectors";
 import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import TabbedCharts from "@/components/charts/tabbed-charts";
-import { Transactions } from "@/components/charts/transactions";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import { CategorySpendingPortalView } from "@/components/portal-views/category-spending-portal-view";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
+import { RecentFilesPortalView } from "@/components/portal-views/recent-files-portal-view";
 import RecentTransactions from "@/components/recent-transactions";
-import { Table } from "@/components/tables/transactions";
 import { Widgets } from "@/components/widgets";
 import { Cookies } from "@/utils/constants";
-import { getTeamBankAccounts, getTeamUser, getUser } from "@midday/supabase/cached-queries";
-import { RecurringTransactionFrequency } from "@midday/supabase/queries";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@midday/ui/card";
-import { AreaChart } from "@midday/ui/charts/base/area-chart";
+  getBankConnectionsByTeamId,
+  getTeamBankAccounts,
+  getUser,
+} from "@midday/supabase/cached-queries";
+import { RecurringTransactionFrequency } from "@midday/supabase/queries";
+import { Card } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
-import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-import { columns, DataTable } from "@midday/ui/transaction-table";
 import { startOfMonth, startOfYear, subMonths } from "date-fns";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -45,17 +39,22 @@ const defaultValue = {
 export default async function Overview({
   searchParams,
 }: { searchParams: Record<string, string> }) {
-  const accounts = await getTeamBankAccounts();
+  const [user, accounts, bankConnections] = await Promise.all([
+    getUser(),
+    getTeamBankAccounts(),
+    getBankConnectionsByTeamId(),
+  ]);
+
   const chartType = cookies().get(Cookies.ChartType)?.value ?? "profit";
 
   const hideConnectFlow = cookies().has(Cookies.HideConnectFlow);
   const initialPeriod = cookies().has(Cookies.SpendingPeriod)
     ? JSON.parse(cookies().get(Cookies.SpendingPeriod)?.value ?? "{}")
     : {
-      id: "this_year",
-      from: startOfYear(new Date()).toISOString(),
-      to: new Date().toISOString(),
-    };
+        id: "this_year",
+        from: startOfYear(new Date()).toISOString(),
+        to: new Date().toISOString(),
+      };
 
   const value = {
     ...(searchParams.from && { from: searchParams.from }),
@@ -64,10 +63,18 @@ export default async function Overview({
 
   const isEmpty = !accounts?.data?.length;
 
+  const tier = user?.data?.tier ?? "free";
+
   return (
     <>
       {/** financial portal view */}
-      <FinancialPortalView disabled={isEmpty} />
+      <FinancialPortalView
+        disabled={isEmpty}
+        tier={tier}
+        bankAccounts={accounts?.data ?? []}
+        bankConnections={bankConnections?.data ?? []}
+        userName={user?.data?.full_name ?? ""}
+      />
 
       <div>
         <Card className="h-[530px] md:h-[700px] my-4 p-[2%]">
@@ -87,6 +94,19 @@ export default async function Overview({
             </div>
           </div>
         </Card>
+        <Card className="my-4 p-[2%]">
+          <div className="mt-8">
+            {isEmpty && <EmptyState />}
+
+            <div className={cn(isEmpty && "blur-[8px] opacity-20")}>
+              <CategorySpendingPortalView
+                disabled={isEmpty}
+                period={initialPeriod}
+                currency={searchParams.currency ?? "USD"}
+              />
+            </div>
+          </div>
+        </Card>
 
         {/** display recent transactions */}
         <Tabs defaultValue="transactions">
@@ -95,25 +115,37 @@ export default async function Overview({
             <TabsTrigger value="recurring">Recurring</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions">
-            <RecentTransactions title="Recent Transactions" description="Most Recent Transactions Of Interest" />
+            <RecentTransactions
+              title="Recent Transactions"
+              description="Most Recent Transactions Of Interest"
+            />
           </TabsContent>
           <TabsContent value="recurring">
-            <RecentTransactions title="Subscriptions" description="Most Recent Detected recurring transactions across your accounts" recurringTransactionFrequency={RecurringTransactionFrequency.MONTHLY} />
+            <RecentTransactions
+              title="Subscriptions"
+              description="Most Recent Detected recurring transactions across your accounts"
+              recurringTransactionFrequency={
+                RecurringTransactionFrequency.MONTHLY
+              }
+            />
           </TabsContent>
         </Tabs>
+
+        <RecentFilesPortalView disabled={isEmpty} />
 
         {/** tabbed charts with income and expense charts */}
         <TabbedCharts
           currency={searchParams.currency ?? "USD"}
           className="mt-8"
           disabled={isEmpty}
+          tier={tier}
         />
-
+        {/* 
         <Widgets
           initialPeriod={initialPeriod}
           disabled={isEmpty}
           searchParams={searchParams}
-        />
+        /> */}
 
         {/* * recent transactions
         <Card className="mt-8 min-h-[530px] overflow-y-auto scrollbar-hide">

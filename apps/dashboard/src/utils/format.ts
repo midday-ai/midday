@@ -104,3 +104,23 @@ export function formatAccountName({
 
   return name;
 }
+
+/**
+ * Formats a number as a percentage string
+ * @param value - The number to format as a percentage
+ * @param locale - The locale to use for formatting
+ * @param options - Additional Intl.NumberFormat options
+ * @returns A formatted percentage string
+ */
+export function formatPercentage(
+  value: number,
+  locale: string,
+  options: Intl.NumberFormatOptions = {},
+): string {
+  return new Intl.NumberFormat(locale, {
+    style: "percent",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    ...options,
+  }).format(value);
+}

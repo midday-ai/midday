@@ -1,0 +1,52 @@
+"use client";
+
+import { useIncomeViewStore } from "@/store/income-view";
+import { cn } from "@midday/ui/utils";
+import { ChartBarIncreasing } from "lucide-react";
+
+/**
+ * IncomeViewAccButton Component
+ *
+ * This component renders a floating button that opens the income view when clicked.
+ * It's positioned at the bottom right corner of the screen and is hidden on small screens.
+ *
+ * @remarks
+ * - The button is only visible on screens larger than the 'sm' breakpoint (typically 640px).
+ * - It uses the `useIncomeViewStore` hook to access the `setOpen` function for opening the income view.
+ * - The button's position is adjusted to account for potential scrollbar changes when the view opens.
+ *
+ * @returns A React functional component
+ */
+const IncomeViewAccessibilityButton: React.FC<{
+  className?: string;
+  isWidget?: boolean;
+}> = ({ className, isWidget = false }) => {
+  const { setOpen } = useIncomeViewStore();
+
+  return (
+    <div
+      className={cn(
+        isWidget && "fixed bottom-0 m-4 hidden sm:block",
+        className,
+      )}
+    >
+      <button
+        className="inline-flex items-center justify-center rounded-full bg-primary p-4 text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        onClick={() => setOpen(true)}
+        style={
+          isWidget
+            ? {
+                marginRight:
+                  "calc(20px + var(--removed-body-scroll-bar-size, 0px))",
+              }
+            : undefined
+        }
+        aria-label="Open income view"
+      >
+        <ChartBarIncreasing className="h-5 w-5" />
+      </button>
+    </div>
+  );
+};
+
+export default IncomeViewAccessibilityButton;
