@@ -63,6 +63,20 @@ const ExpenseSkeleton = () => (
     </div>
 );
 
+/**
+ * ExpenseViewModal Component
+ * 
+ * @component
+ * @description
+ * This component renders a modal dialog that displays detailed expense information.
+ * It fetches and presents expense data, including charts and growth rate information.
+ * 
+ * @example
+ * ```tsx
+ * <ExpenseViewModal />
+ * ```
+ */
+
 export const ExpenseViewModal = React.memo(function ExpenseViewModal() {
     const supabase = useMemo(() => createClient(), []);
     const { isOpen, setOpen } = useExpenseViewStore();
