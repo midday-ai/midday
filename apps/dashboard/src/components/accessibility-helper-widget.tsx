@@ -98,18 +98,27 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           </Button>
         </div>
         <Tabs defaultValue="quick-access" className="w-full flex flex-col gap-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="quick-access">Quick Access</TabsTrigger>
             <TabsTrigger value="product">Product</TabsTrigger>
+            <TabsTrigger value="pro-tier">Pro Tier</TabsTrigger>
           </TabsList>
           <TabsContent value="quick-access">
-            <div className="flex flex-col gap-4 items-start max-h-[400px] overflow-y-auto scrollbar-hide">
+            <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
               {renderQuickAccessButtons()}
             </div>
           </TabsContent>
           <TabsContent value="product">
-            <div className="flex flex-col gap-4 items-start max-h-[400px] overflow-y-auto scrollbar-hide">
+            <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
               {renderProductButtons()}
+            </div>
+          </TabsContent>
+          <TabsContent value="pro-tier">
+            <div className="flex flex-col items-center justify-center gap-4 md:h-[400px] overflow-y-auto scrollbar-hide">
+              <div className="text-lg font-bold">Private Beta</div>
+              <div className="text-sm text-muted-foreground">
+                You are in the private beta of Pro Tier.
+              </div>
             </div>
           </TabsContent>
         </Tabs>

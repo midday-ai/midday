@@ -18,7 +18,7 @@ export function OverviewViewModal() {
                 className="overflow-hidden p-0 max-w-full w-full h-full md:min-h-[60%] md:max-h-[75%] md:min-w-[60%] md:max-w-[75%] m-0 rounded-2xl"
                 hideClose
             >
-                <FeatureInDevelopment featureName="Quick Access FinancialOverview" isDisabled={true} />
+                <FeatureInDevelopment featureName="Quick Access Financial Overview" isDisabled={true} />
             </DialogContent>
         </Dialog>
     );
