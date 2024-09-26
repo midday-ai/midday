@@ -13,6 +13,13 @@ const ratelimit = new Ratelimit({
 export async function POST(req: Request) {
   const { challenge, team_id, event } = await req.json();
 
+  // We don't need to handle message_deleted events
+  if (event.type === "message_deleted") {
+    return NextResponse.json({
+      success: true,
+    });
+  }
+
   const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
   const { success } = await ratelimit.limit(ip);
 
@@ -33,9 +40,9 @@ export async function POST(req: Request) {
 
   const { data } = await supabase
     .from("apps")
-    .select("team_id, settings")
+    .select("team_id, config")
     .eq("app_id", config.id)
-    .eq("settings->>team_id", team_id)
+    .eq("config->>team_id", team_id)
     .single();
 
   if (!data) {
@@ -46,14 +53,10 @@ export async function POST(req: Request) {
     );
   }
 
-  const settings = data?.settings as {
-    access_token: string;
-    bot_user_id: string;
-  };
-
   if (event) {
     await handleSlackEvent(event, {
-      token: settings.access_token,
+      token: data?.config.access_token,
+      teamId: data.team_id,
     });
   }
 

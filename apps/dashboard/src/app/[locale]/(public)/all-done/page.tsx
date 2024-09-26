@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import appIcon from "public/appicon.png";
 import { EventEmitter } from "./event-emitter";
 import { searchParamsSchema } from "./schema";
 
@@ -16,8 +18,19 @@ const AllDonePage = ({ searchParams }: Props) => {
   return (
     <>
       <EventEmitter event={parsedSearchParams.data.event} />
-      <div className="w-dvw h-dvh flex items-center justify-center">
-        <p>All done, you can close this window!</p>
+      <div>
+        <div className="h-screen flex flex-col items-center justify-center text-center text-sm text-[#606060]">
+          <Image
+            src={appIcon}
+            width={80}
+            height={80}
+            alt="Midday"
+            quality={100}
+            className="mb-10"
+          />
+
+          <p>You may close this browser tab when done</p>
+        </div>
       </div>
     </>
   );

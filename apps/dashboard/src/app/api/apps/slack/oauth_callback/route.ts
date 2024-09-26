@@ -79,7 +79,8 @@ export async function GET(request: NextRequest) {
       team_id: parsedMetadata.data.teamId,
       created_by: parsedMetadata.data.userId,
       app_id: config.id,
-      settings: {
+      settings: config.settings,
+      config: {
         access_token: parsedJson.data.access_token,
         team_id: parsedJson.data.team.id,
         team_name: parsedJson.data.team.name,
@@ -93,12 +94,12 @@ export async function GET(request: NextRequest) {
 
     if (createdSlackIntegration) {
       const slackApp = createSlackApp({
-        token: createdSlackIntegration.settings.access_token,
-        botId: createdSlackIntegration.settings.bot_user_id,
+        token: createdSlackIntegration.config.access_token,
+        botId: createdSlackIntegration.config.bot_user_id,
       });
 
       slackApp.client.chat.postMessage({
-        channel: createdSlackIntegration.settings.channel_id,
+        channel: createdSlackIntegration.config.channel_id,
         text: `Hello, I'm Midday Assistant. I'll send notifications in this channel`,
       });
 
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
       // This window will be in a popup so we redirect to the all-done route which closes the window
       // and then sends a browser event to the parent window. Actions can be taken based on this event.
       return NextResponse.redirect(
-        `${requestUrl.origin}/all-done?event=slack_oauth_completed`,
+        `${requestUrl.origin}/all-done?event=app_oauth_completed`,
       );
     }
   } catch (err) {

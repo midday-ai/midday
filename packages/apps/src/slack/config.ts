@@ -19,4 +19,13 @@ export default {
       teamId: user.team_id,
     });
   },
+  settings: [
+    {
+      id: "notifications",
+      label: "Notifications",
+      type: "switch",
+      required: false,
+      default: true,
+    },
+  ],
 };

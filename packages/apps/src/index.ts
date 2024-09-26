@@ -4,6 +4,7 @@ import quickBooksApp from "./quick-books/config";
 import slackApp from "./slack/config";
 import vismaApp from "./visma/config";
 import xeroApp from "./xero/config";
+import zapierApp from "./zapier/config";
 
 export const apps = [
   slackApp,
@@ -12,4 +13,5 @@ export const apps = [
   calApp,
   fortnoxApp,
   vismaApp,
+  zapierApp,
 ];

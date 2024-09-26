@@ -56,7 +56,7 @@ export function App({
           <Logo />
 
           {installed && (
-            <div className="text-xs text-green-600 bg-green-100 text-[9px] dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full font-mono">
+            <div className="text-green-600 bg-green-100 text-[10px] dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full font-mono">
               Installed
             </div>
           )}
