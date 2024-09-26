@@ -1,5 +1,6 @@
 import { LogLevel, App as SlackApp } from "@slack/bolt";
 import { InstallProvider } from "@slack/oauth";
+import { WebClient } from "@slack/web-api";
 
 const SLACK_CLIENT_ID = process.env.NEXT_PUBLIC_SLACK_CLIENT_ID;
 const SLACK_CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET;
@@ -45,4 +46,12 @@ export const createSlackApp = ({
     token,
     botId,
   });
+};
+
+export const createSlackWebClient = ({
+  token,
+}: {
+  token: string;
+}) => {
+  return new WebClient(token);
 };

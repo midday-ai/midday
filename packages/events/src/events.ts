@@ -191,4 +191,8 @@ export const LogEvents = {
     name: "Update Currency",
     channel: "transaction",
   },
+  DisconnectApp: {
+    name: "Disconnect App",
+    channel: "app",
+  },
 };

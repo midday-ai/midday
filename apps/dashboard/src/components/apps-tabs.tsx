@@ -28,8 +28,11 @@ export function AppsTabs() {
           key={tab.value}
           type="button"
           className={cn(
-            "text-sm transition-colors bg-[#1D1D1D] text-[#878787] px-4",
-            currentTab === tab.value && "text-primary bg-[#2C2C2C]",
+            "text-sm transition-colors px-4",
+            "dark:bg-[#1D1D1D] dark:text-[#878787]",
+            "bg-white text-gray-600",
+            currentTab === tab.value &&
+              "text-primary dark:bg-[#2C2C2C] bg-gray-100",
           )}
         >
           {tab.name}

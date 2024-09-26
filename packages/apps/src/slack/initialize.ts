@@ -13,7 +13,7 @@ const generateInstallUrl = ({
   );
   url.searchParams.set(
     "scope",
-    "incoming-webhook,chat:write,chat:write.public,team:read,assistant:write",
+    "incoming-webhook,chat:write,chat:write.public,team:read,assistant:write,im:history",
   );
 
   url.searchParams.set("state", JSON.stringify({ teamId, userId }));
@@ -46,7 +46,7 @@ export const onInitialize = ({
 
   const listener = (e: MessageEvent) => {
     if (e.data === "slack_oauth_completed") {
-      // router.refresh();
+      window.location.reload();
       window.removeEventListener("message", listener);
       popup.close();
     }

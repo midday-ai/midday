@@ -1,3 +1,4 @@
+import { disconnectAppAction } from "@/actions/disconnect-app-action";
 import {
   Accordion,
   AccordionContent,
@@ -6,18 +7,20 @@ import {
 } from "@midday/ui/accordion";
 import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
+import { ScrollArea } from "@midday/ui/scroll-area";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTrigger,
 } from "@midday/ui/sheet";
+import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
 import type { User } from "./apps";
 
 export function App({
   id,
-  logo,
+  logo: Logo,
   name,
   short_description,
   description,
@@ -25,13 +28,11 @@ export function App({
   onInitialize,
   images,
   active,
+  installed,
+  category,
 }: {
   id: string;
-  logo: {
-    src: string;
-    width: number;
-    height: number;
-  };
+  logo: React.ComponentType;
   name: string;
   short_description: string;
   description: string;
@@ -39,18 +40,26 @@ export function App({
   onInitialize: (user: User) => void;
   images: string[];
   active?: boolean;
+  installed?: boolean;
+  category: string;
 }) {
+  const disconnectApp = useAction(disconnectAppAction);
+
+  const handleDisconnect = () => {
+    disconnectApp.execute({ appId: id });
+  };
+
   return (
     <Card key={id} className="w-full flex flex-col">
       <Sheet>
-        <div className="pt-6 pl-6 h-16 flex items-center">
-          <Image
-            src={logo.src}
-            alt={name}
-            width={logo.width}
-            height={logo.height}
-            quality={100}
-          />
+        <div className="pt-6 px-6 h-16 flex items-center justify-between">
+          <Logo />
+
+          {installed && (
+            <div className="text-xs text-green-600 bg-green-100 text-[9px] dark:bg-green-900 dark:text-green-300 px-3 py-1 rounded-full font-mono">
+              Installed
+            </div>
+          )}
         </div>
 
         <CardHeader className="pb-0">
@@ -59,7 +68,7 @@ export function App({
               {name}
             </CardTitle>
             {!active && (
-              <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full cursor-default font-mono">
+              <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full font-mono">
                 Coming soon
               </span>
             )}
@@ -70,20 +79,32 @@ export function App({
         </CardContent>
 
         <div className="px-6 pb-6 flex gap-2 mt-auto">
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={onInitialize}
-            disabled={!onInitialize || !active}
-          >
-            Install
-          </Button>
-
           <SheetTrigger asChild disabled={!active}>
             <Button variant="outline" className="w-full">
               Details
             </Button>
           </SheetTrigger>
+
+          {installed ? (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleDisconnect}
+            >
+              {disconnectApp.status === "executing"
+                ? "Disconnecting..."
+                : "Disconnect"}
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={onInitialize}
+              disabled={!onInitialize || !active}
+            >
+              Install
+            </Button>
+          )}
         </div>
 
         <SheetContent>
@@ -98,58 +119,71 @@ export function App({
               />
             </div>
 
-            <div className="flex items-center justify-between border-b border-border pb-4">
+            <div className="flex items-center justify-between border-b border-border pb-2">
               <div className="flex items-center space-x-2">
-                <Image
-                  src={logo}
-                  alt={name}
-                  className="size-10 object-cover"
-                  width={40}
-                  height={40}
-                  quality={100}
-                />
+                <Logo />
                 <div>
-                  <h3 className="text-lg leading-none">{name}</h3>
+                  <div className="flex items-center space-x-2">
+                    <h3 className="text-lg leading-none">{name}</h3>
+                    {installed && (
+                      <div className="bg-green-600 text-[9px] dark:bg-green-300 rounded-full size-1" />
+                    )}
+                  </div>
+
                   <span className="text-xs text-[#878787]">
-                    1.3k installs • Published by Midday
+                    {category} • Published by Midday
                   </span>
                 </div>
               </div>
 
               <div>
-                <Button
-                  variant="outline"
-                  className="w-full border-primary"
-                  onClick={onInitialize}
-                  disabled={!onInitialize || !active}
-                >
-                  Install
-                </Button>
+                {installed ? (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleDisconnect}
+                  >
+                    {disconnectApp.status === "executing"
+                      ? "Disconnecting..."
+                      : "Disconnect"}
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary"
+                    onClick={onInitialize}
+                    disabled={!onInitialize || !active}
+                  >
+                    Install
+                  </Button>
+                )}
               </div>
             </div>
           </SheetHeader>
 
-          <Accordion
-            type="multiple"
-            defaultValue={["description"]}
-            className="mt-4"
-          >
-            <AccordionItem value="description" className="border-none">
-              <AccordionTrigger>How it works</AccordionTrigger>
-              <AccordionContent className="text-[#878787] text-sm">
-                {description}
-              </AccordionContent>
-            </AccordionItem>
-
-            {settings && (
-              <AccordionItem value="settings" className="border-none">
-                <AccordionTrigger>Settings</AccordionTrigger>
+          <ScrollArea className="h-[calc(100vh-530px)] pt-2" hideScrollbar>
+            <Accordion
+              type="multiple"
+              defaultValue={["description"]}
+              className="mt-4"
+            >
+              <AccordionItem value="description" className="border-none">
+                <AccordionTrigger>How it works</AccordionTrigger>
                 <AccordionContent className="text-[#878787] text-sm">
-                  Settings
+                  {description}
                 </AccordionContent>
               </AccordionItem>
-            )}
-          </Accordion>
+
+              {settings && (
+                <AccordionItem value="settings" className="border-none">
+                  <AccordionTrigger>Settings</AccordionTrigger>
+                  <AccordionContent className="text-[#878787] text-sm">
+                    {description}
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+            </Accordion>
+          </ScrollArea>
 
           <div className="absolute bottom-4 pt-8 border-t border-border">
             <p className="text-[10px] text-[#878787]">
@@ -159,9 +193,12 @@ export function App({
               certified. Report any concerns about app content or behavior.
             </p>
 
-            <button type="button" className="text-[10px] text-red-500">
+            <a
+              href="mailto:support@midday.dev"
+              className="text-[10px] text-red-500"
+            >
               Report app
-            </button>
+            </a>
           </div>
         </SheetContent>
       </Sheet>
