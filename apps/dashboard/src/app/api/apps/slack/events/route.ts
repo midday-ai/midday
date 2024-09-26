@@ -25,6 +25,10 @@ export async function POST(req: Request) {
     );
   }
 
+  if (challenge) {
+    return new NextResponse(challenge);
+  }
+
   const supabase = createClient({ admin: true });
 
   const { data } = await supabase
@@ -46,10 +50,6 @@ export async function POST(req: Request) {
     access_token: string;
     bot_user_id: string;
   };
-
-  if (challenge) {
-    return new NextResponse(challenge);
-  }
 
   if (event) {
     await handleSlackEvent(event, {
