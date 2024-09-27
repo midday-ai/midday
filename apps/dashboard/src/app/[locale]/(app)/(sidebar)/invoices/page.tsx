@@ -1,10 +1,11 @@
 import { EmptyStateInvoice } from "@/components/empty-state-invoice";
+import config from "@/config";
 import { Cookies } from "@/utils/constants";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-
+  
 export const metadata: Metadata = {
-  title: "Invoices | Solomon AI",
+  title: `Invoices | ${config.company}`,
 };
 
 export default function Invoices() {

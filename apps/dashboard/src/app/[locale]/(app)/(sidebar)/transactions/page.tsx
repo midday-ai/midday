@@ -6,6 +6,7 @@ import { NoAccounts } from "@/components/tables/transactions/empty-states";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
+import config from "@/config";
 import { Cookies } from "@/utils/constants";
 import {
   getCategories,
@@ -20,7 +21,7 @@ import { Suspense } from "react";
 import { searchParamsCache } from "./search-params";
 
 export const metadata: Metadata = {
-  title: "Transactions | Solomon AI",
+  title: `Transactions | ${config.company}`,
 };
 
 export default async function Transactions({

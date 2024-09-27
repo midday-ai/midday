@@ -1,5 +1,6 @@
 import { SelectTeamTable } from "@/components/tables/select-team/table";
 import { UserMenu } from "@/components/user-menu";
+import config from "@/config";
 import { getUser } from "@midday/supabase/cached-queries";
 import { getTeamsByUserIdQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
@@ -10,7 +11,7 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Teams | Solomon AI",
+  title: `Teams | ${config.company}`,
 };
 
 export default async function Teams() {

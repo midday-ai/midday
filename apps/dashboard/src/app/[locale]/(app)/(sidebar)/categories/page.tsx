@@ -1,13 +1,14 @@
 import { CategoryCharts } from "@/components/charts/categories-chart";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import config from "@/config";
 import Tier from "@/config/tier";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Categories | Solomon AI",
+  title: `Categories | ${config.company}`,
 };
 
 type Props = {

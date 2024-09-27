@@ -1,7 +1,8 @@
+import config from "@/config";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Billing | Solomon AI",
+  title: `Billing | ${config.company}`,
 };
 
 export default async function Billing() {

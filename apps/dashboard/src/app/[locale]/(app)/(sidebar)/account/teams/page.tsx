@@ -1,10 +1,11 @@
 import { TeamsTable } from "@/components/tables/teams";
 import { TeamsSkeleton } from "@/components/tables/teams/table";
+import config from "@/config";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Teams | Solomon AI",
+  title: `Teams | ${config.company}`,
 };
 
 export default function Teams() {

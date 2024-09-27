@@ -1,9 +1,10 @@
 import { BaseCurrency } from "@/components/base-currency/base-currency";
 import { ConnectedAccounts } from "@/components/connected-accounts";
+import config from "@/config";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Accounts | Solomon AI",
+  title: `Accounts | ${config.company}`,
 };
 
 export default function Page() {

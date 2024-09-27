@@ -2,11 +2,12 @@ import { ChangeTheme } from "@/components/change-theme";
 import { DeleteAccount } from "@/components/delete-account";
 import { DisplayName } from "@/components/display-name";
 import { UserAvatar } from "@/components/user-avatar";
+import config from "@/config";
 import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account Settings | Solomon AI",
+  title: `Account Settings | ${config.company}`,
 };
 
 export default async function Account() {

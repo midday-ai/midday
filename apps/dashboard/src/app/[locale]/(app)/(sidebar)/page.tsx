@@ -8,6 +8,7 @@ import { FinancialPortalView } from "@/components/portal-views/financial-portal-
 import { RecentFilesPortalView } from "@/components/portal-views/recent-files-portal-view";
 import RecentTransactions from "@/components/recent-transactions";
 import { Widgets } from "@/components/widgets";
+import config from "@/config";
 import { Cookies } from "@/utils/constants";
 import {
   getBankConnectionsByTeamId,
@@ -27,7 +28,7 @@ import { cookies } from "next/headers";
 export const maxDuration = 30;
 
 export const metadata: Metadata = {
-  title: "Overview | Solomon AI",
+  title: `Overview | ${config.company}`,
 };
 
 const defaultValue = {
