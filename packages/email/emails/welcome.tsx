@@ -13,19 +13,19 @@ import {
 import { Footer } from "../components/footer";
 import { GetStarted } from "../components/get-started";
 import { Logo } from "../components/logo";
-
+import config from "../config/index";
 interface WelcomeProps {
   fullName: string;
 }
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? `${config.webUrl}/email`
     : "http://localhost:3000/email";
 
-export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
+export const WelcomeEmail = ({ fullName = config.company }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
-  const text = `Hi ${firstName}, Welcome to Midday! I'm Pontus, one of the founders. It's really important to us that you have a great experience ramping up.`;
+  const text = `Hi ${firstName}, Welcome to ${config.company}! We're really excited to have you on board. It's really important to us that you have a great experience ramping up.`;
 
   return (
     <Html>
@@ -62,18 +62,22 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
           >
             <Logo baseUrl={baseUrl} />
             <Heading className="text-[#121212] text-[21px] font-normal text-center p-0 my-[30px] mx-0">
-              Welcome to Midday
+              Welcome to {config.company}
             </Heading>
 
             <br />
 
             <span className="font-medium">Hi {firstName},</span>
             <Text className="text-[#121212]">
-              Welcome to Midday! I'm Pontus, one of the founders.
+              Welcome to {config.company}! We're really excited to have you on
+              board.
               <br />
               <br />
-              We've been working on Midday for the past months, and during this
-              time, we've implemented the basic functionality to get started.
+              We've been working on {config.company} for the past months, and
+              during this time, we've implemented the basic functionality to get
+              started.
+              <br />
+              <br />
               However, with your feedback, we can make the right decisions to
               help run your business smarter.
               <br />
@@ -85,7 +89,7 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
               Should you have any questions, please don't hesitate to reply
               directly to this email or to{" "}
               <Link
-                href="https://cal.com/pontus-midday/15min"
+                href="https://cal.com/solomonai/15min"
                 className="text-[#121212] underline"
               >
                 schedule a call with me
@@ -95,19 +99,9 @@ export const WelcomeEmail = ({ fullName = "Viktor Hofte" }: WelcomeProps) => {
 
             <br />
 
-            <Img
-              src={`${baseUrl}/founders.jpeg`}
-              alt="Founders"
-              className="my-0 mx-auto block w-full"
-            />
-
-            <Text className="text-[#707070]">Best regards, founders</Text>
-
-            <Img
-              src={`${baseUrl}/signature.png`}
-              alt="Signature"
-              className="block w-full w-[143px] h-[20px]"
-            />
+            <Text className="text-[#707070]">
+              Best regards, Solomon AI Founding Team
+            </Text>
 
             <br />
             <br />

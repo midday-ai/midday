@@ -12,6 +12,7 @@ import {
 } from "@react-email/components";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
+import config from "../config/index";
 
 interface WelcomeProps {
   fullName: string;
@@ -21,13 +22,13 @@ interface WelcomeProps {
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? `${config.webUrl}/email`
     : "http://localhost:3000/email";
 
 export const ConnectionIssueEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "Solomon AI",
   bankName = "Revolut",
-  teamName = "Midday",
+  teamName = config.company,
 }: WelcomeProps) => {
   const firstName = fullName.split(" ").at(0);
   const text = `Hi ${firstName}, We wanted to inform you that our connection to your bank ${bankName} for your team ${teamName} is currently disconnected.`;
@@ -79,7 +80,7 @@ export const ConnectionIssueEmail = ({
               <br />
               We wanted to let you know that your bank{" "}
               <strong>{bankName}</strong> for team <strong>{teamName}</strong>{" "}
-              is currently disconnected. To keep Midday running smoothly, we'll
+              is currently disconnected. To keep {config.company} running smoothly, we'll
               need you to reconnect your bank.
               <br />
               <br />
@@ -90,7 +91,7 @@ export const ConnectionIssueEmail = ({
             <Section className="text-center mt-[50px] mb-[50px]">
               <Button
                 className="bg-transparent rounded-md text-primary text-[14px] text-[#121212] font-medium no-underline text-center px-6 py-3 border border-solid border-[#121212]"
-                href="https://go.midday.ai/34Xt7XK"
+                href={`${config.platformUrl}/settings/accounts`}
               >
                 Reconnect
               </Button>
