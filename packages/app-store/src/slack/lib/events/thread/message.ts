@@ -3,8 +3,14 @@ import { createClient } from "@midday/supabase/server";
 import type { AssistantThreadStartedEvent, WebClient } from "@slack/web-api";
 import { generateText } from "ai";
 import { startOfMonth, subMonths } from "date-fns";
-import { getRunwayTool } from "../../tools/get-runway";
-import { systemPrompt } from "../../tools/system-prompt";
+import {
+  getBurnRateTool,
+  getRunwayTool,
+  getSpendingTool,
+  systemPrompt,
+} from "../../tools";
+import { getProfitTool } from "../../tools/get-profit";
+import { getRevenueTool } from "../../tools/get-revenue";
 
 const defaultValues = {
   from: subMonths(startOfMonth(new Date()), 12).toISOString(),
@@ -25,18 +31,30 @@ export async function assistantThreadMessage(
     status: "Is thinking...",
   });
 
-  // Set the title of the thread
-  await client.assistant.threads.setTitle({
-    channel_id: event.channel,
-    thread_ts: event.thread_ts,
-    title: event.text,
+  const threadHistory = await client.conversations.replies({
+    channel: event.channel,
+    ts: event.thread_ts,
+    limit: 5,
+    inclusive: true,
   });
+
+  const lastTwoMessages = threadHistory.messages
+    ?.map((msg) => ({
+      role: msg.bot_id ? "assistant" : "user",
+      content: msg.text || "",
+    }))
+    .reverse();
+
+  if (!lastTwoMessages || lastTwoMessages.length === 0) {
+    console.warn("No messages found in the thread");
+  }
 
   const { text } = await generateText({
     model: openai("gpt-4o-mini"),
     maxToolRoundtrips: 5,
     system: systemPrompt,
     messages: [
+      ...(lastTwoMessages ?? []),
       {
         role: "user",
         content: event.text,
@@ -48,68 +66,26 @@ export async function assistantThreadMessage(
         supabase,
         teamId,
       }),
-      // getProfit: {
-      //   description: "Get the profit",
-      //   parameters: z.object({
-      //     currency: z
-      //       .string()
-      //       .describe("The currency for the profit")
-      //       .optional(),
-      //     startDate: z.coerce
-      //       .date()
-      //       .describe(
-      //         "The start date for profit calculation, in ISO-8601 format",
-      //       )
-      //       .default(new Date(defaultValues.from)),
-      //     endDate: z.coerce
-      //       .date()
-      //       .describe("The end date for profit calculation, in ISO-8601 format")
-      //       .default(new Date(defaultValues.to)),
-      //   }),
-      //   execute: async ({ currency, startDate, endDate }) => {
-      //     return `Profit from ${startDate.toISOString()} to ${endDate.toISOString()} with currency ${currency || "default"}`;
-      //   },
-      // },
-      // getTransactions: {
-      //   description: "Get transactions or expenses",
-      //   parameters: z.object({
-      //     type: z
-      //       .enum(["transactions", "expenses"])
-      //       .describe("Type of data to retrieve"),
-      //     startDate: z.coerce
-      //       .date()
-      //       .describe("The start date for transactions, in ISO-8601 format")
-      //       .default(new Date(defaultValues.from)),
-      //     endDate: z.coerce
-      //       .date()
-      //       .describe("The end date for transactions, in ISO-8601 format")
-      //       .default(new Date(defaultValues.to)),
-      //   }),
-      //   execute: async ({ type, startDate, endDate }) => {
-      //     return `${type} from ${startDate.toISOString()} to ${endDate.toISOString()}`;
-      //   },
-      // },
-      // getSpending: {
-      //   description: "Get spending based on a category",
-      //   parameters: z.object({
-      //     category: z.string().describe("The spending category"),
-      //     startDate: z.coerce
-      //       .date()
-      //       .describe(
-      //         "The start date for spending calculation, in ISO-8601 format",
-      //       )
-      //       .default(new Date(defaultValues.from)),
-      //     endDate: z.coerce
-      //       .date()
-      //       .describe(
-      //         "The end date for spending calculation, in ISO-8601 format",
-      //       )
-      //       .default(new Date(defaultValues.to)),
-      //   }),
-      //   execute: async ({ category, startDate, endDate }) => {
-      //     return `Spending for category '${category}' from ${startDate.toISOString()} to ${endDate.toISOString()}`;
-      //   },
-      // },
+      getBurnRate: getBurnRateTool({
+        defaultValues,
+        supabase,
+        teamId,
+      }),
+      getSpending: getSpendingTool({
+        defaultValues,
+        supabase,
+        teamId,
+      }),
+      getProfit: getProfitTool({
+        defaultValues,
+        supabase,
+        teamId,
+      }),
+      getRevenue: getRevenueTool({
+        defaultValues,
+        supabase,
+        teamId,
+      }),
     },
   });
 
@@ -118,7 +94,15 @@ export async function assistantThreadMessage(
     await client.chat.postMessage({
       channel: event.channel,
       thread_ts: event.thread_ts,
-      text,
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: text,
+          },
+        },
+      ],
     });
   } else {
     // If no previous message found, post the new message
@@ -126,6 +110,12 @@ export async function assistantThreadMessage(
       channel: event.channel,
       thread_ts: event.thread_ts,
       text: "Sorry I couldn't find an answer to that question",
+    });
+
+    await client.assistant.threads.setStatus({
+      channel_id: event.channel,
+      thread_ts: event.thread_ts,
+      status: "",
     });
   }
 }

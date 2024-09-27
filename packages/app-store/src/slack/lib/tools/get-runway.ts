@@ -40,7 +40,11 @@ export function getRunwayTool({
         teamId,
       });
 
-      return `Runway with currency ${currency || "default"} is ${data} months. Based on the data from ${startDate.toISOString()} to ${endDate.toISOString()}.`;
+      if (!data) {
+        return "No runway found";
+      }
+
+      return `Runway with currency ${currency} is ${data} months. Based on the data from ${startDate.toISOString()} to ${endDate.toISOString()}.`;
     },
   };
 }
