@@ -14,7 +14,7 @@ export default async function Page() {
 
   return (
     <div className="mt-4">
-      <AppsHeader />
+      <AppsHeader  />
 
       <Suspense fallback={<AppsSkeleton />}>
         <AppsServer user={data} />
