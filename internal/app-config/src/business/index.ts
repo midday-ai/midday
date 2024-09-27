@@ -2,7 +2,7 @@ import { SiteConfig } from "@/types/index";
 
 const sharedTitle = "Solomon AI | Your Personal Financial Assistant";
 const sharedDescription =
-  "Simplify Your Finances, Make Smarter Decisions, and Achieve Your Financial Goals with AI-Powered Insights.";
+  "A better way to act on your finances.";
 const sharedImages = [
   { url: "", width: 800, height: 600 },
   { url: "", width: 1800, height: 1600 },
@@ -80,17 +80,17 @@ const pricingPlans = [
 ];
 
 export const BusinessConfig: SiteConfig = {
-  platformHost: "app-consumer.solomon-ai.app",
+  platformHost: "app-business.solomon-ai.app",
   company: "Solomon AI",
   name: "Solomon AI | Personal Finance",
   email: { from: "Solomon AI <founders@inbox.solomon-ai.app>" },
   title: sharedTitle,
   description: sharedDescription,
-  platformUrl: "https://app-consumer.solomon-ai.app",
+  platformUrl: "https://app-business.solomon-ai.app",
   webUrl: "https://solomon-ai.app",
   desktopUrl: "solomonai://",
   dubProjectSlug: "solomon-ai",
-  mfaIssuer: "app-consumer.solomon-ai.app",
+  mfaIssuer: "app-business.solomon-ai.app",
   uptimeUrl: "https://solomon-ai.betteruptime.com/",
   mainNav: [
     { title: "Home", href: "/" },
@@ -119,12 +119,12 @@ export const BusinessConfig: SiteConfig = {
         : "https://billing.stripe.com/p/login/8wM9Btf6j8Gf8Q8000",
   },
   metadata: {
-    metadataBase: new URL("https://app-consumer.solomon-ai.app"),
+    metadataBase: new URL("https://app-business.solomon-ai.app"),
     ...sharedMetadata,
     twitter: sharedMetadata,
     openGraph: {
       ...sharedMetadata,
-      url: "https://app-consumer.solomon-ai.app",
+      url: "https://app-business.solomon-ai.app",
       siteName: "Solomon AI",
       locale: "en_US",
       type: "website",

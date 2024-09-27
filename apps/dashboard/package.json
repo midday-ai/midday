@@ -18,6 +18,7 @@
     "@ai-sdk/openai": "^0.0.60",
     "@hookform/resolvers": "^3.9.0",
     "@internal/env": "workspace:*",
+    "@internal/app-config": "workspace:*",
     "@midday-ai/engine": "^0.1.0-alpha.22",
     "@midday/events": "workspace:*",
     "@midday/inbox": "workspace:*",
