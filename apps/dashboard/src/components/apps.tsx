@@ -11,7 +11,8 @@ export type User = {
 export function Apps({
   user,
   installedApps,
-}: { user: User; installedApps: string[] }) {
+  settings,
+}: { user: User; installedApps: string[]; settings: Record<string, any>[] }) {
   return (
     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 mx-auto mt-8">
       {apps.map((app) => (
@@ -19,6 +20,10 @@ export function Apps({
           key={app.id}
           installed={installedApps?.includes(app.id)}
           {...app}
+          userSettings={
+            settings.find((setting) => setting.app_id === app.id)?.settings ??
+            []
+          }
           onInitialize={() => app.onInitialize(user)}
         />
       ))}

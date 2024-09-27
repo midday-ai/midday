@@ -16,11 +16,13 @@ export default {
   onInitialize,
   settings: [
     {
-      id: "notifications",
-      label: "Notifications",
+      id: "transactions",
+      label: "Transactions",
+      description:
+        "Get notified when a new transaction is added. This will notify you in the channel you have selected.",
       type: "switch",
       required: false,
-      default: true,
+      value: true,
     },
   ],
 };

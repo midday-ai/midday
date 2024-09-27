@@ -5,13 +5,6 @@ export async function assistantThreadStarted(
   client: WebClient,
 ) {
   try {
-    // Set initial status while preparing prompts
-    await client.assistant.threads.setStatus({
-      channel_id: event.assistant_thread.channel_id,
-      thread_ts: event.assistant_thread.thread_ts,
-      status: "Thinking...",
-    });
-
     // Post welcome message
     await client.chat.postMessage({
       channel: event.assistant_thread.channel_id,
@@ -25,29 +18,22 @@ export async function assistantThreadStarted(
       thread_ts: event.assistant_thread.thread_ts,
       prompts: [
         {
-          title: "Recent Transactions",
+          title: "Show recent transactions",
           message: "Show me my recent transactions",
         },
         {
-          title: "Category Spending",
+          title: "What did I spend on software last month?",
           message: "How much did I spend on software last month?",
         },
         {
-          title: "Burn Rate",
-          message: "What's my current burn rate?",
+          title: "What's my burn rate?",
+          message: "What's my burn rate?",
         },
         {
-          title: "Runway",
+          title: "What's my runway?",
           message: "What's my runway?",
         },
       ],
-    });
-
-    // Clear the "Thinking..." status
-    await client.assistant.threads.setStatus({
-      channel_id: event.assistant_thread.channel_id,
-      thread_ts: event.assistant_thread.thread_ts,
-      status: "",
     });
   } catch (error) {
     console.error("Error handling assistant thread start:", error);

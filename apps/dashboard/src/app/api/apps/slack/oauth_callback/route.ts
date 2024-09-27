@@ -107,10 +107,36 @@ export async function GET(request: NextRequest) {
         botId: createdSlackIntegration.config.bot_user_id,
       });
 
-      slackApp.client.chat.postMessage({
-        channel: createdSlackIntegration.config.channel_id,
-        text: `Hello, I'm Midday Assistant. I'll send notifications in this channel`,
-      });
+      try {
+        await slackApp.client.chat.postMessage({
+          channel: createdSlackIntegration.config.channel_id,
+          unfurl_links: false,
+          unfurl_media: false,
+          blocks: [
+            {
+              type: "section",
+              text: {
+                type: "mrkdwn",
+                text: "Hello there! 👋 I'm your new Midday bot, I'll send notifications in this channel regarding new transactions and other important updates.\n\n Head over to the <slack://app?id=A07PN48FW3A&tab=home|Midday Assistant> to ask questions.",
+              },
+            },
+            {
+              type: "divider",
+            },
+            {
+              type: "context",
+              elements: [
+                {
+                  type: "mrkdwn",
+                  text: "<https://app.midday.ai/apps?app=slack&settings=true|Notification settings>",
+                },
+              ],
+            },
+          ],
+        });
+      } catch (err) {
+        console.error(err);
+      }
 
       const requestUrl = new URL(request.url);
 
@@ -125,7 +151,6 @@ export async function GET(request: NextRequest) {
       );
     }
   } catch (err) {
-    console.error(err);
     return NextResponse.json(
       { error: "Failed to exchange code for token" },
       { status: 500 },

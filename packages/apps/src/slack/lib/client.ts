@@ -67,6 +67,8 @@ export const getInstallUrl = ({
       "team:read",
       "assistant:write",
       "im:history",
+      "commands",
+      "files:read",
     ],
     redirectUri: SLACK_OAUTH_REDIRECT_URL,
     metadata: JSON.stringify({ teamId, userId }),

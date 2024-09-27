@@ -8,15 +8,12 @@ import {
 import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { ScrollArea } from "@midday/ui/scroll-area";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTrigger,
-} from "@midday/ui/sheet";
+import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
+import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
+import { AppSettings } from "./app-settings";
 
 export function App({
   id,
@@ -30,6 +27,7 @@ export function App({
   active,
   installed,
   category,
+  userSettings,
 }: {
   id: string;
   logo: React.ComponentType;
@@ -42,7 +40,13 @@ export function App({
   active?: boolean;
   installed?: boolean;
   category: string;
+  userSettings: Record<string, any>;
 }) {
+  const [params, setParams] = useQueryStates({
+    app: parseAsString,
+    settings: parseAsBoolean,
+  });
+
   const [isLoading, setLoading] = useState(false);
   const disconnectApp = useAction(disconnectAppAction);
 
@@ -58,7 +62,7 @@ export function App({
 
   return (
     <Card key={id} className="w-full flex flex-col">
-      <Sheet>
+      <Sheet open={params.app === id} onOpenChange={() => setParams(null)}>
         <div className="pt-6 px-6 h-16 flex items-center justify-between">
           <Logo />
 
@@ -86,11 +90,14 @@ export function App({
         </CardContent>
 
         <div className="px-6 pb-6 flex gap-2 mt-auto">
-          <SheetTrigger asChild disabled={!active}>
-            <Button variant="outline" className="w-full">
-              Details
-            </Button>
-          </SheetTrigger>
+          <Button
+            variant="outline"
+            className="w-full"
+            disabled={!active}
+            onClick={() => setParams({ app: id })}
+          >
+            Details
+          </Button>
 
           {installed ? (
             <Button
@@ -171,7 +178,10 @@ export function App({
           <ScrollArea className="h-[calc(100vh-530px)] pt-2" hideScrollbar>
             <Accordion
               type="multiple"
-              defaultValue={["description"]}
+              defaultValue={[
+                "description",
+                ...(params.settings ? ["settings"] : []),
+              ]}
               className="mt-4"
             >
               <AccordionItem value="description" className="border-none">
@@ -185,7 +195,24 @@ export function App({
                 <AccordionItem value="settings" className="border-none">
                   <AccordionTrigger>Settings</AccordionTrigger>
                   <AccordionContent className="text-[#878787] text-sm">
-                    {description}
+                    <AppSettings
+                      appId={id}
+                      settings={[
+                        ...Object.values({
+                          ...Object.fromEntries(
+                            (Array.isArray(settings) ? settings : []).map(
+                              (setting) => [setting.id, setting],
+                            ),
+                          ),
+                          ...Object.fromEntries(
+                            (Array.isArray(userSettings)
+                              ? userSettings
+                              : []
+                            ).map((setting) => [setting.id, setting]),
+                          ),
+                        }),
+                      ]}
+                    />
                   </AccordionContent>
                 </AccordionItem>
               )}
