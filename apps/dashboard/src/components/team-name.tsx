@@ -2,6 +2,7 @@
 
 import { UpdateTeamFormValues, updateTeamSchema } from "@/actions/schema";
 import { updateTeamAction } from "@/actions/update-team-action";
+import config from "@/config";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import {
@@ -45,8 +46,8 @@ export function TeamName({ name }) {
           <CardHeader>
             <CardTitle>Team Name</CardTitle>
             <CardDescription>
-              This is your team's visible name within Midday. For example, the
-              name of your company or department.
+              This is your team's visible name within {config.company}. For
+              example, the name of your company or department.
             </CardDescription>
           </CardHeader>
 

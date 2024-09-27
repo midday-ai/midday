@@ -1,4 +1,4 @@
-import * as crypto from "node:crypto";
+import config from "@/config";
 import { env } from "@/env.mjs";
 import { logger } from "@/utils/logger";
 import WelcomeEmail from "@midday/email/emails/welcome";
@@ -9,6 +9,7 @@ import { LoopsClient } from "loops";
 import { nanoid } from "nanoid";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import * as crypto from "node:crypto";
 import { Resend } from "resend";
 
 export const dynamic = "force-dynamic";
@@ -60,8 +61,8 @@ export async function POST(req: Request) {
   if (fullName) {
     await resend.emails.send({
       to: email,
-      subject: "Welcome to Midday",
-      from: "Pontus from Midday <pontus@midday.ai>",
+      subject: `Welcome to ${config.company}`,
+      from: `${config.email.from}`,
       html: await render(
         WelcomeEmail({
           fullName,

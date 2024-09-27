@@ -8,6 +8,7 @@ import {
   Text,
 } from "@react-email/components";
 import { TripleColumn } from "responsive-react-email";
+import config from "../config/index";
 
 type Props = {
   baseUrl?: string;
@@ -20,8 +21,8 @@ export function Footer({ baseUrl }: Props) {
 
       <br />
 
-      <Text className="text-[21px] font-regular">
-        Run your business smarter.
+      <Text className="font-regular text-[21px]">
+       {config.description}
       </Text>
 
       <br />
@@ -31,57 +32,11 @@ export function Footer({ baseUrl }: Props) {
         pY={0}
         styles={{ textAlign: "left" }}
         columnOneContent={
-          <Section className="text-left p-0 m-0">
-            <Row>
-              <Text className="font-medium">Features</Text>
-            </Row>
-
+          <Section className="m-0 p-0 text-left">
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/bOp4NOx"
-              >
-                Overview
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/VFcNsmQ"
-              >
-                Inbox
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/uA06kWO"
-              >
-                Vault
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/x7Fow9L"
-              >
-                Tracker
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fkYXc95"
-              >
-                Invoice
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/dEnP9h5"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/pricing`}
               >
                 Pricing
               </Link>
@@ -89,17 +44,8 @@ export function Footer({ baseUrl }: Props) {
 
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/E24P3oY"
-              >
-                Engine
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://midday.ai/download"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/download`}
               >
                 Download
               </Link>
@@ -108,46 +54,38 @@ export function Footer({ baseUrl }: Props) {
         }
         columnOneStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
         columnTwoContent={
-          <Section className="text-left p-0 m-0">
+          <Section className="m-0 p-0 text-left">
             <Row>
               <Text className="font-medium">Resources</Text>
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/fhEy5CL"
+                className="text-[14px] text-[#707070]"
+                href={config.webUrl}
               >
                 Homepage
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://git.new/midday"
-              >
-                Github
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/ZrhEMbR"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/support`}
               >
                 Support
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/rofdWKi"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/terms`}
               >
                 Terms of service
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/TJIL5mQ"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/privacy`}
               >
                 Privacy policy
               </Link>
@@ -155,17 +93,8 @@ export function Footer({ baseUrl }: Props) {
 
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/IQ1kcN0"
-              >
-                Branding
-              </Link>
-            </Row>
-
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/x5ohOs7"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/feature-request`}
               >
                 Feature Request
               </Link>
@@ -174,40 +103,24 @@ export function Footer({ baseUrl }: Props) {
         }
         columnTwoStyles={{ paddingRight: 0, paddingLeft: 0, width: 185 }}
         columnThreeContent={
-          <Section className="text-left p-0 m-0">
+          <Section className="m-0 p-0 text-left">
             <Row>
               <Text className="font-medium">Company</Text>
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/186swoH"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/story`}
               >
                 Story
               </Link>
             </Row>
             <Row className="mb-1.5">
               <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/QWyX8Um"
+                className="text-[14px] text-[#707070]"
+                href={`${config.webUrl}/updates/v1.0.0`}
               >
                 Updates
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/Dd7M8cl"
-              >
-                Open startup
-              </Link>
-            </Row>
-            <Row className="mb-1.5">
-              <Link
-                className="text-[#707070] text-[14px]"
-                href="https://go.midday.ai/M2Hv420"
-              >
-                OSS Friends
               </Link>
             </Row>
           </Section>
@@ -219,45 +132,24 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/lS72Toq">
+        <Column className="w-[40px] align-middle">
+          <Link href="https://x.com/solomon_ai">
             <Img
               src={`${baseUrl}/x.png`}
               width="22"
               height="22"
-              alt="Midday on X"
-            />
-          </Link>
-        </Column>
-        <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/7rhA3rz">
-            <Img
-              src={`${baseUrl}/producthunt.png`}
-              width="22"
-              height="22"
-              alt="Midday on Producthunt"
+              alt="Solomon AI on X"
             />
           </Link>
         </Column>
 
-        <Column className="align-middle w-[40px]">
-          <Link href="https://go.midday.ai/anPiuRx">
+        <Column className="w-[40px] align-middle">
+          <Link href="https://discord.gg/solomon-ai">
             <Img
               src={`${baseUrl}/discord.png`}
               width="22"
               height="22"
-              alt="Midday on Discord"
-            />
-          </Link>
-        </Column>
-
-        <Column className="align-middle">
-          <Link href="https://go.midday.ai/Ct3xybK">
-            <Img
-              src={`${baseUrl}/linkedin.png`}
-              width="22"
-              height="22"
-              alt="Midday on LinkedIn"
+              alt="Solomon AI on Discord"
             />
           </Link>
         </Column>
@@ -267,15 +159,15 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Text className="text-[#B8B8B8] text-xs">
-          Midday Labs AB - Torsgatan 59 113 37, Stockholm, Sweden.
+        <Text className="text-xs text-[#B8B8B8]">
+          Solomon AI - New York, NY
         </Text>
       </Row>
 
       <Row>
         <Link
-          className="text-[#707070] text-[14px]"
-          href="https://app.midday.ai/settings/notifications"
+          className="text-[14px] text-[#707070]"
+          href={`${config.platformUrl}/settings/notifications`}
           title="Unsubscribe"
         >
           Notification preferences
@@ -286,11 +178,11 @@ export function Footer({ baseUrl }: Props) {
       <br />
 
       <Row>
-        <Link href="https://go.midday.ai/FZwOHud">
+        <Link href="https://solomon-ai.app">
           <Img
             src={`${baseUrl}/logo-footer.png`}
             width="100"
-            alt="Midday"
+            alt="Solomon AI"
             className="block"
           />
         </Link>

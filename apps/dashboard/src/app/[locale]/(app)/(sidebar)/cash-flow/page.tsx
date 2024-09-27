@@ -5,6 +5,7 @@ import { SpendingTabsSection } from "@/components/cash-flow/spending-tabs-sectio
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import config from "@/config";
 import { getDefaultDateRange } from "@/config/chart-date-range-default-picker";
 import Tier from "@/config/tier";
 import { Cookies } from "@/utils/constants";
@@ -15,7 +16,7 @@ import { cookies } from "next/headers";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Cash Flow | Solomon AI",
+  title: `Cash Flow | ${config.company}`,
 };
 
 type Props = {

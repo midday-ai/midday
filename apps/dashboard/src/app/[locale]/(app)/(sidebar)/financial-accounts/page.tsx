@@ -2,7 +2,7 @@
  * @fileoverview Financial Accounts Page Component
  *
  * This file contains the FinancialAccountsPage component, which renders the financial accounts
- * overview for a user in the Midday application.
+ * overview for a user in the application.
  *
  * @module FinancialAccountsPage
  */
@@ -12,6 +12,7 @@ import { BankAccountOverviewProTier } from "@/components/bank-account/bank-accou
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
+import config from "@/config";
 import Tier, { isFreeТier } from "@/config/tier";
 import {
   getBankConnectionsByTeamId,
@@ -27,7 +28,7 @@ import { Suspense } from "react";
  * @type {Metadata}
  */
 export const metadata: Metadata = {
-  title: "Financial Accounts | Solomon AI",
+  title: `Financial Accounts | ${config.company}`,
 };
 
 /**

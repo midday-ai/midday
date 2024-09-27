@@ -115,7 +115,7 @@ export function ConnectTransactionsModal({
     token: plaidToken,
     publicKey: "",
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
-    clientName: "Midday",
+    clientName: "simfiny",
     product: ["transactions"],
     onSuccess: async (public_token, metadata) => {
       const accessToken = await exchangePublicToken(public_token);

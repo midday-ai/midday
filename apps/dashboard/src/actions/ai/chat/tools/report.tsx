@@ -1,4 +1,5 @@
 import type { MutableAIState } from "@/actions/ai/types";
+import config from "@/config";
 import { dub } from "@/utils/dub";
 import { createClient } from "@midday/supabase/server";
 import { startOfMonth } from "date-fns";
@@ -57,7 +58,7 @@ export function createReport({
         .single();
 
       const link = await dub.links.create({
-        url: `https://app.midday.ai/report/${data.id}`,
+        url: `${config.platformUrl}/report/${data.id}`,
         expiresAt,
       });
 

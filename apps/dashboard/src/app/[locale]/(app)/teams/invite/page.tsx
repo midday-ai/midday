@@ -1,5 +1,6 @@
 import { InviteForm } from "@/components/forms/invite-form";
 import { UserMenu } from "@/components/user-menu";
+import config from "@/config";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { Button } from "@midday/ui/button";
 import {
@@ -15,7 +16,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Invite Team Member | Solomon AI",
+  title: `Invite Team Member | ${config.company}`,
 };
 
 export default async function InviteMembers() {

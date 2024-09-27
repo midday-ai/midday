@@ -1,9 +1,10 @@
 import { Table } from "@/components/tables/vault";
 import { searchParamsCache } from "@/components/tables/vault/search-params";
+import config from "@/config";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Vault | Solomon AI",
+  title: `Vault | ${config.company}`,
 };
 
 type Props = {

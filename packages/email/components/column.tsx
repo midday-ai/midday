@@ -1,9 +1,9 @@
 import {
-  Column as TwColumn,
   Img,
   Row,
-  Text,
   Section,
+  Text,
+  Column as TwColumn,
 } from "@react-email/components";
 import React from "react";
 

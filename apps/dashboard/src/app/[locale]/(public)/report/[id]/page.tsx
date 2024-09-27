@@ -4,6 +4,7 @@ import { BarChart } from "@/components/charts/bar-chart";
 import { ExpenseChart } from "@/components/charts/expense-chart";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { FormatAmount } from "@/components/format-amount";
+import config from "@/config";
 import { calculateAvgBurnRate } from "@/utils/format";
 import {
   getBurnRateQuery,
@@ -221,10 +222,10 @@ export default async function Report({ params }) {
           <p className="text-[#878787] text-sm">
             Powered by{" "}
             <a
-              href="https://midday.ai?utm_source=report"
+              href={`${config.webUrl}?utm_source=report`}
               className="text-black dark:text-white"
             >
-              Midday
+              {config.company}
             </a>
           </p>
         </div>

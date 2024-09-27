@@ -15,6 +15,7 @@ import {
 import { format } from "date-fns";
 import { Footer } from "../components/footer";
 import { Logo } from "../components/logo";
+import config from "../config/index";
 import { getI18n } from "../locales";
 
 type Transaction = {
@@ -72,19 +73,19 @@ const defaultTransactions = [
 
 const baseUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://midday.ai/email"
+    ? `${config.webUrl}/email`
     : "http://localhost:3000/email";
 
 const baseAppUrl =
   process.env.VERCEL_ENV === "production"
-    ? "https://app.midday.ai"
+    ? `${config.platformUrl}`
     : "http://localhost:3001";
 
 export const TransactionsEmail = ({
-  fullName = "Viktor Hofte",
+  fullName = "Solomon AI",
   transactions = defaultTransactions,
   locale = "en",
-  teamName = "Viktor Hofte AB",
+  teamName = config.company,
 }: TransactionsEmailEmailProps) => {
   const { t } = getI18n({ locale });
   const firstName = fullName.split(" ").at(0);

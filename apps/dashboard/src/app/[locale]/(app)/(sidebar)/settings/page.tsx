@@ -1,11 +1,12 @@
 import { DeleteTeam } from "@/components/delete-team";
 import { TeamAvatar } from "@/components/team-avatar";
 import { TeamName } from "@/components/team-name";
+import config from "@/config";
 import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Team Settings | Solomon AI",
+  title: `Team Settings | ${config.company}`,
 };
 
 export default async function Account() {

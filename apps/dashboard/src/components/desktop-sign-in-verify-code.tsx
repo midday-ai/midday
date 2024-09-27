@@ -1,5 +1,6 @@
 "use client";
 
+import config from "@/config";
 import Image from "next/image";
 import appIcon from "public/appicon.png";
 import { useEffect, useRef } from "react";
@@ -15,7 +16,7 @@ export function DesktopSignInVerifyCode({
 
   useEffect(() => {
     if (code && !hasRunned.current) {
-      window.location.replace(`midday://api/auth/callback?code=${code}`);
+      window.location.replace(`${config.desktopUrl}/api/auth/callback?code=${code}`);
       hasRunned.current = true;
     }
   }, [code]);
@@ -27,16 +28,16 @@ export function DesktopSignInVerifyCode({
           src={appIcon}
           width={80}
           height={80}
-          alt="Midday"
+          alt={config.company}
           quality={100}
           className="mb-10"
         />
         <p>Signing in...</p>
         <p className="mb-4">
-          If Midday dosen't open in a few seconds,{" "}
+          If {config.company} dosen't open in a few seconds,{" "}
           <a
             className="underline"
-            href={`midday://api/auth/callback?code=${code}`}
+            href={`${config.desktopUrl}/api/auth/callback?code=${code}`}
           >
             click here
           </a>

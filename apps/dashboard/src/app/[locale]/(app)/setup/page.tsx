@@ -1,4 +1,5 @@
 import { SetupForm } from "@/components/setup-form";
+import config from "@/config";
 import { getSession, getUser } from "@midday/supabase/cached-queries";
 import { Icons } from "@midday/ui/icons";
 import type { Metadata } from "next";
@@ -6,7 +7,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Setup account | Solomon AI",
+  title: `Setup account | ${config.company}`,
 };
 
 export default async function Page() {

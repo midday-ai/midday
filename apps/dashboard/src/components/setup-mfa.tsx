@@ -1,12 +1,13 @@
 "use client";
 
 import { EnrollMFA } from "@/components/enroll-mfa";
+import config from "@/config";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import { useState } from "react";
 
-function MfaStart({ setEnroll }) {
+function MfaStart({ setEnroll }: { setEnroll: (enroll: boolean) => void }) {
   return (
     <>
       <div className="flex w-full flex-col relative">
@@ -54,7 +55,7 @@ export function SetupMfa() {
   return (
     <div>
       <div className="absolute left-5 top-4 md:left-10 md:top-10">
-        <Link href="https://midday.ai">
+        <Link href={config.webUrl}>
           <Icons.Logo />
         </Link>
       </div>

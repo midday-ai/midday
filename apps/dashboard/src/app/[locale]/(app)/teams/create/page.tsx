@@ -1,5 +1,6 @@
 import { CreateTeamForm } from "@/components/forms/create-team-form";
 import { UserMenu } from "@/components/user-menu";
+import config from "@/config";
 import {
   Card,
   CardContent,
@@ -13,7 +14,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Create Team | Solomon AI",
+  title: `Create Team | ${config.company}`,
 };
 
 export default async function CreateTeam() {

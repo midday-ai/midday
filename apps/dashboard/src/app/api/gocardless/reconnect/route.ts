@@ -1,3 +1,4 @@
+import config from "@/config";
 import { getSession } from "@midday/supabase/cached-queries";
 import { updateBankConnection } from "@midday/supabase/mutations";
 import { createClient } from "@midday/supabase/server";
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   if (isDesktop === "true") {
     return NextResponse.redirect(
-      `midday://settings/accounts?id=${id}&step=reconnect`,
+      `${config.desktopUrl}/settings/accounts?id=${id}&step=reconnect`,
     );
   }
 

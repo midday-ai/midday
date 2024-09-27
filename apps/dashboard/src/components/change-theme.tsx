@@ -1,4 +1,5 @@
 import { ThemeSwitch } from "@/components/theme-switch";
+import config from "@/config";
 import {
   Card,
   CardContent,
@@ -13,7 +14,7 @@ export function ChangeTheme() {
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
         <CardDescription>
-          Customize how Midday looks on your device.
+          Customize how {config.company} looks on your device.
         </CardDescription>
       </CardHeader>
 

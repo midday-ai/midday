@@ -6,6 +6,7 @@ import { NoAccounts } from "@/components/tables/transactions/empty-states";
 import { Loading } from "@/components/tables/transactions/loading";
 import { TransactionsActions } from "@/components/transactions-actions";
 import { TransactionsSearchFilter } from "@/components/transactions-search-filter";
+import config from "@/config";
 import { Cookies } from "@/utils/constants";
 import {
   getCategories,
@@ -23,7 +24,7 @@ import { searchParamsCacheRecurring } from "./search-params";
  * Metadata for the Recurring Transactions page.
  */
 export const metadata: Metadata = {
-  title: "Recurring Transactions | Solomon AI",
+  title: `Recurring Transactions | ${config.company}`,
 };
 
 /**

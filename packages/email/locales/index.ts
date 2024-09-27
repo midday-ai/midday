@@ -1,3 +1,5 @@
+import config from "../config/index";
+
 type Options = {
   locale?: string;
 };
@@ -36,8 +38,8 @@ function translations(locale: string, params?: any) {
         "transactions.amount": "Amount",
         "transactions.date": "Date",
         "transactions.description": "Description",
-        "invite.subject": `${params?.invitedByName} invited you to the ${params?.teamName} team on Midday`,
-        "invite.preview": `Join ${params?.teamName} on Midday`,
+        "invite.subject": `${params?.invitedByName} invited you to the ${params?.teamName} team on ${config.company}`,
+        "invite.preview": `Join ${params?.teamName} on ${config.company}`,
         "invite.title1": "Join",
         "invite.title2": "on",
         "invite.link1": "has invited you to the",
@@ -85,8 +87,8 @@ function translations(locale: string, params?: any) {
         "transactions.amount": "Belopp",
         "transactions.date": "Datum",
         "transactions.description": "Beskrivning",
-        "invite.subject": `${params?.invitedByName} bjöd in dig till ${params?.teamName} på Midday`,
-        "invite.preview": `Gå med i ${params?.teamName} på Midday`,
+        "invite.subject": `${params?.invitedByName} bjöd in dig till ${params?.teamName} på ${config.company}`,
+        "invite.preview": `Gå med i ${params?.teamName} på ${config.company}`,
         "invite.title1": "Gå med",
         "invite.title2": "på",
         "invite.link1": "har bjudit in dig till",

@@ -1,9 +1,10 @@
 import { SupportForm } from "@/components/support-form";
+import config from "@/config";
 import { getUser } from "@midday/supabase/cached-queries";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Support | Solomon AI",
+  title: `Support | ${config.company}`,
 };
 
 export default async function Support() {
