@@ -80,6 +80,7 @@ export function VerifyMfa() {
         <InputOTP
           onComplete={onComplete}
           maxLength={6}
+          autoFocus
           className={error ? "invalid" : undefined}
           disabled={isValidating}
           render={({ slots }) => (

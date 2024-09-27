@@ -1,4 +1,4 @@
-// import { sendSlackTransactionsNotification } from "@midday/app-store/slack";
+import { sendSlackTransactionsNotification } from "@midday/app-store/slack";
 import TransactionsEmail from "@midday/email/emails/transactions";
 import { getI18n } from "@midday/email/locales";
 import { getInboxEmail } from "@midday/inbox";
@@ -150,18 +150,18 @@ client.defineJob({
       }
     }
 
-    // const slackTransactions = sortedTransactions.map((transaction) => ({
-    //   date: transaction.date,
-    //   amount: Intl.NumberFormat("en-US", {
-    //     style: "currency",
-    //     currency: transaction.currency,
-    //   }).format(transaction.amount),
-    //   name: transaction.name,
-    // }));
+    const slackTransactions = sortedTransactions.map((transaction) => ({
+      date: transaction.date,
+      amount: Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: transaction.currency,
+      }).format(transaction.amount),
+      name: transaction.name,
+    }));
 
-    // await sendSlackTransactionsNotification({
-    //   teamId,
-    //   transactions: slackTransactions,
-    // });
+    await sendSlackTransactionsNotification({
+      teamId,
+      transactions: slackTransactions,
+    });
   },
 });
