@@ -1,6 +1,6 @@
 "use client";
 
-import { apps } from "@midday/apps";
+import { apps } from "@midday/app-store";
 import { useSearchParams } from "next/navigation";
 import { App } from "./app";
 

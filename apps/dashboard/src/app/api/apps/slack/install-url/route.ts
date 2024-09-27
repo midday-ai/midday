@@ -1,4 +1,4 @@
-import { getInstallUrl } from "@midday/apps/slack";
+import { getInstallUrl } from "@midday/app-store/slack";
 import { getUser } from "@midday/supabase/cached-queries";
 import { NextResponse } from "next/server";
 

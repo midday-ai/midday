@@ -2,7 +2,7 @@ import {
   config,
   handleSlackEvent,
   verifySlackRequest,
-} from "@midday/apps/slack";
+} from "@midday/app-store/slack";
 import { createClient } from "@midday/supabase/server";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";

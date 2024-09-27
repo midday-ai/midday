@@ -1,4 +1,4 @@
-import { createSlackWebClient } from "@midday/apps/slack";
+import { createSlackWebClient } from "@midday/app-store/slack";
 import type { SlackEvent } from "@slack/bolt";
 import { waitUntil } from "@vercel/functions";
 import { assistantThreadMessage, assistantThreadStarted } from "./thread";

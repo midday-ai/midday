@@ -1,5 +1,9 @@
-import { createApp } from "@midday/apps/db";
-import { config, createSlackApp, slackInstaller } from "@midday/apps/slack";
+import { createApp } from "@midday/app-store/db";
+import {
+  config,
+  createSlackApp,
+  slackInstaller,
+} from "@midday/app-store/slack";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 

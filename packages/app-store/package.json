@@ -1,5 +1,5 @@
 {
-  "name": "@midday/apps",
+  "name": "@midday/app-store",
   "version": "1.0.0",
   "private": true,
   "sideEffects": false,
