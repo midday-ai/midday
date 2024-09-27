@@ -1,31 +1,9 @@
-const BASE = "https://slack.com/oauth/v2/authorize";
-
-const generateInstallUrl = ({
-  teamId,
-  userId,
-}: { teamId: string; userId: string }) => {
-  const url = new URL(BASE);
-
-  url.searchParams.set("client_id", process.env.NEXT_PUBLIC_SLACK_CLIENT_ID!);
-  url.searchParams.set(
-    "redirect_uri",
-    process.env.NEXT_PUBLIC_SLACK_OAUTH_REDIRECT_URL!,
-  );
-  url.searchParams.set(
-    "scope",
-    "incoming-webhook,chat:write,chat:write.public,team:read,assistant:write,im:history",
+export const onInitialize = async () => {
+  const response = await fetch("/api/apps/slack/install-url").then((res) =>
+    res.json(),
   );
 
-  url.searchParams.set("state", JSON.stringify({ teamId, userId }));
-
-  return url.toString();
-};
-
-export const onInitialize = ({
-  teamId,
-  userId,
-}: { teamId: string; userId: string }) => {
-  const url = generateInstallUrl({ teamId, userId });
+  const { url } = response;
 
   const width = 600;
   const height = 800;
@@ -45,7 +23,7 @@ export const onInitialize = ({
   }
 
   const listener = (e: MessageEvent) => {
-    if (e.data === "slack_oauth_completed") {
+    if (e.data === "app_oauth_completed") {
       window.location.reload();
       window.removeEventListener("message", listener);
       popup.close();

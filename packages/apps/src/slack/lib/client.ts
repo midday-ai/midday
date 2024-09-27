@@ -33,7 +33,6 @@ export const slackInstaller = new InstallProvider({
   clientId: SLACK_CLIENT_ID,
   clientSecret: SLACK_CLIENT_SECRET,
   stateSecret: SLACK_STATE_SECRET,
-  stateVerification: false,
   logLevel: process.env.NODE_ENV === "development" ? LogLevel.DEBUG : undefined,
 });
 
@@ -54,4 +53,22 @@ export const createSlackWebClient = ({
   token: string;
 }) => {
   return new WebClient(token);
+};
+
+export const getInstallUrl = ({
+  teamId,
+  userId,
+}: { teamId: string; userId: string }) => {
+  return slackInstaller.generateInstallUrl({
+    scopes: [
+      "incoming-webhook",
+      "chat:write",
+      "chat:write.public",
+      "team:read",
+      "assistant:write",
+      "im:history",
+    ],
+    redirectUri: SLACK_OAUTH_REDIRECT_URL,
+    metadata: JSON.stringify({ teamId, userId }),
+  });
 };

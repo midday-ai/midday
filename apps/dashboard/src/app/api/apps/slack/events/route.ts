@@ -1,35 +1,37 @@
-import { config, handleSlackEvent } from "@midday/apps/slack";
+import {
+  config,
+  handleSlackEvent,
+  verifySlackRequest,
+} from "@midday/apps/slack";
 import { createClient } from "@midday/supabase/server";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(15, "1m"),
-  analytics: true,
-});
-
 export async function POST(req: Request) {
-  const { challenge, team_id, event } = await req.json();
+  const rawBody = await req.text();
+
+  try {
+    verifySlackRequest({
+      signingSecret: process.env.SLACK_SIGNING_SECRET!,
+      body: rawBody,
+      // @ts-expect-error - headers are not typed
+      headers: Object.fromEntries(headers().entries()),
+    });
+  } catch (error) {
+    console.error("Slack request verification failed:", error);
+    return NextResponse.json(
+      { error: "Invalid Slack request" },
+      { status: 401 },
+    );
+  }
+
+  const { challenge, team_id, event } = JSON.parse(rawBody);
 
   // We don't need to handle message_deleted events
-  if (event.type === "message_deleted") {
+  if (event?.type === "message_deleted") {
     return NextResponse.json({
       success: true,
     });
-  }
-
-  const ip = req.headers.get("x-forwarded-for") ?? "127.0.0.1";
-  const { success } = await ratelimit.limit(ip);
-
-  if (!success) {
-    return NextResponse.json(
-      { error: "Too many requests" },
-      {
-        status: 429,
-      },
-    );
   }
 
   if (challenge) {
@@ -46,7 +48,6 @@ export async function POST(req: Request) {
     .single();
 
   if (!data) {
-    console.error(`No team found for Slack team_id: ${team_id}`);
     return NextResponse.json(
       { error: "Unauthorized: No matching team found" },
       { status: 401 },

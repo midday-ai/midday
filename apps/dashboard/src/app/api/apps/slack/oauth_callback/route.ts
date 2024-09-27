@@ -1,5 +1,5 @@
 import { createApp } from "@midday/apps/db";
-import { config, createSlackApp } from "@midday/apps/slack";
+import { config, createSlackApp, slackInstaller } from "@midday/apps/slack";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -46,9 +46,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid params" }, { status: 400 });
   }
 
-  const parsedMetadata = metadataSchema.safeParse(
-    JSON.parse(parsedParams.data.state),
+  const veryfiedState = await slackInstaller.stateStore?.verifyStateParam(
+    new Date(),
+    parsedParams.data.state,
   );
+  const parsedMetadata = metadataSchema.safeParse(
+    JSON.parse(veryfiedState?.metadata ?? "{}"),
+  );
+
+  if (!parsedMetadata.success) {
+    console.error("Invalid metadata", parsedMetadata.error.errors);
+    return NextResponse.json({ error: "Invalid metadata" }, { status: 400 });
+  }
 
   try {
     const slackOauthAccessUrl = [

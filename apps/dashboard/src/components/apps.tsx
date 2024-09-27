@@ -17,7 +17,6 @@ export function Apps({
       {apps.map((app) => (
         <App
           key={app.id}
-          user={user}
           installed={installedApps?.includes(app.id)}
           {...app}
           onInitialize={() => app.onInitialize(user)}

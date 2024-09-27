@@ -16,7 +16,7 @@ import {
 } from "@midday/ui/sheet";
 import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import type { User } from "./apps";
+import { useState } from "react";
 
 export function App({
   id,
@@ -37,16 +37,23 @@ export function App({
   short_description: string;
   description: string;
   settings: Record<string, any>;
-  onInitialize: (user: User) => void;
+  onInitialize: () => void;
   images: string[];
   active?: boolean;
   installed?: boolean;
   category: string;
 }) {
+  const [isLoading, setLoading] = useState(false);
   const disconnectApp = useAction(disconnectAppAction);
 
   const handleDisconnect = () => {
     disconnectApp.execute({ appId: id });
+  };
+
+  const handleOnInitialize = async () => {
+    setLoading(true);
+    await onInitialize();
+    setLoading(false);
   };
 
   return (
@@ -99,8 +106,8 @@ export function App({
             <Button
               variant="outline"
               className="w-full"
-              onClick={onInitialize}
-              disabled={!onInitialize || !active}
+              onClick={handleOnInitialize}
+              disabled={!onInitialize || !active || isLoading}
             >
               Install
             </Button>
@@ -151,8 +158,8 @@ export function App({
                   <Button
                     variant="outline"
                     className="w-full border-primary"
-                    onClick={onInitialize}
-                    disabled={!onInitialize || !active}
+                    onClick={handleOnInitialize}
+                    disabled={!onInitialize || !active || isLoading}
                   >
                     Install
                   </Button>
