@@ -4,6 +4,29 @@ export async function assistantThreadStarted(
   event: AssistantThreadStartedEvent,
   client: WebClient,
 ) {
+  const prompts = [
+    {
+      title: "What's my profit?",
+      message: "What's my profit?",
+    },
+    {
+      title: "What did I spend on software last month?",
+      message: "How much did I spend on software last month?",
+    },
+    {
+      title: "What's my burn rate?",
+      message: "What's my burn rate?",
+    },
+    {
+      title: "What's my runway?",
+      message: "What's my runway?",
+    },
+    {
+      title: "What's my revenue?",
+      message: "What's my revenue?",
+    },
+  ];
+
   try {
     // Post welcome message
     await client.chat.postMessage({
@@ -16,24 +39,7 @@ export async function assistantThreadStarted(
     await client.assistant.threads.setSuggestedPrompts({
       channel_id: event.assistant_thread.channel_id,
       thread_ts: event.assistant_thread.thread_ts,
-      prompts: [
-        {
-          title: "Show recent transactions",
-          message: "Show me my recent transactions",
-        },
-        {
-          title: "What did I spend on software last month?",
-          message: "How much did I spend on software last month?",
-        },
-        {
-          title: "What's my burn rate?",
-          message: "What's my burn rate?",
-        },
-        {
-          title: "What's my runway?",
-          message: "What's my runway?",
-        },
-      ],
+      prompts: prompts.sort(() => 0.5 - Math.random()).slice(0, 4),
     });
   } catch (error) {
     console.error("Error handling assistant thread start:", error);
