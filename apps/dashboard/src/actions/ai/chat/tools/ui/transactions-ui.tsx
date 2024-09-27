@@ -4,6 +4,7 @@ import { BotCard } from "@/components/chat/messages";
 import { FormatAmount } from "@/components/format-amount";
 import { TransactionStatus } from "@/components/transaction-status";
 import { useI18n } from "@/locales/client";
+import { formatTransactionDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
 import {
   Table,
@@ -58,6 +59,7 @@ export function TransactionsUI({ meta, data, q, filter, sort }: Props) {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[45%] h-10">Description</TableHead>
+              <TableHead className="h-10 min-w-[80px]">Date</TableHead>
               <TableHead className="h-10">Amount</TableHead>
               <TableHead className="h-10 text-right w-[50px]">Status</TableHead>
             </TableRow>
@@ -78,6 +80,9 @@ export function TransactionsUI({ meta, data, q, filter, sort }: Props) {
                     )}
                   >
                     <span className="line-clamp-1">{transaction.name}</span>
+                  </TableCell>
+                  <TableCell className="font-normal">
+                    {formatTransactionDate(transaction.date)}
                   </TableCell>
                   <TableCell
                     className={cn(
