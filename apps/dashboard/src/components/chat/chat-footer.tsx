@@ -1,3 +1,4 @@
+import config from "@/config";
 import { useAssistantStore } from "@/store/assistant";
 import { Icons } from "@midday/ui/icons";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
@@ -102,7 +103,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
                 onClick={() => app.quit()}
               >
                 <Icons.ExitToApp className="w-[16px] h-[16px]" />
-                <span>Quit Midday</span>
+                <span>Quit {config.company}</span>
               </button>
             </li>
           </ul>

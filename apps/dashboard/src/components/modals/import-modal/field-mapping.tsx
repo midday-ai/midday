@@ -3,6 +3,7 @@
 import { generateCsvMapping } from "@/actions/ai/generate-csv-mapping";
 import { SelectAccount } from "@/components/select-account";
 import { SelectCurrency } from "@/components/select-currency";
+import config from "@/config";
 import { formatAmount } from "@/utils/format";
 import { formatAmountValue, formatDate } from "@midday/import";
 import {
@@ -72,7 +73,7 @@ export function FieldMapping({ currencies }: { currencies: string[] }) {
     <div className="mt-6">
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div className="text-sm">CSV Data column</div>
-        <div className="text-sm">Midday data column</div>
+        <div className="text-sm">{config.company} data column</div>
         {(Object.keys(mappableFields) as (keyof typeof mappableFields)[]).map(
           (field) => (
             <FieldRow

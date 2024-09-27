@@ -1,5 +1,6 @@
 "use server";
 
+import config from "@/config";
 import { env } from "@/env.mjs";
 import InviteEmail from "@midday/email/emails/invite";
 import { getI18n } from "@midday/email/locales";
@@ -48,7 +49,7 @@ export const inviteTeamMembersAction = authActionClient
         .select("email, code, user:invited_by(*), team:team_id(*)");
 
       const emails = invtesData?.map(async (invites) => ({
-        from: "Midday <middaybot@midday.ai>",
+        from: config.email.from,
         to: [invites.email],
         subject: t("invite.subject", {
           invitedByName: invites.user.full_name,

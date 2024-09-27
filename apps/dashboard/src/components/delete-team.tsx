@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteTeamAction } from "@/actions/delete-team-action";
+import config from "@/config";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,9 +40,9 @@ export function DeleteTeam({ teamId }: DeleteTeamProps) {
       <CardHeader>
         <CardTitle>Delete team</CardTitle>
         <CardDescription>
-          Permanently remove your Team and all of its contents from the Midday
-          platform. This action is not reversible — please continue with
-          caution.
+          Permanently remove your Team and all of its contents from the
+          {config.company} platform. This action is not reversible — please
+          continue with caution.
         </CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">

@@ -1,6 +1,7 @@
 "use server";
 
 import { BotMessage, SpinnerMessage } from "@/components/chat/messages";
+import config from "@/config";
 import { openai } from "@ai-sdk/openai";
 import { client as RedisClient } from "@midday/kv";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -91,7 +92,7 @@ export async function submitUserMessage(
     model: openai("gpt-4o-mini"),
     initial: <SpinnerMessage />,
     system: `\
-    You are a helpful assistant in Midday who can help users ask questions about their transactions, revenue, spending find invoices and more.
+    You are a helpful assistant in ${config.company}  who can help users ask questions about their transactions, revenue, spending find invoices and more.
 
     If the user wants the burn rate, call \`getBurnRate\` function.
     If the user wants the runway, call \`getRunway\` function.

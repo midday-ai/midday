@@ -1,6 +1,7 @@
 "use client";
 
 import { deleteUserAction } from "@/actions/delete-user-action";
+import config from "@/config";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,8 +33,8 @@ export function DeleteAccount() {
         <CardTitle>Delete account</CardTitle>
         <CardDescription>
           Permanently remove your Personal Account and all of its contents from
-          the Midday platform. This action is not reversible, so please continue
-          with caution.
+          the {config.company} platform. This action is not reversible, so please
+          continue with caution.
         </CardDescription>
       </CardHeader>
       <CardFooter className="flex justify-between">

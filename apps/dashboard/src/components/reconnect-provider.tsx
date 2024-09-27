@@ -67,7 +67,7 @@ export function ReconnectProvider({
     token: plaidToken,
     publicKey: "",
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
-    clientName: "Midday",
+    clientName: "simfiny",
     product: ["transactions"],
     onSuccess: () => {
       setPlaidToken(undefined);
@@ -77,9 +77,8 @@ export function ReconnectProvider({
       setPlaidToken(undefined);
     },
   });
-
   const openTeller = () => {
-    const teller = window.TellerConnect.setup({
+    const teller = (window as any).TellerConnect.setup({
       applicationId: process.env.NEXT_PUBLIC_TELLER_APPLICATION_ID!,
       environment: process.env.NEXT_PUBLIC_TELLER_ENVIRONMENT,
       enrollmentId,

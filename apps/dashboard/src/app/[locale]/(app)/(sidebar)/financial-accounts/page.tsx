@@ -2,7 +2,7 @@
  * @fileoverview Financial Accounts Page Component
  *
  * This file contains the FinancialAccountsPage component, which renders the financial accounts
- * overview for a user in the Midday application.
+ * overview for a user in the application.
  *
  * @module FinancialAccountsPage
  */
