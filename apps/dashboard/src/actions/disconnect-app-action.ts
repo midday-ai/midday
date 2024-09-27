@@ -18,11 +18,12 @@ export const disconnectAppAction = authActionClient
       channel: LogEvents.DisconnectApp.channel,
     },
   })
-  .action(async ({ parsedInput: { appId }, ctx: { supabase } }) => {
+  .action(async ({ parsedInput: { appId }, ctx: { supabase, user } }) => {
     const { data } = await supabase
       .from("apps")
       .delete()
       .eq("app_id", appId)
+      .eq("team_id", user.team_id)
       .select();
 
     revalidatePath("/apps");
