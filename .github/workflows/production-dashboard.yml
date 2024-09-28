@@ -16,6 +16,8 @@ on:
     paths:
       - apps/dashboard/**
       - packages/**
+  workflow_dispatch:
+
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
