@@ -81,11 +81,11 @@ export function DeleteItemModal({ onDelete }: Props): JSX.Element {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>
-            <XCircleIcon className="mr-2 h-4 w-4" />
+            <XCircleIcon className="mr-2 h-4 w-4" strokeWidth={0.5} />
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction onClick={onDelete}>
-            <Trash className="mr-2 h-4 w-4" />
+            <Trash className="mr-2 h-4 w-4" strokeWidth={0.5} />
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

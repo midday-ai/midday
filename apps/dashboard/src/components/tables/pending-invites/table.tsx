@@ -89,7 +89,7 @@ export const columns: ColumnDef<Payment>[] = [
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-8 w-8 p-0">
                     <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
+                    <MoreHorizontal className="h-4 w-4" strokeWidth={0.5} />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

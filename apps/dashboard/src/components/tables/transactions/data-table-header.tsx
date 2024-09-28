@@ -68,8 +68,12 @@ export function DataTableHeader({ table, loading }: Props) {
               onClick={() => createSortQuery("date")}
             >
               <span>Date</span>
-              {"date" === column && value === "asc" && <ArrowDown size={16} />}
-              {"date" === column && value === "desc" && <ArrowUp size={16} />}
+              {"date" === column && value === "asc" && (
+                <ArrowDown size={16} strokeWidth={0.5} />
+              )}
+              {"date" === column && value === "desc" && (
+                <ArrowUp size={16} strokeWidth={0.5} />
+              )}
             </Button>
           </TableHead>
         )}
@@ -82,8 +86,12 @@ export function DataTableHeader({ table, loading }: Props) {
               onClick={() => createSortQuery("name")}
             >
               <span>Description</span>
-              {"name" === column && value === "asc" && <ArrowDown size={16} />}
-              {"name" === column && value === "desc" && <ArrowUp size={16} />}
+              {"name" === column && value === "asc" && (
+                <ArrowDown size={16} strokeWidth={0.5} />
+              )}
+              {"name" === column && value === "desc" && (
+                <ArrowUp size={16} strokeWidth={0.5} />
+              )}
             </Button>
           </TableHead>
         )}
@@ -97,9 +105,11 @@ export function DataTableHeader({ table, loading }: Props) {
             >
               <span>Amount</span>
               {"amount" === column && value === "asc" && (
-                <ArrowDown size={16} />
+                <ArrowDown size={16} strokeWidth={0.5} />
               )}
-              {"amount" === column && value === "desc" && <ArrowUp size={16} />}
+              {"amount" === column && value === "desc" && (
+                <ArrowUp size={16} strokeWidth={0.5} />
+              )}
             </Button>
           </TableHead>
         )}
@@ -113,10 +123,10 @@ export function DataTableHeader({ table, loading }: Props) {
             >
               <span>Category</span>
               {"category" === column && value === "asc" && (
-                <ArrowDown size={16} />
+                <ArrowDown size={16} strokeWidth={0.5} />
               )}
               {"category" === column && value === "desc" && (
-                <ArrowUp size={16} />
+                <ArrowUp size={16} strokeWidth={0.5} />
               )}
             </Button>
           </TableHead>
@@ -131,10 +141,10 @@ export function DataTableHeader({ table, loading }: Props) {
             >
               <span>Account</span>
               {"bank_account" === column && value === "asc" && (
-                <ArrowDown size={16} />
+                <ArrowDown size={16} strokeWidth={0.5} />
               )}
               {"bank_account" === column && value === "desc" && (
-                <ArrowUp size={16} />
+                <ArrowUp size={16} strokeWidth={0.5} />
               )}
             </Button>
           </TableHead>
@@ -149,9 +159,11 @@ export function DataTableHeader({ table, loading }: Props) {
             >
               <span>Method</span>
               {"method" === column && value === "asc" && (
-                <ArrowDown size={16} />
+                <ArrowDown size={16} strokeWidth={0.5} />
               )}
-              {"method" === column && value === "desc" && <ArrowUp size={16} />}
+              {"method" === column && value === "desc" && (
+                <ArrowUp size={16} strokeWidth={0.5} />
+              )}
             </Button>
           </TableHead>
         )}
@@ -165,10 +177,10 @@ export function DataTableHeader({ table, loading }: Props) {
             >
               <span>Assigned</span>
               {"assigned" === column && value === "asc" && (
-                <ArrowDown size={16} />
+                <ArrowDown size={16} strokeWidth={0.5} />
               )}
               {"assigned" === column && value === "desc" && (
-                <ArrowUp size={16} />
+                <ArrowUp size={16} strokeWidth={0.5} />
               )}
             </Button>
           </TableHead>
@@ -183,10 +195,10 @@ export function DataTableHeader({ table, loading }: Props) {
             >
               <span>Status</span>
               {"attachment" === column && value === "asc" && (
-                <ArrowDown size={16} />
+                <ArrowDown size={16} strokeWidth={0.5} />
               )}
               {"attachment" === column && value === "desc" && (
-                <ArrowUp size={16} />
+                <ArrowUp size={16} strokeWidth={0.5} />
               )}
             </Button>
           </TableHead>

@@ -21,11 +21,11 @@ type Props = {
 const ThemeIcon = ({ currentTheme }: Props) => {
   switch (currentTheme) {
     case "dark":
-      return <Moon size={12} />;
+      return <Moon size={12} strokeWidth={0.5} />;
     case "system":
-      return <Monitor size={12} />;
+      return <Monitor size={12} strokeWidth={0.5} />;
     default:
-      return <Sun size={12} />;
+      return <Sun size={12} strokeWidth={0.5} />;
   }
 };
 

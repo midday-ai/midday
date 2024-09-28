@@ -53,7 +53,7 @@ export function TeamAvatar({ teamId, logoUrl, name }) {
           onClick={() => inputRef?.current?.click()}
         >
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
           ) : (
             <>
               <AvatarImage src={logoUrl} />

@@ -78,7 +78,7 @@ export function TeamName({ name }) {
             <div>Please use 32 characters at maximum.</div>
             <Button type="submit" disabled={action.status === "executing"}>
               {action.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
               ) : (
                 "Save"
               )}

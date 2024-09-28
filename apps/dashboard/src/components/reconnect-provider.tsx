@@ -153,9 +153,9 @@ export function ReconnectProvider({
             disabled={isLoading}
           >
             {isLoading ? (
-              <Loader2 className="size-3.5 animate-spin" />
+              <Loader2 className="size-3.5 animate-spin" strokeWidth={0.5} />
             ) : (
-              <Icons.Reconnect size={16} />
+              <Icons.Reconnect size={16} strokeWidth={0.5} />
             )}
           </Button>
         </TooltipTrigger>

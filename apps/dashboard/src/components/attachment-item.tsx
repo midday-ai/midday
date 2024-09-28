@@ -74,7 +74,7 @@ export function AttachmentItem({ file, onDelete }: Props) {
         className="w-auto hover:bg-transparent flex"
         onClick={onDelete}
       >
-        <X size={14} />
+        <X size={14} strokeWidth={0.5} />
       </Button>
     </div>
   );

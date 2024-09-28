@@ -23,12 +23,12 @@ export type User = {
 };
 
 const categoryIcons = {
-  [types.IntegrationCategory.Accounting]: <BarChart2 className="h-5 w-5" />,
-  [types.IntegrationCategory.Assistant]: <HelpCircle className="h-5 w-5" />,
-  [types.IntegrationCategory.Payroll]: <Briefcase className="h-5 w-5" />,
-  [types.IntegrationCategory.Banking]: <Building2 className="h-5 w-5" />,
-  [types.IntegrationCategory.CRM]: <MessageSquare className="h-5 w-5" />,
-  [types.IntegrationCategory.Notification]: <Bell className="h-5 w-5" />,
+  [types.IntegrationCategory.Accounting]: <BarChart2 className="h-5 w-5" strokeWidth={0.5} />,
+  [types.IntegrationCategory.Assistant]: <HelpCircle className="h-5 w-5" strokeWidth={0.5} />,
+  [types.IntegrationCategory.Payroll]: <Briefcase className="h-5 w-5" strokeWidth={0.5}   />,
+  [types.IntegrationCategory.Banking]: <Building2 className="h-5 w-5" strokeWidth={0.5} />,
+  [types.IntegrationCategory.CRM]: <MessageSquare className="h-5 w-5" strokeWidth={0.5} />,
+  [types.IntegrationCategory.Notification]: <Bell className="h-5 w-5" strokeWidth={0.5} />,
 };
 
 const categoryDescriptions = {

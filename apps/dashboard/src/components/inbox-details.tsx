@@ -2,10 +2,11 @@ import { Avatar, AvatarFallback } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import {
+  DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
-import { DropdownMenu, DropdownMenuTrigger } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { Separator } from "@midday/ui/separator";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -95,7 +96,7 @@ export function InboxDetails({
                 disabled={!item}
                 onClick={onDelete}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" strokeWidth={0.5} />
               </Button>
             </TooltipTrigger>
             <TooltipContent className="px-3 py-1.5 text-xs">
@@ -108,7 +109,7 @@ export function InboxDetails({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" disabled={!item}>
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-4 w-4" strokeWidth={0.5} />
                 <span className="sr-only">More</span>
               </Button>
             </DropdownMenuTrigger>

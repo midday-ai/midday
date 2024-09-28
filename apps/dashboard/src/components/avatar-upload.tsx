@@ -7,8 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import { stripSpecialCharacters } from "@midday/utils";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
-import { useRef, useState } from "react";
-import { forwardRef } from "react";
+import { forwardRef, useRef, useState } from "react";
 
 type Props = {
   userId: string;
@@ -61,7 +60,7 @@ export const AvatarUpload = forwardRef<HTMLInputElement, Props>(
         }}
       >
         {isLoading ? (
-          <Loader2 className="size-4 animate-spin" />
+          <Loader2 className="size-4 animate-spin" strokeWidth={0.5} />
         ) : (
           <>
             <AvatarImage src={avatar} />

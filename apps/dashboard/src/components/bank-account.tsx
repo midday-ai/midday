@@ -25,8 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
 import { Switch } from "@midday/ui/switch";
-import { MoreHorizontal } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { Loader2, MoreHorizontal } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
@@ -99,7 +98,7 @@ export function BankAccount({
         <AlertDialog>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <MoreHorizontal size={20} />
+              <MoreHorizontal size={20} strokeWidth={0.5} />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-48">
               <DropdownMenuItem onClick={() => setOpen(true)}>
@@ -146,7 +145,7 @@ export function BankAccount({
                 }
               >
                 {deleteAccount.status === "executing" ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
                 ) : (
                   "Confirm"
                 )}

@@ -43,7 +43,7 @@ const IncomeViewAccessibilityButton: React.FC<{
         }
         aria-label="Open income view"
       >
-        <ChartBarIncreasing className="h-5 w-5" />
+        <ChartBarIncreasing className="h-5 w-5" strokeWidth={0.5} />
       </button>
     </div>
   );

@@ -61,7 +61,7 @@ export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
                       variant="destructive"
                       className="bg-transparent border border-destructive hover:bg-transparent"
                     >
-                      <Icons.Delete className="text-destructive" size={18} />
+                      <Icons.Delete className="text-destructive" size={18} strokeWidth={0.5} />
                     </Button>
                   </AlertDialogTrigger>
                 )}
@@ -86,7 +86,7 @@ export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
               }}
             >
               {deleteTransactions.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
               ) : (
                 "Confirm"
               )}

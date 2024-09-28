@@ -49,7 +49,7 @@ export function ProTierDock() {
                       "size-12 rounded-full",
                     )}
                   >
-                    <item.icon className="size-4" />
+                    <item.icon className="size-4" strokeWidth={0.5} />
                   </Link>
                 </TooltipTrigger>
                 <TooltipContent

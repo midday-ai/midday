@@ -2,11 +2,10 @@ import { formatCurrency } from "@/utils/currency";
 import { Tables } from "@midday/supabase/types";
 import { Button } from "@midday/ui/button";
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
+  CardTitle
 } from "@midday/ui/card";
 import {
   Sheet,
@@ -16,9 +15,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@midday/ui/sheet";
-import { GitGraphIcon, TrendingUpDown } from "lucide-react";
+import { TrendingUpDown } from "lucide-react";
 import React, { useMemo } from "react";
-import TransactionCategoryChart from "../charts/transaction-category-chart";
 
 type Transaction = Tables<"transactions">;
 
@@ -145,7 +143,7 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline">
-          <TrendingUpDown className="w-4 h-4 mr-2" />
+          <TrendingUpDown className="w-4 h-4 mr-2" strokeWidth={0.5} />
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[400px] sm:min-w-[540px]">

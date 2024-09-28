@@ -99,7 +99,7 @@ export function SetupForm({ userId, avatarUrl, fullName }: Props) {
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
           ) : (
             <span>Save</span>
           )}

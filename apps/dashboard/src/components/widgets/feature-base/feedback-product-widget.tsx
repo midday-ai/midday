@@ -160,7 +160,7 @@ const FeedbackProductWidget: React.FC<FeedbackProductWidgetProps> = ({
           aria-label="Open feedback"
           data-featurebase-feedback
         >
-          <Microscope className="h-5 w-5" />
+          <Microscope className="h-5 w-5" strokeWidth={0.5} />
           <span id="fb-update-badge"></span>
         </button>
       </div>

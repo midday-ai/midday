@@ -30,7 +30,7 @@ const TransactionViewAccessibilityButton: React.FC<{
         }
         aria-label="Open transaction view"
       >
-        <ListOrdered className="h-5 w-5" />
+        <ListOrdered className="h-5 w-5" strokeWidth={0.5} />
       </button>
     </div>
   );

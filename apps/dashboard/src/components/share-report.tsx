@@ -22,8 +22,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { useToast } from "@midday/ui/use-toast";
 import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -121,7 +120,7 @@ export function ShareReport({ defaultValue, type, setOpen }: Props) {
                         ) : (
                           <span>Expire at</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" strokeWidth={0.5} />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -150,7 +149,7 @@ export function ShareReport({ defaultValue, type, setOpen }: Props) {
               className="w-full"
             >
               {createReport.status === "executing" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
               ) : (
                 "Publish"
               )}

@@ -76,9 +76,9 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
       onClick={toggleWidget}
     >
       {isOpen ? (
-        <XIcon className="w-6 h-6" />
+        <XIcon className="w-6 h-6" strokeWidth={0.5} />
       ) : (
-        <CircleIcon className="w-6 h-6" />
+          <CircleIcon className="w-6 h-6" strokeWidth={0.5} />
       )}
       <span className="sr-only">{isOpen ? "Close Menu" : "Open Menu"}</span>
     </button>
@@ -94,7 +94,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
       <Card className="fixed bottom-20 left-20 p-6 shadow-lg md:min-w-[300px]">
         <div className="flex justify-between items-center mb-4">
           <Button variant="ghost" size="icon" onClick={toggleWidget}>
-            <XIcon className="h-6 w-6" />
+            <XIcon className="h-6 w-6" strokeWidth={0.5} />
             <span className="sr-only">Close</span>
           </Button>
         </div>

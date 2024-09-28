@@ -125,7 +125,7 @@ function SupportForm() {
             className="mt-4"
           >
             {sendSupport.status === "executing" ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
             ) : (
               "Submit"
             )}
@@ -363,7 +363,7 @@ export function SelectBankAccountsModal() {
                         }
                       >
                         {connectBankAction.status === "executing" ? (
-                          <Loader2 className="w-4 h-4 animate-spin pointer-events-none" />
+                          <Loader2 className="w-4 h-4 animate-spin pointer-events-none" strokeWidth={0.5} />
                         ) : (
                           "Save"
                         )}
@@ -401,7 +401,7 @@ export function SelectBankAccountsModal() {
                   className="items-center border bg-accent p-1"
                   onClick={() => setActiveTab("select-accounts")}
                 >
-                  <Icons.ArrowBack />
+                  <Icons.ArrowBack strokeWidth={0.5} />
                 </button>
                 <h2>Support</h2>
               </div>

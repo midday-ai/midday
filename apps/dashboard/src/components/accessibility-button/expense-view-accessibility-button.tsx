@@ -30,7 +30,7 @@ const ExpenseViewAccessibilityButton: React.FC<{
         }
         aria-label="Open expense view"
       >
-        <ChartBarDecreasing className="h-5 w-5" />
+        <ChartBarDecreasing className="h-5 w-5" strokeWidth={0.5} />
       </button>
     </div>
   );

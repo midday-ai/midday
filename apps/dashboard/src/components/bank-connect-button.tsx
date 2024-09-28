@@ -27,7 +27,7 @@ export function BankConnectButton({ onClick }: Props) {
       disabled={isLoading}
       onClick={handleOnClick}
     >
-      {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Connect"}
+      {isLoading ? <Loader2 className="w-4 h-4 animate-spin" strokeWidth={0.5} /> : "Connect"}
     </Button>
   );
 }

@@ -172,7 +172,7 @@ const AdminProductWidget: React.FC<AdminProductWidgetProps> = ({
           aria-label="Open product updates"
           data-featurebase-feedback-portal
         >
-          <BracketsIcon className="h-5 w-5" />
+          <BracketsIcon className="h-5 w-5" strokeWidth={0.5} />
           <span id="fb-update-badge"></span>
         </button>
       </div>

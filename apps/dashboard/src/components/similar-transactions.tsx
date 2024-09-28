@@ -110,7 +110,7 @@ export const TransactionsFilterHelper: React.FC<{
             "text-foreground",
           )}
         >
-          <SearchIcon className="w-4 h-4" />
+          <SearchIcon className="w-4 h-4" strokeWidth={0.5} />
         </div>
         <Input
           type="search"
@@ -126,7 +126,7 @@ export const TransactionsFilterHelper: React.FC<{
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
-                <FilterIcon className="w-4 h-4" />
+                <FilterIcon className="w-4 h-4" strokeWidth={0.5} />
                 <span>Filter</span>
               </Button>
             </DropdownMenuTrigger>
@@ -153,7 +153,7 @@ export const TransactionsFilterHelper: React.FC<{
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="flex items-center gap-2">
-                <ListOrderedIcon className="w-4 h-4" />
+                <ListOrderedIcon className="w-4 h-4" strokeWidth={0.5} />
                 <span>Sort</span>
               </Button>
             </DropdownMenuTrigger>

@@ -30,7 +30,7 @@ const OverviewViewAccessibilityButton: React.FC<{
         }
         aria-label="Open overview"
       >
-        <LayoutDashboard className="h-5 w-5" />
+        <LayoutDashboard className="h-5 w-5" strokeWidth={0.5} />
       </button>
     </div>
   );

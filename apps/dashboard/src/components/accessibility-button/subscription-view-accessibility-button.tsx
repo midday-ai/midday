@@ -30,7 +30,7 @@ const SubscriptionViewAccessibilityButton: React.FC<{
         }
         aria-label="Open subscription view"
       >
-        <Repeat className="h-5 w-5" />
+        <Repeat className="h-5 w-5" strokeWidth={0.5} />
       </button>
     </div>
   );
