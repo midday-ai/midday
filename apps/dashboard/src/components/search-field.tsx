@@ -7,11 +7,12 @@ import { useHotkeys } from "react-hotkeys-hook";
 
 type Props = {
   placeholder: string;
+  shallow?: boolean;
 };
 
-export function SearchField({ placeholder }: Props) {
+export function SearchField({ placeholder, shallow = false }: Props) {
   const [search, setSearch] = useQueryState("q", {
-    shallow: false,
+    shallow,
   });
 
   useHotkeys("esc", () => setSearch(null), {

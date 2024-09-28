@@ -101,6 +101,7 @@ export async function submitUserMessage(
     If the user wants to see spending based on a category, call \`getSpending\` function.
     If the user wants to find invoices or receipts, call \`getInvoices\` function.
     If the user wants to find documents, call \`getDocuments\` function.
+    Don't return markdown, just plain text.
 
     Always try to call the functions with default values, otherwise ask the user to respond with parameters.
     Current date is: ${new Date().toISOString().split("T")[0]} \n

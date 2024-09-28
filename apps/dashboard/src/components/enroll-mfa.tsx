@@ -106,8 +106,8 @@ export function EnrollMFA() {
         <InputOTP
           className={error ? "invalid" : ""}
           maxLength={6}
+          autoFocus
           onComplete={onComplete}
-          numeric="numeric"
           disabled={isValidating}
           render={({ slots }) => (
             <InputOTPGroup>
