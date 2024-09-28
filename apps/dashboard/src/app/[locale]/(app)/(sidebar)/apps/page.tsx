@@ -21,7 +21,7 @@ export default async function Page() {
         description={`Connect business-critical integrations to ${config.company}`}
         subtitle={``}
         disabled={false}
-        className="w-full border-none py-[2%] px-[0.5%]"
+        className="w-full border-none py-[2%] px-[0.5%] shadow-none"
       >
         <AppsHeader />
 
