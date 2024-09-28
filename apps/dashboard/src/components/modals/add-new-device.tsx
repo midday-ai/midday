@@ -109,7 +109,7 @@ export function AddNewDeviceModal() {
             <InputOTP
               maxLength={6}
               onComplete={onComplete}
-              numeric="numeric"
+              autoFocus
               disabled={isValidating}
               className={error ? "invalid" : ""}
               render={({ slots }) => (

@@ -62,7 +62,7 @@ export function Iframe({
         allowFullScreen={false}
         loading="lazy"
         className={cn(
-          "h-full w-full transition-opacity duration-[100ms]",
+          "h-full w-full transition-opacity duration-100",
           isLoading && "opacity-0",
         )}
         style={{

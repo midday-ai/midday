@@ -44,7 +44,7 @@ port = 54323
 [auth.external.google]
 enabled = true
 client_id = "env(GOOGLE_CLIENT_ID)"
-secret = "env(GOOGLE_SECRET)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
 redirect_uri = "http://localhost:54321/auth/v1/callback"
 
 [analytics]
