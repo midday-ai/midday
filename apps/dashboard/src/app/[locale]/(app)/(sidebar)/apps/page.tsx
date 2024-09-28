@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Apps | Midday",
+  title: `Apps | ${config.company}`,
 };
 
 export default async function Page() {
