@@ -67,7 +67,7 @@ export function Apps({
   const categories = Object.values(types.IntegrationCategory);
 
   return (
-    <div className="flex p-[2%]">
+    <div className="flex py-[2%]">
       {/* Side Navigation */}
       <div className={`bg-gray-100 dark:bg-gray-800 h-screen p-4 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ${isSidebarCollapsed ? 'w-16' : 'w-64'}`}>
         <div className="flex justify-between items-center mb-4">
