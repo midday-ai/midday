@@ -102,7 +102,7 @@ export function Apps({
           <p className="text-gray-600 dark:text-gray-300 mb-6">{categoryDescriptions[activeCategory]}</p>
         </div>
         
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3">
           {filteredApps.map((app) => (
             <App
               key={app.id}
