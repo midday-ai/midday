@@ -22,7 +22,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./slack": "./src/slack/index.ts",
-    "./db": "./src/db/index.ts"
+    "./slack": "./src/assistant/slack/index.ts",
+    "./db": "./src/db/index.ts",
+    "./types": "./src/types/index.ts"
   }
 }

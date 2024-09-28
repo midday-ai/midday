@@ -10,6 +10,8 @@ type Settings = {
     description: string;
     /** The type of input for the setting */
     type: "switch" | "text" | "number" | "select";
+    /** Options for select type */
+    options?: string[];
     /** Indicates whether the setting is required */
     required: boolean;
     /** The current value of the setting */
@@ -57,4 +59,5 @@ type IntegrationConfig = {
 };
 
 export { IntegrationCategory };
-export default IntegrationConfig;
+export type { IntegrationConfig, Settings };
+
