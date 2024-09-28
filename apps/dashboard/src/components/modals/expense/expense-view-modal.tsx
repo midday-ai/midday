@@ -174,28 +174,30 @@ const ExpenseDetails = React.memo<{ data: ExpenseData }>(({ data }) => {
     }), [data]);
 
     return (
-        <div className="flex flex-col gap-4 md:p-[4%] overflow-y-auto scrollbar-hide">
-            <p className="text-2xl font-bold mb-4">Expense Overview</p>
-            <p className="text-sm text-gray-600 mb-4 md:max-w-[60%]">
-                This expense overview provides a detailed breakdown of your financial outflows. 
-                It includes a chart showing your monthly expenses, highlighting both recurring 
-                and one-time costs. Below, you'll find a growth rate chart that illustrates 
-                how your expenses have changed over time, helping you identify trends and 
-                make informed financial decisions.
-            </p>
-            
-            <ExpenseChartCard
-                data={data}
-                value={defaultValue}
-                defaultValue={defaultValue}
-                currency={data.meta.currency}
-                disabled={false}
-            />
-
-            <div className="md:mt-12">
-                <ExpenseGrowthRateBarChart
-                    data={growthRateData}
+        <div className="flex flex-col gap-4 md:p-[4%] h-full">
+            <div className="overflow-y-auto scrollbar-hide flex-grow">
+                <p className="text-2xl font-bold mb-4">Expense Overview</p>
+                <p className="text-sm text-gray-600 mb-4 md:max-w-[60%]">
+                    This expense overview provides a detailed breakdown of your financial outflows. 
+                    It includes a chart showing your monthly expenses, highlighting both recurring 
+                    and one-time costs. Below, you'll find a growth rate chart that illustrates 
+                    how your expenses have changed over time, helping you identify trends and 
+                    make informed financial decisions.
+                </p>
+                
+                <ExpenseChartCard
+                    data={data}
+                    value={defaultValue}
+                    defaultValue={defaultValue}
+                    currency={data.meta.currency}
+                    disabled={false}
                 />
+
+                <div className="md:mt-12">
+                    <ExpenseGrowthRateBarChart
+                        data={growthRateData}
+                    />
+                </div>
             </div>
         </div>
     );
