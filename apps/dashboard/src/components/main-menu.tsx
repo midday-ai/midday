@@ -40,7 +40,10 @@ const defaultItems = [
     path: "/",
     name: "Overview",
   },
-
+  {
+    path: "/apps",
+    name: "Apps",
+  },
   {
     path: "/inbox",
     name: "Inbox",
@@ -65,10 +68,7 @@ const defaultItems = [
     path: "/vault",
     name: "Vault",
   },
-  {
-    path: "/apps",
-    name: "Apps",
-  },
+
   {
     path: "/settings",
     name: "Settings",

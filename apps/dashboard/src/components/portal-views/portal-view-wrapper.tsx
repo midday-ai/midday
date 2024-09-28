@@ -8,6 +8,7 @@ interface PortalViewWrapperProps {
   subtitle?: string;
   children: React.ReactNode;
   disabled?: boolean;
+  className?: string;
 }
 
 export const PortalViewWrapper: React.FC<PortalViewWrapperProps> = ({
@@ -16,9 +17,10 @@ export const PortalViewWrapper: React.FC<PortalViewWrapperProps> = ({
   subtitle,
   children,
   disabled,
+  className,
 }) => {
   return (
-    <Card className="my-4 p-[2%]">
+    <Card className={cn("my-4 p-[2%]", className)}>
       <div className="mt-8">
         {disabled && <EmptyState />}
 

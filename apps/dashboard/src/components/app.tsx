@@ -1,10 +1,13 @@
 import { disconnectAppAction } from "@/actions/disconnect-app-action";
+import config from "@/config";
+import { capitalize } from "@/utils/utils";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import { Badge } from "@midday/ui/badge";
 import { Button } from "@midday/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { ScrollArea } from "@midday/ui/scroll-area";
@@ -59,7 +62,7 @@ export function App({
     await onInitialize();
     setLoading(false);
   };
-
+  
   return (
     <Card key={id} className="w-full flex flex-col">
       <Sheet open={params.app === id} onOpenChange={() => setParams(null)}>
@@ -78,6 +81,11 @@ export function App({
             <CardTitle className="text-md font-medium leading-none p-0 m-0">
               {name}
             </CardTitle>
+            {category && (
+              <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full font-mono">
+                {capitalize(category)}
+              </span>
+            )}
             {!active && (
               <span className="text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D] px-3 py-1 rounded-full font-mono">
                 Coming soon
@@ -93,7 +101,7 @@ export function App({
           <Button
             variant="outline"
             className="w-full"
-            disabled={!active}
+            disabled={false}
             onClick={() => setParams({ app: id })}
           >
             Details
@@ -124,13 +132,20 @@ export function App({
         <SheetContent>
           <SheetHeader>
             <div className="mb-4">
-              <Image
-                src={images[0]}
-                alt={name}
-                width={465}
-                height={290}
-                quality={100}
-              />
+            
+              <div
+                className="flex flex-col gap-3 items-center justify-center border-b border-border pb-2  h-[290px] w-[465px]"
+                style={{
+                  background: `linear-gradient(to right, var(--gray-100), var(--black))`,
+                }}
+              >
+                <Badge>
+                  Integrations • {capitalize(category)}
+                </Badge>
+                <div className="md:text-5xl font-bold text-foreground">
+                  {capitalize(name)}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-between border-b border-border pb-2">
@@ -145,7 +160,7 @@ export function App({
                   </div>
 
                   <span className="text-xs text-[#878787]">
-                    {category} • Published by Midday
+                      {capitalize(category)} • Published by {config.company}
                   </span>
                 </div>
               </div>
@@ -211,7 +226,7 @@ export function App({
                             ).map((setting) => [setting.id, setting]),
                           ),
                         }),
-                      ]}
+                      ] as any}
                     />
                   </AccordionContent>
                 </AccordionItem>
@@ -221,14 +236,15 @@ export function App({
 
           <div className="absolute bottom-4 pt-8 border-t border-border">
             <p className="text-[10px] text-[#878787]">
-              All apps on the Midday App Store are open-source and
-              peer-reviewed. Midday Labs AB maintains high standards but doesn't
-              endorse third-party apps. Apps published by Midday are officially
+              All integrations on the {config.company} platform are open-source
+              and peer-reviewed. {config.company} maintains high standards but
+              doesn't endorse third-party apps. Apps published by {config.company}
+              are officially certified. Report any concerns about app content
               certified. Report any concerns about app content or behavior.
             </p>
 
             <a
-              href="mailto:support@midday.dev"
+              href="mailto:engineering@solomon-ai.co"
               className="text-[10px] text-red-500"
             >
               Report app
