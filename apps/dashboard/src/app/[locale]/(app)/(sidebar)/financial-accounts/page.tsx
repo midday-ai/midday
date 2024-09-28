@@ -11,6 +11,7 @@ import BankAccountSingleView from "@/components/bank-account/bank-account-single
 import { BankAccountOverviewProTier } from "@/components/bank-account/bank-account-summary-details";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import config from "@/config";
 import Tier, { isFreeТier } from "@/config/tier";
@@ -65,6 +66,7 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
   const isCurrentUserTierFree = isFreeТier(tier);
 
   return (
+    <ContentLayout title="Financial Accounts">
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ConnectAccountServerWrapper>
         <FinancialPortalView
@@ -106,6 +108,7 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
           tier={tier}
         />
       </ConnectAccountServerWrapper>
-    </Suspense>
+      </Suspense>
+    </ContentLayout>
   );
 }

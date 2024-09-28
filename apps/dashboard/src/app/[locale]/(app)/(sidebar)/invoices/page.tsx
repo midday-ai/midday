@@ -1,4 +1,5 @@
 import { EmptyStateInvoice } from "@/components/empty-state-invoice";
+import { ContentLayout } from "@/components/panel/content-layout";
 import config from "@/config";
 import { Cookies } from "@/utils/constants";
 import type { Metadata } from "next";
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 export default function Invoices() {
   const hasRequested = cookies().get(Cookies.RequestAccess)?.value === "true";
 
-  return <EmptyStateInvoice hasRequested={hasRequested} />;
+  return (
+    <ContentLayout title="Invoices">
+      <EmptyStateInvoice hasRequested={hasRequested} />
+    </ContentLayout>
+  );
 }

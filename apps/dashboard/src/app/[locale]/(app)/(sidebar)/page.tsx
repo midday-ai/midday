@@ -3,6 +3,7 @@ import { Charts } from "@/components/charts/charts";
 import { EmptyState } from "@/components/charts/empty-state";
 import TabbedCharts from "@/components/charts/tabbed-charts";
 import { OverviewModal } from "@/components/modals/overview-modal";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { CategorySpendingPortalView } from "@/components/portal-views/category-spending-portal-view";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import { RecentFilesPortalView } from "@/components/portal-views/recent-files-portal-view";
@@ -67,7 +68,7 @@ export default async function Overview({
   const tier = user?.data?.tier ?? "free";
 
   return (
-    <>
+    <ContentLayout title="Overview">
       {/** financial portal view */}
       <FinancialPortalView
         disabled={isEmpty}
@@ -174,6 +175,6 @@ export default async function Overview({
       </div>
 
       <OverviewModal defaultOpen={isEmpty && !hideConnectFlow} />
-    </>
+    </ContentLayout>
   );
 }

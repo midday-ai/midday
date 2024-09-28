@@ -1,6 +1,7 @@
 import { CategoryCharts } from "@/components/charts/categories-chart";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { ContentLayout } from "@/components/panel/content-layout";
 import config from "@/config";
 import Tier from "@/config/tier";
 import { getTeamBankAccounts, getUser } from "@midday/supabase/cached-queries";
@@ -22,8 +23,9 @@ export default async function InboxPage({ searchParams }: Props) {
   const tier: Tier = user?.data?.tier ?? "free";
 
   return (
-    <Suspense fallback={<InboxViewSkeleton ascending />}>
-      <ConnectAccountServerWrapper>
+    <ContentLayout title="Categories">
+      <Suspense fallback={<InboxViewSkeleton ascending />}>
+        <ConnectAccountServerWrapper>
         <CategoryCharts
           currency={(searchParams.currency as string) ?? "USD"}
           disableAllCharts={isEmpty}
@@ -31,5 +33,6 @@ export default async function InboxPage({ searchParams }: Props) {
         />
       </ConnectAccountServerWrapper>
     </Suspense>
+    </ContentLayout>
   );
 }

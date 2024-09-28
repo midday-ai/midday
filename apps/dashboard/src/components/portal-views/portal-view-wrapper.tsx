@@ -26,7 +26,7 @@ export const PortalViewWrapper: React.FC<PortalViewWrapperProps> = ({
 
         <div className={cn(disabled && "blur-[8px] opacity-20")}>
           <div className="flex flex-row justify-between">
-            <p className="text-base font-semibold leading-7 text-blue-600 md:pt-[5%]">
+            <p className="text-base font-semibold leading-7 text-blue-600 md:pt-[1.5%]">
               Solomon AI
             </p>
           </div>

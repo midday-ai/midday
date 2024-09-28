@@ -1,6 +1,7 @@
 import { AppsHeader } from "@/components/apps-header";
 import { AppsServer } from "@/components/apps.server";
 import { AppsSkeleton } from "@/components/apps.skeleton";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { PortalViewWrapper } from "@/components/portal-views/portal-view-wrapper";
 import config from "@/config";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -15,13 +16,13 @@ export default async function Page() {
   const { data } = await getUser();
 
   return (
-    <div className="mt-4">
+    <ContentLayout title="Apps">
       <PortalViewWrapper
         title={`${config.company} Integration Marketplace`}
         description={`Connect business-critical integrations to ${config.company}`}
         subtitle={``}
         disabled={false}
-        className="w-full border-none py-[2%] px-[0.5%]"
+        className="w-full border-none py-[2%] px-[0.5%] shadow-none"
       >
         <AppsHeader />
 
@@ -30,6 +31,6 @@ export default async function Page() {
         </Suspense>
       </PortalViewWrapper>
 
-    </div>
+    </ContentLayout>
   );
 }
