@@ -5,6 +5,7 @@ import { SpendingTabsSection } from "@/components/cash-flow/spending-tabs-sectio
 import { CashflowCharts } from "@/components/charts/cashflow-charts";
 import ConnectAccountServerWrapper from "@/components/connect-account-server-wrapper";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { ContentLayout } from "@/components/panel/content-layout";
 import config from "@/config";
 import { getDefaultDateRange } from "@/config/chart-date-range-default-picker";
 import Tier from "@/config/tier";
@@ -46,7 +47,8 @@ export default async function CashFlowPage({ searchParams }: Props) {
 
   return (
     <Suspense fallback={<InboxViewSkeleton ascending />}>
-      <ConnectAccountServerWrapper>
+      <ContentLayout title="Cash Flow">
+        <ConnectAccountServerWrapper>
         <div className="mt-8">
           <AccountSummarySection
             user={user}
@@ -83,7 +85,8 @@ export default async function CashFlowPage({ searchParams }: Props) {
             tier={tier}
           />
         </div>
-      </ConnectAccountServerWrapper>
+        </ConnectAccountServerWrapper>
+      </ContentLayout>
     </Suspense>
   );
 }

@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@midday/ui/button";
 import {
   Dialog,
@@ -11,18 +13,20 @@ import { useState } from "react";
 
 interface UpgradeTierProps {
   message?: string;
-  open?: boolean;
+  initialOpen?: boolean;
 }
 
 export const UpgradeTier: React.FC<UpgradeTierProps> = ({
   message = "Please upgrade your tier to access detailed financial insights and analytics.",
-  open = false,
+  initialOpen = false,
 }) => {
+  const [isOpen, setIsOpen] = useState(initialOpen);
+
   return (
     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
       <h3 className="text-xl font-semibold mb-4">Upgrade Your Account</h3>
       <p className="text-center mb-6">{message}</p>
-      <Dialog open={open}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
           <Button variant="default">Upgrade Now</Button>
         </DialogTrigger>

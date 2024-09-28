@@ -33,7 +33,7 @@ interface NavbarProps {
  */
 export const Navbar: React.FC<NavbarProps> = ({ title }) => {
   return (
-    <header className="sticky top-0 z-10 w-full bg-background/95 shadow backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:shadow-secondary">
+    <header className="sticky top-0 z-10 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-4 flex h-14 items-center sm:mx-8">
         <NavbarLeft title={title} />
         <div className="ml-4 flex items-center space-x-4">

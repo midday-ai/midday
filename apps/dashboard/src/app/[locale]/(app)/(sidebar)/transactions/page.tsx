@@ -1,5 +1,6 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { CreateTransactionSheet } from "@/components/sheets/create-transaction-sheet";
 import { Table } from "@/components/tables/transactions";
 import { NoAccounts } from "@/components/tables/transactions/empty-states";
@@ -79,7 +80,7 @@ export default async function Transactions({
   });
 
   return (
-    <>
+    <ContentLayout title="Transactions">
       <div className="flex justify-between py-6">
         <div className="p-[2%] md:p-[4%]">
           <div className="mx-auto w-full">
@@ -159,6 +160,6 @@ export default async function Transactions({
         accountId={accountsData?.data?.at(0)?.id ?? ""}
         currency={accountsData?.data?.at(0)?.currency ?? ""}
       />
-    </>
+    </ContentLayout>
   );
 }

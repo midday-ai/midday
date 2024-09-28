@@ -1,5 +1,6 @@
 import { Inbox } from "@/components/inbox";
 import { InboxViewSkeleton } from "@/components/inbox-skeleton";
+import { ContentLayout } from "@/components/panel/content-layout";
 import config from "@/config";
 import { Cookies } from "@/utils/constants";
 import { uniqueCurrencies } from "@midday/location/src/currencies";
@@ -20,6 +21,7 @@ export default async function InboxPage({ searchParams }: Props) {
     cookies().get(Cookies.InboxOrder)?.value === "true" ?? false;
 
   return (
+    <ContentLayout title="Inbox">
     <Suspense
       key={ascending.toString()}
       fallback={<InboxViewSkeleton ascending />}
@@ -28,7 +30,8 @@ export default async function InboxPage({ searchParams }: Props) {
         ascending={ascending}
         query={searchParams?.q}
         currencies={uniqueCurrencies}
-      />
-    </Suspense>
+        />
+      </Suspense>
+    </ContentLayout>
   );
 }

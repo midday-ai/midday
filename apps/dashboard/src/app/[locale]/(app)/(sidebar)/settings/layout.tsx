@@ -1,10 +1,12 @@
 import { Header } from "@/components/header";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { SecondaryMenu } from "@/components/secondary-menu";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="max-w-[800px]">
-      <SecondaryMenu
+    <ContentLayout title="Settings">
+      <div className="max-w-[800px]">
+        <SecondaryMenu
         items={[
           { path: "/settings", label: "General" },
           { path: "/settings/accounts", label: "Accounts" },
@@ -15,6 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       />
 
       <main className="mt-8">{children}</main>
-    </div>
+      </div>
+    </ContentLayout>
   );
 }

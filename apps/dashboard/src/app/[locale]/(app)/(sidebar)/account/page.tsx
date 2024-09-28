@@ -1,6 +1,7 @@
 import { ChangeTheme } from "@/components/change-theme";
 import { DeleteAccount } from "@/components/delete-account";
 import { DisplayName } from "@/components/display-name";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { UserAvatar } from "@/components/user-avatar";
 import config from "@/config";
 import { getUser } from "@midday/supabase/cached-queries";
@@ -15,14 +16,14 @@ export default async function Account() {
 
   return (
     <div className="space-y-12">
-      <UserAvatar
-        userId={userData.id}
-        fullName={userData.full_name}
-        avatarUrl={userData?.avatar_url}
-      />
-      <DisplayName fullName={userData.full_name} />
-      <ChangeTheme />
-      <DeleteAccount />
+        <UserAvatar
+          userId={userData.id}
+          fullName={userData.full_name}
+          avatarUrl={userData?.avatar_url}
+        />
+        <DisplayName fullName={userData.full_name} />
+        <ChangeTheme />
+        <DeleteAccount />
     </div>
   );
 }

@@ -23,7 +23,7 @@ export const ContentLayout: React.FC<ContentLayoutProps> = React.memo(
     return (
       <div className="flex min-h-screen flex-col">
         <Navbar title={title} />
-        <main className="container mx-auto flex-grow px-4 pb-8 pt-8 sm:px-8">
+        <main className="flex-grow px-4 pb-8 pt-8 sm:px-8">
           <BreadcrumbNav />
           {children}
         </main>

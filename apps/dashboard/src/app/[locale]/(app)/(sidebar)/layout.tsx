@@ -90,7 +90,7 @@ export default async function Layout({
         <Sidebar />
 
         <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-          <Header />
+          {/* <Header /> */}
           {children}
           <AccessibilityWidget
             email={user.data.email as string}

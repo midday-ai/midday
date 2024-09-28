@@ -1,5 +1,6 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { TransactionsModal } from "@/components/modals/transactions-modal";
+import { ContentLayout } from "@/components/panel/content-layout";
 import { CreateTransactionSheet } from "@/components/sheets/create-transaction-sheet";
 import { Table } from "@/components/tables/transactions";
 import { NoAccounts } from "@/components/tables/transactions/empty-states";
@@ -93,7 +94,7 @@ export default async function Transactions({
   const defaultAccount = accountsData?.data?.[0];
 
   return (
-    <>
+    <ContentLayout title="Recurring Transactions">
       <div className="flex justify-between py-6">
         <PageHeader accountsCount={accountsData?.data?.length ?? 0} />
         <TransactionsSearchFilter
@@ -129,7 +130,7 @@ export default async function Transactions({
         accountId={defaultAccount?.id ?? ""}
         currency={defaultAccount?.currency ?? ""}
       />
-    </>
+    </ContentLayout>
   );
 }
 
