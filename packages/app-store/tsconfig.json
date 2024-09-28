@@ -1,4 +1,7 @@
 {
+  "compilerOptions": {
+      "jsx": "react"
+  },
   "extends": "@midday/tsconfig/base.json",
   "include": ["src", "."],
   "exclude": ["node_modules"]
