@@ -1,4 +1,4 @@
-import { SiteConfig } from "@/types/index";
+import { SiteConfig } from "../types/index";
 
 const sharedTitle =
   "Solomon AI | Intelligent Financial Management for Solopreneurs";
