@@ -1,4 +1,4 @@
-import Midday from "@solomon-ai/financial-engine-sdk";
+import FinancialEngine from "@solomon-ai/financial-engine-sdk";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
@@ -21,7 +21,7 @@ client.defineJob({
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
       )
       .eq("team_id", teamId)
       .eq("enabled", true)
@@ -54,7 +54,7 @@ client.defineJob({
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
       } catch (error) {
-        if (error instanceof Midday.APIError) {
+        if (error instanceof FinancialEngine.APIError) {
           const parsedError = parseAPIError(error);
 
           await io.supabase.client
@@ -137,7 +137,7 @@ client.defineJob({
       await io.logger.debug(`Team id: ${teamId}`);
 
       await io.logger.error(
-        error instanceof Error ? error.message : String(error),
+        error instanceof Error ? error.message : String(error)
       );
     }
   },

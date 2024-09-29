@@ -1,8 +1,8 @@
+import { eventTrigger } from "@trigger.dev/sdk";
+import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { scheduler } from "./scheduler";
-import { eventTrigger } from "@trigger.dev/sdk";
-import { z } from "zod";
 
 /**
  * Interval in seconds for the scheduler (12 hours)
