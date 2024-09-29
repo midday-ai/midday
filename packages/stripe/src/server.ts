@@ -251,7 +251,7 @@ export async function createStripePortal<T extends Database>(
       console.log("Return URL for stripe billing portal:", stripeReturnUrl);
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
-        return_url: getURL("/account"),
+        return_url: stripeReturnUrl,
       });
       if (!url) {
         throw new Error("Could not create billing portal");

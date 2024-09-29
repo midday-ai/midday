@@ -114,8 +114,9 @@ export function getURL(path = ""): string {
   baseUrl = baseUrl.replace(/\/+$/, "");
 
   // Ensure the URL starts with a protocol (http:// or https://)
-  // Use https:// for all non-localhost URLs
-  baseUrl = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`;
+  if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
+    baseUrl = baseUrl.startsWith("localhost") ? `http://${baseUrl}` : `https://${baseUrl}`;
+  }
 
   // Remove any leading slashes from the path to avoid double slashes
   const cleanPath = path.replace(/^\/+/, "");
