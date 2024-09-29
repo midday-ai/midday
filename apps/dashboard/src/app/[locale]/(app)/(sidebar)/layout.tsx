@@ -12,7 +12,7 @@ import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
 import { currencies, uniqueCurrencies } from "@midday/location/src/currencies";
-import { getUser } from "@midday/supabase/cached-queries";
+import { getUser, getUserSubscriptions } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
@@ -74,9 +74,37 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getUser();
+
+  var user: any = null;
+  try {
+    user = await getUser();
+    // Proceed with your logic for when a user is successfully retrieved
+  } catch (error) {
+    console.error("Error fetching user", error);
+    redirect("/login");
+  }
+
+  // if no rows are returned (a user does not exist), redirect to the login page
+  if (!user?.data || user?.error !== null) {
+    redirect("/login");
+  }
+
   const countryCode = getCountryCode();
 
+  // get the current users subscriptions from the database and ensure that the cache is invalidated
+  // this is to ensure that the user's subscription is always up to date
+  const invalidateCache = true;
+  const currentUserSubscription = await getUserSubscriptions(invalidateCache);
+
+  // if there are no subscriptions, redirect to payment page
+  if (
+    !currentUserSubscription?.data?.length ||
+    currentUserSubscription?.data[0]?.status === null
+  ) {
+      redirect("/payment");
+  }
+
+  // if the user does not have a team, redirect to the teams page
   if (!user?.data?.team) {
     redirect("/teams");
   }

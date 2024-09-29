@@ -44,6 +44,7 @@
     "@trigger.dev/nextjs": "^2.3.19",
     "@uidotdev/usehooks": "^2.4.1",
     "@upstash/ratelimit": "^2.0.3",
+    "@midday/stripe": "workspace:*",
     "ai": "3.3.40",
     "change-case": "^5.4.4",
     "class-variance-authority": "^0.7.0",

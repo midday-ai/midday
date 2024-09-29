@@ -1,0 +1,39 @@
+{
+  "name": "@midday/stripe",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "keywords": [],
+  "author": "Yoan Yomba",
+  "license": "AGPL-3.0",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "src/*"
+      ]
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf .turbo node_modules",
+    "lint": "eslint .",
+    "format": "prettier --check \"**/*.{mjs,ts,md,json}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run -c ./vitest.config.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@midday/supabase": "workspace:*",
+    "@stripe/stripe-js": "^4.3.0",
+    "stripe": "^16.12.0",
+    "@internal/app-config": "workspace:*"
+  },
+  "devDependencies": {
+    "@tooling/typescript-config": "workspace:*",
+    "typescript": "^5.5.3",
+    "@tooling/prettier-config": "workspace:*"
+    
+  },
+  "prettier": "@tooling/prettier-config"
+}
