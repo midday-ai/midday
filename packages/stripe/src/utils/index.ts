@@ -108,15 +108,16 @@ export function getURL(path = ""): string {
   const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL?.trim();
 
   // Use the first non-empty URL, or default to localhost if none are set
-  let baseUrl = siteUrl || vercelUrl || "http://localhost:3001";
+  let baseUrl = siteUrl || vercelUrl || "localhost:3001";
+
+  // Remove any existing protocol (http:// or https://) from the baseUrl
+  baseUrl = baseUrl.replace(/^(https?:\/\/)/, '');
 
   // Remove any trailing slashes from the base URL
   baseUrl = baseUrl.replace(/\/+$/, "");
 
-  // Ensure the URL starts with a protocol (http:// or https://)
-  if (!baseUrl.startsWith("http://") && !baseUrl.startsWith("https://")) {
-    baseUrl = baseUrl.startsWith("localhost") ? `http://${baseUrl}` : `https://${baseUrl}`;
-  }
+  // Add the appropriate protocol
+  baseUrl = baseUrl.startsWith("localhost") ? `http://${baseUrl}` : `https://${baseUrl}`;
 
   // Remove any leading slashes from the path to avoid double slashes
   const cleanPath = path.replace(/^\/+/, "");
