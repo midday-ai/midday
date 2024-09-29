@@ -46,7 +46,7 @@ export async function sendSlackTransactionsNotification({
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "You got some new transactions! We'll do our best to match these with receipts in your Inbox.",
+            text: "You got some new transactions! We'll do our best to match these with receipts in your Inbox or you can simply upload them in your <slack://app?id=A07PN48FW3A|Midday Assistant>.",
           },
         },
         {
