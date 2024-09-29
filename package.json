@@ -48,7 +48,8 @@
     "bump-versions": "bun changeset version && bun install",
     "format:write": "prettier \"**/*\" \"!turbo/**\" --ignore-unknown --list-different --write",
     "format:check": "prettier \"**/*\" \"!turbo/**\" --ignore-unknown --list-different",
-    "gen": "turbo gen --config 'turbo/generators/config.ts'"
+    "gen": "turbo gen --config 'turbo/generators/config.ts'",
+    "changeset": "bun changeset"
   },
   "dependencies": {
     "@biomejs/biome": "1.9.1",
