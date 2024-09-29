@@ -43,7 +43,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => handleOpenUrl("https://x.com/middayai")}
+                onClick={() => handleOpenUrl("https://x.com/solomonai")}
               >
                 <Icons.X className="w-[16px] h-[16px]" />
                 <span>Follow us</span>
@@ -53,7 +53,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => handleOpenUrl("https://go.midday.ai/anPiuRx")}
+                onClick={() => handleOpenUrl("https://solomon-ai.app")}
               >
                 <Icons.Discord className="w-[16px] h-[16px]" />
                 <span>Join Our Community</span>
@@ -75,7 +75,7 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => handleOpenUrl("https://git.new/midday")}
+                onClick={() => handleOpenUrl("https://github.com/SolomonAIEngineering/financial-platform-as-a-service")}
               >
                 <Icons.GithubOutline className="w-[16px] h-[16px]" />
                 <span>Github</span>
