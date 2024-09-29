@@ -9,12 +9,12 @@ export function Hero() {
   return (
     <section className="md:mt-[250px] relative md:min-h-[375px]">
       <div className="hero-slide-up flex flex-col mt-[240px]">
-        <Link href="/updates/august-product-updates">
+        <Link href="/updates/apps">
           <Button
             variant="outline"
             className="rounded-full border-border flex space-x-2 items-center"
           >
-            <span className="font-mono text-xs">August Product Updates</span>
+            <span className="font-mono text-xs">Introducing Apps</span>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={12}
@@ -60,7 +60,7 @@ export function Hero() {
         <p className="text-xs text-[#707070] mt-8 font-mono">
           Used by over{" "}
           <Link href="/open-startup" prefetch>
-            <span className="underline">8,000+</span>
+            <span className="underline">8,100+</span>
           </Link>{" "}
           businesses.
         </p>
