@@ -228,6 +228,9 @@
     "sass": "^1.77.2",
     "storybook": "^8.0.10",
     "tailwindcss": "^3.4.3",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "semantic-release": "^19.0.5"
   }
 }
