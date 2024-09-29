@@ -49,7 +49,7 @@
     "format:write": "prettier \"**/*\" \"!turbo/**\" --ignore-unknown --list-different --write",
     "format:check": "prettier \"**/*\" \"!turbo/**\" --ignore-unknown --list-different",
     "gen": "turbo gen --config 'turbo/generators/config.ts'",
-    "changeset": "bun changeset"
+    "changeset": "bunx changeset"
   },
   "dependencies": {
     "@biomejs/biome": "1.9.1",
