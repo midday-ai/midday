@@ -102,6 +102,7 @@ export async function GET(request: NextRequest) {
         slack_configuration_url:
           parsedJson.data.incoming_webhook.configuration_url,
         url: parsedJson.data.incoming_webhook.url,
+        bot_user_id: parsedJson.data.bot_user_id,
       },
     });
 

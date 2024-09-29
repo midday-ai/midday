@@ -14,6 +14,7 @@ export const Jobs = {
   BANK_CONNECTION_DISCONNECTED: "bank-connection-disconnected",
   BANK_CONNECTION_EXPIRING: "bank-connection-expiring",
   EXCHANGE_RATES_UPDATE: "exchange-rates-update",
+  INBOX_SLACK_UPLOAD: "inbox-slack-upload",
 };
 
 export const Events = {
@@ -26,4 +27,5 @@ export const Events = {
   TRANSACTIONS_MANUAL_SYNC: "transactions.manual.sync",
   TRANSACTIONS_IMPORT: "transactions.import",
   UPDATE_CURRENCY: "update.base.currency",
+  INBOX_SLACK_UPLOAD: "inbox.slack.upload",
 };
