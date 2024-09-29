@@ -140,7 +140,7 @@ const Item = ({
               style={{ y }}
               layoutRoot
               className={cn(
-                "relative border border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
+                "relative border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
                 "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                 isActive &&
                   "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
