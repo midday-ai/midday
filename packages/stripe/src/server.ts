@@ -1,10 +1,11 @@
-'use server'
+"use server";
 
-import { SupabaseClient } from "@supabase/supabase-js";
-import Stripe from "stripe";
 // NOTE: don't change this import directive, it works, it may show red
 // due to how module resolution works in this package may have to fix that instead
 import { createClient } from "@midday/supabase/server";
+import { SupabaseClient } from "@supabase/supabase-js";
+import Stripe from "stripe";
+
 import { createOrRetrieveCustomer } from "./mutations/index";
 import { Database } from "./types";
 import {
@@ -15,7 +16,7 @@ import {
 
 // Initialize Stripe with the secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: "2024-06-20",
 });
 
 /**
@@ -45,27 +46,27 @@ type CheckoutResponse = {
 export type Price = {
   description: string;
   id: string;
-  interval: 'day' | 'week' | 'month' | 'year';
+  interval: "day" | "week" | "month" | "year";
   interval_count: number;
   metadata: Record<string, string>;
   product_id: string;
   trial_period_days: number;
-  type: 'recurring' | 'one_time';
+  type: "recurring" | "one_time";
   unit_amount: number;
 };
 
 /**
  * Initiates a checkout process with Stripe for a given price.
- * 
+ *
  * @async
  * @template T
  * @param {Price} price - The price object for the item being purchased.
  * @param {string} [redirectPath="/teams"] - The path to redirect to after successful checkout.
  * @param {string} [errorRedirect="/teams"] - The path to redirect to in case of an error.
  * @returns {Promise<CheckoutResponse>} A promise that resolves to a CheckoutResponse object.
- * 
+ *
  * @throws {Error} If there's an issue retrieving the user, accessing the customer record, or creating the checkout session.
- * 
+ *
  * @description
  * This function performs the following steps:
  * 1. Retrieves the current user from Supabase authentication.
@@ -73,7 +74,7 @@ export type Price = {
  * 3. Constructs the parameters for the Stripe checkout session.
  * 4. Creates a Stripe checkout session.
  * 5. Returns the session ID on success or an error redirect URL on failure.
- * 
+ *
  * The function handles both recurring subscriptions and one-time payments.
  * For recurring subscriptions, it sets up a trial period if specified in the price object.
  */
@@ -187,24 +188,24 @@ export async function checkoutWithStripe<T extends Database>(
 
 /**
  * Creates a Stripe billing portal session for the current user.
- * 
+ *
  * @async
  * @template T
  * @param {string} currentPath - The current path in the application.
  * @param {SupabaseClient<T>} client - The Supabase client instance.
  * @returns {Promise<string>} A promise that resolves to the URL of the Stripe billing portal.
- * 
+ *
  * @throws {Error} If there's an issue retrieving the user, accessing the customer record, or creating the billing portal session.
- * 
+ *
  * @description
  * This function performs the following steps:
  * 1. Retrieves the current user from Supabase authentication.
  * 2. Creates or retrieves a Stripe customer for the user.
  * 3. Creates a Stripe billing portal session for the customer.
  * 4. Returns the URL of the billing portal on success.
- * 
+ *
  * If any step fails, it returns an error redirect URL.
- * 
+ *
  * @example
  * ```typescript
  * const supabaseClient = createClient();
@@ -246,6 +247,8 @@ export async function createStripePortal<T extends Database>(
     }
 
     try {
+      const stripeReturnUrl = getURL("/account");
+      console.log("Return URL for stripe billing portal:", stripeReturnUrl);
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
         return_url: getURL("/account"),

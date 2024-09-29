@@ -7,6 +7,9 @@ import { processBatch } from "../utils/process";
 
 const BATCH_LIMIT = 500;
 
+/**
+ * Parameters for calculating the account balance in the base currency.
+ */
 type GetAccountBalanceParams = {
   currency: string;
   balance: number;
@@ -14,6 +17,11 @@ type GetAccountBalanceParams = {
   rate: number | null;
 };
 
+/**
+ * Calculates the account balance in the base currency.
+ * @param params - The parameters for the calculation.
+ * @returns The account balance in the base currency.
+ */
 function getAccountBalance({
   currency,
   balance,
@@ -27,6 +35,9 @@ function getAccountBalance({
   return +(balance * (rate ?? 1)).toFixed(2);
 }
 
+/**
+ * Parameters for calculating the transaction amount in the base currency.
+ */
 type GetTransactionAmountParams = {
   amount: number;
   currency: string;
@@ -34,6 +45,11 @@ type GetTransactionAmountParams = {
   rate: number | null;
 };
 
+/**
+ * Calculates the transaction amount in the base currency.
+ * @param params - The parameters for the calculation.
+ * @returns The transaction amount in the base currency.
+ */
 function getTransactionAmount({
   amount,
   currency,
@@ -47,6 +63,18 @@ function getTransactionAmount({
   return +(amount * (rate ?? 1)).toFixed(2);
 }
 
+/**
+ * Defines a job to update the base currency for a team's accounts and transactions.
+ * 
+ * This job is triggered when a team changes their base currency. It performs the following tasks:
+ * 1. Updates the base balance for all enabled bank accounts.
+ * 2. Updates the base amount for all transactions associated with these accounts.
+ * 3. Revalidates various cache tags to ensure up-to-date data in the UI.
+ * 
+ * @remarks
+ * The job processes accounts and transactions in batches to handle large datasets efficiently.
+ * It uses exchange rates stored in the database to perform currency conversions.
+ */
 client.defineJob({
   id: Jobs.UPDATE_CURRENCY,
   name: "Transactions - Update Base Currency",
@@ -72,6 +100,7 @@ client.defineJob({
       .eq("enabled", true);
 
     const promises = accounts?.map(async (account) => {
+      // Fetch the exchange rate for the account's currency to the new base currency
       const { data: exchangeRate } = await supabase
         .from("exchange_rates")
         .select("rate")
@@ -80,7 +109,6 @@ client.defineJob({
         .single();
 
       // Update account base balance and base currency
-      // based on the new currency exchange rate
       await supabase
         .from("bank_accounts")
         .update({
@@ -94,6 +122,7 @@ client.defineJob({
         })
         .eq("id", account.id);
 
+      // Fetch all transactions for the account
       const { data: transactions } = await supabase.rpc(
         "get_all_transactions_by_account",
         {
@@ -101,8 +130,8 @@ client.defineJob({
         },
       );
 
+      // Format transactions with updated base amount and currency
       const formattedTransactions = transactions?.map(
-        // Exclude fts_vector from the transaction object because it's a generated column
         ({ fts_vector, ...transaction }) => ({
           ...transaction,
           base_amount: getTransactionAmount({
@@ -115,6 +144,7 @@ client.defineJob({
         }),
       );
 
+      // Process transactions in batches
       await processBatch(
         formattedTransactions ?? [],
         BATCH_LIMIT,
@@ -127,10 +157,12 @@ client.defineJob({
       );
     });
 
+    // Wait for all account and transaction updates to complete
     if (promises) {
       await Promise.all(promises);
     }
 
+    // Revalidate cache tags to ensure fresh data in the UI
     revalidateTag(`spending_${teamId}`);
     revalidateTag(`metrics_${teamId}`);
     revalidateTag(`insights_${teamId}`);

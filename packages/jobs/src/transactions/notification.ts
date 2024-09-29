@@ -35,13 +35,34 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
+  /**
+   * Processes transactions and sends notifications to users.
+   * 
+   * @param payload - The job payload containing team ID and transactions.
+   * @param io - The I/O object for interacting with external services.
+   * 
+   * @remarks
+   * This function performs the following steps:
+   * 1. Sorts transactions by date (most recent first).
+   * 2. Fetches user data for the given team.
+   * 3. Generates in-app notification events for each user.
+   * 4. Sends in-app notifications.
+   * 5. Generates and sends email notifications.
+   * 6. Sends Slack notifications.
+   */
   run: async (payload, io) => {
     const { transactions, teamId } = payload;
 
+    /**
+     * Sorts transactions by date in descending order (most recent first).
+     */
     const sortedTransactions = transactions.sort(
       (a, b) => b.date.getTime() - a.date.getTime(),
     );
 
+    /**
+     * Fetches user data for the given team, including related team information.
+     */
     const { data: usersData } = await io.supabase.client
       .from("users_on_team")
       .select(
@@ -49,6 +70,13 @@ client.defineJob({
       )
       .eq("team_id", teamId);
 
+    /**
+     * Generates in-app notification events for each user.
+     * 
+     * @remarks
+     * - For a single transaction, it creates a TransactionNewInApp event.
+     * - For multiple transactions, it creates a TransactionsNewInApp event.
+     */
     const notificationEvents = usersData?.map(({ user, team_id, team }) => {
       const { t } = getI18n({ locale: user.locale });
 
@@ -111,6 +139,12 @@ client.defineJob({
       }
     }
 
+    /**
+     * Generates email notification events for each user.
+     * 
+     * @remarks
+     * Renders a TransactionsEmail component with user-specific data.
+     */
     const emailPromises = usersData?.map(async ({ user, team_id, team }) => {
       const { t } = getI18n({ locale: user.locale });
 
@@ -150,6 +184,9 @@ client.defineJob({
       }
     }
 
+    /**
+     * Prepares transaction data for Slack notifications.
+     */
     const slackTransactions = sortedTransactions.map((transaction) => ({
       date: transaction.date,
       amount: Intl.NumberFormat("en-US", {
@@ -159,6 +196,9 @@ client.defineJob({
       name: transaction.name,
     }));
 
+    /**
+     * Sends Slack notifications with the prepared transaction data.
+     */
     await sendSlackTransactionsNotification({
       teamId,
       transactions: slackTransactions,

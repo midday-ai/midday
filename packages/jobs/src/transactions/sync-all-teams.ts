@@ -5,7 +5,6 @@ import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 
 import { Database } from "@midday/supabase/types";
-import type { Transaction as EngineTransaction } from "@solomon-ai/financial-engine/src/providers/types";
 
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
@@ -313,8 +312,7 @@ async function fetchTransactions(
     latest: "true",
   });
 
-  const transactions: Array<EngineTransaction> =
-    result.data as Array<EngineTransaction>;
+  const transactions = result.data || [];
 
   const formattedTransactions = transactions?.map((transaction) => {
     return transformTransaction({

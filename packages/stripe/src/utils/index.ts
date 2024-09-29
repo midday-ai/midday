@@ -7,7 +7,7 @@ const toastKeyMap: { [key: string]: string[] } = {
 
 /**
  * Generates a redirect URL with toast parameters.
- * 
+ *
  * @param path - The base path for the redirect URL.
  * @param toastType - The type of toast ('status' or 'error').
  * @param toastName - The name or title of the toast message.
@@ -45,7 +45,7 @@ const getToastRedirect = (
 
 /**
  * Generates a redirect URL with status toast parameters.
- * 
+ *
  * @param path - The base path for the redirect URL.
  * @param statusName - The name or title of the status message.
  * @param statusDescription - Optional description for the status message.
@@ -71,7 +71,7 @@ export const getStatusRedirect = (
 
 /**
  * Generates a redirect URL with error toast parameters.
- * 
+ *
  * @param path - The base path for the redirect URL.
  * @param errorName - The name or title of the error message.
  * @param errorDescription - Optional description for the error message.
@@ -97,37 +97,36 @@ export const getErrorRedirect = (
 
 /**
  * Constructs a complete URL based on environment variables and the provided path.
- * 
- * @param path - Optional path to append to the base URL.
+ *
+ * @param path - Optional path to append to the base URL. Defaults to an empty string.
  * @returns A complete URL string.
  */
-export const getURL = (path: string = "") => {
-  // Check if NEXT_PUBLIC_SITE_URL is set and non-empty. Set this to your site URL in production env.
-  let url =
-    process?.env?.NEXT_PUBLIC_SITE_URL &&
-    process.env.NEXT_PUBLIC_SITE_URL.trim() !== ""
-      ? process.env.NEXT_PUBLIC_SITE_URL
-      : // If not set, check for NEXT_PUBLIC_VERCEL_URL, which is automatically set by Vercel.
-        process?.env?.NEXT_PUBLIC_VERCEL_URL &&
-          process.env.NEXT_PUBLIC_VERCEL_URL.trim() !== ""
-        ? process.env.NEXT_PUBLIC_VERCEL_URL
-        : // If neither is set, default to localhost for local development.
-          "http://localhost:3001/";
+export function getURL(path = ""): string {
+  // Try to get the site URL from environment variables, trimming any whitespace
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  // If SITE_URL is not set, try to get the Vercel URL (automatically set by Vercel)
+  const vercelUrl = process.env.NEXT_PUBLIC_VERCEL_URL?.trim();
 
-  // Trim the URL and remove trailing slash if exists.
-  url = url.replace(/\/+$/, "");
-  // Make sure to include `https://` when not localhost.
-  url = url.includes("http") ? url : `https://${url}`;
-  // Ensure path starts without a slash to avoid double slashes in the final URL.
-  path = path.replace(/^\/+/, "");
+  // Use the first non-empty URL, or default to localhost if none are set
+  let baseUrl = siteUrl || vercelUrl || "http://localhost:3001";
 
-  // Concatenate the URL and the path.
-  return path ? `${url}/${path}` : url;
-};
+  // Remove any trailing slashes from the base URL
+  baseUrl = baseUrl.replace(/\/+$/, "");
+
+  // Ensure the URL starts with a protocol (http:// or https://)
+  // Use https:// for all non-localhost URLs
+  baseUrl = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`;
+
+  // Remove any leading slashes from the path to avoid double slashes
+  const cleanPath = path.replace(/^\/+/, "");
+
+  // If there's a path, append it to the base URL; otherwise, just return the base URL
+  return cleanPath ? `${baseUrl}/${cleanPath}` : baseUrl;
+}
 
 /**
  * Sends a POST request to the specified URL with the provided data.
- * 
+ *
  * @template T - Type extending Database
  * @param options - An object containing the URL and optional data to send.
  * @param options.url - The URL to send the POST request to.
@@ -153,7 +152,7 @@ export const postData = async <T extends Database>({
 
 /**
  * Calculates the Unix timestamp for the end of a trial period.
- * 
+ *
  * @param trialPeriodDays - The number of days for the trial period.
  * @returns The Unix timestamp (in seconds) for the end of the trial period, or undefined if the input is invalid.
  */
