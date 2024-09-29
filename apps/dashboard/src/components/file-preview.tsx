@@ -12,8 +12,7 @@ import { Skeleton } from "@midday/ui/skeleton";
 import { FileType } from "@midday/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useState } from "react";
-import React from "react";
+import React, { useState } from "react";
 
 const Iframe = dynamic(() => import("./iframe").then((mod) => mod.Iframe), {
   ssr: false,
@@ -240,7 +239,7 @@ export function FilePreview({
         </div>
       </div>
 
-      <DialogContentFrameless className="w-[680px] h-[800px] overflow-auto p-0 m-0">
+      <DialogContentFrameless className="min-w-[60%] h-[85%] overflow-auto p-0 m-0 rounded-lg">
         <FilePreview
           src={src}
           name={name}
