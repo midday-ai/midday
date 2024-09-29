@@ -221,8 +221,6 @@ export const createOrRetrieveCustomer = async <T extends Database>({
     throw new Error(`Supabase customer lookup failed: ${queryError.message}`);
   }
 
-  console.log("existingSupabaseCustomer obtained", existingSupabaseCustomer);
-
   // Retrieve the Stripe customer ID using the Supabase customer ID, with email fallback
   let stripeCustomerId: string | undefined;
   if (
@@ -247,18 +245,10 @@ export const createOrRetrieveCustomer = async <T extends Database>({
         : undefined;
   }
 
-  console.log("about to create customer in stripe", {
-    stripeCustomerId,
-    email,
-    uuid,
-  });
-
   // If still no stripeCustomerId, create a new customer in Stripe
   const stripeIdToInsert = stripeCustomerId
     ? stripeCustomerId
     : await createCustomerInStripe(uuid, email);
-
-  console.log("stripeIdToInsert obtained", stripeIdToInsert);
 
   if (!stripeIdToInsert) throw new Error("Stripe customer creation failed.");
 
