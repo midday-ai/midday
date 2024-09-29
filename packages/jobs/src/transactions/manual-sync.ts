@@ -23,11 +23,32 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
+  /**
+   * Performs a manual synchronization of transactions for a given team and connection.
+   * 
+   * @param payload - The job payload containing teamId and connectionId.
+   * @param io - The I/O object providing access to integrations like Supabase.
+   * 
+   * This function does the following:
+   * 1. Retrieves enabled bank accounts for the given team and connection.
+   * 2. For each account:
+   *    - Fetches the latest transactions
+   *    - Retrieves and updates the account balance
+   *    - Processes and upserts transactions in batches
+   * 3. Handles any errors during processing
+   * 4. Updates the bank connection status
+   * 5. Revalidates various data tags
+   * 
+   * @throws {Error} If any error occurs during processing
+   */
   run: async (payload, io) => {
+    console.log("Starting manual sync job");
     const supabase = io.supabase.client;
 
     const { teamId, connectionId } = payload;
+    console.log(`Processing for teamId: ${teamId}, connectionId: ${connectionId}`);
 
+    // Fetch enabled bank accounts
     const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
@@ -37,7 +58,12 @@ client.defineJob({
       .eq("team_id", teamId)
       .eq("enabled", true);
 
+    console.log(`Found ${accountsData?.length || 0} enabled bank accounts`);
+
     const promises = accountsData?.map(async (account) => {
+      console.log(`Processing account: ${account.id}`);
+
+      // Fetch transactions for the account
       const transactions = await engine.transactions.list({
         provider: account.bank_connection.provider,
         accountId: account.account_id,
@@ -45,7 +71,9 @@ client.defineJob({
         accessToken: account.bank_connection?.access_token,
         latest: "true",
       });
+      console.log(`Retrieved ${transactions.data?.length || 0} transactions for account ${account.id}`);
 
+      // Transform transactions
       const formattedTransactions = transactions.data?.map((transaction) => {
         return transformTransaction({
           transaction,
@@ -54,13 +82,14 @@ client.defineJob({
         });
       });
 
+      // Fetch and update account balance
       const balance = await engine.accounts.balance({
         provider: account.bank_connection.provider,
         id: account.account_id,
         accessToken: account.bank_connection?.access_token,
       });
+      console.log(`Retrieved balance for account ${account.id}: ${balance.data?.amount}`);
 
-      // Update account balance
       if (balance.data?.amount) {
         await supabase
           .from("bank_accounts")
@@ -70,9 +99,9 @@ client.defineJob({
           .eq("id", account.id);
       }
 
-      // NOTE: We will get all the transactions at once for each account so
-      // we need to guard against massive payloads
+      // Process transactions in batches
       await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
+        console.log(`Processed batch of ${batch.length} transactions for account ${account.id}`);
         await supabase.from("transactions").upsert(batch, {
           onConflict: "internal_id",
           ignoreDuplicates: true,
@@ -84,9 +113,12 @@ client.defineJob({
 
     try {
       if (promises) {
+        console.log("Waiting for all account processing to complete");
         await Promise.all(promises);
+        console.log("All accounts processed successfully");
       }
     } catch (error) {
+      console.error("Error occurred during processing:", error);
       if (error instanceof FinancialEngine.APIError) {
         const parsedError = parseAPIError(error);
 
@@ -102,7 +134,8 @@ client.defineJob({
       throw new Error(error instanceof Error ? error.message : String(error));
     }
 
-    // Update bank connection last accessed and restore connection status
+    // Update bank connection status
+    console.log("Updating bank connection status");
     await io.supabase.client
       .from("bank_connections")
       .update({
@@ -112,6 +145,8 @@ client.defineJob({
       })
       .eq("id", connectionId);
 
+    // Revalidate data tags
+    console.log("Revalidating tags");
     revalidateTag(`bank_connections_${teamId}`);
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
@@ -119,5 +154,7 @@ client.defineJob({
     revalidateTag(`bank_accounts_${teamId}`);
     revalidateTag(`insights_${teamId}`);
     revalidateTag(`expenses_${teamId}`);
+
+    console.log("Manual sync job completed successfully");
   },
 });

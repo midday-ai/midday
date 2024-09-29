@@ -24,6 +24,22 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
+  /**
+   * Performs the initial synchronization of transactions for a given team.
+   * 
+   * This function does the following:
+   * 1. Sets up a scheduler for regular syncs
+   * 2. Retrieves all enabled bank accounts for the team
+   * 3. For each account:
+   *    - Fetches transactions from the financial engine
+   *    - Formats and upserts transactions to the database
+   *    - Handles rate limiting and errors
+   *    - Updates account balance and last accessed time
+   * 4. Revalidates relevant cache tags
+   * 
+   * @param payload - The job payload containing the teamId
+   * @param io - The I/O object for logging and database operations
+   */
   run: async (payload, io) => {
     const supabase = io.supabase.client;
     const { teamId } = payload;
@@ -38,6 +54,9 @@ client.defineJob({
       `Created status: setting-up-account-bank for team: ${teamId}`
     );
 
+    /**
+     * Sets up a scheduler for regular synchronization.
+     */
     try {
       await scheduler.register(teamId, {
         type: "interval",
@@ -62,11 +81,22 @@ client.defineJob({
       `Found ${accountsData?.length} accounts for team: ${teamId}`
     );
 
+    /**
+     * Processes transactions for each bank account.
+     * 
+     * @param account - The bank account information
+     */
     const promises = accountsData?.map(async (account) => {
       await io.logger.debug(
         `Processing account: ${account.id} for team: ${teamId}`
       );
       try {
+        /**
+         * Fetches transactions from the financial engine with retry logic.
+         * 
+         * @param retries - The number of retry attempts
+         * @returns A promise resolving to the transactions data
+         */
         const getTransactions = async (
           retries = 0
         ): Promise<FinancialEngine.TransactionsSchema> => {
@@ -114,6 +144,9 @@ client.defineJob({
           `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`
         );
 
+        /**
+         * Processes transactions in batches and upserts them to the database.
+         */
         await processBatch(
           formattedTransactions,
           BATCH_LIMIT,
@@ -164,6 +197,9 @@ client.defineJob({
         }
       }
 
+      /**
+       * Updates the account balance and last accessed time.
+       */
       try {
         const balance = await engine.accounts.balance({
           provider: account.bank_connection.provider,
@@ -204,6 +240,9 @@ client.defineJob({
       `Updated status to setting-up-account-transactions for team: ${teamId}`
     );
 
+    /**
+     * Waits for all account processing to complete.
+     */
     try {
       if (promises) {
         await Promise.all(promises);
@@ -217,6 +256,9 @@ client.defineJob({
       });
     }
 
+    /**
+     * Revalidates cache tags for updated data.
+     */
     const tagsToRevalidate = [
       `bank_connections_${teamId}`,
       `transactions_${teamId}`,

@@ -30,6 +30,16 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
+  /**
+   * Imports transactions from either a CSV file or an image-extracted table.
+   * 
+   * @param payload - The job payload containing import configuration and data.
+   * @param io - The I/O object provided by the job runner for integration access.
+   * 
+   * @throws {Error} If the file path is missing for CSV imports or the table is missing for image imports.
+   * @throws {Error} If there's no data in a CSV import chunk.
+   * @throws {Error} If an invalid import type is specified.
+   */
   run: async (payload, io) => {
     const supabase = io.supabase.client;
 
@@ -58,6 +68,12 @@ client.defineJob({
 
         const content = await fileData?.text();
 
+        /**
+         * Parses the CSV content and processes transactions in chunks.
+         * 
+         * @param content - The CSV content as a string.
+         * @returns A promise that resolves when all chunks have been processed.
+         */
         await new Promise((resolve, reject) => {
           Papa.parse(content as string, {
             header: true,
