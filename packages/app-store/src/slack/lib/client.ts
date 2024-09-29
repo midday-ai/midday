@@ -74,3 +74,17 @@ export const getInstallUrl = ({
     metadata: JSON.stringify({ teamId, userId }),
   });
 };
+
+export const downloadFile = async ({
+  privateDownloadUrl,
+  token,
+}: { privateDownloadUrl: string; token: string }) => {
+  const response = await fetch(privateDownloadUrl, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return response.arrayBuffer();
+};
