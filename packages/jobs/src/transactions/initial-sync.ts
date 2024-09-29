@@ -1,4 +1,4 @@
-import Midday from "@solomon-ai/financial-engine-sdk";
+import FinancialEngine from "@solomon-ai/financial-engine-sdk";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
@@ -35,7 +35,7 @@ client.defineJob({
       data: { step: "connecting_bank" },
     });
     await io.logger.debug(
-      `Created status: setting-up-account-bank for team: ${teamId}`,
+      `Created status: setting-up-account-bank for team: ${teamId}`
     );
 
     try {
@@ -53,23 +53,23 @@ client.defineJob({
     const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
       )
       .eq("team_id", teamId)
       .eq("enabled", true);
 
     await io.logger.info(
-      `Found ${accountsData?.length} accounts for team: ${teamId}`,
+      `Found ${accountsData?.length} accounts for team: ${teamId}`
     );
 
     const promises = accountsData?.map(async (account) => {
       await io.logger.debug(
-        `Processing account: ${account.id} for team: ${teamId}`,
+        `Processing account: ${account.id} for team: ${teamId}`
       );
       try {
         const getTransactions = async (
-          retries = 0,
-        ): Promise<Midday.TransactionsSchema> => {
+          retries = 0
+        ): Promise<FinancialEngine.TransactionsSchema> => {
           try {
             return await engine.transactions.list({
               provider: account.bank_connection.provider,
@@ -79,10 +79,10 @@ client.defineJob({
             });
           } catch (error) {
             if (
-              (error instanceof Midday.APIError &&
+              (error instanceof FinancialEngine.APIError &&
                 error.status === 429 &&
                 retries < 5) ||
-              (error instanceof Midday.APIError &&
+              (error instanceof FinancialEngine.APIError &&
                 error.message.includes("rate limit") &&
                 retries < 5)
             ) {
@@ -100,7 +100,7 @@ client.defineJob({
         const transactions = await getTransactions();
 
         await io.logger.info(
-          `Retrieved ${transactions.data?.length} transactions for account: ${account.id}`,
+          `Retrieved ${transactions.data?.length} transactions for account: ${account.id}`
         );
 
         const formattedTransactions = transactions.data?.map((transaction) =>
@@ -108,10 +108,10 @@ client.defineJob({
             transaction,
             teamId: account.team_id,
             bankAccountId: account.id,
-          }),
+          })
         );
         await io.logger.debug(
-          `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`,
+          `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`
         );
 
         await processBatch(
@@ -119,7 +119,7 @@ client.defineJob({
           BATCH_LIMIT,
           async (batch) => {
             await io.logger.debug(
-              `Upserting batch of ${batch.length} transactions for account: ${account.id}`,
+              `Upserting batch of ${batch.length} transactions for account: ${account.id}`
             );
             const { data, error } = await supabase
               .from("transactions")
@@ -131,22 +131,22 @@ client.defineJob({
             if (error) {
               await io.logger.error(
                 `Error upserting transactions for account: ${account.id}`,
-                { error },
+                { error }
               );
             }
 
             await io.logger.debug(
-              `Upserted batch ${data} for account: ${account.id}`,
+              `Upserted batch ${data} for account: ${account.id}`
             );
             return batch;
-          },
+          }
         );
       } catch (error) {
         await io.logger.error(
           `Error processing transactions for account: ${account.id}`,
-          { error },
+          { error }
         );
-        if (error instanceof Midday.APIError) {
+        if (error instanceof FinancialEngine.APIError) {
           const parsedError = parseAPIError(error);
           await io.logger.warn(`API Error for account: ${account.id}`, {
             parsedError,
@@ -159,7 +159,7 @@ client.defineJob({
             })
             .eq("id", account.bank_connection.id);
           await io.logger.info(
-            `Updated bank connection status for account: ${account.id}`,
+            `Updated bank connection status for account: ${account.id}`
           );
         }
       }
@@ -187,12 +187,12 @@ client.defineJob({
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
         await io.logger.debug(
-          `Updated last_accessed for bank connection: ${account.bank_connection.id}`,
+          `Updated last_accessed for bank connection: ${account.bank_connection.id}`
         );
       } catch (error) {
         await io.logger.error(
           `Error updating balance or last_accessed for account: ${account.id}`,
-          { error },
+          { error }
         );
       }
     });
@@ -201,14 +201,14 @@ client.defineJob({
       data: { step: "getting_transactions" },
     });
     await io.logger.debug(
-      `Updated status to setting-up-account-transactions for team: ${teamId}`,
+      `Updated status to setting-up-account-transactions for team: ${teamId}`
     );
 
     try {
       if (promises) {
         await Promise.all(promises);
         await io.logger.info(
-          `Completed processing all accounts for team: ${teamId}`,
+          `Completed processing all accounts for team: ${teamId}`
         );
       }
     } catch (error) {

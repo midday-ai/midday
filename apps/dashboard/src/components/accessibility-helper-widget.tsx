@@ -142,28 +142,28 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
   const renderQuickAccessButtons = () => (
     <>
       {renderAccessButton(
-        "Ask Solomon",
-        <ChatAccessibilityButton className="m-3" />,
+        "",
+        <ChatAccessibilityButton className="m-3" title="Ask Solomon"/>,
       )}
       {renderAccessButton(
-        "Income",
-        <IncomeViewAccessibilityButton className="m-3" />,
+        "",
+        <IncomeViewAccessibilityButton className="m-3" title={"Income"} />,
       )}
       {renderAccessButton(
-        "Expenses",
-        <ExpenseViewAccessibilityButton className="m-3" />,
+        "",
+        <ExpenseViewAccessibilityButton className="m-3" title={"Expense"} />,
       )}
       {renderAccessButton(
-        "Subscriptions",
-        <SubscriptionViewAccessibilityButton className="m-3" />,
+        "",
+        <SubscriptionViewAccessibilityButton className="m-3" title="Subscriptions"/>,
       )}
       {renderAccessButton(
-        "Transactions",
-        <TransactionViewAccessibilityButton className="m-3" />,
+        "",
+        <TransactionViewAccessibilityButton className="m-3" title="Transactions" />,
       )}
       {renderAccessButton(
-        "Overview",
-        <OverviewViewAccessibilityButton className="m-3" />,
+        "",
+        <OverviewViewAccessibilityButton className="m-3" title="Overview" />,
       )}
     </>
   );
@@ -183,7 +183,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           fullscreenPopup={false}
           locale="en"
           usersName="Solomon"
-          className="m-3"
+          className="m-1"
           placement="right"
           email={email}
           name={name}
@@ -198,7 +198,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           theme="light"
           locale="en"
           usersName="Solomon"
-          className="m-3"
+          className="m-1"
           placement="right"
           email={email}
           name={name}
@@ -213,7 +213,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           theme="light"
           locale="en"
           usersName="Solomon"
-          className="m-3"
+          className="m-1"
           email={email}
           name={name}
           id={id}
@@ -237,7 +237,6 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
       className="flex flex-1 items-center gap-2 border-0 w-full justify-start"
     >
       {icon}
-      <span className="text-lg">{label}</span>
     </Button>
   );
 
