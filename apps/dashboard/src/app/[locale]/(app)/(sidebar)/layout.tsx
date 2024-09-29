@@ -1,6 +1,7 @@
 import { AI } from "@/actions/ai/chat";
 import ChatAccessibilityButton from "@/components/accessibility-button/chat-accessibility-button";
 import { AccessibilityWidget } from "@/components/accessibility-helper-widget";
+import { FinancialAnalyticsDock } from "@/components/dock/financial-analytics-dock";
 import { Header } from "@/components/header";
 import { ExpenseViewModal } from "@/components/modals/expense/expense-view-modal";
 import { IncomeViewModal } from "@/components/modals/income/income-view-modal";

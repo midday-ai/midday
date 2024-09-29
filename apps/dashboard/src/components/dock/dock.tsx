@@ -11,14 +11,12 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@midday/ui/button";
 import { Dock, DockIcon } from "@midday/ui/magicui/dock";
-import { Separator } from "@midday/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
-import { CalendarIcon } from "@radix-ui/react-icons";
 
 export type IconProps = React.HTMLAttributes<SVGElement>;
 
@@ -34,7 +32,7 @@ const DATA = {
 
 export function ProTierDock() {
   return (
-    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden md:shadow-xl">
+    <div className="relative flex w-full flex-col items-center justify-center overflow-hidden">
       <TooltipProvider>
         <Dock direction="middle" className="bg-background">
           {DATA.features.map((item) => (
