@@ -1,9 +1,10 @@
 import { Button } from "@midday/ui/button";
-import { ErrorBoundary } from "next/dist/client/components/error-boundary";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Suspense } from "react";
-import { Donut } from "./donut";
-import { ErrorFallback } from "./error-fallback";
+
+const Donut = dynamic(() => import("./donut").then((mod) => mod.Donut), {
+  ssr: false,
+});
 
 export function Hero() {
   return (
@@ -67,11 +68,7 @@ export function Hero() {
       </div>
 
       <div className="scale-50 lg:scale-[0.50] xl:scale-100 -top-[500px] -right-[380px] pointer-events-none transform-gpu grayscale sm:flex xl:flex lg:animate-[open-scale-up-fade_1.5s_ease-in-out] absolute md:-right-[200px] xl:-right-[100px] w-auto h-auto md:-top-[200px]">
-        <ErrorBoundary errorComponent={ErrorFallback}>
-          <Suspense>
-            <Donut />
-          </Suspense>
-        </ErrorBoundary>
+        <Donut />
       </div>
     </section>
   );

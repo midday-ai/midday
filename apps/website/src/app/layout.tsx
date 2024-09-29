@@ -24,7 +24,8 @@ export const metadata: Metadata = {
     "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
   openGraph: {
     title: "Midday | Run your business smarter",
-    description: "This is my portfolio.",
+    description:
+      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
     url: baseUrl,
     siteName:
       "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
@@ -45,7 +46,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     title: "Midday | Run your business smarter",
-    description: "This is my portfolio.",
+    description:
+      "Midday provides you with greater insight into your business and automates the boring tasks, allowing you to focus on what you love to do instead.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image.jpg",
