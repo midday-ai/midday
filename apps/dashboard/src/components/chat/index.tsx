@@ -109,8 +109,8 @@ export function Chat({
             autoComplete="off"
             autoCorrect="off"
             value={input}
-            className="h-12 min-h-12 pt-3 resize-none border-none"
-            placeholder="Ask Solomon  a question..."
+            className="h-12 min-h-12 pt-3 resize-none border-none bg-background text-foreground border-0"
+            placeholder="Ask Solomon a question..."
             onKeyDown={onKeyDown}
             onChange={(evt) => {
               setInput(evt.target.value);
