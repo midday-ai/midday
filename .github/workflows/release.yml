@@ -1,5 +1,16 @@
 name: Release
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_WEB_APP_BUSINESS }}
+  TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
+  SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+  SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+  SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+  SENTRY_SUPPRESS_GLOBAL_ERROR_HANDLER_FILE_WARNING: true
+  TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+
 on:
   push:
     branches:
