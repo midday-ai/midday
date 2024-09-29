@@ -116,8 +116,10 @@ export function getURL(path = ""): string {
   // Remove any trailing slashes from the base URL
   baseUrl = baseUrl.replace(/\/+$/, "");
 
-  // Add the appropriate protocol
-  baseUrl = baseUrl.startsWith("localhost") ? `http://${baseUrl}` : `https://${baseUrl}`;
+  // Add the appropriate protocol only if it's not already present
+  if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+    baseUrl = baseUrl.startsWith("localhost") ? `http://${baseUrl}` : `https://${baseUrl}`;
+  }
 
   // Remove any leading slashes from the path to avoid double slashes
   const cleanPath = path.replace(/^\/+/, "");
