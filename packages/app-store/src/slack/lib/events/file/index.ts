@@ -1,1 +1,1 @@
-export * from "./shared";
+export * from "./share";
