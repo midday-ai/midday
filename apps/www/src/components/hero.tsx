@@ -80,7 +80,7 @@ export function Hero() {
               </Button>
             </Link>
 
-            <a href="https://app.solomon-ai.app">
+            <a href="https://app-business.solomon-ai.app">
               <Button className="h-12 rounded-2xl px-5">
                 Get Early Access
               </Button>

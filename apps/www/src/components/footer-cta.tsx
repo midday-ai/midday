@@ -34,7 +34,7 @@ export function FooterCTA() {
     //         </Button>
     //       </Link>
 
-    //       <a href="https://app.solomon-ai.app">
+    //       <a href="https://app-business.solomon-ai.app">
     //         <Button className="rounded-2xl h-12 px-5 bg-white text-black hover:bg-white/80">
     //           Get Early Access
     //         </Button>

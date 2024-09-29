@@ -44,7 +44,7 @@ export default function Page() {
                 <a
                   target="_blank"
                   rel="noreferrer"
-                  href="https://app.solomon-ai.app"
+                  href="https://app-business.solomon-ai.app"
                 >
                   <Button className="h-12 rounded-2xl px-5">
                     Get Early Access

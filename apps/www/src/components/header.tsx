@@ -466,7 +466,7 @@ export function Header() {
               >
                 <Link
                   className="text-xl text-primary"
-                  href="https://app.solomon-ai.app"
+                  href="https://app-business.solomon-ai.app"
                 >
                   Sign in
                 </Link>

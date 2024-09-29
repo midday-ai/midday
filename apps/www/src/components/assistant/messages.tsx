@@ -128,7 +128,7 @@ export function SignUpCard({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 2.2 }}
       >
-        <a href="https://app.solomon-ai.app">
+        <a href="https://app-business.solomon-ai.app">
           <Button>Sign up</Button>
         </a>
       </motion.div>

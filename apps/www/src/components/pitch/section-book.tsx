@@ -6,7 +6,7 @@ export function SectionBook() {
     <div className="relative min-h-screen w-screen">
       <div className="absolute left-4 right-4 top-4 flex justify-between text-lg md:left-8 md:right-8">
         <span>Book a meeting</span>
-        <Link href="https://app.solomon-ai.app">
+        <Link href="https://app-business.solomon-ai.app">
           <Button variant="outline">Sign up</Button>
         </Link>
       </div>
