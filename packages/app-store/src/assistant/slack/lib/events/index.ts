@@ -1,6 +1,7 @@
 import { createSlackWebClient } from "../..";
 import type { SlackEvent } from "@slack/bolt";
 import { waitUntil } from "@vercel/functions";
+import { fileShare } from "./file";
 import { assistantThreadMessage, assistantThreadStarted } from "./thread";
 
 export async function handleSlackEvent(
@@ -16,6 +17,12 @@ export async function handleSlackEvent(
     return;
   }
 
+  // In Assisant Threads
+  if (event.subtype === "file_share") {
+    waitUntil(fileShare(event, options));
+    return;
+  }
+
   if (
     event.text &&
     event.type === "message" &&
@@ -23,9 +30,7 @@ export async function handleSlackEvent(
     !event.bot_id && // Ignore bot messages
     event.subtype !== "assistant_app_thread"
   ) {
-    waitUntil(
-      assistantThreadMessage(event, client, { teamId: options.teamId }),
-    );
+    waitUntil(assistantThreadMessage(event, client, options));
     return;
   }
 }

@@ -19,6 +19,7 @@ export default async function Page() {
       next: {
         revalidate: 3600,
       },
+      cache: "force-cache",
     },
   )
     .then(async (res) => res.json())
