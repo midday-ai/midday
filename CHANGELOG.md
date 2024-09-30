@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/compare/v0.4.0...v0.5.0) (2024-09-30)
+
+
+### Features
+
+* add readme ([1d14cac](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/commit/1d14cac5f778a370686ed409f860d164b33f4497))
+
 # [0.4.0](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/compare/v0.3.0...v0.4.0) (2024-09-30)
 
 
