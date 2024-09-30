@@ -5,8 +5,9 @@ export async function fetchGithubStars() {
     "https://api.github.com/repos/midday-ai/midday",
     {
       next: {
-        revalidate: 300,
+        revalidate: 3600,
       },
+      cache: "force-cache",
     },
   );
 

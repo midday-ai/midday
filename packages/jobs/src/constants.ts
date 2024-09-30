@@ -14,6 +14,7 @@ export const Jobs = {
   BANK_CONNECTION_DISCONNECTED: "bank-connection-disconnected",
   BANK_CONNECTION_EXPIRING: "bank-connection-expiring",
   EXCHANGE_RATES_UPDATE: "exchange-rates-update",
+  INBOX_SLACK_UPLOAD: "inbox-slack-upload",
   TRANSACTIONS_EXPORT_PDF: "transactions-export-pdf",
   IDENTIFY_UNUSUAL_TRANSACTIONS: "identify-unusual-transactions",
   GENERATE_TRANSACTION_SUMMARY: "generate-transaction-summary",
@@ -40,4 +41,5 @@ export const Events = {
   GENERATE_TAX_SUMMARY: "transactions.generate.tax.summary",
   MANUALLY_SCHEDULE_TRANSACTION_SYNC: "manually.schedule.transaction.sync",
   TRANSACTION_SYNC_ALL_TEAMS: "transaction.sync.all.teams",
+  INBOX_SLACK_UPLOAD: "inbox.slack.upload",
 };

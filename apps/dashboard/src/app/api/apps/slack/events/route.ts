@@ -10,6 +10,12 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const rawBody = await req.text();
 
+  const { challenge, team_id, event } = JSON.parse(rawBody);
+
+  if (challenge) {
+    return new NextResponse(challenge);
+  }
+
   try {
     verifySlackRequest({
       signingSecret: process.env.SLACK_SIGNING_SECRET!,
@@ -25,17 +31,11 @@ export async function POST(req: Request) {
     );
   }
 
-  const { challenge, team_id, event } = JSON.parse(rawBody);
-
   // We don't need to handle message_deleted events
   if (event?.type === "message_deleted") {
     return NextResponse.json({
       success: true,
     });
-  }
-
-  if (challenge) {
-    return new NextResponse(challenge);
   }
 
   const supabase = createClient({ admin: true });

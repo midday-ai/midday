@@ -4,7 +4,7 @@ const testimonials = [
   {
     name: "Lucas Grey",
     avatarUrl:
-      "https://pbs.twimg.com/profile_images/1803830464605753393/dIvu3zC7_400x400.jpg",
+      "https://pbs.twimg.com/profile_images/1835098603733520384/-5ere4t1_400x400.jpg",
     handle: "@ImLucasGrey",
     verified: true,
     quote: "This is so ingenious and good!",
