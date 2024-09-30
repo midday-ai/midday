@@ -1,4 +1,5 @@
 Copyright (c) 2023-present Midday Labs AB.
+Copyright (c) 2024-present Solomon AI (modifications and additions)
 
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
@@ -661,3 +662,27 @@ You should also get your employer (if you work as a programmer) or school,
 if any, to sign a "copyright disclaimer" for the program, if necessary.
 For more information on this, and how to apply and follow the GNU AGPL, see
 <https://www.gnu.org/licenses/>.
+
+                     Additional Information
+
+This license applies to Solomon AI, the Open Source Financial Workspace For Your Small Business.
+
+Solomon AI provides an open-source platform designed to help small businesses manage their finances effectively and efficiently.
+
+For more information about this project, please visit: https://solomon-ai.app
+
+To obtain the source code for this software, please visit: [URL where source code can be obtained]
+
+For questions regarding this license or to contact the copyright holders, please use the following information:
+
+Midday Labs AB
+Website: https://midday.ai
+
+Solomon AI
+Email: yoanyomba@solomon-ai.co
+Address: 200 Water St, New York, New York
+Website: https://solomon-ai.app
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+As per Section 13 of the GNU Affero General Public License, if you modify this program, you must offer all users interacting with it remotely through a computer network an opportunity to receive the Corresponding Source of your version. This can be done by providing access to the Corresponding Source from a network server at no charge, through some standard or customary means of facilitating copying of software.
