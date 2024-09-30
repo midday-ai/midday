@@ -5,131 +5,186 @@
 <p align="center">
 	<h1 align="center"><b>Solomon AI</b></h1>
 <p align="center">
-    We help new fintech companies launch faster by providing a suite of essential services and tools.
+  The Open Source Financial Workspace For Your Small Business
     <br />
     <br />
     <a href="https://go.Solomon AI.ai/anPiuRx">Discord</a>
     ·
     <a href="https://solomon-ai.app">Website</a>
     ·
-    <a href="https://github.comSolomonAIEngineering/SolomonAIEngineering-frontend-financial-platform/issues">Issues</a>
+    <a href="https://github.comSolomonAIEngineering/financial-platform-as-a-service/issues">Issues</a>
   </p>
 </p>
 
+
 ## About Solomon AI
 
-Solomon AI is a fintech company that helps companies ship products faster. We are a team of 3 people that are passionate about building products that help people live better lives.
+**Solomon AI** is an open-source financial workspace, purpose-built for the unique demands of cyclical businesses and brick-and-mortar establishments. Building on the innovations of __[Midday](https://midday.ai)__, we’ve created a comprehensive platform designed to empower seasonal entrepreneurs and local business owners by helping them navigate their distinct financial challenges.
 
-## Features
+### Our Mission
+At Solomon AI, we are dedicated to democratizing access to powerful financial tools and AI-driven insights, giving businesses with fluctuating demand and location-based challenges the resources they need to thrive. Our platform integrates cutting-edge AI with robust financial services, offering a suite of tools that streamline operations, improve decision-making, and mitigate the uncertainties of cyclical markets.
 
-### Workspace/File-Storage as a Service
+### Why Solomon AI?
+Solomon AI stands out by focusing on the often-overlooked needs of brick-and-mortar businesses and seasonal operations, ensuring you have the right tools to tackle your financial landscape.
 
-- Secure cloud storage for sensitive financial documents
-- Version control for important files
-- Collaborative workspaces for team members
-- Integration with popular productivity tools
-- Compliance-ready storage solutions adhering to financial regulations
+- **Open-Source at Heart**: We believe in the power of community. With Solomon AI, transparency and adaptability come first. Our open-source codebase invites collaboration and customization, empowering businesses to tailor the platform to their specific needs while benefiting from continuous community-driven enhancements.
+  
+- **Designed for Cyclical Businesses**: Our platform is tailored to meet the distinct needs of businesses that experience seasonal fluctuations, such as retail stores, hospitality venues, restaurants, wineries, breweries, real estate agencies, construction firms, dealerships, urgent care centers, and tourism-related businesses. Solomon AI ensures you’re prepared for both peak seasons and slower periods, with AI-powered tools that anticipate and adapt to changes in demand.
 
-### Workflows as a Service
+- **Brick-and-Mortar Optimization**: Managing physical storefronts comes with its own set of financial challenges, and Solomon AI is built to handle them all. From inventory management and foot traffic analysis to insights on local market trends, our tools help you stay ahead in the dynamic world of brick-and-mortar business.
 
-- Customizable workflow templates for common fintech processes
-- Automation of repetitive tasks such as KYC (Know Your Customer) checks
-- Visual workflow builders for non-technical users
-- Integration with external APIs and services
-- Audit trails and logging for regulatory compliance
+- **AI-Powered Forecasting & Insights**: With artificial intelligence at its core, Solomon AI delivers smart, data-driven insights on seasonal trends, demand forecasting, and cash flow management, ensuring your business can make informed decisions during both high-traffic and slower periods.
 
-### Financial Engine/Provider as a Service
+- **Comprehensive Financial Toolkit**: Whether you’re managing basic bookkeeping or diving into advanced analytics, Solomon AI provides a full suite of financial tools designed to meet the needs of businesses with physical locations and cyclical demand patterns.
 
-- Modular architecture for various financial products (loans, investments, insurance)
-- Real-time transaction processing capabilities
-- Integration with major payment gateways and banking systems
-- Sandbox environments for testing financial products
+- **Scalable Growth**: Solomon AI grows with you. Whether you’re running a single shop or managing a chain of locations, our platform adapts to the evolving financial needs of expanding businesses, providing consistent support no matter the scale.
 
-### Financial Ledger as a Service
+- **Developer Platform**: We’ve built a powerful developer ecosystem to extend Solomon AI’s capabilities. By offering access to our APIs, developers can integrate Solomon AI’s financial tools directly into their own applications and workflows, creating custom solutions that leverage the platform’s robust insights.
 
-- Double-entry bookkeeping system
-- Real-time balance sheet and income statement generation
-- Multi-currency support
-- Automated reconciliation tools
-- Audit-ready financial reporting
+### Building on [Midday](https://midday.ai)
+By expanding upon Midday’s innovative foundation, Solomon AI is setting a new standard for financial management in cyclical and brick-and-mortar businesses. We bring enterprise-grade tools to the hands of local entrepreneurs in an accessible, open-source package. 
 
-### Analytics as a Service
+From seasonal forecasting to managing a storefront’s day-to-day finances, Solomon AI is here to help you succeed at every turn. Our developer platform allows businesses to seamlessly integrate our financial utilities into a wide range of applications, unlocking even greater potential for growth.
 
-- Comprehensive API suite for financial analytics:
 
-  - User financial health scoring
-  - Spending pattern analysis
-  - Income stability assessment
-  - Debt-to-income ratio calculations
-  - Savings rate and goal tracking
+To download the full app, visit our homepage at __https://solomon-ai.app__.
 
-- Real-time data processing:
+## Engineering Stack
+| Tool/Framework | Description |
+|----------------|-------------|
+| [Next.js](https://nextjs.org/) | Framework |
+| [Turborepo](https://turbo.build) | Build system |
+| [Expo](https://expo.com) | Mobile Development system |
+| [Biome](https://biomejs.dev) | Linter, formatter |
+| [TailwindCSS](https://tailwindcss.com/) | Styling |
+| [Shadcn](https://ui.shadcn.com/) | UI components |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| [Supabase](https://supabase.com/) | Authentication, database, storage |
+| [Upstash](https://upstash.com/) | Cache and rate limiting |
+| [React Email](https://react.email/) | Email templates |
+| [Resend](https://resend.com/) | Email delivery |
+| [i18n](https://next-international.vercel.app/) | Internationalization |
+| [Sentry](https://sentry.io/) | Error handling/monitoring |
+| [Dub](https://dub.sh/) | Sharable links |
+| [Trigger.dev](https://trigger.dev/) | Background jobs |
+| [OpenPanel](https://openpanel.dev/) | Analytics |
+| [Polar](https://polar.sh) | Billing (coming soon) |
+| [react-safe-action](https://next-safe-action.dev) | Validated Server Actions |
+| [nuqs](https://nuqs.47ng.com/) | Type-safe search params state manager |
+| [next-themes](https://next-themes-example.vercel.app/) | Theme manager |
 
-  - Up-to-the-12h financial metrics
-  - Instant transaction categorization
-  - Live budget tracking and alerts
+## Directory Structure
 
-- Predictive analytics for risk management:
+This structure showcases a well-organized monorepo setup with clear separation of concerns:
 
-  - Credit risk scoring models
-  - Default probability predictions
-  - Cash flow forecasting
-  - Investment risk analysis
+1. The `apps` directory contains different applications within the project.
+2. The `internal` directory houses internal modules and utilities.
+3. The `packages` directory includes shared packages used across the project.
+4. The `services` directory contains various microservices.
+5. The `tooling` directory manages development and build tools configurations.
+6. Configuration files at the root level manage the overall project setup.
 
-- Developer-friendly features:
-  - Comprehensive API documentation
-  - SDKs for popular programming languages
-  - Sandbox environment for testing and integration
+This structure allows for efficient code sharing, easier maintenance, and scalability across different parts of the project.
 
-### Team Management (Social) as a Service
+```
+.
+├── CHANGELOG.md
+├── LICENSE
+├── README.md
+├── apps                        # App Workspace
+│   ├── api                     # Supabase API
+│   ├── dashboard               # Dashboard application
+│   ├── docs                    # Documentation app
+│   ├── engine                  # Core engine app
+│   ├── lead                    # Lead generation app
+│   ├── mobile                  # Mobile app
+│   ├── website                 # Main website app
+│   └── www                     # Public-facing web app
+├── biome.json
+├── bun.lockb
+├── bunfig.toml
+├── commitlint.config.ts
+├── docs                        # Documentation files
+│   ├── developer               # Developer-specific docs
+│   └── platform                # Platform-specific docs
+├── github.png
+├── internal                    # Internal modules and utilities
+│   ├── app-config              # Application configuration
+│   ├── backend-client          # Backend client utilities
+│   ├── billing                 # Billing-related utilities
+│   ├── cache                   # Caching utilities
+│   ├── db                      # Database utilities
+│   ├── email                   # Email-related utilities
+│   ├── encoding                # Encoding utilities
+│   ├── encryption              # Encryption utilities
+│   ├── error                   # Error handling utilities
+│   ├── events                  # Event handling utilities
+│   ├── hash                    # Hashing utilities
+│   ├── id                      # ID generation utilities
+│   ├── keys                    # Key management utilities
+│   ├── logs                    # Logging utilities
+│   ├── metrics                 # Metrics and monitoring utilities
+│   ├── providers               # Service providers
+│   ├── resend                  # Resend-related utilities
+│   ├── schema                  # Schema definitions
+│   ├── store                   # Data store utilities
+│   ├── tinybird                # Tinybird integration utilities
+│   ├── vercel                  # Vercel-related utilities
+│   ├── worker-logging          # Worker logging utilities
+│   └── zod                     # Zod schema utilities
+├── midday.code-workspace
+├── package.json
+├── packages                    # Shared packages
+│   ├── analytics               # Analytics package
+│   ├── app-store               # App store integration package
+│   ├── assets                  # Shared assets
+│   ├── documents               # Document handling package
+│   ├── editor                  # Editor package
+│   ├── email                   # Email handling package
+│   ├── env                     # Environment configuration package
+│   ├── events                  # Event handling package
+│   ├── import                  # Import utilities package
+│   ├── inbox                   # Inbox management package
+│   ├── jobs                    # Job scheduling package
+│   ├── kv                      # Key-Value store package
+│   ├── location                # Location services package
+│   ├── notification            # Notification package
+│   ├── stripe                  # Stripe integration package
+│   ├── supabase                # Supabase integration package
+│   ├── tsconfig                # Shared TypeScript configuration
+│   ├── ui                      # Shared UI components
+│   └── utils                   # Shared utilities
+├── saasfly-logo.svg
+├── services                    # Microservices
+│   ├── gateway                 # API gateway service
+│   ├── latency-benchmarks      # Service for performance testing
+│   ├── logdrain                # Logging service
+│   └── semantic-cache          # Caching service with semantic understanding
+├── tooling                     # Development and build tools
+│   ├── eslint-config           # ESLint configuration
+│   ├── prettier-config         # Prettier configuration
+│   ├── tailwind-config         # Tailwind CSS configuration
+│   └── typescript-config       # TypeScript configuration
+├── tsconfig.json               # TypeScript configuration for the project
+├── turbo                       # Turborepo configuration
+│   └── generators              # Code generators for Turborepo
+├── turbo.json                  # Turborepo pipeline configuration
+├── types                       # Global type definitions
+│   └── index.ts                # Main types file
+└── vercel.json                 # Vercel deployment configuration
+```
 
-Our Team Management service provides a robust API suite that enables fintech startups to build powerful, secure, and compliant team collaboration features. This service acts as a specialized social network for financial teams, offering:
-
-- Conversation and Interaction APIs:
-
-  - Real-time messaging endpoints for team discussions
-  - Thread-based conversation management
-  - File sharing and collaborative document editing
-  - Tagging and mention functionality
-  - Reaction and comment systems
-
-- Team Structure and Permissions API:
-
-  - Dynamic role-based access control management
-  - Team creation and member invitation endpoints
-  - Hierarchical team structure support
-  - Custom permission set creation and assignment
-
-- Task and Workflow Management API:
-
-  - Task creation, assignment, and tracking
-  - Workflow template management
-  - Progress tracking and reporting
-  - Deadline and reminder systems
-
-- Activity Feeds and Notifications API:
-
-  - Customizable activity streams for users and teams
-  - Push notification management for mobile and web
-  - Email digest generation for team activities
-
-- Security and Encryption:
-
-  - End-to-end encryption for all communications
-  - Multi-factor authentication integration
-  - Secure file storage and sharing
-  - Data retention and deletion policies
-
-- Integration Capabilities:
-
-  - Webhook support for real-time event notifications
-  - OAuth 2.0 for secure authorization
-  - SSO (Single Sign-On) compatibility
-
-- Developer Tools:
-  - Comprehensive API documentation
-  - SDKs for major programming languages
-  - Sandbox environment for testing and integration
+| Prerequisite | Description |
+|--------------|-------------|
+| Bun          | JavaScript runtime and package manager, used for running and managing the project |
+| Docker       | Containerization platform, used for creating consistent development and deployment environments |
+| Upstash      | Serverless database and messaging service, likely used for data storage and real-time features |
+| Dub          | Open source link management system |
+| Trigger.dev  | Workflow automation platform, used for background jobs and scheduled tasks |
+| Resend       | Email API service, used for sending transactional and marketing emails |
+| Supabase     | Open-source Firebase alternative, provides backend services including database, authentication, and storage |
+| Sentry       | Error tracking and performance monitoring service, used for identifying and diagnosing issues in production |
+| OpenPanel    | Open source telemetry and monitoring platform |
 
 ## 🚀 Getting Started
 
@@ -157,120 +212,119 @@ Before you start, make sure you have the following installed:
 2. [PostgreSQL](https://www.postgresql.org/)
    1. You can use Vercel Postgres or a local PostgreSQL server(add POSTGRES_URL env in .env.local)
       ```bash
-         POSTGRES_URL = ''
+         bun install -g supabase
       ```
 
 ### Installation
 
-To get started with this boilerplate, we offer two options:
-
-1. Use the `bun create` command(🌟Strongly recommend🌟):
-
-```bash
-bun create saasfly
-```
 
 2. Manually clone the repository:
 
-```
-bash git@github.com:PlaybookMediaEngineering/tesseract-engineering.git
-cd tesseract-engineering
-bun install
-```
-
-### Setup
-
-Follow these steps to set up your project:
-
-1. Set up the environment variables:
-
-```bash
-cp .env.example .env.local
-// (you must have a database prepared before running this command)
-bun db:push
+```bash 
+git clone git@github.com:SolomonAIEngineering/financial-platform-as-a-service.git
+cd financial-platform-as-a-service
 ```
 
-2. Run the development server:
+3. Install dependencies using bun:
 
-```bash
-bun run dev:web
+```sh
+bun i
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
+4. Copy `.env.example` to `.env` and update the variables.
 
-4. (Optional alpha)`bun run tailwind-config-viewer` Open [http://localhost:3333](http://localhost:3333) in your browser to see your Tailwind CSS configuration
+```sh
+# Copy .env.example to .env for each app
+cp apps/api/.env.example apps/api/.env
+cp apps/app/.env.example apps/app/.env
+cp apps/web/.env.example apps/web/.env
+```
 
-## ⭐ Features
+5. Start the development server from either bun or turbo:
 
-### 🐭 Frameworks
+```ts
+bun dev // starts everything in development mode (web, app, api, email)
+bun dev:web // starts the web app in development mode
+bun dev:app // starts the app in development mode
+bun dev:api // starts the api in development mode
+bun dev:email // starts the email app in development mode
 
-- **[Next.js](https://nextjs.org/)** - The React Framework for the Web (with **App Directory**)
-- **[NextAuth.js](https://next-auth.js.org/)** - Authentication for Next.js
-- **[Kysely](https://kysely.dev/)** - The type-safe SQL query builder for TypeScript
-- **[Prisma](https://www.prisma.io/)** - Next-generation ORM for Node.js and TypeScript, used as a schema management tool
-- **[React-email](https://react.email/)** - A React renderer for creating beautiful emails using React components
+// Database
+bun migrate // run migrations
+bun seed // run seed
+```
 
-### 🐮 Platforms
+## ⭐ Features | In Development/On Roadmap
 
-- **[Vercel](https://vercel.com/)** – Deploy your Next.js app with ease
-- **[Stripe](https://stripe.com/)** – Payment processing for internet businesses
-- **[Resend](https://resend.com/)** – Email marketing platform for developers
+#### Smart Workspace
+- **Secure Cloud Storage**: Safeguard sensitive financial documents with encrypted, cloud-based solutions.
+- **Version Control**: Maintain a detailed version history for critical files.
+- **Collaborative Workspaces**: Empower team collaboration with shared workspaces and real-time updates.
+- **Tool Integrations**: Seamless compatibility with popular productivity apps.
+- **Compliance-Ready**: Meet financial regulations with built-in secure storage solutions.
 
-### 🐯 Enterprise Features
+#### App Marketplace & Workflow Management
+- **Customizable Templates**: Pre-built workflow templates for common fintech operations.
+- **Task Automation**: Automate repetitive processes for your financial team.
+- **Visual Workflow Builder**: User-friendly tools for non-technical users to build workflows.
+- **API Integrations & Marketplace**: Connect to external services and APIs effortlessly.
+- **Regulatory Compliance**: Track every action with audit logs and detailed reporting.
 
-- **[i18n](https://nextjs.org/docs/app/building-your-application/routing/internationalization)** - Support for internationalization
-- **[SEO](https://nextjs.org/docs/app/building-your-application/optimizing/metadata)** - Search engine optimization
-- **[MonoRepo](https://turbo.build/)** - Monorepo for better code management
-- **[T3 Env](https://env.t3.gg/)** - Manage your environment variables with ease
+#### Financial Engine (Project Wise)
+- **Modular Architecture**: Build on top of financial products such as loans, and investments with a flexible framework.
+- **Real-Time Processing**: Handle transactions in real time with high efficiency.
+- **Payment Gateway Integration**: Connect with leading payment systems and banking networks.
 
-### 🐰 Data Fetching
+#### Financial Reporting
+- **Real-Time Financials**: Generate balance sheets and income statements instantly.
+- **Multi-Currency Support**: Easily manage transactions across currencies.
+- **Automated Reconciliation**: Reconcile accounts automatically, ensuring accuracy.
+- **Audit-Ready Reports**: Generate compliant reports ready for regulatory review.
 
-- **[trpc](https://trpc.io/)** – End-to-end typesafe APIs made easy
-- **[tanstack/react-query](https://react-query.tanstack.com/)** – Hooks for fetching, caching and updating asynchronous data in React
+#### Analytics
+- **Comprehensive Analytics API**: Access advanced financial insights, including:
+  - User financial health scoring
+  - Spending pattern analysis
+  - Income stability assessment
+  - Debt-to-income ratio
+  - Savings rate tracking
+- **Real-Time Data**: Up-to-the-day financial metrics, including:
+  - Instant transaction categorization
+  - Live budget tracking and alerts
+- **Predictive Risk Analytics**: Leverage advanced forecasting models for:
+  - Default probability prediction
+  - Cash flow forecasting
+  - Business risk analysis
+- **Developer Tools**: Full API documentation, SDKs, and a sandbox environment for testing.
 
-### 🐲 Global State Management
+#### Team Management & Collaboration
+- **Real-Time Collaboration**: Messaging, file sharing, and document editing APIs designed for financial teams.
+- **Thread-Based Conversations**: Manage structured discussions and feedback in one place.
+- **Role-Based Access Control**: Dynamic team roles and permission management with API support.
+- **Task & Workflow Management**: Endpoints for task assignment, tracking, and workflow automation.
+- **Activity Feeds & Notifications**: Customizable activity streams, push notifications, and email digests for team updates.
+- **Security & Encryption**: End-to-end encryption, multi-factor authentication, and secure file sharing.
+- **Integration & Compatibility**: OAuth 2.0, SSO, and webhook support for real-time event notifications.
+  
+## Contributing
 
-- **[Zustand](https://zustand.surge.sh/)** – Small, fast and scalable state management for React
+We welcome contributions from the community! Whether you're fixing a bug, improving the documentation, or adding a new feature, we appreciate your help in making Solomon AI better. There is a lot of context involved and we understand it can be overwhelming when first trying to join the project. Here is a quick summary of key information and how we currently work together:
 
-### 🐒 UI
+- The Solomon AI Team conducts "Missions", which are 1-week sprints aimed at completing high-priority issues. We select the most critical tasks for these missions. Our goal is to complete these high-priority issues within the 1-week timeframe. You can view current open missions on our project board.
+- Outside of dedicated Missions, we have numerous issues (including good first issues) available for contribution. When tackling these, please leave a comment on the issue to indicate you're working on it (and check for existing comments). We welcome pull requests at any time and strive to review them promptly.
+- We have a lot on our plate so it's easy for us to miss something. The best way to get our attention is to ping us directly in our Discord server.
+- Please review our coding Contributing Guide to set up your coding environment. For any questions, join the Solomon AI Discord!
 
-- **[Tailwind CSS](https://tailwindcss.com/)** – Utility-first CSS framework for rapid UI development
-- **[Shadcn/ui](https://ui.shadcn.com/)** – Re-usable components built using Radix UI and Tailwind CSS
-- **[Framer Motion](https://framer.com/motion)** – Motion library for React to animate components with ease
-- **[Lucide](https://lucide.dev/)** – Beautifully simple, pixel-perfect icons
-- **[next/font](https://nextjs.org/docs/basic-features/font-optimization)** – Optimize custom fonts and remove external network requests for improved performance
+For more detailed information on how to contribute, please see our [CONTRIBUTING.md](.github/CONTRIBUTING.md) file.
 
-### 🐴 Code Quality
-
-- **[TypeScript](https://www.typescriptlang.org/)** – Static type checker for end-to-end type safety
-- **[Prettier](https://prettier.io/)** – Opinionated code formatter for consistent code style
-- **[ESLint](https://eslint.org/)** – Pluggable linter for Next.js and TypeScript
-- **[Husky](https://typicode.github.io/husky)** – Git hooks made easy
-
-### 🐑 Performance
-
-- **[Vercel Analytics](https://vercel.com/analytics)** – Real-time performance metrics for your Next.js app
-- **[bun.sh](https://bun.sh/)** – npm alternative for faster and more reliable package management
-
-### 🐘 Database
-
-- **[PostgreSQL](https://www.postgresql.org/)** – The world's most advanced open source database
-
-## 📦 Apps and Packages
-
-- `web`: The main Next.js application
-- `ui`: Shared UI components
-- `db`: Database schema and utilities
-- `auth`: Authentication utilities
-- `email`: Email templates and utilities
 
 ## 📜 License
 
-This project is licensed under the MIT License. For more information, see the [LICENSE](./LICENSE) file.
+This project is licensed under the AGPL License. For more information, see the [LICENSE](./LICENSE) file.
 
 ## 🙏 Credits
 
-This project was inspired by shadcn's [Taxonomy](https://github.com/shadcn-ui/taxonomy) and t3-oss's [create-t3-turbo](https://github.com/t3-oss/create-t3-turbo).
+This project is a fork of [Midday](https://github.com/midday-ai/midday)
 
 Made with [contrib.rocks](https://contrib.rocks).
 
@@ -284,3 +338,4 @@ Made with [contrib.rocks](https://contrib.rocks).
 [github-license-badge-link]: https://github.com/saasfly/saasfly/blob/main/LICENSE
 [discord-badge-link]: https://discord.gg/8SwSX43wnD
 [made-by-nextify-badge-link]: https://nextify.ltd
+
