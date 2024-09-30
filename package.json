@@ -66,5 +66,6 @@
     "@commitlint/config-conventional": "^17.0.0",
     "@commitlint/types": "^17.0.0",
     "husky": "^8.0.0"
-  }
+  },
+  "version": "0.4.0"
 }

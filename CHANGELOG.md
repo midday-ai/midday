@@ -1,3 +1,11 @@
+# [0.4.0](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/compare/v0.3.0...v0.4.0) (2024-09-30)
+
+
+### Features
+
+* update server ([efbcd27](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/commit/efbcd27244c6edc50359aadb842954ea397a8930))
+* update server ([f50d859](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/commit/f50d859e8347b02f4db8ac0e5fcc6f4863eca1a8))
+
 # [0.3.0](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/compare/v0.2.0...v0.3.0) (2024-09-29)
 
 
