@@ -1,7 +1,7 @@
 "use server";
 
 import { Cookies } from "@/utils/constants";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
 import { authActionClient } from "./safe-action";
@@ -37,13 +37,16 @@ export const createTrackerEntriesAction = authActionClient
       const { data, error } = await supabase
         .from("tracker_entries")
         .upsert(entries)
-        .select("*");
+        .select(
+          "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+        );
 
       if (error) {
         throw error;
       }
 
-      revalidatePath("/tracker");
+      revalidateTag(`tracker_entries_${user.team_id}`);
+      //   revalidatePath("/tracker");
 
       return data;
     },

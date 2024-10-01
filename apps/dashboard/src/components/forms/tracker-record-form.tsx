@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
+import { SubmitButton } from "@midday/ui/submit-button";
 import { TimeRangeInput } from "@midday/ui/time-range-input";
 import { differenceInSeconds, parse } from "date-fns";
 import { useEffect } from "react";
@@ -30,6 +31,7 @@ type Props = {
   end?: string;
   onSelectProject: (selected: { id: string; name: string }) => void;
   description?: string;
+  isSaving: boolean;
 };
 
 export function TrackerRecordForm({
@@ -42,6 +44,7 @@ export function TrackerRecordForm({
   end,
   onSelectProject,
   description,
+  isSaving,
 }: Props) {
   const isUpdate = eventId !== NEW_EVENT_ID;
 
@@ -152,13 +155,14 @@ export function TrackerRecordForm({
         />
 
         <div className="flex mt-6 justify-between">
-          <Button
+          <SubmitButton
             className="w-full"
-            disabled={form.formState.isSubmitting}
+            disabled={isSaving}
+            isSubmitting={isSaving}
             type="submit"
           >
             {isUpdate ? "Update" : "Add"}
-          </Button>
+          </SubmitButton>
         </div>
       </form>
     </Form>

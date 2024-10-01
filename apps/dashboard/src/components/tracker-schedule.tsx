@@ -1,24 +1,35 @@
 "use client";
 
 import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-action";
+import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entry";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@midday/ui/context-menu";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import {
   addMinutes,
   addSeconds,
   differenceInSeconds,
   eachDayOfInterval,
+  endOfDay,
   format,
   parseISO,
   setHours,
   setMinutes,
+  startOfDay,
 } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerRecordForm } from "./forms/tracker-record-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
@@ -30,7 +41,6 @@ interface TrackerRecord {
     id: string;
     name: string;
   };
-  isSaved: boolean;
   description?: string;
 }
 
@@ -71,7 +81,22 @@ export function TrackerSchedule({
   const [resizeType, setResizeType] = useState<"top" | "bottom" | null>(null);
   const [movingEvent, setMovingEvent] = useState<TrackerRecord | null>(null);
   const [moveStartY, setMoveStartY] = useState(0);
-  const createTrackerEntries = useAction(createTrackerEntriesAction);
+
+  const createTrackerEntries = useAction(createTrackerEntriesAction, {
+    // onSuccess: (result) => {
+    //   if (result.data) {
+    //     setSelectedEvent(
+    //       result.data.find((event) => event.date === selectedDate) || null,
+    //     );
+    //   }
+    // },
+  });
+
+  const deleteTrackerEntry = useAction(deleteTrackerEntryAction, {
+    onSuccess: () => {
+      console.log("success");
+    },
+  });
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
@@ -102,7 +127,6 @@ export function TrackerSchedule({
                 id: event.project_id,
                 name: event.project?.name || "",
               },
-              isSaved: true,
               description: event.description,
             };
           },
@@ -136,6 +160,24 @@ export function TrackerSchedule({
     }
   }, []);
 
+  const handleDeleteEvent = (eventId: string) => {
+    if (eventId !== NEW_EVENT_ID) {
+      deleteTrackerEntry.execute({ id: eventId });
+      setData((prevData) => prevData.filter((event) => event.id !== eventId));
+      setSelectedEvent(null);
+    }
+  };
+
+  useHotkeys(
+    "backspace",
+    () => {
+      if (selectedEvent && selectedEvent.id !== NEW_EVENT_ID) {
+        handleDeleteEvent(selectedEvent.id);
+      }
+    },
+    [selectedEvent],
+  );
+
   const currentOrNewEvent =
     data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
 
@@ -146,7 +188,7 @@ export function TrackerSchedule({
   };
 
   const handleMouseDown = (slot: number) => {
-    if (selectedEvent && !selectedEvent.isSaved) {
+    if (selectedEvent && selectedEvent.id === NEW_EVENT_ID) {
       setData((prevData) =>
         prevData.filter((event) => event.id !== selectedEvent.id),
       );
@@ -166,7 +208,6 @@ export function TrackerSchedule({
       start: startDate,
       end: endDate,
       project: { id: projectId ?? "", name: "" },
-      isSaved: false,
     };
 
     setData((prevData) => [...prevData, newEvent]);
@@ -196,6 +237,11 @@ export function TrackerSchedule({
             : event,
         ),
       );
+      setSelectedEvent((prev) =>
+        prev && prev.id === selectedEvent.id
+          ? { ...prev, start: startDate, end: endDate }
+          : prev,
+      );
     } else if (resizingEvent && resizingEvent.id !== NEW_EVENT_ID) {
       const deltaY = e.clientY - resizeStartY;
       const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
@@ -206,6 +252,11 @@ export function TrackerSchedule({
             event.id === resizingEvent.id ? { ...event, end: newEnd } : event,
           ),
         );
+        setSelectedEvent((prev) =>
+          prev && prev.id === resizingEvent.id
+            ? { ...prev, end: newEnd }
+            : prev,
+        );
       } else if (resizeType === "top") {
         const newStart = addMinutes(resizingEvent.start, deltaSlots * 15);
         setData((prevData) =>
@@ -215,19 +266,36 @@ export function TrackerSchedule({
               : event,
           ),
         );
+        setSelectedEvent((prev) =>
+          prev && prev.id === resizingEvent.id
+            ? { ...prev, start: newStart }
+            : prev,
+        );
       }
     } else if (movingEvent) {
       const deltaY = e.clientY - moveStartY;
       const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
       const newStart = addMinutes(movingEvent.start, deltaSlots * 15);
       const newEnd = addMinutes(movingEvent.end, deltaSlots * 15);
-      setData((prevData) =>
-        prevData.map((event) =>
-          event.id === movingEvent.id
-            ? { ...event, start: newStart, end: newEnd }
-            : event,
-        ),
-      );
+
+      // Ensure the event doesn't move before start of day or after end of day
+      const dayStart = startOfDay(movingEvent.start);
+      const dayEnd = endOfDay(movingEvent.start);
+
+      if (newStart >= dayStart && newEnd <= dayEnd) {
+        setData((prevData) =>
+          prevData.map((event) =>
+            event.id === movingEvent.id
+              ? { ...event, start: newStart, end: newEnd }
+              : event,
+          ),
+        );
+        setSelectedEvent((prev) =>
+          prev && prev.id === movingEvent.id
+            ? { ...prev, start: newStart, end: newEnd }
+            : prev,
+        );
+      }
     }
   };
 
@@ -260,13 +328,15 @@ export function TrackerSchedule({
 
   const handleEventMoveStart = (e: React.MouseEvent, event: TrackerRecord) => {
     e.stopPropagation();
+    // Delete unsaved event if it exists
+    setData((prevData) => prevData.filter((e) => e.id !== NEW_EVENT_ID));
     setMovingEvent(event);
     setMoveStartY(e.clientY);
     setSelectedEvent(event);
   };
 
   const handleEventClick = (event: TrackerRecord) => {
-    if (selectedEvent && !selectedEvent.isSaved) {
+    if (selectedEvent && selectedEvent.id === NEW_EVENT_ID) {
       setData((prevData) => prevData.filter((e) => e.id !== selectedEvent.id));
     }
     setSelectedEvent(event);
@@ -352,10 +422,13 @@ export function TrackerSchedule({
             className="relative flex-grow border border-border border-t-0"
             onMouseMove={handleMouseMove}
             onMouseDown={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const y = e.clientY - rect.top;
-              const slot = Math.floor(y / SLOT_HEIGHT);
-              handleMouseDown(slot);
+              if (e.button === 0) {
+                // Check if left mouse button is pressed
+                const rect = e.currentTarget.getBoundingClientRect();
+                const y = e.clientY - rect.top;
+                const slot = Math.floor(y / SLOT_HEIGHT);
+                handleMouseDown(slot);
+              }
             }}
           >
             {hours.map((hour) => (
@@ -372,48 +445,59 @@ export function TrackerSchedule({
               const height = (endSlot - startSlot) * SLOT_HEIGHT;
 
               return (
-                <div
-                  onClick={() => handleEventClick(event)}
-                  key={event.id}
-                  className={cn(
-                    "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
-                    selectedEvent?.id === event.id && "!text-primary",
-                    event.isSaved && "cursor-move",
-                  )}
-                  style={{
-                    top: `${startSlot * SLOT_HEIGHT}px`,
-                    height: `${height}px`,
-                  }}
-                  onMouseDown={(e) =>
-                    event.isSaved && handleEventMoveStart(e, event)
-                  }
-                >
-                  <div className="text-xs p-4 flex justify-between items-center select-none pointer-events-none">
-                    <span>
-                      {event.project.name} (
-                      {secondsToHoursAndMinutes(
-                        differenceInSeconds(event.end, event.start),
+                <ContextMenu key={event.id}>
+                  <ContextMenuTrigger>
+                    <div
+                      onClick={() => handleEventClick(event)}
+                      className={cn(
+                        "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                        selectedEvent?.id === event.id && "!text-primary",
+                        event.id !== NEW_EVENT_ID && "cursor-move",
                       )}
-                      )
-                    </span>
-                  </div>
-                  {event.id !== NEW_EVENT_ID && (
-                    <>
-                      <div
-                        className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
-                        onMouseDown={(e) =>
-                          handleEventResizeStart(e, event, "top")
-                        }
-                      />
-                      <div
-                        className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                        onMouseDown={(e) =>
-                          handleEventResizeStart(e, event, "bottom")
-                        }
-                      />
-                    </>
-                  )}
-                </div>
+                      style={{
+                        top: `${startSlot * SLOT_HEIGHT}px`,
+                        height: `${height}px`,
+                      }}
+                      onMouseDown={(e) =>
+                        event.id !== NEW_EVENT_ID &&
+                        handleEventMoveStart(e, event)
+                      }
+                    >
+                      <div className="text-xs p-4 flex justify-between items-center select-none pointer-events-none">
+                        <span>
+                          {event.project.name} (
+                          {secondsToHoursAndMinutes(
+                            differenceInSeconds(event.end, event.start),
+                          )}
+                          )
+                        </span>
+                      </div>
+                      {event.id !== NEW_EVENT_ID && (
+                        <>
+                          <div
+                            className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
+                            onMouseDown={(e) =>
+                              handleEventResizeStart(e, event, "top")
+                            }
+                          />
+                          <div
+                            className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                            onMouseDown={(e) =>
+                              handleEventResizeStart(e, event, "bottom")
+                            }
+                          />
+                        </>
+                      )}
+                    </div>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent>
+                    <ContextMenuItem
+                      onClick={() => handleDeleteEvent(event.id)}
+                    >
+                      Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
               );
             })}
           </div>
@@ -423,6 +507,7 @@ export function TrackerSchedule({
       <TrackerRecordForm
         eventId={currentOrNewEvent?.id}
         onCreate={handleCreateEvent}
+        isSaving={createTrackerEntries.isExecuting}
         userId={userId}
         teamId={teamId}
         projectId={currentOrNewEvent?.project.id ?? projectId}
