@@ -2,8 +2,6 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
-import { createClient } from "@midday/supabase/client";
-import { getTrackerRecordsByRangeQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -26,7 +24,7 @@ import {
   subMonths,
 } from "date-fns";
 import MotionNumber from "motion-number";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { TrackerEvents } from "./tracker-events";
 import { TrackerMonthSelect } from "./tracker-month-select";
@@ -44,6 +42,8 @@ export function TrackerCalendar({
   userId,
   weekStartsOnMonday = false,
   timeFormat,
+  data,
+  meta,
 }: Props) {
   const {
     date: currentDate,
@@ -51,9 +51,6 @@ export function TrackerCalendar({
     setParams,
     selectedDate,
   } = useTrackerParams();
-  const supabase = createClient();
-  const [data, setData] = useState<Record<string, TrackerEvent[]>>({});
-  const [meta, setMeta] = useState<{ totalDuration?: number }>({});
   const [localRange, setLocalRange] = useState<[string, string | null]>([
     "",
     null,
@@ -61,21 +58,9 @@ export function TrackerCalendar({
   const [isDragging, setIsDragging] = useState(false);
 
   const { monthStart, monthEnd, calendarDays, firstWeek } = useCalendarDates(
-    currentDate,
+    new Date(currentDate),
     weekStartsOnMonday,
   );
-
-  useEffect(() => {
-    fetchTrackerData(
-      supabase,
-      teamId,
-      userId,
-      monthStart,
-      monthEnd,
-      setData,
-      setMeta,
-    );
-  }, [currentDate]);
 
   useHotkeys("arrowLeft", () => handleMonthChange(-1, currentDate, setParams), {
     enabled: !selectedDate,
@@ -173,26 +158,6 @@ function useCalendarDates(currentDate: Date, weekStartsOnMonday: boolean) {
   };
 }
 
-async function fetchTrackerData(
-  supabase: any,
-  teamId: string,
-  userId: string,
-  start: Date,
-  end: Date,
-  setData: React.Dispatch<React.SetStateAction<Record<string, TrackerEvent[]>>>,
-  setMeta: React.Dispatch<React.SetStateAction<{ totalDuration?: number }>>,
-) {
-  const trackerData = await getTrackerRecordsByRangeQuery(supabase, {
-    teamId,
-    userId,
-    from: formatISO(start, { representation: "date" }),
-    to: formatISO(end, { representation: "date" }),
-  });
-
-  setData(trackerData?.data || {});
-  setMeta(trackerData?.meta || {});
-}
-
 function handleMonthChange(
   direction: number,
   currentDate: Date,
@@ -255,12 +220,29 @@ function CalendarHeader({
       currency,
     }));
 
+  const mostUsedCurrency = Object.values(projectTotals).reduce(
+    (acc, { currency }) => {
+      acc[currency] = (acc[currency] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
+
+  const dominantCurrency =
+    Object.entries(mostUsedCurrency).length > 0
+      ? Object.entries(mostUsedCurrency).reduce((a, b) =>
+          a[1] > b[1] ? a : b,
+        )[0]
+      : null;
+
   return (
     <div className="flex items-center justify-between mb-6">
       <div className="space-y-2 select-text">
         <h1 className="text-4xl font-mono">
           <MotionNumber
-            value={meta?.totalDuration ? meta.totalDuration / 3600 : 0}
+            value={
+              meta?.totalDuration ? Math.round(meta.totalDuration / 3600) : 0
+            }
           />
           h
         </h1>
@@ -268,7 +250,7 @@ function CalendarHeader({
           <p className="text-sm text-[#606060]">
             {meta?.totalAmount &&
               formatAmount({
-                currency: "SEK",
+                currency: dominantCurrency,
                 amount: meta?.totalAmount,
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0,

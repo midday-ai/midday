@@ -14,7 +14,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
-import { isHotkeyPressed } from "react-hotkeys-hook";
+import { useEffect, useState } from "react";
 import { TrackerHeader } from "./tracker-header";
 import { TrackerIndicator } from "./tracker-indicator";
 
@@ -48,6 +48,10 @@ export function TrackerWidget({
     selectedDate,
   } = useTrackerParams(initialDate);
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState<string | null>(null);
+  const [dragEnd, setDragEnd] = useState<string | null>(null);
+
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calendarStart = startOfWeek(monthStart, {
@@ -68,7 +72,7 @@ export function TrackerWidget({
     end: endOfWeek(calendarStart, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
   });
 
-  const ref = useClickAway(() => {
+  const ref = useClickAway<HTMLDivElement>(() => {
     if (range?.length === 1) {
       setParams({ range: null });
     }
@@ -78,19 +82,45 @@ export function TrackerWidget({
     return data?.[formatISO(date, { representation: "date" })]?.length ?? 0;
   };
 
-  const handleOnSelect = (date: Date) => {
-    if (isHotkeyPressed("meta")) {
-      if (!range) {
-        setParams({ range: [formatISO(date, { representation: "date" })] });
-      } else if (range?.length === 1) {
-        setParams({
-          range: [...range, formatISO(date, { representation: "date" })],
-        });
-      }
-    } else {
-      setParams({ selectedDate: formatISO(date, { representation: "date" }) });
+  const handleMouseDown = (date: Date) => {
+    setIsDragging(true);
+    const dateStr = formatISO(date, { representation: "date" });
+    setDragStart(dateStr);
+    setDragEnd(null);
+    setParams({ range: [dateStr] });
+  };
+
+  const handleMouseEnter = (date: Date) => {
+    if (isDragging) {
+      setDragEnd(formatISO(date, { representation: "date" }));
     }
   };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (dragStart && dragEnd) {
+      setParams({
+        range: [dragStart, dragEnd].sort(),
+      });
+    } else if (dragStart) {
+      setParams({ selectedDate: dragStart, range: null });
+    }
+    setDragStart(null);
+    setDragEnd(null);
+  };
+
+  useEffect(() => {
+    const handleGlobalMouseUp = () => {
+      if (isDragging) {
+        handleMouseUp();
+      }
+    };
+
+    document.addEventListener("mouseup", handleGlobalMouseUp);
+    return () => {
+      document.removeEventListener("mouseup", handleGlobalMouseUp);
+    };
+  }, [isDragging, dragStart, dragEnd]);
 
   return (
     <div ref={ref}>
@@ -109,11 +139,18 @@ export function TrackerWidget({
           {calendarDays.map((date, index) => {
             const isCurrentMonth =
               new Date(date).getMonth() === new Date(currentDate).getMonth();
+            const dateStr = formatISO(date, { representation: "date" });
+            const isInDragRange =
+              dragStart &&
+              dragEnd &&
+              ((dateStr >= dragStart && dateStr <= dragEnd) ||
+                (dateStr <= dragStart && dateStr >= dragEnd));
 
             return (
               <button
                 type="button"
-                onClick={() => handleOnSelect(date)}
+                onMouseDown={() => handleMouseDown(date)}
+                onMouseEnter={() => handleMouseEnter(date)}
                 key={index.toString()}
                 className={cn(
                   "pt-2 pb-5 px-3 font-mono text-sm relative transition-all duration-100 text-left",
@@ -122,22 +159,13 @@ export function TrackerWidget({
                     : "bg-background",
                   !isCurrentMonth &&
                     "bg-[repeating-linear-gradient(-60deg,#DBDBDB,#DBDBDB_1px,background_1px,background_5px)] dark:bg-[repeating-linear-gradient(-60deg,#2C2C2C,#2C2C2C_1px,background_1px,background_5px)]",
-                  selectedDate ===
-                    formatISO(date, { representation: "date" }) &&
-                    "ring-1 ring-primary",
-                  (range?.includes(
-                    formatISO(date, { representation: "date" }),
-                  ) ||
+                  selectedDate === dateStr && "ring-1 ring-primary",
+                  (range?.includes(dateStr) ||
                     (sortedDates.length === 2 &&
-                      date >=
-                        (sortedDates[0]
-                          ? new Date(sortedDates[0])
-                          : new Date()) &&
-                      date <=
-                        (sortedDates[1]
-                          ? new Date(sortedDates[1])
-                          : new Date()))) &&
+                      date >= new Date(sortedDates[0] || 0) &&
+                      date <= new Date(sortedDates[1] || 0))) &&
                     "ring-1 ring-primary",
+                  isInDragRange && "ring-1 ring-primary",
                 )}
               >
                 <div>{format(date, "d")}</div>

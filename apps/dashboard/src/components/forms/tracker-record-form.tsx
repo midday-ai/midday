@@ -3,10 +3,12 @@ import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { TimeRangeInput } from "@midday/ui/time-range-input";
+import { differenceInSeconds, parse } from "date-fns";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AssignUser } from "../assign-user";
+import { NEW_EVENT_ID } from "../tracker-schedule";
 import { TrackerSelectProject } from "../tracker-select-project";
 
 const formSchema = z.object({
@@ -26,6 +28,8 @@ type Props = {
   projectId?: string;
   start?: string;
   end?: string;
+  onSelectProject: (selected: { id: string; name: string }) => void;
+  description?: string;
 };
 
 export function TrackerRecordForm({
@@ -36,8 +40,10 @@ export function TrackerRecordForm({
   projectId,
   start,
   end,
+  onSelectProject,
+  description,
 }: Props) {
-  const isUpdate = !!eventId;
+  const isUpdate = eventId !== NEW_EVENT_ID;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,6 +52,7 @@ export function TrackerRecordForm({
       project_id: projectId,
       start,
       end,
+      description: description ?? undefined,
     },
   });
 
@@ -59,16 +66,29 @@ export function TrackerRecordForm({
     if (projectId) {
       form.setValue("project_id", projectId);
     }
-  }, [start, end, projectId]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    onCreate(values);
-  }
+    if (description) {
+      form.setValue("description", description);
+    }
+
+    if (start && end) {
+      const startDate = parse(start, "HH:mm", new Date());
+      const endDate = parse(end, "HH:mm", new Date());
+
+      const durationInSeconds = differenceInSeconds(endDate, startDate);
+
+      if (durationInSeconds) {
+        form.setValue("duration", durationInSeconds);
+      }
+    }
+  }, [start, end, projectId, description]);
+
+  console.log(description);
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(onCreate)}
         className="mb-12 mt-6 space-y-4"
       >
         <TimeRangeInput
@@ -88,9 +108,10 @@ export function TrackerRecordForm({
                 <TrackerSelectProject
                   teamId={teamId}
                   selectedId={field.value}
-                  onSelect={(projectId: string) => {
-                    if (projectId) {
-                      field.onChange(projectId);
+                  onSelect={(selected) => {
+                    if (selected) {
+                      field.onChange(selected.id);
+                      onSelectProject(selected);
                     }
                   }}
                 />
@@ -131,7 +152,13 @@ export function TrackerRecordForm({
         />
 
         <div className="flex mt-6 justify-between">
-          <Button className="w-full">{isUpdate ? "Update" : "Add"}</Button>
+          <Button
+            className="w-full"
+            disabled={form.formState.isSubmitting}
+            type="submit"
+          >
+            {isUpdate ? "Update" : "Add"}
+          </Button>
         </div>
       </form>
     </Form>

@@ -3,7 +3,11 @@ import { Table } from "@/components/tables/tracker";
 import { Loading } from "@/components/tables/tracker/loading";
 import { TrackerCalendar } from "@/components/tracker-calendar";
 import { TrackerSearchFilter } from "@/components/tracker-search-filter";
-import { getUser } from "@midday/supabase/cached-queries";
+import {
+  getTrackerRecordsByRange,
+  getUser,
+} from "@midday/supabase/cached-queries";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
@@ -24,7 +28,20 @@ type Props = {
 export default async function Tracker({ searchParams }: Props) {
   const status = searchParams?.statuses;
   const sort = searchParams?.sort?.split(":") ?? ["status", "asc"];
-  const { data: userData } = await getUser();
+
+  const currentDate =
+    searchParams?.date ?? formatISO(new Date(), { representation: "date" });
+  const [{ data: userData }, { data, meta }] = await Promise.all([
+    getUser(),
+    getTrackerRecordsByRange({
+      from: formatISO(startOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+      to: formatISO(endOfMonth(new Date(currentDate)), {
+        representation: "date",
+      }),
+    }),
+  ]);
 
   return (
     <div>
@@ -33,6 +50,8 @@ export default async function Tracker({ searchParams }: Props) {
         userId={userData?.id}
         weekStartsOnMonday={userData?.week_starts_on_monday}
         timeFormat={userData?.time_format}
+        data={data}
+        meta={meta}
       />
 
       <div className="mt-14 mb-6 flex items-center justify-between space-x-4">

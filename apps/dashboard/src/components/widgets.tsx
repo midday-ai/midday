@@ -42,6 +42,7 @@ export function Widgets({ disabled, initialPeriod, searchParams }: Props) {
       className="flex flex-col"
       opts={{
         align: "start",
+        watchDrag: false,
       }}
     >
       <WidgetsNavigation />

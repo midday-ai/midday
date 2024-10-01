@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@date-fns/utc": "^2.1.0",
+    "@supabase-cache-helpers/postgrest-react-query": "^1.10.1",
+    "@supabase/postgrest-js": "^1.16.2",
     "@supabase/ssr": "^0.5.1",
+    "@tanstack/react-query": "5.0.0-beta.2",
     "react": "18.3.1",
     "server-only": "^0.0.1",
     "supabase": "^1.192.5"
@@ -23,11 +26,13 @@
   "exports": {
     "./server": "./src/client/server.ts",
     "./client": "./src/client/client.ts",
+    "./client-query": "./src/queries/client.ts",
     "./mutations": "./src/mutations/index.ts",
     "./middleware": "./src/client/middleware.ts",
     "./queries": "./src/queries/index.ts",
     "./cached-queries": "./src/queries/cached-queries.ts",
     "./storage": "./src/utils/storage.ts",
-    "./types": "./src/types/index.ts"
+    "./types": "./src/types/index.ts",
+    "./provider": "./src/client/provider.tsx"
   }
 }

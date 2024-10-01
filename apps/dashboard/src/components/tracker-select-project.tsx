@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 type Props = {
   teamId: string;
   selectedId?: string;
+  onSelect: (selected: Option) => void;
 };
 
 type Option = {
@@ -18,7 +19,7 @@ type Option = {
   name: string;
 };
 
-export function TrackerSelectProject({ teamId, selectedId }: Props) {
+export function TrackerSelectProject({ teamId, selectedId, onSelect }: Props) {
   const { toast } = useToast();
   const supabase = createClient();
   const [data, setData] = useState([]);
@@ -45,6 +46,11 @@ export function TrackerSelectProject({ teamId, selectedId }: Props) {
       });
     },
   });
+
+  const handleSelect = (selected: Option) => {
+    setValue(selected);
+    onSelect(selected);
+  };
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -78,7 +84,7 @@ export function TrackerSelectProject({ teamId, selectedId }: Props) {
       placeholder="Search or create project"
       classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
       className="w-full bg-transparent px-12 border py-3"
-      onSelect={setValue}
+      onSelect={handleSelect}
       options={data}
       value={value}
       isLoading={isLoading}

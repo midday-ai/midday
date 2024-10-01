@@ -99,6 +99,8 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
               {formatAmount({
                 currency: row.currency,
                 amount: row.total_amount,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
               })}
             </span>
           </DataTableCell>

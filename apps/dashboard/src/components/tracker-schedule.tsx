@@ -1,28 +1,43 @@
 "use client";
 
+import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-action";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
 import { ScrollArea } from "@midday/ui/scroll-area";
-import { format } from "date-fns";
+import {
+  addMinutes,
+  addSeconds,
+  differenceInSeconds,
+  eachDayOfInterval,
+  format,
+  parseISO,
+  setHours,
+  setMinutes,
+} from "date-fns";
+import { useAction } from "next-safe-action/hooks";
 import React, { useEffect, useRef, useState } from "react";
 import { TrackerRecordForm } from "./forms/tracker-record-form";
 import { TrackerDaySelect } from "./tracker-day-select";
 
 interface TrackerRecord {
   id: string;
-  start: number;
-  duration: number;
+  start: Date;
+  end: Date;
   project: {
+    id: string;
     name: string;
   };
+  isSaved: boolean;
+  description?: string;
 }
+
+export const NEW_EVENT_ID = "new-event";
 
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
-const SLOTS_PER_HOUR = 4;
 
 type Props = {
   teamId: string;
@@ -37,14 +52,15 @@ export function TrackerSchedule({
   timeFormat,
   projectId,
 }: Props) {
+  const supabase = createClient();
+
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { selectedDate } = useTrackerParams();
+  const { selectedDate, range } = useTrackerParams();
   const [selectedEvent, setSelectedEvent] = useState<TrackerRecord | null>(
     null,
   );
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const [data, setData] = useState<TrackerRecord[]>([]);
-  const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStartSlot, setDragStartSlot] = useState<number | null>(null);
   const [totalDuration, setTotalDuration] = useState(0);
@@ -52,18 +68,52 @@ export function TrackerSchedule({
     null,
   );
   const [resizeStartY, setResizeStartY] = useState(0);
+  const [resizeType, setResizeType] = useState<"top" | "bottom" | null>(null);
+  const [movingEvent, setMovingEvent] = useState<TrackerRecord | null>(null);
+  const [moveStartY, setMoveStartY] = useState(0);
+  const createTrackerEntries = useAction(createTrackerEntriesAction);
+
+  const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
   useEffect(() => {
     const fetchData = async () => {
-      const supabase = createClient();
       const trackerData = await getTrackerRecordsByDateQuery(supabase, {
         teamId,
         userId,
-        date: selectedDate ?? "",
+        date: selectedDate,
       });
 
-      setData((trackerData?.data as TrackerRecord[]) ?? []);
-      setTotalDuration(trackerData?.meta?.totalDuration ?? 0);
+      if (trackerData?.data) {
+        const processedData = trackerData.data.map(
+          (event: any): TrackerRecord => {
+            const start = event.start
+              ? parseISO(event.start)
+              : parseISO(`${event.date || selectedDate}T09:00:00`);
+            const end = event.end
+              ? parseISO(event.end)
+              : addSeconds(start, event.duration || 0);
+
+            return {
+              ...event,
+              id: event.id,
+              start,
+              end,
+              project: {
+                id: event.project_id,
+                name: event.project?.name || "",
+              },
+              isSaved: true,
+              description: event.description,
+            };
+          },
+        );
+
+        setData(processedData);
+        setTotalDuration(trackerData.meta?.totalDuration || 0);
+      } else {
+        setData([]);
+        setTotalDuration(0);
+      }
     };
 
     if (selectedDate) {
@@ -86,6 +136,9 @@ export function TrackerSchedule({
     }
   }, []);
 
+  const currentOrNewEvent =
+    data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
+
   const formatHour = (hour: number) => {
     const date = new Date();
     date.setHours(hour, 0, 0, 0);
@@ -93,20 +146,88 @@ export function TrackerSchedule({
   };
 
   const handleMouseDown = (slot: number) => {
+    if (selectedEvent && !selectedEvent.isSaved) {
+      setData((prevData) =>
+        prevData.filter((event) => event.id !== selectedEvent.id),
+      );
+    }
+    setSelectedEvent(null);
     setIsDragging(true);
     setDragStartSlot(slot);
-    setSelectedSlots([slot]);
+
+    const startDate = setMinutes(
+      setHours(new Date(), Math.floor(slot / 4)),
+      (slot % 4) * 15,
+    );
+
+    const endDate = addMinutes(startDate, 15);
+    const newEvent: TrackerRecord = {
+      id: NEW_EVENT_ID,
+      start: startDate,
+      end: endDate,
+      project: { id: projectId ?? "", name: "" },
+      isSaved: false,
+    };
+
+    setData((prevData) => [...prevData, newEvent]);
+    setSelectedEvent(newEvent);
   };
 
-  const handleMouseEnter = (slot: number) => {
-    if (isDragging && dragStartSlot !== null) {
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && dragStartSlot !== null && selectedEvent) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      const slot = Math.floor(y / SLOT_HEIGHT);
       const start = Math.min(dragStartSlot, slot);
       const end = Math.max(dragStartSlot, slot);
-      const newSelectedSlots = [];
-      for (let i = start; i <= end; i++) {
-        newSelectedSlots.push(i);
+      const startDate = setMinutes(
+        setHours(new Date(), Math.floor(start / 4)),
+        (start % 4) * 15,
+      );
+      const endDate = addMinutes(startDate, (end - start + 1) * 15);
+      setData((prevData) =>
+        prevData.map((event) =>
+          event.id === selectedEvent.id
+            ? {
+                ...event,
+                start: startDate,
+                end: endDate,
+              }
+            : event,
+        ),
+      );
+    } else if (resizingEvent && resizingEvent.id !== NEW_EVENT_ID) {
+      const deltaY = e.clientY - resizeStartY;
+      const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
+      if (resizeType === "bottom") {
+        const newEnd = addMinutes(resizingEvent.end, deltaSlots * 15);
+        setData((prevData) =>
+          prevData.map((event) =>
+            event.id === resizingEvent.id ? { ...event, end: newEnd } : event,
+          ),
+        );
+      } else if (resizeType === "top") {
+        const newStart = addMinutes(resizingEvent.start, deltaSlots * 15);
+        setData((prevData) =>
+          prevData.map((event) =>
+            event.id === resizingEvent.id
+              ? { ...event, start: newStart }
+              : event,
+          ),
+        );
       }
-      setSelectedSlots(newSelectedSlots);
+    } else if (movingEvent) {
+      const deltaY = e.clientY - moveStartY;
+      const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
+      const newStart = addMinutes(movingEvent.start, deltaSlots * 15);
+      const newEnd = addMinutes(movingEvent.end, deltaSlots * 15);
+      setData((prevData) =>
+        prevData.map((event) =>
+          event.id === movingEvent.id
+            ? { ...event, start: newStart, end: newEnd }
+            : event,
+        ),
+      );
     }
   };
 
@@ -114,6 +235,8 @@ export function TrackerSchedule({
     setIsDragging(false);
     setDragStartSlot(null);
     setResizingEvent(null);
+    setResizeType(null);
+    setMovingEvent(null);
   };
 
   useEffect(() => {
@@ -124,56 +247,82 @@ export function TrackerSchedule({
   const handleEventResizeStart = (
     e: React.MouseEvent,
     event: TrackerRecord,
+    type: "top" | "bottom",
   ) => {
-    setResizingEvent(event);
-    setResizeStartY(e.clientY);
-  };
-
-  const handleEventResize = (e: React.MouseEvent) => {
-    if (resizingEvent && scrollRef.current) {
-      const deltaY = e.clientY - resizeStartY;
-      const deltaSlots = Math.round(deltaY / SLOT_HEIGHT);
-      const newDuration =
-        Math.max(
-          1,
-          Math.ceil(resizingEvent.duration / (15 * 60)) + deltaSlots,
-        ) *
-        15 *
-        60;
-
-      setData((prevData) =>
-        prevData.map((item) =>
-          item.id === resizingEvent.id
-            ? { ...item, duration: newDuration }
-            : item,
-        ),
-      );
+    if (event.id !== NEW_EVENT_ID) {
+      e.stopPropagation();
+      setResizingEvent(event);
+      setResizeStartY(e.clientY);
+      setResizeType(type);
+      setSelectedEvent(event);
     }
   };
 
-  const handleEventResizeEnd = () => {
-    setResizingEvent(null);
-    // Here you would typically update the backend with the new event duration
+  const handleEventMoveStart = (e: React.MouseEvent, event: TrackerRecord) => {
+    e.stopPropagation();
+    setMovingEvent(event);
+    setMoveStartY(e.clientY);
+    setSelectedEvent(event);
   };
 
-  const handleEditEvent = (event: TrackerRecord) => {
-    // Implement edit event logic
+  const handleEventClick = (event: TrackerRecord) => {
+    if (selectedEvent && !selectedEvent.isSaved) {
+      setData((prevData) => prevData.filter((e) => e.id !== selectedEvent.id));
+    }
+    setSelectedEvent(event);
   };
 
-  const getTimeFromSlot = (slot: number) => {
-    const hour = Math.floor(slot / 4);
-    const minute = (slot % 4) * 15;
-    return `${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}`;
+  const handleCreateEvent = (values: {
+    start: string;
+    end: string;
+    assigned_id: string;
+    project_id: string;
+    description?: string;
+  }) => {
+    const getDates = (): string[] => {
+      if (selectedDate) return [selectedDate];
+      if (sortedRange && sortedRange.length === 2) {
+        const [start, end] = sortedRange;
+        if (start && end) {
+          return eachDayOfInterval({
+            start: parseISO(start),
+            end: parseISO(end),
+          }).map((date) => format(date, "yyyy-MM-dd"));
+        }
+      }
+      return [];
+    };
+
+    const dates = getDates();
+    const baseDate =
+      dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
+
+    const startDate = parseISO(`${baseDate}T${values.start}`);
+    const endDate = parseISO(`${baseDate}T${values.end}`);
+
+    const newEvent = {
+      start: startDate.toISOString(),
+      stop: endDate.toISOString(),
+      dates,
+      team_id: teamId,
+      assigned_id: values.assigned_id,
+      project_id: values.project_id,
+      description: values.description || "",
+      rate: 0,
+      currency: "SEK",
+      duration: Math.max(0, differenceInSeconds(endDate, startDate)),
+    };
+
+    createTrackerEntries.execute(newEvent);
   };
 
-  const selectedStart =
-    selectedSlots.length > 0
-      ? getTimeFromSlot(Math.min(...selectedSlots))
-      : undefined;
-  const selectedEnd =
-    selectedSlots.length > 0
-      ? getTimeFromSlot(Math.max(...selectedSlots) + 1)
-      : undefined;
+  const getTimeFromDate = (date: Date) => {
+    return format(date, "HH:mm");
+  };
+
+  const getSlotFromDate = (date: Date) => {
+    return date.getHours() * 4 + Math.floor(date.getMinutes() / 15);
+  };
 
   return (
     <div className="w-full">
@@ -185,7 +334,7 @@ export function TrackerSchedule({
 
       <TrackerDaySelect />
 
-      <ScrollArea ref={scrollRef} className="h-[calc(100vh-485px)] mt-8">
+      <ScrollArea ref={scrollRef} className="h-[calc(100vh-470px)] mt-8">
         <div className="flex text-[#878787] text-xs">
           <div className="w-20 flex-shrink-0 select-none">
             {hours.map((hour) => (
@@ -198,9 +347,16 @@ export function TrackerSchedule({
               </div>
             ))}
           </div>
+
           <div
             className="relative flex-grow border border-border border-t-0"
-            onMouseMove={handleEventResize}
+            onMouseMove={handleMouseMove}
+            onMouseDown={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const y = e.clientY - rect.top;
+              const slot = Math.floor(y / SLOT_HEIGHT);
+              handleMouseDown(slot);
+            }}
           >
             {hours.map((hour) => (
               <React.Fragment key={hour}>
@@ -211,70 +367,88 @@ export function TrackerSchedule({
               </React.Fragment>
             ))}
             {data?.map((event) => {
-              const startSlot = event.start ?? 9 * SLOTS_PER_HOUR; // Set to 09:00 if null
-              const endSlot = startSlot + Math.ceil(event.duration / (15 * 60));
+              const startSlot = getSlotFromDate(event.start);
+              const endSlot = getSlotFromDate(event.end);
               const height = (endSlot - startSlot) * SLOT_HEIGHT;
 
               return (
                 <div
-                  onClick={() => setSelectedEvent(event)}
+                  onClick={() => handleEventClick(event)}
                   key={event.id}
                   className={cn(
-                    "absolute w-full z-10 bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
+                    "absolute w-full bg-[#F0F0F0]/[0.95] dark:bg-[#1D1D1D]/[0.95] text-[#606060] dark:text-[#878787] border-t border-border",
                     selectedEvent?.id === event.id && "!text-primary",
+                    event.isSaved && "cursor-move",
                   )}
                   style={{
                     top: `${startSlot * SLOT_HEIGHT}px`,
                     height: `${height}px`,
                   }}
+                  onMouseDown={(e) =>
+                    event.isSaved && handleEventMoveStart(e, event)
+                  }
                 >
-                  <div className="text-xs p-4 flex justify-between items-center">
+                  <div className="text-xs p-4 flex justify-between items-center select-none pointer-events-none">
                     <span>
                       {event.project.name} (
-                      {secondsToHoursAndMinutes(event.duration)})
+                      {secondsToHoursAndMinutes(
+                        differenceInSeconds(event.end, event.start),
+                      )}
+                      )
                     </span>
                   </div>
-                  <div
-                    className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
-                    onMouseDown={(e) => handleEventResizeStart(e, event)}
-                    onMouseUp={handleEventResizeEnd}
-                  />
+                  {event.id !== NEW_EVENT_ID && (
+                    <>
+                      <div
+                        className="absolute top-0 left-0 right-0 h-2 cursor-ns-resize"
+                        onMouseDown={(e) =>
+                          handleEventResizeStart(e, event, "top")
+                        }
+                      />
+                      <div
+                        className="absolute bottom-0 left-0 right-0 h-2 cursor-ns-resize"
+                        onMouseDown={(e) =>
+                          handleEventResizeStart(e, event, "bottom")
+                        }
+                      />
+                    </>
+                  )}
                 </div>
               );
             })}
-            {hours.map((hour) =>
-              [0, 1, 2, 3].map((quarter) => {
-                const slot = hour * 4 + quarter;
-                return (
-                  <div
-                    key={slot}
-                    className={cn(
-                      "absolute w-full cursor-pointer",
-                      selectedSlots.includes(slot)
-                        ? "h-[9px] bg-[#F0F0F0]/[0.9] dark:bg-[#1D1D1D]/[0.9] text-[#606060] dark:text-[#878787]"
-                        : "h-9",
-                    )}
-                    style={{
-                      top: `${slot * SLOT_HEIGHT}px`,
-                    }}
-                    onMouseDown={() => handleMouseDown(slot)}
-                    onMouseEnter={() => handleMouseEnter(slot)}
-                  />
-                );
-              }),
-            )}
           </div>
         </div>
       </ScrollArea>
 
       <TrackerRecordForm
-        eventId={selectedEvent?.id}
-        onCreate={() => {}}
+        eventId={currentOrNewEvent?.id}
+        onCreate={handleCreateEvent}
         userId={userId}
         teamId={teamId}
-        projectId={selectedEvent?.project_id ?? projectId}
-        start={selectedEvent?.start ?? selectedStart}
-        end={selectedEvent?.end ?? selectedEnd}
+        projectId={currentOrNewEvent?.project.id ?? projectId}
+        description={currentOrNewEvent?.description}
+        start={
+          currentOrNewEvent
+            ? getTimeFromDate(currentOrNewEvent.start)
+            : undefined
+        }
+        end={
+          currentOrNewEvent ? getTimeFromDate(currentOrNewEvent.end) : undefined
+        }
+        onSelectProject={(project) => {
+          if (selectedEvent) {
+            setData((prevData) =>
+              prevData.map((event) =>
+                event.id === selectedEvent.id
+                  ? {
+                      ...event,
+                      project: { id: project.id, name: project.name },
+                    }
+                  : event,
+              ),
+            );
+          }
+        }}
       />
     </div>
   );
