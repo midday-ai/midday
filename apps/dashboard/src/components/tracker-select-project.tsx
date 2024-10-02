@@ -12,6 +12,7 @@ type Props = {
   teamId: string;
   selectedId?: string;
   onSelect: (selected: Option) => void;
+  onCreate: (project: { id: string; name: string }) => void;
 };
 
 type Option = {
@@ -19,7 +20,12 @@ type Option = {
   name: string;
 };
 
-export function TrackerSelectProject({ teamId, selectedId, onSelect }: Props) {
+export function TrackerSelectProject({
+  teamId,
+  selectedId,
+  onSelect,
+  onCreate,
+}: Props) {
   const { toast } = useToast();
   const supabase = createClient();
   const [data, setData] = useState([]);
@@ -34,9 +40,15 @@ export function TrackerSelectProject({ teamId, selectedId, onSelect }: Props) {
     }
   }, [selectedId]);
 
-  const action = useAction(createProjectAction, {
+  const handleSelect = (selected: Option) => {
+    setValue(selected);
+    onSelect(selected);
+  };
+
+  const createProject = useAction(createProjectAction, {
     onSuccess: ({ data: project }) => {
-      // setParams({ projectId: project?.id || null });
+      onCreate?.(project);
+      handleSelect(project);
     },
     onError: () => {
       toast({
@@ -46,11 +58,6 @@ export function TrackerSelectProject({ teamId, selectedId, onSelect }: Props) {
       });
     },
   });
-
-  const handleSelect = (selected: Option) => {
-    setValue(selected);
-    onSelect(selected);
-  };
 
   const fetchProjects = async () => {
     setLoading(true);
@@ -88,7 +95,7 @@ export function TrackerSelectProject({ teamId, selectedId, onSelect }: Props) {
       options={data}
       value={value}
       isLoading={isLoading}
-      onCreate={(name) => action.execute({ name })}
+      onCreate={(name) => createProject.execute({ name })}
     />
   );
 }

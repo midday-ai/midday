@@ -31,6 +31,7 @@ export default async function Tracker({ searchParams }: Props) {
 
   const currentDate =
     searchParams?.date ?? formatISO(new Date(), { representation: "date" });
+
   const [{ data: userData }, { data, meta }] = await Promise.all([
     getUser(),
     getTrackerRecordsByRange({
@@ -46,8 +47,6 @@ export default async function Tracker({ searchParams }: Props) {
   return (
     <div>
       <TrackerCalendar
-        teamId={userData?.team_id}
-        userId={userData?.id}
         weekStartsOnMonday={userData?.week_starts_on_monday}
         timeFormat={userData?.time_format}
         data={data}

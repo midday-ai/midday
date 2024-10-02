@@ -153,7 +153,7 @@ export function TrackerWidget({
                 onMouseEnter={() => handleMouseEnter(date)}
                 key={index.toString()}
                 className={cn(
-                  "pt-2 pb-5 px-3 font-mono text-sm relative transition-all duration-100 text-left",
+                  "pt-2 pb-5 px-3 font-mono text-sm relative transition-all duration-100 text-left aspect-square",
                   isCurrentMonth && isToday(date)
                     ? "bg-[#f0f0f0] dark:bg-[#202020]"
                     : "bg-background",

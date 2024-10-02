@@ -26,7 +26,7 @@ type Props = {
   userId: string;
   teamId: string;
   onCreate: (values: z.infer<typeof formSchema>) => void;
-  projectId?: string;
+  projectId?: string | null;
   start?: string;
   end?: string;
   onSelectProject: (selected: { id: string; name: string }) => void;
@@ -86,8 +86,6 @@ export function TrackerRecordForm({
     }
   }, [start, end, projectId, description]);
 
-  console.log(description);
-
   return (
     <Form {...form}>
       <form
@@ -109,6 +107,12 @@ export function TrackerRecordForm({
             <FormItem className="w-full">
               <FormControl>
                 <TrackerSelectProject
+                  onCreate={(project) => {
+                    if (project) {
+                      field.onChange(project.id);
+                      onSelectProject(project);
+                    }
+                  }}
                   teamId={teamId}
                   selectedId={field.value}
                   onSelect={(selected) => {

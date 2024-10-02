@@ -1,6 +1,7 @@
 "use server";
 
 import { Cookies } from "@/utils/constants";
+import { UTCDate } from "@date-fns/utc";
 import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { z } from "zod";
@@ -16,8 +17,6 @@ export const createTrackerEntriesAction = authActionClient
       assigned_id: z.string(),
       project_id: z.string(),
       description: z.string().optional(),
-      rate: z.number().optional(),
-      currency: z.string().optional(),
       duration: z.number(),
     }),
   )
@@ -31,7 +30,9 @@ export const createTrackerEntriesAction = authActionClient
       const entries = dates.map((date) => ({
         ...params,
         team_id: user.team_id,
-        date,
+        date: new UTCDate(date).toISOString(),
+        start: new UTCDate(params.start).toISOString(),
+        stop: new UTCDate(params.stop).toISOString(),
       }));
 
       const { data, error } = await supabase
@@ -46,7 +47,6 @@ export const createTrackerEntriesAction = authActionClient
       }
 
       revalidateTag(`tracker_entries_${user.team_id}`);
-      //   revalidatePath("/tracker");
 
       return data;
     },

@@ -2,6 +2,7 @@ import { UTCDate } from "@date-fns/utc";
 import {
   addDays,
   endOfMonth,
+  formatISO,
   isWithinInterval,
   startOfMonth,
   subYears,
@@ -972,7 +973,7 @@ export async function getTrackerRecordsByDateQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     )
     .eq("team_id", teamId)
-    .eq("date", date);
+    .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
 
   if (projectId) {
     query.eq("project_id", projectId);
@@ -1019,8 +1020,8 @@ export async function getTrackerRecordsByRangeQuery(
       "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate)",
     )
     .eq("team_id", params.teamId)
-    .gte("date", params.from)
-    .lte("date", params.to)
+    .gte("date", new UTCDate(params.from).toISOString())
+    .lte("date", new UTCDate(params.to).toISOString())
     .order("created_at");
 
   if (params.userId) {

@@ -81,6 +81,10 @@ export function TrackerSchedule({
   const [resizeType, setResizeType] = useState<"top" | "bottom" | null>(null);
   const [movingEvent, setMovingEvent] = useState<TrackerRecord | null>(null);
   const [moveStartY, setMoveStartY] = useState(0);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
+    projectId ?? null,
+  );
 
   const createTrackerEntries = useAction(createTrackerEntriesAction, {
     // onSuccess: (result) => {
@@ -207,7 +211,7 @@ export function TrackerSchedule({
       id: NEW_EVENT_ID,
       start: startDate,
       end: endDate,
-      project: { id: projectId ?? "", name: "" },
+      project: { id: selectedProjectId ?? "", name: "" },
     };
 
     setData((prevData) => [...prevData, newEvent]);
@@ -378,8 +382,6 @@ export function TrackerSchedule({
       assigned_id: values.assigned_id,
       project_id: values.project_id,
       description: values.description || "",
-      rate: 0,
-      currency: "SEK",
       duration: Math.max(0, differenceInSeconds(endDate, startDate)),
     };
 
@@ -422,7 +424,7 @@ export function TrackerSchedule({
             className="relative flex-grow border border-border border-t-0"
             onMouseMove={handleMouseMove}
             onMouseDown={(e) => {
-              if (e.button === 0) {
+              if (e.button === 0 && !isContextMenuOpen) {
                 // Check if left mouse button is pressed
                 const rect = e.currentTarget.getBoundingClientRect();
                 const y = e.clientY - rect.top;
@@ -445,7 +447,17 @@ export function TrackerSchedule({
               const height = (endSlot - startSlot) * SLOT_HEIGHT;
 
               return (
-                <ContextMenu key={event.id}>
+                <ContextMenu
+                  key={event.id}
+                  onOpenChange={(open) => {
+                    if (!open) {
+                      // Delay closing the context menu to prevent it creating a new event
+                      setTimeout(() => setIsContextMenuOpen(false), 50);
+                    } else {
+                      setIsContextMenuOpen(true);
+                    }
+                  }}
+                >
                   <ContextMenuTrigger>
                     <div
                       onClick={() => handleEventClick(event)}
@@ -463,7 +475,7 @@ export function TrackerSchedule({
                         handleEventMoveStart(e, event)
                       }
                     >
-                      <div className="text-xs p-4 flex justify-between items-center select-none pointer-events-none">
+                      <div className="text-xs p-4 flex justify-between flex-col select-none pointer-events-none">
                         <span>
                           {event.project.name} (
                           {secondsToHoursAndMinutes(
@@ -471,6 +483,7 @@ export function TrackerSchedule({
                           )}
                           )
                         </span>
+                        <span>{event.description}</span>
                       </div>
                       {event.id !== NEW_EVENT_ID && (
                         <>
@@ -492,7 +505,10 @@ export function TrackerSchedule({
                   </ContextMenuTrigger>
                   <ContextMenuContent>
                     <ContextMenuItem
-                      onClick={() => handleDeleteEvent(event.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteEvent(event.id);
+                      }}
                     >
                       Delete <ContextMenuShortcut>⌫</ContextMenuShortcut>
                     </ContextMenuItem>
@@ -510,7 +526,7 @@ export function TrackerSchedule({
         isSaving={createTrackerEntries.isExecuting}
         userId={userId}
         teamId={teamId}
-        projectId={currentOrNewEvent?.project.id ?? projectId}
+        projectId={selectedProjectId}
         description={currentOrNewEvent?.description}
         start={
           currentOrNewEvent
@@ -521,6 +537,8 @@ export function TrackerSchedule({
           currentOrNewEvent ? getTimeFromDate(currentOrNewEvent.end) : undefined
         }
         onSelectProject={(project) => {
+          setSelectedProjectId(project.id);
+
           if (selectedEvent) {
             setData((prevData) =>
               prevData.map((event) =>

@@ -1,4 +1,5 @@
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { UTCDate } from "@date-fns/utc";
 import { createClient } from "@midday/supabase/client";
 import { Button } from "@midday/ui/button";
 import { Calendar } from "@midday/ui/calendar";
@@ -11,7 +12,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Label } from "@midday/ui/label";
 import { Switch } from "@midday/ui/switch";
-import { endOfMonth, startOfMonth } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import Papa from "papaparse";
 import React, { useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -50,8 +51,8 @@ export function TrackerExportCSV({
         "date, description, duration, assigned:assigned_id(id, full_name), project:project_id(id, name)",
       )
       .eq("team_id", teamId)
-      .gte("date", date?.from?.toISOString())
-      .lte("date", date?.to?.toISOString())
+      .gte("date", new UTCDate(date?.from)?.toISOString())
+      .lte("date", new UTCDate(date?.to)?.toISOString())
       .eq("project_id", projectId)
       .order("date");
 
@@ -63,7 +64,7 @@ export function TrackerExportCSV({
 
     const formattedData = data?.map((item) => {
       const formattedItem: Record<string, string | null> = {
-        Date: item.date,
+        Date: format(item.date, "P"),
         Description: item.description,
         Time: secondsToHoursAndMinutes(item.duration ?? 0),
       };
@@ -72,11 +73,11 @@ export function TrackerExportCSV({
         formattedItem.Assigned = item.assigned?.full_name ?? null;
       }
 
-      const { Date, Assigned, Description, Time } = formattedItem;
+      const { Date: date, Assigned, Description, Time } = formattedItem;
 
       return includeTeam
-        ? { Date, Assigned, Description, Time }
-        : { Date, Description, Time };
+        ? { Date: date, Assigned, Description, Time }
+        : { Date: date, Description, Time };
     });
 
     const totalTimeInSeconds =

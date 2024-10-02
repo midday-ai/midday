@@ -31,15 +31,11 @@ import { TrackerMonthSelect } from "./tracker-month-select";
 import { TrackerSettings } from "./tracker-settings";
 
 type Props = {
-  teamId: string;
-  userId: string;
   weekStartsOnMonday?: boolean;
   timeFormat: number;
 };
 
 export function TrackerCalendar({
-  teamId,
-  userId,
   weekStartsOnMonday = false,
   timeFormat,
   data,
@@ -57,7 +53,7 @@ export function TrackerCalendar({
   ]);
   const [isDragging, setIsDragging] = useState(false);
 
-  const { monthStart, monthEnd, calendarDays, firstWeek } = useCalendarDates(
+  const { calendarDays, firstWeek } = useCalendarDates(
     new Date(currentDate),
     weekStartsOnMonday,
   );
@@ -222,7 +218,9 @@ function CalendarHeader({
 
   const mostUsedCurrency = Object.values(projectTotals).reduce(
     (acc, { currency }) => {
-      acc[currency] = (acc[currency] || 0) + 1;
+      if (currency !== null) {
+        acc[currency] = (acc[currency] || 0) + 1;
+      }
       return acc;
     },
     {} as Record<string, number>,
@@ -421,7 +419,7 @@ function CalendarDay({
       onMouseEnter={() => handleMouseEnter(date)}
       onMouseUp={handleMouseUp}
       className={cn(
-        "pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left flex space-x-2 select-none",
+        "aspect-square md:aspect-[4/2] pt-2 pb-10 px-3 font-mono text-lg relative transition-all duration-100 text-left flex space-x-2 select-none",
         isCurrentMonth && isToday(date)
           ? "bg-[#f0f0f0] dark:bg-[#202020]"
           : "bg-background",

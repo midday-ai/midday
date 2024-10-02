@@ -18,7 +18,6 @@ import {
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
-import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,7 +107,7 @@ export function DataTableRow({ row, userId }: DataTableRowProps) {
           <DataTableCell>
             <div className="flex items-center space-x-2">
               {row.users?.map((user) => (
-                <Avatar key={user.id} className="size-4">
+                <Avatar key={user.user_id} className="size-4">
                   <AvatarImage src={user.avatar_url} />
                   <AvatarFallback className="text-[10px]">
                     {user.full_name?.slice(0, 1)?.toUpperCase()}
