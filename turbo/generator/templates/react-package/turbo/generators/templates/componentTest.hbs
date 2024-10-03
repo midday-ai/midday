@@ -1,0 +1,49 @@
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { {{pascalCase name}} } from './{{pascalCase name}}';
+
+describe('{{pascalCase name}} Component', () => {
+  // Test for rendering with required props only
+  it('renders successfully with mandatory props', () => {
+    render(
+      <{{pascalCase name}}>
+        <p>Test child content</p>
+      </{{pascalCase name}}>
+    );
+    expect(screen.getByText('Test child content')).toBeInTheDocument();
+    expect(screen.getByText('{{pascalCase name}} Component')).toBeInTheDocument();
+  });
+
+  // Test for rendering with a custom title
+  it('renders with a custom title when provided', () => {
+    const customTitle = 'Custom Title';
+    render(
+      <{{pascalCase name}} title={customTitle}>
+        <div>Testing custom title</div>
+      </{{pascalCase name}}>
+    );
+    expect(screen.getByText('Testing custom title')).toBeInTheDocument();
+    expect(screen.getByText(customTitle)).toBeInTheDocument();
+  });
+
+  // Test for custom className application
+  it('applies a custom className when provided', () => {
+    const { container } = render(
+      <{{pascalCase name}} className="custom-class">
+        <p>Testing custom class</p>
+      </{{pascalCase name}}>
+    );
+    expect(container.firstChild).toHaveClass('custom-class');
+  });
+
+  // Ensure that the component correctly adds styles from its CSS module
+  it('applies default styles from CSS module', () => {
+    const { container } = render(
+      <{{pascalCase name}}>
+        <p>Testing default styles</p>
+      </{{pascalCase name}}>
+    );
+    // Assuming the main container class from the CSS module is named `{{camelCase name}}Container`
+    expect(container.firstChild).toHaveClass('{{camelCase name}}Container');
+  });
+});

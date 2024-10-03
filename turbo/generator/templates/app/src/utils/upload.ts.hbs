@@ -1,0 +1,97 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { stripSpecialCharacters } from "@v1/utils";
+import * as tus from "tus-js-client";
+
+/** Parameters for the resumable upload function. */
+type ResumableUploadParams = {
+  /** The file to be uploaded. */
+  file: File;
+  /** An array of strings representing the path segments where the file will be stored. */
+  path: string[];
+  /** The name of the storage bucket where the file will be uploaded. */
+  bucket: string;
+  /**
+   * Optional callback function to track upload progress.
+   * @param bytesUploaded - The number of bytes uploaded so far.
+   * @param bytesTotal - The total number of bytes to be uploaded.
+   */
+  onProgress?: (bytesUploaded: number, bytesTotal: number) => void;
+};
+
+/**
+ * Performs a resumable upload of a file to Supabase storage using the TUS protocol.
+ *
+ * @param client - The authenticated Supabase client instance.
+ * @param params - An object containing the upload parameters.
+ * @param params.file - The file to be uploaded.
+ * @param params.path - An array of path segments where the file will be stored.
+ * @param params.bucket - The name of the storage bucket for the upload.
+ * @param params.onProgress - Optional callback to track upload progress.
+ *
+ * @returns A Promise that resolves with the TUS Upload instance when the upload is successful.
+ *
+ * @throws Will reject the promise if there's an error during the upload process.
+ *
+ * @example
+ * const client = createClient('https://your-project.supabase.co', 'your-anon-key');
+ * const file = new File(['file contents'], 'example.txt', { type: 'text/plain' });
+ *
+ * resumableUpload(client, {
+ *   file: file,
+ *   path: ['documents', 'text-files'],
+ *   bucket: 'my-bucket',
+ *   onProgress: (uploaded, total) => console.log(`${uploaded / total * 100}% uploaded`)
+ * }).then(() => console.log('Upload complete'))
+ *   .catch(error => console.error('Upload failed:', error));
+ */
+export async function resumableUpload(
+  client: SupabaseClient,
+  { file, path, bucket, onProgress }: ResumableUploadParams
+) {
+  const { data: { session } } = await client.auth.getSession();
+  const fullPath = decodeURIComponent(
+    [...path, stripSpecialCharacters(file.name)].join("/")
+  );
+
+  return new Promise((resolve, reject) => {
+    const upload = new tus.Upload(file, {
+      endpoint: process.env.NODE_ENV === "production"
+        ? `https://${process.env.NEXT_PUBLIC_SUPABASE_ID}.supabase.co/storage/v1/upload/resumable`
+        : "http://127.0.0.1:54321/storage/v1/upload/resumable",
+      retryDelays: [0, 3000, 5000, 10000],
+      headers: {
+        authorization: `Bearer ${session?.access_token}`,
+        // optionally set upsert to true to overwrite existing files
+        "x-upsert": "true",
+      },
+      uploadDataDuringCreation: true,
+      // Important if you want to allow re-uploading the same file
+      // https://github.com/tus/tus-js-client/blob/main/docs/api.md#removefingerprintonsuccess
+      removeFingerprintOnSuccess: true,
+      metadata: {
+        bucketName: bucket,
+        objectName: fullPath,
+        contentType: file.type,
+        cacheControl: "3600",
+      },
+      // NOTE: it must be set to 6MB (for now) do not change it
+      chunkSize: 6 * 1024 * 1024,
+      onError: (error) => {
+        reject(error);
+      },
+      onProgress,
+      onSuccess: () => {
+        resolve(upload);
+      },
+    });
+
+    // Check if there are any previous uploads to continue.
+    return upload.findPreviousUploads().then((previousUploads) => {
+      // Found previous uploads so we select the first one.
+      if (previousUploads.length) {
+        upload.resumeFromPreviousUpload(previousUploads[0] as any);
+      }
+      upload.start();
+    });
+  });
+}

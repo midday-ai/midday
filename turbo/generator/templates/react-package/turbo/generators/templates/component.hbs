@@ -1,0 +1,47 @@
+import React from 'react';
+import styles from './{{pascalCase name}}.module.css';
+
+/**
+ * Props definition for the {{pascalCase name}} component.
+ */
+interface {{pascalCase name}}Props {
+  children: React.ReactNode;
+  title?: string; // Optional title prop to allow customization of the component header
+  className?: string; // Optional className prop for custom styling
+}
+
+/**
+ * {{pascalCase name}} is a reusable React component that displays a title and encapsulates any children components.
+ * It supports optional styling and customization through props.
+ *
+ * @param {React.ReactNode} children - The components to be rendered within this component.
+ * @param {string} title - Optional. The title to display in the header of the component.
+ * @param {string} className - Optional. Additional CSS classes to apply to the component for custom styling.
+ * @returns {React.ReactElement} A React Element representing the {{pascalCase name}} component.
+ */
+export const {{pascalCase name}}: React.FC<{{pascalCase name}}Props> = ({
+  children,
+  title = '{{pascalCase name}} Component', // Default title if none provided
+  className = ''
+}) => {
+  return (
+    <div className={`${styles.{{camelCase name}}Container} ${className}`}>
+      <h1 className={styles.title}>{title}</h1>
+      {children}
+    </div>
+  );
+};
+
+// Ensure to create a CSS module file named `{{pascalCase name}}.module.css` with at least the following styles:
+/*
+.{{camelCase name}}Container {
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.title {
+  color: #333;
+  font-size: 24px;
+}
+*/

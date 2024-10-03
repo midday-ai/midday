@@ -1,0 +1,55 @@
+{
+    "name":"@v1/{{name}}",
+    "private":true,
+    "version":"0.1.0",
+    "exports":{
+        ".":"./index.ts"
+    },
+    "typesVersions":{
+        "*":{
+            "*":[
+                "src/*"
+            ]
+        }
+    },
+    "scripts":{
+        "clean":"rm -rf .turbo node_modules",
+        "lint":"eslint .",
+        "format":"prettier --check \"**/*.{mjs,ts,md,json}\"",
+        "typecheck":"tsc --noEmit",
+        "build-storybook": "storybook build",
+        "format": "prettier --write --ignore-path .gitignore \"./**/*.{js,jsx,ts,tsx,json,css}\" \"!./storybook-static/**\"",
+        "format:check": "prettier --check \"{app,lib,src}**/*.{ts,tsx,mdx}\" --cache",
+        "format:write": "prettier --write \"{app,lib,src}/**/*.{ts,tsx,mdx}\" --cache",
+        "generate:component": "turbo gen react-component",
+        "storybook": "storybook dev -p 6006 --no-open",
+        "test-storybook": "test-storybook"
+    },
+    "dependencies":{
+        "vite": "^5.2.11",
+        "@vitejs/plugin-react": "^4.3.0"
+    },
+    "devDependencies":{
+        "@v1/eslint-config":"workspace:*",
+        "@v1/prettier-config":"workspace:*",
+        "@v1/typescript-config":"workspace:*",
+        "@v1/ui":"workspace:*",
+        "eslint":"8.57.0",
+        "typescript":"5.4.5",
+        "@storybook/addon-a11y": "^8.0.10",
+        "@storybook/addon-essentials": "^8.0.10",
+        "@storybook/addon-interactions": "^8.0.10",
+        "@storybook/addon-links": "^8.0.10",
+        "@storybook/addon-themes": "^8.0.10",
+        "@storybook/react": "^8.0.10",
+        "@storybook/test": "^8.0.10",
+        "@storybook/testing-library": "^0.2.2",
+        "storybook": "^8.0.10"
+    },
+    "eslintConfig":{
+        "extends":[
+            "@v1/eslint-config/base"
+        ]
+    },
+    "prettier":"@v1/prettier-config"
+}
