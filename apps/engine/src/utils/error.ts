@@ -53,6 +53,8 @@ export class ProviderError extends Error {
 }
 
 export function createErrorResponse(error: unknown, requestId: string) {
+  console.error(error);
+
   if (error instanceof ProviderError) {
     return {
       requestId,
