@@ -62,7 +62,7 @@ export function TrackerRecordForm({
 
   useEffect(() => {
     if (eventId && eventId !== NEW_EVENT_ID) {
-      form.setValue("id", eventId);
+      form.setValue("id", eventId, { shouldValidate: true });
     }
     if (start) {
       form.setValue("start", start);
