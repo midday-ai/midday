@@ -2,6 +2,9 @@ compatibility_date = "2023-12-01"
 workers_dev = false
 logpush = true
 
+[observability]
+enabled = true
+
 [env.production]
 name = "engine"
 route = { pattern = "engine.midday.ai/*", zone_name = "midday.ai" }
