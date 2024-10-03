@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.5.0...v0.5.1) (2024-10-03)
+
+
+### Bug Fixes
+
+* wip ([6615b2f](https://github.com/SolomonAIEngineering/solomonai/commit/6615b2ff540f5b52d7e9ce953ba46726c7ae84db))
+
 # [0.5.0](https://github.com/SolomonAIEngineering/financial-platform-as-a-service/compare/v0.4.0...v0.5.0) (2024-09-30)
 
 
