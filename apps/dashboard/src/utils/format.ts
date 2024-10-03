@@ -110,19 +110,22 @@ export function formatAccountName({
 export function formatDateRange(dates: TZDate[]): string {
   if (!dates.length) return "";
 
-  const formatDate = (date: TZDate) => format(date, "MMM d");
+  const formatFullDate = (date: TZDate) => format(date, "MMM d");
+  const formatDay = (date: TZDate) => format(date, "d");
 
   if (dates.length === 1 || dates[0].getTime() === dates[1]?.getTime()) {
-    return formatDate(dates[0]);
+    return formatFullDate(dates[0]);
   }
 
-  const startDate = formatDate(dates[0]);
-  const endDate = formatDate(dates[1] ?? dates[0]);
+  const startDate = dates[0];
+  const endDate = dates[1];
 
-  if (startDate.slice(0, -2) === endDate.slice(0, -2)) {
+  if (!startDate || !endDate) return "";
+
+  if (startDate.getMonth() === endDate.getMonth()) {
     // Same month
-    return `${startDate.slice(0, -2)}${startDate.slice(-2)} - ${endDate.slice(-2)}`;
+    return `${format(startDate, "MMM")} ${formatDay(startDate)} - ${formatDay(endDate)}`;
   }
   // Different months
-  return `${startDate} - ${endDate}`;
+  return `${formatFullDate(startDate)} - ${formatFullDate(endDate)}`;
 }
