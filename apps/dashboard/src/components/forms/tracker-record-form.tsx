@@ -165,7 +165,7 @@ export function TrackerRecordForm({
         <div className="flex mt-6 justify-between">
           <SubmitButton
             className="w-full"
-            disabled={isSaving}
+            disabled={isSaving || !form.formState.isValid}
             isSubmitting={isSaving}
             type="submit"
           >
