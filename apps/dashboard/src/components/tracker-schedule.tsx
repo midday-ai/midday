@@ -4,6 +4,16 @@ import { createTrackerEntriesAction } from "@/actions/create-tracker-entries-act
 import { deleteTrackerEntryAction } from "@/actions/delete-tracker-entry";
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { secondsToHoursAndMinutes } from "@/utils/format";
+import {
+  NEW_EVENT_ID,
+  createNewEvent,
+  formatHour,
+  getDates,
+  getSlotFromDate,
+  getTimeFromDate,
+  transformTrackerData,
+  updateEventTime,
+} from "@/utils/tracker";
 import { createClient } from "@midday/supabase/client";
 import { getTrackerRecordsByDateQuery } from "@midday/supabase/queries";
 import { cn } from "@midday/ui/cn";
@@ -19,7 +29,6 @@ import {
   addMinutes,
   addSeconds,
   differenceInSeconds,
-  eachDayOfInterval,
   endOfDay,
   format,
   parseISO,
@@ -43,8 +52,6 @@ interface TrackerRecord {
   };
   description?: string;
 }
-
-export const NEW_EVENT_ID = "new-event";
 
 const ROW_HEIGHT = 36;
 const SLOT_HEIGHT = 9;
@@ -87,20 +94,37 @@ export function TrackerSchedule({
   );
 
   const createTrackerEntries = useAction(createTrackerEntriesAction, {
-    // onSuccess: (result) => {
-    //   if (result.data) {
-    //     setSelectedEvent(
-    //       result.data.find((event) => event.date === selectedDate) || null,
-    //     );
-    //   }
-    // },
-  });
+    onSuccess: (result) => {
+      if (!result.data) return;
 
-  const deleteTrackerEntry = useAction(deleteTrackerEntryAction, {
-    onSuccess: () => {
-      console.log("success");
+      setData((prevData) => {
+        const processedData = result?.data.map((event) =>
+          transformTrackerData(event, selectedDate),
+        );
+        return prevData
+          .filter((event) => event.id !== NEW_EVENT_ID)
+          .concat(processedData);
+      });
+
+      const newTotalDuration = result.data.reduce((total, event) => {
+        const start = event.start
+          ? new Date(event.start)
+          : new Date(`${event.date || selectedDate}T09:00:00`);
+        const end = event.end
+          ? new Date(event.end)
+          : addSeconds(start, event.duration || 0);
+        return total + differenceInSeconds(end, start);
+      }, 0);
+      setTotalDuration(newTotalDuration);
+
+      const lastEvent = result.data.at(-1);
+      setSelectedEvent(
+        lastEvent ? transformTrackerData(lastEvent, selectedDate) : null,
+      );
     },
   });
+
+  const deleteTrackerEntry = useAction(deleteTrackerEntryAction);
 
   const sortedRange = range?.sort((a, b) => a.localeCompare(b));
 
@@ -113,27 +137,8 @@ export function TrackerSchedule({
       });
 
       if (trackerData?.data) {
-        const processedData = trackerData.data.map(
-          (event: any): TrackerRecord => {
-            const start = event.start
-              ? parseISO(event.start)
-              : parseISO(`${event.date || selectedDate}T09:00:00`);
-            const end = event.end
-              ? parseISO(event.end)
-              : addSeconds(start, event.duration || 0);
-
-            return {
-              ...event,
-              id: event.id,
-              start,
-              end,
-              project: {
-                id: event.project_id,
-                name: event.project?.name || "",
-              },
-              description: event.description,
-            };
-          },
+        const processedData = trackerData.data.map((event: any) =>
+          transformTrackerData(event, selectedDate),
         );
 
         setData(processedData);
@@ -169,6 +174,15 @@ export function TrackerSchedule({
       deleteTrackerEntry.execute({ id: eventId });
       setData((prevData) => prevData.filter((event) => event.id !== eventId));
       setSelectedEvent(null);
+
+      // Update total duration
+      setTotalDuration((prevDuration) => {
+        const deletedEventDuration = differenceInSeconds(
+          new Date(data.find((event) => event.id === eventId)?.end || 0),
+          new Date(data.find((event) => event.id === eventId)?.start || 0),
+        );
+        return Math.max(0, prevDuration - deletedEventDuration);
+      });
     }
   };
 
@@ -185,12 +199,6 @@ export function TrackerSchedule({
   const currentOrNewEvent =
     data.find((event) => event.id === NEW_EVENT_ID) || selectedEvent;
 
-  const formatHour = (hour: number) => {
-    const date = new Date();
-    date.setHours(hour, 0, 0, 0);
-    return format(date, timeFormat === 12 ? "hh:mm a" : "HH:mm");
-  };
-
   const handleMouseDown = (slot: number) => {
     if (selectedEvent && selectedEvent.id === NEW_EVENT_ID) {
       setData((prevData) =>
@@ -201,18 +209,7 @@ export function TrackerSchedule({
     setIsDragging(true);
     setDragStartSlot(slot);
 
-    const startDate = setMinutes(
-      setHours(new Date(), Math.floor(slot / 4)),
-      (slot % 4) * 15,
-    );
-
-    const endDate = addMinutes(startDate, 15);
-    const newEvent: TrackerRecord = {
-      id: NEW_EVENT_ID,
-      start: startDate,
-      end: endDate,
-      project: { id: selectedProjectId ?? "", name: "" },
-    };
+    const newEvent = createNewEvent(slot, selectedProjectId);
 
     setData((prevData) => [...prevData, newEvent]);
     setSelectedEvent(newEvent);
@@ -233,17 +230,13 @@ export function TrackerSchedule({
       setData((prevData) =>
         prevData.map((event) =>
           event.id === selectedEvent.id
-            ? {
-                ...event,
-                start: startDate,
-                end: endDate,
-              }
+            ? updateEventTime(event, startDate, endDate)
             : event,
         ),
       );
       setSelectedEvent((prev) =>
         prev && prev.id === selectedEvent.id
-          ? { ...prev, start: startDate, end: endDate }
+          ? updateEventTime(prev, startDate, endDate)
           : prev,
       );
     } else if (resizingEvent && resizingEvent.id !== NEW_EVENT_ID) {
@@ -253,12 +246,14 @@ export function TrackerSchedule({
         const newEnd = addMinutes(resizingEvent.end, deltaSlots * 15);
         setData((prevData) =>
           prevData.map((event) =>
-            event.id === resizingEvent.id ? { ...event, end: newEnd } : event,
+            event.id === resizingEvent.id
+              ? updateEventTime(event, event.start, newEnd)
+              : event,
           ),
         );
         setSelectedEvent((prev) =>
           prev && prev.id === resizingEvent.id
-            ? { ...prev, end: newEnd }
+            ? updateEventTime(prev, prev.start, newEnd)
             : prev,
         );
       } else if (resizeType === "top") {
@@ -266,13 +261,13 @@ export function TrackerSchedule({
         setData((prevData) =>
           prevData.map((event) =>
             event.id === resizingEvent.id
-              ? { ...event, start: newStart }
+              ? updateEventTime(event, newStart, event.end)
               : event,
           ),
         );
         setSelectedEvent((prev) =>
           prev && prev.id === resizingEvent.id
-            ? { ...prev, start: newStart }
+            ? updateEventTime(prev, newStart, prev.end)
             : prev,
         );
       }
@@ -290,13 +285,13 @@ export function TrackerSchedule({
         setData((prevData) =>
           prevData.map((event) =>
             event.id === movingEvent.id
-              ? { ...event, start: newStart, end: newEnd }
+              ? updateEventTime(event, newStart, newEnd)
               : event,
           ),
         );
         setSelectedEvent((prev) =>
           prev && prev.id === movingEvent.id
-            ? { ...prev, start: newStart, end: newEnd }
+            ? updateEventTime(prev, newStart, newEnd)
             : prev,
         );
       }
@@ -347,27 +342,14 @@ export function TrackerSchedule({
   };
 
   const handleCreateEvent = (values: {
+    id?: string;
     start: string;
     end: string;
     assigned_id: string;
     project_id: string;
     description?: string;
   }) => {
-    const getDates = (): string[] => {
-      if (selectedDate) return [selectedDate];
-      if (sortedRange && sortedRange.length === 2) {
-        const [start, end] = sortedRange;
-        if (start && end) {
-          return eachDayOfInterval({
-            start: parseISO(start),
-            end: parseISO(end),
-          }).map((date) => format(date, "yyyy-MM-dd"));
-        }
-      }
-      return [];
-    };
-
-    const dates = getDates();
+    const dates = getDates(selectedDate, sortedRange);
     const baseDate =
       dates[0] || selectedDate || format(new Date(), "yyyy-MM-dd");
 
@@ -375,6 +357,7 @@ export function TrackerSchedule({
     const endDate = parseISO(`${baseDate}T${values.end}`);
 
     const newEvent = {
+      id: values.id,
       start: startDate.toISOString(),
       stop: endDate.toISOString(),
       dates,
@@ -386,14 +369,6 @@ export function TrackerSchedule({
     };
 
     createTrackerEntries.execute(newEvent);
-  };
-
-  const getTimeFromDate = (date: Date) => {
-    return format(date, "HH:mm");
-  };
-
-  const getSlotFromDate = (date: Date) => {
-    return date.getHours() * 4 + Math.floor(date.getMinutes() / 15);
   };
 
   return (
@@ -415,7 +390,7 @@ export function TrackerSchedule({
                 className="pr-4 flex font-mono flex-col"
                 style={{ height: `${ROW_HEIGHT}px` }}
               >
-                {formatHour(hour)}
+                {formatHour(hour, timeFormat)}
               </div>
             ))}
           </div>

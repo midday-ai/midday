@@ -37,7 +37,9 @@ export const createTrackerEntriesAction = authActionClient
 
       const { data, error } = await supabase
         .from("tracker_entries")
-        .upsert(entries)
+        .upsert(entries, {
+          ignoreDuplicates: false,
+        })
         .select(
           "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
         );

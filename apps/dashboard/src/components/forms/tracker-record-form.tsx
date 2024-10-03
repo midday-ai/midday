@@ -1,5 +1,5 @@
+import { NEW_EVENT_ID } from "@/utils/tracker";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@midday/ui/form";
 import { Input } from "@midday/ui/input";
 import { SubmitButton } from "@midday/ui/submit-button";
@@ -9,10 +9,10 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { AssignUser } from "../assign-user";
-import { NEW_EVENT_ID } from "../tracker-schedule";
 import { TrackerSelectProject } from "../tracker-select-project";
 
 const formSchema = z.object({
+  id: z.string().optional(),
   duration: z.number().min(1),
   project_id: z.string(),
   assigned_id: z.string().optional(),
@@ -51,6 +51,7 @@ export function TrackerRecordForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: eventId,
       assigned_id: userId,
       project_id: projectId,
       start,
@@ -60,6 +61,9 @@ export function TrackerRecordForm({
   });
 
   useEffect(() => {
+    if (eventId && eventId !== NEW_EVENT_ID) {
+      form.setValue("id", eventId);
+    }
     if (start) {
       form.setValue("start", start);
     }
@@ -84,7 +88,7 @@ export function TrackerRecordForm({
         form.setValue("duration", durationInSeconds);
       }
     }
-  }, [start, end, projectId, description]);
+  }, [start, end, projectId, description, eventId]);
 
   return (
     <Form {...form}>

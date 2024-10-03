@@ -17,7 +17,8 @@ export const deleteTrackerEntryAction = authActionClient
     const { data, error } = await supabase
       .from("tracker_entries")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select();
 
     if (error) {
       throw error;
