@@ -1,4 +1,5 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { TZDate } from "@date-fns/tz";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -11,7 +12,9 @@ type Props = {
 
 export function TrackerMonthSelect({ className, dateFormat = "MMM" }: Props) {
   const { date, setParams } = useTrackerParams();
-  const currentDate = date ? new Date(date) : new Date();
+  const currentDate = date
+    ? new TZDate(date, "UTC")
+    : new TZDate(new Date(), "UTC");
 
   const selectPrevMonth = () => {
     setParams(

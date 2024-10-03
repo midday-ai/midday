@@ -251,16 +251,17 @@ function CalendarHeader({
           />
           h
         </h1>
+
         <div className="text-sm text-[#606060] flex items-center space-x-2">
           <p className="text-sm text-[#606060]">
-            {meta?.totalAmount &&
-              formatAmount({
-                currency: dominantCurrency,
-                amount: meta?.totalAmount,
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}{" "}
-            this month
+            {dominantCurrency
+              ? `${formatAmount({
+                  currency: dominantCurrency,
+                  amount: meta?.totalAmount,
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0,
+                })} this month`
+              : "Nothing billable yet"}
           </p>
           <TooltipProvider delayDuration={100}>
             <Tooltip>
