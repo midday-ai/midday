@@ -2,6 +2,7 @@ import { UTCDate } from "@date-fns/utc";
 import {
   addDays,
   endOfMonth,
+  formatISO,
   isWithinInterval,
   startOfMonth,
   subYears,
@@ -156,7 +157,7 @@ export type GetTransactionsParams = {
   teamId: string;
   to: number;
   from: number;
-  sort?: string[];
+  sort?: [string, "asc" | "desc"];
   searchQuery?: string;
   filter?: {
     statuses?: string[];
@@ -856,14 +857,30 @@ export async function getInboxQuery(
   };
 }
 
+type GetTrackerProjectQueryParams = {
+  teamId: string;
+  projectId: string;
+};
+
+export async function getTrackerProjectQuery(
+  supabase: Client,
+  params: GetTrackerProjectQueryParams,
+) {
+  return supabase
+    .from("tracker_projects")
+    .select("*")
+    .eq("id", params.projectId)
+    .eq("team_id", params.teamId)
+    .single();
+}
+
 export type GetTrackerProjectsQueryParams = {
   teamId: string;
-  to: number;
+  to?: number;
   from?: number;
-  sort?: {
-    column: string;
-    value: "asc" | "desc";
-  };
+  start?: string;
+  end?: string;
+  sort?: [string, "asc" | "desc"];
   search?: {
     query?: string;
     fuzzy?: boolean;
@@ -877,16 +894,35 @@ export async function getTrackerProjectsQuery(
   supabase: Client,
   params: GetTrackerProjectsQueryParams,
 ) {
-  const { from = 0, to = 10, filter, sort, teamId, search } = params;
+  const {
+    from = 0,
+    to = 10,
+    filter,
+    sort,
+    teamId,
+    search,
+    start,
+    end,
+  } = params;
   const { status } = filter || {};
 
   const query = supabase
     .from("tracker_projects")
-    .select("*, total_duration", { count: "exact" })
+    .select(
+      "*, total_duration, users:get_assigned_users_for_project, total_amount:get_project_total_amount",
+      {
+        count: "exact",
+      },
+    )
     .eq("team_id", teamId);
 
   if (status) {
     query.eq("status", status);
+  }
+
+  if (start && end) {
+    query.gte("created_at", start);
+    query.lte("created_at", end);
   }
 
   if (search?.query && search?.fuzzy) {
@@ -897,6 +933,10 @@ export async function getTrackerProjectsQuery(
     const [column, value] = sort;
     if (column === "time") {
       query.order("total_duration", { ascending: value === "asc" });
+    } else if (column === "amount") {
+      // query.order("total_amount", { ascending: value === "asc" });
+    } else if (column === "assigned") {
+      // query.order("assigned_id", { ascending: value === "asc" });
     } else {
       query.order(column, { ascending: value === "asc" });
     }
@@ -914,11 +954,56 @@ export async function getTrackerProjectsQuery(
   };
 }
 
+type GetTrackerRecordsByDateParams = {
+  teamId: string;
+  date: string;
+  projectId?: string;
+  userId?: string;
+};
+
+export async function getTrackerRecordsByDateQuery(
+  supabase: Client,
+  params: GetTrackerRecordsByDateParams,
+) {
+  const { teamId, projectId, date, userId } = params;
+
+  const query = supabase
+    .from("tracker_entries")
+    .select(
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
+    )
+    .eq("team_id", teamId)
+    .eq("date", formatISO(new UTCDate(date), { representation: "date" }));
+
+  if (projectId) {
+    query.eq("project_id", projectId);
+  }
+
+  if (userId) {
+    query.eq("assigned_id", userId);
+  }
+
+  const { data } = await query;
+
+  const totalDuration = data?.reduce(
+    (duration, item) => (item?.duration ?? 0) + duration,
+    0,
+  );
+
+  return {
+    meta: {
+      totalDuration,
+    },
+    data,
+  };
+}
+
 export type GetTrackerRecordsByRangeParams = {
   teamId: string;
   from: string;
   to: string;
-  projectId: string;
+  projectId?: string;
+  userId?: string;
 };
 
 export async function getTrackerRecordsByRangeQuery(
@@ -932,12 +1017,16 @@ export async function getTrackerRecordsByRangeQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate)",
     )
     .eq("team_id", params.teamId)
-    .gte("date", params.from)
-    .lte("date", params.to)
+    .gte("date", new UTCDate(params.from).toISOString())
+    .lte("date", new UTCDate(params.to).toISOString())
     .order("created_at");
+
+  if (params.userId) {
+    query.eq("assigned_id", params.userId);
+  }
 
   if (params.projectId) {
     query.eq("project_id", params.projectId);
@@ -955,13 +1044,20 @@ export async function getTrackerRecordsByRangeQuery(
   }, {});
 
   const totalDuration = data?.reduce(
-    (duration, item) => item.duration + duration,
+    (duration, item) => (item?.duration ?? 0) + duration,
+    0,
+  );
+
+  const totalAmount = data?.reduce(
+    (amount, { project, duration = 0 }) =>
+      amount + (project?.rate ?? 0) * (duration / 3600),
     0,
   );
 
   return {
     meta: {
       totalDuration,
+      totalAmount,
       from: params.from,
       to: params.to,
     },

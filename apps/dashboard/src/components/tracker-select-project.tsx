@@ -6,18 +6,49 @@ import { getTrackerProjectsQuery } from "@midday/supabase/queries";
 import { Combobox } from "@midday/ui/combobox";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export function TrackerSelectProject({ setParams, teamId }) {
+type Props = {
+  teamId: string;
+  selectedId?: string;
+  onSelect: (selected: Option) => void;
+  onCreate: (project: { id: string; name: string }) => void;
+};
+
+type Option = {
+  id: string;
+  name: string;
+};
+
+export function TrackerSelectProject({
+  teamId,
+  selectedId,
+  onSelect,
+  onCreate,
+}: Props) {
   const { toast } = useToast();
   const supabase = createClient();
-  const [value, setValue] = useState("");
   const [data, setData] = useState([]);
   const [isLoading, setLoading] = useState(false);
+  const [value, setValue] = useState<Option | undefined>();
 
-  const action = useAction(createProjectAction, {
+  useEffect(() => {
+    const foundProject = data?.find((project) => project?.id === selectedId);
+
+    if (foundProject) {
+      setValue({ id: foundProject.id, name: foundProject.name });
+    }
+  }, [selectedId]);
+
+  const handleSelect = (selected: Option) => {
+    setValue(selected);
+    onSelect(selected);
+  };
+
+  const createProject = useAction(createProjectAction, {
     onSuccess: ({ data: project }) => {
-      setParams({ projectId: project?.id || null });
+      onCreate?.(project);
+      handleSelect(project);
     },
     onError: () => {
       toast({
@@ -28,38 +59,43 @@ export function TrackerSelectProject({ setParams, teamId }) {
     },
   });
 
-  const onChangeValue = async (query: string) => {
-    setValue(query);
+  const fetchProjects = async () => {
     setLoading(true);
 
     const { data: projectsData } = await getTrackerProjectsQuery(supabase, {
       teamId,
-      query,
-      search: {
-        query: value,
-        fuzzy: true,
-      },
+      sort: ["status", "asc"],
     });
 
     setLoading(false);
     setData(projectsData);
+
+    const foundProject = projectsData.find(
+      (project) => project?.id === selectedId,
+    );
+
+    if (foundProject) {
+      setValue({ id: foundProject.id, name: foundProject.name });
+    }
   };
 
-  const onSelect = (project) => {
-    setParams({ projectId: project.id });
-  };
+  useEffect(() => {
+    if (!data.length) {
+      fetchProjects();
+    }
+  }, [data]);
 
   return (
     <Combobox
+      key={value?.id}
       placeholder="Search or create project"
       classNameList="-top-[4px] border-t-0 rounded-none rounded-b-md"
       className="w-full bg-transparent px-12 border py-3"
-      value={value}
-      onValueChange={onChangeValue}
-      onSelect={onSelect}
+      onSelect={handleSelect}
       options={data}
+      value={value}
       isLoading={isLoading}
-      onCreate={(name) => action.execute({ name })}
+      onCreate={(name) => createProject.execute({ name })}
     />
   );
 }

@@ -1,37 +1,49 @@
 "use client";
 
-import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
-import { TrackerSheet } from "@/components/sheets/tracker-sheet";
-import { TrackerUpdateSheet } from "@/components/sheets/tracker-update-sheet";
 import { Button } from "@midday/ui/button";
 import { Spinner } from "@midday/ui/spinner";
 import { Table, TableBody } from "@midday/ui/table";
-import { formatISO } from "date-fns";
-import { parseAsString, useQueryStates } from "nuqs";
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { DataTableHeader } from "./data-table-header";
 import { DataTableRow } from "./data-table-row";
 
-type Item = {
+export type TrackerProject = {
   id: string;
+  name: string;
+  description: string;
+  status: "active" | "completed";
+  total_duration: number;
+  estimate?: number;
+  rate?: number;
+  currency?: string;
+  users: {
+    id: string;
+    full_name: string;
+    avatar_url?: string;
+  }[];
 };
 
-type ItemsProps = {
-  data: Item[];
-  teamId?: string;
-  initialDate: string;
-  currencyCode?: string;
+type DataTableProps = {
+  data: TrackerProject[];
+  pageSize: number;
+  userId: string;
+  meta: {
+    count: number;
+  };
+  loadMore: (params: { from: number; to: number }) => Promise<{
+    data: TrackerProject[];
+    meta: { count: number };
+  }>;
 };
 
 export function DataTable({
   data: initialData,
-  currencyCode,
   pageSize,
   meta,
   loadMore,
-  user,
-}: ItemsProps) {
+  userId,
+}: DataTableProps) {
   const [data, setData] = useState(initialData);
   const [from, setFrom] = useState(pageSize);
   const { ref, inView } = useInView();
@@ -46,19 +58,6 @@ export function DataTable({
   useEffect(() => {
     setData(initialData);
   }, [initialData]);
-
-  const [params, setParams] = useQueryStates({
-    day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
-    ),
-    projectId: parseAsString,
-    create: parseAsString,
-    update: parseAsString,
-  });
-
-  const selectedProject = data.find(
-    (project) => project.id === params?.projectId
-  );
 
   const loadMoreData = async () => {
     const formatedFrom = from;
@@ -85,32 +84,10 @@ export function DataTable({
 
         <TableBody>
           {data.map((row) => (
-            <DataTableRow row={row} setParams={setParams} key={row.id} />
+            <DataTableRow row={row} key={row.id} userId={userId} />
           ))}
         </TableBody>
       </Table>
-
-      <TrackerSheet
-        isOpen={Boolean(params.projectId) && !params.update}
-        params={params}
-        setParams={setParams}
-        project={selectedProject}
-        user={user}
-      />
-
-      <TrackerCreateSheet
-        currencyCode={currencyCode}
-        setParams={setParams}
-        isOpen={Boolean(params.create)}
-      />
-
-      <TrackerUpdateSheet
-        currencyCode={currencyCode}
-        setParams={setParams}
-        isOpen={Boolean(params.update)}
-        data={selectedProject}
-        key={selectedProject?.id}
-      />
 
       {hasNextPage && (
         <div className="flex items-center justify-center mt-6" ref={ref}>

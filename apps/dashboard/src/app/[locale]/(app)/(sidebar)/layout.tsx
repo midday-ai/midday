@@ -1,5 +1,6 @@
 import { AI } from "@/actions/ai/chat";
 import { Header } from "@/components/header";
+import { GlobalSheets } from "@/components/sheets/global-sheets";
 import { Sidebar } from "@/components/sidebar";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
@@ -8,6 +9,7 @@ import { getUser } from "@midday/supabase/cached-queries";
 import { nanoid } from "nanoid";
 import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 const AssistantModal = dynamic(
   () =>
@@ -99,6 +101,10 @@ export default async function Layout({
         />
         <ExportStatus />
         <HotKeys />
+
+        <Suspense>
+          <GlobalSheets defaultCurrency={currencies[countryCode]} />
+        </Suspense>
       </AI>
     </div>
   );

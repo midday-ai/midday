@@ -4,7 +4,6 @@ import useEmblaCarousel, {
   type UseEmblaCarouselType,
 } from "embla-carousel-react";
 import * as React from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { cn } from "../utils";
 import { Button } from "./button";
 import { Icons } from "./icons";
@@ -92,9 +91,6 @@ const Carousel = React.forwardRef<
       },
       [api],
     );
-
-    useHotkeys("left", scrollPrev);
-    useHotkeys("right", scrollNext);
 
     React.useEffect(() => {
       if (!api || !setApi) {

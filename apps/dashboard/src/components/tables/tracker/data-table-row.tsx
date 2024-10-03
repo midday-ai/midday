@@ -1,11 +1,11 @@
 "use client";
 
-import { createProjectReport } from "@/actions/project/create-project-report";
 import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
-import { CopyInput } from "@/components/copy-input";
+import { TrackerExportCSV } from "@/components/tracker-export-csv";
 import { TrackerStatus } from "@/components/tracker-status";
-import { secondsToHoursAndMinutes } from "@/utils/format";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
+import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@midday/ui/alert-dialog";
-import { Button } from "@midday/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,13 +28,23 @@ import { Icons } from "@midday/ui/icons";
 import { TableCell, TableRow } from "@midday/ui/table";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import Link from "next/link";
+import type { TrackerProject } from "./data-table";
 
-export function DataTableCell({ children, className }) {
+type DataTableCellProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+
+export function DataTableCell({ children, className }: DataTableCellProps) {
   return <TableCell className={className}>{children}</TableCell>;
 }
 
-export function Row({ onClick, children }) {
+type RowProps = {
+  onClick: () => void;
+  children: React.ReactNode;
+};
+
+export function Row({ onClick, children }: RowProps) {
   return (
     <TableRow className="h-[45px]" onClick={onClick}>
       {children}
@@ -42,37 +52,14 @@ export function Row({ onClick, children }) {
   );
 }
 
-export function DataTableRow({ row, setParams }) {
-  const { toast, dismiss } = useToast();
+type DataTableRowProps = {
+  row: TrackerProject;
+  userId: string;
+};
 
-  const createReport = useAction(createProjectReport, {
-    onError: () => {
-      toast({
-        duration: 2500,
-        variant: "error",
-        title: "Something went wrong please try again.",
-      });
-    },
-    onSuccess: ({ data }) => {
-      const { id } = toast({
-        title: "Time Report Published",
-        description: "Your report is ready to share.",
-        variant: "success",
-        footer: (
-          <div className="mt-4 space-x-2 flex w-full">
-            <CopyInput
-              value={data.short_link}
-              className="border-[#2C2C2C] w-full"
-            />
-
-            <Link href={data.short_link} onClick={() => dismiss(id)}>
-              <Button>View</Button>
-            </Link>
-          </div>
-        ),
-      });
-    },
-  });
+export function DataTableRow({ row, userId }: DataTableRowProps) {
+  const { toast } = useToast();
+  const { setParams } = useTrackerParams();
 
   const deleteAction = useAction(deleteProjectAction, {
     onError: () => {
@@ -101,11 +88,34 @@ export function DataTableRow({ row, setParams }) {
           <DataTableCell>{row.name}</DataTableCell>
           <DataTableCell>
             <span className="text-sm">
-              {secondsToHoursAndMinutes(row?.total_duration)}
+              {row.estimate
+                ? `${secondsToHoursAndMinutes(row.total_duration)} / ${secondsToHoursAndMinutes(row.estimate * 3600)}`
+                : secondsToHoursAndMinutes(row?.total_duration)}
+            </span>
+          </DataTableCell>
+          <DataTableCell>
+            <span className="text-sm">
+              {formatAmount({
+                currency: row.currency,
+                amount: row.total_amount,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}
             </span>
           </DataTableCell>
           <DataTableCell>{row.description}</DataTableCell>
-
+          <DataTableCell>
+            <div className="flex items-center space-x-2">
+              {row.users?.map((user) => (
+                <Avatar key={user.user_id} className="size-4">
+                  <AvatarImage src={user.avatar_url} />
+                  <AvatarFallback className="text-[10px]">
+                    {user.full_name?.slice(0, 1)?.toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+          </DataTableCell>
           <DataTableCell>
             <div className="flex justify-between items-center">
               <TrackerStatus status={row.status} />
@@ -139,6 +149,17 @@ export function DataTableRow({ row, setParams }) {
           >
             Edit
           </DropdownMenuItem>
+
+          <TrackerExportCSV
+            name={row.name}
+            projectId={row.id}
+            currency={row.currency}
+            billable={row.billable}
+            rate={row.rate}
+            teamId={row.team_id}
+            userId={userId}
+          />
+
           {row.status !== "completed" && (
             <DropdownMenuItem
               onClick={() =>
@@ -151,16 +172,6 @@ export function DataTableRow({ row, setParams }) {
               Mark as complete
             </DropdownMenuItem>
           )}
-          <DropdownMenuItem
-            onClick={() =>
-              createReport.execute({
-                projectId: row.id,
-                baseUrl: window.location.origin,
-              })
-            }
-          >
-            Share Report
-          </DropdownMenuItem>
 
           <AlertDialogTrigger asChild>
             <DropdownMenuItem className="text-destructive">

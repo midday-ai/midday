@@ -4,7 +4,10 @@ import { deleteProjectAction } from "@/actions/project/delete-project-action";
 import { updateProjectAction } from "@/actions/project/update-project-action";
 import { updateProjectSchema } from "@/actions/schema";
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { createClient } from "@midday/supabase/client";
+import { getTrackerProjectQuery } from "@midday/supabase/queries";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,31 +32,68 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import { useToast } from "@midday/ui/use-toast";
 import { useAction } from "next-safe-action/hooks";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
+type Props = {
+  userId: string;
+  teamId: string;
+};
+
+export function TrackerUpdateSheet({ teamId }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { setParams, update, projectId } = useTrackerParams();
+  const supabase = createClient();
+  const id = projectId ?? "";
+
+  const isOpen = update !== null && Boolean(projectId);
 
   const form = useForm<z.infer<typeof updateProjectSchema>>({
     resolver: zodResolver(updateProjectSchema),
     defaultValues: {
-      id: data?.id,
-      name: data?.name ?? undefined,
-      description: data?.description ?? undefined,
-      rate: data?.rate ?? undefined,
-      status: data?.status ?? undefined,
-      billable: data?.billable ?? undefined,
-      estimate: data?.estimate ?? undefined,
-      currency: (data?.currency || currencyCode) ?? undefined,
+      id: undefined,
+      name: undefined,
+      description: undefined,
+      rate: undefined,
+      status: undefined,
+      billable: undefined,
+      estimate: 0,
+      currency: undefined,
     },
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await getTrackerProjectQuery(supabase, {
+        teamId,
+        projectId: id,
+      });
+
+      if (data) {
+        form.reset({
+          id: data.id,
+          name: data.name,
+          description: data.description ?? undefined,
+          rate: data.rate ?? undefined,
+          status: data.status ?? undefined,
+          billable: data.billable ?? undefined,
+          estimate: data.estimate ?? undefined,
+          currency: data.currency ?? undefined,
+        });
+      }
+    };
+
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
 
   const deleteAction = useAction(deleteProjectAction, {
     onSuccess: () => {
       setParams({ update: null, projectId: null });
+      form.reset();
     },
     onError: () => {
       toast({
@@ -65,7 +105,10 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
   });
 
   const updateAction = useAction(updateProjectAction, {
-    onSuccess: () => setParams({ update: null, projectId: null }),
+    onSuccess: () => {
+      setParams({ update: null, projectId: null });
+      form.reset();
+    },
     onError: () => {
       toast({
         duration: 3500,
@@ -74,20 +117,6 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
       });
     },
   });
-
-  const handleShareURL = async (id: string) => {
-    try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/tracker?projectId=${id}`,
-      );
-
-      toast({
-        duration: 4000,
-        title: "Copied URL to clipboard.",
-        variant: "success",
-      });
-    } catch {}
-  };
 
   if (isDesktop) {
     return (
@@ -110,12 +139,6 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
                   sideOffset={10}
                   align="end"
                 >
-                  <DropdownMenuItem
-                  // onClick={() => handleShareURL(data.id)}
-                  >
-                    Share Report
-                  </DropdownMenuItem>
-
                   <AlertDialogTrigger asChild>
                     <DropdownMenuItem className="text-destructive">
                       Delete
@@ -145,9 +168,7 @@ export function TrackerUpdateSheet({ currencyCode, data, isOpen, setParams }) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteAction.execute({ id: data.id })}
-            >
+            <AlertDialogAction onClick={() => deleteAction.execute({ id })}>
               Continue
             </AlertDialogAction>
           </AlertDialogFooter>

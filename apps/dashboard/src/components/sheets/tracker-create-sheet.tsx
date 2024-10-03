@@ -3,6 +3,7 @@
 import { createProjectAction } from "@/actions/project/create-project-action";
 import { createProjectSchema } from "@/actions/schema";
 import { TrackerProjectForm } from "@/components/forms/tracker-project-form";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Drawer, DrawerContent, DrawerHeader } from "@midday/ui/drawer";
 import { useMediaQuery } from "@midday/ui/hooks";
@@ -14,9 +15,16 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
+type Props = {
+  currencyCode: string;
+};
+
+export function TrackerCreateSheet({ currencyCode }: Props) {
   const { toast } = useToast();
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const { setParams, create } = useTrackerParams();
+
+  const isOpen = create;
 
   const form = useForm<z.infer<typeof createProjectSchema>>({
     resolver: zodResolver(createProjectSchema),
@@ -27,7 +35,10 @@ export function TrackerCreateSheet({ currencyCode, setParams, isOpen }) {
   });
 
   const action = useAction(createProjectAction, {
-    onSuccess: () => setParams({ create: null }),
+    onSuccess: () => {
+      setParams({ create: null });
+      form.reset();
+    },
     onError: () => {
       toast({
         duration: 3500,

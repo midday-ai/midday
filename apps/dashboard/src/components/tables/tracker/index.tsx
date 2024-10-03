@@ -1,20 +1,30 @@
 import { DataTable } from "@/components/tables/tracker/data-table";
-import { getCountryInfo } from "@midday/location";
-import { getTrackerProjects, getUser } from "@midday/supabase/cached-queries";
+import { getTrackerProjects } from "@midday/supabase/cached-queries";
 import { EmptyState, NoResults } from "./empty-states";
 
 const pageSize = 20;
 
-export async function Table({ status, sort, query }) {
-  const { currencyCode } = getCountryInfo();
-  const { data: userData } = await getUser();
+type Props = {
+  status?: string;
+  sort?: string;
+  q?: string;
+  start?: string;
+  end?: string;
+  userId: string;
+};
+
+export async function Table({ status, sort, q, start, end, userId }: Props) {
+  const hasFilters = Boolean(status || q);
+
   const { data, meta } = await getTrackerProjects({
     from: 0,
     to: pageSize,
     sort,
+    start,
+    end,
     filter: { status },
     search: {
-      query,
+      query: q,
       fuzzy: true,
     },
   });
@@ -29,25 +39,28 @@ export async function Table({ status, sort, query }) {
       filter: {
         status,
       },
+      search: {
+        query: q,
+        fuzzy: true,
+      },
     });
   }
 
-  if (!data?.length && !query?.length) {
-    return <EmptyState currencyCode={currencyCode} user={userData} />;
+  if (!data?.length && !hasFilters) {
+    return <EmptyState />;
   }
 
-  if (!data?.length && query?.length) {
-    return <NoResults currencyCode={currencyCode} user={userData} />;
+  if (!data?.length && hasFilters) {
+    return <NoResults />;
   }
 
   return (
     <DataTable
       data={data}
-      currencyCode={currencyCode}
       pageSize={pageSize}
       loadMore={loadMore}
       meta={meta}
-      user={userData}
+      userId={userId}
     />
   );
 }

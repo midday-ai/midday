@@ -327,7 +327,7 @@ export const getUserInvites = async () => {
 };
 
 export const getTrackerProjects = async (
-  params: GetTrackerProjectsQueryParams,
+  params: Omit<GetTrackerProjectsQueryParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -346,7 +346,7 @@ export const getTrackerProjects = async (
 };
 
 export const getTrackerRecordsByRange = async (
-  params: GetTrackerRecordsByRangeParams,
+  params: Omit<GetTrackerRecordsByRangeParams, "teamId">,
 ) => {
   const supabase = createClient();
   const user = await getUser();
@@ -354,7 +354,11 @@ export const getTrackerRecordsByRange = async (
 
   return unstable_cache(
     async () => {
-      return getTrackerRecordsByRangeQuery(supabase, { ...params, teamId });
+      return getTrackerRecordsByRangeQuery(supabase, {
+        ...params,
+        teamId,
+        userId: user?.data?.id,
+      });
     },
     ["tracker_entries", teamId],
     {

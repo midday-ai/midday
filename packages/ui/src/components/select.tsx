@@ -30,11 +30,13 @@ const SelectTrigger = React.forwardRef<
     )}
     {...props}
   >
-    {children}
+    <span className="line-clamp-1">{children}</span>
     {!hideIcon && (
-      <SelectPrimitive.Icon asChild>
-        <Icons.ChevronDown className="h-4 w-4" />
-      </SelectPrimitive.Icon>
+      <div className="h-4 w-4">
+        <SelectPrimitive.Icon asChild>
+          <Icons.ChevronDown className="h-4 w-4" />
+        </SelectPrimitive.Icon>
+      </div>
     )}
   </SelectPrimitive.Trigger>
 ));

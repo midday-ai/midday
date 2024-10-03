@@ -2,7 +2,6 @@ import { AssistantButton } from "@/components/assistant/button";
 import { DesktopAssistantButton } from "@/components/assistant/button-desktop";
 import { ConnectionStatus } from "@/components/connection-status";
 import { NotificationCenter } from "@/components/notification-center";
-import { TrackerControl } from "@/components/tracker-contol";
 import { UserMenu } from "@/components/user-menu";
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -26,8 +25,6 @@ export function Header() {
         {isDesktopApp() && <DesktopAssistantButton />}
 
         <FeedbackForm />
-
-        <TrackerControl />
 
         <Suspense>
           <ConnectionStatus />

@@ -20,19 +20,19 @@ type ProviderProps = {
 export function Providers({ locale, children }: ProviderProps) {
   return (
     <I18nProviderClient locale={locale}>
-      <TriggerProvider
-        publicApiKey={process.env.NEXT_PUBLIC_TRIGGER_API_KEY!}
-        apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+        <TriggerProvider
+          publicApiKey={process.env.NEXT_PUBLIC_TRIGGER_API_KEY!}
+          apiUrl={process.env.NEXT_PUBLIC_TRIGGER_API_URL}
         >
           {children}
-        </ThemeProvider>
-      </TriggerProvider>
+        </TriggerProvider>
+      </ThemeProvider>
     </I18nProviderClient>
   );
 }

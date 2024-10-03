@@ -12,7 +12,7 @@ body {
   color: hsl(var(--border)) !important;
   user-select: none !important;
   cursor: default !important;
-  animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   border-color: transparent !important;
 }
 
@@ -22,7 +22,7 @@ body {
   color: hsl(var(--border)) !important;
   user-select: none !important;
   cursor: default !important;
-  animation: pulse 2s cubic-bezier(.4,0,.6,1) infinite;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   border-color: transparent !important;
 }
 
@@ -78,10 +78,18 @@ body {
 }
 
 @keyframes shake {
-  0% { transform: translateX(0rem); }
-  25% { transform: translateX(0.5rem); }
-  75% { transform: translateX(-0.5rem); }
-  100% { transform: translateX(0rem); }
+  0% {
+    transform: translateX(0rem);
+  }
+  25% {
+    transform: translateX(0.5rem);
+  }
+  75% {
+    transform: translateX(-0.5rem);
+  }
+  100% {
+    transform: translateX(0rem);
+  }
 }
 
 /* Desktop App */
@@ -105,7 +113,7 @@ html.todesktop a {
 }
 
 .update-available {
-  background: #68A7FF;
+  background: #68a7ff;
   width: 12px;
   height: 12px;
   border-radius: 50%;
@@ -120,12 +128,12 @@ html.todesktop a {
   left: 0;
 }
 
-.update-available svg path.svg-update{
+.update-available svg path.svg-update {
   opacity: 1;
   transform: scale(1);
 }
 
-.update-available svg circle.svg-progress{
+.update-available svg circle.svg-progress {
   stroke-dashoffset: 16px;
   stroke-dasharray: 16px;
   transform: rotate(270deg);
@@ -135,7 +143,7 @@ html.todesktop a {
 .update-available.progress svg path.svg-update,
 .update-available.update-downloaded svg path.svg-update {
   opacity: 0;
-  transform: scale(.5);
+  transform: scale(0.5);
 }
 
 .update-available.progress svg circle.svg-progress {
@@ -144,24 +152,24 @@ html.todesktop a {
   transition: all 4s linear;
 }
 
-.update-available svg path.svg-refresh{
+.update-available svg path.svg-refresh {
   opacity: 0;
-  transform: scale(.2) rotate(-135deg);
+  transform: scale(0.2) rotate(-135deg);
   transition: all .3s ease;
   transform-origin: center;
 }
 
-.update-available.update-downloaded svg path.svg-refresh{
+.update-available.update-downloaded svg path.svg-refresh {
   opacity: 1;
   transform: scale(1) rotate(0);
 }
 
 @keyframes anim-update {
-  0%{
+  0% {
     transform: scale(0);
     opacity: 1;
   }
-  100%{
+  100% {
     transform: scale(4);
     opacity: 0;
   }
@@ -169,11 +177,11 @@ html.todesktop a {
 
 /* Desktop Command menu */
 html.light.todesktop-panel {
-  background-color: rgba(255,255,255,.5);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 html.dark.todesktop-panel {
-  background-color: rgba(000,000,000,.3);
+  background-color: rgba(000, 000, 000, 0.3);
 }
 
 html.todesktop-panel body {
@@ -207,10 +215,18 @@ html.todesktop-panel body {
 
 .remove-arrow::-webkit-inner-spin-button,
 .remove-arrow::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .remove-arrow {
-    appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="time"]::-webkit-clear-button {
+  display: none;
+}
+
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
 }

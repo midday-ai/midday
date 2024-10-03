@@ -1,7 +1,6 @@
 import { AnimatedNumber } from "@/components/animated-number";
 import { AreaChart } from "@/components/charts/area-chart";
 import { BarChart } from "@/components/charts/bar-chart";
-import { ExpenseChart } from "@/components/charts/expense-chart";
 import { StackedBarChart } from "@/components/charts/stacked-bar-chart";
 import { FormatAmount } from "@/components/format-amount";
 import { calculateAvgBurnRate } from "@/utils/format";

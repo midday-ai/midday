@@ -1,21 +1,10 @@
 "use client";
 
-import { TrackerCreateSheet } from "@/components/sheets/tracker-create-sheet";
-import { TrackerSheet } from "@/components/sheets/tracker-sheet";
+import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { Button } from "@midday/ui/button";
-import { formatISO } from "date-fns";
-import { useRouter } from "next/navigation";
-import { parseAsString, useQueryStates } from "nuqs";
 
-export function EmptyState({ currencyCode, user }) {
-  const [params, setParams] = useQueryStates({
-    create: parseAsString,
-    projectId: parseAsString,
-    update: parseAsString,
-    day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
-    ),
-  });
+export function EmptyState() {
+  const { setParams } = useTrackerParams();
 
   return (
     <div className="flex items-center justify-center ">
@@ -28,38 +17,23 @@ export function EmptyState({ currencyCode, user }) {
           </p>
         </div>
 
-        <Button variant="outline" onClick={() => setParams({ create: "true" })}>
+        <Button
+          variant="outline"
+          onClick={() =>
+            setParams({
+              create: true,
+            })
+          }
+        >
           Create project
         </Button>
       </div>
-
-      <TrackerCreateSheet
-        setParams={setParams}
-        currencyCode={currencyCode}
-        isOpen={Boolean(params.create)}
-      />
-
-      <TrackerSheet
-        isOpen={Boolean(params.projectId) && !params.update}
-        params={params}
-        setParams={setParams}
-        user={user}
-      />
     </div>
   );
 }
 
-export function NoResults({ currencyCode, user }) {
-  const router = useRouter();
-
-  const [params, setParams] = useQueryStates({
-    create: parseAsString,
-    projectId: parseAsString,
-    update: parseAsString,
-    day: parseAsString.withDefault(
-      formatISO(new Date(), { representation: "date" })
-    ),
-  });
+export function NoResults() {
+  const { setParams } = useTrackerParams();
 
   return (
     <div className="flex items-center justify-center ">
@@ -71,22 +45,12 @@ export function NoResults({ currencyCode, user }) {
           </p>
         </div>
 
-        <Button variant="outline" onClick={() => router.push("/tracker")}>
+        <Button
+          variant="outline"
+          onClick={() => setParams(null, { shallow: false })}
+        >
           Clear filters
         </Button>
-
-        <TrackerCreateSheet
-          setParams={setParams}
-          currencyCode={currencyCode}
-          isOpen={Boolean(params.create)}
-        />
-
-        <TrackerSheet
-          isOpen={Boolean(params.projectId) && !params.update}
-          params={params}
-          setParams={setParams}
-          user={user}
-        />
       </div>
     </div>
   );
