@@ -1,5 +1,6 @@
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { getTrackerDates } from "@/utils/tracker";
+import { TZDate } from "@date-fns/tz";
 import { Button } from "@midday/ui/button";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
@@ -17,10 +18,9 @@ export function TrackerDaySelect({ className }: Props) {
 
   const selectPrevDay = () => {
     if (currentDate[0]) {
+      const prevDay = new TZDate(subDays(currentDate[0], 1), "UTC");
       setParams({
-        selectedDate: formatISO(subDays(currentDate[0], 1), {
-          representation: "date",
-        }),
+        selectedDate: formatISO(prevDay, { representation: "date" }),
         range: null,
       });
     }
@@ -28,10 +28,9 @@ export function TrackerDaySelect({ className }: Props) {
 
   const selectNextDay = () => {
     if (currentDate[0]) {
+      const nextDay = new TZDate(addDays(currentDate[0], 1), "UTC");
       setParams({
-        selectedDate: formatISO(addDays(currentDate[0], 1), {
-          representation: "date",
-        }),
+        selectedDate: formatISO(nextDay, { representation: "date" }),
         range: null,
       });
     }
@@ -52,11 +51,16 @@ export function TrackerDaySelect({ className }: Props) {
       </Button>
       <span className="w-full text-center">
         {currentDate.length > 1 && currentDate[0] && currentDate[1]
-          ? formatDateRange(currentDate[0], currentDate[1], {
-              includeTime: false,
-            })
+          ? formatDateRange(
+              new TZDate(currentDate[0], "UTC"),
+              new TZDate(currentDate[1], "UTC"),
+              {
+                includeTime: false,
+                today: new TZDate(new Date(), "UTC"),
+              },
+            )
           : currentDate[0]
-            ? format(currentDate[0], "MMM d")
+            ? format(new TZDate(currentDate[0], "UTC"), "MMM d")
             : ""}
       </span>
       <Button

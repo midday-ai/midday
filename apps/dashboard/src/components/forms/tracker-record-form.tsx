@@ -64,14 +64,16 @@ export function TrackerRecordForm({
     if (eventId && eventId !== NEW_EVENT_ID) {
       form.setValue("id", eventId, { shouldValidate: true });
     }
+
     if (start) {
       form.setValue("start", start);
     }
     if (end) {
       form.setValue("end", end);
     }
+
     if (projectId) {
-      form.setValue("project_id", projectId);
+      form.setValue("project_id", projectId, { shouldValidate: true });
     }
 
     if (description) {
@@ -85,7 +87,7 @@ export function TrackerRecordForm({
       const durationInSeconds = differenceInSeconds(endDate, startDate);
 
       if (durationInSeconds) {
-        form.setValue("duration", durationInSeconds);
+        form.setValue("duration", durationInSeconds, { shouldValidate: true });
       }
     }
   }, [start, end, projectId, description, eventId]);

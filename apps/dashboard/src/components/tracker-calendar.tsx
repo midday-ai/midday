@@ -2,6 +2,7 @@
 
 import { useTrackerParams } from "@/hooks/use-tracker-params";
 import { formatAmount, secondsToHoursAndMinutes } from "@/utils/format";
+import { TZDate } from "@date-fns/tz";
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -54,28 +55,36 @@ export function TrackerCalendar({
   const [isDragging, setIsDragging] = useState(false);
 
   const { calendarDays, firstWeek } = useCalendarDates(
-    new Date(currentDate),
+    new TZDate(currentDate, "UTC"),
     weekStartsOnMonday,
   );
 
-  useHotkeys("arrowLeft", () => handleMonthChange(-1, currentDate, setParams), {
-    enabled: !selectedDate,
-  });
+  useHotkeys(
+    "arrowLeft",
+    () => handleMonthChange(-1, new TZDate(currentDate, "UTC"), setParams),
+    {
+      enabled: !selectedDate,
+    },
+  );
 
-  useHotkeys("arrowRight", () => handleMonthChange(1, currentDate, setParams), {
-    enabled: !selectedDate,
-  });
+  useHotkeys(
+    "arrowRight",
+    () => handleMonthChange(1, new TZDate(currentDate, "UTC"), setParams),
+    {
+      enabled: !selectedDate,
+    },
+  );
 
   const ref = useClickAway<HTMLDivElement>(() => {
     if (range?.length === 1) setParams({ range: null });
   });
 
-  const handleMouseDown = (date: Date) => {
+  const handleMouseDown = (date: TZDate) => {
     setIsDragging(true);
     setLocalRange([formatISO(date, { representation: "date" }), null]);
   };
 
-  const handleMouseEnter = (date: Date) => {
+  const handleMouseEnter = (date: TZDate) => {
     if (isDragging) {
       setLocalRange((prev) => [
         prev[0],
@@ -87,8 +96,8 @@ export function TrackerCalendar({
   const handleMouseUp = () => {
     setIsDragging(false);
     if (localRange[0] && localRange[1]) {
-      let start = new Date(localRange[0]);
-      let end = new Date(localRange[1]);
+      let start = new TZDate(localRange[0], "UTC");
+      let end = new TZDate(localRange[1], "UTC");
       if (start > end) [start, end] = [end, start];
 
       setParams({ range: [localRange[0], localRange[1]] });
@@ -110,7 +119,7 @@ export function TrackerCalendar({
         <CalendarGrid
           firstWeek={firstWeek}
           calendarDays={calendarDays}
-          currentDate={currentDate}
+          currentDate={new TZDate(currentDate, "UTC")}
           selectedDate={selectedDate}
           data={data}
           range={range}
@@ -126,7 +135,7 @@ export function TrackerCalendar({
   );
 }
 
-function useCalendarDates(currentDate: Date, weekStartsOnMonday: boolean) {
+function useCalendarDates(currentDate: TZDate, weekStartsOnMonday: boolean) {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calendarStart = startOfWeek(monthStart, {
@@ -138,11 +147,11 @@ function useCalendarDates(currentDate: Date, weekStartsOnMonday: boolean) {
   const calendarDays = eachDayOfInterval({
     start: calendarStart,
     end: calendarEnd,
-  });
+  }).map((date) => new TZDate(date, "UTC"));
   const firstWeek = eachDayOfInterval({
     start: calendarStart,
     end: endOfWeek(calendarStart, { weekStartsOn: weekStartsOnMonday ? 1 : 0 }),
-  });
+  }).map((date) => new TZDate(date, "UTC"));
 
   return {
     monthStart,
@@ -156,13 +165,11 @@ function useCalendarDates(currentDate: Date, weekStartsOnMonday: boolean) {
 
 function handleMonthChange(
   direction: number,
-  currentDate: Date,
+  currentDate: TZDate,
   setParams: (params: any) => void,
 ) {
   const newDate =
-    direction > 0
-      ? addMonths(new Date(currentDate), 1)
-      : subMonths(new Date(currentDate), 1);
+    direction > 0 ? addMonths(currentDate, 1) : subMonths(currentDate, 1);
   setParams({
     date: formatISO(newDate, { representation: "date" }),
   });
@@ -311,17 +318,17 @@ function CalendarHeader({
 }
 
 type CalendarGridProps = {
-  firstWeek: Date[];
-  calendarDays: Date[];
-  currentDate: Date;
+  firstWeek: TZDate[];
+  calendarDays: TZDate[];
+  currentDate: TZDate;
   selectedDate: string;
   data: Record<string, TrackerEvent[]>;
   range: [string, string] | null;
   localRange: [string, string | null];
   isDragging: boolean;
   weekStartsOnMonday: boolean;
-  handleMouseDown: (date: Date) => void;
-  handleMouseEnter: (date: Date) => void;
+  handleMouseDown: (date: TZDate) => void;
+  handleMouseEnter: (date: TZDate) => void;
   handleMouseUp: () => void;
 };
 
@@ -368,15 +375,15 @@ function CalendarGrid({
 }
 
 type CalendarDayProps = {
-  date: Date;
-  currentDate: Date;
+  date: TZDate;
+  currentDate: TZDate;
   selectedDate: string;
   data: Record<string, TrackerEvent[]>;
   range: [string, string] | null;
   localRange: [string, string | null];
   isDragging: boolean;
-  handleMouseDown: (date: Date) => void;
-  handleMouseEnter: (date: Date) => void;
+  handleMouseDown: (date: TZDate) => void;
+  handleMouseEnter: (date: TZDate) => void;
   handleMouseUp: () => void;
 };
 
@@ -392,23 +399,22 @@ function CalendarDay({
   handleMouseEnter,
   handleMouseUp,
 }: CalendarDayProps) {
-  const isCurrentMonth =
-    new Date(date).getMonth() === new Date(currentDate).getMonth();
+  const isCurrentMonth = date.getMonth() === currentDate.getMonth();
   const formattedDate = formatISO(date, { representation: "date" });
 
   const isInRange = useCallback(
-    (date: Date) => checkIsInRange(date, isDragging, localRange, range),
+    (date: TZDate) => checkIsInRange(date, isDragging, localRange, range),
     [isDragging, localRange, range],
   );
 
   const isFirstSelectedDate = useCallback(
-    (date: Date) =>
+    (date: TZDate) =>
       checkIsFirstSelectedDate(date, isDragging, localRange, range),
     [isDragging, localRange, range],
   );
 
   const isLastSelectedDate = useCallback(
-    (date: Date) =>
+    (date: TZDate) =>
       checkIsLastSelectedDate(date, isDragging, localRange, range),
     [isDragging, localRange, range],
   );
@@ -438,49 +444,55 @@ function CalendarDay({
 }
 
 function checkIsInRange(
-  date: Date,
+  date: TZDate,
   isDragging: boolean,
   localRange: [string, string | null],
   range: [string, string] | null,
 ) {
   if (isDragging && localRange[0] && localRange[1]) {
-    const start = new Date(localRange[0]);
-    const end = new Date(localRange[1]);
+    const start = new TZDate(localRange[0], "UTC");
+    const end = new TZDate(localRange[1], "UTC");
     return (
-      date >= new Date(Math.min(start.getTime(), end.getTime())) &&
-      date <= new Date(Math.max(start.getTime(), end.getTime()))
+      date >= new TZDate(Math.min(start.getTime(), end.getTime()), "UTC") &&
+      date <= new TZDate(Math.max(start.getTime(), end.getTime()), "UTC")
     );
   }
   if (range && range.length === 2) {
-    const start = new Date(range[0]);
-    const end = new Date(range[1]);
+    const start = new TZDate(range[0], "UTC");
+    const end = new TZDate(range[1], "UTC");
     return (
-      date >= new Date(Math.min(start.getTime(), end.getTime())) &&
-      date <= new Date(Math.max(start.getTime(), end.getTime()))
+      date >= new TZDate(Math.min(start.getTime(), end.getTime()), "UTC") &&
+      date <= new TZDate(Math.max(start.getTime(), end.getTime()), "UTC")
     );
   }
   return false;
 }
 
 function checkIsFirstSelectedDate(
-  date: Date,
+  date: TZDate,
   isDragging: boolean,
   localRange: [string, string | null],
   range: [string, string] | null,
 ) {
   if (isDragging && localRange[0]) {
-    const start = new Date(localRange[0]);
-    const end = localRange[1] ? new Date(localRange[1]) : start;
-    const firstDate = new Date(Math.min(start.getTime(), end.getTime()));
+    const start = new TZDate(localRange[0], "UTC");
+    const end = localRange[1] ? new TZDate(localRange[1], "UTC") : start;
+    const firstDate = new TZDate(
+      Math.min(start.getTime(), end.getTime()),
+      "UTC",
+    );
     return (
       formatISO(date, { representation: "date" }) ===
       formatISO(firstDate, { representation: "date" })
     );
   }
   if (range && range.length > 0) {
-    const start = new Date(range[0]);
-    const end = new Date(range[1]);
-    const firstDate = new Date(Math.min(start.getTime(), end.getTime()));
+    const start = new TZDate(range[0], "UTC");
+    const end = new TZDate(range[1], "UTC");
+    const firstDate = new TZDate(
+      Math.min(start.getTime(), end.getTime()),
+      "UTC",
+    );
     return (
       formatISO(date, { representation: "date" }) ===
       formatISO(firstDate, { representation: "date" })
@@ -490,24 +502,30 @@ function checkIsFirstSelectedDate(
 }
 
 function checkIsLastSelectedDate(
-  date: Date,
+  date: TZDate,
   isDragging: boolean,
   localRange: [string, string | null],
   range: [string, string] | null,
 ) {
   if (isDragging && localRange[0] && localRange[1]) {
-    const start = new Date(localRange[0]);
-    const end = new Date(localRange[1]);
-    const lastDate = new Date(Math.max(start.getTime(), end.getTime()));
+    const start = new TZDate(localRange[0], "UTC");
+    const end = new TZDate(localRange[1], "UTC");
+    const lastDate = new TZDate(
+      Math.max(start.getTime(), end.getTime()),
+      "UTC",
+    );
     return (
       formatISO(date, { representation: "date" }) ===
       formatISO(lastDate, { representation: "date" })
     );
   }
   if (range && range.length === 2) {
-    const start = new Date(range[0]);
-    const end = new Date(range[1]);
-    const lastDate = new Date(Math.max(start.getTime(), end.getTime()));
+    const start = new TZDate(range[0], "UTC");
+    const end = new TZDate(range[1], "UTC");
+    const lastDate = new TZDate(
+      Math.max(start.getTime(), end.getTime()),
+      "UTC",
+    );
     return (
       formatISO(date, { representation: "date" }) ===
       formatISO(lastDate, { representation: "date" })
