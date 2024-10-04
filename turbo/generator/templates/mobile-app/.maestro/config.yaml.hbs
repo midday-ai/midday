@@ -1,0 +1,12 @@
+flows:
+  - auth/*
+  - app/*
+
+excludeTags:
+  - util
+
+executionOrder:
+    continueOnFailure: false # default is true
+    flowsOrder:
+        - onboarding
+        - login-with-validation

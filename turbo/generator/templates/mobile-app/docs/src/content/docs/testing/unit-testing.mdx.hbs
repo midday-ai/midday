@@ -1,0 +1,75 @@
+---
+title: Unit Tests
+description: How to write unit tests using Jest and React Native Testing Library
+head:
+  - tag: title
+    content: Unit Tests | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+As we mention in the overview page of the testing section, we include the [Jest](https://jestjs.io/) testing framework and the [React Native Testing Library](https://callstack.github.io/react-native-testing-library/) for unit tests, along with mocks for most libraries.
+
+The following guide is not a tutorial on how to write tests using React Native Testing Library and Jest, but rather a guide on how to write tests with this starter and some best practices to follow. If you are not familiar with testing, we recommend reading the [official documentation](https://jestjs.io/docs/en/getting-started) of Jest and [React Native Testing Library](https://callstack.github.io/react-native-testing-library/) to get familiar with them.
+
+Also worth mentioning that we should aim to test the following:
+
+- **Business logic**: Test component and function utilities that contain business logic. Form validation, data manipulation and calculations, etc.
+
+- **Complex components**: Test components that contain complex logic. For example, components that contain a lot of conditional rendering, or components that contain a lot of state management logic.
+
+## Writing tests
+
+Let's start by writing a simple test for our login screen. We will test the following login form component:
+
+<CodeBlock file="./src/components/login-form.tsx" />
+
+:::tip
+
+To make it easier to write tests, we are separating the form from any other logic related to API calls, navigation, etc. This way, we can test the form logic without having to worry about other things.
+
+As you may have noticed, writing code with the intention of writing tests for it will assist us in producing cleaner code.
+:::
+
+Now, let's write a test for the login form component. We will test the following:
+
+- The form renders correctly.
+- Show the correct error messages on invalid or missing data.
+- Submit the form with valid data and make sure that the `onSubmit` function is called with the correct data.
+
+First, let's create a new file called `login-form.test.tsx` in the `src/screens/login` directory. Then, add the following code to it:
+
+<CodeBlock file="./src/components/login-form.test.tsx" />
+
+As you may notice from the code, we are importing a bunch of things from the `@/core/test-utils` directory. This is a simple file that exports everything from the `@testing-library/react-native` library and overrides the `render` function to wrap the component with the providers we need. This way, we don't have to import the providers in every test file.
+
+:::tip
+You can update this file to add any other providers you need to wrap your components with as well as any other utility functions you need to use in your tests.
+
+<CodeBlock file="src/core/test-utils.tsx" />
+:::
+
+Now that we have our test file ready, let's run it and see what happens. To run the test, run the following command:
+
+```bash
+pnpm  test
+pnpm test:watch # To run the tests in watch mode
+```
+
+## Tests on CI with GitHub actions
+
+It's important to run tests on CI in addition to local testing. This ensures that our code doesn't break when we push it to Github. We have added a GitHub action that runs tests for every push to the main branch or new pull request. It reports the results to GitHub through annotations and provides a summary of the tests along with coverage.
+
+Here is an example of the output of the GitHub action:
+
+![GitHub action output](https://github.com/obytes/react-native-template-obytes/assets/11137944/081896b2-bf74-490b-9ad5-da8e2bbc5c88)
+
+:::tip
+Aiming for 100% test coverage is not always a good idea and doesn't always make sense. Same with testing views and components that only render a UI
+:::
+
+## More tests
+
+For more complex logic and components, we recommend taking a look at this amazing project which provides a lot of examples and best practices for testing React Native apps using React Native Testing Library and Jest:
+
+[⚡️ React Native Testing](https://github.com/vanGalilea/react-native-testing/)

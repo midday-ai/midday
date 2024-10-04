@@ -1,0 +1,153 @@
+{
+  "View": {
+    "prefix": "v",
+    "body": [
+      "<View className=\"flex-1 items-center justify-center\">",
+      "  $1",
+      "</View>"
+    ],
+    "description": "A Simple View "
+  },
+  "Text": {
+    "prefix": "t",
+    "body": [
+      "<Text variant=\"body\" className=\"text-center\">",
+      "  $1",
+      "</Text>"
+    ],
+    "description": "A Simple Text"
+  },
+  "export *": {
+    "prefix": "ex *",
+    "body": ["export * from '.$1';"],
+    "description": "export *"
+  },
+  "Component": {
+    "prefix": "comp",
+    "body": [
+      "import * as React from 'react';",
+      "",
+      "import { Text, View } from '@/ui';",
+      "",
+      "type Props = {",
+      "  $2",
+      "};",
+      "export const ${1:CompName} = ({}: Props) => {",
+      "  return (",
+      "    <View className=\"flex-1\">",
+      "      <Text className=\"text-base\">${1:CompName} Component</Text>",
+      "    </View>",
+      "  );",
+      "};",
+      ""
+    ],
+    "description": "Component"
+  },
+  // https://snippet-generator.app/?description=useQuery+with+variables&tabtrigger=useqv&snippet=import+type+%7B+AxiosError+%7D+from+%27axios%27%3B%0Aimport+%7B+createQuery+%7D+from+%27react-query-kit%27%3B%0A%0Aimport+%7B+client+%7D+from+%27..%2Fcommon%27%3B%0A%0Atype+Variables+%3D+%7B%243%7D%3B%0Atype+Response+%3D+%7B%244%7D%3B%0A%0Aexport+const+use%241+%3D+createQuery%3CResponse%2C+Variables%2C+AxiosError%3E%28%7B%0A++queryKey%3A+%5B%27%242%27%5D%2C+%0A++fetcher%3A+%28variables%29+%3D%3E+%7B%0A++++return+client%0A++++++.get%28%60%242%2F%5C%5C%24%7Bvariables.%24%7B5%7D%7D%60%29%22%2C%0A++++++.then%28%28response%29+%3D%3E+response.data%29%3B%0A++%7D%2C%0A%7D%29%3B%0A&mode=vscode
+  "useQuery with variables": {
+    "prefix": "useqv",
+    "body": [
+      "import type { AxiosError } from 'axios';",
+      "import { createQuery } from 'react-query-kit';",
+      "",
+      "import { client } from '../common';",
+      "",
+      "type Variables = {$3};",
+      "type Response = {$4};",
+      "",
+      "export const use$1 = createQuery<Response, Variables, AxiosError>({",
+      "  queryKey: ['$2'], ",
+      "  fetcher: (variables) => {",
+      "    return client",
+      "      .get(`$2/\\${variables.${5}}`)",
+      "      .then((response) => response.data);",
+      "  },",
+      "});",
+      ""
+    ],
+    "description": "useQuery with variables"
+  },
+  //https://snippet-generator.app/?description=useQuery&tabtrigger=useq&snippet=import+type+%7B+AxiosError+%7D+from+%27axios%27%3B%0Aimport+%7B+createQuery+%7D+from+%27react-query-kit%27%3B%0A%0Aimport+%7B+client+%7D+from+%27..%2Fcommon%27%3B%0A%0Atype+Response+%3D+%7B%243%7D%3B%0Atype+Variables+%3D+void%3B%0A%0Aexport+const+use%241+%3D+createQuery%3CResponse%2C+Variables%2C+AxiosError%3E%28%7B%0A++queryKey%3A+%5B%27%242%27%5D%2C%0A++fetcher%3A+%28%29+%3D%3E+%7B%0A++++return+client.get%28%60%242%60%29.then%28%28response%29+%3D%3E+response.data.posts%29%3B%0A++%7D%2C%0A%7D%29%3B%0A&mode=vscode
+  "useQuery": {
+    "prefix": "useq",
+    "body": [
+      "import type { AxiosError } from 'axios';",
+      "import { createQuery } from 'react-query-kit';",
+      "",
+      "import { client } from '../common';",
+      "",
+      "type Response = {$3};",
+      "type Variables = void;",
+      "",
+      "export const use$1 = createQuery<Response, Variables, AxiosError>({",
+      "  queryKey: ['$2'],",
+      "  fetcher: () => {",
+      "    return client.get(`$2`).then((response) => response.data.posts);",
+      "  },",
+      "});",
+      ""
+    ],
+    "description": "useQuery"
+  },
+  //https://snippet-generator.app/?description=useInfiniteQuery&tabtrigger=useiq&snippet=import+type+%7B+AxiosError+%7D+from+%27axios%27%3B%0Aimport+%7B+createInfiniteQuery+%7D+from+%27react-query-kit%27%3B%0A%0Aimport+%7B+client+%7D+from+%27..%2Fcommon%2Fclient%27%3B%0Aimport+%7B+DEFAULT_LIMIT%2C+getNextPageParam+%7D+from+%27..%2Fcommon%2Futils%27%3B%0Aimport+type+%7B+PaginateQuery+%7D+from+%27..%2Ftypes%27%3B%0A%0Atype+Response+%3D+void%3B%0Atype+Variables+%3D+PaginateQuery%3C%243%3E%3B%0A%0Aexport+const+use%241+%3D+createInfiniteQuery%3CResponse%2C+Variables%2C+AxiosError%3E%28%7B%0A++queryKey%3A+%5B%27%242%27%5D%2C%0A++fetcher%3A+%28_variables%3A+any%2C+%7B+pageParam+%7D%29%3A+Promise%3CResponse%3E+%3D%3E+%7B%0A++++return+client%28%7B%0A++++++url%3A+%60%2F%242%2F%60%2C%0A++++++method%3A+%27GET%27%2C%0A++++++params%3A+%7B%0A++++++++limit%3A+DEFAULT_LIMIT%2C%0A++++++++offset%3A+pageParam%2C%0A++++++%7D%2C%0A++++%7D%29.then%28%28response%29+%3D%3E+response.data%29%3B%0A++%7D%2C%0A++getNextPageParam%2C%0A++initialPageParam%3A+0%2C%0A%7D%29%3B&mode=vscode
+  "useInfiniteQuery": {
+    "prefix": "useiq",
+    "body": [
+      "import type { AxiosError } from 'axios';",
+      "import { createInfiniteQuery } from 'react-query-kit';",
+      "",
+      "import { client } from '../common/client';",
+      "import { DEFAULT_LIMIT, getNextPageParam } from '../common/utils';",
+      "import type { PaginateQuery } from '../types';",
+      "",
+      "type Response = void;",
+      "type Variables = PaginateQuery<$3>;",
+      "",
+      "export const use$1 = createInfiniteQuery<Response, Variables, AxiosError>({",
+      "  queryKey: ['$2'],",
+      "  fetcher: (_variables: any, { pageParam }): Promise<Response> => {",
+      "    return client({",
+      "      url: `/$2/`,",
+      "      method: 'GET',",
+      "      params: {",
+      "        limit: DEFAULT_LIMIT,",
+      "        offset: pageParam,",
+      "      },",
+      "    }).then((response) => response.data);",
+      "  },",
+      "  getNextPageParam,",
+      "  initialPageParam: 0,",
+      "});"
+    ],
+    "description": "useInfiniteQuery"
+  },
+
+  //https://snippet-generator.app/?description=useMutation+&tabtrigger=usem&snippet=import+type+%7B+AxiosError+%7D+from+%27axios%27%3B%0Aimport+%7B+createMutation+%7D+from+%27react-query-kit%27%3B%0A%0Aimport+%7B+client+%7D+from+%27..%2Fcommon%27%3B%0A%0Atype+Variables+%3D+%7B%243%7D%3B%0Atype+Response+%3D+%7B%244%7D%3B%0A%0Aexport+const+use%241+%3D+createMutation%3CResponse%2C+Variables%2C+AxiosError%3E%28%0A++async+%28variables%29+%3D%3E%0A++++client%28%7B%0A++++++url%3A+%27%242%27%2C%0A++++++method%3A+%27POST%27%2C%0A++++++data%3A+variables%2C%0A++++%7D%29.then%28%28response%29+%3D%3E+response.data%29%0A%29%3B&mode=vscode
+  "useMutation ": {
+    "prefix": "usem",
+    "body": [
+      "import type { AxiosError } from 'axios';",
+      "import { createMutation } from 'react-query-kit';",
+      "",
+      "import { client } from '../common';",
+      "",
+      "type Variables = {$3};",
+      "type Response = {$4};",
+      "",
+      "export const use$1 = createMutation<Response, Variables, AxiosError>({",
+      "  mutationFn: async (variables) =>",
+      "    client({",
+      "      url: '$2',",
+      "      method: 'POST',",
+      "      data: variables,",
+      "    }).then((response) => response.data)",
+      "});"
+    ],
+    "description": "useMutation "
+  },
+  "navigate": {
+    "prefix": "navigate",
+    "body": ["const { navigate } = useNavigation();", ""],
+    "description": "navigate"
+  }
+}

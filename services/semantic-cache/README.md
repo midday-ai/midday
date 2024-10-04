@@ -61,7 +61,7 @@ The Semantic Cache Service for LLM Requests is an innovative solution designed t
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-organization/semantic-cache-service.git
+   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/semantic-cache-service.git
    cd semantic-cache-service
    ```
 

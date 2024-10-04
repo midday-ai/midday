@@ -1,0 +1,34 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/new-github-release.yml
+# Starter releasing process: https://starter.obytes.com/ci-cd/app-releasing-process/
+
+# ✍️ Description:
+# This workflow will be triggered automatically after the new app version workflow has been executed successfully.
+# It will create a new GitHub release with the new app version and the release notes.
+
+# 🚨 GITHUB SECRETS REQUIRED: None
+
+name: New GitHub Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    name: New GitHub Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 🏃‍♂️Create A Draft Github Release
+        uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          draft: false

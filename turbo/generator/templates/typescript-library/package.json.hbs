@@ -1,0 +1,72 @@
+{
+	"name": "@library/{{kebabCase name}}",
+	"version": "0.0.0-development",
+	"description": "Yet another typescript library starter template",
+	"keywords": [
+		"typescript",
+		"library",
+		"starter",
+		"template"
+	],
+	"homepage": "https://github.com/gjuchault/typescript-library-starter",
+	"bugs": "https://github.com/gjuchault/typescript-library-starter/issues",
+	"author": "Gabriel Juchault <gabriel.juchault@gmail.com>",
+	"repository": "gjuchault/typescript-library-starter",
+	"type": "module",
+	"exports": "./build/index.js",
+	"types": "./build/index.d.ts",
+	"license": "MIT",
+	"engines": {
+		"node": "^22.0.0",
+		"npm": "^10.5.1"
+	},
+	"volta": {
+		"node": "22.0.0",
+		"npm": "10.5.1"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"setup": "node --import=@nitrogql/esbuild-register ./scripts/setup.ts",
+		"build": "node --run clean && node --run type:dts && node --run type:extract && node --run build:src",
+		"build:src": "node --import=@nitrogql/esbuild-register ./scripts/build.ts",
+		"clean": "rimraf build coverage",
+		"type:dts": "tsc --emitDeclarationOnly --project tsconfig.build.json",
+		"type:extract": "api-extractor run && rimraf --glob \"./build/*\" && mv trimmed.d.ts build/index.d.ts",
+		"type:check": "tsc --noEmit",
+		"lint": "biome check . --apply-unsafe",
+		"lint:check": "biome ci .",
+		"test": "node --import=@nitrogql/esbuild-register --test \"src/**/*.test.ts\"",
+		"test:watch": "node --import=@nitrogql/esbuild-register --watch --test \"src/**/*.test.ts\"",
+		"test:coverage": "NODE_V8_COVERAGE=./coverage c8 -r html node --import=@nitrogql/esbuild-register --experimental-test-coverage --test \"src/**/*.test.ts\"",
+		"test:setup": "node --import=@nitrogql/esbuild-register ./scripts/test-setup.ts",
+		"spell:check": "cspell \"{README.md,CODE_OF_CONDUCT.md,CONTRIBUTING.md,.github/*.md,src/**/*.ts}\"",
+		"cz": "cz",
+		"semantic-release": "semantic-release"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@microsoft/api-extractor": "^7.47.4",
+		"@nitrogql/esbuild-register": "^1.7.0",
+		"@ryansonshine/commitizen": "^4.2.8",
+		"@ryansonshine/cz-conventional-changelog": "^3.3.4",
+		"@semantic-release/changelog": "^6.0.3",
+		"@semantic-release/commit-analyzer": "^13.0.0",
+		"@semantic-release/github": "^10.1.3",
+		"@semantic-release/npm": "^12.0.1",
+		"@semantic-release/release-notes-generator": "^14.0.1",
+		"@types/node": "^20.14.5",
+		"@types/prompts": "^2.4.9",
+		"c8": "^10.1.2",
+		"cspell": "^8.12.1",
+		"esbuild": "^0.21.5",
+		"esbuild-register": "^3.6.0",
+		"prompts": "^2.4.2",
+		"rimraf": "^5.0.8",
+		"semantic-release": "^24.0.0",
+		"slugify": "^1.6.6",
+		"tsx": "^4.16.2",
+		"typescript": "^5.5.4"
+	}
+}

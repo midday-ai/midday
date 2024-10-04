@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+- runFlow:
+    when:
+      platform: iOS
+    file: ./hide-keyboard-ios.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: ./hide-keyboard-android.yaml

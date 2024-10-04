@@ -1,0 +1,109 @@
+---
+title: Project Structure
+description: Project structure files and folders.
+head:
+  - tag: title
+    content: Project Structure | React Native / Expo Starter
+---
+
+import { FileTree } from '@astrojs/starlight/components';
+import Code from '../../../components/code.astro';
+
+If you open the new project in VSCode you will see the following structure:
+
+<FileTree>
+
+- api ## any thing related to api calls and data fetching
+  - common/
+  - index.tsx
+  - posts
+  - types.ts
+- app ## app routes and layouts
+  - (app)/
+  - \_layout.tsx
+  - feed/
+  - login.tsx
+  - onboarding.tsx
+- components ## any reusable components
+  - buttons.tsx
+  - card.tsx
+  - colors.tsx
+  - cover.tsx
+  - inputs.tsx
+  - login-form.test.tsx
+  - login-form.tsx
+  - settings/
+  - title.tsx
+  - typography.tsx
+- core ## core files such as auth, localization, storage and more
+  - auth
+  - env.js
+  - hooks
+  - i18n
+  - index.tsx
+  - keyboard.ts
+  - storage.tsx
+  - test-utils.tsx
+  - use-theme-config.tsx
+  - utils.ts
+- translations ## translation resources files
+  - ar.json
+  - en.json
+- types ## global types
+  - index.ts
+- ui ## core ui and theme configuration
+  - button.tsx
+  - checkbox.tsx
+  - colors.js
+  - focus-aware-status-bar.tsx
+  - icons
+  - image.tsx
+  - index.tsx
+  - input.tsx
+  - list.tsx
+  - modal.tsx
+  - progress-bar.tsx
+  - select.tsx
+  - text.tsx
+  - utils.tsx
+
+</FileTree>
+
+- `ui`: This folder contains all the UI components and the theme configuration. We provide minimal components with a basic `obytes` theme. You can add your own components and theme configuration here.
+
+- `components`: This folder contains the components of the app. mainly components used inside the app folder. The only difference between `ui` and `components` is that `ui` is more generic and can be used in any project, while `components` are more specific to the project.
+
+- `core`: This folder contains the core files, such as authentication, localization, storage, and more. It can be shared with other projects. That's why we are only including modules that have nothing to do with project logic. This approach helps us share code between projects and also update the starter with new features.
+
+- `app`: This folder contains the routes of the app, along with its layout routes such as stack and tab navigation structures. We provide a basic navigation structure for the demo app that you can modify to fit your needs.
+
+- `api`: This folder contains the API files. We provide a basic API client and provider and you just need to create query and mutation for your modules. Check `posts` folder for inspiration on how to create a query and mutation.
+
+- `translations`: This folder contains the translation resources files. We recommend using translation files even if you are not supporting multiple languages as it will help you to support multiple languages in the future and also help you to find all the strings in one place.
+
+- `types`: This folder contains the global types.
+
+:::note
+The structure is very opinionated but we think it's
+the best way to structure a react native project. For sure you can change it as you like based on your needs.
+:::
+
+## Importing files
+
+We use absolute imports to import files using the Babel module resolver plugin and TypeScript path mapping. This approach helps us avoid long relative paths and makes the code cleaner and more readable.
+
+Here is a simple example of how the Feed screen looks with absolute imports.
+
+<Code file="src/app/(app)/index.tsx" meta="{4-7}" />
+
+This approach is very useful when you are working on a large project with a lot of files and folders and it can be done by updating the `babel.config.js` file and `tsconfig.json` file to the following:
+
+<details>
+  <summary>⚙️ Babel configuration</summary>
+  <Code file="babel.config.js" meta="ins={8-27}" />
+</details>
+
+<details>
+  <summary>⚙️ Typescript Config</summary>
+  <Code file="tsconfig.json" meta="ins={5-9}" />
+</details>

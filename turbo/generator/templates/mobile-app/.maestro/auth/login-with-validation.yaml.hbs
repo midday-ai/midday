@@ -1,0 +1,35 @@
+appId: ${APP_ID}
+env:
+  Name: 'User'
+  EMAIL: 'user@test.com'
+  PASSWORD: 'password'
+---
+- launchApp
+- runFlow:
+    when:
+      visible: 'Obytes Starter'
+    file: ../utils/onboarding.yaml
+- assertVisible: 'Sign In'
+- assertVisible:
+    id: 'login-button'
+- tapOn:
+    id: 'login-button'
+- assertVisible: 'Email is required'
+- assertVisible: 'Password is required'
+- tapOn:
+    id: 'name'
+- inputText: ${Name}
+- runFlow: ../utils/hide-keyboard.yaml
+- tapOn:
+    id: 'email-input'
+- inputText: 'email'
+- assertVisible: 'Invalid email format'
+- inputText: ${EMAIL}
+- runFlow: ../utils/hide-keyboard.yaml
+- tapOn:
+    id: 'password-input'
+- inputText: ${PASSWORD}
+- runFlow: ../utils/hide-keyboard.yaml
+- tapOn:
+    id: 'login-button'
+- assertVisible: 'Feed'

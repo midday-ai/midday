@@ -1,0 +1,24 @@
+---
+title: Overview
+description: All you need to know about the CI/CD of the starter.
+head:
+  - tag: title
+    content: CI/CD | React Native / Expo Starter
+---
+
+CI/CD stands for Continuous Integration and Continuous Delivery/Deployment. It is a set of practices that help developers automate the process of building, testing, and distributing applications to end-users (such as app stores for mobile apps).
+
+Having a good CI/CD process in place is crucial for any project, as it helps you save time and effort, as well as ensuring that you are delivering a high-quality product to your users. It helps avoid common mistakes and bugs, reduces your time to market, and allows for faster updates to your users.
+
+As most of our projects are hosted on GitHub, we use [GitHub Actions](https://github.com/features/actions) and [Expo EAS](https://expo.dev/eas) as our CI/CD solution. The starter kit comes with over 10 GitHub Actions workflows:
+
+- `.github/workflows/lint-ts.yml`: On PR and new commits on the master branch, run linting and formatting checks.
+- `.github/workflows/test.yml`: On PR and new commits on the master branch, run unit tests.
+- `.github/workflows/type-check.yml`: On PR and new commits on the master branch, run type checking.
+- `.github/workflows/compress-images.yml`: On new commits to the master branch, when adding images, open a pull request (PR) with the compressed images.
+- `.github/workflows/expo-doctor.yml`: On PR and new commits to the master branch, check whether dependencies are aligned with the Expo SDK version.
+- `.github/workflows/new-app-version.yml`: A workflow to manually trigger and update the app version, and publish a tag.
+
+You can check the full list of workflows [here](/ci-cd/workflows-references/)
+
+Pushing the new release to the stores is a weekly process for our team. To make it easier, we have created a simple process using GitHub Actions and Expo EAS. You can check the full guide [here](/ci-cd/app-releasing-process/).

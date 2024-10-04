@@ -1,0 +1,50 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/type-check.yml
+
+# ✍️ Description:
+# This action is used to run the type-check on the project.
+# Runs on pull requests and pushes to  the main/master branches
+# Based on the event type:
+#   - If it's a pull request, it will run type checking, then add the check to the PR as well as annotate the code with the errors using reviewdog.
+#   - If it's a push to main/master, it will run the type checking and fail if there are any errors.
+
+# 🚨 GITHUB SECRETS REQUIRED: NONE
+
+name: Type Check (tsc)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  type-check:
+    name: Type Check (tsc)
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: 📦 Install Reviewdog
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-setup@v1
+
+      - name: 🏃‍♂️ Run TypeScript PR # Reviewdog tsc errorformat: %f:%l:%c - error TS%n: %m
+        # We only need to add the reviewdog step if it's a pull request
+        if: github.event_name == 'pull_request'
+        run: |
+          pnpm type-check | reviewdog -name="tsc" -efm="%f(%l,%c): error TS%n: %m" -reporter="github-pr-review" -filter-mode="nofilter" -fail-on-error -tee
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name:
+          🏃‍♂️ Run TypeScript Commit
+          # If it's not a Pull Request then we just need to run the type-check
+        if: github.event_name != 'pull_request'
+        run: pnpm type-check

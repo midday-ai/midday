@@ -1,0 +1,119 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/e2e-android.yml
+# End-to-end testing: https://starter.obytes.com/testing/end-to-end-testing/
+
+# ✍️ Description:
+# This workflow is used to run end-to-end tests on Android using Maestro.
+# As a first step, it will generate a test APK using the Gradle build and then upload it as an artifact.
+# A new job will be started to run the tests using the test APK generated in the previous job.
+# To test the app, we set up an Android emulator using the `reactivecircus/android-emulator-runner` action. This runner requires macOS as the operating system for the runner.
+# This workflow will be triggered on pull requests (PRs) with the label "android-test-github" or can be manually triggered from the Actions tab.
+#
+
+# 🚨 GITHUB SECRETS REQUIRED: None
+
+name: E2E Tests Android (Maestro + Github Action)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  generate-test-apk:
+    if: github.event_name != 'pull_request' || ( github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'android-test-github'))
+    name: Generate Test APK (Gradle)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: 📦 Set Up JDK + Generate Test APK
+        uses: ./.github/actions/setup-jdk-generate-apk
+        with:
+          APP_ENV: staging
+
+      - name: Upload Test APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-apk
+          path: ./android/app/build/outputs/apk/release/app-release.apk
+
+  test-android:
+    name: Run Android E2E Tests (Maestro + Github Action)
+    needs: generate-test-apk
+    runs-on: macOS-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Install Maestro
+        run: npm run install-maestro ## We use npm because we don't need to install deps again
+
+      - name: Download Test APK
+        uses: actions/download-artifact@v3
+        with:
+          name: test-apk
+          path: ${{ github.workspace }}
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-cache
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          cores: 2
+          ram-size: 4096M
+          profile: Nexus 6
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run tests with Maestro
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          cores: 2
+          ram-size: 4096M
+          profile: Nexus 6
+          script: |
+            adb install "${{ github.workspace }}/app-release.apk"
+            $HOME/.maestro/bin/maestro test .maestro/ --env=APP_ID=com.obytes.staging  --format junit
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-logs
+          path: ~/.maestro/tests/**/*
+
+      - name: Store tests result
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e_android_report
+          path: |
+            report.xml

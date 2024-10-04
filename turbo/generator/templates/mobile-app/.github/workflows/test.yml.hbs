@@ -1,0 +1,50 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/test.yml
+
+# ✍️ Description:
+# This action is used to run unit tests
+# Runs on pull requests and pushes to  the main/master branches
+# Based on the event type:
+#   - If it's a pull request, it will run the tests and post a comment with coverage details.
+#   - If it's a push to main/master, it will run the tests and add the check to the commit.
+
+# 🚨 GITHUB SECRETS REQUIRED: NONE
+
+name: Tests (jest)
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    name: Tests (jest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: 🏃‍♂️ Run Tests
+        run: pnpm run test:ci
+
+      - name: Jest Coverage Comment
+        uses: MishaKav/jest-coverage-comment@main
+        if: (success() || failure()) && github.event_name == 'pull_request'
+        with:
+          coverage-summary-path: ./coverage/coverage-summary.json
+          summary-title: '💯 Test Coverage'
+          badge-title: Coverage
+          create-new-comment: false
+          junitxml-title: 😎 Tests Results
+          junitxml-path: ./coverage/jest-junit.xml
+          coverage-title: 👀 Tests Details
+          coverage-path: ./coverage/coverage.txt
+          report-only-changed-files: true

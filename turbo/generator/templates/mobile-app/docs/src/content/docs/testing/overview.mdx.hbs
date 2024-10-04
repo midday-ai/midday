@@ -1,0 +1,25 @@
+---
+title: Testing Overview
+description: What to test and how to test it.
+head:
+  - tag: title
+    content: Testing Overview| React Native / Expo Starter
+---
+
+Testing is an essential part of any software development process. It helps ensure that your code is working as expected and that you don't introduce any bugs into your codebase. As we believe in the importance of testing, we have made it easy to write your tests with the starter template. We include the [Jest](https://jestjs.io/) testing framework and the [React Native Testing Library](https://callstack.github.io/react-native-testing-library/) for unit tests, along with mocks for most libraries. We also use [Maestro](https://maestro.mobile.dev/) for end-to-end tests.
+
+## Testing approaches
+
+It's clear that testing is important, but what should you test? Apparently, and especially for front-end apps (including mobile apps), there is no clear answer. Should I aim for 100% code coverage? Should I test every component?
+
+The answer is it depends. It depends on your app, your team, and your goals. We believe that testing is a trade-off between the time you spend writing tests and the confidence you get from them. You should aim for a good balance between the two.
+
+Aiming for 100% test coverage is not always a good idea and doesn't always make sense. Same with testing views and components that only render a UI. Instead, you should focus on the following:
+
+- **Business logic**: Test component and function utilities that contain business logic. Form validation, data manipulation and calculations, etc.
+
+- **Complex components**: Test components that contain complex logic. For example, components that contain a lot of conditional rendering, or components that contain a lot of state management logic.
+
+Focus on the above and write unit tests for them. This will help you get the most out of your tests and will assist you in finding bugs early on.
+
+To ensure that your app is functioning as expected, we recommend writing end-to-end tests, as they provide the highest level of confidence and help you test the app as a whole similar to how your users will use it.

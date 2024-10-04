@@ -1,0 +1,20 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Debug Current Test File",
+			"autoAttachChildProcesses": true,
+			"skipFiles": ["<node_internals>/**", "**/node_modules/**"],
+			"program": "${relativeFile}",
+			"runtimeArgs": [
+				"--import=@nitrogql/esbuild-register",
+				"--inspect",
+				"--test"
+			],
+			"smartStep": true,
+			"console": "integratedTerminal"
+		}
+	]
+}

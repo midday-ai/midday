@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "baseUrl": "src",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "inlineSourceMap": false,
+    "listEmittedFiles": false,
+    "listFiles": false,
+    "noFallthroughCasesInSwitch": true,
+    "pretty": true,
+    "resolveJsonModule": true,
+    "rootDir": ".",
+    "traceResolution": false,
+    "outDir": "",
+    "types": [
+      "@types/node",
+      "@types/service-worker-mock",
+      "@cloudflare/workers-types/experimental",
+      "@cloudflare/vitest-pool-workers",
+      "@cloudflare/workers-types/2023-07-01"
+    ]
+  },
+  "include": ["./*.ts", "src/**/*.ts", "src"]
+}

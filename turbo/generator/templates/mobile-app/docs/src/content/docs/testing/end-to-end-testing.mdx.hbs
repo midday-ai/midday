@@ -1,0 +1,71 @@
+---
+title: End-to-End Testing
+description: How to write end-to-end tests using Maestro
+head:
+  - tag: title
+    content: End-to-End Testing | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+Writing end-to-end tests is one of the best ways to ensure that your app is working as expected and simulate exactly how a user would interact with it. However, running those tests can be challenging and time-consuming due to their nature and the need to run them on a device or emulator.
+
+The good news is that we have included [Maestro](https://www.mobile.dev/) the easiest way to run end-to-end tests yet very powerful and come up with a lot of features that will make your life easier.
+
+One of Maestro's best features is its user-friendly test writing capability. It's incredibly simple to write tests using the app, making it accessible to PMs, QAs, and even designers.
+
+:::tip
+Watch this talk by the amazing Henry Moulton for more details about Maestro and how it can help you write better tests: [Henry Moulton – React Native end-to-end testing with Maestro | App.js Conf 2023](https://www.youtube.com/watch?v=uoCzBdFCoqc)
+
+:::
+
+## Installing Maestro
+
+To install Maestro, run the following :
+
+```bash
+# a simple npm script that runs the following command:  curl -Ls 'https://get.maestro.mobile.dev' | bash
+pnpm install-maestro
+```
+
+## Writing tests
+
+Go to the `maestro` directory and write your tests.
+Here is a quick test we wrote for log in screen using Maestro:
+
+Read more about how to write end-to-end test with Maestro [here](https://maestro.mobile.dev/)
+
+<CodeBlock file=".maestro/auth/login-with-validation.yaml" />
+
+To run the tests, execute the following command:
+
+```bash
+pnpm e2e-test
+```
+
+This will run the tests on the local emulator and here is a recording of the test from maestro dashboard:
+
+<video controls>
+  <source
+    src="https://github.com/obytes/react-native-template-obytes/assets/11137944/3b45de00-a369-436a-8faf-6ea1edbb44c3"
+    type="video/mp4"
+  ></source>
+</video>
+
+## Running tests on CI
+
+Running tests on CI is very important to ensure that your code doesn't break when you push it to GitHub. However, running end-to-end tests is quite expensive and time-consuming. To test your app on CI, we need to first build the app, set up the emulator, and then run the tests. This process can consume a significant amount of time and resources.
+
+For this reason, we do not recommend running end-to-end tests on every pull request pushed to GitHub. Instead, we recommend running them for pull requests that contain `test-android` labels so that we can trigger the tests manually by adding the correct label whenever you feel the PR is ready to be tested.
+
+The starter comes with a bunch of GitHub actions that will help you run the tests on CI.
+
+> for now we only support running tests on Android, we are working on adding support for iOS.
+
+- `e2e-android.yml` - Triggered when a PR is labeled with `android-test-github` or run manually from the actions tab in GitHub.
+  This action will generate a staging build for the app, set up the emulator, and run the tests using Maestro.
+
+- `e2e-android-maestro.yml` - Triggered when a PR is labeled with `android-test-maestro-cloud` or run manually from the actions tab in GitHub.
+  This action will run the tests using Maestro Cloud. You will need to add your Maestro Cloud token to the secrets in GitHub.
+
+- `e2e-android-eas-build.yml` - Accepts a EAS APK URL and runs the tests. This action is triggered manually from the actions tab in GitHub.

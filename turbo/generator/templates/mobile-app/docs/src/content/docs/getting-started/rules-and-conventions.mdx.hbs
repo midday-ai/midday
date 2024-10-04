@@ -1,0 +1,84 @@
+---
+title: Rules and Conventions
+description: Rules and conventions that we follow in the starter.
+head:
+  - tag: title
+    content: Rules and Conventions | React Native / Expo Starter
+---
+
+import Code from '../../../components/code.astro';
+
+In order to enforce a consistent code style and avoid common issues in the codebase, we have a set of rules and conventions that we follow and enforce through the starter.
+
+## Typescript
+
+This starter uses TypeScript to provide type safety and avoid common bugs in the codebase. The project configuration is based on Expo config with some updates to support absolute imports.
+
+If you are not familiar with Typescript, you can check this article to learn more about it : [Typescript for React Developers](https://elazizi.com/posts/how-to-learn-typescript-for-react-developers/)
+
+You can find more information about it [here](https://docs.expo.io/guides/typescript/).
+
+## Naming
+
+We follow kabab-case for naming files and folders as we think it's the most readable and consistent way to name files and folders in large projects and it's the most common way to name files and folders in the react native community.
+
+Example of kabab-case naming: `my-component.tsx`
+
+For naming variables, functions, classes, interfaces, and enums, we follow camelCase as it's the most common way to name variables in the React community. It is enforced by the linter, as you cannot create a function component without using camelCase.
+
+## Linting
+
+Using a linter is a must in any JavaScript project. For starters, we are using ESLint with the React Native community config and some custom rules to ensure that we are following the rules and conventions related to file naming, Tailwind CSS classes, TypeScript types, import order, internationalization files, and more.
+
+Here is the complete ESLint configuration file:
+
+<Code file=".eslintrc.js" />
+
+## Git Hooks with Husky
+
+The starter comes with a set of git hooks that help us to enforce rules and conventions. Those hooks are configured using [Husky](https://typicode.github.io/husky/#/). and here is the complete list of the hooks:
+
+### pre-commit
+
+As the name suggest, this hook will run before each commit and it will make sure you are not committing directly on the main branch and it will run the linter and typescript checking on the staged files.
+
+<Code file=".husky/pre-commit" language="bash" />
+
+### post-merge
+
+As the name suggest, this hook will run after each merge and it will check if there is any changed in pnpm-lock.yaml and if there is any, it will run `pnpm install` to make sure the dependencies are up to date.
+
+<Code file=".husky/post-merge" language="bash" />
+
+### commit-msg
+
+This hook will check if the commit message is following the conventional commit format. If it's not, the commit will be aborted and will show you what going wrong with your commit message.
+
+<Code file=".husky/commit-msg" language="bash" />
+
+We are using [commitlint](https://commitlint.js.org/#/) to check if the commit message is following the conventional commit format.
+
+In general, your commit message should follow this format:
+
+```bash
+type(scope?): subject  #scope is optional; multiple scopes are supported (current delimiter options: "/", "\" and ",")
+```
+
+Real world examples can look like this:
+
+```txt
+fix(ui): fix input width
+feat(ui): add button variants
+feat(api): add usePost query hook
+```
+
+`type` should be one of the following: build, chore, ci ,docs,feat,fix, perf, refactor, revert, style or test.
+
+## 🔗 Resources
+
+- [Typescript for React Developers](https://elazizi.com/how-to-learn-type-script-for-react-developers)
+- [Typescript](https://docs.expo.io/guides/typescript/)
+- [Husky](https://typicode.github.io/husky/#/)
+- [commitlint](https://commitlint.js.org/#/)
+- [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+- [Eslint](https://eslint.org/)

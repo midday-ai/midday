@@ -1,0 +1,48 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/actions/setup-jdk-generate-apk/action.yml
+# Composite actions docs: https://docs.github.com/en/actions/creating-actions/creating-a-composite-action
+
+# ✍️ Description:
+# This is a composite action, which means it can be used in other actions.
+# This action is used to set up the JDK environment and generate an Android APK for testing.
+# This action accepts one input: `APP_ENV`, which is used to generate an APK for a specific environment (development, staging, production). We use staging by default.
+# Before generating the APK, we run a pre-build script to generate the necessary native folders based on the APP_ENV.
+# On success, the APK is generated at `./android/app/build/outputs/apk/release/app-release.apk`.
+
+# 👀 Example usage:
+#       - name : 📦 Set Up JDK + Generate Test APK
+#         uses: ./.github/actions/setup-jdk-generate-apk
+#         with:
+#           APP_ENV: 'staging'
+
+name: 'Setup  JDK + GRADLE + Generate APK'
+description: 'Setup  JDK + GRADLE + Generate APK'
+inputs:
+  APP_ENV:
+    description: 'APP_ENV (one of): development, staging, production'
+    required: true
+    default: 'staging'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set Up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu' # See 'Supported distributions' for available options
+        java-version: '11'
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+
+    - name: Generate Test APK
+      run: |
+        pnpm prebuild:${{ inputs.APP_ENV }}
+        cd  android
+        chmod +x ./gradlew
+        ./gradlew assembleRelease --no-daemon
+        cd ..
+      shell: bash
+      env:
+        EXPO_NO_DOTENV: '1'
+        APP_ENV: ${{ inputs.APP_ENV }}
+        CI: 'true'

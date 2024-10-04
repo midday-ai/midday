@@ -1,9 +1,9 @@
 import * as Sentry from "@sentry/nextjs";
-import { setupAnalytics } from "@v1/analytics/server";
-import { getUser } from "@v1/db/cached-queries";
-import { createClient } from "@v1/db/server";
-import { ratelimit } from "@v1/kv/ratelimit";
-import { logger } from "@v1/logger";
+import { setupAnalytics } from "@midday/analytics/server";
+import { getUser } from "@midday/db/cached-queries";
+import { createClient } from "@midday/db/server";
+import { ratelimit } from "@midday/kv/ratelimit";
+import { logger } from "@midday/logger";
 import {
   DEFAULT_SERVER_ERROR_MESSAGE,
   createSafeActionClient,

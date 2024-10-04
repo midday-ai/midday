@@ -1,0 +1,65 @@
+name: Release
+on:
+  workflow_call:
+    inputs:
+      dry-run:
+        description: 'Compiles the app but not upload artifacts to distribution server'
+        default: false
+        required: false
+        type: boolean
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
+
+defaults:
+  run:
+    shell: 'bash'
+
+
+jobs:
+  draft_release:
+
+    permissions:
+      contents: write # Allows this job to create releases
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+
+      - run: npm run build
+
+      - name: Compile artifacts ${{ inputs.dry-run && '' || 'and upload them to github release' }}
+        # I use this action because it is capable of retrying multiple times if there are any issues with the distribution server
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 6
+          retry_wait_seconds: 15
+          retry_on: error
+          shell: 'bash'
+          # Due to this issue https://github.com/electron-userland/electron-builder/issues/6411 the build with npx when rebuilding native dependencies hangs forever
+          # see https://github.com/cawa-93/vite-electron-builder/pull/953
+          command: ./node_modules/.bin/electron-builder --config electron-builder.yml --publish ${{ inputs.dry-run && 'never' || 'always' }}
+        env:
+          # Code Signing params
+          # See https://www.electron.build/code-signing
+          # CSC_LINK: ''
+          # CSC_KEY_PASSWORD: ''
+          # Publishing artifacts
+          GH_TOKEN: ${{ secrets.github_token }} # GitHub token, automatically provided (No need to define this secret in the repo settings)

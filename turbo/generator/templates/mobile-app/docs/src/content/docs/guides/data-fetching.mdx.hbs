@@ -1,0 +1,150 @@
+---
+title: Data Fetching
+description: Learn how to fetch data from a server using react-query and axios.
+head:
+  - tag: title
+    content: Data Fetching | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+From the beginning of React, the community has been building a rich ecosystem of tools and libraries that help you build your applications. One of the most important parts of this ecosystem is the ability to fetch data from a server and display it in your application.
+
+While there are numerous options available for fetching data in React and React Native, the community has recently been gravitating towards adopting React Query as the go-to solution. The reason for this trend is due to React Query's simplicity, flexibility, and tone of features that it provides out of the box.
+
+## What is react-query?
+
+[React-query](https://tanstack.com/query/v4/docs/overview) It is a very powerful library that helps you manage your data fetching, caching, invalidating, and even implementing optimistic UI in a very simple way.
+
+`react-query` offers hooks that simplify the process of fetching and updating data in your app. You can use pre-built hooks like `useQuery` and `useMutation`, or create your own custom hooks based on them. This makes it easier for developers to manage data and build more efficient applications.
+
+## Using react-query-kit & axios
+
+As the starter is designed to save you time and effort, we already have installed react-query and Axios and configured them for you.
+
+The `src/api` folder contains all the fetching logic, with a `common` sub-folder that holds a `client`, `queryClient`, and several utility functions specifically designed to work with `react-query`.
+
+Because we're using Axios as the client, we can leverage all its advanced features, including interceptors, request cancellation, and more. For additional information on Axios, you can check out their website [here](https://axios-http.com/).
+
+To make writing queries and mutation even easier we are using [react-query-kit](https://github.com/liaoliao666/react-query-kit), a simple toolkit that makes ReactQuery reusable and type-safe with less boilerplate.
+
+:::tip
+
+You recommend reading Those guides and checking those resources to learn more about react-query:
+
+- [React-query](https://tanstack.com/query/v4/docs/overview)
+- [react-query-kit](https://github.com/liaoliao666/react-query-kit)
+- [Practical React Query](https://tkdodo.eu/blog/practical-react-query)
+
+:::
+
+## Data Fetching Use Cases
+
+Suppose you're building a blog app and need to add the following features:
+
+- A Feed Screen that displays all posts
+- A Post Screen that shows the details of a single post
+- A Screen to create a new post
+
+To get started, create a new folder named `posts` within `src/api`. This folder will hold all the post-related logic. You can apply this same concept to any other entities, such as users, within your application.
+
+### Feed Screen
+
+The feed screen will show all the posts available in the app. To achieve this, we need to create a hook called `usePosts` that will fetch the posts and display them as a list.
+
+Here are the steps to create the `usePosts` hook:
+
+1. Inside the `src/api/posts` folder, create a new file called `use-posts.ts`.
+2. Define the type for your `Response` and `Variables` if required, to ensure that you receive the correct data from the server. For instance, you could create a `Post` type for the posts.
+3. Use the `createQuery` function from `react-query-kit` library to create a query hook that will fetch the data from the server. We'll name it `usePosts` hook.
+
+Below is the complete code for the use-posts.ts file:
+
+<CodeBlock file="src/api/posts/use-posts.ts" />
+
+the `createQuery` function accept an object with the following: `queryKey`, `fetcher` and `options`. Since we migrated to the latest version of `react-query-kit`, the `queryFn` property is replaced with `fetcher` and the `queryKey` structure is simplified. Read more about (createQuery)[https://github.com/liaoliao666/react-query-kit#createQuery]
+
+:::tip
+Use `useq` snippet to generate a query in no time using VSCode
+![use-query](https://github.com/obytes/react-native-template-obytes/assets/114411010/c052a0ee-8fba-436a-950f-a0c7e44cf3ae)
+
+:::
+
+Now that we have created our custom hook, we can use it in our app to display a list of posts. Follow the steps below to achieve this:
+
+1. Create a new screen in your app and name it Posts.
+2. Import and use the usePosts hook we created earlier to fetch the list of posts.
+3. Use the fetched data to display a list of posts.
+
+<CodeBlock file="src/app/(app)/index.tsx" />
+
+As you can see in the code above, we use the `usePosts` hook to fetch data and handle the loading state. This allows us to display a loading indicator while the data is being fetched, and then display the list of posts once the data is ready.
+
+In the same example above we also show an error message if the request fails.
+
+### Post Screen
+
+The post screen will display the details of a single post. To fetch and display the post, we will create a new hook called `usePost`.
+
+We can use the same steps we used earlier to create the `usePosts` hook. The only difference is that we will use the `id` of the post as a variable to fetch the specific post.
+
+Below is the complete code for the `use-post.ts` file:
+
+<CodeBlock file="src/api/posts/use-post.ts" />
+
+Now our hook is ready to be used in our post details screen:
+
+<CodeBlock file="src/app/feed/[id].tsx" />
+
+### Add new post
+
+To add a new post, we can use the `createMutation` function from the `react-query-kit` library.
+
+Here are the steps to create the useAddPost hook:
+
+1. Create a new file called `use-add-post.ts` inside the `src/api/posts` folder.
+2. Define a type for your `Variables` and `Response` to ensure that you are sending the correct data to the server.
+3. Use the `createMutation` function from `react-query-kit` library to create a mutation hook that will send the data to the server. We'll name this hook `useAddPost`.
+
+Here is the complete code for the `use-add-post.ts` file:
+
+<CodeBlock file="src/api/posts/use-add-post.ts" />
+
+:::tip
+Use `usem` snippet to generate mutation in no time using VSCode
+
+:::
+
+Now that we have our mutation hook ready. Let's create a new screen called `AddPost` and use data from `useAddPost` hook to create a new post:
+
+Exactly the same way we did in [form section](../ui-and-theme/Forms.mdx) while creating a login form, we will follow the same approach to create a from to create a new post.
+
+1. Create the schema for the new form using Zod
+2. Create the form using react-hook-form
+3. Get `mutate` function from `useAddPost` hook and call it when the form is submitted
+4. You can use the `isPending` state to display a loading indicator while the data is being sent to the server and then redirect the user to the feed screen on success.
+
+<CodeBlock file="src/app/feed/add-post.tsx" />
+
+## Create API Hooks with Vs Code Snippets
+
+Maybe you mentioned that creating a new query or mutation hook looks the same every time and you are right. That is why we created a set of vscode snippets to help you create your hooks in no time.
+
+- `useq` : Create a new query hook
+
+![use-query](https://github.com/obytes/react-native-template-obytes/assets/114411010/c052a0ee-8fba-436a-950f-a0c7e44cf3ae)
+
+- `useqv` : Create a new query hook with variables
+
+- `useiq` : Create a new infinite query hook
+- `usem` : Create a new mutation hook
+
+![use-mutation](https://github.com/obytes/react-native-template-obytes/assets/11137944/c322f827-b71d-4629-a337-eb7cd96d4125)
+
+## React Query dev tools plugin
+
+For managing and and monitoring the `React Query` instances, we use the [React Query dev tools plugin](https://docs.expo.dev/debugging/devtools-plugins/#react-query), which offers us visibility into our data fetching processes and caching in real-time.
+It gives the ability to refetch the data manually, inspect and remove queries, providing control over our data.
+To use it, in the terminal press `shift` + `m` and choose from the opened list of dev tools the React Query plugin. The plugin's web interface will open and display the queries, enabling efficient debugging like in the example below:
+
+![React Query plugin web interface](https://github.com/obytes/react-native-template-obytes/assets/114411010/26bc96ef-e6cb-49c3-be3c-006d6901e440)

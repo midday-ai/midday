@@ -1,0 +1,85 @@
+---
+title: Github Action workflows
+description: A list of all the Github Action workflows that come with the starter and how to use them.
+head:
+  - tag: title
+    content: Github Action workflows | A list of all the Github Action workflows that come with the starter and how to use them.
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+The starter comes with over 10 GitHub Actions workflows that help you automate the process of checking, testing, releasing, and much more.
+
+All those workflows are self-documented and contain all details directly inside the workflow file as comments. This approach makes it easier to understand what each workflow does and how to use it without having to go back and forth between the documentation and the workflow file.
+
+This page lists all workflows and actions we use and adds more details on the approach we are using to make those workflows as simple as possible.
+
+All files related to GitHub Actions are located in the `.github/workflows` and `.github/actions` folders.
+
+## Actions
+
+You can think of actions as functions that are used by workflows to perform a specific task and allow you to reuse the same task in multiple workflows without duplicating the code which made them easier to maintain.
+
+All actions are located in the `.github/actions` folder, and here is the complete list:
+
+### ⚙️ Node setup and PNM install
+
+<CodeBlock file=".github/actions/setup-node-pnpm-install/action.yml" />
+
+### ⚙️ Setup JDK && Generate APK
+
+<CodeBlock file=".github/actions/setup-jdk-generate-apk/action.yml" />
+
+### ⚙️ EAS Build
+
+<CodeBlock file=".github/actions/eas-build/action.yml" />
+
+## Workflows
+
+### ⚙️ Linting and formatting
+
+<CodeBlock file=".github/workflows/lint-ts.yml" />
+
+### ⚙️ Type checking
+
+<CodeBlock file=".github/workflows/type-check.yml" />
+
+### ⚙️ Expo Doctor
+
+<CodeBlock file=".github/workflows/expo-doctor.yml" />
+
+### ⚙️ Compress Images
+
+<CodeBlock file=".github/workflows/compress-images.yml" />
+
+### ⚙️ Running Tests + Coverage Reports
+
+<CodeBlock file=".github/workflows/test.yml" />
+
+### ⚙️ New App Version
+
+<CodeBlock file=".github/workflows/new-app-version.yml" />
+
+### ⚙️ New Github Release
+
+<CodeBlock file=".github/workflows/new-github-release.yml" />
+
+### ⚙️ EAS Build QA
+
+<CodeBlock file=".github/workflows/eas-build-qa.yml" />
+
+### ⚙️ EAS Build Prod
+
+<CodeBlock file=".github/workflows/eas-build-prod.yml" />
+
+### ⚙️ E2E Test for Android
+
+<CodeBlock file=".github/workflows/e2e-android.yml" />
+
+### ⚙️ E2E Test for Android using Maestro Cloud
+
+<CodeBlock file=".github/workflows/e2e-android-maestro.yml" />
+
+### ⚙️ E2E Test for Android using EAS Build
+
+<CodeBlock file=".github/workflows/e2e-android-eas-build.yml" />

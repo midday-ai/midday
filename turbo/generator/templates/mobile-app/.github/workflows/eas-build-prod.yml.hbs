@@ -1,0 +1,43 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/eas-build-prod.yml
+# Starter releasing process: https://starter.obytes.com/ci-cd/app-releasing-process/
+
+# ✍️ Description:
+# This workflow is used to trigger a build on EAS for Prod environment.
+# Can be triggered manually from the actions tab.
+# This workflow will use ./actions/eas-build action to trigger the build on EAS with production env.
+
+# 🚨 GITHUB SECRETS REQUIRED:
+#         - EXPO_TOKEN: Expo token to authenticate with EAS
+#         - You can get it from https://expo.dev/settings/access-tokens
+
+name: EAS Production Build (Android & IOS) (EAS)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Build:
+    name: EAS Production Build (Android & IOS) (EAS)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
+            exit 1
+          fi
+
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: ⏱️ EAS Build
+        uses: ./.github/actions/eas-build
+        with:
+          APP_ENV: production
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}

@@ -1,0 +1,111 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/e2e-android-eas-build.yml
+# End-to-end testing: https://starter.obytes.com/testing/end-to-end-testing/
+
+# ✍️ Description:
+# This workflow is used to run end-to-end tests for EAS build on Android.
+# It uses Maestro Cloud to run tests on Android emulator.
+# It downloads the APK from EAS build and triggers the tests on Maestro Cloud with the downloaded APK.
+
+# 🚨 GITHUB SECRETS REQUIRED:
+# MAESTRO_CLOUD_API_KEY: API key for Maestro Cloud. You can get it from https://cloud.mobile.dev/ci-integration/github-actions#add-your-api-key-secret
+
+name: E2E Tests EAS Build Android (Maestro + Github Action)
+
+on:
+  workflow_dispatch:
+    inputs:
+      apk-url:
+        type: string
+        description: 'EAS APK URL'
+        required: true
+        default: ''
+
+jobs:
+  download-eas-apk:
+    if: github.event_name != 'pull_request'  && github.event.inputs.apk-url != ''
+    name: Download Test APK From EAS Url (wget)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Download EAS APK
+        run: wget ${{ github.event.inputs.apk-url }} -O ./app-release.apk
+
+      - name: Upload Test APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-apk
+          path: ./app-release.apk
+
+  test-android:
+    name: E2E Tests EAS Build Android (Maestro + Github Action)
+    needs: download-eas-apk
+    runs-on: macOS-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Install Maestro
+        run: npm run install-maestro ## We use npm because we don't need to install deps again
+
+      - name: Download Test APK
+        uses: actions/download-artifact@v3
+        with:
+          name: test-apk
+          path: ${{ github.workspace }}
+
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-cache
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          cores: 2
+          ram-size: 4096M
+          profile: Nexus 6
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Run tests with Maestro
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          cores: 2
+          ram-size: 4096M
+          profile: Nexus 6
+          script: |
+            adb install "${{ github.workspace }}/app-release.apk"
+            $HOME/.maestro/bin/maestro test .maestro/ --env=APP_ID=com.obytes.staging  --format junit
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-logs
+          path: ~/.maestro/tests/**/*
+
+      - name: Store tests result
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e_android_report
+          path: |
+            report.xml

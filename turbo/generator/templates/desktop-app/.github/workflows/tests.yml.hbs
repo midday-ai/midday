@@ -1,0 +1,37 @@
+name: Tests
+on: [ workflow_call ]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: 'bash'
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+      - run: npm ci
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
+      - run: npm run test:main --if-present
+      - run: npm run test:preload --if-present
+      - run: npm run test:renderer --if-present
+
+      # I ran into problems trying to run an electron window in ubuntu due to a missing graphics server.
+      # That's why this special command for Ubuntu is here
+      - run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:e2e --if-present
+        if: matrix.os == 'ubuntu-latest'
+
+      - run: npm run test:e2e --if-present
+        if: matrix.os != 'ubuntu-latest'

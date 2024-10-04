@@ -1,0 +1,86 @@
+---
+title: Obytes Starter | React Native/Expo starter
+description: "Your All-in-One Solution for Building Outstanding React Native/Expo Apps. From editor setup to store submission, we've got you covered!"
+template: splash
+lastUpdated: false
+banner:
+  content: |
+    🌟 Loving our starter? Share your success story! Your feedback fuels our passion.
+    <a href="https://starter.obytes.com/reviews">Drop a review</a> and inspire others! 🚀
+hero:
+  title: Perfect React Native App Kickstart 🚀!
+  tagline: "Your All-in-One Solution for Building Outstanding React Native/Expo Apps. From editor setup to store submission, we've got you covered!"
+  image:
+    file: ../../assets/logo.webp
+  actions:
+    - text: Get Started
+      link: /overview
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/obytes/react-native-template-obytes
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+import GithubStar from '../../components/GithubStar.astro';
+import About from '../../components/about.astro';
+
+<GithubStar />
+
+## Features
+
+<CardGrid stagger>
+	<Card title="Latest Expo SDK + Dev Client" icon="star">
+		We utilize the most recent Expo SDK and React Native version, along with a custom development client feature, to guarantee that you can install any package and retain full control over your app.
+	</Card>
+  <Card title="Expo Router" icon="add-document">
+		The latest version of Expo Router comes pre-installed and includes examples that demonstrate how to implement comprehensive navigation within your app.
+	</Card>
+  <Card title="10+ GitHub workflows" icon="open-book">
+    From running type checks, tests, lint checks, and code formatting to
+    generating a new app version, and building your app using EAS Build, already
+    configured and ready to go!
+  </Card>
+  <Card title="Minimal UI kit with Tailwind CSS" icon="open-book">
+		We've included a minimal UI with most of the components you'll need to get started with your project. It's built using Tailwind CSS and is very easy to customize.
+  </Card>
+	<Card title="VSCode Setup" icon="laptop">
+		A complete list of recommended extensions, settings, and snippets for Visual Studio Code (VSCode) that enhance the developer experience and boost productivity.
+	</Card>
+	<Card title="TS + Eslint + Prettier + Husky" icon="setting">
+		We use TypeScript, Eslint, Prettier, and Husky to ensure that your code is clean and consistent. No more worrying about code style or pushing bad code!
+	</Card>
+	<Card title="Fully Documented" icon="open-book">
+		We've included a comprehensive set of documentation to help you get started with your project and understand our choices and decisions.
+	</Card>
+	<Card title="Multiple environment builds support" icon="setting">
+		Multiple app environments with a robust solution to manage and validate environment variables with Zod. It enables easy switching between different environments throughout the development and deployment processes.
+	</Card>
+
+<Card title="Form and Keyboard Handling" icon="open-book">
+  We use React Hook Form for form management and Zod for validation, along with
+  a set of inputs for your app. We also include keyboard handling to provide a
+  seamless user experience.
+</Card>
+<Card title="Auth Flow" icon="open-book">
+  We have included a complete authentication flow based on Zustand as a state
+  management library and `react-native-mmkv` as a secure and fast solution for
+  storing tokens and other sensitive data.
+</Card>
+
+  <Card title="React Query + Axios" icon="open-book">
+		We manage data fetching using React Query and Axios. These powerful libraries make it easy to fetch, cache, and update data in your React applications. We also include a set of VSCode snippets to make your life easier when creating queries and mutations.
+	</Card>
+  <Card title="Unit + E2E tests" icon="document">
+		We provide a complete setup for unit and end-to-end tests using Jest and React Testing Library, along with Cypress for end-to-end testing. This will assist you in writing tests for your app and ensuring that it functions as expected.
+	</Card>
+</CardGrid>
+
+<About title="Built with ❤️ by">
+
+In addition to maintaining this starter kit, we provide expertise in custom projects and app development. If you're looking for experienced and reliable developers to bring your app vision to life, reach out to us. Let's discuss your project and explore how we can help you achieve your goals.
+
+[Contact us](https://obytes.com/contact)
+
+</About>

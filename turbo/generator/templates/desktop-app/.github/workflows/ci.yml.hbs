@@ -1,0 +1,49 @@
+# This workflow is the entry point for all CI processes.
+# It is from here that all other workflows are launched.
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'renovate/**'
+    paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/ci.yml'
+      - '!.github/workflows/typechecking.yml'
+      - '!.github/workflows/tests.yml'
+      - '!.github/workflows/release.yml'
+      - '**.md'
+      - .editorconfig
+      - .gitignore
+      - '.idea/**'
+      - '.vscode/**'
+  pull_request:
+    paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/ci.yml'
+      - '!.github/workflows/typechecking.yml'
+      - '!.github/workflows/tests.yml'
+      - '!.github/workflows/release.yml'
+      - '**.md'
+      - .editorconfig
+      - .gitignore
+      - '.idea/**'
+      - '.vscode/**'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typechecking:
+    uses: ./.github/workflows/typechecking.yml
+  tests:
+    uses: ./.github/workflows/tests.yml
+  draft_release:
+    permissions:
+      contents: write # Allows this job to create releases
+    with:
+      dry-run: ${{ github.event_name != 'push' || github.ref_name != 'main' }}
+    needs: [ typechecking, tests ]
+    uses: ./.github/workflows/release.yml
+

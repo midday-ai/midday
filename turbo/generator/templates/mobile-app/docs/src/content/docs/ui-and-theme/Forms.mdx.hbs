@@ -1,0 +1,119 @@
+---
+title: Forms
+description: How to handle forms with react-hook-form and controlled components.
+head:
+  - tag: title
+    content: Forms | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+Forms are a common feature of any application. In this section, we will show you how you can handle form the right way with the starter.
+
+## react-hook-form
+
+The starter uses [react-hook-form](https://react-hook-form.com/) to handle forms. It is a popular library that provides a lot of features out of the box. It is also very easy to use and integrate with React Native.
+
+Make sure to check the [react-hook-form documentation](https://react-hook-form.com/) to learn more about how to use it.
+
+As we mention in the components section of the documentation [here](../components/), we create a set of controlled components that are only used with react-hook-form. The starter only provides two components: `ControlledInput` and `ControlledSelect` but you can easily create other components using the same approach.
+
+Here is the complete code of our `ControlledInput` when we use `useController` hook from react-hook-form to handle form state and validation rules:
+
+<CodeBlock file="src/ui/input.tsx" />
+
+If you want to create your own controlled component, you just need to make sure your component props type extends from `InputControllerType` the same way we are using it with `ControlledInput`.
+Here is another example of a Select input we create using the same approach as `ControlledInput`:
+
+<CodeBlock file="src/ui/select.tsx" />
+
+## Use Case
+
+Let's say you want to create a form that allows the user to log in to the application. You will need to create a screen that contains the form with email and password fields, as well as a submit button. The form will need to be validated, and the data will need to be sent to the backend. Here's how you can do it:
+
+**Step 1: Create your schema validation **
+
+The right way to validate a form is to create a schema validation. You can use any library you want but we recommend using zod as you can easily infer the types from the schema. Here is how you can create a schema validation for the login form:
+
+```tsx
+import * as z from 'zod';
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+type FormType = z.infer<typeof schema>;
+```
+
+**Step 2: Create your form component**
+
+Now that you have your schema validation, you can easily create your login screen using react-hook-form and the controlled components we already have.
+Here is how you can create your login screen:
+
+```tsx
+import { zodResolver } from '@hookform/resolvers/zod';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
+import { useAuth } from '@/core';
+import { Button, ControlledInput, View } from '@/ui';
+
+const schema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+});
+
+type FormType = z.infer<typeof schema>;
+
+export const Login = () => {
+  const { signIn } = useAuth();
+
+  const { handleSubmit, control } = useForm<FormType>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = (data: FormType) => {
+    console.log(data);
+    signIn({ access: 'access-token', refresh: 'refresh-token' });
+  };
+  return (
+    <View className="flex-1 justify-center p-4">
+      <ControlledInput control={control} name="email" label="Email" />
+      <ControlledInput
+        control={control}
+        name="password"
+        label="Password"
+        placeholder="***"
+        secureTextEntry={true}
+      />
+      <Button
+        label="Login"
+        onPress={handleSubmit(onSubmit)}
+        variant="primary"
+      />
+    </View>
+  );
+};
+```
+
+Done ! You have created a form with validation and typescript support.
+
+:::tip
+Any Component with props that inherit from the `InputControllerType` can be used with react-hook-form. You can easily create your own controlled component using the same approach as `ControlledInput` and `ControlledSelect`.
+:::
+
+## Handling Keyboard
+
+The template comes with [`react-native-keyboard-controller`](https://kirillzyusko.github.io/react-native-keyboard-controller/) pre-installed and configured to handle the keyboard. You only need to check the [documentation](https://kirillzyusko.github.io/react-native-keyboard-controller/) and use the appropriate approach for your use case. ( note that we already added the `KeyboardProvider` to the layout in the root file)
+
+Make sure to check the following video for more details on how to handle keyboard in react native:
+
+<div class="embed-container">
+  <iframe
+    src="https://www.youtube.com/embed/Y51mDfAhd4E?si=8uPml61z0R1hsZGy&amp;start=1139"
+    frameborder="0"
+    allowfullscreen
+  ></iframe>
+</div>

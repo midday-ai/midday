@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+function changed {
+    git diff --name-only HEAD@{1} HEAD | grep "^$1" >/dev/null 2>&1
+}
+
+echo 'Checking for changes in pnpm-lock.yml...'
+
+if changed 'pnpm-lock.yml'; then
+    echo "📦 pnpm-lock.yml changed. Run pnpm install to bring your dependencies up to date."
+    pnpm install
+fi
+
+echo 'You are up to date :)'
+
+echo 'If necessary, you can run pnpm prebuild to generate native code.'
+
+exit 0

@@ -1,0 +1,76 @@
+---
+title: Internationalization
+description: How to add internationalization to your app.
+head:
+  - tag: title
+    content: Internationalization | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+The starter comes with a basic internationalization setup. It uses [expo-localization](https://docs.expo.dev/guides/localization/) and [i18next](https://www.i18next.com/) to provide a simple way to translate your app.
+
+## Adding a new language
+
+Mainly the demo app supports two languages: English and Arabic (RTL). You can add more languages by adding the translation files in the `src/translations` folder and adding the language code to the `src/core/i18n/resources.ts` file.
+
+<CodeBlock file="src/core/i18n/resources.ts" />
+
+:::tip
+Anything related to internationalization should be found in the `src/core/i18n` folder.
+:::
+
+## Using translations in your app
+
+The i18n core module provides a set of utility functions to help you use translation in your app.
+
+- `useTranslation` hook from `react-i18next`: to get the translation function.
+
+```tsx
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { Text } from '@/ui';
+
+export const Foo = () => {
+  const { t } = useTranslation();
+  return (
+    <>
+      <Text className="text-center">{t('settings.language')}</Text>
+    </>
+  );
+};
+```
+
+or as `Text` component comes with translation support, you can easily use it as follows:
+
+```tsx
+import React from 'react';
+
+import { Text } from '@/ui';
+
+export const Foo = () => {
+  return <Text className="text-center" tx="settings.language" />;
+};
+```
+
+- `useSetLanguage` hook: to change the current language. This hook returns the selected language and a function to change the language.
+
+Additionally, the `useSetLanguage` hook will save the selected language in device storage using `MMKV` and will be used as the default language when the app is opened again As well as adding some extra config for RTL languages while updating the selected language.
+
+<CodeBlock file="src/core/i18n/utils.tsx" />
+
+## Robust translation
+
+**Typescript support**
+
+To make the translation for your app more robust and easy to maintain, we have added TypeScript support for the translation function. This ensures that you are using the correct translation key and provide auto-completion for the translation keys.
+Here is an example of the error you will get if you are using the wrong translation key.
+
+![typescript-translation](https://github.com/obytes/react-native-template-obytes/assets/11137944/80a7a0fd-a6f8-4d31-a450-46de797ebdc6)
+
+## Eslint rules
+
+We have also added ESLint rules to ensure that your translation file resources are always up to date. These rules will run as a pre-commit hook whenever you attempt to commit changes to the translation files.
+
+We utilize [eslint-plugin-i18n-json](https://github.com/godaddy/eslint-plugin-i18n-json) alongside a customized validation script for i18next. This script helps sort keys, ensures that all resource files are identical and prevents any missing translations.

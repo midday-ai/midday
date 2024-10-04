@@ -1,0 +1,65 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/lint-ts.yml
+# Starter releasing process: https://starter.obytes.com/ci-cd/app-releasing-process/
+
+# ✍️ Description:
+# This workflow is used to create a new version of the app and push a new tag to the repo.
+# As this workflow will push code to the repo, we set up GitHub Bot as a Git user.
+# This Workflow need to be triggered manually from the Actions tab in the repo.
+#         1. Choose your release type (patch, minor, major)
+#         2. The workflow will run the np-release script which runs the following steps:
+#             - Bump the version in package.json based on the release type using np
+#             - Run the prebuild of the app to align the package.json version with the native code
+#             - Create a new tag with the new version
+#             - Push the new tag to the repo
+#
+
+# 🚨 GITHUB SECRETS REQUIRED:
+#         - GH_TOKEN: A GitHub token with write repo access.
+#           You can generate one from here: https://docs.github.com/en/enterprise-server@3.6/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+#           make sure to add it to the repo secrets with the name GH_TOKEN
+
+name: New App Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        type: choice
+        description: 'Release type (one of): patch, minor, major'
+        required: true
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  release:
+    name: Create New Version and push new tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 🔍 GH_TOKEN
+        if: env.GH_TOKEN == ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "GH_TOKEN=${GITHUB_TOKEN}" >> $GITHUB_ENV
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: 📝 Git User Setup
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: 🏃‍♂️ Run App release
+        run: |
+          pnpm app-release ${{ github.event.inputs.release-type }}

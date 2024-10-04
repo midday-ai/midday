@@ -1,0 +1,17 @@
+---
+title: Storage
+description: Storage guide with mmkv library
+head:
+  - tag: title
+    content: Storage| React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+# Storage
+
+The starter comes with a simple storage module that uses [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv) to store data in a key-value format. We also added a simple storage utility to assist you in using the storage module.
+
+<CodeBlock file="src/core/storage.tsx" />
+
+The `react-native-mmkv` library provides various features such as using hooks and adding encryption to stored data. Feel free to check the [official docs](https://github.com/mrousavy/react-native-mmkv) for more information.

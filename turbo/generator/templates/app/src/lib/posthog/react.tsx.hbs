@@ -2,7 +2,7 @@
 
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
-import { env } from '@v1/env/web/client';
+import { env } from '@midday/env/web/client';
 
 if (typeof window !== 'undefined' && env.NEXT_PUBLIC_POSTHOG_HOST && env.NEXT_PUBLIC_POSTHOG_KEY) {
   posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY, {

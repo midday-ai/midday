@@ -1,0 +1,48 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/compress-images.yml
+
+# ✍️ Description:
+# This workflow is used to compress images in the repo.
+# This workflow will trigger on a push to the "master" or "main" branch and only run when a new image is added or updated.
+# If it's the case, it will compress those images and create a pull request with the compressed images.
+
+# 🚨 GITHUB SECRETS REQUIRED: None
+
+name: Compress images
+on:
+  push:
+    branches:
+      - master
+      - main
+    paths:
+      - '**.jpg'
+      - '**.jpeg'
+      - '**.png'
+      - '**.webp'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: calibreapp/image-actions
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Compress Images
+        id: calibre
+        uses: calibreapp/image-actions@main
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          compressOnly: true
+          ignorePaths: 'node_modules/**,ios/**,android/**'
+
+      - name: Create Pull Request
+        if: steps.calibre.outputs.markdown != ''
+        uses: peter-evans/create-pull-request@v3
+        with:
+          title: Auto Compress Images
+          branch-suffix: timestamp
+          commit-message: Compress Images
+          body: ${{ steps.calibre.outputs.markdown }}

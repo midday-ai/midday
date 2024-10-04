@@ -1,0 +1,32 @@
+---
+title: Customize your App
+description: Customize your app by updating Expo configuration and app icon and splash screen.
+head:
+  - tag: title
+    content: Customize your App | React Native / Expo Starter
+---
+
+import Code from '../../../components/code.astro';
+
+The starter is a simple expo app. You just need to edit `app.config.ts` file to update expo attributes and configuration.
+
+Here is the complete config file :
+
+<Code file="app.config.ts" />
+
+You can read more about expo configuration [here](https://docs.expo.io/workflow/configuration/).
+If you have any configurations that depend on environment variables, such as API URLs or keys, you can create it in `config` file following [the environment variables guide](./environment-vars-config) and import your config to `app.config.ts` file.
+
+:::note
+We included TODO comments in the project to guide you to the areas requiring updates.
+:::
+
+## Splash screen and app icon
+
+As we are using expo to create the starter, updating the app icon and splash screen is straightforward. You only need to update the app icon and splash screen images inside the `assets` folder and run `expo prebuild` to update the app icon and splash screen.
+
+As we are supporting multiple variants for development, staging and production environments you need 3 different icons but the right solution is to use the same icon with badges for each environment.
+
+For more details about the app icon and splash screen, please refer to the expo documentation.
+
+👉 [Create a splash screen](https://docs.expo.dev/guides/splash-screens/)

@@ -1,0 +1,157 @@
+---
+title: Upgrading project dependencies
+description: How to update your project dependencies
+head:
+  - tag: title
+    content: Upgrading project dependencies | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+:::note
+Please note that this guide is intended for updating your project dependencies only, and it does not ensure that your project will be in sync with the latest version of the starter.
+
+To take advantage of the latest improvements in the starter project, you will need to compare your `osMetadata.initVersion` with the latest release on GitHub, and manually apply any necessary changes to your project.
+:::
+
+## Easy way 🚀
+
+Upgrading a React Native project to the latest version can be a challenging task. However, as we are using Expo with a custom dev client, the upgrade process is relatively straightforward compared to a bare React Native project, which requires a significant amount of manual work.
+
+To update most of the dependencies that come with the starter, you can follow these simple steps:
+
+First, go to GitHub and compare your `osMetadata.initVersion` in your `package.json` with the latest release. Check if the `package.json` has been updated. Then, copy the new dependencies and devDependencies versions and paste them into your package.json file.
+
+Finally, run the following commands to make sur everything is working as expected:
+
+```bash
+rm -rf node_modules ## remove node_modules folder
+pnpm install ## install new dependencies
+pnpm run doctor ## check for any issues with the dependencies you added to your project
+pnpm lint ## linting
+pnpm type-check ## type checking
+pnpm test ## tests
+pnpm prebuild --clean ## clean ios and android build folders and regenerate them
+pnpm ios ## run ios build
+pnpm android ## run android build
+pnpm start -c ## start the server
+```
+
+:::info
+If your starter version does not have the `osMetadata.initVersion` property, don't worry. Simply follow the steps in the rest of this guide to upgrade your project.
+
+Moreover, if you have added new dependencies to your project (which is common for most projects), the remaining sections of this guide will also assist you in upgrading your project's dependencies."
+:::
+
+## Upgrade Expo
+
+Visit the npm package registry [here](https://www.npmjs.com/package/expo) to ensure that you are getting the latest version of Expo.
+
+Once you have confirmed that you have the latest version, open your terminal and enter the following command:
+
+```bash
+pnpm add expo@latest
+## pnpm add expo@48.0.5 for example
+```
+
+Thanks to the amazing work of the expo team, you can run the following command to upgrade your dependencies to match the correct version required by Expo last version.
+
+```bash
+pnpm expo install --fix
+```
+
+Running the command above will update your dependencies to ensure that they match the version requirements of Expo. In some cases, you may need to manually apply changes to your project in order to make it work with the new version. The command may also provide more detailed information on any necessary changes.
+
+After updating your dependencies, run expo doctor to identify and fix any other issues that may be related to the new version of Expo and your devDependencies.
+
+```bash
+pnpm run doctor ## a script inside the starter
+```
+
+Running this command will generate a list of issues that require manual attention. In addition, it will provide a set of npm packages that need to be updated with the exact version required by the new version of Expo.
+
+Now it's time to make sure everything is still working as expected 😀:
+
+```bash
+rm -rf node_modules ## remove node_modules folder
+pnpm install ## install new dependencies
+pnpm lint ## linting
+pnpm type-check ## type checking
+pnpm test ## tests
+pnpm prebuild --clean ## clean ios and android build folders and regenerate them
+pnpm ios ## run ios build
+pnpm android ## run android build
+pnpm start -c ## start the server
+```
+
+Unfortunately, there is no magic trick here in case you have any issues while running your checks, Fixing those errors may require some manual effort. You can start by reading the error message and identifying any relevant packages that may be causing the issue. Check the changelog of those packages to see if there have been any recent updates that might have introduced breaking changes. This will help you to pinpoint the root cause of the issue and take the necessary steps to resolve it.
+
+The only rule here is to make sure that your project is working as expected before pushing your changes to the remote repository.
+
+:::tip
+Upgrading your project regularly can make the process much easier. We recommend upgrading your project a month after each new Expo major version is released. This will help you stay up to date with the latest features and security updates while minimizing the risk of encountering compatibility issues with older versions of Expo.
+:::
+
+## Upgrade Non Native dependencies
+
+While Expo upgrade will help you update most native dependencies automatically through the process outlined above, it's important to keep in mind that non-native dependencies(JS only) may also need to be updated.
+
+This time you will use the power of pnpm to update dependencies to the last version and then run our checks to make sure everything is working as expected.
+
+First, run the following command:
+
+```bash
+pnpm up -i
+```
+
+When you run this command, it will generate a list of all dependencies associated with your project. You will then be prompted to select the dependencies that you want to update.
+
+```bash
+◯ zod                               latest  3.19.1   ❯  3.21.4   https://zod.dev
+◯ zustand                           latest  4.1.4    ❯  4.3.6    https://github.com/pmndrs/zustand
+
+ devDependencies
+   name                              range   from        to       url
+ ◯ @babel/core                       latest  7.20.2   ❯  7.21.0   https://babel.dev/docs/en/next/babel-core
+ ◯ @commitlint/cli                   latest  17.2.0   ❯  17.4.4   https://commitlint.js.org/
+ ◯ @commitlint/config-conventional   latest  17.2.0   ❯  17.4.4   https://commitlint.js.org/
+ ◯ @testing-library/jest-native      latest  5.1.2    ❯  5.4.2    https://github.com/testing-library/jest-native#readme
+ ◯ @testing-library/react-native     latest  11.4.0   ❯  11.5.3   https://callstack.github.io/react-native-testing-library
+ ◯ @types/i18n-js                    latest  3.8.3    ❯  3.8.4    https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/i18n-js
+ ◯ @types/jest                       latest  29.2.2   ❯  29.4.0   https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/jest
+ ◯ @types/react-native               latest  0.70.6   ❯  0.71.3   https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/react-native
+❯◯ @typescript-eslint/eslint-plugin  latest  5.42.1   ❯  5.54.1   https://github.com/typescript-eslint/typescript-eslint#readme
+ ◯ @typescript-eslint/parser         latest  5.42.1   ❯  5.54.1   https://github.com/typescript-eslint/typescript-eslint#readme
+ ◯ babel-plugin-module-resolver      latest  4.1.0    ❯  5.0.0    https://github.com/tleunen/babel-plugin-module-resolver#readme
+ ◯ eslint                            latest  8.27.0   ❯  8.35.0   https://eslint.org
+ ◯ eslint-plugin-i18n-json           latest  3.1.0    ❯  4.0.0    https://github.com/godaddy/eslint-plugin-i18n-json#readme
+ ◯ eslint-plugin-simple-import-sort  latest  8.0.0    ❯  10.0.0   https://github.com/lydell/eslint-plugin-simple-import-sort#readme
+ ◯ eslint-plugin-tailwindcss         latest  3.6.2    ❯  3.10.1   https://github.com/francoismassart/eslint-plugin-tailwindcss
+ ◯ eslint-plugin-unicorn             latest  43.0.2   ❯  46.0.0   https://github.com/sindresorhus/eslint-plugin-unicorn#readme
+```
+
+There is no one-size-fits-all solution for managing updates to your project's dependencies. However, we recommend reviewing the changelog of each package and paying particular attention to any major version updates (indicated by red text). Major version updates may introduce breaking changes that could potentially affect your project's functionality.
+
+We recommend to start updating `devDependencies` first by following this process:
+
+1. Select all `devDependencies` and update them to the latest version.
+2. Run `pnpm doctor` to revert any changes that are not in sync with the Expo version you are using.
+3. Run your checks to make sure everything is working as expected.
+
+```bash
+rm -rf node_modules ## remove node_modules folder
+pnpm install ## install new dependencies
+pnpm lint ## linting
+pnpm type-check ## type checking
+pnpm test ## tests
+pnpm prebuild --clean ## clean ios and Android build folders and regenerate them
+pnpm ios ## run ios build
+pnpm android ## run android build
+pnpm start -c ## start the server
+```
+
+If you are lucky enough and everything works as expected without any issues, you can now update the rest of the dependencies.
+
+:::tip
+In case your application is not tested enough, it's a good idea to take some time to go through the application and ensure that the most critical features are working correctly before committing any changes.
+:::

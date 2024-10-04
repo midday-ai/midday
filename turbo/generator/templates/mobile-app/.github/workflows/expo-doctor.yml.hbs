@@ -1,0 +1,44 @@
+# 🔗 Links:
+# Source file: https://github.com/obytes/react-native-template-obytes/blob/master/.github/workflows/expo-doctor.yml
+
+# ✍️ Description:
+# This workflow runs the expo doctor command to check if your project dependencies are aligned with the expo sdk version you are using.
+# Can be triggered manually from the Actions tab in your project.
+# Runs Also on pull requests and pushes to the main/master branch, but only if the `package.json` or `pnpm-lock.yaml` files have been changed.
+
+# 🚨 GITHUB SECRETS REQUIRED: NONE
+
+name: Expo Doctor (expo)
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  doctor:
+    name: Expo Doctor (expo)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📦 Checkout project repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup Node + PNPM + install deps
+        uses: ./.github/actions/setup-node-pnpm-install
+
+      - name: Run prebuild
+        run: pnpm run prebuild ## we only need to run this to generate the badged icon in `.expo` folder
+
+      - name: 🚑 Run Doctor Checks
+        run: rm -rf ios android && pnpm run doctor ## apprently the new update of expo will break if you already have ios and android folders in your project as they will show up a eas warning

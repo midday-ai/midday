@@ -1,0 +1,29 @@
+appId: ${APP_ID}
+env:
+  Title: 'Post title'
+  CONTENT:
+    "It is a long established fact that a reader will be distracted by the\
+    \ readable content of a page when looking at its layout. The point of using Lorem\
+    \ Ipsum is that it has a more-or-less normal distribution of letters, as opposed\
+    \ to using"
+---
+- launchApp
+- runFlow: ../utils/onboarding-and-login.yaml
+- assertVisible: 'Feed'
+- assertVisible: 'Create'
+- tapOn: 'Create'
+- assertVisible: 'Add Post'
+- tapOn:
+    id: 'title'
+- inputText: ${Title}
+- tapOn:
+    id: 'body-input'
+- inputText: 'short content'
+- tapOn:
+    id: 'add-post-button'
+- assertVisible: 'String must contain at least 120 character(s)'
+- inputText: ${CONTENT}
+- runFlow: ../utils/hide-keyboard.yaml
+- tapOn:
+    id: 'add-post-button'
+- assertVisible: 'Post added successfully'

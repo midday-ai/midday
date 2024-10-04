@@ -1,0 +1,24 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Current Test File",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"--import=@nitrogql/esbuild-register",
+				"--test",
+				"${relativeFile}"
+			],
+			"presentation": {
+				"clear": true,
+				"showReuseMessage": false,
+				"echo": false
+			},
+			"group": {
+				"kind": "test",
+				"isDefault": true
+			}
+		}
+	]
+}

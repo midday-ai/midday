@@ -1,0 +1,71 @@
+---
+title: Authentication
+description: How to manage authentication in your app.
+head:
+  - tag: title
+    content: Authentication | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+
+Most of the applications we had the chance to work on required some sort of authentication and having a bad approach to do it can lead to a lot of problems. The starter kit comes with the basics and mostly what you need to start with authentication in your application.
+
+As Authentication is global to the application, we end up using Zustand to manage the authentication state of the application.
+
+[Zustand](https://github.com/pmndrs/zustand) is a state management library that is very simple to use and highly performant. It is also easy to integrate with React and works better than a simple context API, as it offers additional features such as selectors to prevent unnecessary re-renders.
+
+Zustand works very well with TypeScript and can be easily used outside the React tree, which means more flexibility.
+
+## Authentication Store
+
+As mentioned earlier, we use Zustand to manage the authentication state of the application. The authentication store is located in `src/store/auth` and is utilized for managing the authentication state of the application.
+
+<CodeBlock file="src/core/auth/index.tsx" />
+
+The store is composed of 2 states and 3 actions:
+
+- `status`: The status of the authentication. It can be `idle`, `signOut` or `signIn`.
+
+  - `idle`: Still not sure if the user is authenticated or not (when we are fetching tokens from the storage)
+  - `signOut`: The user is not authenticated
+  - `signIn`: The user is authenticated
+
+- `useToken`: The token of the user. It is used to authenticate the user to the API. It is stored in the storage of the device and we use it to hydrate the authentication status state when the application is started.
+
+  For the Demo app `useToken` is a simple object that contains the `accessToken` and the `refreshToken`. You can add more fields if you update the `TokenType` type in `src/core/auth/utils.ts`.
+
+- `signIn`: TThe function performs user sign-in. It accepts a token as a parameter, sets the token state, stores it locally, and updates the status to `signIn`.
+
+- `signOut`: The action to sign out the user. It sets the token state to `null` and removes it from the storage as well as setting the status to `signOut`.
+
+- `hydrate`: The action to hydrate the authentication status state. We call this action when the application is started to check if the user is authenticated or not. It fetches the token from the storage and sets the status to `signIn` if the token is not `null` or `signOut` if the token is `null`.
+
+## Use Authentication store
+
+You guessed it, you only need to import the store from `@/core` and use it in your component or even call store actions from outside React.
+
+```tsx
+import { useAuth, hydrate } from '@/core';
+
+hydrate(); // call this when the application is started to check if the user is authenticated or not
+
+const App = () => {
+  const status = useAuth.use.status();
+  const signOut = useAuth.use.signOut();
+
+  return (
+    <View>
+      <Text>{status}</Text>
+      <Button title="Sign Out" onPress={signOut} />
+    </View>
+  );
+};
+```
+
+## Use Case
+
+Let's imagine we have a simple application that has a login navigator and a home navigator. The home navigator is only accessible if the user is authenticated, while the login navigator is accessible if the user is not authenticated.
+
+In this case, you only need to retrieve the status from the authentication store and display the appropriate navigation based on the status.
+
+<CodeBlock file="src/app/(app)/_layout.tsx" />

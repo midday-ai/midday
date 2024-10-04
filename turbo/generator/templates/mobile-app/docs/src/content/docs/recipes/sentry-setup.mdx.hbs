@@ -1,0 +1,303 @@
+---
+title: Sentry Setup
+description: How to setup Sentry in your app.
+head:
+  - tag: title
+    content: Sentry Setup | React Native / Expo Starter
+---
+
+import CodeBlock from '../../../components/code.astro';
+import { Steps } from '@astrojs/starlight/components';
+
+Sentry is one of the most popular solution for error reporting in the javascript ecosystem and has a great integration with Expo, we have been using it for a while and it has been working very well.
+
+The starter kit did not come with Sentry pre-configured, but it's very easy to setup and this guide will walk you through the process.
+
+## Install and configure Sentry
+
+<Steps>
+1. Create a new [Sentry account](https://sentry.io/signup/) if you don't have one already. Once logged in, create a new project for your React Native app.
+
+2. During project creation, pay close attention to and note down the following important details:
+
+   - Organization slug
+   - Project name
+   - DSN
+
+     we will use those details next to configure the Sentry SDK in your app.
+
+3. Now you need also to generate a new Auth Token so you can use it to upload source maps to Sentry. To generate a new Auth Token you need to go to Developer [Settings > Auth Tokens](https://sentry.io/settings/auth-tokens/) and create a new token.
+
+   - Copy and securely store the generated token. You'll need this for configuring source map uploads.
+
+4. At this point, you should have the following environment variables that need to be added to your `.env` files:
+
+   ```bash
+   SENTRY_ORG=your_sentry_organization_slug
+   SENTRY_PROJECT=your_sentry_project_name
+   SENTRY_DSN=your_sentry_dsn
+   ```
+
+   :::note
+   You can use the same Sentry configuration for all app variants (development, staging, production) as Sentry allows you to filter errors by app ID or package name in the dashboard. This simplifies setup and management while still providing the ability to distinguish between different environments.
+   :::
+
+   It's crucial to add these variables to `env.js` for validation. `SENTRY_ORG` and `SENTRY_PROJECT` should be added as build-time variables, while `SENTRY_DSN` should be added as a client variable.
+
+   Update your `env.js` file as follows:
+
+   ```js title='env.js'
+   // ... existing imports and configurations
+
+   const client = z.object({
+     // ... other client env vars
+     SENTRY_DSN: z.string().min(1, 'SENTRY_DSN is required'),
+   });
+
+   const buildTime = z.object({
+     // ... other build-time env vars
+     SENTRY_ORG: z.string().min(1, 'SENTRY_ORG is required'),
+     SENTRY_PROJECT: z.string().min(1, 'SENTRY_PROJECT is required'),
+   });
+
+   const _clientEnv = {
+     // ... other client env vars
+     SENTRY_DSN: process.env.SENTRY_DSN,
+   };
+
+   const _buildTimeEnv = {
+     // ... other build-time env vars
+     SENTRY_ORG: process.env.SENTRY_ORG,
+     SENTRY_PROJECT: process.env.SENTRY_PROJECT,
+   };
+
+   // ... rest of the file
+   ```
+
+   :::note
+   The `SENTRY_AUTH_TOKEN` should not be added to the `.env` file as it's sensitive information that shouldn't be exposed or pushed to version control. Instead, add it as an EAS secret using the [Expo dashboard](https://expo.dev/accounts/[account]/projects/[project]/secrets) or the EAS CLI:
+
+   ```bash
+   eas secret:create --scope your-project-name --name SENTRY_AUTH_TOKEN --value your-token-value --type string
+   ```
+
+   This ensures that your Sentry authentication token remains secure while still being accessible during the build process.
+   :::
+
+5. Now you can install the Sentry SDK in your project.
+
+   ```bash
+   npm install @sentry/react-native
+   ```
+
+6. Add Sentry plugin config to your `app.config.ts` file.
+
+   ```tsx title='app.config.ts'
+   // rest of the file
+
+   import { ClientEnv, Env } from './env';
+
+   export default ({ config }: ConfigContext): ExpoConfig => ({
+     ...config,
+     // rest of the config
+
+     plugins: [
+       // rest of the plugins
+       [
+         '@sentry/react-native/expo',
+         {
+           url: 'https://sentry.io/',
+           organization: Env.SENTRY_ORG,
+           project: Env.SENTRY_PROJECT,
+           note: 'Ensure you set the SENTRY_AUTH_TOKEN as an environment variable to authenticate with Sentry. Do not add it to the .env file. Instead, add it as an EAS secret or as an environment variable in your CI/CD pipeline for security.',
+           // If you are using a self-hosted instance, update the value of the url property
+           // to point towards your self-hosted instance. For example, https://self-hosted.example.com/.
+         },
+       ],
+     ],
+   });
+   ```
+
+7. Update your metro config to inject debug ID intro your source maps
+
+   ```js title='metro.config.js'
+   /* eslint-env node */
+   // this replaces `const { getDefaultConfig } = require('expo/metro-config');`
+   const { getSentryExpoConfig } = require('@sentry/react-native/metro');
+   const { withNativeWind } = require('nativewind/metro');
+
+   const config = getSentryExpoConfig(__dirname);
+
+   module.exports = withNativeWind(config, { input: './global.css' });
+   ```
+
+8. Now you are ready to initialize Sentry in your app.
+   Create a new file `src/core/sentry.ts` and add the following code:
+
+   ```tsx title='src/core/sentry.ts'
+   import { useNavigationContainerRef } from 'expo-router';
+   import { useEffect } from 'react';
+   import * as Sentry from '@sentry/react-native';
+   import { Env } from '@env';
+
+   const routingInstrumentation = new Sentry.ReactNavigationInstrumentation();
+
+   export const initSentry = () => {
+     Sentry.init({
+       dsn: Env.SENTRY_DSN,
+       // debug: Env.APP_ENV === 'development',
+       integrations: [
+         new Sentry.ReactNativeTracing({
+           routingInstrumentation,
+           enableNativeFramesTracking: true,
+           // ...
+         }),
+       ],
+     });
+   };
+
+   export const useSentryNavigationConfig = () => {
+     const navigationRef = useNavigationContainerRef();
+
+     useEffect(() => {
+       if (navigationRef) {
+         routingInstrumentation.registerNavigationContainer(navigationRef);
+       }
+     }, [navigationRef]);
+   };
+   ```
+
+   Then, initialize Sentry and configure it with navigation in your `src/app/_layout.tsx` file:
+
+   ```tsx title='src/app/_layout.tsx'
+   import { initSentry, useSentryNavigationConfig } from '@/core/sentry';
+   import * as Sentry from '@sentry/react-native';
+
+   initSentry();
+
+   function RootLayout() {
+     useSentryNavigationConfig();
+
+     return (
+       <Providers>
+         <Stack>
+           <Stack.Screen name="(app)" options={{ headerShown: false }} />
+           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+           ...
+         </Stack>
+       </Providers>
+     );
+   }
+
+   // Wrap your app with Sentry
+   export default Sentry.wrap(RootLayout);
+   ```
+
+   This setup will enable Sentry error tracking and performance monitoring in your app.
+
+9. One last thing is to add Apple privacy manifest to prevent any issues with Apple.
+   Create a new file `apple-privacy-manifest.json` and add the following code:
+
+   ```json title='apple-privacy-manifest.json'
+   {
+     "NSPrivacyCollectedDataTypes": [
+       {
+         "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeCrashData",
+         "NSPrivacyCollectedDataTypeLinked": false,
+         "NSPrivacyCollectedDataTypeTracking": false,
+         "NSPrivacyCollectedDataTypePurposes": [
+           "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+         ]
+       },
+       {
+         "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePerformanceData",
+         "NSPrivacyCollectedDataTypeLinked": false,
+         "NSPrivacyCollectedDataTypeTracking": false,
+         "NSPrivacyCollectedDataTypePurposes": [
+           "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+         ]
+       },
+       {
+         "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeOtherDiagnosticData",
+         "NSPrivacyCollectedDataTypeLinked": false,
+         "NSPrivacyCollectedDataTypeTracking": false,
+         "NSPrivacyCollectedDataTypePurposes": [
+           "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+         ]
+       }
+     ],
+     "NSPrivacyAccessedAPITypes": [
+       {
+         "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+         "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
+       },
+       {
+         "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
+         "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
+       },
+       {
+         "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
+         "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
+       }
+     ]
+   }
+   ```
+
+   Then add it to your `app.config.ts`
+
+   ```ts title='app.config.ts'
+   import applePrivacyManifest from './apple-privacy-manifest.json';
+   export default ({ config }: ConfigContext): ExpoConfig => ({
+     ...config,
+     // rest of the config
+     ios: {
+       // rest of ios config
+       privacyManifests: applePrivacyManifest,
+     },
+   });
+   ```
+
+   Read more about [Apple Privacy Manifest and sentry](https://docs.sentry.io/platforms/react-native/data-management/apple-privacy-manifest/)
+
+10. Now you are ready to test Sentry integration. Follow these steps to ensure errors are being reported correctly:
+
+    1. Run the prebuild command for your project.
+    2. Launch the app in a simulator or on a physical device.
+    3. Use the following code snippet to add error-triggering buttons to your app:
+
+    ```tsx
+    import React from 'react';
+    import { View, Button } from 'react-native';
+    import * as Sentry from '@sentry/react-native';
+
+    const SentryTestComponent = () => {
+      const throwJSError = () => {
+        throw new Error('Test JavaScript Error for Sentry');
+      };
+
+      const triggerNativeError = () => {
+        Sentry.nativeCrash();
+      };
+
+      return (
+        <View>
+          <Button title="Trigger JS Error" onPress={throwJSError} />
+          <Button title="Trigger Native Error" onPress={triggerNativeError} />
+        </View>
+      );
+    };
+
+    export default SentryTestComponent;
+    ```
+
+    4. Implement this component in your app and interact with the buttons.
+    5. Check your Sentry dashboard to verify that the errors are being reported correctly (make sure to wait a little bit for the errors to appear).
+
+    Remember to remove or disable these test buttons before releasing your app to production.
+
+</Steps>
+
+## More Resources
+
+- [Expo Sentry](https://docs.expo.dev/guides/using-sentry/)
+- [Sentry Documentation](https://docs.sentry.io/platforms/react-native/manual-setup/expo/)
