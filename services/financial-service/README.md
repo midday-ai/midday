@@ -64,7 +64,7 @@ To quickly get started with the Financial Service API:
 
 1. Clone the repository and install dependencies:
    ```bash
-   git clone https://github.com/your-organization/financial-service-api.git
+   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/financial-service-api.git
    cd financial-service-api
    npm install
    ```
@@ -100,7 +100,7 @@ For more detailed setup instructions, see the [Getting Started](#getting-started
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-organization/financial-service-api.git
+   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/financial-service-api.git
    cd financial-service-api
    ```
 

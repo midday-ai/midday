@@ -1,6 +1,9 @@
 # Latency Benchmarks API
 
-![SaasFly Logo](../../saasfly-logo.svg)
+
+<div align="center" width="100%">
+    <img src="../../saasfly-logo.svg" width="128" alt="" />
+</div>
 
 ## Overview
 
@@ -50,7 +53,7 @@ To quickly get started with the Latency Benchmarks API:
 
 1. Clone the repository and install dependencies:
    ```bash
-   git clone https://github.com/your-organization/latency-benchmarks.git
+   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/latency-benchmarks.git
    cd latency-benchmarks
    npm install
    ```
@@ -84,7 +87,7 @@ To quickly get started with the Latency Benchmarks API:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-organization/latency-benchmarks.git
+   git clone https://github.com/SolomonAIEngineering/financial-platform-as-a-service/latency-benchmarks.git
    cd latency-benchmarks
    ```
 
