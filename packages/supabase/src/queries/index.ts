@@ -1017,7 +1017,7 @@ export async function getTrackerRecordsByRangeQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate)",
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name, rate, currency)",
     )
     .eq("team_id", params.teamId)
     .gte("date", new UTCDate(params.from).toISOString())

@@ -197,7 +197,7 @@ function CalendarHeader({
             acc[projectName] = {
               duration: 0,
               amount: 0,
-              currency: event.currency,
+              currency: event.project.currency,
               rate: event.project.rate,
             };
           }
@@ -249,7 +249,7 @@ function CalendarHeader({
               meta?.totalDuration ? Math.round(meta.totalDuration / 3600) : 0
             }
           />
-          h
+          <span className="relative top-[3px]">h</span>
         </h1>
 
         <div className="text-sm text-[#606060] flex items-center space-x-2">
@@ -439,7 +439,7 @@ function CalendarDay({
       )}
     >
       <div>{format(date, "d")}</div>
-      <TrackerEvents data={data[formattedDate]} />
+      <TrackerEvents data={data[formattedDate]} isToday={isToday(date)} />
     </div>
   );
 }

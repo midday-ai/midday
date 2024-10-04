@@ -169,7 +169,10 @@ export function TrackerWidget({
                 )}
               >
                 <div>{format(date, "d")}</div>
-                <TrackerIndicator count={getEventCount(date)} />
+                <TrackerIndicator
+                  count={getEventCount(date)}
+                  isToday={isToday(date)}
+                />
               </button>
             );
           })}

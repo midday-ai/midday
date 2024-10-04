@@ -46,7 +46,7 @@ export function TrackerRecordForm({
   description,
   isSaving,
 }: Props) {
-  const isUpdate = eventId !== NEW_EVENT_ID;
+  const isUpdate = eventId && eventId !== NEW_EVENT_ID;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
