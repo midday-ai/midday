@@ -24,7 +24,7 @@ export async function Table({ filter, page, sort, query }: Props) {
   // NOTE: When we have a filter we want to show all results so users can select
   // And handle all in once (export etc)
   const transactions = await getTransactions({
-    to: hasFilters ? maxItems : pageSize,
+    to: hasFilters ? maxItems : page > 0 ? pageSize : pageSize - 1,
     from: 0,
     filter,
     sort,

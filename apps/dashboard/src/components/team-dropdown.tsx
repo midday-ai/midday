@@ -30,7 +30,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }: Props) {
   const [isOpen, onOpenChange] = useState(false);
   const changeTeam = useAction(changeTeamAction);
 
-  const sortedTeams = [...teams, { team: { id: "add" } }].sort((a, b) => {
+  const sortedTeams = teams.sort((a, b) => {
     if (a.team.id === selectedId) return -1;
     if (b.team.id === selectedId) return 1;
 
@@ -46,7 +46,7 @@ export function TeamDropdown({ selectedTeamId: initialId, teams }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <motion.div ref={ref} layout className="w-[32px] h-[32px] relative">
-        {sortedTeams.map(({ team }, index) => (
+        {[...sortedTeams, { team: { id: "add" } }].map(({ team }, index) => (
           <motion.div
             key={team.id}
             className="w-[32px] h-[32px] left-0 overflow-hidden absolute"
