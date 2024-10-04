@@ -12,6 +12,7 @@ import {
   UpdateUsageParamsSchema,
   UpdateUsageSchema,
 } from "./schema";
+import { excludedInstitutions } from "./utils";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -108,9 +109,13 @@ app.openapi(indexRoute, async (c) => {
 
     const data: SearchResult = JSON.parse(resultString);
 
+    const filteredInstitutions = data.hits.filter(
+      ({ document }) => !excludedInstitutions.includes(document.id),
+    );
+
     return c.json(
       {
-        data: data.hits?.map(({ document }) => ({
+        data: filteredInstitutions.map(({ document }) => ({
           id: document.id,
           name: document.name,
           logo: document.logo ?? null,

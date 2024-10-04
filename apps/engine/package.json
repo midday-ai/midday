@@ -13,13 +13,13 @@
     "@hono/zod-openapi": "^0.16.3",
     "@hono/zod-validator": "^0.3.0",
     "hono": "^4.6.3",
-    "plaid": "^27.0.0",
+    "plaid": "^28.0.0",
     "typesense": "^1.8.2",
     "xior": "^0.6.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240909.0",
+    "@cloudflare/workers-types": "^4.20240925.0",
     "@types/bun": "^1.1.10",
     "wrangler": "^3.79.0"
   }

@@ -3,6 +3,10 @@ import { PlaidProvider } from "@/providers/plaid/plaid-provider";
 import { TellerProvider } from "@/providers/teller/teller-provider";
 import type { ProviderParams } from "@/providers/types";
 
+export const excludedInstitutions = [
+  "ins_56", // Chase - Plaid
+];
+
 export async function getInstitutions(
   params: Omit<
     ProviderParams & { countryCode: string; storage: R2Bucket },
