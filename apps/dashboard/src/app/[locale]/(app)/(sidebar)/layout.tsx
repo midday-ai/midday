@@ -1,14 +1,12 @@
 import { AI } from "@/actions/ai/chat";
-import ChatAccessibilityButton from "@/components/accessibility-button/chat-accessibility-button";
 import { AccessibilityWidget } from "@/components/accessibility-helper-widget";
-import { FinancialAnalyticsDock } from "@/components/dock/financial-analytics-dock";
-import { Header } from "@/components/header";
 import { ExpenseViewModal } from "@/components/modals/expense/expense-view-modal";
 import { IncomeViewModal } from "@/components/modals/income/income-view-modal";
 import { OverviewViewModal } from "@/components/modals/overview/overview-view-modal";
 import { SubscriptionViewModal } from "@/components/modals/subscription/subscription-view-modal";
 import { TransactionViewModal } from "@/components/modals/transaction/transaction-view-modal";
 import { Sidebar } from "@/components/sidebar";
+import OnboardToBackendServerWrapper from "@/components/wrappers/onboard-to-backend-wrapper.server";
 import features from "@/config/enabled-features";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
@@ -110,42 +108,48 @@ export default async function Layout({
     await setupAnalytics({ userId: user.data.id });
   }
 
+  const content = (
+    <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
+      <Sidebar />
+      <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
+        {children}
+        <AccessibilityWidget
+          email={user.data.email as string}
+          name={user.data.full_name as string}
+          id={user.data.id as string}
+          profilePicture={user.data.avatar_url as string}
+        />
+      </div>
+      <AssistantModal />
+      <IncomeViewModal />
+      <ExpenseViewModal />
+      <SubscriptionViewModal />
+      <TransactionViewModal />
+      <OverviewViewModal />
+      <ConnectTransactionsModal countryCode={countryCode} />
+      <SelectBankAccountsModal />
+      <ImportModal
+        currencies={uniqueCurrencies}
+        defaultCurrency={
+          currencies[countryCode as keyof typeof currencies] || "USD"
+        }
+      />
+      <ExportStatus />
+      <HotKeys />
+    </AI>
+  );
+
   return (
     <div className="relative">
-      <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-        <Sidebar />
-
-        <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-          {/* <Header /> */}
-          {children}
-          <AccessibilityWidget
-            email={user.data.email as string}
-            name={user.data.full_name as string}
-            id={user.data.id as string}
-            profilePicture={user.data.avatar_url as string}
-          />
-        </div>
-
-        {/* This is used to make the header draggable on macOS */}
-        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
-
-        <AssistantModal />
-        <IncomeViewModal />
-        <ExpenseViewModal />
-        <SubscriptionViewModal />
-        <TransactionViewModal />
-        <OverviewViewModal />
-        <ConnectTransactionsModal countryCode={countryCode} />
-        <SelectBankAccountsModal />
-        <ImportModal
-          currencies={uniqueCurrencies}
-          defaultCurrency={
-            currencies[countryCode as keyof typeof currencies] || "USD"
-          }
-        />
-        <ExportStatus />
-        <HotKeys />
-      </AI>
+      {features.isBackendEnabled ? (
+        <OnboardToBackendServerWrapper>
+          {content}
+        </OnboardToBackendServerWrapper>
+      ) : (
+        content
+      )}
+      {/* This is used to make the header draggable on macOS */}
+      <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
     </div>
   );
 }

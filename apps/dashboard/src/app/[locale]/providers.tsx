@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import feature from "@/config/enabled-features";
 import { I18nProviderClient } from "@/locales/client";
 import StoreProvider from "@/provider/backend-provider";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
@@ -34,13 +35,26 @@ export function Providers({ locale, children, userId, email, accessToken }: Prov
           enableSystem
           disableTransitionOnChange
         >
-          <StoreProvider
-          userId={userId}
-          accessToken={accessToken}
-          email={email}
-        >
-            {children}
-          </StoreProvider>
+          {/**
+           * Conditionally renders the children based on the backend feature flag.
+           * 
+           * @remarks
+           * This section of the Providers component checks if the backend feature
+           * is enabled. If it is, it wraps the children in a StoreProvider component,
+           * which likely sets up a global state or context for backend-related data.
+           * If the backend feature is not enabled, it renders the children directly.
+           */}
+          {feature.isBackendEnabled ? (
+            <StoreProvider
+              userId={userId}
+              accessToken={accessToken}
+              email={email}
+            >
+              {children}
+            </StoreProvider>
+          ) : (
+            children
+          )}
         </ThemeProvider>
       </TriggerProvider>
     </I18nProviderClient>

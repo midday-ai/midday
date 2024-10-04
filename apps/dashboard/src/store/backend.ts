@@ -26,6 +26,7 @@ export interface UserStateProps {
     userFinancialContext: MelodyFinancialContext;
     /** The authentication token for the user. */
     token: string;
+    isOpen: boolean;
 }
 
 /**
@@ -48,6 +49,7 @@ export interface UserState extends UserStateProps {
     reset: () => void;
     /** Updates multiple state properties at once. */
     setData: (data: Partial<UserStateProps>) => void;
+    setOpen: (isOpen: boolean) => void;
 }
 
 /**
@@ -61,6 +63,7 @@ const initialState: UserStateProps = {
     userFinancialProfile: {} as FinancialUserProfile,
     userFinancialContext: {} as MelodyFinancialContext,
     token: "",
+    isOpen: false,
 };
 
 /** The key used to persist the user store in storage. */
@@ -88,6 +91,7 @@ export const useUserStore = create<UserState>()(
             setData: (data: Partial<UserStateProps>) => set(data),
             setSupabaseAuth0UserId: (supabaseAuth0UserId: string) => set({ supabaseAuth0UserId }),
             reset: () => set(initialState),
+            setOpen: (isOpen: boolean) => set({ isOpen }),
         }),
         {
             name: USER_STORE_KEY,

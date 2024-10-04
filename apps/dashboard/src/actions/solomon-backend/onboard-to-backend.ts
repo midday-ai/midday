@@ -8,11 +8,13 @@ import {
     CreateUserV2Request,
     ProfileType,
 } from "client-typescript-sdk";
+import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { authActionClient } from "../safe-action";
 
 
-export const onboardAccountToBackend = z.object({
+export const onboardAccountToBackendSchema = z.object({
     username: z
         .string()
         .min(10, { message: "Username must be at least 10 characters long" })
@@ -20,10 +22,11 @@ export const onboardAccountToBackend = z.object({
         .regex(/^[a-zA-Z0-9_]+$/, {
             message: "Username can only contain letters, numbers, and underscores",
         }),
+    redirectTo: z.string().optional(),
 });
 
-export type OnboardAccountToBackendFormValues = z.infer<
-    typeof onboardAccountToBackend
+export type OnboardAccountToBackendSchemaFormValues = z.infer<
+    typeof onboardAccountToBackendSchema
 >;
 
 /**
@@ -37,7 +40,7 @@ export type OnboardAccountToBackendFormValues = z.infer<
  */
 
 export const onboardAccountToBackendAction = authActionClient.
-    schema(onboardAccountToBackend).
+    schema(onboardAccountToBackendSchema).
     metadata({
         name: "onboard-account-to-backend",
         track: {
@@ -46,7 +49,7 @@ export const onboardAccountToBackendAction = authActionClient.
         },
     }).action(
         async ({
-            parsedInput: { username },
+            parsedInput: { username, redirectTo },
             ctx: { supabase },
         }) => {
             const {
@@ -103,6 +106,14 @@ export const onboardAccountToBackendAction = authActionClient.
                 throw new Error("User could not be created");
             }
 
+            revalidateTag(`user_${user.id}`);
+            revalidateTag(`teams_${user.id}`);
+
+            if (redirectTo) {
+                redirect(redirectTo);
+            }
+
+            
             return createUserResponse;
         },
     );

@@ -109,7 +109,9 @@ export default async function Layout({
          * In order to work correctly it needs to reside high up on the component tree.
          */}
         <BackendClientInitializer />
-        <Providers locale={locale} userId={userId} accessToken={accessToken} email={email}>{children}</Providers>
+        <Providers locale={locale} userId={userId} accessToken={accessToken} email={email}>
+          {children}
+        </Providers>
 
         <IntercomWidget
           appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
