@@ -13,6 +13,7 @@ Built with TypeScript and deployed on Cloudflare Workers, this API provides a hi
 ## Table of Contents
 
 - [Features](#features)
+- [Quick Start](#quick-start)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
@@ -55,6 +56,36 @@ Built with TypeScript and deployed on Cloudflare Workers, this API provides a hi
 - **Health Monitoring**: Endpoint for checking API and integration health
 - **Typescript Support**: Full TypeScript support for improved developer experience
 - **Cloudflare Workers**: Leverages edge computing for low-latency, globally distributed API access
+- **Webhook Support**: Real-time notifications for account updates and transactions
+
+## Quick Start
+
+To quickly get started with the Financial Service API:
+
+1. Clone the repository and install dependencies:
+   ```bash
+   git clone https://github.com/your-organization/financial-service-api.git
+   cd financial-service-api
+   npm install
+   ```
+
+2. Set up your environment variables:
+   ```bash
+   cp .dev.vars-example .dev.vars
+   # Edit .dev.vars with your API keys
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+4. Make your first API call:
+   ```bash
+   curl http://localhost:3002/v1/health
+   ```
+
+For more detailed setup instructions, see the [Getting Started](#getting-started) section.
 
 ## Getting Started
 
@@ -401,6 +432,13 @@ financial-service-api/
 - Use meaningful variable and function names
 - Keep functions small and focused on a single responsibility
 
+### Performance Optimization
+
+- Use caching strategies to reduce API calls to financial providers
+- Implement request batching for bulk operations
+- Utilize Cloudflare Workers' edge caching capabilities
+- Optimize database queries and indexing
+
 ## Contributing
 
 We welcome contributions to the Financial Service API! Please follow these steps:
@@ -417,7 +455,15 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Security
 
-Security is a top priority for the Financial Service API. If you discover a security vulnerability, please send an e-mail to security@solomon-ai.co. All security vulnerabilities will be promptly addressed.
+Security is a top priority for the Financial Service API. We implement the following security measures:
+
+- End-to-end encryption for all data in transit
+- Regular security audits and penetration testing
+- Compliance with financial industry standards (PCI DSS, SOC 2)
+- Strict access controls and authentication mechanisms
+- Continuous monitoring for suspicious activities
+
+If you discover a security vulnerability, please send an e-mail to security@solomon-ai.co. All security vulnerabilities will be promptly addressed.
 
 Please refer to our [Security Policy](SECURITY.md) for more details.
 
