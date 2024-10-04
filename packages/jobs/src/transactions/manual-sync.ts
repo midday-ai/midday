@@ -31,11 +31,13 @@ client.defineJob({
     const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status)",
       )
       .eq("bank_connection_id", connectionId)
+      .neq("bank_connection.status", "disconnected")
       .eq("team_id", teamId)
-      .eq("enabled", true);
+      .eq("enabled", true)
+      .eq("manual", false);
 
     const promises = accountsData?.map(async (account) => {
       const transactions = await engine.transactions.list({
