@@ -1,0 +1,53 @@
+compatibility_date = "2023-12-01"
+compatibility_flags = [ "nodejs_compat" ]
+
+workers_dev = false
+logpush = true
+tail_consumers = [
+  {service = "financial-service-tail-consumer"},
+  {service = "financial-service-staging-tail-consumer"},
+  {service = "financial-service-tail"}
+]
+
+[env.production]
+name = "financial-service"
+logpush = true
+route = { pattern = "financial-service.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
+
+kv_namespaces = [
+  { binding = "KV", id = "019720a586c448c2a88a58773da08fd8" }
+]
+
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "c82877a0-409e-4589-a935-ca220531651f" }
+]
+
+r2_buckets = [
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
+]
+
+[env.production.observability]
+enabled = true
+head_sampling_rate = 0.1 # 10% of requests are logged
+
+[env.staging]
+name = "financial-service-staging"
+route = { pattern = "financial-service-staging.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
+
+kv_namespaces = [
+  { binding = "KV", id = "6745cb3ad41e4d35a45bf67bb515c08b" }
+]
+
+mtls_certificates = [
+  { binding = "TELLER_CERT", certificate_id = "c82877a0-409e-4589-a935-ca220531651f" }
+]
+
+r2_buckets = [
+  { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" },
+  { binding = "R2", bucket_name = "bank-statements", preview_bucket_name = "" }
+]
+
+[env.staging.observability]
+enabled = true
+head_sampling_rate = 0.1 # 10% of requests are logged
+

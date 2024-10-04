@@ -1,0 +1,48 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Transform income transaction 1`] = `
+{
+  "account_id": "123",
+  "amount": -38000,
+  "balance": null,
+  "bank_account_id": "123",
+  "category": "transfer",
+  "currency": "SEK",
+  "currency_rate": null,
+  "currency_source": null,
+  "date": "2024-02-23",
+  "description": null,
+  "id": "86b1bc36e6a6d2a5dee8ff7138920255",
+  "internal_id": "86b1bc36e6a6d2a5dee8ff7138920255",
+  "method": "transfer",
+  "name": "Lön 160434262327",
+  "status": "posted",
+}
+`;
+
+exports[`Transform accounts 1`] = `
+{
+  "balance": {
+    "amount": 1942682.86,
+    "currency": "SEK",
+  },
+  "currency": "SEK",
+  "enrollment_id": null,
+  "id": "b11e5627-cac8-41c9-a74a-2b88438fe07d",
+  "institution": {
+    "id": "PLEO_PLEODK00",
+    "logo": "https://cdn-engine.midday.ai/PLEO_PLEODK00.png",
+    "name": "Pleo",
+    "provider": "gocardless",
+  },
+  "name": "Pleo Account",
+  "type": "depository",
+}
+`;
+
+exports[`Transform account balance 1`] = `
+{
+  "amount": 1942682.86,
+  "currency": "SEK",
+}
+`;
