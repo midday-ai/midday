@@ -5,7 +5,7 @@
     "dev": "supabase start",
     "login": "supabase login",
     "db:reset": "",
-    "supabase:start": "bunx supabase start",
+    "supabase:start": "node ./scripts/start-supabase.js",
     "supabase:stop": "bunx supabase stop",
     "supabase:status": "bunx supabase status",
     "supabase:restart": "npm run supabase:stop && npm run supabase:start",
@@ -23,6 +23,7 @@
     "clean-volumes": "docker volume rm $(docker volume ls -q --filter label=com.supabase.cli.project=trnlccdjeihaaxmcaddm)"
   },
   "dependencies": {
-    "supabase": "^1.192.5"
+    "dotenv": "^16.0.3",
+    "supabase": "^1.200.3"
   }
 }

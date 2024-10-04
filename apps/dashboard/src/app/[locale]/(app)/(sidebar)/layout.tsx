@@ -9,6 +9,7 @@ import { OverviewViewModal } from "@/components/modals/overview/overview-view-mo
 import { SubscriptionViewModal } from "@/components/modals/subscription/subscription-view-modal";
 import { TransactionViewModal } from "@/components/modals/transaction/transaction-view-modal";
 import { Sidebar } from "@/components/sidebar";
+import features from "@/config/enabled-features";
 import { setupAnalytics } from "@midday/events/server";
 import { getCountryCode } from "@midday/location";
 import { currencies, uniqueCurrencies } from "@midday/location/src/currencies";
@@ -91,17 +92,13 @@ export default async function Layout({
 
   const countryCode = getCountryCode();
 
-  // get the current users subscriptions from the database and ensure that the cache is invalidated
-  // this is to ensure that the user's subscription is always up to date
-  const invalidateCache = true;
-  const currentUserSubscription = await getUserSubscriptions(invalidateCache);
-
-  // if there are no subscriptions, redirect to payment page
-  if (
-    !currentUserSubscription?.data?.length ||
-    currentUserSubscription?.data[0]?.status === null
-  ) {
+  // Check if the payment feature flag is enabled
+  if (features.isPaymentsEnabled) {
+    const currentUserSubscription = await getUserSubscriptions(true); // Invalidate cache
+    if (!currentUserSubscription?.data?.[0]?.status
+    ) {
       redirect("/payment");
+    }
   }
 
   // if the user does not have a team, redirect to the teams page

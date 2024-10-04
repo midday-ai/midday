@@ -56,24 +56,32 @@ precondition: ## Load environment variables
 local: precondition supabase-restart supabase-migrate ## Run local development setup
 
 setup: clean-supabase
-	@echo "Starting Supabase and seeding data..."
-	bun run supabase:start 
+	@echo "Starting Supabase..."
+	bun run supabase:start
 	bun run supabase:reset
 	bun run seed:local
 	supabase status
 
+setup-no-seed: clean-supabase
+	@echo "Starting Supabase without seeding..."
+	bun run supabase:start
+	bun run supabase:reset
+	supabase status
+
 clean-supabase: ## Stop Supabase and clean volumes if running, started, or in an unhealthy state
 	@echo "Checking Supabase status..."
-	@supabase status
+	@supabase status || true
 	@echo "Supabase status check complete."
 	@echo "Evaluating condition..."
-	@if supabase status | grep -q . ; then \
+	@if supabase status 2>/dev/null | grep -q . ; then \
 		echo "Condition is TRUE"; \
 		echo "Detected Supabase running or in problematic state."; \
 		echo "Stopping Supabase and cleaning volumes..."; \
 		supabase stop || true; \
 		echo "Stopping any remaining Supabase containers..."; \
-		docker volume rm $$(docker volume ls -q --filter label=com.supabase.cli.project=trnlccdjeihaaxmcaddm) || true; \
+		docker stop supabase_db_trnlccdjeihaaxmcaddm >/dev/null 2>&1 || true; \
+		docker rm supabase_db_trnlccdjeihaaxmcaddm >/dev/null 2>&1 || true; \
+		docker volume rm $$(docker volume ls -q --filter label=com.supabase.cli.project=trnlccdjeihaaxmcaddm) >/dev/null 2>&1 || true; \
 		echo "Supabase stopped and volumes cleaned."; \
 	else \
 		echo "Condition is FALSE"; \
