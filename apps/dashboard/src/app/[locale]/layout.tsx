@@ -2,6 +2,7 @@ import { BackendClientInitializer } from "@/components/backend-client-initialize
 import "@/styles/globals.css";
 import { initializeBackendClient } from "@/utils/backend";
 import { Provider as Analytics } from "@midday/events/client";
+import { getSession } from "@midday/supabase/cached-queries";
 import { cn } from "@midday/ui/cn";
 import "@midday/ui/globals.css";
 import { IntercomScript } from "@midday/ui/intercom-script";
@@ -78,13 +79,23 @@ export const maxDuration = 60;
 initializeBackendClient();
 
 
-export default function Layout({
+export default async function Layout({
   children,
   params: { locale },
 }: {
   children: ReactElement;
   params: { locale: string };
 }) {
+
+  const session = await getSession().catch((error) => {
+    console.error("Failed to fetch session:", error);
+    return null;
+  });
+
+  const userId = session?.data.session?.user?.id ?? "";
+  const email = session?.data.session?.user?.email ?? "";
+  const accessToken = session?.data.session?.access_token ?? "";
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
@@ -98,7 +109,7 @@ export default function Layout({
          * In order to work correctly it needs to reside high up on the component tree.
          */}
         <BackendClientInitializer />
-        <Providers locale={locale}>{children}</Providers>
+        <Providers locale={locale} userId={userId} accessToken={accessToken} email={email}>{children}</Providers>
 
         <IntercomWidget
           appId={process.env.NEXT_PUBLIC_INTERCOM_APP_ID ?? "pezs7zbq"}
