@@ -17,7 +17,7 @@ import {
   TableCellsMergeIcon,
   Timer,
   TrendingDown,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 
 /**

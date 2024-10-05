@@ -64,7 +64,7 @@ export class PlaidProvider implements Provider {
       transformTransaction({
         transaction,
         accountType,
-      }),
+      })
     );
   }
 
@@ -194,7 +194,7 @@ export class PlaidProvider implements Provider {
   }: GetStatementPdfRequest) {
     if (!accessToken || !statementId || !accountId || !userId || !teamId) {
       throw Error(
-        "accessToken, statementId, accountId, userId, or teamId is missing",
+        "accessToken, statementId, accountId, userId, or teamId is missing"
       );
     }
 

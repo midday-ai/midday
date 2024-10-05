@@ -15,7 +15,7 @@ export function InboxEmpty({ inboxId }: Props) {
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-xl">Reconciliation Inbox</h2>
           <p className="text-[#606060] text-sm">
-           Upload receipts by simply dragging and dropping them here.
+            Upload receipts by simply dragging and dropping them here.
             <br />
           </p>
         </div>

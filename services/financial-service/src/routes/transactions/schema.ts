@@ -20,13 +20,7 @@ export const TransactionsParamsSchema = z
       example: "acct_1234567890",
     }),
     accountType: z
-      .enum([
-        "credit",
-        "depository",
-        "other_asset",
-        "loan",
-        "other_liability",
-      ])
+      .enum(["credit", "depository", "other_asset", "loan", "other_liability"])
       .optional()
       .openapi({
         description:
@@ -115,7 +109,6 @@ export const TransactionsSchema = z
     data: z.array(TransactionSchema),
   })
   .openapi("TransactionsSchema");
-
 
 export const RecurringTransactionsParamsSchema = z
   .object({

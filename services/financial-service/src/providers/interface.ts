@@ -23,7 +23,7 @@ export interface Provider {
    * @returns A promise that resolves to the transaction data.
    */
   getTransactions: (
-    params: GetTransactionsRequest,
+    params: GetTransactionsRequest
   ) => Promise<GetTransactionsResponse>;
 
   /**
@@ -39,7 +39,7 @@ export interface Provider {
    * @returns A promise that resolves to the account balance data.
    */
   getAccountBalance: (
-    params: GetAccountBalanceRequest,
+    params: GetAccountBalanceRequest
   ) => Promise<GetAccountBalanceResponse>;
 
   /**
@@ -48,7 +48,7 @@ export interface Provider {
    * @returns A promise that resolves to the institution data.
    */
   getInstitutions: (
-    params: GetInstitutionsRequest,
+    params: GetInstitutionsRequest
   ) => Promise<GetInstitutionsResponse>;
 
   /**
@@ -69,7 +69,7 @@ export interface Provider {
    * @returns A promise that resolves to the statement data.
    */
   getStatements: (
-    params: GetStatementsRequest,
+    params: GetStatementsRequest
   ) => Promise<GetStatementsResponse>;
 
   /**
@@ -78,7 +78,7 @@ export interface Provider {
    * @returns A promise that resolves to the statement PDF data.
    */
   getStatementPdf: (
-    params: GetStatementPdfRequest,
+    params: GetStatementPdfRequest
   ) => Promise<GetStatementPdfResponse>;
 
   /**
@@ -88,6 +88,6 @@ export interface Provider {
    * @throws Will throw an error if the request fails.
    */
   getRecurringTransactions: (
-    params: GetRecurringTransactionsRequest,
+    params: GetRecurringTransactionsRequest
   ) => Promise<GetRecurringTransactionsResponse>;
 }

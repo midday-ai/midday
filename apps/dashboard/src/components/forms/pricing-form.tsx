@@ -191,11 +191,10 @@ export default function Pricing({ user, products, subscription }: Props) {
                 <button
                   onClick={() => setBillingInterval("month")}
                   type="button"
-                  className={`${
-                    billingInterval === "month"
+                  className={`${billingInterval === "month"
                       ? "relative w-1/2 border-foreground bg-background text-foreground shadow-sm"
                       : "relative ml-0.5 w-1/2 border border-transparent text-background/2"
-                  } m-1 whitespace-nowrap rounded-md py-2 text-sm font-medium focus:z-10 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 sm:w-auto sm:px-8`}
+                    } m-1 whitespace-nowrap rounded-md py-2 text-sm font-medium focus:z-10 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 sm:w-auto sm:px-8`}
                 >
                   Monthly billing
                 </button>
@@ -204,11 +203,10 @@ export default function Pricing({ user, products, subscription }: Props) {
                 <button
                   onClick={() => setBillingInterval("year")}
                   type="button"
-                  className={`${
-                    billingInterval === "year"
+                  className={`${billingInterval === "year"
                       ? "relative w-1/2 border-foreground bg-background text-foreground shadow-sm"
                       : "relative ml-0.5 w-1/2 border border-transparent text-background/2"
-                  } m-1 whitespace-nowrap rounded-md py-2 text-sm font-medium focus:z-10 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 sm:w-auto sm:px-8`}
+                    } m-1 whitespace-nowrap rounded-md py-2 text-sm font-medium focus:z-10 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50 sm:w-auto sm:px-8`}
                 >
                   Yearly billing
                 </button>
