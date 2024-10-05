@@ -57,13 +57,13 @@ export function ExportStatus() {
     },
   });
 
-  const handleOnDownload = (id: string) => {
-    dismiss(id);
+  const handleOnDownload = () => {
+    dismiss(toastId);
   };
 
-  const handleOnShare = ({ id, expireIn, filename }) => {
+  const handleOnShare = ({ expireIn, filename }) => {
     shareFile.execute({ expireIn, filepath: `exports/${filename}` });
-    dismiss(id);
+    dismiss(toastId);
   };
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export function ExportStatus() {
         title: "Exporting transactions.",
         variant: "progress",
         description: "Please do not close browser until completed",
-        duration: 8000,
+        duration: Number.POSITIVE_INFINITY,
         progress: 0,
       });
 
@@ -84,10 +84,10 @@ export function ExportStatus() {
     }
 
     if (status?.data?.progress === 100) {
-      const { id } = toast({
+      update(toastId, {
         title: "Export completed",
         description: `Your export is ready based on ${status?.data?.totalItems} transactions. It's stored in your Vault.`,
-        duration: Number.POSITIVE_INFINITY,
+        variant: "success",
         footer: (
           <div className="mt-4 flex space-x-4">
             <DropdownMenu>
@@ -107,7 +107,6 @@ export function ExportStatus() {
                     key={idx.toString()}
                     onClick={() =>
                       handleOnShare({
-                        id,
                         expireIn: option.expireIn,
                         filename: status?.data?.fileName,
                       })
@@ -123,7 +122,7 @@ export function ExportStatus() {
               href={`/api/download/file?path=exports/${status?.data?.fileName}&filename=${status?.data?.fileName}`}
               download
             >
-              <Button size="sm" onClick={() => handleOnDownload(id)}>
+              <Button size="sm" onClick={handleOnDownload}>
                 Download
               </Button>
             </a>
