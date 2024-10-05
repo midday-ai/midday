@@ -2,6 +2,7 @@ import { updateBankAccountAction } from "@/actions/update-bank-account-action";
 import { useI18n } from "@/locales/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
+import { CurrencyInput } from "@midday/ui/currency-input";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,9 @@ const formSchema = z.object({
     message: "Account Name must be at least 1 characters.",
   }),
   type: z.string(),
+  balance: z.number().min(0, {
+    message: "Balance must be at least 0.",
+  }),
 });
 
 type Props = {
@@ -44,6 +48,7 @@ type Props = {
   isOpen: boolean;
   defaultName: string;
   defaultType?: string;
+  defaultBalance: number;
 };
 
 export function EditBankAccountModal({
@@ -52,6 +57,7 @@ export function EditBankAccountModal({
   isOpen,
   defaultName,
   defaultType,
+  defaultBalance,
 }: Props) {
   const t = useI18n();
 
@@ -64,6 +70,7 @@ export function EditBankAccountModal({
     defaultValues: {
       name: defaultName,
       type: defaultType,
+      balance: defaultBalance,
     },
   });
 
@@ -143,6 +150,30 @@ export function EditBankAccountModal({
                       <SelectContent>{accountTypes()}</SelectContent>
                     </Select>
                     <FormDescription>Change the account type</FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="balance"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Balance</FormLabel>
+
+                    <FormControl>
+                      <CurrencyInput
+                        min={0}
+                        value={field.value}
+                        onValueChange={(values) => {
+                          field.onChange(values.floatValue);
+                        }}
+                      />
+                    </FormControl>
+
+                    <FormDescription>
+                      Change the account balance
+                    </FormDescription>
                   </FormItem>
                 )}
               />

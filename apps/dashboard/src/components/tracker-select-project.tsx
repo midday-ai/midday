@@ -80,10 +80,8 @@ export function TrackerSelectProject({
   };
 
   useEffect(() => {
-    if (!data.length) {
-      fetchProjects();
-    }
-  }, [data]);
+    fetchProjects();
+  }, []);
 
   return (
     <Combobox

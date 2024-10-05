@@ -172,6 +172,7 @@ export function BankAccount({
         isOpen={isOpen}
         defaultName={name}
         defaultType={type}
+        defaultBalance={balance}
       />
     </div>
   );

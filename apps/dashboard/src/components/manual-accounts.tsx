@@ -12,6 +12,7 @@ export function ManualAccounts({ data }) {
           currency={account.currency}
           type={account.type}
           enabled
+          balance={account.balance}
         />
       ))}
     </div>
