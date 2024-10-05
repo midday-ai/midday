@@ -1,5 +1,9 @@
 import { Group } from "@/types/index";
-import { BriefcaseIcon, WalletIcon } from "@heroicons/react/24/outline";
+import {
+  BriefcaseIcon,
+  CubeTransparentIcon,
+  WalletIcon,
+} from "@heroicons/react/24/outline";
 import {
   Database,
   DollarSign,
@@ -85,6 +89,13 @@ const menuConfig: Group[] = [
         href: "/vault",
         label: "Workspace",
         icon: Database,
+        submenus: [],
+        active: false,
+      },
+      {
+        href: "/tracker",
+        label: "Project Tracker",
+        icon: CubeTransparentIcon,
         submenus: [],
         active: false,
       },
@@ -233,7 +244,7 @@ const menuConfig: Group[] = [
  */
 export function getMenuList(
   pathname: string,
-  config: Group[] = menuConfig,
+  config: Group[] = menuConfig
 ): Group[] {
   return config.map((group) => ({
     ...group,
