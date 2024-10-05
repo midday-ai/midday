@@ -1,5 +1,5 @@
 import type { AccountType } from "@/utils/account";
-import { R2Bucket } from '@cloudflare/workers-types';
+import { R2Bucket } from "@cloudflare/workers-types";
 
 export type Providers = "teller" | "plaid" | "gocardless" | "stripe";
 
@@ -16,7 +16,6 @@ export type ProviderParams = {
     STRIPE_SECRET_KEY: string;
   };
   r2: R2Bucket;
-
 };
 
 export type Transaction = {

@@ -44,8 +44,10 @@ const amazonConfig: IntegrationConfig = {
   category: IntegrationCategory.Banking,
   active: false,
   logo: Logo,
-  short_description: "Streamline your Amazon business finances with seamless integration.",
-  description: "Optimize your Amazon business operations with our powerful integration. Automate financial processes, gain real-time insights into your sales and expenses, and simplify reconciliation. Reduce manual work, minimize errors, and get a clear view of your Amazon revenue streams. Ideal for businesses selling on Amazon looking to enhance financial efficiency and make data-driven decisions.",
+  short_description:
+    "Streamline your Amazon business finances with seamless integration.",
+  description:
+    "Optimize your Amazon business operations with our powerful integration. Automate financial processes, gain real-time insights into your sales and expenses, and simplify reconciliation. Reduce manual work, minimize errors, and get a clear view of your Amazon revenue streams. Ideal for businesses selling on Amazon looking to enhance financial efficiency and make data-driven decisions.",
   images: [],
   onInitialize: initialize,
   settings,

@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { error: "Invalid request body", errors },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   if (!inboxId) {
     return NextResponse.json(
       { error: "Invalid OriginalRecipient email" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -168,7 +168,7 @@ export async function POST(req: Request) {
       // to make it unique before the extension
       const uniqueFileName = fileName.replace(
         /(\.[^.]+)$/,
-        (ext) => `_${nanoid(4)}${ext}`
+        (ext) => `_${nanoid(4)}${ext}`,
       );
 
       const { data } = await supabase.storage
@@ -212,8 +212,8 @@ export async function POST(req: Request) {
             recordId: inbox.id,
             teamId,
           },
-        })
-      )
+        }),
+      ),
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -222,7 +222,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       { error: `Failed to create record for ${inboxId}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 

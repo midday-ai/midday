@@ -65,12 +65,12 @@ function getTransactionAmount({
 
 /**
  * Defines a job to update the base currency for a team's accounts and transactions.
- * 
+ *
  * This job is triggered when a team changes their base currency. It performs the following tasks:
  * 1. Updates the base balance for all enabled bank accounts.
  * 2. Updates the base amount for all transactions associated with these accounts.
  * 3. Revalidates various cache tags to ensure up-to-date data in the UI.
- * 
+ *
  * @remarks
  * The job processes accounts and transactions in batches to handle large datasets efficiently.
  * It uses exchange rates stored in the database to perform currency conversions.

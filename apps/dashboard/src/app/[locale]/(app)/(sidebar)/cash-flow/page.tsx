@@ -49,42 +49,42 @@ export default async function CashFlowPage({ searchParams }: Props) {
     <Suspense fallback={<InboxViewSkeleton ascending />}>
       <ContentLayout title="Cash Flow">
         <ConnectAccountServerWrapper>
-        <div className="mt-8">
-          <AccountSummarySection
-            user={user}
-            isEmpty={isEmpty}
-            tier={tier}
-            name={user?.data?.full_name ?? "Solomon AI User"}
-          />
-          <div className="mt-4 flex flex-col gap-4">
-            <ExpenseTabsSection
+          <div className="mt-8">
+            <AccountSummarySection
+              user={user}
               isEmpty={isEmpty}
-              accounts={accounts as any}
-              user={user as any}
               tier={tier}
-              value={value as any}
-              defaultValue={defaultValue}
+              name={user?.data?.full_name ?? "Solomon AI User"}
             />
-            <IncomeTabsSection
-              isEmpty={isEmpty}
-              accounts={accounts as any}
-              user={user as any}
-              tier={tier}
-              value={value as any}
-              defaultValue={getDefaultDateRange("monthly", "income")}
-            />
-            <SpendingTabsSection
-              isEmpty={isEmpty}
-              initialPeriod={initialPeriod}
+            <div className="mt-4 flex flex-col gap-4">
+              <ExpenseTabsSection
+                isEmpty={isEmpty}
+                accounts={accounts as any}
+                user={user as any}
+                tier={tier}
+                value={value as any}
+                defaultValue={defaultValue}
+              />
+              <IncomeTabsSection
+                isEmpty={isEmpty}
+                accounts={accounts as any}
+                user={user as any}
+                tier={tier}
+                value={value as any}
+                defaultValue={getDefaultDateRange("monthly", "income")}
+              />
+              <SpendingTabsSection
+                isEmpty={isEmpty}
+                initialPeriod={initialPeriod}
+                currency={(searchParams.currency as string) ?? "USD"}
+              />
+            </div>
+            <CashflowCharts
               currency={(searchParams.currency as string) ?? "USD"}
+              disableAllCharts={true}
+              tier={tier}
             />
           </div>
-          <CashflowCharts
-            currency={(searchParams.currency as string) ?? "USD"}
-            disableAllCharts={true}
-            tier={tier}
-          />
-        </div>
         </ConnectAccountServerWrapper>
       </ContentLayout>
     </Suspense>

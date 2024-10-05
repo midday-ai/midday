@@ -92,7 +92,9 @@ export class TellerProvider implements Provider {
     });
   }
 
-  async getStatements(params: GetStatementsRequest): Promise<GetStatementsResponse> {
+  async getStatements(
+    params: GetStatementsRequest,
+  ): Promise<GetStatementsResponse> {
     if (!params.accessToken || !params.accountId) {
       throw Error("accessToken or accountId is missing");
     }
@@ -104,7 +106,9 @@ export class TellerProvider implements Provider {
     };
   }
 
-  async getStatementPdf(params: GetStatementPdfRequest): Promise<GetStatementPdfResponse> {
+  async getStatementPdf(
+    params: GetStatementPdfRequest,
+  ): Promise<GetStatementPdfResponse> {
     if (!params.accessToken || !params.accountId || !params.statementId) {
       throw Error("accessToken, accountId, or statementId is missing");
     }

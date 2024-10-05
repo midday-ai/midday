@@ -5,6 +5,7 @@ import { IncomeViewModal } from "@/components/modals/income/income-view-modal";
 import { OverviewViewModal } from "@/components/modals/overview/overview-view-modal";
 import { SubscriptionViewModal } from "@/components/modals/subscription/subscription-view-modal";
 import { TransactionViewModal } from "@/components/modals/transaction/transaction-view-modal";
+import AnalyticsLayout from "@/components/panel/admin-panel-layout";
 import { Sidebar } from "@/components/sidebar";
 import OnboardToBackendServerWrapper from "@/components/wrappers/onboard-to-backend-wrapper.server";
 import features from "@/config/enabled-features";
@@ -68,12 +69,19 @@ const ConnectTransactionsModal = dynamic(
   },
 );
 
+const ClientSideAccessibilityWidget = dynamic(
+  () =>
+    import("@/components/accessibility-helper-widget").then(
+      (mod) => mod.AccessibilityWidget,
+    ),
+  { ssr: false },
+);
+
 export default async function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-
   var user: any = null;
   try {
     user = await getUser();

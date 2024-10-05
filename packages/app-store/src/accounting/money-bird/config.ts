@@ -9,7 +9,8 @@ const moneyBirdConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Simplified bookkeeping with MoneyBird integration.",
-  description: "MoneyBird integration offers easy-to-use online bookkeeping software for freelancers and small businesses. It simplifies invoicing, expense tracking, and financial reporting to help you stay on top of your finances.",
+  description:
+    "MoneyBird integration offers easy-to-use online bookkeeping software for freelancers and small businesses. It simplifies invoicing, expense tracking, and financial reporting to help you stay on top of your finances.",
   images: [],
   onInitialize: initialize,
   settings: [

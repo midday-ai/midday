@@ -8,8 +8,10 @@ const workdayConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Comprehensive enterprise cloud solutions for finance and HR.",
-  description: "Workday integration offers a unified platform for financial management, human capital management, and analytics. It provides real-time insights and helps organizations streamline their finance and HR processes for improved efficiency and decision-making.",
+  short_description:
+    "Comprehensive enterprise cloud solutions for finance and HR.",
+  description:
+    "Workday integration offers a unified platform for financial management, human capital management, and analytics. It provides real-time insights and helps organizations streamline their finance and HR processes for improved efficiency and decision-making.",
   images: [],
   onInitialize: initialize,
   settings: [

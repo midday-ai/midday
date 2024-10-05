@@ -6,10 +6,13 @@ import {
   FileAxis3D,
   FileText,
   InboxIcon,
-  LayoutGrid, PieChart,
-  Settings, TableCellsMergeIcon, Timer,
+  LayoutGrid,
+  PieChart,
+  Settings,
+  TableCellsMergeIcon,
+  Timer,
   TrendingDown,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 
 /**
@@ -30,51 +33,25 @@ const menuConfig: Group[] = [
     ],
   },
   {
-    groupLabel: "Management",
-    menus: [
-      {
-        href: "/inbox",
-        label: "Inbox",
-        icon: InboxIcon,
-        submenus: [],
-        active: false,
-      },
-      {
-        href: "/tracker",
-        label: "Time Tracker",
-        icon: Timer,
-        submenus: [],
-        active: false,
-      },
-      {
-        href: "/vault",
-        label: "Secure Storage",
-        icon: Database,
-        submenus: [],
-        active: false,
-      },
-    ],
-  },
-  {
     groupLabel: "Finances",
     menus: [
       {
-        href: "/bank-accounts",
-        label: "Bank Accounts",
+        href: "/financial-accounts",
+        label: "Financial Accounts",
         icon: DollarSign,
         submenus: [
-          {
-            href: "/bank-accounts/deposit",
-            label: "Deposit",
-            active: false,
-            icon: WalletIcon
-          },
-          {
-            href: "/bank-accounts/credit",
-            label: "Credit",
-            active: false,
-            icon: BriefcaseIcon
-          },
+          // {
+          //   href: "/bank-accounts/deposit",
+          //   label: "Deposit",
+          //   active: false,
+          //   icon: WalletIcon
+          // },
+          // {
+          //   href: "/bank-accounts/credit",
+          //   label: "Credit",
+          //   active: false,
+          //   icon: BriefcaseIcon
+          // },
         ],
         active: false,
       },
@@ -86,8 +63,8 @@ const menuConfig: Group[] = [
         active: false,
       },
       {
-        href: "/invoices",
-        label: "Invoice",
+        href: "/transactions-recurring",
+        label: "Recurring Transactions",
         icon: FileAxis3D,
         submenus: [],
         active: false,
@@ -95,97 +72,116 @@ const menuConfig: Group[] = [
     ],
   },
   {
-    groupLabel: "Analytics",
+    groupLabel: "Management",
     menus: [
       {
-        href: "/analytics/income",
-        label: "Income",
-        icon: TrendingUp,
-        submenus: [
-          {
-            href: "/analytics/income/overview",
-            label: "Overview",
-            active: false,
-          },
-          {
-            href: "/analytics/income/details",
-            label: "Details",
-            active: false,
-          },
-          {
-            href: "/analytics/income/categories",
-            label: "Categories",
-            active: false,
-          },
-          {
-            href: "/analytics/income/sources",
-            label: "Sources",
-            active: false,
-          },
-        ],
+        href: "/inbox",
+        label: "Inbox",
+        icon: InboxIcon,
+        submenus: [],
         active: false,
       },
       {
-        href: "/analytics/expense",
-        label: "Expense",
-        icon: TrendingDown,
-        submenus: [
-          {
-            href: "/analytics/expense/overview",
-            label: "Overview",
-            active: false,
-          },
-          {
-            href: "/analytics/expense/details",
-            label: "Details",
-            active: false,
-          },
-          {
-            href: "/analytics/expense/categories",
-            label: "Categories",
-            active: false,
-          },
-        ],
-        active: false,
-      },
-      {
-        href: "/analytics/revenue",
-        label: "Revenue",
-        icon: DollarSign,
-        submenus: [
-          {
-            href: "/analytics/revenue/overview",
-            label: "Overview",
-            active: false,
-          },
-          {
-            href: "/analytics/revenue/details",
-            label: "Details",
-            active: false,
-          },
-          {
-            href: "/analytics/revenue/categories",
-            label: "Categories",
-            active: false,
-          },
-        ],
-        active: false,
-      },
-      {
-        href: "/analytics/categories",
-        label: "Categories",
-        icon: PieChart,
+        href: "/vault",
+        label: "Workspace",
+        icon: Database,
         submenus: [],
         active: false,
       },
     ],
   },
+  // {
+  //   groupLabel: "Analytics",
+  //   menus: [
+  //     {
+  //       href: "/analytics/income",
+  //       label: "Income",
+  //       icon: TrendingUp,
+  //       submenus: [
+  //         {
+  //           href: "/analytics/income/overview",
+  //           label: "Overview",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/income/details",
+  //           label: "Details",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/income/categories",
+  //           label: "Categories",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/income/sources",
+  //           label: "Sources",
+  //           active: false,
+  //         },
+  //       ],
+  //       active: false,
+  //     },
+  //     {
+  //       href: "/analytics/expense",
+  //       label: "Expense",
+  //       icon: TrendingDown,
+  //       submenus: [
+  //         {
+  //           href: "/analytics/expense/overview",
+  //           label: "Overview",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/expense/details",
+  //           label: "Details",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/expense/categories",
+  //           label: "Categories",
+  //           active: false,
+  //         },
+  //       ],
+  //       active: false,
+  //     },
+  //     {
+  //       href: "/analytics/revenue",
+  //       label: "Revenue",
+  //       icon: DollarSign,
+  //       submenus: [
+  //         {
+  //           href: "/analytics/revenue/overview",
+  //           label: "Overview",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/revenue/details",
+  //           label: "Details",
+  //           active: false,
+  //         },
+  //         {
+  //           href: "/analytics/revenue/categories",
+  //           label: "Categories",
+  //           active: false,
+  //         },
+  //       ],
+  //       active: false,
+  //     },
+  //     {
+  //       href: "/analytics/categories",
+  //       label: "Categories",
+  //       icon: PieChart,
+  //       submenus: [],
+  //       active: false,
+  //     },
+  //   ],
+  // },
   {
-    groupLabel: "Reports",
+    groupLabel: "Marketplace",
     menus: [
       {
-        href: "/reports",
-        label: "Generate Reports",
+        href: "/apps",
+        label: "Market Place",
         icon: FileText,
         submenus: [],
         active: false,
@@ -200,26 +196,26 @@ const menuConfig: Group[] = [
         label: "Settings",
         icon: Settings,
         submenus: [
-          {
-            href: "/settings/accounts",
-            label: "Accounts",
-            active: false,
-          },
-          {
-            href: "/settings/members",
-            label: "Team",
-            active: false,
-          },
-          {
-            href: "/settings/categories",
-            label: "Categories",
-            active: false,
-          },
-          {
-            href: "/settings/notifications",
-            label: "Notifications",
-            active: false,
-          },
+          // {
+          //   href: "/settings/accounts",
+          //   label: "Accounts",
+          //   active: false,
+          // },
+          // {
+          //   href: "/settings/members",
+          //   label: "Team",
+          //   active: false,
+          // },
+          // {
+          //   href: "/settings/categories",
+          //   label: "Categories",
+          //   active: false,
+          // },
+          // {
+          //   href: "/settings/notifications",
+          //   label: "Notifications",
+          //   active: false,
+          // },
         ],
         active: false,
       },

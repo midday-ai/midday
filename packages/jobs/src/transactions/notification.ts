@@ -37,10 +37,10 @@ client.defineJob({
   integrations: { supabase },
   /**
    * Processes transactions and sends notifications to users.
-   * 
+   *
    * @param payload - The job payload containing team ID and transactions.
    * @param io - The I/O object for interacting with external services.
-   * 
+   *
    * @remarks
    * This function performs the following steps:
    * 1. Sorts transactions by date (most recent first).
@@ -72,7 +72,7 @@ client.defineJob({
 
     /**
      * Generates in-app notification events for each user.
-     * 
+     *
      * @remarks
      * - For a single transaction, it creates a TransactionNewInApp event.
      * - For multiple transactions, it creates a TransactionsNewInApp event.
@@ -141,7 +141,7 @@ client.defineJob({
 
     /**
      * Generates email notification events for each user.
-     * 
+     *
      * @remarks
      * Renders a TransactionsEmail component with user-specific data.
      */

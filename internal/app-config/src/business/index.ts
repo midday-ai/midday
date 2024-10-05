@@ -1,8 +1,7 @@
 import { SiteConfig } from "../types/index";
 
 const sharedTitle = "Solomon AI | Your Personal Financial Assistant";
-const sharedDescription =
-  "A better way to act on your finances.";
+const sharedDescription = "A better way to act on your finances.";
 const sharedImages = [
   { url: "", width: 800, height: 600 },
   { url: "", width: 1800, height: 1600 },

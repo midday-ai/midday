@@ -7,6 +7,7 @@ import { Icons } from "@midday/ui/icons";
 import Link from "next/link";
 import React from "react";
 
+import { viewport } from "../../app/[locale]/layout";
 import { Menu } from "./menu";
 import { SidebarToggle } from "./sidebar-toggle";
 
@@ -23,12 +24,12 @@ export const Sidebar: React.FC = React.memo(() => {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-20 h-screen -translate-x-full transition-[width] duration-300 ease-in-out lg:translate-x-0",
+        "fixed left-0 top-0 z-20 h-screen -translate-x-full transition-[width] duration-300 ease-in-out lg:translate-x-0 scrollbar-hide",
         sidebar.isOpen === false ? "w-[90px]" : "w-72",
       )}
     >
       <SidebarToggle isOpen={sidebar.isOpen} setIsOpen={sidebar.setIsOpen} />
-      <div className="relative flex h-full flex-col overflow-y-auto px-3 py-4 shadow-md dark:shadow-zinc-800">
+      <div className="relative flex h-full flex-col md:gap-[2%] overflow-y-auto px-3 py-4 shadow-md dark:shadow-zinc-800">
         <BrandButton isOpen={sidebar.isOpen} />
         <Menu isOpen={sidebar.isOpen} />
       </div>
@@ -55,15 +56,19 @@ interface BrandButtonProps {
 const BrandButton: React.FC<BrandButtonProps> = React.memo(({ isOpen }) => (
   <Button
     className={cn(
-      "mb-1 transition-transform duration-300 ease-in-out",
+      "mb-1 transition-transform duration-300 ease-in-out  md:pt-[2%]",
       isOpen === false ? "translate-x-1" : "translate-x-0",
     )}
     variant="link"
     asChild
   >
     <Link href="/" className="flex items-center gap-2">
-      <Icons.Logo className="mr-1 h-6 w-6" />
-      <h1
+      <Icons.Logo
+        className="mr-1 h-20 w-20"
+        viewport="0 0 24 24"
+        strokeWidth={"0.5"}
+      />
+      {/* <h1
         className={cn(
           "whitespace-nowrap text-lg font-bold transition-[transform,opacity,display] duration-300 ease-in-out",
           isOpen === false
@@ -72,7 +77,7 @@ const BrandButton: React.FC<BrandButtonProps> = React.memo(({ isOpen }) => (
         )}
       >
         {config.company}
-      </h1>
+      </h1> */}
     </Link>
   </Button>
 ));

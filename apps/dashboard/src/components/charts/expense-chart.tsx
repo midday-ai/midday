@@ -18,7 +18,7 @@ export async function ExpenseChart({
   const data = disabled
     ? expenseChartExampleData
     : await getExpenses({ ...defaultValue, ...value, currency });
-    
+
   return (
     <ExpenseChartCard
       value={value}

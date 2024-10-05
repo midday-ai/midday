@@ -18,21 +18,23 @@ import { SignOut } from "./sign-out";
 import { ThemeSwitch } from "./theme-switch";
 /**
  * UserMenu component
- * 
+ *
  * This component renders a dropdown menu for the user, containing various
  * account-related options and actions.
- * 
+ *
  * @param {Object} props - The component props
  * @param {boolean} props.onlySignOut - If true, only the sign-out option will be displayed
- * 
+ *
  * @returns {Promise<React.ReactElement>} A Promise that resolves to a React element
  */
-export async function UserMenu({ onlySignOut }: { onlySignOut: boolean }): Promise<React.ReactElement> {
+export async function UserMenu({
+  onlySignOut,
+}: { onlySignOut: boolean }): Promise<React.ReactElement> {
   const supabaseClient = createClient();
   const { data: userData } = await getUser();
 
   // Query portal URL for Stripe customer portal
-  const portalUrl = await createStripePortal('/account', supabaseClient);
+  const portalUrl = await createStripePortal("/account", supabaseClient);
 
   return (
     <DropdownMenu>
@@ -41,14 +43,14 @@ export async function UserMenu({ onlySignOut }: { onlySignOut: boolean }): Promi
           {userData?.avatar_url && (
             <Image
               src={userData.avatar_url}
-              alt={userData.full_name || 'User avatar'}
+              alt={userData.full_name || "User avatar"}
               width={32}
               height={32}
             />
           )}
           <AvatarFallback>
             <span className="text-xs">
-              {userData?.full_name?.charAt(0)?.toUpperCase() || 'U'}
+              {userData?.full_name?.charAt(0)?.toUpperCase() || "U"}
             </span>
           </AvatarFallback>
         </Avatar>

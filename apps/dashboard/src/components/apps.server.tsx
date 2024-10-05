@@ -10,7 +10,6 @@ export async function AppsServer({ user }) {
     .eq("team_id", user.team_id);
 
   return (
-   
     <Apps
       installedApps={data?.map((app) => app.app_id) ?? []}
       user={user}

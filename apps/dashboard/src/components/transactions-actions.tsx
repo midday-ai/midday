@@ -61,7 +61,11 @@ export function TransactionsActions({ isEmpty }: { isEmpty: boolean }) {
                       variant="destructive"
                       className="bg-transparent border border-destructive hover:bg-transparent"
                     >
-                      <Icons.Delete className="text-destructive" size={18} strokeWidth={0.5} />
+                      <Icons.Delete
+                        className="text-destructive"
+                        size={18}
+                        strokeWidth={0.5}
+                      />
                     </Button>
                   </AlertDialogTrigger>
                 )}

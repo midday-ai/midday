@@ -9,7 +9,8 @@ const xeroConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Beautiful accounting software for small businesses.",
-  description: "Xero integration provides cloud-based accounting software that's easy to use, yet powerful. It offers features like invoicing, bank reconciliation, inventory tracking, and financial reporting to help small businesses manage their finances effectively.",
+  description:
+    "Xero integration provides cloud-based accounting software that's easy to use, yet powerful. It offers features like invoicing, bank reconciliation, inventory tracking, and financial reporting to help small businesses manage their finances effectively.",
   images: [],
   onInitialize: initialize,
   settings: [

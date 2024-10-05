@@ -13,7 +13,7 @@ interface ContentLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
 
 /**
  * ContentLayout component that provides a consistent layout structure for content pages.
- * It includes a Navbar with a title and a container for the main content.
+ * It includes a Navbar with a title and a scrollable container for the main content.
  *
  * @param {ContentLayoutProps} props - The component props
  * @returns {React.ReactElement} The rendered ContentLayout component
@@ -21,12 +21,14 @@ interface ContentLayoutProps extends React.HTMLAttributes<HTMLDivElement> {
 export const ContentLayout: React.FC<ContentLayoutProps> = React.memo(
   ({ title, children }) => {
     return (
-      <div className="flex min-h-screen flex-col">
+      <div className="flex h-screen flex-col">
         <Navbar title={title} />
-        <main className="flex-grow px-4 pb-8 pt-8 sm:px-8">
-          <BreadcrumbNav />
-          {children}
-        </main>
+        <div className="flex-grow overflow-hidden">
+          <main className="h-full overflow-y-auto px-4 pb-8 pt-8 sm:px-8 scrollbar-hide">
+            <BreadcrumbNav />
+            {children}
+          </main>
+        </div>
       </div>
     );
   },

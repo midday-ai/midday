@@ -16,6 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import React, { useMemo, useState } from "react";
 
+import { SignOut } from "../sign-out";
 import { TeamMenu } from "../team-menu";
 import { CollapseMenuButton } from "./collapse-menu-button";
 
@@ -128,13 +129,13 @@ export const Menu: React.FC<MenuProps> = React.memo(({ isOpen }) => {
             <Tooltip delayDuration={100}>
               <TooltipTrigger asChild>
                 <Button
-                  variant={active ? "secondary" : "ghost"}
+                  variant={"ghost"}
                   className="mb-1 h-10 w-full justify-start"
                   asChild
                 >
                   <Link href={href}>
                     <span className={cn(isOpen === false ? "" : "mr-4")}>
-                      <Icon size={18} />
+                      <Icon size={24} strokeWidth={"0.5"} viewBox="0 0 24 24" />
                     </span>
                     <p
                       className={cn(
@@ -172,52 +173,23 @@ export const Menu: React.FC<MenuProps> = React.memo(({ isOpen }) => {
   };
 
   return (
-    <ScrollArea className="[&>div>div[style]]:!block">
-      <nav className="mt-8 h-full w-full">
-        <ul className="flex min-h-[calc(100vh-48px-36px-16px-32px)] flex-col items-start space-y-1 px-2 lg:min-h-[calc(100vh-32px-40px-32px)]">
-          {menuList.map((menuGroup: MenuGroup, groupIndex: number) => (
-            <li
-              className={cn("w-full", menuGroup.groupLabel ? "pt-5" : "")}
-              key={groupIndex}
-            >
-              {renderGroupLabel(menuGroup.groupLabel)}
-              {menuGroup.menus.map(renderMenuItem)}
-            </li>
-          ))}
-          <li className="flex w-full grow items-end">
-            <TooltipProvider disableHoverableContent>
-              <Tooltip delayDuration={100}>
-                <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => {
-                      /* Implement sign out logic */
-                      handleSignOut();
-                    }}
-                    variant="outline"
-                    className="mt-5 h-10 w-full justify-center"
-                  >
-                    <span className={cn(isOpen === false ? "" : "mr-4")}>
-                      {isLoading ? <Loader2 size={18} /> : <LogOut size={18} />}
-                    </span>
-                    <p
-                      className={cn(
-                        "whitespace-nowrap",
-                        isOpen === false ? "hidden opacity-0" : "opacity-100",
-                      )}
-                    >
-                      Sign out
-                    </p>
-                  </Button>
-                </TooltipTrigger>
-                {isOpen === false && (
-                  <TooltipContent side="right">Sign out</TooltipContent>
-                )}
-              </Tooltip>
-            </TooltipProvider>
-          </li>
-        </ul>
-      </nav>
-    </ScrollArea>
+    <div className="flex flex-col h-full">
+      <div className="[&>div>div[style]]:!block scrollbar-hide overflow-y-auto flex-grow">
+        <nav className="mt-8 h-full w-full">
+          <ul className="flex flex-col items-start space-y-1 p-[1.5%]">
+            {menuList.map((menuGroup: MenuGroup, groupIndex: number) => (
+              <li
+                className={cn("w-full", menuGroup.groupLabel ? "pt-5" : "")}
+                key={groupIndex}
+              >
+                {renderGroupLabel(menuGroup.groupLabel)}
+                {menuGroup.menus.map(renderMenuItem)}
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    </div>
   );
 });
 

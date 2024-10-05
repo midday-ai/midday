@@ -1,10 +1,10 @@
 import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import {
-    Tooltip,
-    TooltipContent,
-    TooltipProvider,
-    TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from "@midday/ui/tooltip";
 import Link from "next/link";
 import { AnimatedNumber } from "../../animated-number";
@@ -25,9 +25,13 @@ export async function ExpenseChartCard({
   currency,
   data,
 }: Props) {
-
   return (
-    <div className={cn("bg-white rounded-lg shadow-sm", disabled && "pointer-events-none select-none")}>
+    <div
+      className={cn(
+        "bg-white rounded-lg shadow-sm",
+        disabled && "pointer-events-none select-none",
+      )}
+    >
       <div className="space-y-2 mb-6 inline-block select-text">
         <h1 className="text-4xl font-mono">
           <AnimatedNumber

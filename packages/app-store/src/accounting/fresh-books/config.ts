@@ -8,8 +8,10 @@ const freshBooksConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Effortless invoicing and accounting with FreshBooks integration.",
-  description: "FreshBooks integration simplifies your financial management with easy-to-use invoicing, expense tracking, and time tracking features. It's designed to help small businesses and freelancers streamline their accounting processes.",
+  short_description:
+    "Effortless invoicing and accounting with FreshBooks integration.",
+  description:
+    "FreshBooks integration simplifies your financial management with easy-to-use invoicing, expense tracking, and time tracking features. It's designed to help small businesses and freelancers streamline their accounting processes.",
   images: [],
   onInitialize: initialize,
   settings: [

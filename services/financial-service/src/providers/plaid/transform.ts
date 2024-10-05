@@ -358,7 +358,8 @@ export const transformAccount = ({
 export const transformAccountBalance = (
   balances?: TransformAccountBalance,
 ): BaseBalance => ({
-  currency: balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
+  currency:
+    balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
   amount: balances?.current ?? 0,
   available: balances?.available ?? 0,
 });

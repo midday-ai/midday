@@ -190,7 +190,10 @@ export const columns: ColumnDef[] = [
                             }
                           >
                             {deleteTeamMember.status === "executing" ? (
-                              <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
+                              <Loader2
+                                className="h-4 w-4 animate-spin"
+                                strokeWidth={0.5}
+                              />
                             ) : (
                               "Confirm"
                             )}

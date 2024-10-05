@@ -48,7 +48,7 @@ export function SlackSignIn() {
         <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
       ) : (
         <>
-            <Icons.Slack strokeWidth={0.5} />
+          <Icons.Slack strokeWidth={0.5} />
           <span>Continue with Slack</span>
         </>
       )}

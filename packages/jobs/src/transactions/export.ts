@@ -22,13 +22,13 @@ client.defineJob({
   integrations: { supabase },
   /**
    * Exports transactions to a ZIP file containing a CSV and attachments.
-   * 
+   *
    * @param payload - The job payload containing export configuration.
    * @param payload.transactionIds - Array of transaction IDs to export.
    * @param payload.teamId - The ID of the team exporting the transactions.
    * @param payload.locale - The locale to use for number formatting.
    * @param io - The I/O object provided by the job runner for integration access.
-   * 
+   *
    * @throws {Error} If there's an issue with database queries or file operations.
    */
   run: async (payload, io) => {

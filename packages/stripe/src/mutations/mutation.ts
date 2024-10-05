@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { SupabaseClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
@@ -6,7 +6,7 @@ import { Database } from "../types";
 
 // Initialize Stripe with the secret key for server-side operations
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20',
+  apiVersion: "2024-06-20",
 });
 
 // Change to control trial period length
@@ -233,10 +233,13 @@ export const createOrRetrieveCustomer = async <T extends Database>({
       stripeCustomerId = existingStripeCustomer.id;
     }
   } else {
-    console.log("no existing supabase customer, attempting to retrieve customer by email from stripe", {
-      email,
-      uuid,
-    });
+    console.log(
+      "no existing supabase customer, attempting to retrieve customer by email from stripe",
+      {
+        email,
+        uuid,
+      },
+    );
     // If Stripe ID is missing from Supabase, try to retrieve Stripe customer ID by email
     const stripeCustomers = await stripe.customers.list({ email: email });
     stripeCustomerId =
@@ -340,7 +343,6 @@ export const manageSubscriptionStatusChange = async <T extends Database>({
   type Tables = T["public"]["Tables"];
   type SubscriptionInsert = Tables["subscriptions"]["Insert"];
 
-
   // Get customer's UUID from mapping table.
   const { data: customerData, error: noCustomerError } = await client
     .from("customers")
@@ -368,14 +370,22 @@ export const manageSubscriptionStatusChange = async <T extends Database>({
     price_id: subscription.items.data[0]?.price?.id ?? null,
     quantity: subscription.items.data[0]?.quantity ?? null,
     cancel_at_period_end: subscription.cancel_at_period_end,
-    cancel_at: subscription.cancel_at ? toDateTime(subscription.cancel_at) : null,
-    canceled_at: subscription.canceled_at ? toDateTime(subscription.canceled_at) : null,
+    cancel_at: subscription.cancel_at
+      ? toDateTime(subscription.cancel_at)
+      : null,
+    canceled_at: subscription.canceled_at
+      ? toDateTime(subscription.canceled_at)
+      : null,
     current_period_start: toDateTime(subscription.current_period_start),
     current_period_end: toDateTime(subscription.current_period_end),
     created: toDateTime(subscription.created),
     ended_at: subscription.ended_at ? toDateTime(subscription.ended_at) : null,
-    trial_start: subscription.trial_start ? toDateTime(subscription.trial_start) : null,
-    trial_end: subscription.trial_end ? toDateTime(subscription.trial_end) : null,
+    trial_start: subscription.trial_start
+      ? toDateTime(subscription.trial_start)
+      : null,
+    trial_end: subscription.trial_end
+      ? toDateTime(subscription.trial_end)
+      : null,
   };
 
   console.log("subscriptionData to upsert", subscriptionData);
@@ -449,6 +459,5 @@ export {
   deleteProductRecord,
   upsertCustomerToSupabase,
   upsertPriceRecord,
-  upsertProductRecord
+  upsertProductRecord,
 };
-

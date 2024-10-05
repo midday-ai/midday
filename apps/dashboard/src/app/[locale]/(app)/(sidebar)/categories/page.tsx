@@ -26,13 +26,13 @@ export default async function InboxPage({ searchParams }: Props) {
     <ContentLayout title="Categories">
       <Suspense fallback={<InboxViewSkeleton ascending />}>
         <ConnectAccountServerWrapper>
-        <CategoryCharts
-          currency={(searchParams.currency as string) ?? "USD"}
-          disableAllCharts={isEmpty}
-          tier={tier}
-        />
-      </ConnectAccountServerWrapper>
-    </Suspense>
+          <CategoryCharts
+            currency={(searchParams.currency as string) ?? "USD"}
+            disableAllCharts={isEmpty}
+            tier={tier}
+          />
+        </ConnectAccountServerWrapper>
+      </Suspense>
     </ContentLayout>
   );
 }

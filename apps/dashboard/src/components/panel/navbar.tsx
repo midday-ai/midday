@@ -1,8 +1,8 @@
 "use server";
 
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
-import { Skeleton } from "@midday/ui/skeleton";
 import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
+import { Skeleton } from "@midday/ui/skeleton";
 import React, { Suspense } from "react";
 
 import { AssistantButton } from "../assistant/button";
@@ -41,9 +41,9 @@ export const Navbar: React.FC<NavbarProps> = ({ title }) => {
           <MobileMenu />
           {isDesktopApp() && <DesktopTrafficLight />}
           {isDesktopApp() && <BrowserNavigation />}
-          <div className="flex-1">
+          {/* <div className="flex-1">
             <AssistantButton />
-          </div>
+          </div> */}
         </div>
         <NavbarRight />
       </div>
@@ -84,7 +84,6 @@ const NavbarRight: React.FC = () => (
     <Suspense>
       <ConnectionStatus />
     </Suspense>
-    <NotificationCenter />
     <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
       <UserMenu onlySignOut={false} />
     </Suspense>

@@ -32,7 +32,7 @@ export function Chat({
   const { message } = useAssistantStore();
 
   const onSubmit = async (input: string | undefined) => {
-    const value = typeof input === 'string' ? input.trim() : '';
+    const value = typeof input === "string" ? input.trim() : "";
 
     if (value.length === 0) {
       return null;

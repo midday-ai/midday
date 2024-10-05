@@ -35,18 +35,17 @@ export const UpgradeTier: React.FC<UpgradeTierProps> = ({
             <DialogTitle className="text-3xl font-bold">
               Business Tier Coming Soon
             </DialogTitle>
-            <DialogDescription className="text-lg font-semibold">
+            <DialogDescription className="text-lg font-base text-foreground">
               Our new Business tier is currently in private beta. Our team is
-              working hard to make it available to you soon. Sign up below to be
-              notified when it launches.
+              working hard to make it available to you soon.
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-2 mt-4">
-            <p className="text-md text-muted-foreground">
+            <p className="text-md text-foreground">
               If you'd like to be notified when the Business Tier becomes widely
-              available, please leave your email address with our support team.
+              available, please send us an email below.
             </p>
-            <p className="text-md text-muted-foreground">
+            <p className="text-md text-bold underline">
               engineering@solomon-ai.co
             </p>
           </div>

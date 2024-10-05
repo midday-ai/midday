@@ -8,7 +8,7 @@ import { LayoutDashboard } from "lucide-react";
 const OverviewViewAccessibilityButton: React.FC<{
   className?: string;
   isWidget?: boolean;
-  title?: string; 
+  title?: string;
 }> = ({ className, isWidget = false, title }) => {
   const { setOpen } = useOverviewViewStore();
 
@@ -29,9 +29,9 @@ const OverviewViewAccessibilityButton: React.FC<{
           style={
             isWidget
               ? {
-                marginRight:
-                  "calc(20px + var(--removed-body-scroll-bar-size, 0px))",
-              }
+                  marginRight:
+                    "calc(20px + var(--removed-body-scroll-bar-size, 0px))",
+                }
               : undefined
           }
           aria-label="Open income view"

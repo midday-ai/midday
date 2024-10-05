@@ -15,9 +15,9 @@ export function InboxEmpty({ inboxId }: Props) {
         <div className="text-center mb-6 space-y-2">
           <h2 className="font-medium text-lg">Magic Inbox</h2>
           <p className="text-[#606060] text-sm">
-            Use the email to send receipts to {config.company}. We will extract and
-            reconcile them against your transactions. Additionally, you can also
-            upload receipts by simply dragging and dropping them here.
+            Use the email to send receipts to {config.company}. We will extract
+            and reconcile them against your transactions. Additionally, you can
+            also upload receipts by simply dragging and dropping them here.
             <br />
           </p>
         </div>

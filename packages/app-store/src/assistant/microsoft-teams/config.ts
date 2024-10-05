@@ -9,7 +9,8 @@ const microsoftTeamsConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Enhance collaboration with Microsoft Teams integration.",
-  description: "Microsoft Teams integration allows seamless communication and file sharing within your organization. It enables real-time chat, video meetings, and integration with other Microsoft 365 tools for improved productivity.",
+  description:
+    "Microsoft Teams integration allows seamless communication and file sharing within your organization. It enables real-time chat, video meetings, and integration with other Microsoft 365 tools for improved productivity.",
   images: [],
   onInitialize: initialize,
   settings: [
@@ -40,7 +41,8 @@ const microsoftTeamsConfig: IntegrationConfig = {
     {
       id: "notification_sync",
       label: "Sync Notifications",
-      description: "Enable synchronization of notifications with other platforms",
+      description:
+        "Enable synchronization of notifications with other platforms",
       type: "switch",
       required: false,
       value: false,

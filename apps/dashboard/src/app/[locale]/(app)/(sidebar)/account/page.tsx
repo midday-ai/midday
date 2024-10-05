@@ -16,14 +16,14 @@ export default async function Account() {
 
   return (
     <div className="space-y-12">
-        <UserAvatar
-          userId={userData.id}
-          fullName={userData.full_name}
-          avatarUrl={userData?.avatar_url}
-        />
-        <DisplayName fullName={userData.full_name} />
-        <ChangeTheme />
-        <DeleteAccount />
+      <UserAvatar
+        userId={userData.id}
+        fullName={userData.full_name}
+        avatarUrl={userData?.avatar_url}
+      />
+      <DisplayName fullName={userData.full_name} />
+      <ChangeTheme />
+      <DeleteAccount />
     </div>
   );
 }

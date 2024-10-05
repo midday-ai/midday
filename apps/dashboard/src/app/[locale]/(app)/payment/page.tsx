@@ -14,16 +14,15 @@ export const metadata: Metadata = {
   title: `Payment | ${config.company}`,
 };
 
-
 /**
  * Renders the payment page component.
- * 
+ *
  * This asynchronous function handles the following tasks:
  * 1. Initializes the Supabase client
  * 2. Retrieves the current user's information
  * 3. Fetches product and subscription data
  * 4. Renders the payment page layout with header, main content, and footer
- * 
+ *
  * @async
  * @function
  * @returns {Promise<JSX.Element>} The rendered payment page component

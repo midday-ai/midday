@@ -9,7 +9,8 @@ const ebayConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Streamline your eBay sales and financial management.",
-  description: "Optimize your eBay business with seamless integration. Automate order processing, track sales, and simplify financial reporting. Reduce manual work, minimize errors, and gain real-time insights into your eBay performance. Ideal for sellers looking to scale their eBay operations and improve financial efficiency.",
+  description:
+    "Optimize your eBay business with seamless integration. Automate order processing, track sales, and simplify financial reporting. Reduce manual work, minimize errors, and gain real-time insights into your eBay performance. Ideal for sellers looking to scale their eBay operations and improve financial efficiency.",
   images: [],
   onInitialize: initialize,
   settings: [

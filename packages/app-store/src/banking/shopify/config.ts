@@ -51,15 +51,22 @@ const shopifyConfig: IntegrationConfig = {
   category: IntegrationCategory.Banking,
   active: false,
   logo: Logo,
-  short_description: "Integrate your Shopify store for seamless financial management.",
-  description: "Enhance your e-commerce operations with our Shopify integration. Automatically sync your sales, refunds, and payout data. Get real-time insights into your store's performance, simplify accounting processes, and make informed financial decisions. Perfect for Shopify merchants looking to streamline their financial workflows and gain a comprehensive view of their online business.",
+  short_description:
+    "Integrate your Shopify store for seamless financial management.",
+  description:
+    "Enhance your e-commerce operations with our Shopify integration. Automatically sync your sales, refunds, and payout data. Get real-time insights into your store's performance, simplify accounting processes, and make informed financial decisions. Perfect for Shopify merchants looking to streamline their financial workflows and gain a comprehensive view of their online business.",
   images: [],
   onInitialize: initialize,
   settings,
   config: {
     apiVersion: "2023-07",
     sandboxMode: false,
-    scopes: ["read_orders", "read_products", "read_customers", "read_financial"],
+    scopes: [
+      "read_orders",
+      "read_products",
+      "read_customers",
+      "read_financial",
+    ],
   },
 };
 

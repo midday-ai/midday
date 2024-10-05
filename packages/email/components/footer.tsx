@@ -21,9 +21,7 @@ export function Footer({ baseUrl }: Props) {
 
       <br />
 
-      <Text className="font-regular text-[21px]">
-       {config.description}
-      </Text>
+      <Text className="font-regular text-[21px]">{config.description}</Text>
 
       <br />
 
@@ -59,10 +57,7 @@ export function Footer({ baseUrl }: Props) {
               <Text className="font-medium">Resources</Text>
             </Row>
             <Row className="mb-1.5">
-              <Link
-                className="text-[14px] text-[#707070]"
-                href={config.webUrl}
-              >
+              <Link className="text-[14px] text-[#707070]" href={config.webUrl}>
                 Homepage
               </Link>
             </Row>

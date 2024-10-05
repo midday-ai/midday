@@ -9,7 +9,8 @@ const notionConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Enhance productivity with Notion integration.",
-  description: "Notion integration allows seamless connection to your workspace. It enables easy access to your notes, databases, and wikis, improving organization and collaboration within your team.",
+  description:
+    "Notion integration allows seamless connection to your workspace. It enables easy access to your notes, databases, and wikis, improving organization and collaboration within your team.",
   images: [],
   onInitialize: initialize,
   settings: [

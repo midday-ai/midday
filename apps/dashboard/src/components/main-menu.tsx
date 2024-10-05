@@ -143,9 +143,9 @@ const Item = ({
                 "relative border-transparent md:w-[45px] h-[45px] flex items-center md:justify-center",
                 "hover:bg-accent hover:border-[#DCDAD2] hover:dark:border-[#2C2C2C]",
                 isActive &&
-                "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
+                  "bg-[#F2F1EF] dark:bg-secondary border-[#DCDAD2] dark:border-[#2C2C2C]",
                 isCustomizing &&
-                "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
+                  "bg-background border-[#DCDAD2] dark:border-[#2C2C2C]",
               )}
             >
               <motion.div
@@ -169,7 +169,7 @@ const Item = ({
                   className={cn(
                     "flex space-x-3 p-0 items-center pl-2 md:pl-0",
                     isCustomizing &&
-                    "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
+                      "animate-[jiggle_0.3s_ease-in-out_infinite] transform-gpu pointer-events-none",
                   )}
                 >
                   {IconComponent ? (

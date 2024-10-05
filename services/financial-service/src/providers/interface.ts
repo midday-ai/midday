@@ -27,6 +27,10 @@ export interface Provider {
   ) => Promise<GetInstitutionsResponse>;
   getHealthCheck: () => Promise<boolean>;
   deleteAccounts: (params: DeleteAccountsRequest) => void;
-  getStatements: (params: GetStatementsRequest) => Promise<GetStatementsResponse>;
-  getStatementPdf: (params: GetStatementPdfRequest) => Promise<GetStatementPdfResponse>;
+  getStatements: (
+    params: GetStatementsRequest,
+  ) => Promise<GetStatementsResponse>;
+  getStatementPdf: (
+    params: GetStatementPdfRequest,
+  ) => Promise<GetStatementPdfResponse>;
 }

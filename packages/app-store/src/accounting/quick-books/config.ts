@@ -8,8 +8,10 @@ const quickBooksConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Powerful accounting software for small and medium-sized businesses.",
-  description: "QuickBooks integration provides comprehensive accounting tools, including invoicing, expense tracking, financial reporting, and tax preparation. It helps businesses manage their finances efficiently and make informed decisions.",
+  short_description:
+    "Powerful accounting software for small and medium-sized businesses.",
+  description:
+    "QuickBooks integration provides comprehensive accounting tools, including invoicing, expense tracking, financial reporting, and tax preparation. It helps businesses manage their finances efficiently and make informed decisions.",
   images: [],
   onInitialize: initialize,
   settings: [

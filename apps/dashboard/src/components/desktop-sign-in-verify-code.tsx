@@ -16,7 +16,9 @@ export function DesktopSignInVerifyCode({
 
   useEffect(() => {
     if (code && !hasRunned.current) {
-      window.location.replace(`${config.desktopUrl}/api/auth/callback?code=${code}`);
+      window.location.replace(
+        `${config.desktopUrl}/api/auth/callback?code=${code}`,
+      );
       hasRunned.current = true;
     }
   }, [code]);

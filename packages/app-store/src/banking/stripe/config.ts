@@ -8,8 +8,10 @@ const stripeConfig: IntegrationConfig = {
   category: IntegrationCategory.Banking,
   active: false,
   logo: Logo,
-  short_description: "Supercharge your financial operations with seamless Stripe integration.",
-  description: "Elevate your business with Stripe integration. Automate payment processing, gain real-time financial insights, and streamline reconciliation. This powerful tool reduces manual data entry, minimizes errors, and provides a comprehensive view of your revenue streams. Perfect for businesses of all sizes looking to optimize their financial workflows and make data-driven decisions.",
+  short_description:
+    "Supercharge your financial operations with seamless Stripe integration.",
+  description:
+    "Elevate your business with Stripe integration. Automate payment processing, gain real-time financial insights, and streamline reconciliation. This powerful tool reduces manual data entry, minimizes errors, and provides a comprehensive view of your revenue streams. Perfect for businesses of all sizes looking to optimize their financial workflows and make data-driven decisions.",
   images: [],
   onInitialize: initialize,
   settings: [

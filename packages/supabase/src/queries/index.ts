@@ -23,7 +23,7 @@ export enum RecurringTransactionFrequency {
  * @returns The string representation of the frequency.
  */
 export function recurringFrequencyToString(
-  frequency: RecurringTransactionFrequency
+  frequency: RecurringTransactionFrequency,
 ): string {
   switch (frequency) {
     case RecurringTransactionFrequency.ALL:
@@ -62,7 +62,7 @@ export type GetRecentTransactionsParams = {
  */
 export async function getRecentTransactionsQuery(
   supabase: Client,
-  params: GetRecentTransactionsParams
+  params: GetRecentTransactionsParams,
 ) {
   const { teamId, limit = 15, accountId, recurring } = params;
 
@@ -149,7 +149,7 @@ export async function getUserQuery(supabase: Client, userId: string) {
       `
       *,
       team:team_id(*)
-    `
+    `,
     )
     .eq("id", userId)
     .single()
@@ -169,7 +169,7 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
 
 export async function getBankConnectionsByTeamIdQuery(
   supabase: Client,
-  teamId: string
+  teamId: string,
 ) {
   return supabase
     .from("bank_connections")
@@ -185,7 +185,7 @@ export type GetTeamBankAccountsParams = {
 
 export async function getTeamBankAccountsQuery(
   supabase: Client,
-  params: GetTeamBankAccountsParams
+  params: GetTeamBankAccountsParams,
 ) {
   const { teamId, enabled } = params;
 
@@ -213,7 +213,7 @@ export async function getTeamMembersQuery(supabase: Client, teamId: string) {
       role,
       team_id,
       user:users(id, full_name, avatar_url, email)
-    `
+    `,
     )
     .eq("team_id", teamId)
     .order("created_at")
@@ -231,7 +231,7 @@ type GetTeamUserParams = {
 
 export async function getTeamUserQuery(
   supabase: Client,
-  params: GetTeamUserParams
+  params: GetTeamUserParams,
 ) {
   const { data } = await supabase
     .from("users_on_team")
@@ -241,7 +241,7 @@ export async function getTeamUserQuery(
       role,
       team_id,
       user:users(id, full_name, avatar_url, email)
-    `
+    `,
     )
     .eq("team_id", params.teamId)
     .eq("user_id", params.userId)
@@ -262,7 +262,7 @@ export type GetSpendingParams = {
 
 export async function getSpendingQuery(
   supabase: Client,
-  params: GetSpendingParams
+  params: GetSpendingParams,
 ) {
   return supabase.rpc("get_spending_v3", {
     team_id: params.teamId,
@@ -293,7 +293,7 @@ export type GetTransactionsParams = {
 
 export async function getTransactionsQuery(
   supabase: Client,
-  params: GetTransactionsParams
+  params: GetTransactionsParams,
 ) {
   const { from = 0, to, filter, sort, teamId, searchQuery } = params;
 
@@ -481,7 +481,7 @@ type GetSimilarTransactionsParams = {
 
 export async function getSimilarTransactions(
   supabase: Client,
-  params: GetSimilarTransactionsParams
+  params: GetSimilarTransactionsParams,
 ) {
   const { name, teamId, categorySlug } = params;
 
@@ -497,7 +497,7 @@ export async function getSimilarTransactions(
 // gets all the similar transactions with detailed information
 export async function getSimilarTransactionsDetailedQuery(
   supabase: Client,
-  params: GetSimilarTransactionsParams
+  params: GetSimilarTransactionsParams,
 ) {
   const { name, teamId, categorySlug } = params;
 
@@ -516,7 +516,7 @@ type GetBankAccountsCurrenciesParams = {
 
 export async function getBankAccountsCurrenciesQuery(
   supabase: Client,
-  params: GetBankAccountsCurrenciesParams
+  params: GetBankAccountsCurrenciesParams,
 ) {
   return supabase.rpc("get_bank_account_currencies", {
     team_id: params.teamId,
@@ -532,7 +532,7 @@ export type GetBurnRateQueryParams = {
 
 export async function getBurnRateQuery(
   supabase: Client,
-  params: GetBurnRateQueryParams
+  params: GetBurnRateQueryParams,
 ) {
   const { teamId, from, to, currency } = params;
 
@@ -561,7 +561,7 @@ export type GetRunwayQueryParams = {
 
 export async function getRunwayQuery(
   supabase: Client,
-  params: GetRunwayQueryParams
+  params: GetRunwayQueryParams,
 ) {
   const { teamId, from, to, currency } = params;
 
@@ -586,7 +586,7 @@ export type GetMetricsParams = {
 
 export async function getMetricsQuery(
   supabase: Client,
-  params: GetMetricsParams
+  params: GetMetricsParams,
 ) {
   const { teamId, from, to, type = "profit", currency } = params;
 
@@ -613,7 +613,7 @@ export async function getMetricsQuery(
   const prevTotal = prevData?.reduce((value, item) => item.value + value, 0);
   const currentTotal = currentData?.reduce(
     (value, item) => item.value + value,
-    0
+    0,
   );
 
   const baseCurrency = currentData?.at(0)?.currency;
@@ -636,7 +636,7 @@ export async function getMetricsQuery(
         precentage: {
           value: getPercentageIncrease(
             Math.abs(prev?.value),
-            Math.abs(record.value)
+            Math.abs(record.value),
           ),
           status: record.value > prev?.value ? "positive" : "negative",
         },
@@ -664,7 +664,7 @@ export type GetExpensesQueryParams = {
 
 export async function getExpensesQuery(
   supabase: Client,
-  params: GetExpensesQueryParams
+  params: GetExpensesQueryParams,
 ) {
   const { teamId, from, to, currency } = params;
 
@@ -722,14 +722,14 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   const isSearch =
     (filter !== undefined &&
       Object.values(filter).some(
-        (value) => value !== undefined && value !== null
+        (value) => value !== undefined && value !== null,
       )) ||
     Boolean(searchQuery);
 
   const query = supabase
     .from("documents")
     .select(
-      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)"
+      "id, name, path_tokens, created_at, team_id, metadata, tag, owner:owner_id(*)",
     )
     .eq("team_id", teamId)
     .limit(limit)
@@ -785,7 +785,7 @@ export async function getVaultQuery(supabase: Client, params: GetVaultParams) {
   }));
 
   const mergedMap = new Map(
-    [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj])
+    [...defaultFolders, ...filteredData].map((obj) => [obj.name, obj]),
   );
 
   const mergedArray = Array.from(mergedMap.values());
@@ -815,7 +815,7 @@ type GetVaultRecursiveParams = {
 
 export async function getVaultRecursiveQuery(
   supabase: Client,
-  params: GetVaultRecursiveParams
+  params: GetVaultRecursiveParams,
 ) {
   const { teamId, path, folder, limit = 10000 } = params;
 
@@ -852,8 +852,8 @@ export async function getVaultRecursiveQuery(
       getVaultRecursiveQuery(supabase, {
         ...params,
         folder: decodeURIComponent(folder.name),
-      })
-    )
+      }),
+    ),
   );
 
   subFolderContents.map((subfolderContent) => {
@@ -870,7 +870,7 @@ export async function getTeamsByUserIdQuery(supabase: Client, userId: string) {
       `
       id,
       role,
-      team:team_id(*)`
+      team:team_id(*)`,
     )
     .eq("user_id", userId)
     .throwOnError();
@@ -899,7 +899,7 @@ type GetUserInviteQueryParams = {
 
 export async function getUserInviteQuery(
   supabase: Client,
-  params: GetUserInviteQueryParams
+  params: GetUserInviteQueryParams,
 ) {
   return supabase
     .from("user_invites")
@@ -921,7 +921,7 @@ type GetInboxQueryParams = {
 
 export async function getInboxQuery(
   supabase: Client,
-  params: GetInboxQueryParams
+  params: GetInboxQueryParams,
 ) {
   const {
     from = 0,
@@ -1011,7 +1011,7 @@ export type GetTrackerProjectsQueryParams = {
 
 export async function getTrackerProjectsQuery(
   supabase: Client,
-  params: GetTrackerProjectsQueryParams
+  params: GetTrackerProjectsQueryParams,
 ) {
   const { from = 0, to = 10, filter, sort, teamId, search } = params;
   const { status } = filter || {};
@@ -1059,7 +1059,7 @@ export type GetTrackerRecordsByRangeParams = {
 
 export async function getTrackerRecordsByRangeQuery(
   supabase: Client,
-  params: GetTrackerRecordsByRangeParams
+  params: GetTrackerRecordsByRangeParams,
 ) {
   if (!params.teamId) {
     return null;
@@ -1068,7 +1068,7 @@ export async function getTrackerRecordsByRangeQuery(
   const query = supabase
     .from("tracker_entries")
     .select(
-      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)"
+      "*, assigned:assigned_id(id, full_name, avatar_url), project:project_id(id, name)",
     )
     .eq("team_id", params.teamId)
     .gte("date", params.from)
@@ -1092,7 +1092,7 @@ export async function getTrackerRecordsByRangeQuery(
 
   const totalDuration = data?.reduce(
     (duration, item) => item.duration + duration,
-    0
+    0,
   );
 
   return {
@@ -1112,7 +1112,7 @@ export type GetCategoriesParams = {
 
 export async function getCategoriesQuery(
   supabase: Client,
-  params: GetCategoriesParams
+  params: GetCategoriesParams,
 ) {
   const { teamId, limit = 1000 } = params;
 
@@ -1132,14 +1132,14 @@ type GetInboxSearchParams = {
 
 export async function getInboxSearchQuery(
   supabase: Client,
-  params: GetInboxSearchParams
+  params: GetInboxSearchParams,
 ) {
   const { teamId, q, limit = 10 } = params;
 
   const query = supabase
     .from("inbox")
     .select(
-      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description"
+      "id, created_at, file_name, amount, currency, file_path, content_type, date, display_name, size, description",
     )
     .eq("team_id", teamId)
     .neq("status", "deleted")
@@ -1171,7 +1171,7 @@ export type GetTransactionsByBankAccountQueryParams = z.infer<
 
 export const getTransactionsByBankAccountQuery = async (
   supabase: Client,
-  params: GetTransactionsByBankAccountQueryParams
+  params: GetTransactionsByBankAccountQueryParams,
 ) => {
   const { bankAccountId, limit } =
     getTransactionsByBankAccountQueryParamsSchema.parse(params);
@@ -1199,7 +1199,7 @@ export const getTransactionsByBankAccountQuery = async (
  */
 export async function getUserSubscriptionsQuery(
   supabase: Client,
-  userId: string
+  userId: string,
 ) {
   return await supabase
     .from("subscriptions")

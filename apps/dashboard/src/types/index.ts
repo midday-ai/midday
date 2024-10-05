@@ -1,6 +1,4 @@
-import {
-  LucideIcon
-} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 /**
  * Represents a submenu item in the navigation structure.

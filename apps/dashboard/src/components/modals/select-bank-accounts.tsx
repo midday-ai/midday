@@ -363,7 +363,10 @@ export function SelectBankAccountsModal() {
                         }
                       >
                         {connectBankAction.status === "executing" ? (
-                          <Loader2 className="w-4 h-4 animate-spin pointer-events-none" strokeWidth={0.5} />
+                          <Loader2
+                            className="w-4 h-4 animate-spin pointer-events-none"
+                            strokeWidth={0.5}
+                          />
                         ) : (
                           "Save"
                         )}

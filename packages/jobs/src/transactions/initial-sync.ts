@@ -26,7 +26,7 @@ client.defineJob({
   integrations: { supabase },
   /**
    * Performs the initial synchronization of transactions for a given team.
-   * 
+   *
    * This function does the following:
    * 1. Sets up a scheduler for regular syncs
    * 2. Retrieves all enabled bank accounts for the team
@@ -36,7 +36,7 @@ client.defineJob({
    *    - Handles rate limiting and errors
    *    - Updates account balance and last accessed time
    * 4. Revalidates relevant cache tags
-   * 
+   *
    * @param payload - The job payload containing the teamId
    * @param io - The I/O object for logging and database operations
    */
@@ -51,7 +51,7 @@ client.defineJob({
       data: { step: "connecting_bank" },
     });
     await io.logger.debug(
-      `Created status: setting-up-account-bank for team: ${teamId}`
+      `Created status: setting-up-account-bank for team: ${teamId}`,
     );
 
     /**
@@ -72,33 +72,33 @@ client.defineJob({
     const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
       )
       .eq("team_id", teamId)
       .eq("enabled", true);
 
     await io.logger.info(
-      `Found ${accountsData?.length} accounts for team: ${teamId}`
+      `Found ${accountsData?.length} accounts for team: ${teamId}`,
     );
 
     /**
      * Processes transactions for each bank account.
-     * 
+     *
      * @param account - The bank account information
      */
     const promises = accountsData?.map(async (account) => {
       await io.logger.debug(
-        `Processing account: ${account.id} for team: ${teamId}`
+        `Processing account: ${account.id} for team: ${teamId}`,
       );
       try {
         /**
          * Fetches transactions from the financial engine with retry logic.
-         * 
+         *
          * @param retries - The number of retry attempts
          * @returns A promise resolving to the transactions data
          */
         const getTransactions = async (
-          retries = 0
+          retries = 0,
         ): Promise<FinancialEngine.TransactionsSchema> => {
           try {
             return await engine.transactions.list({
@@ -130,7 +130,7 @@ client.defineJob({
         const transactions = await getTransactions();
 
         await io.logger.info(
-          `Retrieved ${transactions.data?.length} transactions for account: ${account.id}`
+          `Retrieved ${transactions.data?.length} transactions for account: ${account.id}`,
         );
 
         const formattedTransactions = transactions.data?.map((transaction) =>
@@ -138,10 +138,10 @@ client.defineJob({
             transaction,
             teamId: account.team_id,
             bankAccountId: account.id,
-          })
+          }),
         );
         await io.logger.debug(
-          `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`
+          `Formatted ${formattedTransactions?.length} transactions for account: ${account.id}`,
         );
 
         /**
@@ -152,7 +152,7 @@ client.defineJob({
           BATCH_LIMIT,
           async (batch) => {
             await io.logger.debug(
-              `Upserting batch of ${batch.length} transactions for account: ${account.id}`
+              `Upserting batch of ${batch.length} transactions for account: ${account.id}`,
             );
             const { data, error } = await supabase
               .from("transactions")
@@ -164,20 +164,20 @@ client.defineJob({
             if (error) {
               await io.logger.error(
                 `Error upserting transactions for account: ${account.id}`,
-                { error }
+                { error },
               );
             }
 
             await io.logger.debug(
-              `Upserted batch ${data} for account: ${account.id}`
+              `Upserted batch ${data} for account: ${account.id}`,
             );
             return batch;
-          }
+          },
         );
       } catch (error) {
         await io.logger.error(
           `Error processing transactions for account: ${account.id}`,
-          { error }
+          { error },
         );
         if (error instanceof FinancialEngine.APIError) {
           const parsedError = parseAPIError(error);
@@ -192,7 +192,7 @@ client.defineJob({
             })
             .eq("id", account.bank_connection.id);
           await io.logger.info(
-            `Updated bank connection status for account: ${account.id}`
+            `Updated bank connection status for account: ${account.id}`,
           );
         }
       }
@@ -223,12 +223,12 @@ client.defineJob({
           .update({ last_accessed: new Date().toISOString() })
           .eq("id", account.bank_connection.id);
         await io.logger.debug(
-          `Updated last_accessed for bank connection: ${account.bank_connection.id}`
+          `Updated last_accessed for bank connection: ${account.bank_connection.id}`,
         );
       } catch (error) {
         await io.logger.error(
           `Error updating balance or last_accessed for account: ${account.id}`,
-          { error }
+          { error },
         );
       }
     });
@@ -237,7 +237,7 @@ client.defineJob({
       data: { step: "getting_transactions" },
     });
     await io.logger.debug(
-      `Updated status to setting-up-account-transactions for team: ${teamId}`
+      `Updated status to setting-up-account-transactions for team: ${teamId}`,
     );
 
     /**
@@ -247,7 +247,7 @@ client.defineJob({
       if (promises) {
         await Promise.all(promises);
         await io.logger.info(
-          `Completed processing all accounts for team: ${teamId}`
+          `Completed processing all accounts for team: ${teamId}`,
         );
       }
     } catch (error) {

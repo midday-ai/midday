@@ -8,8 +8,10 @@ const etsyConfig: IntegrationConfig = {
   category: IntegrationCategory.Banking,
   active: false,
   logo: Logo,
-  short_description: "Integrate your Etsy shop for seamless financial management.",
-  description: "Enhance your Etsy business with our integration. Automatically sync orders, track revenue, and simplify accounting. Get real-time insights into your shop's performance, manage inventory efficiently, and streamline your financial processes. Perfect for Etsy sellers looking to scale their business and improve financial accuracy.",
+  short_description:
+    "Integrate your Etsy shop for seamless financial management.",
+  description:
+    "Enhance your Etsy business with our integration. Automatically sync orders, track revenue, and simplify accounting. Get real-time insights into your shop's performance, manage inventory efficiently, and streamline your financial processes. Perfect for Etsy sellers looking to scale their business and improve financial accuracy.",
   images: [],
   onInitialize: initialize,
   settings: [

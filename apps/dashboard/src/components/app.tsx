@@ -1,6 +1,7 @@
 import { disconnectAppAction } from "@/actions/disconnect-app-action";
 import config from "@/config";
 import { capitalize } from "@/utils/utils";
+import { EquationConfig } from "@midday/app-store/types";
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +18,7 @@ import Image from "next/image";
 import { parseAsBoolean, parseAsString, useQueryStates } from "nuqs";
 import { useState } from "react";
 import { AppSettings } from "./app-settings";
+import { Equation } from "./equation";
 
 export function App({
   id,
@@ -31,6 +33,7 @@ export function App({
   installed,
   category,
   userSettings,
+  equation,
 }: {
   id: string;
   logo: React.ComponentType;
@@ -44,6 +47,7 @@ export function App({
   installed?: boolean;
   category: string;
   userSettings: Record<string, any>;
+  equation?: EquationConfig;
 }) {
   const [params, setParams] = useQueryStates({
     app: parseAsString,
@@ -62,7 +66,7 @@ export function App({
     await onInitialize();
     setLoading(false);
   };
-  
+
   return (
     <Card key={id} className="w-full flex flex-col">
       <Sheet open={params.app === id} onOpenChange={() => setParams(null)}>
@@ -132,16 +136,13 @@ export function App({
         <SheetContent>
           <SheetHeader>
             <div className="mb-4">
-            
               <div
                 className="flex flex-col gap-3 items-center justify-center border-b border-border pb-2  h-[290px] w-[465px]"
                 style={{
                   background: `linear-gradient(to right, var(--gray-100), var(--black))`,
                 }}
               >
-                <Badge>
-                  Integrations • {capitalize(category)}
-                </Badge>
+                <Badge>Integrations • {capitalize(category)}</Badge>
                 <div className="md:text-5xl font-bold text-foreground">
                   {capitalize(name)}
                 </div>
@@ -160,7 +161,7 @@ export function App({
                   </div>
 
                   <span className="text-xs text-[#878787]">
-                      {capitalize(category)} • Published by {config.company}
+                    {capitalize(category)} • Published by {config.company}
                   </span>
                 </div>
               </div>
@@ -205,6 +206,14 @@ export function App({
                   {description}
                 </AccordionContent>
               </AccordionItem>
+              {equation && (
+                <AccordionItem value="equation" className="border-none">
+                  <AccordionTrigger>Equation</AccordionTrigger>
+                  <AccordionContent className="text-[#878787] text-sm">
+                    <Equation config={equation} />
+                  </AccordionContent>
+                </AccordionItem>
+              )}
 
               {settings && (
                 <AccordionItem value="settings" className="border-none">
@@ -212,21 +221,23 @@ export function App({
                   <AccordionContent className="text-[#878787] text-sm">
                     <AppSettings
                       appId={id}
-                      settings={[
-                        ...Object.values({
-                          ...Object.fromEntries(
-                            (Array.isArray(settings) ? settings : []).map(
-                              (setting) => [setting.id, setting],
+                      settings={
+                        [
+                          ...Object.values({
+                            ...Object.fromEntries(
+                              (Array.isArray(settings) ? settings : []).map(
+                                (setting) => [setting.id, setting],
+                              ),
                             ),
-                          ),
-                          ...Object.fromEntries(
-                            (Array.isArray(userSettings)
-                              ? userSettings
-                              : []
-                            ).map((setting) => [setting.id, setting]),
-                          ),
-                        }),
-                      ] as any}
+                            ...Object.fromEntries(
+                              (Array.isArray(userSettings)
+                                ? userSettings
+                                : []
+                              ).map((setting) => [setting.id, setting]),
+                            ),
+                          }),
+                        ] as any
+                      }
                     />
                   </AccordionContent>
                 </AccordionItem>
@@ -238,7 +249,8 @@ export function App({
             <p className="text-[10px] text-[#878787]">
               All integrations on the {config.company} platform are open-source
               and peer-reviewed. {config.company} maintains high standards but
-              doesn't endorse third-party apps. Apps published by {config.company}
+              doesn't endorse third-party apps. Apps published by{" "}
+              {config.company}
               are officially certified. Report any concerns about app content
               certified. Report any concerns about app content or behavior.
             </p>

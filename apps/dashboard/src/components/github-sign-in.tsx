@@ -59,7 +59,7 @@ export function GithubSignIn() {
         <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
       ) : (
         <>
-            <Icons.Github strokeWidth={0.5} />
+          <Icons.Github strokeWidth={0.5} />
           <span>Continue with Github</span>
         </>
       )}

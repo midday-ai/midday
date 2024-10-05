@@ -8,8 +8,10 @@ const paypalConfig: IntegrationConfig = {
   category: IntegrationCategory.Banking,
   active: false,
   logo: Logo,
-  short_description: "Simplify online payments and financial management with PayPal integration.",
-  description: "Enhance your business operations with PayPal integration. Process payments securely, track transactions in real-time, and manage your finances effortlessly. Benefit from automated reconciliation, detailed reporting, and seamless fund transfers. Ideal for businesses of all sizes looking to streamline their payment processes and improve cash flow management.",
+  short_description:
+    "Simplify online payments and financial management with PayPal integration.",
+  description:
+    "Enhance your business operations with PayPal integration. Process payments securely, track transactions in real-time, and manage your finances effortlessly. Benefit from automated reconciliation, detailed reporting, and seamless fund transfers. Ideal for businesses of all sizes looking to streamline their payment processes and improve cash flow management.",
   images: [],
   onInitialize: initialize,
   settings: [

@@ -79,7 +79,9 @@ export class GoCardLessProvider implements Provider {
     await this.#api.deleteRequisition(accountId);
   }
 
-  async getStatements(params: GetStatementsRequest): Promise<GetStatementsResponse> {
+  async getStatements(
+    params: GetStatementsRequest,
+  ): Promise<GetStatementsResponse> {
     if (!params.accountId) {
       throw Error("accountId is missing");
     }
@@ -91,7 +93,9 @@ export class GoCardLessProvider implements Provider {
     };
   }
 
-  async getStatementPdf(params: GetStatementPdfRequest): Promise<GetStatementPdfResponse> {
+  async getStatementPdf(
+    params: GetStatementPdfRequest,
+  ): Promise<GetStatementPdfResponse> {
     if (!params.accountId || !params.statementId) {
       throw Error("accountId or statementId is missing");
     }

@@ -10,6 +10,7 @@ import {
 } from "@midday/ui/breadcrumb";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import React from "react";
 
 /**
  * Capitalizes the first letter of a string and replaces hyphens with spaces.
@@ -35,7 +36,7 @@ interface BreadcrumbItemType {
  */
 function BreadcrumbNav(): JSX.Element {
   const pathname = usePathname();
-  const pathnameParts = pathname.split("/").filter(Boolean);
+  const pathnameParts = pathname?.split("/").filter(Boolean) as string[];
 
   const breadcrumbItems: BreadcrumbItemType[] = pathnameParts.map(
     (part, index) => ({
@@ -51,21 +52,20 @@ function BreadcrumbNav(): JSX.Element {
           <BreadcrumbLink asChild>
             <Link href="/">Home</Link>
           </BreadcrumbLink>
-          <BreadcrumbSeparator />
         </BreadcrumbItem>
         {breadcrumbItems.map((item, index) => (
-          <BreadcrumbItem key={item.href}>
-            {index === breadcrumbItems.length - 1 ? (
-              <BreadcrumbPage>{item.label}</BreadcrumbPage>
-            ) : (
-              <>
+          <React.Fragment key={item.href}>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              {index === breadcrumbItems.length - 1 ? (
+                <BreadcrumbPage>{item.label}</BreadcrumbPage>
+              ) : (
                 <BreadcrumbLink asChild>
                   <Link href={item.href}>{item.label}</Link>
                 </BreadcrumbLink>
-                <BreadcrumbSeparator />
-              </>
-            )}
-          </BreadcrumbItem>
+              )}
+            </BreadcrumbItem>
+          </React.Fragment>
         ))}
       </BreadcrumbList>
     </Breadcrumb>

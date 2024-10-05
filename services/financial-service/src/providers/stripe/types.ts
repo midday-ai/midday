@@ -1,10 +1,10 @@
-import type { AccountType } from '@/utils/account';
-import type { Stripe } from 'stripe';
+import type { AccountType } from "@/utils/account";
+import type { Stripe } from "stripe";
 import type {
   GetAccountBalanceRequest as BaseGetAccountBalanceRequest,
   GetAccountsRequest as BaseGetAccountsRequest,
-  GetTransactionsRequest as BaseGetTransactionsRequest
-} from '../types';
+  GetTransactionsRequest as BaseGetTransactionsRequest,
+} from "../types";
 
 /** Request type for getting Stripe transactions */
 export type StripeGetTransactionsRequest = BaseGetTransactionsRequest & {
@@ -41,14 +41,14 @@ export type StripeTransformAccountPayload = {
 };
 
 /** Types of Stripe accounts */
-export type StripeAccountType = 'standard' | 'express' | 'custom';
+export type StripeAccountType = "standard" | "express" | "custom";
 
 /** Interface representing a Stripe account */
 export interface StripeAccount {
   /** The account ID */
   id: string;
   /** The object type, always 'account' */
-  object: 'account';
+  object: "account";
   /** The type of Stripe account */
   type: StripeAccountType;
   /** Business profile information */
@@ -82,27 +82,27 @@ export interface StripeBalance {
   /** Issuing information */
   issuing?: Stripe.Balance.Issuing;
   /** The object type, always 'balance' */
-  object: 'balance';
+  object: "balance";
 }
 
 /** Types of Stripe transactions */
 export type StripeTransactionType =
-  | 'charge'
-  | 'refund'
-  | 'adjustment'
-  | 'application_fee'
-  | 'application_fee_refund'
-  | 'transfer'
-  | 'payment'
-  | 'payout'
-  | 'other';
+  | "charge"
+  | "refund"
+  | "adjustment"
+  | "application_fee"
+  | "application_fee_refund"
+  | "transfer"
+  | "payment"
+  | "payout"
+  | "other";
 
 /** Interface representing a Stripe transaction */
 export interface StripeTransaction {
   /** The transaction ID */
   id: string;
   /** The object type, always 'balance_transaction' */
-  object: 'balance_transaction';
+  object: "balance_transaction";
   /** The amount of the transaction in cents */
   amount: number;
   /** The timestamp when the transaction will be available, as Unix timestamp */
@@ -122,7 +122,7 @@ export interface StripeTransaction {
   /** The source of the transaction */
   source: string;
   /** The status of the transaction */
-  status: 'available' | 'pending';
+  status: "available" | "pending";
   /** The type of the transaction */
   type: StripeTransactionType;
 }

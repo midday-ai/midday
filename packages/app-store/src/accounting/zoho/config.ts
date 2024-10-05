@@ -8,8 +8,10 @@ const zohoConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Comprehensive suite of business software including accounting.",
-  description: "Zoho integration offers a wide range of business applications, including accounting software. It provides features for invoicing, expense tracking, inventory management, and financial reporting, helping businesses streamline their financial processes and gain insights into their performance.",
+  short_description:
+    "Comprehensive suite of business software including accounting.",
+  description:
+    "Zoho integration offers a wide range of business applications, including accounting software. It provides features for invoicing, expense tracking, inventory management, and financial reporting, helping businesses streamline their financial processes and gain insights into their performance.",
   images: [],
   onInitialize: initialize,
   settings: [

@@ -9,7 +9,8 @@ const sageIntacctConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Advanced cloud financial management with Sage Intacct.",
-  description: "Sage Intacct integration provides sophisticated cloud-based financial management solutions. It offers advanced functionality for accounting, reporting, and analytics, helping businesses streamline operations and gain real-time insights into their financial performance.",
+  description:
+    "Sage Intacct integration provides sophisticated cloud-based financial management solutions. It offers advanced functionality for accounting, reporting, and analytics, helping businesses streamline operations and gain real-time insights into their financial performance.",
   images: [],
   onInitialize: initialize,
   settings: [

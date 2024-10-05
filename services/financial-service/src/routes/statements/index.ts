@@ -71,7 +71,8 @@ const statementPdfRoute = createRoute({
 
 app.openapi(statementsRoute, async (c) => {
   const envs = env(c);
-  const { provider, accessToken, accountId, userId, teamId } = c.req.valid("query");
+  const { provider, accessToken, accountId, userId, teamId } =
+    c.req.valid("query");
 
   const api = new Provider({
     provider,
@@ -103,7 +104,8 @@ app.openapi(statementsRoute, async (c) => {
 
 app.openapi(statementPdfRoute, async (c) => {
   const envs = env(c);
-  const { provider, accessToken, statementId, accountId, userId, teamId } = c.req.valid("query");
+  const { provider, accessToken, statementId, accountId, userId, teamId } =
+    c.req.valid("query");
 
   const api = new Provider({
     provider,

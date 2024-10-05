@@ -5,16 +5,30 @@ import { FeatureInDevelopment } from "@/components/feature-in-development";
 import { useSubscriptionViewStore } from "@/store/subscription-view";
 import { formatTransactionDate } from "@/utils/format";
 import { createClient } from "@midday/supabase/client";
-import { getRecentTransactionsQuery, getUserQuery, RecurringTransactionFrequency } from "@midday/supabase/queries";
+import {
+  getRecentTransactionsQuery,
+  getUserQuery,
+  RecurringTransactionFrequency,
+} from "@midday/supabase/queries";
 import { TransactionSchema } from "@midday/supabase/types";
-import { CardContent, CardDescription, CardHeader, CardTitle } from "@midday/ui/card";
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@midday/ui/card";
 import { Dialog, DialogContent } from "@midday/ui/dialog";
 import { Skeleton } from "@midday/ui/skeleton";
-import { TableBody, TableCell, TableHead, TableHeader, TableRow } from "@midday/ui/table";
+import {
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@midday/ui/table";
 import { Table } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-
 
 const TransactionSkeleton = () => (
   <div className="flex flex-col gap-4 md:p-[2.5%] w-full">
@@ -47,13 +61,14 @@ const TransactionSkeleton = () => (
 export function SubscriptionViewModal() {
   const { isOpen, setOpen } = useSubscriptionViewStore();
   const supabase = useMemo(() => createClient(), []);
-  const [transactionData, setTransactionData] = useState<TransactionSchema[] | null>(null);
+  const [transactionData, setTransactionData] = useState<
+    TransactionSchema[] | null
+  >(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useHotkeys("meta+s", () => setOpen(true), {
     enableOnFormTags: true,
   });
-
 
   const fetchTransactionData = useCallback(async () => {
     if (isLoading) return;
@@ -66,7 +81,7 @@ export function SubscriptionViewModal() {
 
       const { data: userData } = await getUserQuery(
         supabase,
-        session?.user?.id ?? ''
+        session?.user?.id ?? "",
       );
 
       const result = await getRecentTransactionsQuery(supabase, {
@@ -94,16 +109,19 @@ export function SubscriptionViewModal() {
     }
   }, [isOpen, fetchTransactionData, transactionData, isLoading]);
 
-  const handleOpenChange = useCallback((open: boolean) => {
-    setOpen(open);
-    if (!open) {
-      setTransactionData(null);
-    }
-  }, [setOpen]);
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setOpen(open);
+      if (!open) {
+        setTransactionData(null);
+      }
+    },
+    [setOpen],
+  );
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent
-        className="overflow-hidden p-0 max-w-full w-full h-full md:min-h-[60%] md:max-h-[75%] md:min-w-[60%] md:max-w-[75%] m-0 rounded-2xl"
+        className="overflow-hidden p-0 max-w-full w-full h-full md:min-h-[70%] md:max-h-[75%] md:min-w-[70%] md:max-w-[75%] m-0 rounded-2xl"
         hideClose
       >
         <ModalContent data={transactionData} isLoading={isLoading} />
@@ -112,7 +130,10 @@ export function SubscriptionViewModal() {
   );
 }
 
-const ModalContent = React.memo<{ data: TransactionSchema[] | null, isLoading: boolean }>(({ data, isLoading }) => {
+const ModalContent = React.memo<{
+  data: TransactionSchema[] | null;
+  isLoading: boolean;
+}>(({ data, isLoading }) => {
   if (isLoading) {
     return <TransactionSkeleton />;
   }
@@ -126,8 +147,12 @@ const ModalContent = React.memo<{ data: TransactionSchema[] | null, isLoading: b
       <CardHeader>
         <div className="flex flex-row justify-between">
           <div className="flex flex-col">
-            <CardTitle className="text-3xl font-bold">Recent Subscriptions</CardTitle>
-            <CardDescription>View and manage your recent subscriptions</CardDescription>
+            <CardTitle className="text-3xl font-bold">
+              Recent Subscriptions
+            </CardTitle>
+            <CardDescription>
+              View and manage your recent subscriptions
+            </CardDescription>
           </div>
           <TransactionAnalytics transactions={data} />
         </div>
@@ -147,7 +172,9 @@ const ModalContent = React.memo<{ data: TransactionSchema[] | null, isLoading: b
             {data.map((transaction, index) => (
               <TableRow key={transaction.id || index}>
                 <TableCell>{formatTransactionDate(transaction.date)}</TableCell>
-                <TableCell>{transaction.description ?? transaction.name}</TableCell>
+                <TableCell>
+                  {transaction.description ?? transaction.name}
+                </TableCell>
                 <TableCell>{transaction.amount.toFixed(2)}</TableCell>
                 <TableCell>{transaction.account_owner}</TableCell>
                 <TableCell>{transaction.method}</TableCell>
@@ -155,7 +182,6 @@ const ModalContent = React.memo<{ data: TransactionSchema[] | null, isLoading: b
             ))}
           </TableBody>
         </Table>
-
       </CardContent>
     </div>
   );

@@ -67,47 +67,47 @@ export default async function FinancialAccountsPage({ searchParams }: Props) {
 
   return (
     <ContentLayout title="Financial Accounts">
-    <Suspense fallback={<InboxViewSkeleton ascending />}>
-      <ConnectAccountServerWrapper>
-        <FinancialPortalView
-          disabled={isEmpty}
-          tier={tier}
-          bankAccounts={accounts?.data ?? []}
-          bankConnections={bankConnections?.data ?? []}
-          userName={user?.data?.full_name ?? ""}
-          title="Connected Bank Accounts"
-          description="View your connected bank accounts and manage them."
-        />
-        {/** place a selector here to switch between bank accounts */}
-        <div className="py-[2%]">
-          <Tabs defaultValue={accounts?.data?.[0]?.id}>
-            <TabsList>
+      <Suspense fallback={<InboxViewSkeleton ascending />}>
+        <ConnectAccountServerWrapper>
+          <FinancialPortalView
+            disabled={isEmpty}
+            tier={tier}
+            bankAccounts={accounts?.data ?? []}
+            bankConnections={bankConnections?.data ?? []}
+            userName={user?.data?.full_name ?? ""}
+            title="Connected Bank Accounts"
+            description="View your connected bank accounts and manage them."
+          />
+          {/** place a selector here to switch between bank accounts */}
+          <div className="py-[2%]">
+            <Tabs defaultValue={accounts?.data?.[0]?.id}>
+              <TabsList>
+                {accounts?.data?.map((account) => (
+                  <TabsTrigger key={account.id} value={account.id}>
+                    {account.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
               {accounts?.data?.map((account) => (
-                <TabsTrigger key={account.id} value={account.id}>
-                  {account.name}
-                </TabsTrigger>
+                <TabsContent key={account.id} value={account.id}>
+                  <BankAccountSingleView
+                    bankAccount={account}
+                    bankConnections={bankConnections?.data ?? []}
+                    userName={user?.data?.full_name ?? ""}
+                  />
+                </TabsContent>
               ))}
-            </TabsList>
-            {accounts?.data?.map((account) => (
-              <TabsContent key={account.id} value={account.id}>
-                <BankAccountSingleView
-                  bankAccount={account}
-                  bankConnections={bankConnections?.data ?? []}
-                  userName={user?.data?.full_name ?? ""}
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
-        </div>
+            </Tabs>
+          </div>
 
-        {/** bank account single view */}
-        <BankAccountOverviewProTier
-          user={user}
-          isEmpty={isEmpty}
-          isCurrentUserTierFree={isCurrentUserTierFree}
-          tier={tier}
-        />
-      </ConnectAccountServerWrapper>
+          {/** bank account single view */}
+          <BankAccountOverviewProTier
+            user={user}
+            isEmpty={isEmpty}
+            isCurrentUserTierFree={isCurrentUserTierFree}
+            tier={tier}
+          />
+        </ConnectAccountServerWrapper>
       </Suspense>
     </ContentLayout>
   );

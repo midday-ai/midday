@@ -60,6 +60,33 @@ import sagePayrollApp from "./payroll/sage";
 import workdayPayrollApp from "./payroll/workday";
 import zohoPeopleApp from "./payroll/zoho-people";
 
+// modelling integrations
+import breakEvenAnalysis from "./modelling/expense.break-even";
+import cashFlowStressTest from "./modelling/expense.cash-flow-stress-test";
+import costVolumeProfit from "./modelling/expense.cost-volume-profit";
+import debtCoverageRatioExpense from "./modelling/expense.debt-coverage-ratio";
+import dolAnalysisExpense from "./modelling/expense.degree-of-operating-leverage";
+import expenseGrowthRate from "./modelling/expense.expense-growth-rate";
+import fixedVsVariableCostRatio from "./modelling/expense.fixed-vs-variable-cost-ratio";
+import quickRatioExpense from "./modelling/expense.liquidity-stress-test-ratio";
+import marginOfSafety from "./modelling/expense.margin-of-safety";
+import operatingLeverageExpense from "./modelling/expense.operating-leverage";
+import cacVsLtv from "./modelling/income.cac-vs-ltv";
+import grossProfitMargin from "./modelling/income.gross-profit-margin";
+import lifetimeValue from "./modelling/income.lifetime-value";
+import productProfitability from "./modelling/income.product-profitability";
+import revenueGrowthRate from "./modelling/income.revenue-growth-rate";
+import revenuePerEmployee from "./modelling/income.revenue-per-employee";
+import revenueRetentionRate from "./modelling/income.revenue-retention-rate";
+
+// goal templates integrations
+import customerRetention from "./goal-templates/goal.customer-retention";
+import marketExpansion from "./goal-templates/goal.market-expansion";
+import operationalEfficiency from "./goal-templates/goal.operational-efficiency";
+import productDevelopment from "./goal-templates/goal.product-development";
+import profitability from "./goal-templates/goal.profitability";
+import smallBusiness from "./goal-templates/goal.small-business";
+
 // Partition apps by category
 export const apps = {
   [types.IntegrationCategory.Accounting]: [
@@ -126,6 +153,33 @@ export const apps = {
     zohoCrmApp,
   ],
   [types.IntegrationCategory.Notification]: [],
+  [types.IntegrationCategory.GoalTemplates]: [
+    customerRetention,
+    marketExpansion,
+    operationalEfficiency,
+    productDevelopment,
+    profitability,
+    smallBusiness,
+  ],
+  [types.IntegrationCategory.Modelling]: [
+    breakEvenAnalysis,
+    cashFlowStressTest,
+    costVolumeProfit,
+    expenseGrowthRate,
+    marginOfSafety,
+    cacVsLtv,
+    grossProfitMargin,
+    lifetimeValue,
+    productProfitability,
+    revenueGrowthRate,
+    revenuePerEmployee,
+    operatingLeverageExpense,
+    dolAnalysisExpense,
+    debtCoverageRatioExpense,
+    fixedVsVariableCostRatio,
+    quickRatioExpense,
+    revenueRetentionRate,
+  ],
 };
 
 export { types };

@@ -5,7 +5,7 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
 } from "@midday/ui/card";
 import {
   Sheet,

@@ -1,10 +1,10 @@
-import { Providers } from '@/common/schema';
+import { Providers } from "@/common/schema";
 import { logger } from "@/utils/logger";
 import { withRetry } from "@/utils/retry";
 import { GoCardLessProvider } from "./gocardless/gocardless-provider";
 import { PlaidProvider } from "./plaid/plaid-provider";
-import { StripeApi } from './stripe/stripe-api';
-import { StripeProvider } from './stripe/stripe-provider';
+import { StripeApi } from "./stripe/stripe-api";
+import { StripeProvider } from "./stripe/stripe-provider";
 import { TellerProvider } from "./teller/teller-provider";
 import type {
   DeleteAccountsRequest,
@@ -22,7 +22,12 @@ import type {
 
 export class Provider {
   #name?: string;
-  #provider: PlaidProvider | TellerProvider | GoCardLessProvider | StripeProvider | null = null;
+  #provider:
+    | PlaidProvider
+    | TellerProvider
+    | GoCardLessProvider
+    | StripeProvider
+    | null = null;
 
   constructor(params?: ProviderParams) {
     this.#name = params?.provider;
@@ -129,7 +134,9 @@ export class Provider {
     return withRetry(() => this.#provider?.deleteAccounts(params));
   }
 
-  async getStatements(params: GetStatementsRequest): Promise<GetStatementsResponse> {
+  async getStatements(
+    params: GetStatementsRequest,
+  ): Promise<GetStatementsResponse> {
     logger("getStatements:", `provider: ${this.#name}`);
 
     const data = await withRetry(() => this.#provider?.getStatements(params));
@@ -145,7 +152,9 @@ export class Provider {
     };
   }
 
-  async getStatementPdf(params: GetStatementPdfRequest): Promise<GetStatementPdfResponse> {
+  async getStatementPdf(
+    params: GetStatementPdfRequest,
+  ): Promise<GetStatementPdfResponse> {
     logger("getStatementPdf:", `provider: ${this.#name}`);
 
     const data = await withRetry(() => this.#provider?.getStatementPdf(params));

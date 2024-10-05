@@ -75,7 +75,11 @@ export function ChatFooter({ onSubmit, showFeedback }: Props) {
               <button
                 type="button"
                 className="flex space-x-2 items-center text-xs hover:bg-[#F2F1EF] dark:hover:bg-[#2b2b2b] rounded-md transition-colors w-full p-1"
-                onClick={() => handleOpenUrl("https://github.com/SolomonAIEngineering/financial-platform-as-a-service")}
+                onClick={() =>
+                  handleOpenUrl(
+                    "https://github.com/SolomonAIEngineering/financial-platform-as-a-service",
+                  )
+                }
               >
                 <Icons.GithubOutline className="w-[16px] h-[16px]" />
                 <span>Github</span>

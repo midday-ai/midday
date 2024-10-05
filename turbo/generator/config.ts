@@ -77,7 +77,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
           destination: path.join(
             rootPath,
             answers.type === "app" ? "apps" : "packages",
-            "{{name}}"
+            "{{name}}",
           ),
           base: `templates/${answers.type === "react-library" ? "react-package" : answers.type === "app" ? "app" : "package"}`,
           templateFiles: `templates/${answers.type === "react-library" ? "react-package" : answers.type === "app" ? "app" : "package"}/*`,
@@ -95,7 +95,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
             rootPath,
             answers.type === "app" ? "apps" : "packages",
             "{{name}}",
-            "src"
+            "src",
           ),
           base: `templates/${answers.type === "react-library" ? "react-package" : answers.type === "app" ? "app" : "package"}/src`,
           templateFiles: `templates/${answers.type === "react-library" ? "react-package" : answers.type === "app" ? "app" : "package"}/src/**/*`,
@@ -107,40 +107,38 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
         },
 
         // Add files in the 'public' directory (for app type)
-        ...(answers.type === "app" ? [{
-          type: "addMany",
-          destination: path.join(
-            rootPath,
-            "apps",
-            "{{name}}",
-            "public"
-          ),
-          base: `templates/app/public`,
-          templateFiles: `templates/app/public/**/*`,
-          globOptions: {
-            dot: true,
-            nodir: false,
-          },
-          force: true,
-        }] : []),
+        ...(answers.type === "app"
+          ? [
+              {
+                type: "addMany",
+                destination: path.join(rootPath, "apps", "{{name}}", "public"),
+                base: `templates/app/public`,
+                templateFiles: `templates/app/public/**/*`,
+                globOptions: {
+                  dot: true,
+                  nodir: false,
+                },
+                force: true,
+              },
+            ]
+          : []),
 
         // Add files in the 'styles' directory (for app type)
-        ...(answers.type === "app" ? [{
-          type: "addMany",
-          destination: path.join(
-            rootPath,
-            "apps",
-            "{{name}}",
-            "styles"
-          ),
-          base: `templates/app/styles`,
-          templateFiles: `templates/app/styles/**/*`,
-          globOptions: {
-            dot: true,
-            nodir: false,
-          },
-          force: true,
-        }] : []),
+        ...(answers.type === "app"
+          ? [
+              {
+                type: "addMany",
+                destination: path.join(rootPath, "apps", "{{name}}", "styles"),
+                base: `templates/app/styles`,
+                templateFiles: `templates/app/styles/**/*`,
+                globOptions: {
+                  dot: true,
+                  nodir: false,
+                },
+                force: true,
+              },
+            ]
+          : []),
 
         // Update root package.json to include new package or app
         {

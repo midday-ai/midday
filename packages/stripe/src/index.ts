@@ -5,4 +5,3 @@ export * from "./mutations/index";
 export * from "./queries";
 export * from "./server";
 export * from "./utils";
-

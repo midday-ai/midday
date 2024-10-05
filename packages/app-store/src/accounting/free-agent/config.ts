@@ -9,7 +9,8 @@ const freeAgentConfig: IntegrationConfig = {
   active: false,
   logo: Logo,
   short_description: "Simplify your accounting with FreeAgent integration.",
-  description: "FreeAgent integration streamlines your financial processes, offering easy invoicing, expense tracking, and comprehensive reporting. It helps small businesses and freelancers manage their finances efficiently.",
+  description:
+    "FreeAgent integration streamlines your financial processes, offering easy invoicing, expense tracking, and comprehensive reporting. It helps small businesses and freelancers manage their finances efficiently.",
   images: [],
   onInitialize: initialize,
   settings: [

@@ -7,10 +7,12 @@ const dynamics365FOConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Enterprise-grade financial management with Dynamics 365 F&O.",
-  description: "Dynamics 365 Finance & Operations integration provides powerful tools for financial management, supply chain management, and business intelligence. It's designed to help large enterprises optimize their operations and make data-driven decisions.",
+  short_description:
+    "Enterprise-grade financial management with Dynamics 365 F&O.",
+  description:
+    "Dynamics 365 Finance & Operations integration provides powerful tools for financial management, supply chain management, and business intelligence. It's designed to help large enterprises optimize their operations and make data-driven decisions.",
   images: [],
-  onInitialize: () => { },
+  onInitialize: () => {},
   settings: [
     {
       id: "api_key",

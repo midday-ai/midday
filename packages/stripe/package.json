@@ -10,9 +10,7 @@
   "license": "AGPL-3.0",
   "typesVersions": {
     "*": {
-      "*": [
-        "src/*"
-      ]
+      "*": ["src/*"]
     }
   },
   "scripts": {
@@ -33,7 +31,6 @@
     "@tooling/typescript-config": "workspace:*",
     "typescript": "^5.5.3",
     "@tooling/prettier-config": "workspace:*"
-    
   },
   "prettier": "@tooling/prettier-config"
 }

@@ -58,7 +58,7 @@ export function FeedbackForm() {
                 disabled={value.length === 0 || action.status === "executing"}
               >
                 {action.status === "executing" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
+                  <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
                 ) : (
                   "Send"
                 )}

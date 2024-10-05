@@ -11,22 +11,26 @@ export const TransactionsParamsSchema = z
       example: Providers.Enum.stripe,
     }),
     accountId: z.string().openapi({
-      description: "Get transactions by accountId (Stripe account holder reference for Stripe)",
+      description:
+        "Get transactions by accountId (Stripe account holder reference for Stripe)",
       param: {
         name: "accountId",
         in: "query",
       },
       example: "acct_1234567890",
     }),
-    accountType: z.enum(["credit", "depository"]).optional().openapi({
-      description:
-        "Get transactions with the correct amount depending on credit or depository",
-      param: {
-        name: "accountType",
-        in: "query",
-      },
-      example: "depository",
-    }),
+    accountType: z
+      .enum(["credit", "depository"])
+      .optional()
+      .openapi({
+        description:
+          "Get transactions with the correct amount depending on credit or depository",
+        param: {
+          name: "accountType",
+          in: "query",
+        },
+        example: "depository",
+      }),
     accessToken: z
       .string()
       .optional()

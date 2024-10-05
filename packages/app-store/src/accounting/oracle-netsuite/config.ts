@@ -8,8 +8,10 @@ const oracleNetSuiteConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Comprehensive cloud-based business management with NetSuite.",
-  description: "Oracle NetSuite integration provides a unified cloud-based solution for ERP, financials, CRM, and e-commerce. It offers real-time visibility and control over your business operations, helping you make informed decisions and drive growth.",
+  short_description:
+    "Comprehensive cloud-based business management with NetSuite.",
+  description:
+    "Oracle NetSuite integration provides a unified cloud-based solution for ERP, financials, CRM, and e-commerce. It offers real-time visibility and control over your business operations, helping you make informed decisions and drive growth.",
   images: [],
   onInitialize: initialize,
   settings: [

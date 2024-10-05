@@ -80,8 +80,8 @@ export const ConnectionIssueEmail = ({
               <br />
               We wanted to let you know that your bank{" "}
               <strong>{bankName}</strong> for team <strong>{teamName}</strong>{" "}
-              is currently disconnected. To keep {config.company} running smoothly, we'll
-              need you to reconnect your bank.
+              is currently disconnected. To keep {config.company} running
+              smoothly, we'll need you to reconnect your bank.
               <br />
               <br />
               The good news? It only takes 60 seconds to get everything back on

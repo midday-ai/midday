@@ -8,8 +8,10 @@ const squareConfig: IntegrationConfig = {
   category: IntegrationCategory.Banking,
   active: false,
   logo: Logo,
-  short_description: "Streamline payments and gain financial insights with Square integration.",
-  description: "Optimize your business finances with Square integration. Automate payments, access real-time insights, and simplify reconciliation. Reduce manual work, minimize errors, and get a clear view of your revenue. Ideal for businesses seeking to enhance financial efficiency and make informed decisions.",
+  short_description:
+    "Streamline payments and gain financial insights with Square integration.",
+  description:
+    "Optimize your business finances with Square integration. Automate payments, access real-time insights, and simplify reconciliation. Reduce manual work, minimize errors, and get a clear view of your revenue. Ideal for businesses seeking to enhance financial efficiency and make informed decisions.",
   images: [],
   onInitialize: initialize,
   settings: [

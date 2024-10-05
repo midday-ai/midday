@@ -120,7 +120,10 @@ export function ShareReport({ defaultValue, type, setOpen }: Props) {
                         ) : (
                           <span>Expire at</span>
                         )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" strokeWidth={0.5} />
+                        <CalendarIcon
+                          className="ml-auto h-4 w-4 opacity-50"
+                          strokeWidth={0.5}
+                        />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>

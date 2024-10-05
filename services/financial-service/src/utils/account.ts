@@ -23,11 +23,11 @@ export function getType(type: string): AccountType {
 
 export function getStripeAccountType(account: { type: string }): AccountType {
   switch (account.type) {
-    case 'standard':
-    case 'express':
-    case 'custom':
-      return 'depository';
+    case "standard":
+    case "express":
+    case "custom":
+      return "depository";
     default:
-      return 'other_asset';
+      return "other_asset";
   }
 }

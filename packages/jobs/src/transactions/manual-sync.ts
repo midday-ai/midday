@@ -25,10 +25,10 @@ client.defineJob({
   integrations: { supabase },
   /**
    * Performs a manual synchronization of transactions for a given team and connection.
-   * 
+   *
    * @param payload - The job payload containing teamId and connectionId.
    * @param io - The I/O object providing access to integrations like Supabase.
-   * 
+   *
    * This function does the following:
    * 1. Retrieves enabled bank accounts for the given team and connection.
    * 2. For each account:
@@ -38,7 +38,7 @@ client.defineJob({
    * 3. Handles any errors during processing
    * 4. Updates the bank connection status
    * 5. Revalidates various data tags
-   * 
+   *
    * @throws {Error} If any error occurs during processing
    */
   run: async (payload, io) => {
@@ -46,13 +46,15 @@ client.defineJob({
     const supabase = io.supabase.client;
 
     const { teamId, connectionId } = payload;
-    console.log(`Processing for teamId: ${teamId}, connectionId: ${connectionId}`);
+    console.log(
+      `Processing for teamId: ${teamId}, connectionId: ${connectionId}`,
+    );
 
     // Fetch enabled bank accounts
     const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
       )
       .eq("bank_connection_id", connectionId)
       .eq("team_id", teamId)
@@ -71,7 +73,9 @@ client.defineJob({
         accessToken: account.bank_connection?.access_token,
         latest: "true",
       });
-      console.log(`Retrieved ${transactions.data?.length || 0} transactions for account ${account.id}`);
+      console.log(
+        `Retrieved ${transactions.data?.length || 0} transactions for account ${account.id}`,
+      );
 
       // Transform transactions
       const formattedTransactions = transactions.data?.map((transaction) => {
@@ -88,7 +92,9 @@ client.defineJob({
         id: account.account_id,
         accessToken: account.bank_connection?.access_token,
       });
-      console.log(`Retrieved balance for account ${account.id}: ${balance.data?.amount}`);
+      console.log(
+        `Retrieved balance for account ${account.id}: ${balance.data?.amount}`,
+      );
 
       if (balance.data?.amount) {
         await supabase
@@ -101,7 +107,9 @@ client.defineJob({
 
       // Process transactions in batches
       await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
-        console.log(`Processed batch of ${batch.length} transactions for account ${account.id}`);
+        console.log(
+          `Processed batch of ${batch.length} transactions for account ${account.id}`,
+        );
         await supabase.from("transactions").upsert(batch, {
           onConflict: "internal_id",
           ignoreDuplicates: true,

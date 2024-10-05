@@ -1,11 +1,7 @@
-/**
- * Capitalizes the first letter of a given string.
- * @param str - The input string to capitalize.
- * @returns The input string with its first letter capitalized, or an empty string if the input is undefined.
- */
-const capitalize = (str: string | undefined): string => {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1);
+// give me a function to capitalize the first letter of a string
+const capitalize = (str: string | undefined) => {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1);
 };
 
 /**

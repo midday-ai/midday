@@ -1,6 +1,10 @@
-import { ProviderError } from '@/utils/error';
-import { Stripe } from 'stripe';
-import type { GetTransactionsRequest, GetTransactionsResponse, ProviderParams } from '../types';
+import { ProviderError } from "@/utils/error";
+import { Stripe } from "stripe";
+import type {
+  GetTransactionsRequest,
+  GetTransactionsResponse,
+  ProviderParams,
+} from "../types";
 
 /**
  * StripeApi class for interacting with the Stripe API.
@@ -17,7 +21,7 @@ export class StripeApi {
    */
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#client = new Stripe(params.envs.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-06-20',
+      apiVersion: "2024-06-20",
     });
   }
 
@@ -35,23 +39,26 @@ export class StripeApi {
   }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
     try {
       const limit = latest ? 100 : 1000;
-      const balanceTransactions = await this.#client.balanceTransactions.list({
-        limit,
-      }, {
-        stripeAccount: accountId,
-      });
+      const balanceTransactions = await this.#client.balanceTransactions.list(
+        {
+          limit,
+        },
+        {
+          stripeAccount: accountId,
+        },
+      );
 
-      return balanceTransactions.data.map(transaction => ({
+      return balanceTransactions.data.map((transaction) => ({
         id: transaction.id,
         amount: transaction.amount / 100,
         currency: transaction.currency,
-        date: new Date(transaction.created * 1000).toISOString().split('T')[0],
+        date: new Date(transaction.created * 1000).toISOString().split("T")[0],
         account_id: accountId,
-        status: 'posted',
+        status: "posted",
         balance: null,
         category: transaction.type,
         method: transaction.type,
-        name: transaction.description || 'Stripe Transaction',
+        name: transaction.description || "Stripe Transaction",
         description: transaction.description,
         currency_rate: null,
         currency_source: null,
@@ -62,12 +69,12 @@ export class StripeApi {
       if (error instanceof Error) {
         throw new ProviderError({
           message: error.message,
-          code: 'STRIPE_ERROR',
+          code: "STRIPE_ERROR",
         });
       }
       throw new ProviderError({
-        message: 'Unknown error occurred',
-        code: 'UNKNOWN_ERROR',
+        message: "Unknown error occurred",
+        code: "UNKNOWN_ERROR",
       });
     }
   }

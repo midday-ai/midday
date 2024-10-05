@@ -1,5 +1,5 @@
-import { ProviderError } from '@/utils/error';
-import { Stripe } from 'stripe';
+import { ProviderError } from "@/utils/error";
+import { Stripe } from "stripe";
 import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
@@ -10,9 +10,13 @@ import type {
   GetInstitutionsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
-  ProviderParams
-} from '../types';
-import { transformAccount, transformAccountBalance, transformTransaction } from './transform';
+  ProviderParams,
+} from "../types";
+import {
+  transformAccount,
+  transformAccountBalance,
+  transformTransaction,
+} from "./transform";
 
 /**
  * StripeProvider class for interacting with the Stripe API.
@@ -28,7 +32,7 @@ export class StripeProvider {
    */
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#client = new Stripe(params.envs.STRIPE_SECRET_KEY, {
-      apiVersion: '2024-06-20',
+      apiVersion: "2024-06-20",
     });
   }
 
@@ -47,22 +51,22 @@ export class StripeProvider {
       const limit = latest ? 100 : 1000;
       const balanceTransactions = await this.#client.balanceTransactions.list(
         { limit },
-        { stripeAccount: accountId }
+        { stripeAccount: accountId },
       );
 
-      return balanceTransactions.data.map(transaction =>
-        transformTransaction({ transaction, accountId })
+      return balanceTransactions.data.map((transaction) =>
+        transformTransaction({ transaction, accountId }),
       );
     } catch (error) {
       if (error instanceof Error) {
         throw new ProviderError({
           message: error.message,
-          code: 'STRIPE_ERROR',
+          code: "STRIPE_ERROR",
         });
       }
       throw new ProviderError({
-        message: 'Unknown error occurred',
-        code: 'UNKNOWN_ERROR',
+        message: "Unknown error occurred",
+        code: "UNKNOWN_ERROR",
       });
     }
   }
@@ -73,11 +77,13 @@ export class StripeProvider {
    * @returns A promise that resolves to an array containing the transformed account information.
    * @throws {ProviderError} If there's an error retrieving the account information.
    */
-  async getAccounts({ stripeAccountId }: GetAccountsRequest): Promise<GetAccountsResponse> {
+  async getAccounts({
+    stripeAccountId,
+  }: GetAccountsRequest): Promise<GetAccountsResponse> {
     try {
       const [account, balance] = await Promise.all([
         this.#client.accounts.retrieve({ stripeAccount: stripeAccountId }),
-        this.#client.balance.retrieve({ stripeAccount: stripeAccountId })
+        this.#client.balance.retrieve({ stripeAccount: stripeAccountId }),
       ]);
 
       // TODO: Handle Stripe accounts that are not connected to a balance
@@ -86,12 +92,12 @@ export class StripeProvider {
       if (error instanceof Error) {
         throw new ProviderError({
           message: error.message,
-          code: 'STRIPE_ERROR',
+          code: "STRIPE_ERROR",
         });
       }
       throw new ProviderError({
-        message: 'Unknown error occurred',
-        code: 'UNKNOWN_ERROR',
+        message: "Unknown error occurred",
+        code: "UNKNOWN_ERROR",
       });
     }
   }
@@ -102,20 +108,24 @@ export class StripeProvider {
    * @returns A promise that resolves to the transformed account balance.
    * @throws {ProviderError} If there's an error retrieving the account balance.
    */
-  async getAccountBalance({ accountId }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse> {
+  async getAccountBalance({
+    accountId,
+  }: GetAccountBalanceRequest): Promise<GetAccountBalanceResponse> {
     try {
-      const balance = await this.#client.balance.retrieve({ stripeAccount: accountId });
+      const balance = await this.#client.balance.retrieve({
+        stripeAccount: accountId,
+      });
       return transformAccountBalance(balance);
     } catch (error) {
       if (error instanceof Error) {
         throw new ProviderError({
           message: error.message,
-          code: 'STRIPE_ERROR',
+          code: "STRIPE_ERROR",
         });
       }
       throw new ProviderError({
-        message: 'Unknown error occurred',
-        code: 'UNKNOWN_ERROR',
+        message: "Unknown error occurred",
+        code: "UNKNOWN_ERROR",
       });
     }
   }
@@ -125,14 +135,18 @@ export class StripeProvider {
    * Note: Stripe doesn't have a concept of institutions like other providers.
    * @returns A promise that resolves to an array containing Stripe's institution information.
    */
-  async getInstitutions(_params: GetInstitutionsRequest): Promise<GetInstitutionsResponse> {
+  async getInstitutions(
+    _params: GetInstitutionsRequest,
+  ): Promise<GetInstitutionsResponse> {
     // Stripe doesn't have a concept of institutions like other providers
-    return [{
-      id: 'stripe',
-      name: 'Stripe',
-      logo: 'https://stripe.com/img/v3/home/twitter.png',
-      provider: 'stripe'
-    }];
+    return [
+      {
+        id: "stripe",
+        name: "Stripe",
+        logo: "https://stripe.com/img/v3/home/twitter.png",
+        provider: "stripe",
+      },
+    ];
   }
 
   /**
@@ -143,8 +157,8 @@ export class StripeProvider {
   async deleteAccounts(_params: DeleteAccountsRequest): Promise<void> {
     // Stripe doesn't support deleting accounts via API
     throw new ProviderError({
-      message: 'Deleting Stripe accounts is not supported',
-      code: 'OPERATION_NOT_SUPPORTED',
+      message: "Deleting Stripe accounts is not supported",
+      code: "OPERATION_NOT_SUPPORTED",
     });
   }
 

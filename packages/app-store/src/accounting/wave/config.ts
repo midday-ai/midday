@@ -8,8 +8,10 @@ const waveConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Free and user-friendly accounting software for small businesses.",
-  description: "Wave integration offers free, easy-to-use accounting software designed for entrepreneurs, freelancers, and small businesses. It provides essential features like invoicing, accounting, and receipt scanning to help you manage your finances effortlessly.",
+  short_description:
+    "Free and user-friendly accounting software for small businesses.",
+  description:
+    "Wave integration offers free, easy-to-use accounting software designed for entrepreneurs, freelancers, and small businesses. It provides essential features like invoicing, accounting, and receipt scanning to help you manage your finances effortlessly.",
   images: [],
   onInitialize: initialize,
   settings: [

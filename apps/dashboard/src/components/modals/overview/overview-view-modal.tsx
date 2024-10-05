@@ -15,7 +15,7 @@ export function OverviewViewModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setOpen}>
       <DialogContent
-        className="overflow-hidden p-0 max-w-full w-full h-full md:min-h-[60%] md:max-h-[75%] md:min-w-[60%] md:max-w-[75%] m-0 rounded-2xl"
+        className="overflow-hidden p-0 max-w-full w-full h-full md:min-h-[70%] md:max-h-[75%] md:min-w-[70%] md:max-w-[75%] m-0 rounded-2xl"
         hideClose
       >
         <FeatureInDevelopment

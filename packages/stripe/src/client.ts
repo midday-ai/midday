@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 

@@ -7,8 +7,10 @@ const dynamics365BCConfig: IntegrationConfig = {
   category: IntegrationCategory.Accounting,
   active: false,
   logo: Logo,
-  short_description: "Comprehensive business management with Dynamics 365 Business Central.",
-  description: "Dynamics 365 Business Central integration offers a complete solution for managing finances, operations, sales, and service. It connects your business processes to streamline workflows and improve productivity.",
+  short_description:
+    "Comprehensive business management with Dynamics 365 Business Central.",
+  description:
+    "Dynamics 365 Business Central integration offers a complete solution for managing finances, operations, sales, and service. It connects your business processes to streamline workflows and improve productivity.",
   images: [],
   onInitialize: () => {},
   settings: [

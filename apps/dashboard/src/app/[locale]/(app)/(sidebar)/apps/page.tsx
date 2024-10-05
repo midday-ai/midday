@@ -30,7 +30,6 @@ export default async function Page() {
           <AppsServer user={data} />
         </Suspense>
       </PortalViewWrapper>
-
     </ContentLayout>
   );
 }

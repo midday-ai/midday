@@ -10,7 +10,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card } from "@midday/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
 import { CircleIcon, XIcon } from "lucide-react";
 import React, { useCallback, useState } from "react";
@@ -72,13 +72,13 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    */
   const renderToggleButton = () => (
     <button
-      className="fixed bottom-0 m-4 hidden sm:block left-20 w-12 h-12 rounded-full bg-primary text-primary-foreground items-center justify-center shadow-lg"
+      className="fixed bottom-4 left-4 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg z-50"
       onClick={toggleWidget}
     >
       {isOpen ? (
         <XIcon className="w-6 h-6" strokeWidth={0.5} />
       ) : (
-          <CircleIcon className="w-6 h-6" strokeWidth={0.5} />
+        <CircleIcon className="w-6 h-6" strokeWidth={0.5} />
       )}
       <span className="sr-only">{isOpen ? "Close Menu" : "Open Menu"}</span>
     </button>
@@ -91,7 +91,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    */
   const renderWidgetContent = () => (
     <div className="fixed inset-0 z-50 backdrop-blur-sm">
-      <Card className="fixed bottom-20 left-20 p-6 shadow-lg md:min-w-[300px]">
+      <Card className="fixed bottom-20 left-4 p-6 md:min-w-[400px] max-w-[120vw] md:min-h-[700px] rounded-3xl bg-background text-foreground shadow-xl border-t border-background/3">
         <div className="flex justify-between items-center mb-4">
           <Button variant="ghost" size="icon" onClick={toggleWidget}>
             <XIcon className="h-6 w-6" strokeWidth={0.5} />
@@ -102,10 +102,9 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           defaultValue="quick-access"
           className="w-full flex flex-col gap-4"
         >
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="flex w-fit">
             <TabsTrigger value="quick-access">Quick Access</TabsTrigger>
             <TabsTrigger value="product">Product</TabsTrigger>
-            <TabsTrigger value="pro-tier">Pro Tier</TabsTrigger>
           </TabsList>
           <TabsContent value="quick-access">
             <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
@@ -115,18 +114,6 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
           <TabsContent value="product">
             <div className="flex flex-col gap-4 items-start md:h-[400px] overflow-y-auto scrollbar-hide">
               {renderProductButtons()}
-            </div>
-          </TabsContent>
-          <TabsContent value="pro-tier">
-            <div className="flex flex-col items-center justify-center gap-4 md:h-[400px] overflow-y-auto scrollbar-hide">
-              <div className="text-lg font-bold">Private Beta</div>
-              <div className="text-sm text-muted-foreground">
-                You are in the private beta of Pro Tier.
-              </div>
-              {/* Add ProTierDock at the bottom center */}
-              <div className="fixed bottom-10 left-1/2 transform -translate-x-1/2">
-                <ProTierDock />
-              </div>
             </div>
           </TabsContent>
         </Tabs>
@@ -143,7 +130,7 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
     <>
       {renderAccessButton(
         "",
-        <ChatAccessibilityButton className="m-3" title="Ask Solomon"/>,
+        <ChatAccessibilityButton className="m-3" title="Ask Solomon" />,
       )}
       {renderAccessButton(
         "",
@@ -155,11 +142,17 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
       )}
       {renderAccessButton(
         "",
-        <SubscriptionViewAccessibilityButton className="m-3" title="Subscriptions"/>,
+        <SubscriptionViewAccessibilityButton
+          className="m-3"
+          title="Subscriptions"
+        />,
       )}
       {renderAccessButton(
         "",
-        <TransactionViewAccessibilityButton className="m-3" title="Transactions" />,
+        <TransactionViewAccessibilityButton
+          className="m-3"
+          title="Transactions"
+        />,
       )}
       {renderAccessButton(
         "",
@@ -248,20 +241,19 @@ export const AccessibilityWidget: React.FC<AccessibilityWidgetProps> = ({
    * @returns {React.ReactElement} The rendered product button.
    */
   const renderProductButton = (label: string, widget: React.ReactNode) => (
-    <Button
-      variant="ghost"
-      className="flex flex-1 items-center gap-2 border-0 w-full justify-start"
-    >
-      {widget}
-      <span className="text-lg">{label}</span>
-    </Button>
+    <div className="flex flex-1 items-center gap-2 border-0 w-full justify-start">
+      <div className="flex items-center gap-2">
+        {widget}
+        <span className="text-lg">{label}</span>
+      </div>
+    </div>
   );
 
   return (
-    <div className="relative">
+    <>
       {renderToggleButton()}
       {isOpen && renderWidgetContent()}
-    </div>
+    </>
   );
 };
 

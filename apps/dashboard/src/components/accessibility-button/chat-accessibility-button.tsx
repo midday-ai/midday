@@ -42,9 +42,9 @@ const ChatAccessibilityButton: React.FC<{
           style={
             isWidget
               ? {
-                marginRight:
-                  "calc(20px + var(--removed-body-scroll-bar-size, 0px))",
-              }
+                  marginRight:
+                    "calc(20px + var(--removed-body-scroll-bar-size, 0px))",
+                }
               : undefined
           }
           aria-label="Open income view"

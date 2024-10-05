@@ -59,7 +59,7 @@ export function GoogleSignIn() {
         <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
       ) : (
         <>
-            <Icons.Google strokeWidth={0.5} />
+          <Icons.Google strokeWidth={0.5} />
           <span>Continue with Google</span>
         </>
       )}

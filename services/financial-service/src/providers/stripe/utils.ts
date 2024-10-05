@@ -1,5 +1,5 @@
-import type { Stripe } from 'stripe';
-import type { StripeTransactionType } from './types';
+import type { Stripe } from "stripe";
+import type { StripeTransactionType } from "./types";
 
 /**
  * Maps a Stripe transaction type string to a StripeTransactionType.
@@ -8,17 +8,17 @@ import type { StripeTransactionType } from './types';
  */
 export function mapStripeTransactionType(type: string): StripeTransactionType {
   switch (type) {
-    case 'charge':
-    case 'refund':
-    case 'adjustment':
-    case 'application_fee':
-    case 'application_fee_refund':
-    case 'transfer':
-    case 'payment':
-    case 'payout':
+    case "charge":
+    case "refund":
+    case "adjustment":
+    case "application_fee":
+    case "application_fee_refund":
+    case "transfer":
+    case "payment":
+    case "payout":
       return type as StripeTransactionType;
     default:
-      return 'other';
+      return "other";
   }
 }
 
@@ -27,15 +27,17 @@ export function mapStripeTransactionType(type: string): StripeTransactionType {
  * @param transaction - The Stripe balance transaction object.
  * @returns A string representing the transaction method.
  */
-export function getStripeTransactionMethod(transaction: Stripe.BalanceTransaction): string {
-  if (transaction.type === 'charge' || transaction.type === 'payment') {
-    return 'card_purchase';
-  } else if (transaction.type === 'payout') {
-    return 'transfer';
-  } else if (transaction.type === 'refund') {
-    return 'refund';
+export function getStripeTransactionMethod(
+  transaction: Stripe.BalanceTransaction,
+): string {
+  if (transaction.type === "charge" || transaction.type === "payment") {
+    return "card_purchase";
+  } else if (transaction.type === "payout") {
+    return "transfer";
+  } else if (transaction.type === "refund") {
+    return "refund";
   } else {
-    return 'other';
+    return "other";
   }
 }
 
@@ -53,15 +55,17 @@ export function formatStripeAmount(amount: number): number {
  * @param transaction - The Stripe balance transaction object.
  * @returns A string representing the transaction name.
  */
-export function getStripeTransactionName(transaction: Stripe.BalanceTransaction): string {
+export function getStripeTransactionName(
+  transaction: Stripe.BalanceTransaction,
+): string {
   if (transaction.description) {
     return transaction.description;
-  } else if (transaction.type === 'charge') {
-    return 'Card Charge';
-  } else if (transaction.type === 'payout') {
-    return 'Payout';
-  } else if (transaction.type === 'refund') {
-    return 'Refund';
+  } else if (transaction.type === "charge") {
+    return "Card Charge";
+  } else if (transaction.type === "payout") {
+    return "Payout";
+  } else if (transaction.type === "refund") {
+    return "Refund";
   } else {
     return `Stripe ${transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}`;
   }
@@ -72,6 +76,8 @@ export function getStripeTransactionName(transaction: Stripe.BalanceTransaction)
  * @param transaction - The Stripe balance transaction object.
  * @returns 'posted' if the transaction is available, 'pending' otherwise.
  */
-export function getStripeTransactionStatus(transaction: Stripe.BalanceTransaction): 'posted' | 'pending' {
-  return transaction.status === 'available' ? 'posted' : 'pending';
+export function getStripeTransactionStatus(
+  transaction: Stripe.BalanceTransaction,
+): "posted" | "pending" {
+  return transaction.status === "available" ? "posted" : "pending";
 }

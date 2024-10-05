@@ -22,14 +22,14 @@ export default async function InboxPage({ searchParams }: Props) {
 
   return (
     <ContentLayout title="Inbox">
-    <Suspense
-      key={ascending.toString()}
-      fallback={<InboxViewSkeleton ascending />}
-    >
-      <Inbox
-        ascending={ascending}
-        query={searchParams?.q}
-        currencies={uniqueCurrencies}
+      <Suspense
+        key={ascending.toString()}
+        fallback={<InboxViewSkeleton ascending />}
+      >
+        <Inbox
+          ascending={ascending}
+          query={searchParams?.q}
+          currencies={uniqueCurrencies}
         />
       </Suspense>
     </ContentLayout>

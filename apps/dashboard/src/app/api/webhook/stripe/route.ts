@@ -2,10 +2,11 @@ import Stripe from "stripe";
 
 import {
   deletePriceRecord,
-  deleteProductRecord, manageSubscriptionStatusChange,
+  deleteProductRecord,
+  manageSubscriptionStatusChange,
   stripe,
   upsertPriceRecord,
-  upsertProductRecord
+  upsertProductRecord,
 } from "@midday/stripe";
 import { createClient } from "@midday/supabase/client";
 
@@ -28,7 +29,7 @@ const relevantEvents = new Set([
 
 /**
  * Handles POST requests for Stripe webhook events.
- * 
+ *
  * This function processes various Stripe events related to products, prices,
  * checkout sessions, and customer subscriptions. It verifies the webhook
  * signature, determines the event type, and performs the appropriate action
@@ -36,9 +37,9 @@ const relevantEvents = new Set([
  *
  * @param {Request} req - The incoming HTTP request object.
  * @returns {Promise<Response>} A promise that resolves to an HTTP response.
- * 
+ *
  * @throws {Error} If there's an issue with webhook signature verification or event processing.
- * 
+ *
  * @example
  * // Example usage in a Next.js API route
  * export { POST } from './path/to/this/file';
@@ -49,7 +50,6 @@ export async function POST(req: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let event: Stripe.Event;
   const client = createClient();
-
 
   try {
     if (!sig || !webhookSecret)

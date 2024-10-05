@@ -57,7 +57,7 @@ export const UserNav: React.FC = React.memo(() => {
         <DropdownMenuSeparator />
         <NavLinks />
         <DropdownMenuSeparator />
-        <SignOut />
+        <SignOut mode={"default"} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

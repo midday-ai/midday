@@ -43,8 +43,12 @@ export function DataTableHeader() {
             onClick={() => createSortQuery("name")}
           >
             <span>Project</span>
-            {"name" === column && value === "asc" && <ArrowDown size={16} strokeWidth={0.5} />}
-            {"name" === column && value === "desc" && <ArrowUp size={16} strokeWidth={0.5} />}
+            {"name" === column && value === "asc" && (
+              <ArrowDown size={16} strokeWidth={0.5} />
+            )}
+            {"name" === column && value === "desc" && (
+              <ArrowUp size={16} strokeWidth={0.5} />
+            )}
           </Button>
         </TableHead>
         <TableHead className="w-[140px]">

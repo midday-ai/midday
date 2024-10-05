@@ -1,10 +1,10 @@
 import { ERROR_TYPE } from "@/types/error-types";
 import {
-    BusinessAccount,
-    CheckEmailAndAuth0UserIdExistsResponse,
-    FinancialUserProfile,
-    MelodyFinancialContext,
-    UserAccount
+  BusinessAccount,
+  CheckEmailAndAuth0UserIdExistsResponse,
+  FinancialUserProfile,
+  MelodyFinancialContext,
+  UserAccount,
 } from "client-typescript-sdk";
 
 /**
@@ -17,11 +17,11 @@ import {
  * @property {ERROR_TYPE} [type] - Optional error type if an error occurs.
  */
 interface FetchUserResponse {
-    authenticated: boolean;
-    userExists: boolean;
-    userAccount?: CheckEmailAndAuth0UserIdExistsResponse;
-    error?: string;
-    type?: ERROR_TYPE;
+  authenticated: boolean;
+  userExists: boolean;
+  userAccount?: CheckEmailAndAuth0UserIdExistsResponse;
+  error?: string;
+  type?: ERROR_TYPE;
 }
 
 /**
@@ -33,10 +33,10 @@ interface FetchUserResponse {
  * @property {boolean} [isAuthenticated] - Optional flag indicating if the user is already authenticated.
  */
 interface FetchDataProps {
-    userId: string;
-    email: string;
-    accessToken: string;
-    isAuthenticated?: boolean;
+  userId: string;
+  email: string;
+  accessToken: string;
+  isAuthenticated?: boolean;
 }
 
 /**
@@ -52,14 +52,14 @@ interface FetchDataProps {
  * @property {ERROR_TYPE} [type] - Optional error type if an error occurs.
  */
 interface FetchDataResponse {
-    authenticated: boolean;
-    userFinancialProfile?: FinancialUserProfile;
-    userFinancialContext?: MelodyFinancialContext;
-    userAccount?: UserAccount | BusinessAccount;
-    token?: string;
-    userId?: string;
-    error?: string;
-    type?: ERROR_TYPE;
+  authenticated: boolean;
+  userFinancialProfile?: FinancialUserProfile;
+  userFinancialContext?: MelodyFinancialContext;
+  userAccount?: UserAccount | BusinessAccount;
+  token?: string;
+  userId?: string;
+  error?: string;
+  type?: ERROR_TYPE;
 }
 
 /**
@@ -70,10 +70,14 @@ interface FetchDataResponse {
  * @property {MelodyFinancialContext} [financialContext] - Optional financial context of the user.
  */
 interface FetchUserAccountDetailsResponse {
-    account: UserAccount | BusinessAccount;
-    financialProfile: FinancialUserProfile;
-    financialContext?: MelodyFinancialContext;
+  account: UserAccount | BusinessAccount;
+  financialProfile: FinancialUserProfile;
+  financialContext?: MelodyFinancialContext;
 }
 
-export type { FetchDataProps, FetchDataResponse, FetchUserAccountDetailsResponse, FetchUserResponse };
-
+export type {
+  FetchDataProps,
+  FetchDataResponse,
+  FetchUserAccountDetailsResponse,
+  FetchUserResponse,
+};

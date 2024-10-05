@@ -98,7 +98,12 @@ export class PlaidProvider implements Provider {
     });
   }
 
-  async getStatements({ accessToken, accountId, userId, teamId }: GetStatementsRequest) {
+  async getStatements({
+    accessToken,
+    accountId,
+    userId,
+    teamId,
+  }: GetStatementsRequest) {
     if (!accessToken || !accountId || !userId || !teamId) {
       throw Error("accessToken, accountId, userId, or teamId is missing");
     }
@@ -106,11 +111,25 @@ export class PlaidProvider implements Provider {
     return this.#api.getStatements({ accessToken, accountId, userId, teamId });
   }
 
-  async getStatementPdf({ accessToken, statementId, accountId, userId, teamId }: GetStatementPdfRequest) {
+  async getStatementPdf({
+    accessToken,
+    statementId,
+    accountId,
+    userId,
+    teamId,
+  }: GetStatementPdfRequest) {
     if (!accessToken || !statementId || !accountId || !userId || !teamId) {
-      throw Error("accessToken, statementId, accountId, userId, or teamId is missing");
+      throw Error(
+        "accessToken, statementId, accountId, userId, or teamId is missing",
+      );
     }
 
-    return this.#api.getStatementPdf({ accessToken, statementId, accountId, userId, teamId });
+    return this.#api.getStatementPdf({
+      accessToken,
+      statementId,
+      accountId,
+      userId,
+      teamId,
+    });
   }
 }
