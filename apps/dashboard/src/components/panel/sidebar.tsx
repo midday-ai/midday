@@ -30,7 +30,7 @@ export const Sidebar: React.FC = React.memo(() => {
     >
       <SidebarToggle isOpen={sidebar.isOpen} setIsOpen={sidebar.setIsOpen} />
       <div className="relative flex h-full flex-col md:gap-[2%] overflow-y-auto px-3 py-4 shadow-md dark:shadow-zinc-800">
-        <BrandButton isOpen={sidebar.isOpen} />
+        {/* <BrandButton isOpen={sidebar.isOpen} /> */}
         <Menu isOpen={sidebar.isOpen} />
       </div>
     </aside>
