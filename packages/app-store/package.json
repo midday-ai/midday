@@ -10,14 +10,14 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.62",
-    "@slack/bolt": "^3.21.4",
+    "@ai-sdk/openai": "^0.0.66",
+    "@slack/bolt": "^3.22.0",
     "@slack/web-api": "^7.5.0",
-    "ai": "^3.4.3",
+    "ai": "^3.4.9",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^22.7.2",
+    "@types/node": "^22.7.4",
     "typescript": "^5.6.2"
   },
   "exports": {
