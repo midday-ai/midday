@@ -1319,6 +1319,19 @@ export type Database = {
           currency: string
         }[]
       }
+      get_burn_rate_v4: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          base_currency?: string
+        }
+        Returns: {
+          date: string
+          value: number
+          currency: string
+        }[]
+      }
       get_current_burn_rate: {
         Args: {
           team_id: string
@@ -1390,6 +1403,19 @@ export type Database = {
         }[]
       }
       get_profit_v3: {
+        Args: {
+          team_id: string
+          date_from: string
+          date_to: string
+          base_currency?: string
+        }
+        Returns: {
+          date: string
+          value: number
+          currency: string
+        }[]
+      }
+      get_profit_v4: {
         Args: {
           team_id: string
           date_from: string

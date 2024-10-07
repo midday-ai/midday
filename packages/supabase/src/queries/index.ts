@@ -404,7 +404,7 @@ export async function getBurnRateQuery(
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  const { data } = await supabase.rpc("get_burn_rate_v3", {
+  const { data } = await supabase.rpc("get_burn_rate_v4", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
@@ -433,7 +433,7 @@ export async function getRunwayQuery(
   const fromDate = new UTCDate(from);
   const toDate = new UTCDate(to);
 
-  return supabase.rpc("get_runway_v3", {
+  return supabase.rpc("get_runway_v4", {
     team_id: teamId,
     date_from: startOfMonth(fromDate).toDateString(),
     date_to: endOfMonth(toDate).toDateString(),
