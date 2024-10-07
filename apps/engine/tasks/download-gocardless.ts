@@ -10,8 +10,7 @@ async function main() {
 
   const data = await response.json();
 
-  console.log(data);
-
+  // @ts-ignore
   const tasks = data?.map(async (institution) => {
     const fileName = `${institution.id}.${getFileExtension(institution.logo)}`;
 
