@@ -59,6 +59,7 @@ export type PostRequisitionsRequest = {
   institutionId: string;
   agreement: string;
   redirect: string;
+  reference?: string;
 };
 
 export type PostEndUserAgreementRequest = {

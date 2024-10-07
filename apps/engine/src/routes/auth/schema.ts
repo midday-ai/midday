@@ -60,6 +60,9 @@ export const GoCardLessLinkBodySchema = z
         example: "2dea1b84-97b0-4cb4-8805-302c227587c8",
       })
       .nullable(),
+    reference: z.string().optional().openapi({
+      example: "1234567890",
+    }),
   })
   .openapi("GoCardLessLinkBodySchema");
 

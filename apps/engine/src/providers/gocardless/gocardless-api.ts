@@ -186,6 +186,7 @@ export class GoCardLessApi {
     institutionId,
     agreement,
     redirect,
+    reference,
   }: PostRequisitionsRequest): Promise<PostRequisitionsResponse> {
     const token = await this.#getAccessToken();
 
@@ -196,6 +197,7 @@ export class GoCardLessApi {
         redirect,
         institution_id: institutionId,
         agreement,
+        reference,
       },
     );
   }
