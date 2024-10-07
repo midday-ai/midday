@@ -199,4 +199,8 @@ export const LogEvents = {
     name: "Update App Settings",
     channel: "app",
   },
+  GoCardLessLinkCreated: {
+    name: "GoCardLess Link Created",
+    channel: "gocardless",
+  },
 };
