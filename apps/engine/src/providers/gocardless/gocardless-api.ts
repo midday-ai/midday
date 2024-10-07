@@ -122,11 +122,19 @@ export class GoCardLessApi {
         token,
       );
 
-      const foundAccount = balances?.find(
+      const foundInterimAvailable = balances?.find(
         (account) => account.balanceType === "interimAvailable",
       );
 
-      return foundAccount?.balanceAmount;
+      // For some accounts, the interimAvailable balance is 0, so we need to use the expected balance
+      const foundExpectedAvailable = balances?.find(
+        (account) => account.balanceType === "expected",
+      );
+
+      return (
+        foundInterimAvailable?.balanceAmount ||
+        foundExpectedAvailable?.balanceAmount
+      );
     } catch (error) {
       const parsedError = isError(error);
 

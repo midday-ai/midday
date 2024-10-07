@@ -208,7 +208,21 @@ export type AccountBalance = {
     amount: string;
     currency: string;
   };
-  balanceType: "interimAvailable" | "interimBooked";
+  balanceType:
+    | "interimAvailable"
+    | "interimBooked"
+    | "expected"
+    | "closingAvailable"
+    | "closingBooked"
+    | "closingCleared"
+    | "forwardAvailable"
+    | "interimCleared"
+    | "information"
+    | "nonInvoiced"
+    | "openingBooked"
+    | "openingAvailable"
+    | "openingCleared"
+    | "previouslyClosedBooked";
   creditLimitIncluded: boolean;
 };
 
