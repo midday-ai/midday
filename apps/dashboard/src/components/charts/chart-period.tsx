@@ -171,7 +171,7 @@ export function ChartPeriod({ defaultValue, disabled }: Props) {
             }
             initialFocus
             toDate={new Date()}
-            onSelect={handleChangePeriod}
+            onSelect={(date) => handleChangePeriod(date)}
           />
         </PopoverContent>
       </Popover>
