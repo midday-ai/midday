@@ -14,10 +14,21 @@ import {
 import { Input } from "@midday/ui/input";
 import { Loader2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
+import { redirect } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
-export function CreateTeamForm() {
+interface CreateTeamFormProps {
+  buttonTitle?: string;
+  redirectTo?: string;
+}
+
+export function CreateTeamForm({
+  buttonTitle = "Create Team",
+  redirectTo = "/teams/invite",
+}: CreateTeamFormProps) {
+
+  
   const createTeam = useAction(createTeamAction);
 
   const form = useForm<z.infer<typeof createTeamSchema>>({
@@ -28,7 +39,7 @@ export function CreateTeamForm() {
   });
 
   function onSubmit(values: z.infer<typeof createTeamSchema>) {
-    createTeam.execute({ name: values.name, redirectTo: "/teams/invite" });
+    createTeam.execute({ name: values.name, redirectTo: redirectTo });
   }
 
   return (
@@ -65,7 +76,7 @@ export function CreateTeamForm() {
           {createTeam.status === "executing" ? (
             <Loader2 className="h-4 w-4 animate-spin" strokeWidth={0.5} />
           ) : (
-            "Next"
+            buttonTitle || "Next"
           )}
         </Button>
       </form>

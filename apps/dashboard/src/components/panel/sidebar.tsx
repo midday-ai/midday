@@ -10,6 +10,7 @@ import React from "react";
 import { viewport } from "../../app/[locale]/layout";
 import { Menu } from "./menu";
 import { SidebarToggle } from "./sidebar-toggle";
+import { TeamMenu } from "../team-menu";
 
 /**
  * Sidebar component that renders a collapsible sidebar with a brand logo, toggle button, and menu.
@@ -33,6 +34,7 @@ export const Sidebar: React.FC = React.memo(() => {
         {/* <BrandButton isOpen={sidebar.isOpen} /> */}
         <Menu isOpen={sidebar.isOpen} />
       </div>
+      <TeamMenu mode="button" />
     </aside>
   );
 });

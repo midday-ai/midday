@@ -7,6 +7,7 @@ import { SubscriptionViewModal } from "@/components/modals/subscription/subscrip
 import { TransactionViewModal } from "@/components/modals/transaction/transaction-view-modal";
 import AnalyticsLayout from "@/components/panel/admin-panel-layout";
 import { Sidebar } from "@/components/sidebar";
+import { TeamMenu } from "@/components/team-menu";
 import OnboardToBackendServerWrapper from "@/components/wrappers/onboard-to-backend-wrapper.server";
 import features from "@/config/enabled-features";
 import { setupAnalytics } from "@midday/events/server";
@@ -85,6 +86,7 @@ export default async function Layout({
   var user: any = null;
   try {
     user = await getUser();
+    console.log("hey yoan the user object obtained is here", user);
     // Proceed with your logic for when a user is successfully retrieved
   } catch (error) {
     console.error("Error fetching user", error);
@@ -122,7 +124,6 @@ export default async function Layout({
         {/* <Sidebar /> */}
         <div className="mx-4 md:mx-5 pb-8 overflow-auto relative">
           {children}
-          {/* <TeamMenu mode="button" /> */}
           <div className="absolute bottom-4 left-4 flex items-center space-x-4">
             <ClientSideAccessibilityWidget
               email={user.data.email as string}

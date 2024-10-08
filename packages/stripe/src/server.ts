@@ -109,7 +109,6 @@ export async function checkoutWithStripe<T extends Database>(
 
       console.log("customer obtained", customer);
     } catch (err) {
-      console.error(err);
       throw new Error("Unable to access customer record.", { cause: err });
     }
 
@@ -238,7 +237,6 @@ export async function createStripePortal<T extends Database>(
         client,
       });
     } catch (err) {
-      console.error(err);
       throw new Error("Unable to access customer record.", { cause: err });
     }
 
@@ -248,7 +246,6 @@ export async function createStripePortal<T extends Database>(
 
     try {
       const stripeReturnUrl = getURL("/account");
-      console.log("Return URL for stripe billing portal:", stripeReturnUrl);
       const { url } = await stripe.billingPortal.sessions.create({
         customer,
         return_url: stripeReturnUrl,

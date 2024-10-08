@@ -35,6 +35,11 @@ type TransactionMethods = Database["public"]["Enums"]["transactionMethods"];
 type TransactionStatus = Database["public"]["Enums"]["transactionStatus"];
 type UserTier = Database["public"]["Enums"]["user_tier"];
 
+// combined types
+type UserWithTeam = UserSchema & { team: TeamSchema };
+type UserWithTeams = UserSchema & { teams: TeamSchema[] };
+
+
 export type {
   // Union types
   AccountType,
@@ -67,4 +72,6 @@ export type {
   TransactionStatus,
   UserSchema,
   UserTier,
+  UserWithTeam
 };
+
