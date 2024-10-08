@@ -1,3 +1,26 @@
+# [0.6.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.5.1...v0.6.0) (2024-10-08)
+
+
+### Features
+
+* add authentication ([5caa681](https://github.com/SolomonAIEngineering/solomonai/commit/5caa68160454cf48cc213c494339fa4af7d31c5b))
+* add backend connectivitt ([e9ce92f](https://github.com/SolomonAIEngineering/solomonai/commit/e9ce92f95d6633ca9017ef11d397e7f6b105f593))
+* add backend connectivitt ([6174a47](https://github.com/SolomonAIEngineering/solomonai/commit/6174a473e7918da7f26eb78dd0c632c4185ea2bb))
+* add more stripe event support ([aa4101c](https://github.com/SolomonAIEngineering/solomonai/commit/aa4101c29d0c9dda2a32f328d4dfedcca19d4819))
+* add more stripe event support ([4f14467](https://github.com/SolomonAIEngineering/solomonai/commit/4f1446777c9de12f836f0c2ccceeb42730dba8ca))
+* add workflow dispatch ([0a45f87](https://github.com/SolomonAIEngineering/solomonai/commit/0a45f879b69ebffa983daa33c03557179b19eaf4))
+* checkopint ([45dcdd7](https://github.com/SolomonAIEngineering/solomonai/commit/45dcdd73fd889d0c2e6d65178fb8b5439556c85b))
+* checkopint ([a2769bf](https://github.com/SolomonAIEngineering/solomonai/commit/a2769bf146ff24e40ebeacc66c39cd5babcd06cf))
+* checkopint ([231743b](https://github.com/SolomonAIEngineering/solomonai/commit/231743bdccf908f8629f1175d13b0d09b428c89d))
+* checkopint ([14e9499](https://github.com/SolomonAIEngineering/solomonai/commit/14e94992fe98d084801032eda2b094a699bd8e77))
+* checkopint ([bf90434](https://github.com/SolomonAIEngineering/solomonai/commit/bf904348f0f00f75a28e24301167b9dae3fb6169))
+* checkopint ([cd228fc](https://github.com/SolomonAIEngineering/solomonai/commit/cd228fc0158c0f76fd5ee10ac6413a6b09596bb0))
+* checkpoint ([b4950bc](https://github.com/SolomonAIEngineering/solomonai/commit/b4950bcf05fa547e143e56c1aea4fd6d1cb9a51b))
+* checkpoint ([bf18768](https://github.com/SolomonAIEngineering/solomonai/commit/bf18768ca49c53c06b486bb872d863a784cb70eb))
+* checkpoint ([af63e7a](https://github.com/SolomonAIEngineering/solomonai/commit/af63e7ae0ae448a9d3d34eab0a3a1e950090fee7))
+* checkpoint ([8b8bd20](https://github.com/SolomonAIEngineering/solomonai/commit/8b8bd20e3df4944a6774b730f00e773c7645b16e))
+* upgrade bun lib ([50e5f6a](https://github.com/SolomonAIEngineering/solomonai/commit/50e5f6ab6ac52f978ce2d368ed19fb48b6a40caf))
+
 # [0.9.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.8.0...v0.9.0) (2024-10-08)
 
 
