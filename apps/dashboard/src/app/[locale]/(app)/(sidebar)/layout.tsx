@@ -86,7 +86,6 @@ export default async function Layout({
   var user: any = null;
   try {
     user = await getUser();
-    console.log("hey yoan the user object obtained is here", user);
     // Proceed with your logic for when a user is successfully retrieved
   } catch (error) {
     console.error("Error fetching user", error);
