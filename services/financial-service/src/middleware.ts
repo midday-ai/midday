@@ -33,6 +33,18 @@ const authMiddleware = async (c: Context, next: Next) => {
     throw new HTTPException(500, { message: "API_SECRET_KEY is not set" });
   }
 
+  // TODO: Enhance authentication process
+  // 1. Extract API key from the Authorization header
+  // 2. Call the backend (e.g., database or key-value store) to store valid API keys
+  // 3. Query the datastore to verify if the extracted API key exists
+  // 4. Check if the API key is associated with an active account
+  // 5. If the key is valid and active, allow the request to proceed
+  // 6. If the key is invalid or inactive, return a 401 Unauthorized response
+  // 7. Consider implementing rate limiting based on the API key
+  // 8. Log authentication attempts for security auditing
+  // 9. Implement key rotation and expiration mechanisms for enhanced security
+  // 10. Add support for different access levels or permissions tied to API keys
+
   const bearer = bearerAuth({ token: API_SECRET_KEY });
   return bearer(c, next);
 };
