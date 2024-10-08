@@ -4,15 +4,15 @@ compatibility_flags = [ "nodejs_compat" ]
 workers_dev = false
 logpush = true
 tail_consumers = [
-  {service = "financial-service-tail-consumer"},
-  {service = "financial-service-staging-tail-consumer"},
-  {service = "financial-service-tail"}
+  {service = "engine-tail-consumer"},
+  {service = "engine-staging-tail-consumer"},
+  {service = "engine-tail"}
 ]
 
 [env.production]
-name = "financial-service"
+name = "engine"
 logpush = true
-route = { pattern = "financial-service.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
+route = { pattern = "engine.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
 
 kv_namespaces = [
   { binding = "KV", id = "019720a586c448c2a88a58773da08fd8" }
@@ -31,8 +31,8 @@ enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
 
 [env.staging]
-name = "financial-service-staging"
-route = { pattern = "financial-service-staging.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
+name = "engine-staging"
+route = { pattern = "engine-staging.solomon-ai-platform.com/*", zone_name = "solomon-ai-platform.com" }
 
 kv_namespaces = [
   { binding = "KV", id = "6745cb3ad41e4d35a45bf67bb515c08b" }
