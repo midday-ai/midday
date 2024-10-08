@@ -16,7 +16,7 @@ const PUBLIC_PATHS = ["/", "/openapi", "/health"];
 
 /**
  * Authentication middleware
- * 
+ *
  * @description Handles authentication for protected routes using bearer token
  * @param {Context} c - The Hono context object
  * @param {Next} next - The next middleware function
@@ -58,7 +58,7 @@ const authMiddleware = async (c: Context, next: Next) => {
 
 /**
  * Caching middleware
- * 
+ *
  * @description Implements caching for responses in non-development environments
  * @param {Context} c - The Hono context object
  * @param {Next} next - The next middleware function
@@ -77,35 +77,35 @@ const cacheMiddleware = (c: Context, next: Next) => {
 
 /**
  * Security headers middleware
- * 
+ *
  * @description Adds secure headers to the response
  */
 const securityMiddleware = secureHeaders();
 
 /**
  * Logging middleware
- * 
+ *
  * @description Logs incoming requests using a custom logger
  */
 const loggingMiddleware = logger(customLogger);
 
 /**
  * JSON formatting middleware
- * 
+ *
  * @description Formats JSON responses for better readability
  */
 const jsonFormattingMiddleware = prettyJSON();
 
 /**
  * Timing middleware
- * 
+ *
  * @description Adds timing information to the response headers
  */
 const timingMiddleware = timing();
 
 /**
  * CORS middleware
- * 
+ *
  * @description Handles Cross-Origin Resource Sharing (CORS) in non-development environments
  * @param {Context} c - The Hono context object
  * @param {Next} next - The next middleware function
@@ -117,10 +117,10 @@ const corsMiddleware = (c: Context, next: Next) => {
   }
 
   return cors({
-    origin: ['https://app-business.solomon-ai.app', 'http://localhost:3001'],
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
-    exposeHeaders: ['X-Total-Count'],
+    origin: ["https://app-business.solomon-ai.app", "http://localhost:3001"],
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+    exposeHeaders: ["X-Total-Count"],
     maxAge: 3600,
     credentials: true,
   })(c, next);
@@ -128,7 +128,7 @@ const corsMiddleware = (c: Context, next: Next) => {
 
 /**
  * Error handling middleware
- * 
+ *
  * @description Catches and handles errors thrown during request processing
  * @param {Context} c - The Hono context object
  * @param {Next} next - The next middleware function
@@ -142,14 +142,17 @@ const errorHandlerMiddleware = async (c: Context, next: Next) => {
       return c.json({ error: error.message }, error.status);
     }
     console.error(error);
-    return c.json({ error: 'Internal Server Error' }, 500);
+    return c.json({ error: "Internal Server Error" }, 500);
   }
 };
 
 export {
   authMiddleware,
-  cacheMiddleware, corsMiddleware,
-  errorHandlerMiddleware, jsonFormattingMiddleware, loggingMiddleware,
-  securityMiddleware, timingMiddleware
+  cacheMiddleware,
+  corsMiddleware,
+  errorHandlerMiddleware,
+  jsonFormattingMiddleware,
+  loggingMiddleware,
+  securityMiddleware,
+  timingMiddleware,
 };
-
