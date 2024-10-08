@@ -20,7 +20,7 @@ export function CreateTransactionSheet({
   currency: string;
 }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
-  const [open, setOpen] = useQueryState("create");
+  const [open, setOpen] = useQueryState("create-transaction");
 
   const isOpen = Boolean(open);
 

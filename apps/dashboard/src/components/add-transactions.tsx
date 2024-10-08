@@ -14,7 +14,7 @@ export function AddTransactions() {
   const [_, setParams] = useQueryStates({
     step: parseAsString,
     hide: parseAsBoolean,
-    create: parseAsBoolean,
+    "create-transaction": parseAsBoolean,
   });
 
   return (
@@ -40,7 +40,7 @@ export function AddTransactions() {
           <span>Import/backfill</span>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => setParams({ create: true })}
+          onClick={() => setParams({ "create-transaction": true })}
           className="space-x-2"
         >
           <Icons.CreateTransaction size={18} />
