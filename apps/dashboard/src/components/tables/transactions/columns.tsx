@@ -6,7 +6,7 @@ import { FormatAmount } from "@/components/format-amount";
 import { TransactionBankAccount } from "@/components/transaction-bank-account";
 import { TransactionMethod } from "@/components/transaction-method";
 import { TransactionStatus } from "@/components/transaction-status";
-import { formatTransactionDate } from "@/utils/format";
+import { formatDate } from "@/utils/format";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -90,7 +90,7 @@ export const columns: ColumnDef<Transaction>[] = [
     accessorKey: "date",
     header: "Date",
     cell: ({ row }) => {
-      return formatTransactionDate(row.original.date);
+      return formatDate(row.original.date);
     },
   },
   {

@@ -16,8 +16,8 @@ export default function Invoices() {
       <div className="grid grid-cols-3 gap-6 pt-6">
         <Suspense fallback={<div>Loading...</div>}>
           <InvoicesOpen />
-          <InvoicesPaid />
           <InvoicesOverdue />
+          <InvoicesPaid />
         </Suspense>
       </div>
 

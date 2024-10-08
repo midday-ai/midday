@@ -17,7 +17,7 @@ export function InvoiceRow({ row }: Props) {
   return (
     <>
       <TableRow
-        className="hover:bg-transparent"
+        className="hover:bg-transparent cursor-default"
         key={row.id}
         onClick={() => setOpen(true)}
       >
