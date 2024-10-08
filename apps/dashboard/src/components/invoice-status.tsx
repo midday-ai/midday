@@ -25,9 +25,10 @@ export function InvoiceStatus({
         "p-1 px-3 py-1 rounded-full cursor-default font-mono inline-flex max-w-full text-xs",
         status === "draft" &&
           "text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D]",
-        status === "overdue" && "bg-red-200",
-        status === "paid" && "bg-green-200",
-        status === "unpaid" && "bg-yellow-200",
+        status === "overdue" && "dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]",
+        status === "paid" &&
+          "text-[#00C969] bg-[#E6F9F0]/10 dark:text-[#00C969] dark:bg-[#00C969]/10",
+        status === "unpaid" && "dark:text-[#F5F5F3] dark:bg-[#F5F5F3]/10",
         className,
       )}
     >

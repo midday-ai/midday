@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
 import { formatDate } from "@/utils/format";
@@ -12,6 +13,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
 
 export type Invoice = {
@@ -31,7 +33,8 @@ export const columns: ColumnDef<Invoice>[] = [
     header: "Due date",
     accessorKey: "due_date",
     cell: ({ row }) => {
-      return <span>{formatDate(row.getValue("due_date"))}</span>;
+      const date = row.getValue("due_date");
+      return <span>{date ? formatDate(date) : "-"}</span>;
     },
   },
   {
@@ -50,7 +53,7 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => (
       <FormatAmount
         amount={row.getValue("amount")}
-        currency={row.getValue("currency")}
+        currency={row.original.currency}
       />
     ),
   },
@@ -63,7 +66,8 @@ export const columns: ColumnDef<Invoice>[] = [
     header: "Invoice date",
     accessorKey: "invoice_date",
     cell: ({ row }) => {
-      return <span>{formatDate(row.getValue("invoice_date"))}</span>;
+      const date = row.getValue("invoice_date");
+      return <span>{date ? formatDate(date) : "-"}</span>;
     },
   },
   {
@@ -74,8 +78,9 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row, table }) => {
-      const [isOpen, setOpen] = React.useState(false);
+    cell: ({ row }) => {
+      const status = row.getValue("status");
+      const deleteInvoice = useAction(deleteInvoiceAction);
 
       return (
         <div>
@@ -86,9 +91,16 @@ export const columns: ColumnDef<Invoice>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setOpen(true)}>
-                Edit
-              </DropdownMenuItem>
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+              {(status === "draft" ||
+                status === "overdue" ||
+                status === "unpaid") && (
+                <DropdownMenuItem
+                  onClick={() => deleteInvoice.execute({ id: row.original.id })}
+                >
+                  Cancel
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
