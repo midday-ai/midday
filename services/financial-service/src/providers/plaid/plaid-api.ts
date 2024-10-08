@@ -221,8 +221,9 @@ export class PlaidApi {
     return this.#client.linkTokenCreate({
       client_id: this.#clientId,
       secret: this.#clientSecret,
-      client_name: "Midday",
+      client_name: "simfiny",
       products: [Products.Transactions],
+      required_if_supported_products: [Products.Liabilities, Products.Investments, Products.RecurringTransactions, Products.Statements],
       language,
       access_token: accessToken,
       country_codes: this.#countryCodes,
