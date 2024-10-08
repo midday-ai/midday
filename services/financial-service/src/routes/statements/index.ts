@@ -12,6 +12,10 @@ import type { Bindings } from "@/common/bindings";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
+/**
+ * Route definition for retrieving statements.
+ * @description This route handles GET requests to fetch statements based on the provided query parameters.
+ */
 const statementsRoute = createRoute({
   method: "get",
   path: "/statements",
@@ -39,6 +43,10 @@ const statementsRoute = createRoute({
   },
 });
 
+/**
+ * Route definition for retrieving a statement PDF.
+ * @description This route handles GET requests to fetch a specific statement PDF based on the provided query parameters.
+ */
 const statementPdfRoute = createRoute({
   method: "get",
   path: "/statements/pdf",
@@ -69,6 +77,12 @@ const statementPdfRoute = createRoute({
   },
 });
 
+/**
+ * Handler for the statements route.
+ * @param c - The context object containing request and environment information.
+ * @returns A JSON response with the retrieved statements or an error response.
+ * @throws Will throw an error if there's an issue retrieving the statements.
+ */
 app.openapi(statementsRoute, async (c) => {
   const envs = env(c);
   const { provider, accessToken, accountId, userId, teamId } =
@@ -102,6 +116,12 @@ app.openapi(statementsRoute, async (c) => {
   }
 });
 
+/**
+ * Handler for the statement PDF route.
+ * @param c - The context object containing request and environment information.
+ * @returns A PDF file as the response body or an error response.
+ * @throws Will throw an error if there's an issue retrieving the statement PDF.
+ */
 app.openapi(statementPdfRoute, async (c) => {
   const envs = env(c);
   const { provider, accessToken, statementId, accountId, userId, teamId } =

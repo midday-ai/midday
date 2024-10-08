@@ -1,6 +1,14 @@
 import { Providers } from "@/common/schema";
 import { z } from "@hono/zod-openapi";
 
+/**
+ * Schema for transaction query parameters.
+ * @property {Providers} provider - The provider of the transaction data.
+ * @property {string} accountId - The account ID for which to fetch transactions.
+ * @property {("credit"|"depository"|"other_asset"|"loan"|"other_liability")} [accountType] - The type of account.
+ * @property {string} [accessToken] - Access token for Teller and Plaid providers.
+ * @property {boolean} [latest] - Whether to fetch only the latest transactions.
+ */
 export const TransactionsParamsSchema = z
   .object({
     provider: Providers.openapi({
@@ -57,6 +65,19 @@ export const TransactionsParamsSchema = z
   })
   .openapi("TransactionsParamsSchema");
 
+/**
+ * Schema for a single transaction.
+ * @property {string} id - Unique identifier for the transaction.
+ * @property {string|null} description - Description of the transaction.
+ * @property {string|null} method - Method of the transaction.
+ * @property {number} amount - Amount of the transaction.
+ * @property {string} name - Name associated with the transaction.
+ * @property {string} date - Date of the transaction.
+ * @property {string} currency - Currency of the transaction.
+ * @property {("pending"|"posted")} status - Status of the transaction.
+ * @property {string|null} category - Category of the transaction.
+ * @property {number|null} balance - Balance after the transaction.
+ */
 export const TransactionSchema = z
   .object({
     id: z.string().openapi({
@@ -104,12 +125,22 @@ export const TransactionSchema = z
   })
   .openapi("TransactionSchema");
 
+/**
+ * Schema for a list of transactions.
+ * @property {TransactionSchema[]} data - Array of transactions.
+ */
 export const TransactionsSchema = z
   .object({
     data: z.array(TransactionSchema),
   })
   .openapi("TransactionsSchema");
 
+/**
+ * Schema for recurring transactions query parameters.
+ * @property {Providers.Enum.plaid} provider - The provider (only Plaid supported).
+ * @property {string} accessToken - Access token for Plaid.
+ * @property {string} accountId - Account ID for Plaid.
+ */
 export const RecurringTransactionsParamsSchema = z
   .object({
     provider: z.literal(Providers.Enum.plaid).openapi({
@@ -138,6 +169,9 @@ export const RecurringTransactionsParamsSchema = z
   })
   .openapi("RecurringTransactionsParamsSchema");
 
+/**
+ * Schema for recurring transaction frequency.
+ */
 const RecurringTransactionFrequencySchema = z.enum([
   "weekly",
   "bi-weekly",
@@ -147,12 +181,21 @@ const RecurringTransactionFrequencySchema = z.enum([
   "unknown",
 ]);
 
+/**
+ * Schema for recurring transaction amount.
+ * @property {number} amount - The transaction amount.
+ * @property {string|null} iso_currency_code - ISO currency code.
+ * @property {string|null} unofficial_currency_code - Unofficial currency code.
+ */
 const RecurringTransactionAmountSchema = z.object({
   amount: z.number(),
   iso_currency_code: z.string().nullable(),
   unofficial_currency_code: z.string().nullable(),
 });
 
+/**
+ * Schema for recurring transaction status.
+ */
 const RecurringTransactionStatusSchema = z.enum([
   "mature",
   "early_detection",
@@ -160,12 +203,36 @@ const RecurringTransactionStatusSchema = z.enum([
   "unknown",
 ]);
 
+/**
+ * Schema for recurring transaction category.
+ * @property {string} primary - Primary category.
+ * @property {string} detailed - Detailed category.
+ * @property {string} confidence_level - Confidence level of the categorization.
+ */
 const RecurringTransactionCategorySchema = z.object({
   primary: z.string(),
   detailed: z.string(),
   confidence_level: z.string(),
 });
 
+/**
+ * Schema for a recurring transaction.
+ * @property {string} account_id - ID of the account associated with the recurring transaction.
+ * @property {string} recurring_transaction_id - Unique identifier for the recurring transaction.
+ * @property {string} description - Description of the recurring transaction.
+ * @property {string|null} merchant_name - Name of the merchant.
+ * @property {string} first_date - Date of the first occurrence.
+ * @property {string} last_date - Date of the last occurrence.
+ * @property {RecurringTransactionFrequencySchema} frequency - Frequency of the recurring transaction.
+ * @property {string[]} transaction_ids - Array of transaction IDs associated with this recurring transaction.
+ * @property {RecurringTransactionAmountSchema} average_amount - Average amount of the recurring transaction.
+ * @property {RecurringTransactionAmountSchema} last_amount - Amount of the last occurrence.
+ * @property {boolean} is_active - Whether the recurring transaction is active.
+ * @property {RecurringTransactionStatusSchema} status - Status of the recurring transaction.
+ * @property {RecurringTransactionCategorySchema|null} personal_finance_category - Personal finance category of the recurring transaction.
+ * @property {boolean} is_user_modified - Whether the recurring transaction has been modified by the user.
+ * @property {string|null} last_user_modified_datetime - Datetime of the last user modification.
+ */
 export const RecurringTransactionSchema = z.object({
   account_id: z.string(),
   recurring_transaction_id: z.string(),
@@ -184,12 +251,22 @@ export const RecurringTransactionSchema = z.object({
   last_user_modified_datetime: z.string().nullable(),
 });
 
+/**
+ * Schema for the response of getting recurring transactions.
+ * @property {RecurringTransactionSchema[]} inflow - Array of incoming recurring transactions.
+ * @property {RecurringTransactionSchema[]} outflow - Array of outgoing recurring transactions.
+ * @property {string} last_updated_at - Timestamp of the last update.
+ */
 export const GetRecurringTransactionsResponseSchema = z.object({
   inflow: z.array(RecurringTransactionSchema),
   outflow: z.array(RecurringTransactionSchema),
   last_updated_at: z.string(),
 });
 
+/**
+ * Schema for a list of recurring transactions.
+ * @property {RecurringTransactionSchema[]} data - Array of recurring transactions.
+ */
 export const RecurringTransactionsSchema = z
   .object({
     data: z.array(RecurringTransactionSchema),
