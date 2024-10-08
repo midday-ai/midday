@@ -68,5 +68,5 @@
     "@commitlint/types": "^17.0.0",
     "husky": "^8.0.0"
   },
-  "version": "0.7.0"
+  "version": "0.8.0"
 }
