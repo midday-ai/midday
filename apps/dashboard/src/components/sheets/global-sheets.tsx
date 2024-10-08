@@ -1,6 +1,7 @@
 import { Cookies } from "@/utils/constants";
 import { getUser } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
+import { InvoiceCreateSheet } from "./invoice-create-sheet";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
@@ -26,6 +27,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
         timeFormat={userData?.time_format}
         lastProjectId={projectId}
       />
+      <InvoiceCreateSheet currencyCode={defaultCurrency} />
     </>
   );
 }

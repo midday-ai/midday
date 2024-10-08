@@ -429,8 +429,6 @@ export const assistantSettingsSchema = z.object({
   enabled: z.boolean().optional(),
 });
 
-export const requestAccessSchema = z.void();
-
 export const parseDateSchema = z
   .date()
   .transform((value) => new Date(value))
