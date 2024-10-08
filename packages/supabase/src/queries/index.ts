@@ -1203,3 +1203,11 @@ export async function getInvoiceSummaryQuery(
     })
     .single();
 }
+
+export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
+  return supabase
+    .rpc("get_payment_score", {
+      team_id: teamId,
+    })
+    .single();
+}

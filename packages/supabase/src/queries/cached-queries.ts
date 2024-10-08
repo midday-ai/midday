@@ -22,6 +22,7 @@ import {
   getExpensesQuery,
   getInvoiceSummaryQuery,
   getMetricsQuery,
+  getPaymentStatusQuery,
   getRunwayQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
@@ -465,4 +466,25 @@ export const getInvoiceSummary = async (
       revalidate: 3600,
     },
   )(params);
+};
+
+export const getPaymentStatus = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getPaymentStatusQuery(supabase, teamId);
+    },
+    ["payment_status", teamId],
+    {
+      tags: [`payment_status_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
 };
