@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - apps/engine/**
+      - apps/services/financial-engine/**
 jobs:
   deploy-production:
     runs-on: ubuntu-latest
