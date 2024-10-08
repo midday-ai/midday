@@ -1,3 +1,17 @@
+# [0.9.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.8.0...v0.9.0) (2024-10-08)
+
+
+### Features
+
+* add authentication ([3e98c43](https://github.com/SolomonAIEngineering/solomonai/commit/3e98c4366d42738a55ae5fa7808a9790b708b094))
+* add more stripe event support ([a1d270d](https://github.com/SolomonAIEngineering/solomonai/commit/a1d270d5013b13b7796aec677c9a6830613163bb))
+* add workflow dispatch ([53e30c7](https://github.com/SolomonAIEngineering/solomonai/commit/53e30c713f7ab89b0593525b5acfb136a59d843a))
+* checkopint ([d25a861](https://github.com/SolomonAIEngineering/solomonai/commit/d25a86104da474c8998da3848d062c71df78af69))
+* checkopint ([8b68bd4](https://github.com/SolomonAIEngineering/solomonai/commit/8b68bd453d901b845b943b5e2b96c67604f315bc))
+* checkopint ([7ab7e44](https://github.com/SolomonAIEngineering/solomonai/commit/7ab7e44dce07d81cc6cec78b35c1837c900afd1f))
+* checkopint ([58c5fea](https://github.com/SolomonAIEngineering/solomonai/commit/58c5fea771643699a4dc65222d191ebdf25deb37))
+* checkopint ([15ff3e5](https://github.com/SolomonAIEngineering/solomonai/commit/15ff3e53f413befe84df060a5249b3ad48f08054))
+
 # [0.8.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.7.0...v0.8.0) (2024-10-08)
 
 
