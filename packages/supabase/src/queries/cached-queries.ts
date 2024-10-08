@@ -7,6 +7,7 @@ import {
   type GetBurnRateQueryParams,
   type GetCategoriesParams,
   type GetExpensesQueryParams,
+  type GetInvoiceSummaryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
   type GetSpendingParams,
@@ -19,6 +20,7 @@ import {
   getBurnRateQuery,
   getCategoriesQuery,
   getExpensesQuery,
+  getInvoiceSummaryQuery,
   getMetricsQuery,
   getRunwayQuery,
   getSpendingQuery,
@@ -444,4 +446,23 @@ export const getTeamSettings = async () => {
       revalidate: 3600,
     },
   )();
+};
+
+export const getInvoiceSummary = async (
+  params?: Omit<GetInvoiceSummaryParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getInvoiceSummaryQuery(supabase, { ...params, teamId });
+    },
+    ["invoice_summary", teamId],
+    {
+      tags: [`invoice_summary_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
 };

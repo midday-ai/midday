@@ -1119,3 +1119,87 @@ export async function getInboxSearchQuery(
 export async function getTeamSettingsQuery(supabase: Client, teamId: string) {
   return supabase.from("teams").select("*").eq("id", teamId).single();
 }
+
+export type GetInvoicesQueryParams = {
+  teamId: string;
+  from?: number;
+  to?: number;
+  searchQuery?: string;
+  filter?: {
+    statuses?: string[];
+    start?: string;
+    end?: string;
+  };
+  sort?: string[];
+};
+
+export async function getInvoicesQuery(
+  supabase: Client,
+  params: GetInvoicesQueryParams,
+) {
+  const { teamId, filter, searchQuery, sort, from = 0, to = 25 } = params;
+  const { statuses, start, end } = filter || {};
+
+  const query = supabase
+    .from("invoices")
+    .select(
+      "id, invoice_number, due_date, invoice_date, amount, currency, status, customer:customer_id(id, name)",
+    )
+    .eq("team_id", teamId);
+
+  if (sort) {
+    const [column, value] = sort;
+
+    const ascending = value === "asc";
+
+    if (column === "customer") {
+      query.order(column, { ascending });
+      query.order("customer(name)", { ascending });
+    } else if (column) {
+      query.order(column, { ascending });
+    }
+  } else {
+    query.order("due_date", { ascending: false });
+  }
+
+  if (statuses) {
+    query.in("status", statuses);
+  }
+
+  if (start && end) {
+    const fromDate = new UTCDate(start);
+    const toDate = new UTCDate(end);
+
+    query.gte("due_date", fromDate.toISOString());
+    query.lte("due_date", toDate.toISOString());
+  }
+
+  if (searchQuery) {
+    if (Number.isNaN(Number.parseInt(searchQuery))) {
+      query.like("amount", searchQuery);
+    } else {
+      // query.textSearch("fts_vector", `'${searchQuery}'`);
+    }
+  }
+
+  return query;
+}
+
+export type GetInvoiceSummaryParams = {
+  teamId: string;
+  status?: "paid" | "cancelled";
+};
+
+export async function getInvoiceSummaryQuery(
+  supabase: Client,
+  params: GetInvoiceSummaryParams,
+) {
+  const { teamId, status } = params;
+
+  return supabase
+    .rpc("get_invoice_summary", {
+      team_id: teamId,
+      status,
+    })
+    .single();
+}

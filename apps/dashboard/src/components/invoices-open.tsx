@@ -1,3 +1,4 @@
+import { getInvoiceSummary } from "@midday/supabase/cached-queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
 import {
@@ -6,13 +7,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@midday/ui/tooltip";
+import { FormatAmount } from "./format-amount";
 
-export function InvoicesOpen() {
+export async function InvoicesOpen() {
+  const { data } = await getInvoiceSummary();
+
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="font-mono font-medium text-2xl">
-          €36,500.50
+          <FormatAmount amount={data?.total_amount} currency={data?.currency} />
         </CardTitle>
       </CardHeader>
 
@@ -36,7 +40,9 @@ export function InvoicesOpen() {
             </Tooltip>
           </TooltipProvider>
 
-          <div className="text-sm text-muted-foreground">12 invoices</div>
+          <div className="text-sm text-muted-foreground">
+            {data?.invoice_count} invoices
+          </div>
         </div>
       </CardContent>
     </Card>

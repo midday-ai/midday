@@ -1,5 +1,12 @@
 import type { TZDate } from "@date-fns/tz";
-import { format, isSameYear } from "date-fns";
+import {
+  differenceInDays,
+  differenceInMonths,
+  format,
+  isFuture,
+  isPast,
+  isSameYear,
+} from "date-fns";
 
 export function formatSize(bytes: number): string {
   const units = ["byte", "kilobyte", "megabyte", "gigabyte", "terabyte"];
@@ -128,4 +135,31 @@ export function formatDateRange(dates: TZDate[]): string {
   }
   // Different months
   return `${formatFullDate(startDate)} - ${formatFullDate(endDate)}`;
+}
+
+export function getDueDateStatus(dueDate: string): string {
+  const now = new Date();
+  const due = new Date(dueDate);
+
+  if (isFuture(due)) {
+    const diffDays = differenceInDays(due, now);
+    const diffMonths = differenceInMonths(due, now);
+
+    if (diffMonths < 1) {
+      return `in ${diffDays} day${diffDays === 1 ? "" : "s"}`;
+    }
+    return `in ${diffMonths} month${diffMonths === 1 ? "" : "s"}`;
+  }
+
+  if (isPast(due)) {
+    const diffDays = differenceInDays(now, due);
+    const diffMonths = differenceInMonths(now, due);
+
+    if (diffMonths < 1) {
+      return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+    }
+    return `${diffMonths} month${diffMonths === 1 ? "" : "s"} ago`;
+  }
+
+  return "Today";
 }
