@@ -113,13 +113,7 @@ export function InvoiceSearchFilter() {
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
-      <div className="flex items-center">
-        <FilterList
-          filters={filters}
-          loading={streaming}
-          onRemove={setFilters}
-        />
-
+      <div className="flex space-x-4 items-center">
         <form
           className="relative"
           onSubmit={(e) => {
@@ -154,6 +148,12 @@ export function InvoiceSearchFilter() {
             </button>
           </DropdownMenuTrigger>
         </form>
+
+        <FilterList
+          filters={filters}
+          loading={streaming}
+          onRemove={setFilters}
+        />
       </div>
 
       <DropdownMenuContent
