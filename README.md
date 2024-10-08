@@ -5,7 +5,7 @@
 <p align="center">
 	<h1 align="center"><b>Solomon AI</b></h1>
 <p align="center">
-  The Open Source Financial Workspace For Your Small Business
+  The Open Source Financial Workspace For Your Business
     <br />
     <br />
     <a href="https://go.Solomon AI.ai/anPiuRx">Discord</a>
