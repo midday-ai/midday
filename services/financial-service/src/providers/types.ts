@@ -232,7 +232,7 @@ export type Account = {
 };
 
 export type Balance = {
-  available: any;
+  available: number | { amount: number; currency: string }[];
   amount: number;
   currency: string;
 };

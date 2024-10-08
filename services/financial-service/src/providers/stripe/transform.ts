@@ -87,10 +87,10 @@ export const transformAccountBalance = (
       0,
     ) || 0,
   currency: balance?.available[0]?.currency.toUpperCase() || "USD",
-  available: balance?.available.map((bal) => ({
+  available: balance?.available ? balance.available.map((bal) => ({
     amount: formatStripeAmount(bal.amount),
     currency: bal.currency.toUpperCase(),
-  })),
+  })) : [],
 });
 
 /**

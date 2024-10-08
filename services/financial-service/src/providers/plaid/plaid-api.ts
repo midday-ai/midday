@@ -3,7 +3,7 @@ import { ProviderError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
-import { R2Bucket } from '@cloudflare/workers-types';
+import { R2Bucket } from "@cloudflare/workers-types";
 import {
   Configuration,
   type CountryCode,
@@ -270,7 +270,9 @@ export class PlaidApi {
    * @param {DisconnectAccountRequest} params - The request parameters.
    * @returns {Promise<void>} A promise that resolves when the accounts are deleted.
    */
-  async deleteAccounts({ accessToken }: DisconnectAccountRequest): Promise<void> {
+  async deleteAccounts({
+    accessToken,
+  }: DisconnectAccountRequest): Promise<void> {
     await this.#client.itemRemove({
       access_token: accessToken,
     });
@@ -314,18 +316,19 @@ export class PlaidApi {
    * @returns {Promise<GetStatementsResponse>} A promise that resolves to the statements information.
    * @throws {ProviderError} If an error occurs during the API call.
    */
-  async getStatements({ accessToken, accountId, userId, teamId }: GetStatementsRequest): Promise<GetStatementsResponse> {
+  async getStatements({
+    accessToken,
+    accountId,
+    userId,
+    teamId,
+  }: GetStatementsRequest): Promise<GetStatementsResponse> {
     try {
       const response = await this.#client.statementsList({
         access_token: accessToken,
       });
 
-      const {
-        accounts,
-        institution_id,
-        item_id,
-        institution_name,
-      } = response.data;
+      const { accounts, institution_id, item_id, institution_name } =
+        response.data;
 
       // get the account is and create a hashmap of accountId to account
       const accountIdToAccount = new Map<string, StatementsAccount>();
@@ -341,7 +344,10 @@ export class PlaidApi {
         // we need to store the statement id to statement object
         account.statements.forEach((statement) => {
           accountIdToStatements.set(statement.statement_id, statement);
-          statementIdToAccountId.set(statement.statement_id, account.account_id);
+          statementIdToAccountId.set(
+            statement.statement_id,
+            account.account_id,
+          );
         });
 
         // we need to store the statement id to account id
@@ -349,12 +355,14 @@ export class PlaidApi {
       });
 
       // we construct and statements response object
-      const statements: Array<StatementMetadata> = allStatements.map((statement) => ({
-        account_id: statementIdToAccountId.get(statement.statement_id) ?? "",
-        statement_id: statement.statement_id,
-        month: statement.month.toString(),
-        year: statement.year.toString(),
-      }));
+      const statements: Array<StatementMetadata> = allStatements.map(
+        (statement) => ({
+          account_id: statementIdToAccountId.get(statement.statement_id) ?? "",
+          statement_id: statement.statement_id,
+          month: statement.month.toString(),
+          year: statement.year.toString(),
+        }),
+      );
 
       return {
         statements,
@@ -377,7 +385,13 @@ export class PlaidApi {
    * @returns {Promise<GetStatementPdfResponse>} A promise that resolves to the PDF statement data.
    * @throws {ProviderError} If an error occurs during the API call.
    */
-  async getStatementPdf({ accessToken, statementId, accountId, userId, teamId }: GetStatementPdfRequest): Promise<GetStatementPdfResponse> {
+  async getStatementPdf({
+    accessToken,
+    statementId,
+    accountId,
+    userId,
+    teamId,
+  }: GetStatementPdfRequest): Promise<GetStatementPdfResponse> {
     try {
       const key = `statement_${teamId}_${userId}_${accountId}_${statementId}.pdf`;
 

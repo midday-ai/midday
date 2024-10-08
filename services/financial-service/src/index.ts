@@ -38,7 +38,6 @@ app.use("*", corsMiddleware); // This will now only apply CORS in non-dev enviro
 app.use("*", cacheMiddleware);
 app.use("*", jsonFormattingMiddleware);
 
-
 // Enable cache for the following routes
 app.get("/institutions", cacheMiddleware);
 app.get("/accounts", cacheMiddleware);

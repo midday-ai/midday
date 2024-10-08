@@ -5,7 +5,12 @@ import { AccountType } from "@/utils/account";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import { GetRecurringTransactionsResponseSchema, RecurringTransactionsParamsSchema, TransactionsParamsSchema, TransactionsSchema } from "./schema";
+import {
+  GetRecurringTransactionsResponseSchema,
+  RecurringTransactionsParamsSchema,
+  TransactionsParamsSchema,
+  TransactionsSchema,
+} from "./schema";
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -95,7 +100,6 @@ app.openapi(indexRoute, async (c) => {
     return c.json(errorResponse, 400);
   }
 });
-
 
 app.openapi(recurringTransactionsRoute, async (c) => {
   const envs = env(c);
