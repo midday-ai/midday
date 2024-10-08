@@ -38,7 +38,7 @@
     "lint": "turbo lint && manypkg check",
     "typecheck": "turbo typecheck",
     "prepare": "husky",
-    "release": "turbo run build lint typecheck && changeset version && changeset publish",
+    "release": "changeset version && changeset publish",
     "reset:changelog": "bun run rm -rf */**/CHANGELOG.md",
     "bootstrap": "turbo run bootstrap",
     "bump-package-version": "bunx changeset",
@@ -66,7 +66,7 @@
     "@commitlint/cli": "^17.0.0",
     "@commitlint/config-conventional": "^17.0.0",
     "@commitlint/types": "^17.0.0",
-    "husky": "^8.0.0"
+    "husky": "^9.1.6"
   },
   "version": "0.6.0"
 }
