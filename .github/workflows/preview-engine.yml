@@ -8,6 +8,8 @@ on:
       - main
     paths:
       - apps/services/financial-engine/**
+  workflow_dispatch:
+
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
