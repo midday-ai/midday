@@ -1,6 +1,8 @@
 "use client";
 
 import { signOutAction } from "@/actions/sign-out-action";
+import features from "@/config/enabled-features";
+import { USER_STORE_KEY } from "@/store/backend";
 import { Button } from "@midday/ui/button";
 import { DropdownMenuItem } from "@midday/ui/dropdown-menu";
 import { CaretLeftIcon } from "@radix-ui/react-icons";
@@ -15,6 +17,11 @@ export const SignOut: React.FC<SignOutProps> = ({ mode = "dropdown" }) => {
 
   const handleSignOut = async () => {
     setLoading(true);
+    // wipe the local storage if the backend interaction is enabled
+    if (features.isBackendEnabled) {
+      // wipe local storage of user related data
+      localStorage.removeItem(USER_STORE_KEY);
+    }
     signOutAction();
   };
 

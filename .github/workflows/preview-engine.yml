@@ -7,7 +7,7 @@ on:
     branches-ignore:
       - main
     paths:
-      - apps/services/financial-engine/**
+      - services/financial-service/**
   workflow_dispatch:
 
 jobs:
