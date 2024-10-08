@@ -3,6 +3,7 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
+import { exchangeAccessTokenWithBackend } from "@/actions/solomon-backend/access-token/exchange-access-token-action";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
 import { track } from "@midday/events/client";
@@ -86,10 +87,12 @@ function SearchResult({
 
 type ConnectTransactionsModalProps = {
   countryCode: string;
+  userId: string;
 };
 
 export function ConnectTransactionsModal({
   countryCode: initialCountryCode,
+  userId
 }: ConnectTransactionsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -117,9 +120,15 @@ export function ConnectTransactionsModal({
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
     clientName: "simfiny",
     product: ["transactions"],
-    
+
     onSuccess: async (public_token, metadata) => {
-      const accessToken = await exchangePublicToken(public_token);
+      // exchange the access token (this will perform token exchange with our enterprise backend as well)
+      const accessToken = await exchangePublicToken({
+        publicToken: public_token,
+        institutionId: metadata.institution?.institution_id ?? "",
+        institutionName: metadata.institution?.name ?? "",
+        userId: userId,
+      });
 
       setParams({
         step: "account",
