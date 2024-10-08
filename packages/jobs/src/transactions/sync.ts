@@ -41,7 +41,7 @@ client.defineJob({
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)",
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token)"
       )
       .eq("team_id", teamId)
       .eq("enabled", true)
@@ -93,7 +93,7 @@ client.defineJob({
             })
             .eq("id", account.bank_connection.id);
           console.log(
-            `Updated bank connection status for ID: ${account.bank_connection.id}`,
+            `Updated bank connection status for ID: ${account.bank_connection.id}`
           );
         }
       }
@@ -113,10 +113,10 @@ client.defineJob({
           transaction,
           teamId: account.team_id,
           bankAccountId: account.id,
-        }),
+        })
       );
       console.log(
-        `Fetched ${formattedTransactions?.length || 0} transactions for account ID: ${account.id}`,
+        `Fetched ${formattedTransactions?.length || 0} transactions for account ID: ${account.id}`
       );
 
       return formattedTransactions;
@@ -126,7 +126,16 @@ client.defineJob({
       if (promises) {
         // Wait for all account processing to complete
         console.log("Processing all accounts");
-        const result = await Promise.all(promises);
+
+        // This code will run once, because we're manually creating a task with the "my-task" cacheKey
+        const result = await io.runTask(
+          `resolve-transaction-sync-promises_${teamId}`,
+          async () => {
+            return await await Promise.all(promises);
+          },
+          { name: "Transaction Sync Promise" }
+        );
+
         const transactions = result.flat();
         console.log(`Total transactions fetched: ${transactions.length}`);
 
@@ -140,7 +149,7 @@ client.defineJob({
         const { error: transactionsError, data: transactionsData } =
           await supabase
             .from("transactions")
-            .upsert(transactions, {
+            .upsert(transactions as any, {
               onConflict: "internal_id",
               ignoreDuplicates: true,
             })
@@ -153,7 +162,7 @@ client.defineJob({
 
         if (transactionsData && transactionsData?.length > 0) {
           console.log(
-            `Successfully upserted ${transactionsData.length} transactions`,
+            `Successfully upserted ${transactionsData.length} transactions`
           );
           // 4. Send notifications for new transactions
           console.log("Sending notifications for new transactions");
@@ -189,7 +198,7 @@ client.defineJob({
       console.error("Error in transaction sync process:", error);
       await io.logger.debug(`Team id: ${teamId}`);
       await io.logger.error(
-        error instanceof Error ? error.message : String(error),
+        error instanceof Error ? error.message : String(error)
       );
     }
 

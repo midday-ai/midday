@@ -35,10 +35,6 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   description,
   ...props
 }): JSX.Element | null => {
-  if (!features.isEnterpriseTierEnabled) {
-    return null;
-  }
-
 
   // Return null if analytics v2 is not enabled
   if (!features.isAnalyticsV2Enabled) return null;

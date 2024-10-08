@@ -8,6 +8,7 @@ import Link from "next/link";
 import React from "react";
 
 import { viewport } from "../../app/[locale]/layout";
+import { TeamMenu } from "../team-menu";
 import { Menu } from "./menu";
 import { SidebarToggle } from "./sidebar-toggle";
 
