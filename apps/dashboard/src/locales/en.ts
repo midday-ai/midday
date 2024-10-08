@@ -182,4 +182,16 @@ export default {
       cancelled: "Cancelled",
     },
   },
+  payment_status: {
+    none: "Unknown",
+    good: "Good",
+    average: "Average",
+    bad: "Bad",
+  },
+  payment_status_description: {
+    none: "No payment history available yet.",
+    good: "Customers consistently pay on time.",
+    average: "Mostly on time, with a few late payments.",
+    bad: "Room for improvement in payment timeliness.",
+  },
 } as const;
