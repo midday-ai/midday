@@ -1,3 +1,12 @@
+# [0.10.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.9.0...v0.10.0) (2024-10-08)
+
+
+### Features
+
+* add exchange token logic with the backend ([6e016aa](https://github.com/SolomonAIEngineering/solomonai/commit/6e016aa72b618ecb1834c24ad1900f1137993096))
+* add solomon private pkg repo token ([1a53465](https://github.com/SolomonAIEngineering/solomonai/commit/1a53465f66e559d8f35cc7010a7de544eafdaa58))
+* add token exchange ([9850e6a](https://github.com/SolomonAIEngineering/solomonai/commit/9850e6aedf4184980d9de8c098d866ba2eae7499))
+
 # [0.9.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.8.0...v0.9.0) (2024-10-08)
 
 
