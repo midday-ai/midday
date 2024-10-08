@@ -1,7 +1,7 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { deleteInvoiceSchema } from "./schema";
 
 export const deleteInvoiceAction = authActionClient
@@ -20,6 +20,7 @@ export const deleteInvoiceAction = authActionClient
       .single();
 
     revalidatePath("/invoices");
+    revalidateTag(`invoice_summary_${teamId}`);
 
     return data;
   });
