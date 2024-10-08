@@ -8,6 +8,12 @@ import type {
   GetAccountsResponse,
   GetInstitutionsRequest,
   GetInstitutionsResponse,
+  GetRecurringTransactionsRequest,
+  GetRecurringTransactionsResponse,
+  GetStatementPdfRequest,
+  GetStatementPdfResponse,
+  GetStatementsRequest,
+  GetStatementsResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
   ProviderParams,
@@ -173,5 +179,47 @@ export class StripeProvider {
     } catch {
       return false;
     }
+  }
+
+  async getStatements(
+    params: GetStatementsRequest,
+  ): Promise<GetStatementsResponse> {
+    if (!params.accountId) {
+      throw Error("accountId is missing");
+    }
+
+    return {
+      statements: [],
+      institution_name: "Unknown",
+      institution_id: "Unknown",
+    };
+  }
+
+  async getStatementPdf(
+    params: GetStatementPdfRequest,
+  ): Promise<GetStatementPdfResponse> {
+    if (!params.accountId || !params.statementId) {
+      throw Error("accountId or statementId is missing");
+    }
+
+    return {
+      pdf: Buffer.from([]),
+      filename: "Unknown",
+    };
+  }
+
+  async getRecurringTransactions(
+    params: GetRecurringTransactionsRequest,
+  ): Promise<GetRecurringTransactionsResponse> {
+    const { accountId } = params;
+    if (!accountId) {
+      throw new Error("Missing accountId");
+    }
+
+    return {
+      inflow: [],
+      outflow: [],
+      last_updated_at: new Date().toISOString(),
+    };
   }
 }
