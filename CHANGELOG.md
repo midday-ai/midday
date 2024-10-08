@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.8.0...v0.9.0) (2024-10-08)
+
+
+### Features
+
+* add support for more product types in the financial service ([e0aba38](https://github.com/SolomonAIEngineering/solomonai/commit/e0aba38351a487228c9baa3596269076beb6a18d))
+
 # [0.8.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.7.0...v0.8.0) (2024-10-08)
 
 
