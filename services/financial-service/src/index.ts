@@ -5,8 +5,12 @@ import { requestId } from "hono/request-id";
 import {
   authMiddleware,
   cacheMiddleware,
+  corsMiddleware,
+  errorHandlerMiddleware,
+  jsonFormattingMiddleware,
   loggingMiddleware,
   securityMiddleware,
+  timingMiddleware,
 } from "./middleware";
 import accountRoutes from "./routes/accounts";
 import authRoutes from "./routes/auth";
@@ -28,6 +32,12 @@ app.use("*", requestId());
 app.use(authMiddleware);
 app.use(securityMiddleware);
 app.use(loggingMiddleware);
+app.use("*", errorHandlerMiddleware);
+app.use("*", timingMiddleware);
+app.use("*", corsMiddleware); // This will now only apply CORS in non-dev environments
+app.use("*", cacheMiddleware);
+app.use("*", jsonFormattingMiddleware);
+
 
 // Enable cache for the following routes
 app.get("/institutions", cacheMiddleware);
@@ -59,7 +69,7 @@ app.doc("/openapi", {
   openapi: "3.1.0",
   info: {
     version: "1.0.0",
-    title: "Midday Engine API",
+    title: "Solomon AI Financial Service API",
   },
 });
 

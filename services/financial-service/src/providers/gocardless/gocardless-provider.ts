@@ -4,12 +4,14 @@ import type {
   GetAccountBalanceRequest,
   GetAccountsRequest,
   GetInstitutionsRequest,
-  GetTransactionsRequest,
-  ProviderParams,
-  GetStatementsRequest,
-  GetStatementsResponse,
+  GetRecurringTransactionsRequest,
+  GetRecurringTransactionsResponse,
   GetStatementPdfRequest,
   GetStatementPdfResponse,
+  GetStatementsRequest,
+  GetStatementsResponse,
+  GetTransactionsRequest,
+  ProviderParams,
 } from "../types";
 import { GoCardLessApi } from "./gocardless-api";
 import {
@@ -103,6 +105,21 @@ export class GoCardLessProvider implements Provider {
     return {
       pdf: Buffer.from([]),
       filename: "Unknown",
+    };
+  }
+
+  async getRecurringTransactions(
+    params: GetRecurringTransactionsRequest,
+  ): Promise<GetRecurringTransactionsResponse> {
+    const { accountId } = params;
+    if (!accountId) {
+      throw new Error("Missing accountId");
+    }
+
+    return {
+      inflow: [],
+      outflow: [],
+      last_updated_at: new Date().toISOString(),
     };
   }
 }

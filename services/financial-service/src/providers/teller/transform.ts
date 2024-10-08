@@ -189,6 +189,7 @@ export const transformAccountBalance = (
 ): BaseAccountBalance => ({
   currency: account.currency,
   amount: +account.amount,
+  available: +account.amount,
 });
 
 export const transformInstitution = (institution: TransformInstitution) => ({

@@ -12,12 +12,13 @@ import type {
   GetAccountsRequest,
   GetHealthCheckResponse,
   GetInstitutionsRequest,
-  GetTransactionsRequest,
-  ProviderParams,
-  GetStatementsRequest,
+  GetRecurringTransactionsRequest,
   GetStatementPdfRequest,
   GetStatementPdfResponse,
+  GetStatementsRequest,
   GetStatementsResponse,
+  GetTransactionsRequest,
+  ProviderParams,
 } from "./types";
 
 export class Provider {
@@ -164,5 +165,28 @@ export class Provider {
     }
 
     throw new Error("Statement PDF not supported for this provider");
+  }
+
+  /**
+   * Retrieves recurring transactions for the specified parameters.
+   * @param {GetRecurringTransactionsRequest} params - Parameters for the recurring transactions request.
+   * @returns {Promise<{ inflow: any[], outflow: any[], last_updated_at: string }>} A promise that resolves to an object containing inflow and outflow transactions, and the last update timestamp.
+   */
+  async getRecurringTransactions(params: GetRecurringTransactionsRequest) {
+    logger("getRecurringTransactions:", `provider: ${this.#name}`);
+
+    const data = await withRetry(() =>
+      this.#provider?.getRecurringTransactions(params),
+    );
+
+    if (data) {
+      return data;
+    }
+
+    return {
+      inflow: [],
+      outflow: [],
+      last_updated_at: new Date().toISOString(),
+    };
   }
 }

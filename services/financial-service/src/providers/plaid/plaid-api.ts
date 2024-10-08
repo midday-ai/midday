@@ -3,6 +3,7 @@ import { ProviderError } from "@/utils/error";
 import { logger } from "@/utils/logger";
 import { paginate } from "@/utils/paginate";
 import { withRetry } from "@/utils/retry";
+import { R2Bucket } from '@cloudflare/workers-types';
 import {
   Configuration,
   type CountryCode,
@@ -11,8 +12,6 @@ import {
   PlaidApi as PlaidBaseApi,
   PlaidEnvironments,
   Products,
-  StatementsAccount,
-  StatementsStatement,
   StatementsAccount,
   StatementsStatement,
   type Transaction,
@@ -24,35 +23,38 @@ import type {
   GetAccountBalanceResponse,
   GetAccountsRequest,
   GetAccountsResponse,
+  GetRecurringTransactionsRequest,
+  GetRecurringTransactionsResponse,
+  GetStatementPdfRequest,
+  GetStatementPdfResponse,
+  GetStatementsRequest,
+  GetStatementsResponse,
   GetStatusResponse,
   GetTransactionsRequest,
   GetTransactionsResponse,
   ItemPublicTokenExchangeRequest,
   LinkTokenCreateRequest,
-  GetStatementsRequest,
-  GetStatementsResponse,
-  GetStatementPdfRequest,
-  GetStatementPdfResponse,
-  StatementMetadata,
-  GetStatementsRequest,
-  GetStatementsResponse,
-  GetStatementPdfRequest,
-  GetStatementPdfResponse,
   StatementMetadata,
 } from "./types";
 import { isError } from "./utils";
-import { R2Bucket } from '@cloudflare/workers-types';
-import { R2Bucket } from '@cloudflare/workers-types';
 
+/**
+ * PlaidApi class for interacting with the Plaid API.
+ * This class provides methods to perform various operations such as
+ * retrieving account information, transactions, statements, and more.
+ */
 export class PlaidApi {
   #client: PlaidBaseApi;
   #clientId: string;
   #clientSecret: string;
   #r2: R2Bucket;
-  #r2: R2Bucket;
 
   #countryCodes = PLAID_COUNTRIES as CountryCode[];
 
+  /**
+   * Creates an instance of PlaidApi.
+   * @param {Omit<ProviderParams, "provider">} params - Configuration parameters for the Plaid API.
+   */
   constructor(params: Omit<ProviderParams, "provider">) {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
     this.#clientSecret = params.envs.PLAID_SECRET;
@@ -73,7 +75,11 @@ export class PlaidApi {
     this.#client = new PlaidBaseApi(configuration);
   }
 
-  async getHealthCheck() {
+  /**
+   * Checks the health status of the Plaid API.
+   * @returns {Promise<boolean>} A promise that resolves to true if the API is healthy, false otherwise.
+   */
+  async getHealthCheck(): Promise<boolean> {
     try {
       const response = await fetch(
         "https://status.plaid.com/api/v2/status.json",
@@ -90,6 +96,12 @@ export class PlaidApi {
     }
   }
 
+  /**
+   * Retrieves the balance for a specific account.
+   * @param {GetAccountBalanceRequest} params - The request parameters.
+   * @returns {Promise<GetAccountBalanceResponse | undefined>} A promise that resolves to the account balance or undefined.
+   * @throws {ProviderError} If an error occurs during the API call.
+   */
   async getAccountBalance({
     accessToken,
     accountId,
@@ -112,6 +124,12 @@ export class PlaidApi {
     }
   }
 
+  /**
+   * Retrieves accounts associated with an access token and institution.
+   * @param {GetAccountsRequest} params - The request parameters.
+   * @returns {Promise<GetAccountsResponse | undefined>} A promise that resolves to the accounts information or undefined.
+   * @throws {ProviderError} If an error occurs during the API call.
+   */
   async getAccounts({
     accessToken,
     institutionId,
@@ -139,6 +157,12 @@ export class PlaidApi {
     }
   }
 
+  /**
+   * Retrieves transactions for a specific account.
+   * @param {GetTransactionsRequest} params - The request parameters.
+   * @returns {Promise<GetTransactionsResponse | undefined>} A promise that resolves to the transactions or undefined.
+   * @throws {ProviderError} If an error occurs during the API call.
+   */
   async getTransactions({
     accessToken,
     accountId,
@@ -182,6 +206,11 @@ export class PlaidApi {
     }
   }
 
+  /**
+   * Creates a link token for Plaid Link initialization.
+   * @param {LinkTokenCreateRequest} params - The request parameters.
+   * @returns {Promise<import("axios").AxiosResponse<LinkTokenCreateResponse>>} A promise that resolves to the link token creation response.
+   */
   async linkTokenCreate({
     userId,
     language = "en",
@@ -206,6 +235,11 @@ export class PlaidApi {
     });
   }
 
+  /**
+   * Retrieves information about a specific institution by its ID.
+   * @param {string} institution_id - The ID of the institution.
+   * @returns {Promise<any>} A promise that resolves to the institution information.
+   */
   async institutionsGetById(institution_id: string) {
     return this.#client.institutionsGetById({
       institution_id,
@@ -216,6 +250,11 @@ export class PlaidApi {
     });
   }
 
+  /**
+   * Exchanges a public token for an access token.
+   * @param {ItemPublicTokenExchangeRequest} params - The request parameters.
+   * @returns {Promise<import("axios").AxiosResponse<ItemPublicTokenExchangeResponse>>} A promise that resolves to the token exchange response.
+   */
   async itemPublicTokenExchange({
     publicToken,
   }: ItemPublicTokenExchangeRequest): Promise<
@@ -226,12 +265,22 @@ export class PlaidApi {
     });
   }
 
-  async deleteAccounts({ accessToken }: DisconnectAccountRequest) {
+  /**
+   * Deletes (disconnects) accounts associated with an access token.
+   * @param {DisconnectAccountRequest} params - The request parameters.
+   * @returns {Promise<void>} A promise that resolves when the accounts are deleted.
+   */
+  async deleteAccounts({ accessToken }: DisconnectAccountRequest): Promise<void> {
     await this.#client.itemRemove({
       access_token: accessToken,
     });
   }
 
+  /**
+   * Retrieves a list of institutions.
+   * @param {GetInstitutionsRequest} [params] - Optional request parameters.
+   * @returns {Promise<any>} A promise that resolves to the list of institutions.
+   */
   async getInstitutions(params?: GetInstitutionsRequest) {
     const countryCode = params?.countryCode
       ? [params.countryCode as CountryCode]
@@ -259,6 +308,12 @@ export class PlaidApi {
     });
   }
 
+  /**
+   * Retrieves statements for an account.
+   * @param {GetStatementsRequest} params - The request parameters.
+   * @returns {Promise<GetStatementsResponse>} A promise that resolves to the statements information.
+   * @throws {ProviderError} If an error occurs during the API call.
+   */
   async getStatements({ accessToken, accountId, userId, teamId }: GetStatementsRequest): Promise<GetStatementsResponse> {
     try {
       const response = await this.#client.statementsList({
@@ -316,6 +371,12 @@ export class PlaidApi {
     }
   }
 
+  /**
+   * Retrieves a PDF statement for an account.
+   * @param {GetStatementPdfRequest} params - The request parameters.
+   * @returns {Promise<GetStatementPdfResponse>} A promise that resolves to the PDF statement data.
+   * @throws {ProviderError} If an error occurs during the API call.
+   */
   async getStatementPdf({ accessToken, statementId, accountId, userId, teamId }: GetStatementPdfRequest): Promise<GetStatementPdfResponse> {
     try {
       const key = `statement_${teamId}_${userId}_${accountId}_${statementId}.pdf`;
@@ -348,6 +409,37 @@ export class PlaidApi {
         throw new ProviderError(parsedError);
       }
       throw error;
+    }
+  }
+
+  /**
+   * Retrieves recurring transactions for an account.
+   * @param {GetRecurringTransactionsRequest} params - The request parameters.
+   * @returns {Promise<GetRecurringTransactionsResponse | undefined>} A promise that resolves to the recurring transactions or undefined.
+   * @throws {ProviderError} If an error occurs during the API call.
+   */
+  async getRecurringTransactions({
+    accessToken,
+    accountId,
+  }: GetRecurringTransactionsRequest): Promise<
+    GetRecurringTransactionsResponse | undefined
+  > {
+    try {
+      const response = await this.#client.transactionsRecurringGet({
+        access_token: accessToken,
+        account_ids: [accountId],
+        options: {
+          include_personal_finance_category: true,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      const parsedError = isError(error);
+
+      if (parsedError) {
+        throw new ProviderError(parsedError);
+      }
     }
   }
 }

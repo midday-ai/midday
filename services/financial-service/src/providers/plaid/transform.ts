@@ -2,19 +2,29 @@ import { Providers } from "@/common/schema";
 import { getType } from "@/utils/account";
 import { getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
-import type { Transaction, TransactionCode } from "plaid";
+import type { PersonalFinanceCategory, RecurringTransactionFrequency, Transaction, TransactionCode, TransactionStreamAmount, TransactionStreamStatus } from "plaid";
 import type {
   Account as BaseAccount,
   Balance as BaseBalance,
   Transaction as BaseTransaction,
+  RecurringTransaction,
+  RecurringTransactionAmount,
+  RecurringTransactionCategory,
+  RecurringTransactionStatus,
 } from "../types";
 import type {
   TransformAccount,
   TransformAccountBalance,
   TransformInstitution,
+  TransformRecurringTransaction,
   TransformTransactionPayload,
 } from "./types";
 
+/**
+ * Maps a Plaid transaction code to a standardized transaction method.
+ * @param type - The Plaid transaction code.
+ * @returns A standardized transaction method string.
+ */
 export const mapTransactionMethod = (type?: TransactionCode | null) => {
   switch (type) {
     case "bill payment":
@@ -39,6 +49,12 @@ type MapTransactionCategory = {
   amount: number;
 };
 
+/**
+ * Maps a Plaid transaction to a standardized category.
+ * @param transaction - The Plaid transaction object.
+ * @param amount - The transaction amount.
+ * @returns A standardized category string.
+ */
 export const mapTransactionCategory = ({
   transaction,
   amount,
@@ -225,12 +241,22 @@ export const mapTransactionCategory = ({
   return "uncategorized";
 };
 
+/**
+ * Formats the transaction amount to ensure consistent sign convention.
+ * @param amount - The original transaction amount.
+ * @returns The formatted amount with consistent sign convention.
+ */
 const formatAmout = (amount: number) => {
   // Positive values when money moves out of the account; negative values when money moves in.
   // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
   return +(amount * -1);
 };
 
+/**
+ * Transforms the transaction description, prioritizing original description or merchant name.
+ * @param transaction - The Plaid transaction object.
+ * @returns The transformed description or null if no suitable description is found.
+ */
 const transformDescription = (transaction: Transaction) => {
   const name = capitalCase(transaction.name);
 
@@ -248,6 +274,11 @@ const transformDescription = (transaction: Transaction) => {
   return null;
 };
 
+/**
+ * Transforms a Plaid transaction into a standardized BaseTransaction object.
+ * @param transaction - The Plaid transaction object.
+ * @returns A standardized BaseTransaction object.
+ */
 export const transformTransaction = ({
   transaction,
 }: TransformTransactionPayload): BaseTransaction => {
@@ -321,6 +352,11 @@ export const transformTransaction = ({
   };
 };
 
+/**
+ * Transforms an amount to ensure consistent sign convention for account balance.
+ * @param amount - The original amount.
+ * @returns The transformed amount with consistent sign convention.
+ */
 const transformToSignedAmount = (amount: number) => {
   // Positive values when money moves out of the account; negative values when money moves in.
   // For example, debit card purchases are positive; credit card payments, direct deposits, and refunds are negative.
@@ -331,6 +367,15 @@ const transformToSignedAmount = (amount: number) => {
   return amount * -1;
 };
 
+/**
+ * Transforms a Plaid account into a standardized BaseAccount object.
+ * @param account_id - The account ID.
+ * @param name - The account name.
+ * @param balances - The account balances.
+ * @param institution - The associated institution.
+ * @param type - The account type.
+ * @returns A standardized BaseAccount object.
+ */
 export const transformAccount = ({
   account_id,
   name,
@@ -355,6 +400,11 @@ export const transformAccount = ({
   };
 };
 
+/**
+ * Transforms Plaid account balances into a standardized BaseBalance object.
+ * @param balances - The Plaid account balances.
+ * @returns A standardized BaseBalance object.
+ */
 export const transformAccountBalance = (
   balances?: TransformAccountBalance,
 ): BaseBalance => ({
@@ -364,9 +414,144 @@ export const transformAccountBalance = (
   available: balances?.available ?? 0,
 });
 
+/**
+ * Transforms a Plaid institution into a standardized institution object.
+ * @param institution - The Plaid institution object.
+ * @returns A standardized institution object.
+ */
 export const transformInstitution = (institution: TransformInstitution) => ({
   id: institution.institution_id,
   name: institution.name,
   logo: getLogoURL(institution.institution_id),
   provider: Providers.Enum.plaid,
 });
+
+/**
+ * Transforms a Plaid recurring transaction frequency to a standardized format.
+ * @param frequency - The Plaid recurring transaction frequency.
+ * @returns A standardized frequency string.
+ */
+const transformRecurringTransactionFrequency = (
+  frequency: RecurringTransactionFrequency,
+) => {
+  switch (frequency) {
+    case "WEEKLY":
+      return "weekly";
+    case "MONTHLY":
+      return "monthly";
+    case "ANNUALLY":
+      return "yearly";
+    case "BIWEEKLY":
+      return "bi-weekly";
+    case "SEMI_MONTHLY":
+      return "semi-monthly";
+    default:
+      return "unknown";
+  }
+};
+
+/**
+ * Transforms a Plaid transaction stream amount to a standardized format.
+ * @param amount - The Plaid transaction stream amount.
+ * @returns A standardized RecurringTransactionAmount object.
+ */
+export const transformRecurringTransactionAmount = (
+  amount: TransactionStreamAmount,
+): RecurringTransactionAmount => {
+  return {
+    amount: amount.amount || 0,
+    iso_currency_code: amount.iso_currency_code || undefined,
+    unofficial_currency_code: amount.unofficial_currency_code || undefined,
+  };
+};
+
+/**
+ * Transforms a Plaid transaction stream status to a standardized format.
+ * @param status - The Plaid transaction stream status.
+ * @returns A standardized RecurringTransactionStatus string.
+ */
+export const transformRecurringTransactionStatus = (
+  status: TransactionStreamStatus,
+): RecurringTransactionStatus => {
+  switch (status) {
+    case "MATURE":
+      return "mature";
+    case "EARLY_DETECTION":
+      return "early_detection";
+    case "TOMBSTONED":
+      return "tombstoned";
+    default:
+      return "unknown";
+  }
+};
+
+/**
+ * Transforms a Plaid personal finance category to a standardized format.
+ * @param category - The Plaid personal finance category.
+ * @returns A standardized RecurringTransactionCategory object or null.
+ */
+const transformRecurringTransactionCategory = (
+  category: PersonalFinanceCategory | null | undefined,
+): RecurringTransactionCategory | null | undefined => {
+  if (!category) {
+    return null;
+  }
+
+  return {
+    primary: category.primary,
+    detailed: category.detailed,
+    confidence_level: category.confidence_level || "unknown",
+  };
+};
+
+/**
+ * Transforms a Plaid recurring transaction into a standardized RecurringTransaction object.
+ * @param transaction - The Plaid recurring transaction.
+ * @returns A standardized RecurringTransaction object.
+ */
+export const transformRecurringTransaction = (
+  transaction: TransformRecurringTransaction,
+): RecurringTransaction => {
+  // transform the recurrent transaction frequency
+  const frequency = transformRecurringTransactionFrequency(
+    transaction.frequency,
+  );
+
+  // convert average_amount to amount
+  const average_amount = transformRecurringTransactionAmount(
+    transaction.average_amount,
+  );
+
+  // convert last_amount to amount
+  const last_amount = transformRecurringTransactionAmount(
+    transaction.last_amount,
+  );
+
+  // transform the status
+  const status = transformRecurringTransactionStatus(transaction.status);
+
+  // transform the personal finance category
+  const personal_finance_category = transformRecurringTransactionCategory(
+    transaction.personal_finance_category,
+  );
+
+  return {
+    account_id: transaction.account_id,
+    stream_id: transaction.stream_id,
+    category: transaction.category,
+    category_id: transaction.category_id,
+    description: transaction.description,
+    merchant_name: transaction.merchant_name,
+    first_date: transaction.first_date,
+    last_date: transaction.last_date,
+    frequency: frequency,
+    transaction_ids: transaction.transaction_ids,
+    average_amount: average_amount,
+    last_amount: last_amount,
+    is_active: transaction.is_active,
+    status: status,
+    personal_finance_category: personal_finance_category,
+    is_user_modified: transaction.is_user_modified,
+    last_user_modified_datetime: transaction.last_user_modified_datetime,
+  };
+};

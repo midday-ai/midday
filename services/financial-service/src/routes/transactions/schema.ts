@@ -20,7 +20,13 @@ export const TransactionsParamsSchema = z
       example: "acct_1234567890",
     }),
     accountType: z
-      .enum(["credit", "depository"])
+      .enum([
+        "credit",
+        "depository",
+        "other_asset",
+        "loan",
+        "other_liability",
+      ])
       .optional()
       .openapi({
         description:
@@ -109,3 +115,90 @@ export const TransactionsSchema = z
     data: z.array(TransactionSchema),
   })
   .openapi("TransactionsSchema");
+
+
+export const RecurringTransactionsParamsSchema = z
+  .object({
+    provider: z.literal(Providers.Enum.plaid).openapi({
+      param: {
+        name: "provider",
+        in: "query",
+      },
+      example: Providers.Enum.plaid,
+    }),
+    accessToken: z.string().openapi({
+      description: "Access token for Plaid",
+      param: {
+        name: "accessToken",
+        in: "query",
+      },
+      example: "access-token-123",
+    }),
+    accountId: z.string().openapi({
+      description: "Account ID for Plaid",
+      param: {
+        name: "accountId",
+        in: "query",
+      },
+      example: "account-id-123",
+    }),
+  })
+  .openapi("RecurringTransactionsParamsSchema");
+
+const RecurringTransactionFrequencySchema = z.enum([
+  "weekly",
+  "bi-weekly",
+  "monthly",
+  "yearly",
+  "semi-monthly",
+  "unknown",
+]);
+
+const RecurringTransactionAmountSchema = z.object({
+  amount: z.number(),
+  iso_currency_code: z.string().nullable(),
+  unofficial_currency_code: z.string().nullable(),
+});
+
+const RecurringTransactionStatusSchema = z.enum([
+  "mature",
+  "early_detection",
+  "tombstoned",
+  "unknown",
+]);
+
+const RecurringTransactionCategorySchema = z.object({
+  primary: z.string(),
+  detailed: z.string(),
+  confidence_level: z.string(),
+});
+
+export const RecurringTransactionSchema = z.object({
+  account_id: z.string(),
+  recurring_transaction_id: z.string(),
+  description: z.string(),
+  merchant_name: z.string().nullable(),
+  first_date: z.string(),
+  last_date: z.string(),
+  frequency: RecurringTransactionFrequencySchema,
+  transaction_ids: z.array(z.string()),
+  average_amount: RecurringTransactionAmountSchema,
+  last_amount: RecurringTransactionAmountSchema,
+  is_active: z.boolean(),
+  status: RecurringTransactionStatusSchema,
+  personal_finance_category: RecurringTransactionCategorySchema.nullable(),
+  is_user_modified: z.boolean(),
+  last_user_modified_datetime: z.string().nullable(),
+});
+
+export const GetRecurringTransactionsResponseSchema = z.object({
+  inflow: z.array(RecurringTransactionSchema),
+  outflow: z.array(RecurringTransactionSchema),
+  last_updated_at: z.string(),
+});
+
+export const RecurringTransactionsSchema = z
+  .object({
+    data: z.array(RecurringTransactionSchema),
+  })
+  .openapi("RecurringTransactionsSchema");

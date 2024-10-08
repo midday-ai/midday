@@ -77,6 +77,143 @@ export type Transaction = {
   check_number?: string | null;
 };
 
+// Recurring transaction frequency
+export type RecurringTransactionFrequency =
+  | "weekly"
+  | "bi-weekly"
+  | "monthly"
+  | "yearly"
+  | "semi-monthly"
+  | "unknown";
+
+// Recurring transaction amount
+export type RecurringTransactionAmount = {
+  amount: number;
+  iso_currency_code: string | undefined;
+  unofficial_currency_code: string | undefined;
+};
+
+// Recurring transaction status
+export type RecurringTransactionStatus =
+  | "mature"
+  | "early_detection"
+  | "tombstoned"
+  | "unknown";
+
+// Recurring transaction category
+export type RecurringTransactionCategory = {
+  primary: string;
+  detailed: string;
+  confidence_level: string;
+};
+
+export type RecurringTransaction = {
+  /**
+   * The ID of the account to which the stream belongs
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  account_id: string;
+  /**
+   * A unique id for the stream
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  stream_id: string;
+  /**
+   * A hierarchical array of the categories to which this transaction belongs. See [Categories](https://plaid.com/docs/api/products/transactions/#categoriesget).  All implementations are encouraged to use the new `personal_finance_category` instead of `category`. `personal_finance_category` provides more meaningful categorization and greater accuracy.
+   * @type {Array<string>}
+   * @memberof TransactionStream
+   * @deprecated
+   */
+  category: Array<string>;
+  /**
+   * The ID of the category to which this transaction belongs. See [Categories](https://plaid.com/docs/api/products/transactions/#categoriesget).  All implementations are encouraged to use the new `personal_finance_category` instead of `category`. `personal_finance_category` provides more meaningful categorization and greater accuracy.
+   * @type {string}
+   * @memberof TransactionStream
+   * @deprecated
+   */
+  category_id: string;
+  /**
+   * A description of the transaction stream.
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  description: string;
+  /**
+   * The merchant associated with the transaction stream.
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  merchant_name: string | null;
+  /**
+   * The posted date of the earliest transaction in the stream.
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  first_date: string;
+  /**
+   * The posted date of the latest transaction in the stream.
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  last_date: string;
+  /**
+   *
+   * @type {RecurringTransactionFrequency}
+   * @memberof TransactionStream
+   */
+  frequency: RecurringTransactionFrequency;
+  /**
+   * An array of Plaid transaction IDs belonging to the stream, sorted by posted date.
+   * @type {Array<string>}
+   * @memberof TransactionStream
+   */
+  transaction_ids: Array<string>;
+  /**
+   *
+   * @type {TransactionStreamAmount}
+   * @memberof TransactionStream
+   */
+  average_amount: RecurringTransactionAmount;
+  /**
+   *
+   * @type {TransactionStreamAmount}
+   * @memberof TransactionStream
+   */
+  last_amount: RecurringTransactionAmount;
+  /**
+   * Indicates whether the transaction stream is still live.
+   * @type {boolean}
+   * @memberof TransactionStream
+   */
+  is_active: boolean;
+  /**
+   *
+   * @type {TransactionStreamStatus}
+   * @memberof TransactionStream
+   */
+  status: RecurringTransactionStatus;
+  /**
+   *
+   * @type {PersonalFinanceCategory}
+   * @memberof TransactionStream
+   */
+  personal_finance_category?: RecurringTransactionCategory | null;
+  /**
+   * This will be set to `true` if the stream has been modified by request to a `/transactions/recurring/streams` endpoint. It will be `false` for all other streams.
+   * @type {boolean}
+   * @memberof TransactionStream
+   */
+  is_user_modified: boolean;
+  /**
+   * The date and time of the most recent user modification. This will only be set if `is_user_modified` is `true`.
+   * @type {string}
+   * @memberof TransactionStream
+   */
+  last_user_modified_datetime?: string;
+};
+
 export type Institution = {
   id: string;
   name: string;
@@ -104,7 +241,7 @@ export type GetTransactionsRequest = {
   accountId: string;
   latest?: boolean;
   accessToken?: string; // Teller & Plaid
-  accountType?: AccountType;
+  accountType: AccountType;
 };
 
 export type GetAccountsRequest = {
@@ -186,4 +323,26 @@ export type GetStatementPdfRequest = {
 export type GetStatementPdfResponse = {
   pdf: Buffer;
   filename: string;
+};
+
+/**
+ * Request parameters for fetching recurring transactions
+ */
+export type GetRecurringTransactionsRequest = {
+  /** Access token for authentication */
+  accessToken: string;
+  /** ID of the account */
+  accountId: string;
+};
+
+/**
+ * Response for fetching recurring transactions
+ */
+export type GetRecurringTransactionsResponse = {
+  /** Transactions inflows */
+  inflow: Array<RecurringTransaction>;
+  /** RecurringTransactions outflows */
+  outflow: Array<RecurringTransaction>;
+  /** Last updated at */
+  last_updated_at: string;
 };
