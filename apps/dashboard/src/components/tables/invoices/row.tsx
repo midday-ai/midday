@@ -16,13 +16,15 @@ export function InvoiceRow({ row }: Props) {
 
   return (
     <>
-      <TableRow
-        className="hover:bg-transparent cursor-default"
-        key={row.id}
-        onClick={() => setOpen(true)}
-      >
+      <TableRow className="hover:bg-transparent cursor-default" key={row.id}>
         {row.getVisibleCells().map((cell, index) => (
-          <TableCell key={cell.id} className={cn(index === 2 && "w-[50px]")}>
+          <TableCell
+            key={cell.id}
+            className={cn(index === 2 && "w-[50px]")}
+            onClick={() =>
+              index !== row.getVisibleCells().length - 1 && setOpen(true)
+            }
+          >
             {flexRender(cell.column.columnDef.cell, cell.getContext())}
           </TableCell>
         ))}
