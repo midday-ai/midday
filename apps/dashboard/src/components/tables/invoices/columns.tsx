@@ -3,7 +3,7 @@
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { formatDate } from "@/utils/format";
+import { formatDate, getDueDateStatus } from "@/utils/format";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -34,7 +34,14 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "due_date",
     cell: ({ row }) => {
       const date = row.getValue("due_date");
-      return <span>{date ? formatDate(date) : "-"}</span>;
+      return (
+        <div className="flex flex-col space-y-1">
+          <span>{date ? formatDate(date) : "-"}</span>
+          <span className="text-xs text-muted-foreground">
+            {date ? getDueDateStatus(date) : "-"}
+          </span>
+        </div>
+      );
     },
   },
   {

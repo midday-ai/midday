@@ -1,15 +1,22 @@
+import { getUser } from "@midday/supabase/cached-queries";
+import { getInvoicesQuery } from "@midday/supabase/queries";
 import { createClient } from "@midday/supabase/server";
 import { DataTable } from "./table";
 
-export async function InvoicesTable() {
-  const supabase = createClient();
+type Props = {
+  query: string;
+  sort: string[];
+};
 
-  const { data } = await supabase
-    .from("invoices")
-    .select(
-      "id, invoice_number, due_date, invoice_date, amount, currency, status, customer:customer_id(id, name)",
-    )
-    .order("due_date", { ascending: false });
+export async function InvoicesTable({ query, sort }: Props) {
+  const supabase = createClient();
+  const { data: userData } = await getUser();
+
+  const { data } = await getInvoicesQuery(supabase, {
+    teamId: userData?.team_id,
+    searchQuery: query,
+    sort,
+  });
 
   return <DataTable data={data} />;
 }
