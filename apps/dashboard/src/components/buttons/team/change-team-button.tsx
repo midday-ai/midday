@@ -3,6 +3,8 @@
 import { ChangeTeamModal } from "@/components/modals/team/change-team-modal";
 import { TeamSchema } from "@midday/supabase/types";
 import { Button } from "@midday/ui/button";
+import { SwitchIcon } from "@radix-ui/react-icons";
+import { LoaderPinwheel } from "lucide-react";
 import React, { useState } from "react";
 
 interface ChangeTeamButtonProps {
@@ -22,7 +24,10 @@ export function ChangeTeamButton({
 
   return (
     <>
-      <Button onClick={handleOpenModal}>Change Team</Button>
+      <Button onClick={handleOpenModal}>
+        <LoaderPinwheel className="w-6 h-6 mr-2" />
+        Change Team
+      </Button>
       <ChangeTeamModal
         isOpen={isOpen}
         onOpenChange={setIsOpen}

@@ -14,6 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@midday/ui/sheet";
+import { SwitchIcon } from "@radix-ui/react-icons";
 import { CheckCircle, Plus } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
@@ -97,7 +98,7 @@ export function ChangeTeamModal({
                 disabled={selectedTeamId === currentTeamId}
                 className="w-full"
               >
-                Change Team
+                Switch Team
               </Button>
             </div>
           </div>

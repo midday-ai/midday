@@ -1,8 +1,8 @@
 "use server";
 
 import { BrowserNavigation } from "@/desktop/components/browser-navigation";
-import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import { Skeleton } from "@midday/ui/skeleton";
+import { isDesktopApp } from "@todesktop/client-core/platform/todesktop";
 import React, { Suspense } from "react";
 
 import { AssistantButton } from "../assistant/button";
@@ -12,6 +12,7 @@ import { DesktopTrafficLight } from "../desktop-traffic-light";
 import { FeedbackForm } from "../feedback-form";
 import { MobileMenu } from "../mobile-menu";
 import { NotificationCenter } from "../notification-center";
+import { TeamMenu } from "../team-menu";
 import { TrackerControl } from "../tracker-contol";
 import { UserMenu } from "../user-menu";
 import { SheetMenu } from "./sheet-menu";
@@ -84,8 +85,13 @@ const NavbarRight: React.FC = () => (
     <Suspense>
       <ConnectionStatus />
     </Suspense>
+
     <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
       <UserMenu onlySignOut={false} />
+    </Suspense>
+
+    <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
+      <TeamMenu mode="button" />
     </Suspense>
   </div>
 );
