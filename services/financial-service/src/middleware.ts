@@ -34,16 +34,23 @@ const authMiddleware = async (c: Context, next: Next) => {
   }
 
   // TODO: Enhance authentication process
-  // 1. Extract API key from the Authorization header
-  // 2. Call the backend (e.g., database or key-value store) to store valid API keys
-  // 3. Query the datastore to verify if the extracted API key exists
-  // 4. Check if the API key is associated with an active account
-  // 5. If the key is valid and active, allow the request to proceed
-  // 6. If the key is invalid or inactive, return a 401 Unauthorized response
-  // 7. Consider implementing rate limiting based on the API key
-  // 8. Log authentication attempts for security auditing
-  // 9. Implement key rotation and expiration mechanisms for enhanced security
+  // 1. Extract API key and UserId from the request headers
+  // 2. Validate the format and presence of required authentication headers
+  // 3. Query the database to verify if the extracted API key exists and is valid
+  // 4. Check if the API key is associated with an active account and the correct UserId
+  // 5. If the key is valid and active:
+  //    a. Cache the key and UserId in a KV store for faster subsequent authentications
+  //    b. Set the authenticated user's context for downstream use
+  //    c. Allow the request to proceed
+  // 6. If the key is invalid, inactive, or doesn't match the UserId:
+  //    a. Log the failed attempt
+  //    b. Return a 401 Unauthorized response with appropriate error details
+  // 7. Implement rate limiting based on the API key to prevent abuse
+  // 8. Log all authentication attempts (successful and failed) for security auditing
+  // 9. Implement a mechanism to detect and block suspicious activity patterns
   // 10. Add support for different access levels or permissions tied to API keys
+  // 11. Consider implementing token refresh mechanism for long-lived sessions
+  // 12. Ensure all sensitive data (API keys, user IDs) are properly encrypted in transit and at rest
 
   const bearer = bearerAuth({ token: API_SECRET_KEY });
   return bearer(c, next);
