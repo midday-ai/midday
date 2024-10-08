@@ -192,6 +192,7 @@ app.openapi(linkPlaidRoute, async (c) => {
 
   const api = new PlaidApi({
     kv: c.env.KV,
+    r2: c.env.STORAGE,
     envs,
   });
 
@@ -222,6 +223,7 @@ app.openapi(exchangePlaidRoute, async (c) => {
 
   const api = new PlaidApi({
     kv: c.env.KV,
+    r2: c.env.STORAGE,
     envs,
   });
 
@@ -245,6 +247,7 @@ app.openapi(linkGoCardLessRoute, async (c) => {
 
   const api = new GoCardLessApi({
     kv: c.env.KV,
+    r2: c.env.STORAGE,
     envs,
   });
 
@@ -275,6 +278,7 @@ app.openapi(exchangeGoCardLessRoute, async (c) => {
 
   const api = new GoCardLessApi({
     kv: c.env.KV,
+    r2: c.env.STORAGE,
     envs,
   });
 
@@ -304,6 +308,7 @@ app.openapi(agreementGoCardLessRoute, async (c) => {
 
   const api = new GoCardLessApi({
     kv: c.env.KV,
+    r2: c.env.STORAGE,
     envs,
   });
 

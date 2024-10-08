@@ -2,7 +2,14 @@ import { Providers } from "@/common/schema";
 import { getType } from "@/utils/account";
 import { getLogoURL } from "@/utils/logo";
 import { capitalCase } from "change-case";
-import type { PersonalFinanceCategory, RecurringTransactionFrequency, Transaction, TransactionCode, TransactionStreamAmount, TransactionStreamStatus } from "plaid";
+import type {
+  PersonalFinanceCategory,
+  RecurringTransactionFrequency,
+  Transaction,
+  TransactionCode,
+  TransactionStreamAmount,
+  TransactionStreamStatus,
+} from "plaid";
 import type {
   Account as BaseAccount,
   Balance as BaseBalance,

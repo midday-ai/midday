@@ -5,10 +5,21 @@ import { AccountType } from "@/utils/account";
 import { createErrorResponse } from "@/utils/error";
 import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
-import { GetRecurringTransactionsResponseSchema, RecurringTransactionsParamsSchema, TransactionsParamsSchema, TransactionsSchema } from "./schema";
+import {
+  GetRecurringTransactionsResponseSchema,
+  RecurringTransactionsParamsSchema,
+  TransactionsParamsSchema,
+  TransactionsSchema,
+} from "./schema";
 
+/**
+ * OpenAPI Hono application for handling transaction-related routes.
+ */
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
+/**
+ * Route configuration for retrieving transactions.
+ */
 const indexRoute = createRoute({
   method: "get",
   path: "/",
@@ -36,6 +47,9 @@ const indexRoute = createRoute({
   },
 });
 
+/**
+ * Route configuration for retrieving recurring transactions.
+ */
 const recurringTransactionsRoute = createRoute({
   method: "get",
   path: "/recurring",
@@ -63,6 +77,11 @@ const recurringTransactionsRoute = createRoute({
   },
 });
 
+/**
+ * Handler for the index route to retrieve transactions.
+ * @param c - The context object containing request and environment information.
+ * @returns A JSON response with transaction data or an error.
+ */
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
   const { provider, accountId, accountType, latest, accessToken } =
@@ -96,7 +115,11 @@ app.openapi(indexRoute, async (c) => {
   }
 });
 
-
+/**
+ * Handler for the recurring transactions route.
+ * @param c - The context object containing request and environment information.
+ * @returns A JSON response with recurring transaction data or an error.
+ */
 app.openapi(recurringTransactionsRoute, async (c) => {
   const envs = env(c);
   const { provider, accessToken, accountId } = c.req.valid("query");

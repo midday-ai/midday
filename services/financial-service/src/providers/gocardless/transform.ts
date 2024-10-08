@@ -195,6 +195,7 @@ export const transformAccountBalance = (
 ): BaseAccountBalance => ({
   currency: account?.currency || "EUR",
   amount: +(account?.amount ?? 0),
+  available: +(account?.amount ?? 0),
 });
 
 export const transformInstitution = (
