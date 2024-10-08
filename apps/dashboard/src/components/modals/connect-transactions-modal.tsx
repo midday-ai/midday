@@ -3,7 +3,6 @@
 import { createPlaidLinkTokenAction } from "@/actions/institutions/create-plaid-link";
 import { exchangePublicToken } from "@/actions/institutions/exchange-public-token";
 import { getInstitutions } from "@/actions/institutions/get-institutions";
-import { exchangeAccessTokenWithBackend } from "@/actions/solomon-backend/access-token/exchange-access-token-action";
 import { useConnectParams } from "@/hooks/use-connect-params";
 import type { Institutions } from "@midday-ai/engine/resources/institutions/institutions";
 import { track } from "@midday/events/client";
@@ -123,24 +122,28 @@ export function ConnectTransactionsModal({
 
     onSuccess: async (public_token, metadata) => {
       // exchange the access token (this will perform token exchange with our enterprise backend as well)
-      const accessToken = await exchangePublicToken({
-        publicToken: public_token,
-        institutionId: metadata.institution?.institution_id ?? "",
-        institutionName: metadata.institution?.name ?? "",
-        userId: userId,
-      });
+      try {
+        const res = await exchangePublicToken({
+          publicToken: public_token,
+          institutionId: metadata.institution?.institution_id ?? "",
+          institutionName: metadata.institution?.name ?? "",
+          userId: userId,
+        });
 
-      setParams({
-        step: "account",
-        provider: "plaid",
-        token: accessToken,
-        institution_id: metadata.institution?.institution_id,
-      });
-      track({
-        event: LogEvents.ConnectBankAuthorized.name,
-        channel: LogEvents.ConnectBankAuthorized.channel,
-        provider: "plaid",
-      });
+        setParams({
+          step: "account",
+          provider: "plaid",
+          token: res?.accessToken,
+          institution_id: metadata.institution?.institution_id,
+        });
+        track({
+          event: LogEvents.ConnectBankAuthorized.name,
+          channel: LogEvents.ConnectBankAuthorized.channel,
+          provider: "plaid",
+        });
+      } catch (error) {
+        console.error("Error in exchangePublicToken:", error);
+      }
     },
     onExit: () => {
       setParams({ step: "connect" });
@@ -210,6 +213,7 @@ export function ConnectTransactionsModal({
       createLinkToken();
     }
   }, [isOpen, countryCode]);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>

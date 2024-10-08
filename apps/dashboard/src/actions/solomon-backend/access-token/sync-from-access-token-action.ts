@@ -1,5 +1,3 @@
-"use server";
-
 import { initializeBackendClient } from "@/utils/backend";
 import { LogEvents } from "@midday/events/events";
 import {
@@ -24,7 +22,16 @@ export type SyncAccountFromAccessTokenFormValues = z.infer<
   typeof syncAccountFromAccessTokenSchema
 >;
 
-
+/**
+ * Action to sync a bank account based on the provided access token
+ * @param {Object} params - The parameters for the token exchange.
+ * @param {string} params.accessToken - The Plaid access token to be exchanged.
+ * @param {string} params.institutionId - The ID of the financial institution.
+ * @param {string} params.institutionName - The name of the financial institution.
+ * @param {string} params.userId - The ID of the user initiating the token exchange.
+ * @returns {Promise<Object>} The response from the backend after exchanging the token.
+ * @throws {Error} If the token exchange fails.
+ */
 export const syncAccountDetailsFromAccessToken = authActionClient.
     schema(syncAccountFromAccessTokenSchema).
     metadata({
@@ -63,3 +70,4 @@ export const syncAccountDetailsFromAccessToken = authActionClient.
 
         return response;
     });
+    

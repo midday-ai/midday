@@ -36,7 +36,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@sentry/nextjs": "^8",
     "@solomon-ai/client-typescript-sdk": "^1.9.0",
-    "@solomon-ai/financial-engine-sdk": "^0.0.1-alpha.1",
+    "@solomon-ai/financial-engine-sdk": "0.1.0-alpha.4",
     "@supabase/sentry-js-integration": "^0.3.0",
     "@tanstack/react-table": "^8.20.5",
     "@team-plain/typescript-sdk": "4.7.0",
