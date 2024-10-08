@@ -173,4 +173,13 @@ export default {
     e_learning_materials: "E-learning Materials",
     competency_assessment_forms: "Competency Assessment Forms",
   },
+  invoice: {
+    status: {
+      draft: "Draft",
+      overdue: "Overdue",
+      paid: "Paid",
+      unpaid: "Unpaid",
+      cancelled: "Cancelled",
+    },
+  },
 } as const;

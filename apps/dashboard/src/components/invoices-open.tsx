@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 export function InvoicesOpen() {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>€36,500.50</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="font-mono font-medium text-2xl">
+          €36,500.50
+        </CardTitle>
       </CardHeader>
 
       <CardContent>
