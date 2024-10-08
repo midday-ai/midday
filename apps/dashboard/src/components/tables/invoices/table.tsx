@@ -24,7 +24,6 @@ type Props = {
 };
 
 export function DataTable({ data }: Props) {
-  console.log(data);
   const table = useReactTable({
     data,
     getRowId: ({ id }) => id,
