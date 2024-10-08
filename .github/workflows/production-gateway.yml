@@ -2,6 +2,7 @@ name: Production Deployment - Gateway
 env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
   TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+  SOLOMON_AI_TOKEN: ${{ secrets.SOLOMON_AI_TOKEN }}
 
 on:
   push:

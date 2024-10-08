@@ -9,7 +9,7 @@ import {
     GetUserProfile1Request,
     GetUserV2ProfileTypeEnum,
     GetUserV2Request
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 
 /**
  * Fetches authenticated user account details including financial profile.

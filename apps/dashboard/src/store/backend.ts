@@ -3,7 +3,7 @@ import {
     type BusinessAccount,
     type MelodyFinancialContext,
     type UserAccount,
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";

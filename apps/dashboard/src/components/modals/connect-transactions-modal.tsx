@@ -86,10 +86,12 @@ function SearchResult({
 
 type ConnectTransactionsModalProps = {
   countryCode: string;
+  userId: string;
 };
 
 export function ConnectTransactionsModal({
   countryCode: initialCountryCode,
+  userId
 }: ConnectTransactionsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -117,21 +119,31 @@ export function ConnectTransactionsModal({
     env: process.env.NEXT_PUBLIC_PLAID_ENVIRONMENT!,
     clientName: "simfiny",
     product: ["transactions"],
-    
-    onSuccess: async (public_token, metadata) => {
-      const accessToken = await exchangePublicToken(public_token);
 
-      setParams({
-        step: "account",
-        provider: "plaid",
-        token: accessToken,
-        institution_id: metadata.institution?.institution_id,
-      });
-      track({
-        event: LogEvents.ConnectBankAuthorized.name,
-        channel: LogEvents.ConnectBankAuthorized.channel,
-        provider: "plaid",
-      });
+    onSuccess: async (public_token, metadata) => {
+      // exchange the access token (this will perform token exchange with our enterprise backend as well)
+      try {
+        const res = await exchangePublicToken({
+          publicToken: public_token,
+          institutionId: metadata.institution?.institution_id ?? "",
+          institutionName: metadata.institution?.name ?? "",
+          userId: userId,
+        });
+
+        setParams({
+          step: "account",
+          provider: "plaid",
+          token: res?.accessToken,
+          institution_id: metadata.institution?.institution_id,
+        });
+        track({
+          event: LogEvents.ConnectBankAuthorized.name,
+          channel: LogEvents.ConnectBankAuthorized.channel,
+          provider: "plaid",
+        });
+      } catch (error) {
+        console.error("Error in exchangePublicToken:", error);
+      }
     },
     onExit: () => {
       setParams({ step: "connect" });
@@ -201,6 +213,7 @@ export function ConnectTransactionsModal({
       createLinkToken();
     }
   }, [isOpen, countryCode]);
+
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOnClose}>

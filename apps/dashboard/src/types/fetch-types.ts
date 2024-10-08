@@ -5,7 +5,7 @@ import {
   FinancialUserProfile,
   MelodyFinancialContext,
   UserAccount,
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 
 /**
  * Represents the response structure for fetching user information.

@@ -7,7 +7,7 @@ import {
     CreateUserV2OperationRequest,
     CreateUserV2Request,
     ProfileType,
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";

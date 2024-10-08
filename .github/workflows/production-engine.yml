@@ -2,6 +2,8 @@ name: Production Deployment - Engine
 env:
   CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
   TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+  SOLOMON_AI_TOKEN: ${{ secrets.SOLOMON_AI_TOKEN }}
+  
 on:
   push:
     branches:

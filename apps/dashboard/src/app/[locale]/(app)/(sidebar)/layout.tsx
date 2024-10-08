@@ -143,7 +143,7 @@ export default async function Layout({
         <SubscriptionViewModal />
         <TransactionViewModal />
         <OverviewViewModal />
-        <ConnectTransactionsModal countryCode={countryCode} />
+        <ConnectTransactionsModal countryCode={countryCode} userId={user.data.id} />
         <SelectBankAccountsModal />
         <ImportModal
           currencies={uniqueCurrencies}
