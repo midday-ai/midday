@@ -131,6 +131,7 @@ export default async function Layout({
               id={user.data.id as string}
               profilePicture={user.data.avatar_url as string}
             />
+            <TeamMenu mode="button" />
           </div>
         </div>
 
