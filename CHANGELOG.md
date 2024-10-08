@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.7.0...v0.8.0) (2024-10-08)
+
+
+### Features
+
+* add team support ([058c12f](https://github.com/SolomonAIEngineering/solomonai/commit/058c12f2e90bf261b35a2c8ecc2471089b161a3b))
+
 # [0.7.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.6.0...v0.7.0) (2024-10-08)
 
 
