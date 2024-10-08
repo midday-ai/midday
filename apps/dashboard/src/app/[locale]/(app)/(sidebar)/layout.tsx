@@ -124,6 +124,7 @@ export default async function Layout({
         {/* <Sidebar /> */}
         <div className="mx-4 md:mx-5 pb-8 overflow-auto relative">
           {children}
+          {/* <TeamMenu mode="button" /> */}
           <div className="absolute bottom-4 left-4 flex items-center space-x-4">
             <ClientSideAccessibilityWidget
               email={user.data.email as string}
@@ -131,7 +132,6 @@ export default async function Layout({
               id={user.data.id as string}
               profilePicture={user.data.avatar_url as string}
             />
-            <TeamMenu mode="button" />
           </div>
         </div>
 
