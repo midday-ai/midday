@@ -1,7 +1,7 @@
 "use client";
 
-import features from "@/config/enabled-features";
-import Tier, { isFreeТier } from "@/config/tier";
+import { default as features } from "@/config/enabled-features";
+import { isFreeТier, Tier } from "@/config/tier";
 import { Tables } from "@midday/supabase/types";
 import { Card } from "@midday/ui/card";
 import { FinancialPortalOverview } from "@midday/ui/portal/financial-portal-view";
@@ -35,6 +35,11 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
   description,
   ...props
 }): JSX.Element | null => {
+  if (!features.isEnterpriseTierEnabled) {
+    return null;
+  }
+
+
   // Return null if analytics v2 is not enabled
   if (!features.isAnalyticsV2Enabled) return null;
 

@@ -148,14 +148,12 @@ export function TransactionDetails({
         return;
       }
 
-      console.log("Fetching similar transactions for:", debouncedData.name);
       const transactions = await getSimilarTransactionsDetailedQuery(supabase, {
         name: debouncedData.name,
         teamId: user.data.team_id,
         categorySlug: debouncedData.category.slug,
       });
 
-      console.log("Similar transactions fetched:", transactions?.data);
       setSimilarTransactions(transactions?.data || []);
     } catch (error) {
       console.error("Error fetching similar transactions:", error);
@@ -165,7 +163,6 @@ export function TransactionDetails({
   // Effect to initialize data and trigger initial fetch of similar transactions
   useEffect(() => {
     if (initialData) {
-      console.log("Initial data set:", initialData);
       setData(initialData);
       setLoading(false);
     }
@@ -173,16 +170,13 @@ export function TransactionDetails({
 
   // Effect to fetch similar transactions when debounced data changes
   useEffect(() => {
-    console.log("Debounced data changed, fetching similar transactions");
     fetchSimilarTransactions();
   }, [fetchSimilarTransactions]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("Fetching transaction data for ID:", data?.id);
         const transaction = await getTransactionQuery(supabase, data?.id);
-        console.log("Transaction data fetched:", transaction);
         setData(transaction);
         setLoading(false);
       } catch (error) {
@@ -202,7 +196,6 @@ export function TransactionDetails({
     slug: string;
     color: string;
   }) => {
-    console.log("Category changed to:", category);
     // Optimistic update
     updateTransaction(
       { id: data?.id, category_slug: category.slug },
@@ -217,10 +210,7 @@ export function TransactionDetails({
       categorySlug: category.slug,
     });
 
-    console.log(
-      "Similar transactions after category change:",
-      transactions?.data,
-    );
+
     if (transactions?.data && transactions.data.length > 1) {
       // Show toast for bulk update option
       toast({

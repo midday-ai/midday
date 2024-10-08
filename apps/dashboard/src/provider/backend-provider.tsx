@@ -53,11 +53,28 @@ const StoreProvider: React.FC<StoreProviderProps> = ({
             return { ...response, authenticated: true };
         } catch (error) {
             console.error("Failed to fetch user data:", error);
+            
+            let errorMessage = "An unexpected error occurred. Please try again later.";
+            let errorTitle = "Error fetching user data";
+            
+            if (error instanceof Error) {
+                if (error.message.includes("network")) {
+                    errorMessage = "Please check your internet connection and try again.";
+                } else if (error.message.includes("unauthorized")) {
+                    errorMessage = "Your session may have expired. Please log in again.";
+                    errorTitle = "Authentication Error";
+                } else {
+                    errorMessage = error.message;
+                }
+            }
+            
             toast({
-                title: "Error fetching user data",
-                description: "Please try again later",
+                title: errorTitle,
+                description: errorMessage,
                 variant: "destructive",
+                duration: 5000, // Show the toast for 5 seconds
             });
+            
             return null;
         }
     }, [userId, email, accessToken, toast]);

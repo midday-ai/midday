@@ -115,8 +115,6 @@ export default function Pricing({ user, products, subscription }: Props) {
       return router.push("/login");
     }
 
-    console.log("price about to checkout", price);
-
     const currentPrice: StripePrice = {
       id: price.id,
       interval: price.interval || "month",

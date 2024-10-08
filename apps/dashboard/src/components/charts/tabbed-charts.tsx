@@ -1,7 +1,8 @@
 "use client";
 
 import CardWrapper from "@/components/card/card-wrapper";
-import Tier, { isFreeТier } from "@/config/tier";
+import features from "@/config/enabled-features";
+import { Tier, isFreeТier } from "@/config/tier";
 import { featureFlags } from "@internal/env/dashboard";
 import { Card } from "@midday/ui/card";
 import { AreaChart } from "@midday/ui/charts/base/area-chart";
@@ -24,6 +25,10 @@ const TabbedCharts: React.FC<TabbedChartsProps> = ({
   className,
   disabled,
 }) => {
+  if (!features.isEnterpriseTierEnabled) {
+    return null;
+  }
+
   if (!featureFlags.isAnalyticsV2Enabled) return null;
 
   // based on the tier we disclose a different amount of information

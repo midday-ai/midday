@@ -1,4 +1,5 @@
-import Tier, { isFreeТier } from "@/config/tier";
+import features from "@/config/enabled-features";
+import { Tier, isFreeТier } from "@/config/tier";
 import { MonthlyFinancialByCategoryChart } from "@midday/ui/charts/financials/categories";
 import { MonthlySpendingChart } from "@midday/ui/charts/financials/dashboard/financial-dashboard-overview";
 import { cn } from "@midday/ui/cn";
@@ -23,6 +24,11 @@ export function CategoryCharts({
   disabledCharts = [],
   disableAllCharts = false,
 }: CategoryChartsProps) {
+  if (!features.isEnterpriseTierEnabled) {
+    return null;
+  }
+
+
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 

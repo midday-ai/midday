@@ -1,3 +1,4 @@
+import features from "@/config/enabled-features";
 import { Tier, isFreeТier } from "@/config/tier";
 import { AreaChart } from "@midday/ui/charts/base/area-chart";
 import { cn } from "@midday/ui/cn";
@@ -20,6 +21,7 @@ export function CashflowCharts({
   disabledCharts = [],
   disableAllCharts = false,
 }: CashflowChartsProps) {
+
   const chartOpacity = (chartName: ChartType) =>
     disabledCharts.includes(chartName) ? "opacity-50" : "";
 

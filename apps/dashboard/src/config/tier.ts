@@ -300,30 +300,3 @@ export function isProTier(tier: Tier): boolean {
 export function isEnterpriseTier(tier: Tier): boolean {
   return tier === "enterprise";
 }
-
-/**
- * Demonstrates the usage of various utility functions for tier management.
- */
-export function exampleUsage() {
-  const userTier: Tier = "pro";
-
-  console.log(`User is on ${getTierDetails(userTier).displayName} tier`);
-  console.log(`Has API access: ${hasFeature(userTier, "apiAccess")}`);
-  console.log(
-    `Can generate cash flow analysis: ${hasReportingFeature(userTier, "cashFlowAnalysis")}`,
-  );
-  console.log(
-    `Has access to predictive analytics: ${hasAnalyticsFeature(userTier, "predictiveAnalytics")}`,
-  );
-  console.log(`Can add 15 users: ${isWithinLimits(userTier, "maxUsers", 15)}`);
-  console.log(
-    `Reporting frequency: ${getTierDetails(userTier).limits.reportingFrequency}`,
-  );
-  console.log(`Upgrade path: ${getUpgradePath(userTier)}`);
-  console.log(
-    `Pro tier is higher than Free tier: ${compareTiers("pro", "free") > 0}`,
-  );
-  console.log(`Price: ${formatPrice(userTier)} per month`);
-}
-
-export default Tier;

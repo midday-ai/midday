@@ -73,8 +73,6 @@ export async function queryUserProfileFromBackend({
             };
         }
 
-        console.log("fetch user from backend by auth0 id and email", response);
-
         const { businessAccount, userAccount } =
             response.userAccount as CheckEmailAndAuth0UserIdExistsResponse;
 
@@ -96,11 +94,7 @@ export async function queryUserProfileFromBackend({
             profileType,
         };
 
-        console.log("authenticate request", authenticateRequest);
-
         const authenticateResponse = await queryAuthenticatedUserAccountDetails(authenticateRequest);
-
-        console.log("authenticate response lets see what is in it", authenticateResponse);
 
         if (!authenticateResponse) {
             return {

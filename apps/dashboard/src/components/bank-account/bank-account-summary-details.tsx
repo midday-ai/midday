@@ -16,13 +16,13 @@
 
 import { EmptyState } from "@/components/charts/empty-state";
 import { UpgradeTier } from "@/components/upgrade-tier";
-import Tier from "@/config/tier";
+import features from "@/config/enabled-features";
+import { Tier } from "@/config/tier";
 import { cn } from "@midday/ui/cn";
 import { BankAccountsOverviewSummary } from "@midday/ui/portal/bank-account-portal-view";
 import { ConnectedAccountSummary } from "@midday/ui/portal/connected-account-view";
 import { CreditAccountsOverviewSummary } from "@midday/ui/portal/credit-account-portal-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
-
 /**
  * Props for the BankAccountOverviewProTier component
  * @interface BankAccountOverviewProTierProps
@@ -57,6 +57,10 @@ export function BankAccountOverviewProTier({
   isCurrentUserTierFree,
   tier,
 }: BankAccountOverviewProTierProps) {
+  if (!features.isEnterpriseTierEnabled) {
+    return null;
+  }
+
   return (
     <>
       {/* Connected Account Summary Section */}

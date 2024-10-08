@@ -5,6 +5,7 @@ import {
   WalletIcon,
 } from "@heroicons/react/24/outline";
 import {
+  CpuIcon,
   Database,
   DollarSign,
   FileAxis3D,
@@ -16,7 +17,7 @@ import {
   TableCellsMergeIcon,
   Timer,
   TrendingDown,
-  TrendingUp,
+  TrendingUp
 } from "lucide-react";
 
 /**
@@ -95,7 +96,7 @@ const menuConfig: Group[] = [
       {
         href: "/tracker",
         label: "Project Tracker",
-        icon: CubeTransparentIcon,
+        icon: CpuIcon,
         submenus: [],
         active: false,
       },

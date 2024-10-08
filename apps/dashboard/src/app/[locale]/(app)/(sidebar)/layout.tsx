@@ -117,38 +117,47 @@ export default async function Layout({
   }
 
   const content = (
-    <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
-      <Sidebar />
-      <div className="mx-4 md:ml-[95px] md:mr-10 pb-8">
-        {children}
-        <AccessibilityWidget
-          email={user.data.email as string}
-          name={user.data.full_name as string}
-          id={user.data.id as string}
-          profilePicture={user.data.avatar_url as string}
+    <AnalyticsLayout>
+      <AI initialAIState={{ user: user.data, messages: [], chatId: nanoid() }}>
+        {/* <Sidebar /> */}
+        <div className="mx-4 md:mx-5 pb-8 overflow-auto relative">
+          {children}
+          {/* <TeamMenu mode="button" /> */}
+          <div className="absolute bottom-4 left-4 flex items-center space-x-4">
+            <ClientSideAccessibilityWidget
+              email={user.data.email as string}
+              name={user.data.full_name as string}
+              id={user.data.id as string}
+              profilePicture={user.data.avatar_url as string}
+            />
+          </div>
+        </div>
+
+        {/* This is used to make the header draggable on macOS */}
+        <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
+
+        <AssistantModal />
+        <IncomeViewModal />
+        <ExpenseViewModal />
+        <SubscriptionViewModal />
+        <TransactionViewModal />
+        <OverviewViewModal />
+        <ConnectTransactionsModal countryCode={countryCode} />
+        <SelectBankAccountsModal />
+        <ImportModal
+          currencies={uniqueCurrencies}
+          defaultCurrency={
+            currencies[countryCode as keyof typeof currencies] || "USD"
+          }
         />
-      </div>
-      <AssistantModal />
-      <IncomeViewModal />
-      <ExpenseViewModal />
-      <SubscriptionViewModal />
-      <TransactionViewModal />
-      <OverviewViewModal />
-      <ConnectTransactionsModal countryCode={countryCode} />
-      <SelectBankAccountsModal />
-      <ImportModal
-        currencies={uniqueCurrencies}
-        defaultCurrency={
-          currencies[countryCode as keyof typeof currencies] || "USD"
-        }
-      />
-      <ExportStatus />
-      <HotKeys />
-    </AI>
+        <ExportStatus />
+        <HotKeys />
+      </AI>
+    </AnalyticsLayout>
   );
 
   return (
-    <div className="relative">
+    <div className="h-screen w-screen overflow-hidden">
       {features.isBackendEnabled ? (
         <OnboardToBackendServerWrapper>
           {content}
@@ -156,8 +165,6 @@ export default async function Layout({
       ) : (
         content
       )}
-      {/* This is used to make the header draggable on macOS */}
-      <div className="hidden todesktop:block todesktop:[-webkit-app-region:drag] fixed top-0 w-full h-4 pointer-events-none" />
     </div>
   );
 }

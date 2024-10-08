@@ -47,7 +47,6 @@ export async function queryAuthenticatedUserAccountDetails(
         const userResponse = await backendClient.userServiceApi.getUserV2(request);
         const account = userResponse.userAccount || userResponse.businessAccount;
 
-        console.log("account lets see what is in it", account);
 
         if (!account?.supabaseAuth0UserId) {
             throw new APIRequestError("Invalid account details or missing Supabase Auth User ID");
@@ -62,15 +61,9 @@ export async function queryAuthenticatedUserAccountDetails(
             bypassCache: true
         };
 
-        console.log("financial profile request", financialProfileRequest);
-
         const { profile: financialProfile, financialContext } = 
             await backendClient.financialServiceApi.getUserProfile1(financialProfileRequest);
         
-        console.log("financial response", {
-            financialProfile,
-            financialContext
-        });
 
         if (!financialProfile) {
             throw new APIRequestError("No financial profile found");

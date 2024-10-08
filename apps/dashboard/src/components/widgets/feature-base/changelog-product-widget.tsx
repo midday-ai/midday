@@ -149,8 +149,6 @@ const ChangelogProductWidget: React.FC<ChangelogProductWidgetProps> = ({
   const handleIdentifyCallback = (err: Error | null) => {
     if (err) {
       console.error("Featurebase identification failed:", err);
-    } else {
-      console.log("Featurebase identification successful");
     }
   };
 
