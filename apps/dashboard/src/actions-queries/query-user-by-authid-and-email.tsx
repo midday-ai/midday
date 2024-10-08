@@ -6,7 +6,7 @@ import { createErrorResponse, initializeBackendClient } from "@/utils/backend";
 import { getSession } from "@midday/supabase/cached-queries";
 import {
     CheckEmailAndAuth0UserIdExistsRequest
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 
 
 /**

@@ -6,7 +6,7 @@ import {
     FinancialUserProfileType,
     PlaidSyncAccountFromAccessTokenOperationRequest,
     PlaidSyncAccountFromAccessTokenRequest,
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 import { z } from "zod";
 import { authActionClient } from "../../safe-action";
 

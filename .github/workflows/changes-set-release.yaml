@@ -9,7 +9,8 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 env:
   TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
-
+  SOLOMON_AI_TOKEN: ${{ secrets.SOLOMON_AI_TOKEN }}
+  
 jobs:
   release:
     name: Release

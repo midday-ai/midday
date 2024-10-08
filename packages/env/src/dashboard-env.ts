@@ -197,7 +197,7 @@ export const dashboardEnvironment = createEnv({
     NEXT_PUBLIC_SOLOMON_BACKEND_INTERACTIONS_ENABLED: z.preprocess(
       booleanParser,
       z.boolean()
-    ).default(false),
+    ).default(true),
     NEXT_PUBLIC_ENTERPRISE_TIER_ENABLED: z.preprocess(
       booleanParser,
       z.boolean()

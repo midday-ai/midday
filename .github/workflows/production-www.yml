@@ -5,6 +5,8 @@ env:
   TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   TURBO_TEAM: ${{ secrets.VERCEL_ORG_ID }}
   TIPTAP_PRO_TOKEN: ${{ secrets.TIPTAP_PRO_TOKEN }}
+  SOLOMON_AI_TOKEN: ${{ secrets.SOLOMON_AI_TOKEN }}
+  
 on:
   push:
     branches:

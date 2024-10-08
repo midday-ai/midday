@@ -12,7 +12,7 @@ import {
   CreateUserV2Request,
   GetUserByAuth0IDRequest,
   ProfileType,
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 import { addYears } from "date-fns";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";

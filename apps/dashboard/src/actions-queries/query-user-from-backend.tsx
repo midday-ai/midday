@@ -5,7 +5,7 @@ import { FetchDataProps, FetchDataResponse } from "@/types/fetch-types";
 import {
     CheckEmailAndAuth0UserIdExistsRequest,
     CheckEmailAndAuth0UserIdExistsResponse, GetUserV2Request, ProfileType
-} from "client-typescript-sdk";
+} from "@solomon-ai/client-typescript-sdk";
 import { queryAuthenticatedUserAccountDetails } from "./query-authenticated-user-account-details";
 import { fetchUserByAuth0IdAndEmail } from "./query-user-by-authid-and-email";
 

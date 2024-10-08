@@ -1,3 +1,4 @@
 [install.scopes]
 # here we reference the tiptap pro token to be able to install the tiptap pro packages from the environment variables
 "@tiptap-pro" ={ url = "https://registry.tiptap.dev/", token = "$TIPTAP_PRO_TOKEN" }
+"@solomon-ai" ={ url = "https://registry.npmjs.org/", token = "$SOLOMON_AI_TOKEN" }
