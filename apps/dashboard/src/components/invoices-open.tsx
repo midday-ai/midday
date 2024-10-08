@@ -9,14 +9,21 @@ import {
 } from "@midday/ui/tooltip";
 import { FormatAmount } from "./format-amount";
 
-export async function InvoicesOpen() {
+export async function InvoicesOpen({
+  defaultCurrency,
+}: {
+  defaultCurrency: string;
+}) {
   const { data } = await getInvoiceSummary();
 
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="font-mono font-medium text-2xl">
-          <FormatAmount amount={data?.total_amount} currency={data?.currency} />
+          <FormatAmount
+            amount={data?.total_amount ?? 0}
+            currency={data?.currency ?? defaultCurrency}
+          />
         </CardTitle>
       </CardHeader>
 

@@ -246,7 +246,7 @@ export async function getTransactionsQuery(
 
   if (searchQuery) {
     if (!Number.isNaN(Number.parseInt(searchQuery))) {
-      query.like("amount_text", `%${searchQuery}%`);
+      query.eq("amount", Number(searchQuery));
     } else {
       query.textSearch("fts_vector", `'${searchQuery}'`);
     }
@@ -1124,13 +1124,13 @@ export type GetInvoicesQueryParams = {
   teamId: string;
   from?: number;
   to?: number;
-  searchQuery?: string;
+  searchQuery?: string | null;
   filter?: {
-    statuses?: string[];
-    start?: string;
-    end?: string;
+    statuses?: string[] | null;
+    start?: string | null;
+    end?: string | null;
   };
-  sort?: string[];
+  sort?: string[] | null;
 };
 
 export async function getInvoicesQuery(
@@ -1175,10 +1175,10 @@ export async function getInvoicesQuery(
   }
 
   if (searchQuery) {
-    if (Number.isNaN(Number.parseInt(searchQuery))) {
-      query.like("amount", searchQuery);
+    if (!Number.isNaN(Number.parseInt(searchQuery))) {
+      query.eq("amount", Number(searchQuery));
     } else {
-      // query.textSearch("fts_vector", `'${searchQuery}'`);
+      query.textSearch("fts", `'${searchQuery}'`);
     }
   }
 

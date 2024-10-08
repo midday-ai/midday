@@ -1,6 +1,7 @@
 "use client";
 
-import { generateVaultFilters } from "@/actions/ai/filters/generate-vault-filters";
+import { generateInvoiceFilters } from "@/actions/ai/filters/generate-invoice-filters";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { useI18n } from "@/locales/client";
 import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
@@ -18,41 +19,33 @@ import { Icons } from "@midday/ui/icons";
 import { Input } from "@midday/ui/input";
 import { readStreamableValue } from "ai/rsc";
 import { formatISO } from "date-fns";
-import { parseAsString, useQueryStates } from "nuqs";
 import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 
-const defaultSearch = {
-  q: null,
-  start: null,
-  end: null,
-};
+const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "cancelled"];
 
 export function InvoiceSearchFilter() {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { setParams, statuses, customers, start, end, q } = useInvoiceParams({
+    shallow: false,
+  });
 
   const t = useI18n();
 
-  const [filters, setFilters] = useQueryStates(
-    {
-      q: parseAsString,
-      start: parseAsString,
-      end: parseAsString,
-    },
-    {
-      shallow: false,
-    },
-  );
+  const statusFilters = allowedStatuses.map((status) => ({
+    id: status,
+    name: t(`invoice.status.${status}`),
+  }));
 
   useHotkeys(
     "esc",
     () => {
       setPrompt("");
-      setFilters(defaultSearch);
+      setParams(null);
       setIsOpen(false);
     },
     {
@@ -76,7 +69,7 @@ export function InvoiceSearchFilter() {
     if (value) {
       setPrompt(value);
     } else {
-      setFilters(defaultSearch);
+      setParams(null);
       setPrompt("");
     }
   };
@@ -84,7 +77,10 @@ export function InvoiceSearchFilter() {
   const handleSubmit = async () => {
     setStreaming(true);
 
-    const { object } = await generateVaultFilters(prompt);
+    const { object } = await generateInvoiceFilters(
+      prompt,
+      `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}`,
+    );
 
     let finalObject = {};
 
@@ -92,13 +88,17 @@ export function InvoiceSearchFilter() {
       if (partialObject) {
         finalObject = {
           ...finalObject,
-          ...partialObject,
+          statuses: Array.isArray(partialObject?.statuses)
+            ? partialObject?.statuses
+            : partialObject?.statuses
+              ? [partialObject.statuses]
+              : null,
           q: partialObject?.name ?? null,
         };
       }
     }
 
-    setFilters({
+    setParams({
       q: null,
       ...finalObject,
     });
@@ -106,10 +106,17 @@ export function InvoiceSearchFilter() {
     setStreaming(false);
   };
 
-  const hasValidFilters =
-    Object.entries(filters).filter(
-      ([key, value]) => value !== null && key !== "q",
-    ).length > 0;
+  const filters = {
+    q,
+    end,
+    start,
+    statuses,
+    customers,
+  };
+
+  const hasValidFilters = Object.values(filters).some(
+    (value) => value !== null,
+  );
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -152,7 +159,8 @@ export function InvoiceSearchFilter() {
         <FilterList
           filters={filters}
           loading={streaming}
-          onRemove={setFilters}
+          onRemove={setParams}
+          statusFilters={statusFilters}
         />
       </div>
 
@@ -167,7 +175,7 @@ export function InvoiceSearchFilter() {
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Icons.CalendarMonth className="mr-2 h-4 w-4" />
-              <span>Date</span>
+              <span>Due Date</span>
             </DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent
@@ -178,14 +186,14 @@ export function InvoiceSearchFilter() {
                 <Calendar
                   mode="range"
                   initialFocus
-                  today={filters.start ? new Date(filters.start) : new Date()}
+                  today={start ? new Date(start) : new Date()}
                   toDate={new Date()}
                   selected={{
-                    from: filters.start ? new Date(filters.start) : undefined,
-                    to: filters.end ? new Date(filters.end) : undefined,
+                    from: start ? new Date(start) : undefined,
+                    to: end ? new Date(end) : undefined,
                   }}
                   onSelect={({ from, to }) => {
-                    setFilters({
+                    setParams({
                       start: from
                         ? formatISO(from, { representation: "date" })
                         : null,
