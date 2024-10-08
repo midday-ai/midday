@@ -26,6 +26,10 @@ r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
 ]
 
+tail_consumers = [
+  {service = "financial-service-tail-consumer"},
+]
+
 [env.production.observability]
 enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
@@ -45,6 +49,10 @@ mtls_certificates = [
 r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" },
   { binding = "R2", bucket_name = "bank-statements", preview_bucket_name = "" }
+]
+
+tail_consumers = [
+  {service = "financial-service-staging-tail-consumer"},
 ]
 
 [env.staging.observability]
