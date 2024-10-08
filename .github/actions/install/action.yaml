@@ -39,7 +39,7 @@ runs:
       with:
         node-version: lts/*
 
-    - uses: oven-sh/setup-bun@v1
+    - uses: oven-sh/setup-bun@v2
       if: ${{ inputs.ts == 'true' }}
       with:
         bun-version: latest
