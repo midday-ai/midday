@@ -8,6 +8,7 @@ import {
   type GetCategoriesParams,
   type GetExpensesQueryParams,
   type GetInvoiceSummaryParams,
+  type GetInvoicesQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
   type GetSpendingParams,
@@ -22,6 +23,7 @@ import {
   getCustomersQuery,
   getExpensesQuery,
   getInvoiceSummaryQuery,
+  getInvoicesQuery,
   getMetricsQuery,
   getPaymentStatusQuery,
   getRunwayQuery,
@@ -509,4 +511,27 @@ export const getCustomers = async () => {
       revalidate: 3600,
     },
   )();
+};
+
+export const getInvoices = async (
+  params?: Omit<GetInvoicesQueryParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getInvoicesQuery(supabase, { ...params, teamId });
+    },
+    ["invoices", teamId],
+    {
+      tags: [`invoices_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
 };

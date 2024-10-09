@@ -178,7 +178,7 @@ export default {
     overdue: "Overdue",
     paid: "Paid",
     unpaid: "Unpaid",
-    cancelled: "Cancelled",
+    canceled: "Canceled",
   },
   payment_status: {
     none: "Unknown",
