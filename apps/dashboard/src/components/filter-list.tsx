@@ -112,6 +112,7 @@ export function FilterList({
       }
 
       case "assignees":
+      case "customers":
       case "owners": {
         return value
           .map((id) => {
