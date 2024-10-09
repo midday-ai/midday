@@ -26,9 +26,24 @@ r2_buckets = [
   { binding = "STORAGE", bucket_name = "engine-assets", preview_bucket_name = "" }
 ]
 
+[env.production.queues]
+producers = [
+  { queue = "user-actions-production", binding = "USER_ACTIONS" },
+]
+
+consumers = [
+  { queue = "user-actions-production", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-production-dlq" },
+  { queue = "user-actions-production-dlq", max_batch_size = 10, max_retries = 10 },
+]
+
 [env.production.observability]
 enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "engine-production-db"
+database_id = "019720a586c448c2a88a58773da08fd8"
 
 [env.staging]
 name = "engine-staging"
@@ -51,8 +66,17 @@ r2_buckets = [
 enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
 
-
-[[d1_databases]]
-binding = "DB" # i.e. available in your Worker on env.DB
-database_name = "engine"
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "engine-staging-db"
 database_id = "019720a586c448c2a88a58773da08fd8"
+
+[env.staging.queues]
+producers = [
+  { queue = "user-actions-staging", binding = "USER_ACTIONS" },
+]
+
+consumers = [
+  { queue = "user-actions-staging", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-staging-dlq" },
+  { queue = "user-actions-staging-dlq", max_batch_size = 10, max_retries = 10 },
+]

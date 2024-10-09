@@ -1,7 +1,8 @@
 import type { Bindings } from "@/common/bindings";
+import { Env } from "@/env";
 import Typesense from "typesense";
 
-export function SearchClient(envs: Bindings) {
+export function SearchClient(envs: Env) {
   return new Typesense.Client({
     nearestNode: {
       host: envs.TYPESENSE_ENDPOINT!,

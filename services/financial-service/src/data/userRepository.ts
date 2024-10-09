@@ -1,6 +1,5 @@
 import { DrizzleDB } from '@/db';
-import { and, eq, like, or } from 'drizzle-orm';
-import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
+import { eq, like, or } from 'drizzle-orm';
 import { users, type NewUser, type User } from '../db/schema';
 
 /**

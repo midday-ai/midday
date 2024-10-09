@@ -1,6 +1,8 @@
 {
   "name": "@service/financial-service",
   "type": "module",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
     "dev": "NODE_ENV=development wrangler dev src/index.ts --port 3002",
     "deploy": "wrangler deploy --minify src/index.ts --env production",
@@ -9,7 +11,11 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "check:types": "tsc --noEmit",
-    "import-institutions": "node scripts/importer.js"
+    "import-institutions": "node scripts/importer.js",
+    "test": "vitest run -c vitest.unit.ts",
+    "test:integration": "vitest run -c vitest.integration.ts --bail=1",
+    "test:benchmark": "vitest run -c vitest.benchmark.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@axiomhq/js": "^1.2.0",

@@ -1,16 +1,13 @@
 import { handleError, handleZodError } from "@/errors";
 import {
     authMiddleware,
-    cacheMiddleware,
-    corsMiddleware,
-    errorHandlerMiddleware,
+    cacheMiddleware, errorHandlerMiddleware,
     jsonFormattingMiddleware,
     loggingMiddleware,
     securityMiddleware,
     timingMiddleware
 } from "@/middleware";
 import { enrichContext } from "@/middleware/context-enrich";
-import { setupRoutes } from "@/routes";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context as GenericContext } from "hono";
