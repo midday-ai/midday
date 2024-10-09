@@ -26,14 +26,6 @@ export function InvoiceActions({ status, id }: Props) {
             <Icons.Notifications className="size-3.5" />
             <span>Remind</span>
           </Button>
-          {/* <Button
-            size="sm"
-            variant="secondary"
-            className="flex items-center space-x-2 hover:bg-secondary w-full"
-          >
-            <Icons.Edit className="size-3.5" />
-            <span>Edit invoice</span>
-          </Button> */}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -47,6 +39,7 @@ export function InvoiceActions({ status, id }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem>Mark as paid</DropdownMenuItem>
+              <DropdownMenuItem>Duplicate</DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
                 Cancel invoice
               </DropdownMenuItem>
@@ -86,6 +79,7 @@ export function InvoiceActions({ status, id }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent sideOffset={10} align="end">
               <DropdownMenuItem>Mark as paid</DropdownMenuItem>
+              <DropdownMenuItem>Duplicate</DropdownMenuItem>
               <DropdownMenuItem className="text-destructive">
                 Delete draft
               </DropdownMenuItem>

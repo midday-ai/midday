@@ -18,6 +18,7 @@ import {
   subYears,
 } from "date-fns";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import Link from "next/link";
 
 const options = [
   {
@@ -64,7 +65,9 @@ export function SpendingPeriod({ initialPeriod }: Props) {
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="text-lg">Spending</h2>
+        <Link href="/spending" prefetch>
+          <h2 className="text-lg">Spending</h2>
+        </Link>
       </div>
 
       <DropdownMenu>

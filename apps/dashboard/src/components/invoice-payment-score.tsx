@@ -41,7 +41,7 @@ export async function InvoicePaymentScore() {
 
       <CardContent>
         <div className="flex flex-col gap-2">
-          <div>Payment Score</div>
+          <div>Payment score</div>
           <div className="text-sm text-muted-foreground">
             {t(`payment_status_description.${payment_status}`)}
           </div>

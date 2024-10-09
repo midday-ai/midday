@@ -10,6 +10,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import Link from "next/link";
 
 const options = ["all", "income", "expense"] as const;
 type TransactionType = (typeof options)[number];
@@ -32,7 +33,9 @@ export function TransactionsPeriod({ type, disabled }: Props) {
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="text-lg">Transactions</h2>
+        <Link href="/transactions" prefetch>
+          <h2 className="text-lg">Transactions</h2>
+        </Link>
       </div>
 
       <DropdownMenu>

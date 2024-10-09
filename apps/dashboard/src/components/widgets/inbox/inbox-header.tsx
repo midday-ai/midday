@@ -10,6 +10,7 @@ import {
 } from "@midday/ui/dropdown-menu";
 import { Icons } from "@midday/ui/icons";
 import { useOptimisticAction } from "next-safe-action/hooks";
+import Link from "next/link";
 
 const options = ["all", "todo", "done"];
 
@@ -31,7 +32,9 @@ export function InboxHeader({ filter, disabled }: Props) {
   return (
     <div className="flex justify-between">
       <div>
-        <h2 className="text-lg">Inbox</h2>
+        <Link href="/inbox" prefetch>
+          <h2 className="text-lg">Inbox</h2>
+        </Link>
       </div>
 
       <DropdownMenu>
