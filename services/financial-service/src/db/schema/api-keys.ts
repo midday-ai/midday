@@ -1,6 +1,6 @@
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { users } from './users'; // Assuming you have a users table defined
+import { users } from './users';
 
 export const apiKeys = sqliteTable('api_keys', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
