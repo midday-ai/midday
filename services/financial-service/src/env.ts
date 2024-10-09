@@ -1,4 +1,4 @@
-import type { MessageBody } from "@/message/user-action-message";
+import type { UserActionMessageBody } from "@/message/user-action-message";
 import { z } from "zod";
 
 export const zEnv = z.object({
@@ -8,7 +8,7 @@ export const zEnv = z.object({
     STORAGE: z.custom<R2Bucket>((ns) => typeof ns === "object"),
     BANK_STATEMENTS: z.custom<R2Bucket>((ns) => typeof ns === "object"),
     TELLER_CERT: z.custom<Fetcher>((ns) => typeof ns === "object"),
-    USER_ACTIONS_QUEUE: z.custom<Queue<MessageBody>>((q) => typeof q === "object").optional(),
+    USER_ACTIONS_QUEUE: z.custom<Queue<UserActionMessageBody>>((q) => typeof q === "object").optional(),
     API_SECRET_KEY: z.string(),
     GOCARDLESS_SECRET_ID: z.string(),
     GOCARDLESS_SECRET_KEY: z.string(),

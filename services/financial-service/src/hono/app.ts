@@ -31,7 +31,6 @@ export function newApp(): OpenAPIHono<HonoEnv> {
 
   setupMiddleware(app);
   setupCaching(app);
-  setupRoutes(app);
   setupSwagger(app);
   setupOpenAPIRegistry(app);
 
