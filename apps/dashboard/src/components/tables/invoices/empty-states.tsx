@@ -21,7 +21,7 @@ export function EmptyState() {
           variant="outline"
           onClick={() =>
             setParams({
-              create: true,
+              createInvoice: true,
             })
           }
         >

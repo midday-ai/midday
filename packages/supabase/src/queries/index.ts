@@ -1144,7 +1144,7 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, due_date, invoice_date, amount, currency, status, customer:customer_id(id, name)",
+      "id, invoice_number, due_date, invoice_date, amount, currency, status, customer:customer_id(id, name, website)",
     )
     .eq("team_id", teamId);
 
@@ -1220,7 +1220,7 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
 export async function getCustomersQuery(supabase: Client, teamId: string) {
   return supabase
     .from("customers")
-    .select("id, name")
+    .select("id, name, website")
     .eq("team_id", teamId)
     .limit(100);
 }

@@ -24,20 +24,25 @@ export async function InvoicesTable({
   const supabase = createClient();
   const { data: userData } = await getUser();
 
+  const filter = {
+    start,
+    end,
+    statuses,
+    customers,
+  };
+
   const { data } = await getInvoicesQuery(supabase, {
     teamId: userData?.team_id,
     searchQuery: query,
     sort,
-    filter: {
-      start,
-      end,
-      statuses,
-      customers,
-    },
+    filter,
   });
 
   if (!data?.length) {
-    if (query?.length) {
+    if (
+      query?.length ||
+      Object.values(filter).some((value) => value !== null)
+    ) {
       return <NoResults />;
     }
 

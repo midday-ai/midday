@@ -46,7 +46,7 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
 
   const statusFilters = allowedStatuses.map((status) => ({
     id: status,
-    name: t(`invoice.status.${status}`),
+    name: t(`invoice_status.${status}`),
   }));
 
   useHotkeys(
@@ -267,19 +267,20 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
                 alignOffset={-4}
                 className="p-0"
               >
-                {/* <SelectTag
-                  headless
-                  onChange={(selected) => {
-                    setFilters({
-                      tags: filters?.tags?.includes(selected.slug)
-                        ? filters.tags.filter((s) => s !== selected.slug)
-                            .length > 0
-                          ? filters.tags.filter((s) => s !== selected.slug)
-                          : null
-                        : [...(filters?.tags ?? []), selected.slug],
-                    });
-                  }}
-                /> */}
+                {statusFilters?.map((status) => (
+                  <DropdownMenuCheckboxItem
+                    key={status.id}
+                    onCheckedChange={() => {
+                      setParams({
+                        statuses: filters?.statuses?.includes(status.id)
+                          ? filters.statuses.filter((s) => s !== status.id)
+                          : [...(filters?.statuses ?? []), status.id],
+                      });
+                    }}
+                  >
+                    {status.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>

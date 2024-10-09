@@ -173,14 +173,12 @@ export default {
     e_learning_materials: "E-learning Materials",
     competency_assessment_forms: "Competency Assessment Forms",
   },
-  invoice: {
-    status: {
-      draft: "Draft",
-      overdue: "Overdue",
-      paid: "Paid",
-      unpaid: "Unpaid",
-      cancelled: "Cancelled",
-    },
+  invoice_status: {
+    draft: "Draft",
+    overdue: "Overdue",
+    paid: "Paid",
+    unpaid: "Unpaid",
+    cancelled: "Cancelled",
   },
   payment_status: {
     none: "Unknown",
@@ -194,4 +192,7 @@ export default {
     average: "Mostly on time, with a few late payments.",
     bad: "Room for improvement in payment timeliness.",
   },
+  "invoice_count#zero": "No invoices",
+  "invoice_count#one": "1 invoice",
+  "invoice_count#other": "{count} invoices",
 } as const;

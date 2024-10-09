@@ -21,7 +21,7 @@ export function PaymentScoreVisualizer({
             color = "bg-green-500";
             break;
           case "average":
-            color = "bg-yellow-500";
+            color = "bg-primary";
             break;
           case "bad":
             color = "bg-red-500";
