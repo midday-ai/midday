@@ -1,5 +1,5 @@
-import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
+import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { users } from './users'; // Assuming you have a users table defined
 
 export const apiKeys = sqliteTable('api_keys', {
@@ -23,6 +23,7 @@ export const apiKeys = sqliteTable('api_keys', {
   revoked: integer('revoked', { mode: 'boolean' }).notNull().default(false),
   revokedAt: integer('revoked_at', { mode: 'timestamp' }),
   revokedReason: text('revoked_reason'),
+  keyId: text('key_id'),
 }, (table) => ({
   userIdIndex: uniqueIndex('user_id_idx').on(table.userId),
   keyIndex: uniqueIndex('key_idx').on(table.key),

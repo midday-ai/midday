@@ -1,10 +1,11 @@
-import { GeneralErrorSchema } from "@/common/schema";
+import { openApiErrorResponses as ErrorResponses } from "@/errors";
+import { HonoEnv } from "@/hono/env";
 import { getRates } from "@/utils/rates";
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
 import type { Bindings } from "hono/types";
 import { RatesSchema } from "./schema";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+const app = new OpenAPIHono<HonoEnv>();
 
 const indexRoute = createRoute({
   method: "get",
@@ -19,14 +20,7 @@ const indexRoute = createRoute({
       },
       description: "Retrieve rates",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: GeneralErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+    ...ErrorResponses
   },
 });
 

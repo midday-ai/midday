@@ -1,5 +1,5 @@
-import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
+import { openApiErrorResponses as ErrorResponses } from "@/errors";
+import { HonoEnv } from "@/hono/env";
 import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
 import { PlaidApi } from "@/providers/plaid/plaid-api";
 import { createErrorResponse } from "@/utils/error";
@@ -18,7 +18,7 @@ import {
   PlaidLinkSchema,
 } from "./schema";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+const app = new OpenAPIHono<HonoEnv>();
 
 const linkPlaidRoute = createRoute({
   method: "post",
@@ -42,14 +42,8 @@ const linkPlaidRoute = createRoute({
       },
       description: "Retrieve Link",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
@@ -75,14 +69,8 @@ const exchangePlaidRoute = createRoute({
       },
       description: "Retrieve Exchange",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
@@ -108,14 +96,8 @@ const linkGoCardLessRoute = createRoute({
       },
       description: "Retrieve Link",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
@@ -141,14 +123,8 @@ const agreementGoCardLessRoute = createRoute({
       },
       description: "Retrieve Agreement",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
@@ -174,14 +150,8 @@ const exchangeGoCardLessRoute = createRoute({
       },
       description: "Retrieve Exchange",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 

@@ -12,6 +12,7 @@
     "import-institutions": "node scripts/importer.js"
   },
   "dependencies": {
+    "@axiomhq/js": "^1.2.0",
     "@hono/swagger-ui": "^0.4.1",
     "@hono/zod-openapi": "^0.16.0",
     "@hono/zod-validator": "^0.2.2",

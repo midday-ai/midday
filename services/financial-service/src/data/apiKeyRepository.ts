@@ -1,12 +1,13 @@
-import { eq, and, gte, lte, sql } from 'drizzle-orm';
+import { DrizzleDB } from '@/db';
+import { and, eq, gte, lte, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/d1';
 import { apiKeys, type APIKey } from '../db/schema';
 
 export class APIKeyRepository {
-	private db: ReturnType<typeof drizzle>;
+	private db: DrizzleDB;
 
-	constructor(d1: D1Database) {
-		this.db = drizzle(d1);
+	constructor(d1: DrizzleDB) {
+		this.db = d1;
 	}
 
 	/**
@@ -241,6 +242,7 @@ export class APIKeyRepository {
 			revoked: row.revoked,
 			revokedAt: row.revokedAt ? new Date(row.revokedAt) : null,
 			revokedReason: row.revokedReason,
+			keyId: row.keyId,
 		};
 	}
 }

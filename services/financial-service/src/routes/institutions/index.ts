@@ -1,10 +1,10 @@
 import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
+import { openApiErrorResponses as ErrorResponses } from "@/errors";
+import { HonoEnv } from "@/hono/env";
 import type { Providers } from "@/providers/types";
 import { createErrorResponse } from "@/utils/error";
 import { SearchClient } from "@/utils/search";
-import { createRoute } from "@hono/zod-openapi";
-import { OpenAPIHono } from "@hono/zod-openapi";
+import { createRoute, OpenAPIHono } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import {
   InstitutionParamsSchema,
@@ -13,7 +13,7 @@ import {
   UpdateUsageSchema,
 } from "./schema";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+const app = new OpenAPIHono<HonoEnv>();
 
 const indexRoute = createRoute({
   method: "get",
@@ -31,14 +31,8 @@ const indexRoute = createRoute({
       },
       description: "Retrieve institutions",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
@@ -58,14 +52,8 @@ const updateUsageRoute = createRoute({
       },
       description: "Update institution usage",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 

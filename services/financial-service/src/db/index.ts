@@ -1,7 +1,8 @@
+import { Context } from '@/hono/app';
+import { HonoEnv } from '@/hono/env';
 import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
-import * as schema from "./schema";
 import { Context as HonoContext } from "hono";
-import { Context } from '@/common/bindings';
+import * as schema from "./schema";
 
 // Use a single schema import and type
 export type Schema = typeof schema;
@@ -15,7 +16,7 @@ export function initDB(d1: D1Database): DrizzleDB {
 }
 
 // Improve getDB function with explicit return type
-export const getDB = (context: HonoContext<Context>): DrizzleDB => {
+export const getDB = (context: HonoContext<HonoEnv>): DrizzleDB => {
   return drizzle(context.env.DB, { schema });
 };
 

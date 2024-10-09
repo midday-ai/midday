@@ -1,11 +1,10 @@
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { Context } from "@/common/bindings";
-import { createErrorResponse } from "@/utils/error";
-import { z } from '@hono/zod-openapi';
-import { users } from '@/db/schema';
 import { UserRepository } from "@/data/userRepository";
+import { users } from '@/db/schema';
+import { HonoEnv } from "@/hono/env";
+import { createErrorResponse } from "@/utils/error";
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
-const app = new OpenAPIHono<Context>();
+const app = new OpenAPIHono<HonoEnv>();
 
 const UserSchema = z.object({
   id: z.string(),

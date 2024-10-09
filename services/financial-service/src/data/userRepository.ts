@@ -1,19 +1,20 @@
-import { eq, and, or, like } from 'drizzle-orm';
+import { DrizzleDB } from '@/db';
+import { and, eq, like, or } from 'drizzle-orm';
 import { drizzle, DrizzleD1Database } from 'drizzle-orm/d1';
-import { users, type User, type NewUser } from '../db/schema';
+import { users, type NewUser, type User } from '../db/schema';
 
 /**
  * Repository class for managing user data in the database.
  */
 export class UserRepository {
-	private db: DrizzleD1Database;
+	private db: DrizzleDB;
 
 	/**
 	 * Creates a new UserRepository instance.
 	 * @param d1 - The D1 database instance to use for database operations.
-	 */
-	constructor(d1: D1Database) {
-		this.db = drizzle(d1);
+	*/
+	constructor(d1: DrizzleDB) {
+		this.db = d1;
 	}
 
 	/**

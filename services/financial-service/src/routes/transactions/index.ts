@@ -1,5 +1,6 @@
 import type { Bindings } from "@/common/bindings";
-import { ErrorSchema } from "@/common/schema";
+import { openApiErrorResponses as ErrorResponses } from "@/errors";
+import { HonoEnv } from "@/hono/env";
 import { Provider } from "@/providers";
 import { AccountType } from "@/utils/account";
 import { createErrorResponse } from "@/utils/error";
@@ -15,7 +16,7 @@ import {
 /**
  * OpenAPI Hono application for handling transaction-related routes.
  */
-const app = new OpenAPIHono<{ Bindings: Bindings }>();
+const app = new OpenAPIHono<HonoEnv>();
 
 /**
  * Route configuration for retrieving transactions.
@@ -36,14 +37,8 @@ const indexRoute = createRoute({
       },
       description: "Retrieve transactions",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
@@ -66,14 +61,8 @@ const recurringTransactionsRoute = createRoute({
       },
       description: "Retrieve recurring transactions",
     },
-    400: {
-      content: {
-        "application/json": {
-          schema: ErrorSchema,
-        },
-      },
-      description: "Returns an error",
-    },
+       ...ErrorResponses
+
   },
 });
 
