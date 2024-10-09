@@ -494,7 +494,7 @@ export const filterTrackerSchema = z.object({
 export const filterInvoiceSchema = z.object({
   name: z.string().optional().describe("The name to search for"),
   statuses: z
-    .array(z.enum(["draft", "overdue", "paid", "unpaid", "cancelled"]))
+    .array(z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]))
     .optional()
     .describe("The statuses to filter by"),
   start: parseDateSchema

@@ -1,27 +1,10 @@
 import { PaymentScoreVisualizer } from "@/components/payment-score-visualizer";
 import { getI18n } from "@/locales/server";
-import { getPaymentStatus, getUser } from "@midday/supabase/cached-queries";
-import { Button } from "@midday/ui/button";
-import { Icons } from "@midday/ui/icons";
-import Link from "next/link";
+import { getInvoices, getPaymentStatus } from "@midday/supabase/cached-queries";
 import { Invoice } from "./invoice";
 
 export function InvoiceWidgetSkeleton() {
   return null;
-}
-
-export function InvoiceWidgetHeader() {
-  return (
-    <div className="flex justify-between items-center">
-      <Link href="/invoices" prefetch>
-        <h2 className="text-lg">Invoices</h2>
-      </Link>
-
-      <Button variant="outline" size="icon">
-        <Icons.Add />
-      </Button>
-    </div>
-  );
 }
 
 export async function InvoiceWidget() {
@@ -29,6 +12,8 @@ export async function InvoiceWidget() {
   const {
     data: { payment_status, score },
   } = await getPaymentStatus();
+
+  const { data: invoices } = await getInvoices();
 
   return (
     <div className="mt-8">
@@ -42,7 +27,7 @@ export async function InvoiceWidget() {
         <PaymentScoreVisualizer score={score} paymentStatus={payment_status} />
       </div>
 
-      <Invoice />
+      <Invoice invoices={invoices} />
     </div>
   );
 }

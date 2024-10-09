@@ -1,6 +1,4 @@
-import { getUser } from "@midday/supabase/cached-queries";
-import { getInvoicesQuery } from "@midday/supabase/queries";
-import { createClient } from "@midday/supabase/server";
+import { getInvoices } from "@midday/supabase/cached-queries";
 import { EmptyState, NoResults } from "./empty-states";
 import { DataTable } from "./table";
 
@@ -25,9 +23,6 @@ export async function InvoicesTable({
   customers,
   page,
 }: Props) {
-  const supabase = createClient();
-  const { data: userData } = await getUser();
-
   const filter = {
     start,
     end,
@@ -38,10 +33,7 @@ export async function InvoicesTable({
   async function loadMore({ from, to }: { from: number; to: number }) {
     "use server";
 
-    const supabase = createClient();
-
-    return getInvoicesQuery(supabase, {
-      teamId: userData?.team_id,
+    return getInvoices({
       to,
       from: from + 1,
       searchQuery: query,
@@ -50,8 +42,7 @@ export async function InvoicesTable({
     });
   }
 
-  const { data, meta } = await getInvoicesQuery(supabase, {
-    teamId: userData?.team_id,
+  const { data, meta } = await getInvoices({
     searchQuery: query,
     sort,
     filter,

@@ -6,6 +6,7 @@ import { InvoiceStatus } from "@/components/invoice-status";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -91,10 +92,16 @@ export const columns: ColumnDef<Invoice>[] = [
     header: "Amount",
     accessorKey: "amount",
     cell: ({ row }) => (
-      <FormatAmount
-        amount={row.getValue("amount")}
-        currency={row.original.currency}
-      />
+      <span
+        className={cn({
+          "line-through": row.original.status === "canceled",
+        })}
+      >
+        <FormatAmount
+          amount={row.getValue("amount")}
+          currency={row.original.currency}
+        />
+      </span>
     ),
   },
   {

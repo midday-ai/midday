@@ -6,6 +6,7 @@ import {
 } from "@midday/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
+import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { Textarea } from "@midday/ui/textarea";
 import { format } from "date-fns";
@@ -53,7 +54,11 @@ export function InvoiceDetails({
 
       <div className="flex justify-between items-center mt-6 mb-3">
         <div className="flex flex-col w-full space-y-1">
-          <span className="text-4xl font-mono select-text">
+          <span
+            className={cn("text-4xl font-mono select-text", {
+              "line-through": status === "canceled",
+            })}
+          >
             <FormatAmount amount={amount} currency={currency} />
           </span>
 

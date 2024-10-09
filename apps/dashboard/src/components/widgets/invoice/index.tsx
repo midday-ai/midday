@@ -1,11 +1,8 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import { Suspense } from "react";
-import {
-  InvoiceWidget,
-  InvoiceWidgetHeader,
-  InvoiceWidgetSkeleton,
-} from "./invoice-widget";
+import { InvoiceWidgetHeader } from "./invoice-header";
+import { InvoiceWidget, InvoiceWidgetSkeleton } from "./invoice-widget";
 
 export function Invoice() {
   return (

@@ -1,7 +1,7 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 export const createInvoiceDraftAction = authActionClient
   .metadata({
@@ -18,8 +18,8 @@ export const createInvoiceDraftAction = authActionClient
       .select("*")
       .single();
 
-    revalidatePath("/invoices");
     revalidateTag(`invoice_summary_${teamId}`);
+    revalidateTag(`invoices_${teamId}`);
 
     return data;
   });

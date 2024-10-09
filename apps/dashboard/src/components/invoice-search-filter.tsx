@@ -24,7 +24,7 @@ import { useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { FilterList } from "./filter-list";
 
-const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "cancelled"];
+const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "canceled"];
 
 type Props = {
   customers?: {
