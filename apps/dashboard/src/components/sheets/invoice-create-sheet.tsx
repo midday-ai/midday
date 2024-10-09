@@ -6,12 +6,15 @@ import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
 
 export function InvoiceCreateSheet() {
-  const { setParams, create } = useInvoiceParams();
+  const { setParams, createInvoice } = useInvoiceParams();
 
-  const isOpen = Boolean(create);
+  const isOpen = Boolean(createInvoice);
 
   return (
-    <Sheet open={isOpen} onOpenChange={() => setParams({ create: null })}>
+    <Sheet
+      open={isOpen}
+      onOpenChange={() => setParams({ createInvoice: null })}
+    >
       <SheetContent style={{ maxWidth: 590 }}>
         <SheetHeader className="mb-8 flex justify-between items-center flex-row">
           <h2 className="text-xl">Invoice</h2>

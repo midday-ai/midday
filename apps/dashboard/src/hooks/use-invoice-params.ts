@@ -9,7 +9,7 @@ export function useInvoiceParams(options?: { shallow: boolean }) {
   const [params, setParams] = useQueryStates(
     {
       invoiceId: parseAsString,
-      create: parseAsBoolean,
+      createInvoice: parseAsBoolean,
       sort: parseAsArrayOf(parseAsString),
       q: parseAsString,
       statuses: parseAsArrayOf(parseAsString),
