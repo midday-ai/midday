@@ -1144,7 +1144,7 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, due_date, invoice_date, amount, currency, status, customer:customer_id(id, name, website)",
+      "id, invoice_number, due_date, invoice_date, paid_at, amount, currency, status, vat, tax, customer:customer_id(id, name, website)",
       { count: "exact" },
     )
     .eq("team_id", teamId);
@@ -1155,8 +1155,9 @@ export async function getInvoicesQuery(
     const ascending = value === "asc";
 
     if (column === "customer") {
-      query.order(column, { ascending });
       query.order("customer(name)", { ascending });
+    } else if (column === "recurring") {
+      // Don't do anything until we have a recurring invoice table
     } else if (column) {
       query.order(column, { ascending });
     }

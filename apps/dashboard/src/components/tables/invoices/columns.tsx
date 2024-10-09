@@ -3,7 +3,6 @@
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
-import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -21,10 +20,14 @@ import * as React from "react";
 export type Invoice = {
   id: string;
   due_date: string;
+  invoice_date?: string;
+  paid_at?: string;
   status: string;
   currency: string;
   invoice_number: string;
-  amount: number;
+  amount?: number;
+  vat?: number;
+  tax?: number;
   customer?: {
     id: string;
     name: string;
@@ -69,10 +72,12 @@ export const columns: ColumnDef<Invoice>[] = [
       return (
         <div className="flex items-center space-x-2">
           <Avatar className="size-5">
-            <AvatarImage
-              src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
-              alt={`${customer?.name} logo`}
-            />
+            {customer?.website && (
+              <AvatarImage
+                src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+                alt={`${customer?.name} logo`}
+              />
+            )}
             <AvatarFallback className="text-[9px] font-medium">
               {customer?.name?.[0]}
             </AvatarFallback>
@@ -116,7 +121,6 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status");
       const deleteInvoice = useAction(deleteInvoiceAction);
-      const { setParams } = useInvoiceParams();
 
       return (
         <div>
@@ -127,16 +131,6 @@ export const columns: ColumnDef<Invoice>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() =>
-                  setParams({
-                    invoiceId: row.original.id,
-                  })
-                }
-              >
-                View details
-              </DropdownMenuItem>
-
               {status !== "draft" && (
                 <>
                   <DropdownMenuItem>Download</DropdownMenuItem>
