@@ -31,7 +31,7 @@ export function PaymentScoreVisualizer({
         }
         return (
           <motion.div
-            key={index.toString()}
+            key={`score-bar-${index}`}
             className={`w-1 ${color} h-[27px] ${index < score ? "opacity-100" : "opacity-30"}`}
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
