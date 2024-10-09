@@ -16,7 +16,10 @@ export function InvoiceRow({ row }: Props) {
 
   return (
     <>
-      <TableRow className="hover:bg-transparent cursor-default" key={row.id}>
+      <TableRow
+        className="hover:bg-transparent cursor-default h-[57px]"
+        key={row.id}
+      >
         {row.getVisibleCells().map((cell, index) => (
           <TableCell
             key={cell.id}

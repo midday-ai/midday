@@ -22,7 +22,7 @@ export function InvoiceStatus({
   return (
     <div
       className={cn(
-        "p-1 px-3 py-1 rounded-full cursor-default font-mono inline-flex max-w-full text-xs",
+        "px-2 py-0.5 rounded-full cursor-default font-mono inline-flex max-w-full text-[11px]",
         status === "draft" &&
           "text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D]",
         status === "overdue" && "dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]",

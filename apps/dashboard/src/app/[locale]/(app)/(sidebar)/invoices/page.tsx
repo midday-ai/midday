@@ -35,6 +35,7 @@ export default function Page({
     end,
     statuses,
     customers,
+    page,
   } = searchParamsCache.parse(searchParams);
 
   const countryCode = getCountryCode();
@@ -69,6 +70,7 @@ export default function Page({
             end={end}
             statuses={statuses}
             customers={customers}
+            page={page}
           />
         </Suspense>
       </ErrorBoundary>

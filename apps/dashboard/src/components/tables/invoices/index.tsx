@@ -5,6 +5,7 @@ import { EmptyState, NoResults } from "./empty-states";
 import { DataTable } from "./table";
 
 type Props = {
+  page: number;
   query?: string | null;
   sort?: string[] | null;
   start?: string | null;
@@ -13,6 +14,8 @@ type Props = {
   customers?: string[] | null;
 };
 
+const pageSize = 25;
+
 export async function InvoicesTable({
   query,
   sort,
@@ -20,6 +23,7 @@ export async function InvoicesTable({
   end,
   statuses,
   customers,
+  page,
 }: Props) {
   const supabase = createClient();
   const { data: userData } = await getUser();
@@ -31,12 +35,32 @@ export async function InvoicesTable({
     customers,
   };
 
-  const { data } = await getInvoicesQuery(supabase, {
+  async function loadMore({ from, to }: { from: number; to: number }) {
+    "use server";
+
+    const supabase = createClient();
+
+    return getInvoicesQuery(supabase, {
+      teamId: userData?.team_id,
+      to,
+      from: from + 1,
+      searchQuery: query,
+      sort,
+      filter,
+    });
+  }
+
+  const { data, meta } = await getInvoicesQuery(supabase, {
     teamId: userData?.team_id,
     searchQuery: query,
     sort,
     filter,
+    to: pageSize,
   });
+
+  const hasNextPage = Boolean(
+    meta?.count && meta.count / (page + 1) > pageSize,
+  );
 
   if (!data?.length) {
     if (
@@ -49,5 +73,13 @@ export async function InvoicesTable({
     return <EmptyState />;
   }
 
-  return <DataTable data={data} />;
+  return (
+    <DataTable
+      data={data}
+      loadMore={loadMore}
+      pageSize={pageSize}
+      hasNextPage={hasNextPage}
+      page={page}
+    />
+  );
 }

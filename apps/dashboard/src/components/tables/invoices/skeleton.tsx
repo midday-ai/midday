@@ -8,7 +8,7 @@ export function InvoiceSkeleton() {
       <TableHeader />
       <TableBody>
         {Array.from({ length: 25 }).map((_, index) => (
-          <TableRow key={index.toString()}>
+          <TableRow key={index.toString()} className="h-[57px]">
             <TableCell>
               <Skeleton className="h-4 w-24" />
             </TableCell>
