@@ -66,7 +66,7 @@ export async function InvoicesOpen({
                 side="bottom"
                 sideOffset={10}
               >
-                Open includes all invoices that are not paid or cancelled.
+                Open includes all invoices that are not paid or canceled.
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

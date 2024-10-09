@@ -9,7 +9,7 @@ export function InvoiceStatus({
   isLoading,
   className,
 }: {
-  status: "draft" | "overdue" | "paid" | "unpaid" | "cancelled";
+  status: "draft" | "overdue" | "paid" | "unpaid" | "canceled";
   isLoading?: boolean;
   className?: string;
 }) {
@@ -23,7 +23,7 @@ export function InvoiceStatus({
     <div
       className={cn(
         "px-2 py-0.5 rounded-full cursor-default font-mono inline-flex max-w-full text-[11px]",
-        status === "draft" &&
+        (status === "draft" || status === "canceled") &&
           "text-[#878787] bg-[#F2F1EF] text-[10px] dark:bg-[#1D1D1D]",
         status === "overdue" && "dark:bg-[#FFD02B]/10 dark:text-[#FFD02B]",
         status === "paid" &&

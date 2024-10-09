@@ -89,7 +89,7 @@ type Props = {
 function RowTitle({ name: initialName, isEditing, path, href }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const t = useI18n();
-  const [cancelled, setCancelled] = useState(false);
+  const [canceled, setCanceled] = useState(false);
   const { toast } = useToast();
   const [name, setName] = useState(initialName ?? DEFAULT_FOLDER_NAME);
   const { deleteItem, data } = useVaultContext((s) => s);
@@ -107,7 +107,7 @@ function RowTitle({ name: initialName, isEditing, path, href }: Props) {
     () => {
       const name = initialName ?? DEFAULT_FOLDER_NAME;
       deleteItem(name);
-      setCancelled(true);
+      setCanceled(true);
     },
     { enableOnFormTags: true, enabled: isEditing },
   );
@@ -126,7 +126,7 @@ function RowTitle({ name: initialName, isEditing, path, href }: Props) {
 
   const checkAndCreateFolder = () => {
     if (
-      !cancelled &&
+      !canceled &&
       name === initialName &&
       data.some((folder) => folder.name === name && folder.isFolder)
     ) {
