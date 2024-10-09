@@ -19,6 +19,7 @@ import {
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
+  getCustomersQuery,
   getExpensesQuery,
   getInvoiceSummaryQuery,
   getMetricsQuery,
@@ -484,6 +485,27 @@ export const getPaymentStatus = async () => {
     ["payment_status", teamId],
     {
       tags: [`payment_status_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getCustomers = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getCustomersQuery(supabase, teamId);
+    },
+    ["customers", teamId],
+    {
+      tags: [`customers_${teamId}`],
       revalidate: 3600,
     },
   )();

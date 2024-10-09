@@ -10,6 +10,7 @@ type Props = {
   start?: string | null;
   end?: string | null;
   statuses?: string[] | null;
+  customers?: string[] | null;
 };
 
 export async function InvoicesTable({
@@ -18,6 +19,7 @@ export async function InvoicesTable({
   start,
   end,
   statuses,
+  customers,
 }: Props) {
   const supabase = createClient();
   const { data: userData } = await getUser();
@@ -30,6 +32,7 @@ export async function InvoicesTable({
       start,
       end,
       statuses,
+      customers,
     },
   });
 

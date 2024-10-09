@@ -1,6 +1,7 @@
 import { getInvoiceSummary } from "@midday/supabase/cached-queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
+import { Skeleton } from "@midday/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
@@ -8,6 +9,25 @@ import {
   TooltipTrigger,
 } from "@midday/ui/tooltip";
 import { FormatAmount } from "./format-amount";
+
+export function InvoicesOpenSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle>
+          <Skeleton className="h-8 w-32" />
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-4 w-28" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export async function InvoicesOpen({
   defaultCurrency,
@@ -23,6 +43,8 @@ export async function InvoicesOpen({
           <FormatAmount
             amount={data?.total_amount ?? 0}
             currency={data?.currency ?? defaultCurrency}
+            maximumFractionDigits={0}
+            minimumFractionDigits={0}
           />
         </CardTitle>
       </CardHeader>

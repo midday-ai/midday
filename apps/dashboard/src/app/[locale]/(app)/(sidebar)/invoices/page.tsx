@@ -1,9 +1,15 @@
 import { ErrorFallback } from "@/components/error-fallback";
 import { InvoiceHeader } from "@/components/invoice-header";
-import { InvoicePaymentScore } from "@/components/invoice-payment-score";
-import { InvoicesOpen } from "@/components/invoices-open";
-import { InvoicesOverdue } from "@/components/invoices-overdue";
-import { InvoicesPaid } from "@/components/invoices-paid";
+import {
+  InvoicePaymentScore,
+  InvoicePaymentScoreSkeleton,
+} from "@/components/invoice-payment-score";
+import { InvoicesOpen, InvoicesOpenSkeleton } from "@/components/invoices-open";
+import {
+  InvoicesOverdue,
+  InvoicesOverdueSkeleton,
+} from "@/components/invoices-overdue";
+import { InvoicesPaid, InvoicesPaidSkeleton } from "@/components/invoices-paid";
 import { InvoicesTable } from "@/components/tables/invoices";
 import { InvoiceSkeleton } from "@/components/tables/invoices/skeleton";
 import { getCountryCode } from "@midday/location";
@@ -28,6 +34,7 @@ export default function Page({
     start,
     end,
     statuses,
+    customers,
   } = searchParamsCache.parse(searchParams);
 
   const countryCode = getCountryCode();
@@ -37,16 +44,16 @@ export default function Page({
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-4 gap-6 pt-6">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<InvoicesOpenSkeleton />}>
           <InvoicesOpen defaultCurrency={defaultCurrency} />
         </Suspense>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<InvoicesOverdueSkeleton />}>
           <InvoicesOverdue defaultCurrency={defaultCurrency} />
         </Suspense>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<InvoicesPaidSkeleton />}>
           <InvoicesPaid defaultCurrency={defaultCurrency} />
         </Suspense>
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<InvoicePaymentScoreSkeleton />}>
           <InvoicePaymentScore />
         </Suspense>
       </div>
@@ -61,6 +68,7 @@ export default function Page({
             start={start}
             end={end}
             statuses={statuses}
+            customers={customers}
           />
         </Suspense>
       </ErrorBoundary>
