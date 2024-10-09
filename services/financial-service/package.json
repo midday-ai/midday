@@ -27,10 +27,9 @@
     "local:migrations:apply": "wrangler d1 migrations apply database --local",
     "local:d1:init": "npm run local:migrations:apply && wrangler d1 execute database --file='./migrations/0000_black_butterfly.sql' --local",
     "migrations:apply": "wrangler d1 migrations apply database --env production --remote",
-    "d1:new": "wrangler d1 create database",
     "d1:init": "npm run migrations:apply && wrangler d1 execute database --file='./migrations/0000_black_butterfly.sql'",
     "create-queue": "wrangler queue create queue",
-    "create-d1-database": "wrangler d1 create database",
+    "create-d1-database": "wrangler d1 create engine-production-db",
     "create-namespace-queue-results": "wrangler kv:namespace create QUEUE_RESULTS",
     "create-namespace-kv-namespace": "wrangler kv:namespace create KV_NAMESPACE",
     "create-namespace-r2-bucket": "wrangler r2 bucket create template-service-bucket"

@@ -41,9 +41,9 @@ enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
 
 [[env.production.d1_databases]]
-binding = "DB"
+binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "engine-production-db"
-database_id = "019720a586c448c2a88a58773da08fd8"
+database_id = "7e9430cd-517d-4139-bb27-1be427d3474a"
 
 [env.staging]
 name = "engine-staging"
@@ -67,9 +67,9 @@ enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
 
 [[env.staging.d1_databases]]
-binding = "DB"
+binding = "DB" # i.e. available in your Worker on env.DB
 database_name = "engine-staging-db"
-database_id = "019720a586c448c2a88a58773da08fd8"
+database_id = "4d7f64be-60e6-44ad-9b7a-5e499dfec52c"
 
 [env.staging.queues]
 producers = [
