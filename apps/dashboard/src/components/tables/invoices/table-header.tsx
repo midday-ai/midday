@@ -10,7 +10,7 @@ import {
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export function TableHeader() {
-  const { setParams, sort } = useInvoiceParams();
+  const { setParams, sort } = useInvoiceParams({ shallow: false });
   const [column, value] = sort || [];
 
   const createSortQuery = (name: string) => {
@@ -18,14 +18,14 @@ export function TableHeader() {
 
     if (name === currentColumn) {
       if (currentValue === "asc") {
-        setParams({ sort: [name, "desc"] }, { shallow: false });
+        setParams({ sort: [name, "desc"] });
       } else if (currentValue === "desc") {
-        setParams({ sort: null }, { shallow: false });
+        setParams({ sort: null });
       } else {
-        setParams({ sort: [name, "asc"] }, { shallow: false });
+        setParams({ sort: [name, "asc"] });
       }
     } else {
-      setParams({ sort: [name, "asc"] }, { shallow: false });
+      setParams({ sort: [name, "asc"] });
     }
   };
 

@@ -109,6 +109,8 @@ export function InvoiceSearchFilter({ customers: customersData }: Props) {
                 customersData?.find((customer) => customer.name === name)?.id,
             ) ?? null,
           q: partialObject?.name ?? null,
+          start: partialObject?.start ?? null,
+          end: partialObject?.end ?? null,
         };
       }
     }

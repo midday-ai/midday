@@ -53,6 +53,8 @@ import {
   MdOutlineDashboardCustomize,
   MdOutlineDelete,
   MdOutlineDescription,
+  MdOutlineDownload,
+  MdOutlineEditNote,
   MdOutlineEmail,
   MdOutlineExitToApp,
   MdOutlineFace,
@@ -630,4 +632,6 @@ export const Icons = {
   AccountCircle: MdOutlineAccountCircle,
   Repeat: MdOutlineRepeat,
   ProjectStatus: MdDownloading,
+  Download: MdOutlineDownload,
+  Edit: MdOutlineEditNote,
 };
