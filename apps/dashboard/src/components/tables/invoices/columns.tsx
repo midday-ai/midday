@@ -38,12 +38,20 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "due_date",
     cell: ({ row }) => {
       const date = row.getValue("due_date");
+
+      const showDate =
+        row.original.status === "unpaid" ||
+        row.original.status === "overdue" ||
+        row.original.status === "pending";
+
       return (
         <div className="flex flex-col space-y-1">
           <span>{date ? formatDate(date) : "-"}</span>
-          <span className="text-xs text-muted-foreground">
-            {date ? getDueDateStatus(date) : "-"}
-          </span>
+          {showDate && (
+            <span className="text-xs text-muted-foreground">
+              {date ? getDueDateStatus(date) : "-"}
+            </span>
+          )}
         </div>
       );
     },

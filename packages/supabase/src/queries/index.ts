@@ -1145,6 +1145,7 @@ export async function getInvoicesQuery(
     .from("invoices")
     .select(
       "id, invoice_number, due_date, invoice_date, amount, currency, status, customer:customer_id(id, name, website)",
+      { count: "exact" },
     )
     .eq("team_id", teamId);
 
@@ -1187,7 +1188,14 @@ export async function getInvoicesQuery(
     }
   }
 
-  return query;
+  const { data, count } = await query.range(from, to);
+
+  return {
+    meta: {
+      count,
+    },
+    data,
+  };
 }
 
 export type GetInvoiceSummaryParams = {
