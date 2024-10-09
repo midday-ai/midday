@@ -1127,6 +1127,7 @@ export type GetInvoicesQueryParams = {
   searchQuery?: string | null;
   filter?: {
     statuses?: string[] | null;
+    customers?: string[] | null;
     start?: string | null;
     end?: string | null;
   };
@@ -1138,7 +1139,7 @@ export async function getInvoicesQuery(
   params: GetInvoicesQueryParams,
 ) {
   const { teamId, filter, searchQuery, sort, from = 0, to = 25 } = params;
-  const { statuses, start, end } = filter || {};
+  const { statuses, start, end, customers } = filter || {};
 
   const query = supabase
     .from("invoices")
@@ -1172,6 +1173,10 @@ export async function getInvoicesQuery(
 
     query.gte("due_date", fromDate.toISOString());
     query.lte("due_date", toDate.toISOString());
+  }
+
+  if (customers?.length) {
+    query.in("customer_id", customers);
   }
 
   if (searchQuery) {
@@ -1210,4 +1215,12 @@ export async function getPaymentStatusQuery(supabase: Client, teamId: string) {
       team_id: teamId,
     })
     .single();
+}
+
+export async function getCustomersQuery(supabase: Client, teamId: string) {
+  return supabase
+    .from("customers")
+    .select("id, name")
+    .eq("team_id", teamId)
+    .limit(100);
 }

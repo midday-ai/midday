@@ -7,6 +7,7 @@ import { Calendar } from "@midday/ui/calendar";
 import { cn } from "@midday/ui/cn";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuPortal,
@@ -25,12 +26,19 @@ import { FilterList } from "./filter-list";
 
 const allowedStatuses = ["draft", "overdue", "paid", "unpaid", "cancelled"];
 
-export function InvoiceSearchFilter() {
+type Props = {
+  customers?: {
+    id: string | null;
+    name: string | null;
+  }[];
+};
+
+export function InvoiceSearchFilter({ customers: customersData }: Props) {
   const [prompt, setPrompt] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [streaming, setStreaming] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const { setParams, statuses, customers, start, end, q } = useInvoiceParams({
+  const { setParams, statuses, start, end, q, customers } = useInvoiceParams({
     shallow: false,
   });
 
@@ -79,7 +87,9 @@ export function InvoiceSearchFilter() {
 
     const { object } = await generateInvoiceFilters(
       prompt,
-      `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}`,
+      `Invoice payment statuses: ${statusFilters.map((filter) => filter.name).join(", ")}
+       Customers: ${customersData?.map((customer) => customer.name).join(", ")}
+      `,
     );
 
     let finalObject = {};
@@ -93,6 +103,11 @@ export function InvoiceSearchFilter() {
             : partialObject?.statuses
               ? [partialObject.statuses]
               : null,
+          customers:
+            partialObject?.customers?.map(
+              (name: string) =>
+                customersData?.find((customer) => customer.name === name)?.id,
+            ) ?? null,
           q: partialObject?.name ?? null,
         };
       }
@@ -161,6 +176,7 @@ export function InvoiceSearchFilter() {
           loading={streaming}
           onRemove={setParams}
           statusFilters={statusFilters}
+          members={customersData}
         />
       </div>
 
@@ -203,6 +219,67 @@ export function InvoiceSearchFilter() {
                     });
                   }}
                 />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Face className="mr-2 h-4 w-4" />
+              <span>Customer</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                {customersData?.map((customer) => (
+                  <DropdownMenuCheckboxItem
+                    key={customer.id}
+                    onCheckedChange={() => {
+                      setParams({
+                        customers: filters?.customers?.includes(customer.id)
+                          ? filters.customers.filter((s) => s !== customer.id)
+                          : [...(filters?.customers ?? []), customer.id],
+                      });
+                    }}
+                  >
+                    {customer.name}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+        </DropdownMenuGroup>
+
+        <DropdownMenuGroup>
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Icons.Status className="mr-2 h-4 w-4" />
+              <span>Status</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent
+                sideOffset={14}
+                alignOffset={-4}
+                className="p-0"
+              >
+                {/* <SelectTag
+                  headless
+                  onChange={(selected) => {
+                    setFilters({
+                      tags: filters?.tags?.includes(selected.slug)
+                        ? filters.tags.filter((s) => s !== selected.slug)
+                            .length > 0
+                          ? filters.tags.filter((s) => s !== selected.slug)
+                          : null
+                        : [...(filters?.tags ?? []), selected.slug],
+                    });
+                  }}
+                /> */}
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
