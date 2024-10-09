@@ -23,5 +23,6 @@
   "terminal.integrated.localEchoStyle": "dim",
   "search.exclude": {
     "**/node_modules": true
-  }
+  },
+  "editor.fontSize": 22
 }

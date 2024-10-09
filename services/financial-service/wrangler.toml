@@ -51,3 +51,8 @@ r2_buckets = [
 enabled = true
 head_sampling_rate = 0.1 # 10% of requests are logged
 
+
+[[d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine"
+database_id = "019720a586c448c2a88a58773da08fd8"

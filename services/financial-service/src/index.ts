@@ -1,4 +1,4 @@
-import type { Bindings } from "@/common/bindings";
+import type { Context } from "@/common/bindings";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { requestId } from "hono/request-id";
@@ -18,8 +18,9 @@ import healthRoutes from "./routes/health";
 import institutionRoutes from "./routes/institutions";
 import ratesRoutes from "./routes/rates";
 import transactionsRoutes from "./routes/transactions";
+import { enrichContext } from "./middleware/context-enrich";
 
-const app = new OpenAPIHono<{ Bindings: Bindings }>({
+const app = new OpenAPIHono<Context>({
   defaultHook: (result, c) => {
     console.log(result);
     if (!result.success) {
@@ -37,6 +38,7 @@ app.use("*", timingMiddleware);
 app.use("*", corsMiddleware); // This will now only apply CORS in non-dev environments
 app.use("*", cacheMiddleware);
 app.use("*", jsonFormattingMiddleware);
+app.use("*", enrichContext);
 
 // Enable cache for the following routes
 app.get("/institutions", cacheMiddleware);

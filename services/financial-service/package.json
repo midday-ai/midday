@@ -16,8 +16,11 @@
     "@hono/zod-openapi": "^0.16.0",
     "@hono/zod-validator": "^0.2.2",
     "@types/stripe": "^8.0.417",
+    "@unkey/api": "^0.26.2",
     "change-case": "^5.4.4",
+    "drizzle-orm": "^0.34.1",
     "hono": "^4.6.2",
+    "install": "^0.13.0",
     "plaid": "^27.0.0",
     "stripe": "^16.12.0",
     "typesense": "^1.8.2",
@@ -30,6 +33,7 @@
     "@cloudflare/workers-types": "^4.20240909.0",
     "@types/bun": "^1.1.9",
     "@vitest/ui": "^1.5.0",
+    "drizzle-kit": "^0.25.0",
     "vitest": "^1.5.0",
     "wrangler": "^3.78.3"
   }
