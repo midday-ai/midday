@@ -33,7 +33,7 @@ export function InvoiceStatus({
       )}
     >
       <span className="line-clamp-1 truncate inline-block">
-        {t(`invoice.status.${status}`)}
+        {t(`invoice_status.${status}`)}
       </span>
     </div>
   );

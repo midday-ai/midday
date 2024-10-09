@@ -1,3 +1,4 @@
+import { getI18n } from "@/locales/server";
 import { getInvoiceSummary } from "@midday/supabase/cached-queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Icons } from "@midday/ui/icons";
@@ -35,6 +36,7 @@ export async function InvoicesOpen({
   defaultCurrency: string;
 }) {
   const { data } = await getInvoiceSummary();
+  const t = await getI18n();
 
   return (
     <Card>
@@ -70,7 +72,9 @@ export async function InvoicesOpen({
           </TooltipProvider>
 
           <div className="text-sm text-muted-foreground">
-            {data?.invoice_count} invoices
+            {t("invoice_count", {
+              count: data?.invoice_count ?? 0,
+            })}
           </div>
         </div>
       </CardContent>

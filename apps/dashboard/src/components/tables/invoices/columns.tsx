@@ -3,7 +3,9 @@
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatDate, getDueDateStatus } from "@/utils/format";
+import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
 import {
   DropdownMenu,
@@ -24,7 +26,9 @@ export type Invoice = {
   invoice_number: string;
   amount: number;
   customer?: {
+    id: string;
     name: string;
+    website: string;
   };
 };
 
@@ -52,7 +56,23 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     header: "Customer",
     accessorKey: "customer",
-    cell: ({ row }) => row.original.customer?.name,
+    cell: ({ row }) => {
+      const customer = row.original.customer;
+      return (
+        <div className="flex items-center space-x-2">
+          <Avatar className="size-5">
+            <AvatarImage
+              src={`https://img.logo.dev/${customer?.website}?token=pk_X-1ZO13GSgeOoUrIuJ6GMQ&size=60`}
+              alt={`${customer?.name} logo`}
+            />
+            <AvatarFallback className="text-[9px] font-medium">
+              {customer?.name?.[0]}
+            </AvatarFallback>
+          </Avatar>
+          <span className="truncate">{customer?.name}</span>
+        </div>
+      );
+    },
   },
   {
     header: "Amount",
@@ -88,6 +108,7 @@ export const columns: ColumnDef<Invoice>[] = [
     cell: ({ row }) => {
       const status = row.getValue("status");
       const deleteInvoice = useAction(deleteInvoiceAction);
+      const { setParams } = useInvoiceParams();
 
       return (
         <div>
@@ -98,12 +119,30 @@ export const columns: ColumnDef<Invoice>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() =>
+                  setParams({
+                    invoiceId: row.original.id,
+                  })
+                }
+              >
+                View details
+              </DropdownMenuItem>
+
+              {status !== "draft" && (
+                <>
+                  <DropdownMenuItem>Download</DropdownMenuItem>
+                  <DropdownMenuItem>Copy link</DropdownMenuItem>
+                  <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                </>
+              )}
+
               {(status === "draft" ||
                 status === "overdue" ||
                 status === "unpaid") && (
                 <DropdownMenuItem
                   onClick={() => deleteInvoice.execute({ id: row.original.id })}
+                  className="text-[#FF3638]"
                 >
                   Cancel
                 </DropdownMenuItem>

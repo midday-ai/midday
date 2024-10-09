@@ -1,3 +1,4 @@
+import { getI18n } from "@/locales/server";
 import { getInvoiceSummary } from "@midday/supabase/cached-queries";
 import { Card, CardContent, CardHeader, CardTitle } from "@midday/ui/card";
 import { Skeleton } from "@midday/ui/skeleton";
@@ -28,6 +29,7 @@ export async function InvoicesPaid({
   defaultCurrency: string;
 }) {
   const { data } = await getInvoiceSummary({ status: "paid" });
+  const t = await getI18n();
 
   return (
     <Card>
@@ -46,7 +48,9 @@ export async function InvoicesPaid({
         <div className="flex flex-col gap-2">
           <div>Paid</div>
           <div className="text-sm text-muted-foreground">
-            {data?.invoice_count} invoices
+            {t("invoice_count", {
+              count: data?.invoice_count ?? 0,
+            })}
           </div>
         </div>
       </CardContent>
