@@ -18,10 +18,4 @@ export function setupRoutes(app: App) {
     registerRatesApi(app);
     registerStatementPdfApi(app);
     registerTransactionsApi(app);
-
-  app
-    .route("/transactions", transactionsRoutes)
-    .route("/institutions", institutionRoutes)
-    .route("/rates", ratesRoutes)
-    .route("/auth", authRoutes);  
 }

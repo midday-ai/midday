@@ -1,11 +1,11 @@
 import { handleError, handleZodError } from "@/errors";
 import {
-    authMiddleware,
-    cacheMiddleware, errorHandlerMiddleware,
-    jsonFormattingMiddleware,
-    loggingMiddleware,
-    securityMiddleware,
-    timingMiddleware
+  authMiddleware,
+  cacheMiddleware, errorHandlerMiddleware,
+  jsonFormattingMiddleware,
+  loggingMiddleware,
+  securityMiddleware,
+  timingMiddleware
 } from "@/middleware";
 import { enrichContext } from "@/middleware/context-enrich";
 import { swaggerUI } from "@hono/swagger-ui";

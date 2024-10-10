@@ -1,11 +1,13 @@
 import { Analytics, newId } from "@/analytics";
 import { ServiceCache } from "@/cache";
+import { APIKeyRepository } from "@/data/apiKeyRepository";
+import { UserRepository } from "@/data/userRepository";
 import { initDB } from "@/db";
 import { ConsoleLogger } from "@/logger";
 import { LogdrainMetrics } from "@/metric/logdrain";
 import { formatPlatformPrefix } from "@/utils/formatters";
 import type { MiddlewareHandler } from "hono";
-import type { HonoEnv } from "../hono/env";
+import type { HonoEnv, Repository } from "../hono/env";
 
 /**
  * These maps persist between worker executions and are used for caching
@@ -84,6 +86,11 @@ export function init(): MiddlewareHandler<HonoEnv> {
             environment: c.env.ENVIRONMENT,
         });
 
+        const dataRepository: Repository = {
+            apiKeyRepository: new APIKeyRepository(db),
+            userRepository: new UserRepository(db),
+        }
+
         /**
          * The context object containing initialized services.
          * @property {ReturnType<typeof initDB>} db - The database connection.
@@ -97,8 +104,10 @@ export function init(): MiddlewareHandler<HonoEnv> {
             logger: logger,
             cache: cache,
             metrics: metricsClient,
-            analytics: analyticsClient
+            analytics: analyticsClient,
         });
+
+        c.set("repo", dataRepository);
 
         await next();
     };

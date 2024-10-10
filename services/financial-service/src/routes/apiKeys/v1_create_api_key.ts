@@ -1,6 +1,5 @@
 import { APIKeyRepository } from '@/data/apiKeyRepository';
-import { apiKeys } from '@/db/schema';
-import { openApiErrorResponses as ErrorResponses, errorSchemaFactory } from "@/errors";
+import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";
 import { Unkey } from "@unkey/api";
@@ -84,32 +83,32 @@ export const registerV1CreateApiKey = (app: App) => {
             throw new Error("Failed to create API key with Unkey");
         }
 
+        const repository = c.get("repo")
         /**
          * Store the newly created API key in the database.
          * @type {import('@/data/apiKeyRepository').APIKey}
          */
-        const executer = new APIKeyRepository(db);
-        const apikey = await executer.create({
-            userId: apiKeyData.userId,
-            key: result.key,
-            name: apiKeyData.name as string,
-            expiresAt: apiKeyData.expiresAt ?? null,
-            description: null,
-            updatedAt: new Date(),
-            lastUsedAt: null,
-            isActive: true,
-            scope: '',
-            rateLimit: 0,
-            allowedIPs: null,
-            allowedDomains: null,
-            usageCount: 0,
-            lastUsedIP: null,
-            environment: '',
-            revoked: false,
-            revokedAt: null,
-            revokedReason: null,
-            keyId: result.keyId,
-        });
+        const apiKey = await repository.apiKeyRepository.create({
+                userId: apiKeyData.userId,
+                key: result.key,
+                name: apiKeyData.name as string,
+                expiresAt: apiKeyData.expiresAt ?? null,
+                description: null,
+                updatedAt: new Date(),
+                lastUsedAt: null,
+                isActive: true,
+                scope: '',
+                rateLimit: 0,
+                allowedIPs: null,
+                allowedDomains: null,
+                usageCount: 0,
+                lastUsedIP: null,
+                environment: '',
+                revoked: false,
+                revokedAt: null,
+                revokedReason: null,
+                keyId: result.keyId,
+            });
 
         // TODO: Implement caching for the newly created API key
         // Consider using a distributed cache like Redis for better performance
@@ -125,6 +124,6 @@ export const registerV1CreateApiKey = (app: App) => {
         // TODO: Consider implementing a webhook or event system
         // to notify other parts of the application about new API keys
 
-        return c.json(apikey, 200);
+        return c.json(apiKey, 200);
     });
 };

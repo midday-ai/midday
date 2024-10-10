@@ -1,5 +1,7 @@
 import { Analytics } from '@/analytics';
 import { ServiceCache } from '@/cache';
+import { APIKeyRepository } from '@/data/apiKeyRepository';
+import { UserRepository } from '@/data/userRepository';
 import { DrizzleDB } from '@/db';
 import { User } from '@/db/schema';
 import { Env } from '@/env';
@@ -24,6 +26,11 @@ export type ServiceContext = {
     // TODO: add audit log client to log user actions and store in a nosql db
     // TODO: add usage limit client to check if user has exceeded their usage limits
 };
+
+export type Repository = {
+    apiKeyRepository: APIKeyRepository;
+    userRepository: UserRepository;
+}
 
 /**
  * Represents the environment and context for Hono application requests.
@@ -50,6 +57,8 @@ export type HonoEnv = {
         };
         /** Services available for use during request processing. */
         ctx: ServiceContext;
+        /** Repository instances for interacting with the application's data. */
+        repo: Repository;
         /**
          * IP address or region information of the client making the request.
          */
