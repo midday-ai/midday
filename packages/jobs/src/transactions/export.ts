@@ -73,7 +73,7 @@ client.defineJob({
         category:transaction_categories(id, name, description),
         bank_account:bank_accounts(id, name)
       `,
-        { count: "exact" },
+        { count: "exact" }
       )
       .in("id", transactionIds)
       .eq("team_id", teamId);
@@ -108,15 +108,15 @@ client.defineJob({
            * @returns {Promise<Attachment>} A promise that resolves to the processed attachment.
            */
           async (attachment, idx2: number) => {
-            const extension = attachment.name.split(".").pop();
+            const extension = attachment.name?.split(".").pop() ?? "";
             const name =
               idx2 > 0
                 ? `${rowId}_${idx2}.${extension}`
                 : `${rowId}.${extension}`;
 
-            const { data } = await download(client, {
+            const { data } = await download(client as any, {
               bucket: "vault",
-              path: attachment.path.join("/"),
+              path: attachment?.path?.join("/") ?? "",
             });
 
             return {
@@ -124,9 +124,9 @@ client.defineJob({
               name,
               blob: data,
             };
-          },
+          }
         );
-      }),
+      }) ?? []
     );
 
     await generateExport.update("generate-export-attachments-end", {
@@ -148,7 +148,7 @@ client.defineJob({
      * @type {Array<Array<string|null>>}
      */
     const rows = data
-      ?.sort((a, b) => a.date - b.date)
+      ?.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .map((transaction, idx) => [
         transaction?.id,
         transaction.date,
@@ -174,9 +174,9 @@ client.defineJob({
 
     /**
      * Generates CSV content from the formatted rows.
-     * @type {string}
+     * @type {Promise<string>}
      */
-    const csv = await writeToString(rows, {
+    const csv = await writeToString(rows ?? [], {
       headers: [
         "ID",
         "Date",
@@ -214,12 +214,11 @@ client.defineJob({
     const zipWriter = new ZipWriter(zipFileWriter);
 
     zipWriter.add("transactions.csv", new TextReader(csv));
-
-    attachments?.map((attachment) => {
-      if (attachment?.value?.blob) {
+    attachments?.forEach((attachment) => {
+      if (attachment.status === 'fulfilled' && attachment.value?.blob) {
         zipWriter.add(
           attachment.value.name,
-          new BlobReader(attachment.value.blob),
+          new BlobReader(attachment.value.blob)
         );
       }
     });
