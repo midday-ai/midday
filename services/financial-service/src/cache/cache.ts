@@ -4,7 +4,7 @@ import { Env } from '../env';
 /**
  * Options for configuring cache behavior.
  */
-interface CacheOptions {
+export interface CacheOptions {
   /** Time-to-live in seconds for the cached item. */
   expirationTtl?: number;
   /** Time in seconds after which the cached item should be revalidated. */

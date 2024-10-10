@@ -1,3 +1,4 @@
+import { CacheOptions } from '@/cache';
 import { APIKeyRepository } from '@/data/apiKeyRepository';
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
@@ -61,8 +62,8 @@ export type V1CreateApiKeyResponse = z.infer<(typeof route.responses)[200]["cont
 export const registerV1CreateApiKey = (app: App) => {
     app.openapi(route, async (c) => {
         const unkeyApi = new Unkey({ rootKey: c.env.UNKEY_API_KEY });
-        const { db } = c.get("ctx");
         const apiKeyData = c.req.valid("json");
+        const {cache} = c.get("ctx");
 
         /**
          * Create a new API key using the Unkey service.
@@ -87,7 +88,7 @@ export const registerV1CreateApiKey = (app: App) => {
          * Retrieve the API key repository from the context.
          */
         const repository = c.get("repo")
-        
+
         /**
          * Store the newly created API key in the database.
          * @type {import('@/data/apiKeyRepository').APIKey}
@@ -117,7 +118,12 @@ export const registerV1CreateApiKey = (app: App) => {
         // TODO: Implement caching for the newly created API key
         // Consider using a distributed cache like Redis for better performance
         // Example:
-        // await cache.set(`api_key:${apiKey.id}`, JSON.stringify(apiKey), 'EX', 3600);
+        const cacheOpts: CacheOptions = {
+            expirationTtl: 86400,
+            revalidateAfter: 3600,
+        };
+
+        await cache.set(`api_key:${apiKey.id}`, JSON.stringify(apiKey), cacheOpts);
 
         // TODO: Implement rate limiting for API key creation
         // This can help prevent abuse and ensure fair usage
