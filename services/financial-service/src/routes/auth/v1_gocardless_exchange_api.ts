@@ -94,7 +94,7 @@ export const registerV1GoCardLessExchangeApi = (app: App) => {
             return c.json({
                 error: {
                     message,
-                    docs: "https://api.example.com/docs/errors",
+                    docs: "https://engineering-docs.solomon-ai.app/errors",
                     requestId: c.get("requestId"),
                     code,
                 }

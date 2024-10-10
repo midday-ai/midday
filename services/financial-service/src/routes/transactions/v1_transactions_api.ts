@@ -63,7 +63,7 @@ export const registerRegularTransactionsApi = (app: App) => {
 
         try {
             const data = await api.getTransactions({
-                accountId, // For Stripe, this will be the account holder reference
+                accountId,
                 accessToken,
                 accountType: accountType as AccountType,
                 latest,
@@ -80,7 +80,7 @@ export const registerRegularTransactionsApi = (app: App) => {
             return c.json({
                 error: {
                     message,
-                    docs: "https://api.example.com/docs/errors",
+                    docs: "https://engineering-docs.solomon-ai.app/errors",
                     requestId: c.get("requestId"),
                     code,
                 }

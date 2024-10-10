@@ -100,7 +100,7 @@ export const registerV1CreateApiKey = (app: App) => {
                 expiresAt: apiKeyData.expiresAt ?? null,
                 description: null,
                 updatedAt: new Date(),
-                lastUsedAt: null,
+                lastUsedAt: new Date(),
                 isActive: true,
                 scope: '',
                 rateLimit: 0,
@@ -123,6 +123,7 @@ export const registerV1CreateApiKey = (app: App) => {
             revalidateAfter: 3600,
         };
 
+        // cache the newly created API key
         await cache.set(`api_key:${apiKey.id}`, JSON.stringify(apiKey), cacheOpts);
 
         // TODO: Implement rate limiting for API key creation

@@ -39,7 +39,7 @@ export class ServiceCache {
    * @param prefix - An optional prefix for all cache keys.
    */
   constructor(env: Env, prefix: string = '') {
-    this.kv = env.KV;
+    this.kv = env.KV as KVNamespace<any>;
     this.prefix = prefix;
   }
 
