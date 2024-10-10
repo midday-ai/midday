@@ -428,8 +428,6 @@ export const assistantSettingsSchema = z.object({
   enabled: z.boolean().optional(),
 });
 
-export const requestAccessSchema = z.void();
-
 export const parseDateSchema = z
   .date()
   .transform((value) => new Date(value))
@@ -490,6 +488,26 @@ export const filterTrackerSchema = z.object({
     .enum(["in_progress", "completed"])
     .optional()
     .describe("The status to filter by"),
+});
+
+export const filterInvoiceSchema = z.object({
+  name: z.string().optional().describe("The name to search for"),
+  statuses: z
+    .array(z.enum(["draft", "overdue", "paid", "unpaid", "canceled"]))
+    .optional()
+    .describe("The statuses to filter by"),
+  start: parseDateSchema
+    .optional()
+    .describe("The start date when to retrieve from. Return ISO-8601 format."),
+  end: parseDateSchema
+    .optional()
+    .describe(
+      "The end date when to retrieve data from. If not provided, defaults to the current date. Return ISO-8601 format.",
+    ),
+  customers: z
+    .array(z.string())
+    .optional()
+    .describe("The customers to filter by"),
 });
 
 export const createTransactionSchema = z.object({

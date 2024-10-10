@@ -7,6 +7,8 @@ import {
   type GetBurnRateQueryParams,
   type GetCategoriesParams,
   type GetExpensesQueryParams,
+  type GetInvoiceSummaryParams,
+  type GetInvoicesQueryParams,
   type GetMetricsParams,
   type GetRunwayQueryParams,
   type GetSpendingParams,
@@ -18,8 +20,12 @@ import {
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
+  getCustomersQuery,
   getExpensesQuery,
+  getInvoiceSummaryQuery,
+  getInvoicesQuery,
   getMetricsQuery,
+  getPaymentStatusQuery,
   getRunwayQuery,
   getSpendingQuery,
   getTeamBankAccountsQuery,
@@ -444,4 +450,88 @@ export const getTeamSettings = async () => {
       revalidate: 3600,
     },
   )();
+};
+
+export const getInvoiceSummary = async (
+  params?: Omit<GetInvoiceSummaryParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  return unstable_cache(
+    async () => {
+      return getInvoiceSummaryQuery(supabase, { ...params, teamId });
+    },
+    ["invoice_summary", teamId],
+    {
+      tags: [`invoice_summary_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
+};
+
+export const getPaymentStatus = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getPaymentStatusQuery(supabase, teamId);
+    },
+    ["payment_status", teamId],
+    {
+      tags: [`payment_status_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getCustomers = async () => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getCustomersQuery(supabase, teamId);
+    },
+    ["customers", teamId],
+    {
+      tags: [`customers_${teamId}`],
+      revalidate: 3600,
+    },
+  )();
+};
+
+export const getInvoices = async (
+  params?: Omit<GetInvoicesQueryParams, "teamId">,
+) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getInvoicesQuery(supabase, { ...params, teamId });
+    },
+    ["invoices", teamId],
+    {
+      tags: [`invoices_${teamId}`],
+      revalidate: 3600,
+    },
+  )(params);
 };

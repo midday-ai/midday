@@ -186,6 +186,59 @@ export type Database = {
           },
         ]
       }
+      customers: {
+        Row: {
+          address_line_1: string | null
+          address_line_2: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          note: string | null
+          state: string | null
+          team_id: string
+          zip: string | null
+        }
+        Insert: {
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          note?: string | null
+          state?: string | null
+          team_id?: string
+          zip?: string | null
+        }
+        Update: {
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          note?: string | null
+          state?: string | null
+          team_id?: string
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documents: {
         Row: {
           body: string | null
@@ -370,6 +423,94 @@ export type Database = {
             columns: ["transaction_id"]
             isOneToOne: false
             referencedRelation: "transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number | null
+          company_datails: Json | null
+          created_at: string
+          currency: string | null
+          customer_datails: Json | null
+          customer_id: string | null
+          destination_account_id: string | null
+          due_date: string | null
+          id: string
+          internal_note: string | null
+          invoice_date: string | null
+          invoice_number: string | null
+          line_items: Json | null
+          note: string | null
+          paid_at: string | null
+          payment_datails: Json | null
+          status: Database["public"]["Enums"]["invoice_status"] | null
+          team_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number | null
+          company_datails?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_datails?: Json | null
+          customer_id?: string | null
+          destination_account_id?: string | null
+          due_date?: string | null
+          id?: string
+          internal_note?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line_items?: Json | null
+          note?: string | null
+          paid_at?: string | null
+          payment_datails?: Json | null
+          status?: Database["public"]["Enums"]["invoice_status"] | null
+          team_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number | null
+          company_datails?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_datails?: Json | null
+          customer_id?: string | null
+          destination_account_id?: string | null
+          due_date?: string | null
+          id?: string
+          internal_note?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line_items?: Json | null
+          note?: string | null
+          paid_at?: string | null
+          payment_datails?: Json | null
+          status?: Database["public"]["Enums"]["invoice_status"] | null
+          team_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_destination_account_id_fkey"
+            columns: ["destination_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]
@@ -1236,6 +1377,12 @@ export type Database = {
             }
             Returns: unknown
           }
+      generate_invoice_sequence: {
+        Args: {
+          team_id: string
+        }
+        Returns: number
+      }
       get_all_transactions_by_account: {
         Args: {
           account_id: string
@@ -1375,6 +1522,26 @@ export type Database = {
           value: number
           recurring_value: number
           currency: string
+        }[]
+      }
+      get_invoice_summary: {
+        Args: {
+          team_id: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+        }
+        Returns: {
+          total_amount: number
+          currency: string
+          invoice_count: number
+        }[]
+      }
+      get_payment_score: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          score: number
+          payment_status: string
         }[]
       }
       get_profit: {
@@ -1752,6 +1919,7 @@ export type Database = {
       connection_status: "disconnected" | "connected" | "unknown"
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"
       inbox_type: "invoice" | "expense"
+      invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "cancelled"
       reportTypes: "profit" | "revenue" | "burn_rate" | "expense"
       teamRoles: "owner" | "member"
       trackerStatus: "in_progress" | "completed"
