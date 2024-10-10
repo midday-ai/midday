@@ -71,7 +71,7 @@ export const mapTransactionCategory = ({
   // Helper function to check if a string includes any of the given keywords
   const includesAny = (str: string, keywords: string[]): boolean =>
     keywords.some((keyword) =>
-      str?.toLowerCase().includes(keyword.toLowerCase())
+      str?.toLowerCase().includes(keyword.toLowerCase()),
     );
 
   // Income
@@ -413,7 +413,7 @@ export const transformAccount = ({
  * @returns A standardized BaseBalance object.
  */
 export const transformAccountBalance = (
-  balances?: TransformAccountBalance
+  balances?: TransformAccountBalance,
 ): BaseBalance => ({
   currency:
     balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
@@ -439,7 +439,7 @@ export const transformInstitution = (institution: TransformInstitution) => ({
  * @returns A standardized frequency string.
  */
 const transformRecurringTransactionFrequency = (
-  frequency: RecurringTransactionFrequency
+  frequency: RecurringTransactionFrequency,
 ) => {
   switch (frequency) {
     case "WEEKLY":
@@ -463,7 +463,7 @@ const transformRecurringTransactionFrequency = (
  * @returns A standardized RecurringTransactionAmount object.
  */
 export const transformRecurringTransactionAmount = (
-  amount: TransactionStreamAmount
+  amount: TransactionStreamAmount,
 ): RecurringTransactionAmount => {
   return {
     amount: amount.amount || 0,
@@ -478,7 +478,7 @@ export const transformRecurringTransactionAmount = (
  * @returns A standardized RecurringTransactionStatus string.
  */
 export const transformRecurringTransactionStatus = (
-  status: TransactionStreamStatus
+  status: TransactionStreamStatus,
 ): RecurringTransactionStatus => {
   switch (status) {
     case "MATURE":
@@ -498,7 +498,7 @@ export const transformRecurringTransactionStatus = (
  * @returns A standardized RecurringTransactionCategory object or null.
  */
 const transformRecurringTransactionCategory = (
-  category: PersonalFinanceCategory | null | undefined
+  category: PersonalFinanceCategory | null | undefined,
 ): RecurringTransactionCategory | null | undefined => {
   if (!category) {
     return null;
@@ -517,21 +517,21 @@ const transformRecurringTransactionCategory = (
  * @returns A standardized RecurringTransaction object.
  */
 export const transformRecurringTransaction = (
-  transaction: TransformRecurringTransaction
+  transaction: TransformRecurringTransaction,
 ): RecurringTransaction => {
   // transform the recurrent transaction frequency
   const frequency = transformRecurringTransactionFrequency(
-    transaction.frequency
+    transaction.frequency,
   );
 
   // convert average_amount to amount
   const average_amount = transformRecurringTransactionAmount(
-    transaction.average_amount
+    transaction.average_amount,
   );
 
   // convert last_amount to amount
   const last_amount = transformRecurringTransactionAmount(
-    transaction.last_amount
+    transaction.last_amount,
   );
 
   // transform the status
@@ -539,7 +539,7 @@ export const transformRecurringTransaction = (
 
   // transform the personal finance category
   const personal_finance_category = transformRecurringTransactionCategory(
-    transaction.personal_finance_category
+    transaction.personal_finance_category,
   );
 
   return {

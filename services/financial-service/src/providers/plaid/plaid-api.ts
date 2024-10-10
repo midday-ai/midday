@@ -223,7 +223,12 @@ export class PlaidApi {
       secret: this.#clientSecret,
       client_name: "simfiny",
       products: [Products.Transactions],
-      required_if_supported_products: [Products.Liabilities, Products.Investments, Products.RecurringTransactions, Products.Statements],
+      required_if_supported_products: [
+        Products.Liabilities,
+        Products.Investments,
+        Products.RecurringTransactions,
+        Products.Statements,
+      ],
       language,
       access_token: accessToken,
       country_codes: this.#countryCodes,
