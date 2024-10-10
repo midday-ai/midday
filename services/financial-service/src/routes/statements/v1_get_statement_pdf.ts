@@ -38,6 +38,7 @@ export const registerStatementPdfApi = (app: App) => {
         const envs = env(c);
         const { provider, accessToken, statementId, accountId, userId, teamId } =
             c.req.valid("query");
+            
 
         const api = new Provider({
             provider,

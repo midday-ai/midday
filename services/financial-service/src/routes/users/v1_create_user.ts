@@ -1,13 +1,13 @@
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
-import { HonoEnv } from "@/hono/env";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { CreateUserSchema, UserSchema } from "./schemas";
+import { App } from "@/hono/app";
+import { createRoute, z } from "@hono/zod-openapi";
+import { CreateUserSchema, CreateUserSchemaResponse } from "./schemas";
 
 const createUserRoute = createRoute({
     tags: ["users"],
-    operationId: "createUser",
+    operationId: "createUserApi",
     method: "post",
-    path: "/users",
+    path: "/user",
     summary: "Create User",
     request: {
         body: {
@@ -22,7 +22,7 @@ const createUserRoute = createRoute({
         200: {
             content: {
                 "application/json": {
-                    schema: UserSchema,
+                    schema: CreateUserSchemaResponse,
                 },
             },
             description: "User created successfully",
@@ -31,7 +31,7 @@ const createUserRoute = createRoute({
     },
 });
 
-export const registerV1CreateUser = (app: OpenAPIHono<HonoEnv>) => {
+export const registerV1CreateUser = (app: App) => {
     app.openapi(createUserRoute, async (c) => {
         const userData = c.req.valid("json");
         const repo = c.get("repo");

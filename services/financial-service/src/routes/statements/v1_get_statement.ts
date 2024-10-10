@@ -78,9 +78,13 @@ export const registerGetStatementsApi = (app: App) => {
             });
 
             return c.json({
-                data: statements,
-                status: 200,
-            });
+                data: statements.map(statement => ({
+                    account_id: statement.account_id,
+                    statement_id: statement.statement_id,
+                    month: statement.month,
+                    year: statement.year
+                })),
+            }, 200);
         } catch (error) {
             const { message, code } = createErrorResponse(error, c.get("requestId"));
             return c.json({

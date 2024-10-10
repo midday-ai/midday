@@ -7,6 +7,7 @@ import { registerInstitutionsApi } from "./institutions";
 import { registerRatesApi } from "./rates";
 import { registerStatementPdfApi } from "./statements/v1_get_statement_pdf";
 import { registerTransactionsApi } from "./transactions";
+import { registerUserRoutes } from "./users";
 
 export function setupRoutes(app: App) {
     // register the accounts api route
@@ -18,4 +19,5 @@ export function setupRoutes(app: App) {
     registerRatesApi(app);
     registerStatementPdfApi(app);
     registerTransactionsApi(app);
+    registerUserRoutes(app);
 }

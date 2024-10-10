@@ -1,62 +1,61 @@
-import { users } from '@/db/schema';
-import { openApiErrorResponses as ErrorResponses } from "@/errors";
-import { HonoEnv } from "@/hono/env";
-import { createErrorResponse } from "@/utils/error";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { UpdateUserSchema, UserSchema } from "./schemas";
+import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/errors";
+import { App } from "@/hono/app";
+import { createRoute, z } from "@hono/zod-openapi";
+import { UpdateUserSchema, UpdateUserSchemaResponse } from "./schemas";
 
 const updateUserRoute = createRoute({
-  tags: ["users"],
-  operationId: "updateUser",
-  method: "put",
-  path: "/users/{id}",
-  summary: "Update User",
-  request: {
-    params: z.object({
-      id: z.string(),
-    }),
-    body: {
-      content: {
-        "application/json": {
-          schema: UpdateUserSchema,
+    tags: ["users"],
+    operationId: "updateUserApi",
+    method: "put",
+    path: "/user/{id}",
+    summary: "Update User",
+    request: {
+        params: z.object({
+            id: z.string(),
+        }),
+        body: {
+            content: {
+                "application/json": {
+                    schema: UpdateUserSchema,
+                },
+            },
         },
-      },
     },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: UserSchema,
+    responses: {
+        200: {
+            content: {
+                "application/json": {
+                    schema: UpdateUserSchemaResponse,
+                },
+            },
+            description: "User updated successfully",
         },
-      },
-      description: "User updated successfully",
+        ...ErrorResponses
     },
-    ...ErrorResponses
-  },
 });
+export const registerV1UpdateUser = (app: App) => {
+    app.openapi(updateUserRoute, async (c) => {
+        const { id } = c.req.valid('param');
+        const repo = c.get("repo");
+        const { user: userDb } = repo;
+        const updateData = c.req.valid('json');
 
-export const registerV1UpdateUser = (app: OpenAPIHono<HonoEnv>) => {
-  app.openapi(updateUserRoute, async (c) => {
-    const { db } = c.get('ctx');
-    const { id } = c.req.valid('param');
-    const updateData = c.req.valid('json');
+        const updatedUser = await userDb.update(id, updateData);
+        if (!updatedUser) {
+            throw new ServiceApiError({
+                code: "NOT_FOUND",
+                message: "User not found"
+            });
+        }
 
-    try {
-      const [updatedUser] = await db.update(users)
-        .set(updateData)
-        .where(eq(users.id, id))
-        .returning();
-
-      if (!updatedUser) {
-        return c.json({ error: "User not found" }, 404);
-      }
-      return c.json(updatedUser, 200);
-    } catch (error) {
-      const errorResponse = createErrorResponse(error, c.get("requestId"));
-      return c.json(errorResponse, 500);
-    }
-  });
+        return c.json({
+            id: updatedUser.id,
+            email: updatedUser.email,
+            name: updatedUser.name,
+            createdAt: updatedUser.createdAt?.toISOString(),
+            updatedAt: updatedUser.updatedAt?.toISOString()
+        }, 200);
+    });
 };
 
 export type V1UpdateUserRoute = typeof updateUserRoute;

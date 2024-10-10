@@ -64,7 +64,7 @@ export type V1GoCardLessAgreementApiResponse = z.infer<
 /**
  * Registers the GoCardLess Agreement API route with the application.
  * 
- * @param {OpenAPIHono<HonoEnv>} app - The Hono application instance.
+ * @param {App} app - The Hono application instance.
  * @returns {void}
  * 
  * @remarks

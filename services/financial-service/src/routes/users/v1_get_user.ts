@@ -1,13 +1,16 @@
-import { UserRepository } from "@/data/userRepository";
 import { openApiErrorResponses as ErrorResponses, ServiceApiError } from "@/errors";
-import { HonoEnv } from "@/hono/env";
-import { createErrorResponse } from "@/utils/error";
-import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
-import { UserSchema } from "./schemas";
+import { App } from "@/hono/app";
+import { createRoute, z } from "@hono/zod-openapi";
+import { GetUserResponse } from "./schemas";
 
+/**
+ * OpenAPI route configuration for getting a user by ID.
+ * @remarks
+ * This route is used to retrieve a single user's information based on their unique identifier.
+ */
 const getUserRoute = createRoute({
     tags: ["users"],
-    operationId: "getUser",
+    operationId: "getUserApi",
     method: "get",
     path: "/users/{id}",
     summary: "Get User",
@@ -20,7 +23,7 @@ const getUserRoute = createRoute({
         200: {
             content: {
                 "application/json": {
-                    schema: UserSchema,
+                    schema: GetUserResponse,
                 },
             },
             description: "User retrieved successfully",
@@ -28,7 +31,21 @@ const getUserRoute = createRoute({
         ...ErrorResponses
     },
 });
-export const registerV1GetUser = (app: OpenAPIHono<HonoEnv>) => {
+
+/**
+ * Registers the GET user route with the application.
+ * @param app - The Hono application instance.
+ * @remarks
+ * This function sets up the route handler for retrieving a user by ID.
+ * It performs the following steps:
+ * 1. Extracts the user ID from the request parameters.
+ * 2. Retrieves the user repository from the context.
+ * 3. Attempts to fetch the user by ID.
+ * 4. If the user is not found, it throws a NOT_FOUND error.
+ * 5. If the user is found, it returns the user data in JSON format.
+ * @throws {ServiceApiError} When the user is not found.
+ */
+export const registerV1GetUser = (app: App) => {
     app.openapi(getUserRoute, async (c) => {
         const { id } = c.req.valid('param');
         const repo = c.get("repo");
@@ -42,7 +59,6 @@ export const registerV1GetUser = (app: OpenAPIHono<HonoEnv>) => {
             });
         }
 
-        
         return c.json({
             id: user.id,
             name: user.name,
@@ -53,6 +69,11 @@ export const registerV1GetUser = (app: OpenAPIHono<HonoEnv>) => {
     });
 };
 
+/** Type representing the GET user route configuration. */
 export type V1GetUserRoute = typeof getUserRoute;
+
+/** Type representing the request parameters for the GET user route. */
 export type V1GetUserRequest = z.infer<typeof getUserRoute.request.params>;
+
+/** Type representing the response body for a successful GET user request. */
 export type V1GetUserResponse = z.infer<(typeof getUserRoute.responses)[200]["content"]["application/json"]["schema"]>;
