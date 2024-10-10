@@ -1,3 +1,10 @@
+## [0.12.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.12.0...v0.12.1) (2024-10-10)
+
+
+### Bug Fixes
+
+* update the batch transaction sync jobs ([#53](https://github.com/SolomonAIEngineering/solomonai/issues/53)) ([4771d00](https://github.com/SolomonAIEngineering/solomonai/commit/4771d00618e3e3831663c552381ea4bc2637881f))
+
 # [0.12.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.11.0...v0.12.0) (2024-10-10)
 
 
