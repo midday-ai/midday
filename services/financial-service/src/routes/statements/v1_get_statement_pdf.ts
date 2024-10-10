@@ -6,10 +6,14 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { env } from "hono/adapter";
 import { StatementPdfParamsSchema } from "./schema";
 
+/**
+ * OpenAPI route configuration for retrieving a statement PDF.
+ */
 const route = createRoute({
     method: "get",
     path: "/statements/pdf",
     summary: "Get Statement PDF",
+    tags: ["statements"],
     request: {
         query: StatementPdfParamsSchema,
     },
@@ -17,10 +21,7 @@ const route = createRoute({
         200: {
             content: {
                 "application/pdf": {
-                    schema: {
-                        type: "string",
-                        format: "binary",
-                    },
+                    schema: z.any(),
                 },
             },
             description: "Retrieve statement PDF",
@@ -31,14 +32,16 @@ const route = createRoute({
 
 export type GetStatementPdfRoute = typeof route;
 export type GetStatementPdfRequest = z.infer<typeof route.request.query>;
-export type GetStatementPdfResponse = z.infer<z.ZodType<typeof route.responses["200"]["content"]["application/pdf"]["schema"]>>;
 
+/**
+ * Registers the Statement PDF API endpoint with the application.
+ * 
+ * @param app - The Hono application instance.
+ */
 export const registerStatementPdfApi = (app: App) => {
     app.openapi(route, async (c) => {
         const envs = env(c);
-        const { provider, accessToken, statementId, accountId, userId, teamId } =
-            c.req.valid("query");
-            
+        const { provider, accessToken, statementId, accountId, userId, teamId } = c.req.valid("query");
 
         const api = new Provider({
             provider,
@@ -57,21 +60,26 @@ export const registerStatementPdfApi = (app: App) => {
                 teamId,
             });
 
-            c.header("Content-Type", "application/pdf");
-            c.header("Content-Disposition", `attachment; filename="${filename}"`);
-            return new Response(pdf, {
-                headers: c.res.headers,
+            // Ensure pdf is a Uint8Array or ArrayBuffer
+            const pdfData = new Uint8Array(pdf);
+
+            return new Response(pdfData, {
+                status: 200,
+                headers: {
+                    "Content-Type": "application/pdf",
+                    "Content-Disposition": `attachment; filename="${filename}"`,
+                },
             });
         } catch (error) {
-            const { message, code } = createErrorResponse(error, c.get("requestId"));
+            const errorResponse = createErrorResponse(error, c.get("requestId"));
             return c.json({
                 error: {
-                    message,
+                    message: errorResponse.message,
                     docs: "https://engineering-docs.solomon-ai.app/errors",
                     requestId: c.get("requestId"),
-                    code,
+                    code: errorResponse.code,
                 }
             }, 400);
         }
     });
-}
+};
