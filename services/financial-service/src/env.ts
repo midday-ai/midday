@@ -1,4 +1,5 @@
 import type { UserActionMessageBody } from "@/message/user-action-message";
+import { D1Database, Fetcher, KVNamespace, Queue, R2Bucket } from "@cloudflare/workers-types";
 import { z } from "zod";
 
 export const zEnv = z.object({

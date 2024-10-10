@@ -60,13 +60,35 @@ export type V1ApisDeleteAccountsApiResponse = z.infer<
  * for the provider, accountId, and accessToken. The function uses these parameters to
  * authenticate and perform the account deletion operation.
  *
- * @throws {Error} Throws an error if the account deletion fails.
+ * The endpoint follows these steps:
+ * 1. Extracts environment variables using the `env` function.
+ * 2. Validates and extracts query parameters (provider, accountId, accessToken) from the request.
+ * 3. Initializes a Provider instance with necessary configurations.
+ * 4. Calls the `deleteAccounts` method on the Provider instance to perform the account deletion.
+ * 5. Returns a JSON response indicating the success of the operation.
+ *
+ * @throws {Error} Throws an error if the account deletion fails. This could be due to:
+ *   - Invalid query parameters
+ *   - Authentication failure
+ *   - Provider API errors
+ *   - Network issues
+ *
+ * @returns {Promise<Response>} A promise that resolves to a Hono Response object.
+ *   On success, it returns a JSON object with `{ success: true }` and a 200 status code.
+ *   On failure, it may return appropriate error responses as defined in the route configuration.
  *
  * @example
  * ```typescript
  * const app = new Hono();
  * registerV1ApisDeleteAccountsApi(app);
+ * 
+ * // The endpoint can then be called like this:
+ * // DELETE /v1/api.accountsApi?provider=example&accountId=123&accessToken=xyz
  * ```
+ *
+ * @see {@link Provider} for details on the Provider class and its methods.
+ * @see {@link DeleteAccountsParamsSchema} for the expected query parameter structure.
+ * @see {@link DeleteSchema} for the response schema.
  */
 export const registerV1ApisDeleteAccountsApi = (app: App) => {
     app.openapi(route, async (c) => {

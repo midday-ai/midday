@@ -1,5 +1,5 @@
 import type { AccountType } from "@/utils/account";
-import { R2Bucket } from "@cloudflare/workers-types";
+import { Fetcher, KVNamespace, R2Bucket } from "@cloudflare/workers-types";
 
 export type Providers = "teller" | "plaid" | "gocardless" | "stripe";
 

@@ -80,3 +80,9 @@ consumers = [
   { queue = "user-actions-staging", max_batch_size = 10, max_retries = 10, dead_letter_queue = "user-actions-staging-dlq" },
   { queue = "user-actions-staging-dlq", max_batch_size = 10, max_retries = 10 },
 ]
+
+# local
+[[env.local.d1_databases]]
+binding = "DB" # i.e. available in your Worker on env.DB
+database_name = "engine-db"
+database_id = "50694d1f-d468-4807-a60f-3e3c9287781e"

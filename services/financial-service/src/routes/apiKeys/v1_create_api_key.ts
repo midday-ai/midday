@@ -6,6 +6,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { Unkey } from "@unkey/api";
 import { APIKeySchema, CreateAPIKeySchema } from "./schema";
 
+/**
+ * OpenAPI route definition for creating a new API key.
+ * @description Defines the HTTP method, path, security, request body, and response schemas for the API key creation endpoint.
+ */
 const route = createRoute({
     method: "post",
     path: "/v1/api.apiKeys",
@@ -36,12 +40,35 @@ export type V1CreateApiKeyRoute = typeof route;
 export type V1CreateApiKeyRequest = z.infer<(typeof route.request.body.content)["application/json"]["schema"]>;
 export type V1CreateApiKeyResponse = z.infer<(typeof route.responses)[200]["content"]["application/json"]["schema"]>;
 
+/**
+ * Registers the API key creation route with the application.
+ * 
+ * @param app - The Hono application instance.
+ * @description This function sets up the OpenAPI route for creating a new API key.
+ * It handles the API key creation process, including:
+ * - Generating a new key using the Unkey service
+ * - Storing the key information in the database
+ * - Returning the created API key details
+ * 
+ * @remarks
+ * This function includes several TODOs for future improvements:
+ * - Implementing caching for the newly created API key
+ * - Adding rate limiting for API key creation
+ * - Implementing an audit log for API key creation events
+ * - Setting up a webhook or event system for notifications
+ * 
+ * @throws {Error} If the API key creation with Unkey fails
+ */
 export const registerV1CreateApiKey = (app: App) => {
     app.openapi(route, async (c) => {
         const unkeyApi = new Unkey({ rootKey: c.env.UNKEY_API_KEY });
         const { db } = c.get("ctx");
         const apiKeyData = c.req.valid("json");
 
+        /**
+         * Create a new API key using the Unkey service.
+         * @throws {Error} If the API key creation fails
+         */
         const { result } = await unkeyApi.keys.create({
             apiId: "solomon_ai_api",
             prefix: "sk_live_solomon_ai",
@@ -57,6 +84,10 @@ export const registerV1CreateApiKey = (app: App) => {
             throw new Error("Failed to create API key with Unkey");
         }
 
+        /**
+         * Store the newly created API key in the database.
+         * @type {import('@/data/apiKeyRepository').APIKey}
+         */
         const executer = new APIKeyRepository(db);
         const apikey = await executer.create({
             userId: apiKeyData.userId,

@@ -1,304 +1,51 @@
-import { openApiErrorResponses as ErrorResponses } from "@/errors";
-import { HonoEnv } from "@/hono/env";
-import { GoCardLessApi } from "@/providers/gocardless/gocardless-api";
-import { PlaidApi } from "@/providers/plaid/plaid-api";
-import { createErrorResponse } from "@/utils/error";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { env } from "hono/adapter";
-import {
-  GoCardLessAgreementBodySchema,
-  GoCardLessAgreementSchema,
-  GoCardLessExchangeBodySchema,
-  GoCardLessExchangeSchema,
-  GoCardLessLinkBodySchema,
-  GoCardLessLinkSchema,
-  PlaidExchangeBodySchema,
-  PlaidExchangeSchema,
-  PlaidLinkBodySchema,
-  PlaidLinkSchema,
-} from "./schema";
+import { App } from "@/hono/app";
+import { registerV1GoCardLessAgreementApi } from "./v1_gocardless_agreement_api";
+import { registerV1GoCardLessExchangeApi } from "./v1_gocardless_exchange_api";
+import { registerV1GoCardLessLinkApi } from "./v1_gocardless_link_api";
+import { registerV1ApisPlaidExchangeTokenApi } from "./v1_plaid_exchange_token_api";
+import { registerV1ApisPlaidLinkAccountsApi } from "./v1_plaid_link_account_api";
 
-const app = new OpenAPIHono<HonoEnv>();
+/**
+ * Registers all authentication-related APIs for the application.
+ * 
+ * This function is responsible for setting up various authentication endpoints
+ * for both GoCardless and Plaid services. It centralizes the registration of
+ * these APIs, making it easier to manage and maintain authentication-related
+ * routes in one place.
+ *
+ * @param {App} app - The main application instance to which the APIs will be registered.
+ * 
+ * @remarks
+ * The following APIs are registered:
+ * - GoCardless Link API
+ * - GoCardless Agreement API
+ * - GoCardless Exchange API
+ * - Plaid Link Accounts API
+ * - Plaid Exchange Token API
+ * 
+ * Each of these APIs is registered using its respective registration function,
+ * which is imported from separate modules to keep the codebase modular and maintainable.
+ */
+const registerAuthApi = (app: App) => {
+  registerV1GoCardLessLinkApi(app);
+  registerV1GoCardLessAgreementApi(app);
+  registerV1GoCardLessExchangeApi(app);
+  registerV1ApisPlaidLinkAccountsApi(app);
+  registerV1ApisPlaidExchangeTokenApi(app);
+}
 
-const linkPlaidRoute = createRoute({
-  method: "post",
-  path: "/plaid/link",
-  summary: "Auth Link (Plaid)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: PlaidLinkBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: PlaidLinkSchema,
-        },
-      },
-      description: "Retrieve Link",
-    },
-       ...ErrorResponses
+export {
+  registerAuthApi
+};
 
-  },
-});
-
-const exchangePlaidRoute = createRoute({
-  method: "post",
-  path: "/plaid/exchange",
-  summary: "Exchange token (Plaid)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: PlaidExchangeBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: PlaidExchangeSchema,
-        },
-      },
-      description: "Retrieve Exchange",
-    },
-       ...ErrorResponses
-
-  },
-});
-
-const linkGoCardLessRoute = createRoute({
-  method: "post",
-  path: "/gocardless/link",
-  summary: "Auth link (GoCardLess)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: GoCardLessLinkBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: GoCardLessLinkSchema,
-        },
-      },
-      description: "Retrieve Link",
-    },
-       ...ErrorResponses
-
-  },
-});
-
-const agreementGoCardLessRoute = createRoute({
-  method: "post",
-  path: "/gocardless/agreement",
-  summary: "Agreement (GoCardLess)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: GoCardLessAgreementBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: GoCardLessAgreementSchema,
-        },
-      },
-      description: "Retrieve Agreement",
-    },
-       ...ErrorResponses
-
-  },
-});
-
-const exchangeGoCardLessRoute = createRoute({
-  method: "post",
-  path: "/gocardless/exchange",
-  summary: "Exchange token (GoCardLess)",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: GoCardLessExchangeBodySchema,
-        },
-      },
-    },
-  },
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: GoCardLessExchangeSchema,
-        },
-      },
-      description: "Retrieve Exchange",
-    },
-       ...ErrorResponses
-
-  },
-});
-
-app.openapi(linkPlaidRoute, async (c) => {
-  const envs = env(c);
-
-  const { userId, language, accessToken } = await c.req.json();
-
-  const api = new PlaidApi({
-    kv: c.env.KV,
-    r2: c.env.STORAGE,
-    envs,
-  });
-
-  try {
-    const { data } = await api.linkTokenCreate({
-      userId,
-      language,
-      accessToken,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(exchangePlaidRoute, async (c) => {
-  const envs = env(c);
-
-  const { token } = await c.req.json();
-
-  const api = new PlaidApi({
-    kv: c.env.KV,
-    r2: c.env.STORAGE,
-    envs,
-  });
-
-  try {
-    const data = await api.itemPublicTokenExchange({
-      publicToken: token,
-    });
-
-    return c.json(data, 200);
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(linkGoCardLessRoute, async (c) => {
-  const envs = env(c);
-
-  const { institutionId, agreement, redirect } = await c.req.json();
-
-  const api = new GoCardLessApi({
-    kv: c.env.KV,
-    r2: c.env.STORAGE,
-    envs,
-  });
-
-  try {
-    const data = await api.buildLink({
-      institutionId,
-      agreement,
-      redirect,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(exchangeGoCardLessRoute, async (c) => {
-  const envs = env(c);
-
-  const { institutionId, transactionTotalDays } = await c.req.json();
-
-  const api = new GoCardLessApi({
-    kv: c.env.KV,
-    r2: c.env.STORAGE,
-    envs,
-  });
-
-  try {
-    const data = await api.createEndUserAgreement({
-      institutionId,
-      transactionTotalDays,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-app.openapi(agreementGoCardLessRoute, async (c) => {
-  const envs = env(c);
-
-  const { institutionId, transactionTotalDays } = await c.req.json();
-
-  const api = new GoCardLessApi({
-    kv: c.env.KV,
-    r2: c.env.STORAGE,
-    envs,
-  });
-
-  try {
-    const data = await api.createEndUserAgreement({
-      institutionId,
-      transactionTotalDays,
-    });
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    const errorResponse = createErrorResponse(error, c.get("requestId"));
-
-    return c.json(errorResponse, 400);
-  }
-});
-
-export default app;
+/**
+ * @fileoverview
+ * This module serves as the central point for registering all authentication-related
+ * APIs in the application. It imports and aggregates various API registration functions
+ * for both GoCardless and Plaid services, providing a single entry point to set up
+ * all authentication routes.
+ * 
+ * By centralizing the registration of these APIs, this module simplifies the process
+ * of adding or removing authentication endpoints and ensures consistency in how
+ * these APIs are integrated into the main application.
+ */

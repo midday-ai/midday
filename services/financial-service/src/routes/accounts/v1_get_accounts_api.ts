@@ -48,12 +48,24 @@ export type V1ApisGetAccountsApiResponse = z.infer<
  * 
  * @param app - The Hono app instance to register the route with.
  * 
- * @throws {Error} If there's an issue with the Provider or data retrieval.
+ * @throws {Error} If there's an issue with the Provider initialization or data retrieval.
+ * 
+ * @remarks
+ * The function performs the following steps:
+ * 1. Extracts query parameters from the request.
+ * 2. Initializes a Provider instance with necessary configurations.
+ * 3. Calls the Provider's getAccounts method to fetch account data.
+ * 4. Returns the fetched data as a JSON response.
  * 
  * @example
- * // Usage in app setup
+ * ```typescript
  * const app = new Hono();
  * registerV1ApisGetAccountsApi(app);
+ * ```
+ * 
+ * @see {@link Provider} for details on the account data retrieval process.
+ * @see {@link AccountsParamsSchema} for the structure of query parameters.
+ * @see {@link AccountsSchema} for the structure of the response data.
  */
 export const registerV1ApisGetAccountsApi = (app: App) => {
     app.openapi(route, async (c) => {
