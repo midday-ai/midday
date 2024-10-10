@@ -3,6 +3,7 @@ import { FaXTwitter } from "react-icons/fa6";
 import { FiGithub } from "react-icons/fi";
 import {
   MdAdd,
+  MdAddLink,
   MdArrowBack,
   MdArrowLeft,
   MdArrowRight,
@@ -26,6 +27,10 @@ import {
   MdFolder,
   MdFolderSpecial,
   MdFolderZip,
+  MdFormatBold,
+  MdFormatItalic,
+  MdFormatStrikethrough,
+  MdFormatUnderlined,
   MdInventory2,
   MdIosShare,
   MdKeyboardArrowDown,
@@ -634,4 +639,9 @@ export const Icons = {
   ProjectStatus: MdDownloading,
   Download: MdOutlineDownload,
   Edit: MdOutlineEditNote,
+  Bold: MdFormatBold,
+  Italic: MdFormatItalic,
+  Underlined: MdFormatUnderlined,
+  Strikethrough: MdFormatStrikethrough,
+  AddLink: MdAddLink,
 };

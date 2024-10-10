@@ -6,9 +6,16 @@ import MotionNumber from "motion-number";
 type Props = {
   value: number;
   currency: string;
+  minimumFractionDigits?: number;
+  maximumFractionDigits?: number;
 };
 
-export function AnimatedNumber({ value, currency }: Props) {
+export function AnimatedNumber({
+  value,
+  currency,
+  minimumFractionDigits,
+  maximumFractionDigits,
+}: Props) {
   const locale = useCurrentLocale();
 
   return (
@@ -17,6 +24,8 @@ export function AnimatedNumber({ value, currency }: Props) {
       format={{
         style: "currency",
         currency: currency ?? "USD",
+        minimumFractionDigits,
+        maximumFractionDigits,
       }}
       locales={locale}
     />
