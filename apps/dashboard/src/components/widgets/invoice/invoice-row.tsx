@@ -7,11 +7,37 @@ import type { Invoice } from "@/components/tables/invoices/columns";
 import { getDueDateStatus } from "@/utils/format";
 import { formatDate } from "@/utils/format";
 import { cn } from "@midday/ui/cn";
+import { Skeleton } from "@midday/ui/skeleton";
 import { useState } from "react";
 
 type Props = {
   invoice: Invoice;
 };
+
+export function InvoiceRowSkeleton() {
+  return (
+    <li className="h-[57px] flex items-center w-full">
+      <div className="flex items-center w-full">
+        <div className="flex flex-col space-y-1 w-1/4">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+
+        <div className="w-1/4">
+          <Skeleton className="h-5 w-16" />
+        </div>
+
+        <div className="w-1/4">
+          <Skeleton className="h-4 w-24" />
+        </div>
+
+        <div className="w-1/4 flex justify-end">
+          <Skeleton className="h-4 w-16" />
+        </div>
+      </div>
+    </li>
+  );
+}
 
 export function InvoiceRow({ invoice }: Props) {
   const [isOpen, setOpen] = useState(false);
