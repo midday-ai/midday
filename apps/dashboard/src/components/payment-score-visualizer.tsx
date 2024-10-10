@@ -30,14 +30,31 @@ export function PaymentScoreVisualizer({
             color = "bg-primary";
         }
         return (
-          <motion.div
-            key={`score-bar-${index}`}
-            className={`w-1 ${color} h-[27px] ${index < score ? "opacity-100" : "opacity-30"}`}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 0.2, delay: index * 0.03 }}
-            style={{ originX: 0 }}
-          />
+          <div className="relative" key={index.toString()}>
+            <motion.div
+              className={`w-1 ${color} relative z-10`}
+              initial={{
+                scaleY: 0,
+                height: index >= 8 ? "31px" : "27px",
+                y: index >= 8 ? -4 : 0,
+              }}
+              animate={{
+                scaleY: 1,
+                height: "27px",
+                y: 0,
+                opacity: index < score ? 1 : 0.3,
+              }}
+              transition={{
+                duration: 0.15,
+                delay: index * 0.02,
+                scaleY: { duration: 0.15, delay: index * 0.02 },
+                height: { duration: 0.1, delay: 0.15 + index * 0.02 },
+                y: { duration: 0.1, delay: 0.15 + index * 0.02 },
+                opacity: { duration: 0.1, delay: 0.15 + index * 0.02 },
+              }}
+              style={{ originY: 1 }}
+            />
+          </div>
         );
       })}
     </div>
