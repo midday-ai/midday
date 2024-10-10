@@ -55,15 +55,18 @@ export const registerV1DeleteApiKey = (app: App) => {
         const { db } = c.get("ctx");
         const { id } = c.req.valid("query");
 
-        const executer = new APIKeyRepository(db)
+        /**
+         *  Retrieve the API key from the database.
+         */
+        const repository = c.get("repo")
 
-        const apiKey = await executer.getById(id);
+        const apiKey = await repository.apiKey.getById(id);
         if (!apiKey) {
             throw new Error("API Key not found");
         }
 
         await unkeyApi.keys.delete({ keyId: apiKey.key });
-        await executer.delete(id);
+        await repository.apiKey.delete(id);
 
         /**
          * @todo Add an audit log event for API key deletion events.

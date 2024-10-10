@@ -87,8 +87,8 @@ export function init(): MiddlewareHandler<HonoEnv> {
         });
 
         const dataRepository: Repository = {
-            apiKeyRepository: new APIKeyRepository(db),
-            userRepository: new UserRepository(db),
+            apiKey: new APIKeyRepository(db),
+            user: new UserRepository(db),
         }
 
         /**

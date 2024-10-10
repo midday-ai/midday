@@ -27,10 +27,14 @@ export type ServiceContext = {
     // TODO: add usage limit client to check if user has exceeded their usage limits
 };
 
+export type RepositoryTypes = {
+    apiKey: APIKeyRepository;
+    user: UserRepository;
+};
+
 export type Repository = {
-    apiKeyRepository: APIKeyRepository;
-    userRepository: UserRepository;
-}
+    [K in keyof RepositoryTypes]: RepositoryTypes[K];
+};
 
 /**
  * Represents the environment and context for Hono application requests.

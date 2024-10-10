@@ -53,9 +53,7 @@ export type V1GetApiKeysResponse = z.infer<(typeof route.responses)[200]["conten
  * registerV1GetApiKeys(app);
  */
 export const registerV1GetApiKeys = (app: App) => {
-    app.openapi(route, async (c) => {
-        const { db } = c.get("ctx");
-        
+    app.openapi(route, async (c) => {        
         /**
          * Extract the userId from the validated query parameters.
          * @type {string}
@@ -63,13 +61,17 @@ export const registerV1GetApiKeys = (app: App) => {
         const query = c.req.valid("query");
         const { userId } = query;
 
-        const executer = new APIKeyRepository(db);
+        /**
+         * Retrieve the API key repository from the context.
+         * @type {APIKeyRepository}
+         */ 
+        const repository = c.get("repo")
         
         /**
          * Fetch API keys associated with the userId.
          * @type {Array<APIKey>}
          */
-        const apiKeys = await executer.getByUserId(userId);
+        const apiKeys = await repository.apiKey.getByUserId(userId);
 
         /**
          * @todo Implement caching for API keys in Redis.

@@ -83,12 +83,16 @@ export const registerV1CreateApiKey = (app: App) => {
             throw new Error("Failed to create API key with Unkey");
         }
 
+        /**
+         * Retrieve the API key repository from the context.
+         */
         const repository = c.get("repo")
+        
         /**
          * Store the newly created API key in the database.
          * @type {import('@/data/apiKeyRepository').APIKey}
          */
-        const apiKey = await repository.apiKeyRepository.create({
+        const apiKey = await repository.apiKey.create({
                 userId: apiKeyData.userId,
                 key: result.key,
                 name: apiKeyData.name as string,
