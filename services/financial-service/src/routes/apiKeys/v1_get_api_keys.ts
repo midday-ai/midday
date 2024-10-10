@@ -1,4 +1,3 @@
-import { APIKeyRepository } from "@/data/apiKeyRepository";
 import { openApiErrorResponses as ErrorResponses } from "@/errors";
 import { App } from "@/hono/app";
 import { createRoute, z } from "@hono/zod-openapi";

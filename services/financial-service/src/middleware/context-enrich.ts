@@ -1,13 +1,7 @@
 import { newId } from "@/analytics";
-import { ServiceContext } from "@/common/bindings";
-import { initDB } from "@/db";
 import { LoggerSingleton, LogSchema } from "@/logger";
 import { Context, Next } from "hono";
 
-/**
- * These maps persist between worker executions and are used for caching
- */
-const rlMap = new Map();
 
 /**
  * workerId and coldStartAt are used to track the lifetime of the worker
@@ -35,6 +29,6 @@ export const enrichContext = async (c: Context, next: Next) => {
         defaultFields: { environment: c.env.ENVIRONMENT },
     });
     
-    c.set('services', { db: initDB(c.env.DB), logger } as ServiceContext);
+    c.set('services', { logger });
     await next();
 };

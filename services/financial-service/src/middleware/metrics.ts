@@ -8,7 +8,7 @@ type DiscriminateMetric<T, M = Metric> = M extends { metric: T } ? M : never;
 
 export function metrics(): MiddlewareHandler<HonoEnv> {
     return async (c, next) => {
-        const { metrics, analytics, logger } = c.get("ctx");
+        const { metrics, analytics } = c.get("ctx");
 
         const platformPrefix = c.env.PLATFORM_PREFIX;
         const formattedPlatformPrefix = formatPlatformPrefix(platformPrefix);

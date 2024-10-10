@@ -2,7 +2,6 @@ import type { Context, Next } from "hono";
 import { env } from "hono/adapter";
 import { bearerAuth } from "hono/bearer-auth";
 import { cache } from "hono/cache";
-import { compress } from "hono/compress";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
 import { logger } from "hono/logger";
@@ -154,5 +153,6 @@ export {
   jsonFormattingMiddleware,
   loggingMiddleware,
   securityMiddleware,
-  timingMiddleware,
+  timingMiddleware
 };
+

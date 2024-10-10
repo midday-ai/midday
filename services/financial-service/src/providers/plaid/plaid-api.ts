@@ -319,9 +319,6 @@ export class PlaidApi {
    */
   async getStatements({
     accessToken,
-    accountId,
-    userId,
-    teamId,
   }: GetStatementsRequest): Promise<GetStatementsResponse> {
     try {
       const response = await this.#client.statementsList({

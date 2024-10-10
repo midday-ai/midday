@@ -10,11 +10,6 @@ import type { MiddlewareHandler } from "hono";
 import type { HonoEnv, Repository } from "../hono/env";
 
 /**
- * These maps persist between worker executions and are used for caching
- */
-const rlMap = new Map();
-
-/**
  * workerId and coldStartAt are used to track the lifetime of the worker
  * and are set once when the worker is first initialized.
  *

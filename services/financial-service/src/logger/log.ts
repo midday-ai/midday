@@ -1,6 +1,5 @@
 import { metricSchema } from "@/metric/metric-schema";
 import { z } from "zod";
-import { Metrics } from '../metric/interface';
 
 export const logContext = z.object({
     requestId: z.string(),

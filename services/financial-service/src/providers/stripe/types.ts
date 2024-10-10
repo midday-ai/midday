@@ -1,4 +1,3 @@
-import type { AccountType } from "@/utils/account";
 import type { Stripe } from "stripe";
 import type {
   GetAccountBalanceRequest as BaseGetAccountBalanceRequest,

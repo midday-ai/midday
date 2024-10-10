@@ -7,7 +7,6 @@ import type {
   TransactionsSyncResponse,
   TransactionStream,
 } from "plaid";
-import type { Balance } from "../types";
 
 /**
  * Request parameters for creating a link token.

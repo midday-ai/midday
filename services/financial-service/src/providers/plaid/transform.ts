@@ -417,8 +417,8 @@ export const transformAccountBalance = (
 ): BaseBalance => ({
   currency:
     balances?.iso_currency_code || balances?.unofficial_currency_code || "USD",
-  amount: balances?.current ?? 0,
-  available: balances?.available ?? 0,
+  amount: transformToSignedAmount(balances?.current ?? 0),
+  available: transformToSignedAmount(balances?.available ?? 0),
 });
 
 /**
