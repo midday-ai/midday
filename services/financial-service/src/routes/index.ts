@@ -1,19 +1,24 @@
 import { App } from "@/hono/app";
-import type { HonoEnv } from "@/hono/env";
-import { OpenAPIHono } from "@hono/zod-openapi";
 import { registerAccountsApi } from "./accounts";
 import { registerApiKeysApi } from "./apiKeys";
-import authRoutes from "./auth";
+import { registerAuthApi } from "./auth";
 import { registerHealthApi } from "./health";
-import institutionRoutes from "./institutions";
-import ratesRoutes from "./rates";
-import transactionsRoutes from "./transactions";
+import { registerInstitutionsApi } from "./institutions";
+import { registerRatesApi } from "./rates";
+import { registerStatementPdfApi } from "./statements/v1_get_statement_pdf";
+import { registerTransactionsApi } from "./transactions";
 
 export function setupRoutes(app: App) {
     // register the accounts api route
     registerAccountsApi(app);
     registerHealthApi(app);
     registerApiKeysApi(app);
+    registerAuthApi(app);
+    registerInstitutionsApi(app);
+    registerRatesApi(app);
+    registerStatementPdfApi(app);
+    registerTransactionsApi(app);
+
   app
     .route("/transactions", transactionsRoutes)
     .route("/institutions", institutionRoutes)

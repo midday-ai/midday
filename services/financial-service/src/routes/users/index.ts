@@ -44,7 +44,7 @@ const createUserRoute = createRoute({
 });
 
 app.openapi(createUserRoute, async (c) => {
-  const { db } = c.get('services');
+  const { db } = c.get('ctx');
   const userData = c.req.valid("json");
 
   try {
@@ -81,7 +81,7 @@ const getUserRoute = createRoute({
 });
 
 app.openapi(getUserRoute, async (c) => {
-  const { db } = c.get('services');
+  const { db } = c.get('ctx');
   const { id } = c.req.valid('param');
 
   try {
@@ -128,7 +128,7 @@ const updateUserRoute = createRoute({
 });
 
 app.openapi(updateUserRoute, async (c) => {
-  const { db } = c.get('services');
+  const { db } = c.get('ctx');
   const { id } = c.req.valid('param');
   const updateData = c.req.valid('json');
 
@@ -168,7 +168,7 @@ const deleteUserRoute = createRoute({
 });
 
 app.openapi(deleteUserRoute, async (c) => {
-  const { db } = c.get('services');
+  const { db } = c.get('ctx');
   const { id } = c.req.valid('param');
 
   try {

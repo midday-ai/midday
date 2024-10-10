@@ -1,50 +1,13 @@
-import { openApiErrorResponses as ErrorResponses } from "@/errors";
-import { HonoEnv } from "@/hono/env";
-import { getRates } from "@/utils/rates";
-import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import type { Bindings } from "hono/types";
-import { RatesSchema } from "./schema";
+import { App } from '@/hono/app';
+import { registerGetRates } from './v1_register_get_rates';
 
-const app = new OpenAPIHono<HonoEnv>();
+/**
+ * Registers the rates API endpoints for the application.
+ * 
+ * @param app - The Hono application instance.
+ */
+const registerRatesApi = (app: App) => {
+    registerGetRates(app);
+}
 
-const indexRoute = createRoute({
-  method: "get",
-  path: "/",
-  summary: "Get rates",
-  responses: {
-    200: {
-      content: {
-        "application/json": {
-          schema: RatesSchema,
-        },
-      },
-      description: "Retrieve rates",
-    },
-    ...ErrorResponses
-  },
-});
-
-app.openapi(indexRoute, async (c) => {
-  try {
-    const data = await getRates();
-
-    return c.json(
-      {
-        data,
-      },
-      200,
-    );
-  } catch (error) {
-    return c.json(
-      {
-        error: "Internal server error",
-        message: "Internal server error",
-        requestId: c.get("requestId"),
-        code: "400",
-      },
-      400,
-    );
-  }
-});
-
-export default app;
+export { registerRatesApi };
