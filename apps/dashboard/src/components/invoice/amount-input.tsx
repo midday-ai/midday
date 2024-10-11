@@ -38,7 +38,7 @@ export function AmountInput({
         {...props}
         className={cn(
           className,
-          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border",
+          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border font-mono",
         )}
         thousandSeparator={true}
         allowNegative={false}

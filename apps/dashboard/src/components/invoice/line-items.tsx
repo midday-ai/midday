@@ -97,7 +97,7 @@ function LineItemRow({
 
   return (
     <Reorder.Item
-      className="flex items-end relative group mb-4"
+      className="flex items-end relative group mb-2"
       value={item}
       style={{ y }}
       dragListener={false}

@@ -38,7 +38,7 @@ export function VATInput({
         {...props}
         className={cn(
           className,
-          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border text-right",
+          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border text-right font-mono",
         )}
         thousandSeparator={true}
         allowNegative={false}
