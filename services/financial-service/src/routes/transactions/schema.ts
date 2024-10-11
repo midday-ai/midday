@@ -233,12 +233,20 @@ export const TransactionSchema = z
     pending_transaction_id: z.string().nullable().optional().openapi({
       example: "ptx_12345abcde",
     }),
-    personal_finance_category_primary: z.string().nullable().optional().openapi({
-      example: "FOOD_AND_DRINK",
-    }),
-    personal_finance_category_detailed: z.string().nullable().optional().openapi({
-      example: "GROCERIES",
-    }),
+    personal_finance_category_primary: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "FOOD_AND_DRINK",
+      }),
+    personal_finance_category_detailed: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "GROCERIES",
+      }),
     personal_finance_category_confidence_level: z
       .string()
       .nullable()
@@ -246,9 +254,13 @@ export const TransactionSchema = z
       .openapi({
         example: "HIGH",
       }),
-    personal_finance_category_icon_url: z.string().nullable().optional().openapi({
-      example: "https://example.com/icons/groceries.png",
-    }),
+    personal_finance_category_icon_url: z
+      .string()
+      .nullable()
+      .optional()
+      .openapi({
+        example: "https://example.com/icons/groceries.png",
+      }),
     transaction_id: z.string().nullable().optional().openapi({
       example: "tx_12345abcde",
     }),
@@ -311,16 +323,11 @@ export const RecurringTransactionsParamsSchema = z
 /**
  * Schema for recurring transaction frequency.
  */
-const RecurringTransactionFrequencySchema = z.enum([
-  "weekly",
-  "bi-weekly",
-  "monthly",
-  "yearly",
-  "semi-monthly",
-  "unknown",
-]).openapi({
-  example: "monthly"
-});
+const RecurringTransactionFrequencySchema = z
+  .enum(["weekly", "bi-weekly", "monthly", "yearly", "semi-monthly", "unknown"])
+  .openapi({
+    example: "monthly",
+  });
 
 /**
  * Schema for recurring transaction amount.
@@ -329,7 +336,7 @@ const RecurringTransactionFrequencySchema = z.enum([
  * @property {string|null} unofficial_currency_code - Unofficial currency code.
  */
 const RecurringTransactionAmountSchema = z.object({
-  amount: z.number().openapi({ example: 100.50 }),
+  amount: z.number().openapi({ example: 100.5 }),
   iso_currency_code: z.string().nullable().openapi({ example: "USD" }),
   unofficial_currency_code: z.string().nullable().openapi({ example: null }),
 });
@@ -337,14 +344,11 @@ const RecurringTransactionAmountSchema = z.object({
 /**
  * Schema for recurring transaction status.
  */
-const RecurringTransactionStatusSchema = z.enum([
-  "mature",
-  "early_detection",
-  "tombstoned",
-  "unknown",
-]).openapi({
-  example: "mature"
-});
+const RecurringTransactionStatusSchema = z
+  .enum(["mature", "early_detection", "tombstoned", "unknown"])
+  .openapi({
+    example: "mature",
+  });
 
 /**
  * Schema for recurring transaction category.
@@ -378,13 +382,17 @@ const RecurringTransactionCategorySchema = z.object({
  */
 export const RecurringTransactionSchema = z.object({
   account_id: z.string().openapi({ example: "acc_123456789" }),
-  recurring_transaction_id: z.string().openapi({ example: "rec_tx_987654321" }),
+  stream_id: z.string().openapi({ example: "rec_tx_987654321" }),
+  category: z.array(z.string()).openapi({ example: ["groceries", "food"] }),
+  category_id: z.string(),
   description: z.string().openapi({ example: "Monthly Subscription" }),
   merchant_name: z.string().nullable().openapi({ example: "Netflix" }),
   first_date: z.string().openapi({ example: "2023-01-15" }),
   last_date: z.string().openapi({ example: "2023-12-15" }),
   frequency: RecurringTransactionFrequencySchema,
-  transaction_ids: z.array(z.string()).openapi({ example: ["tx_123", "tx_456", "tx_789"] }),
+  transaction_ids: z
+    .array(z.string())
+    .openapi({ example: ["tx_123", "tx_456", "tx_789"] }),
   average_amount: RecurringTransactionAmountSchema,
   last_amount: RecurringTransactionAmountSchema,
   is_active: z.boolean().openapi({ example: true }),
