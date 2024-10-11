@@ -1,3 +1,10 @@
+## [0.13.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.13.0...v0.13.1) (2024-10-11)
+
+
+### Bug Fixes
+
+* fix batch processing of background jobs ([#54](https://github.com/SolomonAIEngineering/solomonai/issues/54)) ([efea693](https://github.com/SolomonAIEngineering/solomonai/commit/efea6933a015fefd057389e10eb5d4072551a6c4))
+
 # [0.13.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.12.1...v0.13.0) (2024-10-11)
 
 
