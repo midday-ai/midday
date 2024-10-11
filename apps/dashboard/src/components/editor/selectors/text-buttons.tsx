@@ -1,8 +1,8 @@
 import { Button } from "@midday/ui/button";
-import { cn } from "@midday/ui/cn";
 import { Icons } from "@midday/ui/icons";
 import { EditorBubbleItem, type EditorInstance, useEditor } from "novel";
 
+import { cn } from "@midday/ui/cn";
 type SelectorItem = {
   name: string;
   isActive: (editor: EditorInstance) => boolean;
@@ -50,12 +50,14 @@ export const TextButtons = () => {
             item.command(editor);
           }}
         >
-          <Button size="icon" className="rounded-none h-8" variant="ghost">
-            <item.icon
-              className={cn("size-4 text-primary", {
-                // "text-primary": item.isActive(editor),
-              })}
-            />
+          <Button
+            size="icon"
+            className={cn("rounded-none text-primary h-8", {
+              "bg-accent": item.isActive(editor),
+            })}
+            variant="ghost"
+          >
+            <item.icon className="size-4" />
           </Button>
         </EditorBubbleItem>
       ))}

@@ -18,6 +18,7 @@ import {
   MdClose,
   MdDescription,
   MdDownloading,
+  MdDragIndicator,
   MdDriveFileMove,
   MdEditCalendar,
   MdErrorOutline,
@@ -644,4 +645,5 @@ export const Icons = {
   Underlined: MdFormatUnderlined,
   Strikethrough: MdFormatStrikethrough,
   AddLink: MdAddLink,
+  DragIndicator: MdDragIndicator,
 };

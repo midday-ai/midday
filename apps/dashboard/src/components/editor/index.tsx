@@ -16,11 +16,10 @@ type Props = {
 };
 
 export function Editor({ initialContent }: Props) {
+  const [openLink, setOpenLink] = useState(false);
   const [content, setContent] = useState<JSONContent | undefined>(
     initialContent,
   );
-  const [openNode, setOpenNode] = useState(false);
-  const [openLink, setOpenLink] = useState(false);
 
   return (
     <EditorRoot>
@@ -33,7 +32,10 @@ export function Editor({ initialContent }: Props) {
           setContent(json);
         }}
       >
-        <EditorBubble className="flex w-fit overflow-hidden rounded-full border border-border bg-background shadow-xl">
+        <EditorBubble
+          pluginKey="editor"
+          className="flex w-fit overflow-hidden rounded-full border border-border bg-background shadow-xl"
+        >
           <TextButtons />
           <LinkSelector open={openLink} onOpenChange={setOpenLink} />
         </EditorBubble>
