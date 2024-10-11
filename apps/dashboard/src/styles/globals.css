@@ -230,3 +230,9 @@ input[type="time"]::-webkit-clear-button {
 input[type="time"]::-webkit-calendar-picker-indicator {
   display: none;
 }
+
+.invoice-editor,
+.invoice-editor div[aria-expanded="false"],
+.invoice-editor .ProseMirror {
+  height: 100%;
+}

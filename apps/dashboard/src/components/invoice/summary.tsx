@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { AnimatedNumber } from "../animated-number";
 import { FormatAmount } from "../format-amount";
 import type { InvoiceFormValues } from "./schema";
 
@@ -44,8 +43,8 @@ export function Summary() {
       <div className="flex justify-between items-center pt-2">
         <span className="font-mono text-[11px] text-[#878787]">Total</span>
         <span className="text-right font-mono text-[21px]">
-          <AnimatedNumber
-            value={total}
+          <FormatAmount
+            amount={total}
             currency="USD"
             minimumFractionDigits={0}
             maximumFractionDigits={2}

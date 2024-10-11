@@ -10,7 +10,6 @@ const defaultContent: JSONContent = {
     {
       type: "text",
       text: "Lost Island AB",
-      marks: [{ type: "textStyle", attrs: { color: "white" } }],
     },
     {
       type: "hardBreak",
@@ -47,9 +46,6 @@ const defaultContent: JSONContent = {
       type: "text",
       text: "VAT ID: SE1246767676020",
     },
-    {
-      type: "hardBreak",
-    },
   ],
 };
 
@@ -61,7 +57,7 @@ export function FromContent() {
       <span className="font-mono text-[#878787] mb-2 text-[11px] block">
         From
       </span>
-      <Editor initialContent={defaultContent} />
+      <Editor initialContent={defaultContent} className="h-[115px]" />
     </div>
   );
 }
