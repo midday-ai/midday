@@ -20,7 +20,7 @@ export function Input({ className, ...props }: InputProps) {
         autoComplete="off"
         value={fieldValue || ""}
         className={cn(
-          "border-0 p-0 h-6 text-sm border-b border-transparent focus:border-border",
+          "border-0 p-0 h-6 border-b border-transparent focus:border-border font-mono text-xs",
           className,
         )}
         onFocus={() => setIsFocused(true)}
