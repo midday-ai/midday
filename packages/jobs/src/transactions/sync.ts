@@ -26,8 +26,6 @@ client.defineJob({
       .eq("team_id", teamId)
       .eq("enabled", true)
       .neq("bank_connection.status", "disconnected")
-      // Remove this when GoCardless is fixed
-      .neq("bank_connection.provider", "gocardless")
       .eq("manual", false);
 
     if (accountsError) {
