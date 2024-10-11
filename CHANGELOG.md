@@ -1,3 +1,10 @@
+# [0.13.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.12.1...v0.13.0) (2024-10-11)
+
+
+### Features
+
+* ensure recurring transaction schema matches ([8b1e08a](https://github.com/SolomonAIEngineering/solomonai/commit/8b1e08a8de17134dc4e4b021557b1825a7f32218))
+
 ## [0.12.1](https://github.com/SolomonAIEngineering/solomonai/compare/v0.12.0...v0.12.1) (2024-10-10)
 
 
