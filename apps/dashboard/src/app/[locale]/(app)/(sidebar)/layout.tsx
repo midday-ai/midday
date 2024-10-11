@@ -132,6 +132,9 @@ export default async function Layout({
               profilePicture={user.data.avatar_url as string}
             />
           </div>
+          <div className="absolute top-4 left-4 sm:left-6 md:left-8 lg:left-10 xl:left-12 z-10">
+            <TeamMenu mode="dropdown" />
+          </div>
         </div>
 
         {/* This is used to make the header draggable on macOS */}

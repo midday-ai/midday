@@ -2,11 +2,14 @@ import { formatCurrency } from "@/utils/currency";
 import { Tables } from "@midday/supabase/types";
 import { Button } from "@midday/ui/button";
 import {
+  Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@midday/ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@midday/ui/chart";
 import {
   Sheet,
   SheetContent,
@@ -15,8 +18,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@midday/ui/sheet";
-import { TrendingUpDown } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@midday/ui/tabs";
+import { TrendingUp, TrendingUpDown } from "lucide-react";
 import React, { useMemo } from "react";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Line, LineChart, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 type Transaction = Tables<"transactions">;
 
@@ -24,7 +29,6 @@ interface TransactionAnalyticsProps {
   transactions: Transaction[];
   currency?: string;
 }
-
 interface AnalyticsResult {
   totalIncome: number;
   totalExpenses: number;
@@ -67,7 +71,7 @@ const computeAnalytics = (transactions: Transaction[]): AnalyticsResult => {
 
   const merchantCounts: Record<string, number> = {};
 
-  return transactions.reduce((acc, transaction) => {
+  const result = transactions.reduce((acc, transaction) => {
     const amount = Math.abs(transaction.amount);
     const isIncome = transaction.amount > 0;
 
@@ -123,7 +127,31 @@ const computeAnalytics = (transactions: Transaction[]): AnalyticsResult => {
       averageBalance: acc.averageBalance + (transaction.balance || 0),
     };
   }, initialAccumulator);
+
+  // Determine the most frequent merchant
+  const mostFrequentMerchantEntry = Object.entries(merchantCounts).reduce(
+    (max, entry) => (entry[1] > max[1] ? entry : max),
+    ["", 0]
+  );
+  result.mostFrequentMerchant = {
+    name: mostFrequentMerchantEntry[0],
+    count: mostFrequentMerchantEntry[1],
+  };
+
+  return result;
 };
+
+
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884D8",
+  "#A28FD0",
+  "#FF6699",
+  "#FFCC99",
+];
 
 export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
   transactions,
@@ -139,61 +167,250 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
       ? analytics.averageTransactionAmount / analytics.transactionCount
       : 0;
 
+  const categoryData = useMemo(
+    () =>
+      Object.entries(analytics.categoryCounts).map(([name, value]) => ({
+        name,
+        value,
+      })),
+    [analytics.categoryCounts]
+  );
+
+  const methodData = useMemo(
+    () =>
+      Object.entries(analytics.methodCounts).map(([name, value]) => ({
+        name,
+        value,
+      })),
+    [analytics.methodCounts]
+  );
+
+  const dailyCashFlow = useMemo(() => {
+    const dailyData: Record<string, number> = {};
+    transactions.forEach((t) => {
+      const date = new Date(t.date).toISOString().split("T")[0];
+      dailyData[date as any] = (dailyData[date as any] || 0) + t.amount;
+    });
+    return Object.entries(dailyData)
+      .map(([date, amount]) => ({ date, amount }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [transactions]);
+
+
+  // Define chartConfig for ChartContainer
+  const chartConfig = {
+    amount: {
+      label: "Cash Flow",
+      color: "hsl(var(--chart-1))",
+    },
+  } satisfies ChartConfig;
+
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button variant="outline">
           <TrendingUpDown className="w-4 h-4 mr-2" strokeWidth={0.5} />
+          Analytics
         </Button>
       </SheetTrigger>
-      <SheetContent className="w-[400px] sm:min-w-[540px]">
-        <SheetHeader className="p-[2%]">
-          <SheetTitle className="text-3xl font-bold">
-            Transaction Analytics
-          </SheetTitle>
-          <SheetDescription className="text-md">
-            Detailed analysis of your transactions
-          </SheetDescription>
+      <SheetContent className="md:min-w-[80%] sm:max-w-none">
+        <SheetHeader>
+          <SheetTitle className="text-3xl font-bold">Transaction Analytics</SheetTitle>
+          <SheetDescription>Comprehensive analysis of your financial transactions</SheetDescription>
         </SheetHeader>
-        <div className="grid gap-2 py-2">
-          <AnalyticsCard
-            title="Income and Expenses"
-            value={`Income: ${formatMoney(analytics.totalIncome)}`}
-            subtext={`Expenses: ${formatMoney(analytics.totalExpenses)}`}
-          />
-          <AnalyticsCard
-            title="Net Cash Flow"
-            value={formatMoney(analytics.netCashFlow)}
-            valueClassName={
-              analytics.netCashFlow >= 0 ? "text-green-500" : "text-red-500"
-            }
-          />
-          <AnalyticsCard
-            title="Largest Transaction"
-            value={
-              analytics.largestTransaction
-                ? formatMoney(Math.abs(analytics.largestTransaction.amount))
-                : "N/A"
-            }
-            subtext={
-              analytics.largestTransaction?.description ??
-              "No transactions available"
-            }
-          />
-          <AnalyticsCard
-            title="Transaction Count"
-            value={analytics.transactionCount.toString()}
-            subtext={`Income: ${analytics.incomeTransactionCount}, Expenses: ${analytics.expenseTransactionCount}`}
-          />
-          <AnalyticsCard
-            title="Average Transaction"
-            value={formatMoney(averageAmount)}
-          />
-        </div>
+        <Tabs defaultValue="overview" className="w-full mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="charts">Charts</TabsTrigger>
+            <TabsTrigger value="details">Details</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <AnalyticsCard
+                title="Total Income"
+                value={formatMoney(analytics.totalIncome)}
+                subtext={`${analytics.incomeTransactionCount} transactions`}
+              />
+              <AnalyticsCard
+                title="Total Expenses"
+                value={formatMoney(analytics.totalExpenses)}
+                subtext={`${analytics.expenseTransactionCount} transactions`}
+              />
+              <AnalyticsCard
+                title="Net Cash Flow"
+                value={formatMoney(analytics.netCashFlow)}
+                valueClassName={analytics.netCashFlow >= 0 ? "text-green-500" : "text-red-500"}
+              />
+              <AnalyticsCard
+                title="Largest Transaction"
+                value={analytics.largestTransaction ? formatMoney(Math.abs(analytics.largestTransaction.amount)) : "N/A"}
+                subtext={analytics.largestTransaction?.description ?? "No transactions"}
+              />
+              <AnalyticsCard
+                title="Average Transaction"
+                value={formatMoney(analytics.averageTransactionAmount / analytics.transactionCount)}
+              />
+              <AnalyticsCard
+                title="Transaction Count"
+                value={analytics.transactionCount.toString()}
+                subtext={`Recurring: ${analytics.recurringTransactionsCount}, Manual: ${analytics.manualTransactionsCount}`}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="charts">
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Category Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        outerRadius={80}
+                        fill="#8884d8"
+                        dataKey="value"
+                        label={({ name, percent }) =>
+                          `${name} ${(percent * 100).toFixed(0)}%`
+                        }
+                      >
+                        {categoryData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Payment Methods</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={methodData}>
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="value" fill="#8884d8">
+                        {methodData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              {/* Daily Cash Flow Area Chart */}
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle>Daily Cash Flow</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer config={chartConfig}>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <AreaChart
+                        data={dailyCashFlow}
+                        margin={{ left: 12, right: 12 }}
+                      >
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          tickLine={false}
+                          axisLine={false}
+                          tickMargin={8}
+                          tickFormatter={(value) =>
+                            new Date(value).toLocaleDateString()
+                          }
+                        />
+                        <YAxis />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <Area
+                          dataKey="amount"
+                          type="monotone"
+                          fill="var(--color-amount)"
+                          fillOpacity={0.4}
+                          stroke="var(--color-amount)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </CardContent>
+                <CardFooter>
+                  <div className="flex w-full items-start gap-2 text-sm">
+                    <div className="grid gap-2">
+                      <div className="flex items-center gap-2 font-medium leading-none">
+                        {analytics.netCashFlow >= 0
+                          ? "Trending up"
+                          : "Trending down"}{" "}
+                        <TrendingUp className="h-4 w-4" />
+                      </div>
+                      <div className="flex items-center gap-2 leading-none text-muted-foreground">
+                        {dailyCashFlow.length > 0
+                          ? `${dailyCashFlow[0]?.date} - ${dailyCashFlow[dailyCashFlow.length - 1]?.date}`
+                          : "No data"}
+                      </div>
+                    </div>
+                  </div>
+                </CardFooter>
+              </Card>
+            </div>
+          </TabsContent>
+          <TabsContent value="details">
+            <div className="grid grid-cols-1 gap-4 mt-4">
+              <AnalyticsCard
+                title="Most Used Currency"
+                value={Object.entries(analytics.currencyCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A"}
+                subtext="Based on transaction count"
+              />
+              <AnalyticsCard
+                title="Most Common Status"
+                value={Object.entries(analytics.statusCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A"}
+                subtext="Based on transaction count"
+              />
+              <AnalyticsCard
+                title="Average Balance"
+                value={formatMoney(analytics.averageBalance / analytics.transactionCount)}
+                subtext="Across all transactions"
+              />
+              <AnalyticsCard
+                title="Most Frequent Merchant"
+                value={analytics.mostFrequentMerchant?.name || "N/A"}
+                subtext={`${analytics.mostFrequentMerchant?.count || 0} transactions`}
+              />
+              <AnalyticsCard
+                title="Recurring Transactions"
+                value={`${analytics.recurringTransactionsCount} (${((analytics.recurringTransactionsCount / analytics.transactionCount) * 100).toFixed(1)}%)`}
+                subtext="Of total transactions"
+              />
+              <AnalyticsCard
+                title="Manual Transactions"
+                value={`${analytics.manualTransactionsCount} (${((analytics.manualTransactionsCount / analytics.transactionCount) * 100).toFixed(1)}%)`}
+                subtext="Of total transactions"
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </SheetContent>
     </Sheet>
   );
 };
+
 
 interface AnalyticsCardProps {
   title: string;
@@ -208,15 +425,13 @@ const AnalyticsCard: React.FC<AnalyticsCardProps> = ({
   subtext,
   valueClassName = "",
 }) => (
-  <div className="border-none shadow-none">
+  <Card>
     <CardHeader>
       <CardTitle>{title}</CardTitle>
-      {subtext && (
-        <CardDescription className="text-sm mt-1">{subtext}</CardDescription>
-      )}
+      {subtext && <CardDescription>{subtext}</CardDescription>}
     </CardHeader>
     <CardContent>
       <p className={`text-2xl font-bold ${valueClassName}`}>{value}</p>
     </CardContent>
-  </div>
+  </Card>
 );

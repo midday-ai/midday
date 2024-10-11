@@ -10,69 +10,68 @@ import { BATCH_LIMIT } from "../constants/constants";
  * @param io - The Trigger.dev IO context for database operations.
  * @param teamId - The ID of the team whose transactions are being processed.
  * @param cutoffDate - The date before which transactions should be removed.
+ * @param taskKeyPrefix - A prefix for the task key.
  * @returns The number of transactions removed.
  */
-
 async function removeOldTransactionsSubTask(
-  io: IOWithIntegrations<{
-    supabase: Supabase<Database, "public", any>;
-  }>,
+  io: IOWithIntegrations<{ supabase: Supabase<Database, "public", any> }>,
   teamId: string,
   cutoffDate: Date,
   taskKeyPrefix: string
 ): Promise<number> {
-  const data = await io.runTask(
+  return io.runTask(
     `${taskKeyPrefix}-remove-old-transactions`,
     async () => {
       let totalRemoved = 0;
       let hasMore = true;
 
       while (hasMore) {
-        const { data: transactions, error } = await io.supabase.client
-          .from("transactions")
-          .select("id")
-          .eq("team_id", teamId)
-          .lt("date", format(cutoffDate, "yyyy-MM-dd"))
-          .order("date", { ascending: true })
-          .limit(BATCH_LIMIT);
+        const transactionIds = await fetchOldTransactionIds(teamId, cutoffDate);
 
-        if (error) {
-          throw new Error(`Failed to fetch transactions: ${error.message}`);
-        }
-
-        if (transactions.length === 0) {
-          hasMore = false;
+        if (transactionIds.length === 0) {
           break;
         }
 
-        const transactionIds = transactions.map((t) => t.id);
+        const removedCount = await deleteTransactions(transactionIds);
+        totalRemoved += removedCount;
 
-        const { error: deleteError, count } = await io.supabase.client
-          .from("transactions")
-          .delete()
-          .in("id", transactionIds)
-          .select("count");
-
-        if (deleteError) {
-          throw new Error(
-            `Failed to delete transactions: ${deleteError.message}`
-          );
-        }
-
-        totalRemoved += count || 0;
-
-        // If we got less than the batch size, we've processed all old transactions
-        if (transactions.length < BATCH_LIMIT) {
-          hasMore = false;
-        }
+        hasMore = transactionIds.length === BATCH_LIMIT;
       }
 
       return totalRemoved;
     },
-    { name: "Update bank connection status" }
+    { name: "Remove Old Transactions" }
   );
 
-  return data;
+  async function fetchOldTransactionIds(teamId: string, cutoffDate: Date): Promise<string[]> {
+    const { data: transactions, error } = await io.supabase.client
+      .from("transactions")
+      .select("id")
+      .eq("team_id", teamId)
+      .lt("date", format(cutoffDate, "yyyy-MM-dd"))
+      .order("date", { ascending: true })
+      .limit(BATCH_LIMIT);
+
+    if (error) {
+      throw new Error(`Failed to fetch transactions: ${error.message}`);
+    }
+
+    return transactions.map((t) => t.id);
+  }
+
+  async function deleteTransactions(transactionIds: string[]): Promise<number> {
+    const { error: deleteError, count } = await io.supabase.client
+      .from("transactions")
+      .delete()
+      .in("id", transactionIds)
+      .select("count");
+
+    if (deleteError) {
+      throw new Error(`Failed to delete transactions: ${deleteError.message}`);
+    }
+
+    return count || 0;
+  }
 }
 
 export { removeOldTransactionsSubTask };

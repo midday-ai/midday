@@ -3,7 +3,7 @@ import {
   TransactionSchema as Transaction,
 } from "@midday/supabase/types";
 import { eventTrigger } from "@trigger.dev/sdk";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfMonth } from "date-fns";
 import { revalidateTag } from "next/cache";
 import { PDFDocument, rgb } from "pdf-lib";
 import { z } from "zod";
@@ -164,8 +164,8 @@ client.defineJob({
     name: Events.TRANSACTIONS_EXPORT_PDF,
     schema: z.object({
       teamId: z.string(),
-      startDate: z.string(),
-      endDate: z.string(),
+      startDate: z.string().default(() => format(startOfMonth(new Date()), 'yyyy-MM-dd')),
+      endDate: z.string().default(() => format(new Date(), 'yyyy-MM-dd')),
       merchantName: z.string().optional(),
       transactionIds: z.array(z.string()).optional(),
     }),

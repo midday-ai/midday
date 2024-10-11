@@ -11,7 +11,7 @@ import { sleep } from "../utils/sleep";
 import { getClassification, transformTransaction } from "../utils/transform";
 import { scheduler } from "./scheduler";
 
-const BATCH_LIMIT = 500;
+const BATCH_LIMIT = 1000;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_INITIAL_SYNC,
@@ -276,6 +276,7 @@ client.defineJob({
     await settingUpAccount.update("setting-up-account-completed", {
       data: { step: "completed" },
     });
+
     await io.logger.info(`Completed initial sync for team: ${teamId}`);
   },
 });

@@ -7,17 +7,11 @@ import {
   GetRecentTransactionsParams,
   RecurringTransactionFrequency,
 } from "@midday/supabase/queries";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@midday/ui/accordion";
 import { Card, CardFooter } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { format } from "date-fns";
 import { cookies } from "next/headers";
-import { TransactionAnalytics } from "./bank-account/transaction-analytics";
+import { TransactionAnalytics } from "../bank-account/transaction-analytics";
 
 /**
  * Props for the RecentTransactions component.

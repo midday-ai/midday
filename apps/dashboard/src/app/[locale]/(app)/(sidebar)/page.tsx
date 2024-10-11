@@ -7,7 +7,8 @@ import { ContentLayout } from "@/components/panel/content-layout";
 import { CategorySpendingPortalView } from "@/components/portal-views/category-spending-portal-view";
 import { FinancialPortalView } from "@/components/portal-views/financial-portal-view";
 import { RecentFilesPortalView } from "@/components/portal-views/recent-files-portal-view";
-import RecentTransactions from "@/components/recent-transactions";
+import RecentTransactions from "@/components/recent-transactions/recent-transactions";
+import { RecentTransactionsServer } from "@/components/recent-transactions/recent-transactions.server";
 import { Widgets } from "@/components/widgets";
 import config from "@/config";
 import { Cookies } from "@/utils/constants";
@@ -117,13 +118,13 @@ export default async function Overview({
             <TabsTrigger value="recurring">Recurring</TabsTrigger>
           </TabsList>
           <TabsContent value="transactions">
-            <RecentTransactions
+            <RecentTransactionsServer
               title="Recent Transactions"
               description="Most Recent Transactions Of Interest"
             />
           </TabsContent>
           <TabsContent value="recurring">
-            <RecentTransactions
+            <RecentTransactionsServer
               title="Subscriptions"
               description="Most Recent Detected recurring transactions across your accounts"
               recurringTransactionFrequency={

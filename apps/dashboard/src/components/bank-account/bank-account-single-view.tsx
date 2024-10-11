@@ -21,7 +21,7 @@ import { Card } from "@midday/ui/card";
 import { cn } from "@midday/ui/cn";
 import { useMemo } from "react";
 import { BankAccountDetails } from "../bank-account-details";
-import RecentTransactions from "../recent-transactions";
+import RecentTransactions from "../recent-transactions/recent-transactions";
 
 /**
  * Props for the BankAccountSingleView component

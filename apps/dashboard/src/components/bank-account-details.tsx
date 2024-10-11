@@ -11,6 +11,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@midday/ui/accordion";
+import { AccountBalanceChart } from "@midday/ui/charts/financials";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
@@ -83,6 +84,16 @@ export function BankAccountDetails({
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="my-8">
+        {/** Add account balance, recurring transactions, and key metrics */}
+        <AccountBalanceChart 
+          currency={bankAccount.currency ?? "USD"}
+          data={[]} // TODO: Add actual balance history data
+          height={400}
+          className="w-full p-0"
+        />
       </div>
 
       <Accordion

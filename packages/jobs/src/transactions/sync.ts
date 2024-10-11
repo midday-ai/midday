@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
 import { Jobs } from "../constants";
 import { fetchEnabledBankAccountsForTeamSubTask } from "../subtasks/fetch-enabled-bank-account";
@@ -31,18 +32,18 @@ client.defineJob({
   run: async (_, io, ctx) => {
     await uniqueLog(
       io,
-      "info","Starting TRANSACTIONS_SYNC job");
+      "info", "Starting TRANSACTIONS_SYNC job");
     const supabase = io.supabase.client;
     const teamId = ctx.source?.id as string;
     await uniqueLog(
       io,
-      "info",`Processing for team ID: ${teamId}`);
+      "info", `Processing for team ID: ${teamId}`);
     const prefix = `team-txn-sync-${teamId}-${Date.now()}`;
 
     // 1. Fetch enabled bank accounts for the team
     await uniqueLog(
       io,
-      "info","Fetching enabled bank accounts");
+      "info", "Fetching enabled bank accounts");
     const accountsData = await fetchEnabledBankAccountsForTeamSubTask(
       io,
       teamId,
@@ -52,7 +53,7 @@ client.defineJob({
 
     await uniqueLog(
       io,
-      "info",`Found ${accountsData?.length || 0} enabled bank accounts`);
+      "info", `Found ${accountsData?.length || 0} enabled bank accounts`);
 
     try {
       // execute the sync transactions subtask for the accounts enabled for the team
@@ -64,37 +65,12 @@ client.defineJob({
 
     await uniqueLog(
       io,
-      "info","TRANSACTIONS_SYNC job completed");
+      "info", "TRANSACTIONS_SYNC job completed");
+
+    console.log("Revalidating cache tags");
+    revalidateTag(`transactions_${teamId}`);
+    revalidateTag(`spending_${teamId}`);
+    revalidateTag(`metrics_${teamId}`);
+    revalidateTag(`expenses_${teamId}`);
   },
 });
-
-
-// if (transactionsData && transactionsData?.length > 0) {
-//   console.log(
-//     `Successfully upserted ${transactionsData.length} transactions`
-//   );
-//   // 4. Send notifications for new transactions
-//   console.log("Sending notifications for new transactions");
-//   await io.sendEvent("🔔 Send notifications", {
-//     name: Events.TRANSACTIONS_NOTIFICATION,
-//     payload: {
-//       teamId,
-//       transactions: transactionsData.map((transaction) => ({
-//         id: transaction.id,
-//         date: transaction.date,
-//         amount: transaction.amount,
-//         name: transaction.name,
-//         currency: transaction.currency,
-//         category: transaction.category_slug,
-//         status: transaction.status,
-//       })),
-//     },
-//   });
-
-//   // 5. Revalidate relevant cache tags
-//   console.log("Revalidating cache tags");
-//   revalidateTag(`transactions_${teamId}`);
-//   revalidateTag(`spending_${teamId}`);
-//   revalidateTag(`metrics_${teamId}`);
-//   revalidateTag(`expenses_${teamId}`);
-// }

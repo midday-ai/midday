@@ -89,10 +89,6 @@ const NavbarRight: React.FC = () => (
     <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
       <UserMenu onlySignOut={false} />
     </Suspense>
-
-    <Suspense fallback={<Skeleton className="h-8 w-8 rounded-full" />}>
-      <TeamMenu mode="button" />
-    </Suspense>
   </div>
 );
 

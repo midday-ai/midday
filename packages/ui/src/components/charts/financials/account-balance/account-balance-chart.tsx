@@ -1,6 +1,7 @@
-import { AccountBalanceConverter } from "../../../../lib/converters/account-balancer-converter";
 import { AccountBalanceHistory } from "client-typescript-sdk";
+import { AccountBalanceConverter } from "../../../../lib/converters/account-balancer-converter";
 
+import { cn } from "../../../../utils/cn";
 import {
   CardContent,
   CardDescription,
@@ -16,6 +17,7 @@ export interface AccountBalanceChartProps {
   height?: number;
   locale?: string;
   enableAssistantMode?: boolean;
+  className?: string;
 }
 
 export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
@@ -24,6 +26,7 @@ export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
   height = 290,
   locale,
   enableAssistantMode,
+  className
 }) => {
   const chartData = AccountBalanceConverter.convertToChartDataPoints(data);
 
@@ -37,7 +40,7 @@ export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
           Account balance over time in {currency}
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-3">
+      <CardContent className={cn("p-3", className)}>
         <div className="border-none text-background shadow-none">
           <AreaChart
             currency={currency}
