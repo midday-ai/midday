@@ -38,6 +38,7 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
   useEffect(() => {
     inputRef.current && inputRef.current?.focus();
   });
+
   if (!editor) return null;
 
   return (
@@ -48,8 +49,8 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
           className="gap-2 rounded-none border-none h-8 pl-2"
         >
           <Icons.AddLink
-            className={cn("size-4 text-primary", {
-              //   "text-primary": editor.isActive("link"),
+            className={cn("rounded-none text-primary h-8", {
+              "bg-accent": editor.isActive("link"),
             })}
           />
         </Button>
