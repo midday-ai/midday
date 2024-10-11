@@ -12,18 +12,24 @@ import { VATInput } from "./vat-input";
 
 export function LineItems() {
   const { control } = useFormContext<InvoiceFormValues>();
-  const { fields, append, remove, move } = useFieldArray({
+  const { fields, append, remove, swap } = useFieldArray({
     control,
     name: "lineItems",
   });
 
-  const setItems = (newOrder: typeof fields) => {
-    newOrder.forEach((item, index) => {
-      const oldIndex = fields.findIndex((field) => field.id === item.id);
-      if (oldIndex !== index) {
-        move(oldIndex, index);
+  const reorderList = (newFields: typeof fields) => {
+    const firstDiffIndex = fields.findIndex(
+      (field, index) => field.id !== newFields[index]?.id,
+    );
+    if (firstDiffIndex !== -1) {
+      const newIndex = newFields.findIndex(
+        (field) => field.id === fields[firstDiffIndex]?.id,
+      );
+
+      if (newIndex !== -1) {
+        swap(firstDiffIndex, newIndex);
       }
-    });
+    }
   };
 
   const handleRemove = (index: number) => {
@@ -34,7 +40,22 @@ export function LineItems() {
 
   return (
     <div className="space-y-4">
-      <Reorder.Group axis="y" values={fields} onReorder={setItems}>
+      <div className="flex items-end mb-2">
+        <Label className="text-[11px] text-[#878787] font-mono w-1/2 mr-4">
+          Name
+        </Label>
+        <Label className="text-[11px] text-[#878787] font-mono w-40 mr-4">
+          Price
+        </Label>
+        <Label className="text-[11px] text-[#878787] font-mono w-24 mr-4">
+          Quantity
+        </Label>
+        <Label className="text-[11px] text-[#878787] font-mono w-24 text-right">
+          VAT
+        </Label>
+      </div>
+
+      <Reorder.Group axis="y" values={fields} onReorder={reorderList}>
         {fields.map((field, index) => (
           <LineItemRow
             key={field.id}
@@ -42,7 +63,6 @@ export function LineItems() {
             index={index}
             handleRemove={handleRemove}
             isReorderable={fields.length > 1}
-            showLabels={index === 0}
           />
         ))}
       </Reorder.Group>
@@ -64,13 +84,11 @@ function LineItemRow({
   handleRemove,
   isReorderable,
   item,
-  showLabels,
 }: {
   index: number;
   handleRemove: (index: number) => void;
   isReorderable: boolean;
   item: InvoiceFormValues["lineItems"][number];
-  showLabels: boolean;
 }) {
   const controls = useDragControls();
   const y = useMotionValue(0);
@@ -81,7 +99,6 @@ function LineItemRow({
     <Reorder.Item
       className="flex items-end relative group mb-4"
       value={item}
-      id={item.name}
       style={{ y }}
       dragListener={false}
       dragControls={controls}
@@ -89,7 +106,7 @@ function LineItemRow({
       {isReorderable && (
         <Button
           type="button"
-          className="absolute -left-9 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
+          className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent cursor-grab"
           onPointerDown={(e) => controls.start(e)}
           variant="ghost"
         >
@@ -98,57 +115,26 @@ function LineItemRow({
       )}
 
       <div className="w-1/2 mr-4">
-        {showLabels && (
-          <Label className="text-[11px] text-[#878787] font-mono mb-1 block w-full">
-            Name
-          </Label>
-        )}
-        <Input {...register(`lineItems.${index}.name`)} autoFocus={index > 0} />
+        <Input name={`lineItems.${index}.name`} autoFocus={index > 0} />
       </div>
 
       <div className="w-40 mr-4">
-        {showLabels && (
-          <Label className="text-[11px] text-[#878787] font-mono mb-1 block w-full">
-            Price
-          </Label>
-        )}
-        <AmountInput
-          {...register(`lineItems.${index}.price`, { valueAsNumber: true })}
-          min="0"
-        />
+        <AmountInput name={`lineItems.${index}.price`} min="0" />
       </div>
 
       <div className="w-24 mr-4">
-        {showLabels && (
-          <Label className="text-[11px] text-[#878787] font-mono mb-1 block w-full">
-            Quantity
-          </Label>
-        )}
-        <Input
-          {...register(`lineItems.${index}.quantity`, { valueAsNumber: true })}
-          type="number"
-          min="0"
-        />
+        <Input name={`lineItems.${index}.quantity`} type="number" min="0" />
       </div>
 
       <div className="w-24">
-        {showLabels && (
-          <Label className="text-[11px] text-[#878787] font-mono mb-1 block w-full">
-            VAT
-          </Label>
-        )}
-        <VATInput
-          {...register(`lineItems.${index}.vat`, { valueAsNumber: true })}
-          min="0"
-          max="100"
-        />
+        <VATInput name={`lineItems.${index}.vat`} min="0" max="100" />
       </div>
 
       {index !== 0 && (
         <Button
           type="button"
           onClick={() => handleRemove(index)}
-          className="absolute -right-9 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent"
+          className="absolute -right-9 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-transparent text-[#878787]"
           variant="ghost"
         >
           <Icons.Close />

@@ -1,17 +1,24 @@
 import { cn } from "@midday/ui/cn";
 import { CurrencyInput } from "@midday/ui/currency-input";
 import { useState } from "react";
+import { useController, useFormContext } from "react-hook-form";
 import type { NumericFormatProps } from "react-number-format";
 
 export function VATInput({
   className,
-  value,
-  onValueChange,
+  name,
   ...props
-}: Omit<NumericFormatProps, "value"> & {
-  value?: number;
-  onValueChange?: (value: number | undefined) => void;
+}: Omit<NumericFormatProps, "value" | "onChange"> & {
+  name: string;
 }) {
+  const { control } = useFormContext();
+  const {
+    field: { value, onChange, onBlur },
+  } = useController({
+    name,
+    control,
+  });
+
   const [isFocused, setIsFocused] = useState(false);
 
   return (
@@ -21,18 +28,18 @@ export function VATInput({
         autoComplete="off"
         value={value}
         onValueChange={(values) => {
-          onValueChange?.(values.floatValue);
+          onChange(values.floatValue);
         }}
-        onFocus={(e) => {
-          setIsFocused(true);
-          props.onFocus?.(e);
-        }}
+        onFocus={() => setIsFocused(true)}
         onBlur={(e) => {
           setIsFocused(false);
-          props.onBlur?.(e);
+          onBlur();
         }}
         {...props}
-        className={cn(className, "p-0 border-0 h-8 text-xs !bg-transparent")}
+        className={cn(
+          className,
+          "p-0 border-0 h-6 text-xs !bg-transparent border-b border-transparent focus:border-border text-right",
+        )}
         thousandSeparator={true}
         allowNegative={false}
       />

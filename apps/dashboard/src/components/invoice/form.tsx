@@ -40,6 +40,10 @@ export function Form() {
               <Logo />
             </div>
 
+            <div className="mt-8">
+              <Meta />
+            </div>
+
             <div className="grid grid-cols-2 gap-6 mt-8">
               <div>
                 <FromContent />
@@ -64,8 +68,6 @@ export function Form() {
                 <PaymentDetails />
                 <NoteContent />
               </div>
-
-              <Meta />
             </div>
           </div>
         </ScrollArea>
