@@ -218,7 +218,6 @@ export function BankConnection({ connection }: BankConnectionProps) {
       <div className="flex justify-between items-center">
         <AccordionTrigger
           className="justify-start text-start w-full"
-          chevronBefore
         >
           <div className="flex space-x-4 items-center ml-4 w-full">
             <BankLogo src={connection.logo_url} alt={connection.name} />

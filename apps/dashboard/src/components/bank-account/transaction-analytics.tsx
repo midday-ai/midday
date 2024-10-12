@@ -222,7 +222,6 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
         <Tabs defaultValue="overview" className="w-full mt-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="charts">Charts</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
           </TabsList>
           <TabsContent value="overview">
@@ -256,119 +255,6 @@ export const TransactionAnalytics: React.FC<TransactionAnalyticsProps> = ({
                 value={analytics.transactionCount.toString()}
                 subtext={`Recurring: ${analytics.recurringTransactionsCount}, Manual: ${analytics.manualTransactionsCount}`}
               />
-            </div>
-          </TabsContent>
-          <TabsContent value="charts">
-            <div className="grid grid-cols-1 gap-4 mt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Category Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={categoryData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) =>
-                          `${name} ${(percent * 100).toFixed(0)}%`
-                        }
-                      >
-                        {categoryData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Methods</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={methodData}>
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="value" fill="#8884d8">
-                        {methodData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-              {/* Daily Cash Flow Area Chart */}
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Daily Cash Flow</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig}>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <AreaChart
-                        data={dailyCashFlow}
-                        margin={{ left: 12, right: 12 }}
-                      >
-                        <CartesianGrid vertical={false} />
-                        <XAxis
-                          dataKey="date"
-                          tickLine={false}
-                          axisLine={false}
-                          tickMargin={8}
-                          tickFormatter={(value) =>
-                            new Date(value).toLocaleDateString()
-                          }
-                        />
-                        <YAxis />
-                        <ChartTooltip
-                          cursor={false}
-                          content={<ChartTooltipContent indicator="dot" />}
-                        />
-                        <Area
-                          dataKey="amount"
-                          type="monotone"
-                          fill="var(--color-amount)"
-                          fillOpacity={0.4}
-                          stroke="var(--color-amount)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </ChartContainer>
-                </CardContent>
-                <CardFooter>
-                  <div className="flex w-full items-start gap-2 text-sm">
-                    <div className="grid gap-2">
-                      <div className="flex items-center gap-2 font-medium leading-none">
-                        {analytics.netCashFlow >= 0
-                          ? "Trending up"
-                          : "Trending down"}{" "}
-                        <TrendingUp className="h-4 w-4" />
-                      </div>
-                      <div className="flex items-center gap-2 leading-none text-muted-foreground">
-                        {dailyCashFlow.length > 0
-                          ? `${dailyCashFlow[0]?.date} - ${dailyCashFlow[dailyCashFlow.length - 1]?.date}`
-                          : "No data"}
-                      </div>
-                    </div>
-                  </div>
-                </CardFooter>
-              </Card>
             </div>
           </TabsContent>
           <TabsContent value="details">

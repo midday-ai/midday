@@ -168,6 +168,20 @@ export async function getCurrentUserTeamQuery(supabase: Client) {
   return getUserQuery(supabase, session.user?.id);
 }
 
+export async function getBankAccountByAccountIdAndTeamQuery(
+  supabase: Client,
+  accountId: string,
+  teamId: string
+) {
+  return supabase
+    .from("bank_accounts")
+    .select("*")
+    .eq("account_id", accountId)
+    .eq("team_id", teamId)
+    .single()
+    .throwOnError();
+}
+
 export async function getBankConnectionsByTeamIdQuery(
   supabase: Client,
   teamId: string
@@ -176,6 +190,18 @@ export async function getBankConnectionsByTeamIdQuery(
     .from("bank_connections")
     .select("*")
     .eq("team_id", teamId)
+    .throwOnError();
+}
+
+export async function getBankConnectionByIdQuery(
+  supabase: Client,
+  connectionId: string
+) {
+  return supabase
+    .from("bank_connections")
+    .select("*, accounts:bank_accounts(*)")
+    .eq("id", connectionId)
+    .single()
     .throwOnError();
 }
 

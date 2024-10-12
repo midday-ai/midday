@@ -18,6 +18,8 @@ export interface AccountBalanceChartProps {
   locale?: string;
   enableAssistantMode?: boolean;
   className?: string;
+  hideTitle?: boolean;
+  hideDescription?: boolean;
 }
 
 export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
@@ -26,19 +28,25 @@ export const AccountBalanceChart: React.FC<AccountBalanceChartProps> = ({
   height = 290,
   locale,
   enableAssistantMode,
-  className
+  className,
+  hideDescription = false,
+  hideTitle = false,
 }) => {
   const chartData = AccountBalanceConverter.convertToChartDataPoints(data);
 
   return (
     <div className="h-full w-full">
       <CardHeader>
-        <CardTitle className="font bold text-lg">
-          Account Balance Over Time
-        </CardTitle>
-        <CardDescription>
-          Account balance over time in {currency}
-        </CardDescription>
+        {!hideTitle && (
+          <CardTitle className="font bold text-lg">
+            Account Balance Over Time
+          </CardTitle>
+        )}
+        {!hideDescription && (
+          <CardDescription>
+            Account balance over time in {currency}
+          </CardDescription>
+        )}
       </CardHeader>
       <CardContent className={cn("p-3", className)}>
         <div className="border-none text-background shadow-none">

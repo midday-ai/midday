@@ -182,7 +182,7 @@ function calculateTransactionSummary(transactions: Transaction[]): TransactionSu
 }
 
 client.defineJob({
-    id: Jobs.TRANSACTIONS_EXPORT_PDF,
+    id: Jobs.TRANSACTION_EXPORT_DETAILS,
     name: "Transactions - Export PDF (Custom)",
     version: "0.0.5",
     trigger: eventTrigger({

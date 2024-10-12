@@ -15,7 +15,10 @@ import { AccountBalanceChart } from "@midday/ui/charts/financials";
 import { cn } from "@midday/ui/cn";
 import { Skeleton } from "@midday/ui/skeleton";
 import { format } from "date-fns";
+import { ArrowUpRightFromSquare } from "lucide-react";
+import Link from "next/link";
 import { FormatAmount } from "./format-amount";
+import { RecentTransactionsServer } from "./recent-transactions/recent-transactions.server";
 import { TransactionsFilterHelper } from "./similar-transactions";
 
 interface BankAccountDetailsProps {
@@ -61,14 +64,20 @@ export function BankAccountDetails({
               </span>
             </div>
           )}
-
-          <h2 className="mt-6 mb-3 select-text">
-            {isLoading ? (
-              <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
-            ) : (
-              bankAccount.name
-            )}
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="mt-6 mb-3 select-text">
+              {isLoading ? (
+                <Skeleton className="w-[35%] h-[22px] rounded-md mb-2" />
+              ) : (
+                bankAccount.name
+              )}
+            </h2>
+            <Link href={`/financial-accounts/${bankAccount.account_id}`}>
+              <p className="text-md text-[#606060] hover:text-[#090202] hover:font-bold">
+                View More <ArrowUpRightFromSquare size={16} className="inline ml-2" />
+              </p>
+            </Link>
+          </div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col w-full space-y-1">
               {isLoading ? (
@@ -84,16 +93,6 @@ export function BankAccountDetails({
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="my-8">
-        {/** Add account balance, recurring transactions, and key metrics */}
-        <AccountBalanceChart 
-          currency={bankAccount.currency ?? "USD"}
-          data={[]} // TODO: Add actual balance history data
-          height={400}
-          className="w-full p-0"
-        />
       </div>
 
       <Accordion

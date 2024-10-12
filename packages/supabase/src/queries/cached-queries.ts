@@ -8,7 +8,9 @@ import {
   GetRecurringTransactionsParams,
   GetTransactionsByBankAccountQueryParams,
   getAssociatedTransactionsQuery,
+  getBankAccountByAccountIdAndTeamQuery,
   getBankAccountsCurrenciesQuery,
+  getBankConnectionByIdQuery,
   getBankConnectionsByTeamIdQuery,
   getBurnRateQuery,
   getCategoriesQuery,
@@ -252,6 +254,21 @@ export const getBankConnectionsByTeamId = async () => {
     }
   )(teamId);
 };
+
+export const getBankConnectionById = async (bankConnectionId: string) => {
+  const supabase = createClient();
+
+  return unstable_cache(
+    async () => {
+      return getBankConnectionByIdQuery(supabase, bankConnectionId);
+    },
+    ["bank_connection", bankConnectionId],
+    {
+      tags: [`bank_connection_${bankConnectionId}`],
+      revalidate: 180,
+    }
+  )(bankConnectionId);
+}
 
 export const getTeamBankAccounts = async (
   params?: Omit<GetTeamBankAccountsParams, "teamId">
@@ -1086,4 +1103,25 @@ export const getCachedAssociatedTransactions = async (
       revalidate: 3600, // Cache for 1 hour
     }
   )(recurringTransactionId);
+};
+
+export const getBankAccountByAccountId = async (accountId: string) => {
+  const supabase = createClient();
+  const user = await getUser();
+  const teamId = user?.data?.team_id;
+
+  if (!teamId) {
+    return null;
+  }
+
+  return unstable_cache(
+    async () => {
+      return getBankAccountByAccountIdAndTeamQuery(supabase, accountId, teamId);
+    },
+    ["bank_account_by_account_id", teamId, accountId],
+    {
+      tags: [`bank_account_by_account_id_${teamId}_${accountId}`],
+      revalidate: 3600,
+    }
+  )(accountId);
 };
