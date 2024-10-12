@@ -1,5 +1,5 @@
 import { ProviderError } from "@/utils/error";
-import { formatISO, subMonths } from "date-fns";
+import { formatISO, subDays } from "date-fns";
 import xior from "xior";
 import type { XiorInstance, XiorRequestConfig } from "xior";
 import type { GetInstitutionsRequest, ProviderParams } from "../types";
@@ -298,7 +298,7 @@ export class GoCardLessApi {
         token,
         latest
           ? {
-              date_from: formatISO(subMonths(new Date(), 1), {
+              date_from: formatISO(subDays(new Date(), 3), {
                 representation: "date",
               }),
             }
