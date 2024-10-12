@@ -225,8 +225,7 @@ export class PlaidApi {
       products: [Products.Transactions],
       required_if_supported_products: [
         Products.Liabilities,
-        Products.Investments,
-        Products.RecurringTransactions,
+        Products.Investments
       ],
       language,
       access_token: accessToken,
