@@ -233,6 +233,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .invoice-editor,
 .invoice-editor div[aria-expanded="false"],
-.invoice-editor .ProseMirror {
+.invoice-editor .ProseMirror,
+.invoice-editor .is-empty {
   height: 100%;
 }
