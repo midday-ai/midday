@@ -17,6 +17,7 @@ import {
 } from "@midday/ui/dialog";
 import { Input } from "@midday/ui/input";
 import { Skeleton } from "@midday/ui/skeleton";
+import { InstitutionsSchema } from "@solomon-ai/financial-engine-sdk/resources/institutions";
 import { useDebounce, useScript } from "@uidotdev/usehooks";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -95,7 +96,7 @@ export function ConnectTransactionsModal({
 }: ConnectTransactionsModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [results, setResults] = useState<Institutions["data"]>([]);
+  const [results, setResults] = useState<Array<InstitutionsSchema.Data>>([]);
   const [plaidToken, setPlaidToken] = useState<string | undefined>();
 
   const {
@@ -177,7 +178,7 @@ export function ConnectTransactionsModal({
   async function fetchData(query?: string) {
     try {
       setLoading(true);
-      const { data } = await getInstitutions({ countryCode, query });
+      const {data} = await getInstitutions({ countryCode, query });
       setLoading(false);
 
       setResults(data);
@@ -189,7 +190,7 @@ export function ConnectTransactionsModal({
 
   useEffect(() => {
     if (
-      (isOpen && !results?.length > 0) ||
+      (isOpen && (results?.length ?? 0) === 0) ||
       countryCode !== initialCountryCode
     ) {
       fetchData();

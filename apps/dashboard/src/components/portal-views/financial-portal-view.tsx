@@ -79,10 +79,10 @@ export const FinancialPortalView: React.FC<FinancialPortalViewProps> = ({
     <div className="w-full pt-[3%] mx-auto">
       <Card className="p-[2%]">
         <div className={`mt-8 relative`}>
-          {disabled && <EmptyState />}
-          {(isCurrentUserTierFree || !hasBankAccounts) && (
+          {/* {disabled && <EmptyState />} */}
+          {/* {(isCurrentUserTierFree || !hasBankAccounts) && (
             <UpgradeTier message="Please upgrade your tier to access detailed financial insights and analytics." />
-          )}
+          )} */}
           <div
             className={`${(disabled || isCurrentUserTierFree) && "blur-[8px] opacity-20"}`}
           >

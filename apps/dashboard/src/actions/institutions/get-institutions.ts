@@ -2,6 +2,7 @@
 
 import { engine } from "@/utils/engine";
 import { logger } from "@/utils/logger";
+import { InstitutionsSchema } from "@solomon-ai/financial-engine-sdk/resources/institutions";
 
 type GetAccountParams = {
   countryCode: string;
@@ -11,14 +12,14 @@ type GetAccountParams = {
 export async function getInstitutions({
   countryCode,
   query,
-}: GetAccountParams) {
+}: GetAccountParams) : Promise<InstitutionsSchema> {
   try {
     return engine.institutions.list({
-      countryCode,
+      countryCode: countryCode as any,
       q: query,
     });
   } catch (error) {
     logger(error instanceof Error ? error.message : String(error));
-    return [];
+    return { data: [] };
   }
 }
