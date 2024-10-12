@@ -136,6 +136,7 @@ export type Database = {
           expires_at: string | null
           id: string
           institution_id: string
+          item_id: string | null
           last_accessed: string | null
           logo_url: string | null
           name: string
@@ -152,6 +153,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           institution_id: string
+          item_id?: string | null
           last_accessed?: string | null
           logo_url?: string | null
           name: string
@@ -168,6 +170,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           institution_id?: string
+          item_id?: string | null
           last_accessed?: string | null
           logo_url?: string | null
           name?: string

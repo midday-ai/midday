@@ -22,6 +22,7 @@ type CreateBankAccountsPayload = {
   referenceId?: string;
   teamId: string;
   userId: string;
+  itemId: string;
   provider: "gocardless" | "teller" | "plaid";
 };
 
@@ -35,6 +36,7 @@ export async function createBankAccounts(
     teamId,
     userId,
     provider,
+    itemId,
   }: CreateBankAccountsPayload
 ) {
   // Get first account to create a bank connection
@@ -66,6 +68,7 @@ export async function createBankAccounts(
         enrollment_id: enrollmentId,
         reference_id: referenceId,
         expires_at: expiresAt,
+        itemId: itemId,
       },
       {
         onConflict: "institution_id, team_id",

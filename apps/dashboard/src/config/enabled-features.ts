@@ -14,7 +14,7 @@ const features = {
   /** Flag for Payments feature */
   isPaymentsEnabled: featureFlags.isPaymentsEnabled,
   /** Flag for Solomon Backend Interactions */
-  isBackendEnabled: featureFlags.isSolomonBackendInteractionsEnabled,
+  isBackendEnabled: true,
   /** Flag for Enterprise Tier features */
   isEnterpriseTierEnabled: featureFlags.isEnterpriseTierEnabled,
 };

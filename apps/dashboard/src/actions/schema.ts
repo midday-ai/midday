@@ -137,6 +137,7 @@ export const connectBankAccountSchema = z.object({
   referenceId: z.string().nullable().optional(), // GoCardLess
   accessToken: z.string().nullable().optional(), // Teller
   enrollmentId: z.string().nullable().optional(), // Teller
+  itemId: z.string().nullable().optional(), // Plaid
   provider: z.enum(["gocardless", "plaid", "teller"]),
   accounts: z.array(
     z.object({

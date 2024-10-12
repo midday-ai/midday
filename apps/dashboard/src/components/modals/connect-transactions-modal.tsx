@@ -130,11 +130,14 @@ export function ConnectTransactionsModal({
           userId: userId,
         });
 
+        // TODO: save the item id for the given institution id
+
         setParams({
           step: "account",
           provider: "plaid",
           token: res?.accessToken,
           institution_id: metadata.institution?.institution_id,
+          item_id: res?.itemId,
         });
         track({
           event: LogEvents.ConnectBankAuthorized.name,

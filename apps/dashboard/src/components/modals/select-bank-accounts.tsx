@@ -156,6 +156,7 @@ export function SelectBankAccountsModal() {
     institution_id,
     token,
     enrollment_id,
+    item_id,
   } = useConnectParams();
 
   const isOpen = step === "account";
@@ -227,6 +228,7 @@ export function SelectBankAccountsModal() {
           accessToken: token ?? undefined,
           enrollmentId: enrollment_id ?? undefined,
           referenceId: ref ?? undefined,
+          itemId: item_id ?? undefined,
           accounts: data.map((account) => ({
             name: account.name,
             institution_id: account.institution.id,
@@ -254,6 +256,7 @@ export function SelectBankAccountsModal() {
     token,
     institution_id,
     enrollment_id,
+    item_id,
   ]);
 
   return (
