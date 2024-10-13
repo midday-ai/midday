@@ -60,7 +60,7 @@ export class TellerApi {
       `/accounts/${accountId}/transactions`,
       accessToken,
       {
-        count: latest ? 500 : count,
+        count: latest ? 100 : count,
       },
     );
 

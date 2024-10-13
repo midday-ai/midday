@@ -11,6 +11,7 @@ import {
   type LinkTokenCreateResponse,
   PlaidApi as PlaidBaseApi,
   PlaidEnvironments,
+  type LinkTokenCreateRequest as PlaidLinkTokenCreateRequest,
   Products,
   StatementsAccount,
   StatementsStatement,
@@ -180,7 +181,7 @@ export class PlaidApi {
       if (latest) {
         const { data } = await this.#client.transactionsSync({
           access_token: accessToken,
-          count: 500,
+          count: 100,
         });
 
         added = added.concat(data.added);
@@ -223,16 +224,11 @@ export class PlaidApi {
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
-    const payload = {
+    const payload: PlaidLinkTokenCreateRequest = {
       client_id: this.#clientId,
       secret: this.#clientSecret,
       client_name: "simfiny",
       products: [Products.Transactions],
-      required_if_supported_products: [
-        Products.Liabilities,
-        Products.Investments,
-        Products.RecurringTransactions,
-      ],
       language,
       access_token: accessToken,
       country_codes: this.#countryCodes,
