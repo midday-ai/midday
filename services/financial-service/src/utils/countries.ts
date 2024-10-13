@@ -32,7 +32,7 @@ export const GOCARDLESS_COUNTRIES = [
   "GB",
 ];
 
-export const PLAID_COUNTRIES = ["US", "CA"];
+export const PLAID_COUNTRIES = ["US"];
 
 export const TELLER_COUNTRIES = ["US"];
 

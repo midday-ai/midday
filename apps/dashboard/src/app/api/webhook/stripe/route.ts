@@ -111,6 +111,11 @@ export async function POST(req: Request) {
             });
           }
           break;
+        case "billing_portal.session.created":
+        case "invoice.upcoming":
+          // TODO: Handle billing portal session creation
+          console.log("Billing portal session created");
+          break;
         default:
           throw new Error("Unhandled relevant event!");
       }
