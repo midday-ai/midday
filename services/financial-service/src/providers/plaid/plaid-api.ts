@@ -59,7 +59,12 @@ export class PlaidApi {
     this.#clientId = params.envs.PLAID_CLIENT_ID;
     this.#clientSecret = params.envs.PLAID_SECRET;
     this.#r2 = params.r2;
-    this.#r2 = params.r2;
+
+    console.log('Plaid client ID:', this.#clientId);
+    console.log('Plaid secret length:', this.#clientSecret.length);
+
+    this.#countryCodes = PLAID_COUNTRIES as CountryCode[];
+    console.log('Country codes:', this.#countryCodes);
 
     const configuration = new Configuration({
       basePath:
@@ -218,7 +223,7 @@ export class PlaidApi {
   }: LinkTokenCreateRequest): Promise<
     import("axios").AxiosResponse<LinkTokenCreateResponse>
   > {
-    return this.#client.linkTokenCreate({
+    const payload = {
       client_id: this.#clientId,
       secret: this.#clientSecret,
       client_name: "simfiny",
@@ -237,7 +242,18 @@ export class PlaidApi {
       user: {
         client_user_id: userId,
       },
-    });
+    };
+
+    console.log('Link token create payload:', JSON.stringify(payload, null, 2));
+
+    try {
+      const response = await this.#client.linkTokenCreate(payload);
+      console.log('Link token created successfully');
+      return response;
+    } catch (error: unknown) {
+      console.error('Error creating link token:', error);
+      throw error;
+    }
   }
 
   /**
