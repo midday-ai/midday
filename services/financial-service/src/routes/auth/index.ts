@@ -210,6 +210,7 @@ app.openapi(linkPlaidRoute, async (c) => {
       200,
     );
   } catch (error) {
+    console.log(error);
     const errorResponse = createErrorResponse(error, c.get("requestId"));
 
     return c.json(errorResponse, 400);
