@@ -1,3 +1,10 @@
+# [0.19.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.18.0...v0.19.0) (2024-10-13)
+
+
+### Features
+
+* checkpoint ([e6b6555](https://github.com/SolomonAIEngineering/solomonai/commit/e6b655561cc77a0dfb53c6617e71c52d6f0955c3))
+
 # [0.18.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.17.0...v0.18.0) (2024-10-13)
 
 
