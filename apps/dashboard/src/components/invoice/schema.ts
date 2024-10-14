@@ -1,22 +1,8 @@
+import { updateInvoiceSettingsSchema } from "@/actions/invoice/schema";
 import { z } from "zod";
 
 export const invoiceSchema = z.object({
-  settings: z.object({
-    customerContent: z.string(),
-    fromContent: z.string(),
-    invoiceNo: z.string(),
-    issueDate: z.string(),
-    dueDate: z.string(),
-    description: z.string(),
-    price: z.string(),
-    quantity: z.string(),
-    total: z.string(),
-    vat: z.string(),
-    tax: z.string(),
-    paymentDetails: z.string(),
-    note: z.string(),
-    logoUrl: z.string().optional(),
-  }),
+  settings: updateInvoiceSettingsSchema,
   from: z.any(),
   customer: z.any(),
   paymentDetails: z.any(),

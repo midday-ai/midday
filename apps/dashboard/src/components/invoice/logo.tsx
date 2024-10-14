@@ -6,7 +6,7 @@ import { useToast } from "@midday/ui/use-toast";
 import { useFormContext } from "react-hook-form";
 import type { InvoiceFormValues } from "./schema";
 
-export function Logo() {
+export function Logo({ teamId }: { teamId: string }) {
   const { watch, setValue } = useFormContext<InvoiceFormValues>();
   const logoUrl = watch("logoUrl");
   const { uploadFile, isLoading } = useUpload();
@@ -18,7 +18,7 @@ export function Logo() {
       try {
         const { url } = await uploadFile({
           file,
-          path: ["dd6a039e-d071-423a-9a4d-9ba71325d890", "invoice", file.name],
+          path: [teamId, "invoice", file.name],
           bucket: "avatars",
         });
 

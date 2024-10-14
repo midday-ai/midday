@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@midday/ui/button";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { FormProvider, useForm } from "react-hook-form";
 import { CreateButton } from "./create-button";
@@ -13,41 +12,53 @@ import { PaymentDetails } from "./payment-details";
 import { type InvoiceFormValues, invoiceSchema } from "./schema";
 import { Summary } from "./summary";
 
-export function Form() {
+type Props = {
+  teamId: string;
+};
+
+export function Form({ teamId }: Props) {
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       settings: {
-        invoiceNo: "Invoice NO",
-        issueDate: "Issue Date",
-        dueDate: "Due Date",
-        customerContent: "To",
-        fromContent: "From",
-        description: "Description",
-        price: "Price",
-        quantity: "Quantity",
-        total: "Total",
-        vat: "VAT",
-        tax: "Tax",
-        paymentDetails: "Payment Details",
-        note: "Note",
+        customerLabel: "To",
+        fromLabel: "From",
+        invoiceNoLabel: "Invoice No",
+        issueDateLabel: "Issue Date",
+        dueDateLabel: "Due Date",
+        descriptionLabel: "Description",
+        priceLabel: "Price",
+        quantityLabel: "Quantity",
+        totalLabel: "Total",
+        vatLabel: "VAT",
+        taxLabel: "Tax",
+        paymentDetailsLabel: "Payment Details",
+        noteLabel: "Note",
         logoUrl: undefined,
       },
+      invoiceNumber: "INV-0001",
       currency: "USD",
       lineItems: [{ name: "", quantity: 0, price: 0 }],
     },
   });
 
+  const onSubmit = (data: InvoiceFormValues) => {
+    console.log(data);
+  };
+
   return (
     <FormProvider {...form}>
-      <form className="relative h-full antialiased">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="relative h-full antialiased"
+      >
         <ScrollArea
           className="w-[544px] h-full max-h-[770px] bg-background"
           hideScrollbar
         >
           <div className="p-8">
             <div className="flex flex-col">
-              <Logo />
+              <Logo teamId={teamId} />
             </div>
 
             <div className="mt-8">

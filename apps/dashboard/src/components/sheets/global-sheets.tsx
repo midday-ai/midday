@@ -27,7 +27,7 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
         timeFormat={userData?.time_format}
         lastProjectId={projectId}
       />
-      <InvoiceCreateSheet currencyCode={defaultCurrency} />
+      <InvoiceCreateSheet teamId={userData?.team_id} />
     </>
   );
 }

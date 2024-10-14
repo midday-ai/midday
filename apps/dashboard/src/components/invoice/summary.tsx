@@ -30,7 +30,7 @@ export function Summary() {
   return (
     <div className="w-[240px] flex flex-col space-y-4 divide-y divide-border">
       <div className="flex justify-between items-center">
-        <LabelInput name="settings.vat" />
+        <LabelInput name="settings.vatLabel" />
         <span className="text-right font-mono text-[11px] text-[#878787]">
           <FormatAmount
             amount={totalVAT}
@@ -42,7 +42,7 @@ export function Summary() {
       </div>
 
       <div className="flex justify-between items-center pt-2">
-        <LabelInput name="settings.total" />
+        <LabelInput name="settings.totalLabel" />
         <span className="text-right font-mono text-[21px]">
           <FormatAmount
             amount={total}

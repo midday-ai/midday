@@ -7,9 +7,10 @@ type Props = {
   name: string;
   required?: boolean;
   className?: string;
+  onSave?: (value: string) => void;
 };
 
-export function LabelInput({ name, className }: Props) {
+export function LabelInput({ name, className, onSave }: Props) {
   const { setValue, watch } = useFormContext();
   const value = watch(name);
 
@@ -22,6 +23,7 @@ export function LabelInput({ name, className }: Props) {
       onBlur={(e) => {
         const newValue = e.currentTarget.textContent || "";
         setValue(name, newValue, { shouldValidate: true });
+        onSave?.(newValue);
       }}
     >
       {value}

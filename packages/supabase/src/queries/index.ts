@@ -1233,3 +1233,15 @@ export async function getCustomersQuery(supabase: Client, teamId: string) {
     .eq("team_id", teamId)
     .limit(100);
 }
+
+export async function getInvoiceSettingsQuery(
+  supabase: Client,
+  teamId: string,
+) {
+  return supabase
+    .from("team_settings")
+    .select("*")
+    .eq("team_id", teamId)
+    .eq("setting_key", "invoice")
+    .single();
+}

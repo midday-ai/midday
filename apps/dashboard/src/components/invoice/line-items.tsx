@@ -42,13 +42,18 @@ export function LineItems() {
   return (
     <div className="space-y-4">
       <div className="flex items-end mb-2">
-        <LabelInput name="settings.description" className="w-1/2 mr-4" />
-        <LabelInput name="settings.price" className="w-40 mr-4" />
-        <LabelInput name="settings.quantity" className="w-24 mr-4" />
-        <LabelInput name="settings.vat" className="w-24 text-right" />
+        <LabelInput name="settings.descriptionLabel" className="w-1/2 mr-4" />
+        <LabelInput name="settings.priceLabel" className="w-40 mr-4" />
+        <LabelInput name="settings.quantityLabel" className="w-24 mr-4" />
+        <LabelInput name="settings.vatLabel" className="w-24 text-right" />
       </div>
 
-      <Reorder.Group axis="y" values={fields} onReorder={reorderList}>
+      <Reorder.Group
+        axis="y"
+        values={fields}
+        onReorder={reorderList}
+        className="!m-0"
+      >
         {fields.map((field, index) => (
           <LineItemRow
             key={field.id}
