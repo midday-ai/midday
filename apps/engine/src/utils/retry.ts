@@ -1,7 +1,7 @@
 export async function withRetry<TResult>(
   fn: (attempt: number) => TResult | Promise<TResult>,
   {
-    maxRetries = 3,
+    maxRetries = 1,
     onError,
     delay,
   }: {
