@@ -83,12 +83,7 @@ client.defineJob({
 
     try {
       if (promises) {
-        const results = await Promise.allSettled(promises);
-        const errors = results.filter((result) => result.status === "rejected");
-
-        if (errors.length > 0) {
-          await io.logger.error("Some requests failed", errors);
-        }
+        await Promise.all(promises);
       }
     } catch (error) {
       if (error instanceof Midday.APIError) {
