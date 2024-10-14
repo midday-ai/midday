@@ -133,6 +133,7 @@ export type Database = {
           created_at: string
           enrollment_id: string | null
           error_details: string | null
+          error_retries: number | null
           expires_at: string | null
           id: string
           institution_id: string
@@ -149,6 +150,7 @@ export type Database = {
           created_at?: string
           enrollment_id?: string | null
           error_details?: string | null
+          error_retries?: number | null
           expires_at?: string | null
           id?: string
           institution_id: string
@@ -165,6 +167,7 @@ export type Database = {
           created_at?: string
           enrollment_id?: string | null
           error_details?: string | null
+          error_retries?: number | null
           expires_at?: string | null
           id?: string
           institution_id?: string
@@ -179,6 +182,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "bank_connections_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          address_line_1: string | null
+          address_line_2: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+          note: string | null
+          state: string | null
+          team_id: string
+          website: string | null
+          zip: string | null
+        }
+        Insert: {
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          note?: string | null
+          state?: string | null
+          team_id?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Update: {
+          address_line_1?: string | null
+          address_line_2?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+          note?: string | null
+          state?: string | null
+          team_id?: string
+          website?: string | null
+          zip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -374,6 +433,99 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number | null
+          company_datails: Json | null
+          created_at: string
+          currency: string | null
+          customer_datails: Json | null
+          customer_id: string | null
+          due_date: string | null
+          fts: unknown | null
+          id: string
+          internal_note: string | null
+          invoice_date: string | null
+          invoice_number: string | null
+          line_items: Json | null
+          note: string | null
+          paid_at: string | null
+          path_tokens: string[] | null
+          payment_datails: Json | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          tax: number | null
+          team_id: string
+          updated_at: string | null
+          url: string | null
+          vat: number | null
+        }
+        Insert: {
+          amount?: number | null
+          company_datails?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_datails?: Json | null
+          customer_id?: string | null
+          due_date?: string | null
+          fts?: unknown | null
+          id?: string
+          internal_note?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line_items?: Json | null
+          note?: string | null
+          paid_at?: string | null
+          path_tokens?: string[] | null
+          payment_datails?: Json | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          tax?: number | null
+          team_id: string
+          updated_at?: string | null
+          url?: string | null
+          vat?: number | null
+        }
+        Update: {
+          amount?: number | null
+          company_datails?: Json | null
+          created_at?: string
+          currency?: string | null
+          customer_datails?: Json | null
+          customer_id?: string | null
+          due_date?: string | null
+          fts?: unknown | null
+          id?: string
+          internal_note?: string | null
+          invoice_date?: string | null
+          invoice_number?: string | null
+          line_items?: Json | null
+          note?: string | null
+          paid_at?: string | null
+          path_tokens?: string[] | null
+          payment_datails?: Json | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          tax?: number | null
+          team_id?: string
+          updated_at?: string | null
+          url?: string | null
+          vat?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -424,6 +576,38 @@ export type Database = {
           },
           {
             foreignKeyName: "reports_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_settings: {
+        Row: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          setting_key: string
+          setting_value: Json
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_settings_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1236,6 +1420,12 @@ export type Database = {
             }
             Returns: unknown
           }
+      generate_invoice_sequence: {
+        Args: {
+          team_id: string
+        }
+        Returns: number
+      }
       get_all_transactions_by_account: {
         Args: {
           account_id: string
@@ -1375,6 +1565,26 @@ export type Database = {
           value: number
           recurring_value: number
           currency: string
+        }[]
+      }
+      get_invoice_summary: {
+        Args: {
+          team_id: string
+          status?: Database["public"]["Enums"]["invoice_status"]
+        }
+        Returns: {
+          total_amount: number
+          currency: string
+          invoice_count: number
+        }[]
+      }
+      get_payment_score: {
+        Args: {
+          team_id: string
+        }
+        Returns: {
+          score: number
+          payment_status: string
         }[]
       }
       get_profit: {
@@ -1739,6 +1949,22 @@ export type Database = {
         }
         Returns: unknown
       }
+      update_team_setting: {
+        Args: {
+          team_id: string
+          setting_key: string
+          setting_path: string[]
+          new_value: Json
+          create_missing?: boolean
+        }
+        Returns: {
+          created_at: string
+          id: string
+          setting_key: string
+          setting_value: Json
+          team_id: string
+        }[]
+      }
     }
     Enums: {
       account_type:
@@ -1752,6 +1978,7 @@ export type Database = {
       connection_status: "disconnected" | "connected" | "unknown"
       inbox_status: "processing" | "pending" | "archived" | "new" | "deleted"
       inbox_type: "invoice" | "expense"
+      invoice_status: "draft" | "overdue" | "paid" | "unpaid" | "canceled"
       reportTypes: "profit" | "revenue" | "burn_rate" | "expense"
       teamRoles: "owner" | "member"
       trackerStatus: "in_progress" | "completed"

@@ -31,10 +31,10 @@ client.defineJob({
     const { data: accountsData } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status)",
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status, error_retries)",
       )
       .eq("bank_connection_id", connectionId)
-      .neq("bank_connection.status", "disconnected")
+      .lt("bank_connection.error_retries", 4)
       .eq("team_id", teamId)
       .eq("enabled", true)
       .eq("manual", false);
@@ -83,7 +83,12 @@ client.defineJob({
 
     try {
       if (promises) {
-        await Promise.all(promises);
+        const results = await Promise.allSettled(promises);
+        const errors = results.filter((result) => result.status === "rejected");
+
+        if (errors.length > 0) {
+          await io.logger.error("Some requests failed", errors);
+        }
       }
     } catch (error) {
       if (error instanceof Midday.APIError) {
@@ -108,6 +113,7 @@ client.defineJob({
         last_accessed: new Date().toISOString(),
         status: "connected",
         error_details: null,
+        error_retries: 0,
       })
       .eq("id", connectionId);
 

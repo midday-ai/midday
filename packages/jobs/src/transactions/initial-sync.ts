@@ -128,12 +128,13 @@ client.defineJob({
       },
     });
 
-    try {
-      if (promises) {
-        await Promise.all(promises);
+    if (promises) {
+      const results = await Promise.allSettled(promises);
+      const errors = results.filter((result) => result.status === "rejected");
+
+      if (errors.length > 0) {
+        await io.logger.error("Some promises failed", errors);
       }
-    } catch (error) {
-      throw new Error("Something went wrong");
     }
 
     revalidateTag(`bank_connections_${teamId}`);

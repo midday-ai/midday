@@ -21,11 +21,11 @@ client.defineJob({
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
       .select(
-        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status)",
+        "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status, error_retries)",
       )
       .eq("team_id", teamId)
       .eq("enabled", true)
-      .neq("bank_connection.status", "disconnected")
+      .lt("bank_connection.error_retries", 4)
       .eq("manual", false);
 
     if (accountsError) {
@@ -52,7 +52,10 @@ client.defineJob({
         // TODO: Fix so it only update once per connection
         await io.supabase.client
           .from("bank_connections")
-          .update({ last_accessed: new Date().toISOString() })
+          .update({
+            last_accessed: new Date().toISOString(),
+            error_retries: 0,
+          })
           .eq("id", account.bank_connection.id);
       } catch (error) {
         if (error instanceof Midday.APIError) {
@@ -63,6 +66,7 @@ client.defineJob({
             .update({
               status: parsedError.code,
               error_details: parsedError.message,
+              error_retries: account.bank_connection.error_retries + 1,
             })
             .eq("id", account.bank_connection.id);
         }
@@ -89,8 +93,10 @@ client.defineJob({
 
     try {
       if (promises) {
-        const result = await Promise.all(promises);
-        const transactions = result.flat();
+        const results = await Promise.allSettled(promises);
+        const transactions = results
+          .filter((result) => result.status === "fulfilled")
+          .flatMap((result) => result.value);
 
         if (!transactions?.length) {
           return null;
