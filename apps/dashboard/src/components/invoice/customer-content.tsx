@@ -2,7 +2,7 @@
 
 import { Editor } from "@/components/editor";
 import type { JSONContent } from "novel";
-import { useState } from "react";
+import { LabelInput } from "./label-input";
 
 const defaultContent: JSONContent = {
   type: "paragraph",
@@ -50,13 +50,9 @@ const defaultContent: JSONContent = {
 };
 
 export function CustomerContent() {
-  const [content, setContent] = useState(null);
-
   return (
     <div>
-      <span className="font-mono text-[#878787] mb-2 text-[11px] block">
-        To
-      </span>
+      <LabelInput name="settings.customerContent" />
       <Editor initialContent={defaultContent} className="h-[115px]" />
     </div>
   );
