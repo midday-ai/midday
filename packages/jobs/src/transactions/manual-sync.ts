@@ -1,11 +1,9 @@
-import Midday from "@midday-ai/engine";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
-import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
@@ -39,78 +37,87 @@ client.defineJob({
       .eq("enabled", true)
       .eq("manual", false);
 
-    const promises = accountsData?.map(async (account) => {
-      const transactions = await engine.transactions.list({
-        provider: account.bank_connection.provider,
-        accountId: account.account_id,
-        accountType: getClassification(account.type),
-        accessToken: account.bank_connection?.access_token,
-      });
+    const accountErrors = [];
+    const connectionErrors = new Set();
 
-      const formattedTransactions = transactions.data?.map((transaction) => {
-        return transformTransaction({
-          transaction,
-          teamId: account.team_id,
-          bankAccountId: account.id,
+    for (const account of accountsData || []) {
+      try {
+        // Get balance and update account
+        const balance = await engine.accounts.balance({
+          provider: account.bank_connection.provider,
+          id: account.account_id,
+          accessToken: account.bank_connection?.access_token,
         });
-      });
 
-      const balance = await engine.accounts.balance({
-        provider: account.bank_connection.provider,
-        id: account.account_id,
-        accessToken: account.bank_connection?.access_token,
-      });
+        if (balance.data?.amount) {
+          await supabase
+            .from("bank_accounts")
+            .update({
+              balance: balance.data.amount,
+            })
+            .eq("id", account.id);
+        }
 
-      // Update account balance
-      if (balance.data?.amount) {
-        await supabase
-          .from("bank_accounts")
-          .update({
-            balance: balance.data.amount,
-          })
-          .eq("id", account.id);
-      }
-
-      // NOTE: We will get all the transactions at once for each account so
-      // we need to guard against massive payloads
-      await processBatch(formattedTransactions, BATCH_LIMIT, async (batch) => {
-        await supabase.from("transactions").upsert(batch, {
-          onConflict: "internal_id",
-          ignoreDuplicates: true,
+        // Get transactions
+        const transactions = await engine.transactions.list({
+          provider: account.bank_connection.provider,
+          accountId: account.account_id,
+          accountType: getClassification(account.type),
+          accessToken: account.bank_connection?.access_token,
         });
-      });
-    });
 
-    try {
-      if (promises) {
-        await Promise.all(promises);
+        const formattedTransactions = transactions.data?.map((transaction) => {
+          return transformTransaction({
+            transaction,
+            teamId: account.team_id,
+            bankAccountId: account.id,
+          });
+        });
+
+        // NOTE: We will get all the transactions at once for each account so
+        // we need to guard against massive payloads
+        await processBatch(
+          formattedTransactions,
+          BATCH_LIMIT,
+          async (batch) => {
+            await supabase.from("transactions").upsert(batch, {
+              onConflict: "internal_id",
+              ignoreDuplicates: true,
+            });
+          },
+        );
+      } catch (error) {
+        accountErrors.push({
+          accountId: account.id,
+          error: error instanceof Error ? error.message : String(error),
+        });
+        connectionErrors.add(account.bank_connection.id);
       }
-    } catch (error) {
-      if (error instanceof Midday.APIError) {
-        const parsedError = parseAPIError(error);
-
-        await io.supabase.client
-          .from("bank_connections")
-          .update({
-            status: parsedError.code,
-            error_details: parsedError.message,
-          })
-          .eq("id", connectionId);
-      }
-
-      throw new Error(error instanceof Error ? error.message : String(error));
     }
 
-    // Update bank connection last accessed and restore connection status
-    await io.supabase.client
+    // Update bank connection status based on error_retries is more than 3, set to disconnected
+    await supabase
       .from("bank_connections")
-      .update({
-        last_accessed: new Date().toISOString(),
-        status: "connected",
-        error_details: null,
-        error_retries: 0,
-      })
-      .eq("id", connectionId);
+      .update({ status: "disconnected" })
+      .eq("id", connectionId)
+      .gte("error_retries", 4);
+
+    // If is success, reset error_retries to 0 once per bank connection
+    if (accountErrors.length === 0) {
+      await supabase
+        .from("bank_connections")
+        .update({
+          last_accessed: new Date().toISOString(),
+          status: "connected",
+          error_details: null,
+          error_retries: 0,
+        })
+        .eq("id", connectionId);
+    }
+
+    if (accountErrors.length > 0) {
+      await io.logger.error("Some accounts failed to sync", accountErrors);
+    }
 
     revalidateTag(`bank_connections_${teamId}`);
     revalidateTag(`transactions_${teamId}`);
