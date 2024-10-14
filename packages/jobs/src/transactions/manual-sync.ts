@@ -7,7 +7,7 @@ import { engine } from "../utils/engine";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
-const BATCH_LIMIT = 500;
+const TRANSACTIONS_BATCH_LIMIT = 500;
 
 client.defineJob({
   id: Jobs.TRANSACTIONS_MANUAL_SYNC,
@@ -21,14 +21,14 @@ client.defineJob({
     }),
   }),
   integrations: { supabase },
-  run: async (payload, io) => {
+  run: async (syncPayload, io) => {
     const supabase = io.supabase.client;
 
-    const { teamId, connectionId } = payload;
+    const { teamId, connectionId } = syncPayload;
 
     await io.logger.info("Starting manual sync", { teamId, connectionId });
 
-    const { data: accountsData } = await supabase
+    const { data: bankAccounts } = await supabase
       .from("bank_accounts")
       .select(
         "id, team_id, account_id, type, bank_connection:bank_connection_id(id, provider, access_token, status, error_retries)",
@@ -39,15 +39,15 @@ client.defineJob({
       .eq("enabled", true)
       .eq("manual", false);
 
-    await io.logger.info(`Found ${accountsData?.length || 0} accounts to sync`);
+    await io.logger.info(`Found ${bankAccounts?.length || 0} accounts to sync`);
 
-    const promises = accountsData?.map(async (account) => {
+    const syncPromises = bankAccounts?.map(async (account) => {
       try {
-        await io.logger.info(`Starting sync for account`, {
+        await io.logger.info("Starting sync for account", {
           accountId: account.id,
         });
 
-        const transactions = await engine.transactions.list({
+        const fetchedTransactions = await engine.transactions.list({
           provider: account.bank_connection.provider,
           accountId: account.account_id,
           accountType: getClassification(account.type),
@@ -55,35 +55,37 @@ client.defineJob({
         });
 
         await io.logger.info(
-          `Retrieved ${transactions.data?.length || 0} transactions`,
+          `Retrieved ${fetchedTransactions.data?.length || 0} transactions`,
           { accountId: account.id },
         );
 
-        const formattedTransactions = transactions.data?.map((transaction) => {
-          return transformTransaction({
-            transaction,
-            teamId: account.team_id,
-            bankAccountId: account.id,
-          });
-        });
+        const formattedTransactions = fetchedTransactions.data?.map(
+          (transaction) => {
+            return transformTransaction({
+              transaction,
+              teamId: account.team_id,
+              bankAccountId: account.id,
+            });
+          },
+        );
 
-        const balance = await engine.accounts.balance({
+        const accountBalance = await engine.accounts.balance({
           provider: account.bank_connection.provider,
           id: account.account_id,
           accessToken: account.bank_connection?.access_token,
         });
 
         // Update account balance
-        if (balance.data?.amount) {
+        if (accountBalance.data?.amount) {
           await supabase
             .from("bank_accounts")
             .update({
-              balance: balance.data.amount,
+              balance: accountBalance.data.amount,
             })
             .eq("id", account.id);
-          await io.logger.info(`Updated balance for account`, {
+          await io.logger.info("Updated balance for account", {
             accountId: account.id,
-            balance: balance.data.amount,
+            balance: accountBalance.data.amount,
           });
         }
 
@@ -91,19 +93,22 @@ client.defineJob({
         // we need to guard against massive payloads
         await processBatch(
           formattedTransactions,
-          BATCH_LIMIT,
-          async (batch) => {
-            await supabase.from("transactions").upsert(batch, {
+          TRANSACTIONS_BATCH_LIMIT,
+          async (transactionBatch) => {
+            await supabase.from("transactions").upsert(transactionBatch, {
               onConflict: "internal_id",
               ignoreDuplicates: true,
             });
-            await io.logger.info(`Upserted ${batch.length} transactions`, {
-              accountId: account.id,
-            });
+            await io.logger.info(
+              `Upserted ${transactionBatch.length} transactions`,
+              {
+                accountId: account.id,
+              },
+            );
           },
         );
 
-        await io.logger.info(`Completed sync for account`, {
+        await io.logger.info("Completed sync for account", {
           accountId: account.id,
         });
 
@@ -111,25 +116,25 @@ client.defineJob({
           success: true,
           accountId: account.id,
         };
-      } catch (error) {
-        await io.logger.error(`Error syncing account`, {
+      } catch (syncError) {
+        await io.logger.error("Error syncing account", {
           accountId: account.id,
-          error,
+          error: syncError,
         });
         return {
           success: false,
           accountId: account.id,
-          error,
+          error: syncError,
         };
       }
     });
 
-    if (promises) {
-      const results = await Promise.all(promises);
-      const successfulAccounts = results.filter((result) => result.success);
-      const failedAccounts = results.filter((result) => !result.success);
+    if (syncPromises) {
+      const syncResults = await Promise.all(syncPromises);
+      const successfulAccounts = syncResults.filter((result) => result.success);
+      const failedAccounts = syncResults.filter((result) => !result.success);
 
-      await io.logger.info(`Sync results`, {
+      await io.logger.info("Sync results", {
         successfulAccounts: successfulAccounts.length,
         failedAccounts: failedAccounts.length,
       });
@@ -149,7 +154,8 @@ client.defineJob({
               //     : String(failedAccount.error),
             })
             .eq("id", failedAccount.accountId);
-          await io.logger.info(`Disabled failed account`, {
+
+          await io.logger.info("Disabled failed account", {
             accountId: failedAccount.accountId,
           });
         }
@@ -164,8 +170,9 @@ client.defineJob({
             error_retries: 4, // Set to max to prevent further retries
           })
           .eq("id", connectionId);
+
         await io.logger.warn(
-          `All accounts failed, marked connection as disconnected`,
+          "All accounts failed, marked connection as disconnected",
           { connectionId },
         );
       } else {
@@ -179,14 +186,14 @@ client.defineJob({
             error_retries: 0,
           })
           .eq("id", connectionId);
+
         await io.logger.info(
-          `At least one account succeeded, marked connection as connected`,
+          "At least one account succeeded, marked connection as connected",
           { connectionId },
         );
       }
     }
 
-    await io.logger.info("Revalidating tags");
     revalidateTag(`bank_connections_${teamId}`);
     revalidateTag(`transactions_${teamId}`);
     revalidateTag(`spending_${teamId}`);
@@ -194,7 +201,5 @@ client.defineJob({
     revalidateTag(`bank_accounts_${teamId}`);
     revalidateTag(`insights_${teamId}`);
     revalidateTag(`expenses_${teamId}`);
-
-    await io.logger.info("Manual sync completed", { teamId, connectionId });
   },
 });
