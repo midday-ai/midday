@@ -1,14 +1,12 @@
 "use client";
 
 import { Editor } from "@/components/editor";
+import { LabelInput } from "./label-input";
 
 export function NoteContent() {
   return (
     <div>
-      <span className="font-mono text-[#878787] mb-2 text-[11px] block">
-        Note
-      </span>
-
+      <LabelInput name="settings.note" className="mb-2 block" />
       <Editor className="h-[78px]" />
     </div>
   );

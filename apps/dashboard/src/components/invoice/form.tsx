@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@midday/ui/button";
 import { ScrollArea } from "@midday/ui/scroll-area";
 import { FormProvider, useForm } from "react-hook-form";
+import { CreateButton } from "./create-button";
 import { CustomerContent } from "./customer-content";
 import { FromContent } from "./from-content";
 import { LineItems } from "./line-items";
@@ -16,21 +17,30 @@ export function Form() {
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
+      settings: {
+        invoiceNo: "Invoice NO",
+        issueDate: "Issue Date",
+        dueDate: "Due Date",
+        customerContent: "To",
+        fromContent: "From",
+        description: "Description",
+        price: "Price",
+        quantity: "Quantity",
+        total: "Total",
+        vat: "VAT",
+        tax: "Tax",
+        paymentDetails: "Payment Details",
+        note: "Note",
+        logoUrl: undefined,
+      },
       currency: "USD",
       lineItems: [{ name: "", quantity: 0, price: 0 }],
     },
   });
 
-  const onSubmit = (data: InvoiceFormValues) => {
-    console.log(data);
-  };
-
   return (
     <FormProvider {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="relative h-full antialiased"
-      >
+      <form className="relative h-full antialiased">
         <ScrollArea
           className="w-[544px] h-full max-h-[770px] bg-background"
           hideScrollbar
@@ -74,7 +84,7 @@ export function Form() {
 
         <div className="absolute bottom-14 w-full h-9">
           <div className="flex justify-end mt-auto">
-            <Button>Create & Send</Button>
+            <CreateButton />
           </div>
         </div>
       </form>

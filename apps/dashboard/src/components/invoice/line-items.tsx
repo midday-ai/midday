@@ -7,6 +7,7 @@ import { Reorder, useDragControls, useMotionValue } from "framer-motion";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Input } from "./input";
+import { LabelInput } from "./label-input";
 import type { InvoiceFormValues } from "./schema";
 import { VATInput } from "./vat-input";
 
@@ -41,18 +42,10 @@ export function LineItems() {
   return (
     <div className="space-y-4">
       <div className="flex items-end mb-2">
-        <Label className="text-[11px] text-[#878787] font-mono w-1/2 mr-4">
-          Name
-        </Label>
-        <Label className="text-[11px] text-[#878787] font-mono w-40 mr-4">
-          Price
-        </Label>
-        <Label className="text-[11px] text-[#878787] font-mono w-24 mr-4">
-          Quantity
-        </Label>
-        <Label className="text-[11px] text-[#878787] font-mono w-24 text-right">
-          VAT
-        </Label>
+        <LabelInput name="settings.description" className="w-1/2 mr-4" />
+        <LabelInput name="settings.price" className="w-40 mr-4" />
+        <LabelInput name="settings.quantity" className="w-24 mr-4" />
+        <LabelInput name="settings.vat" className="w-24 text-right" />
       </div>
 
       <Reorder.Group axis="y" values={fields} onReorder={reorderList}>

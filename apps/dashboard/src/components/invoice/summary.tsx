@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormatAmount } from "../format-amount";
+import { LabelInput } from "./label-input";
 import type { InvoiceFormValues } from "./schema";
 
 export function Summary() {
@@ -29,7 +30,7 @@ export function Summary() {
   return (
     <div className="w-[240px] flex flex-col space-y-4 divide-y divide-border">
       <div className="flex justify-between items-center">
-        <span className="font-mono text-[11px] text-[#878787]">VAT</span>
+        <LabelInput name="settings.vat" />
         <span className="text-right font-mono text-[11px] text-[#878787]">
           <FormatAmount
             amount={totalVAT}
@@ -41,7 +42,7 @@ export function Summary() {
       </div>
 
       <div className="flex justify-between items-center pt-2">
-        <span className="font-mono text-[11px] text-[#878787]">Total</span>
+        <LabelInput name="settings.total" />
         <span className="text-right font-mono text-[21px]">
           <FormatAmount
             amount={total}
