@@ -2,6 +2,7 @@
 
 import { Editor } from "@/components/editor";
 import type { JSONContent } from "novel";
+import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
 const defaultContent: JSONContent = {
@@ -50,10 +51,23 @@ const defaultContent: JSONContent = {
 };
 
 export function FromContent() {
+  const { control } = useFormContext();
+
   return (
     <div>
-      <LabelInput name="settings.fromContent" />
-      <Editor initialContent={defaultContent} className="h-[115px]" />
+      <LabelInput name="settings.fromLabel" />
+      <Controller
+        name="fromContent"
+        control={control}
+        defaultValue={defaultContent}
+        render={({ field }) => (
+          <Editor
+            initialContent={field.value}
+            onChange={field.onChange}
+            className="h-[115px]"
+          />
+        )}
+      />
     </div>
   );
 }

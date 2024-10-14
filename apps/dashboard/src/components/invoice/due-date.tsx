@@ -21,7 +21,7 @@ export function DueDate() {
   return (
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
-        <LabelInput name="settings.dueDate" />
+        <LabelInput name="settings.dueDateLabel" />
         <span className="text-[11px] text-[#878787] font-mono">:</span>
       </div>
       <Popover open={isOpen} onOpenChange={setIsOpen}>

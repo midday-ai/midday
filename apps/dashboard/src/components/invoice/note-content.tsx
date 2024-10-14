@@ -6,7 +6,7 @@ import { LabelInput } from "./label-input";
 export function NoteContent() {
   return (
     <div>
-      <LabelInput name="settings.note" className="mb-2 block" />
+      <LabelInput name="settings.noteLabel" className="mb-2 block" />
       <Editor className="h-[78px]" />
     </div>
   );

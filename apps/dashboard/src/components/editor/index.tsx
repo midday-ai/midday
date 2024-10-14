@@ -15,9 +15,10 @@ import { TextButtons } from "./selectors/text-buttons";
 type Props = {
   initialContent?: JSONContent;
   className?: string;
+  onChange?: (content: JSONContent) => void;
 };
 
-export function Editor({ initialContent, className }: Props) {
+export function Editor({ initialContent, className, onChange }: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [content, setContent] = useState<JSONContent | undefined>(
@@ -41,6 +42,7 @@ export function Editor({ initialContent, className }: Props) {
         onUpdate={({ editor }) => {
           const json = editor.getJSON();
           setContent(json);
+          onChange?.(json);
         }}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}

@@ -6,7 +6,11 @@ import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
 
-export function InvoiceCreateSheet() {
+type Props = {
+  teamId: string;
+};
+
+export function InvoiceCreateSheet({ teamId }: Props) {
   const { setParams, createInvoice } = useInvoiceParams();
 
   const isOpen = Boolean(createInvoice);
@@ -22,7 +26,7 @@ export function InvoiceCreateSheet() {
           <Icons.MoreVertical />
         </SheetHeader>
 
-        <Form />
+        <Form teamId={teamId} />
       </SheetContent>
     </Sheet>
   );
