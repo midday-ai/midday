@@ -1,3 +1,10 @@
+# [0.22.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.21.0...v0.22.0) (2024-10-15)
+
+
+### Features
+
+* enable financial service to account for cursor when triggering account sync operations ([#60](https://github.com/SolomonAIEngineering/solomonai/issues/60)) ([ff55fef](https://github.com/SolomonAIEngineering/solomonai/commit/ff55fef6564bed7ccb6aa72fba6c4b7a50ad99b3))
+
 # [0.21.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.20.0...v0.21.0) (2024-10-15)
 
 
