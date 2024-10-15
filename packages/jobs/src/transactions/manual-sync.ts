@@ -170,21 +170,21 @@ client.defineJob({
         await io.logger.error("Some accounts failed to sync", failedAccounts);
 
         // Update failed accounts
-        for (const failedAccount of failedAccounts) {
-          await supabase
-            .from("bank_accounts")
-            .update({
-              enabled: false,
-              // error_details: failedAccount.error instanceof Error
-              //   ? failedAccount.error.message
-              //   : String(failedAccount.error),
-            })
-            .eq("id", failedAccount.accountId);
+        // for (const failedAccount of failedAccounts) {
+        //   await supabase
+        //     .from("bank_accounts")
+        //     .update({
+        //       // enabled: false, // TODO: Disable if the account id is not found in the bank connection
+        //       // error_details: failedAccount.error instanceof Error
+        //       //   ? failedAccount.error.message
+        //       //   : String(failedAccount.error),
+        //     })
+        //     .eq("id", failedAccount.accountId);
 
-          await io.logger.info("Disabled failed account", {
-            accountId: failedAccount.accountId,
-          });
-        }
+        //   await io.logger.info("Disabled failed account", {
+        //     accountId: failedAccount.accountId,
+        //   });
+        // }
       }
 
       // Update bank connection status based on sync results

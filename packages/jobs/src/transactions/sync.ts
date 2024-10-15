@@ -137,15 +137,19 @@ client.defineJob({
         const successfulResults = results.filter((result) => result.success);
         const failedResults = results.filter((result) => !result.success);
 
-        // Update failed accounts
-        for (const failedResult of failedResults) {
-          await supabase
-            .from("bank_accounts")
-            .update({
-              enabled: false,
-              // error_details: failedResult.error,
-            })
-            .eq("id", failedResult.accountId);
+        if (failedResults.length > 0) {
+          await io.logger.error("Some accounts failed to sync", failedResults);
+
+          // Update failed accounts
+          // for (const failedResult of failedResults) {
+          //   await supabase
+          //     .from("bank_accounts")
+          //     .update({
+          //       // enabled: false, // TODO: Disable if the account id is not found in the bank connection
+          //       // error_details: failedResult.error,
+          //     })
+          //     .eq("id", failedResult.accountId);
+          // }
         }
 
         // Update bank connections status
