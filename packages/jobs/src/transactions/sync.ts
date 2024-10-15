@@ -84,6 +84,7 @@ client.defineJob({
       } catch (error) {
         // Handle errors and update connection status
         let errorDetails = "Unknown error occurred";
+
         if (error instanceof Midday.APIError) {
           const parsedError = parseAPIError(error);
           errorDetails = parsedError.message;
@@ -95,12 +96,16 @@ client.defineJob({
           account.bank_connection.id,
         ) || {
           success: false,
-          errorRetries: account.bank_connection.error_retries + 1,
+          errorRetries: account.bank_connection.error_retries,
         };
 
         connectionMap.set(account.bank_connection.id, connectionStatus);
 
-        return { success: false, accountId: account.id, error: errorDetails };
+        return {
+          success: false,
+          accountId: account.id,
+          error: errorDetails,
+        };
       }
     });
 
@@ -124,17 +129,25 @@ client.defineJob({
 
         // Update bank connections status
         for (const [connectionId, status] of connectionMap) {
-          const updateData = status.success
-            ? {
-                last_accessed: new Date().toISOString(),
-                status: "connected",
-                error_details: null,
-                error_retries: 0,
-              }
-            : {
-                status: status.errorRetries >= 3 ? "disconnected" : "unknown",
-                error_retries: status.errorRetries,
-              };
+          let updateData;
+
+          if (status.success) {
+            updateData = {
+              last_accessed: new Date().toISOString(),
+              status: "connected",
+              error_details: null,
+              error_retries: 0,
+            };
+          } else {
+            updateData = {
+              status: status.errorRetries >= 3 ? "disconnected" : "unknown",
+            };
+
+            // Only update error_retries if the new status is not "unknown"
+            if (updateData.status !== "unknown") {
+              updateData.error_retries = status.errorRetries;
+            }
+          }
 
           await supabase
             .from("bank_connections")
@@ -190,7 +203,6 @@ client.defineJob({
         revalidateTag(`bank_connections_${teamId}`);
       }
     } catch (error) {
-      await io.logger.debug(`Team id: ${teamId}`);
       await io.logger.error(
         error instanceof Error ? error.message : String(error),
       );
