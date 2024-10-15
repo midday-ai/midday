@@ -201,6 +201,7 @@ client.defineJob({
             const newErrorRetries = currentErrorRetries + 1;
 
             updateData = {
+              last_accessed: new Date().toISOString(),
               status: connectionStatus.status,
               error_details: connectionStatus.errorDetails,
             };
