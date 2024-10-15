@@ -29,7 +29,7 @@ export function getTransactionsTool({ aiState }: Args) {
       attachments: z
         .enum(["include", "exclude"])
         .describe(
-          "Filter transactions if they are completed or not, if they have reciepts or attachments",
+          "Filter transactions if they are completed or not, if they have receipts or attachments",
         )
         .optional(),
       limit: z.number().describe("Limit the number of transactions").optional(),

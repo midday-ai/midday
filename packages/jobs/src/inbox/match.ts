@@ -28,7 +28,7 @@ client.defineJob({
     supabase,
   },
   run: async (payload, io) => {
-    // NOTE: All inbox reciepts and invoices amount are
+    // NOTE: All inbox receipts and invoices amount are
     // saved with positive values while transactions have signed values
     const { data: transactionData } = await io.supabase.client
       .from("transactions")

@@ -12,9 +12,9 @@ type Args = {
 
 export function getInvoicesTool({ aiState, teamId }: Args) {
   return {
-    description: "Find reciept or invoice",
+    description: "Find receipt or invoice",
     parameters: z.object({
-      name: z.string().describe("The name of the invoice or reciept"),
+      name: z.string().describe("The name of the invoice or receipt"),
     }),
     generate: async (args) => {
       const { name, amount } = args;
