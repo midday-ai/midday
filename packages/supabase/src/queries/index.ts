@@ -1144,7 +1144,7 @@ export async function getInvoicesQuery(
   const query = supabase
     .from("invoices")
     .select(
-      "id, invoice_number, due_date, invoice_date, paid_at, amount, currency, status, vat, tax, customer:customer_id(id, name, website)",
+      "id, invoice_number, due_date, invoice_date, paid_at, viewed_at, amount, currency, status, vat, tax, customer:customer_id(id, name, website)",
       { count: "exact" },
     )
     .eq("team_id", teamId);
@@ -1234,14 +1234,13 @@ export async function getCustomersQuery(supabase: Client, teamId: string) {
     .limit(100);
 }
 
-export async function getInvoiceSettingsQuery(
+export async function getInvoiceTemplatesQuery(
   supabase: Client,
   teamId: string,
 ) {
   return supabase
-    .from("team_settings")
+    .from("invoice_templates")
     .select("*")
     .eq("team_id", teamId)
-    .eq("setting_key", "invoice")
     .single();
 }

@@ -13,8 +13,12 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@midday/ui/dropdown-menu";
+import { Icons } from "@midday/ui/icons";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@midday/ui/tooltip";
+import { TooltipProvider } from "@midday/ui/tooltip";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { ColumnDef } from "@tanstack/react-table";
+import { formatDistanceToNow } from "date-fns";
 import { useAction } from "next-safe-action/hooks";
 import * as React from "react";
 
@@ -70,6 +74,9 @@ export const columns: ColumnDef<Invoice>[] = [
     accessorKey: "customer",
     cell: ({ row }) => {
       const customer = row.original.customer;
+      const viewAt = row.original.viewed_at;
+      const hasNewMessages = false;
+
       return (
         <div className="flex items-center space-x-2">
           <Avatar className="size-5">
@@ -84,6 +91,36 @@ export const columns: ColumnDef<Invoice>[] = [
             </AvatarFallback>
           </Avatar>
           <span className="truncate">{customer?.name}</span>
+
+          {viewAt && (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger className="flex items-center space-x-2">
+                  <Icons.Visibility className="size-4 text-[#878787]" />
+                </TooltipTrigger>
+                <TooltipContent
+                  className="text-xs py-1 px-2"
+                  side="right"
+                  sideOffset={5}
+                >
+                  {`Viewed ${formatDistanceToNow(viewAt)} ago`}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          {row.original.status !== "draft" && (
+            <button type="button" className="relative">
+              <Icons.Chat className="size-3.5 text-[#878787]" />
+              {hasNewMessages && (
+                <div className="rounded-full size-1 absolute bg-[#FFD02B] -right-0 -top-0 ring-2 ring-background">
+                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[ping_1s_ease-in-out_5]" />
+                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-75" />
+                  <div className="absolute inset-0 rounded-full bg-[#FFD02B] animate-[pulse_1s_ease-in-out_5] opacity-50" />
+                </div>
+              )}
+            </button>
+          )}
         </div>
       );
     },

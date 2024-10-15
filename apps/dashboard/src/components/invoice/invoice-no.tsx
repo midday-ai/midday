@@ -13,10 +13,10 @@ export function InvoiceNo() {
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
-          name="settings.invoiceNoLabel"
+          name="settings.invoice_no_label"
           onSave={(value) => {
             updateInvoiceSettings.execute({
-              invoiceNoLabel: value,
+              invoice_no_label: value,
             });
           }}
         />

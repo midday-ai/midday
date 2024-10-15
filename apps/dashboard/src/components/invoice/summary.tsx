@@ -1,3 +1,5 @@
+import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormatAmount } from "../format-amount";
@@ -10,6 +12,8 @@ export function Summary() {
     control,
     name: "lineItems",
   });
+
+  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
 
   const { totalAmount, totalVAT } = useMemo(() => {
     return lineItems.reduce(
@@ -30,7 +34,14 @@ export function Summary() {
   return (
     <div className="w-[240px] flex flex-col space-y-4 divide-y divide-border">
       <div className="flex justify-between items-center">
-        <LabelInput name="settings.vatLabel" />
+        <LabelInput
+          name="settings.vat_label"
+          onSave={(value) => {
+            updateInvoiceSettings.execute({
+              vat_label: value,
+            });
+          }}
+        />
         <span className="text-right font-mono text-[11px] text-[#878787]">
           <FormatAmount
             amount={totalVAT}
@@ -42,7 +53,14 @@ export function Summary() {
       </div>
 
       <div className="flex justify-between items-center pt-2">
-        <LabelInput name="settings.totalLabel" />
+        <LabelInput
+          name="settings.total_label"
+          onSave={(value) => {
+            updateInvoiceSettings.execute({
+              total_label: value,
+            });
+          }}
+        />
         <span className="text-right font-mono text-[21px]">
           <FormatAmount
             amount={total}

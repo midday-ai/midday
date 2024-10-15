@@ -1,6 +1,7 @@
 "use server";
 
 import { authActionClient } from "@/actions/safe-action";
+import { revalidateTag } from "next/cache";
 import { updateInvoiceSettingsSchema } from "./schema";
 
 export const updateInvoiceSettingsAction = authActionClient
@@ -12,17 +13,13 @@ export const updateInvoiceSettingsAction = authActionClient
     const teamId = user.team_id;
 
     const { data, error } = await supabase
-      .rpc("update_team_setting", {
-        team_id: teamId,
-        setting_key: "invoice",
-        setting_path: [setting],
-        new_value: setting,
-        create_missing: true,
-      })
-      .select("*")
+      .from("invoice_templates")
+      .upsert({ team_id: teamId, ...setting }, { onConflict: "team_id" })
+      .eq("team_id", teamId)
+      .select()
       .single();
 
-    console.log(data, error);
+    revalidateTag(`invoice_templates_${teamId}`);
 
     return data;
   });
