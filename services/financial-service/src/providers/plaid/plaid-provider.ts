@@ -7,6 +7,7 @@ import type {
   GetRecurringTransactionsRequest,
   GetRecurringTransactionsResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   ProviderParams,
 } from "../types";
 import { PlaidApi } from "./plaid-api";
@@ -49,23 +50,46 @@ export class PlaidProvider implements Provider {
     accountId,
     accountType,
     latest,
-  }: GetTransactionsRequest) {
+    syncCursor,
+  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     if (!accessToken || !accountId) {
       throw Error("accessToken or accountId is missing");
     }
 
-    const response = await this.#api.getTransactions({
+    const res = await this.#api.getTransactions({
       accessToken,
       accountId,
       latest,
+      syncCursor,
     });
 
-    return (response ?? []).map((transaction) =>
+    if (!res) {
+      return {
+        data: [],
+        cursor: syncCursor ?? "",
+        hasMore: false,
+      };
+    }
+    
+    const {
+      added,
+      cursor,
+      hasMore,
+    } = res;
+  
+
+    const data = added.map((transaction) =>
       transformTransaction({
         transaction,
         accountType,
       }),
     );
+
+    return {
+      data,
+      cursor: cursor ?? "",
+      hasMore: hasMore ?? false,
+    };
   }
 
   /**

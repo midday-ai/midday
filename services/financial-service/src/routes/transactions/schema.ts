@@ -62,6 +62,9 @@ export const TransactionsParamsSchema = z
         },
         example: "true",
       }),
+    syncCursor: z.string().nullable().optional().openapi({
+        example: "cursor-123",
+    }),
   })
   .openapi("TransactionsParamsSchema");
 
@@ -283,6 +286,12 @@ export const TransactionSchema = z
 export const TransactionsSchema = z
   .object({
     data: z.array(TransactionSchema),
+    cursor: z.string().nullable().optional().openapi({
+      example: "cursor-123",
+    }),
+    hasMore: z.boolean().nullable().optional().openapi({
+      example: false,
+    }),
   })
   .openapi("TransactionsSchema");
 

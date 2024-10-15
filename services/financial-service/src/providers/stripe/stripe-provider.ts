@@ -60,9 +60,15 @@ export class StripeProvider {
         { stripeAccount: accountId },
       );
 
-      return balanceTransactions.data.map((transaction) =>
+      const data = balanceTransactions.data.map((transaction) =>
         transformTransaction({ transaction, accountId }),
       );
+
+      return {
+        data,
+        cursor: null,
+        hasMore: balanceTransactions.has_more,
+      };
     } catch (error) {
       if (error instanceof Error) {
         throw new ProviderError({

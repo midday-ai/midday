@@ -6,6 +6,7 @@ import { PlaidProvider } from "./plaid/plaid-provider";
 import { StripeApi } from "./stripe/stripe-api";
 import { StripeProvider } from "./stripe/stripe-provider";
 import { TellerProvider } from "./teller/teller-provider";
+// import { GetTransactionResponse } from './teller/types';
 import type {
   DeleteAccountsRequest,
   GetAccountBalanceRequest,
@@ -18,6 +19,7 @@ import type {
   GetStatementsRequest,
   GetStatementsResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   ProviderParams,
 } from "./types";
 
@@ -81,10 +83,11 @@ export class Provider {
     }
   }
 
-  async getTransactions(params: GetTransactionsRequest) {
+  async getTransactions(params: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     if (!this.#provider) {
       throw new Error(`Invalid provider: ${this.#name}`);
     }
+    
     return this.#provider.getTransactions(params);
   }
 

@@ -4,6 +4,7 @@ import type {
   GetTransactionsRequest,
   GetTransactionsResponse,
   ProviderParams,
+  Transaction,
 } from "../types";
 
 /**
@@ -48,7 +49,7 @@ export class StripeApi {
         },
       );
 
-      return balanceTransactions.data.map((transaction) => ({
+      const data = balanceTransactions.data.map((transaction) => ({
         id: transaction.id,
         amount: transaction.amount / 100,
         currency: transaction.currency,
@@ -64,7 +65,13 @@ export class StripeApi {
         currency_source: null,
         internal_id: transaction.id,
         bank_account_id: accountId,
-      }));
+      } as Transaction));
+
+      return {
+        data: data,
+        cursor: null,
+        hasMore: balanceTransactions.has_more,
+      };
     } catch (error) {
       if (error instanceof Error) {
         throw new ProviderError({

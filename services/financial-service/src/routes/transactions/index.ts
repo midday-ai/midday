@@ -84,7 +84,7 @@ const recurringTransactionsRoute = createRoute({
  */
 app.openapi(indexRoute, async (c) => {
   const envs = env(c);
-  const { provider, accountId, accountType, latest, accessToken } =
+  const { provider, accountId, accountType, latest, accessToken, syncCursor } =
     c.req.valid("query");
 
   const api = new Provider({
@@ -96,16 +96,25 @@ app.openapi(indexRoute, async (c) => {
   });
 
   try {
-    const data = await api.getTransactions({
+    const res = await api.getTransactions({
       accountId, // For Stripe, this will be the account holder reference
       accessToken,
       accountType: accountType as AccountType,
       latest,
+      syncCursor: syncCursor ?? "",
     });
+
+    const {
+      data,
+      cursor,
+      hasMore,
+    } = res;
 
     return c.json(
       {
         data,
+        cursor: cursor ?? "",
+        hasMore: hasMore ?? false,
       },
       200,
     );

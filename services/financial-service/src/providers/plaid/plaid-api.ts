@@ -173,9 +173,10 @@ export class PlaidApi {
     accessToken,
     accountId,
     latest,
+    syncCursor,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse | undefined> {
     let added: Array<Transaction> = [];
-    let cursor = undefined;
+    let cursor = syncCursor;
     let hasMore = true;
     try {
       if (latest) {
@@ -200,9 +201,15 @@ export class PlaidApi {
 
       // NOTE: Plaid transactions for all accounts
       // we need to filter based on the provided accountId and pending status
-      return added
+      const newlyAddedTxns = added
         .filter((transaction) => transaction.account_id === accountId)
         .filter((transaction) => !transaction.pending);
+
+      return {
+        added: newlyAddedTxns,
+        cursor: cursor ?? "",
+        hasMore: hasMore,
+      };
     } catch (error) {
       const parsedError = isError(error);
 
@@ -247,7 +254,7 @@ export class PlaidApi {
       console.log('Link token created successfully');
       return response;
     } catch (error: unknown) {
-      console.error('Error creating link token:', error);
+      console.error('Error creating link token:', JSON.stringify(error, null, 2));
       throw error;
     }
   }

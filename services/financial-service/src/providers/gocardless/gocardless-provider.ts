@@ -11,6 +11,7 @@ import type {
   GetStatementsRequest,
   GetStatementsResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   ProviderParams,
 } from "../types";
 import { GoCardLessApi } from "./gocardless-api";
@@ -32,15 +33,21 @@ export class GoCardLessProvider implements Provider {
     return this.#api.getHealthCheck();
   }
 
-  async getTransactions({ accountId, latest }: GetTransactionsRequest) {
+  async getTransactions({ accountId, latest }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     const response = await this.#api.getTransactions({
       latest,
       accountId,
     });
 
-    return (response ?? []).map((transaction) =>
+    const data =  (response ?? []).map((transaction) =>
       transformTransaction(transaction, accountId),
     );
+
+    return {
+      data,
+      cursor: null,
+      hasMore: false,
+    }
   }
 
   async getAccounts({ id }: GetAccountsRequest) {

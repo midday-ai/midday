@@ -10,6 +10,7 @@ import type {
   GetStatementsRequest,
   GetStatementsResponse,
   GetTransactionsRequest,
+  GetTransactionsResponse,
   ProviderParams,
 } from "../types";
 import { TellerApi } from "./teller-api";
@@ -35,7 +36,7 @@ export class TellerProvider implements Provider {
     accessToken,
     accountType,
     latest,
-  }: GetTransactionsRequest) {
+  }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     if (!accessToken) {
       throw Error("accessToken missing");
     }
@@ -46,12 +47,18 @@ export class TellerProvider implements Provider {
       latest,
     });
 
-    return response.map((transaction) =>
+    const data = response.map((transaction) =>
       transformTransaction({
         transaction,
         accountType,
       }),
     );
+
+    return {
+      data,
+      cursor: null,
+      hasMore: false,
+    };
   }
 
   async getAccounts({ accessToken }: GetAccountsRequest) {

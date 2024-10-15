@@ -261,7 +261,14 @@ export type GetTransactionsRequest = {
   latest?: boolean;
   accessToken?: string; // Teller & Plaid
   accountType: AccountType;
+  syncCursor?: string;
 };
+
+export type GetTransactionsResponse = {
+  data: Transaction[];
+  hasMore: boolean;
+  cursor: string | null;
+}
 
 export type GetAccountsRequest = {
   id?: string; // GoCardLess
@@ -284,8 +291,6 @@ export type DeleteAccountsRequest = {
   accountId?: string; // GoCardLess
   accessToken?: string; // Teller & Plaid
 };
-
-export type GetTransactionsResponse = Transaction[];
 
 export type GetAccountsResponse = Account[];
 
