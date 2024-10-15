@@ -18,12 +18,14 @@
  * and updates the status of bank connections based on overall sync success or failure.
  */
 
+import Midday from "@midday-ai/engine";
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";
 import { client, supabase } from "../client";
 import { Events, Jobs } from "../constants";
 import { engine } from "../utils/engine";
+import { parseAPIError } from "../utils/error";
 import { processBatch } from "../utils/process";
 import { getClassification, transformTransaction } from "../utils/transform";
 
@@ -64,6 +66,7 @@ client.defineJob({
     await io.logger.info(`Found ${bankAccounts?.length || 0} accounts to sync`);
 
     let connectionHasError = false;
+    let connectionErrorCode = "unknown";
 
     const syncPromises = bankAccounts?.map(async (account) => {
       try {
@@ -151,6 +154,10 @@ client.defineJob({
         });
 
         connectionHasError = true;
+        if (syncError instanceof Midday.APIError) {
+          const parsedError = parseAPIError(syncError);
+          connectionErrorCode = parsedError.code;
+        }
 
         return {
           success: false,
@@ -179,7 +186,6 @@ client.defineJob({
           await supabase
             .from("bank_accounts")
             .update({
-              // enabled: false, // TODO: Disable if the account id is not found in the bank connection
               error_details:
                 failedAccount.error instanceof Error
                   ? failedAccount.error.message
@@ -205,7 +211,7 @@ client.defineJob({
           { connectionId },
         );
       } else {
-        // At least one account succeeded, update bank connection status to connected
+        // At least one account succeeded, update bank connection status
         const updateData: {
           last_accessed: string;
           status: string;
@@ -224,12 +230,9 @@ client.defineJob({
             .eq("id", connectionId)
             .single();
 
-          const newStatus =
-            (data?.error_retries || 0) + 1 >= 3 ? "disconnected" : "unknown";
+          updateData.status = connectionErrorCode;
 
-          updateData.status = newStatus;
-
-          if (newStatus !== "unknown") {
+          if (updateData.status !== "unknown") {
             updateData.error_retries = (data?.error_retries || 0) + 1;
           }
         } else {
