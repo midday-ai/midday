@@ -1,3 +1,10 @@
+# [0.23.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.22.0...v0.23.0) (2024-10-15)
+
+
+### Features
+
+* remove canadaa support ([881270b](https://github.com/SolomonAIEngineering/solomonai/commit/881270bd0a5c985fb96cd7ed035f44ce261cdca5))
+
 # [0.22.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.21.0...v0.22.0) (2024-10-15)
 
 
