@@ -168,7 +168,7 @@ client.defineJob({
         }
 
         // Update bank connections status
-        for (const [connectionId, status] of connectionMap) {
+        for (const [connectionId] of connectionMap) {
           let updateData: {
             last_accessed?: string;
             status: string;
@@ -176,7 +176,8 @@ client.defineJob({
             error_retries?: number;
           };
 
-          if (status.success) {
+          if (successfulResults.length > 0) {
+            // At least one account succeeded
             updateData = {
               last_accessed: new Date().toISOString(),
               status: "connected",
@@ -184,12 +185,22 @@ client.defineJob({
               error_retries: 0,
             };
           } else {
+            // All accounts failed
+            const { data } = await supabase
+              .from("bank_connections")
+              .select("error_retries")
+              .eq("id", connectionId)
+              .single();
+
+            const currentErrorRetries = data?.error_retries || 0;
+            const newErrorRetries = currentErrorRetries + 1;
+
             updateData = {
-              status: status.errorRetries >= 3 ? "disconnected" : "unknown",
+              status: newErrorRetries >= 3 ? "disconnected" : "unknown",
             };
 
-            if (updateData.status !== "unknown") {
-              updateData.error_retries = status.errorRetries;
+            if (updateData.status === "disconnected") {
+              updateData.error_retries = newErrorRetries;
             }
           }
 
@@ -253,10 +264,9 @@ client.defineJob({
         revalidateTag(`bank_connections_${teamId}`);
       }
     } catch (error) {
-      await io.logger.error(
-        "Unexpected error during transaction sync",
-        error instanceof Error ? error.message : String(error),
-      );
+      await io.logger.error("Unexpected error during transaction sync", {
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   },
 });
