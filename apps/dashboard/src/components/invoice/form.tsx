@@ -1,27 +1,31 @@
+import { createInvoiceAction } from "@/actions/invoice/create-invoice-action";
+import {
+  type InvoiceFormValues,
+  type InvoiceTemplate,
+  createInvoiceSchema,
+} from "@/actions/invoice/schema";
+import { UTCDate } from "@date-fns/utc";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ScrollArea } from "@midday/ui/scroll-area";
+import { addMonths } from "date-fns";
+import { useAction } from "next-safe-action/hooks";
 import { FormProvider, useForm } from "react-hook-form";
 import { CreateButton } from "./create-button";
-import { CustomerContent } from "./customer-content";
+import { CustomerDetails } from "./customer-details";
 import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
 import { Meta } from "./meta";
 import { NoteContent } from "./note-content";
 import { PaymentDetails } from "./payment-details";
-import {
-  type InvoiceFormValues,
-  type InvoiceSettings,
-  invoiceSchema,
-} from "./schema";
 import { Summary } from "./summary";
 
 type Props = {
   teamId: string;
-  settings: InvoiceSettings;
+  template: InvoiceTemplate;
 };
 
-const defaultSettings: InvoiceSettings = {
+const defaultTemplate: InvoiceTemplate = {
   customer_label: "To",
   from_label: "From",
   invoice_no_label: "Invoice No",
@@ -41,21 +45,33 @@ const defaultSettings: InvoiceSettings = {
   from_details: undefined,
 };
 
-export function Form({ teamId, settings }: Props) {
+export function Form({ teamId, template: initialTemplate }: Props) {
+  const template = {
+    ...defaultTemplate,
+    ...initialTemplate,
+  };
+
   const form = useForm<InvoiceFormValues>({
-    resolver: zodResolver(invoiceSchema),
+    resolver: zodResolver(createInvoiceSchema),
     defaultValues: {
-      settings: {
-        ...defaultSettings,
-        ...settings,
-      },
+      customerDetails: undefined,
+      fromDetails: template.from_details,
+      paymentDetails: template.payment_details,
+      note: undefined,
+      issueDate: new UTCDate(),
+      dueDate: addMonths(new UTCDate(), 1),
       invoiceNumber: "INV-0001",
-      lineItems: [{ name: "", quantity: 0, price: 0 }],
+      lineItems: [{ name: undefined, quantity: 0, price: 0 }],
     },
+    mode: "onChange",
   });
 
+  const createInvoice = useAction(createInvoiceAction);
+
+  console.log(form.formState.errors);
+
   const onSubmit = (data: InvoiceFormValues) => {
-    console.log(data);
+    createInvoice.execute(data);
   };
 
   return (
@@ -82,7 +98,7 @@ export function Form({ teamId, settings }: Props) {
                 <FromDetails />
               </div>
               <div>
-                <CustomerContent />
+                <CustomerDetails />
               </div>
             </div>
 

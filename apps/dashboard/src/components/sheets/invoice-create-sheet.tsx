@@ -1,18 +1,18 @@
 "use client";
 
+import type { InvoiceTemplate } from "@/actions/invoice/schema";
 import { Form } from "@/components/invoice/form";
 import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { Icons } from "@midday/ui/icons";
 import { Sheet, SheetContent, SheetHeader } from "@midday/ui/sheet";
 import React from "react";
-import type { InvoiceSettings } from "../invoice/schema";
 
 type Props = {
   teamId: string;
-  settings: InvoiceSettings;
+  template: InvoiceTemplate;
 };
 
-export function InvoiceCreateSheet({ teamId, settings }: Props) {
+export function InvoiceCreateSheet({ teamId, template }: Props) {
   const { setParams, createInvoice } = useInvoiceParams();
 
   const isOpen = Boolean(createInvoice);
@@ -28,7 +28,7 @@ export function InvoiceCreateSheet({ teamId, settings }: Props) {
           <Icons.MoreVertical />
         </SheetHeader>
 
-        <Form teamId={teamId} settings={settings} />
+        <Form teamId={teamId} template={template} />
       </SheetContent>
     </Sheet>
   );

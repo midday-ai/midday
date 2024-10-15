@@ -1,33 +1,32 @@
 "use client";
 
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/editor";
 import { useAction } from "next-safe-action/hooks";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
-export function CustomerContent() {
+export function CustomerDetails() {
   const { control } = useFormContext();
 
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <div>
       <LabelInput
-        name="settings.customer_label"
+        name="template.customer_label"
         onSave={(value) => {
-          updateInvoiceSettings.execute({
+          updateInvoiceTemplate.execute({
             customer_label: value,
           });
         }}
       />
       <Controller
-        name="customerContent"
+        name="customerDetails"
         control={control}
         render={({ field }) => (
           <Editor
             initialContent={field.value}
-            placeholder="Search or create a customer"
             onChange={field.onChange}
             className="h-[115px]"
           />

@@ -1,6 +1,6 @@
 "use client";
 
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/editor";
 import { useAction } from "next-safe-action/hooks";
 import { Controller, useFormContext } from "react-hook-form";
@@ -9,14 +9,14 @@ import { LabelInput } from "./label-input";
 export function PaymentDetails() {
   const { control } = useFormContext();
 
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <div>
       <LabelInput
-        name="settings.payment_details_label"
+        name="template.payment_details_label"
         onSave={(value) => {
-          updateInvoiceSettings.execute({
+          updateInvoiceTemplate.execute({
             payment_details_label: value,
           });
         }}
@@ -25,7 +25,7 @@ export function PaymentDetails() {
 
       <Controller
         control={control}
-        name="settings.payment_details"
+        name="template.payment_details"
         render={({ field }) => (
           <Editor
             initialContent={field.value}
@@ -33,7 +33,7 @@ export function PaymentDetails() {
               field.onChange(content);
             }}
             onBlur={(content) => {
-              updateInvoiceSettings.execute({
+              updateInvoiceTemplate.execute({
                 payment_details: content,
               });
             }}

@@ -1,4 +1,4 @@
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useAction } from "next-safe-action/hooks";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
@@ -7,15 +7,15 @@ export function InvoiceNo() {
   const { watch } = useFormContext();
   const invoiceNumber = watch("invoiceNumber");
 
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
-          name="settings.invoice_no_label"
+          name="template.invoice_no_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               invoice_no_label: value,
             });
           }}
