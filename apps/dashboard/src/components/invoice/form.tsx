@@ -3,7 +3,7 @@ import { ScrollArea } from "@midday/ui/scroll-area";
 import { FormProvider, useForm } from "react-hook-form";
 import { CreateButton } from "./create-button";
 import { CustomerContent } from "./customer-content";
-import { FromContent } from "./from-content";
+import { FromDetails } from "./from-details";
 import { LineItems } from "./line-items";
 import { Logo } from "./logo";
 import { Meta } from "./meta";
@@ -34,8 +34,11 @@ const defaultSettings: InvoiceSettings = {
   vat_label: "VAT",
   tax_label: "Tax",
   payment_details_label: "Payment Details",
+  payment_details: undefined,
   note_label: "Note",
   logo_url: undefined,
+  currency: "USD",
+  from_details: undefined,
 };
 
 export function Form({ teamId, settings }: Props) {
@@ -47,7 +50,6 @@ export function Form({ teamId, settings }: Props) {
         ...settings,
       },
       invoiceNumber: "INV-0001",
-      currency: "USD",
       lineItems: [{ name: "", quantity: 0, price: 0 }],
     },
   });
@@ -77,7 +79,7 @@ export function Form({ teamId, settings }: Props) {
 
             <div className="grid grid-cols-2 gap-6 mt-8">
               <div>
-                <FromContent />
+                <FromDetails />
               </div>
               <div>
                 <CustomerContent />

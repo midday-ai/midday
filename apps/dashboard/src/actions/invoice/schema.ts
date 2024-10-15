@@ -19,4 +19,7 @@ export const updateInvoiceSettingsSchema = z.object({
   payment_details_label: z.string().optional(),
   note_label: z.string().optional(),
   logo_url: z.string().optional(),
+  currency: z.string().optional(),
+  payment_details: z.any(),
+  from_details: z.any(),
 });

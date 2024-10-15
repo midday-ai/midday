@@ -24,7 +24,6 @@ export function AmountInput({
   return (
     <div className="relative">
       <CurrencyInput
-        prefix="$"
         autoComplete="off"
         value={value}
         onValueChange={(values) => {

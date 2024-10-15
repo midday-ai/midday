@@ -7,52 +7,7 @@ import type { JSONContent } from "novel";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
 
-const defaultContent: JSONContent = {
-  type: "paragraph",
-  content: [
-    {
-      type: "text",
-      text: "Lost Island AB",
-    },
-    {
-      type: "hardBreak",
-    },
-    {
-      type: "text",
-      text: "pontus@lostisland.co",
-    },
-    {
-      type: "hardBreak",
-    },
-    {
-      type: "text",
-      text: "36182-4441",
-    },
-    {
-      type: "hardBreak",
-    },
-    {
-      type: "text",
-      text: "Roslagsgatan 48",
-    },
-    {
-      type: "hardBreak",
-    },
-    {
-      type: "text",
-      text: "211 34 Stockholm, Sweden",
-    },
-    {
-      type: "hardBreak",
-    },
-    {
-      type: "text",
-      text: "VAT ID: SE1246767676020",
-    },
-  ],
-};
-
-export function FromContent() {
+export function FromDetails() {
   const { control } = useFormContext();
 
   const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
@@ -68,13 +23,19 @@ export function FromContent() {
         }}
       />
       <Controller
-        name="fromContent"
+        name="settings.from_details"
         control={control}
-        defaultValue={defaultContent}
         render={({ field }) => (
           <Editor
             initialContent={field.value}
-            onChange={field.onChange}
+            onChange={(content) => {
+              field.onChange(content);
+            }}
+            onBlur={(content) => {
+              updateInvoiceSettings.execute({
+                from_details: content,
+              });
+            }}
             className="h-[115px]"
           />
         )}

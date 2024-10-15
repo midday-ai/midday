@@ -3,8 +3,8 @@ import { z } from "zod";
 
 export const invoiceSchema = z.object({
   settings: updateInvoiceSettingsSchema,
-  from: z.any(),
-  customer: z.any(),
+  fromDetails: z.any(),
+  customerDetails: z.any(),
   paymentDetails: z.any(),
   note: z.any().optional(),
   dueDate: z.date(),

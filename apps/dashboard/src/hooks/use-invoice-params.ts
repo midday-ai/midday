@@ -2,6 +2,7 @@ import {
   parseAsArrayOf,
   parseAsBoolean,
   parseAsString,
+  parseAsStringEnum,
   useQueryStates,
 } from "nuqs";
 
@@ -16,6 +17,7 @@ export function useInvoiceParams(options?: { shallow: boolean }) {
       customers: parseAsArrayOf(parseAsString),
       start: parseAsString,
       end: parseAsString,
+      type: parseAsStringEnum(["draft", "details"]),
     },
     options,
   );
