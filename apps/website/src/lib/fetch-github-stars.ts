@@ -7,7 +7,6 @@ export async function fetchGithubStars() {
       next: {
         revalidate: 3600,
       },
-      cache: "force-cache",
     },
   );
 
