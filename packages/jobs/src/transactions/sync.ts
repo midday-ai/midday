@@ -60,6 +60,8 @@ client.defineJob({
     // Process each account
     const promises = accountsData?.map(async (account) => {
       try {
+        await io.logger.info(`Processing account ${account.id}`);
+
         // Fetch and update account balance
         const balance = await engine.accounts.balance({
           provider: account.bank_connection.provider,
@@ -72,6 +74,8 @@ client.defineJob({
             .from("bank_accounts")
             .update({ balance: balance.data.amount })
             .eq("id", account.id);
+
+          await io.logger.info(`Updated balance for account ${account.id}`);
         }
 
         // Fetch and format transactions
@@ -90,6 +94,10 @@ client.defineJob({
             bankAccountId: account.id,
           });
         });
+
+        await io.logger.info(
+          `Fetched ${formattedTransactions?.length || 0} transactions for account ${account.id}`,
+        );
 
         // Mark connection as successful
         connectionMap.set(account.bank_connection.id, {
@@ -113,6 +121,10 @@ client.defineJob({
           errorDetails = error.message;
         }
 
+        await io.logger.error(`Error processing account ${account.id}`, {
+          error: errorDetails,
+        });
+
         const connectionStatus = connectionMap.get(account.bank_connection.id);
         if (!connectionStatus) {
           connectionMap.set(account.bank_connection.id, {
@@ -135,6 +147,10 @@ client.defineJob({
 
         const successfulResults = results.filter((result) => result.success);
         const failedResults = results.filter((result) => !result.success);
+
+        await io.logger.info(
+          `Sync results: ${successfulResults.length} successful, ${failedResults.length} failed`,
+        );
 
         if (failedResults.length > 0) {
           await io.logger.error("Some accounts failed to sync", failedResults);
@@ -181,6 +197,10 @@ client.defineJob({
             .from("bank_connections")
             .update(updateData)
             .eq("id", connectionId);
+
+          await io.logger.info(
+            `Updated bank connection ${connectionId} status to ${updateData.status}`,
+          );
         }
 
         // Process successful transactions
@@ -189,6 +209,8 @@ client.defineJob({
         );
 
         if (transactions && transactions.length > 0) {
+          await io.logger.info(`Upserting ${transactions.length} transactions`);
+
           const { error: transactionsError, data: transactionsData } =
             await supabase
               .from("transactions")
@@ -232,6 +254,7 @@ client.defineJob({
       }
     } catch (error) {
       await io.logger.error(
+        "Unexpected error during transaction sync",
         error instanceof Error ? error.message : String(error),
       );
     }
