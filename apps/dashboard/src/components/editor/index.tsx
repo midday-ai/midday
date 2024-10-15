@@ -15,10 +15,18 @@ import { TextButtons } from "./selectors/text-buttons";
 type Props = {
   initialContent?: JSONContent;
   className?: string;
+  placeholder?: string;
   onChange?: (content: JSONContent) => void;
+  onBlur?: (content: JSONContent) => void;
 };
 
-export function Editor({ initialContent, className, onChange }: Props) {
+export function Editor({
+  initialContent,
+  className,
+  placeholder,
+  onChange,
+  onBlur,
+}: Props) {
   const [isFocused, setIsFocused] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [content, setContent] = useState<JSONContent | undefined>(
@@ -45,7 +53,13 @@ export function Editor({ initialContent, className, onChange }: Props) {
           onChange?.(json);
         }}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
+        onBlur={() => {
+          setIsFocused(false);
+
+          if (content) {
+            onBlur?.(content);
+          }
+        }}
       >
         <EditorBubble
           pluginKey="editor"

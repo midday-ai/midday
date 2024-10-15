@@ -8,6 +8,12 @@ import type { InvoiceFormValues } from "./schema";
 
 export function Summary() {
   const { control } = useFormContext<InvoiceFormValues>();
+
+  const currency = useWatch({
+    control,
+    name: "settings.currency",
+  });
+
   const lineItems = useWatch({
     control,
     name: "lineItems",
@@ -32,7 +38,7 @@ export function Summary() {
   const total = totalAmount + totalVAT;
 
   return (
-    <div className="w-[240px] flex flex-col space-y-4 divide-y divide-border">
+    <div className="w-[280px] flex flex-col space-y-4 divide-y divide-border">
       <div className="flex justify-between items-center">
         <LabelInput
           name="settings.vat_label"
@@ -47,7 +53,7 @@ export function Summary() {
             amount={totalVAT}
             minimumFractionDigits={0}
             maximumFractionDigits={2}
-            currency="USD"
+            currency={currency}
           />
         </span>
       </div>
@@ -64,7 +70,7 @@ export function Summary() {
         <span className="text-right font-mono text-[21px]">
           <FormatAmount
             amount={total}
-            currency="USD"
+            currency={currency}
             minimumFractionDigits={0}
             maximumFractionDigits={2}
           />

@@ -3,6 +3,7 @@
 import { deleteInvoiceAction } from "@/actions/invoice/delete-invoice-action";
 import { FormatAmount } from "@/components/format-amount";
 import { InvoiceStatus } from "@/components/invoice-status";
+import { useInvoiceParams } from "@/hooks/use-invoice-params";
 import { formatDate, getDueDateStatus } from "@/utils/format";
 import { Avatar, AvatarFallback, AvatarImage } from "@midday/ui/avatar";
 import { Button } from "@midday/ui/button";
@@ -33,6 +34,8 @@ export type Invoice = {
   amount?: number;
   vat?: number;
   tax?: number;
+  updated_at?: string;
+  viewed_at?: string;
   customer?: {
     id: string;
     name: string;
@@ -166,6 +169,8 @@ export const columns: ColumnDef<Invoice>[] = [
       const status = row.getValue("status");
       const deleteInvoice = useAction(deleteInvoiceAction);
 
+      const { setParams } = useInvoiceParams();
+
       return (
         <div>
           <DropdownMenu>
@@ -175,6 +180,15 @@ export const columns: ColumnDef<Invoice>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {status === "draft" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    setParams({ invoiceId: row.original.id, type: "draft" })
+                  }
+                >
+                  Edit invoice
+                </DropdownMenuItem>
+              )}
               {status !== "draft" && (
                 <>
                   <DropdownMenuItem>Download</DropdownMenuItem>
@@ -183,14 +197,22 @@ export const columns: ColumnDef<Invoice>[] = [
                 </>
               )}
 
-              {(status === "draft" ||
-                status === "overdue" ||
-                status === "unpaid") && (
+              {(status === "overdue" || status === "unpaid") && (
+                <DropdownMenuItem
+                  // Cancel
+                  // onClick={() => deleteInvoice.execute({ id: row.original.id })}
+                  className="text-[#FF3638]"
+                >
+                  Cancel
+                </DropdownMenuItem>
+              )}
+
+              {status === "draft" && (
                 <DropdownMenuItem
                   onClick={() => deleteInvoice.execute({ id: row.original.id })}
                   className="text-[#FF3638]"
                 >
-                  Cancel
+                  Delete
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
