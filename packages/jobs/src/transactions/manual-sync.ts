@@ -196,7 +196,10 @@ client.defineJob({
       }
 
       // Update bank connection status based on sync results
-      if (successfulAccounts.length === 0) {
+      if (
+        successfulAccounts.length === 0 &&
+        connectionErrorCode === "disconnected"
+      ) {
         // All accounts failed, update bank connection status to disconnected
         await supabase
           .from("bank_connections")
