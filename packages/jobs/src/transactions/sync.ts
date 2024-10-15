@@ -103,6 +103,7 @@ client.defineJob({
         connectionMap.set(account.bank_connection.id, {
           success: true,
           errorRetries: 0,
+          status: "connected",
         });
 
         return {
@@ -113,30 +114,31 @@ client.defineJob({
       } catch (error) {
         // Handle errors and update connection status
         let errorDetails = "Unknown error occurred";
+        let errorCode = "unknown";
 
         if (error instanceof Midday.APIError) {
           const parsedError = parseAPIError(error);
           errorDetails = parsedError.message;
+          errorCode = parsedError.code;
         } else if (error instanceof Error) {
           errorDetails = error.message;
         }
 
         await io.logger.error(`Error processing account ${account.id}`, {
           error: errorDetails,
+          errorCode,
         });
 
-        const connectionStatus = connectionMap.get(account.bank_connection.id);
-        if (!connectionStatus) {
-          connectionMap.set(account.bank_connection.id, {
-            success: false,
-            errorRetries: account.bank_connection.error_retries + 1,
-          });
-        }
+        connectionMap.set(account.bank_connection.id, {
+          success: false,
+          status: errorCode,
+        });
 
         return {
           success: false,
           accountId: account.id,
           error: errorDetails,
+          errorCode,
         };
       }
     });
@@ -156,23 +158,23 @@ client.defineJob({
           await io.logger.error("Some accounts failed to sync", failedResults);
 
           // Update failed accounts
-          // for (const failedResult of failedResults) {
-          //   await supabase
-          //     .from("bank_accounts")
-          //     .update({
-          //       // enabled: false, // TODO: Disable if the account id is not found in the bank connection
-          //       // error_details: failedResult.error,
-          //     })
-          //     .eq("id", failedResult.accountId);
-          // }
+          for (const failedResult of failedResults) {
+            await supabase
+              .from("bank_accounts")
+              .update({
+                // enabled: false, // TODO: Disable if the account id is not found in the bank connection
+                error_details: failedResult.error,
+              })
+              .eq("id", failedResult.accountId);
+          }
         }
 
         // Update bank connections status
-        for (const [connectionId] of connectionMap) {
+        for (const [connectionId, connectionStatus] of connectionMap) {
           let updateData: {
             last_accessed?: string;
             status: string;
-            error_details?: null;
+            error_details?: string | null;
             error_retries?: number;
           };
 
@@ -196,10 +198,11 @@ client.defineJob({
             const newErrorRetries = currentErrorRetries + 1;
 
             updateData = {
-              status: newErrorRetries >= 3 ? "disconnected" : "unknown",
+              status: connectionStatus.status,
+              error_details: connectionStatus.errorDetails,
             };
 
-            if (updateData.status === "disconnected") {
+            if (connectionStatus.status !== "unknown") {
               updateData.error_retries = newErrorRetries;
             }
           }
