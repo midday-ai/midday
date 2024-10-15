@@ -27,3 +27,4 @@ export const invoiceSchema = z.object({
 });
 
 export type InvoiceFormValues = z.infer<typeof invoiceSchema>;
+export type InvoiceSettings = z.infer<typeof invoiceSchema>["settings"];

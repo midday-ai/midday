@@ -1,9 +1,11 @@
 "use client";
 
+import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
 import { Label } from "@midday/ui/label";
 import { Reorder, useDragControls, useMotionValue } from "framer-motion";
+import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Input } from "./input";
@@ -17,6 +19,8 @@ export function LineItems() {
     control,
     name: "lineItems",
   });
+
+  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
 
   const reorderList = (newFields: typeof fields) => {
     const firstDiffIndex = fields.findIndex(
@@ -42,10 +46,42 @@ export function LineItems() {
   return (
     <div className="space-y-4">
       <div className="flex items-end mb-2">
-        <LabelInput name="settings.descriptionLabel" className="w-1/2 mr-4" />
-        <LabelInput name="settings.priceLabel" className="w-40 mr-4" />
-        <LabelInput name="settings.quantityLabel" className="w-24 mr-4" />
-        <LabelInput name="settings.vatLabel" className="w-24 text-right" />
+        <LabelInput
+          name="settings.description_label"
+          onSave={(value) => {
+            updateInvoiceSettings.execute({
+              description_label: value,
+            });
+          }}
+          className="w-1/2 mr-4"
+        />
+        <LabelInput
+          name="settings.price_label"
+          onSave={(value) => {
+            updateInvoiceSettings.execute({
+              price_label: value,
+            });
+          }}
+          className="w-40 mr-4"
+        />
+        <LabelInput
+          name="settings.quantity_label"
+          onSave={(value) => {
+            updateInvoiceSettings.execute({
+              quantity_label: value,
+            });
+          }}
+          className="w-24 mr-4"
+        />
+        <LabelInput
+          name="settings.vat_label"
+          onSave={(value) => {
+            updateInvoiceSettings.execute({
+              vat_label: value,
+            });
+          }}
+          className="w-24 text-right"
+        />
       </div>
 
       <Reorder.Group

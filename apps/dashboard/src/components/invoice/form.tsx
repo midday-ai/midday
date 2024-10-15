@@ -9,32 +9,42 @@ import { Logo } from "./logo";
 import { Meta } from "./meta";
 import { NoteContent } from "./note-content";
 import { PaymentDetails } from "./payment-details";
-import { type InvoiceFormValues, invoiceSchema } from "./schema";
+import {
+  type InvoiceFormValues,
+  type InvoiceSettings,
+  invoiceSchema,
+} from "./schema";
 import { Summary } from "./summary";
 
 type Props = {
   teamId: string;
+  settings: InvoiceSettings;
 };
 
-export function Form({ teamId }: Props) {
+const defaultSettings: InvoiceSettings = {
+  customer_label: "To",
+  from_label: "From",
+  invoice_no_label: "Invoice No",
+  issue_date_label: "Issue Date",
+  due_date_label: "Due Date",
+  description_label: "Description",
+  price_label: "Price",
+  quantity_label: "Quantity",
+  total_label: "Total",
+  vat_label: "VAT",
+  tax_label: "Tax",
+  payment_details_label: "Payment Details",
+  note_label: "Note",
+  logo_url: undefined,
+};
+
+export function Form({ teamId, settings }: Props) {
   const form = useForm<InvoiceFormValues>({
     resolver: zodResolver(invoiceSchema),
     defaultValues: {
       settings: {
-        customerLabel: "To",
-        fromLabel: "From",
-        invoiceNoLabel: "Invoice No",
-        issueDateLabel: "Issue Date",
-        dueDateLabel: "Due Date",
-        descriptionLabel: "Description",
-        priceLabel: "Price",
-        quantityLabel: "Quantity",
-        totalLabel: "Total",
-        vatLabel: "VAT",
-        taxLabel: "Tax",
-        paymentDetailsLabel: "Payment Details",
-        noteLabel: "Note",
-        logoUrl: undefined,
+        ...defaultSettings,
+        ...settings,
       },
       invoiceNumber: "INV-0001",
       currency: "USD",

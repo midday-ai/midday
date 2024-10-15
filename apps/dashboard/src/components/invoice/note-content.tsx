@@ -1,12 +1,24 @@
 "use client";
 
+import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
 import { Editor } from "@/components/editor";
+import { useAction } from "next-safe-action/hooks";
 import { LabelInput } from "./label-input";
 
 export function NoteContent() {
+  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+
   return (
     <div>
-      <LabelInput name="settings.noteLabel" className="mb-2 block" />
+      <LabelInput
+        name="settings.note_label"
+        onSave={(value) => {
+          updateInvoiceSettings.execute({
+            note_label: value,
+          });
+        }}
+        className="mb-2 block"
+      />
       <Editor className="h-[78px]" />
     </div>
   );

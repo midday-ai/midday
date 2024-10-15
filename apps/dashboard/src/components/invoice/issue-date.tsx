@@ -26,10 +26,10 @@ export function IssueDate() {
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
-          name="settings.issueDateLabel"
+          name="settings.issue_date_label"
           onSave={(value) => {
             updateInvoiceSettings.execute({
-              invoiceNoLabel: value,
+              issue_date_label: value,
             });
           }}
         />

@@ -1,6 +1,8 @@
 "use client";
 
+import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
 import { Editor } from "@/components/editor";
+import { useAction } from "next-safe-action/hooks";
 import type { JSONContent } from "novel";
 import { Controller, useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
@@ -53,9 +55,18 @@ const defaultContent: JSONContent = {
 export function FromContent() {
   const { control } = useFormContext();
 
+  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+
   return (
     <div>
-      <LabelInput name="settings.fromLabel" />
+      <LabelInput
+        name="settings.from_label"
+        onSave={(value) => {
+          updateInvoiceSettings.execute({
+            from_label: value,
+          });
+        }}
+      />
       <Controller
         name="fromContent"
         control={control}

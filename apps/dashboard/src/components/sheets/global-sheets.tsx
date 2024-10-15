@@ -1,7 +1,8 @@
 import { Cookies } from "@/utils/constants";
 import { getUser } from "@midday/supabase/cached-queries";
 import { cookies } from "next/headers";
-import { InvoiceCreateSheet } from "./invoice-create-sheet";
+import { Suspense } from "react";
+import { InvoiceCreateSheetServer } from "./invoice-create-sheet.server";
 import { TrackerCreateSheet } from "./tracker-create-sheet";
 import { TrackerScheduleSheet } from "./tracker-schedule-sheet";
 import { TrackerUpdateSheet } from "./tracker-update-sheet";
@@ -27,7 +28,11 @@ export async function GlobalSheets({ defaultCurrency }: Props) {
         timeFormat={userData?.time_format}
         lastProjectId={projectId}
       />
-      <InvoiceCreateSheet teamId={userData?.team_id} />
+
+      <Suspense fallback={null}>
+        {/* We preload the invoice data (template, invoice number etc) */}
+        <InvoiceCreateSheetServer teamId={userData?.team_id} />
+      </Suspense>
     </>
   );
 }
