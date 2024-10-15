@@ -11,7 +11,7 @@
  *    c. Upsert transactions in batches
  * 3. Handle sync results:
  *    a. Update failed accounts
- *    b. Update bank connection status
+ *    b. Update bank connection status and error retries
  * 4. Revalidate relevant cache tags
  *
  * The job uses error handling to manage sync issues for individual accounts
@@ -33,7 +33,7 @@ const TRANSACTIONS_BATCH_LIMIT = 500;
 client.defineJob({
   id: Jobs.TRANSACTIONS_MANUAL_SYNC,
   name: "Transactions - Manual Sync",
-  version: "0.0.2",
+  version: "0.0.3",
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_MANUAL_SYNC,
     schema: z.object({
@@ -62,6 +62,8 @@ client.defineJob({
       .eq("manual", false);
 
     await io.logger.info(`Found ${bankAccounts?.length || 0} accounts to sync`);
+
+    let connectionHasError = false;
 
     const syncPromises = bankAccounts?.map(async (account) => {
       try {
@@ -147,6 +149,8 @@ client.defineJob({
           error: syncError,
         });
 
+        connectionHasError = true;
+
         return {
           success: false,
           accountId: account.id,
@@ -204,19 +208,44 @@ client.defineJob({
         );
       } else {
         // At least one account succeeded, update bank connection status to connected
+        const updateData: {
+          last_accessed: string;
+          status: string;
+          error_details: null;
+          error_retries?: number;
+        } = {
+          last_accessed: new Date().toISOString(),
+          status: "connected",
+          error_details: null,
+        };
+
+        if (connectionHasError) {
+          const { data } = await supabase
+            .from("bank_connections")
+            .select("error_retries")
+            .eq("id", connectionId)
+            .single();
+
+          const newStatus =
+            (data?.error_retries || 0) + 1 >= 3 ? "disconnected" : "unknown";
+
+          updateData.status = newStatus;
+
+          if (newStatus !== "unknown") {
+            updateData.error_retries = (data?.error_retries || 0) + 1;
+          }
+        } else {
+          updateData.error_retries = 0;
+        }
+
         await supabase
           .from("bank_connections")
-          .update({
-            last_accessed: new Date().toISOString(),
-            status: "connected",
-            error_details: null,
-            error_retries: 0,
-          })
+          .update(updateData)
           .eq("id", connectionId);
 
         await io.logger.info(
-          "At least one account succeeded, marked connection as connected",
-          { connectionId },
+          "At least one account succeeded, updated connection status",
+          { connectionId, connectionHasError, newStatus: updateData.status },
         );
       }
     }

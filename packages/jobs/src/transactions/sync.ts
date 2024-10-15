@@ -113,14 +113,13 @@ client.defineJob({
           errorDetails = error.message;
         }
 
-        const connectionStatus = connectionMap.get(
-          account.bank_connection.id,
-        ) || {
-          success: false,
-          errorRetries: account.bank_connection.error_retries,
-        };
-
-        connectionMap.set(account.bank_connection.id, connectionStatus);
+        const connectionStatus = connectionMap.get(account.bank_connection.id);
+        if (!connectionStatus) {
+          connectionMap.set(account.bank_connection.id, {
+            success: false,
+            errorRetries: account.bank_connection.error_retries + 1,
+          });
+        }
 
         return {
           success: false,
@@ -154,7 +153,12 @@ client.defineJob({
 
         // Update bank connections status
         for (const [connectionId, status] of connectionMap) {
-          let updateData;
+          let updateData: {
+            last_accessed?: string;
+            status: string;
+            error_details?: null;
+            error_retries?: number;
+          };
 
           if (status.success) {
             updateData = {
@@ -168,7 +172,6 @@ client.defineJob({
               status: status.errorRetries >= 3 ? "disconnected" : "unknown",
             };
 
-            // Only update error_retries if the new status is not "unknown"
             if (updateData.status !== "unknown") {
               updateData.error_retries = status.errorRetries;
             }
