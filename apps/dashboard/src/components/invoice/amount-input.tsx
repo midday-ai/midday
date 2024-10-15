@@ -27,10 +27,10 @@ export function AmountInput({
         autoComplete="off"
         value={value}
         onValueChange={(values) => {
-          onChange(values.floatValue);
+          onChange(values.floatValue, { shouldValidate: true });
         }}
         onFocus={() => setIsFocused(true)}
-        onBlur={(e) => {
+        onBlur={() => {
           setIsFocused(false);
           onBlur();
         }}

@@ -2,13 +2,13 @@
 
 import { authActionClient } from "@/actions/safe-action";
 import { revalidateTag } from "next/cache";
-import { updateInvoiceSettingsSchema } from "./schema";
+import { updateInvoiceTemplateSchema } from "./schema";
 
-export const updateInvoiceSettingsAction = authActionClient
+export const updateInvoiceTemplateAction = authActionClient
   .metadata({
-    name: "update-invoice-settings",
+    name: "update-invoice-template",
   })
-  .schema(updateInvoiceSettingsSchema)
+  .schema(updateInvoiceTemplateSchema)
   .action(async ({ parsedInput: setting, ctx: { user, supabase } }) => {
     const teamId = user.team_id;
 

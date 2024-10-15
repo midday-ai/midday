@@ -1,19 +1,19 @@
 "use client";
 
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Editor } from "@/components/editor";
 import { useAction } from "next-safe-action/hooks";
 import { LabelInput } from "./label-input";
 
 export function NoteContent() {
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   return (
     <div>
       <LabelInput
-        name="settings.note_label"
+        name="template.note_label"
         onSave={(value) => {
-          updateInvoiceSettings.execute({
+          updateInvoiceTemplate.execute({
             note_label: value,
           });
         }}

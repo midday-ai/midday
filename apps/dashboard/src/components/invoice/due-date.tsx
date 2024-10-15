@@ -1,4 +1,5 @@
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import type { InvoiceFormValues } from "@/actions/invoice/schema";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Calendar } from "@midday/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@midday/ui/popover";
 import { format } from "date-fns";
@@ -6,14 +7,13 @@ import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { LabelInput } from "./label-input";
-import type { InvoiceFormValues } from "./schema";
 
 export function DueDate() {
   const { setValue, watch } = useFormContext<InvoiceFormValues>();
   const dueDate = watch("dueDate");
   const [isOpen, setIsOpen] = useState(false);
 
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
@@ -26,9 +26,9 @@ export function DueDate() {
     <div className="flex space-x-1 items-center">
       <div className="flex items-center">
         <LabelInput
-          name="settings.due_date_label"
+          name="template.due_date_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               due_date_label: value,
             });
           }}

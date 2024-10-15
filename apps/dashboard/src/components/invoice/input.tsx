@@ -9,7 +9,9 @@ export function Input({ className, ...props }: InputProps) {
   const fieldName = props.name as string;
   const fieldValue = watch(fieldName);
 
-  const { ref, ...rest } = register(fieldName);
+  const { ref, ...rest } = register(fieldName, {
+    valueAsNumber: props.type === "number",
+  });
 
   return (
     <div className="relative">

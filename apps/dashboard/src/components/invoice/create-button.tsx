@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 
 export function CreateButton() {
   const form = useFormContext();
-  const isDirty = form.formState.isDirty;
+  const isValid = form.formState.isValid;
 
-  return <Button disabled={!isDirty}>Create</Button>;
+  return <Button disabled={!isValid}>Create</Button>;
 }

@@ -1,16 +1,15 @@
 "use client";
 
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import type { InvoiceFormValues } from "@/actions/invoice/schema";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { Button } from "@midday/ui/button";
 import { Icons } from "@midday/ui/icons";
-import { Label } from "@midday/ui/label";
 import { Reorder, useDragControls, useMotionValue } from "framer-motion";
 import { useAction } from "next-safe-action/hooks";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { AmountInput } from "./amount-input";
 import { Input } from "./input";
 import { LabelInput } from "./label-input";
-import type { InvoiceFormValues } from "./schema";
 import { VATInput } from "./vat-input";
 
 export function LineItems() {
@@ -20,7 +19,7 @@ export function LineItems() {
     name: "lineItems",
   });
 
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const reorderList = (newFields: typeof fields) => {
     const firstDiffIndex = fields.findIndex(
@@ -47,36 +46,36 @@ export function LineItems() {
     <div className="space-y-4">
       <div className="flex items-end mb-2">
         <LabelInput
-          name="settings.description_label"
+          name="template.description_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               description_label: value,
             });
           }}
           className="w-1/2 mr-4"
         />
         <LabelInput
-          name="settings.price_label"
+          name="template.price_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               price_label: value,
             });
           }}
           className="w-40 mr-4"
         />
         <LabelInput
-          name="settings.quantity_label"
+          name="template.quantity_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               quantity_label: value,
             });
           }}
           className="w-24 mr-4"
         />
         <LabelInput
-          name="settings.vat_label"
+          name="template.vat_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               vat_label: value,
             });
           }}
@@ -126,8 +125,6 @@ function LineItemRow({
 }) {
   const controls = useDragControls();
   const y = useMotionValue(0);
-
-  const { register } = useFormContext();
 
   return (
     <Reorder.Item

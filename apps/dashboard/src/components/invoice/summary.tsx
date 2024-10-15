@@ -1,17 +1,17 @@
-import { updateInvoiceSettingsAction } from "@/actions/invoice/update-invoice-settings-action";
+import type { InvoiceFormValues } from "@/actions/invoice/schema";
+import { updateInvoiceTemplateAction } from "@/actions/invoice/update-invoice-template-action";
 import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormatAmount } from "../format-amount";
 import { LabelInput } from "./label-input";
-import type { InvoiceFormValues } from "./schema";
 
 export function Summary() {
-  const { control } = useFormContext<InvoiceFormValues>();
+  const { control, setValue } = useFormContext<InvoiceFormValues>();
 
   const currency = useWatch({
     control,
-    name: "settings.currency",
+    name: "template.currency",
   });
 
   const lineItems = useWatch({
@@ -19,7 +19,7 @@ export function Summary() {
     name: "lineItems",
   });
 
-  const updateInvoiceSettings = useAction(updateInvoiceSettingsAction);
+  const updateInvoiceTemplate = useAction(updateInvoiceTemplateAction);
 
   const { totalAmount, totalVAT } = useMemo(() => {
     return lineItems.reduce(
@@ -37,13 +37,21 @@ export function Summary() {
 
   const total = totalAmount + totalVAT;
 
+  useMemo(() => {
+    setValue("amount", total, { shouldValidate: true });
+
+    if (totalVAT) {
+      setValue("vat", totalVAT, { shouldValidate: true });
+    }
+  }, [total, totalVAT, setValue]);
+
   return (
     <div className="w-[280px] flex flex-col space-y-4 divide-y divide-border">
       <div className="flex justify-between items-center">
         <LabelInput
-          name="settings.vat_label"
+          name="template.vat_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               vat_label: value,
             });
           }}
@@ -60,9 +68,9 @@ export function Summary() {
 
       <div className="flex justify-between items-center pt-2">
         <LabelInput
-          name="settings.total_label"
+          name="template.total_label"
           onSave={(value) => {
-            updateInvoiceSettings.execute({
+            updateInvoiceTemplate.execute({
               total_label: value,
             });
           }}
