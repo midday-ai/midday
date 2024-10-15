@@ -10,7 +10,7 @@ import { scheduler } from "./scheduler";
 client.defineJob({
   id: Jobs.TRANSACTIONS_SYNC,
   name: "Transactions - Sync",
-  version: "0.0.1",
+  version: "0.0.2",
   trigger: scheduler,
   integrations: { supabase },
   run: async (_, io, ctx) => {
@@ -18,6 +18,7 @@ client.defineJob({
 
     const teamId = ctx.source?.id as string;
 
+    // Fetch enabled bank accounts for the team
     const { data: accountsData, error: accountsError } = await supabase
       .from("bank_accounts")
       .select(
@@ -30,119 +31,166 @@ client.defineJob({
 
     if (accountsError) {
       await io.logger.error("Accounts Error", accountsError);
+      return;
     }
 
+    const connectionMap = new Map();
+
+    // Process each account
     const promises = accountsData?.map(async (account) => {
       try {
+        // Fetch and update account balance
         const balance = await engine.accounts.balance({
           provider: account.bank_connection.provider,
           id: account.account_id,
           accessToken: account.bank_connection?.access_token,
         });
 
-        // Update account balance
-        if (balance.data?.amount) {
+        if (balance.data?.amount && balance.data.amount > 0) {
           await io.supabase.client
             .from("bank_accounts")
             .update({ balance: balance.data.amount })
             .eq("id", account.id);
         }
 
-        // Update bank connection last accessed
-        // TODO: Fix so it only update once per connection
-        await io.supabase.client
-          .from("bank_connections")
-          .update({
-            last_accessed: new Date().toISOString(),
-            error_retries: 0,
-          })
-          .eq("id", account.bank_connection.id);
+        // Fetch and format transactions
+        const transactions = await engine.transactions.list({
+          provider: account.bank_connection.provider,
+          accountId: account.account_id,
+          accountType: getClassification(account.type),
+          accessToken: account.bank_connection?.access_token,
+          latest: "true",
+        });
+
+        const formattedTransactions = transactions.data?.map((transaction) => {
+          return transformTransaction({
+            transaction,
+            teamId: account.team_id,
+            bankAccountId: account.id,
+          });
+        });
+
+        // Mark connection as successful
+        connectionMap.set(account.bank_connection.id, {
+          success: true,
+          errorRetries: 0,
+        });
+
+        return {
+          success: true,
+          transactions: formattedTransactions,
+          accountId: account.id,
+        };
       } catch (error) {
+        // Handle errors and update connection status
+        let errorDetails = "Unknown error occurred";
         if (error instanceof Midday.APIError) {
           const parsedError = parseAPIError(error);
-
-          await io.supabase.client
-            .from("bank_connections")
-            .update({
-              status: parsedError.code,
-              error_details: parsedError.message,
-              error_retries: account.bank_connection.error_retries + 1,
-            })
-            .eq("id", account.bank_connection.id);
+          errorDetails = parsedError.message;
+        } else if (error instanceof Error) {
+          errorDetails = error.message;
         }
+
+        const connectionStatus = connectionMap.get(
+          account.bank_connection.id,
+        ) || {
+          success: false,
+          errorRetries: account.bank_connection.error_retries + 1,
+        };
+
+        connectionMap.set(account.bank_connection.id, connectionStatus);
+
+        return { success: false, accountId: account.id, error: errorDetails };
       }
-
-      const transactions = await engine.transactions.list({
-        provider: account.bank_connection.provider,
-        accountId: account.account_id,
-        accountType: getClassification(account.type),
-        accessToken: account.bank_connection?.access_token,
-        latest: "true",
-      });
-
-      const formattedTransactions = transactions.data?.map((transaction) => {
-        return transformTransaction({
-          transaction,
-          teamId: account.team_id,
-          bankAccountId: account.id,
-        });
-      });
-
-      return formattedTransactions;
     });
 
     try {
       if (promises) {
-        const results = await Promise.allSettled(promises);
-        const transactions = results
-          .filter((result) => result.status === "fulfilled")
-          .flatMap((result) => result.value);
+        const results = await Promise.all(promises);
 
-        if (!transactions?.length) {
-          return null;
-        }
+        const successfulResults = results.filter((result) => result.success);
+        const failedResults = results.filter((result) => !result.success);
 
-        const { error: transactionsError, data: transactionsData } =
+        // Update failed accounts
+        for (const failedResult of failedResults) {
           await supabase
-            .from("transactions")
-            .upsert(transactions, {
-              onConflict: "internal_id",
-              ignoreDuplicates: true,
+            .from("bank_accounts")
+            .update({
+              enabled: false,
+              // error_details: failedResult.error,
             })
-            .select("*");
-
-        if (transactionsError) {
-          await io.logger.error("Transactions error", transactionsError);
+            .eq("id", failedResult.accountId);
         }
 
-        if (transactionsData && transactionsData?.length > 0) {
-          await io.sendEvent("🔔 Send notifications", {
-            name: Events.TRANSACTIONS_NOTIFICATION,
-            payload: {
-              teamId,
-              transactions: transactionsData.map((transaction) => ({
-                id: transaction.id,
-                date: transaction.date,
-                amount: transaction.amount,
-                name: transaction.name,
-                currency: transaction.currency,
-                category: transaction.category_slug,
-                status: transaction.status,
-              })),
-            },
-          });
+        // Update bank connections status
+        for (const [connectionId, status] of connectionMap) {
+          const updateData = status.success
+            ? {
+                last_accessed: new Date().toISOString(),
+                status: "connected",
+                error_details: null,
+                error_retries: 0,
+              }
+            : {
+                status: status.errorRetries >= 3 ? "disconnected" : "unknown",
+                error_retries: status.errorRetries,
+              };
 
-          revalidateTag(`transactions_${teamId}`);
-          revalidateTag(`spending_${teamId}`);
-          revalidateTag(`metrics_${teamId}`);
-          revalidateTag(`expenses_${teamId}`);
+          await supabase
+            .from("bank_connections")
+            .update(updateData)
+            .eq("id", connectionId);
+        }
+
+        // Process successful transactions
+        const transactions = successfulResults.flatMap(
+          (result) => result.transactions,
+        );
+
+        if (transactions && transactions.length > 0) {
+          const { error: transactionsError, data: transactionsData } =
+            await supabase
+              .from("transactions")
+              .upsert(transactions, {
+                onConflict: "internal_id",
+                ignoreDuplicates: true,
+              })
+              .select("*");
+
+          if (transactionsError) {
+            await io.logger.error("Transactions error", transactionsError);
+          }
+
+          // Send notifications for new transactions
+          if (transactionsData && transactionsData.length > 0) {
+            await io.sendEvent("🔔 Send notifications", {
+              name: Events.TRANSACTIONS_NOTIFICATION,
+              payload: {
+                teamId,
+                transactions: transactionsData.map((transaction) => ({
+                  id: transaction.id,
+                  date: transaction.date,
+                  amount: transaction.amount,
+                  name: transaction.name,
+                  currency: transaction.currency,
+                  category: transaction.category_slug,
+                  status: transaction.status,
+                })),
+              },
+            });
+
+            revalidateTag(`transactions_${teamId}`);
+            revalidateTag(`spending_${teamId}`);
+            revalidateTag(`metrics_${teamId}`);
+            revalidateTag(`expenses_${teamId}`);
+          }
         }
 
         revalidateTag(`bank_accounts_${teamId}`);
+        revalidateTag(`bank_connections_${teamId}`);
       }
     } catch (error) {
       await io.logger.debug(`Team id: ${teamId}`);
-
       await io.logger.error(
         error instanceof Error ? error.message : String(error),
       );

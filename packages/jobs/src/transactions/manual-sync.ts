@@ -13,7 +13,7 @@ const TRANSACTIONS_BATCH_LIMIT = 500;
 client.defineJob({
   id: Jobs.TRANSACTIONS_MANUAL_SYNC,
   name: "Transactions - Manual Sync",
-  version: "0.0.1",
+  version: "0.0.2",
   trigger: eventTrigger({
     name: Events.TRANSACTIONS_MANUAL_SYNC,
     schema: z.object({
@@ -80,8 +80,8 @@ client.defineJob({
           accessToken: account.bank_connection?.access_token,
         });
 
-        // Update account balance if available
-        if (accountBalance.data?.amount) {
+        // Update account balance if available and greater than 0
+        if (accountBalance.data?.amount && accountBalance.data.amount > 0) {
           await supabase
             .from("bank_accounts")
             .update({
