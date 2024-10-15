@@ -67,7 +67,7 @@ app.get(
 app.doc("/openapi", {
   openapi: "3.1.0",
   info: {
-    version: "1.0.1",
+    version: "1.0.2",
     title: "Solomon AI Financial Service API",
   },
 });
