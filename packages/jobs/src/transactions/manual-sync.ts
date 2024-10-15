@@ -1,3 +1,23 @@
+/**
+ * Manual Transaction Sync Job
+ *
+ * This job performs a manual synchronization of bank account transactions for a specific team and connection.
+ * It is triggered by an event and executes the following steps:
+ *
+ * 1. Fetch enabled bank accounts for the given connection and team
+ * 2. For each account:
+ *    a. Fetch and format transactions
+ *    b. Update account balance
+ *    c. Upsert transactions in batches
+ * 3. Handle sync results:
+ *    a. Update failed accounts
+ *    b. Update bank connection status
+ * 4. Revalidate relevant cache tags
+ *
+ * The job uses error handling to manage sync issues for individual accounts
+ * and updates the status of bank connections based on overall sync success or failure.
+ */
+
 import { eventTrigger } from "@trigger.dev/sdk";
 import { revalidateTag } from "next/cache";
 import { z } from "zod";

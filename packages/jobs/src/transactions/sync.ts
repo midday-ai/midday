@@ -1,3 +1,24 @@
+/**
+ * Transactions Sync Job
+ *
+ * This job synchronizes bank account transactions for a given team. It performs the following steps:
+ *
+ * 1. Fetch enabled bank accounts for the team
+ * 2. For each account:
+ *    a. Fetch and update account balance
+ *    b. Fetch and format transactions
+ *    c. Handle any errors that occur during the process
+ * 3. Process results:
+ *    a. Update failed accounts
+ *    b. Update bank connection statuses
+ *    c. Upsert successful transactions
+ *    d. Send notifications for new transactions
+ * 4. Revalidate relevant cache tags
+ *
+ * The job uses error handling and retries to manage connection issues,
+ * and updates the status of bank connections based on success or failure.
+ */
+
 import Midday from "@midday-ai/engine";
 import { revalidateTag } from "next/cache";
 import { client, supabase } from "../client";
