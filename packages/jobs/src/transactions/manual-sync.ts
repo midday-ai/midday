@@ -108,6 +108,7 @@ client.defineJob({
             .from("bank_accounts")
             .update({
               balance: accountBalance.data.amount,
+              error_details: null,
             })
             .eq("id", account.id);
 

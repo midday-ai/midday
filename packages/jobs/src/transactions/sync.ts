@@ -72,7 +72,10 @@ client.defineJob({
         if (balance.data?.amount && balance.data.amount > 0) {
           await io.supabase.client
             .from("bank_accounts")
-            .update({ balance: balance.data.amount })
+            .update({
+              balance: balance.data.amount,
+              error_details: null,
+            })
             .eq("id", account.id);
 
           await io.logger.info(`Updated balance for account ${account.id}`);
