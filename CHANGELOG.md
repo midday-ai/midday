@@ -1,3 +1,10 @@
+# [0.33.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.32.0...v0.33.0) (2024-10-16)
+
+
+### Features
+
+* relax sync exp ([53b1de4](https://github.com/SolomonAIEngineering/solomonai/commit/53b1de4eb561c0f067b6ff73ffcc6adeab96f324))
+
 # [0.32.0](https://github.com/SolomonAIEngineering/solomonai/compare/v0.31.0...v0.32.0) (2024-10-16)
 
 
