@@ -174,7 +174,7 @@ export class PlaidApi {
     accountId,
     latest,
     syncCursor,
-    maxCalls = 10,
+    maxCalls = 15,
   }: GetTransactionsRequest): Promise<GetTransactionsResponse> {
     let added: Array<Transaction> = [];
     let cursor = syncCursor;
@@ -182,28 +182,16 @@ export class PlaidApi {
     let callCount = 0;
 
     try {
-      if (latest) {
+      while (hasMore && callCount < maxCalls) {
         const { data } = await this.#client.transactionsSync({
           access_token: accessToken,
-          count: 100,
           cursor,
         });
 
         added = added.concat(data.added);
-        cursor = data.next_cursor;
         hasMore = data.has_more;
-      } else {
-        while (hasMore && callCount < maxCalls) {
-          const { data } = await this.#client.transactionsSync({
-            access_token: accessToken,
-            cursor,
-          });
-
-          added = added.concat(data.added);
-          hasMore = data.has_more;
-          cursor = data.next_cursor;
-          callCount++;
-        }
+        cursor = data.next_cursor;
+        callCount++;
       }
 
       // NOTE: Plaid transactions for all accounts
