@@ -1,21 +1,15 @@
 import { cors } from "@/middleware/index";
 import { init } from "@/middleware/init";
-import { metrics } from "@/middleware/metrics";
 import { Env, zEnv } from "./env";
 import { newApp } from "./hono/app";
 import { ConsoleLogger } from "./logger";
 import { UserActionMessageBody } from "./message";
 import { setupRoutes } from "./routes";
-import { rateLimit } from "./middleware/ratelimit";
-import { authMiddleware } from "./middleware/auth";
 
 const app = newApp();
 
 app.use("*", init());
 app.use("*", cors());;
-app.use("*", metrics());
-app.use("*", rateLimit());
-app.use(authMiddleware);
 
 // set up all the routes
 setupRoutes(app);

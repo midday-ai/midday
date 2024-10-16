@@ -14,6 +14,8 @@ import type { Context as GenericContext } from "hono";
 import { prettyJSON } from "hono/pretty-json";
 import { requestId } from "hono/request-id";
 import type { HonoEnv } from "./env";
+import { rateLimit } from "@/middleware/ratelimit";
+import { metrics } from "@/middleware/metrics";
 
 /**
  * Creates and configures a new OpenAPIHono application.
@@ -67,6 +69,9 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
   app.use("*", timingMiddleware);
   app.use("*", cacheMiddleware);
   app.use("*", jsonFormattingMiddleware);
+  app.use("*", rateLimit());
+  app.use("*", metrics());
+
 }
 
 /**
@@ -102,7 +107,7 @@ function setLocationAndUserAgent(c: GenericContext<HonoEnv>, next: () => Promise
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupCaching(app: OpenAPIHono<HonoEnv>) {
-  const cachedRoutes = ["/institutions", "/accounts", "/accounts/balance", "/transactions", "/rates"];
+  const cachedRoutes = ["/institutions", "/accounts", "/accounts/balance", "/rates"];
   cachedRoutes.forEach(route => app.get(route, cacheMiddleware));
 }
 
