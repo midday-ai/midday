@@ -16,7 +16,8 @@ import { requestId } from "hono/request-id";
 import type { HonoEnv } from "./env";
 import { rateLimit } from "@/middleware/ratelimit";
 import { metrics } from "@/middleware/metrics";
-
+import { init } from "@/middleware/init";
+import { cors } from "@/middleware/index";
 /**
  * Creates and configures a new OpenAPIHono application.
  * 
@@ -57,6 +58,8 @@ export function newApp(): OpenAPIHono<HonoEnv> {
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
 function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
+  app.use("*", init());
+  app.use("*", cors());
   app.use(prettyJSON());
   app.onError(handleError);
   app.use("*", setLocationAndUserAgent);

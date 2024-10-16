@@ -1,5 +1,4 @@
-import { cors } from "@/middleware/index";
-import { init } from "@/middleware/init";
+
 import { Env, zEnv } from "./env";
 import { newApp } from "./hono/app";
 import { ConsoleLogger } from "./logger";
@@ -7,9 +6,6 @@ import { UserActionMessageBody } from "./message";
 import { setupRoutes } from "./routes";
 
 const app = newApp();
-
-app.use("*", init());
-app.use("*", cors());;
 
 // set up all the routes
 setupRoutes(app);
