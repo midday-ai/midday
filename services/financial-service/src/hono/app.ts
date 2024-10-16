@@ -122,11 +122,25 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
     info: {
       version: "1.0.0",
       title: "Solomon AI Financial Service API",
+      termsOfService: "https://solomon-ai.com/terms",
+      contact: {
+        name: "Solomon AI",
+        url: "https://solomon-ai.com",
+        email: "support@solomon-ai.com",
+      },
+      license: {
+        name: "AGPL-3.0-or-later",
+        url: "https://www.gnu.org/licenses/agpl-3.0.en.html",
+      },
     },
     servers: [
       {
         url: "https://engine.solomon-ai-platform.com",
         description: "Production",
+      },
+      {
+        url: "https://engine-staging.solomon-ai-platform.com",
+        description: "Staging",
       },
     ],
     "x-speakeasy-retries": {
