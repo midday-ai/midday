@@ -94,7 +94,7 @@ type = "ratelimit"
 namespace_id = "1002"
 simple = { limit = 5000, period = 60 }
 
-[env.staging.tail_consumers]
+[[env.staging.tail_consumers]]
 service = "engine-staging-tail"
 
 # local
