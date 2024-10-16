@@ -298,7 +298,7 @@ export class GoCardLessApi {
         token,
         latest
           ? {
-              date_from: formatISO(subDays(new Date(), 3), {
+              date_from: formatISO(subDays(new Date(), 7), {
                 representation: "date",
               }),
             }
