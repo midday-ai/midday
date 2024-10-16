@@ -9,10 +9,10 @@ import {
 } from "./schema";
 
 const route = createRoute({
-    tags: ["apis"],
+    tags: ["api", "accounts"],
     operationId: "deleteAccountsApi",
     method: "delete",
-    path: "/v1/api.accountsApi",
+    path: "/v1/api.accounts",
     security: [{ bearerAuth: [] }],
     summary: "Delete Accounts",
     request: {

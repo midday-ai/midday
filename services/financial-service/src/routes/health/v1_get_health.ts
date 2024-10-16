@@ -21,7 +21,7 @@ const route = createRoute({
     tags: ["apis"],
     operationId: "healthCheckApi",
     method: "get",
-    path: "/",
+    path: "/v1/api.health",
     summary: "Health",
     responses: {
         200: {
