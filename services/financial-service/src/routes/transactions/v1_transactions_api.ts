@@ -11,12 +11,13 @@ import {
 } from "./schema";
 
 const route = createRoute({
-    tags: ["apis"],
+    tags: ["api", "transactions"],
     operationId: "getTransactionsApi",
     method: "get",
-    path: "/transactions",
+    path: "/v1/api.transactions",
     security: [{ bearerAuth: [] }],
     summary: "Get transactions",
+    description: "Get transactions",
     request: {
         query: TransactionsParamsSchema,
     },

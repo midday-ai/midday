@@ -4,10 +4,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { CreateUserSchema, CreateUserSchemaResponse } from "./schemas";
 
 const createUserRoute = createRoute({
-    tags: ["users"],
+    tags: ["api", "users"],
     operationId: "createUserApi",
     method: "post",
-    path: "/user",
+    path: "/v1/api.users",
     summary: "Create User",
     request: {
         body: {

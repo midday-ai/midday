@@ -9,10 +9,10 @@ import { GetUserResponse } from "./schemas";
  * This route is used to retrieve a single user's information based on their unique identifier.
  */
 const getUserRoute = createRoute({
-    tags: ["users"],
+    tags: ["api", "users"],
     operationId: "getUserApi",
     method: "get",
-    path: "/users/{id}",
+    path: "/v1/api.users/{id}",
     summary: "Get User",
     request: {
         params: z.object({

@@ -4,10 +4,10 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { DeleteUserApiResponse } from "./schemas";
 
 const deleteUserRoute = createRoute({
-    tags: ["users"],
+    tags: ["api", "users"],
     operationId: "deleteUserApi",
     method: "delete",
-    path: "/user/{id}",
+    path: "/v1/api.users/{id}",
     summary: "Delete User",
     request: {
         params: z.object({
