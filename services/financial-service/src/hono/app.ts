@@ -1,12 +1,4 @@
 import { handleError, handleZodError } from "@/errors";
-import {
-  authMiddleware,
-  cacheMiddleware, errorHandlerMiddleware,
-  jsonFormattingMiddleware,
-  loggingMiddleware,
-  securityMiddleware,
-  timingMiddleware
-} from "@/middleware";
 import { enrichContext } from "@/middleware/context-enrich";
 import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
@@ -17,7 +9,9 @@ import type { HonoEnv } from "./env";
 import { rateLimit } from "@/middleware/ratelimit";
 import { metrics } from "@/middleware/metrics";
 import { init } from "@/middleware/init";
-import { cors } from "@/middleware/index";
+import { authMiddleware, cacheMiddleware, cors, errorHandlerMiddleware, jsonFormattingMiddleware, loggingMiddleware } from "@/middleware/index";
+import { secureHeaders } from "hono/secure-headers";
+import { timing } from "hono/timing";
 /**
  * Creates and configures a new OpenAPIHono application.
  * 
@@ -64,16 +58,16 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
   app.onError(handleError);
   app.use("*", setLocationAndUserAgent);
   app.use("*", requestId());
-  app.use(authMiddleware);
-  app.use(securityMiddleware);
-  app.use(loggingMiddleware);
+  app.use("*", authMiddleware);
+  app.use("*", loggingMiddleware);
   app.use(enrichContext);
   app.use("*", errorHandlerMiddleware);
-  app.use("*", timingMiddleware);
   app.use("*", cacheMiddleware);
   app.use("*", jsonFormattingMiddleware);
   app.use("*", rateLimit());
   app.use("*", metrics());
+  app.use("*", secureHeaders());
+  app.use("*", timing());
 }
 
 /**

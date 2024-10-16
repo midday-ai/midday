@@ -62,16 +62,24 @@ export class Analytics {
     /**
      * Inserts API request data.
      * 
-     * This method is responsible for logging API request events. Currently, it only
-     * logs the event information and does not actually insert the data into a database.
+     * This method is responsible for logging API request events. It strips the request body
+     * from the event before logging to avoid storing potentially sensitive or large data.
      * 
      * @param event - The API analytics event data to be inserted
      * @returns A promise that resolves to null after the operation is complete
      */
     public async insertApiRequest(event: ApiAnalyticsEvent): Promise<null> {
+        // Create a new object without the request body
+        const strippedEvent = {
+            ...event,
+            request_body: undefined, // Remove the request body as we do not want to log it (may contain PII)
+            response_body: undefined, // Remove the response body as we do not want to log it (may contain PII)
+        };
+
         this.logger.info("Inserting API request", {
-            event,
+            event: strippedEvent,
         });
+
         // Placeholder for actual API request insertion logic
         // TODO: Implement the actual API request insertion logic here
         await Promise.resolve();
