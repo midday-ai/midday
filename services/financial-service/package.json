@@ -39,6 +39,7 @@
     "@hono/swagger-ui": "^0.4.1",
     "@hono/zod-openapi": "^0.16.0",
     "@hono/zod-validator": "^0.2.2",
+    "@internal/keys": "workspace:*",
     "@types/stripe": "^8.0.417",
     "@unkey/api": "^0.26.2",
     "change-case": "^5.4.4",
