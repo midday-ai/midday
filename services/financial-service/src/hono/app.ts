@@ -12,6 +12,7 @@ import { init } from "@/middleware/init";
 import { authMiddleware, cacheMiddleware, cors, errorHandlerMiddleware, jsonFormattingMiddleware, loggingMiddleware } from "@/middleware/index";
 import { secureHeaders } from "hono/secure-headers";
 import { timing } from "hono/timing";
+
 /**
  * Creates and configures a new OpenAPIHono application.
  * 
@@ -157,7 +158,7 @@ function setupSwagger(app: OpenAPIHono<HonoEnv>) {
     security: [
       { bearerAuth: [] },
     ],
-    
+
   });
 
   app.get("/", swaggerUI({ url: "/openapi" }));
