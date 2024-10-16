@@ -18,6 +18,8 @@ import { rateLimit } from "@/middleware/ratelimit";
 import { metrics } from "@/middleware/metrics";
 import { init } from "@/middleware/init";
 import { cors } from "@/middleware/index";
+import { ConsoleLogger } from "@/logger";
+
 /**
  * Creates and configures a new OpenAPIHono application.
  * 
@@ -74,7 +76,6 @@ function setupMiddleware(app: OpenAPIHono<HonoEnv>) {
   app.use("*", jsonFormattingMiddleware);
   app.use("*", rateLimit());
   app.use("*", metrics());
-
 }
 
 /**
