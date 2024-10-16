@@ -187,6 +187,8 @@ export class PlaidApi {
         });
 
         added = added.concat(data.added);
+        cursor = data.next_cursor;
+        hasMore = data.has_more;
       } else {
         while (hasMore) {
           const { data } = await this.#client.transactionsSync({
