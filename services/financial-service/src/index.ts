@@ -5,6 +5,7 @@ import { newApp } from "./hono/app";
 import { ConsoleLogger } from "./logger";
 import { UserActionMessageBody } from "./message";
 import { setupRoutes } from "./routes";
+import { swaggerUI } from "@hono/swagger-ui";
 
 const app = newApp();
 
@@ -13,6 +14,16 @@ app.use("*", cors());;
 
 // set up all the routes
 setupRoutes(app);
+
+app.get("/", swaggerUI({ url: "/openapi" }));
+
+app.doc("/openapi", {
+    openapi: "3.1.0",
+    info: {
+        version: "1.0.2",
+        title: "Solomon AI Financial Service API",
+    },
+});
 
 // define default handler
 const handler = {

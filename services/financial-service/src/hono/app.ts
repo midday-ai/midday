@@ -8,7 +8,7 @@ import {
   timingMiddleware
 } from "@/middleware";
 import { enrichContext } from "@/middleware/context-enrich";
-import { swaggerUI } from "@hono/swagger-ui";
+// import { swaggerUI } from "@hono/swagger-ui";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import type { Context as GenericContext } from "hono";
 import { prettyJSON } from "hono/pretty-json";
@@ -30,7 +30,7 @@ export function newApp(): OpenAPIHono<HonoEnv> {
 
   setupMiddleware(app);
   setupCaching(app);
-  setupSwagger(app);
+  // setupSwagger(app);
   setupOpenAPIRegistry(app);
 
   return app;
@@ -119,34 +119,17 @@ function setupCaching(app: OpenAPIHono<HonoEnv>) {
  * 
  * @param {OpenAPIHono<HonoEnv>} app - The OpenAPIHono application instance.
  */
-function setupSwagger(app: OpenAPIHono<HonoEnv>) {
-  app.get("/", swaggerUI({ url: "/openapi" }));
+// function setupSwagger(app: OpenAPIHono<HonoEnv>) {
+//   app.get("/", swaggerUI({ url: "/openapi" }));
 
-  app.doc("/openapi.json", {
-    openapi: "3.1.0",
-    info: {
-      version: "1.0.0",
-      title: "Solomon AI Financial Service API",
-    },
-    servers: [
-      {
-        url: "https://engine.solomon-ai-platform.com",
-        description: "Production",
-      },
-    ],
-    "x-speakeasy-retries": {
-      strategy: "backoff",
-      backoff: {
-        initialInterval: 50,
-        maxInterval: 1_000,
-        maxElapsedTime: 30_000,
-        exponent: 1.5,
-      },
-      statusCodes: ["5XX"],
-      retryConnectionErrors: true,
-    },
-  });
-}
+//   app.doc("/openapi", {
+//     openapi: "3.1.0",
+//     info: {
+//       version: "1.0.2",
+//       title: "Solomon AI Financial Service API",
+//     },
+//   });
+// }
 
 /**
  * Sets up the OpenAPI registry for the application.
